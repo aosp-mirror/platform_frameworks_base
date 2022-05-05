@@ -594,7 +594,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"အခြားလက်ဗွေဖြင့် စမ်းကြည့်ပါ"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"အလွန် လင်းသည်"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"ပြင်ဆင်ကြည့်ပါ"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"အကြိမ်တိုင်း သင့်လက်ချောင်း၏တည်နေရာကို အနည်းငယ်ပြောင်းပါ"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"အကြိမ်တိုင်း သင့်လက်ချောင်း၏ အနေအထားကို အနည်းငယ်ပြောင်းပါ"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"လက်ဗွေကို မသိရှိပါ"</string>
@@ -634,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"လက်ဗွေသုံး လော့ခ်ဖွင့်ခြင်း"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"လက်ဗွေ အာရုံခံကိရိယာကို အသုံးပြု၍ မရပါ"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"ပြုပြင်ရေး ဝန်ဆောင်မှုပေးသူထံသို့ သွားပါ။"</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"မျက်နှာဒေတာ အမှန် မရိုက်ယူနိုင်ပါ၊ ထပ်စမ်းကြည့်ပါ။"</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"သင့်မျက်နှာနမူနာ ပြုလုပ်၍မရပါ။ ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"အလွန် လင်းသည်။ အလင်းလျှော့ကြည့်ပါ။"</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"အလွန်မှောင်သည်။ ပိုလင်းအောင် လုပ်ကြည့်ပါ။"</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"ဖုန်းကို အဝေးသို့ခွာပါ။"</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"ဖုန်းကို အနားသို့ ပိုတိုးပါ။"</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"ဖုန်းကို ပိုမြှင့်လိုက်ပါ။"</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"ဖုန်းကို အောက်ပိုနှိမ့်ပါ။"</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"ဖုန်းကို ဘယ်ဘက်သို့ရွှေ့ပါ။"</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"ဖုန်းကို ညာဘက်သို့ ရွှေ့ပါ။"</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"ပိုလင်းအောင် လုပ်ကြည့်ပါ"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"ဖုန်းကို အဝေးသို့ခွာပါ"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"ဖုန်းကို အနားသို့ပိုတိုးပါ"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"ဖုန်းကို ပိုမြှင့်လိုက်ပါ"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"ဖုန်းကို အောက်ပိုနှိမ့်ပါ"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"ဖုန်းကို သင့်ဘယ်ဘက်သို့ ရွှေ့ပါ"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"ဖုန်းကို သင့်ညာဘက်သို့ ရွှေ့ပါ"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"သင့်စက်ပစ္စည်းကို တည့်တည့်ကြည့်ပါ။"</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"မျက်နှာကို ဖုန်းရှေ့တွင် တည့်အောင်ထားပါ။"</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"သင့်မျက်နှာကို မမြင်ရပါ။ ဖုန်းကို မျက်လုံးနှင့် တစ်တန်းတည်းထား၍ ကိုင်ပါ။"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"လှုပ်လွန်းသည်။ ဖုန်းကို ငြိမ်ငြိမ်ကိုင်ပါ။"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"သင့်မျက်နှာကို ပြန်စာရင်းသွင်းပါ။"</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"မျက်နှာ မမှတ်သားနိုင်တော့ပါ။ ထပ်စမ်းကြည့်ပါ။"</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"ဆင်တူနေသည်၊ အမူအရာ ပြောင်းပါ။"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"ခေါင်းကို သိပ်မလှည့်ပါနှင့်။"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"သင့်ခေါင်းကို သိပ်မလှည့်ပါနှင့်။"</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"ခေါင်းကို သိပ်မလှည့်ပါနှင့်။"</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"မျက်နှာကို မသိပါ။ ထပ်စမ်းကြည့်ပါ။"</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"ခေါင်းအနေအထားကို အနည်းငယ်ပြောင်းပါ"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"သင့်ဖုန်းကို တည့်တည့်ကြည့်ပါ"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"သင့်ဖုန်းကို တည့်တည့်ကြည့်ပါ"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"သင့်ဖုန်းကို တည့်တည့်ကြည့်ပါ"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"သင့်မျက်နှာကို ကွယ်နေသည့်အရာအားလုံး ဖယ်ပါ။"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"အနက်ရောင်ဘားအပါအဝင် ဖန်သားပြင်ထိပ်ကို သန့်ရှင်းရေး လုပ်ပါ"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"သင့်မျက်နှာကို အပြည့်အဝ မြင်ရရန်လိုအပ်သည်"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"သင့်မျက်နှာကို အပြည့်အဝ မြင်ရရန်လိုအပ်သည်"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"သင့်မျက်နှာနမူနာ ပြုလုပ်၍မရပါ။ ထပ်စမ်းကြည့်ပါ။"</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"အရောင်ရင့်သောမျက်မှန် တွေ့သည်။ သင့်မျက်နှာကို အပြည့်အဝ မြင်ရရန်လိုအပ်သည်။"</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"မျက်နှာဖုံး တွေ့သည်။ သင့်မျက်နှာကို အပြည့်အဝ မြင်ရရန်လိုအပ်သည်။"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"မျက်နှာကို အတည်ပြု၍ မရပါ။ ဟာ့ဒ်ဝဲ မရနိုင်ပါ။"</string>
@@ -2053,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\'မနှောင့်ယှက်ရ\' ပြောင်းလဲသွားပါပြီ"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"ပိတ်ထားသည့်အရာများကို ကြည့်ရန် တို့ပါ။"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"အကြောင်းကြားချက် ဆက်တင်များ စိစစ်ရန်"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13 မှစ၍ ထည့်သွင်းသော အက်ပ်များသည် အကြောင်းကြားချက်များပို့ရန် သင်၏ခွင့်ပြုချက် လိုအပ်ပါမည်။ ရှိပြီးသားအက်ပ်များအတွက် ဤခွင့်ပြုချက်ကိုပြောင်းရန် တို့ပါ။"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"နောက်မှ သတိပေးပါ"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"ပယ်ရန်"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"စနစ်"</string>

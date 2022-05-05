@@ -305,17 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"ඔබේ දින දර්ශනයට පිවිසෙන්න"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"කෙටි පණිවිඩ"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS පණිවිඩ යැවීම සහ බැලීම"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"ගොනු සහ ලේඛන"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"ඔබගේ උපාංගයේ ගොනු සහ ලේඛන වෙත ප්‍රවේශ වන්න"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"සංගීතය සහ ශ්‍රව්‍ය"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"ඔබගේ උපාංගයේ සංගීතය සහ ශ්‍රව්‍ය වෙත ප්‍රවේශ වන්න"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ඡායාරූප සහ වීඩියෝ"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"ඔබගේ උපාංගයේ ඡායාරූප සහ වීඩියෝ වෙත ප්‍රවේශ වන්න"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"මයික්‍රොෆෝනය"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ශ්‍රව්‍ය පටිගත කරන්න"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"ශාරීරික ක්‍රියාකාරකම"</string>
@@ -639,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ඇඟිලි සලකුණු අගුළු හැරීම"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"ඇඟිලි සලකුණු සංවේදකය භාවිත කළ නොහැකිය"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"අළුත්වැඩියා සැපයුම්කරුවෙකු බලන්න."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"නිරවද්‍ය මුහුණු දත්ත ගත නොහැකි විය. නැවත උත්සාහ කරන්න."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"ඔබගේ මුහුණු ආකෘතිය තැනිය නොහැකිය. නැවත උත්සාහ කරන්න."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"දීප්තිය වැඩියි. තවත් මඳ ආලෝකය උත්සාහ කරන්න."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"ඉතා අඳුරුයි. තවත් දීප්තිමත් ආලෝකය උත්සාහ කරන්න."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"දුරකථනය තවත් දුරට ගෙන යන්න."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"දුරකථනය තවත් සමීපව ගෙන යන්න."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"දුරකථනය ඉහළට ගෙන යන්න."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"දුරකථනය පහළට ගෙන යන්න."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"දුරකථනය වමට ගෙන යන්න."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"දුරකථනය දකුණට ගෙන යන්න."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"තවත් දීප්තිමත් ආලෝකය උත්සාහ කරන්න"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"දුරකථනය තවත් ඈතට ගෙන යන්න"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"දුරකථනය තවත් සමීපයට ගෙන එන්න"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"දුරකථනය තවත් ඉහළට ගෙන යන්න"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"දුරකථනය තවත් පහළට ගෙන යන්න"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"දුරකථනය ඔබගේ වම් පසට ගෙන යන්න"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"දුරකථනය ඔබගේ දකුණු පසට ගෙන යන්න"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"ඔබේ උපාංගය වෙත තවත් ඍජුව බලන්න."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"ඔබේ මුහුණ දුරකථනයට සෘජුවම ඉදිරියෙන් ස්ථානගත කරන්න."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"ඔබගේ මුහුණ දැකිය නොහැකිය. ඔබගේ දුරකථනය ඇස් මට්ටමින් අල්ලා ගන්න."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"චලනය ඉතා වැඩියි. දුරකථනය ස්ථිරව අල්ලා සිටින්න."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"ඔබේ මුහුණ යළි ලියාපදිංචි කරන්න."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"තවදුරටත් මුහුණ හඳුනාගත නොහැක. නැවත උත්සාහ කරන්න."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"ඉතා සමානයි, ඔබේ හැඩ ගැසීම වෙනස් කරන්න."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"ඔබේ හිස ටිකක් අඩුවෙන් කරකවන්න."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"ඔබගේ හිස ටිකක් අඩුවෙන් ඇල කරන්න."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"ඔබේ හිස ටිකක් අඩුවෙන් කරකවන්න."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"මුහුණ හඳුනා ගත නොහැකිය. නැවත උත්සාහ කරන්න."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"ඔබගේ හිසෙහි පිහිටීම මදක් වෙනස් කරන්න"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"ඔබගේ දුරකථනය දෙස වඩාත් ඍජුව බලන්න"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"ඔබගේ දුරකථනය දෙස වඩාත් ඍජුව බලන්න"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"ඔබගේ දුරකථනය දෙස වඩාත් ඍජුව බලන්න"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"ඔබේ මුහුණ සඟවන කිසිවක් ඉවත් කරන්න."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"කලු තීරුව ඇතුළුව, ඔබේ තිරයෙහි මුදුන පිරිසිදු කරන්න"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"ඔබගේ මුහුණ සම්පූර්ණයෙන් දෘශ්‍යමාන විය යුතුය"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"ඔබගේ මුහුණ සම්පූර්ණයෙන් දෘශ්‍යමාන විය යුතුය"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"ඔබගේ මුහුණු ආකෘතිය තැනිය නොහැකිය. නැවත උත්සාහ කරන්න."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"අඳුරු කණ්ණාඩි අනාවරණය කර ගන්නා ලදි. ඔබගේ මුහුණ සම්පූර්ණයෙන් දෘශ්‍යමාන විය යුතුය."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"මුහුණු ආවරණය අනාවරණය කර ගන්නා ලදි. ඔබගේ මුහුණ සම්පූර්ණයෙන් දෘශ්‍යමාන විය යුතුය."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"මුහුණ සත්‍යාපනය කළ නොහැක. දෘඩාංගය නොමැත."</string>
@@ -2058,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"බාධා නොකරන්න වෙනස් කර ඇත"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"අවහිර කර ඇති දේ පරීක්ෂා කිරීමට තට්ටු කරන්න."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"දැනුම්දීම් සැකසීම් සමාලෝචනය කරන්න"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13 හි සිට ආරම්භ වෙමින්, ඔබ ස්ථාපනය කරන යෙදුම්වලට දැනුම්දීම් යැවීමට ඔබගේ අවසරය අවශ්‍ය වේ. තිබෙන යෙදුම් සඳහා මෙම අවසරය වෙනස් කිරීමට තට්ටු කරන්න."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"මට පසුව මතක් කරන්න"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"ඉවත ලන්න"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"පද්ධතිය"</string>
