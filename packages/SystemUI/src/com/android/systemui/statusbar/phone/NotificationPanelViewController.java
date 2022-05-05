@@ -3197,6 +3197,8 @@ public class NotificationPanelViewController extends PanelViewController {
         updateTrackingHeadsUp(null);
         mExpandingFromHeadsUp = false;
         setPanelScrimMinFraction(0.0f);
+        // Reset status bar alpha so alpha can be calculated upon updating view state.
+        setKeyguardStatusBarAlpha(-1f);
     }
 
     private void updateTrackingHeadsUp(@Nullable ExpandableNotificationRow pickedChild) {
