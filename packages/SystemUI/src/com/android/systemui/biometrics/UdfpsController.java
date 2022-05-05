@@ -131,6 +131,7 @@ public class UdfpsController implements DozeReceiver {
     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
     // sensors, this, in addition to a lot of the code here, will be updated.
     @VisibleForTesting int mSensorId;
+    private boolean mHalControlsIllumination;
     @VisibleForTesting @NonNull UdfpsOverlayParams mOverlayParams = new UdfpsOverlayParams();
     // TODO(b/229290039): UDFPS controller should manage its dimensions on its own. Remove this.
     @Nullable private Runnable mAuthControllerUpdateUdfpsLocation;
@@ -201,9 +202,10 @@ public class UdfpsController implements DozeReceiver {
                             mKeyguardUpdateMonitor, mDialogManager, mDumpManager,
                             mLockscreenShadeTransitionController, mConfigurationController,
                             mSystemClock, mKeyguardStateController,
-                            mUnlockedScreenOffAnimationController, mHbmProvider, requestId, reason,
-                            callback, (view, event, fromUdfpsView) -> onTouch(requestId, event,
-                            fromUdfpsView), mActivityLaunchAnimator)));
+                            mUnlockedScreenOffAnimationController, mHalControlsIllumination,
+                            mHbmProvider, requestId, reason, callback,
+                            (view, event, fromUdfpsView) -> onTouch(requestId, event,
+                                    fromUdfpsView), mActivityLaunchAnimator)));
         }
 
         @Override
@@ -308,6 +310,11 @@ public class UdfpsController implements DozeReceiver {
     // TODO(b/229290039): UDFPS controller should manage its dimensions on its own. Remove this.
     public void setAuthControllerUpdateUdfpsLocation(@Nullable Runnable r) {
         mAuthControllerUpdateUdfpsLocation = r;
+    }
+
+    // TODO(b/229290039): UDFPS controller should manage its properties on its own. Remove this.
+    public void setHalControlsIllumination(boolean value) {
+        mHalControlsIllumination = value;
     }
 
     /**

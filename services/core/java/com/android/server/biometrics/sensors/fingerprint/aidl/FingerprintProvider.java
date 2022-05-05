@@ -176,6 +176,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                             prop.commonProps.maxEnrollmentsPerUser,
                             componentInfo,
                             prop.sensorType,
+                            prop.halControlsIllumination,
                             true /* resetLockoutRequiresHardwareAuthToken */,
                             !workaroundLocations.isEmpty() ? workaroundLocations :
                                     Arrays.stream(prop.sensorLocations).map(location ->
