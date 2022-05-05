@@ -250,7 +250,7 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"အမှားရှာပြင် မှတ်တမ်း"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"စက်ရှင် ပြီးဆုံးပြီ"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"ဖန်သားပြင်ဓာတ်ပုံ"</string>
-    <string name="bugreport_title" msgid="8549990811777373050">"ချွတ်ယွင်းမှုအစီရင်ခံစာ"</string>
+    <string name="bugreport_title" msgid="8549990811777373050">"ချွတ်ယွင်းမှတ်တမ်း"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"သင့်ရဲ့ လက်ရှိ စက်အခြေအနေ အချက်အလက်များကို အီးမေးလ် အနေဖြင့် ပေးပို့ရန် စုဆောင်းပါမည်။ အမှားရှာဖွေပြင်ဆင်မှုမှတ်တမ်းမှ ပေးပို့ရန် အသင့်ဖြစ်သည်အထိ အချိန် အနည်းငယ်ကြာမြင့်မှာ ဖြစ်သဖြင့် သည်းခံပြီး စောင့်ပါရန်"</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"လက်ငင်းတုံ့ပြန်နိုင်သည့် အစီရင်ခံချက်"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"အခြေအနေတော်တော်များများတွင် ၎င်းကိုအသုံးပြုပါ။ ၎င်းသည် အစီရင်ခံစာကို မှတ်သားခြင်း၊ ပြဿနာအကြောင်း နောက်ထပ်အသေးစိတ်များကို ထည့်သွင်းခြင်းနှင့် မျက်နှာပြင်ပုံဖမ်းယူခြင်းတို့ကို ပြုလုပ်ခွင့်ပေးပါသည်။ ပေးပို့ရန် အလွန်ကြာပြီး အသုံးပြုခြင်းနည်းပါးသည့်အပိုင်းကို ၎င်းက ချန်ခဲ့နိုင်ပါသည်။"</string>
@@ -349,7 +349,7 @@
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"လော့ခ်ချထားသော စက်ပစ္စည်းပေါ်တွင် အကြောင်းကြားချက်များကို ဖန်သားပြင်အပြည့် လုပ်ဆောင်ချက်များအဖြစ် ပြခြင်း"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"လော့ခ်ချထားသော စက်ပစ္စည်းပေါ်တွင် အကြောင်းကြားချက်များကို ဖန်သားပြင်အပြည့် လုပ်ဆောင်ချက်များအဖြစ် ပြရန် အက်ပ်ကို ခွင့်ပြုသည်"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"ဖြတ်လမ်းလင့်ခ်များ ထည့်သွင်းခြင်း"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"အပလီကေးရှင်းအား အသုံးပြုသူ လုပ်ဆောင်ခြင်း မပါပဲ ပင်မ မြင်ကွင်းအား ပြောင်းလဲခွင့် ပေးခြင်း"</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"အပလီကေးရှင်းအား အသုံးပြုသူ၏ လုပ်ဆောင်ချက်မပါဘဲ ပင်မစာမျက်နှာ ဖြတ်လမ်းလင့်ခ်များကို ထည့်သွင်းခွင့်ပေးသည်။"</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"အတိုကောက်များ ဖယ်ထုတ်ခြင်း"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"အပလီကေးရှင်းအား အသုံးပြုသူ လုပ်ဆောင်ခြင်း မပါပဲ ပင်မ မြင်ကွင်းအား ဖယ်ရှားခွင့် ပေးခြင်း"</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"အထွက် ခေါ်ဆိုမှုများအား လမ်းလွှဲပြောင်းခြင်း"</string>
@@ -584,7 +584,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"အခြားလက်ဗွေဖြင့် စမ်းကြည့်ပါ"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"အလွန် လင်းသည်"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"ပြင်ဆင်ကြည့်ပါ"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"အကြိမ်တိုင်း သင့်လက်ချောင်း၏တည်နေရာကို အနည်းငယ်ပြောင်းပါ"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"အကြိမ်တိုင်း သင့်လက်ချောင်း၏ အနေအထားကို အနည်းငယ်ပြောင်းပါ"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"လက်ဗွေကို အထောက်အထား စိစစ်ပြီးပါပြီ"</string>

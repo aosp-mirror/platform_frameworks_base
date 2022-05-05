@@ -118,7 +118,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Annulla"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"L\'accoppiamento consente l\'accesso ai tuoi contatti e alla cronologia chiamate quando i dispositivi sono connessi."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Impossibile eseguire l\'accoppiamento con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Impossibile eseguire l\'accoppiamento con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. La passkey o il PIN sono errati."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Impossibile eseguire l\'accoppiamento con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. La password o il PIN sono errati."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Impossibile comunicare con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Accoppiamento rifiutato da <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Computer"</string>
@@ -507,7 +507,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Sveglie e promemoria"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Consenti l\'impostazione di sveglie e promemoria"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Sveglie e promemoria"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Consenti a questa app di impostare sveglie e programmare azioni per le quali il fattore temporale è decisivo. L\'app potrà essere eseguita in background, comportando un consumo maggiore della batteria.\n\nSe questa autorizzazione viene disattivata, le sveglie esistenti e gli eventi basati sull\'orario programmati da questa app non funzioneranno."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Consenti a questa app di impostare sveglie e programmare azioni per orari specifici. L\'app potrà essere eseguita in background, comportando un consumo maggiore della batteria.\n\nSe questa autorizzazione viene disattivata, le sveglie esistenti e gli eventi basati sull\'orario programmati da questa app non funzioneranno."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"programmare, sveglia, promemoria, orologio"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Attiva"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Attiva Non disturbare"</string>
@@ -547,7 +547,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Profilo con limitazioni"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Aggiungere un nuovo utente?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Puoi condividere il dispositivo con altre persone creando altri utenti. Ogni utente ha un proprio spazio personalizzabile con app, sfondo e così via. Gli utenti possono anche regolare le impostazioni del dispositivo, come il Wi‑Fi, che riguardano tutti.\n\nQuando crei un nuovo utente, la persona in questione deve configurare il proprio spazio.\n\nQualsiasi utente può aggiornare le app per tutti gli altri utenti. I servizi e le impostazioni di accessibilità non potranno essere trasferiti al nuovo utente."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Il nuovo utente, una volta aggiunto, deve impostare il proprio spazio.\n\nQualsiasi utente può aggiornare le app per tutti gli altri."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Il nuovo utente, una volta aggiunto, deve configurare il proprio spazio.\n\nQualsiasi utente può aggiornare le app per tutti gli altri."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Configurare l\'utente ora?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Assicurati che la persona sia disponibile a prendere il dispositivo e configurare il suo spazio"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Configurare il profilo ora?"</string>
