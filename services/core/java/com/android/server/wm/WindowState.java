@@ -6043,6 +6043,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mRedrawForSyncReported) {
             return false;
         }
+        if (mInRelayout) {
+            // The last sync seq id will return to the client, so there is no need to request the
+            // client to redraw.
+            return false;
+        }
         return useBLASTSync();
     }
 
