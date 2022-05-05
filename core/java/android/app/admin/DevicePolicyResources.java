@@ -863,12 +863,6 @@ public final class DevicePolicyResources {
                     PREFIX + "REMOVE_AND_UNINSTALL_DEVICE_ADMIN";
 
             /**
-             * Title for selecting device admin apps
-             */
-            public static final String SELECT_DEVICE_ADMIN_APPS =
-                    PREFIX + "SELECT_DEVICE_ADMIN_APPS";
-
-            /**
              * Message when there are no available device admin apps to display
              */
             public static final String NO_DEVICE_ADMINS = PREFIX + "NO_DEVICE_ADMINS";
@@ -908,11 +902,6 @@ public final class DevicePolicyResources {
              */
             public static final String ACTIVE_DEVICE_ADMIN_WARNING =
                     PREFIX + "ACTIVE_DEVICE_ADMIN_WARNING";
-
-            /**
-             * Title for screen to set a profile owner
-             */
-            public static final String SET_PROFILE_OWNER_TITLE = PREFIX + "SET_PROFILE_OWNER_TITLE";
 
             /**
              * Simplified title for dialog to set a profile owner
@@ -1173,7 +1162,8 @@ public final class DevicePolicyResources {
             /**
              * Header for items under the personal user
              */
-            public static final String PERSONAL_CATEGORY_HEADER = PREFIX + "CATEGORY_PERSONAL";
+            public static final String PERSONAL_CATEGORY_HEADER =
+                    PREFIX + "PERSONAL_CATEGORY_HEADER";
 
             /**
              * Text to indicate work notification content will be shown on the lockscreen.
@@ -1196,8 +1186,7 @@ public final class DevicePolicyResources {
             /**
              * Text for toggle to enable auto-sycing work data
              */
-            public static final String AUTO_SYNC_WORK_DATA = PREFIX
-                    + "AUTO_SYNC_WORK_DATA";
+            public static final String AUTO_SYNC_WORK_DATA = PREFIX + "AUTO_SYNC_WORK_DATA";
 
             /**
              * Summary for "More security settings" section when a work profile is on the device.
@@ -1213,10 +1202,17 @@ public final class DevicePolicyResources {
                     + "LOCK_SETTINGS_NEW_PROFILE_LOCK_TITLE";
 
             /**
+             * Title for screen asking the user to update the type of screen lock (such as a
+             * pattern, PIN, or password) that they need to enter to use their work apps
+             */
+            public static final String LOCK_SETTINGS_UPDATE_PROFILE_LOCK_TITLE = PREFIX
+                    + "LOCK_SETTINGS_UPDATE_PROFILE_LOCK_TITLE";
+
+            /**
              * Title for section listing information that can be seen by organization
              */
             public static final String INFORMATION_SEEN_BY_ORGANIZATION_TITLE = PREFIX
-                    + "information_seen_by_organization_title";
+                    + "INFORMATION_SEEN_BY_ORGANIZATION_TITLE";
 
             /**
              * Title for section listing changes made by the organization.
@@ -1229,6 +1225,30 @@ public final class DevicePolicyResources {
              */
             public static final String ENTERPRISE_PRIVACY_FOOTER =
                     PREFIX + "ENTERPRISE_PRIVACY_FOOTER";
+
+            /**
+             * Title for spell checker settings for work.
+             */
+            public static final String SPELL_CHECKER_FOR_WORK =
+                    PREFIX + "SPELL_CHECKER_FOR_WORK";
+
+            /**
+             * Title for personal dictionary for work settings.
+             */
+            public static final String PERSONAL_DICTIONARY_FOR_WORK =
+                    PREFIX + "PERSONAL_DICTIONARY_FOR_WORK";
+
+            /**
+             * Summary for switch preference to indicate it is disabled by the admin
+             */
+            public static final String DISABLED_BY_ADMIN_SWITCH_SUMMARY =
+                    PREFIX + "DISABLED_BY_ADMIN_SWITCH_SUMMARY";
+
+            /**
+             * Summary for switch preference to indicate it is enabled by the admin
+             */
+            public static final String ENABLED_BY_ADMIN_SWITCH_SUMMARY =
+                    PREFIX + "ENABLED_BY_ADMIN_SWITCH_SUMMARY";
         }
 
         /**
