@@ -643,9 +643,15 @@ public class AppTransition implements Dump {
             @Nullable Rect surfaceInsets, @Nullable Rect stableInsets, boolean isVoiceInteraction,
             boolean freeform, WindowContainer container) {
 
-        if (mNextAppTransitionOverrideRequested
-                && (container.canCustomizeAppTransition() || mOverrideTaskTransition)) {
-            mNextAppTransitionType = NEXT_TRANSIT_TYPE_CUSTOM;
+        final boolean canCustomizeAppTransition = container.canCustomizeAppTransition();
+
+        if (mNextAppTransitionOverrideRequested) {
+            if (canCustomizeAppTransition || mOverrideTaskTransition) {
+                mNextAppTransitionType = NEXT_TRANSIT_TYPE_CUSTOM;
+            } else {
+                ProtoLog.e(WM_DEBUG_APP_TRANSITIONS_ANIM, "applyAnimation: "
+                        + " override requested, but it is prohibited by policy.");
+            }
         }
 
         Animation a;
@@ -844,13 +850,15 @@ public class AppTransition implements Dump {
                             : WindowAnimation_dreamActivityCloseExitAnimation;
                     break;
             }
-            a = animAttr != 0 ? loadAnimationAttr(lp, animAttr, transit) : null;
 
+            a = animAttr == 0 ? null : (canCustomizeAppTransition
+                    ? loadAnimationAttr(lp, animAttr, transit)
+                    : mTransitionAnimation.loadDefaultAnimationAttr(animAttr, transit));
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
                     "applyAnimation: anim=%s animAttr=0x%x transit=%s isEntrance=%b "
-                            + "Callers=%s",
+                            + " canCustomizeAppTransition=%b Callers=%s",
                     a, animAttr, appTransitionOldToString(transit), enter,
-                    Debug.getCallers(3));
+                    canCustomizeAppTransition, Debug.getCallers(3));
         }
         setAppTransitionFinishedCallbackIfNeeded(a);
 
