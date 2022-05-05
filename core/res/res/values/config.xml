@@ -5166,9 +5166,8 @@
          when TextClassifier has not been initialized. -->
     <integer name="config_smartSelectionInitializingTimeoutMillis">500</integer>
 
-    <!-- The delay in milliseconds before focused Views set themselves as preferred to keep clear.
-         Set to -1 if Views should not set themselves as preferred to keep clear. -->
-    <integer name="config_preferKeepClearForFocusDelayMillis">-1</integer>
+    <!-- If true, Views will declare they prefer to be kept clear from overlays when focused. -->
+    <bool name="config_preferKeepClearForFocus">false</bool>
 
     <!-- Indicates that default fitness tracker app needs to request sensor and location permissions. -->
     <bool name="config_trackerAppNeedsPermissions">false</bool>
