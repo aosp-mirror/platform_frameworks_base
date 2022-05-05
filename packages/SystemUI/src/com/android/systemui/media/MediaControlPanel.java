@@ -448,6 +448,7 @@ public class MediaControlPanel {
 
         bindOutputSwitcherChip(data);
         bindGutsMenuForPlayer(data);
+        bindPlayerContentDescription(data);
         bindScrubbingTime(data);
         bindActionButtons(data);
 
@@ -541,12 +542,6 @@ public class MediaControlPanel {
     }
 
     private boolean bindSongMetadata(MediaData data) {
-        // Accessibility label
-        mMediaViewHolder.getPlayer().setContentDescription(
-                mContext.getString(
-                        R.string.controls_media_playing_item_description,
-                        data.getSong(), data.getArtist(), data.getApp()));
-
         TextView titleText = mMediaViewHolder.getTitleText();
         TextView artistText = mMediaViewHolder.getArtistText();
         return mMetadataAnimationHandler.setNext(
@@ -566,6 +561,26 @@ public class MediaControlPanel {
                 mMediaViewController.refreshState();
                 return Unit.INSTANCE;
             });
+    }
+
+    private void bindPlayerContentDescription(MediaData data) {
+        if (mMediaViewHolder == null) {
+            return;
+        }
+
+        CharSequence contentDescription;
+        if (mMediaViewController.isGutsVisible()) {
+            contentDescription = mMediaViewHolder.getGutsViewHolder().getGutsText().getText();
+        } else if (data != null) {
+            contentDescription = mContext.getString(
+                    R.string.controls_media_playing_item_description,
+                    data.getSong(),
+                    data.getArtist(),
+                    data.getApp());
+        } else {
+            contentDescription = null;
+        }
+        mMediaViewHolder.getPlayer().setContentDescription(contentDescription);
     }
 
     private void bindArtworkAndColors(MediaData data, boolean updateBackground) {
@@ -1175,6 +1190,9 @@ public class MediaControlPanel {
             mRecommendationViewHolder.marquee(false, mMediaViewController.GUTS_ANIMATION_DURATION);
         }
         mMediaViewController.closeGuts(immediate);
+        if (mMediaViewHolder != null) {
+            bindPlayerContentDescription(mMediaData);
+        }
     }
 
     private void closeGuts() {
@@ -1188,6 +1206,9 @@ public class MediaControlPanel {
             mRecommendationViewHolder.marquee(true, mMediaViewController.GUTS_ANIMATION_DURATION);
         }
         mMediaViewController.openGuts();
+        if (mMediaViewHolder != null) {
+            bindPlayerContentDescription(mMediaData);
+        }
         mLogger.logLongPressOpen(mUid, mPackageName, mInstanceId);
     }
 
