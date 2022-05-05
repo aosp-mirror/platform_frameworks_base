@@ -86,6 +86,7 @@ import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.rotation.RotationButtonController;
 import com.android.systemui.statusbar.CommandQueue;
@@ -188,6 +189,8 @@ public class NavigationBarTest extends SysuiTestCase {
     private DeadZone mDeadZone;
     @Mock
     private CentralSurfaces mCentralSurfaces;
+    @Mock
+    private UserContextProvider mUserContextProvider;
     private DeviceConfigProxyFake mDeviceConfigProxyFake = new DeviceConfigProxyFake();
 
     @Rule
@@ -210,6 +213,8 @@ public class NavigationBarTest extends SysuiTestCase {
                 .thenReturn(mLightBarTransitionsController);
         when(mStatusBarKeyguardViewManager.isNavBarVisible()).thenReturn(true);
         when(mNavigationBarView.getViewTreeObserver()).thenReturn(mViewTreeObserver);
+        when(mUserContextProvider.createCurrentUserContext(any(Context.class)))
+                .thenReturn(mContext);
         setupSysuiDependency();
         // This class inflates views that call Dependency.get, thus these injections are still
         // necessary.
@@ -457,7 +462,8 @@ public class NavigationBarTest extends SysuiTestCase {
                 mDeviceConfigProxyFake,
                 mNavigationBarTransitions,
                 mEdgeBackGestureHandler,
-                Optional.of(mock(BackAnimation.class))));
+                Optional.of(mock(BackAnimation.class)),
+                mUserContextProvider));
     }
 
     private void processAllMessages() {
