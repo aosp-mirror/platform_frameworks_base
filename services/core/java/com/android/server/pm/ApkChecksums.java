@@ -34,13 +34,14 @@ import android.content.Context;
 import android.content.pm.ApkChecksum;
 import android.content.pm.Checksum;
 import android.content.pm.IOnChecksumsReadyListener;
-import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.Signature;
 import android.content.pm.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
+import android.os.Environment;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -63,7 +64,6 @@ import android.util.apk.VerityBuilder;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.security.VerityUtils;
-import com.android.server.LocalServices;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.ByteArrayOutputStream;
@@ -637,9 +637,18 @@ public class ApkChecksums {
         return null;
     }
 
+    private static boolean containsFile(File dir, String filePath) {
+        if (dir == null) {
+            return false;
+        }
+        return FileUtils.contains(dir.getAbsolutePath(), filePath);
+    }
+
     private static ApkChecksum extractHashFromFS(String split, String filePath) {
         // verity first
-        {
+        // Skip /product folder.
+        // TODO(b/231354111): remove this hack once we are allowed to change SELinux rules.
+        if (!containsFile(Environment.getProductDirectory(), filePath)) {
             byte[] hash = VerityUtils.getFsverityRootHash(filePath);
             if (hash != null) {
                 return new ApkChecksum(split, TYPE_WHOLE_MERKLE_ROOT_4K_SHA256, hash);
