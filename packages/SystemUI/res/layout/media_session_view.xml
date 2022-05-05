@@ -42,7 +42,6 @@
         android:adjustViewBounds="true"
         android:clipToOutline="true"
         android:background="@drawable/qs_media_outline_album_bg"
-        android:foreground="@drawable/qs_media_scrim"
         />
 
     <!-- Guideline for output switcher -->
