@@ -333,7 +333,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     }
 
     private void adjustScreenOrientation(State state) {
-        if (state.isKeyguardShowingAndNotOccluded() || state.mDozing) {
+        if (state.mBouncerShowing || state.isKeyguardShowingAndNotOccluded() || state.mDozing) {
             if (mKeyguardStateController.isKeyguardScreenRotationAllowed()) {
                 mLpChanged.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_USER;
             } else {
