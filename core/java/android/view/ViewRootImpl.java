@@ -590,7 +590,6 @@ public final class ViewRootImpl implements ViewParent,
     @Nullable
     int mContentCaptureEnabled = CONTENT_CAPTURE_ENABLED_NOT_CHECKED;
     boolean mPerformContentCapture;
-    boolean mPerformAutoFill;
 
 
     boolean mReportNextDraw;
@@ -892,7 +891,6 @@ public final class ViewRootImpl implements ViewParent,
         mPreviousTransparentRegion = new Region();
         mFirst = true; // true for the first time the view is added
         mPerformContentCapture = true; // also true for the first time the view is added
-        mPerformAutoFill = true;
         mAdded = false;
         mAttachInfo = new View.AttachInfo(mWindowSession, mWindow, display, this, mHandler, this,
                 context);
@@ -4308,18 +4306,6 @@ public final class ViewRootImpl implements ViewParent,
         }
         if (mPerformContentCapture) {
             performContentCaptureInitialReport();
-        }
-
-        if (mPerformAutoFill) {
-            notifyEnterForAutoFillIfNeeded();
-        }
-    }
-
-    private void notifyEnterForAutoFillIfNeeded() {
-        mPerformAutoFill = false;
-        final AutofillManager afm = getAutofillManager();
-        if (afm != null) {
-            afm.notifyViewEnteredForActivityStarted(mView);
         }
     }
 
