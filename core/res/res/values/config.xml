@@ -5451,6 +5451,8 @@
     <bool name="config_supportsHardwareCamToggle">false</bool>
     <!-- Whether a camera intent is launched when the lens cover is toggled -->
     <bool name="config_launchCameraOnCameraLensCoverToggle">true</bool>
+    <!-- Whether changing sensor privacy SW setting requires device to be unlocked -->
+    <bool name="config_sensorPrivacyRequiresAuthentication">true</bool>
 
     <!-- List containing the allowed install sources for accessibility service. -->
     <string-array name="config_accessibility_allowed_install_source" translatable="false"/>
