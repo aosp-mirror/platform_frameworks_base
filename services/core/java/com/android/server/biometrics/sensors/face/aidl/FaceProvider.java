@@ -285,6 +285,11 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
     }
 
     @Override
+    public boolean hasEnrollments(int sensorId, int userId) {
+        return !getEnrolledFaces(sensorId, userId).isEmpty();
+    }
+
+    @Override
     public void scheduleInvalidateAuthenticatorId(int sensorId, int userId,
             @NonNull IInvalidationCallback callback) {
         mHandler.post(() -> {

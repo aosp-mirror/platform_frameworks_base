@@ -32,7 +32,8 @@ import android.hardware.biometrics.fingerprint.FingerprintSensorType;
 import android.hardware.biometrics.fingerprint.IFingerprint;
 import android.hardware.biometrics.fingerprint.SensorLocation;
 import android.hardware.biometrics.fingerprint.SensorProps;
-import android.os.RemoteException;
+import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
+import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
 import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
 import android.testing.TestableContext;
@@ -52,6 +53,8 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 @Presubmit
 @SmallTest
@@ -94,9 +97,12 @@ public class FingerprintServiceTest {
 
         mContext.getTestablePermissions().setPermission(
                 USE_BIOMETRIC_INTERNAL, PackageManager.PERMISSION_GRANTED);
+    }
 
+    private void initServiceWith(String... aidlInstances) {
         mService = new FingerprintService(mContext, mBiometricContext,
                 () -> mIBiometricService,
+                () -> aidlInstances,
                 (fqName) -> {
                     if (fqName.endsWith(NAME_DEFAULT)) return mIFingerprintDefault;
                     if (fqName.endsWith(NAME_VIRTUAL)) return mIFingerprintVirtual;
@@ -105,27 +111,48 @@ public class FingerprintServiceTest {
     }
 
     @Test
-    public void registerAuthenticators_defaultOnly() throws RemoteException {
-        mService.registerAuthenticatorsForService(List.of(NAME_DEFAULT, NAME_VIRTUAL), List.of());
+    public void registerAuthenticators_defaultOnly() throws Exception {
+        initServiceWith(NAME_DEFAULT, NAME_VIRTUAL);
+
+        mService.mServiceWrapper.registerAuthenticators(List.of());
+        waitForRegistration();
 
         verify(mIBiometricService).registerAuthenticator(eq(ID_DEFAULT), anyInt(), anyInt(), any());
     }
 
     @Test
-    public void registerAuthenticators_virtualOnly() throws RemoteException {
+    public void registerAuthenticators_virtualOnly() throws Exception {
+        initServiceWith(NAME_DEFAULT, NAME_VIRTUAL);
         Settings.Secure.putInt(mSettingsRule.mockContentResolver(mContext),
                 Settings.Secure.BIOMETRIC_VIRTUAL_ENABLED, 1);
 
-        mService.registerAuthenticatorsForService(List.of(NAME_DEFAULT, NAME_VIRTUAL), List.of());
+        mService.mServiceWrapper.registerAuthenticators(List.of());
+        waitForRegistration();
 
         verify(mIBiometricService).registerAuthenticator(eq(ID_VIRTUAL), anyInt(), anyInt(), any());
     }
 
     @Test
-    public void registerAuthenticators_virtualAlwaysWhenNoOther() throws RemoteException {
-        mService.registerAuthenticatorsForService(List.of(NAME_VIRTUAL), List.of());
+    public void registerAuthenticators_virtualAlwaysWhenNoOther() throws Exception {
+        initServiceWith(NAME_VIRTUAL);
+
+        mService.mServiceWrapper.registerAuthenticators(List.of());
+        waitForRegistration();
 
         verify(mIBiometricService).registerAuthenticator(eq(ID_VIRTUAL), anyInt(), anyInt(), any());
+    }
+
+    private void waitForRegistration() throws Exception {
+        final CountDownLatch latch = new CountDownLatch(1);
+        mService.mServiceWrapper.addAuthenticatorsRegisteredCallback(
+                new IFingerprintAuthenticatorsRegisteredCallback.Stub() {
+                    @Override
+                    public void onAllAuthenticatorsRegistered(
+                            List<FingerprintSensorPropertiesInternal> sensors) {
+                        latch.countDown();
+                    }
+                });
+        latch.await(5, TimeUnit.SECONDS);
     }
 
     private static SensorProps createProps(int id, byte strength, byte type) {

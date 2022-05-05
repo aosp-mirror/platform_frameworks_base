@@ -29,6 +29,7 @@ import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricFaceConstants;
+import android.hardware.biometrics.BiometricStateListener;
 import android.hardware.biometrics.CryptoObject;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.os.Binder;
@@ -671,6 +672,45 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
             e.rethrowFromSystemServer();
         }
         return new ArrayList<>();
+    }
+
+    /**
+     * Forwards BiometricStateListener to FaceService.
+     *
+     * @param listener new BiometricStateListener being added
+     * @hide
+     */
+    public void registerBiometricStateListener(@NonNull BiometricStateListener listener) {
+        try {
+            mService.registerBiometricStateListener(listener);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Adds a callback that gets called when the service registers all of the face
+     * authenticators (HALs).
+     *
+     * If the face authenticators are already registered when the callback is added, the
+     * callback is invoked immediately.
+     *
+     * The callback is automatically removed after it's invoked.
+     *
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void addAuthenticatorsRegisteredCallback(
+            IFaceAuthenticatorsRegisteredCallback callback) {
+        if (mService != null) {
+            try {
+                mService.addAuthenticatorsRegisteredCallback(callback);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        } else {
+            Slog.w(TAG, "addAuthenticatorsRegisteredCallback(): Service not connected!");
+        }
     }
 
     /**
