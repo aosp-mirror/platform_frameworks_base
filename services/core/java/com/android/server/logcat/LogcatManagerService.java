@@ -410,8 +410,8 @@ public final class LogcatManagerService extends SystemService {
     }
 
     private void processNewLogAccessRequest(LogAccessClient client) {
-        boolean isInstrumented = mActivityManagerInternal.isUidCurrentlyInstrumented(client.mUid);
-
+        boolean isInstrumented = mActivityManagerInternal.getInstrumentationSourceUid(client.mUid)
+                != android.os.Process.INVALID_UID;
         // The instrumented apks only run for testing, so we don't check user permission.
         if (isInstrumented) {
             onAccessApprovedForClient(client);

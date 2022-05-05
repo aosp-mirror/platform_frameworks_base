@@ -17234,17 +17234,17 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public boolean isUidCurrentlyInstrumented(int uid) {
+        public int getInstrumentationSourceUid(int uid) {
             synchronized (mProcLock) {
                 for (int i = mActiveInstrumentation.size() - 1; i >= 0; i--) {
                     ActiveInstrumentation activeInst = mActiveInstrumentation.get(i);
                     if (!activeInst.mFinished && activeInst.mTargetInfo != null
                             && activeInst.mTargetInfo.uid == uid) {
-                        return true;
+                        return activeInst.mSourceUid;
                     }
                 }
             }
-            return false;
+            return INVALID_UID;
         }
 
         @Override
