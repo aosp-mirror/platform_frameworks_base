@@ -176,6 +176,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                             true /* showProgressBar */, false /* showStatus */);
                 } else if (mController.getSelectedMediaDevice().size() > 1
                         && isDeviceIncluded(mController.getSelectedMediaDevice(), device)) {
+                    boolean isDeviceDeselectable = isDeviceIncluded(
+                            mController.getDeselectableMediaDevice(), device);
                     mTitleText.setTextColor(mController.getColorItemContent());
                     setSingleLineLayout(getItemTitle(device), true /* bFocused */,
                             true /* showSeekBar */,
@@ -184,13 +186,20 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     mCheckBox.setOnCheckedChangeListener(null);
                     mCheckBox.setVisibility(View.VISIBLE);
                     mCheckBox.setChecked(true);
-                    mCheckBox.setOnCheckedChangeListener(
-                            (buttonView, isChecked) -> onGroupActionTriggered(false, device));
+                    mCheckBox.setOnCheckedChangeListener(isDeviceDeselectable
+                            ? (buttonView, isChecked) -> onGroupActionTriggered(false, device)
+                            : null);
+                    mCheckBox.setEnabled(isDeviceDeselectable);
+                    mCheckBox.setAlpha(
+                            isDeviceDeselectable ? DEVICE_CONNECTED_ALPHA
+                                    : DEVICE_DISCONNECTED_ALPHA
+                    );
                     setCheckBoxColor(mCheckBox, mController.getColorItemContent());
                     initSeekbar(device, isCurrentSeekbarInvisible);
                     mEndTouchArea.setVisibility(View.VISIBLE);
                     mEndTouchArea.setOnClickListener(null);
-                    mEndTouchArea.setOnClickListener((v) -> mCheckBox.performClick());
+                    mEndTouchArea.setOnClickListener(
+                            isDeviceDeselectable ? (v) -> mCheckBox.performClick() : null);
                     mEndTouchArea.setImportantForAccessibility(
                             View.IMPORTANT_FOR_ACCESSIBILITY_YES);
                     setUpContentDescriptionForView(mEndTouchArea, true, device);
