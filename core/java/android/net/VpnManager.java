@@ -595,6 +595,63 @@ public class VpnManager {
     }
 
     /**
+     * Sets the application exclusion list for the specified VPN profile.
+     *
+     * <p>If an app in the set of excluded apps is not installed for the given user, it will be
+     * skipped in the list of app exclusions. If apps are installed or removed, any active VPN will
+     * have its UID set updated automatically. If the caller is not {@code userId},
+     * {@link android.Manifest.permission.INTERACT_ACROSS_USERS_FULL} permission is required.
+     *
+     * <p>This will ONLY affect VpnManager profiles. As such, the NETWORK_SETTINGS provider MUST NOT
+     * allow configuration of these options if the application has not provided a VPN profile.
+     *
+     * @param userId the identifier of the user to set app exclusion list
+     * @param vpnPackage The package name for an installed VPN app on the device
+     * @param excludedApps the app exclusion list
+     * @throws IllegalStateException exception if vpn for the @code userId} is not ready yet.
+     *
+     * @return whether setting the list is successful or not
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_SETTINGS,
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK})
+    public boolean setAppExclusionList(int userId, @NonNull String vpnPackage,
+            @NonNull List<String> excludedApps) {
+        try {
+            return mService.setAppExclusionList(userId, vpnPackage, excludedApps);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the application exclusion list for the specified VPN profile. If the caller is not
+     * {@code userId}, {@link android.Manifest.permission.INTERACT_ACROSS_USERS_FULL} permission
+     * is required.
+     *
+     * @param userId the identifier of the user to set app exclusion list
+     * @param vpnPackage The package name for an installed VPN app on the device
+     * @return the list of packages for the specified VPN profile or null if no corresponding VPN
+     *         profile configured.
+     *
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_SETTINGS,
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK})
+    @Nullable
+    public List<String> getAppExclusionList(int userId, @NonNull String vpnPackage) {
+        try {
+            return mService.getAppExclusionList(userId, vpnPackage);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * @return the list of packages that are allowed to access network when always-on VPN is in
      * lockdown mode but not connected. Returns {@code null} when VPN lockdown is not active.
      *
