@@ -85,6 +85,11 @@ public class NoManSimulator {
         mRankings.put(key, ranking);
     }
 
+    /** This is for testing error cases: b/216384850 */
+    public Ranking removeRankingWithoutEvent(String key) {
+        return mRankings.remove(key);
+    }
+
     private RankingMap buildRankingMap() {
         return new RankingMap(mRankings.values().toArray(new Ranking[0]));
     }
