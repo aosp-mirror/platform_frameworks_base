@@ -166,18 +166,19 @@ class ShortcutPackage extends ShortcutPackageItem {
      * An in-memory copy of shortcuts for this package that was loaded from xml, keyed on IDs.
      */
     @GuardedBy("mLock")
-    final ArrayMap<String, ShortcutInfo> mShortcuts = new ArrayMap<>();
+    private final ArrayMap<String, ShortcutInfo> mShortcuts = new ArrayMap<>();
 
     /**
      * A temporary copy of shortcuts that are to be cleared once persisted into AppSearch, keyed on
      * IDs.
      */
     @GuardedBy("mLock")
-    private ArrayMap<String, ShortcutInfo> mTransientShortcuts = new ArrayMap<>(0);
+    private final ArrayMap<String, ShortcutInfo> mTransientShortcuts = new ArrayMap<>(0);
 
     /**
      * All the share targets from the package
      */
+    @GuardedBy("mLock")
     private final ArrayList<ShareTargetInfo> mShareTargets = new ArrayList<>(0);
 
     /**
@@ -231,7 +232,9 @@ class ShortcutPackage extends ShortcutPackageItem {
     }
 
     public int getShortcutCount() {
-        return mShortcuts.size();
+        synchronized (mLock) {
+            return mShortcuts.size();
+        }
     }
 
     @Override
@@ -272,7 +275,9 @@ class ShortcutPackage extends ShortcutPackageItem {
     @Nullable
     public ShortcutInfo findShortcutById(@Nullable final String id) {
         if (id == null) return null;
-        return mShortcuts.get(id);
+        synchronized (mLock) {
+            return mShortcuts.get(id);
+        }
     }
 
     public boolean isShortcutExistsAndInvisibleToPublisher(String id) {
@@ -347,11 +352,14 @@ class ShortcutPackage extends ShortcutPackageItem {
      * Delete a shortcut by ID. This will *always* remove it even if it's immutable or invisible.
      */
     private ShortcutInfo forceDeleteShortcutInner(@NonNull String id) {
-        final ShortcutInfo shortcut = mShortcuts.remove(id);
-        if (shortcut != null) {
-            removeIcon(shortcut);
-            shortcut.clearFlags(ShortcutInfo.FLAG_DYNAMIC | ShortcutInfo.FLAG_PINNED
-                    | ShortcutInfo.FLAG_MANIFEST | ShortcutInfo.FLAG_CACHED_ALL);
+        final ShortcutInfo shortcut;
+        synchronized (mLock) {
+            shortcut = mShortcuts.remove(id);
+            if (shortcut != null) {
+                removeIcon(shortcut);
+                shortcut.clearFlags(ShortcutInfo.FLAG_DYNAMIC | ShortcutInfo.FLAG_PINNED
+                        | ShortcutInfo.FLAG_MANIFEST | ShortcutInfo.FLAG_CACHED_ALL);
+            }
         }
         return shortcut;
     }
@@ -524,14 +532,16 @@ class ShortcutPackage extends ShortcutPackageItem {
     public List<ShortcutInfo> deleteAllDynamicShortcuts() {
         final long now = mShortcutUser.mService.injectCurrentTimeMillis();
         boolean changed = false;
-        for (int i = mShortcuts.size() - 1; i >= 0; i--) {
-            ShortcutInfo si = mShortcuts.valueAt(i);
-            if (si.isDynamic() && si.isVisibleToPublisher()) {
-                changed = true;
+        synchronized (mLock) {
+            for (int i = mShortcuts.size() - 1; i >= 0; i--) {
+                ShortcutInfo si = mShortcuts.valueAt(i);
+                if (si.isDynamic() && si.isVisibleToPublisher()) {
+                    changed = true;
 
-                si.setTimestamp(now);
-                si.clearFlags(ShortcutInfo.FLAG_DYNAMIC);
-                si.setRank(0); // It may still be pinned, so clear the rank.
+                    si.setTimestamp(now);
+                    si.clearFlags(ShortcutInfo.FLAG_DYNAMIC);
+                    si.setRank(0); // It may still be pinned, so clear the rank.
+                }
             }
         }
         removeAllShortcutsAsync();
@@ -874,59 +884,63 @@ class ShortcutPackage extends ShortcutPackageItem {
      */
     public List<ShortcutManager.ShareShortcutInfo> getMatchingShareTargets(
             @NonNull IntentFilter filter) {
-        final List<ShareTargetInfo> matchedTargets = new ArrayList<>();
-        for (int i = 0; i < mShareTargets.size(); i++) {
-            final ShareTargetInfo target = mShareTargets.get(i);
-            for (ShareTargetInfo.TargetData data : target.mTargetData) {
-                if (filter.hasDataType(data.mMimeType)) {
-                    // Matched at least with one data type
-                    matchedTargets.add(target);
-                    break;
-                }
-            }
-        }
-
-        if (matchedTargets.isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        // Get the list of all dynamic shortcuts in this package.
-        final ArrayList<ShortcutInfo> shortcuts = new ArrayList<>();
-        // Pass callingLauncher to ensure pinned flag marked by system ui, e.g. ShareSheet, are
-        // included in the result
-        findAll(shortcuts, ShortcutInfo::isNonManifestVisible,
-                ShortcutInfo.CLONE_REMOVE_FOR_APP_PREDICTION,
-                mShortcutUser.mService.mContext.getPackageName(),
-                0, /*getPinnedByAnyLauncher=*/ false);
-
-        final List<ShortcutManager.ShareShortcutInfo> result = new ArrayList<>();
-        for (int i = 0; i < shortcuts.size(); i++) {
-            final Set<String> categories = shortcuts.get(i).getCategories();
-            if (categories == null || categories.isEmpty()) {
-                continue;
-            }
-            for (int j = 0; j < matchedTargets.size(); j++) {
-                // Shortcut must have all of share target categories
-                boolean hasAllCategories = true;
-                final ShareTargetInfo target = matchedTargets.get(j);
-                for (int q = 0; q < target.mCategories.length; q++) {
-                    if (!categories.contains(target.mCategories[q])) {
-                        hasAllCategories = false;
+        synchronized (mLock) {
+            final List<ShareTargetInfo> matchedTargets = new ArrayList<>();
+            for (int i = 0; i < mShareTargets.size(); i++) {
+                final ShareTargetInfo target = mShareTargets.get(i);
+                for (ShareTargetInfo.TargetData data : target.mTargetData) {
+                    if (filter.hasDataType(data.mMimeType)) {
+                        // Matched at least with one data type
+                        matchedTargets.add(target);
                         break;
                     }
                 }
-                if (hasAllCategories) {
-                    result.add(new ShortcutManager.ShareShortcutInfo(shortcuts.get(i),
-                            new ComponentName(getPackageName(), target.mTargetClass)));
-                    break;
+            }
+
+            if (matchedTargets.isEmpty()) {
+                return new ArrayList<>();
+            }
+
+            // Get the list of all dynamic shortcuts in this package.
+            final ArrayList<ShortcutInfo> shortcuts = new ArrayList<>();
+            // Pass callingLauncher to ensure pinned flag marked by system ui, e.g. ShareSheet, are
+            // included in the result
+            findAll(shortcuts, ShortcutInfo::isNonManifestVisible,
+                    ShortcutInfo.CLONE_REMOVE_FOR_APP_PREDICTION,
+                    mShortcutUser.mService.mContext.getPackageName(),
+                    0, /*getPinnedByAnyLauncher=*/ false);
+
+            final List<ShortcutManager.ShareShortcutInfo> result = new ArrayList<>();
+            for (int i = 0; i < shortcuts.size(); i++) {
+                final Set<String> categories = shortcuts.get(i).getCategories();
+                if (categories == null || categories.isEmpty()) {
+                    continue;
+                }
+                for (int j = 0; j < matchedTargets.size(); j++) {
+                    // Shortcut must have all of share target categories
+                    boolean hasAllCategories = true;
+                    final ShareTargetInfo target = matchedTargets.get(j);
+                    for (int q = 0; q < target.mCategories.length; q++) {
+                        if (!categories.contains(target.mCategories[q])) {
+                            hasAllCategories = false;
+                            break;
+                        }
+                    }
+                    if (hasAllCategories) {
+                        result.add(new ShortcutManager.ShareShortcutInfo(shortcuts.get(i),
+                                new ComponentName(getPackageName(), target.mTargetClass)));
+                        break;
+                    }
                 }
             }
+            return result;
         }
-        return result;
     }
 
     public boolean hasShareTargets() {
-        return !mShareTargets.isEmpty();
+        synchronized (mLock) {
+            return !mShareTargets.isEmpty();
+        }
     }
 
     /**
@@ -935,38 +949,40 @@ class ShortcutPackage extends ShortcutPackageItem {
      * the app's Xml resource.
      */
     int getSharingShortcutCount() {
-        if (mShareTargets.isEmpty()) {
-            return 0;
-        }
-
-        // Get the list of all dynamic shortcuts in this package
-        final ArrayList<ShortcutInfo> shortcuts = new ArrayList<>();
-        findAll(shortcuts, ShortcutInfo::isNonManifestVisible,
-                ShortcutInfo.CLONE_REMOVE_FOR_LAUNCHER);
-
-        int sharingShortcutCount = 0;
-        for (int i = 0; i < shortcuts.size(); i++) {
-            final Set<String> categories = shortcuts.get(i).getCategories();
-            if (categories == null || categories.isEmpty()) {
-                continue;
+        synchronized (mLock) {
+            if (mShareTargets.isEmpty()) {
+                return 0;
             }
-            for (int j = 0; j < mShareTargets.size(); j++) {
-                // A SharingShortcut must have all of share target categories
-                boolean hasAllCategories = true;
-                final ShareTargetInfo target = mShareTargets.get(j);
-                for (int q = 0; q < target.mCategories.length; q++) {
-                    if (!categories.contains(target.mCategories[q])) {
-                        hasAllCategories = false;
+
+            // Get the list of all dynamic shortcuts in this package
+            final ArrayList<ShortcutInfo> shortcuts = new ArrayList<>();
+            findAll(shortcuts, ShortcutInfo::isNonManifestVisible,
+                    ShortcutInfo.CLONE_REMOVE_FOR_LAUNCHER);
+
+            int sharingShortcutCount = 0;
+            for (int i = 0; i < shortcuts.size(); i++) {
+                final Set<String> categories = shortcuts.get(i).getCategories();
+                if (categories == null || categories.isEmpty()) {
+                    continue;
+                }
+                for (int j = 0; j < mShareTargets.size(); j++) {
+                    // A SharingShortcut must have all of share target categories
+                    boolean hasAllCategories = true;
+                    final ShareTargetInfo target = mShareTargets.get(j);
+                    for (int q = 0; q < target.mCategories.length; q++) {
+                        if (!categories.contains(target.mCategories[q])) {
+                            hasAllCategories = false;
+                            break;
+                        }
+                    }
+                    if (hasAllCategories) {
+                        sharingShortcutCount++;
                         break;
                     }
                 }
-                if (hasAllCategories) {
-                    sharingShortcutCount++;
-                    break;
-                }
             }
+            return sharingShortcutCount;
         }
-        return sharingShortcutCount;
     }
 
     /**
@@ -1090,19 +1106,25 @@ class ShortcutPackage extends ShortcutPackageItem {
 
         // Now prepare to publish manifest shortcuts.
         List<ShortcutInfo> newManifestShortcutList = null;
-        try {
-            newManifestShortcutList = ShortcutParser.parseShortcuts(mShortcutUser.mService,
-                    getPackageName(), getPackageUserId(), mShareTargets);
-        } catch (IOException|XmlPullParserException e) {
-            Slog.e(TAG, "Failed to load shortcuts from AndroidManifest.xml.", e);
+        final int shareTargetSize;
+        synchronized (mLock) {
+            try {
+                shareTargetSize = mShareTargets.size();
+                newManifestShortcutList = ShortcutParser.parseShortcuts(mShortcutUser.mService,
+                        getPackageName(), getPackageUserId(), mShareTargets);
+            } catch (IOException | XmlPullParserException e) {
+                Slog.e(TAG, "Failed to load shortcuts from AndroidManifest.xml.", e);
+            }
         }
         final int manifestShortcutSize = newManifestShortcutList == null ? 0
                 : newManifestShortcutList.size();
         if (ShortcutService.DEBUG || ShortcutService.DEBUG_REBOOT) {
             Slog.d(TAG,
-                    String.format("Package %s has %d manifest shortcut(s), and %d share target(s)",
-                            getPackageName(), manifestShortcutSize, mShareTargets.size()));
+                    String.format(
+                            "Package %s has %d manifest shortcut(s), and %d share target(s)",
+                            getPackageName(), manifestShortcutSize, shareTargetSize));
         }
+
         if (isNewApp && (manifestShortcutSize == 0)) {
             // If it's a new app, and it doesn't have manifest shortcuts, then nothing to do.
 
@@ -1701,37 +1723,38 @@ class ShortcutPackage extends ShortcutPackageItem {
     @Override
     public void saveToXml(@NonNull TypedXmlSerializer out, boolean forBackup)
             throws IOException, XmlPullParserException {
-        final int size = mShortcuts.size();
-        final int shareTargetSize = mShareTargets.size();
+        synchronized (mLock) {
+            final int size = mShortcuts.size();
+            final int shareTargetSize = mShareTargets.size();
 
-        if (hasNoShortcut() && shareTargetSize == 0 && mApiCallCount == 0) {
-            return; // nothing to write.
-        }
+            if (hasNoShortcut() && shareTargetSize == 0 && mApiCallCount == 0) {
+                return; // nothing to write.
+            }
 
-        out.startTag(null, TAG_ROOT);
+            out.startTag(null, TAG_ROOT);
 
-        ShortcutService.writeAttr(out, ATTR_NAME, getPackageName());
-        ShortcutService.writeAttr(out, ATTR_CALL_COUNT, mApiCallCount);
-        ShortcutService.writeAttr(out, ATTR_LAST_RESET, mLastResetTime);
-        if (!forBackup) {
-            synchronized (mLock) {
-                ShortcutService.writeAttr(out, ATTR_SCHEMA_VERSON, (mIsAppSearchSchemaUpToDate)
+            ShortcutService.writeAttr(out, ATTR_NAME, getPackageName());
+            ShortcutService.writeAttr(out, ATTR_CALL_COUNT, mApiCallCount);
+            ShortcutService.writeAttr(out, ATTR_LAST_RESET, mLastResetTime);
+            if (!forBackup) {
+                ShortcutService.writeAttr(out, ATTR_SCHEMA_VERSON, mIsAppSearchSchemaUpToDate
                         ? AppSearchShortcutInfo.SCHEMA_VERSION : 0);
             }
-        }
-        getPackageInfo().saveToXml(mShortcutUser.mService, out, forBackup);
+            getPackageInfo().saveToXml(mShortcutUser.mService, out, forBackup);
 
-        for (int j = 0; j < size; j++) {
-            saveShortcut(out, mShortcuts.valueAt(j), forBackup, getPackageInfo().isBackupAllowed());
-        }
-
-        if (!forBackup) {
-            for (int j = 0; j < shareTargetSize; j++) {
-                mShareTargets.get(j).saveToXml(out);
+            for (int j = 0; j < size; j++) {
+                saveShortcut(
+                        out, mShortcuts.valueAt(j), forBackup, getPackageInfo().isBackupAllowed());
             }
-        }
 
-        out.endTag(null, TAG_ROOT);
+            if (!forBackup) {
+                for (int j = 0; j < shareTargetSize; j++) {
+                    mShareTargets.get(j).saveToXml(out);
+                }
+            }
+
+            out.endTag(null, TAG_ROOT);
+        }
     }
 
     private void saveShortcut(TypedXmlSerializer out, ShortcutInfo si, boolean forBackup,
@@ -1917,38 +1940,38 @@ class ShortcutPackage extends ShortcutPackageItem {
         synchronized (ret.mLock) {
             ret.mIsAppSearchSchemaUpToDate = ShortcutService.parseIntAttribute(
                     parser, ATTR_SCHEMA_VERSON, 0) == AppSearchShortcutInfo.SCHEMA_VERSION;
-        }
-        ret.mApiCallCount = ShortcutService.parseIntAttribute(parser, ATTR_CALL_COUNT);
-        ret.mLastResetTime = ShortcutService.parseLongAttribute(parser, ATTR_LAST_RESET);
 
+            ret.mApiCallCount = ShortcutService.parseIntAttribute(parser, ATTR_CALL_COUNT);
+            ret.mLastResetTime = ShortcutService.parseLongAttribute(parser, ATTR_LAST_RESET);
 
-        final int outerDepth = parser.getDepth();
-        int type;
-        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
-            if (type != XmlPullParser.START_TAG) {
-                continue;
-            }
-            final int depth = parser.getDepth();
-            final String tag = parser.getName();
-            if (depth == outerDepth + 1) {
-                switch (tag) {
-                    case ShortcutPackageInfo.TAG_ROOT:
-                        ret.getPackageInfo().loadFromXml(parser, fromBackup);
-
-                        continue;
-                    case TAG_SHORTCUT:
-                        final ShortcutInfo si = parseShortcut(parser, packageName,
-                                shortcutUser.getUserId(), fromBackup);
-                        // Don't use addShortcut(), we don't need to save the icon.
-                        ret.mShortcuts.put(si.getId(), si);
-                        continue;
-                    case TAG_SHARE_TARGET:
-                        ret.mShareTargets.add(ShareTargetInfo.loadFromXml(parser));
-                        continue;
+            final int outerDepth = parser.getDepth();
+            int type;
+            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                    && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+                if (type != XmlPullParser.START_TAG) {
+                    continue;
                 }
+                final int depth = parser.getDepth();
+                final String tag = parser.getName();
+                if (depth == outerDepth + 1) {
+                    switch (tag) {
+                        case ShortcutPackageInfo.TAG_ROOT:
+                            ret.getPackageInfo().loadFromXml(parser, fromBackup);
+
+                            continue;
+                        case TAG_SHORTCUT:
+                            final ShortcutInfo si = parseShortcut(parser, packageName,
+                                    shortcutUser.getUserId(), fromBackup);
+                            // Don't use addShortcut(), we don't need to save the icon.
+                            ret.mShortcuts.put(si.getId(), si);
+                            continue;
+                        case TAG_SHARE_TARGET:
+                            ret.mShareTargets.add(ShareTargetInfo.loadFromXml(parser));
+                            continue;
+                    }
+                }
+                ShortcutService.warnForInvalidTag(depth, tag);
             }
-            ShortcutService.warnForInvalidTag(depth, tag);
         }
         return ret;
     }
@@ -2152,7 +2175,9 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     @VisibleForTesting
     List<ShareTargetInfo> getAllShareTargetsForTest() {
-        return new ArrayList<>(mShareTargets);
+        synchronized (mLock) {
+            return new ArrayList<>(mShareTargets);
+        }
     }
 
     @Override
@@ -2291,15 +2316,19 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     private void saveShortcut(@NonNull final Collection<ShortcutInfo> shortcuts) {
         Objects.requireNonNull(shortcuts);
-        for (ShortcutInfo si : shortcuts) {
-            mShortcuts.put(si.getId(), si);
+        synchronized (mLock) {
+            for (ShortcutInfo si : shortcuts) {
+                mShortcuts.put(si.getId(), si);
+            }
         }
     }
 
     @Nullable
     List<ShortcutInfo> findAll(@NonNull final Collection<String> ids) {
-        return ids.stream().map(mShortcuts::get)
-                .filter(Objects::nonNull).collect(Collectors.toList());
+        synchronized (mLock) {
+            return ids.stream().map(mShortcuts::get)
+                    .filter(Objects::nonNull).collect(Collectors.toList());
+        }
     }
 
     private void forEachShortcut(@NonNull final Consumer<ShortcutInfo> cb) {
@@ -2318,10 +2347,12 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     private void forEachShortcutStopWhen(
             @NonNull final Function<ShortcutInfo, Boolean> cb) {
-        for (int i = mShortcuts.size() - 1; i >= 0; i--) {
-            final ShortcutInfo si = mShortcuts.valueAt(i);
-            if (cb.apply(si)) {
-                return;
+        synchronized (mLock) {
+            for (int i = mShortcuts.size() - 1; i >= 0; i--) {
+                final ShortcutInfo si = mShortcuts.valueAt(i);
+                if (cb.apply(si)) {
+                    return;
+                }
             }
         }
     }
@@ -2461,6 +2492,7 @@ class ShortcutPackage extends ShortcutPackageItem {
                         })));
     }
 
+    @GuardedBy("mLock")
     @Override
     void scheduleSaveToAppSearchLocked() {
         final Map<String, ShortcutInfo> copy = new ArrayMap<>(mShortcuts);
