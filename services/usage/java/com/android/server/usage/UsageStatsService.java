@@ -76,7 +76,6 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
-import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
@@ -140,13 +139,26 @@ public class UsageStatsService extends SystemService implements
     private static final boolean ENABLE_KERNEL_UPDATES = true;
     private static final File KERNEL_COUNTER_FILE = new File("/proc/uid_procstat/set");
 
-    private static final File USAGE_STATS_LEGACY_DIR = new File(
-            Environment.getDataSystemDirectory(), "usagestats");
-    // For migration purposes, indicates whether to keep the legacy usage stats directory or not
-    private static final boolean KEEP_LEGACY_DIR = false;
+    // /data/system/usagestats.  Now only used for globalcomponentusage.  Previously per-user stats
+    // were stored here too, but they've been moved to /data/system_ce/$userId/usagestats.
+    private static final File COMMON_USAGE_STATS_DIR =
+            new File(Environment.getDataSystemDirectory(), "usagestats");
+    private static final File LEGACY_USER_USAGE_STATS_DIR = COMMON_USAGE_STATS_DIR;
 
-    private static final File COMMON_USAGE_STATS_DE_DIR =
+    // /data/system_de/usagestats.  When the globalcomponentusage file was added, it was incorrectly
+    // added here instead of in /data/system/usagestats where it should be.  We lazily migrate this
+    // file by reading it from here if needed, and always writing it to the new path.  We don't
+    // delete the old directory, as system_server no longer has permission to do so.
+    //
+    // Note, this migration is *not* related to the migration of the per-user stats from
+    // /data/system/usagestats/$userId to /data/system_ce/$userId/usagestats mentioned above.  Both
+    // of these just happen to involve /data/system/usagestats.  /data/system is the right place for
+    // system data not tied to a user, but the wrong place for per-user data.  So due to two
+    // separate mistakes, we've unfortunately ended up with one case where we need to move files out
+    // of /data/system, and one case where we need to move a different file *into* /data/system.
+    private static final File LEGACY_COMMON_USAGE_STATS_DIR =
             new File(Environment.getDataSystemDeDirectory(), "usagestats");
+
     private static final String GLOBAL_COMPONENT_USAGE_FILE_NAME = "globalcomponentusage";
 
     private static final char TOKEN_DELIMITER = '/';
@@ -630,7 +642,7 @@ public class UsageStatsService extends SystemService implements
                 final int previousVersion = Integer.parseInt(reader.readLine());
                 // UsageStatsDatabase.BACKUP_VERSION was 4 when usage stats were migrated to CE.
                 if (previousVersion >= 4) {
-                    deleteLegacyDir(userId);
+                    deleteLegacyUserDir(userId);
                     return;
                 }
                 // If migration logic needs to be changed in a future version, do it here.
@@ -651,7 +663,7 @@ public class UsageStatsService extends SystemService implements
         }
 
         Slog.i(TAG, "Starting migration to system CE for user " + userId);
-        final File legacyUserDir = new File(USAGE_STATS_LEGACY_DIR, Integer.toString(userId));
+        final File legacyUserDir = new File(LEGACY_USER_USAGE_STATS_DIR, Integer.toString(userId));
         if (legacyUserDir.exists()) {
             copyRecursively(usageStatsDir, legacyUserDir);
         }
@@ -666,8 +678,8 @@ public class UsageStatsService extends SystemService implements
         }
         Slog.i(TAG, "Finished migration to system CE for user " + userId);
 
-        // Migration was successful - delete the legacy directory
-        deleteLegacyDir(userId);
+        // Migration was successful - delete the legacy user directory
+        deleteLegacyUserDir(userId);
     }
 
     private static void copyRecursively(final File parent, File f) {
@@ -698,20 +710,13 @@ public class UsageStatsService extends SystemService implements
         }
     }
 
-    private void deleteLegacyDir(int userId) {
-        final File legacyUserDir = new File(USAGE_STATS_LEGACY_DIR, Integer.toString(userId));
-        if (!KEEP_LEGACY_DIR && legacyUserDir.exists()) {
+    private void deleteLegacyUserDir(int userId) {
+        final File legacyUserDir = new File(LEGACY_USER_USAGE_STATS_DIR, Integer.toString(userId));
+        if (legacyUserDir.exists()) {
             deleteRecursively(legacyUserDir);
             if (legacyUserDir.exists()) {
                 Slog.w(TAG, "Error occurred while attempting to delete legacy usage stats "
                         + "dir for user " + userId);
-            }
-            // If all users have been migrated, delete the parent legacy usage stats directory
-            if (USAGE_STATS_LEGACY_DIR.list() != null
-                    && USAGE_STATS_LEGACY_DIR.list().length == 0) {
-                if (!USAGE_STATS_LEGACY_DIR.delete()) {
-                    Slog.w(TAG, "Error occurred while attempting to delete legacy usage stats dir");
-                }
             }
         }
     }
@@ -807,13 +812,16 @@ public class UsageStatsService extends SystemService implements
     }
 
     private void loadGlobalComponentUsageLocked() {
-        final File[] packageUsageFile = COMMON_USAGE_STATS_DE_DIR.listFiles(
-                (dir, name) -> TextUtils.equals(name, GLOBAL_COMPONENT_USAGE_FILE_NAME));
-        if (packageUsageFile == null || packageUsageFile.length == 0) {
-            return;
+        AtomicFile af = new AtomicFile(new File(COMMON_USAGE_STATS_DIR,
+                    GLOBAL_COMPONENT_USAGE_FILE_NAME));
+        if (!af.exists()) {
+            af = new AtomicFile(new File(LEGACY_COMMON_USAGE_STATS_DIR,
+                        GLOBAL_COMPONENT_USAGE_FILE_NAME));
+            if (!af.exists()) {
+                return;
+            }
+            Slog.i(TAG, "Reading " + GLOBAL_COMPONENT_USAGE_FILE_NAME + " file from old location");
         }
-
-        final AtomicFile af = new AtomicFile(packageUsageFile[0]);
         final Map<String, Long> tmpUsage = new ArrayMap<>();
         try {
             try (FileInputStream in = af.openRead()) {
@@ -831,7 +839,7 @@ public class UsageStatsService extends SystemService implements
             }
         } catch (Exception e) {
             // Most likely trying to read a corrupted file - log the failure
-            Slog.e(TAG, "Could not read " + packageUsageFile[0]);
+            Slog.e(TAG, "Could not read " + af.getBaseFile());
         }
     }
 
@@ -840,11 +848,11 @@ public class UsageStatsService extends SystemService implements
             return;
         }
 
-        if (!COMMON_USAGE_STATS_DE_DIR.mkdirs() && !COMMON_USAGE_STATS_DE_DIR.exists()) {
-            throw new IllegalStateException("Common usage stats DE directory does not exist: "
-                    + COMMON_USAGE_STATS_DE_DIR.getAbsolutePath());
+        if (!COMMON_USAGE_STATS_DIR.mkdirs() && !COMMON_USAGE_STATS_DIR.exists()) {
+            throw new IllegalStateException("Common usage stats directory does not exist: "
+                    + COMMON_USAGE_STATS_DIR.getAbsolutePath());
         }
-        final File lastTimePackageFile = new File(COMMON_USAGE_STATS_DE_DIR,
+        final File lastTimePackageFile = new File(COMMON_USAGE_STATS_DIR,
                 GLOBAL_COMPONENT_USAGE_FILE_NAME);
         final AtomicFile af = new AtomicFile(lastTimePackageFile);
         FileOutputStream fos = null;
