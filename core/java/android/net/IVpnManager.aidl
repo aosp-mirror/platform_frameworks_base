@@ -42,6 +42,8 @@ interface IVpnManager {
     String startVpnProfile(String packageName);
     void stopVpnProfile(String packageName);
     VpnProfileState getProvisionedVpnProfileState(String packageName);
+    boolean setAppExclusionList(int userId, String vpnPackage, in List<String> excludedApps);
+    List<String> getAppExclusionList(int userId, String vpnPackage);
 
     /** Always-on VPN APIs */
     boolean isAlwaysOnVpnPackageSupported(int userId, String packageName);
