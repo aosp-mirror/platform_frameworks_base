@@ -26,6 +26,7 @@ import static com.android.server.companion.Utils.prepareForIpc;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.PendingIntent;
 import android.companion.AssociationInfo;
@@ -91,6 +92,7 @@ public class SystemDataTransferProcessor {
         mAssociationStore = associationStore;
         mSystemDataTransferRequestStore = systemDataTransferRequestStore;
         mCompanionMessageProcessor = companionMessageProcessor;
+        mCompanionMessageProcessor.setListener(this::onCompleteMessageReceived);
     }
 
     /**
@@ -201,44 +203,36 @@ public class SystemDataTransferProcessor {
     }
 
     /**
-     * Process message reported by the companion app.
+     * Process a complete decrypted message reported by the companion app.
      */
-    public void processMessage(String packageName, int userId, int associationId,
-            int messageId, byte[] message) {
-        Slog.i(LOG_TAG, "Start processing message [" + messageId + "] from package ["
-                + packageName + "] userId [" + userId + "] associationId [" + associationId + "]");
-
-        AssociationInfo association = mAssociationStore.getAssociationById(associationId);
-        association = PermissionsUtils.sanitizeWithCallerChecks(mContext, association);
-        if (association == null) {
-            throw new DeviceNotAssociatedException("Association "
-                    + associationId + " is not associated with the app " + packageName
-                    + " for user " + userId);
+    public void onCompleteMessageReceived(@NonNull CompanionMessageInfo completeMessage) {
+        switch (completeMessage.getType()) {
+            case CompanionMessage.PERMISSION_SYNC:
+                processPermissionSyncMessage(completeMessage);
+                break;
+            default:
+                Slog.e(LOG_TAG, "Unknown message type [" + completeMessage.getType()
+                        + "]. Unable to process.");
         }
+    }
 
-        PermissionsUtils.enforceCallerIsSystemOr(userId, packageName);
+    private void processPermissionSyncMessage(CompanionMessageInfo messageInfo) {
+        Slog.i(LOG_TAG, "Applying permissions.");
+        // Start applying permissions
+        BackupHelper backupHelper = new BackupHelper(mContext, mContext.getUser());
+        try {
+            XmlPullParser parser = Xml.newPullParser();
+            ByteArrayInputStream stream = new ByteArrayInputStream(
+                    messageInfo.getData());
+            parser.setInput(stream, UTF_8.name());
 
-        CompanionMessageInfo completeMessage = mCompanionMessageProcessor.processMessage(messageId,
-                associationId, message);
-        if (completeMessage != null) {
-            if (completeMessage.getType() == CompanionMessage.PERMISSION_SYNC) {
-                // Start applying permissions
-                BackupHelper backupHelper = new BackupHelper(mContext, UserHandle.of(userId));
-                try {
-                    XmlPullParser parser = Xml.newPullParser();
-                    ByteArrayInputStream stream = new ByteArrayInputStream(
-                            completeMessage.getData());
-                    parser.setInput(stream, UTF_8.name());
-
-                    backupHelper.restoreState(parser);
-                } catch (IOException e) {
-                    Slog.e(LOG_TAG, "IOException reading message: "
-                            + new String(completeMessage.getData()));
-                } catch (XmlPullParserException e) {
-                    Slog.e(LOG_TAG, "Error parsing message: "
-                            + new String(completeMessage.getData()));
-                }
-            }
+            backupHelper.restoreState(parser);
+        } catch (IOException e) {
+            Slog.e(LOG_TAG, "IOException reading message: "
+                    + new String(messageInfo.getData()));
+        } catch (XmlPullParserException e) {
+            Slog.e(LOG_TAG, "Error parsing message: "
+                    + new String(messageInfo.getData()));
         }
     }
 

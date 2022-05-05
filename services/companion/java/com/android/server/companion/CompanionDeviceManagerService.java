@@ -626,7 +626,15 @@ public class CompanionDeviceManagerService extends SystemService {
                         + " message(Base64)=" + Base64.encodeToString(message, 0));
             }
 
-            mSecureCommsManager.receiveSecureMessage(associationId, message);
+            AssociationInfo association = getAssociationWithCallerChecks(associationId);
+            if (association == null) {
+                throw new IllegalArgumentException("Association with ID " + associationId + " "
+                        + "does not exist "
+                        + "or belongs to a different package "
+                        + "or belongs to a different user");
+            }
+
+            mSecureCommsManager.receiveSecureMessage(messageId, associationId, message);
         }
 
         @Override
