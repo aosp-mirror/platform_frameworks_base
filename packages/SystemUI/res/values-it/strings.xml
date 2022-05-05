@@ -340,7 +340,7 @@
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • In carica nel dock • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> alla ricarica completa"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Cambio utente"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Tutte le app e i dati di questa sessione verranno eliminati."</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Ti ridiamo il benvenuto alla sessione Ospite."</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Ti ridiamo il benvenuto nella sessione Ospite."</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Vuoi continuare la sessione?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Ricomincia"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Sì, continua"</string>
@@ -374,20 +374,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Questo dispositivo appartiene alla tua organizzazione, che potrebbe monitorare il traffico di rete"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"Questo dispositivo appartiene a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>, che potrebbe monitorare il traffico di rete"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Questo dispositivo è fornito da <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Questo dispositivo appartiene alla tua organizzazione ed è collegato a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Questo dispositivo appartiene a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ed è collegato a <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Questo dispositivo appartiene alla tua organizzazione e si connette a Internet tramite <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Questo dispositivo appartiene a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> e si connette a Internet tramite <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Questo dispositivo appartiene alla tua organizzazione"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Questo dispositivo appartiene a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Questo dispositivo appartiene alla tua organizzazione ed è collegato a VPN"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Questo dispositivo appartiene a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ed è collegato a VPN"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Questo dispositivo appartiene alla tua organizzazione e si connette a Internet tramite VPN"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Questo dispositivo appartiene a <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> e si connette a Internet tramite VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"La tua organizzazione potrebbe monitorare il traffico di rete nel tuo profilo di lavoro"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> potrebbe monitorare il traffico di rete nel tuo profilo di lavoro"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"L\'attività di rete del tuo profilo di lavoro è visibile all\'amministratore IT"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"La rete potrebbe essere monitorata"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Questo dispositivo è collegato a VPN"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Il tuo profilo di lavoro è collegato a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Il tuo profilo personale è collegato a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Questo dispositivo è collegato a <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Questo dispositivo si connette a Internet tramite VPN"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Le tue app di lavoro si connettono a Internet tramite <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Le tue app personali si connettono a Internet tramite <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Questo dispositivo si connette a Internet tramite <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Questo dispositivo è fornito da <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Gestione dei dispositivi"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -403,10 +403,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Sul dispositivo è installata un\'autorità di certificazione. Il tuo traffico di rete protetto potrebbe essere monitorato o modificato."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"L\'amministratore ha attivato i log di rete, che consentono di monitorare il traffico sul dispositivo."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"L\'amministratore ha attivato i log di rete, che consentono di monitorare il traffico nel profilo di lavoro, ma non nel profilo personale."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Sei connesso a <xliff:g id="VPN_APP">%1$s</xliff:g>, che consente di monitorare le attività di rete, inclusi siti web, email e app."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Sei connesso a <xliff:g id="VPN_APP_0">%1$s</xliff:g> e <xliff:g id="VPN_APP_1">%2$s</xliff:g>, che consentono di monitorare le attività di rete, inclusi siti web, email e app."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Il tuo profilo di lavoro è collegato a <xliff:g id="VPN_APP">%1$s</xliff:g>, da cui è possibile monitorare la tua attività di rete, inclusi siti web, email e app."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Il tuo profilo personale è collegato a <xliff:g id="VPN_APP">%1$s</xliff:g>, da cui è possibile monitorare la tua attività di rete, inclusi siti web, email e app."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Questo dispositivo si connette a Internet tramite <xliff:g id="VPN_APP">%1$s</xliff:g>. La tua attività di rete, inclusi email e dati di navigazione, è visibile all\'amministratore IT."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Questo dispositivo si connette a Internet tramite <xliff:g id="VPN_APP_0">%1$s</xliff:g> e <xliff:g id="VPN_APP_1">%2$s</xliff:g>. La tua attività di rete, inclusi email e dati di navigazione, è visibile all\'amministratore IT."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Le tue app di lavoro si connettono a Internet tramite <xliff:g id="VPN_APP">%1$s</xliff:g>. La tua attività di rete nelle app di lavoro, inclusi email e dati di navigazione, è visibile all\'amministratore IT e al provider VPN."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Le tue app personali si connettono a Internet tramite <xliff:g id="VPN_APP">%1$s</xliff:g>. La tua attività di rete nelle app personali, inclusi email e dati di navigazione, è visibile al provider VPN."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Apri impostazioni VPN"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Questo dispositivo è gestito da uno dei tuoi genitori, il quale può visualizzare e gestire informazioni come le app che usi, la tua posizione e il tuo tempo di utilizzo."</string>
@@ -511,7 +511,7 @@
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Appare in cima alle notifiche delle conversazioni e compare come immagine del profilo nella schermata di blocco"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Appare in cima alle notifiche delle conversazioni, nonché compare come immagine del profilo nella schermata di blocco e come bolla"</string>
     <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Appare in cima alle notifiche delle conversazioni, interrompe la modalità Non disturbare e compare come immagine del profilo nella schermata di blocco"</string>
-    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Appare in cima alle notifiche delle conversazioni, interrompe la modalità Non disturbare, nonché compare come immagine del profilo nella schermata di blocco e come bolla"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Appare in cima alle notifiche delle conversazioni, come immagine del profilo nella schermata di blocco e sotto forma di bolla, inoltre interrompe la modalità Non disturbare"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorità"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> non supporta le funzionalità delle conversazioni"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Impossibile modificare queste notifiche."</string>
@@ -851,6 +851,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Nome annuncio"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Password"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Salva"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Avvio in corso…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Impossibile trasmettere"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Numero build"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Numero build copiato negli appunti."</string>
     <string name="basic_status" msgid="2315371112182658176">"Apri conversazione"</string>

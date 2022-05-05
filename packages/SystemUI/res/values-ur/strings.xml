@@ -356,7 +356,7 @@
     <string name="user_remove_user_message" msgid="6702834122128031833">"اس صارف کی سبھی ایپس اور ڈیٹا حذف کر دیا جائے گا۔"</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"ہٹائیں"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> کو ان تمام معلومات تک رسائی حاصل ہوگی جو آپ کی اسکرین پر مرئی ہے یا ریکارڈنگ یا کاسٹنگ کے دوران آپ کے آلے سے چلائے گئے ہوں۔ اس میں پاس ورڈز، ادائیگی کی تفصیلات، تصاویر، پیغامات، اور آپ کے ذریعے چلائی جانے والی آڈیو جیسی معلومات شامل ہے۔"</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"یہ فنکشن فراہم کرنے والی سروس کو ان تمام معلومات تک رسائی حاصل ہوگی جو آپ کی اسکرین پر مرئی ہے یا ریکارڈنگ یا کاسٹنگ کے دوران آپ کے آلے سے چلائے گئے ہوں۔ اس میں پاس ورڈز، ادائیگی کی تفصیلات، تصاویر، پیغامات، اور آپ کے ذریعے چلائی جانے والی آڈیو جیسی معلومات شامل ہے۔"</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"یہ فنکشن فراہم کرنے والی سروس کو اس تمام معلومات تک رسائی حاصل ہوگی جو آپ کی اسکرین پر نظر آتی ہے یا ریکارڈنگ یا کاسٹنگ کے دوران آپ کے آلے سے چلائی جاتی ہے۔ اس میں پاس ورڈز، ادائیگی کی تفصیلات، تصاویر، پیغامات اور وہ آڈیو جو آپ چلاتے ہیں جیسی معلومات شامل ہے۔"</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"ریکارڈنگ یا کاسٹنگ شروع کریں؟"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> کے ذریعے ریکارڈنگ یا کاسٹنگ شروع کریں؟"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"سبھی کو صاف کریں"</string>
@@ -374,20 +374,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"آپ کی تنظیم اس آلے کی مالک ہے اور نیٹ ورک ٹریفک کی نگرانی کر سکتی ہے"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> اس آلے کی مالک ہے اور نیٹ ورک ٹریفک کی نگرانی کر سکتی ہے"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"یہ آلہ <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> نے فراہم کیا ہے"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"یہ آلہ آپ کی تنظیم کا ہے اور <xliff:g id="VPN_APP">%1$s</xliff:g> سے منسلک ہے"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"یہ آلہ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> کا ہے اور <xliff:g id="VPN_APP">%2$s</xliff:g> سے منسلک ہے"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"یہ آلہ آپ کی تنظیم کا ہے اور <xliff:g id="VPN_APP">%1$s</xliff:g> کے ذریعے انٹرنیٹ سے منسلک ہے"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"یہ آلہ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> کا ہے اور <xliff:g id="VPN_APP">%2$s</xliff:g> کے ذریعے انٹرنیٹ سے منسلک ہے"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"یہ آلہ آپ کی تنظیم کا ہے"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"یہ آلہ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> کا ہے"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"‏یہ آلہ آپ کی تنظیم کا ہے اور VPNs سے منسلک ہے"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"‏یہ آلہ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> کا ہے اور VPNs سے منسلک ہے"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"‏یہ آلہ آپ کی تنظیم کا ہے اور VPNs کے ذریعے انٹرنیٹ سے منسلک ہے"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"‏یہ آلہ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> کا ہے اور VPNs کے ذریعے انٹرنیٹ سے منسلک ہے"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"آپ کی تنظیم آپ کے دفتری پروفائل میں نیٹ ورک ٹریفک مانیٹر کر سکتی ہے"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> آپ کے دفتری پروفائل میں نیٹ ورک ٹریفک مانیٹر کر سکتی ہے"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"‏آپ کا IT منتظم دفتری پروفائل نیٹ ورک کی سرگرمی دیکھ سکتا ہے۔"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"نیٹ ورک کو مانیٹر کیا جا سکتا ہے"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"‏یہ آلہ VPNs سے منسلک ہے"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"آپ کی دفتری پروفائل <xliff:g id="VPN_APP">%1$s</xliff:g> سے منسلک ہے"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"آپ کی ذاتی پروفائل <xliff:g id="VPN_APP">%1$s</xliff:g> سے منسلک ہے"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"یہ آلہ <xliff:g id="VPN_APP">%1$s</xliff:g> سے منسلک ہے"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"‏یہ آلہ VPNs کے ذریعے انٹرنیٹ سے منسلک ہے"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"آپ کی ورک ایپس <xliff:g id="VPN_APP">%1$s</xliff:g> کے ذریعے انٹرنیٹ سے منسلک ہیں"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"آپ کی ذاتی ایپس <xliff:g id="VPN_APP">%1$s</xliff:g> کے ذریعے انٹرنیٹ سے منسلک ہیں"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"یہ آلہ <xliff:g id="VPN_APP">%1$s</xliff:g> کے ذریعے انٹرنیٹ سے منسلک ہے"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"یہ آلہ <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> نے فراہم کیا ہے"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"آلے کا نظم و نسق"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -403,10 +403,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"ایک سرٹیفکیٹ کی اتھارٹی اس آلہ پر انسٹال ہے۔ آپ کا محفوظ نیٹ ورک ٹریفک مانیٹر ہو سکتا ہے یا اس میں ترمیم کی جا سکتی ہے۔"</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"آپ کے منتظم نے نیٹ ورک لاگنگ کو آن کر دیا ہے، جو آپ کے آلے پر ٹریفک مانیٹر کرتی ہے۔"</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"آپ کے منتظم نے نیٹ ورک لاگنگ آن کر دی ہے، جو آپ کے ذاتی پروفائل پر نہیں بلکہ دفتری پروفائل پر ٹریفک کو مانیٹر کرتی ہے۔"</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"آپ <xliff:g id="VPN_APP">%1$s</xliff:g> سے منسلک ہیں جو ای میلز، ایپس اور ویب سائٹس سمیت آپ کے نیٹ ورک کی سرگرمی مانیٹر کر سکتی ہے۔"</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"آپ <xliff:g id="VPN_APP_0">%1$s</xliff:g> اور <xliff:g id="VPN_APP_1">%2$s</xliff:g> سے منسلک ہیں، جو ای میلز، ایپس اور ویب سائٹس سمیت آپ کے نیٹ ورک کی سرگرمی مانیٹر کر سکتی ہیں۔"</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"آپ کا دفتری پروفائل <xliff:g id="VPN_APP">%1$s</xliff:g> سے منسلک ہے، جو ای میلز، ایپس اور ویب سائٹس سمیت آپ کے نیٹ ورک کی سرگرمی مانیٹر کر سکتی ہے۔"</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"آپ کا ذاتی پروفائل <xliff:g id="VPN_APP">%1$s</xliff:g> سے منسلک ہے جو ای میلز، ایپس اور ویب سائٹس سمیت آپ کے نیٹ ورک کی سرگرمی مانیٹر کر سکتی ہے۔"</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"‏یہ آلہ <xliff:g id="VPN_APP">%1$s</xliff:g> کے ذریعے انٹرنیٹ سے منسلک ہے۔ آپ کا IT منتظم ای میلز اور براؤزر ڈیٹا سمیت آپ کے نیٹ ورک کی سرگرمی دیکھ سکتا ہے۔"</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"‏یہ آلہ <xliff:g id="VPN_APP_0">%1$s</xliff:g> اور <xliff:g id="VPN_APP_1">%2$s</xliff:g> کے ذریعے انٹرنیٹ سے منسلک ہے۔ آپ کا IT منتظم ای میلز اور براؤزر ڈیٹا سمیت آپ کے نیٹ ورک کی سرگرمی دیکھ سکتا ہے۔"</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"‏آپ کی ورک ایپس <xliff:g id="VPN_APP">%1$s</xliff:g> کے ذریعے انٹرنیٹ سے منسلک ہیں۔ آپ کے IT منتظم اور VPN فراہم کنندہ ای میلز اور براؤزر ڈیٹا سمیت ورک ایپس میں آپ کے نیٹ ورک کی سرگرمی دیکھ سکتے ہیں۔"</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"‏آپ کی ذاتی ایپس <xliff:g id="VPN_APP">%1$s</xliff:g> کے ذریعے انٹرنیٹ سے منسلک ہیں۔ آپ کا VPN فراہم کنندہ ای میلز اور براؤزر ڈیٹا سمیت آپ کے نیٹ ورک کی سرگرمی دیکھ سکتا ہے۔"</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"‏VPN کی ترتیبات کھولیں"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"یہ آلہ آپ کے والدین کے زیر انتظام ہے۔ آپ کے والدین آپ کی استعمال والی ایپس، آپ کا مقام اور آپ کے اسکرین کے وقت جیسی معلومات کو دیکھ اور اس کا نظم کر سکتے ہیں۔"</string>
@@ -851,6 +851,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"براڈکاسٹ کا نام"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"پاس ورڈ"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"محفوظ کریں"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"شروع ہو رہا ہے…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"براڈکاسٹ نہیں کیا جا سکتا"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"بلڈ نمبر"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"بلڈ نمبر کلپ بورڈ میں کاپی ہو گیا۔"</string>
     <string name="basic_status" msgid="2315371112182658176">"گفتگو کھولیں"</string>

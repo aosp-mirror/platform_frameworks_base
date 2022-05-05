@@ -362,7 +362,7 @@
     <string name="user_remove_user_message" msgid="6702834122128031833">"Bus ištrinti visi šio naudotojo duomenys ir programos."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Pašalinti"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> galės pasiekti visą informaciją, matomą ekrane ir leidžiamą iš įrenginio įrašant ar perduodant turinį. Tai apima įvairią informaciją, pvz., slaptažodžius, išsamią mokėjimo informaciją, nuotraukas, pranešimus ir leidžiamus garso įrašus."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Šią funkcija teikianti paslauga galės pasiekti visą informaciją, matomą ekrane ir leidžiamą iš įrenginio įrašant ar perduodant turinį. Tai apima įvairią informaciją, pvz., slaptažodžius, išsamią mokėjimo informaciją, nuotraukas, pranešimus ir leidžiamus garso įrašus."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Šią funkciją teikianti paslauga galės pasiekti visą informaciją, matomą ekrane ir leidžiamą iš įrenginio įrašant ar perduodant turinį. Tai apima įvairią informaciją, pvz., slaptažodžius, išsamią mokėjimo informaciją, nuotraukas, pranešimus ir leidžiamus garso įrašus."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Pradėti įrašyti ar perduoti turinį?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Pradėti įrašyti ar perduoti turinį naudojant „<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>“?"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Viską išvalyti"</string>
@@ -380,20 +380,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Šis įrenginys priklauso jūsų organizacijai ir ji gali stebėti tinklo srautą"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"Šis įrenginys priklauso „<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>“ ir ji gali stebėti tinklo srautą"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Šį įrenginį teikia „<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>“"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Šis įrenginys priklauso jūsų organizacijai ir yra susietas su „<xliff:g id="VPN_APP">%1$s</xliff:g>“"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Šis įrenginys priklauso „<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>“ ir yra susietas su „<xliff:g id="VPN_APP">%2$s</xliff:g>“"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Šis įrenginys priklauso jūsų organizacijai ir yra prijungtas prie interneto naudojant „<xliff:g id="VPN_APP">%1$s</xliff:g>“"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Šis įrenginys priklauso „<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>“ ir yra prijungtas prie interneto naudojant „<xliff:g id="VPN_APP">%2$s</xliff:g>“"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Šis įrenginys priklauso jūsų organizacijai"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Šis įrenginys priklauso „<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>“"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Šis įrenginys priklauso jūsų organizacijai ir yra prijungtas prie VPN"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Šis įrenginys priklauso „<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>“ ir yra prijungtas prie VPN"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Šis įrenginys priklauso jūsų organizacijai ir yra prijungtas prie interneto naudojant VPN"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Šis įrenginys priklauso „<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>“ ir yra prijungtas prie interneto naudojant VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Jūsų organizacija darbo profilyje gali stebėti tinklo srautą"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"„<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>“ darbo profilyje gali stebėti tinklo srautą"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Darbo profilio tinklo veiklą mato jūsų IT administratorius"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Tinklas gali būti stebimas"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Šis įrenginys prijungtas prie VPN"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Darbo profilis susietas su „<xliff:g id="VPN_APP">%1$s</xliff:g>“"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Asmeninis profilis susietas su „<xliff:g id="VPN_APP">%1$s</xliff:g>“"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Šis įrenginys susietas su „<xliff:g id="VPN_APP">%1$s</xliff:g>“"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Šis įrenginys prijungtas prie interneto naudojant VPN"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Jūsų darbo programos prijungtos prie interneto naudojant <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Jūsų asmeninės programos prijungtos prie interneto naudojant „<xliff:g id="VPN_APP">%1$s</xliff:g>“"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Šis įrenginys prijungtas prie interneto naudojant „<xliff:g id="VPN_APP">%1$s</xliff:g>“"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Šį įrenginį teikia „<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>“"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Įrenginio tvarkymas"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -409,10 +409,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Šiame įrenginyje įdiegtas sertifikato įgaliojimas. Jūsų saugaus tinklo srautas gali būti stebimas arba keičiamas."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Administratorius įjungė tinklo duomenų įrašymą į žurnalą. Įjungus šią funkciją stebimas srautas jūsų įrenginyje."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Administratorius įjungė tinklo duomenų įrašymą į žurnalą. Įjungus šią funkciją stebimas srautas jūsų darbo, bet ne asmeniniame profilyje."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Esate prisijungę prie programos „<xliff:g id="VPN_APP">%1$s</xliff:g>“, kuri gali stebėti tinklo veiklą, įskaitant el. laiškus, programas ir svetaines."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Esate prisijungę prie programų „<xliff:g id="VPN_APP_0">%1$s</xliff:g>“ ir „<xliff:g id="VPN_APP_1">%2$s</xliff:g>“, kurios gali stebėti tinklo veiklą, įskaitant el. laiškus, programas ir svetaines."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Darbo profilis susietas su programa „<xliff:g id="VPN_APP">%1$s</xliff:g>“, kuri gali stebėti tinklo veiklą, įskaitant el. laiškus, programas ir svetaines."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Asmeninis profilis susietas su programa „<xliff:g id="VPN_APP">%1$s</xliff:g>“, kuri gali stebėti tinklo veiklą, įskaitant el. laiškus, programas ir svetaines."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Šis įrenginys prijungtas prie interneto naudojant „<xliff:g id="VPN_APP">%1$s</xliff:g>“. Jūsų tinklo veikla, įskaitant el. laiškus ir naršymo duomenis, matoma jūsų IT administratoriui."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Šis įrenginys prijungtas prie interneto naudojant „<xliff:g id="VPN_APP_0">%1$s</xliff:g>“ ir „<xliff:g id="VPN_APP_1">%2$s</xliff:g>“. Jūsų tinklo veikla, įskaitant el. laiškus ir naršymo duomenis, matoma jūsų IT administratoriui."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Jūsų darbo programos prijungtos prie interneto naudojant „<xliff:g id="VPN_APP">%1$s</xliff:g>“. Jūsų tinklo veikla darbo programose, įskaitant el. laiškus ir naršymo duomenis, matoma jūsų IT administratoriui ir VPN teikėjui."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Jūsų asmeninės programos prijungtos prie interneto naudojant „<xliff:g id="VPN_APP">%1$s</xliff:g>“. Jūsų tinklo veikla, įskaitant el. laiškus ir naršymo duomenis, matoma jūsų VPN teikėjui."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Atidaryti VPN nustatymus"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Šį įrenginį tvarko vienas iš tavo tėvų. Jis gali peržiūrėti ir tvarkyti informaciją, pvz., tavo naudojamas programas, vietovę ir įrenginio naudojimo laiką."</string>
@@ -517,7 +517,7 @@
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Rodoma pokalbių pranešimų viršuje ir kaip profilio nuotrauka užrakinimo ekrane"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Rodoma pokalbių pranešimų viršuje ir kaip profilio nuotrauka užrakinimo ekrane, burbule"</string>
     <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Rodoma pokalbių pranešimų viršuje ir kaip profilio nuotrauka užrakinimo ekrane, pertraukia netrukdymo režimą"</string>
-    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Rodoma pokalbių pranešimų viršuje ir kaip profilio nuotrauka užrakinimo ekrane, debesėlyje, pertraukia netrukdymo režimą"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Rodoma pokalbių pranešimų viršuje ir kaip profilio nuotrauka užrakinimo ekrane, burbule, pertraukia netrukdymo režimą"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritetiniai"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Programa „<xliff:g id="APP_NAME">%1$s</xliff:g>“ nepalaiko pokalbių funkcijų"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Šių pranešimų keisti negalima."</string>
@@ -863,6 +863,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Transliacijos pavadinimas"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Slaptažodis"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Išsaugoti"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Pradedama…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Nepavyko transliuoti"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Versijos numeris"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Versijos numeris nukopijuotas į iškarpinę."</string>
     <string name="basic_status" msgid="2315371112182658176">"Atidaryti pokalbį"</string>

@@ -374,20 +374,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"এই ডিভাইসটি আপনার প্রতিষ্ঠানের এবং এরা ডিভাইসের নেটওয়ার্ক ট্রাফিক মনিটর করতে পারে"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> এই ডিভাইসের মালিক এবং এটির নেটওয়ার্ক ট্রাফিক মনিটর করতে পারে"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"এই ডিভাইস <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> দিয়েছে"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"এই ডিভাইসটি আপনার প্রতিষ্ঠানের এবং <xliff:g id="VPN_APP">%1$s</xliff:g>-এ কানেক্ট করা আছে"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"এই ডিভাইস <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>-এর এবং <xliff:g id="VPN_APP">%2$s</xliff:g>-এ কানেক্ট করা আছে"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"এই ডিভাইস আপনার প্রতিষ্ঠানের এবং <xliff:g id="VPN_APP">%1$s</xliff:g>-এর মাধ্যমে ইন্টারনেটের সাথে কানেক্ট করা আছে"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"এই ডিভাইস <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>-এর এবং <xliff:g id="VPN_APP">%2$s</xliff:g>-এর মাধ্যমে ইন্টারনেটের সাথে কানেক্ট করা আছে"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"এই ডিভাইসটি আপনার প্রতিষ্ঠানের"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"এই ডিভাইসটি <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>-এর"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"এই ডিভাইসটি আপনার প্রতিষ্ঠানের এবং একাধিক VPN-এ কানেক্ট করা আছে"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"এই ডিভাইস <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>-এর এবং একাধিক VPN-এ কানেক্ট করা আছে"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"এই ডিভাইস আপনার প্রতিষ্ঠানের এবং একাধিক ভিপিএন-এর মাধ্যমে ইন্টারনেটের সাথে কানেক্ট করা আছে"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"এই ডিভাইস <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>-এর এবং একাধিক ভিপিএন-এর মাধ্যমে ইন্টারনেটের সাথে কানেক্ট করা আছে"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"আপনার প্রতিষ্ঠান আপনার কর্মস্থলের প্রোফাইলের নেটওয়ার্ক ট্রাফিকে নজর রাখতে পারে"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> আপনার কর্মস্থলের প্রোফাইলের নেটওয়ার্ক ট্রাফিকে নজর রাখতে পারে"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"আপনার আইটি অ্যাডমিন অফিস প্রোফাইল নেটওয়ার্ক অ্যাক্টিভিটি দেখতে পারবেন"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"নেটওয়ার্কের উপরে নজর রাখা হতে পারে"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"এই ডিভাইস একাধিক VPN-এ কানেক্ট করা আছে"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"<xliff:g id="VPN_APP">%1$s</xliff:g>-এ আপনার অফিস প্রোফাইল কানেক্ট করা রয়েছে"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"আপনার ব্যক্তিগত প্রোফাইল <xliff:g id="VPN_APP">%1$s</xliff:g>-এ কানেক্ট করা আছে"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"এই ডিভাইস <xliff:g id="VPN_APP">%1$s</xliff:g>-এ কানেক্ট করা আছে"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"একাধিক ভিপিএন-এর মাধ্যমে আপনার ডিভাইস ইন্টারনেটের সাথে কানেক্ট করা আছে"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"<xliff:g id="VPN_APP">%1$s</xliff:g>-এর মাধ্যমে আপনার অফিসের অ্যাপ ইন্টারনেটের সাথে কানেক্ট করা আছে"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"<xliff:g id="VPN_APP">%1$s</xliff:g>-এর মাধ্যমে আপনার ব্যক্তিগত অ্যাপ ইন্টারনেটের সাথে কানেক্ট করা আছে"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"<xliff:g id="VPN_APP">%1$s</xliff:g>-এর মাধ্যমে এই ডিভাইস ইন্টারনেটের সাথে কানেক্ট করা আছে"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"এই ডিভাইস <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> দিয়েছে"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"ডিভাইসের পরিচালনা"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -403,10 +403,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"এই ডিভাইসে একটি সার্টিফিকেট কর্তৃপক্ষ ইনস্টল করা আছে। আপনার নিরাপদ নেটওয়ার্ক ট্রাফিকে নজর রাখা হতে পারে বা তাতে পরিবর্তন করা হতে পারে।"</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"আপনার প্রশাসক নেটওয়ার্ক লগিং চালু করেছেন, যা আপনার ডিভাইসের ট্রাফিকের উপরে নজর রাখে।"</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"আপনার অ্যাডমিন নেটওয়ার্ক লগ করা চালু করেছেন যা আপনার অফিস প্রোফাইলে ট্রাফিক মনিটর করে তবে ব্যক্তিগত প্রোফাইলে করে না।"</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"আপনি <xliff:g id="VPN_APP">%1$s</xliff:g> এ সংযুক্ত রয়েছেন, যা আপনার ইমেল, অ্যাপ, এবং ওয়েবসাইট সহ আপনার নেটওয়ার্ক অ্যাক্টিভিটির উপর নজর রাখতে পারে।"</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"আপনি <xliff:g id="VPN_APP_0">%1$s</xliff:g> এবং <xliff:g id="VPN_APP_1">%2$s</xliff:g> এর সাথে সংযুক্ত রয়েছেন, যেগুলি আপনার ইমেল, অ্যাপ, এবং ওয়েবসাইট সহ আপনার নেটওয়ার্ক অ্যাক্টিভিটির উপর নজর রাখতে পারে।"</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"আপনার কর্মস্থলের প্রোফাইল <xliff:g id="VPN_APP">%1$s</xliff:g> এর সাথে সংযুক্ত রয়েছে, যেটি ইমেল, অ্যাপ, এবং ওয়েবসাইট সহ আপনার নেটওয়ার্ক কার্যকলাপে নজর রাখতে পারে।"</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"আপনার ব্যক্তিগত প্রোফাইল <xliff:g id="VPN_APP">%1$s</xliff:g> এর সাথে সংযুক্ত রয়েছে, যেটি ইমেল, অ্যাপ, এবং ওয়েবসাইট সহ আপনার নেটওয়ার্ক কার্যকলাপে নজর রাখতে পারে৷"</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"<xliff:g id="VPN_APP">%1$s</xliff:g>-এর মাধ্যমে আপনার ডিভাইস ইন্টারনেটের সাথে কানেক্ট করা আছে। ইমেল ও ব্রাউজ করা ডেটা সহ নেটওয়ার্ক অ্যাক্টিভিটি আপনার আইটি অ্যাডমিন দেখতে পারবেন।"</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"<xliff:g id="VPN_APP_0">%1$s</xliff:g> ও <xliff:g id="VPN_APP_1">%2$s</xliff:g>-এর মাধ্যমে এই ডিভাইস ইন্টারনেটের সাথে কানেক্ট করা আছে। ইমেল ও ব্রাউজ করা ডেটা সহ নেটওয়ার্ক অ্যাক্টিভিটি আপনার আইটি অ্যাডমিন দেখতে পারবেন।"</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"<xliff:g id="VPN_APP">%1$s</xliff:g>-এর মাধ্যমে আপনার অফিসের অ্যাপ ইন্টারনেটের সাথে কানেক্ট করা আছে। ইমেল ও ব্রাউজ করা ডেটা সহ অফিসের অ্যাপে করা নেটওয়ার্ক অ্যাক্টিভিটি আপনার আইটি অ্যাডমিন ও ভিপিএন প্রদানকারী দেখতে পারবেন।"</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"<xliff:g id="VPN_APP">%1$s</xliff:g>-এর মাধ্যমে আপনার ব্যক্তিগত অ্যাপ ইন্টারনেটের সাথে কানেক্ট করা আছে। ইমেল ও ব্রাউজ করা ডেটা সহ নেটওয়ার্ক অ্যাক্টিভিটি আপনার ভিপিএন প্রদানকারী দেখতে পারবেন।"</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN সেটিংস খুলুন"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"আপনার অভিভাবক এই ডিভাইস ম্যানেজ করেন। আপনার অভিভাবক আপনার ব্যবহার করা অ্যাপ, লোকেশন ও স্ক্রিন টাইমের মতো তথ্যগুলি দেখতে এবং ম্যানেজ করতে পারেন।"</string>
@@ -851,6 +851,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"ব্রডকাস্টের নাম"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"পাসওয়ার্ড"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"সেভ করুন"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"শুরু করা হচ্ছে…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"সম্প্রচার করা যাচ্ছে না"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"বিল্ড নম্বর"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"বিল্ড নম্বর ক্লিপবোর্ডে কপি করা হয়েছে।"</string>
     <string name="basic_status" msgid="2315371112182658176">"খোলা কথোপকথন"</string>
@@ -919,11 +921,13 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"টাইল যোগ করুন"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"টাইল যোগ করবেন না"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ব্যবহারকারী বেছে নিন"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g>টি অ্যাপ চালু আছে</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g>টি অ্যাপ চালু আছে</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"নতুন তথ্য"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"অ্যাক্টিভ অ্যাপ"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"আপনি এইসব অ্যাপ ব্যবহার না করলেও, সেগুলি এখনও চালু থাকতে পারে এবং তার জন্য ব্যাটারির চার্জ কমতে পারে"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"বন্ধ করুন"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"থামানো হয়েছে"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"হয়ে গেছে"</string>

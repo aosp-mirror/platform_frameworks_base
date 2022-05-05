@@ -141,21 +141,21 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"已識別面孔。按解鎖圖示即可繼續。"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"驗證咗"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"使用 PIN"</string>
-    <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"使用圖案"</string>
+    <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"使用圖形"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"使用密碼"</string>
     <string name="biometric_dialog_wrong_pin" msgid="1878539073972762803">"PIN 錯誤"</string>
-    <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"圖案錯誤"</string>
+    <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"圖形錯誤"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"密碼錯誤"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"輸入錯誤的次數太多，\n請於 <xliff:g id="NUMBER">%d</xliff:g> 秒後再試。"</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"請再試一次。您已嘗試 <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> 次，最多可試 <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g> 次。"</string>
     <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"您的資料將會刪除"</string>
-    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"如果您下次畫出錯誤的上鎖圖案，系統將會刪除此裝置上的資料。"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"如果您下次畫出錯誤的上鎖圖形，系統將會刪除此裝置上的資料。"</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"如果您下次輸入錯誤的 PIN，系統將會刪除此裝置上的資料。"</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"如果您下次輸入錯誤的密碼，系統將會刪除此裝置上的資料。"</string>
-    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"如果您下次畫出錯誤的上鎖圖案，系統將會刪除此使用者。"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"如果您下次畫出錯誤的上鎖圖形，系統將會刪除此使用者。"</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"如果您下次輸入錯誤的 PIN，系統將會刪除此使用者。"</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"如果您下次輸入錯誤的密碼，系統將會刪除此使用者。"</string>
-    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"如果您下次畫出錯誤的上鎖圖案，系統將會刪除工作設定檔和相關資料。"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"如果您下次畫出錯誤的上鎖圖形，系統將會刪除工作設定檔和相關資料。"</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"如果您下次輸入錯誤的 PIN，系統將會刪除工作設定檔和相關資料。"</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"如果您下次輸入錯誤的密碼，系統將會刪除工作設定檔和相關資料。"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"請輕觸指紋感應器"</string>
@@ -374,20 +374,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"您的機構擁有此裝置，並可能會監察網絡流量"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"「<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>」擁有此裝置，並可能會監察網絡流量"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"此裝置由 <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> 提供"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"此裝置屬於您的機構，並已連結至「<xliff:g id="VPN_APP">%1$s</xliff:g>」"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"此裝置屬於「<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>」，並已連結至「<xliff:g id="VPN_APP">%2$s</xliff:g>」"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"此裝置屬於您的機構，並已透過「<xliff:g id="VPN_APP">%1$s</xliff:g>」連接至互聯網"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"此裝置屬於「<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>」，並已透過「<xliff:g id="VPN_APP">%2$s</xliff:g>」連接至互聯網"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"此裝置屬於您的機構"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"此裝置屬於「<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>」"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"此裝置屬於您的機構，並已連結至 VPN"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"此裝置屬於「<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>」，並已連結至 VPN"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"此裝置屬於您的機構，並已透過 VPN 連接至互聯網"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"此裝置屬於「<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>」，並已透過 VPN 連接至互聯網"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"您的機構可能監控您工作設定檔上的網絡流量"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>可能會監控您工作設定檔上的網絡流量"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"IT 管理員可以查看工作設定檔的網絡活動"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"網絡可能會受到監控"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"此裝置已連結至 VPN"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"您的工作設定檔已連結至「<xliff:g id="VPN_APP">%1$s</xliff:g>」"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"您的個人設定檔已連結至「<xliff:g id="VPN_APP">%1$s</xliff:g>」"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"此裝置已連結至「<xliff:g id="VPN_APP">%1$s</xliff:g>」"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"此裝置已透過 VPN 連接至互聯網"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"您的工作應用程式已透過「<xliff:g id="VPN_APP">%1$s</xliff:g>」連接至互聯網"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"您的個人應用程式已透過「<xliff:g id="VPN_APP">%1$s</xliff:g>」連接至互聯網"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"此裝置已透過「<xliff:g id="VPN_APP">%1$s</xliff:g>」連接至互聯網"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"此裝置由 <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> 提供"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"裝置管理"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -403,10 +403,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"此裝置已安裝憑證授權單位。您的安全網絡流量可能會受監控或修改。"</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"您的管理員已開啟網絡記錄功能，以監控您裝置上的流量。"</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"您的管理員已開啟網絡記錄功能，可監控您工作設定檔 (而非個人設定檔) 的流量。"</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"您已連接至「<xliff:g id="VPN_APP">%1$s</xliff:g>」，此應用程式可以監控您的網絡活動，包括電郵、應用程式及網站。"</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"您已連接至「<xliff:g id="VPN_APP_0">%1$s</xliff:g>」和「<xliff:g id="VPN_APP_1">%2$s</xliff:g>」，這些應用程式可以監控您的網絡活動，包括電郵、應用程式及網站。"</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"您的工作設定檔已連結至「<xliff:g id="VPN_APP">%1$s</xliff:g>」，此應用程式可以監控您的網絡活動，包括電郵、應用程式及網站。"</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"您的個人設定檔已連結至「<xliff:g id="VPN_APP">%1$s</xliff:g>」，此應用程式可以監控您的網絡活動，包括電郵、應用程式及網站。"</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"此裝置已透過「<xliff:g id="VPN_APP">%1$s</xliff:g>」連接至互聯網。IT 管理員可以看到您的網絡活動，包括電郵和瀏覽資料。"</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"此裝置已透過「<xliff:g id="VPN_APP_0">%1$s</xliff:g>」和「<xliff:g id="VPN_APP_1">%2$s</xliff:g>」連接至互聯網。IT 管理員可以看到您的網絡活動，包括電郵和瀏覽資料。"</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"您的工作應用程式已透過「<xliff:g id="VPN_APP">%1$s</xliff:g>」連接至互聯網。IT 管理員和 VPN 供應商可以看到您在工作應用程式的網絡活動，包括電郵和瀏覽資料。"</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"您的個人應用程式已透過「<xliff:g id="VPN_APP">%1$s</xliff:g>」連接至互聯網。您的 VPN 供應商可以看到您的網絡活動，包括電郵和瀏覽資料。"</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"開啟 VPN 設定"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"此裝置由您的家長管理。家長可以查看及管理裝置上的資料，例如您使用的應用程式、位置和裝置使用時間。"</string>
@@ -851,6 +851,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"廣播名稱"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"密碼"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"儲存"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"啟動中…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"無法廣播"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"版本號碼"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"版本號碼已複製到剪貼簿。"</string>
     <string name="basic_status" msgid="2315371112182658176">"開啟對話"</string>

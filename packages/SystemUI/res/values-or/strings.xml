@@ -374,20 +374,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"ଏହି ଡିଭାଇସର ମାଲିକାନା ଆପଣଙ୍କ ସଂସ୍ଥା ପାଖରେ ଅଛି ଏବଂ ଏହା ନେଟୱାର୍କ ଟ୍ରାଫିକର ନିରୀକ୍ଷଣ କରିପାରେ"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"ଏହି ଡିଭାଇସଟି <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ର ଅଟେ ଏବଂ ଏହା ନେଟୱାର୍କ ଟ୍ରାଫିକକୁ ନିରୀକ୍ଷଣ କରିପାରେ"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"ଏହି ଡିଭାଇସ୍ <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ଦ୍ୱାରା ପ୍ରଦାନ କରାଯାଇଛି"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"ଏହି ଡିଭାଇସଟି ଆପଣଙ୍କ ସଂସ୍ଥାର ଅଟେ ଏବଂ ଏହା <xliff:g id="VPN_APP">%1$s</xliff:g> ସହ ସଂଯୁକ୍ତ ଅଛି"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"ଏହି ଡିଭାଇସଟି <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ର ଅଟେ ଏବଂ ଏହା <xliff:g id="VPN_APP">%2$s</xliff:g> ସହ ସଂଯୁକ୍ତ ଅଛି"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"ଏହି ଡିଭାଇସଟି ଆପଣଙ୍କ ସଂସ୍ଥାର ଅଟେ ଏବଂ ଏହା <xliff:g id="VPN_APP">%1$s</xliff:g> ମାଧ୍ୟମରେ ଇଣ୍ଟରନେଟ ସହ କନେକ୍ଟ ଅଛି"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"ଏହି ଡିଭାଇସଟି <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ର ଅଟେ ଏବଂ ଏହା <xliff:g id="VPN_APP">%2$s</xliff:g> ମାଧ୍ୟମରେ ଇଣ୍ଟରନେଟ ସହ କନେକ୍ଟ ଅଛି"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"ଏହି ଡିଭାଇସଟି ଆପଣଙ୍କ ସଂସ୍ଥାର ଅଟେ"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"ଏହି ଡିଭାଇସଟି <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ର ଅଟେ"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"ଏହି ଡିଭାଇସଟି ଆପଣଙ୍କ ସଂସ୍ଥାର ଅଟେ ଏବଂ ଏହା VPNଗୁଡ଼ିକ ସହ ସଂଯୁକ୍ତ ଅଛି"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"ଏହି ଡିଭାଇସଟି <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ର ଅଟେ ଏବଂ ଏହା VPNଗୁଡ଼ିକ ସହ ସଂଯୁକ୍ତ ଅଛି"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"ଏହି ଡିଭାଇସଟି ଆପଣଙ୍କ ସଂସ୍ଥାର ଅଟେ ଏବଂ ଏହା VPNଗୁଡ଼ିକ ମାଧ୍ୟମରେ ଇଣ୍ଟରନେଟ ସହ କନେକ୍ଟ ଅଛି"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"ଏହି ଡିଭାଇସଟି <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ର ଅଟେ ଏବଂ ଏହା VPNଗୁଡ଼ିକ ମାଧ୍ୟମରେ ଇଣ୍ଟରନେଟ ସହ କନେକ୍ଟ ଅଛି"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"ଆପଣଙ୍କ ୱର୍କ ପ୍ରୋଫାଇଲରେ ଆପଣଙ୍କ ସଂସ୍ଥା ନେଟୱର୍କ ଟ୍ରାଫିକ୍‍ ନୀରିକ୍ଷଣ କରିପାରନ୍ତି"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ଆପଣଙ୍କ ୱର୍କ ପ୍ରୋଫାଇଲରେ ନେଟୱର୍କ ଟ୍ରାଫିକ୍‍ ନୀରିକ୍ଷଣ କରିପାରନ୍ତି"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"ୱାର୍କ ପ୍ରୋଫାଇଲ୍ ନେଟୱାର୍କ କାର୍ଯ୍ୟକଳାପ ଆପଣଙ୍କ IT ଆଡମିନଙ୍କୁ ଦେଖାଯିବ"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"ନେଟୱର୍କ ନୀରିକ୍ଷଣ କରାଯାଇପାରେ"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"ଏହି ଡିଭାଇସଟି VPNଗୁଡ଼ିକ ସହ ସଂଯୁକ୍ତ ଅଛି"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"ଆପଣଙ୍କ ୱାର୍କ ପ୍ରୋଫାଇଲ୍ <xliff:g id="VPN_APP">%1$s</xliff:g> ସହ ସଂଯୁକ୍ତ ଅଛି"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"ଆପଣଙ୍କ ବ୍ୟକ୍ତିଗତ ପ୍ରୋଫାଇଲ୍ <xliff:g id="VPN_APP">%1$s</xliff:g> ସହ ସଂଯୁକ୍ତ ଅଛି"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"ଏହି ଡିଭାଇସଟି <xliff:g id="VPN_APP">%1$s</xliff:g> ସହ ସଂଯୁକ୍ତ ଅଛି"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"ଏହି ଡିଭାଇସ VPNଗୁଡ଼ିକ ମାଧ୍ୟମରେ ଇଣ୍ଟରନେଟ ସହ କନେକ୍ଟ ଅଛି"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"ଆପଣଙ୍କ ୱାର୍କ ଆପ୍ସ <xliff:g id="VPN_APP">%1$s</xliff:g> ମାଧ୍ୟମରେ ଇଣ୍ଟରନେଟ ସହ କନେକ୍ଟ ଅଛି"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"ଆପଣଙ୍କ ବ୍ୟକ୍ତିଗତ ଆପ୍ସ <xliff:g id="VPN_APP">%1$s</xliff:g> ମାଧ୍ୟମରେ ଇଣ୍ଟରନେଟ ସହ କନେକ୍ଟ ଅଛି"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"ଏହି ଡିଭାଇସ <xliff:g id="VPN_APP">%1$s</xliff:g> ମାଧ୍ୟମରେ ଇଣ୍ଟରନେଟ ସହ କନେକ୍ଟ ଅଛି"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"ଏହି ଡିଭାଇସ୍ <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ଦ୍ୱାରା ପ୍ରଦାନ କରାଯାଇଛି"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"ଡିଭାଇସ୍‌ ପରିଚାଳନା"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -403,10 +403,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"ଏହି ଡିଭାଇସରେ ଏକ ସର୍ଟିଫିକେଟ୍‍ ଅଥରିଟି ଇନଷ୍ଟଲ୍‍ କରାଯାଇଛି। ଆପଣଙ୍କ ସୁରକ୍ଷିତ ନେଟୱର୍କ ଟ୍ରାଫିକ୍‍ ନୀରିକ୍ଷଣ କିମ୍ବା ସଂଶୋଧନ କରାଯାଇ ପାରେ।"</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"ଆପଣଙ୍କ ଆଡମିନ୍‍ ନେଟୱର୍କ ଲଗଇନ୍‍ କରିବା ଅନ୍‍ କରିଛନ୍ତି, ଯାହା ଆପଣଙ୍କ ଡିଭାଇସରେ ଟ୍ରାଫିକ୍‍ ନୀରିକ୍ଷଣ କରେ।"</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"ଆପଣଙ୍କ ଆଡମିନ୍ ନେଟୱାର୍କ ଲଗିଂ ଚାଲୁ କରିଛନ୍ତି, ଯାହା ଆପଣଙ୍କ ୱାର୍କ ପ୍ରୋଫାଇଲରେ ଟ୍ରାଫିକ୍ ନିରୀକ୍ଷଣ କରେ କିନ୍ତୁ ଆପଣଙ୍କ ବ୍ୟକ୍ତିଗତ ପ୍ରୋଫାଇଲରେ ନୁହେଁ।"</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"ଆପଣ <xliff:g id="VPN_APP">%1$s</xliff:g>ରେ ସଂଯୁକ୍ତ, ଯାହା ଇମେଲ୍‍, ଆପ୍‌ ଓ ୱେବସାଇଟ୍‍ ସମେତ ଆପଣଙ୍କ ନେଟୱର୍କ ଗତିବିଧିକୁ ନିରୀକ୍ଷଣ କରିପାରେ।"</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"ଆପଣ <xliff:g id="VPN_APP_0">%1$s</xliff:g> ଏବଂ <xliff:g id="VPN_APP_1">%2$s</xliff:g>ରେ ସଂଯୁକ୍ତ, ଯାହା ଇମେଲ୍‍, ଆପ୍‌ ଓ ୱେବସାଇଟ୍‍ ସମେତ ଆପଣଙ୍କ ନେଟୱର୍କ ଗତିବିଧିକୁ ନିରୀକ୍ଷଣ କରିପାରେ।"</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"ଆପଣଙ୍କ ୱର୍କ ପ୍ରୋଫାଇଲ୍‍ <xliff:g id="VPN_APP">%1$s</xliff:g>ରେ ସଂଯୁକ୍ତ, ଯାହା ଇମେଲ୍‍, ଆପ୍‌ ଓ ୱେବସାଇଟ୍‍ ସମେତ ଆପଣଙ୍କ ନେଟୱର୍କ ଗତିବିଧିକୁ ନିରୀକ୍ଷଣ କରିପାରେ।"</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"ଆପଣଙ୍କ ବ୍ୟକ୍ତିଗତ ପ୍ରୋଫାଇଲ୍‍ <xliff:g id="VPN_APP">%1$s</xliff:g>ରେ ସଂଯୁକ୍ତ, ଯାହା ଇମେଲ୍‍, ଆପ୍‌ ଓ ୱେବସାଇଟ୍‍ ସମେତ ଆପଣଙ୍କ ନେଟୱର୍କ ଗତିବିଧିକୁ ନିରୀକ୍ଷଣ କରିପାରେ।"</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"ଆପଣଙ୍କ ଡିଭାଇସ <xliff:g id="VPN_APP">%1$s</xliff:g> ମାଧ୍ୟମରେ ଇଣ୍ଟରନେଟ ସହ କନେକ୍ଟ ଅଛି। ଇମେଲ ଏବଂ ବ୍ରାଉଜିଂ ଡାଟା ସମେତ, ଆପଣଙ୍କ ନେଟୱାର୍କ କାର୍ଯ୍ୟକଳାପ ଆପଣଙ୍କର IT ଆଡମିନଙ୍କୁ ଦୃଶ୍ୟମାନ ହୋଇଥାଏ।"</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"ଏହି ଡିଭାଇସ <xliff:g id="VPN_APP_0">%1$s</xliff:g> ଏବଂ <xliff:g id="VPN_APP_1">%2$s</xliff:g> ମାଧ୍ୟମରେ ଇଣ୍ଟରନେଟ ସହ କନେକ୍ଟ ଅଛି। ଇମେଲ ଏବଂ ବ୍ରାଉଜିଂ ଡାଟା ସମେତ, ଆପଣଙ୍କ ନେଟୱାର୍କ କାର୍ଯ୍ୟକଳାପ ଆପଣଙ୍କର IT ଆଡମିନଙ୍କୁ ଦୃଶ୍ୟମାନ ହୋଇଥାଏ।"</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"ଆପଣଙ୍କ ୱାର୍କ ଆପ୍ସ <xliff:g id="VPN_APP">%1$s</xliff:g> ମାଧ୍ୟମରେ ଇଣ୍ଟରନେଟ ସହ କନେକ୍ଟ ଅଛି। ଇମେଲ ଏବଂ ବ୍ରାଉଜିଂ ଡାଟା ସମେତ, ୱାର୍କ ଆପ୍ସରେ ଆପଣଙ୍କ ନେଟୱାର୍କ କାର୍ଯ୍ୟକଳାପ ଆପଣଙ୍କର IT ଆଡମିନ ଏବଂ VPN ପ୍ରଦାନକାରୀଙ୍କୁ ଦୃଶ୍ୟମାନ ହୋଇଥାଏ।"</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"ଆପଣଙ୍କ ବ୍ୟକ୍ତିଗତ ଆପ୍ସ <xliff:g id="VPN_APP">%1$s</xliff:g> ମାଧ୍ୟମରେ ଇଣ୍ଟରନେଟ ସହ କନେକ୍ଟ ଅଛି। ଇମେଲ ଏବଂ ବ୍ରାଉଜିଂ ଡାଟା ସମେତ, ଆପଣଙ୍କ ନେଟୱାର୍କ କାର୍ଯ୍ୟକଳାପ ଆପଣଙ୍କର VPN ପ୍ରଦାନକାରୀଙ୍କୁ ଦୃଶ୍ୟମାନ ହୋଇଥାଏ।"</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN ସେଟିଂସ୍ ଖୋଲନ୍ତୁ"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"ଏହି ଡିଭାଇସ୍ ଆପଣଙ୍କ ବାପାମାଙ୍କ ଦ୍ୱାରା ପରିଚାଳିତ। ଆପଣଙ୍କ ବାପାମା ଆପଣ ବ୍ୟବହାର କରୁଥିବା ଆପ୍ସ, ଆପଣଙ୍କ ଲୋକେସନ୍ ଓ ସ୍କ୍ରିନ୍ ସମୟ ପରି ସୂଚନା ଦେଖିପାରିବେ ଏବଂ ପରିଚାଳନା କରିପାରିବେ।"</string>
@@ -851,6 +851,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"ବ୍ରଡକାଷ୍ଟର ନାମ"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"ପାସୱାର୍ଡ"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"ସେଭ କରନ୍ତୁ"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"ଆରମ୍ଭ ହେଉଛି…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"ବ୍ରଡକାଷ୍ଟ କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"ବିଲ୍ଡ ନମ୍ୱର"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"କ୍ଲିପବୋର୍ଡକୁ କପି କରାଯାଇଥିବା ବିଲ୍ଡ ନମ୍ୱର।"</string>
     <string name="basic_status" msgid="2315371112182658176">"ବାର୍ତ୍ତାଳାପ ଖୋଲନ୍ତୁ"</string>
@@ -919,11 +921,13 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"ଟାଇଲ୍ ଯୋଗ କରନ୍ତୁ"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"ଟାଇଲ୍ ଯୋଗ କର ନାହିଁ"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ଉପଯୋଗକର୍ତ୍ତା ଚୟନ କର"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g>ଟି ଆପ ସକ୍ରିୟ ଅଛି</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g>ଟି ଆପ ସକ୍ରିୟ ଅଛି</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"ନୂଆ ସୂଚନା"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"ସକ୍ରିୟ ଆପଗୁଡ଼ିକ"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"ଆପଣ ଏହି ଆପ୍ସ ବ୍ୟବହାର କରୁନଥିଲେ ମଧ୍ୟ, ସେଗୁଡ଼ିକ ଏବେ ବି ସକ୍ରିୟ ଅଛି ଏବଂ ତାହା ବ୍ୟାଟେରୀ ଲାଇଫକୁ ପ୍ରଭାବିତ କରିପାରେ"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"ବନ୍ଦ ହୋଇଛି"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"ହୋଇଗଲା"</string>
