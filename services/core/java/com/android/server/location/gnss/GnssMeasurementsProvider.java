@@ -158,6 +158,7 @@ public final class GnssMeasurementsProvider extends
             Collection<GnssListenerRegistration> registrations) {
         boolean fullTracking = false;
         boolean enableCorrVecOutputs = false;
+        int intervalMillis = Integer.MAX_VALUE;
 
         if (mSettingsHelper.isGnssMeasurementsFullTrackingEnabled()) {
             fullTracking = true;
@@ -171,11 +172,13 @@ public final class GnssMeasurementsProvider extends
             if (request.isCorrelationVectorOutputsEnabled()) {
                 enableCorrVecOutputs = true;
             }
+            intervalMillis = Math.min(intervalMillis, request.getIntervalMillis());
         }
 
         return new GnssMeasurementRequest.Builder()
                     .setFullTracking(fullTracking)
                     .setCorrelationVectorOutputsEnabled(enableCorrVecOutputs)
+                    .setIntervalMillis(intervalMillis)
                     .build();
     }
 

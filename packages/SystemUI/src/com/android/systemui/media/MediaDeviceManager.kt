@@ -30,7 +30,6 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionManager
 import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionManagerFactory
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -116,13 +115,13 @@ class MediaDeviceManager @Inject constructor(
         }
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<String>) {
+    override fun dump(pw: PrintWriter, args: Array<String>) {
         with(pw) {
             println("MediaDeviceManager state:")
             entries.forEach {
                 key, entry ->
                 println("  key=$key")
-                entry.dump(fd, pw, args)
+                entry.dump(pw, args)
             }
         }
     }
@@ -186,7 +185,7 @@ class MediaDeviceManager @Inject constructor(
             muteAwaitConnectionManager?.stopListening()
         }
 
-        fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<String>) {
+        fun dump(pw: PrintWriter, args: Array<String>) {
             val routingSession = controller?.let {
                 mr2manager.getRoutingSessionForMediaController(it)
             }

@@ -596,8 +596,6 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
      * surface flinger to the accessibility framework.
      */
     public static class AccessibilityWindow {
-        private static final Region TEMP_REGION = new Region();
-        private static final RectF TEMP_RECTF = new RectF();
         // Data
         private IWindow mWindow;
         private int mDisplayId;
@@ -615,15 +613,16 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
         private final Region mLetterBoxBounds = new Region();
         private WindowInfo mWindowInfo;
 
+
         /**
          * Returns the instance after initializing the internal data.
          * @param service The window manager service.
          * @param inputWindowHandle The window from the surface flinger.
-         * @param inverseMatrix The magnification spec inverse matrix.
+         * @param magnificationInverseMatrix The magnification spec inverse matrix.
          */
         public static AccessibilityWindow initializeData(WindowManagerService service,
-                InputWindowHandle inputWindowHandle, Matrix inverseMatrix, IBinder pipIBinder,
-                Matrix displayMatrix) {
+                InputWindowHandle inputWindowHandle, Matrix magnificationInverseMatrix,
+                IBinder pipIBinder, Matrix displayMatrix) {
             final IWindow window = inputWindowHandle.getWindow();
             final WindowState windowState = window != null ? service.mWindowMap.get(
                     window.asBinder()) : null;
@@ -655,13 +654,35 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
                     inputWindowHandle.frameTop, inputWindowHandle.frameRight,
                     inputWindowHandle.frameBottom);
             getTouchableRegionInWindow(instance.mShouldMagnify, inputWindowHandle.touchableRegion,
-                    instance.mTouchableRegionInWindow, windowFrame, inverseMatrix, displayMatrix);
+                    instance.mTouchableRegionInWindow, windowFrame, magnificationInverseMatrix,
+                    displayMatrix);
             getUnMagnifiedTouchableRegion(instance.mShouldMagnify,
                     inputWindowHandle.touchableRegion, instance.mTouchableRegionInScreen,
-                    inverseMatrix, displayMatrix);
+                    magnificationInverseMatrix, displayMatrix);
             instance.mWindowInfo = windowState != null
                     ? windowState.getWindowInfo() : getWindowInfoForWindowlessWindows(instance);
 
+            // Compute the transform matrix that will transform bounds from the window
+            // coordinates to screen coordinates.
+            final Matrix inverseTransform = new Matrix();
+            inputWindowHandle.transform.invert(inverseTransform);
+            inverseTransform.postConcat(displayMatrix);
+            inverseTransform.getValues(instance.mWindowInfo.mTransformMatrix);
+
+            // Compute the magnification spec matrix.
+            final Matrix magnificationSpecMatrix = new Matrix();
+            if (instance.shouldMagnify() && magnificationInverseMatrix != null
+                    && !magnificationInverseMatrix.isIdentity()) {
+                if (magnificationInverseMatrix.invert(magnificationSpecMatrix)) {
+                    magnificationSpecMatrix.getValues(sTempFloats);
+                    final MagnificationSpec spec = instance.mWindowInfo.mMagnificationSpec;
+                    spec.scale = sTempFloats[Matrix.MSCALE_X];
+                    spec.offsetX = sTempFloats[Matrix.MTRANS_X];
+                    spec.offsetY = sTempFloats[Matrix.MTRANS_Y];
+                } else {
+                    Slog.w(TAG, "can't find spec");
+                }
+            }
             return instance;
         }
 
@@ -779,7 +800,7 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             // for the consistency and match developers expectation.
             // So we need to make the intersection between the frame and touchable region to
             // obtain the real touch region in the screen.
-            Region touchRegion = TEMP_REGION;
+            Region touchRegion = new Region();
             touchRegion.set(inRegion);
             touchRegion.op(frame, Region.Op.INTERSECT);
 
@@ -807,8 +828,7 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
 
             forEachRect(inRegion, rect -> {
                 // Move to origin as all transforms are captured by the matrix.
-                RectF windowFrame = TEMP_RECTF;
-                windowFrame.set(rect);
+                RectF windowFrame = new RectF(rect);
 
                 displayMatrix.mapRect(windowFrame);
                 inverseMatrix.mapRect(windowFrame);

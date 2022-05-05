@@ -824,9 +824,9 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
          * authentication method may be set. This method will overwrite any previously set
          * authentication method.
          *
-         * <p>It's not allowed to set this if this {@link Builder} is constructed from an
-         * {@link IkeTunnelConnectionParams}. This information should be retrieved from
-         * {@link IkeTunnelConnectionParams}
+         * <p>If this {@link Builder} is constructed with an {@link IkeTunnelConnectionParams},
+         * authentication details should be configured there, and calling this method will result
+         * in an exception being thrown.
          *
          * @param user the username to be used for EAP-MSCHAPv2 authentication
          * @param pass the password to be used for EAP-MSCHAPv2 authentication
@@ -864,9 +864,9 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
          * Only one authentication method may be set. This method will overwrite any previously set
          * authentication method.
          *
-         * <p>It's not allowed to set this if this {@link Builder} is constructed from an
-         * {@link IkeTunnelConnectionParams}. This information should be retrieved from
-         * {@link IkeTunnelConnectionParams}
+         * <p>If this {@link Builder} is constructed with an {@link IkeTunnelConnectionParams},
+         * authentication details should be configured there, and calling this method will result in
+         * an exception being thrown.
          *
          * @param userCert the username to be used for RSA Digital signiture authentication
          * @param key the PrivateKey instance associated with the user ceritificate, used for
@@ -906,9 +906,9 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
          * authentication method may be set. This method will overwrite any previously set
          * authentication method.
          *
-         * <p>It's not allowed to set this if this {@link Builder} is constructed from an
-         * {@link IkeTunnelConnectionParams}. This information should be retrieved from
-         * {@link IkeTunnelConnectionParams}
+         * <p>If this {@link Builder} is constructed with an {@link IkeTunnelConnectionParams},
+         * authentication details should be configured there, and calling this method will result in
+         * an exception being thrown.
          *
          * @param psk the key to be used for Pre-Shared Key authentication
          * @return this {@link Builder} object to facilitate chaining of method calls
@@ -1042,9 +1042,9 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
          * Authentication, and one that provides Encryption. Authenticated Encryption with
          * Associated Data (AEAD) algorithms provide both Authentication and Encryption.
          *
-         * <p>It's not allowed to set this if this {@link Builder} is constructed from an
-         * {@link IkeTunnelConnectionParams}. This information should be retrieved from
-         * {@link IkeTunnelConnectionParams}
+         * <p>If this {@link Builder} is constructed with an {@link IkeTunnelConnectionParams},
+         * authentication details should be configured there, and calling this method will result in
+         * an exception being thrown.
          *
          * <p>By default, this profile will use any algorithm defined in {@link IpSecAlgorithm},
          * with the exception of those considered insecure (as described above).

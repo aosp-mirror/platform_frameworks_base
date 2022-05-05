@@ -172,17 +172,20 @@ public abstract class AbstractThreadedSyncAdapter {
     }
 
     private class ISyncAdapterImpl extends ISyncAdapter.Stub {
-        private void enforceCallerSystem() {
+        private boolean isCallerSystem() {
             final long callingUid = Binder.getCallingUid();
             if (callingUid != Process.SYSTEM_UID) {
                 android.util.EventLog.writeEvent(0x534e4554, "203229608", -1, "");
-                return;
+                return false;
             }
+            return true;
         }
 
         @Override
         public void onUnsyncableAccount(ISyncAdapterUnsyncableAccountCallback cb) {
-            enforceCallerSystem();
+            if (!isCallerSystem()) {
+                return;
+            }
             Handler.getMain().sendMessage(obtainMessage(
                     AbstractThreadedSyncAdapter::handleOnUnsyncableAccount,
                     AbstractThreadedSyncAdapter.this, cb));
@@ -191,13 +194,15 @@ public abstract class AbstractThreadedSyncAdapter {
         @Override
         public void startSync(ISyncContext syncContext, String authority, Account account,
                 Bundle extras) {
+            if (!isCallerSystem()) {
+                return;
+            }
             if (ENABLE_LOG) {
                 if (extras != null) {
                     extras.size(); // Unparcel so its toString() will show the contents.
                 }
                 Log.d(TAG, "startSync() start " + authority + " " + account + " " + extras);
             }
-            enforceCallerSystem();
 
             try {
                 final SyncContext syncContextClient = new SyncContext(syncContext);
@@ -254,7 +259,9 @@ public abstract class AbstractThreadedSyncAdapter {
 
         @Override
         public void cancelSync(ISyncContext syncContext) {
-            enforceCallerSystem();
+            if (!isCallerSystem()) {
+                return;
+            }
             try {
                 // synchronize to make sure that mSyncThreads doesn't change between when we
                 // check it and when we use it

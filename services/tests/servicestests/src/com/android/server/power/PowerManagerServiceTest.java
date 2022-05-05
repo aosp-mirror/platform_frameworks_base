@@ -18,6 +18,8 @@ package com.android.server.power;
 
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_TOP;
 import static android.app.ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
+import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.app.AppOpsManager.MODE_ERRORED;
 import static android.os.PowerManagerInternal.WAKEFULNESS_ASLEEP;
 import static android.os.PowerManagerInternal.WAKEFULNESS_AWAKE;
 import static android.os.PowerManagerInternal.WAKEFULNESS_DOZING;
@@ -46,6 +48,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManagerInternal;
+import android.app.AppOpsManager;
 import android.attention.AttentionManagerInternal;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -68,7 +71,6 @@ import android.os.IWakeLockCallback;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.PowerSaveState;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.test.TestLooper;
 import android.provider.Settings;
@@ -87,7 +89,6 @@ import com.android.server.lights.LightsManager;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.power.PowerManagerService.BatteryReceiver;
 import com.android.server.power.PowerManagerService.BinderService;
-import com.android.server.power.PowerManagerService.DockReceiver;
 import com.android.server.power.PowerManagerService.Injector;
 import com.android.server.power.PowerManagerService.NativeWrapper;
 import com.android.server.power.PowerManagerService.UserSwitchedReceiver;
@@ -110,6 +111,7 @@ import org.mockito.stubbing.Answer;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -140,6 +142,8 @@ public class PowerManagerServiceTest {
     @Mock private WirelessChargerDetector mWirelessChargerDetectorMock;
     @Mock private AmbientDisplayConfiguration mAmbientDisplayConfigurationMock;
     @Mock private SystemPropertiesWrapper mSystemPropertiesMock;
+    @Mock private AppOpsManager mAppOpsManagerMock;
+    @Mock private LowPowerStandbyController mLowPowerStandbyControllerMock;
 
     @Mock
     private InattentiveSleepWarningController mInattentiveSleepWarningControllerMock;
@@ -151,7 +155,6 @@ public class PowerManagerServiceTest {
     private Resources mResourcesSpy;
     private OffsettableClock mClock;
     private TestLooper mTestLooper;
-    private DockReceiver mDockReceiver;
 
     private static class IntentFilterMatcher implements ArgumentMatcher<IntentFilter> {
         private final IntentFilter mFilter;
@@ -222,7 +225,8 @@ public class PowerManagerServiceTest {
             @Override
             Notifier createNotifier(Looper looper, Context context, IBatteryStats batteryStats,
                     SuspendBlocker suspendBlocker, WindowManagerPolicy policy,
-                    FaceDownDetector faceDownDetector, ScreenUndimDetector screenUndimDetector) {
+                    FaceDownDetector faceDownDetector, ScreenUndimDetector screenUndimDetector,
+                    Executor executor) {
                 return mNotifierMock;
             }
 
@@ -294,8 +298,12 @@ public class PowerManagerServiceTest {
             @Override
             LowPowerStandbyController createLowPowerStandbyController(Context context,
                     Looper looper) {
-                return new LowPowerStandbyController(context, mTestLooper.getLooper(),
-                        SystemClock::elapsedRealtime);
+                return mLowPowerStandbyControllerMock;
+            }
+
+            @Override
+            AppOpsManager createAppOpsManager(Context context) {
+                return mAppOpsManagerMock;
             }
         });
         return mService;
@@ -307,7 +315,6 @@ public class PowerManagerServiceTest {
         LocalServices.removeServiceForTest(DisplayManagerInternal.class);
         LocalServices.removeServiceForTest(BatteryManagerInternal.class);
         LocalServices.removeServiceForTest(ActivityManagerInternal.class);
-        LocalServices.removeServiceForTest(LowPowerStandbyControllerInternal.class);
         FakeSettingsProvider.clearSettingsProvider();
     }
 
@@ -337,14 +344,6 @@ public class PowerManagerServiceTest {
         verify(mContextSpy).registerReceiver(userSwitchedCaptor.capture(),
                 argThat(new IntentFilterMatcher(usFilter)), isNull(), isA(Handler.class));
         mUserSwitchedReceiver = userSwitchedCaptor.getValue();
-
-        // Grab the DockReceiver
-        ArgumentCaptor<DockReceiver> dockReceiverCaptor =
-                ArgumentCaptor.forClass(DockReceiver.class);
-        IntentFilter dockFilter = new IntentFilter(Intent.ACTION_DOCK_EVENT);
-        verify(mContextSpy).registerReceiver(dockReceiverCaptor.capture(),
-                argThat(new IntentFilterMatcher(dockFilter)), isNull(), isA(Handler.class));
-        mDockReceiver = dockReceiverCaptor.getValue();
 
         mService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
     }
@@ -392,16 +391,6 @@ public class PowerManagerServiceTest {
         when(mResourcesSpy.getInteger(
                 com.android.internal.R.integer.config_minimumScreenOffTimeout))
                 .thenReturn(minimumScreenOffTimeoutConfigMillis);
-    }
-
-    private void setScreenOffTimeout(int screenOffTimeoutMillis) {
-        Settings.System.putInt(mContextSpy.getContentResolver(), Settings.System.SCREEN_OFF_TIMEOUT,
-                screenOffTimeoutMillis);
-    }
-
-    private void setScreenOffTimeoutDocked(int screenOffTimeoutMillis) {
-        Settings.System.putInt(mContextSpy.getContentResolver(),
-                Settings.System.SCREEN_OFF_TIMEOUT_DOCKED, screenOffTimeoutMillis);
     }
 
     private void advanceTime(long timeMs) {
@@ -479,7 +468,7 @@ public class PowerManagerServiceTest {
     }
 
     @Test
-    public void testWakefulnessAwake_AcquireCausesWakeup() {
+    public void testWakefulnessAwake_AcquireCausesWakeup_turnScreenOnAllowed() {
         createService();
         startSystem();
         forceSleep();
@@ -487,6 +476,8 @@ public class PowerManagerServiceTest {
         IBinder token = new Binder();
         String tag = "acq_causes_wakeup";
         String packageName = "pkg.name";
+        when(mAppOpsManagerMock.checkOpNoThrow(AppOpsManager.OP_TURN_SCREEN_ON,
+                Binder.getCallingUid(), packageName)).thenReturn(MODE_ALLOWED);
 
         // First, ensure that a normal full wake lock does not cause a wakeup
         int flags = PowerManager.FULL_WAKE_LOCK;
@@ -507,6 +498,27 @@ public class PowerManagerServiceTest {
         mService.getBinderServiceInstance().acquireWakeLock(token, flags, tag, packageName,
                 null /* workSource */, null /* historyTag */, Display.INVALID_DISPLAY, null);
         assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+        mService.getBinderServiceInstance().releaseWakeLock(token, 0 /* flags */);
+    }
+
+    @Test
+    public void testWakefulnessAwake_AcquireCausesWakeup_turnScreenOnDenied() {
+        createService();
+        startSystem();
+        forceSleep();
+
+        IBinder token = new Binder();
+        String tag = "acq_causes_wakeup";
+        String packageName = "pkg.name";
+        when(mAppOpsManagerMock.checkOpNoThrow(AppOpsManager.OP_TURN_SCREEN_ON,
+                Binder.getCallingUid(), packageName)).thenReturn(MODE_ERRORED);
+
+
+        // Verify that flag has no effect when OP_TURN_SCREEN_ON is not allowed
+        int flags = PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP;
+        mService.getBinderServiceInstance().acquireWakeLock(token, flags, tag, packageName,
+                null /* workSource */, null /* historyTag */, Display.INVALID_DISPLAY, null);
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
         mService.getBinderServiceInstance().releaseWakeLock(token, 0 /* flags */);
     }
 
@@ -949,71 +961,6 @@ public class PowerManagerServiceTest {
         assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
         assertThat(mService.getBinderServiceInstance().getLastSleepReason()).isEqualTo(
                 PowerManager.GO_TO_SLEEP_REASON_INATTENTIVE);
-    }
-
-    @Test
-    public void testScreenOffTimeout_goesToSleepAfterTimeout() {
-        final DisplayInfo info = new DisplayInfo();
-        info.displayGroupId = Display.DEFAULT_DISPLAY_GROUP;
-        when(mDisplayManagerInternalMock.getDisplayInfo(Display.DEFAULT_DISPLAY)).thenReturn(info);
-
-        setMinimumScreenOffTimeoutConfig(10);
-        setScreenOffTimeout(10);
-
-        createService();
-        startSystem();
-
-        mService.getBinderServiceInstance().userActivity(Display.DEFAULT_DISPLAY, mClock.now(),
-                PowerManager.USER_ACTIVITY_EVENT_TOUCH, 0);
-        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
-        advanceTime(15);
-        assertThat(mService.getGlobalWakefulnessLocked()).isNotEqualTo(WAKEFULNESS_AWAKE);
-    }
-
-    @Test
-    public void testScreenOffTimeout_usesRegularTimeoutWhenNotDocked() {
-        final DisplayInfo info = new DisplayInfo();
-        info.displayGroupId = Display.DEFAULT_DISPLAY_GROUP;
-        when(mDisplayManagerInternalMock.getDisplayInfo(Display.DEFAULT_DISPLAY)).thenReturn(info);
-
-        setMinimumScreenOffTimeoutConfig(10);
-        setScreenOffTimeout(10);
-        setScreenOffTimeoutDocked(30);
-
-        createService();
-        startSystem();
-
-        mService.getBinderServiceInstance().userActivity(Display.DEFAULT_DISPLAY, mClock.now(),
-                PowerManager.USER_ACTIVITY_EVENT_TOUCH, 0);
-        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
-        advanceTime(15);
-        assertThat(mService.getGlobalWakefulnessLocked()).isNotEqualTo(WAKEFULNESS_AWAKE);
-    }
-
-    @Test
-    public void testScreenOffTimeout_usesDockedTimeoutWhenDocked() {
-        final DisplayInfo info = new DisplayInfo();
-        info.displayGroupId = Display.DEFAULT_DISPLAY_GROUP;
-        when(mDisplayManagerInternalMock.getDisplayInfo(Display.DEFAULT_DISPLAY)).thenReturn(info);
-
-        setMinimumScreenOffTimeoutConfig(10);
-        setScreenOffTimeout(10);
-        setScreenOffTimeoutDocked(30);
-
-        createService();
-        startSystem();
-
-        mService.getBinderServiceInstance().userActivity(Display.DEFAULT_DISPLAY, mClock.now(),
-                PowerManager.USER_ACTIVITY_EVENT_TOUCH, 0);
-        mDockReceiver.onReceive(mContextSpy,
-                new Intent(Intent.ACTION_DOCK_EVENT).putExtra(Intent.EXTRA_DOCK_STATE,
-                        Intent.EXTRA_DOCK_STATE_DESK));
-
-        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
-        advanceTime(15);
-        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
-        advanceTime(20);
-        assertThat(mService.getGlobalWakefulnessLocked()).isNotEqualTo(WAKEFULNESS_AWAKE);
     }
 
     @Test
@@ -1937,6 +1884,18 @@ public class PowerManagerServiceTest {
         mService.setLowPowerStandbyActiveInternal(true);
 
         assertThat(wakeLock.mDisabled).isFalse();
+    }
+
+    @Test
+    public void testSetLowPowerStandbyActiveDuringMaintenance_redirectsCallToNativeWrapper() {
+        createService();
+        startSystem();
+
+        mService.getBinderServiceInstance().setLowPowerStandbyActiveDuringMaintenance(true);
+        verify(mLowPowerStandbyControllerMock).setActiveDuringMaintenance(true);
+
+        mService.getBinderServiceInstance().setLowPowerStandbyActiveDuringMaintenance(false);
+        verify(mLowPowerStandbyControllerMock).setActiveDuringMaintenance(false);
     }
 
     private WakeLock acquireWakeLock(String tag, int flags) {

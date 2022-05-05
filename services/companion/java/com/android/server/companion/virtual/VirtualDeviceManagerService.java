@@ -251,7 +251,10 @@ public class VirtualDeviceManagerService extends SystemService {
                                 }
                             }
                         },
-                        this, activityListener, params);
+                        this, activityListener,
+                        runningUids -> cameraAccessController.blockCameraAccessIfNeeded(
+                                runningUids),
+                        params);
                 if (cameraAccessController != null) {
                     cameraAccessController.startObservingIfNeeded();
                 } else {

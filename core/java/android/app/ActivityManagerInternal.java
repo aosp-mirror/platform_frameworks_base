@@ -239,6 +239,12 @@ public abstract class ActivityManagerInternal {
     public abstract void notifyNetworkPolicyRulesUpdated(int uid, long procStateSeq);
 
     /**
+     * Inform ActivityManagerService about the latest {@code blockedReasons} for an uid, which
+     * can be used to understand whether the {@code uid} is allowed to access network or not.
+     */
+    public abstract void onUidBlockedReasonsChanged(int uid, int blockedReasons);
+
+    /**
      * @return true if runtime was restarted, false if it's normal boot
      */
     public abstract boolean isRuntimeRestarted();
@@ -562,15 +568,14 @@ public abstract class ActivityManagerInternal {
     public abstract void unregisterProcessObserver(IProcessObserver processObserver);
 
     /**
-     * Gets the uid of the instrumentation source if there is an unfinished instrumentation that
-     * targets the given uid.
+     * Checks if there is an unfinished instrumentation that targets the given uid.
      *
      * @param uid The uid to be checked for
      *
-     * @return the uid of the instrumentation source, if there is an instrumentation whose target
-     * application uid matches the given uid, and {@link android.os.Process#INVALID_UID} otherwise.
+     * @return True, if there is an instrumentation whose target application uid matches the given
+     * uid, false otherwise
      */
-    public abstract int getInstrumentationSourceUid(int uid);
+    public abstract boolean isUidCurrentlyInstrumented(int uid);
 
     /** Is this a device owner app? */
     public abstract boolean isDeviceOwner(int uid);
@@ -626,7 +631,7 @@ public abstract class ActivityManagerInternal {
      * @param uid uid
      * @param pid pid of the ProcessRecord that is pending top.
      */
-    public abstract void addPendingTopUid(int uid, int pid);
+    public abstract void addPendingTopUid(int uid, int pid, @Nullable IApplicationThread thread);
 
     /**
      * Delete uid from the ActivityManagerService PendingStartActivityUids list.

@@ -423,7 +423,7 @@ public class WindowManagerService extends IWindowManager.Stub
             "persist.wm.enable_remote_keyguard_animation";
 
     private static final int sEnableRemoteKeyguardAnimation =
-            SystemProperties.getInt(ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY, 1);
+            SystemProperties.getInt(ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY, 2);
 
     /**
      * @see #ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY
@@ -988,6 +988,8 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mPointerLocationEnabled = false;
 
     final LetterboxConfiguration mLetterboxConfiguration;
+
+    private boolean mIsIgnoreOrientationRequestDisabled;
 
     final InputManagerService mInputManager;
     final DisplayManagerInternal mDisplayManagerInternal;
@@ -1976,8 +1978,10 @@ public class WindowManagerService extends IWindowManager.Stub
         // We use the visible frame, because we want the animation to morph the window from what
         // was visible to the user to the final destination of the new window.
         final Rect frame = new Rect(replacedWindow.getFrame());
+        final WindowManager.LayoutParams attrs = replacedWindow.mAttrs;
         frame.inset(replacedWindow.getInsetsStateWithVisibilityOverride().calculateVisibleInsets(
-                frame, replacedWindow.mAttrs.softInputMode));
+                frame, attrs.type, replacedWindow.getWindowingMode(), attrs.softInputMode,
+                attrs.flags));
         // We treat this as if this activity was opening, so we can trigger the app transition
         // animation and piggy-back on existing transition animation infrastructure.
         final DisplayContent dc = activity.getDisplayContent();
@@ -2007,15 +2011,15 @@ public class WindowManagerService extends IWindowManager.Stub
      * the device policy cache.
      */
     @Override
-    public void refreshScreenCaptureDisabled(int userId) {
+    public void refreshScreenCaptureDisabled() {
         int callingUid = Binder.getCallingUid();
         if (callingUid != SYSTEM_UID) {
             throw new SecurityException("Only system can call refreshScreenCaptureDisabled.");
         }
 
         synchronized (mGlobalLock) {
-            // Update secure surface for all windows belonging to this user.
-            mRoot.setSecureSurfaceState(userId);
+            // Refresh secure surface for all windows.
+            mRoot.refreshSecureSurfaceState();
         }
     }
 
@@ -2768,12 +2772,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 // TODO(b/155340867): Investigate if we still need roundedCornerOverlay after
                 // the feature b/155340867 is completed.
-                final DisplayArea da = dc.findAreaForWindowType(type, options,
+                final DisplayArea<?> da = dc.findAreaForWindowType(type, options,
                         callerCanManageAppTokens, false /* roundedCornerOverlay */);
-                // TODO(b/190019118): Avoid to send onConfigurationChanged because it has been done
-                //  in return value of attachWindowContextToDisplayArea.
                 mWindowContextListenerController.registerWindowContainerListener(clientToken, da,
-                        callingUid, type, options);
+                        callingUid, type, options, false /* shouDispatchConfigWhenRegistering */);
                 return da.getConfiguration();
             }
         } finally {
@@ -2869,7 +2871,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
 
                 mWindowContextListenerController.registerWindowContainerListener(clientToken, dc,
-                        callingUid, INVALID_WINDOW_TYPE, null /* options */);
+                        callingUid, INVALID_WINDOW_TYPE, null /* options */,
+                        false /* shouDispatchConfigWhenRegistering */);
                 return dc.getConfiguration();
             }
         } finally {
@@ -4084,6 +4087,36 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             return display.getIgnoreOrientationRequest();
         }
+    }
+
+    /**
+     * Controls whether ignore orientation request logic in {@link DisplayArea} is disabled
+     * at runtime.
+     *
+     * <p>Note: this assumes that {@link #mGlobalLock} is held by the caller.
+     *
+     * @param isDisabled when {@code true}, the system always ignores the value of {@link
+     *                   DisplayArea#getIgnoreOrientationRequest} and app requested orientation is
+     *                   respected.
+     */
+    void setIsIgnoreOrientationRequestDisabled(boolean isDisabled) {
+        if (isDisabled == mIsIgnoreOrientationRequestDisabled) {
+            return;
+        }
+        mIsIgnoreOrientationRequestDisabled = isDisabled;
+        for (int i = mRoot.getChildCount() - 1; i >= 0; i--) {
+            mRoot.getChildAt(i).onIsIgnoreOrientationRequestDisabledChanged();
+        }
+    }
+
+    /**
+     * Whether the system ignores the value of {@link DisplayArea#getIgnoreOrientationRequest} and
+     * app requested orientation is respected.
+     *
+     * <p>Note: this assumes that {@link #mGlobalLock} is held by the caller.
+     */
+    boolean isIgnoreOrientationRequestDisabled() {
+        return mIsIgnoreOrientationRequestDisabled;
     }
 
     @Override
@@ -7621,29 +7654,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public MagnificationSpec getCompatibleMagnificationSpecForWindow(IBinder windowToken) {
-            synchronized (mGlobalLock) {
-                WindowState windowState = mWindowMap.get(windowToken);
-                if (windowState == null) {
-                    return null;
-                }
-                MagnificationSpec spec = null;
-                if (mAccessibilityController.hasCallbacks()) {
-                    spec = mAccessibilityController.getMagnificationSpecForWindow(windowState);
-                }
-                if ((spec == null || spec.isNop()) && windowState.mGlobalScale == 1.0f) {
-                    return null;
-                }
-                MagnificationSpec result = new MagnificationSpec();
-                if (spec != null) {
-                    result.setTo(spec);
-                }
-                result.scale *= windowState.mGlobalScale;
-                return result;
-            }
-        }
-
-        @Override
         public boolean setMagnificationCallbacks(int displayId,
                 @Nullable MagnificationCallbacks callbacks) {
             synchronized (mGlobalLock) {
@@ -7668,6 +7678,18 @@ public class WindowManagerService extends IWindowManager.Stub
         public IBinder getFocusedWindowToken() {
             synchronized (mGlobalLock) {
                 return mAccessibilityController.getFocusedWindowToken();
+            }
+        }
+
+        // TODO (b/229837707): Delete this method after changing the solution.
+        @Override
+        public IBinder getFocusedWindowTokenFromWindowStates() {
+            synchronized (mGlobalLock) {
+                final WindowState windowState = getFocusedWindowLocked();
+                if (windowState != null) {
+                    return windowState.mClient.asBinder();
+                }
+                return null;
             }
         }
 
@@ -8135,7 +8157,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (task == null) {
                     throw new IllegalArgumentException("no task with taskId" + taskId);
                 }
-                task.addTrustedOverlay(overlay);
+                task.addTrustedOverlay(overlay, task.getTopVisibleAppMainWindow());
             }
         }
 
@@ -8745,8 +8767,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     return new ArrayList<>();
                 }
 
-                // Retrieve the DisplayInfo for all possible rotations across all possible display
-                // layouts.
+                // Retrieve the DisplayInfo across all possible display layouts.
                 return List.copyOf(mPossibleDisplayInfoMapper.getPossibleDisplayInfos(displayId));
             }
         } finally {

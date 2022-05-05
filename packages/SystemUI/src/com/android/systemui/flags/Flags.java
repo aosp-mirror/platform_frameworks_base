@@ -20,7 +20,9 @@ import com.android.internal.annotations.Keep;
 import com.android.systemui.R;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -149,7 +151,7 @@ public class Flags {
     /***************************************/
     // 900 - media
     public static final BooleanFlag MEDIA_TAP_TO_TRANSFER = new BooleanFlag(900, true);
-    public static final BooleanFlag MEDIA_SESSION_ACTIONS = new BooleanFlag(901, false);
+    public static final BooleanFlag MEDIA_SESSION_ACTIONS = new BooleanFlag(901, true);
     public static final BooleanFlag MEDIA_NEARBY_DEVICES = new BooleanFlag(903, true);
     public static final BooleanFlag MEDIA_MUTE_AWAIT = new BooleanFlag(904, true);
 
@@ -182,25 +184,36 @@ public class Flags {
         if (sFlagMap != null) {
             return sFlagMap;
         }
+
         Map<Integer, Flag<?>> flags = new HashMap<>();
+        List<Field> flagFields = getFlagFields();
 
-        Field[] fields = Flags.class.getFields();
-
-        for (Field field : fields) {
-            Class<?> t = field.getType();
-            if (Flag.class.isAssignableFrom(t)) {
-                try {
-                    Flag<?> flag = (Flag<?>) field.get(null);
-                    flags.put(flag.getId(), flag);
-                } catch (IllegalAccessException e) {
-                    // no-op
-                }
+        for (Field field : flagFields) {
+            try {
+                Flag<?> flag = (Flag<?>) field.get(null);
+                flags.put(flag.getId(), flag);
+            } catch (IllegalAccessException e) {
+                // no-op
             }
         }
 
         sFlagMap = flags;
 
         return sFlagMap;
+    }
+
+    static List<Field> getFlagFields() {
+        Field[] fields = Flags.class.getFields();
+        List<Field> result = new ArrayList<>();
+
+        for (Field field : fields) {
+            Class<?> t = field.getType();
+            if (Flag.class.isAssignableFrom(t)) {
+                result.add(field);
+            }
+        }
+
+        return result;
     }
     // |  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  |
     // |                                                           |

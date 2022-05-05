@@ -72,4 +72,14 @@ public class ActivityOptions {
     public static final ComponentName EDITOR_POPUP_DIALOG_ACTIVITY_COMPONENT_NAME =
             new ComponentName(FLICKER_APP_PACKAGE,
                     FLICKER_APP_PACKAGE + ".ImeEditorPopupDialogActivity");
+
+    public static final String SHOW_WHEN_LOCKED_ACTIVITY_LAUNCHER_NAME = "ShowWhenLockedApp";
+    public static final ComponentName SHOW_WHEN_LOCKED_ACTIVITY_COMPONENT_NAME =
+            new ComponentName(FLICKER_APP_PACKAGE,
+                    FLICKER_APP_PACKAGE + ".ShowWhenLockedActivity");
+
+    public static final String NOTIFICATION_ACTIVITY_LAUNCHER_NAME = "NotificationApp";
+    public static final ComponentName NOTIFICATION_ACTIVITY_COMPONENT_NAME =
+            new ComponentName(FLICKER_APP_PACKAGE,
+                    FLICKER_APP_PACKAGE + ".NotificationActivity");
 }

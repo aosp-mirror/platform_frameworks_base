@@ -1430,6 +1430,8 @@ public class UserManagerService extends IUserManager.Stub {
     /**
      * Returns a UserInfo object with the name filled in, for Owner and Guest, or the original
      * if the name is already set.
+     *
+     * Note: Currently, the resulting name can be null if a user was truly created with a null name.
      */
     private UserInfo userWithName(UserInfo orig) {
         if (orig != null && orig.name == null) {
@@ -1638,7 +1640,7 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public String getUserName() {
+    public @NonNull String getUserName() {
         final int callingUid = Binder.getCallingUid();
         if (!hasQueryOrCreateUsersPermission()
                 && !hasPermissionGranted(
@@ -1649,7 +1651,10 @@ public class UserManagerService extends IUserManager.Stub {
         final int userId = UserHandle.getUserId(callingUid);
         synchronized (mUsersLock) {
             UserInfo userInfo = userWithName(getUserInfoLU(userId));
-            return userInfo == null ? "" : userInfo.name;
+            if (userInfo != null && userInfo.name != null) {
+                return userInfo.name;
+            }
+            return "";
         }
     }
 
@@ -4165,7 +4170,7 @@ public class UserManagerService extends IUserManager.Stub {
      * @return the converted user, or {@code null} if no pre-created user could be converted.
      */
     private @Nullable UserInfo convertPreCreatedUserIfPossible(String userType,
-            @UserInfoFlag int flags, String name, @Nullable Object token) {
+            @UserInfoFlag int flags, @Nullable String name, @Nullable Object token) {
         final UserData preCreatedUserData;
         synchronized (mUsersLock) {
             preCreatedUserData = getPreCreatedUserLU(userType);
@@ -4291,7 +4296,7 @@ public class UserManagerService extends IUserManager.Stub {
         for (int i = 0; i < userSize; i++) {
             final UserData user = mUsers.valueAt(i);
             if (DBG) Slog.d(LOG_TAG, i + ":" + user.info.toFullString());
-            if (user.info.preCreated && user.info.userType.equals(userType)) {
+            if (user.info.preCreated && !user.info.partial && user.info.userType.equals(userType)) {
                 if (!user.info.isInitialized()) {
                     Slog.w(LOG_TAG, "found pre-created user of type " + userType
                             + ", but it's not initialized yet: " + user.info.toFullString());
@@ -4317,16 +4322,9 @@ public class UserManagerService extends IUserManager.Stub {
 
     private long logUserCreateJourneyBegin(@UserIdInt int userId, String userType,
             @UserInfoFlag int flags) {
-        final long sessionId = ThreadLocalRandom.current().nextLong(1, Long.MAX_VALUE);
-        // log the journey atom with the user metadata
-        FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED, sessionId,
+        return logUserJourneyBegin(
                 FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__USER_CREATE,
-                /* origin_user= */ -1, userId, UserManager.getUserTypeForStatsd(userType), flags);
-        // log the event atom to indicate the event start
-        FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED, sessionId, userId,
-                FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__CREATE_USER,
-                FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__BEGIN);
-        return sessionId;
+                userId, userType, flags);
     }
 
     private void logUserCreateJourneyFinish(long sessionId, @UserIdInt int userId, boolean finish) {
@@ -4334,6 +4332,46 @@ public class UserManagerService extends IUserManager.Stub {
                 FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__CREATE_USER,
                 finish ? FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__FINISH
                         : FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__NONE);
+    }
+
+    private long logUserRemoveJourneyBegin(@UserIdInt int userId, String userType,
+            @UserInfoFlag int flags) {
+        return logUserJourneyBegin(
+                FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__USER_REMOVE,
+                userId, userType, flags);
+    }
+
+    private void logUserRemoveJourneyFinish(long sessionId, @UserIdInt int userId, boolean finish) {
+        FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED, sessionId, userId,
+                FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__REMOVE_USER,
+                finish ? FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__FINISH
+                        : FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__NONE);
+    }
+
+    private long logUserJourneyBegin(int journey, @UserIdInt int userId, String userType,
+            @UserInfoFlag int flags) {
+        final long sessionId = ThreadLocalRandom.current().nextLong(1, Long.MAX_VALUE);
+        // log the journey atom with the user metadata
+        FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED, sessionId,
+                journey, /* origin_user= */ -1, userId,
+                UserManager.getUserTypeForStatsd(userType), flags);
+
+        // log the event atom to indicate the event start
+        int event;
+        switch (journey) {
+            case FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__USER_CREATE:
+                event = FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__CREATE_USER;
+                break;
+            case FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__USER_REMOVE:
+                event = FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__REMOVE_USER;
+                break;
+            default:
+                throw new IllegalArgumentException("Journey " + journey + " not expected.");
+        }
+
+        FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED, sessionId, userId,
+                event, FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__BEGIN);
+        return sessionId;
     }
 
     /** Register callbacks for statsd pulled atoms. */
@@ -4578,6 +4616,10 @@ public class UserManagerService extends IUserManager.Stub {
                 userData.info.flags |= UserInfo.FLAG_DISABLED;
                 writeUserLP(userData);
             }
+
+            final long sessionId = logUserRemoveJourneyBegin(
+                    userId, userData.info.userType, userData.info.flags);
+
             try {
                 mAppOpsService.removeUser(userId);
             } catch (RemoteException e) {
@@ -4600,9 +4642,11 @@ public class UserManagerService extends IUserManager.Stub {
                             @Override
                             public void userStopped(int userIdParam) {
                                 finishRemoveUser(userIdParam);
+                                logUserRemoveJourneyFinish(sessionId, userIdParam, true);
                             }
                             @Override
                             public void userStopAborted(int userIdParam) {
+                                logUserRemoveJourneyFinish(sessionId, userIdParam, false);
                             }
                         });
             } catch (RemoteException e) {
@@ -5858,33 +5902,6 @@ public class UserManagerService extends IUserManager.Stub {
                 boolean isDeviceOwner) {
             UserManagerService.this.setDevicePolicyUserRestrictionsInner(originatingUserId,
                     global, local, isDeviceOwner);
-        }
-
-        @Override
-        public Bundle getBaseUserRestrictions(@UserIdInt int userId) {
-            synchronized (mRestrictionsLock) {
-                return mBaseUserRestrictions.getRestrictions(userId);
-            }
-        }
-
-        @Override
-        public void setBaseUserRestrictionsByDpmsForMigration(
-                @UserIdInt int userId, Bundle baseRestrictions) {
-            synchronized (mRestrictionsLock) {
-                if (mBaseUserRestrictions.updateRestrictions(userId,
-                        new Bundle(baseRestrictions))) {
-                    invalidateEffectiveUserRestrictionsLR(userId);
-                }
-            }
-
-            final UserData userData = getUserDataNoChecks(userId);
-            synchronized (mPackagesLock) {
-                if (userData != null) {
-                    writeUserLP(userData);
-                } else {
-                    Slog.w(LOG_TAG, "UserInfo not found for " + userId);
-                }
-            }
         }
 
         @Override

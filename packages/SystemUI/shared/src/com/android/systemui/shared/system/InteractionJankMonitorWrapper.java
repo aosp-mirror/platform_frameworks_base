@@ -18,6 +18,7 @@ package com.android.systemui.shared.system;
 
 import android.annotation.IntDef;
 import android.os.Build;
+import android.text.TextUtils;
 import android.view.View;
 
 import com.android.internal.jank.InteractionJankMonitor;
@@ -46,6 +47,8 @@ public final class InteractionJankMonitorWrapper {
             InteractionJankMonitor.CUJ_LAUNCHER_ALL_APPS_SCROLL;
     public static final int CUJ_APP_LAUNCH_FROM_WIDGET =
             InteractionJankMonitor.CUJ_LAUNCHER_APP_LAUNCH_FROM_WIDGET;
+    public static final int CUJ_SPLIT_SCREEN_ENTER =
+            InteractionJankMonitor.CUJ_SPLIT_SCREEN_ENTER;
 
     @IntDef({
             CUJ_APP_LAUNCH_FROM_RECENTS,
@@ -82,6 +85,23 @@ public final class InteractionJankMonitorWrapper {
         Configuration.Builder builder =
                 Configuration.Builder.withView(cujType, v)
                         .setTimeout(timeout);
+        InteractionJankMonitor.getInstance().begin(builder);
+    }
+
+    /**
+     * Begin a trace session.
+     *
+     * @param v       an attached view.
+     * @param cujType the specific {@link InteractionJankMonitor.CujType}.
+     * @param tag the tag to distinguish different flow of same type CUJ.
+     */
+    public static void begin(View v, @CujType int cujType, String tag) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return;
+        Configuration.Builder builder =
+                Configuration.Builder.withView(cujType, v);
+        if (!TextUtils.isEmpty(tag)) {
+            builder.setTag(tag);
+        }
         InteractionJankMonitor.getInstance().begin(builder);
     }
 

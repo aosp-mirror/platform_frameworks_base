@@ -24,9 +24,9 @@ import android.os.IBinder;
 import android.view.inputmethod.InlineSuggestionsRequest;
 import android.view.inputmethod.InputMethodInfo;
 
+import com.android.internal.inputmethod.IAccessibilityInputMethodSession;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
-import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.InlineSuggestionsRequestInfo;
 import com.android.server.LocalServices;
 
@@ -133,10 +133,13 @@ public abstract class InputMethodManagerInternal {
      *
      * @param windowToken the window token that is now in control, or {@code null} if no client
      *                   window is in control of the IME.
-     * @param imeParentChanged {@code true} when the window manager thoughts the IME surface parent
-     *                         will end up to change later, or {@code false} otherwise.
      */
-    public abstract void reportImeControl(@Nullable IBinder windowToken, boolean imeParentChanged);
+    public abstract void reportImeControl(@Nullable IBinder windowToken);
+
+    /**
+     * Indicates that the IME window has re-parented to the new target when the IME control changed.
+     */
+    public abstract void onImeParentChanged();
 
     /**
      * Destroys the IME surface.
@@ -164,7 +167,7 @@ public abstract class InputMethodManagerInternal {
      * @param session The session passed back from the accessibility service.
      */
     public abstract void onSessionForAccessibilityCreated(int accessibilityConnectionId,
-            IInputMethodSession session);
+            IAccessibilityInputMethodSession session);
 
     /**
      * Unbind the accessibility service with the specified accessibilityConnectionId from current
@@ -226,8 +229,11 @@ public abstract class InputMethodManagerInternal {
                 }
 
                 @Override
-                public void reportImeControl(@Nullable IBinder windowToken,
-                        boolean imeParentChanged) {
+                public void reportImeControl(@Nullable IBinder windowToken) {
+                }
+
+                @Override
+                public void onImeParentChanged() {
                 }
 
                 @Override
@@ -240,7 +246,7 @@ public abstract class InputMethodManagerInternal {
 
                 @Override
                 public void onSessionForAccessibilityCreated(int accessibilityConnectionId,
-                        IInputMethodSession session) {
+                        IAccessibilityInputMethodSession session) {
                 }
 
                 @Override

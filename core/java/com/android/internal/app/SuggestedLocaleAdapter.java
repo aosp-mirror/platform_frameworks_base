@@ -27,7 +27,6 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
-import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.android.internal.R;
@@ -217,27 +216,25 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
                 break;
             case TYPE_SYSTEM_LANGUAGE_FOR_APP_LANGUAGE_PICKER:
                 if (!(convertView instanceof ViewGroup)) {
+                    TextView title;
                     if (((LocaleStore.LocaleInfo)getItem(position)).isAppCurrentLocale()) {
                         convertView = mInflater.inflate(
-                                R.layout.app_language_picker_system_current, parent, false);
+                                R.layout.app_language_picker_current_locale_item, parent, false);
+                        title = convertView.findViewById(R.id.language_picker_item);
+                        addStateDescriptionIntoCurrentLocaleItem(convertView);
                     } else {
                         convertView = mInflater.inflate(
-                                R.layout.app_language_picker_system_default, parent, false);
+                                R.layout.language_picker_item, parent, false);
+                        title = convertView.findViewById(R.id.locale);
                     }
+                    title.setText(R.string.system_locale_title);
                 }
-
-                Locale defaultLocale = Locale.getDefault();
-                TextView title = convertView.findViewById(R.id.locale);
-                title.setText(R.string.system_locale_title);
-                title.setTextLocale(defaultLocale);
-                TextView subtitle = convertView.findViewById(R.id.system_locale_subtitle);
-                subtitle.setText(defaultLocale.getDisplayName());
-                subtitle.setTextLocale(defaultLocale);
                 break;
             case TYPE_CURRENT_LOCALE:
                 if (!(convertView instanceof ViewGroup)) {
                     convertView = mInflater.inflate(
                             R.layout.app_language_picker_current_locale_item, parent, false);
+                    addStateDescriptionIntoCurrentLocaleItem(convertView);
                 }
                 updateTextView(
                         convertView, convertView.findViewById(R.id.language_picker_item), position);
@@ -372,5 +369,10 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
                     ? View.TEXT_DIRECTION_RTL
                     : View.TEXT_DIRECTION_LTR);
         }
+    }
+
+    private void addStateDescriptionIntoCurrentLocaleItem(View root) {
+        String description = root.getContext().getResources().getString(R.string.checked);
+        root.setStateDescription(description);
     }
 }

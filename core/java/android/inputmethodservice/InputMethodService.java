@@ -482,8 +482,9 @@ public class InputMethodService extends AbstractInputMethodService {
 
     /**
      * Timeout after which hidden IME surface will be removed from memory
+     * TODO(b/230762351): reset timeout to 5000ms and invalidate cache when IME insets change.
      */
-    private static final long TIMEOUT_SURFACE_REMOVAL_MILLIS = 5000;
+    private static final long TIMEOUT_SURFACE_REMOVAL_MILLIS = 500;
 
     InputMethodManager mImm;
     private InputMethodPrivilegedOperations mPrivOps = new InputMethodPrivilegedOperations();
@@ -1058,10 +1059,6 @@ public class InputMethodService extends AbstractInputMethodService {
         return viewRoot == null ? null : viewRoot.getInputToken();
     }
 
-    private void notifyImeHidden() {
-        requestHideSelf(0);
-    }
-
     private void scheduleImeSurfaceRemoval() {
         if (mShowInputRequested || mWindowVisible || mWindow == null
                 || mImeSurfaceScheduledForRemoval) {
@@ -1222,14 +1219,6 @@ public class InputMethodService extends AbstractInputMethodService {
                 return;
             }
             InputMethodService.this.onUpdateCursorAnchorInfo(info);
-        }
-
-        /**
-         * Notify IME that window is hidden.
-         * @hide
-         */
-        public final void notifyImeHidden() {
-            InputMethodService.this.notifyImeHidden();
         }
 
         /**

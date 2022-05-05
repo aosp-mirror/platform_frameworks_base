@@ -34,8 +34,6 @@ import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.flicker.replacesLayer
-import com.android.server.wm.flicker.rules.WMFlickerServiceRuleForTestSpec
-import org.junit.Rule
 import org.junit.Test
 
 /**
@@ -44,9 +42,6 @@ import org.junit.Test
 abstract class CloseAppTransition(protected val testSpec: FlickerTestParameter) {
     protected val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     protected open val testApp: StandardAppHelper = SimpleAppHelper(instrumentation)
-
-    @get:Rule
-    val flickerRule = WMFlickerServiceRuleForTestSpec(testSpec)
 
     /**
      * Specification of the test transition to execute

@@ -731,6 +731,13 @@ public final class DeviceConfig {
     public static final String NAMESPACE_AMBIENT_CONTEXT_MANAGER_SERVICE =
             "ambient_context_manager_service";
 
+    /**
+     * Namespace for Vendor System Native related features.
+     *
+     * @hide
+     */
+    public static final String NAMESPACE_VENDOR_SYSTEM_NATIVE = "vendor_system_native";
+
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
     private static ArrayMap<OnPropertiesChangedListener, Pair<String, Executor>> sListeners =

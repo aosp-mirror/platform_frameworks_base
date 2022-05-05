@@ -262,7 +262,7 @@ open class QSTileViewImpl @JvmOverloads constructor(
         }
         // Limit how much we affect the height, so we don't have rounding artifacts when the tile
         // is too short.
-        val constrainedSquishiness = 0.1f + squishinessFraction * 0.9f
+        val constrainedSquishiness = constrainSquishiness(squishinessFraction)
         bottom = top + (actualHeight * constrainedSquishiness).toInt()
         scrollY = (actualHeight - height) / 2
     }
@@ -676,6 +676,10 @@ internal object SubtitleArrayMapping {
     fun getSubtitleId(spec: String?): Int {
         return subtitleIdsMap.getOrDefault(spec, R.array.tile_states_default)
     }
+}
+
+fun constrainSquishiness(squish: Float): Float {
+    return 0.1f + squish * 0.9f
 }
 
 private fun colorValuesHolder(name: String, vararg values: Int): PropertyValuesHolder {

@@ -21,6 +21,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="@integer/biometric_dialog_text_gravity"
+        android:singleLine="true"
+        android:marqueeRepeatLimit="1"
+        android:ellipsize="marquee"
         style="@style/TextAppearance.AuthCredential.Title"/>
 
     <TextView
@@ -28,13 +31,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="@integer/biometric_dialog_text_gravity"
+        android:singleLine="true"
+        android:marqueeRepeatLimit="1"
+        android:ellipsize="marquee"
         style="@style/TextAppearance.AuthCredential.Subtitle"/>
 
     <TextView
         android:id="@+id/description"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="@integer/biometric_dialog_text_gravity"
+        android:scrollbars ="vertical"
         style="@style/TextAppearance.AuthCredential.Description"/>
 
     <Space android:id="@+id/space_above_icon"

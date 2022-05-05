@@ -17,6 +17,7 @@
 package com.android.server.job;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -25,6 +26,7 @@ import static org.junit.Assert.fail;
 import android.app.job.JobInfo;
 import android.content.ComponentName;
 import android.platform.test.annotations.LargeTest;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -118,6 +120,56 @@ public class PendingJobQueueTest {
     }
 
     @Test
+    public void testContains() {
+        JobStatus joba1 = createJobStatus("testRemove", createJobInfo(1), 1);
+        JobStatus joba2 = createJobStatus("testRemove", createJobInfo(2), 1);
+        JobStatus jobb1 = createJobStatus("testRemove", createJobInfo(3).setExpedited(true), 2);
+        JobStatus jobb2 = createJobStatus("testRemove",
+                createJobInfo(4).setPriority(JobInfo.PRIORITY_MIN), 2);
+
+        // Make joba1 and joba2 sort-equivalent
+        joba1.enqueueTime = 3;
+        joba2.enqueueTime = 3;
+        jobb1.enqueueTime = 4;
+        jobb2.enqueueTime = 1;
+
+        PendingJobQueue jobQueue = new PendingJobQueue();
+
+        assertFalse(jobQueue.contains(joba1));
+        assertFalse(jobQueue.contains(joba2));
+        assertFalse(jobQueue.contains(jobb1));
+        assertFalse(jobQueue.contains(jobb2));
+
+        jobQueue.add(joba1);
+
+        assertTrue(jobQueue.contains(joba1));
+        assertFalse(jobQueue.contains(joba2));
+        assertFalse(jobQueue.contains(jobb1));
+        assertFalse(jobQueue.contains(jobb2));
+
+        jobQueue.add(jobb1);
+
+        assertTrue(jobQueue.contains(joba1));
+        assertFalse(jobQueue.contains(joba2));
+        assertTrue(jobQueue.contains(jobb1));
+        assertFalse(jobQueue.contains(jobb2));
+
+        jobQueue.add(jobb2);
+
+        assertTrue(jobQueue.contains(joba1));
+        assertFalse(jobQueue.contains(joba2));
+        assertTrue(jobQueue.contains(jobb1));
+        assertTrue(jobQueue.contains(jobb2));
+
+        jobQueue.add(joba2);
+
+        assertTrue(jobQueue.contains(joba1));
+        assertTrue(jobQueue.contains(joba2));
+        assertTrue(jobQueue.contains(jobb1));
+        assertTrue(jobQueue.contains(jobb2));
+    }
+
+    @Test
     public void testRemove() {
         List<JobStatus> jobs = new ArrayList<>();
         jobs.add(createJobStatus("testRemove", createJobInfo(1), 1));
@@ -129,9 +181,120 @@ public class PendingJobQueueTest {
         PendingJobQueue jobQueue = new PendingJobQueue();
         jobQueue.addAll(jobs);
 
+        ArraySet<JobStatus> removed = new ArraySet<>();
+        JobStatus job;
         for (int i = 0; i < jobs.size(); ++i) {
             jobQueue.remove(jobs.get(i));
+            removed.add(jobs.get(i));
+
             assertEquals(jobs.size() - i - 1, jobQueue.size());
+
+            jobQueue.resetIterator();
+            while ((job = jobQueue.next()) != null) {
+                assertFalse("Queue retained a removed job " + testJobToString(job),
+                        removed.contains(job));
+            }
+        }
+        assertNull(jobQueue.next());
+    }
+
+    @Test
+    public void testRemove_outOfOrder() {
+        List<JobStatus> jobs = new ArrayList<>();
+        JobStatus job1 = createJobStatus("testRemove", createJobInfo(1), 1);
+        JobStatus job2 = createJobStatus("testRemove", createJobInfo(2), 1);
+        JobStatus job3 = createJobStatus("testRemove", createJobInfo(3).setExpedited(true), 1);
+        JobStatus job4 = createJobStatus("testRemove",
+                createJobInfo(4).setPriority(JobInfo.PRIORITY_MIN), 1);
+        JobStatus job5 = createJobStatus("testRemove", createJobInfo(5).setExpedited(true), 1);
+
+        // Enqueue order (by ID): 4, 5, 3, {1,2 -- at the same time}
+        job1.enqueueTime = 3;
+        job2.enqueueTime = 3;
+        job3.enqueueTime = 4;
+        job4.enqueueTime = 1;
+        job5.enqueueTime = 2;
+
+        // 1 & 2 have the same enqueue time (could happen at boot), so ordering won't be consistent
+        // between the two
+        // Result job order should be (by ID): 5, 3, {1,2}, {1,2}, 4
+
+        // Intended removal order (by ID): 5, 3, 2, 1, 4
+        jobs.add(job5);
+        jobs.add(job3);
+        jobs.add(job2);
+        jobs.add(job1);
+        jobs.add(job4);
+
+        PendingJobQueue jobQueue = new PendingJobQueue();
+        jobQueue.addAll(jobs);
+
+        ArraySet<JobStatus> removed = new ArraySet<>();
+        JobStatus job;
+        while ((job = jobQueue.next()) != null) {
+            Log.d(TAG, testJobToString(job));
+        }
+        for (int i = 0; i < jobs.size(); ++i) {
+            jobQueue.remove(jobs.get(i));
+            removed.add(jobs.get(i));
+
+            assertEquals(jobs.size() - i - 1, jobQueue.size());
+
+            jobQueue.resetIterator();
+            while ((job = jobQueue.next()) != null) {
+                assertFalse("Queue retained a removed job " + testJobToString(job),
+                        removed.contains(job));
+            }
+        }
+        assertNull(jobQueue.next());
+
+        // Intended removal order (by ID): 3, 1, 2, 5, 4
+        jobs.clear();
+        jobs.add(job3);
+        jobs.add(job1);
+        jobs.add(job5);
+        jobs.add(job2);
+        jobs.add(job4);
+
+        jobQueue.addAll(jobs);
+
+        removed.clear();
+        for (int i = 0; i < jobs.size(); ++i) {
+            jobQueue.remove(jobs.get(i));
+            removed.add(jobs.get(i));
+
+            assertEquals(jobs.size() - i - 1, jobQueue.size());
+
+            jobQueue.resetIterator();
+            while ((job = jobQueue.next()) != null) {
+                assertFalse("Queue retained a removed job " + testJobToString(job),
+                        removed.contains(job));
+            }
+        }
+        assertNull(jobQueue.next());
+
+        // Intended removal order (by ID): 3, 2, 1, 4, 5
+        jobs.clear();
+        jobs.add(job3);
+        jobs.add(job2);
+        jobs.add(job1);
+        jobs.add(job4);
+        jobs.add(job5);
+
+        jobQueue.addAll(jobs);
+
+        removed.clear();
+        for (int i = 0; i < jobs.size(); ++i) {
+            jobQueue.remove(jobs.get(i));
+            removed.add(jobs.get(i));
+
+            assertEquals(jobs.size() - i - 1, jobQueue.size());
+
+            jobQueue.resetIterator();
+            while ((job = jobQueue.next()) != null) {
+                assertFalse("Queue retained a removed job " + testJobToString(job),
+                        removed.contains(job));
+            }
         }
         assertNull(jobQueue.next());
     }
@@ -224,7 +387,7 @@ public class PendingJobQueueTest {
         }
 
         final JobStatus[] expectedOptimizedOrder = new JobStatus[]{
-                eC3, eC11, rD4, eE5, eE14, eB6, rB2, eA7, rA1, rH8, eF9, rF8,  rC10, rG12, rG13};
+                eC3, eC11, rD4, eE5, eE14, eB6, rB2, eA7, rA1, rH8, eF9, rF8, rC10, rG12, rG13};
         idx = 0;
         jobQueue.setOptimizeIteration(true);
         jobQueue.resetIterator();

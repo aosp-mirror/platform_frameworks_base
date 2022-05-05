@@ -26,6 +26,7 @@ import com.android.systemui.util.ViewController
 import com.android.systemui.util.concurrency.DelayableExecutor
 import java.util.function.Consumer
 import javax.inject.Inject
+import kotlin.reflect.KMutableProperty0
 
 @VisibleForTesting
 internal const val INSET_DEBOUNCE_MILLIS = 500L
@@ -54,6 +55,7 @@ class NotificationsQSContainerController @Inject constructor(
     private var largeScreenShadeHeaderActive = false
     private var notificationsBottomMargin = 0
     private var scrimShadeBottomMargin = 0
+    private var footerActionsOffset = 0
     private var bottomStableInsets = 0
     private var bottomCutoutInsets = 0
     private var panelMarginHorizontal = 0
@@ -132,18 +134,17 @@ class NotificationsQSContainerController @Inject constructor(
             resources.getDimensionPixelSize(R.dimen.notification_panel_margin_top)
         }
         updateConstraints()
-        if (splitShadeEnabledChanged) {
-            // Let's do it at the end when all margins/paddings were already applied.
-            // We need to updateBottomSpacing() in case device configuration changed while showing
-            // QS details/customizer
-            updateBottomSpacing()
-        }
-        val previousScrimShadeBottomMargin = scrimShadeBottomMargin
-        scrimShadeBottomMargin = resources.getDimensionPixelSize(
-            R.dimen.split_shade_notifications_scrim_margin_bottom
-        )
 
-        if (previousScrimShadeBottomMargin != scrimShadeBottomMargin) {
+        val scrimMarginChanged = ::scrimShadeBottomMargin.setAndReportChange(
+            resources.getDimensionPixelSize(R.dimen.split_shade_notifications_scrim_margin_bottom)
+        )
+        val footerOffsetChanged = ::footerActionsOffset.setAndReportChange(
+            resources.getDimensionPixelSize(R.dimen.qs_footer_action_inset) +
+                resources.getDimensionPixelSize(R.dimen.qs_footer_actions_bottom_padding)
+        )
+        val dimensChanged = scrimMarginChanged || footerOffsetChanged
+
+        if (splitShadeEnabledChanged || dimensChanged) {
             updateBottomSpacing()
         }
     }
@@ -166,22 +167,13 @@ class NotificationsQSContainerController @Inject constructor(
     }
 
     private fun updateBottomSpacing() {
-        val (containerPadding, notificationsMargin) = calculateBottomSpacing()
-        var qsScrollPaddingBottom = 0
-        if (!(isQSCustomizing || isQSDetailShowing)) {
-            // With the new footer, we also want this padding in the bottom in these cases
-            qsScrollPaddingBottom = if (splitShadeEnabled) {
-                notificationsMargin - scrimShadeBottomMargin
-            } else {
-                bottomStableInsets
-            }
-        }
+        val (containerPadding, notificationsMargin, qsContainerPadding) = calculateBottomSpacing()
         mView.setPadding(0, 0, 0, containerPadding)
         mView.setNotificationsMarginBottom(notificationsMargin)
-        mView.setQSContainerPaddingBottom(qsScrollPaddingBottom)
+        mView.setQSContainerPaddingBottom(qsContainerPadding)
     }
 
-    private fun calculateBottomSpacing(): Pair<Int, Int> {
+    private fun calculateBottomSpacing(): Paddings {
         val containerPadding: Int
         var stackScrollMargin = notificationsBottomMargin
         if (splitShadeEnabled) {
@@ -210,7 +202,17 @@ class NotificationsQSContainerController @Inject constructor(
                 containerPadding = 0
             }
         }
-        return containerPadding to stackScrollMargin
+        val qsContainerPadding = if (!(isQSCustomizing || isQSDetailShowing)) {
+            // We also want this padding in the bottom in these cases
+            if (splitShadeEnabled) {
+                stackScrollMargin - scrimShadeBottomMargin - footerActionsOffset
+            } else {
+                bottomStableInsets
+            }
+        } else {
+            0
+        }
+        return Paddings(containerPadding, stackScrollMargin, qsContainerPadding)
     }
 
     fun updateConstraints() {
@@ -274,4 +276,16 @@ class NotificationsQSContainerController @Inject constructor(
             }
         }
     }
+}
+
+private data class Paddings(
+    val containerPadding: Int,
+    val notificationsMargin: Int,
+    val qsContainerPadding: Int
+)
+
+private fun KMutableProperty0<Int>.setAndReportChange(newValue: Int): Boolean {
+    val oldValue = get()
+    set(newValue)
+    return oldValue != newValue
 }

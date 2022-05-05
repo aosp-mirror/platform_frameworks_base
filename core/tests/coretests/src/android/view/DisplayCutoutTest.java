@@ -609,7 +609,8 @@ public class DisplayCutoutTest {
     private static DisplayCutout.CutoutPathParserInfo createParserInfo(
             @Surface.Rotation int rotation) {
         return new DisplayCutout.CutoutPathParserInfo(
-                0 /* displayWidth */, 0 /* displayHeight */, 0f /* density */, "" /* cutoutSpec */,
-                rotation, 0f /* scale */);
+                0 /* displayWidth */, 0 /* displayHeight */, 0 /* displayWidth */,
+                0 /* displayHeight */, 0f /* density */, "" /* cutoutSpec */,
+                rotation, 0f /* scale */, 0f /* displaySizeRatio */);
     }
 }

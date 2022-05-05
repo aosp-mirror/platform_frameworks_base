@@ -177,6 +177,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private ArgumentCaptor<StatusBarStateController.StateListener> mStatusBarStateListenerCaptor;
     @Mock
     private KeyguardUpdateMonitorCallback mTestCallback;
+    @Mock
+    private ActiveUnlockConfig mActiveUnlockConfig;
     // Direct executor
     private Executor mBackgroundExecutor = Runnable::run;
     private Executor mMainExecutor = Runnable::run;
@@ -269,7 +271,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.registerCallback(mTestCallback);
 
         mTestableLooper.processAllMessages();
-        when(mAuthController.areAllAuthenticatorsRegistered()).thenReturn(true);
+        when(mAuthController.areAllFingerprintAuthenticatorsRegistered()).thenReturn(true);
     }
 
     @After
@@ -499,7 +501,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Test
     public void test_doesNotTryToAuthenticateFingerprint_whenAuthenticatorsNotRegistered() {
-        when(mAuthController.areAllAuthenticatorsRegistered()).thenReturn(false);
+        when(mAuthController.areAllFingerprintAuthenticatorsRegistered()).thenReturn(false);
 
         mKeyguardUpdateMonitor.dispatchStartedGoingToSleep(0 /* why */);
         mTestableLooper.processAllMessages();
@@ -1188,7 +1190,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                     mBackgroundExecutor, mMainExecutor,
                     mStatusBarStateController, mLockPatternUtils,
                     mAuthController, mTelephonyListenerManager,
-                    mInteractionJankMonitor, mLatencyTracker);
+                    mInteractionJankMonitor, mLatencyTracker, mActiveUnlockConfig);
             setStrongAuthTracker(KeyguardUpdateMonitorTest.this.mStrongAuthTracker);
         }
 

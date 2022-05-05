@@ -20,6 +20,7 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
+import android.animation.ValueAnimator
 import android.util.IntProperty
 import android.view.View
 import android.view.ViewGroup
@@ -37,7 +38,7 @@ class ViewHierarchyAnimator {
         private const val DEFAULT_DURATION = 500L
         private val DEFAULT_INTERPOLATOR = Interpolators.STANDARD
         private val DEFAULT_ADDITION_INTERPOLATOR = Interpolators.STANDARD_DECELERATE
-        private val DEFAULT_BOUNDS = setOf(Bound.LEFT, Bound.TOP, Bound.RIGHT, Bound.BOTTOM)
+        private val DEFAULT_REMOVAL_INTERPOLATOR = Interpolators.STANDARD_ACCELERATE
 
         /** The properties used to animate the view bounds. */
         private val PROPERTIES = mapOf(
@@ -61,8 +62,7 @@ class ViewHierarchyAnimator {
 
         /**
          * Instruct the animator to watch for changes to the layout of [rootView] and its children
-         * and animate them. The animation can be limited to a subset of [bounds]. It uses the
-         * given [interpolator] and [duration].
+         * and animate them. It uses the given [interpolator] and [duration].
          *
          * If a new layout change happens while an animation is already in progress, the animation
          * is updated to continue from the current values to the new end state.
@@ -74,40 +74,31 @@ class ViewHierarchyAnimator {
          *
          * Returns true if the [rootView] is already visible and will be animated, false otherwise.
          * To animate the addition of a view, see [animateAddition].
-         *
-         * TODO(b/221418522): remove the ability to select which bounds to animate and always
-         * animate all of them.
          */
         @JvmOverloads
         fun animate(
             rootView: View,
-            bounds: Set<Bound> = DEFAULT_BOUNDS,
             interpolator: Interpolator = DEFAULT_INTERPOLATOR,
             duration: Long = DEFAULT_DURATION
         ): Boolean {
-            return animate(rootView, bounds, interpolator, duration, ephemeral = false)
+            return animate(rootView, interpolator, duration, ephemeral = false)
         }
 
         /**
          * Like [animate], but only takes effect on the next layout update, then unregisters itself
          * once the first animation is complete.
-         *
-         * TODO(b/221418522): remove the ability to select which bounds to animate and always
-         * animate all of them.
          */
         @JvmOverloads
         fun animateNextUpdate(
             rootView: View,
-            bounds: Set<Bound> = DEFAULT_BOUNDS,
             interpolator: Interpolator = DEFAULT_INTERPOLATOR,
             duration: Long = DEFAULT_DURATION
         ): Boolean {
-            return animate(rootView, bounds, interpolator, duration, ephemeral = true)
+            return animate(rootView, interpolator, duration, ephemeral = true)
         }
 
         private fun animate(
             rootView: View,
-            bounds: Set<Bound>,
             interpolator: Interpolator,
             duration: Long,
             ephemeral: Boolean
@@ -123,26 +114,24 @@ class ViewHierarchyAnimator {
                 return false
             }
 
-            val listener = createUpdateListener(bounds, interpolator, duration, ephemeral)
-            recursivelyAddListener(rootView, listener)
+            val listener = createUpdateListener(interpolator, duration, ephemeral)
+            addListener(rootView, listener, recursive = true)
             return true
         }
 
         /**
          * Returns a new [View.OnLayoutChangeListener] that when called triggers a layout animation
-         * for the specified [bounds], using [interpolator] and [duration].
+         * using [interpolator] and [duration].
          *
          * If [ephemeral] is true, the listener is unregistered after the first animation. Otherwise
          * it keeps listening for further updates.
          */
         private fun createUpdateListener(
-            bounds: Set<Bound>,
             interpolator: Interpolator,
             duration: Long,
             ephemeral: Boolean
         ): View.OnLayoutChangeListener {
             return createListener(
-                bounds,
                 interpolator,
                 duration,
                 ephemeral
@@ -196,7 +185,7 @@ class ViewHierarchyAnimator {
             val listener = createAdditionListener(
                 origin, interpolator, duration, ignorePreviousValues = !includeMargins
             )
-            recursivelyAddListener(rootView, listener)
+            addListener(rootView, listener, recursive = true)
             return true
         }
 
@@ -214,7 +203,6 @@ class ViewHierarchyAnimator {
             ignorePreviousValues: Boolean
         ): View.OnLayoutChangeListener {
             return createListener(
-                DEFAULT_BOUNDS,
                 interpolator,
                 duration,
                 ephemeral = true,
@@ -225,7 +213,7 @@ class ViewHierarchyAnimator {
 
         /**
          * Returns a new [View.OnLayoutChangeListener] that when called triggers a layout animation
-         * for the specified [bounds], using [interpolator] and [duration].
+         * using [interpolator] and [duration].
          *
          * If [ephemeral] is true, the listener is unregistered after the first animation. Otherwise
          * it keeps listening for further updates.
@@ -234,7 +222,6 @@ class ViewHierarchyAnimator {
          * [ignorePreviousValues] controls whether the previous values should be taken into account.
          */
         private fun createListener(
-            bounds: Set<Bound>,
             interpolator: Interpolator,
             duration: Long,
             ephemeral: Boolean,
@@ -290,10 +277,11 @@ class ViewHierarchyAnimator {
                     )
 
                     val boundsToAnimate = mutableSetOf<Bound>()
-                    bounds.forEach { bound ->
-                        if (endValues.getValue(bound) != startValues.getValue(bound)) {
-                            boundsToAnimate.add(bound)
-                        }
+                    if (startValues.getValue(Bound.LEFT) != left) boundsToAnimate.add(Bound.LEFT)
+                    if (startValues.getValue(Bound.TOP) != top) boundsToAnimate.add(Bound.TOP)
+                    if (startValues.getValue(Bound.RIGHT) != right) boundsToAnimate.add(Bound.RIGHT)
+                    if (startValues.getValue(Bound.BOTTOM) != bottom) {
+                        boundsToAnimate.add(Bound.BOTTOM)
                     }
 
                     if (boundsToAnimate.isNotEmpty()) {
@@ -312,6 +300,183 @@ class ViewHierarchyAnimator {
         }
 
         /**
+         * Animates the removal of [rootView] and its children from the hierarchy. It uses the given
+         * [interpolator] and [duration].
+         *
+         * The end state of the animation is controlled by [destination]. This value can be any of
+         * the four corners, any of the four edges, or the center of the view.
+         */
+        @JvmOverloads
+        fun animateRemoval(
+            rootView: View,
+            destination: Hotspot = Hotspot.CENTER,
+            interpolator: Interpolator = DEFAULT_REMOVAL_INTERPOLATOR,
+            duration: Long = DEFAULT_DURATION
+        ): Boolean {
+            if (!isVisible(
+                    rootView.visibility,
+                    rootView.left,
+                    rootView.top,
+                    rootView.right,
+                    rootView.bottom
+                )
+            ) {
+                return false
+            }
+
+            val parent = rootView.parent as ViewGroup
+
+            // Ensure that rootView's siblings animate nicely around the removal.
+            val listener = createUpdateListener(
+                interpolator,
+                duration,
+                ephemeral = true
+            )
+            for (i in 0 until parent.childCount) {
+                val child = parent.getChildAt(i)
+                if (child == rootView) continue
+                addListener(child, listener, recursive = false)
+            }
+
+            // Remove the view so that a layout update is triggered for the siblings and they
+            // animate to their next position while the view's removal is also animating.
+            parent.removeView(rootView)
+            // By adding the view to the overlay, we can animate it while it isn't part of the view
+            // hierarchy. It is correctly positioned because we have its previous bounds, and we set
+            // them manually during the animation.
+            parent.overlay.add(rootView)
+
+            val startValues = mapOf(
+                Bound.LEFT to rootView.left,
+                Bound.TOP to rootView.top,
+                Bound.RIGHT to rootView.right,
+                Bound.BOTTOM to rootView.bottom
+            )
+            val endValues = processEndValuesForRemoval(
+                destination,
+                rootView.left,
+                rootView.top,
+                rootView.right,
+                rootView.bottom
+            )
+
+            val boundsToAnimate = mutableSetOf<Bound>()
+            if (rootView.left != endValues.getValue(Bound.LEFT)) boundsToAnimate.add(Bound.LEFT)
+            if (rootView.top != endValues.getValue(Bound.TOP)) boundsToAnimate.add(Bound.TOP)
+            if (rootView.right != endValues.getValue(Bound.RIGHT)) boundsToAnimate.add(Bound.RIGHT)
+            if (rootView.bottom != endValues.getValue(Bound.BOTTOM)) {
+                boundsToAnimate.add(Bound.BOTTOM)
+            }
+
+            startAnimation(
+                rootView,
+                boundsToAnimate,
+                startValues,
+                endValues,
+                interpolator,
+                duration,
+                ephemeral = true
+            )
+
+            if (rootView is ViewGroup) {
+                // Shift the children so they maintain a consistent position within the shrinking
+                // view.
+                shiftChildrenForRemoval(rootView, destination, endValues, interpolator, duration)
+
+                // Fade out the children during the first half of the removal, so they don't clutter
+                // too much once the view becomes very small. Then we fade out the view itself, in
+                // case it has its own content and/or background.
+                val startAlphas = FloatArray(rootView.childCount)
+                for (i in 0 until rootView.childCount) {
+                    startAlphas[i] = rootView.getChildAt(i).alpha
+                }
+
+                val animator = ValueAnimator.ofFloat(1f, 0f)
+                animator.interpolator = Interpolators.ALPHA_OUT
+                animator.duration = duration / 2
+                animator.addUpdateListener { animation ->
+                    for (i in 0 until rootView.childCount) {
+                        rootView.getChildAt(i).alpha =
+                            (animation.animatedValue as Float) * startAlphas[i]
+                    }
+                }
+                animator.addListener(object : AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator) {
+                        rootView.animate()
+                            .alpha(0f)
+                            .setInterpolator(Interpolators.ALPHA_OUT)
+                            .setDuration(duration / 2)
+                            .withEndAction { parent.overlay.remove(rootView) }
+                            .start()
+                    }
+                })
+                animator.start()
+            } else {
+                // Fade out the view during the second half of the removal.
+                rootView.animate()
+                    .alpha(0f)
+                    .setInterpolator(Interpolators.ALPHA_OUT)
+                    .setDuration(duration / 2)
+                    .setStartDelay(duration / 2)
+                    .withEndAction { parent.overlay.remove(rootView) }
+                    .start()
+            }
+
+            return true
+        }
+
+        /**
+         * Animates the children of [rootView] so that its layout remains internally consistent as
+         * it shrinks towards [destination] and changes its bounds to [endValues].
+         *
+         * Uses [interpolator] and [duration], which should match those of the removal animation.
+         */
+        private fun shiftChildrenForRemoval(
+            rootView: ViewGroup,
+            destination: Hotspot,
+            endValues: Map<Bound, Int>,
+            interpolator: Interpolator,
+            duration: Long
+        ) {
+            for (i in 0 until rootView.childCount) {
+                val child = rootView.getChildAt(i)
+                val childStartValues = mapOf(
+                    Bound.LEFT to child.left,
+                    Bound.TOP to child.top,
+                    Bound.RIGHT to child.right,
+                    Bound.BOTTOM to child.bottom
+                )
+                val childEndValues = processChildEndValuesForRemoval(
+                    destination,
+                    child.left,
+                    child.top,
+                    child.right,
+                    child.bottom,
+                    endValues.getValue(Bound.RIGHT) - endValues.getValue(Bound.LEFT),
+                    endValues.getValue(Bound.BOTTOM) - endValues.getValue(Bound.TOP)
+                )
+
+                val boundsToAnimate = mutableSetOf<Bound>()
+                if (child.left != endValues.getValue(Bound.LEFT)) boundsToAnimate.add(Bound.LEFT)
+                if (child.top != endValues.getValue(Bound.TOP)) boundsToAnimate.add(Bound.TOP)
+                if (child.right != endValues.getValue(Bound.RIGHT)) boundsToAnimate.add(Bound.RIGHT)
+                if (child.bottom != endValues.getValue(Bound.BOTTOM)) {
+                    boundsToAnimate.add(Bound.BOTTOM)
+                }
+
+                startAnimation(
+                    child,
+                    boundsToAnimate,
+                    childStartValues,
+                    childEndValues,
+                    interpolator,
+                    duration,
+                    ephemeral = true
+                )
+            }
+        }
+
+        /**
          * Returns whether the given [visibility] and bounds are consistent with a view being
          * currently visible on screen.
          */
@@ -326,7 +491,7 @@ class ViewHierarchyAnimator {
         }
 
         /**
-         * Compute the actual starting values based on the requested [origin] and on
+         * Computes the actual starting values based on the requested [origin] and on
          * [ignorePreviousValues].
          *
          * If [origin] is null, the resolved start values will be the same as those passed in, or
@@ -436,7 +601,140 @@ class ViewHierarchyAnimator {
             )
         }
 
-        private fun recursivelyAddListener(view: View, listener: View.OnLayoutChangeListener) {
+        /**
+         * Computes a removal animation's end values based on the requested [destination] and the
+         * view's starting bounds.
+         *
+         * Examples:
+         *     1) destination=TOP
+         *         x---------x    x---------x    x---------x    x---------x    x---------x
+         *         |         |    |         |    |         |    x---------x
+         *         |         | -> |         | -> x---------x ->             ->
+         *         |         |    x---------x
+         *         x---------x
+         *      2) destination=BOTTOM_LEFT
+         *         x---------x
+         *         |         |    x-------x
+         *         |         | -> |       |   -> x----x      ->             ->
+         *         |         |    |       |      |    |         x--x
+         *         x---------x    x-------x      x----x         x--x           x
+         *     3) destination=CENTER
+         *         x---------x
+         *         |         |     x-------x       x-----x
+         *         |         | ->  |       |  ->   |     |   ->    x---x    ->      x
+         *         |         |     x-------x       x-----x
+         *         x---------x
+         */
+        private fun processEndValuesForRemoval(
+            destination: Hotspot,
+            left: Int,
+            top: Int,
+            right: Int,
+            bottom: Int
+        ): Map<Bound, Int> {
+            val endLeft = when (destination) {
+                Hotspot.CENTER -> (left + right) / 2
+                Hotspot.BOTTOM, Hotspot.BOTTOM_LEFT, Hotspot.LEFT, Hotspot.TOP_LEFT, Hotspot.TOP ->
+                    left
+                Hotspot.TOP_RIGHT, Hotspot.RIGHT, Hotspot.BOTTOM_RIGHT -> right
+            }
+            val endTop = when (destination) {
+                Hotspot.CENTER -> (top + bottom) / 2
+                Hotspot.LEFT, Hotspot.TOP_LEFT, Hotspot.TOP, Hotspot.TOP_RIGHT, Hotspot.RIGHT ->
+                    top
+                Hotspot.BOTTOM_RIGHT, Hotspot.BOTTOM, Hotspot.BOTTOM_LEFT -> bottom
+            }
+            val endRight = when (destination) {
+                Hotspot.CENTER -> (left + right) / 2
+                Hotspot.TOP, Hotspot.TOP_RIGHT, Hotspot.RIGHT,
+                Hotspot.BOTTOM_RIGHT, Hotspot.BOTTOM ->
+                    right
+                Hotspot.BOTTOM_LEFT, Hotspot.LEFT, Hotspot.TOP_LEFT -> left
+            }
+            val endBottom = when (destination) {
+                Hotspot.CENTER -> (top + bottom) / 2
+                Hotspot.RIGHT, Hotspot.BOTTOM_RIGHT, Hotspot.BOTTOM,
+                Hotspot.BOTTOM_LEFT, Hotspot.LEFT ->
+                    bottom
+                Hotspot.TOP_LEFT, Hotspot.TOP, Hotspot.TOP_RIGHT -> top
+            }
+
+            return mapOf(
+                Bound.LEFT to endLeft,
+                Bound.TOP to endTop,
+                Bound.RIGHT to endRight,
+                Bound.BOTTOM to endBottom
+            )
+        }
+
+        /**
+         * Computes the end values for the child of a view being removed, based on the child's
+         * starting bounds, the removal's [destination], and the [parentWidth] and [parentHeight].
+         *
+         * The end values always represent the child's position after it has been translated so that
+         * its center is at the [destination].
+         *
+         * Examples:
+         *     1) destination=TOP
+         *         The child maintains its left and right positions, but is shifted up so that its
+         *         center is on the parent's end top edge.
+         *     2) destination=BOTTOM_LEFT
+         *         The child shifts so that its center is on the parent's end bottom left corner.
+         *     3) destination=CENTER
+         *         The child shifts so that its own center is on the parent's end center.
+         */
+        private fun processChildEndValuesForRemoval(
+            destination: Hotspot,
+            left: Int,
+            top: Int,
+            right: Int,
+            bottom: Int,
+            parentWidth: Int,
+            parentHeight: Int
+        ): Map<Bound, Int> {
+            val halfWidth = (right - left) / 2
+            val halfHeight = (bottom - top) / 2
+
+            val endLeft = when (destination) {
+                Hotspot.CENTER -> (parentWidth / 2) - halfWidth
+                Hotspot.BOTTOM_LEFT, Hotspot.LEFT, Hotspot.TOP_LEFT -> -halfWidth
+                Hotspot.TOP_RIGHT, Hotspot.RIGHT, Hotspot.BOTTOM_RIGHT -> parentWidth - halfWidth
+                Hotspot.TOP, Hotspot.BOTTOM -> left
+            }
+            val endTop = when (destination) {
+                Hotspot.CENTER -> (parentHeight / 2) - halfHeight
+                Hotspot.TOP_LEFT, Hotspot.TOP, Hotspot.TOP_RIGHT -> -halfHeight
+                Hotspot.BOTTOM_RIGHT, Hotspot.BOTTOM, Hotspot.BOTTOM_LEFT ->
+                    parentHeight - halfHeight
+                Hotspot.LEFT, Hotspot.RIGHT -> top
+            }
+            val endRight = when (destination) {
+                Hotspot.CENTER -> (parentWidth / 2) + halfWidth
+                Hotspot.TOP_RIGHT, Hotspot.RIGHT, Hotspot.BOTTOM_RIGHT -> parentWidth + halfWidth
+                Hotspot.BOTTOM_LEFT, Hotspot.LEFT, Hotspot.TOP_LEFT -> halfWidth
+                Hotspot.TOP, Hotspot.BOTTOM -> right
+            }
+            val endBottom = when (destination) {
+                Hotspot.CENTER -> (parentHeight / 2) + halfHeight
+                Hotspot.BOTTOM_RIGHT, Hotspot.BOTTOM, Hotspot.BOTTOM_LEFT ->
+                    parentHeight + halfHeight
+                Hotspot.TOP_LEFT, Hotspot.TOP, Hotspot.TOP_RIGHT -> halfHeight
+                Hotspot.LEFT, Hotspot.RIGHT -> bottom
+            }
+
+            return mapOf(
+                Bound.LEFT to endLeft,
+                Bound.TOP to endTop,
+                Bound.RIGHT to endRight,
+                Bound.BOTTOM to endBottom
+            )
+        }
+
+        private fun addListener(
+            view: View,
+            listener: View.OnLayoutChangeListener,
+            recursive: Boolean = false
+        ) {
             // Make sure that only one listener is active at a time.
             val previousListener = view.getTag(R.id.tag_layout_listener)
             if (previousListener != null && previousListener is View.OnLayoutChangeListener) {
@@ -445,9 +743,9 @@ class ViewHierarchyAnimator {
 
             view.addOnLayoutChangeListener(listener)
             view.setTag(R.id.tag_layout_listener, listener)
-            if (view is ViewGroup) {
+            if (view is ViewGroup && recursive) {
                 for (i in 0 until view.childCount) {
-                    recursivelyAddListener(view.getChildAt(i), listener)
+                    addListener(view.getChildAt(i), listener, recursive = true)
                 }
             }
         }
@@ -504,6 +802,8 @@ class ViewHierarchyAnimator {
                 }
             }.toTypedArray()
 
+            (view.getTag(R.id.tag_animator) as? ObjectAnimator)?.cancel()
+
             val animator = ObjectAnimator.ofPropertyValuesHolder(view, *propertyValuesHolders)
             animator.interpolator = interpolator
             animator.duration = duration
@@ -541,8 +841,7 @@ class ViewHierarchyAnimator {
         CENTER, LEFT, TOP_LEFT, TOP, TOP_RIGHT, RIGHT, BOTTOM_RIGHT, BOTTOM, BOTTOM_LEFT
     }
 
-    // TODO(b/221418522): make this private once it can't be passed as an arg anymore.
-    enum class Bound(val label: String, val overrideTag: Int) {
+    private enum class Bound(val label: String, val overrideTag: Int) {
         LEFT("left", R.id.tag_override_left) {
             override fun setValue(view: View, value: Int) {
                 view.left = value

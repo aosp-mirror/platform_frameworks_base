@@ -560,7 +560,7 @@ public final class SensorPrivacyService extends SystemService {
                         + " sensors");
                 return;
             }
-            mContext.startActivityAsUser(dialogIntent, options.toBundle(), info.mUser);
+            mContext.startActivityAsUser(dialogIntent, options.toBundle(), UserHandle.SYSTEM);
         }
 
         /**

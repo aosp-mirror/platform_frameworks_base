@@ -69,6 +69,7 @@ import static android.app.AppOpsManager.extractUidStateFromKey;
 import static android.app.AppOpsManager.makeKey;
 import static android.app.AppOpsManager.modeToName;
 import static android.app.AppOpsManager.opAllowSystemBypassRestriction;
+import static android.app.AppOpsManager.opRestrictsRead;
 import static android.app.AppOpsManager.opToName;
 import static android.app.AppOpsManager.opToPublicName;
 import static android.app.AppOpsManager.resolveFirstUnrestrictedUidState;
@@ -2367,8 +2368,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         ActivityManagerInternal ami = LocalServices.getService(ActivityManagerInternal.class);
         boolean isSelfRequest = (filter & FILTER_BY_UID) != 0 && uid == Binder.getCallingUid();
         if (!isSelfRequest) {
-            boolean isCallerInstrumented =
-                    ami.getInstrumentationSourceUid(Binder.getCallingUid()) != Process.INVALID_UID;
+            boolean isCallerInstrumented = ami.isUidCurrentlyInstrumented(Binder.getCallingUid());
             boolean isCallerSystem = Binder.getCallingPid() == Process.myPid();
             boolean isCallerPermissionController;
             try {
@@ -2876,6 +2876,10 @@ public class AppOpsService extends IAppOpsService.Stub {
             // features may require permissions our remote caller does not have.
             final long identity = Binder.clearCallingIdentity();
             try {
+                if (shouldIgnoreCallback(switchedCode, callback.mCallingPid,
+                        callback.mCallingUid)) {
+                    continue;
+                }
                 callback.mCallback.opChanged(switchedCode, uid, packageName);
             } catch (RemoteException e) {
                 /* ignore */
@@ -4206,6 +4210,9 @@ public class AppOpsService extends IAppOpsService.Stub {
             for (int i = 0; i < callbackCount; i++) {
                 final ActiveCallback callback = callbacks.valueAt(i);
                 try {
+                    if (shouldIgnoreCallback(code, callback.mCallingPid, callback.mCallingUid)) {
+                        continue;
+                    }
                     callback.mCallback.opActiveChanged(code, uid, packageName, attributionTag,
                             active, attributionFlags, attributionChainId);
                 } catch (RemoteException e) {
@@ -4259,6 +4266,9 @@ public class AppOpsService extends IAppOpsService.Stub {
             for (int i = 0; i < callbackCount; i++) {
                 final StartedCallback callback = callbacks.valueAt(i);
                 try {
+                    if (shouldIgnoreCallback(code, callback.mCallingPid, callback.mCallingUid)) {
+                        continue;
+                    }
                     callback.mCallback.opStarted(code, uid, packageName, attributionTag, flags,
                             result, startedType, attributionFlags, attributionChainId);
                 } catch (RemoteException e) {
@@ -4307,6 +4317,9 @@ public class AppOpsService extends IAppOpsService.Stub {
             for (int i = 0; i < callbackCount; i++) {
                 final NotedCallback callback = callbacks.valueAt(i);
                 try {
+                    if (shouldIgnoreCallback(code, callback.mCallingPid, callback.mCallingUid)) {
+                        continue;
+                    }
                     callback.mCallback.opNoted(code, uid, packageName, attributionTag, flags,
                             result);
                 } catch (RemoteException e) {
@@ -4371,8 +4384,20 @@ public class AppOpsService extends IAppOpsService.Stub {
                 Binder.getCallingPid(), Binder.getCallingUid(), null);
     }
 
+    private boolean shouldIgnoreCallback(int op, int watcherPid, int watcherUid) {
+        // If it's a restricted read op, ignore it if watcher doesn't have manage ops permission,
+        // as watcher should not use this to signal if the value is changed.
+        return opRestrictsRead(op) && mContext.checkPermission(Manifest.permission.MANAGE_APPOPS,
+                watcherPid, watcherUid) != PackageManager.PERMISSION_GRANTED;
+    }
+
     private void verifyIncomingOp(int op) {
         if (op >= 0 && op < AppOpsManager._NUM_OP) {
+            // Enforce manage appops permission if it's a restricted read op.
+            if (opRestrictsRead(op)) {
+                mContext.enforcePermission(Manifest.permission.MANAGE_APPOPS,
+                        Binder.getCallingPid(), Binder.getCallingUid(), "verifyIncomingOp");
+            }
             return;
         }
         throw new IllegalArgumentException("Bad operation #" + op);
@@ -6895,8 +6920,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     @Override
     public @Nullable RuntimeAppOpAccessMessage collectRuntimeAppOpAccessMessage() {
         ActivityManagerInternal ami = LocalServices.getService(ActivityManagerInternal.class);
-        boolean isCallerInstrumented =
-                ami.getInstrumentationSourceUid(Binder.getCallingUid()) != Process.INVALID_UID;
+        boolean isCallerInstrumented = ami.isUidCurrentlyInstrumented(Binder.getCallingUid());
         boolean isCallerSystem = Binder.getCallingPid() == Process.myPid();
         if (!isCallerSystem && !isCallerInstrumented) {
             return null;

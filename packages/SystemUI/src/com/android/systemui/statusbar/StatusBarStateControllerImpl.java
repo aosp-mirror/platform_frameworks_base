@@ -56,7 +56,6 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController.StateList
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.policy.CallbackController;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -533,7 +532,7 @@ public class StatusBarStateControllerImpl implements
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("StatusBarStateController: ");
         pw.println(" mState=" + mState + " (" + describe(mState) + ")");
         pw.println(" mLastState=" + mLastState + " (" + describe(mLastState) + ")");

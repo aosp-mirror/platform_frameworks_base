@@ -170,7 +170,7 @@ public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testCanContainActivities() {
+    public void testCanActivityBeLaunched() {
         ActivityStarter starter = new ActivityStarter(mock(ActivityStartController.class), mAtm,
                 mSupervisor, mock(ActivityStartInterceptor.class));
         final Task task = new TaskBuilder(mSupervisor).setDisplay(mSecondaryDisplay).build();
@@ -202,6 +202,13 @@ public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
         ComponentName mTopActivity = null;
         int mTopActivityUid = UserHandle.USER_NULL;
         ArraySet<Integer> mRunningUids = new ArraySet<>();
+
+        @Override
+        public boolean canActivityBeLaunched(@NonNull ActivityInfo activity,
+                @WindowConfiguration.WindowingMode int windowingMode, int launchingFromDisplayId,
+                boolean isNewTask) {
+            return false;
+        }
 
         @Override
         public boolean canContainActivities(@NonNull List<ActivityInfo> activities,

@@ -54,7 +54,6 @@ import com.android.systemui.tuner.TunerService;
 import com.android.systemui.unfold.FoldAodAnimationController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Optional;
@@ -300,6 +299,17 @@ public class DozeParameters implements
     }
 
     /**
+     * Whether we're capable of controlling the screen off animation if we want to. This isn't
+     * possible if AOD isn't even enabled or if the flag is disabled, or if the display needs
+     * blanking.
+     */
+    public boolean canControlUnlockedScreenOff() {
+        return getAlwaysOn()
+                && mFeatureFlags.isEnabled(Flags.LOCKSCREEN_ANIMATIONS)
+                && !getDisplayNeedsBlanking();
+    }
+
+    /**
      * Whether we want to control the screen off animation when the device is unlocked. If we do,
      * we'll animate in AOD before turning off the screen, rather than simply fading to black and
      * then abruptly showing AOD.
@@ -309,8 +319,7 @@ public class DozeParameters implements
      * disabled for a11y.
      */
     public boolean shouldControlUnlockedScreenOff() {
-        return canControlUnlockedScreenOff()
-                && mUnlockedScreenOffAnimationController.shouldPlayUnlockedScreenOffAnimation();
+        return mUnlockedScreenOffAnimationController.shouldPlayUnlockedScreenOffAnimation();
     }
 
     public boolean shouldDelayKeyguardShow() {
@@ -340,16 +349,6 @@ public class DozeParameters implements
 
     private boolean willAnimateFromLockScreenToAod() {
         return getAlwaysOn() && mKeyguardShowing;
-    }
-
-    /**
-     * Whether we're capable of controlling the screen off animation if we want to. This isn't
-     * possible if AOD isn't even enabled or if the flag is disabled.
-     */
-    public boolean canControlUnlockedScreenOff() {
-        return getAlwaysOn()
-                && mFeatureFlags.isEnabled(Flags.LOCKSCREEN_ANIMATIONS)
-                && !getDisplayNeedsBlanking();
     }
 
     private boolean getBoolean(String propName, int resId) {
@@ -447,7 +446,7 @@ public class DozeParameters implements
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.print("getAlwaysOn(): "); pw.println(getAlwaysOn());
         pw.print("getDisplayStateSupported(): "); pw.println(getDisplayStateSupported());
         pw.print("getPulseDuration(): "); pw.println(getPulseDuration());

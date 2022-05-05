@@ -752,33 +752,6 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void faceAuthMessageSuppressed() {
-        createController();
-        String faceHelpMsg = "Face auth help message";
-
-        // GIVEN state of showing message when keyguard screen is on
-        when(mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(true);
-        when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
-
-        // GIVEN fingerprint is also running (not udfps)
-        when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);
-        when(mKeyguardUpdateMonitor.isUdfpsSupported()).thenReturn(false);
-
-        mController.setVisible(true);
-
-        // WHEN a face help message comes in
-        mController.getKeyguardCallback().onBiometricHelp(
-                KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_RECOGNIZED, faceHelpMsg,
-                BiometricSourceType.FACE);
-
-        // THEN no help message appears
-        verify(mRotateTextViewController, never()).showTransient(anyString());
-
-        // THEN the face help message is still announced for a11y
-        verify(mIndicationAreaBottom).announceForAccessibility(eq(faceHelpMsg));
-    }
-
-    @Test
     public void testEmptyOwnerInfoHidesIndicationArea() {
         createController();
 

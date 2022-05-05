@@ -16,7 +16,7 @@
 
 package com.android.systemui.dreams;
 
-import static com.android.keyguard.BouncerPanelExpansionCalculator.getBackScrimScaledExpansion;
+import static com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress;
 import static com.android.keyguard.BouncerPanelExpansionCalculator.getDreamAlphaScaledExpansion;
 import static com.android.keyguard.BouncerPanelExpansionCalculator.getDreamYPositionScaledExpansion;
 import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
@@ -217,19 +217,19 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
 
         mBlurUtils.applyBlur(mView.getViewRootImpl(),
                 (int) mBlurUtils.blurRadiusOfRatio(
-                        1 - getBackScrimScaledExpansion(bouncerHideAmount)), false);
+                        1 - aboutToShowBouncerProgress(bouncerHideAmount)), false);
     }
 
     private static float getAlpha(int position, float expansion) {
         return Interpolators.LINEAR_OUT_SLOW_IN.getInterpolation(
                 position == POSITION_TOP ? getDreamAlphaScaledExpansion(expansion)
-                        : getBackScrimScaledExpansion(expansion + 0.03f));
+                        : aboutToShowBouncerProgress(expansion + 0.03f));
     }
 
     private float getTranslationY(int position, float expansion) {
         final float fraction = Interpolators.LINEAR_OUT_SLOW_IN.getInterpolation(
                 position == POSITION_TOP ? getDreamYPositionScaledExpansion(expansion)
-                        : getBackScrimScaledExpansion(expansion + 0.03f));
+                        : aboutToShowBouncerProgress(expansion + 0.03f));
         return MathUtils.lerp(-mDreamOverlayMaxTranslationY, 0, fraction);
     }
 }

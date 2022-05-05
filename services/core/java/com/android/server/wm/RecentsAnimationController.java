@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 import static android.view.WindowManager.INPUT_CONSUMER_RECENTS_ANIMATION;
@@ -445,7 +444,7 @@ public class RecentsAnimationController implements DeathRecipient {
         }
 
         final int taskCount = visibleTasks.size();
-        for (int i = 0; i < taskCount; i++) {
+        for (int i = taskCount - 1; i >= 0; i--) {
             final Task task = visibleTasks.get(i);
             if (skipAnimation(task)) {
                 continue;
@@ -602,22 +601,12 @@ public class RecentsAnimationController implements DeathRecipient {
                 || mDisplayContent.getAsyncRotationController() != null) {
             return;
         }
-        boolean shouldTranslateNavBar = false;
-        final boolean isDisplayLandscape =
-                mDisplayContent.getConfiguration().orientation == ORIENTATION_LANDSCAPE;
         for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
             final TaskAnimationAdapter adapter = mPendingAnimations.get(i);
             final Task task = adapter.mTask;
-            final TaskFragment adjacentTask = task.getRootTask().getAdjacentTaskFragment();
-            final boolean inSplitScreen = task.inSplitScreen();
-            if (task.isActivityTypeHomeOrRecents()
-                    // Skip if the task is in split screen and in landscape.
-                    || (inSplitScreen && isDisplayLandscape)
-                    // Skip if the task is the top task in split screen.
-                    || (inSplitScreen && task.getBounds().top < adjacentTask.getBounds().top)) {
+            if (task.isActivityTypeHomeOrRecents()) {
                 continue;
             }
-            shouldTranslateNavBar = inSplitScreen;
             mNavBarAttachedApp = task.getTopVisibleActivity();
             break;
         }
@@ -630,9 +619,7 @@ public class RecentsAnimationController implements DeathRecipient {
         navWindow.mToken.cancelAnimation();
         final SurfaceControl.Transaction t = navWindow.mToken.getPendingTransaction();
         final SurfaceControl navSurfaceControl = navWindow.mToken.getSurfaceControl();
-        if (shouldTranslateNavBar) {
-            navWindow.setSurfaceTranslationY(-mNavBarAttachedApp.getBounds().top);
-        }
+        navWindow.setSurfaceTranslationY(-mNavBarAttachedApp.getBounds().top);
         t.reparent(navSurfaceControl, mNavBarAttachedApp.getSurfaceControl());
         t.show(navSurfaceControl);
 
@@ -707,13 +694,7 @@ public class RecentsAnimationController implements DeathRecipient {
             if (isAnimatingTask(task) || skipAnimation(task)) {
                 return;
             }
-            final RemoteAnimationTarget target = createTaskRemoteAnimation(task, MODE_OPENING,
-                    finishedCallback);
-            if (target == null) {
-                return;
-            }
-            ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS, "addTaskToTargets, target: %s", target);
-            mPendingTaskAppears.add(target);
+            collectTaskRemoteAnimations(task, MODE_OPENING, finishedCallback);
         }
     }
 
@@ -729,19 +710,30 @@ public class RecentsAnimationController implements DeathRecipient {
         }
     }
 
-    private RemoteAnimationTarget createTaskRemoteAnimation(Task task, int mode,
+    private void collectTaskRemoteAnimations(Task task, int mode,
             OnAnimationFinishedCallback finishedCallback) {
         final SparseBooleanArray recentTaskIds =
                 mService.mAtmService.getRecentTasks().getRecentTaskIds();
+
         // The target must be built off the root task (the leaf task surface would be cropped
-        // within the root surface). However, recents only tracks leaf task ids, so we'll replace
-        // the task-id with the leaf id.
-        final Task leafTask = task.getTopLeafTask();
-        int taskId = leafTask.mTaskId;
-        TaskAnimationAdapter adapter = addAnimation(task,
-                !recentTaskIds.get(taskId), true /* hidden */, finishedCallback);
-        mPendingNewTaskTargets.add(taskId);
-        return adapter.createRemoteAnimationTarget(taskId, mode);
+        // within the root surface). However, recents only tracks leaf task ids, so we'll traverse
+        // and create animation target for all visible leaf tasks.
+        task.forAllLeafTasks(leafTask -> {
+            if (!leafTask.shouldBeVisible(null /* starting */)) {
+                return;
+            }
+            final int taskId = leafTask.mTaskId;
+            TaskAnimationAdapter adapter = addAnimation(leafTask,
+                    !recentTaskIds.get(taskId), true /* hidden */, finishedCallback);
+            mPendingNewTaskTargets.add(taskId);
+            final RemoteAnimationTarget target =
+                    adapter.createRemoteAnimationTarget(taskId, mode);
+            if (target != null) {
+                mPendingTaskAppears.add(target);
+                ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
+                        "collectTaskRemoteAnimations, target: %s", target);
+            }
+        }, false /* traverseTopToBottom */);
     }
 
     void logRecentsAnimationStartTime(int durationMs) {

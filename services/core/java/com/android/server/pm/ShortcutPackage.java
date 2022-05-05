@@ -160,8 +160,6 @@ class ShortcutPackage extends ShortcutPackageItem {
     private static final String KEY_BITMAPS = "bitmaps";
     private static final String KEY_BITMAP_BYTES = "bitmapBytes";
 
-    private final Object mLock = new Object();
-
     private final Executor mExecutor;
 
     /**
@@ -351,7 +349,7 @@ class ShortcutPackage extends ShortcutPackageItem {
     private ShortcutInfo forceDeleteShortcutInner(@NonNull String id) {
         final ShortcutInfo shortcut = mShortcuts.remove(id);
         if (shortcut != null) {
-            mShortcutUser.mService.removeIconLocked(shortcut);
+            removeIcon(shortcut);
             shortcut.clearFlags(ShortcutInfo.FLAG_DYNAMIC | ShortcutInfo.FLAG_PINNED
                     | ShortcutInfo.FLAG_MANIFEST | ShortcutInfo.FLAG_CACHED_ALL);
         }
@@ -368,7 +366,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         forceDeleteShortcutInner(newShortcut.getId());
 
         // Extract Icon and update the icon res ID and the bitmap path.
-        s.saveIconAndFixUpShortcutLocked(newShortcut);
+        s.saveIconAndFixUpShortcutLocked(this, newShortcut);
         s.fixUpShortcutResourceNamesAndValues(newShortcut);
         saveShortcut(newShortcut);
     }
@@ -779,7 +777,7 @@ class ShortcutPackage extends ShortcutPackageItem {
             return false;
         }
         mApiCallCount++;
-        s.scheduleSaveUser(getOwnerUserId());
+        scheduleSave();
         return true;
     }
 
@@ -789,7 +787,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
         if (mApiCallCount > 0) {
             mApiCallCount = 0;
-            mShortcutUser.mService.scheduleSaveUser(getOwnerUserId());
+            scheduleSave();
         }
     }
 
@@ -894,8 +892,12 @@ class ShortcutPackage extends ShortcutPackageItem {
 
         // Get the list of all dynamic shortcuts in this package.
         final ArrayList<ShortcutInfo> shortcuts = new ArrayList<>();
+        // Pass callingLauncher to ensure pinned flag marked by system ui, e.g. ShareSheet, are
+        // included in the result
         findAll(shortcuts, ShortcutInfo::isNonManifestVisible,
-                ShortcutInfo.CLONE_REMOVE_FOR_APP_PREDICTION);
+                ShortcutInfo.CLONE_REMOVE_FOR_APP_PREDICTION,
+                mShortcutUser.mService.mContext.getPackageName(),
+                0, /*getPinnedByAnyLauncher=*/ false);
 
         final List<ShortcutManager.ShareShortcutInfo> result = new ArrayList<>();
         for (int i = 0; i < shortcuts.size(); i++) {
@@ -970,7 +972,8 @@ class ShortcutPackage extends ShortcutPackageItem {
     /**
      * Return the filenames (excluding path names) of icon bitmap files from this package.
      */
-    public ArraySet<String> getUsedBitmapFiles() {
+    @GuardedBy("mLock")
+    private ArraySet<String> getUsedBitmapFilesLocked() {
         final ArraySet<String> usedFiles = new ArraySet<>(1);
         forEachShortcut(si -> {
             if (si.getBitmapPath() != null) {
@@ -978,6 +981,26 @@ class ShortcutPackage extends ShortcutPackageItem {
             }
         });
         return usedFiles;
+    }
+
+    public void cleanupDanglingBitmapFiles(@NonNull File path) {
+        synchronized (mLock) {
+            mShortcutBitmapSaver.waitForAllSavesLocked();
+            final ArraySet<String> usedFiles = getUsedBitmapFilesLocked();
+
+            for (File child : path.listFiles()) {
+                if (!child.isFile()) {
+                    continue;
+                }
+                final String name = child.getName();
+                if (!usedFiles.contains(name)) {
+                    if (ShortcutService.DEBUG) {
+                        Slog.d(TAG, "Removing dangling bitmap file: " + child.getAbsolutePath());
+                    }
+                    child.delete();
+                }
+            }
+        }
     }
 
     private static String getFileName(@NonNull String path) {
@@ -1606,6 +1629,11 @@ class ShortcutPackage extends ShortcutPackageItem {
         pw.print(" (");
         pw.print(Formatter.formatFileSize(mShortcutUser.mService.mContext, totalBitmapSize[0]));
         pw.println(")");
+
+        pw.println();
+        synchronized (mLock) {
+            mShortcutBitmapSaver.dumpLocked(pw, "  ");
+        }
     }
 
     public void dumpShortcuts(@NonNull PrintWriter pw, int matchFlags) {
@@ -1727,7 +1755,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         // Note: at this point no shortcuts should have bitmaps pending save, but if they do,
         // just remove the bitmap.
         if (si.isIconPendingSave()) {
-            s.removeIconLocked(si);
+            removeIcon(si);
         }
         out.startTag(null, TAG_SHORTCUT);
         ShortcutService.writeAttr(out, ATTR_ID, si.getId());
@@ -1886,15 +1914,12 @@ class ShortcutPackage extends ShortcutPackageItem {
 
         final ShortcutPackage ret = new ShortcutPackage(shortcutUser,
                 shortcutUser.getUserId(), packageName);
-
         synchronized (ret.mLock) {
             ret.mIsAppSearchSchemaUpToDate = ShortcutService.parseIntAttribute(
                     parser, ATTR_SCHEMA_VERSON, 0) == AppSearchShortcutInfo.SCHEMA_VERSION;
         }
-        ret.mApiCallCount =
-                ShortcutService.parseIntAttribute(parser, ATTR_CALL_COUNT);
-        ret.mLastResetTime =
-                ShortcutService.parseLongAttribute(parser, ATTR_LAST_RESET);
+        ret.mApiCallCount = ShortcutService.parseIntAttribute(parser, ATTR_CALL_COUNT);
+        ret.mLastResetTime = ShortcutService.parseLongAttribute(parser, ATTR_LAST_RESET);
 
 
         final int outerDepth = parser.getDepth();
@@ -2436,16 +2461,15 @@ class ShortcutPackage extends ShortcutPackageItem {
                         })));
     }
 
-    void persistsAllShortcutsAsync() {
-        synchronized (mLock) {
-            final Map<String, ShortcutInfo> copy = mShortcuts;
-            if (!mTransientShortcuts.isEmpty()) {
-                copy.putAll(mTransientShortcuts);
-                mTransientShortcuts.clear();
-            }
-            saveShortcutsAsync(copy.values().stream().filter(ShortcutInfo::usesQuota).collect(
-                    Collectors.toList()));
+    @Override
+    void scheduleSaveToAppSearchLocked() {
+        final Map<String, ShortcutInfo> copy = new ArrayMap<>(mShortcuts);
+        if (!mTransientShortcuts.isEmpty()) {
+            copy.putAll(mTransientShortcuts);
+            mTransientShortcuts.clear();
         }
+        saveShortcutsAsync(copy.values().stream().filter(ShortcutInfo::usesQuota).collect(
+                Collectors.toList()));
     }
 
     private void saveShortcutsAsync(
@@ -2543,5 +2567,13 @@ class ShortcutPackage extends ShortcutPackageItem {
         } finally {
             Binder.restoreCallingIdentity(callingIdentity);
         }
+    }
+
+    @Override
+    protected File getShortcutPackageItemFile() {
+        final File path = new File(mShortcutUser.mService.injectUserDataPath(
+                mShortcutUser.getUserId()), ShortcutUser.DIRECTORY_PACKAGES);
+        final String fileName = getPackageName() + ".xml";
+        return new File(path, fileName);
     }
 }

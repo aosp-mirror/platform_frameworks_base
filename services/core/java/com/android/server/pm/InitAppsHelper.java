@@ -31,7 +31,6 @@ import static com.android.server.pm.PackageManagerService.SCAN_REQUIRE_KNOWN;
 import static com.android.server.pm.PackageManagerService.SYSTEM_PARTITIONS;
 import static com.android.server.pm.PackageManagerService.TAG;
 import static com.android.server.pm.pkg.parsing.ParsingPackageUtils.PARSE_APK_IN_APEX;
-import static com.android.server.pm.pkg.parsing.ParsingPackageUtils.PARSE_FRAMEWORK_RES_SPLITS;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -318,9 +317,8 @@ final class InitAppsHelper {
                     packageParser, executorService);
         }
 
-        List<File> frameworkSplits = getFrameworkResApkSplitFiles();
-        scanDirTracedLI(frameworkDir, frameworkSplits,
-                mSystemParseFlags | PARSE_FRAMEWORK_RES_SPLITS,
+        scanDirTracedLI(frameworkDir, null,
+                mSystemParseFlags,
                 mSystemScanFlags | SCAN_NO_DEX | SCAN_AS_PRIVILEGED,
                 packageParser, executorService);
         if (!mPm.mPackages.containsKey("android")) {

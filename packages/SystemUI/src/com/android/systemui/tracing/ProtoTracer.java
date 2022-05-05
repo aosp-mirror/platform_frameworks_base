@@ -37,7 +37,6 @@ import com.android.systemui.tracing.nano.SystemUiTraceProto;
 import com.google.protobuf.nano.MessageNano;
 
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Queue;
@@ -141,7 +140,7 @@ public class ProtoTracer implements
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("ProtoTracer:");
         pw.print("    "); pw.println("enabled: " + mProtoTracer.isEnabled());
         pw.print("    "); pw.println("usagePct: " + mProtoTracer.getBufferUsagePct());

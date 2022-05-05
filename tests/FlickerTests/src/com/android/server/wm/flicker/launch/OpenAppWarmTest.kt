@@ -130,6 +130,10 @@ open class OpenAppWarmTest(testSpec: FlickerTestParameter)
     @Test
     override fun appWindowBecomesVisible() = super.appWindowBecomesVisible_warmStart()
 
+    @FlakyTest(bugId = 229735718)
+    @Test
+    override fun entireScreenCovered() = super.entireScreenCovered()
+
     companion object {
         /**
          * Creates the test configurations.

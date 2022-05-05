@@ -23,6 +23,7 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.ViewUtils
 import android.view.LayoutInflater
+import android.view.Surface
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
@@ -35,6 +36,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.nullable
@@ -42,7 +44,6 @@ import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 import org.mockito.Mockito.`when` as whenever
 
-private const val DISPLAY_ID = "" // default display id
 private const val SENSOR_X = 50
 private const val SENSOR_Y = 250
 private const val SENSOR_RADIUS = 10
@@ -69,9 +70,8 @@ class UdfpsViewTest : SysuiTestCase() {
             com.android.internal.R.integer.config_udfps_illumination_transition_ms, 0)
         view = LayoutInflater.from(context).inflate(R.layout.udfps_view, null) as UdfpsView
         view.animationViewController = animationViewController
-        view.sensorProperties =
-            SensorLocationInternal(DISPLAY_ID, SENSOR_X, SENSOR_Y, SENSOR_RADIUS)
-                .asFingerprintSensorProperties()
+        val sensorBounds = SensorLocationInternal("", SENSOR_X, SENSOR_Y, SENSOR_RADIUS).rect
+        view.overlayParams = UdfpsOverlayParams(sensorBounds, 1920, 1080, 1f, Surface.ROTATION_0)
         view.setHbmProvider(hbmProvider)
         ViewUtils.attachView(view)
     }
@@ -146,7 +146,7 @@ class UdfpsViewTest : SysuiTestCase() {
         view.startIllumination(onDone)
 
         val illuminator = withArgCaptor<Runnable> {
-            verify(hbmProvider).enableHbm(capture())
+            verify(hbmProvider).enableHbm(anyBoolean(), capture())
         }
 
         assertThat(view.isIlluminationRequested).isTrue()

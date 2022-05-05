@@ -32,11 +32,8 @@ import java.io.PrintWriter;
  * framework classes for internal use.
  *
  * <p>CAVEATS: {@link AbstractInputMethodService} does not support all the methods here.</p>
- *
- * @hide
  */
-// TODO(b/215636776): move InputMethodServiceInternal to proper package
-public interface InputMethodServiceInternal {
+interface InputMethodServiceInternal {
     /**
      * @return {@link Context} associated with the service.
      */

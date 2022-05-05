@@ -763,6 +763,14 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * (for example, when apps are displayed side by side in split-screen mode
      * in landscape orientation).
      *
+     * <p>In multiple-screen scenarios, the width measurement can span screens.
+     * For example, if the app is spanning both screens of a dual-screen device
+     * (with the screens side by side), {@code screenWidthDp} represents the
+     * width of both screens, excluding the area occupied by screen decorations.
+     * When the app is restricted to a single screen in a multiple-screen
+     * environment, {@code screenWidthDp} is the width of the screen on which
+     * the app is running.
+     *
      * <p>Differs from {@link android.view.WindowMetrics} by not including
      * screen decorations in the width measurement and by expressing the
      * measurement in dp rather than px. Use {@code screenWidthDp} to obtain the
@@ -791,6 +799,14 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * of the app window, not the available display area of the device screen
      * (for example, when apps are displayed one above another in split-screen
      * mode in portrait orientation).
+     *
+     * <p>In multiple-screen scenarios, the height measurement can span screens.
+     * For example, if the app is spanning both screens of a dual-screen device
+     * rotated 90 degrees (one screen above the other), {@code screenHeightDp}
+     * represents the height of both screens, excluding the area occupied by
+     * screen decorations. When the app is restricted to a single screen in a
+     * multiple-screen environment, {@code screenHeightDp} is the height of the
+     * screen on which the app is running.
      *
      * <p>Differs from {@link android.view.WindowMetrics} by not including
      * screen decorations in the height measurement and by expressing the

@@ -244,7 +244,7 @@ class EnsureActivitiesVisibleHelper {
         // invisible. If the app is already visible, it must have died while it was visible. In this
         // case, we'll show the dead window but will not restart the app. Otherwise we could end up
         // thrashing.
-        if (!isTop && r.mVisibleRequested) {
+        if (!isTop && r.mVisibleRequested && !r.isState(INITIALIZING)) {
             return;
         }
 

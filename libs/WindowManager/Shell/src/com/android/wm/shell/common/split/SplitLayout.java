@@ -55,6 +55,7 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.internal.policy.DockedDividerUtils;
 import com.android.wm.shell.R;
@@ -62,6 +63,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
+import com.android.wm.shell.common.InteractionJankMonitorUtils;
 import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
 
 import java.io.PrintWriter;
@@ -434,6 +436,8 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             mSplitLayoutHandler.onLayoutSizeChanged(this);
             return;
         }
+        InteractionJankMonitorUtils.beginTracing(InteractionJankMonitor.CUJ_SPLIT_SCREEN_RESIZE,
+                mSplitWindowManager.getDividerView(), "Divider fling");
         ValueAnimator animator = ValueAnimator
                 .ofInt(from, to)
                 .setDuration(250);
@@ -446,6 +450,8 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
                 if (flingFinishedCallback != null) {
                     flingFinishedCallback.run();
                 }
+                InteractionJankMonitorUtils.endTracing(
+                        InteractionJankMonitor.CUJ_SPLIT_SCREEN_RESIZE);
             }
 
             @Override

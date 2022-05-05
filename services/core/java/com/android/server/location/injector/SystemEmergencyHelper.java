@@ -34,6 +34,8 @@ import java.util.Objects;
 public class SystemEmergencyHelper extends EmergencyHelper {
 
     private final Context mContext;
+    private final EmergencyCallTelephonyCallback mEmergencyCallTelephonyCallback =
+            new EmergencyCallTelephonyCallback();
 
     TelephonyManager mTelephonyManager;
 
@@ -56,7 +58,7 @@ public class SystemEmergencyHelper extends EmergencyHelper {
         // TODO: this doesn't account for multisim phones
 
         mTelephonyManager.registerTelephonyCallback(FgThread.getExecutor(),
-                new EmergencyCallTelephonyCallback());
+                mEmergencyCallTelephonyCallback);
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {

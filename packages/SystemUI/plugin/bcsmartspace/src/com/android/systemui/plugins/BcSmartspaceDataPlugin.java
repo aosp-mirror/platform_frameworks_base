@@ -94,6 +94,12 @@ public interface BcSmartspaceDataPlugin extends Plugin {
         void setPrimaryTextColor(int color);
 
         /**
+         * When the view is displayed on Dream, set the flag to true, immediately after the view is
+         * created.
+         */
+        void setIsDreaming(boolean isDreaming);
+
+        /**
          * Range [0.0 - 1.0] when transitioning from Lockscreen to/from AOD
          */
         void setDozeAmount(float amount);

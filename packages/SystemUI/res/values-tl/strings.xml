@@ -78,6 +78,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Subukang kumuhang muli ng screenshot"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Hindi ma-save ang screenshot"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Hindi pinahihintulutan ng app o ng iyong organisasyon ang pagkuha ng mga screenshot"</string>
+    <!-- no translation found for screenshot_blocked_by_admin (5486757604822795797) -->
+    <skip />
     <string name="screenshot_edit_label" msgid="8754981973544133050">"I-edit"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"I-edit ang screenshot"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Ibahagi ang screenshot"</string>
@@ -135,8 +137,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Na-authenticate ang mukha"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Nakumpirma"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"I-tap ang Kumpirmahin para kumpletuhin"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (7538145860465755864) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Na-unlock gamit ang mukha. Pindutin ang icon ng unlock para magpatuloy."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Na-authenticate"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Gumamit ng PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Gumamit ng pattern"</string>
@@ -311,7 +312,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"I-tap ulit upang buksan"</string>
     <string name="tap_again" msgid="1315420114387908655">"I-tap ulit"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Mag-swipe pataas para buksan"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Pindutin para buksan"</string>
+    <string name="keyguard_unlock_press" msgid="9140109453735019209">"Pindutin ang icon ng unlock para buksan"</string>
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Na-unlock gamit ang mukha. Pindutin ang icon ng unlock para buksan."</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Mag-swipe pataas para subukan ulit"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"I-unlock para magamit ang NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Pagmamay-ari ng iyong organisasyon ang device na ito"</string>
@@ -365,20 +367,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Pagmamay-ari ng organisasyon mo ang device na ito at puwede nitong subaybayan ang trapiko sa network"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"Pagmamay-ari ng <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ang device na ito at puwede nitong subaybayan ang trapiko sa network"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Nagmula sa <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ang device na ito"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Pagmamay-ari ng iyong organisasyon ang device na ito at nakakonekta ito sa <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Pagmamay-ari ng <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ang device na ito at nakakonekta ito sa <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Pagmamay-ari ng organisasyon mo ang device na ito at nakakonekta ito sa internet sa pamamagitan ng <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Pagmamay-ari ng <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ang device na ito at nakakonekta ito sa internet sa pamamagitan ng <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Pagmamay-ari ng iyong organisasyon ang device na ito"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Pagmamay-ari ng <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ang device na ito"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Pagmamay-ari ng iyong organisasyon ang device na ito nakakonekta ito sa mga VPN"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Pagmamay-ari ng <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ang device na ito at nakakonekta ito sa mga VPN"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Pag-aari ng organisasyon mo ang device na ito at nakakonekta ito sa internet sa pamamagitan ng VPN"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Pagmamay-ari ng <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ang device na ito at nakakoenekta ito sa internet sa pamamagitan ng mga VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Maaaring sumubaybay ang iyong organisasyon ng trapiko sa network sa profile sa trabaho mo"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"Maaaring subaybayan ng <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ang trapiko sa network sa iyong profile sa trabaho"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Nakikita ng IT admin ang aktibidad sa network"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Maaaring sinusubaybayan ang network"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Nakakonekta sa mga VPN ang device na ito"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Nakakonekta sa <xliff:g id="VPN_APP">%1$s</xliff:g> ang iyong profile sa trabaho"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Nakakonekta sa <xliff:g id="VPN_APP">%1$s</xliff:g> ang iyong personal na profile"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Nakakonekta sa <xliff:g id="VPN_APP">%1$s</xliff:g> ang device na ito"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Nakakonekta ang device na ito sa internet sa pamamagitan ng mga VPN."</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Nakakonekta sa internet ang iyong mga app para sa trabaho sa pamamagitan ng <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Nakakonekta sa internet ang iyong mga personal na app sa pamamagitan ng <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Nakakonekta ang device na ito sa internet sa pamamagitan ng <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Nagmula sa <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ang device na ito"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Pamamahala ng device"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -394,10 +396,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"May naka-install sa device na ito na isang awtoridad sa certificate. Maaaring subaybayan o baguhin ang iyong ligtas na trapiko sa network."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Na-on ng iyong admin ang pag-log sa network, na sumusubaybay sa trapiko sa device mo."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Na-on ng iyong admin ang pag-log sa network, na sumusubaybay sa trapiko sa profile mo sa trabaho pero hindi sa iyong personal na profile."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Nakakonekta ka sa <xliff:g id="VPN_APP">%1$s</xliff:g>, na maaaring sumubaybay sa iyong aktibidad sa network, kabilang ang mga email, app, at website."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Nakakonekta ka sa <xliff:g id="VPN_APP_0">%1$s</xliff:g> at <xliff:g id="VPN_APP_1">%2$s</xliff:g>, na maaaring sumubaybay sa iyong aktibidad sa network, kabilang ang mga email, app, at website."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Nakakonekta sa <xliff:g id="VPN_APP">%1$s</xliff:g> ang iyong profile sa trabaho, na maaaring sumubaybay sa aktibidad sa iyong network, kasama ang mga email, app, at website."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Nakakonekta sa <xliff:g id="VPN_APP">%1$s</xliff:g> ang iyong personal na profile, na maaaring sumubaybay sa aktibidad mo sa network, kasama ang mga email, app at website."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Nakakonekta ang device na ito sa internet sa pamamagitan ng <xliff:g id="VPN_APP">%1$s</xliff:g>. Nakikita ng iyong IT admin ang aktibidad ng network, kasama ang mga email at data mula sa pag-browse."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Nakakonekta ang device na ito sa internet sa pamamagitan ng <xliff:g id="VPN_APP_0">%1$s</xliff:g> at <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Nakikita ng iyong IT admin ang aktibidad ng network, kasama ang mga email at data mula sa pag-browse."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Nakakonekta sa internet ang iyong mga app para sa trabaho sa pamamagitan ng <xliff:g id="VPN_APP">%1$s</xliff:g>. Nakikita ng iyong IT admin at VPN provider ang aktibidad ng network sa app para sa trabaho, kasama ang mga email at data mula sa pag-browse."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Nakakonekta ang iyong mga personal na app sa internet sa pamamagitan ng <xliff:g id="VPN_APP">%1$s</xliff:g>. Nakikita ng iyong VPN provider ang aktibidad ng network, kasama ang mga email at data mula sa pag-browse."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Buksan ang mga setting ng VPN"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Pinapamahalaan ng iyong magulang ang device na ito. Makikita at mapapamahalaan ng iyong magulang ang impormasyon tulad ng mga app na ginagamit mo, iyong lokasyon, at tagal ng paggamit mo sa device."</string>
@@ -454,7 +456,7 @@
     <string name="enable_demo_mode" msgid="3180345364745966431">"I-enable ang demo mode"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"Ipakita ang demo mode"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
-    <string name="status_bar_alarm" msgid="87160847643623352">"Alarma"</string>
+    <string name="status_bar_alarm" msgid="87160847643623352">"Alarm"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"I-set up para makapagsagawa ng mas mabibilis, mas secure na pagbili gamit ang telepono mo"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Ipakita lahat"</string>
@@ -506,6 +508,7 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"Priyoridad"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Hindi sinusuportahan ng <xliff:g id="APP_NAME">%1$s</xliff:g> ang mga feature ng pag-uusap"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Hindi puwedeng baguhin ang mga notification na ito."</string>
+    <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Hindi mabago ang mga notification ng tawag."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Hindi mako-configure dito ang pangkat na ito ng mga notification"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Na-proxy na notification"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Lahat ng notification ng <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -717,6 +720,8 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"I-on kapag malamang na maubos ang baterya"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Hindi, salamat na lang"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
+    <!-- no translation found for ongoing_privacy_dialog_a11y_title (2205794093673327974) -->
+    <skip />
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Ginagamit ng mga application ang iyong <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" at "</string>
@@ -805,6 +810,7 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"I-pause"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Nakaraang track"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"Susunod na track"</string>
+    <string name="controls_media_button_connecting" msgid="3138354625847598095">"Kumokonekta"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"I-play"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Buksan ang <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"I-play ang <xliff:g id="SONG_NAME">%1$s</xliff:g> ni/ng <xliff:g id="ARTIST_NAME">%2$s</xliff:g> mula sa <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
@@ -841,6 +847,12 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Pangalan ng Broadcast"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Password"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"I-save"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Nagsisimula…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Hindi makapag-broadcast"</string>
+    <!-- no translation found for media_output_broadcast_update_error (1420868236079122521) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast_last_update_error (5484328807296895491) -->
+    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Numero ng build"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Nakopya sa clipboard ang numero ng build."</string>
     <string name="basic_status" msgid="2315371112182658176">"Buksan ang pag-uusap"</string>
@@ -909,12 +921,13 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Idagdag ang tile"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Huwag idagdag"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Pumili ng user"</string>
-    <plurals name="fgs_manager_footer_label" formatted="false" msgid="9091110396713032871">
-      <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> aktibong app</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> na aktibong app</item>
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> app ang aktibo</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> na app ang aktibo</item>
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Bagong impormasyon"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Mga aktibong app"</string>
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Kahit na hindi mo ginagamit ang mga app na ito, aktibo pa rin ang mga ito at posibleng maapektuhan ng mga ito ang tagal ng baterya"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Ihinto"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Inihinto"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Tapos na"</string>

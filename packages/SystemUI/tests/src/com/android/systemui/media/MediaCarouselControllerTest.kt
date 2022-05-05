@@ -19,6 +19,7 @@ package com.android.systemui.media
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.InstanceId
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.qualifiers.Main
@@ -28,6 +29,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
@@ -120,6 +122,11 @@ class MediaCarouselControllerTest : SysuiTestCase() {
                         playbackLocation = MediaData.PLAYBACK_CAST_REMOTE, resumption = false),
                 5000L)
 
+        val active = Triple("active",
+            DATA.copy(active = true, isPlaying = false,
+                playbackLocation = MediaData.PLAYBACK_LOCAL, resumption = true),
+            250L)
+
         val resume1 = Triple("resume 1",
             DATA.copy(active = false, isPlaying = false,
                     playbackLocation = MediaData.PLAYBACK_LOCAL, resumption = true),
@@ -138,7 +145,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         // Resume controls, by last active
 
         val expected = listOf(playingLocal, playingCast, pausedCast, pausedLocal, playingRcn,
-                pausedRcn, resume2, resume1)
+                pausedRcn, active, resume2, resume1)
 
         expected.forEach {
             clock.setCurrentTimeMillis(it.third)
@@ -171,9 +178,9 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         MediaPlayerData.addMediaRecommendation(SMARTSPACE_KEY, EMPTY_SMARTSPACE_MEDIA_DATA, panel,
             false, clock)
 
-        // Then it should be shown at the end of the carousel
-        val size = MediaPlayerData.playerKeys().size
-        assertTrue(MediaPlayerData.playerKeys().elementAt(size - 1).isSsMediaRec)
+        // Then it should be shown at the end of the carousel's active entries
+        val idx = MediaPlayerData.playerKeys().count { it.data.active } - 1
+        assertTrue(MediaPlayerData.playerKeys().elementAt(idx).isSsMediaRec)
     }
 
     @Test
@@ -224,5 +231,20 @@ class MediaCarouselControllerTest : SysuiTestCase() {
             mediaHostState,
             animate = false)
         verify(logger).logCarouselPosition(MediaHierarchyManager.LOCATION_DREAM_OVERLAY)
+    }
+
+    @Test
+    fun testRecommendationRemoved_logged() {
+        val packageName = "smartspace package"
+        val instanceId = InstanceId.fakeInstanceId(123)
+
+        val smartspaceData = EMPTY_SMARTSPACE_MEDIA_DATA.copy(
+            packageName = packageName,
+            instanceId = instanceId
+        )
+        MediaPlayerData.addMediaRecommendation(SMARTSPACE_KEY, smartspaceData, panel, true, clock)
+        mediaCarouselController.removePlayer(SMARTSPACE_KEY)
+
+        verify(logger).logRecommendationRemoved(eq(packageName), eq(instanceId!!))
     }
 }

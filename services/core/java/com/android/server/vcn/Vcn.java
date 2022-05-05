@@ -341,6 +341,9 @@ public class Vcn extends Handler {
                 if (gatewayConnection == null) {
                     logWtf("Found gatewayConnectionConfig without GatewayConnection");
                 } else {
+                    logInfo(
+                            "Config updated, restarting gateway "
+                                    + gatewayConnection.getLogPrefix());
                     gatewayConnection.teardownAsynchronously();
                 }
             }
@@ -397,7 +400,7 @@ public class Vcn extends Handler {
         // If preexisting VcnGatewayConnection(s) satisfy request, return
         for (VcnGatewayConnectionConfig gatewayConnectionConfig : mVcnGatewayConnections.keySet()) {
             if (isRequestSatisfiedByGatewayConnectionConfig(request, gatewayConnectionConfig)) {
-                logDbg("Request already satisfied by existing VcnGatewayConnection: " + request);
+                logVdbg("Request already satisfied by existing VcnGatewayConnection: " + request);
                 return;
             }
         }
@@ -407,8 +410,6 @@ public class Vcn extends Handler {
         for (VcnGatewayConnectionConfig gatewayConnectionConfig :
                 mConfig.getGatewayConnectionConfigs()) {
             if (isRequestSatisfiedByGatewayConnectionConfig(request, gatewayConnectionConfig)) {
-                logDbg("Bringing up new VcnGatewayConnection for request " + request);
-
                 if (getExposedCapabilitiesForMobileDataState(gatewayConnectionConfig).isEmpty()) {
                     // Skip; this network does not provide any services if mobile data is disabled.
                     continue;
@@ -424,6 +425,7 @@ public class Vcn extends Handler {
                     return;
                 }
 
+                logInfo("Bringing up new VcnGatewayConnection for request " + request);
                 final VcnGatewayConnection vcnGatewayConnection =
                         mDeps.newVcnGatewayConnection(
                                 mVcnContext,
@@ -455,7 +457,7 @@ public class Vcn extends Handler {
     }
 
     private void handleGatewayConnectionQuit(VcnGatewayConnectionConfig config) {
-        logDbg("VcnGatewayConnection quit: " + config);
+        logInfo("VcnGatewayConnection quit: " + config);
         mVcnGatewayConnections.remove(config);
 
         // Trigger a re-evaluation of all NetworkRequests (to make sure any that can be satisfied
@@ -534,7 +536,7 @@ public class Vcn extends Handler {
             // Trigger re-evaluation of all requests; mobile data state impacts supported caps.
             mVcnContext.getVcnNetworkProvider().resendAllRequests(mRequestListener);
 
-            logDbg("Mobile data " + (mIsMobileDataEnabled ? "enabled" : "disabled"));
+            logInfo("Mobile data " + (mIsMobileDataEnabled ? "enabled" : "disabled"));
         }
     }
 
@@ -569,11 +571,11 @@ public class Vcn extends Handler {
     }
 
     private String getLogPrefix() {
-        return "["
+        return "("
                 + LogUtils.getHashedSubscriptionGroup(mSubscriptionGroup)
                 + "-"
                 + System.identityHashCode(this)
-                + "] ";
+                + ") ";
     }
 
     private void logVdbg(String msg) {

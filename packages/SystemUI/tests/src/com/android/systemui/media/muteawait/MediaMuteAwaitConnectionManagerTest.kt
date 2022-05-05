@@ -53,6 +53,8 @@ class MediaMuteAwaitConnectionManagerTest : SysuiTestCase() {
     private lateinit var deviceIconUtil: DeviceIconUtil
     @Mock
     private lateinit var localMediaManager: LocalMediaManager
+    @Mock
+    private lateinit var logger: MediaMuteAwaitLogger
     private lateinit var icon: Drawable
 
     @Before
@@ -66,7 +68,8 @@ class MediaMuteAwaitConnectionManagerTest : SysuiTestCase() {
             FakeExecutor(FakeSystemClock()),
             localMediaManager,
             context,
-            deviceIconUtil
+            deviceIconUtil,
+            logger
         )
     }
 
@@ -184,6 +187,39 @@ class MediaMuteAwaitConnectionManagerTest : SysuiTestCase() {
         muteAwaitListener.onUnmutedEvent(EVENT_CONNECTION, DEVICE, intArrayOf(USAGE_MEDIA))
 
         verify(localMediaManager).dispatchAboutToConnectDeviceRemoved()
+    }
+
+    @Test
+    fun onMutedUntilConnection_isLogged() {
+        muteAwaitConnectionManager.startListening()
+
+        getMuteAwaitListener().onMutedUntilConnection(DEVICE, intArrayOf(USAGE_MEDIA))
+
+        verify(logger).logMutedDeviceAdded(DEVICE_ADDRESS, DEVICE_NAME, hasMediaUsage = true)
+    }
+
+    @Test
+    fun onUnmutedEvent_notMostRecentDevice_isLogged() {
+        muteAwaitConnectionManager.startListening()
+
+        getMuteAwaitListener().onUnmutedEvent(EVENT_CONNECTION, DEVICE, intArrayOf(USAGE_MEDIA))
+
+        verify(logger).logMutedDeviceRemoved(
+            DEVICE_ADDRESS, DEVICE_NAME, hasMediaUsage = true, isMostRecentDevice = false
+        )
+    }
+
+    @Test
+    fun onUnmutedEvent_isMostRecentDevice_isLogged() {
+        muteAwaitConnectionManager.startListening()
+        val muteAwaitListener = getMuteAwaitListener()
+
+        muteAwaitListener.onMutedUntilConnection(DEVICE, intArrayOf(USAGE_MEDIA))
+        muteAwaitListener.onUnmutedEvent(EVENT_CONNECTION, DEVICE, intArrayOf(USAGE_MEDIA))
+
+        verify(logger).logMutedDeviceRemoved(
+            DEVICE_ADDRESS, DEVICE_NAME, hasMediaUsage = true, isMostRecentDevice = true
+        )
     }
 
     private fun getMuteAwaitListener(): AudioManager.MuteAwaitConnectionCallback {

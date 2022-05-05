@@ -38,6 +38,7 @@ import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
+import android.view.Display;
 import android.view.SurfaceControl;
 import android.window.ITaskOrganizer;
 import android.window.ITaskOrganizerController;
@@ -256,7 +257,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                     // organizer is disposed off to avoid inconsistent behavior.
                     t.removeImmediately();
                 } else {
-                    t.updateTaskOrganizerState(true /* forceUpdate */);
+                    t.updateTaskOrganizerState();
                 }
                 if (mOrganizedTasks.contains(t)) {
                     // updateTaskOrganizerState should remove the task from the list, but still
@@ -380,8 +381,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 final TaskOrganizerState state = mTaskOrganizerStates.get(organizer.asBinder());
                 mService.mRootWindowContainer.forAllTasks((task) -> {
                     boolean returnTask = !task.mCreatedByOrganizer;
-                    task.updateTaskOrganizerState(true /* forceUpdate */,
-                            returnTask /* skipTaskAppeared */);
+                    task.updateTaskOrganizerState(returnTask /* skipTaskAppeared */);
                     if (returnTask) {
                         SurfaceControl outSurfaceControl = state.addTaskWithoutCallback(task,
                                 "TaskOrganizerController.registerTaskOrganizer");
@@ -526,17 +526,17 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         }
         final StartingWindowRemovalInfo removalInfo = new StartingWindowRemovalInfo();
         removalInfo.taskId = task.mTaskId;
-        removalInfo.playRevealAnimation = prepareAnimation;
+        removalInfo.playRevealAnimation = prepareAnimation
+                && task.getDisplayInfo().state == Display.STATE_ON;
         final boolean playShiftUpAnimation = !task.inMultiWindowMode();
         final ActivityRecord topActivity = task.topActivityContainsStartingWindow();
         if (topActivity != null) {
             removalInfo.deferRemoveForIme = topActivity.mDisplayContent
                     .mayImeShowOnLaunchingActivity(topActivity);
-            if (prepareAnimation && playShiftUpAnimation) {
+            if (removalInfo.playRevealAnimation && playShiftUpAnimation) {
                 final WindowState mainWindow =
                         topActivity.findMainWindow(false/* includeStartingApp */);
                 if (mainWindow != null) {
-                    final SurfaceControl.Transaction t = mainWindow.getPendingTransaction();
                     removalInfo.windowAnimationLeash = applyStartingWindowAnimation(mainWindow);
                     removalInfo.mainFrame = mainWindow.getRelativeFrame();
                 }
@@ -602,7 +602,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
     void onTaskVanished(ITaskOrganizer organizer, Task task) {
         final TaskOrganizerState state = mTaskOrganizerStates.get(organizer.asBinder());
-        if (state != null && state.removeTask(task, false /* removeFromSystem */)) {
+        if (state != null && state.removeTask(task, task.mRemoveWithTaskOrganizer)) {
             onTaskVanishedInternal(organizer, task);
         }
     }
@@ -994,6 +994,19 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 if (activity != null) {
                     activity.updateCameraCompatStateFromUser(state);
                 }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    @Override
+    public void setIsIgnoreOrientationRequestDisabled(boolean isDisabled) {
+        enforceTaskPermission("setIsIgnoreOrientationRequestDisabled()");
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                mService.mWindowManager.setIsIgnoreOrientationRequestDisabled(isDisabled);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);

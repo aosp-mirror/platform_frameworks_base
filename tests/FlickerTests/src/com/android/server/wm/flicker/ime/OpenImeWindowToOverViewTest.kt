@@ -17,6 +17,7 @@
 package com.android.server.wm.flicker.ime
 
 import android.app.Instrumentation
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
 import android.view.Surface
@@ -29,12 +30,14 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
 import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.WindowManagerConditionsFactory
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import org.junit.Assume.assumeTrue
 import org.junit.Assume.assumeFalse
@@ -56,6 +59,8 @@ import org.junit.runners.Parameterized
 class OpenImeWindowToOverViewTest(private val testSpec: FlickerTestParameter) {
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     private val imeTestApp = ImeAppAutoFocusHelper(instrumentation, testSpec.startRotation)
+    private val statusBarInvisible = WindowManagerConditionsFactory.isStatusBarVisible().negate()
+    private val navBarInvisible = WindowManagerConditionsFactory.isNavBarVisible().negate()
 
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
@@ -68,6 +73,7 @@ class OpenImeWindowToOverViewTest(private val testSpec: FlickerTestParameter) {
             transitions {
                 device.pressRecentApps()
                 waitForRecentsActivityVisible(wmHelper)
+                waitNavStatusBarVisibility(wmHelper)
             }
             teardown {
                 test {
@@ -77,6 +83,29 @@ class OpenImeWindowToOverViewTest(private val testSpec: FlickerTestParameter) {
             }
         }
     }
+
+    /**
+     * The bars (including status bar and navigation bar) are expected to be hidden while
+     * entering overview in landscape if launcher is set to portrait only. Because
+     * "showing portrait overview (launcher) in landscape display" is an intermediate state
+     * depending on the touch-up to decide the intention of gesture, the display may keep in
+     * landscape if return to app, or change to portrait if the gesture is to swipe-to-home.
+     *
+     * So instead of showing landscape bars with portrait launcher at the same time
+     * (especially return-to-home that launcher workspace becomes visible), hide the bars until
+     * leave overview to have cleaner appearance.
+     *
+     * b/227189877
+     */
+    private fun waitNavStatusBarVisibility(wmHelper: WindowManagerStateHelper) {
+        when {
+            testSpec.isLandscapeOrSeascapeAtStart && !testSpec.isGesturalNavigation ->
+                wmHelper.waitFor(statusBarInvisible)
+            testSpec.isLandscapeOrSeascapeAtStart ->
+                wmHelper.waitFor(statusBarInvisible, navBarInvisible)
+        }
+    }
+
     @Presubmit
     @Test
     fun navBarWindowIsVisible() = testSpec.navBarWindowIsVisible()
@@ -91,11 +120,43 @@ class OpenImeWindowToOverViewTest(private val testSpec: FlickerTestParameter) {
         testSpec.imeWindowIsAlwaysVisible()
     }
 
-    @FlakyTest(bugId = 227189877)
+    @Presubmit
     @Test
-    fun navBarLayerIsVisible() = testSpec.navBarLayerIsVisible()
+    fun navBarLayerIsVisible3Button() {
+        assumeFalse(testSpec.isGesturalNavigation)
+        testSpec.navBarLayerIsVisible()
+    }
 
-    @FlakyTest(bugId = 206753786)
+    /**
+     * Bars are expected to be hidden while entering overview in landscape (b/227189877)
+     */
+    @Presubmit
+    @Test
+    fun navBarLayerIsVisibleInPortraitGestural() {
+        assumeFalse(testSpec.isLandscapeOrSeascapeAtStart)
+        assumeTrue(testSpec.isGesturalNavigation)
+        testSpec.navBarLayerIsVisible()
+    }
+
+    /**
+     * In the legacy transitions, the nav bar is not marked as invisible.
+     * In the new transitions this is fixed and the nav bar shows as invisible
+     */
+    @Postsubmit
+    @Test
+    fun navBarLayerIsInvisibleInLandscapeGestural() {
+        assumeTrue(testSpec.isLandscapeOrSeascapeAtStart)
+        assumeTrue(testSpec.isGesturalNavigation)
+        assumeTrue(isShellTransitionsEnabled)
+        testSpec.assertLayersStart {
+            this.isVisible(FlickerComponentName.NAV_BAR)
+        }
+        testSpec.assertLayersEnd {
+            this.isInvisible(FlickerComponentName.NAV_BAR)
+        }
+    }
+
+    @Postsubmit
     @Test
     fun statusBarLayerIsVisibleInPortrait() {
         assumeFalse(testSpec.isLandscapeOrSeascapeAtStart)
@@ -104,7 +165,7 @@ class OpenImeWindowToOverViewTest(private val testSpec: FlickerTestParameter) {
 
     @Presubmit
     @Test
-    fun statusBarLayerIsInVisibleInLandscape() {
+    fun statusBarLayerIsInvisibleInLandscape() {
         assumeTrue(testSpec.isLandscapeOrSeascapeAtStart)
         testSpec.assertLayersStart {
             this.isVisible(FlickerComponentName.STATUS_BAR)

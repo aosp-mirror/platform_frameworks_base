@@ -46,6 +46,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.settingslib.fuelgauge.BatterySaverUtils;
 import com.android.systemui.SysuiTestCase;
@@ -79,6 +80,8 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
     @Mock
     private DialogLaunchAnimator mDialogLaunchAnimator;
     @Mock
+    private UiEventLogger mUiEventLogger;
+    @Mock
     private View mView;
 
     private BroadcastReceiver mReceiver;
@@ -101,7 +104,7 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
         ActivityStarter starter = mDependency.injectMockDependency(ActivityStarter.class);
         BroadcastSender broadcastSender = mDependency.injectMockDependency(BroadcastSender.class);
         mPowerNotificationWarnings = new PowerNotificationWarnings(wrapper, starter,
-                broadcastSender, () -> mBatteryController, mDialogLaunchAnimator);
+                broadcastSender, () -> mBatteryController, mDialogLaunchAnimator, mUiEventLogger);
         BatteryStateSnapshot snapshot = new BatteryStateSnapshot(100, false, false, 1,
                 BatteryManager.BATTERY_HEALTH_GOOD, 5, 15);
         mPowerNotificationWarnings.updateSnapshot(snapshot);

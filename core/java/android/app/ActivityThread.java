@@ -4114,8 +4114,8 @@ public final class ActivityThread extends ClientTransactionHandler
             @NonNull SurfaceControl startingWindowLeash) {
         final SplashScreenView.Builder builder = new SplashScreenView.Builder(r.activity);
         final SplashScreenView view = builder.createFromParcel(parcelable).build();
+        view.attachHostWindow(r.window);
         decorView.addView(view);
-        view.attachHostActivityAndSetSystemUIColors(r.activity, r.window);
         view.requestLayout();
 
         view.getViewTreeObserver().addOnDrawListener(new ViewTreeObserver.OnDrawListener() {
@@ -7030,7 +7030,13 @@ public final class ActivityThread extends ClientTransactionHandler
                 // local, we'll need to wait for the publishing of the provider.
                 if (holder != null && holder.provider == null && !holder.mLocal) {
                     synchronized (key.mLock) {
-                        key.mLock.wait(ContentResolver.CONTENT_PROVIDER_READY_TIMEOUT_MILLIS);
+                        if (key.mHolder != null) {
+                            if (DEBUG_PROVIDER) {
+                                Slog.i(TAG, "already received provider: " + auth);
+                            }
+                        } else {
+                            key.mLock.wait(ContentResolver.CONTENT_PROVIDER_READY_TIMEOUT_MILLIS);
+                        }
                         holder = key.mHolder;
                     }
                     if (holder != null && holder.provider == null) {

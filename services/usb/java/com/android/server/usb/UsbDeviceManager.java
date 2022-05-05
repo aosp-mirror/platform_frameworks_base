@@ -237,7 +237,12 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         @Override
         public void onUEvent(UEventObserver.UEvent event) {
             if (DEBUG) Slog.v(TAG, "USB UEVENT: " + event.toString());
-            sEventLogger.log(new UsbDeviceLogger.StringEvent("USB UEVENT: " + event.toString()));
+            if (sEventLogger != null) {
+                sEventLogger.log(new UsbDeviceLogger.StringEvent("USB UEVENT: "
+                        + event.toString()));
+            } else {
+                if (DEBUG) Slog.d(TAG, "sEventLogger == null");
+            }
 
             String state = event.get("USB_STATE");
             String accessory = event.get("ACCESSORY");
@@ -551,6 +556,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         protected boolean mCurrentUsbFunctionsReceived;
         protected int mUsbSpeed;
         protected int mCurrentGadgetHalVersion;
+        protected boolean mPendingBootAccessoryHandshakeBroadcast;
 
         /**
          * The persistent property which stores whether adb is enabled or not.
@@ -1108,7 +1114,13 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                     if (DEBUG) {
                         Slog.v(TAG, "Accessory handshake timeout");
                     }
-                    broadcastUsbAccessoryHandshake();
+                    if (mBootCompleted) {
+                        broadcastUsbAccessoryHandshake();
+                    } else {
+                        if (DEBUG) Slog.v(TAG, "Pending broadcasting intent as "
+                                + "not boot completed yet.");
+                        mPendingBootAccessoryHandshakeBroadcast = true;
+                    }
                     break;
                 }
                 case MSG_INCREASE_SENDSTRING_COUNT: {
@@ -1132,8 +1144,11 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                 if (mCurrentAccessory != null) {
                     mUsbDeviceManager.getCurrentSettings().accessoryAttached(mCurrentAccessory);
                     broadcastUsbAccessoryHandshake();
+                } else if (mPendingBootAccessoryHandshakeBroadcast) {
+                    broadcastUsbAccessoryHandshake();
                 }
 
+                mPendingBootAccessoryHandshakeBroadcast = false;
                 updateUsbNotification(false);
                 updateAdbNotification(false);
                 updateUsbFunctions();

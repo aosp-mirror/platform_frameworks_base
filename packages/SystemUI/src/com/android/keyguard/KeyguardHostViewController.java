@@ -68,12 +68,6 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
     private final KeyguardUpdateMonitorCallback mUpdateCallback =
             new KeyguardUpdateMonitorCallback() {
                 @Override
-                public void onUserSwitchComplete(int userId) {
-                    mKeyguardSecurityContainerController.showPrimarySecurityScreen(
-                            false /* turning off */);
-                }
-
-                @Override
                 public void onTrustGrantedWithFlags(int flags, int userId) {
                     if (userId != KeyguardUpdateMonitor.getCurrentUser()) return;
                     boolean bouncerVisible = mView.isVisibleToUser();
@@ -327,7 +321,7 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
      * @param fraction amount of the screen that should show.
      */
     public void setExpansion(float fraction) {
-        float scaledFraction = BouncerPanelExpansionCalculator.getHostViewScaledExpansion(fraction);
+        float scaledFraction = BouncerPanelExpansionCalculator.showBouncerProgress(fraction);
         mView.setAlpha(MathUtils.constrain(1 - scaledFraction, 0f, 1f));
         mView.setTranslationY(scaledFraction * mTranslationY);
     }

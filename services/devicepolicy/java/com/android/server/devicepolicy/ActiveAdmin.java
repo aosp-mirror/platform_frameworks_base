@@ -21,6 +21,7 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
 import static android.app.admin.WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_ALLOWLIST;
 import static android.app.admin.WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_DENYLIST;
+import static android.net.NetworkCapabilities.NET_ENTERPRISE_ID_1;
 
 import static com.android.server.devicepolicy.DevicePolicyManagerService.LOG_TAG;
 
@@ -159,6 +160,10 @@ class ActiveAdmin {
     private static final String ATTR_VALUE = "value";
     private static final String ATTR_LAST_NETWORK_LOGGING_NOTIFICATION = "last-notification";
     private static final String ATTR_NUM_NETWORK_LOGGING_NOTIFICATIONS = "num-notifications";
+    private static final String TAG_PREFERENTIAL_NETWORK_SERVICE_CONFIGS =
+            "preferential_network_service_configs";
+    private static final String TAG_PREFERENTIAL_NETWORK_SERVICE_CONFIG =
+            "preferential_network_service_config";
 
     DeviceAdminInfo info;
 
@@ -587,8 +592,6 @@ class ActiveAdmin {
         }
         writeAttributeValueToXml(out, TAG_ADMIN_CAN_GRANT_SENSORS_PERMISSIONS,
                 mAdminCanGrantSensorsPermissions);
-        writeAttributeValueToXml(out, TAG_PREFERENTIAL_NETWORK_SERVICE_ENABLED,
-                mPreferentialNetworkServiceEnabled);
         if (mUsbDataSignalingEnabled != USB_DATA_SIGNALING_ENABLED_DEFAULT) {
             writeAttributeValueToXml(out, TAG_USB_DATA_SIGNALING, mUsbDataSignalingEnabled);
         }
@@ -602,6 +605,13 @@ class ActiveAdmin {
             } else if (mWifiSsidPolicy.getPolicyType() == WIFI_SSID_POLICY_TYPE_DENYLIST) {
                 writeAttributeValuesToXml(out, TAG_SSID_DENYLIST, TAG_SSID, ssids);
             }
+        }
+        if (!mPreferentialNetworkServiceConfigs.isEmpty()) {
+            out.startTag(null, TAG_PREFERENTIAL_NETWORK_SERVICE_CONFIGS);
+            for (PreferentialNetworkServiceConfig config : mPreferentialNetworkServiceConfigs) {
+                config.writeToXml(out);
+            }
+            out.endTag(null, TAG_PREFERENTIAL_NETWORK_SERVICE_CONFIGS);
         }
     }
 
@@ -833,6 +843,14 @@ class ActiveAdmin {
             } else if (TAG_PREFERENTIAL_NETWORK_SERVICE_ENABLED.equals(tag)) {
                 mPreferentialNetworkServiceEnabled = parser.getAttributeBoolean(null, ATTR_VALUE,
                         DevicePolicyManager.PREFERENTIAL_NETWORK_SERVICE_ENABLED_DEFAULT);
+                if (mPreferentialNetworkServiceEnabled) {
+                    PreferentialNetworkServiceConfig.Builder configBuilder =
+                            new PreferentialNetworkServiceConfig.Builder();
+                    configBuilder.setEnabled(mPreferentialNetworkServiceEnabled);
+                    configBuilder.setNetworkId(NET_ENTERPRISE_ID_1);
+                    mPreferentialNetworkServiceConfigs = List.of(configBuilder.build());
+                    mPreferentialNetworkServiceEnabled = false;
+                }
             } else if (TAG_COMMON_CRITERIA_MODE.equals(tag)) {
                 mCommonCriteriaMode = parser.getAttributeBoolean(null, ATTR_VALUE, false);
             } else if (TAG_PASSWORD_COMPLEXITY.equals(tag)) {
@@ -871,6 +889,12 @@ class ActiveAdmin {
                 List<WifiSsid> ssids = readWifiSsids(parser, TAG_SSID);
                 mWifiSsidPolicy = new WifiSsidPolicy(
                         WIFI_SSID_POLICY_TYPE_DENYLIST, new ArraySet<>(ssids));
+            } else if (TAG_PREFERENTIAL_NETWORK_SERVICE_CONFIGS.equals(tag)) {
+                List<PreferentialNetworkServiceConfig> configs =
+                        getPreferentialNetworkServiceConfigs(parser, tag);
+                if (!configs.isEmpty()) {
+                    mPreferentialNetworkServiceConfigs = configs;
+                }
             } else {
                 Slogf.w(LOG_TAG, "Unknown admin tag: %s", tag);
                 XmlUtils.skipCurrentTag(parser);
@@ -956,19 +980,43 @@ class ActiveAdmin {
         return result;
     }
 
-    private TrustAgentInfo getTrustAgentInfo(TypedXmlPullParser parser, String tag)
+    private TrustAgentInfo getTrustAgentInfo(TypedXmlPullParser parser, String outerTag)
             throws XmlPullParserException, IOException  {
-        int outerDepthDAM = parser.getDepth();
-        int typeDAM;
+        int outerDepth = parser.getDepth();
+        int type;
         TrustAgentInfo result = new TrustAgentInfo(null);
+        while ((type = parser.next()) != END_DOCUMENT
+                && (type != END_TAG || parser.getDepth() > outerDepth)) {
+            if (type == END_TAG || type == TEXT) {
+                continue;
+            }
+            String tag = parser.getName();
+            if (TAG_TRUST_AGENT_COMPONENT_OPTIONS.equals(tag)) {
+                result.options = PersistableBundle.restoreFromXml(parser);
+            } else {
+                Slogf.w(LOG_TAG, "Unknown tag under %s: %s", outerTag, tag);
+            }
+        }
+        return result;
+    }
+
+    @NonNull
+    private List<PreferentialNetworkServiceConfig> getPreferentialNetworkServiceConfigs(
+            TypedXmlPullParser parser, String tag) throws XmlPullParserException, IOException {
+        int outerDepth = parser.getDepth();
+        int typeDAM;
+        final List<PreferentialNetworkServiceConfig> result = new ArrayList<>();
         while ((typeDAM = parser.next()) != END_DOCUMENT
-                && (typeDAM != END_TAG || parser.getDepth() > outerDepthDAM)) {
+            && (typeDAM != END_TAG || parser.getDepth() > outerDepth)) {
             if (typeDAM == END_TAG || typeDAM == TEXT) {
                 continue;
             }
             String tagDAM = parser.getName();
-            if (TAG_TRUST_AGENT_COMPONENT_OPTIONS.equals(tagDAM)) {
-                result.options = PersistableBundle.restoreFromXml(parser);
+            if (TAG_PREFERENTIAL_NETWORK_SERVICE_CONFIG.equals(tagDAM)) {
+                final PreferentialNetworkServiceConfig preferentialNetworkServiceConfig =
+                        PreferentialNetworkServiceConfig.getPreferentialNetworkServiceConfig(
+                                parser, tag);
+                result.add(preferentialNetworkServiceConfig);
             } else {
                 Slogf.w(LOG_TAG, "Unknown tag under %s: %s", tag, tagDAM);
             }
@@ -1256,6 +1304,15 @@ class ActiveAdmin {
             pw.println("mFactoryResetProtectionPolicy:");
             pw.increaseIndent();
             mFactoryResetProtectionPolicy.dump(pw);
+            pw.decreaseIndent();
+        }
+
+        if (mPreferentialNetworkServiceConfigs != null) {
+            pw.println("mPreferentialNetworkServiceConfigs:");
+            pw.increaseIndent();
+            for (PreferentialNetworkServiceConfig config : mPreferentialNetworkServiceConfigs) {
+                config.dump(pw);
+            }
             pw.decreaseIndent();
         }
     }

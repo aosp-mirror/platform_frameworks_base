@@ -27,6 +27,8 @@ import static com.android.internal.util.CollectionUtils.any;
 import static com.android.internal.util.Preconditions.checkState;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.server.companion.AssociationStore.CHANGE_TYPE_UPDATED_ADDRESS_UNCHANGED;
+import static com.android.server.companion.MetricUtils.logCreateAssociation;
+import static com.android.server.companion.MetricUtils.logRemoveAssociation;
 import static com.android.server.companion.PackageUtils.enforceUsesCompanionDeviceFeature;
 import static com.android.server.companion.PackageUtils.getPackageInfo;
 import static com.android.server.companion.PermissionsUtils.checkCallerCanManageCompanionDevice;
@@ -292,6 +294,15 @@ public class CompanionDeviceManagerService extends SystemService {
 
     private boolean onCompanionApplicationBindingDiedInternal(
             @UserIdInt int userId, @NonNull String packageName) {
+        // Update the current connected devices sets when binderDied, so that application is able
+        // to call notifyDeviceAppeared after re-launch the application.
+        for (AssociationInfo ai :
+                mAssociationStore.getAssociationsForPackage(userId, packageName)) {
+            int id = ai.getId();
+            Slog.i(TAG, "Removing association id: " + id + " for package: "
+                    + packageName + " due to binderDied.");
+            mDevicePresenceMonitor.removeDeviceFromMonitoring(id);
+        }
         // TODO(b/218613015): implement.
         return false;
     }
@@ -669,6 +680,9 @@ public class CompanionDeviceManagerService extends SystemService {
             association = AssociationInfo.builder(association)
                     .setNotifyOnDeviceNearby(active)
                     .build();
+            // Do not need to call {@link BleCompanionDeviceScanner#restartScan()} since it will
+            // trigger {@link BleCompanionDeviceScanner#restartScan(int, AssociationInfo)} when
+            // an application sets/unsets the mNotifyOnDeviceNearby flag.
             mAssociationStore.updateAssociation(association);
 
             // TODO(b/218615198): correctly handle the case when the device is currently present.
@@ -771,7 +785,7 @@ public class CompanionDeviceManagerService extends SystemService {
         }
 
         updateSpecialAccessPermissionForAssociatedPackage(association);
-
+        logCreateAssociation(deviceProfile);
         return association;
     }
 
@@ -813,7 +827,13 @@ public class CompanionDeviceManagerService extends SystemService {
         synchronized (mPreviouslyUsedIds) {
             // First: collect all IDs currently in use for this user's Associations.
             final SparseBooleanArray usedIds = new SparseBooleanArray();
-            for (AssociationInfo it : mAssociationStore.getAssociationsForUser(userId)) {
+
+            // We should really only be checking associations for the given user (i.e.:
+            // mAssociationStore.getAssociationsForUser(userId)), BUT in the past we've got in a
+            // state where association IDs were not assigned correctly in regard to
+            // user-to-association-ids-range (e.g. associations with IDs from 1 to 100,000 should
+            // always belong to u0), so let's check all the associations.
+            for (AssociationInfo it : mAssociationStore.getAssociations()) {
                 usedIds.put(it.getId(), true);
             }
 
@@ -850,6 +870,7 @@ public class CompanionDeviceManagerService extends SystemService {
 
         // Removing the association.
         mAssociationStore.removeAssociation(associationId);
+        logRemoveAssociation(deviceProfile);
 
         final List<AssociationInfo> otherAssociations =
                 mAssociationStore.getAssociationsForPackage(userId, packageName);

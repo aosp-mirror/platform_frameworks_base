@@ -27,6 +27,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -36,7 +37,6 @@ import com.android.systemui.statusbar.phone.NotifPanelEvents;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -137,6 +137,13 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable,
                             mReorderingAllowed || mHeadsUpManager.isAlerting(entry.getKey());
                     mIsSuppressingGroupChange |= !isGroupChangeAllowedForEntry;
                     return isGroupChangeAllowedForEntry;
+                }
+
+                @Override
+                public boolean isGroupPruneAllowed(@NonNull GroupEntry entry) {
+                    final boolean isGroupPruneAllowedForEntry = mReorderingAllowed;
+                    mIsSuppressingGroupChange |= !isGroupPruneAllowedForEntry;
+                    return isGroupPruneAllowedForEntry;
                 }
 
                 @Override
@@ -253,7 +260,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable,
     };
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("pipelineRunAllowed: " + mPipelineRunAllowed);
         pw.println("  notifPanelCollapsing: " + mNotifPanelCollapsing);
         pw.println("  launchingNotifActivity: " + mNotifPanelLaunchingActivity);

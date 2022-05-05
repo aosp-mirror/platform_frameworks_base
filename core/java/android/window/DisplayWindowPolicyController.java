@@ -110,6 +110,13 @@ public abstract class DisplayWindowPolicyController {
             @WindowConfiguration.WindowingMode int windowingMode);
 
     /**
+     * Returns {@code true} if the given new task can be launched on this virtual display.
+     */
+    public abstract boolean canActivityBeLaunched(@NonNull ActivityInfo activityInfo,
+            @WindowConfiguration.WindowingMode int windowingMode, int launchingFromDisplayId,
+            boolean isNewTask);
+
+    /**
      * Called when an Activity window is layouted with the new changes where contains the
      * window flags that we’re interested in.
      * Returns {@code false} if the Activity cannot remain on the display and the activity task will

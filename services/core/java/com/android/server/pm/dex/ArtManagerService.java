@@ -465,14 +465,15 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     /**
      * Dumps the profiles for the given package.
      */
-    public void dumpProfiles(AndroidPackage pkg) {
+    public void dumpProfiles(AndroidPackage pkg, boolean dumpClassesAndMethods) {
         final int sharedGid = UserHandle.getSharedAppGid(pkg.getUid());
         try {
             ArrayMap<String, String> packageProfileNames = getPackageProfileNames(pkg);
             for (int i = packageProfileNames.size() - 1; i >= 0; i--) {
                 String codePath = packageProfileNames.keyAt(i);
                 String profileName = packageProfileNames.valueAt(i);
-                mInstaller.dumpProfiles(sharedGid, pkg.getPackageName(), profileName, codePath);
+                mInstaller.dumpProfiles(sharedGid, pkg.getPackageName(), profileName, codePath,
+                                        dumpClassesAndMethods);
             }
         } catch (InstallerException e) {
             Slog.w(TAG, "Failed to dump profiles", e);

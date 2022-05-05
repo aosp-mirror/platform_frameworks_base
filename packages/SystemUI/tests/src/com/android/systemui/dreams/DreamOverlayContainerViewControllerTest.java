@@ -177,7 +177,7 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
 
         final float bouncerHideAmount = 0.05f;
         final float scaledFraction =
-                BouncerPanelExpansionCalculator.getBackScrimScaledExpansion(bouncerHideAmount);
+                BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(bouncerHideAmount);
 
         bouncerExpansionCaptor.getValue().onExpansionChanged(bouncerHideAmount);
         verify(mBlurUtils).blurRadiusOfRatio(1 - scaledFraction);

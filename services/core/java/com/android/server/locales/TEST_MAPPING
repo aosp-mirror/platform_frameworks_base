@@ -10,10 +10,7 @@
     },
     {
       "name": "CtsLocaleManagerHostTestCases"
-    }
-  ],
-  "postsubmit": [
-    // TODO(b/225192026): Move back to presubmit after b/225192026 is fixed
+    },
     {
       "name": "CtsLocaleManagerTestCases"
     }

@@ -55,7 +55,6 @@ import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.util.DeviceConfigProxy
 import com.android.systemui.util.indentIfPossible
 import com.android.systemui.util.time.SystemClock
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.util.Objects
 import java.util.concurrent.Executor
@@ -229,8 +228,13 @@ class FgsManagerController @Inject constructor(
         synchronized(lock) {
             if (dialog == null) {
 
+                runningServiceTokens.keys.forEach {
+                    it.updateUiControl()
+                }
+
                 val dialog = SystemUIDialog(context)
                 dialog.setTitle(R.string.fgs_manager_dialog_title)
+                dialog.setMessage(R.string.fgs_manager_dialog_message)
 
                 val dialogContext = dialog.context
 
@@ -238,7 +242,9 @@ class FgsManagerController @Inject constructor(
                 recyclerView.layoutManager = LinearLayoutManager(dialogContext)
                 recyclerView.adapter = appListAdapter
 
-                dialog.setView(recyclerView)
+                val topSpacing = dialogContext.resources
+                        .getDimensionPixelSize(R.dimen.fgs_manager_list_top_spacing)
+                dialog.setView(recyclerView, 0, topSpacing, 0, 0)
 
                 this.dialog = dialog
 
@@ -397,15 +403,27 @@ class FgsManagerController @Inject constructor(
         val userId: Int,
         val packageName: String
     ) {
-        val uiControl: UIControl by lazy {
-            val uid = packageManager.getPackageUidAsUser(packageName, userId)
+        val uid by lazy { packageManager.getPackageUidAsUser(packageName, userId) }
 
-            when (activityManager.getBackgroundRestrictionExemptionReason(uid)) {
+        private var uiControlInitialized = false
+        var uiControl: UIControl = UIControl.NORMAL
+            get() {
+                if (!uiControlInitialized) {
+                    updateUiControl()
+                }
+                return field
+            }
+            private set
+
+        fun updateUiControl() {
+            uiControl = when (activityManager.getBackgroundRestrictionExemptionReason(uid)) {
                 PowerExemptionManager.REASON_SYSTEM_UID,
                 PowerExemptionManager.REASON_DEVICE_DEMO_MODE -> UIControl.HIDE_ENTRY
 
-                PowerExemptionManager.REASON_ALLOWLISTED_PACKAGE,
+                PowerExemptionManager.REASON_SYSTEM_ALLOW_LISTED,
                 PowerExemptionManager.REASON_DEVICE_OWNER,
+                PowerExemptionManager.REASON_DISALLOW_APPS_CONTROL,
+                PowerExemptionManager.REASON_DPO_PROTECTED_APP,
                 PowerExemptionManager.REASON_PROFILE_OWNER,
                 PowerExemptionManager.REASON_PROC_STATE_PERSISTENT,
                 PowerExemptionManager.REASON_PROC_STATE_PERSISTENT_UI,
@@ -413,6 +431,7 @@ class FgsManagerController @Inject constructor(
                 PowerExemptionManager.REASON_SYSTEM_MODULE -> UIControl.HIDE_BUTTON
                 else -> UIControl.NORMAL
             }
+            uiControlInitialized = true
         }
 
         override fun equals(other: Any?): Boolean {
@@ -520,7 +539,7 @@ class FgsManagerController @Inject constructor(
         NORMAL, HIDE_BUTTON, HIDE_ENTRY
     }
 
-    override fun dump(fd: FileDescriptor, printwriter: PrintWriter, args: Array<out String>) {
+    override fun dump(printwriter: PrintWriter, args: Array<out String>) {
         val pw = IndentingPrintWriter(printwriter)
         synchronized(lock) {
             pw.println("changesSinceDialog=$changesSinceDialog")

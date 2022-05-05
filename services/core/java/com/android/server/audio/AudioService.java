@@ -223,7 +223,8 @@ import java.util.stream.Collectors;
 public class AudioService extends IAudioService.Stub
         implements AccessibilityManager.TouchExplorationStateChangeListener,
             AccessibilityManager.AccessibilityServicesStateChangeListener,
-            AudioSystemAdapter.OnRoutingUpdatedListener {
+            AudioSystemAdapter.OnRoutingUpdatedListener,
+            AudioSystemAdapter.OnVolRangeInitRequestListener {
 
     private static final String TAG = "AS.AudioService";
 
@@ -1137,6 +1138,9 @@ public class AudioService extends IAudioService.Stub
 
         // monitor routing updates coming from native
         mAudioSystem.setRoutingListener(this);
+        // monitor requests for volume range initialization coming from native (typically when
+        // errors are found by AudioPolicyManager
+        mAudioSystem.setVolRangeInitReqListener(this);
 
         // done with service initialization, continue additional work in our Handler thread
         queueMsgUnderWakeLock(mAudioHandler, MSG_INIT_STREAMS_VOLUMES,
@@ -1355,6 +1359,14 @@ public class AudioService extends IAudioService.Stub
             mSpatializerHelper.onRoutingUpdated();
         }
         checkMuteAwaitConnection();
+    }
+
+    //-----------------------------------------------------------------
+    // monitoring requests for volume range initialization
+    @Override // AudioSystemAdapter.OnVolRangeInitRequestListener
+    public void onVolumeRangeInitRequestFromNative() {
+        sendMsg(mAudioHandler, MSG_REINIT_VOLUMES, SENDMSG_REPLACE, 0, 0,
+                "onVolumeRangeInitRequestFromNative" /*obj: caller, for dumpsys*/, /*delay*/ 0);
     }
 
     //-----------------------------------------------------------------
@@ -3228,7 +3240,8 @@ public class AudioService extends IAudioService.Stub
                 dispatchAbsoluteVolumeChanged(streamType, info, newIndex);
             }
 
-            if (device == AudioSystem.DEVICE_OUT_BLE_HEADSET
+            if ((device == AudioSystem.DEVICE_OUT_BLE_HEADSET
+                    || device == AudioSystem.DEVICE_OUT_BLE_BROADCAST)
                     && streamType == getBluetoothContextualVolumeStream()
                     && (flags & AudioManager.FLAG_BLUETOOTH_ABS_VOLUME) == 0) {
                 if (DEBUG_VOL) {
@@ -3891,7 +3904,8 @@ public class AudioService extends IAudioService.Stub
                 dispatchAbsoluteVolumeChanged(streamType, info, index);
             }
 
-            if (device == AudioSystem.DEVICE_OUT_BLE_HEADSET
+            if ((device == AudioSystem.DEVICE_OUT_BLE_HEADSET
+                    || device == AudioSystem.DEVICE_OUT_BLE_BROADCAST)
                     && streamType == getBluetoothContextualVolumeStream()
                     && (flags & AudioManager.FLAG_BLUETOOTH_ABS_VOLUME) == 0) {
                 if (DEBUG_VOL) {
@@ -6832,6 +6846,7 @@ public class AudioService extends IAudioService.Stub
             BluetoothProfile.A2DP,
             BluetoothProfile.A2DP_SINK,
             BluetoothProfile.LE_AUDIO,
+            BluetoothProfile.LE_AUDIO_BROADCAST,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface BtProfile {}
@@ -6853,6 +6868,7 @@ public class AudioService extends IAudioService.Stub
         final int profile = info.getProfile();
         if (profile != BluetoothProfile.A2DP && profile != BluetoothProfile.A2DP_SINK
                 && profile != BluetoothProfile.LE_AUDIO
+                && profile != BluetoothProfile.LE_AUDIO_BROADCAST
                 && profile != BluetoothProfile.HEARING_AID) {
             throw new IllegalArgumentException("Illegal BluetoothProfile profile for device "
                     + previousDevice + " -> " + newDevice + ". Got: " + profile);
@@ -9119,6 +9135,8 @@ public class AudioService extends IAudioService.Stub
         if (timeOutMs <= 0 || usages.length == 0) {
             throw new IllegalArgumentException("Invalid timeOutMs/usagesToMute");
         }
+        Log.i(TAG, "muteAwaitConnection dev:" + device + " timeOutMs:" + timeOutMs
+                + " usages:" + usages);
 
         if (mDeviceBroker.isDeviceConnected(device)) {
             // not throwing an exception as there could be a race between a connection (server-side,
@@ -9162,7 +9180,7 @@ public class AudioService extends IAudioService.Stub
                 Log.i(TAG, "cancelMuteAwaitConnection ignored, no expected device");
                 return;
             }
-            if (!device.equals(mMutingExpectedDevice)) {
+            if (!device.equalTypeAddress(mMutingExpectedDevice)) {
                 Log.e(TAG, "cancelMuteAwaitConnection ignored, got " + device
                         + "] but expected device is" + mMutingExpectedDevice);
                 throw new IllegalStateException("cancelMuteAwaitConnection for wrong device");
@@ -9712,7 +9730,7 @@ public class AudioService extends IAudioService.Stub
     //==========================================================================================
     static final int LOG_NB_EVENTS_LIFECYCLE = 20;
     static final int LOG_NB_EVENTS_PHONE_STATE = 20;
-    static final int LOG_NB_EVENTS_DEVICE_CONNECTION = 30;
+    static final int LOG_NB_EVENTS_DEVICE_CONNECTION = 50;
     static final int LOG_NB_EVENTS_FORCE_USE = 20;
     static final int LOG_NB_EVENTS_VOLUME = 40;
     static final int LOG_NB_EVENTS_DYN_POLICY = 10;

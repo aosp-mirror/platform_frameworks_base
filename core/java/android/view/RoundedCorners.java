@@ -67,6 +67,8 @@ public class RoundedCorners implements Parcelable {
     private static Pair<Integer, Integer> sCachedRadii;
     @GuardedBy("CACHE_LOCK")
     private static RoundedCorners sCachedRoundedCorners;
+    @GuardedBy("CACHE_LOCK")
+    private static float sCachedPhysicalPixelDisplaySizeRatio;
 
     @VisibleForTesting
     public final RoundedCorner[] mRoundedCorners;
@@ -96,8 +98,10 @@ public class RoundedCorners implements Parcelable {
      * @android:dimen/rounded_corner_radius_top and @android:dimen/rounded_corner_radius_bottom
      */
     public static RoundedCorners fromResources(
-            Resources res, String displayUniqueId, int displayWidth, int displayHeight) {
-        return fromRadii(loadRoundedCornerRadii(res, displayUniqueId), displayWidth, displayHeight);
+            Resources res, String displayUniqueId, int stableDisplayWidth, int stableDisplayHeight,
+            int displayWidth, int displayHeight) {
+        return fromRadii(loadRoundedCornerRadii(res, displayUniqueId), stableDisplayWidth,
+                stableDisplayHeight, displayWidth, displayHeight);
     }
 
     /**
@@ -106,20 +110,33 @@ public class RoundedCorners implements Parcelable {
     @VisibleForTesting
     public static RoundedCorners fromRadii(Pair<Integer, Integer> radii, int displayWidth,
             int displayHeight) {
+        return fromRadii(radii, displayWidth, displayHeight, displayWidth, displayHeight);
+    }
+
+    private static RoundedCorners fromRadii(Pair<Integer, Integer> radii, int stableDisplayWidth,
+            int stableDisplayHeight, int displayWidth, int displayHeight) {
         if (radii == null) {
             return null;
         }
 
+        final float physicalPixelDisplaySizeRatio = DisplayUtils.getPhysicalPixelDisplaySizeRatio(
+                stableDisplayWidth, stableDisplayHeight, displayWidth, displayHeight);
+
         synchronized (CACHE_LOCK) {
             if (radii.equals(sCachedRadii) && sCachedDisplayWidth == displayWidth
-                    && sCachedDisplayHeight == displayHeight) {
+                    && sCachedDisplayHeight == displayHeight
+                    && sCachedPhysicalPixelDisplaySizeRatio == physicalPixelDisplaySizeRatio) {
                 return sCachedRoundedCorners;
             }
         }
 
         final RoundedCorner[] roundedCorners = new RoundedCorner[ROUNDED_CORNER_POSITION_LENGTH];
-        final int topRadius = radii.first > 0 ? radii.first : 0;
-        final int bottomRadius = radii.second > 0 ? radii.second : 0;
+        int topRadius = radii.first > 0 ? radii.first : 0;
+        int bottomRadius = radii.second > 0 ? radii.second : 0;
+        if (physicalPixelDisplaySizeRatio != 1f) {
+            topRadius = (int) (topRadius * physicalPixelDisplaySizeRatio + 0.5);
+            bottomRadius = (int) (bottomRadius * physicalPixelDisplaySizeRatio + 0.5);
+        }
         for (int i = 0; i < ROUNDED_CORNER_POSITION_LENGTH; i++) {
             roundedCorners[i] = createRoundedCorner(
                     i,
@@ -134,6 +151,7 @@ public class RoundedCorners implements Parcelable {
             sCachedDisplayHeight = displayHeight;
             sCachedRadii = radii;
             sCachedRoundedCorners = result;
+            sCachedPhysicalPixelDisplaySizeRatio = physicalPixelDisplaySizeRatio;
         }
         return result;
     }

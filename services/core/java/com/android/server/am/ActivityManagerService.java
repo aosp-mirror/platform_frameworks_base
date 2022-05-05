@@ -49,6 +49,7 @@ import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.net.ConnectivityManager.BLOCKED_REASON_NONE;
 import static android.os.FactoryTest.FACTORY_TEST_OFF;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_HIGH;
@@ -88,13 +89,11 @@ import static android.os.Process.killProcessQuiet;
 import static android.os.Process.myPid;
 import static android.os.Process.myUid;
 import static android.os.Process.readProcFile;
-import static android.os.Process.removeAllProcessGroups;
 import static android.os.Process.sendSignal;
 import static android.os.Process.setThreadPriority;
 import static android.os.Process.setThreadScheduler;
 import static android.provider.Settings.Global.ALWAYS_FINISH_ACTIVITIES;
 import static android.provider.Settings.Global.DEBUG_APP;
-import static android.provider.Settings.Global.NETWORK_ACCESS_TIMEOUT_MS;
 import static android.provider.Settings.Global.WAIT_FOR_DEBUGGER;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.util.FeatureFlagUtils.SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS;
@@ -129,6 +128,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.MemoryStatUtil.hasMemcg;
 import static com.android.server.am.ProcessList.ProcStartHandler;
+import static com.android.server.net.NetworkPolicyManagerInternal.updateBlockedReasonsWithProcState;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
@@ -533,11 +533,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     // If set, we will push process association information in to procstats.
     static final boolean TRACK_PROCSTATS_ASSOCIATIONS = true;
 
-    /**
-     * Default value for {@link Settings.Global#NETWORK_ACCESS_TIMEOUT_MS}.
-     */
-    private static final long NETWORK_ACCESS_TIMEOUT_DEFAULT_MS = 200; // 0.2 sec
-
     // The minimum memory growth threshold (in KB) for low RAM devices.
     private static final int MINIMUM_MEMORY_GROWTH_THRESHOLD = 10 * 1000; // 10 MB
 
@@ -555,7 +550,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     // Max character limit for a notification title. If the notification title is larger than this
     // the notification will not be legible to the user.
-    private static final int MAX_BUGREPORT_TITLE_SIZE = 50;
+    private static final int MAX_BUGREPORT_TITLE_SIZE = 100;
     private static final int MAX_BUGREPORT_DESCRIPTION_SIZE = 150;
 
     private static final int NATIVE_DUMP_TIMEOUT_MS =
@@ -708,12 +703,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     final AppErrors mAppErrors;
     final PackageWatchdog mPackageWatchdog;
-
-    /**
-     * Indicates the maximum time spent waiting for the network rules to get updated.
-     */
-    @VisibleForTesting
-    long mWaitForNetworkTimeoutMs;
 
     /**
      * Uids of apps with current active camera sessions.  Access synchronized on
@@ -1034,29 +1023,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     private final ActivityMetricsLaunchObserver mActivityLaunchObserver =
             new ActivityMetricsLaunchObserver() {
         @Override
-        public void onActivityLaunched(byte[] activity, int temperature) {
+        public void onActivityLaunched(long id, ComponentName name, int temperature) {
             mAppProfiler.onActivityLaunched();
-        }
-
-        // The other observer methods are unused
-        @Override
-        public void onIntentStarted(Intent intent, long timestampNs) {
-        }
-
-        @Override
-        public void onIntentFailed() {
-        }
-
-        @Override
-        public void onActivityLaunchCancelled(byte[] abortingActivity) {
-        }
-
-        @Override
-        public void onActivityLaunchFinished(byte[] finalActivity, long timestampNs) {
-        }
-
-        @Override
-        public void onReportFullyDrawn(byte[] finalActivity, long timestampNs) {
         }
     };
 
@@ -1476,6 +1444,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     final UidObserverController mUidObserverController;
     private volatile IUidObserver mNetworkPolicyUidObserver;
+
+    @GuardedBy("mUidNetworkBlockedReasons")
+    private final SparseIntArray mUidNetworkBlockedReasons = new SparseIntArray();
 
     final AppRestrictionController mAppRestrictionController;
 
@@ -2468,8 +2439,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private void start() {
-        removeAllProcessGroups();
-
         mBatteryStatsService.publish();
         mAppOpsService.publish();
         mProcessStats.publish();
@@ -4541,8 +4510,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // We're going to cleanup the successor process record, which wasn't started at all.
                 app = successor;
             } else {
-                Slog.w(TAG, "Process " + app + " failed to attach");
+                final String msg = "Process " + app + " failed to attach";
+                Slog.w(TAG, msg);
                 EventLogTags.writeAmProcessStartTimeout(app.userId, pid, app.uid, app.processName);
+                if (app.getActiveInstrumentation() != null) {
+                    final Bundle info = new Bundle();
+                    info.putString("shortMsg", "failed to attach");
+                    info.putString("longMsg", msg);
+                    finishInstrumentationLocked(app, Activity.RESULT_CANCELED, info);
+                }
             }
             synchronized (mProcLock) {
                 mProcessList.removeProcessNameLocked(app.processName, app.uid);
@@ -4811,7 +4787,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             checkTime(startTime, "attachApplicationLocked: immediately before bindApplication");
-            bindApplicationTimeMillis = SystemClock.elapsedRealtime();
+            bindApplicationTimeMillis = SystemClock.uptimeMillis();
             mAtmInternal.preBindApplication(app.getWindowProcessController());
             final ActiveInstrumentation instr2 = app.getActiveInstrumentation();
             if (mPlatformCompat != null) {
@@ -4959,9 +4935,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pid,
                 app.info.packageName,
                 FrameworkStatsLog.PROCESS_START_TIME__TYPE__COLD,
-                app.getStartTime(),
-                (int) (bindApplicationTimeMillis - app.getStartTime()),
-                (int) (SystemClock.elapsedRealtime() - app.getStartTime()),
+                app.getStartElapsedTime(),
+                (int) (bindApplicationTimeMillis - app.getStartUptime()),
+                (int) (SystemClock.uptimeMillis() - app.getStartUptime()),
                 app.getHostingRecord().getType(),
                 (app.getHostingRecord().getName() != null ? app.getHostingRecord().getName() : ""));
         return true;
@@ -7194,8 +7170,16 @@ public class ActivityManagerService extends IActivityManager.Stub
             enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS,
                     "getUidProcessState");
         }
+        // In case the caller is requesting processState of an app in a different user,
+        // then verify the caller has INTERACT_ACROSS_USERS_FULL permission
+        mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
+                UserHandle.getUserId(uid), false /* allowAll */, ALLOW_FULL_ONLY,
+                "getUidProcessState", callingPackage); // Ignore return value
 
         synchronized (mProcLock) {
+            if (mPendingStartActivityUids.isPendingTopUid(uid)) {
+                return PROCESS_STATE_TOP;
+            }
             return mProcessList.getUidProcStateLOSP(uid);
         }
     }
@@ -7206,6 +7190,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS,
                     "getUidProcessState");
         }
+        // In case the caller is requesting processCapabilities of an app in a different user,
+        // then verify the caller has INTERACT_ACROSS_USERS_FULL permission
+        mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
+                UserHandle.getUserId(uid), false /* allowAll */, ALLOW_FULL_ONLY,
+                "getUidProcessCapabilities", callingPackage); // Ignore return value
 
         synchronized (mProcLock) {
             return mProcessList.getUidProcessCapabilityLOSP(uid);
@@ -7921,8 +7910,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         final boolean waitForDebugger = Settings.Global.getInt(resolver, WAIT_FOR_DEBUGGER, 0) != 0;
         final boolean alwaysFinishActivities =
                 Settings.Global.getInt(resolver, ALWAYS_FINISH_ACTIVITIES, 0) != 0;
-        final long waitForNetworkTimeoutMs = Settings.Global.getLong(resolver,
-                NETWORK_ACCESS_TIMEOUT_MS, NETWORK_ACCESS_TIMEOUT_DEFAULT_MS);
         mHiddenApiBlacklist.registerObserver();
         mPlatformCompat.registerContentObserver();
 
@@ -7943,7 +7930,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     com.android.internal.R.bool.config_multiuserDelayUserDataLocking);
             mUserController.setInitialConfig(userSwitchUiEnabled, maxRunningUsers,
                     delayUserDataLocking);
-            mWaitForNetworkTimeoutMs = waitForNetworkTimeoutMs;
         }
         mAppErrors.loadAppsNotReportingCrashesFromConfig(res.getString(
                 com.android.internal.R.string.config_appsNotReportingCrashes));
@@ -8720,7 +8706,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (dbox == null || !dbox.isTagEnabled(dropboxTag)) return;
 
         // Check if we should rate limit and abort early if needed.
-        if (mDropboxRateLimiter.shouldRateLimit(eventType, processName)) return;
+        final DropboxRateLimiter.RateLimitResult rateLimitResult =
+                mDropboxRateLimiter.shouldRateLimit(eventType, processName);
+        if (rateLimitResult.shouldRateLimit()) return;
 
         final StringBuilder sb = new StringBuilder(1024);
         appendDropBoxProcessHeaders(process, processName, sb);
@@ -8769,6 +8757,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         millisSinceOldestPendingRead).append("\n");
             }
         }
+        sb.append("Dropped-Count: ").append(
+                rateLimitResult.droppedCountSinceRateLimitActivated()).append("\n");
         sb.append("\n");
 
         // Do the rest in a worker thread to avoid blocking the caller on I/O
@@ -10857,7 +10847,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             "Native",
             "System", "Persistent", "Persistent Service", "Foreground",
             "Visible", "Perceptible", "Perceptible Low", "Perceptible Medium",
-            "Heavy Weight", "Backup",
+            "Backup", "Heavy Weight",
             "A Services", "Home",
             "Previous", "B Services", "Cached"
     };
@@ -10865,7 +10855,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             "native",
             "sys", "pers", "persvc", "fore",
             "vis", "percept", "perceptl", "perceptm",
-            "heavy", "backup",
+            "backup", "heavy",
             "servicea", "home",
             "prev", "serviceb", "cached"
     };
@@ -15080,7 +15070,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     @GuardedBy("this")
     final boolean canGcNowLocked() {
         for (BroadcastQueue q : mBroadcastQueues) {
-            if (!q.mParallelBroadcasts.isEmpty() || !q.mDispatcher.isEmpty()) {
+            if (!q.mParallelBroadcasts.isEmpty() || !q.mDispatcher.isIdle()) {
                 return false;
             }
         }
@@ -15254,7 +15244,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 uid, change, procState, procStateSeq, capability, ephemeral);
         if (uidRec != null) {
             uidRec.setLastReportedChange(enqueuedChange);
-            uidRec.updateLastDispatchedProcStateSeq(enqueuedChange);
         }
 
         // Directly update the power manager, since we sit on top of it and it is critical
@@ -16520,20 +16509,26 @@ public class ActivityManagerService extends IActivityManager.Stub
                     return;
                 }
                 record.lastNetworkUpdatedProcStateSeq = procStateSeq;
-                if (record.curProcStateSeq > procStateSeq) {
-                    if (DEBUG_NETWORK) {
-                        Slog.d(TAG_NETWORK, "No need to handle older seq no., Uid: " + uid
-                                + ", curProcstateSeq: " + record.curProcStateSeq
-                                + ", procStateSeq: " + procStateSeq);
-                    }
-                    return;
-                }
-                if (record.waitingForNetwork) {
+                if (record.procStateSeqWaitingForNetwork != 0
+                        && procStateSeq >= record.procStateSeqWaitingForNetwork) {
                     if (DEBUG_NETWORK) {
                         Slog.d(TAG_NETWORK, "Notifying all blocking threads for uid: " + uid
-                                + ", procStateSeq: " + procStateSeq);
+                                + ", procStateSeq: " + procStateSeq
+                                + ", procStateSeqWaitingForNetwork: "
+                                + record.procStateSeqWaitingForNetwork);
                     }
                     record.networkStateLock.notifyAll();
+                }
+            }
+        }
+
+        @Override
+        public void onUidBlockedReasonsChanged(int uid, int blockedReasons) {
+            synchronized (mUidNetworkBlockedReasons) {
+                if (blockedReasons == BLOCKED_REASON_NONE) {
+                    mUidNetworkBlockedReasons.delete(uid);
+                } else {
+                    mUidNetworkBlockedReasons.put(uid, blockedReasons);
                 }
             }
         }
@@ -17200,17 +17195,17 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public int getInstrumentationSourceUid(int uid) {
+        public boolean isUidCurrentlyInstrumented(int uid) {
             synchronized (mProcLock) {
                 for (int i = mActiveInstrumentation.size() - 1; i >= 0; i--) {
                     ActiveInstrumentation activeInst = mActiveInstrumentation.get(i);
                     if (!activeInst.mFinished && activeInst.mTargetInfo != null
                             && activeInst.mTargetInfo.uid == uid) {
-                        return activeInst.mSourceUid;
+                        return true;
                     }
                 }
             }
-            return INVALID_UID;
+            return false;
         }
 
         @Override
@@ -17256,7 +17251,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void addPendingTopUid(int uid, int pid) {
+        public void addPendingTopUid(int uid, int pid, @Nullable IApplicationThread thread) {
             final boolean isNewPending = mPendingStartActivityUids.add(uid, pid);
             // If the next top activity is in cached and frozen mode, WM should raise its priority
             // to unfreeze it. This is done by calling AMS.updateOomAdj that will lower its oom adj.
@@ -17273,13 +17268,32 @@ public class ActivityManagerService extends IActivityManager.Stub
             // (e.g. battery/data saver) but since waiting for updateOomAdj to complete and then
             // informing NetworkPolicyManager might get delayed, informing the state change as soon
             // as we know app is going to come to the top state.
-            if (mNetworkPolicyUidObserver != null) {
+            if (isNewPending && mNetworkPolicyUidObserver != null) {
                 try {
+                    final long procStateSeq = mProcessList.getNextProcStateSeq();
                     mNetworkPolicyUidObserver.onUidStateChanged(uid, PROCESS_STATE_TOP,
-                            mProcessList.getProcStateSeqCounter(), PROCESS_CAPABILITY_ALL);
+                            procStateSeq, PROCESS_CAPABILITY_ALL);
+                    if (thread != null && shouldWaitForNetworkRulesUpdate(uid)) {
+                        thread.setNetworkBlockSeq(procStateSeq);
+                    }
                 } catch (RemoteException e) {
-                    // Should not happen; call is within the same process
+                    Slog.d(TAG, "Error calling setNetworkBlockSeq", e);
                 }
+            }
+        }
+
+        private boolean shouldWaitForNetworkRulesUpdate(int uid) {
+            synchronized (mUidNetworkBlockedReasons) {
+                // TODO: We can reuse this data in
+                // ProcessList#incrementProcStateSeqAndNotifyAppsLOSP instead of calling into
+                // NetworkManagementService.
+                final int uidBlockedReasons = mUidNetworkBlockedReasons.get(
+                        uid, BLOCKED_REASON_NONE);
+                // We should only inform the uid to block if it is currently blocked but will be
+                // unblocked once it comes to the TOP state.
+                return uidBlockedReasons != BLOCKED_REASON_NONE
+                        && updateBlockedReasonsWithProcState(uidBlockedReasons, PROCESS_STATE_TOP)
+                        == BLOCKED_REASON_NONE;
             }
         }
 
@@ -17565,23 +17579,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
         synchronized (record.networkStateLock) {
-            if (record.lastDispatchedProcStateSeq < procStateSeq) {
-                if (DEBUG_NETWORK) {
-                    Slog.d(TAG_NETWORK, "Uid state change for seq no. " + procStateSeq + " is not "
-                            + "dispatched to NPMS yet, so don't wait. Uid: " + callingUid
-                            + " lastProcStateSeqDispatchedToObservers: "
-                            + record.lastDispatchedProcStateSeq);
-                }
-                return;
-            }
-            if (record.curProcStateSeq > procStateSeq) {
-                if (DEBUG_NETWORK) {
-                    Slog.d(TAG_NETWORK, "Ignore the wait requests for older seq numbers. Uid: "
-                            + callingUid + ", curProcStateSeq: " + record.curProcStateSeq
-                            + ", procStateSeq: " + procStateSeq);
-                }
-                return;
-            }
             if (record.lastNetworkUpdatedProcStateSeq >= procStateSeq) {
                 if (DEBUG_NETWORK) {
                     Slog.d(TAG_NETWORK, "Network rules have been already updated for seq no. "
@@ -17597,11 +17594,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                         + " Uid: " + callingUid + " procStateSeq: " + procStateSeq);
                 }
                 final long startTime = SystemClock.uptimeMillis();
-                record.waitingForNetwork = true;
-                record.networkStateLock.wait(mWaitForNetworkTimeoutMs);
-                record.waitingForNetwork = false;
+                record.procStateSeqWaitingForNetwork = procStateSeq;
+                record.networkStateLock.wait(mConstants.mNetworkAccessTimeoutMs);
+                record.procStateSeqWaitingForNetwork = 0;
                 final long totalTime = SystemClock.uptimeMillis() - startTime;
-                if (totalTime >= mWaitForNetworkTimeoutMs || DEBUG_NETWORK) {
+                if (totalTime >= mConstants.mNetworkAccessTimeoutMs || DEBUG_NETWORK) {
                     Slog.w(TAG_NETWORK, "Total time waited for network rules to get updated: "
                             + totalTime + ". Uid: " + callingUid + " procStateSeq: "
                             + procStateSeq + " UidRec: " + record

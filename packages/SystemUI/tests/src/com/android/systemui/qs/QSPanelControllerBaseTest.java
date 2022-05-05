@@ -24,7 +24,6 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -59,7 +58,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Collections;
@@ -209,16 +207,15 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         String mockTileViewString = "Mock Tile View";
         String mockTileString = "Mock Tile";
         doAnswer(invocation -> {
-            PrintWriter pw = invocation.getArgument(1);
+            PrintWriter pw = invocation.getArgument(0);
             pw.println(mockTileString);
             return null;
-        }).when(mQSTile).dump(any(FileDescriptor.class), any(PrintWriter.class),
-                any(String[].class));
+        }).when(mQSTile).dump(any(PrintWriter.class), any(String[].class));
         when(mQSTileView.toString()).thenReturn(mockTileViewString);
 
         StringWriter w = new StringWriter();
         PrintWriter pw = new PrintWriter(w);
-        mController.dump(mock(FileDescriptor.class), pw, new String[]{});
+        mController.dump(pw, new String[]{});
         String expected = "TestableQSPanelControllerBase:\n"
                 + "  Tile records:\n"
                 + "    " + mockTileString + "\n"

@@ -428,7 +428,7 @@ public final class DataCallResponse implements Parcelable {
     public String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append("DataCallResponse: {")
-           .append(" cause=").append(mCause)
+           .append(" cause=").append(DataFailCause.toString(mCause))
            .append(" retry=").append(mSuggestedRetryTime)
            .append(" cid=").append(mId)
            .append(" linkStatus=").append(mLinkStatus)

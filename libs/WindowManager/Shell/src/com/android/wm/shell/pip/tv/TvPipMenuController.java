@@ -24,13 +24,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ParceledListSlice;
 import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Handler;
-import android.os.RemoteException;
 import android.view.LayoutInflater;
 import android.view.SurfaceControl;
 import android.view.SyncRtSurfaceTransactionApplier;
@@ -88,19 +86,6 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     RectF mTmpDestinationRectF = new RectF();
     Matrix mMoveTransform = new Matrix();
 
-    private final float[] mTmpValues = new float[9];
-    private final Runnable mUpdateEmbeddedMatrix = () -> {
-        if (mPipMenuView == null || mPipMenuView.getViewRootImpl() == null) {
-            return;
-        }
-        mMoveTransform.getValues(mTmpValues);
-        try {
-            mPipMenuView.getViewRootImpl().getAccessibilityEmbeddedConnection()
-                    .setScreenMatrix(mTmpValues);
-        } catch (RemoteException e) {
-            if (DEBUG) e.printStackTrace();
-        }
-    };
     private final Runnable mCloseEduTextRunnable = this::closeEduText;
 
     public TvPipMenuController(Context context, TvPipBoundsState tvPipBoundsState,
@@ -183,6 +168,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         mPipMenuView.setListener(this);
         setUpViewSurfaceZOrder(mPipMenuView, 1);
         addPipMenuViewToSystemWindows(mPipMenuView, MENU_WINDOW_TITLE);
+        maybeUpdateMenuViewActions();
     }
 
     private void attachPipBackgroundView() {
@@ -213,6 +199,9 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
 
     void notifyPipAnimating(boolean animating) {
         mPipMenuView.setEduTextActive(!animating);
+        if (!animating) {
+            mPipMenuView.onPipTransitionFinished();
+        }
     }
 
     void showMovementMenuOnly() {
@@ -248,6 +237,13 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
             mPipMenuView.showMoveMenu(mDelegate.getPipGravity());
         } else {
             mPipMenuView.showButtonsMenu();
+        }
+        mPipMenuView.updateBounds(mTvPipBoundsState.getBounds());
+    }
+
+    void onPipTransitionStarted(Rect finishBounds) {
+        if (mPipMenuView != null) {
+            mPipMenuView.onPipTransitionStarted(finishBounds);
         }
     }
 
@@ -350,12 +346,12 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     }
 
     @Override
-    public void setAppActions(ParceledListSlice<RemoteAction> actions, RemoteAction closeAction) {
+    public void setAppActions(List<RemoteAction> actions, RemoteAction closeAction) {
         if (DEBUG) {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: setAppActions()", TAG);
         }
-        updateAdditionalActionsList(mAppActions, actions.getList(), closeAction);
+        updateAdditionalActionsList(mAppActions, actions, closeAction);
     }
 
     private void onMediaActionsChanged(List<RemoteAction> actions) {
@@ -525,11 +521,6 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
             mApplier.scheduleApply(frontParams);
         }
 
-        if (mPipMenuView.getViewRootImpl() != null) {
-            mPipMenuView.getHandler().removeCallbacks(mUpdateEmbeddedMatrix);
-            mPipMenuView.getHandler().post(mUpdateEmbeddedMatrix);
-        }
-
         updateMenuBounds(pipDestBounds);
     }
 
@@ -578,7 +569,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
                         menuBounds.height()));
 
         if (mPipMenuView != null) {
-            mPipMenuView.updateLayout(destinationBounds);
+            mPipMenuView.updateBounds(destinationBounds);
         }
     }
 

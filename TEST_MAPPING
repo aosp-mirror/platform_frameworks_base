@@ -17,6 +17,14 @@
   ],
   "presubmit": [
     {
+      "name": "ManagedProvisioningTests",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
       "file_patterns": [
         "ApexManager\\.java",
         "SystemServer\\.java",

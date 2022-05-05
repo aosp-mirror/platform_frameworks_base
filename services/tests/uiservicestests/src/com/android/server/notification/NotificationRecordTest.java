@@ -816,8 +816,10 @@ public class NotificationRecordTest extends UiServiceTestCase {
         when(ugm.checkGrantUriPermission(anyInt(), eq(null), any(Uri.class),
                 anyInt(), anyInt())).thenThrow(new SecurityException());
 
-        Notification n = mock(Notification.class);
-        when(n.getChannelId()).thenReturn(channel.getId());
+        channel.setSound(null, null);
+        Notification n = new Notification.Builder(mContext, channel.getId())
+                .setSmallIcon(Icon.createWithContentUri(Uri.parse("content://something")))
+                .build();
         StatusBarNotification sbn =
                 new StatusBarNotification(PKG_P, PKG_P, id1, tag1, uid, uid, n, mUser, null, uid);
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
@@ -830,6 +832,27 @@ public class NotificationRecordTest extends UiServiceTestCase {
         } catch (SecurityException e) {
             // expected
         }
+    }
+
+    @Test
+    public void testCalculateGrantableUris_PappProvided_invalidSound() {
+        IActivityManager am = mock(IActivityManager.class);
+        UriGrantsManagerInternal ugm = mock(UriGrantsManagerInternal.class);
+        when(ugm.checkGrantUriPermission(anyInt(), eq(null), any(Uri.class),
+                anyInt(), anyInt())).thenThrow(new SecurityException());
+
+        channel.setSound(Uri.parse("content://something"), mock(AudioAttributes.class));
+
+        Notification n = mock(Notification.class);
+        when(n.getChannelId()).thenReturn(channel.getId());
+        StatusBarNotification sbn =
+                new StatusBarNotification(PKG_P, PKG_P, id1, tag1, uid, uid, n, mUser, null, uid);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+        record.mAm = am;
+        record.mUgmInternal = ugm;
+
+        record.calculateGrantableUris();
+        assertEquals(Settings.System.DEFAULT_NOTIFICATION_URI, record.getSound());
     }
 
     @Test

@@ -20,7 +20,7 @@
     <string name="install" msgid="711829760615509273">"ఇన్‌స్టాల్ చేయి"</string>
     <string name="update" msgid="3932142540719227615">"అప్‌డేట్ చేయి"</string>
     <string name="done" msgid="6632441120016885253">"పూర్తయింది"</string>
-    <string name="cancel" msgid="1018267193425558088">"రద్దు చేయి"</string>
+    <string name="cancel" msgid="1018267193425558088">"రద్దు చేయండి"</string>
     <string name="installing" msgid="4921993079741206516">"ఇన్‌స్టాల్ చేస్తోంది…"</string>
     <string name="installing_app" msgid="1165095864863849422">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>ని ఇన్‌స్టాల్ చేస్తోంది…"</string>
     <string name="install_done" msgid="5987363587661783896">"యాప్ ఇన్‌స్టాల్ చేయబడింది."</string>
@@ -48,7 +48,7 @@
     <string name="app_not_found_dlg_text" msgid="5219983779377811611">"ఇన్‌స్టాల్ చేసిన యాప్‌ల లిస్ట్‌లో యాప్ కనుగొనబడలేదు."</string>
     <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"అనుమతించబడలేదు"</string>
     <string name="user_is_not_allowed_dlg_text" msgid="3468447791330611681">"ప్రస్తుత వినియోగదారు ఈ అన్ఇన్‌స్టాలేషన్ చేసేందుకు అనుమతించబడరు."</string>
-    <string name="generic_error_dlg_title" msgid="5863195085927067752">"లోపం"</string>
+    <string name="generic_error_dlg_title" msgid="5863195085927067752">"ఎర్రర్"</string>
     <string name="generic_error_dlg_text" msgid="5287861443265795232">"యాప్‌ను అన్ఇన్‌స్టాల్ చేయడం సాధ్యపడలేదు."</string>
     <string name="uninstall_application_title" msgid="4045420072401428123">"యాప్‌ను అన్‌ఇన్‌స్టాల్ చేయి"</string>
     <string name="uninstall_update_title" msgid="824411791011583031">"అప్‌డేట్ అన్‌ఇన్‌స్టాల్ చేయి"</string>

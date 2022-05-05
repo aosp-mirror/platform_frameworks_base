@@ -300,6 +300,81 @@ public class RootWindowContainerTests extends WindowTestsBase {
         assertTrue(firstActivity.mRequestForceTransition);
     }
 
+    /**
+     * When there is only one activity in the Task, and the activity is requesting to enter PIP, the
+     * whole Task should enter PIP.
+     */
+    @Test
+    public void testSingleActivityTaskEnterPip() {
+        final Task fullscreenTask = mRootWindowContainer.getDefaultTaskDisplayArea().createRootTask(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setTask(fullscreenTask)
+                .build();
+        final Task task = activity.getTask();
+
+        // Move activity to pinned root task.
+        mRootWindowContainer.moveActivityToPinnedRootTask(activity,
+                null /* launchIntoPipHostActivity */, "test");
+
+        // Ensure a task has moved over.
+        ensureTaskPlacement(task, activity);
+        assertTrue(task.inPinnedWindowingMode());
+    }
+
+    /**
+     * When there is only one activity in the Task, and the activity is requesting to enter PIP, the
+     * whole Task should enter PIP even if the activity is in a TaskFragment.
+     */
+    @Test
+    public void testSingleActivityInTaskFragmentEnterPip() {
+        final Task fullscreenTask = mRootWindowContainer.getDefaultTaskDisplayArea().createRootTask(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(fullscreenTask)
+                .createActivityCount(1)
+                .build();
+        final ActivityRecord activity = taskFragment.getTopMostActivity();
+        final Task task = activity.getTask();
+
+        // Move activity to pinned root task.
+        mRootWindowContainer.moveActivityToPinnedRootTask(activity,
+                null /* launchIntoPipHostActivity */, "test");
+
+        // Ensure a task has moved over.
+        ensureTaskPlacement(task, activity);
+        assertTrue(task.inPinnedWindowingMode());
+    }
+
+    /**
+     * When there is one TaskFragment with two activities in the Task, the activity requests to
+     * enter PIP, that activity will be move to PIP root task.
+     */
+    @Test
+    public void testMultipleActivitiesInTaskFragmentEnterPip() {
+        final Task fullscreenTask = mRootWindowContainer.getDefaultTaskDisplayArea().createRootTask(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(fullscreenTask)
+                .createActivityCount(2)
+                .build();
+        final ActivityRecord firstActivity = taskFragment.getTopMostActivity();
+        final ActivityRecord secondActivity = taskFragment.getBottomMostActivity();
+
+        // Move first activity to pinned root task.
+        mRootWindowContainer.moveActivityToPinnedRootTask(firstActivity,
+                null /* launchIntoPipHostActivity */, "test");
+
+        final TaskDisplayArea taskDisplayArea = fullscreenTask.getDisplayArea();
+        final Task pinnedRootTask = taskDisplayArea.getRootPinnedTask();
+
+        // Ensure a task has moved over.
+        ensureTaskPlacement(pinnedRootTask, firstActivity);
+        ensureTaskPlacement(fullscreenTask, secondActivity);
+        assertTrue(pinnedRootTask.inPinnedWindowingMode());
+        assertEquals(WINDOWING_MODE_FULLSCREEN, fullscreenTask.getWindowingMode());
+    }
+
     private static void ensureTaskPlacement(Task task, ActivityRecord... activities) {
         final ArrayList<ActivityRecord> taskActivities = new ArrayList<>();
 

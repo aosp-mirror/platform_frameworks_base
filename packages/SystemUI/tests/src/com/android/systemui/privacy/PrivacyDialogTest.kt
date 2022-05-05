@@ -35,6 +35,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import android.content.Intent
+import android.text.TextUtils
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -372,5 +373,32 @@ class PrivacyDialogTest : SysuiTestCase() {
                         element.attributionLabel, element.proxyLabel
                 )
         )
+    }
+
+    @Test
+    fun testDialogHasTitle() {
+        // Dialog must have a non-empty title for a11y purposes.
+
+        val list = listOf(
+            PrivacyDialog.PrivacyElement(
+                PrivacyType.TYPE_MICROPHONE,
+                TEST_PACKAGE_NAME,
+                TEST_USER_ID,
+                "App",
+                null,
+                null,
+                null,
+                0L,
+                false,
+                false,
+                false,
+                TEST_PERM_GROUP,
+                null
+            )
+        )
+        dialog = PrivacyDialog(context, list, starter)
+        dialog.show()
+
+        assertThat(TextUtils.isEmpty(dialog.window?.attributes?.title)).isFalse()
     }
 }

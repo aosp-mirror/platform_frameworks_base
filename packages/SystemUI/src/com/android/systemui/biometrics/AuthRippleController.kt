@@ -80,6 +80,7 @@ class AuthRippleController @Inject constructor(
 
     @VisibleForTesting
     internal var startLightRevealScrimOnKeyguardFadingAway = false
+    var lightRevealScrimAnimator: ValueAnimator? = null
     var fingerprintSensorLocation: PointF? = null
     private var faceSensorLocation: PointF? = null
     private var circleReveal: LightRevealEffect? = null
@@ -145,6 +146,7 @@ class AuthRippleController @Inject constructor(
         val lightRevealScrim = centralSurfaces.lightRevealScrim
         if (statusBarStateController.isDozing || biometricUnlockController.isWakeAndUnlock) {
             circleReveal?.let {
+                lightRevealScrim?.revealAmount = 0f
                 lightRevealScrim?.revealEffect = it
                 startLightRevealScrimOnKeyguardFadingAway = true
             }
@@ -162,13 +164,15 @@ class AuthRippleController @Inject constructor(
         if (keyguardStateController.isKeyguardFadingAway) {
             val lightRevealScrim = centralSurfaces.lightRevealScrim
             if (startLightRevealScrimOnKeyguardFadingAway && lightRevealScrim != null) {
-                ValueAnimator.ofFloat(.1f, 1f).apply {
+                lightRevealScrimAnimator?.cancel()
+                lightRevealScrimAnimator = ValueAnimator.ofFloat(.1f, 1f).apply {
                     interpolator = Interpolators.LINEAR_OUT_SLOW_IN
                     duration = RIPPLE_ANIMATION_DURATION
                     startDelay = keyguardStateController.keyguardFadingAwayDelay
                     addUpdateListener { animator ->
                         if (lightRevealScrim.revealEffect != circleReveal) {
-                            // if something else took over the reveal, let's do nothing.
+                            // if something else took over the reveal, let's cancel ourselves
+                            cancel()
                             return@addUpdateListener
                         }
                         lightRevealScrim.revealAmount = animator.animatedValue as Float
@@ -181,6 +185,8 @@ class AuthRippleController @Inject constructor(
                             if (lightRevealScrim.revealEffect == circleReveal) {
                                 lightRevealScrim.revealEffect = LiftReveal
                             }
+
+                            lightRevealScrimAnimator = null
                         }
                     })
                     start()
@@ -188,6 +194,13 @@ class AuthRippleController @Inject constructor(
                 startLightRevealScrimOnKeyguardFadingAway = false
             }
         }
+    }
+
+    /**
+     * Whether we're animating the light reveal scrim from a call to [onKeyguardFadingAwayChanged].
+     */
+    fun isAnimatingLightRevealScrim(): Boolean {
+        return lightRevealScrimAnimator?.isRunning ?: false
     }
 
     override fun onStartedGoingToSleep() {

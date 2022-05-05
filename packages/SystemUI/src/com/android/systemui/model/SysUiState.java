@@ -25,7 +25,6 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.shared.system.QuickStepContract;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -106,7 +105,7 @@ public class SysUiState implements Dumpable {
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("SysUiState state:");
         pw.print("  mSysUiStateFlags="); pw.println(mFlags);
         pw.println("    " + QuickStepContract.getSystemUiStateString(mFlags));

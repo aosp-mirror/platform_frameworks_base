@@ -904,7 +904,6 @@ public abstract class WallpaperService extends Service {
             // based on its default wallpaper color hints.
             mShouldDim = dimAmount != 0f || mShouldDimByDefault;
             updateSurfaceDimming();
-            updateSurface(false, false, true);
         }
 
         private void updateSurfaceDimming() {
@@ -941,6 +940,7 @@ public abstract class WallpaperService extends Service {
             } else {
                 Log.v(TAG, "Setting wallpaper dimming: " + 0);
                 surfaceControlTransaction.setAlpha(mBbqSurfaceControl, 1.0f).apply();
+                updateSurface(false, false, true);
             }
 
             mPreviousWallpaperDimAmount = mWallpaperDimAmount;
@@ -1685,13 +1685,12 @@ public abstract class WallpaperService extends Service {
 
         void updatePage(EngineWindowPage currentPage, int pageIndx, int numPages,
                 float xOffsetStep) {
-            // to save creating a runnable, check twice
-            long current = System.currentTimeMillis();
+            // in case the clock is zero, we start with negative time
+            long current = SystemClock.elapsedRealtime() - DEFAULT_UPDATE_SCREENSHOT_DURATION;
             long lapsed = current - currentPage.getLastUpdateTime();
             // Always update the page when the last update time is <= 0
             // This is important especially when the device first boots
-            if (lapsed < DEFAULT_UPDATE_SCREENSHOT_DURATION
-                    && currentPage.getLastUpdateTime() > 0) {
+            if (lapsed < DEFAULT_UPDATE_SCREENSHOT_DURATION) {
                 return;
             }
             Surface surface = mSurfaceHolder.getSurface();

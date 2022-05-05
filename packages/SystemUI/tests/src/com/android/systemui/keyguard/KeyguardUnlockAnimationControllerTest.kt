@@ -17,6 +17,7 @@ import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import junit.framework.Assert.assertEquals
+import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -124,5 +125,70 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
         // Since the animation is running, we should not have finished the remote animation.
         verify(keyguardViewMediator, times(0)).onKeyguardExitRemoteAnimationFinished(
             false /* cancelled */)
+    }
+
+    /**
+     * If we requested that the surface behind be made visible, and we're not flinging away the
+     * keyguard, it means that we're swiping to unlock and want the surface visible so it can follow
+     * the user's touch event as they swipe to unlock.
+     *
+     * In this case, we should verify that the surface was made visible via the alpha fade in
+     * animator, and verify that we did not start the canned animation to animate the surface in
+     * (since it's supposed to be following the touch events).
+     */
+    @Test
+    fun fadeInSurfaceBehind_ifRequestedShowSurface_butNotFlinging() {
+        `when`(keyguardStateController.isFlingingToDismissKeyguard).thenReturn(false)
+
+        keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
+            remoteAnimationTarget,
+            0 /* startTime */,
+            true /* requestedShowSurfaceBehindKeyguard */
+        )
+
+        assertTrue(keyguardUnlockAnimationController.surfaceBehindAlphaAnimator.isRunning)
+        assertFalse(keyguardUnlockAnimationController.isPlayingCannedUnlockAnimation())
+    }
+
+    /**
+     * We requested the surface behind to be made visible, but we're now flinging to dismiss the
+     * keyguard. This means this was a swipe to dismiss gesture but the user flung the keyguard and
+     * lifted their finger while we were requesting the surface be made visible.
+     *
+     * In this case, we should verify that we are playing the canned unlock animation and not
+     * simply fading in the surface.
+     */
+    @Test
+    fun playCannedUnlockAnimation_ifRequestedShowSurface_andFlinging() {
+        `when`(keyguardStateController.isFlingingToDismissKeyguard).thenReturn(true)
+
+        keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
+            remoteAnimationTarget,
+            0 /* startTime */,
+            true /* requestedShowSurfaceBehindKeyguard */
+        )
+
+        assertTrue(keyguardUnlockAnimationController.isPlayingCannedUnlockAnimation())
+        assertFalse(keyguardUnlockAnimationController.surfaceBehindAlphaAnimator.isRunning)
+    }
+
+    /**
+     * We never requested the surface behind to be made visible, which means no swiping to unlock
+     * ever happened and we're just playing the simple canned animation (happens via UDFPS unlock,
+     * long press on the lock icon, etc).
+     *
+     * In this case, we should verify that we are playing the canned unlock animation and not
+     * simply fading in the surface.
+     */
+    @Test
+    fun playCannedUnlockAnimation_ifDidNotRequestShowSurface() {
+        keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
+            remoteAnimationTarget,
+            0 /* startTime */,
+            false /* requestedShowSurfaceBehindKeyguard */
+        )
+
+        assertTrue(keyguardUnlockAnimationController.isPlayingCannedUnlockAnimation())
+        assertFalse(keyguardUnlockAnimationController.surfaceBehindAlphaAnimator.isRunning)
     }
 }

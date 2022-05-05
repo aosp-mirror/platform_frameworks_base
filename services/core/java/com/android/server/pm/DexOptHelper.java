@@ -29,7 +29,9 @@ import static com.android.server.pm.PackageManagerService.TAG;
 import static com.android.server.pm.PackageManagerServiceCompilerMapping.getDefaultCompilerFilter;
 import static com.android.server.pm.PackageManagerServiceUtils.REMOVE_IF_NULL_PKG;
 
+import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.content.Intent;
@@ -42,6 +44,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
@@ -250,9 +253,59 @@ final class DexOptHelper {
                 numberOfPackagesFailed};
     }
 
+    /**
+     * Checks if system UI package (typically "com.android.systemui") needs to be re-compiled, and
+     * compiles it if needed.
+     */
+    private void checkAndDexOptSystemUi() {
+        Computer snapshot = mPm.snapshotComputer();
+        String sysUiPackageName =
+                mPm.mContext.getString(com.android.internal.R.string.config_systemUi);
+        AndroidPackage pkg = snapshot.getPackage(sysUiPackageName);
+        if (pkg == null) {
+            Log.w(TAG, "System UI package " + sysUiPackageName + " is not found for dexopting");
+            return;
+        }
+
+        boolean useProfileForDexopt = false;
+        File profileFile = new File(getPrebuildProfilePath(pkg));
+        // Copy the profile to the reference profile path if it exists. Installd can only use a
+        // profile at the reference profile path for dexopt.
+        if (profileFile.exists()) {
+            try {
+                synchronized (mPm.mInstallLock) {
+                    if (mPm.mInstaller.copySystemProfile(profileFile.getAbsolutePath(),
+                                pkg.getUid(), pkg.getPackageName(),
+                                ArtManager.getProfileName(null))) {
+                        useProfileForDexopt = true;
+                    } else {
+                        Log.e(TAG, "Failed to copy profile " + profileFile.getAbsolutePath());
+                    }
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to copy profile " + profileFile.getAbsolutePath(), e);
+            }
+        }
+
+        // It could also be after mainline update, but we're not introducing a new reason just for
+        // this special case.
+        performDexOptTraced(new DexoptOptions(pkg.getPackageName(), REASON_BOOT_AFTER_OTA,
+                useProfileForDexopt ? "speed-profile" : "speed", null /* splitName */,
+                0 /* dexoptFlags */));
+    }
+
+    @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
     public void performPackageDexOptUpgradeIfNeeded() {
         PackageManagerServiceUtils.enforceSystemOrRoot(
                 "Only the system can request package update");
+
+        // The default is "true".
+        if (!"false".equals(DeviceConfig.getProperty("runtime", "dexopt_system_ui_on_boot"))) {
+            // System UI is important to user experience, so we check it on every boot. It may need
+            // to be re-compiled after a mainline update or an OTA.
+            // TODO(b/227310505): Only do this after a mainline update or an OTA.
+            checkAndDexOptSystemUi();
+        }
 
         // We need to re-extract after an OTA.
         boolean causeUpgrade = mPm.isDeviceUpgrading();
@@ -432,8 +485,8 @@ final class DexOptHelper {
         // Whoever is calling forceDexOpt wants a compiled package.
         // Don't use profiles since that may cause compilation to be skipped.
         final int res = performDexOptInternalWithDependenciesLI(pkg, packageState,
-                new DexoptOptions(packageName,
-                        getDefaultCompilerFilter(),
+                new DexoptOptions(packageName, REASON_CMDLINE,
+                        getDefaultCompilerFilter(), null /* splitName */,
                         DexoptOptions.DEXOPT_FORCE | DexoptOptions.DEXOPT_BOOT_COMPLETE));
 
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
@@ -442,16 +495,35 @@ final class DexOptHelper {
         }
     }
 
-    public boolean performDexOptMode(String packageName,
+    public boolean performDexOptMode(@NonNull Computer snapshot, String packageName,
             boolean checkProfiles, String targetCompilerFilter, boolean force,
             boolean bootComplete, String splitName) {
-        PackageManagerServiceUtils.enforceSystemOrRootOrShell("performDexOptMode");
+        if (!PackageManagerServiceUtils.isSystemOrRootOrShell()
+                && !isCallerInstallerForPackage(snapshot, packageName)) {
+            throw new SecurityException("performDexOptMode");
+        }
 
         int flags = (checkProfiles ? DexoptOptions.DEXOPT_CHECK_FOR_PROFILES_UPDATES : 0)
                 | (force ? DexoptOptions.DEXOPT_FORCE : 0)
                 | (bootComplete ? DexoptOptions.DEXOPT_BOOT_COMPLETE : 0);
         return performDexOpt(new DexoptOptions(packageName, REASON_CMDLINE,
                 targetCompilerFilter, splitName, flags));
+    }
+
+    private boolean isCallerInstallerForPackage(@NonNull Computer snapshot, String packageName) {
+        final PackageStateInternal packageState = snapshot.getPackageStateInternal(packageName);
+        if (packageState == null) {
+            return false;
+        }
+        final InstallSource installSource = packageState.getInstallSource();
+
+        final PackageStateInternal installerPackageState =
+                snapshot.getPackageStateInternal(installSource.installerPackageName);
+        if (installerPackageState == null) {
+            return false;
+        }
+        final AndroidPackage installerPkg = installerPackageState.getPkg();
+        return installerPkg.getUid() == Binder.getCallingUid();
     }
 
     public boolean performDexOptSecondary(String packageName, String compilerFilter,

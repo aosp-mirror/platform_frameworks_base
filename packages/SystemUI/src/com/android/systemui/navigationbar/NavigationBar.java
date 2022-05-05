@@ -83,6 +83,7 @@ import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
+import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.InsetsVisibilities;
 import android.view.KeyEvent;
@@ -124,6 +125,7 @@ import com.android.systemui.navigationbar.gestural.QuickswitchOrientedNavHandle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.shared.rotation.RotationButton;
 import com.android.systemui.shared.rotation.RotationButtonController;
@@ -196,12 +198,13 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     private final Optional<Pip> mPipOptional;
     private final Optional<Recents> mRecentsOptional;
     private final DeviceConfigProxy mDeviceConfigProxy;
+    private final NavigationBarTransitions mNavigationBarTransitions;
     private final Optional<BackAnimation> mBackAnimation;
     private final Handler mHandler;
-    private final NavigationBarOverlayController mNavbarOverlayController;
     private final UiEventLogger mUiEventLogger;
     private final NavBarHelper mNavBarHelper;
     private final NotificationShadeDepthController mNotificationShadeDepthController;
+    private final UserContextProvider mUserContextProvider;
     private NavigationBarFrame mFrame;
 
     private @WindowVisibleState int mNavigationBarWindowState = WINDOW_STATE_SHOWING;
@@ -327,7 +330,9 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     private final OverviewProxyListener mOverviewProxyListener = new OverviewProxyListener() {
         @Override
         public void onConnectionChanged(boolean isConnected) {
-            mView.updateStates();
+            mView.onOverviewProxyConnectionChange(
+                    mOverviewProxyService.isEnabled());
+            mView.setShouldShowSwipeUpUi(mOverviewProxyService.shouldShowSwipeUpUI());
             updateScreenPinningGestures();
         }
 
@@ -500,7 +505,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             NotificationRemoteInputManager notificationRemoteInputManager,
             NotificationShadeDepthController notificationShadeDepthController,
             @Main Handler mainHandler,
-            NavigationBarOverlayController navbarOverlayController,
             UiEventLogger uiEventLogger,
             NavBarHelper navBarHelper,
             LightBarController mainLightBarController,
@@ -511,7 +515,9 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             InputMethodManager inputMethodManager,
             DeadZone deadZone,
             DeviceConfigProxy deviceConfigProxy,
-            Optional<BackAnimation> backAnimation) {
+            NavigationBarTransitions navigationBarTransitions,
+            Optional<BackAnimation> backAnimation,
+            UserContextProvider userContextProvider) {
         super(navigationBarView);
         mFrame = navigationBarFrame;
         mContext = context;
@@ -535,9 +541,9 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mRecentsOptional = recentsOptional;
         mDeadZone = deadZone;
         mDeviceConfigProxy = deviceConfigProxy;
+        mNavigationBarTransitions = navigationBarTransitions;
         mBackAnimation = backAnimation;
         mHandler = mainHandler;
-        mNavbarOverlayController = navbarOverlayController;
         mUiEventLogger = uiEventLogger;
         mNavBarHelper = navBarHelper;
         mNotificationShadeDepthController = notificationShadeDepthController;
@@ -547,6 +553,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mAutoHideControllerFactory = autoHideControllerFactory;
         mTelecomManagerOptional = telecomManagerOptional;
         mInputMethodManager = inputMethodManager;
+        mUserContextProvider = userContextProvider;
 
         mNavBarMode = mNavigationModeController.addListener(mModeChangedListener);
     }
@@ -557,11 +564,11 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
 
     @Override
     public void onInit() {
-        // TODO: A great deal of this code should probalby live in onViewAttached.
+        // TODO: A great deal of this code should probably live in onViewAttached.
         // It should also has corresponding cleanup in onViewDetached.
+        mView.setBarTransitions(mNavigationBarTransitions);
         mView.setTouchHandler(mTouchHandler);
         mView.setNavBarMode(mNavBarMode);
-
         mView.updateRotationButton();
 
         mView.setVisibility(
@@ -631,12 +638,18 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mView.setOnVerticalChangedListener(this::onVerticalChanged);
         mView.setOnTouchListener(this::onNavigationTouch);
         if (mSavedState != null) {
-            mView.getLightTransitionsController().restoreState(mSavedState);
+            getBarTransitions().getLightTransitionsController().restoreState(mSavedState);
         }
         setNavigationIconHints(mNavigationIconHints);
         mView.setWindowVisible(isNavBarWindowVisible());
         mView.setBehavior(mBehavior);
         mView.setNavBarMode(mNavBarMode);
+        mView.setUpdateActiveTouchRegionsCallback(
+                () -> mOverviewProxyService.onActiveNavBarRegionChanges(
+                        mView.getButtonLocations(
+                                true /* includeFloatingButtons */,
+                                true /* inScreen */,
+                                true /* useNearestRegion */)));
 
         mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
 
@@ -697,8 +710,8 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         final RotationButtonController rotationButtonController =
                 mView.getRotationButtonController();
         rotationButtonController.setRotationCallback(null);
-        mView.getBarTransitions().destroy();
-        mView.getLightTransitionsController().destroy(mContext);
+        mView.setUpdateActiveTouchRegionsCallback(null);
+        getBarTransitions().destroy();
         mOverviewProxyService.removeCallback(mOverviewProxyListener);
         mBroadcastDispatcher.unregisterReceiver(mBroadcastReceiver);
         if (mOrientationHandle != null) {
@@ -724,7 +737,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         outState.putInt(EXTRA_APPEARANCE, mAppearance);
         outState.putInt(EXTRA_BEHAVIOR, mBehavior);
         outState.putBoolean(EXTRA_TRANSIENT_STATE, mTransientShown);
-        mView.getLightTransitionsController().saveState(outState);
+        getBarTransitions().getLightTransitionsController().saveState(outState);
     }
 
     /**
@@ -885,7 +898,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         pw.println("  mTransientShown=" + mTransientShown);
         pw.println("  mTransientShownFromGestureOnSystemBar="
                 + mTransientShownFromGestureOnSystemBar);
-        dumpBarTransitions(pw, "mNavigationBarView", mView.getBarTransitions());
+        dumpBarTransitions(pw, "mNavigationBarView", getBarTransitions());
         mView.dump(pw);
     }
 
@@ -955,9 +968,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
 
     @Override
     public void onRecentsAnimationStateChanged(boolean running) {
-        if (running) {
-            mNavbarOverlayController.setButtonState(/* visible */false, /* force */true);
-        }
         mView.getRotationButtonController().setRecentsAnimationRunning(running);
     }
 
@@ -1422,7 +1432,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mLightBarController = lightBarController;
         if (mLightBarController != null) {
             mLightBarController.setNavigationBar(
-                    mView.getLightTransitionsController());
+                    getBarTransitions().getLightTransitionsController());
         }
     }
 
@@ -1464,7 +1474,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                 mCentralSurfacesOptionalLazy.get().map(CentralSurfaces::isDeviceInteractive)
                         .orElse(false)
                 && mNavigationBarWindowState != WINDOW_STATE_HIDDEN;
-        mView.getBarTransitions().transitionTo(mTransitionMode, anim);
+        getBarTransitions().transitionTo(mTransitionMode, anim);
     }
 
     public void disableAnimationsDuringHide(long delay) {
@@ -1484,11 +1494,11 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     }
 
     public NavigationBarTransitions getBarTransitions() {
-        return mView.getBarTransitions();
+        return mNavigationBarTransitions;
     }
 
     public void finishBarAnimations() {
-        mView.getBarTransitions().finishAnimations();
+        getBarTransitions().finishAnimations();
     }
 
     private WindowManager.LayoutParams getBarLayoutParams(int rotation) {
@@ -1506,35 +1516,36 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         int insetsHeight = -1;
         int gravity = Gravity.BOTTOM;
         boolean navBarCanMove = true;
+        final Context userContext = mUserContextProvider.createCurrentUserContext(mContext);
         if (mWindowManager != null && mWindowManager.getCurrentWindowMetrics() != null) {
             Rect displaySize = mWindowManager.getCurrentWindowMetrics().getBounds();
             navBarCanMove = displaySize.width() != displaySize.height()
-                    && mContext.getResources().getBoolean(
+                    && userContext.getResources().getBoolean(
                     com.android.internal.R.bool.config_navBarCanMove);
         }
         if (!navBarCanMove) {
-            height = mContext.getResources().getDimensionPixelSize(
+            height = userContext.getResources().getDimensionPixelSize(
                     com.android.internal.R.dimen.navigation_bar_frame_height);
-            insetsHeight = mContext.getResources().getDimensionPixelSize(
+            insetsHeight = userContext.getResources().getDimensionPixelSize(
                     com.android.internal.R.dimen.navigation_bar_height);
         } else {
             switch (rotation) {
                 case ROTATION_UNDEFINED:
                 case Surface.ROTATION_0:
                 case Surface.ROTATION_180:
-                    height = mContext.getResources().getDimensionPixelSize(
+                    height = userContext.getResources().getDimensionPixelSize(
                             com.android.internal.R.dimen.navigation_bar_frame_height);
-                    insetsHeight = mContext.getResources().getDimensionPixelSize(
+                    insetsHeight = userContext.getResources().getDimensionPixelSize(
                             com.android.internal.R.dimen.navigation_bar_height);
                     break;
                 case Surface.ROTATION_90:
                     gravity = Gravity.RIGHT;
-                    width = mContext.getResources().getDimensionPixelSize(
+                    width = userContext.getResources().getDimensionPixelSize(
                             com.android.internal.R.dimen.navigation_bar_width);
                     break;
                 case Surface.ROTATION_270:
                     gravity = Gravity.LEFT;
-                    width = mContext.getResources().getDimensionPixelSize(
+                    width = userContext.getResources().getDimensionPixelSize(
                             com.android.internal.R.dimen.navigation_bar_width);
                     break;
             }
@@ -1551,18 +1562,20 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                         | WindowManager.LayoutParams.FLAG_SLIPPERY,
                 PixelFormat.TRANSLUCENT);
         lp.gravity = gravity;
+        lp.providedInternalInsets = new Insets[InsetsState.SIZE];
         if (insetsHeight != -1) {
-            lp.providedInternalInsets = Insets.of(0, height - insetsHeight, 0, 0);
+            lp.providedInternalInsets[ITYPE_NAVIGATION_BAR] =
+                    Insets.of(0, height - insetsHeight, 0, 0);
         } else {
-            lp.providedInternalInsets = Insets.NONE;
+            lp.providedInternalInsets[ITYPE_NAVIGATION_BAR] = null;
         }
         lp.token = new Binder();
-        lp.accessibilityTitle = mContext.getString(R.string.nav_bar);
+        lp.accessibilityTitle = userContext.getString(R.string.nav_bar);
         lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC
                 | WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT;
         lp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         lp.windowAnimations = 0;
-        lp.setTitle("NavigationBar" + mContext.getDisplayId());
+        lp.setTitle("NavigationBar" + userContext.getDisplayId());
         lp.setFitInsetsTypes(0 /* types */);
         lp.setTrustedOverlay();
         return lp;
@@ -1644,6 +1657,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             }
             if (mView != null) {
                 mView.setNavBarMode(mode);
+                mView.setShouldShowSwipeUpUi(mOverviewProxyService.shouldShowSwipeUpUI());
             }
         }
     };

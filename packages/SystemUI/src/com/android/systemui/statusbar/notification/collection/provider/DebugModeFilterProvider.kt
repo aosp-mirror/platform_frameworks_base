@@ -29,7 +29,6 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.util.Assert
 import com.android.systemui.util.ListenerSet
 import com.android.systemui.util.isNotEmpty
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -93,7 +92,7 @@ class DebugModeFilterProvider @Inject constructor(
         return entry.sbn.packageName !in allowedPackages
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("initialized: ${listeners.isNotEmpty()}")
         pw.println("allowedPackages: ${allowedPackages.size}")
         allowedPackages.forEachIndexed { i, pkg ->

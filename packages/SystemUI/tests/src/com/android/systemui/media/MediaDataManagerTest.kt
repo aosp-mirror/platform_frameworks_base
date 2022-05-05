@@ -1,11 +1,13 @@
 package com.android.systemui.media
 
+import android.app.Notification
 import android.app.Notification.MediaStyle
 import android.app.PendingIntent
 import android.app.smartspace.SmartspaceAction
 import android.app.smartspace.SmartspaceTarget
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.drawable.Icon
 import android.media.MediaDescription
 import android.media.MediaMetadata
 import android.media.session.MediaController
@@ -18,6 +20,7 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import androidx.media.utils.MediaConstants
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.InstanceId
 import com.android.systemui.InstanceIdSequenceFake
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
@@ -28,6 +31,7 @@ import com.android.systemui.statusbar.SbnBuilder
 import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
@@ -45,7 +49,9 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.junit.MockitoJUnit
 import org.mockito.Mockito.`when` as whenever
 
@@ -92,6 +98,7 @@ class MediaDataManagerTest : SysuiTestCase() {
     lateinit var smartspaceMediaDataProvider: SmartspaceMediaDataProvider
     @Mock lateinit var mediaSmartspaceTarget: SmartspaceTarget
     @Mock private lateinit var mediaRecommendationItem: SmartspaceAction
+    lateinit var validRecommendationList: List<SmartspaceAction>
     @Mock private lateinit var mediaSmartspaceBaseAction: SmartspaceAction
     @Mock private lateinit var mediaFlags: MediaFlags
     @Mock private lateinit var logger: MediaUiEventLogger
@@ -167,12 +174,17 @@ class MediaDataManagerTest : SysuiTestCase() {
             putString("package_name", PACKAGE_NAME)
             putParcelable("dismiss_intent", DISMISS_INTENT)
         }
+        val icon = Icon.createWithResource(context, android.R.drawable.ic_media_play)
         whenever(mediaSmartspaceBaseAction.extras).thenReturn(recommendationExtras)
         whenever(mediaSmartspaceTarget.baseAction).thenReturn(mediaSmartspaceBaseAction)
         whenever(mediaRecommendationItem.extras).thenReturn(recommendationExtras)
+        whenever(mediaRecommendationItem.icon).thenReturn(icon)
+        validRecommendationList = listOf(
+            mediaRecommendationItem, mediaRecommendationItem, mediaRecommendationItem
+        )
         whenever(mediaSmartspaceTarget.smartspaceTargetId).thenReturn(KEY_MEDIA_SMARTSPACE)
         whenever(mediaSmartspaceTarget.featureType).thenReturn(SmartspaceTarget.FEATURE_MEDIA)
-        whenever(mediaSmartspaceTarget.iconGrid).thenReturn(listOf(mediaRecommendationItem))
+        whenever(mediaSmartspaceTarget.iconGrid).thenReturn(validRecommendationList)
         whenever(mediaSmartspaceTarget.creationTimeMillis).thenReturn(1234L)
         whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(false)
         whenever(logger.getNewInstanceId()).thenReturn(instanceIdSequence.newInstanceId())
@@ -271,6 +283,49 @@ class MediaDataManagerTest : SysuiTestCase() {
                 MediaData.PLAYBACK_CAST_REMOTE)
         verify(logger).logActiveMediaAdded(anyInt(), eq(SYSTEM_PACKAGE_NAME),
             eq(mediaDataCaptor.value.instanceId), eq(MediaData.PLAYBACK_CAST_REMOTE))
+    }
+
+    @Test
+    fun testLoadMediaDataInBg_invalidTokenNoCrash() {
+        val bundle = Bundle()
+        // wrong data type
+        bundle.putParcelable(Notification.EXTRA_MEDIA_SESSION, Bundle())
+        val rcn = SbnBuilder().run {
+            setPkg(SYSTEM_PACKAGE_NAME)
+            modifyNotification(context).also {
+                it.setSmallIcon(android.R.drawable.ic_media_pause)
+                it.addExtras(bundle)
+                it.setStyle(MediaStyle().apply {
+                    setRemotePlaybackInfo("Remote device", 0, null)
+                })
+            }
+            build()
+        }
+
+        mediaDataManager.loadMediaDataInBg(KEY, rcn, null)
+        // no crash even though the data structure is incorrect
+    }
+
+    @Test
+    fun testLoadMediaDataInBg_invalidMediaRemoteIntentNoCrash() {
+        val bundle = Bundle()
+        // wrong data type
+        bundle.putParcelable(Notification.EXTRA_MEDIA_REMOTE_INTENT, Bundle())
+        val rcn = SbnBuilder().run {
+            setPkg(SYSTEM_PACKAGE_NAME)
+            modifyNotification(context).also {
+                it.setSmallIcon(android.R.drawable.ic_media_pause)
+                it.addExtras(bundle)
+                it.setStyle(MediaStyle().apply {
+                    setMediaSession(session.sessionToken)
+                    setRemotePlaybackInfo("Remote device", 0, null)
+                })
+            }
+            build()
+        }
+
+        mediaDataManager.loadMediaDataInBg(KEY, rcn, null)
+        // no crash even though the data structure is incorrect
     }
 
     @Test
@@ -451,11 +506,20 @@ class MediaDataManagerTest : SysuiTestCase() {
     @Test
     fun testOnSmartspaceMediaDataLoaded_hasNewValidMediaTarget_callsListener() {
         smartspaceMediaDataProvider.onTargetsAvailable(listOf(mediaSmartspaceTarget))
+        verify(logger).getNewInstanceId()
+        val instanceId = instanceIdSequence.lastInstanceId
+
         verify(listener).onSmartspaceMediaDataLoaded(
             eq(KEY_MEDIA_SMARTSPACE),
-            eq(SmartspaceMediaData(KEY_MEDIA_SMARTSPACE, true /* isActive */, true /*isValid */,
-                PACKAGE_NAME, mediaSmartspaceBaseAction, listOf(mediaRecommendationItem),
-                DISMISS_INTENT, 0, 1234L)),
+            eq(SmartspaceMediaData(
+                targetId = KEY_MEDIA_SMARTSPACE,
+                isActive = true,
+                packageName = PACKAGE_NAME,
+                cardAction = mediaSmartspaceBaseAction,
+                recommendations = validRecommendationList,
+                dismissIntent = DISMISS_INTENT,
+                headphoneConnectionTimeMillis = 1234L,
+                instanceId = InstanceId.fakeInstanceId(instanceId))),
             eq(false))
     }
 
@@ -463,12 +527,17 @@ class MediaDataManagerTest : SysuiTestCase() {
     fun testOnSmartspaceMediaDataLoaded_hasNewInvalidMediaTarget_callsListener() {
         whenever(mediaSmartspaceTarget.iconGrid).thenReturn(listOf())
         smartspaceMediaDataProvider.onTargetsAvailable(listOf(mediaSmartspaceTarget))
+        verify(logger).getNewInstanceId()
+        val instanceId = instanceIdSequence.lastInstanceId
+
         verify(listener).onSmartspaceMediaDataLoaded(
             eq(KEY_MEDIA_SMARTSPACE),
-            eq(EMPTY_SMARTSPACE_MEDIA_DATA
-                .copy(targetId = KEY_MEDIA_SMARTSPACE, isActive = true,
-                    isValid = false, dismissIntent = DISMISS_INTENT,
-                headphoneConnectionTimeMillis = 1234L)),
+            eq(EMPTY_SMARTSPACE_MEDIA_DATA.copy(
+                targetId = KEY_MEDIA_SMARTSPACE,
+                isActive = true,
+                dismissIntent = DISMISS_INTENT,
+                headphoneConnectionTimeMillis = 1234L,
+                instanceId = InstanceId.fakeInstanceId(instanceId))),
             eq(false))
     }
 
@@ -483,18 +552,24 @@ class MediaDataManagerTest : SysuiTestCase() {
         whenever(mediaSmartspaceTarget.iconGrid).thenReturn(listOf())
 
         smartspaceMediaDataProvider.onTargetsAvailable(listOf(mediaSmartspaceTarget))
+        verify(logger).getNewInstanceId()
+        val instanceId = instanceIdSequence.lastInstanceId
 
         verify(listener).onSmartspaceMediaDataLoaded(
             eq(KEY_MEDIA_SMARTSPACE),
-            eq(EMPTY_SMARTSPACE_MEDIA_DATA
-                .copy(targetId = KEY_MEDIA_SMARTSPACE, isActive = true,
-                    isValid = false, dismissIntent = null, headphoneConnectionTimeMillis = 1234L)),
+            eq(EMPTY_SMARTSPACE_MEDIA_DATA.copy(
+                targetId = KEY_MEDIA_SMARTSPACE,
+                isActive = true,
+                dismissIntent = null,
+                headphoneConnectionTimeMillis = 1234L,
+                instanceId = InstanceId.fakeInstanceId(instanceId))),
             eq(false))
     }
 
     @Test
     fun testOnSmartspaceMediaDataLoaded_hasNoneMediaTarget_notCallsListener() {
         smartspaceMediaDataProvider.onTargetsAvailable(listOf())
+        verify(logger, never()).getNewInstanceId()
         verify(listener, never())
                 .onSmartspaceMediaDataLoaded(anyObject(), anyObject(), anyBoolean())
     }
@@ -502,11 +577,14 @@ class MediaDataManagerTest : SysuiTestCase() {
     @Test
     fun testOnSmartspaceMediaDataLoaded_hasNoneMediaTarget_callsRemoveListener() {
         smartspaceMediaDataProvider.onTargetsAvailable(listOf(mediaSmartspaceTarget))
+        verify(logger).getNewInstanceId()
+
         smartspaceMediaDataProvider.onTargetsAvailable(listOf())
         foregroundExecutor.advanceClockToLast()
         foregroundExecutor.runAllReady()
 
         verify(listener).onSmartspaceMediaDataRemoved(eq(KEY_MEDIA_SMARTSPACE), eq(false))
+        verifyNoMoreInteractions(logger)
     }
 
     @Test
@@ -618,6 +696,36 @@ class MediaDataManagerTest : SysuiTestCase() {
                 eq(0), eq(false))
         assertThat(mediaDataCaptor.value.actionsToShowInCompact.size).isEqualTo(
                 MediaDataManager.MAX_COMPACT_ACTIONS)
+    }
+
+    @Test
+    fun testTooManyNotificationActions_isTruncated() {
+        // GIVEN a notification where too many notification actions are added
+        val action = Notification.Action(R.drawable.ic_android, "action", null)
+        val notif = SbnBuilder().run {
+            setPkg(PACKAGE_NAME)
+            modifyNotification(context).also {
+                it.setSmallIcon(android.R.drawable.ic_media_pause)
+                it.setStyle(MediaStyle().apply {
+                    setMediaSession(session.sessionToken)
+                })
+                for (i in 0..MediaDataManager.MAX_NOTIFICATION_ACTIONS) {
+                    it.addAction(action)
+                }
+            }
+            build()
+        }
+
+        // WHEN the notification is loaded
+        mediaDataManager.onNotificationAdded(KEY, notif)
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+
+        // THEN only the first MAX_NOTIFICATION_ACTIONS are actually included
+        verify(listener).onMediaDataLoaded(eq(KEY), eq(null), capture(mediaDataCaptor), eq(true),
+            eq(0), eq(false))
+        assertThat(mediaDataCaptor.value.actions.size).isEqualTo(
+            MediaDataManager.MAX_NOTIFICATION_ACTIONS)
     }
 
     @Test
@@ -778,6 +886,28 @@ class MediaDataManagerTest : SysuiTestCase() {
 
         assertThat(actions.custom1).isNotNull()
         assertThat(actions.custom1!!.contentDescription).isEqualTo(customDesc[1])
+
+        assertThat(actions.reserveNext).isTrue()
+        assertThat(actions.reservePrev).isTrue()
+    }
+
+    @Test
+    fun testPlaybackActions_playPause_hasButton() {
+        whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
+        val stateActions = PlaybackState.ACTION_PLAY_PAUSE
+        val stateBuilder = PlaybackState.Builder().setActions(stateActions)
+        whenever(controller.playbackState).thenReturn(stateBuilder.build())
+
+        addNotificationAndLoad()
+
+        assertThat(mediaDataCaptor.value!!.semanticActions).isNotNull()
+        val actions = mediaDataCaptor.value!!.semanticActions!!
+
+        assertThat(actions.playOrPause).isNotNull()
+        assertThat(actions.playOrPause!!.contentDescription).isEqualTo(
+            context.getString(R.string.controls_media_button_play))
+        actions.playOrPause!!.action!!.run()
+        verify(transportControls).play()
     }
 
     @Test
@@ -812,6 +942,38 @@ class MediaDataManagerTest : SysuiTestCase() {
         assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
         verify(logger).logPlaybackLocationChange(anyInt(), eq(SYSTEM_PACKAGE_NAME),
             eq(instanceId), eq(MediaData.PLAYBACK_CAST_REMOTE))
+    }
+
+    @Test
+    fun testPlaybackStateChange_keyExists_callsListener() {
+        // Notification has been added
+        addNotificationAndLoad()
+        val callbackCaptor = argumentCaptor<(String, PlaybackState) -> Unit>()
+        verify(mediaTimeoutListener).stateCallback = capture(callbackCaptor)
+
+        // Callback gets an updated state
+        val state = PlaybackState.Builder()
+                .setState(PlaybackState.STATE_PLAYING, 0L, 1f)
+                .build()
+        callbackCaptor.value.invoke(KEY, state)
+
+        // Listener is notified of updated state
+        verify(listener).onMediaDataLoaded(eq(KEY), eq(KEY),
+                capture(mediaDataCaptor), eq(true), eq(0), eq(false))
+        assertThat(mediaDataCaptor.value.isPlaying).isTrue()
+    }
+
+    @Test
+    fun testPlaybackStateChange_keyDoesNotExist_doesNothing() {
+        val state = PlaybackState.Builder().build()
+        val callbackCaptor = argumentCaptor<(String, PlaybackState) -> Unit>()
+        verify(mediaTimeoutListener).stateCallback = capture(callbackCaptor)
+
+        // No media added with this key
+
+        callbackCaptor.value.invoke(KEY, state)
+        verify(listener, never()).onMediaDataLoaded(eq(KEY), any(), any(), anyBoolean(), anyInt(),
+                anyBoolean())
     }
 
     /**

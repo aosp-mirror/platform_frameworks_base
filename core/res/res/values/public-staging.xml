@@ -102,140 +102,65 @@
 <resources>
 
   <!-- ===============================================================
-    Resources added in version T of the platform
+    Resources added in version U of the platform
 
     NOTE: After this version of the platform is forked, changes cannot be made to the root
     branch's groups for that release. Only merge changes to the forked platform branch.
     =============================================================== -->
   <eat-comment/>
 
-  <staging-public-group type="attr" first-id="0x01df0000">
-    <public name="sharedUserMaxSdkVersion" />
-    <public name="requiredSplitTypes" />
-    <public name="splitTypes" />
-    <public name="canDisplayOnRemoteDevices" />
-    <public name="supportedTypes" />
-    <public name="resetEnabledSettingsOnAppDataCleared" />
-    <public name="supportsStylusHandwriting" />
-    <public name="showClockAndComplications" />
-    <!-- @hide @SystemApi -->
-    <public name="gameSessionService" />
-    <public name="supportsBatteryGameMode" />
-    <public name="supportsPerformanceGameMode" />
-    <public name="allowGameAngleDriver" />
-    <public name="allowGameDownscaling" />
-    <public name="allowGameFpsOverride" />
-    <public name="localeConfig" />
-    <public name="showBackdrop" />
-    <public name="removed_useTargetActivityForQuickAccess"/>
-    <public name="removed_inheritKeyStoreKeys" />
-    <public name="preferKeepClear" />
-    <public name="autoHandwritingEnabled" />
-    <public name="fromExtendLeft" />
-    <public name="fromExtendTop" />
-    <public name="fromExtendRight" />
-    <public name="fromExtendBottom" />
-    <public name="toExtendLeft" />
-    <public name="toExtendTop" />
-    <public name="toExtendRight" />
-    <public name="toExtendBottom" />
-    <public name="tileService" />
-    <public name="windowSplashScreenBehavior" />
-    <public name="allowUntrustedActivityEmbedding" />
-    <public name="knownActivityEmbeddingCerts" />
-    <public name="intro" />
-    <public name="enableOnBackInvokedCallback" />
-    <public name="supportsInlineSuggestionsWithTouchExploration" />
-    <public name="lineBreakStyle" />
-    <public name="lineBreakWordStyle" />
-    <!-- @hide -->
-    <public name="maxDrawableWidth" />
-    <!-- @hide -->
-    <public name="maxDrawableHeight" />
-    <public name="backdropColor" />
+  <staging-public-group type="attr" first-id="0x01ce0000">
   </staging-public-group>
 
-  <staging-public-group type="id" first-id="0x01de0000">
-    <public name="removed_accessibilityActionSwipeLeft" />
-    <public name="removed_accessibilityActionSwipeRight" />
-    <public name="removed_accessibilityActionSwipeUp" />
-    <public name="removed_accessibilityActionSwipeDown" />
-    <public name="accessibilityActionShowTextSuggestions" />
-    <public name="inputExtractAction" />
-    <public name="inputExtractAccessories" />
+  <staging-public-group type="id" first-id="0x01cd0000">
   </staging-public-group>
 
-  <staging-public-group type="style" first-id="0x01dd0000">
-    <public name="TextAppearance.DeviceDefault.Headline" />
+  <staging-public-group type="style" first-id="0x01cc0000">
   </staging-public-group>
 
-  <staging-public-group type="string" first-id="0x01dc0000">
-    <!-- @hide @SystemApi -->
-    <public name="config_systemSupervision" />
-    <!-- @hide @SystemApi -->
-    <public name="config_devicePolicyManagement" />
-    <!-- @hide @SystemApi -->
-    <public name="config_systemAppProtectionService" />
-    <!-- @hide @SystemApi @TestApi -->
-    <public name="config_systemAutomotiveCalendarSyncManager" />
-    <!-- @hide @SystemApi -->
-    <public name="config_defaultAutomotiveNavigation" />
-    <!-- @hide @SystemApi -->
-    <public name="safety_protection_display_text" />
-    <!-- @hide @SystemApi -->
-    <public name="config_systemSettingsIntelligence" />
-    <!-- @hide -->
-    <public name="config_systemBluetoothStack" />
+  <staging-public-group type="string" first-id="0x01cb0000">
   </staging-public-group>
 
-  <staging-public-group type="dimen" first-id="0x01db0000">
+  <staging-public-group type="dimen" first-id="0x01ca0000">
   </staging-public-group>
 
-  <staging-public-group type="color" first-id="0x01da0000">
+  <staging-public-group type="color" first-id="0x01c90000">
   </staging-public-group>
 
-  <staging-public-group type="array" first-id="0x01d90000">
-    <!-- @hide @SystemApi -->
-    <public name="config_optionalIpSecAlgorithms" />
+  <staging-public-group type="array" first-id="0x01c80000">
   </staging-public-group>
 
-  <staging-public-group type="drawable" first-id="0x01d80000">
-    <!-- @hide @SystemApi -->
-    <public name="ic_safety_protection" />
+  <staging-public-group type="drawable" first-id="0x01c70000">
   </staging-public-group>
 
-  <staging-public-group type="layout" first-id="0x01d70000">
+  <staging-public-group type="layout" first-id="0x01c60000">
   </staging-public-group>
 
-  <staging-public-group type="anim" first-id="0x01d60000">
+  <staging-public-group type="anim" first-id="0x01c50000">
   </staging-public-group>
 
-  <staging-public-group type="animator" first-id="0x01d50000">
+  <staging-public-group type="animator" first-id="0x01c40000">
   </staging-public-group>
 
-  <staging-public-group type="interpolator" first-id="0x01d40000">
+  <staging-public-group type="interpolator" first-id="0x01c30000">
   </staging-public-group>
 
-  <staging-public-group type="mipmap" first-id="0x01d30000">
+  <staging-public-group type="mipmap" first-id="0x01c20000">
   </staging-public-group>
 
-  <staging-public-group type="integer" first-id="0x01d20000">
+  <staging-public-group type="integer" first-id="0x01c10000">
   </staging-public-group>
 
-  <staging-public-group type="transition" first-id="0x01d10000">
+  <staging-public-group type="transition" first-id="0x01c00000">
   </staging-public-group>
 
-  <staging-public-group type="raw" first-id="0x01d00000">
+  <staging-public-group type="raw" first-id="0x01bf0000">
   </staging-public-group>
 
-  <staging-public-group type="bool" first-id="0x01cf0000">
-    <!-- @hide @TestApi -->
-    <public name="config_preventImeStartupUnlessTextEditor" />
-    <!-- @hide @SystemApi -->
-    <public name="config_enableQrCodeScannerOnLockScreen" />
+  <staging-public-group type="bool" first-id="0x01be0000">
   </staging-public-group>
 
-  <staging-public-group type="fraction" first-id="0x01ce0000">
+  <staging-public-group type="fraction" first-id="0x01bd0000">
   </staging-public-group>
 
 </resources>

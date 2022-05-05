@@ -27,6 +27,7 @@ import android.content.pm.ResolveInfo
 import android.database.ContentObserver
 import android.net.Uri
 import android.os.Handler
+import android.os.UserHandle
 import android.os.VibrationEffect
 import android.provider.Settings.Secure
 import android.service.controls.Control
@@ -74,10 +75,10 @@ class ControlActionCoordinatorImpl @Inject constructor(
     private var actionsInProgress = mutableSetOf<String>()
     private val isLocked: Boolean
         get() = !keyguardStateController.isUnlocked()
-    private var mAllowTrivialControls: Boolean = secureSettings.getInt(
-            Secure.LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS, 0) != 0
-    private var mShowDeviceControlsInLockscreen: Boolean = secureSettings.getInt(
-            Secure.LOCKSCREEN_SHOW_CONTROLS, 0) != 0
+    private var mAllowTrivialControls: Boolean = secureSettings.getIntForUser(
+            Secure.LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS, 0, UserHandle.USER_CURRENT) != 0
+    private var mShowDeviceControlsInLockscreen: Boolean = secureSettings.getIntForUser(
+            Secure.LOCKSCREEN_SHOW_CONTROLS, 0, UserHandle.USER_CURRENT) != 0
     override lateinit var activityContext: Context
 
     companion object {
@@ -95,23 +96,25 @@ class ControlActionCoordinatorImpl @Inject constructor(
                 super.onChange(selfChange, uri)
                 when (uri) {
                     lockScreenShowControlsUri -> {
-                        mAllowTrivialControls = secureSettings.getInt(
-                                Secure.LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS, 0) != 0
+                        mAllowTrivialControls = secureSettings.getIntForUser(
+                                Secure.LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS,
+                                0, UserHandle.USER_CURRENT) != 0
                     }
                     showControlsUri -> {
                         mShowDeviceControlsInLockscreen = secureSettings
-                                .getInt(Secure.LOCKSCREEN_SHOW_CONTROLS, 0) != 0
+                                .getIntForUser(Secure.LOCKSCREEN_SHOW_CONTROLS,
+                                        0, UserHandle.USER_CURRENT) != 0
                     }
                 }
             }
         }
-        secureSettings.registerContentObserver(
+        secureSettings.registerContentObserverForUser(
             lockScreenShowControlsUri,
-            false /* notifyForDescendants */, controlsContentObserver
+            false /* notifyForDescendants */, controlsContentObserver, UserHandle.USER_ALL
         )
-        secureSettings.registerContentObserver(
+        secureSettings.registerContentObserverForUser(
             showControlsUri,
-            false /* notifyForDescendants */, controlsContentObserver
+            false /* notifyForDescendants */, controlsContentObserver, UserHandle.USER_ALL
         )
     }
 
@@ -311,7 +314,8 @@ class ControlActionCoordinatorImpl @Inject constructor(
                                     MAX_NUMBER_ATTEMPTS_CONTROLS_DIALOG)
                                     .commit()
                         }
-                        secureSettings.putInt(Secure.LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS, 1)
+                        secureSettings.putIntForUser(Secure.LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS, 1,
+                                UserHandle.USER_CURRENT)
                         true
                     }
                     .create()
@@ -325,8 +329,10 @@ class ControlActionCoordinatorImpl @Inject constructor(
                                     MAX_NUMBER_ATTEMPTS_CONTROLS_DIALOG)
                                     .commit()
                         }
-                        secureSettings.putInt(Secure.LOCKSCREEN_SHOW_CONTROLS, 1)
-                        secureSettings.putInt(Secure.LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS, 1)
+                        secureSettings.putIntForUser(Secure.LOCKSCREEN_SHOW_CONTROLS,
+                                1, UserHandle.USER_CURRENT)
+                        secureSettings.putIntForUser(Secure.LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS,
+                                1, UserHandle.USER_CURRENT)
                         true
                     }
                     .create()

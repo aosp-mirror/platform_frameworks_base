@@ -386,6 +386,22 @@ public class AppStandbyController
     private final Map<String, String> mAppStandbyProperties = new ArrayMap<>();
 
     /**
+     * List of app-ids of system packages, populated on boot, when system services are ready.
+     */
+    private final ArrayList<Integer> mSystemPackagesAppIds = new ArrayList<>();
+
+    /**
+     * PackageManager flags to query for all system packages, including those that are disabled
+     * and hidden.
+     */
+    private static final int SYSTEM_PACKAGE_FLAGS = PackageManager.MATCH_UNINSTALLED_PACKAGES
+            | PackageManager.MATCH_SYSTEM_ONLY
+            | PackageManager.MATCH_ANY_USER
+            | PackageManager.MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS
+            | PackageManager.MATCH_DIRECT_BOOT_AWARE
+            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
+
+    /**
      * Whether we should allow apps into the
      * {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_RESTRICTED} bucket or not.
      * If false, any attempts to put an app into the bucket will put the app into the
@@ -585,6 +601,14 @@ public class AppStandbyController
             if (mPendingOneTimeCheckIdleStates) {
                 postOneTimeCheckIdleStates();
             }
+
+            // Populate list of system packages and their app-ids.
+            final List<ApplicationInfo> systemApps = mPackageManager.getInstalledApplications(
+                    SYSTEM_PACKAGE_FLAGS);
+            for (int i = 0, size = systemApps.size(); i < size; i++) {
+                final ApplicationInfo appInfo = systemApps.get(i);
+                mSystemPackagesAppIds.add(UserHandle.getAppId(appInfo.uid));
+            }
         } else if (phase == PHASE_BOOT_COMPLETED) {
             setChargingState(mInjector.isCharging());
 
@@ -602,27 +626,25 @@ public class AppStandbyController
         // Get sync adapters for the authority
         String[] packages = ContentResolver.getSyncAdapterPackagesForAuthorityAsUser(
                 authority, userId);
+        final PackageManagerInternal pmi = mInjector.getPackageManagerInternal();
         final long elapsedRealtime = mInjector.elapsedRealtime();
-        for (String packageName: packages) {
-            // Only force the sync adapters to active if the provider is not in the same package and
-            // the sync adapter is a system package.
-            try {
-                PackageInfo pi = mPackageManager.getPackageInfoAsUser(
-                        packageName, PackageManager.MATCH_SYSTEM_ONLY, userId);
-                if (pi == null || pi.applicationInfo == null) {
-                    continue;
+        for (String packageName : packages) {
+            // Don't force the sync adapter to active if the provider is in the same APK.
+            if (packageName.equals(providerPkgName)) {
+                continue;
+            }
+
+            final int appId = UserHandle.getAppId(pmi.getPackageUid(packageName, 0, userId));
+            // Elevate the sync adapter to active if it's a system app or
+            // is a non-system app and shares its app id with a system app.
+            if (mSystemPackagesAppIds.contains(appId)) {
+                final List<UserHandle> linkedProfiles = getCrossProfileTargets(packageName,
+                        userId);
+                synchronized (mAppIdleLock) {
+                    reportNoninteractiveUsageCrossUserLocked(packageName, userId,
+                            STANDBY_BUCKET_ACTIVE, REASON_SUB_USAGE_SYNC_ADAPTER,
+                            elapsedRealtime, mSyncAdapterTimeoutMillis, linkedProfiles);
                 }
-                if (!packageName.equals(providerPkgName)) {
-                    final List<UserHandle> linkedProfiles = getCrossProfileTargets(packageName,
-                            userId);
-                    synchronized (mAppIdleLock) {
-                        reportNoninteractiveUsageCrossUserLocked(packageName, userId,
-                                STANDBY_BUCKET_ACTIVE, REASON_SUB_USAGE_SYNC_ADAPTER,
-                                elapsedRealtime, mSyncAdapterTimeoutMillis, linkedProfiles);
-                    }
-                }
-            } catch (PackageManager.NameNotFoundException e) {
-                // Shouldn't happen
             }
         }
     }
@@ -1133,6 +1155,12 @@ public class AppStandbyController
 
         final int appId = getAppId(packageName);
         if (appId < 0) return;
+        final int minBucket = getAppMinBucket(packageName, appId, userId);
+        if (idle && minBucket < AppIdleHistory.IDLE_BUCKET_CUTOFF) {
+            Slog.e(TAG, "Tried to force an app to be idle when its min bucket is "
+                    + standbyBucketToString(minBucket));
+            return;
+        }
         final long elapsedRealtime = mInjector.elapsedRealtime();
 
         final boolean previouslyIdle = isAppIdleFiltered(packageName, appId,
@@ -1144,12 +1172,10 @@ public class AppStandbyController
         final boolean stillIdle = isAppIdleFiltered(packageName, appId,
                 userId, elapsedRealtime);
         // Inform listeners if necessary
+        maybeInformListeners(packageName, userId, elapsedRealtime, standbyBucket,
+                REASON_MAIN_FORCED_BY_USER, false);
         if (previouslyIdle != stillIdle) {
-            maybeInformListeners(packageName, userId, elapsedRealtime, standbyBucket,
-                    REASON_MAIN_FORCED_BY_USER, false);
-            if (!stillIdle) {
-                notifyBatteryStats(packageName, userId, idle);
-            }
+            notifyBatteryStats(packageName, userId, stillIdle);
         }
     }
 
@@ -1912,6 +1938,8 @@ public class AppStandbyController
             }
             mAppIdleHistory.setAppStandbyBucket(
                     packageName, userId, elapsedRealtime, newBucket, newReason);
+            maybeInformListeners(packageName, userId, elapsedRealtime, newBucket,
+                    newReason, false);
         }
     }
 
@@ -2190,7 +2218,18 @@ public class AppStandbyController
             for (int i = mHeadlessSystemApps.size() - 1; i >= 0; --i) {
                 pw.print("  ");
                 pw.print(mHeadlessSystemApps.valueAt(i));
-                pw.println(",");
+                if (i != 0) pw.println(",");
+            }
+        }
+        pw.println("]");
+        pw.println();
+
+        pw.println("mSystemPackagesAppIds=[");
+        synchronized (mSystemPackagesAppIds) {
+            for (int i = mSystemPackagesAppIds.size() - 1; i >= 0; --i) {
+                pw.print("  ");
+                pw.print(mSystemPackagesAppIds.get(i));
+                if (i != 0) pw.println(",");
             }
         }
         pw.println("]");
@@ -2457,6 +2496,8 @@ public class AppStandbyController
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_INFORM_LISTENERS:
+                    // TODO(230875908): Properly notify BatteryStats when apps change from active to
+                    // idle, and vice versa
                     StandbyUpdateRecord r = (StandbyUpdateRecord) msg.obj;
                     informListeners(r.packageName, r.userId, r.bucket, r.reason,
                             r.isUserInteraction);

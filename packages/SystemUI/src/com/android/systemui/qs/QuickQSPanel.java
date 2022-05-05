@@ -71,7 +71,11 @@ public class QuickQSPanel extends QSPanel {
 
     @Override
     protected void updatePadding() {
-        // QS Panel is setting a top padding by default, which we don't need.
+        int bottomPadding = getResources().getDimensionPixelSize(R.dimen.qqs_layout_padding_bottom);
+        setPaddingRelative(getPaddingStart(),
+                getPaddingTop(),
+                getPaddingEnd(),
+                bottomPadding);
     }
 
     @Override

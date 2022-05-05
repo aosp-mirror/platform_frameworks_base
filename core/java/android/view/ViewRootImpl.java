@@ -319,6 +319,13 @@ public final class ViewRootImpl implements ViewParent,
      */
     private static final int SCROLL_CAPTURE_REQUEST_TIMEOUT_MILLIS = 2500;
 
+    private static final int UNSET_SYNC_ID = -1;
+
+    /**
+     * Minimum time to wait before reporting changes to keep clear areas.
+     */
+    private static final int KEEP_CLEAR_AREA_REPORT_RATE_MILLIS = 100;
+
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     static final ThreadLocal<HandlerActionQueue> sRunQueues = new ThreadLocal<HandlerActionQueue>();
 
@@ -794,6 +801,8 @@ public final class ViewRootImpl implements ViewParent,
             new ViewRootRectTracker(v -> v.collectPreferKeepClearRects());
     private final ViewRootRectTracker mUnrestrictedKeepClearRectsTracker =
             new ViewRootRectTracker(v -> v.collectUnrestrictedPreferKeepClearRects());
+    private List<Rect> mPendingKeepClearAreas;
+    private List<Rect> mPendingUnrestrictedKeepClearAreas;
 
     private IAccessibilityEmbeddedConnection mAccessibilityEmbeddedConnection;
 
@@ -815,7 +824,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private final SurfaceSyncer mSurfaceSyncer = new SurfaceSyncer();
-    private int mLastSyncId = -1;
+    private int mSyncId = UNSET_SYNC_ID;
     private SurfaceSyncer.SyncBufferCallback mSyncBufferCallback;
     private int mNumSyncsInProgress = 0;
 
@@ -2577,7 +2586,8 @@ public final class ViewRootImpl implements ViewParent,
             mAttachInfo.mContentInsets.set(mLastWindowInsets.getSystemWindowInsets().toRect());
             mAttachInfo.mStableInsets.set(mLastWindowInsets.getStableInsets().toRect());
             mAttachInfo.mVisibleInsets.set(mInsetsController.calculateVisibleInsets(
-                    mWindowAttributes.softInputMode).toRect());
+                    mWindowAttributes.type, config.windowConfiguration.getWindowingMode(),
+                    mWindowAttributes.softInputMode, mWindowAttributes.flags).toRect());
         }
         return mLastWindowInsets;
     }
@@ -2892,6 +2902,14 @@ public final class ViewRootImpl implements ViewParent,
 
         if (mFirst || windowShouldResize || viewVisibilityChanged || params != null
                 || mForceNextWindowRelayout) {
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+                Trace.traceBegin(Trace.TRACE_TAG_VIEW,
+                        TextUtils.formatSimple("relayoutWindow#"
+                                        + "first=%b/resize=%b/vis=%b/params=%b/force=%b",
+                                mFirst, windowShouldResize, viewVisibilityChanged, params != null,
+                                mForceNextWindowRelayout));
+            }
+
             mForceNextWindowRelayout = false;
 
             // If this window is giving internal insets to the window manager, then we want to first
@@ -3082,6 +3100,10 @@ public final class ViewRootImpl implements ViewParent,
                     }
                 }
             } catch (RemoteException e) {
+            } finally {
+                if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+                    Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+                }
             }
 
             if (DEBUG_ORIENTATION) Log.v(
@@ -3469,21 +3491,21 @@ public final class ViewRootImpl implements ViewParent,
             mReportNextDraw = false;
             mSyncBufferCallback = null;
             mSyncBuffer = false;
-            if (mLastSyncId != -1) {
-                mSurfaceSyncer.markSyncReady(mLastSyncId);
-                mLastSyncId = -1;
+            if (isInLocalSync()) {
+                mSurfaceSyncer.markSyncReady(mSyncId);
+                mSyncId = UNSET_SYNC_ID;
             }
         }
     }
 
     private void createSyncIfNeeded() {
         // Started a sync already or there's nothing needing to sync
-        if (mLastSyncId != -1 || !mReportNextDraw) {
+        if (isInLocalSync() || !mReportNextDraw) {
             return;
         }
 
         final int seqId = mSyncSeqId;
-        mLastSyncId = mSurfaceSyncer.setupSync(transaction -> {
+        mSyncId = mSurfaceSyncer.setupSync(transaction -> {
             // Callback will be invoked on executor thread so post to main thread.
             mHandler.postAtFrontOfQueue(() -> {
                 mSurfaceChangedTransaction.merge(transaction);
@@ -3491,9 +3513,9 @@ public final class ViewRootImpl implements ViewParent,
             });
         });
         if (DEBUG_BLAST) {
-            Log.d(mTag, "Setup new sync id=" + mLastSyncId);
+            Log.d(mTag, "Setup new sync id=" + mSyncId);
         }
-        mSurfaceSyncer.addToSync(mLastSyncId, mSyncTarget);
+        mSurfaceSyncer.addToSync(mSyncId, mSyncTarget);
     }
 
     private void notifyContentCatpureEvents() {
@@ -4129,17 +4151,19 @@ public final class ViewRootImpl implements ViewParent,
         return mAttachInfo.mThreadedRenderer != null && mAttachInfo.mThreadedRenderer.isEnabled();
     }
 
-    boolean addToSync(SurfaceSyncer.SyncTarget syncable) {
-        if (mLastSyncId == -1) {
-            return false;
+    void addToSync(SurfaceSyncer.SyncTarget syncable) {
+        if (!isInLocalSync()) {
+            return;
         }
-        mSurfaceSyncer.addToSync(mLastSyncId, syncable);
-        return true;
+        mSurfaceSyncer.addToSync(mSyncId, syncable);
     }
 
-
-    public boolean isInSync() {
-        return mLastSyncId != -1;
+    /**
+     * This VRI is currently in the middle of a sync request, but specifically one initiated from
+     * within VRI.
+     */
+    public boolean isInLocalSync() {
+        return mSyncId != UNSET_SYNC_ID;
     }
 
     private void addFrameCommitCallbackIfNeeded() {
@@ -4170,26 +4194,6 @@ public final class ViewRootImpl implements ViewParent,
                 }
             });
         });
-    }
-
-    @Nullable
-    private void registerFrameDrawingCallbackForBlur() {
-        if (!isHardwareEnabled()) {
-            return;
-        }
-        final boolean hasBlurUpdates = mBlurRegionAggregator.hasUpdates();
-        final boolean needsCallbackForBlur = hasBlurUpdates || mBlurRegionAggregator.hasRegions();
-
-        if (!needsCallbackForBlur) {
-            return;
-        }
-
-        final BackgroundBlurDrawable.BlurRegion[] blurRegionsForFrame =
-                mBlurRegionAggregator.getBlurRegionsCopyForRT();
-
-        // The callback will run on the render thread.
-        registerRtFrameCallback((frame) -> mBlurRegionAggregator
-                .dispatchBlurTransactionIfNeeded(frame, blurRegionsForFrame, hasBlurUpdates));
     }
 
     private void registerCallbackForPendingTransactions() {
@@ -4229,7 +4233,6 @@ public final class ViewRootImpl implements ViewParent,
         mIsDrawing = true;
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "draw");
 
-        registerFrameDrawingCallbackForBlur();
         addFrameCommitCallbackIfNeeded();
 
         boolean usingAsyncReport = isHardwareEnabled() && mSyncBufferCallback != null;
@@ -4819,12 +4822,39 @@ public final class ViewRootImpl implements ViewParent,
                 unrestrictedKeepClearRects = Collections.emptyList();
             }
 
-            try {
-                mWindowSession.reportKeepClearAreasChanged(mWindow, restrictedKeepClearRects,
-                        unrestrictedKeepClearRects);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
+            if (mHandler.hasMessages(MSG_REPORT_KEEP_CLEAR_RECTS)) {
+                // Keep clear areas have been reported recently, wait before reporting new set
+                // of keep clear areas
+                mPendingKeepClearAreas = restrictedKeepClearRects;
+                mPendingUnrestrictedKeepClearAreas = unrestrictedKeepClearRects;
+            } else {
+                mHandler.sendEmptyMessageDelayed(MSG_REPORT_KEEP_CLEAR_RECTS,
+                        KEEP_CLEAR_AREA_REPORT_RATE_MILLIS);
+                try {
+                    mWindowSession.reportKeepClearAreasChanged(mWindow, restrictedKeepClearRects,
+                            unrestrictedKeepClearRects);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
             }
+        }
+    }
+
+    void reportKeepClearAreasChanged() {
+        final List<Rect> restrictedKeepClearRects = mPendingKeepClearAreas;
+        final List<Rect> unrestrictedKeepClearRects = mPendingUnrestrictedKeepClearAreas;
+        if (restrictedKeepClearRects == null && unrestrictedKeepClearRects == null) {
+            return;
+        }
+
+        mPendingKeepClearAreas = null;
+        mPendingUnrestrictedKeepClearAreas = null;
+
+        try {
+            mWindowSession.reportKeepClearAreasChanged(mWindow, restrictedKeepClearRects,
+                    unrestrictedKeepClearRects);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -5030,9 +5060,6 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     void requestPointerCapture(boolean enabled) {
-        if (mPointerCapture == enabled) {
-            return;
-        }
         final IBinder inputToken = getInputToken();
         if (inputToken == null) {
             Log.e(mTag, "No input channel to request Pointer Capture.");
@@ -5320,6 +5347,7 @@ public final class ViewRootImpl implements ViewParent,
     private static final int MSG_REQUEST_SCROLL_CAPTURE = 33;
     private static final int MSG_WINDOW_TOUCH_MODE_CHANGED = 34;
     private static final int MSG_KEEP_CLEAR_RECTS_CHANGED = 35;
+    private static final int MSG_REPORT_KEEP_CLEAR_RECTS = 36;
 
 
     final class ViewRootHandler extends Handler {
@@ -5595,6 +5623,9 @@ public final class ViewRootImpl implements ViewParent,
                 }   break;
                 case MSG_KEEP_CLEAR_RECTS_CHANGED: {
                     keepClearRectsChanged();
+                }   break;
+                case MSG_REPORT_KEEP_CLEAR_RECTS: {
+                    reportKeepClearAreasChanged();
                 }   break;
                 case MSG_REQUEST_SCROLL_CAPTURE:
                     handleScrollCaptureRequest((IScrollCaptureResponseListener) msg.obj);
@@ -10256,13 +10287,14 @@ public final class ViewRootImpl implements ViewParent,
         public void findAccessibilityNodeInfoByAccessibilityId(long accessibilityNodeId,
                 Region interactiveRegion, int interactionId,
                 IAccessibilityInteractionConnectionCallback callback, int flags,
-                int interrogatingPid, long interrogatingTid, MagnificationSpec spec, Bundle args) {
+                int interrogatingPid, long interrogatingTid, MagnificationSpec spec, float[] matrix,
+                Bundle args) {
             ViewRootImpl viewRootImpl = mViewRootImpl.get();
             if (viewRootImpl != null && viewRootImpl.mView != null) {
                 viewRootImpl.getAccessibilityInteractionController()
                     .findAccessibilityNodeInfoByAccessibilityIdClientThread(accessibilityNodeId,
                             interactiveRegion, interactionId, callback, flags, interrogatingPid,
-                            interrogatingTid, spec, args);
+                            interrogatingTid, spec, matrix, args);
             } else {
                 // We cannot make the call and notify the caller so it does not wait.
                 try {
@@ -10297,13 +10329,14 @@ public final class ViewRootImpl implements ViewParent,
         public void findAccessibilityNodeInfosByViewId(long accessibilityNodeId,
                 String viewId, Region interactiveRegion, int interactionId,
                 IAccessibilityInteractionConnectionCallback callback, int flags,
-                int interrogatingPid, long interrogatingTid, MagnificationSpec spec) {
+                int interrogatingPid, long interrogatingTid, MagnificationSpec spec,
+                float[] matrix) {
             ViewRootImpl viewRootImpl = mViewRootImpl.get();
             if (viewRootImpl != null && viewRootImpl.mView != null) {
                 viewRootImpl.getAccessibilityInteractionController()
                     .findAccessibilityNodeInfosByViewIdClientThread(accessibilityNodeId,
                             viewId, interactiveRegion, interactionId, callback, flags,
-                            interrogatingPid, interrogatingTid, spec);
+                            interrogatingPid, interrogatingTid, spec, matrix);
             } else {
                 // We cannot make the call and notify the caller so it does not wait.
                 try {
@@ -10318,13 +10351,14 @@ public final class ViewRootImpl implements ViewParent,
         public void findAccessibilityNodeInfosByText(long accessibilityNodeId, String text,
                 Region interactiveRegion, int interactionId,
                 IAccessibilityInteractionConnectionCallback callback, int flags,
-                int interrogatingPid, long interrogatingTid, MagnificationSpec spec) {
+                int interrogatingPid, long interrogatingTid, MagnificationSpec spec,
+                float[] matrix) {
             ViewRootImpl viewRootImpl = mViewRootImpl.get();
             if (viewRootImpl != null && viewRootImpl.mView != null) {
                 viewRootImpl.getAccessibilityInteractionController()
                     .findAccessibilityNodeInfosByTextClientThread(accessibilityNodeId, text,
                             interactiveRegion, interactionId, callback, flags, interrogatingPid,
-                            interrogatingTid, spec);
+                            interrogatingTid, spec, matrix);
             } else {
                 // We cannot make the call and notify the caller so it does not wait.
                 try {
@@ -10338,13 +10372,14 @@ public final class ViewRootImpl implements ViewParent,
         @Override
         public void findFocus(long accessibilityNodeId, int focusType, Region interactiveRegion,
                 int interactionId, IAccessibilityInteractionConnectionCallback callback, int flags,
-                int interrogatingPid, long interrogatingTid, MagnificationSpec spec) {
+                int interrogatingPid, long interrogatingTid, MagnificationSpec spec,
+                float[] matrix) {
             ViewRootImpl viewRootImpl = mViewRootImpl.get();
             if (viewRootImpl != null && viewRootImpl.mView != null) {
                 viewRootImpl.getAccessibilityInteractionController()
                     .findFocusClientThread(accessibilityNodeId, focusType, interactiveRegion,
                             interactionId, callback, flags, interrogatingPid, interrogatingTid,
-                            spec);
+                            spec, matrix);
             } else {
                 // We cannot make the call and notify the caller so it does not wait.
                 try {
@@ -10358,13 +10393,14 @@ public final class ViewRootImpl implements ViewParent,
         @Override
         public void focusSearch(long accessibilityNodeId, int direction, Region interactiveRegion,
                 int interactionId, IAccessibilityInteractionConnectionCallback callback, int flags,
-                int interrogatingPid, long interrogatingTid, MagnificationSpec spec) {
+                int interrogatingPid, long interrogatingTid, MagnificationSpec spec,
+                float[] matrix) {
             ViewRootImpl viewRootImpl = mViewRootImpl.get();
             if (viewRootImpl != null && viewRootImpl.mView != null) {
                 viewRootImpl.getAccessibilityInteractionController()
                     .focusSearchClientThread(accessibilityNodeId, direction, interactiveRegion,
                             interactionId, callback, flags, interrogatingPid, interrogatingTid,
-                            spec);
+                            spec, matrix);
             } else {
                 // We cannot make the call and notify the caller so it does not wait.
                 try {
@@ -10896,6 +10932,10 @@ public final class ViewRootImpl implements ViewParent,
 
     private void readyToSync(SurfaceSyncer.SyncBufferCallback syncBufferCallback) {
         mNumSyncsInProgress++;
+        if (!isInLocalSync()) {
+            // Always sync the buffer if the sync request did not come from VRI.
+            mSyncBuffer = true;
+        }
         if (mAttachInfo.mThreadedRenderer != null) {
             HardwareRenderer.setRtAnimationsEnabled(false);
         }

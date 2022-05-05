@@ -48,6 +48,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Slog;
+import android.util.SparseArrayMap;
 import android.util.SparseIntArray;
 
 import com.android.internal.util.ArrayUtils;
@@ -103,6 +104,23 @@ class UserUsageStatsService {
          */
         void onNewUpdate(int mUserId);
     }
+
+    private static final class CachedEarlyEvents {
+        public long searchBeginTime;
+
+        public long eventTime;
+
+        @Nullable
+        public List<UsageEvents.Event> events;
+    }
+
+    /**
+     * Mapping of {@link UsageEvents.Event} event value to packageName-cached early usage event.
+     * This is used to reduce how much we need to interact with the underlying database to get the
+     * earliest event for a specific package.
+     */
+    private final SparseArrayMap<String, CachedEarlyEvents> mCachedEarlyEvents =
+            new SparseArrayMap<>();
 
     UserUsageStatsService(Context context, int userId, File usageStatsDir,
             StatsUpdatedListener listener) {
@@ -177,9 +195,14 @@ class UserUsageStatsService {
     void userStopped() {
         // Flush events to disk immediately to guarantee persistence.
         persistActiveStats();
+        mCachedEarlyEvents.clear();
     }
 
     int onPackageRemoved(String packageName, long timeRemoved) {
+        for (int i = mCachedEarlyEvents.numMaps() - 1; i >= 0; --i) {
+            final int eventType = mCachedEarlyEvents.keyAt(i);
+            mCachedEarlyEvents.delete(eventType, packageName);
+        }
         return mDatabase.onPackageRemoved(packageName, timeRemoved);
     }
 
@@ -240,6 +263,7 @@ class UserUsageStatsService {
     }
 
     private void onTimeChanged(long oldTime, long newTime) {
+        mCachedEarlyEvents.clear();
         persistActiveStats();
         mDatabase.onTimeChanged(newTime - oldTime);
         loadActiveStats(newTime);
@@ -675,14 +699,56 @@ class UserUsageStatsService {
      * for the package as well as the earliest event of {@code eventType} seen for the package.
      */
     @Nullable
-    UsageEvents queryEarliestEventsForPackage(final long beginTime, final long endTime,
+    UsageEvents queryEarliestEventsForPackage(long beginTime, final long endTime,
             @NonNull final String packageName, final int eventType) {
-        if (!validRange(checkAndGetTimeLocked(), beginTime, endTime)) {
+        final long currentTime = checkAndGetTimeLocked();
+        if (!validRange(currentTime, beginTime, endTime)) {
             return null;
         }
+
+        CachedEarlyEvents cachedEvents = mCachedEarlyEvents.get(eventType, packageName);
+        if (cachedEvents != null) {
+            // We can use this cached event if the previous search time was the exact same
+            // or earlier AND the event we previously found was at this current time or
+            // afterwards. Since no new events will be added before the cached event,
+            // redoing the search will yield the same event.
+            if (cachedEvents.searchBeginTime <= beginTime && beginTime <= cachedEvents.eventTime) {
+                final int numEvents = cachedEvents.events == null ? 0 : cachedEvents.events.size();
+                if ((numEvents == 0
+                        || cachedEvents.events.get(numEvents - 1).getEventType() != eventType)
+                        && cachedEvents.eventTime < endTime) {
+                    // We didn't find a match in the earlier range but this new request is allowing
+                    // us to look at events after the previous request's end time, so we may find
+                    // something new.
+                    beginTime = Math.min(currentTime, cachedEvents.eventTime);
+                    // Leave the cachedEvents's searchBeginTime as the earlier begin time to
+                    // cache/show that we searched the entire range (the union of the two queries):
+                    // [previous query's begin time, current query's end time].
+                } else if (cachedEvents.eventTime <= endTime) {
+                    if (cachedEvents.events == null) {
+                        return null;
+                    }
+                    return new UsageEvents(cachedEvents.events, new String[]{packageName}, false);
+                } else {
+                    // Any event we previously found is after the end of this query's range, but
+                    // this query starts at the same time (or after) the previous query's begin time
+                    // so there is no event to return.
+                    return null;
+                }
+            } else {
+                // The previous query isn't helpful in any way for this query. Reset the event data.
+                cachedEvents.searchBeginTime = beginTime;
+            }
+        } else {
+            cachedEvents = new CachedEarlyEvents();
+            cachedEvents.searchBeginTime = beginTime;
+            mCachedEarlyEvents.add(eventType, packageName, cachedEvents);
+        }
+
+        final long finalBeginTime = beginTime;
         final List<Event> results = queryStats(INTERVAL_DAILY,
                 beginTime, endTime, (stats, mutable, accumulatedResult) -> {
-                    final int startIndex = stats.events.firstIndexOnOrAfter(beginTime);
+                    final int startIndex = stats.events.firstIndexOnOrAfter(finalBeginTime);
                     final int size = stats.events.size();
                     for (int i = startIndex; i < size; i++) {
                         final Event event = stats.events.get(i);
@@ -706,9 +772,15 @@ class UserUsageStatsService {
                 });
 
         if (results == null || results.isEmpty()) {
+            // There won't be any new events added earlier than endTime, so we can use endTime to
+            // avoid querying for events earlier than it.
+            cachedEvents.eventTime = Math.min(currentTime, endTime);
+            cachedEvents.events = null;
             return null;
         }
 
+        cachedEvents.eventTime = results.get(results.size() - 1).getTimeStamp();
+        cachedEvents.events = results;
         return new UsageEvents(results, new String[]{packageName}, false);
     }
 

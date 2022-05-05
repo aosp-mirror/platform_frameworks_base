@@ -79,7 +79,8 @@ import java.util.Set;
 import java.util.function.Function;
 
 /** Resolves all Android component types [activities, services, providers and receivers]. */
-public class ComponentResolver extends ComponentResolverLocked implements Snappable {
+public class ComponentResolver extends ComponentResolverLocked implements
+        Snappable<ComponentResolverApi> {
     private static final boolean DEBUG = false;
     private static final String TAG = "PackageManager";
     private static final boolean DEBUG_FILTERS = false;
@@ -166,11 +167,13 @@ public class ComponentResolver extends ComponentResolverLocked implements Snappa
         mProvidersByAuthority = new ArrayMap<>();
         mDeferProtectedFilters = true;
 
-        mSnapshot = new SnapshotCache<ComponentResolverApi>(this, this) {
+        mSnapshot = new SnapshotCache<>(this, this) {
                 @Override
                 public ComponentResolverApi createSnapshot() {
-                    return new ComponentResolverSnapshot(ComponentResolver.this,
-                            userNeedsBadgingCache);
+                    synchronized (mLock) {
+                        return new ComponentResolverSnapshot(ComponentResolver.this,
+                                userNeedsBadgingCache);
+                    }
                 }};
     }
 

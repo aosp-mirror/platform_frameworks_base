@@ -21,6 +21,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.never;
 
+import android.platform.test.annotations.Presubmit;
 import android.window.TaskFragmentOrganizer;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -38,6 +39,7 @@ import org.mockito.MockitoAnnotations;
  * Build/Install/Run:
  *  atest WMJetpackUnitTests:TaskFragmentAnimationControllerTest
  */
+@Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class TaskFragmentAnimationControllerTest {

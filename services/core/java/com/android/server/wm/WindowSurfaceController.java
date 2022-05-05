@@ -217,6 +217,11 @@ class WindowSurfaceController {
         mService.openSurfaceTransaction();
         try {
             getGlobalTransaction().setSecure(mSurfaceControl, isSecure);
+
+            final DisplayContent dc = mAnimator.mWin.mDisplayContent;
+            if (dc != null) {
+                dc.refreshImeSecureFlag(getGlobalTransaction());
+            }
         } finally {
             mService.closeSurfaceTransaction("setSecure");
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION setSecureLocked");

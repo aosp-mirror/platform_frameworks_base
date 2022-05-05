@@ -63,6 +63,7 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
     private int mFirstVisiblePosition = 0;
     private int mTopDistance = 0;
     private String mAppPackageName;
+    private CharSequence mTitle = null;
 
     /**
      * Other classes can register to be notified when a locale was selected.
@@ -128,6 +129,12 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
         boolean isForCountryMode = parent != null;
 
         if (!TextUtils.isEmpty(appPackageName) && !isForCountryMode) {
+            // Filter current system locale to add them into suggestion
+            LocaleList systemLangList = LocaleList.getDefault();
+            for(int i = 0; i < systemLangList.size(); i++) {
+                langTagsToIgnore.add(systemLangList.get(i).toLanguageTag());
+            }
+
             if (appCurrentLocale != null) {
                 Log.d(TAG, "appCurrentLocale: " + appCurrentLocale.getLocale().toLanguageTag());
                 langTagsToIgnore.add(appCurrentLocale.getLocale().toLanguageTag());
@@ -167,8 +174,20 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
                     result.mLocaleStatus == LocaleStatus.GET_SUPPORTED_LANGUAGE_FROM_LOCAL_CONFIG
                     || result.mLocaleStatus == LocaleStatus.GET_SUPPORTED_LANGUAGE_FROM_ASSET;
 
+            // Add current system language into suggestion list
+            for(LocaleStore.LocaleInfo localeInfo: LocaleStore.getSystemCurrentLocaleInfo()) {
+                boolean isNotCurrentLocale = appCurrentLocale == null
+                        || !localeInfo.getLocale().equals(appCurrentLocale.getLocale());
+                if (!isForCountryMode && isNotCurrentLocale) {
+                    mLocaleList.add(localeInfo);
+                }
+            }
+
+            // Filter the language not support in app
             mLocaleList = filterTheLanguagesNotSupportedInApp(
                     shouldShowList, result.mAppSupportedLocales);
+
+            Log.d(TAG, "mLocaleList after app-supported filter:  " + mLocaleList.size());
 
             // Add "system language"
             if (!isForCountryMode && shouldShowList) {
@@ -189,7 +208,6 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
                     }
                 }
             }
-            Log.d(TAG, "mLocaleList after app-supported filter:  " + filteredList.size());
         }
 
         return filteredList;
@@ -213,6 +231,7 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
             return;
         }
 
+        mTitle = getActivity().getTitle();
         final boolean countryMode = mParentLocale != null;
         final Locale sortingLocale = countryMode ? mParentLocale.getLocale() : Locale.getDefault();
         mAdapter = new SuggestedLocaleAdapter(mLocaleList, countryMode, mAppPackageName);
@@ -228,6 +247,7 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
         // In order to make the list view work with CollapsingToolbarLayout,
         // we have to enable the nested scrolling feature of the list view.
         getListView().setNestedScrollingEnabled(true);
+        getListView().setDivider(null);
     }
 
     @Override
@@ -248,7 +268,7 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
         if (mParentLocale != null) {
             getActivity().setTitle(mParentLocale.getFullNameNative());
         } else {
-            getActivity().setTitle(R.string.language_selection_title);
+            getActivity().setTitle(mTitle);
         }
 
         getListView().requestFocus();

@@ -28,7 +28,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -249,7 +248,7 @@ public class DozeLog implements Dumpable {
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         synchronized (DozeLog.class) {
             pw.print("  Doze summary stats (for ");
             TimeUtils.formatDuration(System.currentTimeMillis() - mSince, pw);

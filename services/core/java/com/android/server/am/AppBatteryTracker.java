@@ -266,36 +266,35 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                 }
                 FrameworkStatsLog.write(FrameworkStatsLog.APP_BACKGROUND_RESTRICTIONS_INFO,
                         uid,
-                        FrameworkStatsLog
-                                .APP_BACKGROUND_RESTRICTIONS_INFO__RESTRICTION_LEVEL__LEVEL_UNKNOWN,
-                        FrameworkStatsLog
-                                .APP_BACKGROUND_RESTRICTIONS_INFO__THRESHOLD__THRESHOLD_UNKNOWN,
-                        FrameworkStatsLog
-                                .APP_BACKGROUND_RESTRICTIONS_INFO__TRACKER__UNKNOWN_TRACKER,
-                        null /*byte[] fgs_tracker_info*/,
-                        getBatteryTrackerInfoProtoLocked(uid) /*byte[] battery_tracker_info*/,
-                        null /*byte[] broadcast_events_tracker_info*/,
-                        null /*byte[] bind_service_events_tracker_info*/,
-                        FrameworkStatsLog
-                                .APP_BACKGROUND_RESTRICTIONS_INFO__EXEMPTION_REASON__REASON_UNKNOWN,
-                        FrameworkStatsLog
-                                .APP_BACKGROUND_RESTRICTIONS_INFO__OPT_LEVEL__UNKNOWN,
-                        FrameworkStatsLog
-                                .APP_BACKGROUND_RESTRICTIONS_INFO__TARGET_SDK__SDK_UNKNOWN,
-                        isLowRamDeviceStatic());
+                        AppBackgroundRestrictionsInfo.LEVEL_UNKNOWN, // RestrictionLevel
+                        AppBackgroundRestrictionsInfo.THRESHOLD_UNKNOWN,
+                        AppBackgroundRestrictionsInfo.UNKNOWN_TRACKER,
+                        null, // FgsTrackerInfo
+                        getTrackerInfoForStatsd(uid),
+                        null, // BroadcastEventsTrackerInfo
+                        null, // BindServiceEventsTrackerInfo
+                        AppBackgroundRestrictionsInfo.REASON_UNKNOWN, // ExemptionReason
+                        AppBackgroundRestrictionsInfo.UNKNOWN, // OptimizationLevel
+                        AppBackgroundRestrictionsInfo.SDK_UNKNOWN, // TargetSdk
+                        isLowRamDeviceStatic(),
+                        AppBackgroundRestrictionsInfo.LEVEL_UNKNOWN // previous RestrictionLevel
+                );
             }
         }
     }
 
     /**
-     * Get the BatteryTrackerInfo proto of a UID.
-     * @param uid
-     * @return byte array of the proto.
+     * Get the BatteryTrackerInfo object of the given uid.
+     * @return byte array of the proto object.
      */
-     @NonNull byte[] getBatteryTrackerInfoProtoLocked(int uid) {
-        final ImmutableBatteryUsage temp = mUidBatteryUsageInWindow.get(uid);
+    @Override
+    byte[] getTrackerInfoForStatsd(int uid) {
+        final ImmutableBatteryUsage temp;
+        synchronized (mLock) {
+            temp = mUidBatteryUsageInWindow.get(uid);
+        }
         if (temp == null) {
-            return new byte[0];
+            return null;
         }
         final BatteryUsage bgUsage = temp.calcPercentage(uid, mInjector.getPolicy());
         final double allUsage = bgUsage.mPercentage[BatteryUsage.BATTERY_USAGE_INDEX_UNSPECIFIED]
@@ -307,10 +306,18 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                 bgUsage.mPercentage[BatteryUsage.BATTERY_USAGE_INDEX_BACKGROUND];
         final double usageFgs =
                 bgUsage.mPercentage[BatteryUsage.BATTERY_USAGE_INDEX_FOREGROUND_SERVICE];
-        Slog.d(TAG, "getBatteryTrackerInfoProtoLocked uid:" + uid
-                + " allUsage:" + String.format("%4.2f%%", allUsage)
-                + " usageBackground:" + String.format("%4.2f%%", usageBackground)
-                + " usageFgs:" + String.format("%4.2f%%", usageFgs));
+        final double usageForeground =
+                bgUsage.mPercentage[BatteryUsage.BATTERY_USAGE_INDEX_FOREGROUND];
+        final double usageCached =
+                bgUsage.mPercentage[BatteryUsage.BATTERY_USAGE_INDEX_CACHED];
+        if (DEBUG_BACKGROUND_BATTERY_TRACKER_VERBOSE) {
+            Slog.d(TAG, "getBatteryTrackerInfoProtoLocked uid:" + uid
+                    + " allUsage:" + String.format("%4.2f%%", allUsage)
+                    + " usageBackground:" + String.format("%4.2f%%", usageBackground)
+                    + " usageFgs:" + String.format("%4.2f%%", usageFgs)
+                    + " usageForeground:" + String.format("%4.2f%%", usageForeground)
+                    + " usageCached:" + String.format("%4.2f%%", usageCached));
+        }
         final ProtoOutputStream proto = new ProtoOutputStream();
         proto.write(AppBackgroundRestrictionsInfo.BatteryTrackerInfo.BATTERY_24H,
                 allUsage * 10000);
@@ -318,6 +325,10 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                 usageBackground * 10000);
         proto.write(AppBackgroundRestrictionsInfo.BatteryTrackerInfo.BATTERY_USAGE_FGS,
                 usageFgs * 10000);
+        proto.write(AppBackgroundRestrictionsInfo.BatteryTrackerInfo.BATTERY_USAGE_FOREGROUND,
+                usageForeground * 10000);
+        proto.write(AppBackgroundRestrictionsInfo.BatteryTrackerInfo.BATTERY_USAGE_CACHED,
+                usageCached * 10000);
         proto.flush();
         return proto.getBytes();
     }
@@ -654,7 +665,7 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
             final long start = stats.getStatsStartTimestamp();
             final long end = stats.getStatsEndTimestamp();
             final double scale = expectedDuration > 0
-                    ? (expectedDuration * 1.0d) / (end - start) : 1.0d;
+                    ? Math.min((expectedDuration * 1.0d) / (end - start), 1.0d) : 1.0d;
             final AppBatteryPolicy bgPolicy = mInjector.getPolicy();
             for (UidBatteryConsumer uidConsumer : uidConsumers) {
                 // TODO: b/200326767 - as we are not supporting per proc state attribution yet,
@@ -1677,6 +1688,7 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                 if (pair != null) {
                     final long[] ts = pair.first;
                     final int restrictedLevel = ts[TIME_STAMP_INDEX_RESTRICTED_BUCKET] > 0
+                            && mTracker.mAppRestrictionController.isAutoRestrictAbusiveAppEnabled()
                             ? RESTRICTION_LEVEL_RESTRICTED_BUCKET
                             : RESTRICTION_LEVEL_ADAPTIVE_BUCKET;
                     if (maxLevel > RESTRICTION_LEVEL_BACKGROUND_RESTRICTED) {

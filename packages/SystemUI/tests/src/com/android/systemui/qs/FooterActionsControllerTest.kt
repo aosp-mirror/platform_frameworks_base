@@ -1,5 +1,6 @@
 package com.android.systemui.qs
 
+import android.content.Intent
 import android.os.Handler
 import android.os.UserManager
 import android.provider.Settings
@@ -14,6 +15,7 @@ import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.UiEventLogger
 import com.android.internal.logging.testing.FakeMetricsLogger
 import com.android.systemui.R
+import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.globalactions.GlobalActionsDialogLite
 import com.android.systemui.plugins.ActivityStarter
@@ -137,11 +139,24 @@ class FooterActionsControllerTest : LeakCheckedTest() {
     }
 
     @Test
+    fun testSettings() {
+        val captor = ArgumentCaptor.forClass(Intent::class.java)
+        whenever(deviceProvisionedController.isCurrentUserSetup).thenReturn(true)
+        view.findViewById<View>(R.id.settings_button_container).performClick()
+
+        verify(activityStarter)
+            .startActivity(capture(captor), anyBoolean(), any<ActivityLaunchAnimator.Controller>())
+
+        assertThat(captor.value.action).isEqualTo(Settings.ACTION_SETTINGS)
+    }
+
+    @Test
     fun testSettings_UserNotSetup() {
         whenever(deviceProvisionedController.isCurrentUserSetup).thenReturn(false)
-        view.findViewById<View>(R.id.settings_button).performClick()
+        view.findViewById<View>(R.id.settings_button_container).performClick()
         // Verify Settings wasn't launched.
-        verify<ActivityStarter>(activityStarter, Mockito.never()).startActivity(any(), anyBoolean())
+        verify(activityStarter, never())
+            .startActivity(any(), anyBoolean(), any<ActivityLaunchAnimator.Controller>())
     }
 
     @Test

@@ -355,6 +355,11 @@ interface ITelecomService {
 
     void setTestDefaultCallRedirectionApp(String packageName);
 
+    /**
+     * @see TelecomServiceImpl#requestLogMark
+     */
+    void requestLogMark(in String message);
+
     void setTestPhoneAcctSuggestionComponent(String flattenedComponentName);
 
     void setTestDefaultCallScreeningApp(String packageName);

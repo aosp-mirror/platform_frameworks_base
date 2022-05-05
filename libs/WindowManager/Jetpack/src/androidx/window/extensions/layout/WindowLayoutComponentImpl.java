@@ -200,10 +200,21 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
                 rotateRectToDisplayRotation(displayId, featureRect);
                 transformToWindowSpaceRect(activity, featureRect);
 
-                features.add(new FoldingFeature(featureRect, baseFeature.getType(), state));
+                if (!isRectZero(featureRect)) {
+                    // TODO(b/228641877) Remove guarding if when fixed.
+                    features.add(new FoldingFeature(featureRect, baseFeature.getType(), state));
+                }
             }
         }
         return features;
+    }
+
+    /**
+     * Returns {@link true} if a {@link Rect} has zero width and zero height,
+     * {@code false} otherwise.
+     */
+    private boolean isRectZero(Rect rect) {
+        return rect.width() == 0 && rect.height() == 0;
     }
 
     private final class NotifyOnConfigurationChanged extends EmptyLifecycleCallbacksAdapter {
