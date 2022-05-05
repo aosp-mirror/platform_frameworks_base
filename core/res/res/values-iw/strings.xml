@@ -355,7 +355,7 @@
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"הצגת התראות כפעילויות במסך מלא במכשיר נעול"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"מאפשרת לאפליקציה להציג התראות כפעילויות במסך מלא במכשיר נעול"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"התקנה של קיצורי דרך"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"מאפשרת לאפליקציה להוסיף קיצורי דרך במסך דף הבית ללא התערבות המשתמש."</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"מאפשרת לאפליקציה להוסיף קיצורי דרך במסך הבית ללא התערבות המשתמש."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"הסרת התקנה של קיצורי דרך"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"מאפשרת לאפליקציה להסיר קיצורי דרך במסך דף הבית ללא התערבות המשתמש."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"ניתוב מחדש של שיחות יוצאות"</string>

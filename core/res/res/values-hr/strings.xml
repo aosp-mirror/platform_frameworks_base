@@ -351,7 +351,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Omogućuje aplikaciji proširivanje ili sažimanje trake statusa."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"prikazivati obavijesti kao aktivnosti na cijelom zaslonu na zaključanom uređaju"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Omogućuje aplikaciji da na zaključanom uređaju prikazuje obavijesti kao aktivnosti na cijelom zaslonu"</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"instaliranje prečaca"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Instaliranje prečaca"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Aplikaciji omogućuje dodavanje prečaca početnog zaslona bez intervencije korisnika."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"deinstaliranje prečaca"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Aplikaciji omogućuje uklanjanje prečaca početnog zaslona bez intervencije korisnika."</string>

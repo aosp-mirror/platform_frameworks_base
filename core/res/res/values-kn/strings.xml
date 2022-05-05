@@ -982,7 +982,7 @@
     <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"ಈ ಪುಟದಿಂದ ಹೊರಬನ್ನಿ"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"ಈ ಪುಟದಲ್ಲಿಯೇ ಇರಿ"</string>
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nನೀವು ಈ ಪುಟದಿಂದಾಚೆಗೆ ನ್ಯಾವಿಗೇಟ್ ಮಾಡಲು ಖಚಿತವಾಗಿ ಬಯಸುವಿರಾ?"</string>
-    <string name="save_password_label" msgid="9161712335355510035">"ದೃಢೀಕರಿಸು"</string>
+    <string name="save_password_label" msgid="9161712335355510035">"ದೃಢೀಕರಿಸಿ"</string>
     <string name="double_tap_toast" msgid="7065519579174882778">"ಸಲಹೆ: ಝೂಮ್ ಇನ್ ಮತ್ತು ಝೂಮ್ ಔಟ್ ಮಾಡಲು ಡಬಲ್-ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="autofill_this_form" msgid="3187132440451621492">"ಸ್ವಯಂತುಂಬುವಿಕೆ"</string>
     <string name="setup_autofill" msgid="5431369130866618567">"ಸ್ವಯಂತುಂಬುವಿಕೆಯನ್ನು ಹೊಂದಿಸಿ"</string>

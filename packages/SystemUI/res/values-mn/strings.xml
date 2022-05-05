@@ -1115,7 +1115,7 @@
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Хийцийн дугаар"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Хийцийн дугаарыг түр санах ойд хуулсан."</string>
     <string name="basic_status" msgid="2315371112182658176">"Харилцан яриаг нээх"</string>
-    <string name="select_conversation_title" msgid="6716364118095089519">"Харилцан ярианы жижиг хэрэгслүүд"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"Харилцан ярианы виджетүүд"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Үндсэн нүүрэндээ нэмэх харилцан яриаг товшино уу"</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"Таны сүүлийн харилцан яриа энд харагдана"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Чухал харилцан яриа"</string>
