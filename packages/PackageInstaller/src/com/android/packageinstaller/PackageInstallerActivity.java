@@ -41,6 +41,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.UserInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Process;
@@ -546,20 +547,27 @@ public class PackageInstallerActivity extends AlertActivity {
      */
     private boolean processPackageUri(final Uri packageUri) {
         mPackageURI = packageUri;
-
         final String scheme = packageUri.getScheme();
+        final String packageName = packageUri.getSchemeSpecificPart();
+
         if (mLocalLOGV) Log.i(TAG, "processPackageUri(): uri=" + packageUri + ", scheme=" + scheme);
 
         switch (scheme) {
             case SCHEME_PACKAGE: {
-                try {
-                    mPkgInfo = mPm.getPackageInfo(packageUri.getSchemeSpecificPart(),
-                            PackageManager.GET_PERMISSIONS
-                                    | PackageManager.MATCH_UNINSTALLED_PACKAGES);
-                } catch (NameNotFoundException e) {
+                for (UserInfo info : mUserManager.getUsers()) {
+                    PackageManager pmForUser = createContextAsUser(info.getUserHandle(), 0)
+                                                .getPackageManager();
+                    try {
+                        if (pmForUser.canPackageQuery(mCallingPackage, packageName)) {
+                            mPkgInfo = pmForUser.getPackageInfo(packageName,
+                                    PackageManager.GET_PERMISSIONS
+                                            | PackageManager.MATCH_UNINSTALLED_PACKAGES);
+                        }
+                    } catch (NameNotFoundException e) {
+                    }
                 }
                 if (mPkgInfo == null) {
-                    Log.w(TAG, "Requested package " + packageUri.getScheme()
+                    Log.w(TAG, "Requested package " + packageUri.getSchemeSpecificPart()
                             + " not available. Discontinuing installation");
                     showDialogInner(DLG_PACKAGE_ERROR);
                     setPmResult(PackageManager.INSTALL_FAILED_INVALID_APK);
