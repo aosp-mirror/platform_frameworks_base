@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"கேலெண்டரை அணுகலாம்"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS அனுப்பலாம், வந்த SMSகளைப் பார்க்கலாம்"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"ஃபைல்கள் &amp; ஆவணங்கள்"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"ஃபைல்களும் ஆவணங்களும்"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"சாதனத்திலுள்ள ஃபைல்களையும் ஆவணங்களையும் அணுகும்"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"இசை &amp; பிற ஆடியோ"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"உங்கள் சாதனத்திலுள்ள ஆடியோ ஃபைல்களை அணுகும்"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"படங்கள் &amp; வீடியோக்கள்"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"உங்கள் சாதனத்திலுள்ள படங்களையும் வீடியோ ஃபைல்களையும் அணுகும்"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"இசையும் ஆடியோவும்"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"உங்கள் சாதனத்திலுள்ள இசையையும் ஆடியோவையும் அணுகும்"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"படங்களும் வீடியோக்களும்"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"உங்கள் சாதனத்திலுள்ள படங்களையும் வீடியோக்களையும் அணுகும்"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"மைக்ரோஃபோன்"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ஒலிப் பதிவு செய்யலாம்"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"உடல் செயல்பாடுகள்"</string>
@@ -634,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"கைரேகை அன்லாக்"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"கைரேகை சென்சாரைப் பயன்படுத்த முடியவில்லை"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"பழுதுபார்ப்புச் சேவை வழங்குநரைத் தொடர்புகொள்ளவும்."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"முகம் தெளிவாகப் பதிவாகவில்லை. மீண்டும் முயலவும்."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"முகத் தோற்றம் பதிவாகவில்லை. மீண்டும் முயலவும்."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"அதிக ஒளிர்வு. மிதமான ஒளியில் முயலவும்."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"இருட்டாக உள்ளது. பிரகாசமான ஒளியில் முயலவும்."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"மொபைலை முகத்தில் இருந்து தள்ளிப் பிடிக்கவும்."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"மொபைலை அருகில் நகர்த்தவும்."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"மொபைலை மேலே நகர்த்தவும்."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"மொபைலைக் கீழே நகர்த்தவும்."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"மொபைலை இடப்புறம் நகர்த்தவும்."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"மொபைலை வலப்புறம் நகர்த்தவும்."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"பிரகாசமான ஒளியில் முயலவும்"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"மொபைலை முகத்தில் இருந்து தள்ளிப் பிடிக்கவும்"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"மொபைலை அருகில் நகர்த்தவும்"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"மொபைலை மேலே நகர்த்தவும்"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"மொபைலைக் கீழே நகர்த்தவும்"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"மொபைலை இடதுபுறம் நகர்த்தவும்"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"மொபைலை வலதுபுறம் நகர்த்தவும்"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"முழுமுகம் தெரியுமாறு நேராகப் பார்க்கவும்."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"முகத்தை மொபைலுக்கு நேராக வைக்கவும்."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"முகம் சரியாகத் தெரியவில்லை. மொபைலைக் கண்களுக்கு நேராகப் பிடிக்கவும்."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"அதிகமாக அசைகிறது. மொபைலை அசைக்காமல் பிடிக்கவும்."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"உங்கள் முகத்தை மீண்டும் பதிவுசெய்யுங்கள்."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"முகத்தைக் கண்டறிய இயலவில்லை. மீண்டும் முயலவும்."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"மீண்டும் அதே போஸ் தருகிறீர்கள், வேறு முயலுங்கள்."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"தலையை லேசாகத் திருப்பவும்."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"உங்கள் தலையை லேசாகச் சாய்க்கவும்."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"உங்கள் தலையைச் சற்றுத் திருப்பவும்."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"முகத்தை அடையாளம் காண இயலவில்லை. மீண்டும் முயலவும்."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"தலையின் நிலையைச் சிறிதளவு மாற்றவும்"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"உங்கள் மொபைலை நேராகப் பார்க்கவும்"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"உங்கள் மொபைலை நேராகப் பார்க்கவும்"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"உங்கள் மொபைலை நேராகப் பார்க்கவும்"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"உங்கள் முகத்தை மறைக்கும் அனைத்தையும் நீக்குக."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"திரையையும் அதிலுள்ள கருப்புப் பட்டியையும் சுத்தம் செய்யவும்"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"உங்கள் முகத்தை முழுமையாகக் காட்டவும்"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"உங்கள் முகத்தை முழுமையாகக் காட்டவும்"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"முகத் தோற்றம் பதிவாகவில்லை. மீண்டும் முயலவும்."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"அடர் நிறக் கண்ணாடிகள் கண்டறியப்பட்டுள்ளது. உங்கள் முகத்தை முழுமையாகக் காட்டவும்."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"முகம் மறைக்கப்பட்டுள்ளது. உங்கள் முகத்தை முழுமையாகக் காட்டவும்."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"முகத்தைச் சரிபார்க்க இயலவில்லை. வன்பொருள் இல்லை."</string>
@@ -1712,7 +1717,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>க்கு மாறுகிறது…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> வெளியேறுகிறார்…"</string>
     <string name="owner_name" msgid="8713560351570795743">"உரிமையாளர்"</string>
-    <string name="guest_name" msgid="8502103277839834324">"விருந்தினர்"</string>
+    <string name="guest_name" msgid="8502103277839834324">"கெஸ்ட்"</string>
     <string name="error_message_title" msgid="4082495589294631966">"பிழை"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"உங்கள் நிர்வாகி இந்த மாற்றத்தை அனுமதிக்கவில்லை"</string>
     <string name="app_not_found" msgid="3429506115332341800">"இந்தச் செயலைச் செய்ய ஆப்ஸ் எதுவுமில்லை"</string>
@@ -2053,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"தொந்தரவு செய்ய வேண்டாம் அமைப்புகள் மாற்றப்பட்டன"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"எவற்றையெல்லாம் தடுக்கிறது என்பதைப் பார்க்க, தட்டவும்."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"அறிவிப்பு அமைப்புகளை மதிப்பாய்வு செய்யுங்கள்"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13 பதிப்பு முதல், நீங்கள் நிறுவுகின்ற ஆப்ஸ் உங்களுக்கு அறிவிப்புகளை அனுப்ப அனுமதி தேவை. ஏற்கெனவே உள்ள ஆப்ஸுக்கு இந்த அனுமதியை மாற்ற தட்டவும்."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"பின்னர் நினைவூட்டு"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"நிராகரி"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"சிஸ்டம்"</string>

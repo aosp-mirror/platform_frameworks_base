@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_APP_CRASHED;
@@ -32,6 +33,8 @@ import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_RELAUNCH;
 import static android.view.WindowManager.TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_DREAM_ACTIVITY_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_DREAM_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_OCCLUDE;
@@ -314,6 +317,9 @@ public class AppTransitionController {
             ArraySet<WindowContainer> changingContainers, @Nullable WindowState wallpaperTarget,
             @Nullable WindowState oldWallpaper, boolean skipAppTransitionAnimation) {
 
+        final ActivityRecord topOpeningApp = getTopApp(openingApps, false /* ignoreHidden */);
+        final ActivityRecord topClosingApp = getTopApp(closingApps, true /* ignoreHidden */);
+
         // Determine if closing and opening app token sets are wallpaper targets, in which case
         // special animations are needed.
         final boolean openingAppHasWallpaper = canBeWallpaperTarget(openingApps)
@@ -321,7 +327,7 @@ public class AppTransitionController {
         final boolean closingAppHasWallpaper = canBeWallpaperTarget(closingApps)
                 && wallpaperTarget != null;
 
-        // Keyguard transit has highest priority.
+        // Keyguard transit has high priority.
         switch (appTransition.getKeyguardTransition()) {
             case TRANSIT_KEYGUARD_GOING_AWAY:
                 return openingAppHasWallpaper ? TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER
@@ -334,6 +340,15 @@ public class AppTransitionController {
                         : TRANSIT_OLD_ACTIVITY_OPEN;
             case TRANSIT_KEYGUARD_UNOCCLUDE:
                 return TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
+        }
+
+        // Determine whether the top opening and closing activity is a dream activity. If so, this
+        // has higher priority than others except keyguard transit.
+        if (topOpeningApp != null && topOpeningApp.getActivityType() == ACTIVITY_TYPE_DREAM) {
+            return TRANSIT_OLD_DREAM_ACTIVITY_OPEN;
+        } else if (topClosingApp != null
+                && topClosingApp.getActivityType() == ACTIVITY_TYPE_DREAM) {
+            return TRANSIT_OLD_DREAM_ACTIVITY_CLOSE;
         }
 
         // This is not keyguard transition and one of the app has request to skip app transition.
@@ -398,11 +413,6 @@ public class AppTransitionController {
                 return TRANSIT_OLD_TRANSLUCENT_ACTIVITY_OPEN;
             }
         }
-
-        final ActivityRecord topOpeningApp = getTopApp(openingApps,
-                false /* ignoreHidden */);
-        final ActivityRecord topClosingApp = getTopApp(closingApps,
-                true /* ignoreHidden */);
 
         if (closingAppHasWallpaper && openingAppHasWallpaper) {
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS, "Wallpaper animation!");

@@ -2422,6 +2422,15 @@
         <!--  When closing the current activity, this is the animation that is
               run on the current activity (which is exiting the screen). -->
         <attr name="activityCloseExitAnimation" format="reference" />
+        <!--  When closing a dream activity, this is the animation that is
+              run on the dream activity (which is exiting the screen). -->
+        <attr name="dreamActivityCloseExitAnimation" format="reference" />
+        <!--  When opening a dream activity, this is the animation that is
+              run on the dream activity (which is entering the screen). -->
+        <attr name="dreamActivityOpenEnterAnimation" format="reference" />
+        <!--  When opening a dream activity, this is the animation that is
+              run on the old activity (which is exiting the screen). -->
+        <attr name="dreamActivityOpenExitAnimation" format="reference" />
         <!--  When opening an activity in a new task, this is the animation that is
               run on the activity of the new task (which is entering the screen). -->
         <attr name="taskOpenEnterAnimation" format="reference" />

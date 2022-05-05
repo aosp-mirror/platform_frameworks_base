@@ -777,22 +777,14 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         return null;
     }
 
-    private void updateCallbackIfNecessary() {
-        updateCallbackIfNecessary(true /* deferCallbackUntilAllActivitiesCreated */);
-    }
-
     /**
      * Notifies listeners about changes to split states if necessary.
-     *
-     * @param deferCallbackUntilAllActivitiesCreated boolean to indicate whether the split info
-     *                                               callback should be deferred until all the
-     *                                               organized activities have been created.
      */
-    private void updateCallbackIfNecessary(boolean deferCallbackUntilAllActivitiesCreated) {
+    private void updateCallbackIfNecessary() {
         if (mEmbeddingCallback == null) {
             return;
         }
-        if (deferCallbackUntilAllActivitiesCreated && !allActivitiesCreated()) {
+        if (!allActivitiesCreated()) {
             return;
         }
         List<SplitInfo> currentSplitStates = getActiveSplitStates();
@@ -848,9 +840,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         for (int i = mTaskContainers.size() - 1; i >= 0; i--) {
             final List<TaskFragmentContainer> containers = mTaskContainers.valueAt(i).mContainers;
             for (TaskFragmentContainer container : containers) {
-                if (container.getInfo() == null
-                        || container.getInfo().getActivities().size()
-                        != container.collectActivities().size()) {
+                if (!container.taskInfoActivityCountMatchesCreated()) {
                     return false;
                 }
             }
@@ -1035,11 +1025,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                             && container.getTaskFragmentToken().equals(initialTaskFragmentToken)) {
                         // The onTaskFragmentInfoChanged callback containing this activity has not
                         // reached the client yet, so add the activity to the pending appeared
-                        // activities and send a split info callback to the client before
-                        // {@link Activity#onCreate} is called.
+                        // activities.
                         container.addPendingAppearedActivity(activity);
-                        updateCallbackIfNecessary(
-                                false /* deferCallbackUntilAllActivitiesCreated */);
                         return;
                     }
                 }

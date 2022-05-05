@@ -306,12 +306,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"приступи календару"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"шаље и прегледа SMS поруке"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Фајлови и документи"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Фајлови и документи"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"приступање фајловима и документима на уређају"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Музика и други аудио садржај"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"приступ аудио фајловима на уређају"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Слике и видео снимци"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"приступ сликама и видео фајловима на уређају"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Музика и звук"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"приступ музици и аудио садржају на уређају"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Слике и видео снимци"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"приступ сликама и видео снимцима на уређају"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"снима звук"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Физичке активности"</string>
@@ -351,7 +351,7 @@
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"приказује обавештења као активности преко целог екрана на закључаном уређају"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Омогућава апликацији да на закључаном уређају приказује обавештења као активности преко целог екрана."</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"Инсталирање пречица"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Омогућава апликацији да додаје пречице на почетни екран без интервенције корисника."</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"да додају пречице на почетни екран без интервенције корисника."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"деинсталирање пречица"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Омогућава апликацији да уклања пречице са почетног екрана без интервенције корисника."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"преусмеравање одлазних позива"</string>
@@ -595,7 +595,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Пробајте са другим отиском прста"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Превише је светло"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Пробајте да прилагодите"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Сваки пут лагано промените положај прста"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Сваки пут помало промените положај прста"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Отисак прста није препознат"</string>
@@ -635,26 +635,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Откључавање отиском прста"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Не можете да користите сензор за отисак прста"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Посетите добављача за поправке."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Снимање лица није успело. Пробајте поново."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Прављење модела лица није успело. Пробајте поново."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Превише је светло. Пробајте са слабијим осветљењем."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Претамно је. Пробајте са јачим осветљењем."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Удаљите телефон."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"Приближите телефон."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Померите телефон нагоре."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Померите телефон надоле."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Померите телефон улево."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Померите телефон удесно."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Пробајте са јачим осветљењем"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"Удаљите телефон"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"Приближите телефон"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Померите телефон нагоре"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Померите телефон надоле"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Померите телефон улево"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Померите телефон удесно"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Гледајте право у уређај."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Поставите лице директно испред телефона"</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Не види се лице. Држите телефон у висини очију."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Много се померате. Држите телефон мирно."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Поново региструјте лице."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Више не може да се препозна лице. Пробајте поново."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"Превише је слично, промените позу."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Мало мање померите главу."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Мало мање нагните главу."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Мало мање померите главу."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"Лице није препознато. Пробајте поново."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Мало померите главу"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Гледајте право у телефон"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Гледајте право у телефон"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Гледајте право у телефон"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Уклоните све што вам заклања лице."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Очистите горњи део екрана, укључујући црну траку"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Лице мора да буде потпуно видљиво"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Лице мора да буде потпуно видљиво"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Прављење модела лица није успело. Пробајте поново."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Откривене су тамне наочари. Лице мора да буде потпуно видљиво."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Откривено је прекривање лица. Лице мора да буде потпуно видљиво."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Провера лица није успела. Хардвер није доступан."</string>
@@ -2054,8 +2059,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Режим Не узнемиравај је промењен"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Додирните да бисте проверили шта је блокирано."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Прегледајте подешавања обавештења"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Од Android-а 13 апликације које инсталирате морају да имају дозволу за слање обавештења. Додирните да бисте променили ову дозволу за постојеће апликације."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Подсети ме касније"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Одбаци"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Систем"</string>

@@ -278,6 +278,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
                 }
             });
             mUdfpsController.setAuthControllerUpdateUdfpsLocation(this::updateUdfpsLocation);
+            mUdfpsController.setHalControlsIllumination(mUdfpsProps.get(0).halControlsIllumination);
             mUdfpsBounds = mUdfpsProps.get(0).getLocation().getRect();
             updateUdfpsLocation();
         }
