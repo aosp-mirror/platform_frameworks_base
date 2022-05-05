@@ -136,6 +136,8 @@ sk_sp<SkData> ShaderCache::load(const SkData& key) {
         free(valueBuffer);
         return nullptr;
     }
+    mNumShadersCachedInRam++;
+    ATRACE_FORMAT("HWUI RAM cache: %d shaders", mNumShadersCachedInRam);
     return SkData::MakeFromMalloc(valueBuffer, valueSize);
 }
 
@@ -182,9 +184,11 @@ void ShaderCache::saveToDiskLocked() {
     mSavePending = false;
 }
 
-void ShaderCache::store(const SkData& key, const SkData& data) {
+void ShaderCache::store(const SkData& key, const SkData& data, const SkString& /*description*/) {
     ATRACE_NAME("ShaderCache::store");
     std::lock_guard<std::mutex> lock(mMutex);
+    mNumShadersCachedInRam++;
+    ATRACE_FORMAT("HWUI RAM cache: %d shaders", mNumShadersCachedInRam);
 
     if (!mInitialized) {
         return;
