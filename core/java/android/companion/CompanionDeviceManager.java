@@ -928,7 +928,8 @@ public final class CompanionDeviceManager {
     @UserHandleAware
     public void startSystemDataTransfer(int associationId) throws DeviceNotAssociatedException {
         try {
-            mService.startSystemDataTransfer(mContext.getUserId(), associationId);
+            mService.startSystemDataTransfer(mContext.getOpPackageName(), mContext.getUserId(),
+                    associationId);
         } catch (RemoteException e) {
             ExceptionUtils.propagateIfInstanceOf(e.getCause(), DeviceNotAssociatedException.class);
             throw e.rethrowFromSystemServer();

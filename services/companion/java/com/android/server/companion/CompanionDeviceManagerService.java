@@ -100,6 +100,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.companion.datatransfer.CompanionMessageProcessor;
 import com.android.server.companion.datatransfer.SystemDataTransferProcessor;
 import com.android.server.companion.datatransfer.SystemDataTransferRequestStore;
 import com.android.server.companion.presence.CompanionDevicePresenceMonitor;
@@ -137,6 +138,7 @@ public class CompanionDeviceManagerService extends SystemService {
     private final SystemDataTransferRequestStore mSystemDataTransferRequestStore;
     private AssociationRequestsProcessor mAssociationRequestsProcessor;
     private SystemDataTransferProcessor mSystemDataTransferProcessor;
+    private CompanionMessageProcessor mCompanionMessageProcessor;
     private CompanionDevicePresenceMonitor mDevicePresenceMonitor;
     private CompanionApplicationController mCompanionAppController;
     private CompanionSecureCommunicationsManager mSecureCommsManager;
@@ -188,12 +190,13 @@ public class CompanionDeviceManagerService extends SystemService {
 
         mAssociationRequestsProcessor = new AssociationRequestsProcessor(
                 /* cdmService */this, mAssociationStore);
-        mSystemDataTransferProcessor = new SystemDataTransferProcessor(this, mAssociationStore,
-                mSystemDataTransferRequestStore);
         mCompanionAppController = new CompanionApplicationController(
                 context, mApplicationControllerCallback);
         mSecureCommsManager = new CompanionSecureCommunicationsManager(
                 mAssociationStore, mCompanionAppController);
+        mCompanionMessageProcessor = new CompanionMessageProcessor(mSecureCommsManager);
+        mSystemDataTransferProcessor = new SystemDataTransferProcessor(this, mAssociationStore,
+                mSystemDataTransferRequestStore, mCompanionMessageProcessor);
 
         // Publish "binder" service.
         final CompanionDeviceManagerImpl impl = new CompanionDeviceManagerImpl();
@@ -628,14 +631,15 @@ public class CompanionDeviceManagerService extends SystemService {
 
         @Override
         public PendingIntent buildPermissionTransferUserConsentIntent(String packageName,
-                int userId, int associationId) throws RemoteException {
+                int userId, int associationId) {
             return mSystemDataTransferProcessor.buildPermissionTransferUserConsentIntent(
                     packageName, userId, associationId);
         }
 
         @Override
-        public void startSystemDataTransfer(int userId, int associationId) throws RemoteException {
-            // TODO(b/222121838)
+        public void startSystemDataTransfer(String packageName, int userId, int associationId) {
+            mSystemDataTransferProcessor.startSystemDataTransfer(packageName, userId,
+                    associationId);
         }
 
         @Override

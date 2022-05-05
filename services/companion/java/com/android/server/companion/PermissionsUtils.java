@@ -54,7 +54,7 @@ import java.util.Map;
  * {@link Manifest.permission#REQUEST_COMPANION_PROFILE_APP_STREAMING},
  * {@link Manifest.permission#REQUEST_COMPANION_SELF_MANAGED} etc.)
  */
-final class PermissionsUtils {
+public final class PermissionsUtils {
 
     private static final Map<String, String> DEVICE_PROFILE_TO_PERMISSION;
     static {
@@ -132,7 +132,11 @@ final class PermissionsUtils {
         return true;
     }
 
-    static void enforceCallerIsSystemOr(@UserIdInt int userId, @NonNull String packageName) {
+    /**
+     * Check if the calling user id matches the userId, and if the package belongs to
+     * the calling uid.
+     */
+    public static void enforceCallerIsSystemOr(@UserIdInt int userId, @NonNull String packageName) {
         final int callingUid = getCallingUid();
         if (callingUid == SYSTEM_UID) return;
 
@@ -191,7 +195,11 @@ final class PermissionsUtils {
         return checkCallerCanManageCompanionDevice(context);
     }
 
-    static @Nullable AssociationInfo sanitizeWithCallerChecks(@NonNull Context context,
+    /**
+     * Check if CDM can trust the context to process the association.
+     */
+    @Nullable
+    public static AssociationInfo sanitizeWithCallerChecks(@NonNull Context context,
             @Nullable AssociationInfo association) {
         if (association == null) return null;
 

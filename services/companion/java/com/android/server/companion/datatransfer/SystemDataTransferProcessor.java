@@ -24,6 +24,8 @@ import static android.content.ComponentName.createRelative;
 
 import static com.android.server.companion.Utils.prepareForIpc;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import android.annotation.UserIdInt;
 import android.app.PendingIntent;
 import android.companion.AssociationInfo;
@@ -36,13 +38,24 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.os.UserHandle;
 import android.util.Slog;
+import android.util.Xml;
 
 import com.android.server.companion.AssociationStore;
 import com.android.server.companion.CompanionDeviceManagerService;
+import com.android.server.companion.PermissionsUtils;
+import com.android.server.companion.datatransfer.permbackup.BackupHelper;
+import com.android.server.companion.proto.CompanionMessage;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -68,47 +81,45 @@ public class SystemDataTransferProcessor {
     private final Context mContext;
     private final AssociationStore mAssociationStore;
     private final SystemDataTransferRequestStore mSystemDataTransferRequestStore;
+    private final CompanionMessageProcessor mCompanionMessageProcessor;
 
     public SystemDataTransferProcessor(CompanionDeviceManagerService service,
             AssociationStore associationStore,
-            SystemDataTransferRequestStore systemDataTransferRequestStore) {
+            SystemDataTransferRequestStore systemDataTransferRequestStore,
+            CompanionMessageProcessor companionMessageProcessor) {
         mContext = service.getContext();
         mAssociationStore = associationStore;
         mSystemDataTransferRequestStore = systemDataTransferRequestStore;
+        mCompanionMessageProcessor = companionMessageProcessor;
     }
 
     /**
      * Build a PendingIntent of permission sync user consent dialog
      */
     public PendingIntent buildPermissionTransferUserConsentIntent(String packageName,
-            @UserIdInt int userId, int associationId) throws RemoteException {
-        // The association must exist and either belong to the calling package,
-        // or the calling package must hold REQUEST_SYSTEM_DATA_TRANSFER permission.
+            @UserIdInt int userId, int associationId) {
         AssociationInfo association = mAssociationStore.getAssociationById(associationId);
+        association = PermissionsUtils.sanitizeWithCallerChecks(mContext, association);
         if (association == null) {
-            throw new RemoteException(new DeviceNotAssociatedException(
-                    "Association id: " + associationId + " doesn't exist."));
-        } else {
-            if (!association.getPackageName().equals(packageName)) {
-                Slog.e(LOG_TAG, "The calling package doesn't own the association.");
-                return null;
-            }
+            throw new DeviceNotAssociatedException("Association "
+                    + associationId + " is not associated with the app " + packageName
+                    + " for user " + userId);
+        }
 
-            // Check if the request's data type has been requested before.
-            List<SystemDataTransferRequest> storedRequests =
-                    mSystemDataTransferRequestStore.readRequestsByAssociationId(userId,
-                            associationId);
-            for (SystemDataTransferRequest storedRequest : storedRequests) {
-                if (storedRequest instanceof PermissionSyncRequest) {
-                    Slog.e(LOG_TAG, "The request has been sent before, you can not send "
-                            + "the same request type again.");
-                    return null;
-                }
+        // Check if the request's data type has been requested before.
+        List<SystemDataTransferRequest> storedRequests =
+                mSystemDataTransferRequestStore.readRequestsByAssociationId(userId,
+                        associationId);
+        for (SystemDataTransferRequest storedRequest : storedRequests) {
+            if (storedRequest instanceof PermissionSyncRequest) {
+                Slog.e(LOG_TAG, "The request has been sent before, you can not send "
+                        + "the same request type again.");
+                return null;
             }
         }
 
-        Slog.i(LOG_TAG, "Creating permission sync intent for userId=" + userId
-                + "associationId: " + associationId);
+        Slog.i(LOG_TAG, "Creating permission sync intent for userId [" + userId
+                + "] associationId [" + associationId + "]");
 
         // Create an internal intent to launch the user consent dialog
         final Bundle extras = new Bundle();
@@ -130,6 +141,104 @@ public class SystemDataTransferProcessor {
                     FLAG_ONE_SHOT | FLAG_CANCEL_CURRENT | FLAG_IMMUTABLE);
         } finally {
             Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    /**
+     * Start system data transfer. It should first try to establish a secure channel and then sync
+     * system data.
+     */
+    public void startSystemDataTransfer(String packageName, int userId, int associationId) {
+        Slog.i(LOG_TAG, "Start system data transfer for package [" + packageName
+                + "] userId [" + userId + "] associationId [" + associationId + "]");
+
+        AssociationInfo association = mAssociationStore.getAssociationById(associationId);
+        association = PermissionsUtils.sanitizeWithCallerChecks(mContext, association);
+        if (association == null) {
+            throw new DeviceNotAssociatedException("Association "
+                    + associationId + " is not associated with the app " + packageName
+                    + " for user " + userId);
+        }
+
+        // Check if the request has been consented by the user.
+        List<SystemDataTransferRequest> storedRequests =
+                mSystemDataTransferRequestStore.readRequestsByAssociationId(userId,
+                        associationId);
+        boolean hasConsented = false;
+        for (SystemDataTransferRequest storedRequest : storedRequests) {
+            if (storedRequest instanceof PermissionSyncRequest && storedRequest.isUserConsented()) {
+                hasConsented = true;
+                break;
+            }
+        }
+        if (!hasConsented) {
+            Slog.e(LOG_TAG, "User " + userId + " hasn't consented permission sync.");
+            return;
+        }
+
+        // TODO: Establish a secure channel
+
+        final long callingIdentityToken = Binder.clearCallingIdentity();
+
+        // Start permission sync
+        try {
+            BackupHelper backupHelper = new BackupHelper(mContext, UserHandle.of(userId));
+            XmlSerializer serializer = Xml.newSerializer();
+            ByteArrayOutputStream backup = new ByteArrayOutputStream();
+            serializer.setOutput(backup, UTF_8.name());
+
+            backupHelper.writeState(serializer);
+
+            serializer.flush();
+
+            mCompanionMessageProcessor.paginateAndDispatchMessagesToApp(backup.toByteArray(),
+                    CompanionMessage.PERMISSION_SYNC, packageName, userId, associationId);
+        } catch (IOException ioe) {
+            Slog.e(LOG_TAG, "Error while writing permission state.");
+        } finally {
+            Binder.restoreCallingIdentity(callingIdentityToken);
+        }
+    }
+
+    /**
+     * Process message reported by the companion app.
+     */
+    public void processMessage(String packageName, int userId, int associationId,
+            int messageId, byte[] message) {
+        Slog.i(LOG_TAG, "Start processing message [" + messageId + "] from package ["
+                + packageName + "] userId [" + userId + "] associationId [" + associationId + "]");
+
+        AssociationInfo association = mAssociationStore.getAssociationById(associationId);
+        association = PermissionsUtils.sanitizeWithCallerChecks(mContext, association);
+        if (association == null) {
+            throw new DeviceNotAssociatedException("Association "
+                    + associationId + " is not associated with the app " + packageName
+                    + " for user " + userId);
+        }
+
+        PermissionsUtils.enforceCallerIsSystemOr(userId, packageName);
+
+        CompanionMessageInfo completeMessage = mCompanionMessageProcessor.processMessage(messageId,
+                associationId, message);
+        if (completeMessage != null) {
+            if (completeMessage.getType() == CompanionMessage.PERMISSION_SYNC) {
+                // Start applying permissions
+                BackupHelper backupHelper = new BackupHelper(mContext, UserHandle.of(userId));
+                try {
+                    XmlPullParser parser = Xml.newPullParser();
+                    ByteArrayInputStream stream = new ByteArrayInputStream(
+                            completeMessage.getData());
+                    parser.setInput(stream, UTF_8.name());
+
+                    backupHelper.restoreState(parser);
+                } catch (IOException e) {
+                    Slog.e(LOG_TAG, "IOException reading message: "
+                            + new String(completeMessage.getData()));
+                } catch (XmlPullParserException e) {
+                    Slog.e(LOG_TAG, "Error parsing message: "
+                            + new String(completeMessage.getData()));
+                }
+            }
         }
     }
 

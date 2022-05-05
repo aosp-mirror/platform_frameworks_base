@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,19 +18,33 @@ syntax = "proto3";
 
 option java_multiple_files = true;
 
+package com.android.server.companion.proto;
+
 /* Represents a message between companion devices */
 message CompanionMessage {
-  // id of the message
-  int32 messageId = 1;
+  int64 id = 1;
 
-  // type of the message
-  CompanionMessageType type = 2;
+  PaginationInfo paginationInfo = 2;
 
-  // data contained in the message
-  bytes data = 3;
+  Type type = 3;
 
-  // types of CompanionMessage
-  enum CompanionMessageType {
+  // message body data
+  bytes data = 4;
+
+  /* Message pagination info */
+  message PaginationInfo {
+    // id of the parent message, which should be the same for all the paginated messages
+    int64 parentId = 1;
+
+    // page number of the current message in [1, total]
+    int32 page = 2;
+
+    // total number of messages
+    int32 total = 3;
+  }
+
+  /* Message type */
+  enum Type {
     // default value for proto3
     UNKNOWN = 0;
 
