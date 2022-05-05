@@ -20,6 +20,7 @@ import static com.android.internal.jank.FrameTracker.REASON_CANCEL_NORMAL;
 import static com.android.internal.jank.FrameTracker.REASON_CANCEL_TIMEOUT;
 import static com.android.internal.jank.FrameTracker.REASON_END_NORMAL;
 import static com.android.internal.jank.FrameTracker.REASON_END_UNKNOWN;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__BIOMETRIC_PROMPT_TRANSITION;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_ALL_APPS_SCROLL;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_CLOSE_TO_HOME;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_CLOSE_TO_PIP;
@@ -46,6 +47,7 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SCREEN_OFF_SHOW_AOD;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SETTINGS_PAGE_SCROLL;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SETTINGS_SLIDER;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SETTINGS_TOGGLE;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH_FROM_HISTORY_BUTTON;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH_FROM_MEDIA_PLAYER;
@@ -198,6 +200,7 @@ public class InteractionJankMonitor {
     public static final int CUJ_SETTINGS_SLIDER = 53;
     public static final int CUJ_TAKE_SCREENSHOT = 54;
     public static final int CUJ_VOLUME_CONTROL = 55;
+    public static final int CUJ_SETTINGS_TOGGLE = 57;
 
     private static final int NO_STATSD_LOGGING = -1;
 
@@ -262,6 +265,8 @@ public class InteractionJankMonitor {
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SETTINGS_SLIDER,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__TAKE_SCREENSHOT,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__VOLUME_CONTROL,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__BIOMETRIC_PROMPT_TRANSITION,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SETTINGS_TOGGLE,
     };
 
     private static volatile InteractionJankMonitor sInstance;
@@ -338,6 +343,7 @@ public class InteractionJankMonitor {
             CUJ_SETTINGS_SLIDER,
             CUJ_TAKE_SCREENSHOT,
             CUJ_VOLUME_CONTROL,
+            CUJ_SETTINGS_TOGGLE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {
@@ -768,6 +774,8 @@ public class InteractionJankMonitor {
                 return "TAKE_SCREENSHOT";
             case CUJ_VOLUME_CONTROL:
                 return "VOLUME_CONTROL";
+            case CUJ_SETTINGS_TOGGLE:
+                return "SETTINGS_TOGGLE";
         }
         return "UNKNOWN";
     }
