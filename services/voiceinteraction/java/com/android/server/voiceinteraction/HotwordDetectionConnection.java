@@ -80,6 +80,7 @@ import android.service.voice.IDspHotwordDetectionCallback;
 import android.service.voice.IHotwordDetectionService;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 import android.service.voice.VoiceInteractionManagerInternal.HotwordDetectionServiceIdentity;
+import android.speech.IRecognitionServiceManager;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.util.Slog;
@@ -923,6 +924,7 @@ final class HotwordDetectionConnection {
 
             updateAudioFlinger(connection, mAudioFlinger);
             updateContentCaptureManager(connection);
+            updateSpeechService(connection);
             updateServiceIdentity(connection);
             return connection;
         }
@@ -1058,6 +1060,14 @@ final class HotwordDetectionConnection {
         connection.run(
                 service -> service.updateContentCaptureManager(binderService,
                         new ContentCaptureOptions(null)));
+    }
+
+    private static void updateSpeechService(ServiceConnection connection) {
+        IBinder b = ServiceManager.getService(Context.SPEECH_RECOGNITION_SERVICE);
+        IRecognitionServiceManager binderService = IRecognitionServiceManager.Stub.asInterface(b);
+        connection.run(service -> {
+            service.updateRecognitionServiceManager(binderService);
+        });
     }
 
     private void updateServiceIdentity(ServiceConnection connection) {

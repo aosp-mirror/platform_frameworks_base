@@ -95,11 +95,13 @@ public class BootReceiver extends BroadcastReceiver {
 
     // example: fs_stat,/dev/block/platform/soc/by-name/userdata,0x5
     private static final String FS_STAT_PATTERN = "fs_stat,[^,]*/([^/,]+),(0x[0-9a-fA-F]+)";
-    private static final int FS_STAT_FS_FIXED = 0x400; // should match with fs_mgr.cpp:FsStatFlags
+    private static final int FS_STAT_FSCK_FS_FIXED =
+            0x400; // should match with fs_mgr.cpp:FsStatFlags
     private static final String FSCK_PASS_PATTERN = "Pass ([1-9]E?):";
     private static final String FSCK_TREE_OPTIMIZATION_PATTERN =
             "Inode [0-9]+ extent tree.*could be shorter";
-    private static final String FSCK_FS_MODIFIED = "FILE SYSTEM WAS MODIFIED";
+    private static final String E2FSCK_FS_MODIFIED = "FILE SYSTEM WAS MODIFIED";
+    private static final String F2FS_FSCK_FS_MODIFIED = "[FSCK] Unreachable";
     // ro.boottime.init.mount_all. + postfix for mount_all duration
     private static final String[] MOUNT_DURATION_PROPS_POSTFIX =
             new String[] { "early", "default", "late" };
@@ -449,9 +451,9 @@ public class BootReceiver extends BroadcastReceiver {
         int lineNumber = 0;
         int lastFsStatLineNumber = 0;
         for (String line : lines) { // should check all lines
-            if (line.contains(FSCK_FS_MODIFIED)) {
+            if (line.contains(E2FSCK_FS_MODIFIED) || line.contains(F2FS_FSCK_FS_MODIFIED)) {
                 uploadNeeded = true;
-            } else if (line.contains("fs_stat")){
+            } else if (line.contains("fs_stat")) {
                 Matcher matcher = pattern.matcher(line);
                 if (matcher.find()) {
                     handleFsckFsStat(matcher, lines, lastFsStatLineNumber, lineNumber);
@@ -463,12 +465,13 @@ public class BootReceiver extends BroadcastReceiver {
             lineNumber++;
         }
 
-        if (uploadEnabled && uploadNeeded ) {
+        if (uploadEnabled && uploadNeeded) {
             addFileToDropBox(db, timestamps, headers, "/dev/fscklogs/log", maxSize, tag);
         }
 
-        // Remove the file so we don't re-upload if the runtime restarts.
-        file.delete();
+        // Rename the file so we don't re-upload if the runtime restarts.
+        File pfile = new File("/dev/fscklogs/fsck");
+        file.renameTo(pfile);
     }
 
     private static void logFsMountTime() {
@@ -662,7 +665,7 @@ public class BootReceiver extends BroadcastReceiver {
     public static int fixFsckFsStat(String partition, int statOrg, String[] lines,
             int startLineNumber, int endLineNumber) {
         int stat = statOrg;
-        if ((stat & FS_STAT_FS_FIXED) != 0) {
+        if ((stat & FS_STAT_FSCK_FS_FIXED) != 0) {
             // fs was fixed. should check if quota warning was caused by tree optimization.
             // This is not a real fix but optimization, so should not be counted as a fs fix.
             Pattern passPattern = Pattern.compile(FSCK_PASS_PATTERN);
@@ -675,7 +678,8 @@ public class BootReceiver extends BroadcastReceiver {
             String otherFixLine = null;
             for (int i = startLineNumber; i < endLineNumber; i++) {
                 String line = lines[i];
-                if (line.contains(FSCK_FS_MODIFIED)) { // no need to parse above this
+                if (line.contains(E2FSCK_FS_MODIFIED)
+                        || line.contains(F2FS_FSCK_FS_MODIFIED)) { // no need to parse above this
                     break;
                 } else if (line.startsWith("Pass ")) {
                     Matcher matcher = passPattern.matcher(line);
@@ -703,9 +707,9 @@ public class BootReceiver extends BroadcastReceiver {
                     }
                 } else if (line.startsWith("Update quota info") && currentPass.equals("5")) {
                     // follows "[QUOTA WARNING]", ignore
-                } else if (line.startsWith("Timestamp(s) on inode") &&
-                        line.contains("beyond 2310-04-04 are likely pre-1970") &&
-                        currentPass.equals("1")) {
+                } else if (line.startsWith("Timestamp(s) on inode")
+                        && line.contains("beyond 2310-04-04 are likely pre-1970")
+                        && currentPass.equals("1")) {
                     Slog.i(TAG, "fs_stat, partition:" + partition + " found timestamp adjustment:"
                             + line);
                     // followed by next line, "Fix? yes"
@@ -733,7 +737,7 @@ public class BootReceiver extends BroadcastReceiver {
             } else if ((foundTreeOptimization && foundQuotaFix) || foundTimestampAdjustment) {
                 // not a real fix, so clear it.
                 Slog.i(TAG, "fs_stat, partition:" + partition + " fix ignored");
-                stat &= ~FS_STAT_FS_FIXED;
+                stat &= ~FS_STAT_FSCK_FS_FIXED;
             }
         }
         return stat;

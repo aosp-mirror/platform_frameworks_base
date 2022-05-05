@@ -1503,8 +1503,8 @@ public class ProvisioningManager {
      * Get the provisioning status for the IMS RCS capability specified.
      *
      * If provisioning is not required for the queried
-     * {@link ImsRcsManager.RcsImsCapabilityFlag} this method will always return
-     * {@code true}.
+     * {@link ImsRcsManager.RcsImsCapabilityFlag} or if the device does not support IMS
+     * this method will always return {@code true}.
      *
      * @see CarrierConfigManager.Ims#KEY_CARRIER_RCS_PROVISIONING_REQUIRED_BOOL
      * @return true if the device is provisioned for the capability or does not require
@@ -1533,8 +1533,8 @@ public class ProvisioningManager {
      * Get the provisioning status for the IMS RCS capability specified.
      *
      * If provisioning is not required for the queried
-     * {@link ImsRcsManager.RcsImsCapabilityFlag} this method
-     * will always return {@code true}.
+     * {@link ImsRcsManager.RcsImsCapabilityFlag} or if the device does not support IMS
+     * this method will always return {@code true}.
      *
      * <p> Requires Permission:
      * <ul>
@@ -1643,7 +1643,8 @@ public class ProvisioningManager {
      * </ul>
      *
      * @return true if provisioning is required for the MMTEL capability and IMS
-     * registration technology specified, false if it is not required.
+     * registration technology specified, false if it is not required or if the device does not
+     * support IMS.
      */
     @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
     public boolean isProvisioningRequiredForCapability(
@@ -1670,7 +1671,8 @@ public class ProvisioningManager {
      * </ul>
      *
      * @return true if provisioning is required for the RCS capability and IMS
-     * registration technology specified, false if it is not required.
+     * registration technology specified, false if it is not required or if the device does not
+     * support IMS.
      */
     @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
     public boolean isRcsProvisioningRequiredForCapability(

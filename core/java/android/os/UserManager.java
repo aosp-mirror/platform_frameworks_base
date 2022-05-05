@@ -2231,7 +2231,10 @@ public class UserManager {
             }
         } else {
             UserInfo userInfo = getUserInfo(mUserId);
-            return userInfo == null ? "" : userInfo.name;
+            if (userInfo != null && userInfo.name != null) {
+                return userInfo.name;
+            }
+            return "";
         }
     }
 

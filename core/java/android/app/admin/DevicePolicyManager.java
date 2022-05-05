@@ -3375,6 +3375,55 @@ public class DevicePolicyManager {
             RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_PROVISIONING_DISABLED = 3;
 
     /**
+     * An {@code int} extra that specifies one of {@link
+     * #ROLE_HOLDER_UPDATE_FAILURE_STRATEGY_FAIL_PROVISIONING} or {@link
+     * #ROLE_HOLDER_UPDATE_FAILURE_STRATEGY_FALLBACK_TO_PLATFORM_PROVISIONING}.
+     *
+     * <p>The failure strategy specifies how the platform should handle a failed device policy
+     * management role holder update via {@link
+     * #ACTION_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER} when {@link
+     * #EXTRA_PROVISIONING_ALLOW_OFFLINE} is not set or set to {@code false}.
+     *
+     * <p>This extra may be supplied as part of the {@link
+     * #ACTION_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER} result intent.
+     *
+     * <p>Default value is {@link #ROLE_HOLDER_UPDATE_FAILURE_STRATEGY_FAIL_PROVISIONING}.
+     *
+     * @hide
+     */
+    public static final String EXTRA_ROLE_HOLDER_UPDATE_FAILURE_STRATEGY =
+            "android.app.extra.ROLE_HOLDER_UPDATE_FAILURE_STRATEGY";
+
+    /**
+     * Possible values for {@link #EXTRA_ROLE_HOLDER_UPDATE_FAILURE_STRATEGY}.
+     *
+     * @hide
+     */
+    @IntDef(prefix = { "ROLE_HOLDER_UPDATE_FAILURE_STRATEGY_" }, value = {
+            ROLE_HOLDER_UPDATE_FAILURE_STRATEGY_FAIL_PROVISIONING,
+            ROLE_HOLDER_UPDATE_FAILURE_STRATEGY_FALLBACK_TO_PLATFORM_PROVISIONING
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RoleHolderUpdateFailureStrategy {}
+
+    /**
+     * A value for {@link #EXTRA_ROLE_HOLDER_UPDATE_FAILURE_STRATEGY} indicating that upon
+     * failure to update the role holder, provisioning should fail.
+     *
+     * @hide
+     */
+    public static final int ROLE_HOLDER_UPDATE_FAILURE_STRATEGY_FAIL_PROVISIONING = 1;
+
+    /**
+     * A value for {@link #EXTRA_ROLE_HOLDER_UPDATE_FAILURE_STRATEGY} indicating that upon
+     * failure to update the role holder, provisioning should fallback to be platform-driven.
+     *
+     * @hide
+     */
+    public static final int ROLE_HOLDER_UPDATE_FAILURE_STRATEGY_FALLBACK_TO_PLATFORM_PROVISIONING =
+            2;
+
+    /**
      * An {@code int} extra which contains the result code of the last attempt to update
      * the device policy management role holder via {@link
      * #ACTION_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER}.

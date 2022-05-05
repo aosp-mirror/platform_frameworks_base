@@ -543,7 +543,7 @@ public class AccessibilityWindowManagerTest {
                 mWindowInfos.get(Display.DEFAULT_DISPLAY).get(DEFAULT_FOCUSED_INDEX + 1).token;
         final int eventWindowId = mA11yWindowManager.findWindowIdLocked(
                 USER_SYSTEM_ID, eventWindowToken);
-        when(mMockWindowManagerInternal.getFocusedWindowToken())
+        when(mMockWindowManagerInternal.getFocusedWindowTokenFromWindowStates())
                 .thenReturn(eventWindowToken);
 
         final int noUse = 0;
@@ -679,7 +679,7 @@ public class AccessibilityWindowManagerTest {
                 mWindowInfos.get(Display.DEFAULT_DISPLAY).get(DEFAULT_FOCUSED_INDEX).token;
         final int defaultFocusWindowId = mA11yWindowManager.findWindowIdLocked(
                 USER_SYSTEM_ID, defaultFocusWinToken);
-        when(mMockWindowManagerInternal.getFocusedWindowToken())
+        when(mMockWindowManagerInternal.getFocusedWindowTokenFromWindowStates())
                 .thenReturn(defaultFocusWinToken);
         final int newFocusWindowId = getWindowIdFromWindowInfosForDisplay(Display.DEFAULT_DISPLAY,
                 DEFAULT_FOCUSED_INDEX + 1);

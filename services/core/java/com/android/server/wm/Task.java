@@ -68,6 +68,7 @@ import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
+import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
 
 import static com.android.internal.policy.DecorView.DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP;
 import static com.android.internal.policy.DecorView.DECOR_SHADOW_UNFOCUSED_HEIGHT_IN_DIP;
@@ -77,7 +78,6 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_LOCKTASK;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_RECENTS_ANIMATIONS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
-import static com.android.server.wm.ActivityRecord.State.INITIALIZING;
 import static com.android.server.wm.ActivityRecord.State.PAUSED;
 import static com.android.server.wm.ActivityRecord.State.PAUSING;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
@@ -426,9 +426,6 @@ class Task extends TaskFragment {
 
     /** Helper object used for updating override configuration. */
     private Configuration mTmpConfig = new Configuration();
-
-    /** Used by fillTaskInfo */
-    final TaskActivitiesReport mReuseActivitiesReport = new TaskActivitiesReport();
 
     /* Unique identifier for this task. */
     final int mTaskId;
@@ -1402,15 +1399,6 @@ class Task extends TaskFragment {
         }
         return getActivity((r) -> r.getWindow(window ->
                 window.getBaseType() == TYPE_APPLICATION_STARTING) != null);
-    }
-
-    /**
-     * Return the number of running activities, and the number of non-finishing/initializing
-     * activities in the provided {@param reportOut} respectively.
-     */
-    private void getNumRunningActivities(TaskActivitiesReport reportOut) {
-        reportOut.reset();
-        forAllActivities(reportOut);
     }
 
     /**
@@ -3382,14 +3370,14 @@ class Task extends TaskFragment {
      *            the give {@link TaskDisplayArea}.
      */
     void fillTaskInfo(TaskInfo info, boolean stripExtras, @Nullable TaskDisplayArea tda) {
-        getNumRunningActivities(mReuseActivitiesReport);
+        info.launchCookies.clear();
+        info.addLaunchCookie(mLaunchCookie);
+        final ActivityRecord top = mTaskSupervisor.mTaskInfoHelper.fillAndReturnTop(this, info);
+
         info.userId = isLeafTask() ? mUserId : mCurrentUser;
         info.taskId = mTaskId;
         info.displayId = getDisplayId();
-        if (tda != null) {
-            info.displayAreaFeatureId = tda.mFeatureId;
-        }
-        info.isRunning = getTopNonFinishingActivity() != null;
+        info.displayAreaFeatureId = tda != null ? tda.mFeatureId : FEATURE_UNDEFINED;
         final Intent baseIntent = getBaseIntent();
         // Make a copy of base intent because this is like a snapshot info.
         // Besides, {@link RecentTasks#getRecentTasksImpl} may modify it.
@@ -3398,19 +3386,16 @@ class Task extends TaskFragment {
                 ? new Intent()
                 : stripExtras ? baseIntent.cloneFilter() : new Intent(baseIntent);
         info.baseIntent.setFlags(baseIntentFlags);
-        info.baseActivity = mReuseActivitiesReport.base != null
-                ? mReuseActivitiesReport.base.intent.getComponent()
-                : null;
-        info.topActivity = mReuseActivitiesReport.top != null
-                ? mReuseActivitiesReport.top.mActivityComponent
-                : null;
+
+        info.isRunning = top != null;
+        info.topActivity = top != null ? top.mActivityComponent : null;
         info.origActivity = origActivity;
         info.realActivity = realActivity;
-        info.numActivities = mReuseActivitiesReport.numActivities;
         info.lastActiveTime = lastActiveTime;
         info.taskDescription = new ActivityManager.TaskDescription(getTaskDescription());
         info.supportsSplitScreenMultiWindow = supportsSplitScreenWindowingModeInDisplayArea(tda);
-        info.supportsMultiWindow = supportsMultiWindowInDisplayArea(tda);
+        info.supportsMultiWindow = info.supportsSplitScreenMultiWindow
+                || supportsMultiWindowInDisplayArea(tda);
         info.configuration.setTo(getConfiguration());
         // Update to the task's current activity type and windowing mode which may differ from the
         // window configuration
@@ -3420,49 +3405,38 @@ class Task extends TaskFragment {
 
         //TODO (AM refactor): Just use local once updateEffectiveIntent is run during all child
         //                    order changes.
-        final Task top = getTopMostTask();
-        info.resizeMode = top != null ? top.mResizeMode : mResizeMode;
-        info.topActivityType = top.getActivityType();
+        final Task topTask = top != null ? top.getTask() : this;
+        info.resizeMode = topTask.mResizeMode;
+        info.topActivityType = topTask.getActivityType();
+        info.displayCutoutInsets = topTask.getDisplayCutoutInsets();
         info.isResizeable = isResizeable();
         info.minWidth = mMinWidth;
         info.minHeight = mMinHeight;
         info.defaultMinSize = mDisplayContent == null
                 ? DEFAULT_MIN_TASK_SIZE_DP : mDisplayContent.mMinSizeOfResizeableTaskDp;
-
         info.positionInParent = getRelativePosition();
 
+        info.topActivityInfo = top != null ? top.info : null;
         info.pictureInPictureParams = getPictureInPictureParams(top);
-        info.shouldDockBigOverlays = shouldDockBigOverlays();
-        if (info.pictureInPictureParams != null
+        info.launchIntoPipHostTaskId = (info.pictureInPictureParams != null
                 && info.pictureInPictureParams.isLaunchIntoPip()
-                && top.getTopMostActivity().getLastParentBeforePip() != null) {
-            info.launchIntoPipHostTaskId =
-                    top.getTopMostActivity().getLastParentBeforePip().mTaskId;
-        }
-        info.displayCutoutInsets = top != null ? top.getDisplayCutoutInsets() : null;
-        info.topActivityInfo = mReuseActivitiesReport.top != null
-                ? mReuseActivitiesReport.top.info
-                : null;
+                && top.getLastParentBeforePip() != null)
+                        ? top.getLastParentBeforePip().mTaskId : INVALID_TASK_ID;
+        info.shouldDockBigOverlays = top != null && top.shouldDockBigOverlays;
+        info.mTopActivityLocusId = top != null ? top.getLocusId() : null;
 
-        boolean isTopActivityResumed = mReuseActivitiesReport.top != null
-                 && mReuseActivitiesReport.top.getOrganizedTask() == this
-                 && mReuseActivitiesReport.top.isState(RESUMED);
+        final boolean isTopActivityResumed = top != null
+                && top.getOrganizedTask() == this && top.isState(RESUMED);
         // Whether the direct top activity is in size compat mode on foreground.
-        info.topActivityInSizeCompat = isTopActivityResumed
-                && mReuseActivitiesReport.top.inSizeCompatMode();
+        info.topActivityInSizeCompat = isTopActivityResumed && top.inSizeCompatMode();
         // Whether the direct top activity is eligible for letterbox education.
         info.topActivityEligibleForLetterboxEducation = isTopActivityResumed
-                && mReuseActivitiesReport.top.isEligibleForLetterboxEducation();
+                && top.isEligibleForLetterboxEducation();
         // Whether the direct top activity requested showing camera compat control.
         info.cameraCompatControlState = isTopActivityResumed
-                ? mReuseActivitiesReport.top.getCameraCompatControlState()
+                ? top.getCameraCompatControlState()
                 : TaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
 
-        info.launchCookies.clear();
-        info.addLaunchCookie(mLaunchCookie);
-        forAllActivities(r -> {
-            info.addLaunchCookie(r.mLaunchCookie);
-        });
         final Task parentTask = getParent() != null ? getParent().asTask() : null;
         info.parentTaskId = parentTask != null && parentTask.mCreatedByOrganizer
                 ? parentTask.mTaskId
@@ -3470,19 +3444,17 @@ class Task extends TaskFragment {
         info.isFocused = isFocused();
         info.isVisible = hasVisibleChildren();
         info.isSleeping = shouldSleepActivities();
-        ActivityRecord topRecord = getTopNonFinishingActivity();
-        info.mTopActivityLocusId = topRecord != null ? topRecord.getLocusId() : null;
     }
 
     @Nullable PictureInPictureParams getPictureInPictureParams() {
-        return getPictureInPictureParams(getTopMostTask());
+        final Task topTask = getTopMostTask();
+        if (topTask == null) return null;
+        return getPictureInPictureParams(topTask.getTopMostActivity());
     }
 
-    private @Nullable PictureInPictureParams getPictureInPictureParams(Task top) {
-        if (top == null) return null;
-        final ActivityRecord topMostActivity = top.getTopMostActivity();
-        return (topMostActivity == null || topMostActivity.pictureInPictureArgs.empty())
-                ? null : new PictureInPictureParams(topMostActivity.pictureInPictureArgs);
+    private static @Nullable PictureInPictureParams getPictureInPictureParams(ActivityRecord top) {
+        return (top == null || top.pictureInPictureArgs.empty())
+                ? null : new PictureInPictureParams(top.pictureInPictureArgs);
     }
 
     private boolean shouldDockBigOverlays() {
@@ -3714,42 +3686,6 @@ class Task extends TaskFragment {
         }
         stringName = sb.toString();
         return toString();
-    }
-
-    /** @see #getNumRunningActivities(TaskActivitiesReport) */
-    static class TaskActivitiesReport implements Consumer<ActivityRecord> {
-        int numRunning;
-        int numActivities;
-        ActivityRecord top;
-        ActivityRecord base;
-
-        void reset() {
-            numRunning = numActivities = 0;
-            top = base = null;
-        }
-
-        @Override
-        public void accept(ActivityRecord r) {
-            if (r.finishing) {
-                return;
-            }
-
-            base = r;
-
-            // Increment the total number of non-finishing activities
-            numActivities++;
-
-            if (top == null || (top.isState(INITIALIZING))) {
-                top = r;
-                // Reset the number of running activities until we hit the first non-initializing
-                // activity
-                numRunning = 0;
-            }
-            if (r.attachedToProcess()) {
-                // Increment the number of actually running activities
-                numRunning++;
-            }
-        }
     }
 
     /**

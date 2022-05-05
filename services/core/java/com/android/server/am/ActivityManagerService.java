@@ -90,7 +90,6 @@ import static android.os.Process.killProcessQuiet;
 import static android.os.Process.myPid;
 import static android.os.Process.myUid;
 import static android.os.Process.readProcFile;
-import static android.os.Process.removeAllProcessGroups;
 import static android.os.Process.sendSignal;
 import static android.os.Process.setThreadPriority;
 import static android.os.Process.setThreadScheduler;
@@ -2431,8 +2430,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private void start() {
-        removeAllProcessGroups();
-
         mBatteryStatsService.publish();
         mAppOpsService.publish();
         mProcessStats.publish();
@@ -16654,7 +16651,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     final WindowProcessController wpc =
                             (WindowProcessController) procsToKill.get(i);
                     final ProcessRecord pr = (ProcessRecord) wpc.mOwner;
-                    if (pr.mState.getSetSchedGroup() == ProcessList.SCHED_GROUP_BACKGROUND
+                    if (ActivityManager.isProcStateBackground(pr.mState.getSetProcState())
                             && pr.mReceivers.numberOfCurReceivers() == 0) {
                         pr.killLocked("remove task", ApplicationExitInfo.REASON_USER_REQUESTED,
                                 ApplicationExitInfo.SUBREASON_REMOVE_TASK, true);

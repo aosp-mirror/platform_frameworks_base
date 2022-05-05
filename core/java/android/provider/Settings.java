@@ -3785,6 +3785,10 @@ public final class Settings {
 
         private static boolean putStringForUser(ContentResolver resolver, String name, String value,
                 String tag, boolean makeDefault, int userHandle, boolean overrideableByRestore) {
+            if (LOCAL_LOGV) {
+                Log.v(TAG, "System.putString(name=" + name + ", value=" + value + ") for "
+                        + userHandle);
+            }
             if (MOVED_TO_SECURE.contains(name)) {
                 Log.w(TAG, "Setting " + name + " has moved from android.provider.Settings.System"
                         + " to android.provider.Settings.Secure, value is unchanged.");
@@ -5678,6 +5682,33 @@ public final class Settings {
         @Readable
         public static final String WHEN_TO_MAKE_WIFI_CALLS = "when_to_make_wifi_calls";
 
+        /** Controls whether bluetooth is on or off on wearable devices.
+         *
+         * <p>The valid values for this key are: 0 (disabled) or 1 (enabled).
+         *
+         * @hide
+         */
+        public static final String CLOCKWORK_BLUETOOTH_SETTINGS_PREF = "cw_bt_settings_pref";
+
+        /**
+         * Controls whether the unread notification dot indicator is shown on wearable devices.
+         *
+         * <p>The valid values for this key are: 0 (disabled) or 1 (enabled).
+         *
+         * @hide
+         */
+        public static final String UNREAD_NOTIFICATION_DOT_INDICATOR =
+                "unread_notification_dot_indicator";
+
+        /**
+         * Controls whether auto-launching media controls is enabled on wearable devices.
+         *
+         * <p>The valid values for this key are: 0 (disabled) or 1 (enabled).
+         *
+         * @hide
+         */
+        public static final String AUTO_LAUNCH_MEDIA_CONTROLS = "auto_launch_media_controls";
+
         // Settings moved to Settings.Secure
 
         /**
@@ -6206,6 +6237,10 @@ public final class Settings {
         public static boolean putStringForUser(@NonNull ContentResolver resolver,
                 @NonNull String name, @Nullable String value, @Nullable String tag,
                 boolean makeDefault, @UserIdInt int userHandle, boolean overrideableByRestore) {
+            if (LOCAL_LOGV) {
+                Log.v(TAG, "Secure.putString(name=" + name + ", value=" + value + ") for "
+                        + userHandle);
+            }
             if (MOVED_TO_GLOBAL.contains(name)) {
                 Log.w(TAG, "Setting " + name + " has moved from android.provider.Settings.Secure"
                         + " to android.provider.Settings.Global");
@@ -7232,13 +7267,6 @@ public final class Settings {
          */
         public static final String LOCATION_SHOW_SYSTEM_OPS = "locationShowSystemOps";
 
-
-        /**
-         * Whether or not an indicator experiment has started.
-         * @hide
-         */
-        public static final String LOCATION_INDICATOR_EXPERIMENT_STARTED =
-                "locationIndicatorExperimentStarted";
         /**
          * A flag containing settings used for biometric weak
          * @hide
@@ -9148,6 +9176,66 @@ public final class Settings {
         public static final String SCREENSAVER_ENABLED_COMPLICATIONS =
                 "screensaver_enabled_complications";
 
+
+        /**
+         * Default, indicates that the user has not yet started the dock setup flow.
+         *
+         * @hide
+         */
+        public static final int DOCK_SETUP_NOT_STARTED = 0;
+
+        /**
+         * Indicates that the user has started but not yet completed dock setup.
+         * One of the possible states for {@link #DOCK_SETUP_STATE}.
+         *
+         * @hide
+         */
+        public static final int DOCK_SETUP_STARTED = 1;
+
+        /**
+         * Indicates that the user has snoozed dock setup and will complete it later.
+         * One of the possible states for {@link #DOCK_SETUP_STATE}.
+         *
+         * @hide
+         */
+        public static final int DOCK_SETUP_PAUSED = 2;
+
+        /**
+         * Indicates that the dock setup has resumed snoozing but the user hasn't started it yet.
+         * One of the possible states for {@link #DOCK_SETUP_STATE}.
+         *
+         * @hide
+         */
+        public static final int DOCK_SETUP_RESUMED = 3;
+
+        /**
+         * Indicates that the user has completed dock setup.
+         * One of the possible states for {@link #DOCK_SETUP_STATE}.
+         *
+         * @hide
+         */
+        public static final int DOCK_SETUP_COMPLETED = 10;
+
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef({
+                DOCK_SETUP_NOT_STARTED,
+                DOCK_SETUP_STARTED,
+                DOCK_SETUP_PAUSED,
+                DOCK_SETUP_RESUMED,
+                DOCK_SETUP_COMPLETED
+        })
+        public @interface DockSetupState {
+        }
+
+        /**
+         * Defines the user's current state of dock setup.
+         * The possible states are defined in {@link DockSetupState}.
+         *
+         * @hide
+         */
+        public static final String DOCK_SETUP_STATE = "dock_setup_state";
+
         /**
          * The default NFC payment component
          * @hide
@@ -10660,6 +10748,16 @@ public final class Settings {
          * @hide
          */
         public static final String ADAPTIVE_CONNECTIVITY_ENABLED = "adaptive_connectivity_enabled";
+
+        /**
+         * Controls the 'Sunlight boost' toggle in wearable devices (high brightness mode).
+         *
+         * Valid values for this key are: '0' (disabled) or '1' (enabled).
+         *
+         * @hide
+         */
+        public static final String HBM_SETTING_KEY =
+                "com.android.server.display.HBM_SETTING_KEY";
 
         /**
          * Keys we no longer back up under the current schema, but want to continue to
@@ -15994,8 +16092,8 @@ public final class Settings {
                 @NonNull String name, @Nullable String value, @Nullable String tag,
                 boolean makeDefault, @UserIdInt int userHandle, boolean overrideableByRestore) {
             if (LOCAL_LOGV) {
-                Log.v(TAG, "Global.putString(name=" + name + ", value=" + value
-                        + " for " + userHandle);
+                Log.v(TAG, "Global.putString(name=" + name + ", value=" + value + ") for "
+                        + userHandle);
             }
             // Global and Secure have the same access policy so we can forward writes
             if (MOVED_TO_SECURE.contains(name)) {

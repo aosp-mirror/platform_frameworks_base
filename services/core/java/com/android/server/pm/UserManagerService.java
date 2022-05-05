@@ -1440,6 +1440,8 @@ public class UserManagerService extends IUserManager.Stub {
     /**
      * Returns a UserInfo object with the name filled in, for Owner and Guest, or the original
      * if the name is already set.
+     *
+     * Note: Currently, the resulting name can be null if a user was truly created with a null name.
      */
     private UserInfo userWithName(UserInfo orig) {
         if (orig != null && orig.name == null) {
@@ -1648,7 +1650,7 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public String getUserName() {
+    public @NonNull String getUserName() {
         final int callingUid = Binder.getCallingUid();
         if (!hasQueryOrCreateUsersPermission()
                 && !hasPermissionGranted(
@@ -1659,7 +1661,10 @@ public class UserManagerService extends IUserManager.Stub {
         final int userId = UserHandle.getUserId(callingUid);
         synchronized (mUsersLock) {
             UserInfo userInfo = userWithName(getUserInfoLU(userId));
-            return userInfo == null ? "" : userInfo.name;
+            if (userInfo != null && userInfo.name != null) {
+                return userInfo.name;
+            }
+            return "";
         }
     }
 
@@ -4297,7 +4302,7 @@ public class UserManagerService extends IUserManager.Stub {
      * @return the converted user, or {@code null} if no pre-created user could be converted.
      */
     private @Nullable UserInfo convertPreCreatedUserIfPossible(String userType,
-            @UserInfoFlag int flags, String name, @Nullable Object token) {
+            @UserInfoFlag int flags, @Nullable String name, @Nullable Object token) {
         final UserData preCreatedUserData;
         synchronized (mUsersLock) {
             preCreatedUserData = getPreCreatedUserLU(userType);
