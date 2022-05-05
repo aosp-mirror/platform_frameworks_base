@@ -812,6 +812,12 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     }
 
     @Override
+    public void scheduleInternalCleanup(int sensorId, int userId,
+            @Nullable ClientMonitorCallback callback, boolean favorHalEnrollments) {
+        scheduleInternalCleanup(userId, callback);
+    }
+
+    @Override
     public void startPreparedClient(int sensorId, int cookie) {
         mHandler.post(() -> {
             mScheduler.startPreparedClient(cookie);

@@ -18,11 +18,13 @@ package com.android.server.biometrics.sensors.face;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.MANAGE_BIOMETRIC;
+import static android.Manifest.permission.MANAGE_FACE;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricsProtoEnums;
@@ -45,7 +47,9 @@ import android.os.IBinder;
 import android.os.NativeHandle;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.ServiceManager;
+import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.util.Pair;
 import android.util.Slog;
@@ -445,6 +449,15 @@ public class FaceService extends SystemService {
         }
 
         @Override // Binder call
+        public void onShellCommand(@Nullable FileDescriptor in, @Nullable FileDescriptor out,
+                @Nullable FileDescriptor err, @NonNull String[] args,
+                @Nullable ShellCallback callback, @NonNull ResultReceiver resultReceiver)
+                throws RemoteException {
+            (new FaceShellCommand(FaceService.this))
+                    .exec(this, in, out, err, args, callback, resultReceiver);
+        }
+
+        @Override // Binder call
         protected void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) {
                 return;
@@ -732,4 +745,19 @@ public class FaceService extends SystemService {
      * @param handle a handle that was obtained from {@link #acquireSurfaceHandle(Surface)}.
      */
     public static native void releaseSurfaceHandle(@NonNull NativeHandle handle);
+
+
+    void syncEnrollmentsNow() {
+        Utils.checkPermissionOrShell(getContext(), MANAGE_FACE);
+        if (Utils.isVirtualEnabled(getContext())) {
+            Slog.i(TAG, "Sync virtual enrollments");
+            final int userId = ActivityManager.getCurrentUser();
+            for (ServiceProvider provider : mServiceProviders) {
+                for (FaceSensorPropertiesInternal props : provider.getSensorProperties()) {
+                    provider.scheduleInternalCleanup(props.sensorId, userId, null /* callback */,
+                            true /* favorHalEnrollments */);
+                }
+            }
+        }
+    }
 }
