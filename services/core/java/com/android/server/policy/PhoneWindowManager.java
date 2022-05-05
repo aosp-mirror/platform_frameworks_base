@@ -171,7 +171,6 @@ import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.HapticFeedbackConstants;
 import android.view.IDisplayFoldListener;
-import android.view.IWindowManager;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyCharacterMap.FallbackAction;
@@ -383,7 +382,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private final SparseArray<ScreenOnListener> mScreenOnListeners = new SparseArray<>();
 
     Context mContext;
-    IWindowManager mWindowManager;
     WindowManagerFuncs mWindowManagerFuncs;
     WindowManagerInternal mWindowManagerInternal;
     PowerManager mPowerManager;
@@ -1883,10 +1881,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     @Override
-    public void init(Context context, IWindowManager windowManager,
-            WindowManagerFuncs windowManagerFuncs) {
+    public void init(Context context, WindowManagerFuncs windowManagerFuncs) {
         mContext = context;
-        mWindowManager = windowManager;
         mWindowManagerFuncs = windowManagerFuncs;
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
@@ -4814,10 +4810,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         if (enableScreen) {
-            try {
-                mWindowManager.enableScreenIfNeeded();
-            } catch (RemoteException unhandled) {
-            }
+            mWindowManagerFuncs.enableScreenIfNeeded();
         }
     }
 
@@ -5274,12 +5267,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     void updateRotation(boolean alwaysSendConfiguration) {
-        try {
-            // Set orientation on WindowManager.
-            mWindowManager.updateRotation(alwaysSendConfiguration, false /* forceRelayout */);
-        } catch (RemoteException e) {
-            // Ignore
-        }
+        mWindowManagerFuncs.updateRotation(alwaysSendConfiguration, false /* forceRelayout */);
     }
 
     /**
