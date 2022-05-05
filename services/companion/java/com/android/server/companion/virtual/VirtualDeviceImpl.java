@@ -166,7 +166,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         mAppToken = token;
         mParams = params;
         if (inputController == null) {
-            mInputController = new InputController(mVirtualDeviceLock);
+            mInputController = new InputController(
+                    mVirtualDeviceLock, context.getMainThreadHandler());
         } else {
             mInputController = inputController;
         }

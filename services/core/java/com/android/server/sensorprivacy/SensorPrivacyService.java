@@ -727,7 +727,8 @@ public final class SensorPrivacyService extends SystemService {
                 return false;
             }
 
-            if (mKeyguardManager != null && mKeyguardManager.isDeviceLocked(userId)) {
+            if (requiresAuthentication() && mKeyguardManager != null
+                    && mKeyguardManager.isDeviceLocked(userId)) {
                 Log.i(TAG, "Can't change mic/cam toggle while device is locked");
                 return false;
             }
@@ -990,6 +991,13 @@ public final class SensorPrivacyService extends SystemService {
                     mHandler.removeSuppressPackageReminderToken(key, token);
                 }
             }
+        }
+
+        @Override
+        public boolean requiresAuthentication() {
+            enforceObserveSensorPrivacyPermission();
+            return mContext.getResources()
+                    .getBoolean(R.bool.config_sensorPrivacyRequiresAuthentication);
         }
 
         @Override

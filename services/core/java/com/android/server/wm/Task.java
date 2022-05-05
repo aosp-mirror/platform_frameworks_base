@@ -28,7 +28,6 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.activityTypeToString;
@@ -1718,13 +1717,6 @@ class Task extends TaskFragment {
         final Task topTask = getTopMostTask();
         return super.supportsSplitScreenWindowingMode()
                 && (topTask == null || topTask.supportsSplitScreenWindowingModeInner(tda));
-    }
-
-    /** Returns {@code true} if this task is currently in split-screen. */
-    boolean inSplitScreen() {
-        return getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW
-                && getCreatedByOrganizerTask() != null
-                && getCreatedByOrganizerTask().getAdjacentTaskFragment() != null;
     }
 
     private boolean supportsSplitScreenWindowingModeInner(@Nullable TaskDisplayArea tda) {
