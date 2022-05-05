@@ -478,6 +478,22 @@
     <dimen name="qqs_layout_margin_top">16dp</dimen>
     <dimen name="qqs_layout_padding_bottom">24dp</dimen>
 
+    <!-- Most of the time it should be the same as notification_side_paddings as it's vertically
+         aligned with notifications. The exception is split shade when this value becomes
+         independent  -->
+    <dimen name="qs_horizontal_margin">@dimen/notification_side_paddings</dimen>
+
+    <!-- Most of the time it should be the same as notification_shade_content_margin_horizontal as
+         it's vertically aligned with notifications. The exception is split shade when this value
+         becomes independent  -->
+    <dimen name="qs_content_horizontal_padding">@dimen/notification_shade_content_margin_horizontal</dimen>
+
+    <!-- Most of the time it should be the same as notification_side_paddings as it's vertically
+        aligned with notifications. That's not the case on large screen when we have either split
+        shade and QS is not above notifications or in portrait shade when notification scrim is no
+        longer full width and next page of tiles should be at the edge of the screen -->
+    <dimen name="qs_tiles_page_horizontal_margin">@dimen/notification_side_paddings</dimen>
+
     <dimen name="qs_customize_internal_side_paddings">8dp</dimen>
     <dimen name="qs_icon_size">20dp</dimen>
     <dimen name="qs_side_view_size">28dp</dimen>
