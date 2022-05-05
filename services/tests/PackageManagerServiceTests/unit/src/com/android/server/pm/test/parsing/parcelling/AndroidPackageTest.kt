@@ -200,6 +200,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         AndroidPackage::isExternalStorage,
         AndroidPackage::isExtractNativeLibs,
         AndroidPackage::isFactoryTest,
+        AndroidPackage::isApex,
         AndroidPackage::isForceQueryable,
         AndroidPackage::isFullBackupOnly,
         AndroidPackage::isGame,

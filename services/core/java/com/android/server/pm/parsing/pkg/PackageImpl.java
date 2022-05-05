@@ -161,6 +161,7 @@ public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, An
         private static final int SIGNED_WITH_PLATFORM_KEY = 1 << 9;
         private static final int NATIVE_LIBRARY_ROOT_REQUIRES_ISA = 1 << 10;
         private static final int STUB = 1 << 11;
+        private static final int APEX = 1 << 12;
     }
 
     private ParsedPackage setBoolean(@Booleans.Flags int flag, boolean value) {
@@ -627,6 +628,11 @@ public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, An
     }
 
     @Override
+    public boolean isApex() {
+        return getBoolean(Booleans.APEX);
+    }
+
+    @Override
     public boolean isSystemExt() {
         return getBoolean(Booleans.SYSTEM_EXT);
     }
@@ -690,6 +696,12 @@ public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, An
     @Override
     public PackageImpl setFactoryTest(boolean value) {
         setBoolean(Booleans.FACTORY_TEST, value);
+        return this;
+    }
+
+    @Override
+    public PackageImpl setApex(boolean isApex) {
+        setBoolean(Booleans.APEX, isApex);
         return this;
     }
 

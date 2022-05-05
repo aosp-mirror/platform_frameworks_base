@@ -66,6 +66,8 @@ public interface ParsedPackage extends AndroidPackage {
 
     ParsedPackage setFactoryTest(boolean factoryTest);
 
+    ParsedPackage setApex(boolean isApex);
+
     ParsedPackage markNotActivitiesAsNotExportedIfSingleUser();
 
     ParsedPackage setOdm(boolean odm);
