@@ -37,6 +37,7 @@ public class IndividualSensorPrivacyControllerImpl implements IndividualSensorPr
     private final @NonNull SensorPrivacyManager mSensorPrivacyManager;
     private final SparseBooleanArray mSoftwareToggleState = new SparseBooleanArray();
     private final SparseBooleanArray mHardwareToggleState = new SparseBooleanArray();
+    private Boolean mRequiresAuthentication;
     private final Set<Callback> mCallbacks = new ArraySet<>();
 
     public IndividualSensorPrivacyControllerImpl(
@@ -93,6 +94,11 @@ public class IndividualSensorPrivacyControllerImpl implements IndividualSensorPr
     @Override
     public void suppressSensorPrivacyReminders(int sensor, boolean suppress) {
         mSensorPrivacyManager.suppressSensorPrivacyReminders(sensor, suppress);
+    }
+
+    @Override
+    public boolean requiresAuthentication() {
+        return mSensorPrivacyManager.requiresAuthentication();
     }
 
     @Override

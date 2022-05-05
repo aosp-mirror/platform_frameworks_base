@@ -4661,6 +4661,7 @@
   <java-symbol type="bool" name="config_supportsHardwareMicToggle" />
   <java-symbol type="bool" name="config_supportsHardwareCamToggle" />
   <java-symbol type="bool" name="config_launchCameraOnCameraLensCoverToggle" />
+  <java-symbol type="bool" name="config_sensorPrivacyRequiresAuthentication" />
 
   <java-symbol type="dimen" name="starting_surface_icon_size" />
   <java-symbol type="dimen" name="starting_surface_default_icon_size" />
