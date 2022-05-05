@@ -37,6 +37,11 @@ public interface IndividualSensorPrivacyController extends
 
     void suppressSensorPrivacyReminders(int sensor, boolean suppress);
 
+    /**
+     * @return whether lock screen authentication is required to change the toggle state
+     */
+    boolean requiresAuthentication();
+
     interface Callback {
         void onSensorBlockedChanged(@Sensor int sensor, boolean blocked);
     }
