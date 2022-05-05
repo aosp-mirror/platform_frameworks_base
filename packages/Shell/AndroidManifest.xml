@@ -646,6 +646,7 @@
 
     <!-- Permission required to run the `vm` tool which manages on-device virtual machines -->
     <uses-permission android:name="android.permission.MANAGE_VIRTUAL_MACHINE" />
+    <uses-permission android:name="android.permission.USE_CUSTOM_VIRTUAL_MACHINE" />
     <uses-permission android:name="android.permission.DEBUG_VIRTUAL_MACHINE" />
 
     <!-- Permission required to run GtsAssistantTestCases -->
