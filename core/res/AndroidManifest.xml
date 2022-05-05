@@ -6776,9 +6776,8 @@
         </activity>
 
         <activity android:name="com.android.server.logcat.LogAccessDialogActivity"
-                  android:theme="@style/Theme.DeviceDefault.Dialog.Alert.DayNight"
+                  android:theme="@style/Theme.Translucent.NoTitleBar"
                   android:excludeFromRecents="true"
-                  android:label="@string/log_access_confirmation_title"
                   android:exported="false">
         </activity>
 
@@ -7054,6 +7053,10 @@
         </service>
 
         <service android:name="com.android.server.BinaryTransparencyService$UpdateMeasurementsJobService"
+                 android:permission="android.permission.BIND_JOB_SERVICE">
+        </service>
+
+        <service android:name="com.android.server.notification.ReviewNotificationPermissionsJobService"
                  android:permission="android.permission.BIND_JOB_SERVICE">
         </service>
 

@@ -1747,6 +1747,10 @@ class ActivityStarter {
             // until after we launched to identify the relevant activity.
             transitionController.setTransientLaunch(mLastStartActivityRecord, mPriorAboveTask);
         }
+        if (!mSupervisor.mUserLeaving) {
+            // no-user-leaving implies not entering PiP.
+            transitionController.setCanPipOnFinish(false /* canPipOnFinish */);
+        }
         if (newTransition != null) {
             transitionController.requestStartTransition(newTransition,
                     mTargetTask == null ? started.getTask() : mTargetTask,
@@ -1813,6 +1817,10 @@ class ActivityStarter {
         // Check if starting activity on given task or on a new task is allowed.
         int startResult = isAllowedToStart(r, newTask, targetTask);
         if (startResult != START_SUCCESS) {
+            if (r.resultTo != null) {
+                r.resultTo.sendResult(INVALID_UID, r.resultWho, r.requestCode, RESULT_CANCELED,
+                        null /* data */, null /* dataGrants */);
+            }
             return startResult;
         }
 
@@ -1982,13 +1990,9 @@ class ActivityStarter {
         mPreferredWindowingMode = mLaunchParams.mWindowingMode;
     }
 
-    private int isAllowedToStart(ActivityRecord r, boolean newTask, Task targetTask) {
-        if (mStartActivity.packageName == null) {
-            if (mStartActivity.resultTo != null) {
-                mStartActivity.resultTo.sendResult(INVALID_UID, mStartActivity.resultWho,
-                        mStartActivity.requestCode, RESULT_CANCELED,
-                        null /* data */, null /* dataGrants */);
-            }
+    @VisibleForTesting
+    int isAllowedToStart(ActivityRecord r, boolean newTask, Task targetTask) {
+        if (r.packageName == null) {
             ActivityOptions.abort(mOptions);
             return START_CLASS_NOT_FOUND;
         }
@@ -2011,8 +2015,7 @@ class ActivityStarter {
                 || !targetTask.isUidPresent(mCallingUid)
                 || (LAUNCH_SINGLE_INSTANCE == mLaunchMode && targetTask.inPinnedWindowingMode()));
 
-        if (mRestrictedBgActivity && blockBalInTask
-                && handleBackgroundActivityAbort(mStartActivity)) {
+        if (mRestrictedBgActivity && blockBalInTask && handleBackgroundActivityAbort(r)) {
             Slog.e(TAG, "Abort background activity starts from " + mCallingUid);
             return START_ABORTED;
         }
@@ -2026,12 +2029,12 @@ class ActivityStarter {
         if (!newTask) {
             if (mService.getLockTaskController().isLockTaskModeViolation(targetTask,
                     isNewClearTask)) {
-                Slog.e(TAG, "Attempted Lock Task Mode violation mStartActivity=" + mStartActivity);
+                Slog.e(TAG, "Attempted Lock Task Mode violation r=" + r);
                 return START_RETURN_LOCK_TASK_MODE_VIOLATION;
             }
         } else {
-            if (mService.getLockTaskController().isNewTaskLockTaskModeViolation(mStartActivity)) {
-                Slog.e(TAG, "Attempted Lock Task Mode violation mStartActivity=" + mStartActivity);
+            if (mService.getLockTaskController().isNewTaskLockTaskModeViolation(r)) {
+                Slog.e(TAG, "Attempted Lock Task Mode violation r=" + r);
                 return START_RETURN_LOCK_TASK_MODE_VIOLATION;
             }
         }

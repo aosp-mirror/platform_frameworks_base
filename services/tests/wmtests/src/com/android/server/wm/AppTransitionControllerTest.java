@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -25,6 +26,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_OPEN;
+import static android.view.WindowManager.TRANSIT_OLD_DREAM_ACTIVITY_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_DREAM_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_CHANGE;
@@ -149,6 +152,32 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         mDisplayContent.prepareAppTransition(TRANSIT_CLOSE);
         mDisplayContent.mClosingApps.add(translucentClosing);
         assertEquals(WindowManager.TRANSIT_OLD_TRANSLUCENT_ACTIVITY_CLOSE,
+                AppTransitionController.getTransitCompatType(mDisplayContent.mAppTransition,
+                        mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
+                        mDisplayContent.mChangingContainers, null, null, false));
+    }
+
+    @Test
+    public void testDreamActivityOpenTransition() {
+        final ActivityRecord dreamActivity = createActivityRecord(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_DREAM);
+        mDisplayContent.prepareAppTransition(TRANSIT_OPEN);
+        mDisplayContent.mOpeningApps.add(dreamActivity);
+
+        assertEquals(TRANSIT_OLD_DREAM_ACTIVITY_OPEN,
+                AppTransitionController.getTransitCompatType(mDisplayContent.mAppTransition,
+                        mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
+                        mDisplayContent.mChangingContainers, null, null, false));
+    }
+
+    @Test
+    public void testDreamActivityCloseTransition() {
+        final ActivityRecord dreamActivity = createActivityRecord(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_DREAM);
+        mDisplayContent.prepareAppTransition(TRANSIT_CLOSE);
+        mDisplayContent.mClosingApps.add(dreamActivity);
+
+        assertEquals(TRANSIT_OLD_DREAM_ACTIVITY_CLOSE,
                 AppTransitionController.getTransitCompatType(mDisplayContent.mAppTransition,
                         mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps,
                         mDisplayContent.mChangingContainers, null, null, false));

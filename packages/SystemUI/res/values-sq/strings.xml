@@ -78,6 +78,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Provo ta nxjerrësh përsëri pamjen e ekranit"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Pamja e ekranit nuk mund të ruhet"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Nxjerrja e pamjeve të ekranit nuk lejohet nga aplikacioni ose organizata jote."</string>
+    <!-- no translation found for screenshot_blocked_by_admin (5486757604822795797) -->
+    <skip />
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Modifiko"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Modifiko pamjen e ekranit"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Ndaj pamjen e ekranit"</string>
@@ -346,8 +348,6 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Po, vazhdo"</string>
     <string name="guest_notification_app_name" msgid="2110425506754205509">"Modaliteti \"vizitor\""</string>
     <string name="guest_notification_session_active" msgid="5567273684713471450">"Je në modalitetin \"vizitor\""</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Të shtohet përdorues i ri?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Kur shton një përdorues të ri, ai person duhet të konfigurojë hapësirën e vet.\n\nÇdo përdorues mund t\'i përditësojë aplikacionet për të gjithë përdoruesit e tjerë."</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Shtimi i një përdoruesi të ri do të të nxjerrë nga modaliteti \"vizitor\" dhe do të fshijë të gjitha aplikacionet dhe të dhënat nga sesioni aktual për vizitorë."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"U arrit kufiri i përdoruesve"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
@@ -376,20 +376,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Organizata jote e zotëron këtë pajisje dhe mund të monitorojë trafikun e rrjetit"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> e zotëron këtë pajisje dhe mund të monitorojë trafikun e rrjetit"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Kjo pajisje ofrohet nga <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Kjo pajisje i përket organizatës sate dhe është e lidhur me <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Kjo pajisje i përket <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> dhe është e lidhur me <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Kjo pajisje i përket organizatës sate dhe është e lidhur me internetin nëpërmjet <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Kjo pajisje i përket <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> dhe është e lidhur me internetin nëpërmjet <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Kjo pajisje i përket organizatës sate"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Kjo pajisje i përket <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Kjo pajisje i përket organizatës sate dhe është e lidhur me rrjetet VPN"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Kjo pajisje i përket <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> dhe është e lidhur me rrjetet VPN"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Kjo pajisje i përket organizatës sate dhe është e lidhur me internetin nëpërmjet VPN-ve"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Kjo pajisje i përket <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> dhe është e lidhur me internetin nëpërmjet VPN-ve"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Organizata jote mund të monitorojë trafikun e rrjetit në profilin tënd të punës"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> mund të monitorojë trafikun e rrjetit në profilin tënd të punës"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Aktiviteti i rrjetit të profilit të punës është i dukshëm për administratorin tënd të teknologjisë së informacionit"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Rrjeti mund të jetë i monitoruar"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Kjo pajisje është e lidhur me rrjetet VPN"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Profili yt i punës është i lidhur me <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Profili yt personal është i lidhur me <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Kjo pajisje është e lidhur me <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Kjo pajisje është e lidhur me internetin nëpërmjet VPN-ve"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Aplikacionet e tua të punës janë të lidhura me internetin nëpërmjet <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Aplikacionet e tua personale janë të lidhura me internetin nëpërmjet <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Kjo pajisje është e lidhur me internetin nëpërmjet <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Kjo pajisje ofrohet nga <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Menaxhimi i pajisjes"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -405,10 +405,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Në këtë pajisje është instaluar një autoritet certifikate. Trafiku i rrjetit tënd të sigurt mund të monitorohet ose modifikohet."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Administratori ka aktivizuar regjistrimin e rrjetit, i cili monitoron trafikun në pajisjen tënde."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Administratori yt ka aktivizuar regjistrimin e rrjetit, i cili monitoron trafikun në profilin tënd të punës, por jo në profilin tënd personal."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Je lidhur me aplikacionin <xliff:g id="VPN_APP">%1$s</xliff:g>, i cili mund të monitorojë aktivitetin tënd në rrjet, duke përfshirë mail-et, aplikacionet dhe sajtet e uebit."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Je lidhur me aplikacionet <xliff:g id="VPN_APP_0">%1$s</xliff:g> dhe <xliff:g id="VPN_APP_1">%2$s</xliff:g>, të cilat mund të monitorojnë aktivitetin tënd në rrjet, duke përfshirë mail-et, aplikacionet dhe sajtet e uebit."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Profili yt i punës është i lidhur me <xliff:g id="VPN_APP">%1$s</xliff:g>, i cili mund të monitorojë aktivitetin tënd në rrjet, duke përfshirë mail-et, aplikacionet dhe sajtet e uebit."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Profili yt personal është i lidhur me <xliff:g id="VPN_APP">%1$s</xliff:g>, i cili mund të monitorojë aktivitetin tënd në rrjet, duke përfshirë mail-et, aplikacionet dhe sajtet e uebit."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Kjo pajisje është e lidhur me internetin nëpërmjet <xliff:g id="VPN_APP">%1$s</xliff:g>. Aktiviteti yt në rrjet, duke përfshirë email-et e dhe të dhënat e shfletimit, është i dukshëm për administratorin tënd të teknologjisë së informacionit."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Kjo pajisje është e lidhur me internetin nëpërmjet <xliff:g id="VPN_APP_0">%1$s</xliff:g> dhe <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Aktiviteti yt në rrjet, duke përfshirë email-et e dhe të dhënat e shfletimit, është i dukshëm për administratorin tënd të teknologjisë së informacionit."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Aplikacionet e tua të punës janë të lidhura me internetin nëpërmjet <xliff:g id="VPN_APP">%1$s</xliff:g>. Aktiviteti yt në rrjet në aplikacionet e punës, duke përfshirë email-et dhe të dhënat e shfletimit, është i dukshëm për administratorin e teknologjisë së informacionit dhe ofruesin e VPN-së."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Aplikacionet e tua personale janë të lidhura me internetin nëpërmjet <xliff:g id="VPN_APP">%1$s</xliff:g>. Aktiviteti yt në rrjet, duke përfshirë email-et e dhe të dhënat e shfletimit, është i dukshëm për ofruesin tënd të VPN-së."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Hap cilësimet e VPN-së"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Kjo pajisje menaxhohet nga prindi yt. Prindi yt mund të shikojë dhe menaxhojë informacionet, si p.sh. aplikacionet që përdor, vendndodhjen tënde dhe kohën para ekranit."</string>
@@ -729,6 +729,8 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"Aktivizoje kur bateria mund të mbarojë"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Jo"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Hidh grumbullin SysUI"</string>
+    <!-- no translation found for ongoing_privacy_dialog_a11y_title (2205794093673327974) -->
+    <skip />
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Aplikacionet po përdorin <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" dhe "</string>
@@ -854,6 +856,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Emri i transmetimit"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Fjalëkalimi"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Ruaj"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Po fillon…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Nuk mund të transmetohet"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Numri i ndërtimit"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Numri i ndërtimit u kopjua te kujtesa e fragmenteve"</string>
     <string name="basic_status" msgid="2315371112182658176">"Hap bisedën"</string>
@@ -922,11 +926,13 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Shto një pllakëz"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Mos e shto pllakëzën"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Zgjidh përdoruesin"</string>
-    <!-- no translation found for fgs_manager_footer_label (790443735462280164) -->
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> aplikacione janë aktive</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> aplikacion është aktiv</item>
+    </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Informacion i ri"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aplikacionet aktive"</string>
-    <!-- no translation found for fgs_manager_dialog_message (6839542063522121108) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Edhe nëse nuk je duke i përdorur këto aplikacione, ato janë ende aktive dhe mund të ndikojnë në kohëzgjatjen e baterisë"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Ndalo"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Ndaluar"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"U krye"</string>

@@ -48,6 +48,7 @@ import android.os.Process;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Interpolator;
@@ -340,6 +341,10 @@ public class MediaControlPanel {
             }
         });
 
+        // AlbumView uses a hardware layer so that clipping of the foreground is handled
+        // with clipping the album art. Otherwise album art shows through at the edges.
+        mMediaViewHolder.getAlbumView().setLayerType(View.LAYER_TYPE_HARDWARE, null);
+
         TextView titleText = mMediaViewHolder.getTitleText();
         TextView artistText = mMediaViewHolder.getArtistText();
         AnimatorSet enter = loadAnimator(R.anim.media_metadata_enter,
@@ -570,8 +575,8 @@ public class MediaControlPanel {
         }
 
         // Capture width & height from views in foreground for artwork scaling in background
-        int width = mMediaViewHolder.getPlayer().getWidth();
-        int height = mMediaViewHolder.getPlayer().getHeight();
+        int width = mMediaViewHolder.getAlbumView().getMeasuredWidth();
+        int height = mMediaViewHolder.getAlbumView().getMeasuredHeight();
 
         // WallpaperColors.fromBitmap takes a good amount of time. We do that work
         // on the background executor to avoid stalling animations on the UI Thread.
@@ -609,7 +614,6 @@ public class MediaControlPanel {
                 // Bind the album view to the artwork or a transition drawable
                 ImageView albumView = mMediaViewHolder.getAlbumView();
                 albumView.setPadding(0, 0, 0, 0);
-                albumView.setClipToOutline(true);
                 if (updateBackground || (!mIsArtworkBound && isArtworkBound)) {
                     if (mPrevArtwork == null) {
                         albumView.setImageDrawable(artwork);
@@ -619,6 +623,12 @@ public class MediaControlPanel {
                         // the metadata changes).
                         TransitionDrawable transitionDrawable = new TransitionDrawable(
                                 new Drawable[]{mPrevArtwork, artwork});
+
+                        scaleTransitionDrawableLayer(transitionDrawable, 0, width, height);
+                        scaleTransitionDrawableLayer(transitionDrawable, 1, width, height);
+                        transitionDrawable.setLayerGravity(0, Gravity.CENTER);
+                        transitionDrawable.setLayerGravity(1, Gravity.CENTER);
+
                         albumView.setImageDrawable(transitionDrawable);
                         transitionDrawable.startTransition(isArtworkBound ? 333 : 80);
                     }
@@ -627,7 +637,7 @@ public class MediaControlPanel {
                 }
 
                 // Transition Colors to current color scheme
-                mColorSchemeTransition.updateColorScheme(colorScheme);
+                mColorSchemeTransition.updateColorScheme(colorScheme, mIsArtworkBound);
 
                 // App icon - use notification icon
                 ImageView appIconView = mMediaViewHolder.getAppIcon();
@@ -650,6 +660,30 @@ public class MediaControlPanel {
                 }
             });
         });
+    }
+
+    private void scaleTransitionDrawableLayer(TransitionDrawable transitionDrawable, int layer,
+            int targetWidth, int targetHeight) {
+        Drawable drawable = transitionDrawable.getDrawable(layer);
+        if (drawable == null) {
+            return;
+        }
+
+        int width = drawable.getIntrinsicWidth();
+        int height = drawable.getIntrinsicHeight();
+        if (width == 0 || height == 0 || targetWidth == 0 || targetHeight == 0) {
+            return;
+        }
+
+        float scale;
+        if ((width / (float) height) > (targetWidth / (float) targetHeight)) {
+            // Drawable is wider than target view, scale to match height
+            scale = targetHeight / (float) height;
+        } else {
+            // Drawable is taller than target view, scale to match width
+            scale = targetWidth / (float) width;
+        }
+        transitionDrawable.setLayerSize(layer, (int) (scale * width), (int) (scale * height));
     }
 
     private void bindActionButtons(MediaData data) {
@@ -894,27 +928,13 @@ public class MediaControlPanel {
                 InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_MEDIA_PLAYER) {
             @Override
             protected float getCurrentTopCornerRadius() {
-                return ((IlluminationDrawable) player.getBackground()).getCornerRadius();
+                return mContext.getResources().getDimension(R.dimen.notification_corner_radius);
             }
 
             @Override
             protected float getCurrentBottomCornerRadius() {
                 // TODO(b/184121838): Make IlluminationDrawable support top and bottom radius.
                 return getCurrentTopCornerRadius();
-            }
-
-            @Override
-            protected void setBackgroundCornerRadius(Drawable background, float topCornerRadius,
-                    float bottomCornerRadius) {
-                // TODO(b/184121838): Make IlluminationDrawable support top and bottom radius.
-                float radius = Math.min(topCornerRadius, bottomCornerRadius);
-                ((IlluminationDrawable) background).setCornerRadiusOverride(radius);
-            }
-
-            @Override
-            public void onLaunchAnimationEnd(boolean isExpandingFullyAbove) {
-                super.onLaunchAnimationEnd(isExpandingFullyAbove);
-                ((IlluminationDrawable) player.getBackground()).setCornerRadiusOverride(null);
             }
         };
     }
