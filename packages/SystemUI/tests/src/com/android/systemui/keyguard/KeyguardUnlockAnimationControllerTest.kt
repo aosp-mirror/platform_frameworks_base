@@ -14,6 +14,7 @@ import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardViewController
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import junit.framework.Assert.assertEquals
@@ -49,6 +50,8 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
     private lateinit var biometricUnlockController: BiometricUnlockController
     @Mock
     private lateinit var surfaceTransactionApplier: SyncRtSurfaceTransactionApplier
+    @Mock
+    private lateinit var statusBarStateController: SysuiStatusBarStateController
 
     private lateinit var remoteAnimationTarget: RemoteAnimationTarget
 
@@ -57,7 +60,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         keyguardUnlockAnimationController = KeyguardUnlockAnimationController(
             context, keyguardStateController, { keyguardViewMediator }, keyguardViewController,
-            featureFlags, { biometricUnlockController }
+            featureFlags, { biometricUnlockController }, statusBarStateController
         )
 
         `when`(keyguardViewController.viewRootImpl).thenReturn(mock(ViewRootImpl::class.java))
