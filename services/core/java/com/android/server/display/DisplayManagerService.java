@@ -1435,16 +1435,6 @@ public final class DisplayManagerService extends SystemService {
             DisplayDevice device =
                     mVirtualDisplayAdapter.releaseVirtualDisplayLocked(appToken);
             if (device != null) {
-                final LogicalDisplay display = mLogicalDisplayMapper.getDisplayLocked(device);
-                if (display != null) {
-                    final int displayId = display.getDisplayIdLocked();
-                    if (mDisplayWindowPolicyControllers.contains(displayId)) {
-                        Pair<IVirtualDevice, DisplayWindowPolicyController> pair =
-                                mDisplayWindowPolicyControllers.removeReturnOld(displayId);
-                        getLocalService(VirtualDeviceManagerInternal.class)
-                                .onVirtualDisplayRemoved(pair.first, displayId);
-                    }
-                }
                 // TODO: multi-display - handle virtual displays the same as other display adapters.
                 mDisplayDeviceRepo.onDisplayDeviceEvent(device,
                         DisplayAdapter.DISPLAY_DEVICE_EVENT_REMOVED);
@@ -1601,6 +1591,17 @@ public final class DisplayManagerService extends SystemService {
         DisplayManagerGlobal.invalidateLocalDisplayInfoCaches();
         sendDisplayEventLocked(displayId, DisplayManagerGlobal.EVENT_DISPLAY_REMOVED);
         scheduleTraversalLocked(false);
+
+        if (mDisplayWindowPolicyControllers.contains(displayId)) {
+            final IVirtualDevice virtualDevice = mDisplayWindowPolicyControllers.removeReturnOld(
+                    displayId).first;
+            if (virtualDevice != null) {
+                mHandler.post(() -> {
+                    getLocalService(VirtualDeviceManagerInternal.class)
+                            .onVirtualDisplayRemoved(virtualDevice, displayId);
+                });
+            }
+        }
     }
 
     private void handleLogicalDisplaySwappedLocked(@NonNull LogicalDisplay display) {
