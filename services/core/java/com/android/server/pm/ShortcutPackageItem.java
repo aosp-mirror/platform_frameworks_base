@@ -16,8 +16,10 @@
 package com.android.server.pm;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.pm.PackageInfo;
 import android.content.pm.ShortcutInfo;
+import android.graphics.Bitmap;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.TypedXmlSerializer;
@@ -50,6 +52,9 @@ abstract class ShortcutPackageItem {
 
     protected ShortcutUser mShortcutUser;
 
+    @GuardedBy("mLock")
+    protected ShortcutBitmapSaver mShortcutBitmapSaver;
+
     protected final Object mLock = new Object();
 
     protected ShortcutPackageItem(@NonNull ShortcutUser shortcutUser,
@@ -59,6 +64,7 @@ abstract class ShortcutPackageItem {
         mPackageUserId = packageUserId;
         mPackageName = Preconditions.checkStringNotEmpty(packageName);
         mPackageInfo = Objects.requireNonNull(packageInfo);
+        mShortcutBitmapSaver = new ShortcutBitmapSaver(shortcutUser.mService);
     }
 
     /**
@@ -206,7 +212,7 @@ abstract class ShortcutPackageItem {
 
     void saveShortcutPackageItem() {
         // Wait for bitmap saves to conclude before proceeding to saving shortcuts.
-        mShortcutUser.mService.waitForBitmapSaves();
+        waitForBitmapSaves();
         // Save each ShortcutPackageItem in a separate Xml file.
         final File path = getShortcutPackageItemFile();
         if (ShortcutService.DEBUG || ShortcutService.DEBUG_REBOOT) {
@@ -218,6 +224,35 @@ abstract class ShortcutPackageItem {
             //  AppSearch as opposed to maintaining a separate XML file.
             saveToFileLocked(path, false /*forBackup*/);
             scheduleSaveToAppSearchLocked();
+        }
+    }
+
+    public boolean waitForBitmapSaves() {
+        synchronized (mLock) {
+            return mShortcutBitmapSaver.waitForAllSavesLocked();
+        }
+    }
+
+    public void saveBitmap(ShortcutInfo shortcut,
+            int maxDimension, Bitmap.CompressFormat format, int quality) {
+        synchronized (mLock) {
+            mShortcutBitmapSaver.saveBitmapLocked(shortcut, maxDimension, format, quality);
+        }
+    }
+
+    /**
+     * Wait for all pending saves to finish, and then return the given shortcut's bitmap path.
+     */
+    @Nullable
+    public String getBitmapPathMayWait(ShortcutInfo shortcut) {
+        synchronized (mLock) {
+            return mShortcutBitmapSaver.getBitmapPathMayWaitLocked(shortcut);
+        }
+    }
+
+    public void removeIcon(ShortcutInfo shortcut) {
+        synchronized (mLock) {
+            mShortcutBitmapSaver.removeIcon(shortcut);
         }
     }
 

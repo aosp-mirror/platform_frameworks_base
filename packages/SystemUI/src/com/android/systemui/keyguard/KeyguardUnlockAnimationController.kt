@@ -44,6 +44,7 @@ import com.android.systemui.shared.system.QuickStepContract
 import com.android.systemui.shared.system.smartspace.ILauncherUnlockAnimationController
 import com.android.systemui.shared.system.smartspace.ISysuiUnlockAnimationController
 import com.android.systemui.shared.system.smartspace.SmartspaceState
+import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import dagger.Lazy
@@ -140,7 +141,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
     keyguardViewMediator: Lazy<KeyguardViewMediator>,
     private val keyguardViewController: KeyguardViewController,
     private val featureFlags: FeatureFlags,
-    private val biometricUnlockControllerLazy: Lazy<BiometricUnlockController>
+    private val biometricUnlockControllerLazy: Lazy<BiometricUnlockController>,
+    private val statusBarStateController: SysuiStatusBarStateController
 ) : KeyguardStateController.Callback, ISysuiUnlockAnimationController.Stub() {
 
     interface KeyguardUnlockAnimationListener {
@@ -372,7 +374,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
      * changed.
      */
     override fun onKeyguardGoingAwayChanged() {
-        if (keyguardStateController.isKeyguardGoingAway) {
+        if (keyguardStateController.isKeyguardGoingAway
+            && !statusBarStateController.leaveOpenOnKeyguardHide()) {
             prepareForInWindowLauncherAnimations()
         }
     }
@@ -810,6 +813,11 @@ class KeyguardUnlockAnimationController @Inject constructor(
         // would not make sense.
         if (!keyguardStateController.canDismissLockScreen() &&
             !biometricUnlockControllerLazy.get().isBiometricUnlock) {
+            return false
+        }
+
+        // The smartspace is not visible if the bouncer is showing, so don't shared element it.
+        if (keyguardStateController.isBouncerShowing) {
             return false
         }
 

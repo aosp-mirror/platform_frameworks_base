@@ -590,7 +590,6 @@ public final class ViewRootImpl implements ViewParent,
     @Nullable
     int mContentCaptureEnabled = CONTENT_CAPTURE_ENABLED_NOT_CHECKED;
     boolean mPerformContentCapture;
-    boolean mPerformAutoFill;
 
 
     boolean mReportNextDraw;
@@ -858,6 +857,28 @@ public final class ViewRootImpl implements ViewParent,
      */
     private Bundle mRelayoutBundle = new Bundle();
 
+    private static volatile boolean sAnrReported = false;
+    static BLASTBufferQueue.TransactionHangCallback sTransactionHangCallback =
+        new BLASTBufferQueue.TransactionHangCallback() {
+            @Override
+            public void onTransactionHang(boolean isGPUHang) {
+                if (isGPUHang && !sAnrReported) {
+                    sAnrReported = true;
+                    try {
+                        ActivityManager.getService().appNotResponding(
+                            "Buffer processing hung up due to stuck fence. Indicates GPU hang");
+                    } catch (RemoteException e) {
+                        // We asked the system to crash us, but the system
+                        // already crashed. Unfortunately things may be
+                        // out of control.
+                    }
+                } else {
+                    // TODO: Do something with this later. For now we just ANR
+                    // in dequeue buffer later like we always have.
+                }
+            }
+        };
+
     private String mTag = TAG;
 
     public ViewRootImpl(Context context, Display display) {
@@ -890,7 +911,6 @@ public final class ViewRootImpl implements ViewParent,
         mPreviousTransparentRegion = new Region();
         mFirst = true; // true for the first time the view is added
         mPerformContentCapture = true; // also true for the first time the view is added
-        mPerformAutoFill = true;
         mAdded = false;
         mAttachInfo = new View.AttachInfo(mWindowSession, mWindow, display, this, mHandler, this,
                 context);
@@ -2100,6 +2120,7 @@ public final class ViewRootImpl implements ViewParent,
         }
         mBlastBufferQueue = new BLASTBufferQueue(mTag, mSurfaceControl,
                 mSurfaceSize.x, mSurfaceSize.y, mWindowAttributes.format);
+        mBlastBufferQueue.setTransactionHangCallback(sTransactionHangCallback);
         Surface blastSurface = mBlastBufferQueue.createSurface();
         // Only call transferFrom if the surface has changed to prevent inc the generation ID and
         // causing EGL resources to be recreated.
@@ -4196,26 +4217,6 @@ public final class ViewRootImpl implements ViewParent,
         });
     }
 
-    @Nullable
-    private void registerFrameDrawingCallbackForBlur() {
-        if (!isHardwareEnabled()) {
-            return;
-        }
-        final boolean hasBlurUpdates = mBlurRegionAggregator.hasUpdates();
-        final boolean needsCallbackForBlur = hasBlurUpdates || mBlurRegionAggregator.hasRegions();
-
-        if (!needsCallbackForBlur) {
-            return;
-        }
-
-        final BackgroundBlurDrawable.BlurRegion[] blurRegionsForFrame =
-                mBlurRegionAggregator.getBlurRegionsCopyForRT();
-
-        // The callback will run on the render thread.
-        registerRtFrameCallback((frame) -> mBlurRegionAggregator
-                .dispatchBlurTransactionIfNeeded(frame, blurRegionsForFrame, hasBlurUpdates));
-    }
-
     private void registerCallbackForPendingTransactions() {
         registerRtFrameCallback(new FrameDrawingCallback() {
             @Override
@@ -4253,7 +4254,6 @@ public final class ViewRootImpl implements ViewParent,
         mIsDrawing = true;
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "draw");
 
-        registerFrameDrawingCallbackForBlur();
         addFrameCommitCallbackIfNeeded();
 
         boolean usingAsyncReport = isHardwareEnabled() && mSyncBufferCallback != null;
@@ -4328,18 +4328,6 @@ public final class ViewRootImpl implements ViewParent,
         }
         if (mPerformContentCapture) {
             performContentCaptureInitialReport();
-        }
-
-        if (mPerformAutoFill) {
-            notifyEnterForAutoFillIfNeeded();
-        }
-    }
-
-    private void notifyEnterForAutoFillIfNeeded() {
-        mPerformAutoFill = false;
-        final AutofillManager afm = getAutofillManager();
-        if (afm != null) {
-            afm.notifyViewEnteredForActivityStarted(mView);
         }
     }
 
