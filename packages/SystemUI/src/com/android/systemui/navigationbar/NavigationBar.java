@@ -129,6 +129,7 @@ import com.android.systemui.navigationbar.gestural.QuickswitchOrientedNavHandle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.shared.rotation.RotationButton;
 import com.android.systemui.shared.rotation.RotationButtonController;
@@ -210,6 +211,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     private final NavBarHelper mNavBarHelper;
     private final NotificationShadeDepthController mNotificationShadeDepthController;
     private final OnComputeInternalInsetsListener mOnComputeInternalInsetsListener;
+    private final UserContextProvider mUserContextProvider;
     private NavigationBarFrame mFrame;
 
     private @WindowVisibleState int mNavigationBarWindowState = WINDOW_STATE_SHOWING;
@@ -522,7 +524,8 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             DeviceConfigProxy deviceConfigProxy,
             NavigationBarTransitions navigationBarTransitions,
             EdgeBackGestureHandler edgeBackGestureHandler,
-            Optional<BackAnimation> backAnimation) {
+            Optional<BackAnimation> backAnimation,
+            UserContextProvider userContextProvider) {
         super(navigationBarView);
         mFrame = navigationBarFrame;
         mContext = context;
@@ -559,6 +562,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mAutoHideControllerFactory = autoHideControllerFactory;
         mTelecomManagerOptional = telecomManagerOptional;
         mInputMethodManager = inputMethodManager;
+        mUserContextProvider = userContextProvider;
 
         mOnComputeInternalInsetsListener = info -> {
             // When the nav bar is in 2-button or 3-button mode, or when IME is visible in fully
@@ -1550,35 +1554,36 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         int insetsHeight = -1;
         int gravity = Gravity.BOTTOM;
         boolean navBarCanMove = true;
+        final Context userContext = mUserContextProvider.createCurrentUserContext(mContext);
         if (mWindowManager != null && mWindowManager.getCurrentWindowMetrics() != null) {
             Rect displaySize = mWindowManager.getCurrentWindowMetrics().getBounds();
             navBarCanMove = displaySize.width() != displaySize.height()
-                    && mContext.getResources().getBoolean(
+                    && userContext.getResources().getBoolean(
                     com.android.internal.R.bool.config_navBarCanMove);
         }
         if (!navBarCanMove) {
-            height = mContext.getResources().getDimensionPixelSize(
+            height = userContext.getResources().getDimensionPixelSize(
                     com.android.internal.R.dimen.navigation_bar_frame_height);
-            insetsHeight = mContext.getResources().getDimensionPixelSize(
+            insetsHeight = userContext.getResources().getDimensionPixelSize(
                     com.android.internal.R.dimen.navigation_bar_height);
         } else {
             switch (rotation) {
                 case ROTATION_UNDEFINED:
                 case Surface.ROTATION_0:
                 case Surface.ROTATION_180:
-                    height = mContext.getResources().getDimensionPixelSize(
+                    height = userContext.getResources().getDimensionPixelSize(
                             com.android.internal.R.dimen.navigation_bar_frame_height);
-                    insetsHeight = mContext.getResources().getDimensionPixelSize(
+                    insetsHeight = userContext.getResources().getDimensionPixelSize(
                             com.android.internal.R.dimen.navigation_bar_height);
                     break;
                 case Surface.ROTATION_90:
                     gravity = Gravity.RIGHT;
-                    width = mContext.getResources().getDimensionPixelSize(
+                    width = userContext.getResources().getDimensionPixelSize(
                             com.android.internal.R.dimen.navigation_bar_width);
                     break;
                 case Surface.ROTATION_270:
                     gravity = Gravity.LEFT;
-                    width = mContext.getResources().getDimensionPixelSize(
+                    width = userContext.getResources().getDimensionPixelSize(
                             com.android.internal.R.dimen.navigation_bar_width);
                     break;
             }
@@ -1603,12 +1608,12 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             lp.providedInternalInsets[ITYPE_NAVIGATION_BAR] = null;
         }
         lp.token = new Binder();
-        lp.accessibilityTitle = mContext.getString(R.string.nav_bar);
+        lp.accessibilityTitle = userContext.getString(R.string.nav_bar);
         lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC
                 | WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT;
         lp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         lp.windowAnimations = 0;
-        lp.setTitle("NavigationBar" + mContext.getDisplayId());
+        lp.setTitle("NavigationBar" + userContext.getDisplayId());
         lp.setFitInsetsTypes(0 /* types */);
         lp.setTrustedOverlay();
         return lp;
