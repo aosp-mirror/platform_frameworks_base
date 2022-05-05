@@ -195,8 +195,8 @@ enum class Style(internal val coreSpec: CoreSpec) {
             a1 = TonalSpec(HueSource(), ChromaMinimum(48.0)),
             a2 = TonalSpec(HueVibrantSecondary(), ChromaConstant(24.0)),
             a3 = TonalSpec(HueVibrantTertiary(), ChromaConstant(32.0)),
-            n1 = TonalSpec(HueSource(), ChromaConstant(10.0)),
-            n2 = TonalSpec(HueSource(), ChromaConstant(12.0))
+            n1 = TonalSpec(HueSource(), ChromaConstant(12.0)),
+            n2 = TonalSpec(HueSource(), ChromaConstant(14.0))
     )),
     EXPRESSIVE(CoreSpec(
             a1 = TonalSpec(HueAdd(240.0), ChromaConstant(40.0)),
