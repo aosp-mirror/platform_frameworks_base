@@ -480,7 +480,7 @@
   <java-symbol type="bool" name="config_useAssistantVolume" />
   <java-symbol type="integer" name="config_smartSelectionInitializedTimeoutMillis" />
   <java-symbol type="integer" name="config_smartSelectionInitializingTimeoutMillis" />
-  <java-symbol type="integer" name="config_preferKeepClearForFocusDelayMillis" />
+  <java-symbol type="bool" name="config_preferKeepClearForFocus" />
   <java-symbol type="bool" name="config_hibernationDeletesOatArtifactsEnabled"/>
   <java-symbol type="integer" name="config_defaultAnalogClockSecondsHandFps"/>
 
