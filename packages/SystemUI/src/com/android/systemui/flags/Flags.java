@@ -60,6 +60,9 @@ public class Flags {
     public static final ResourceBooleanFlag NOTIFICATION_DRAG_TO_CONTENTS =
             new ResourceBooleanFlag(108, R.bool.config_notificationToContents);
 
+    public static final BooleanFlag REMOVE_UNRANKED_NOTIFICATIONS =
+            new BooleanFlag(109, false);
+
     /***************************************/
     // 200 - keyguard/lockscreen
 

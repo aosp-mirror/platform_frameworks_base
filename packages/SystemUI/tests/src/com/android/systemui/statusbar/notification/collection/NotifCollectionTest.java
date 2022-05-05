@@ -1492,6 +1492,80 @@ public class NotifCollectionTest extends SysuiTestCase {
     }
 
     @Test
+    public void testMissingRankingWhenRemovalFeatureIsDisabled() {
+        // GIVEN a pipeline with one two notifications
+        when(mNotifPipelineFlags.removeUnrankedNotifs()).thenReturn(false);
+        String key1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 1, "myTag")).key;
+        String key2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 2, "myTag")).key;
+        NotificationEntry entry1 = mCollectionListener.getEntry(key1);
+        NotificationEntry entry2 = mCollectionListener.getEntry(key2);
+        clearInvocations(mCollectionListener);
+
+        // GIVEN the message for removing key1 gets does not reach NotifCollection
+        Ranking ranking1 = mNoMan.removeRankingWithoutEvent(key1);
+        // WHEN the message for removing key2 arrives
+        mNoMan.retractNotif(entry2.getSbn(), REASON_APP_CANCEL);
+
+        // THEN only entry2 gets removed
+        verify(mCollectionListener).onEntryRemoved(eq(entry2), eq(REASON_APP_CANCEL));
+        verify(mCollectionListener).onEntryCleanUp(eq(entry2));
+        verify(mCollectionListener).onRankingApplied();
+        verifyNoMoreInteractions(mCollectionListener);
+        verify(mLogger).logMissingRankings(eq(List.of(entry1)), eq(1), any());
+        verify(mLogger, never()).logRecoveredRankings(any());
+        clearInvocations(mCollectionListener, mLogger);
+
+        // WHEN a ranking update includes key1 again
+        mNoMan.setRanking(key1, ranking1);
+        mNoMan.issueRankingUpdate();
+
+        // VERIFY that we do nothing but log the 'recovery'
+        verify(mCollectionListener).onRankingUpdate(any());
+        verify(mCollectionListener).onRankingApplied();
+        verifyNoMoreInteractions(mCollectionListener);
+        verify(mLogger, never()).logMissingRankings(any(), anyInt(), any());
+        verify(mLogger).logRecoveredRankings(eq(List.of(key1)));
+    }
+
+    @Test
+    public void testMissingRankingWhenRemovalFeatureIsEnabled() {
+        // GIVEN a pipeline with one two notifications
+        when(mNotifPipelineFlags.removeUnrankedNotifs()).thenReturn(true);
+        String key1 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 1, "myTag")).key;
+        String key2 = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 2, "myTag")).key;
+        NotificationEntry entry1 = mCollectionListener.getEntry(key1);
+        NotificationEntry entry2 = mCollectionListener.getEntry(key2);
+        clearInvocations(mCollectionListener);
+
+        // GIVEN the message for removing key1 gets does not reach NotifCollection
+        Ranking ranking1 = mNoMan.removeRankingWithoutEvent(key1);
+        // WHEN the message for removing key2 arrives
+        mNoMan.retractNotif(entry2.getSbn(), REASON_APP_CANCEL);
+
+        // THEN both entry1 and entry2 get removed
+        verify(mCollectionListener).onEntryRemoved(eq(entry2), eq(REASON_APP_CANCEL));
+        verify(mCollectionListener).onEntryRemoved(eq(entry1), eq(REASON_UNKNOWN));
+        verify(mCollectionListener).onEntryCleanUp(eq(entry2));
+        verify(mCollectionListener).onEntryCleanUp(eq(entry1));
+        verify(mCollectionListener).onRankingApplied();
+        verifyNoMoreInteractions(mCollectionListener);
+        verify(mLogger).logMissingRankings(eq(List.of(entry1)), eq(1), any());
+        verify(mLogger, never()).logRecoveredRankings(any());
+        clearInvocations(mCollectionListener, mLogger);
+
+        // WHEN a ranking update includes key1 again
+        mNoMan.setRanking(key1, ranking1);
+        mNoMan.issueRankingUpdate();
+
+        // VERIFY that we do nothing but log the 'recovery'
+        verify(mCollectionListener).onRankingUpdate(any());
+        verify(mCollectionListener).onRankingApplied();
+        verifyNoMoreInteractions(mCollectionListener);
+        verify(mLogger, never()).logMissingRankings(any(), anyInt(), any());
+        verify(mLogger).logRecoveredRankings(eq(List.of(key1)));
+    }
+
+    @Test
     public void testRegisterFutureDismissal() throws RemoteException {
         // GIVEN a pipeline with one notification
         NotifEvent notifEvent = mNoMan.postNotif(buildNotif(TEST_PACKAGE, 47, "myTag"));
