@@ -298,14 +298,11 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
     @Test
     @Throws(Exception::class)
     fun sendPackagesSuspendedForUser_withSameVisibilityAllowList() {
-        mockAllowList(packageSetting1, allowList(10001, 10002, 10003))
-        mockAllowList(packageSetting2, allowList(10001, 10002, 10003))
-
         suspendPackageHelper.sendPackagesSuspendedForUser(pms.snapshotComputer(),
             Intent.ACTION_PACKAGES_SUSPENDED, packagesToChange, uidsToChange, TEST_USER_ID)
         testHandler.flush()
         verify(broadcastHelper).sendPackageBroadcast(any(), nullable(), bundleCaptor.capture(),
-                anyInt(), nullable(), nullable(), any(), nullable(), any(), nullable())
+                anyInt(), nullable(), nullable(), any(), nullable(), nullable(), nullable())
 
         var changedPackages = bundleCaptor.value.getStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST)
         var changedUids = bundleCaptor.value.getIntArray(Intent.EXTRA_CHANGED_UID_LIST)
@@ -317,8 +314,8 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
     @Test
     @Throws(Exception::class)
     fun sendPackagesSuspendedForUser_withDifferentVisibilityAllowList() {
-        mockAllowList(packageSetting1, allowList(10001, 10002, 10003))
-        mockAllowList(packageSetting2, allowList(10001, 10002, 10007))
+        mockDividedSeparatedBroadcastList(
+                intArrayOf(10001, 10002, 10003), intArrayOf(10001, 10002, 10007))
 
         suspendPackageHelper.sendPackagesSuspendedForUser(pms.snapshotComputer(),
             Intent.ACTION_PACKAGES_SUSPENDED, packagesToChange, uidsToChange, TEST_USER_ID)
@@ -327,21 +324,20 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
                 any(), nullable(), bundleCaptor.capture(), anyInt(), nullable(), nullable(), any(),
                 nullable(), any(), nullable())
 
-        bundleCaptor.allValues.forEach {
+        bundleCaptor.allValues.forEachIndexed { i, it ->
             var changedPackages = it.getStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST)
             var changedUids = it.getIntArray(Intent.EXTRA_CHANGED_UID_LIST)
             assertThat(changedPackages?.size).isEqualTo(1)
             assertThat(changedUids?.size).isEqualTo(1)
-            assertThat(changedPackages?.get(0)).isAnyOf(TEST_PACKAGE_1, TEST_PACKAGE_2)
-            assertThat(changedUids?.get(0)).isAnyOf(packageSetting1.appId, packageSetting2.appId)
+            assertThat(changedPackages?.get(0)).isEqualTo(packagesToChange[i])
+            assertThat(changedUids?.get(0)).isEqualTo(uidsToChange[i])
         }
     }
 
     @Test
     @Throws(Exception::class)
     fun sendPackagesSuspendedForUser_withNullVisibilityAllowList() {
-        mockAllowList(packageSetting1, allowList(10001, 10002, 10003))
-        mockAllowList(packageSetting2, null)
+        mockDividedSeparatedBroadcastList(intArrayOf(10001, 10002, 10003), null)
 
         suspendPackageHelper.sendPackagesSuspendedForUser(pms.snapshotComputer(),
             Intent.ACTION_PACKAGES_SUSPENDED, packagesToChange, uidsToChange, TEST_USER_ID)
@@ -350,13 +346,13 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
                 any(), nullable(), bundleCaptor.capture(), anyInt(), nullable(), nullable(), any(),
                 nullable(), nullable(), nullable())
 
-        bundleCaptor.allValues.forEach {
+        bundleCaptor.allValues.forEachIndexed { i, it ->
             var changedPackages = it.getStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST)
             var changedUids = it.getIntArray(Intent.EXTRA_CHANGED_UID_LIST)
             assertThat(changedPackages?.size).isEqualTo(1)
             assertThat(changedUids?.size).isEqualTo(1)
-            assertThat(changedPackages?.get(0)).isAnyOf(TEST_PACKAGE_1, TEST_PACKAGE_2)
-            assertThat(changedUids?.get(0)).isAnyOf(packageSetting1.appId, packageSetting2.appId)
+            assertThat(changedPackages?.get(0)).isEqualTo(packagesToChange[i])
+            assertThat(changedUids?.get(0)).isEqualTo(uidsToChange[i])
         }
     }
 
