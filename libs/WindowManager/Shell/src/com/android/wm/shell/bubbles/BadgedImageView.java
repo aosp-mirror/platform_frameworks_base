@@ -182,7 +182,7 @@ public class BadgedImageView extends ConstraintLayout {
 
         getDrawingRect(mTempBounds);
 
-        mDrawParams.color = mDotColor;
+        mDrawParams.dotColor = mDotColor;
         mDrawParams.iconBounds = mTempBounds;
         mDrawParams.leftAlign = mOnLeft;
         mDrawParams.scale = mDotScale;
