@@ -25,6 +25,7 @@ import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_OLD_NONE;
 import static android.view.WindowManager.TRANSIT_OLD_TRANSLUCENT_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_TRANSLUCENT_ACTIVITY_OPEN;
+import static android.view.WindowManager.TRANSIT_OLD_UNSET;
 import static android.view.WindowManager.TRANSIT_OLD_WALLPAPER_INTRA_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_WALLPAPER_INTRA_OPEN;
 import static android.view.WindowManager.TRANSIT_OPEN;
@@ -261,11 +262,17 @@ public class TransitionAnimation {
         }
         return null;
     }
-
-    /** Load animation by attribute Id from a specific AnimationStyle resource. */
+    /**
+     * Load animation by attribute Id from a specific AnimationStyle resource.
+     *
+     * @param translucent {@code true} if we're sure that the animation is applied on a translucent
+     *                    window container, {@code false} otherwise.
+     * @param transit {@link TransitionOldType} for the app transition of this animation, or
+     *                {@link TransitionOldType#TRANSIT_OLD_UNSET} if app transition type is unknown.
+     */
     @Nullable
-    public Animation loadAnimationAttr(String packageName, int animStyleResId, int animAttr,
-            boolean translucent) {
+    private Animation loadAnimationAttr(String packageName, int animStyleResId, int animAttr,
+            boolean translucent, @TransitionOldType int transit) {
         if (animStyleResId == 0) {
             return null;
         }
@@ -281,6 +288,8 @@ public class TransitionAnimation {
         }
         if (translucent) {
             resId = updateToTranslucentAnimIfNeeded(resId);
+        } else if (transit != TRANSIT_OLD_UNSET) {
+            resId = updateToTranslucentAnimIfNeeded(resId, transit);
         }
         if (ResourceId.isValid(resId)) {
             return loadAnimationSafely(context, resId, mTag);
@@ -288,11 +297,27 @@ public class TransitionAnimation {
         return null;
     }
 
+
+    /** Load animation by attribute Id from a specific AnimationStyle resource. */
+    @Nullable
+    public Animation loadAnimationAttr(String packageName, int animStyleResId, int animAttr,
+            boolean translucent) {
+        return loadAnimationAttr(packageName, animStyleResId, animAttr, translucent,
+                TRANSIT_OLD_UNSET);
+    }
+
     /** Load animation by attribute Id from android package. */
     @Nullable
     public Animation loadDefaultAnimationAttr(int animAttr, boolean translucent) {
         return loadAnimationAttr(DEFAULT_PACKAGE, mDefaultWindowAnimationStyleResId, animAttr,
                 translucent);
+    }
+
+    /** Load animation by attribute Id from android package. */
+    @Nullable
+    public Animation loadDefaultAnimationAttr(int animAttr, @TransitionOldType int transit) {
+        return loadAnimationAttr(DEFAULT_PACKAGE, mDefaultWindowAnimationStyleResId, animAttr,
+                false /* translucent */, transit);
     }
 
     @Nullable
