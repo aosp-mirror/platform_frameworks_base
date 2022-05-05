@@ -180,7 +180,7 @@ public class QuickAccessWalletController {
         int iconSizePx = mContext.getResources().getDimensionPixelSize(R.dimen.wallet_icon_size);
         GetWalletCardsRequest request =
                 new GetWalletCardsRequest(cardWidth, cardHeight, iconSizePx, /* maxCards= */ 1);
-        mQuickAccessWalletClient.getWalletCards(mExecutor, request, cardsRetriever);
+        mQuickAccessWalletClient.getWalletCards(mCallbackExecutor, request, cardsRetriever);
     }
 
     /**
