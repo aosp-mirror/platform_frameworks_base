@@ -1167,7 +1167,7 @@ public class WindowManagerService extends IWindowManager.Stub
             @Override
             public void run() {
                 WindowManagerPolicyThread.set(Thread.currentThread(), Looper.myLooper());
-                mPolicy.init(mContext, WindowManagerService.this, WindowManagerService.this);
+                mPolicy.init(mContext, WindowManagerService.this);
             }
         }, 0);
     }
