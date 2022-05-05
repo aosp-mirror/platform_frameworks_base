@@ -5824,4 +5824,7 @@
     <string-array name="config_serviceStateLocationAllowedPackages">
         <item>"com.android.phone"</item>
     </string-array>
+
+    <!-- Whether the wake screen on notifications feature is available. -->
+    <bool name="config_pulseOnNotificationsAvailable">true</bool>
 </resources>
