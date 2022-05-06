@@ -107,7 +107,6 @@ public class MediaShellCommand extends ShellCommand {
     public void onHelp() {
         mWriter.println("usage: media_session [subcommand] [options]");
         mWriter.println("       media_session dispatch KEY");
-        mWriter.println("       media_session dispatch KEY");
         mWriter.println("       media_session list-sessions");
         mWriter.println("       media_session monitor <tag>");
         mWriter.println("       media_session volume [options]");

@@ -45,6 +45,10 @@ android_app {
     jni_libs: ["libshim_jni"],
 
     uses_libs: ["android.test.runner"],
+
+    apex_available: [
+        "com.android.apex.cts.shim.v2_apk_in_apex_upgrades",
+    ],
 }
 
 genrule {
@@ -84,6 +88,7 @@ android_app {
         "//apex_available:platform",
         "com.android.apex.cts.shim.v1",
         "com.android.apex.cts.shim.v2",
+        "com.android.apex.cts.shim.v2_apk_in_apex_upgrades",
         "com.android.apex.cts.shim.v2_no_hashtree",
         "com.android.apex.cts.shim.v2_legacy",
         "com.android.apex.cts.shim.v2_sdk_target_p",
@@ -187,6 +192,7 @@ android_app {
         "//apex_available:platform",
         "com.android.apex.cts.shim.v1",
         "com.android.apex.cts.shim.v2",
+        "com.android.apex.cts.shim.v2_apk_in_apex_upgrades",
         "com.android.apex.cts.shim.v2_no_hashtree",
         "com.android.apex.cts.shim.v2_legacy",
         "com.android.apex.cts.shim.v2_sdk_target_p",

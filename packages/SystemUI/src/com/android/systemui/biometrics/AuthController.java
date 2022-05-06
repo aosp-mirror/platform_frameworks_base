@@ -65,7 +65,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.CoreStartable;
-import com.android.systemui.assist.ui.DisplayUtils;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -279,6 +278,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
                 }
             });
             mUdfpsController.setAuthControllerUpdateUdfpsLocation(this::updateUdfpsLocation);
+            mUdfpsController.setHalControlsIllumination(mUdfpsProps.get(0).halControlsIllumination);
             mUdfpsBounds = mUdfpsProps.get(0).getLocation().getRect();
             updateUdfpsLocation();
         }
@@ -444,6 +444,27 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
     }
 
     /**
+     * @return the radius of UDFPS on the screen in pixels
+     */
+    public int getUdfpsRadius() {
+        if (mUdfpsController == null || mUdfpsBounds == null) {
+            return -1;
+        }
+        return mUdfpsBounds.height() / 2;
+    }
+
+    /**
+     * @return the scale factor representing the user's current resolution / the stable
+     * (default) resolution
+     */
+    public float getScaleFactor() {
+        if (mUdfpsController == null || mUdfpsController.mOverlayParams == null) {
+            return 1f;
+        }
+        return mUdfpsController.mOverlayParams.getScaleFactor();
+    }
+
+    /**
      * @return where the fingerprint sensor exists in pixels in portrait mode. devices without an
      * overridden value will use the default value even if they don't have a fingerprint sensor
      */
@@ -579,8 +600,14 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
         mSensorPrivacyManager = context.getSystemService(SensorPrivacyManager.class);
     }
 
+    private int getDisplayWidth() {
+        DisplayInfo displayInfo = new DisplayInfo();
+        mContext.getDisplay().getDisplayInfo(displayInfo);
+        return displayInfo.getNaturalWidth();
+    }
+
     private void updateFingerprintLocation() {
-        int xLocation = DisplayUtils.getWidth(mContext) / 2;
+        int xLocation = getDisplayWidth() / 2;
         try {
             xLocation = mContext.getResources().getDimensionPixelSize(
                     com.android.systemui.R.dimen

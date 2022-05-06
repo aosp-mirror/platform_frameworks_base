@@ -8206,24 +8206,25 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (canNotifyAutofillEnterExitEvent()) {
             AutofillManager afm = getAutofillManager();
             if (afm != null) {
-                if (enter && isFocused()) {
+                if (enter) {
                     // We have not been laid out yet, hence cannot evaluate
                     // whether this view is visible to the user, we will do
                     // the evaluation once layout is complete.
                     if (!isLaidOut()) {
                         mPrivateFlags3 |= PFLAG3_NOTIFY_AUTOFILL_ENTER_ON_LAYOUT;
                     } else if (isVisibleToUser()) {
-                        // TODO This is a potential problem that View gets focus before it's visible
-                        // to User. Ideally View should handle the event when isVisibleToUser()
-                        // becomes true where it should issue notifyViewEntered().
-                        afm.notifyViewEntered(this);
-                    } else {
-                        afm.enableFillRequestActivityStarted(this);
+                        if (isFocused()) {
+                            // TODO This is a potential problem that View gets focus before it's
+                            // visible to User. Ideally View should handle the event when
+                            // isVisibleToUser() becomes true where it should issue
+                            // notifyViewEntered().
+                            afm.notifyViewEntered(this);
+                        } else {
+                            afm.notifyViewEnteredForFillDialog(this);
+                        }
                     }
-                } else if (!enter && !isFocused()) {
+                } else if (!isFocused()) {
                     afm.notifyViewExited(this);
-                } else if (enter) {
-                    afm.enableFillRequestActivityStarted(this);
                 }
             }
         }
@@ -11752,6 +11753,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 && (info.mHandwritingArea == null || !isAutoHandwritingEnabled())) {
             if (info.mPositionUpdateListener != null) {
                 mRenderNode.removePositionUpdateListener(info.mPositionUpdateListener);
+                info.mPositionUpdateListener = null;
                 info.mPositionChangedUpdate = null;
             }
         } else {
@@ -11863,6 +11865,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>
      * @see #setPreferKeepClear
      * @see #getPreferKeepClearRects
+     *
+     * @param rects A list of rects in this view's local coordinate system
      */
     public final void setPreferKeepClearRects(@NonNull List<Rect> rects) {
         final ListenerInfo info = getListenerInfo();
@@ -11902,6 +11906,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>
      * @see #setPreferKeepClear
      * @see #getPreferKeepClearRects
+     *
+     * @param rects A list of rects in this view's local coordinate system
      *
      * @hide
      */
@@ -13459,8 +13465,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void setDefaultFocusHighlightEnabled(boolean defaultFocusHighlightEnabled) {
         mDefaultFocusHighlightEnabled = defaultFocusHighlightEnabled;
     }
-
-    /**
 
     /**
      * Returns whether this View should use a default focus highlight when it gets focused but

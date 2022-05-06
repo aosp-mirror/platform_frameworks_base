@@ -420,7 +420,7 @@ class FgsManagerController @Inject constructor(
                 PowerExemptionManager.REASON_SYSTEM_UID,
                 PowerExemptionManager.REASON_DEVICE_DEMO_MODE -> UIControl.HIDE_ENTRY
 
-                PowerExemptionManager.REASON_ALLOWLISTED_PACKAGE,
+                PowerExemptionManager.REASON_SYSTEM_ALLOW_LISTED,
                 PowerExemptionManager.REASON_DEVICE_OWNER,
                 PowerExemptionManager.REASON_DISALLOW_APPS_CONTROL,
                 PowerExemptionManager.REASON_DPO_PROTECTED_APP,

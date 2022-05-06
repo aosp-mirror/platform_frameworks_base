@@ -1111,8 +1111,9 @@
     </style>
 
     <style name="FgsManagerAppDuration">
-        <item name="android:fontFamily">?android:attr/textAppearanceSmall</item>
         <item name="android:textDirection">locale</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
     <style name="BroadcastDialog">

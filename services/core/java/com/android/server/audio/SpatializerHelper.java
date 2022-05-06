@@ -242,15 +242,19 @@ public class SpatializerHelper {
                     mSACapableDeviceTypes.add(SPAT_MODE_FOR_DEVICE_TYPE.keyAt(i));
                 }
             }
+            // for both transaural / binaural, we are not forcing enablement as the init() method
+            // could have been called another time after boot in case of audioserver restart
             if (mTransauralSupported) {
                 // TODO deal with persisted values
-                mSADevices.add(
-                        new SADeviceState(AudioDeviceInfo.TYPE_BUILTIN_SPEAKER, null));
+                addCompatibleAudioDevice(
+                        new AudioDeviceAttributes(AudioSystem.DEVICE_OUT_SPEAKER, ""),
+                                false /*forceEnable*/);
             }
             if (mBinauralSupported) {
                 // TODO deal with persisted values
-                mSADevices.add(
-                        new SADeviceState(AudioDeviceInfo.TYPE_WIRED_HEADPHONES, null));
+                addCompatibleAudioDevice(
+                        new AudioDeviceAttributes(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE, ""),
+                                false /*forceEnable*/);
             }
             // TODO read persisted states
         } catch (RemoteException e) {
@@ -461,6 +465,20 @@ public class SpatializerHelper {
     }
 
     synchronized void addCompatibleAudioDevice(@NonNull AudioDeviceAttributes ada) {
+        addCompatibleAudioDevice(ada, true /*forceEnable*/);
+    }
+
+    /**
+     * Add the given device to the list of devices for which spatial audio will be available
+     * (== possible).
+     * @param ada the compatible device
+     * @param forceEnable if true, spatial audio is enabled for this device, regardless of whether
+     *                    this device was already in the list. If false, the enabled field is only
+     *                    set to true if the device is added to the list, otherwise, if already
+     *                    present, the setting is left untouched.
+     */
+    private void addCompatibleAudioDevice(@NonNull AudioDeviceAttributes ada,
+            boolean forceEnable) {
         loglogi("addCompatibleAudioDevice: dev=" + ada);
         final int deviceType = ada.getType();
         final boolean wireless = isWireless(deviceType);
@@ -471,7 +489,9 @@ public class SpatializerHelper {
                     && (wireless && ada.getAddress().equals(deviceState.mDeviceAddress))
                     || !wireless) {
                 isInList = true;
-                deviceState.mEnabled = true;
+                if (forceEnable) {
+                    deviceState.mEnabled = true;
+                }
                 break;
             }
         }
@@ -508,7 +528,7 @@ public class SpatializerHelper {
     private synchronized Pair<Boolean, Boolean> evaluateState(AudioDeviceAttributes ada) {
         // if not a wireless device, this value will be overwritten to map the type
         // to TYPE_BUILTIN_SPEAKER or TYPE_WIRED_HEADPHONES
-        int deviceType = ada.getType();
+        @AudioDeviceInfo.AudioDeviceType int deviceType = ada.getType();
         final boolean wireless = isWireless(deviceType);
 
         // if not a wireless device: find if media device is in the speaker, wired headphones
@@ -1468,13 +1488,13 @@ public class SpatializerHelper {
     }
 
     private static final class SADeviceState {
-        final int mDeviceType;
+        final @AudioDeviceInfo.AudioDeviceType int mDeviceType;
         final @Nullable String mDeviceAddress; // non-null for wireless devices
         boolean mEnabled = true;               // by default, SA is enabled on any device
         boolean mHasHeadTracker = false;
         boolean mHeadTrackerEnabled = true;    // by default, if head tracker is present, use it
 
-        SADeviceState(int deviceType, @Nullable String address) {
+        SADeviceState(@AudioDeviceInfo.AudioDeviceType int deviceType, @Nullable String address) {
             mDeviceType = deviceType;
             mDeviceAddress = address;
         }
@@ -1505,7 +1525,7 @@ public class SpatializerHelper {
         }
     }
 
-    private static boolean isWireless(int deviceType) {
+    private static boolean isWireless(@AudioDeviceInfo.AudioDeviceType int deviceType) {
         for (int type : WIRELESS_TYPES) {
             if (type == deviceType) {
                 return true;
@@ -1514,7 +1534,7 @@ public class SpatializerHelper {
         return false;
     }
 
-    private static boolean isWirelessSpeaker(int deviceType) {
+    private static boolean isWirelessSpeaker(@AudioDeviceInfo.AudioDeviceType int deviceType) {
         for (int type : WIRELESS_SPEAKER_TYPES) {
             if (type == deviceType) {
                 return true;

@@ -899,8 +899,8 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         final DisplayInfo displayInfo = new DisplayInfo();
         mContext.getDisplay().getDisplayInfo(displayInfo);
         return DisplayUtils.getPhysicalPixelDisplaySizeRatio(
-                stableDisplaySize.x, stableDisplaySize.y, displayInfo.logicalWidth,
-                displayInfo.logicalHeight);
+                stableDisplaySize.x, stableDisplaySize.y, displayInfo.getNaturalWidth(),
+                displayInfo.getNaturalHeight());
     }
 
     @Override
