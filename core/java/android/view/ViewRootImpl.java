@@ -6111,6 +6111,28 @@ public final class ViewRootImpl implements ViewParent,
 
         @Override
         protected int onProcess(QueuedInputEvent q) {
+            if (q.mEvent instanceof KeyEvent) {
+                final KeyEvent event = (KeyEvent) q.mEvent;
+
+                // If the new back dispatch is enabled, intercept KEYCODE_BACK before it reaches the
+                // view tree or IME, and invoke the appropriate {@link OnBackInvokedCallback}.
+                if (isBack(event)
+                        && mContext != null
+                        && WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(mContext)) {
+                    OnBackInvokedCallback topCallback =
+                            getOnBackInvokedDispatcher().getTopCallback();
+                    if (event.getAction() == KeyEvent.ACTION_UP) {
+                        if (topCallback != null) {
+                            topCallback.onBackInvoked();
+                            return FINISH_HANDLED;
+                        }
+                    } else {
+                        // Drop other actions such as {@link KeyEvent.ACTION_DOWN}.
+                        return FINISH_NOT_HANDLED;
+                    }
+                }
+            }
+
             if (mInputQueue != null && q.mEvent instanceof KeyEvent) {
                 mInputQueue.sendInputEvent(q.mEvent, q, true, this);
                 return DEFER;
@@ -6460,24 +6482,6 @@ public final class ViewRootImpl implements ViewParent,
 
             if (mUnhandledKeyManager.preViewDispatch(event)) {
                 return FINISH_HANDLED;
-            }
-
-            // If the new back dispatch is enabled, intercept KEYCODE_BACK before it reaches the
-            // view tree and invoke the appropriate {@link OnBackInvokedCallback}.
-            if (isBack(event)
-                    && mContext != null
-                    && WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(mContext)) {
-                OnBackInvokedCallback topCallback =
-                        getOnBackInvokedDispatcher().getTopCallback();
-                if (event.getAction() == KeyEvent.ACTION_UP) {
-                    if (topCallback != null) {
-                        topCallback.onBackInvoked();
-                        return FINISH_HANDLED;
-                    }
-                } else {
-                    // Drop other actions such as {@link KeyEvent.ACTION_DOWN}.
-                    return FINISH_NOT_HANDLED;
-                }
             }
 
             // Deliver the key to the view hierarchy.
