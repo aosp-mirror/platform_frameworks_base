@@ -24,6 +24,7 @@ import static androidx.constraintlayout.widget.ConstraintSet.PARENT_ID;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE;
 import static com.android.keyguard.KeyguardClockSwitch.LARGE;
 import static com.android.keyguard.KeyguardClockSwitch.SMALL;
+import static com.android.systemui.animation.Interpolators.EMPHASIZED_ACCELERATE;
 import static com.android.systemui.animation.Interpolators.EMPHASIZED_DECELERATE;
 import static com.android.systemui.classifier.Classifier.QS_COLLAPSE;
 import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
@@ -936,7 +937,7 @@ public class NotificationPanelViewController extends PanelViewController {
                                         // the launcher icons animation starts, so use that as our
                                         // duration.
                                         .setDuration(unlockAnimationStartDelay)
-                                        .setInterpolator(EMPHASIZED_DECELERATE)
+                                        .setInterpolator(EMPHASIZED_ACCELERATE)
                                         .withEndAction(() -> {
                                             instantCollapse();
                                             mView.setAlpha(1f);
