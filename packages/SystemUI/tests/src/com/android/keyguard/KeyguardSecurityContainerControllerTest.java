@@ -51,7 +51,6 @@ import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.FalsingManager;
-import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
@@ -125,7 +124,7 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     @Mock
     private SessionTracker mSessionTracker;
     @Mock
-    private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    private KeyguardViewController mKeyguardViewController;
     private Configuration mConfiguration;
 
     private KeyguardSecurityContainerController mKeyguardSecurityContainerController;
@@ -153,7 +152,7 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
                 (KeyguardPasswordView) mKeyguardPasswordView, mKeyguardUpdateMonitor,
                 SecurityMode.Password, mLockPatternUtils, null,
                 mKeyguardMessageAreaControllerFactory, null, null, mEmergencyButtonController,
-                null, mock(Resources.class), null, mStatusBarKeyguardViewManager);
+                null, mock(Resources.class), null, mKeyguardViewController);
 
         mKeyguardSecurityContainerController = new KeyguardSecurityContainerController.Factory(
                 mView, mAdminSecondaryLockScreenControllerFactory, mLockPatternUtils,

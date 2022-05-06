@@ -25,7 +25,6 @@ import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
-import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.util.concurrency.DelayableExecutor
 import org.junit.Before
 import org.junit.Test
@@ -63,7 +62,7 @@ class KeyguardPasswordViewControllerTest : SysuiTestCase() {
     @Mock
     lateinit var falsingCollector: FalsingCollector
     @Mock
-    lateinit var statusBarKeyguardViewManager: StatusBarKeyguardViewManager
+    lateinit var keyguardViewController: KeyguardViewController
     @Mock
     private lateinit var mKeyguardMessageArea: KeyguardMessageArea
     @Mock
@@ -92,13 +91,13 @@ class KeyguardPasswordViewControllerTest : SysuiTestCase() {
                 mainExecutor,
                 mContext.resources,
                 falsingCollector,
-                statusBarKeyguardViewManager
+                keyguardViewController
         )
     }
 
     @Test
     fun testFocusWhenBouncerIsShown() {
-        Mockito.`when`(statusBarKeyguardViewManager.isBouncerShowing).thenReturn(true)
+        Mockito.`when`(keyguardViewController.isBouncerShowing).thenReturn(true)
         Mockito.`when`(keyguardPasswordView.isShown).thenReturn(true)
         keyguardPasswordViewController.onResume(KeyguardSecurityView.VIEW_REVEALED)
         keyguardPasswordView.post { verify(keyguardPasswordView).requestFocus() }
@@ -106,7 +105,7 @@ class KeyguardPasswordViewControllerTest : SysuiTestCase() {
 
     @Test
     fun testDoNotFocusWhenBouncerIsHidden() {
-        Mockito.`when`(statusBarKeyguardViewManager.isBouncerShowing).thenReturn(false)
+        Mockito.`when`(keyguardViewController.isBouncerShowing).thenReturn(false)
         Mockito.`when`(keyguardPasswordView.isShown).thenReturn(true)
         keyguardPasswordViewController.onResume(KeyguardSecurityView.VIEW_REVEALED)
         verify(keyguardPasswordView, never()).requestFocus()
