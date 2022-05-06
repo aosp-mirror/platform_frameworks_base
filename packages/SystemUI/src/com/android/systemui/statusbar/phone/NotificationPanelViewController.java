@@ -325,6 +325,11 @@ public class NotificationPanelViewController extends PanelViewController {
     private boolean mShouldUseSplitNotificationShade;
     // The bottom padding reserved for elements of the keyguard measuring notifications
     private float mKeyguardNotificationBottomPadding;
+    /**
+     * The top padding from where notification should start in lockscreen.
+     * Should be static also during animations and should match the Y of the first notification.
+     */
+    private float mKeyguardNotificationTopPadding;
     // Current max allowed keyguard notifications determined by measuring the panel
     private int mMaxAllowedKeyguardNotifications;
 
@@ -1513,7 +1518,10 @@ public class NotificationPanelViewController extends PanelViewController {
      */
     @VisibleForTesting
     float getSpaceForLockscreenNotifications() {
-        float topPadding = mNotificationStackScrollLayoutController.getTopPadding();
+        float staticTopPadding = mClockPositionAlgorithm.getLockscreenMinStackScrollerPadding()
+                // getMinStackScrollerPadding is from the top of the screen,
+                // but we need it from the top of the NSSL.
+                - mNotificationStackScrollLayoutController.getTop();
 
         // Space between bottom of notifications and top of lock icon or udfps background.
         float lockIconPadding = mLockIconViewController.getTop();
@@ -1525,11 +1533,15 @@ public class NotificationPanelViewController extends PanelViewController {
 
         float bottomPadding = Math.max(lockIconPadding,
                 Math.max(mIndicationBottomPadding, mAmbientIndicationBottomPadding));
-        mKeyguardNotificationBottomPadding = bottomPadding;
 
+        mKeyguardNotificationBottomPadding = bottomPadding;
+        mKeyguardNotificationTopPadding = staticTopPadding;
+
+        // To debug the available space, enable debug lines in this class. If you change how the
+        // available space is calculated, please also update those lines.
         float availableSpace =
                 mNotificationStackScrollLayoutController.getHeight()
-                        - topPadding
+                        - staticTopPadding
                         - bottomPadding;
         return availableSpace;
     }
@@ -4922,6 +4934,20 @@ public class NotificationPanelViewController extends PanelViewController {
                     "mClockPositionResult.clockY");
             drawDebugInfo(canvas, (int) mLockIconViewController.getTop(), Color.GRAY,
                     "mLockIconViewController.getTop()");
+
+            if (mKeyguardShowing) {
+                // Notifications have the space between those two lines.
+                drawDebugInfo(canvas,
+                        mNotificationStackScrollLayoutController.getTop() +
+                                (int) mKeyguardNotificationTopPadding,
+                        Color.RED,
+                        "NSSL.getTop() + mKeyguardNotificationTopPadding");
+
+                drawDebugInfo(canvas, mNotificationStackScrollLayoutController.getBottom() -
+                                (int) mKeyguardNotificationBottomPadding,
+                        Color.RED,
+                        "NSSL.getBottom() - mKeyguardNotificationBottomPadding");
+            }
 
             mDebugPaint.setColor(Color.CYAN);
             canvas.drawLine(0, mClockPositionResult.stackScrollerPadding, mView.getWidth(),

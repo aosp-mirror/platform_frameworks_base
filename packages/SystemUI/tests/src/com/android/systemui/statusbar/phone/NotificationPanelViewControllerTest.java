@@ -610,13 +610,13 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         when(mLockIconViewController.getTop()).thenReturn(80f);
         when(mResources.getDimensionPixelSize(R.dimen.shelf_and_lock_icon_overlap)).thenReturn(5);
 
-        // Available space (100 - 10 - 15 = 75)
+        // Available space (100 - 0 - 15 = 85)
         when(mNotificationStackScrollLayoutController.getHeight()).thenReturn(100);
-        when(mNotificationStackScrollLayoutController.getTopPadding()).thenReturn(10);
+        when(mNotificationStackScrollLayoutController.getTop()).thenReturn(0);
         mNotificationPanelViewController.updateResources();
 
         assertThat(mNotificationPanelViewController.getSpaceForLockscreenNotifications())
-                .isEqualTo(75);
+                .isEqualTo(85);
     }
 
     @Test
