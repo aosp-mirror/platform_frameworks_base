@@ -28,6 +28,7 @@ import android.Manifest;
 import android.annotation.AppIdInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.BroadcastOptions;
@@ -40,8 +41,10 @@ import android.content.pm.PackageInstaller;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.PowerExemptionManager;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -49,6 +52,8 @@ import android.util.SparseArray;
 import com.android.internal.util.ArrayUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Helper class to send broadcasts for various situations.
@@ -326,5 +331,46 @@ public final class BroadcastHelper {
             int[] userIds, int[] instantUserIds) {
         sendPackageBroadcast(Intent.ACTION_PACKAGE_FIRST_LAUNCH, pkgName, null, 0,
                 installerPkg, null, userIds, instantUserIds, null /* broadcastAllowList */, null);
+    }
+
+    /**
+     * Get broadcast params list based on the given package and uid list. The broadcast params are
+     * used to send broadcast separately if the given packages have different visibility allow list.
+     *
+     * @param pkgList The names of packages which have changes.
+     * @param uidList The uids of packages which have changes.
+     * @param userId The user where packages reside.
+     * @return The list of {@link BroadcastParams} object.
+     */
+    public List<BroadcastParams> getBroadcastParams(@NonNull Computer snapshot,
+            @NonNull String[] pkgList, @NonNull int[] uidList, @UserIdInt int userId) {
+        final List<BroadcastParams> lists = new ArrayList<>(pkgList.length);
+        // Get allow lists for the pkg in the pkgList. Merge into the existed pkgs and uids if
+        // allow lists are the same.
+        for (int i = 0; i < pkgList.length; i++) {
+            final String pkgName = pkgList[i];
+            final int uid = uidList[i];
+            if (TextUtils.isEmpty(pkgName) || Process.INVALID_UID == uid) {
+                continue;
+            }
+            int[] allowList = snapshot.getVisibilityAllowList(pkgName, userId);
+            if (allowList == null) {
+                allowList = new int[0];
+            }
+            boolean merged = false;
+            for (int j = 0; j < lists.size(); j++) {
+                final BroadcastParams list = lists.get(j);
+                if (Arrays.equals(list.getAllowList().get(userId), allowList)) {
+                    list.addPackage(pkgName, uid);
+                    merged = true;
+                    break;
+                }
+            }
+            if (!merged) {
+                lists.add(new BroadcastParams(pkgName, uid, allowList, userId));
+            }
+        }
+
+        return lists;
     }
 }

@@ -34,6 +34,8 @@ import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_OLD_ACTIVITY_RELAUNCH;
 import static android.view.WindowManager.TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_DREAM_ACTIVITY_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_DREAM_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_OCCLUDE;
@@ -64,6 +66,9 @@ import static com.android.internal.R.styleable.WindowAnimation_activityCloseEnte
 import static com.android.internal.R.styleable.WindowAnimation_activityCloseExitAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_activityOpenEnterAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_activityOpenExitAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_dreamActivityCloseExitAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_dreamActivityOpenEnterAnimation;
+import static com.android.internal.R.styleable.WindowAnimation_dreamActivityOpenExitAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_launchTaskBehindSourceAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_launchTaskBehindTargetAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_taskCloseEnterAnimation;
@@ -638,9 +643,15 @@ public class AppTransition implements Dump {
             @Nullable Rect surfaceInsets, @Nullable Rect stableInsets, boolean isVoiceInteraction,
             boolean freeform, WindowContainer container) {
 
-        if (mNextAppTransitionOverrideRequested
-                && (container.canCustomizeAppTransition() || mOverrideTaskTransition)) {
-            mNextAppTransitionType = NEXT_TRANSIT_TYPE_CUSTOM;
+        final boolean canCustomizeAppTransition = container.canCustomizeAppTransition();
+
+        if (mNextAppTransitionOverrideRequested) {
+            if (canCustomizeAppTransition || mOverrideTaskTransition) {
+                mNextAppTransitionType = NEXT_TRANSIT_TYPE_CUSTOM;
+            } else {
+                ProtoLog.e(WM_DEBUG_APP_TRANSITIONS_ANIM, "applyAnimation: "
+                        + " override requested, but it is prohibited by policy.");
+            }
         }
 
         Animation a;
@@ -828,14 +839,26 @@ public class AppTransition implements Dump {
                             ? WindowAnimation_activityCloseEnterAnimation
                             : WindowAnimation_activityCloseExitAnimation;
                     break;
+                case TRANSIT_OLD_DREAM_ACTIVITY_OPEN:
+                    animAttr = enter
+                            ? WindowAnimation_dreamActivityOpenEnterAnimation
+                            : WindowAnimation_dreamActivityOpenExitAnimation;
+                    break;
+                case TRANSIT_OLD_DREAM_ACTIVITY_CLOSE:
+                    animAttr = enter
+                            ? 0
+                            : WindowAnimation_dreamActivityCloseExitAnimation;
+                    break;
             }
-            a = animAttr != 0 ? loadAnimationAttr(lp, animAttr, transit) : null;
 
+            a = animAttr == 0 ? null : (canCustomizeAppTransition
+                    ? loadAnimationAttr(lp, animAttr, transit)
+                    : mTransitionAnimation.loadDefaultAnimationAttr(animAttr, transit));
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
                     "applyAnimation: anim=%s animAttr=0x%x transit=%s isEntrance=%b "
-                            + "Callers=%s",
+                            + " canCustomizeAppTransition=%b Callers=%s",
                     a, animAttr, appTransitionOldToString(transit), enter,
-                    Debug.getCallers(3));
+                    canCustomizeAppTransition, Debug.getCallers(3));
         }
         setAppTransitionFinishedCallbackIfNeeded(a);
 
@@ -1149,6 +1172,12 @@ public class AppTransition implements Dump {
             }
             case TRANSIT_OLD_TASK_FRAGMENT_CHANGE: {
                 return "TRANSIT_OLD_TASK_FRAGMENT_CHANGE";
+            }
+            case TRANSIT_OLD_DREAM_ACTIVITY_OPEN: {
+                return "TRANSIT_OLD_DREAM_ACTIVITY_OPEN";
+            }
+            case TRANSIT_OLD_DREAM_ACTIVITY_CLOSE: {
+                return "TRANSIT_OLD_DREAM_ACTIVITY_CLOSE";
             }
             default: {
                 return "<UNKNOWN: " + transition + ">";

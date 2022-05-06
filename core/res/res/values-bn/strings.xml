@@ -305,17 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"আপনার ক্যালেন্ডারে অ্যাক্সেস"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"এসএমএসগুলি পাঠাতে এবং দেখতে"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"ফাইল এবং ডকুমেন্ট"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"আপনার ডিভাইসে ফাইল ও ডকুমেন্ট অ্যাক্সেস করুন"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"মিউজিক এবং অডিও"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"আপনার ডিভাইসে মিউজিক এবং অডিও অ্যাক্সেস করুন"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ফটো এবং ভিডিও"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"আপনার ডিভাইসে ফটো এবং ভিডিও অ্যাক্সেস করুন"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"মাইক্রোফোন"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"অডিও রেকর্ড"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"শারীরিক অ্যাক্টিভিটি"</string>
@@ -639,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ফিঙ্গারপ্রিন্ট আনলক"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"আঙ্গুলের ছাপের সেন্সর ব্যবহার করা যাচ্ছে না"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"একজন মেরামতি মিস্ত্রির কাছে যান।"</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"মুখের সঠিক ডেটা পাওয়া যায়নি। আবার চেষ্টা করুন।"</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"ফেস মডেল তৈরি করা যাচ্ছে না। আবার চেষ্টা করুন।"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"খুব উজ্জ্বল। আলো কমিয়ে চেষ্টা করে দেখুন।"</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"খুব অন্ধকার। আরও উজ্জ্বল আলো ব্যবহার করে দেখুন।"</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"ফোনটি আরও দূরে নিয়ে যান।"</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"ফোনটি আরও কাছে নিয়ে আসুন।"</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"ফোন উঁচুতে তুলুন।"</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"ফোন নিচে নামান।"</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"ফোনটি বাঁদিকে সরান।"</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"ফোনটি ডানদিকে সরান।"</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"আরও উজ্জ্বল আলো ব্যবহার করে দেখুন"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"ফোন আরও দূরে নিয়ে যান"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"ফোন আরও কাছে নিয়ে আসুন"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"ফোন আরও উঁচুতে তুলুন"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"ফোন নিচে নামান"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"ফোন আপনার বাঁদিকে সরান"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"ফোন আপনার ডানদিকে সরান"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"সরাসরি ডিভাইসের দিকে তাকান।"</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"আপনার মুখ সরাসরি ফোনের সামনে রাখুন।"</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"আপনার মুখ দেখা যাচ্ছে না। ফোন আপনার চোখের সোজাসুজি ধরুন।"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"খুব বেশি নড়ছে। ফোনটি যাতে না কাঁপে সেইভাবে ধরুন।"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"আপনার মুখের ছবি আবার নথিভুক্ত করুন।"</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"আর মুখ চিনতে পারবেন না। আবার চেষ্টা করুন।"</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"একই ধরনের দেখতে, একটু অন্যদিকে ঘুরে দাঁড়ান।"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"আপনার মাথাটি নিচের দিকে সামান্য নামান।"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"আপনার মাথা একটু কম ঝোঁকান।"</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"আপনার মাথাটি সামান্য ঘোরান।"</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"মুখ শনাক্ত করা যাচ্ছে না। আবার চেষ্টা করুন।"</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"আপনার মাথার পজিশন সামান্য পরিবর্তন করুন"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"আপনার ফোনের দিকে আরও সরাসরি তাকান"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"আপনার ফোনের দিকে আরও সরাসরি তাকান"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"আপনার ফোনের দিকে আরও সরাসরি তাকান"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"আপনার ফেসকে আড়াল করে এমন সব কিছু সরিয়ে দিন।"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"ব্ল্যাক বার সহ আপনার স্ক্রিনের উপরের অংশ মুছে ফেলুন"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"আপনার মুখ পুরোপুরি দৃশ্যমান হতে হবে"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"আপনার মুখ পুরোপুরি দৃশ্যমান হতে হবে"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"ফেস মডেল তৈরি করা যাচ্ছে না। আবার চেষ্টা করুন।"</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"কালো চশমা শনাক্ত করা হয়েছে। আপনার মুখ পুরোপুরি দৃশ্যমান হতে হবে।"</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"মুখে মাস্ক শনাক্ত করা হয়েছে। আপনার মুখ পুরোপুরি দৃশ্যমান হতে হবে।"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"ফেস যাচাই করা যায়নি। হার্ডওয়্যার উপলভ্য নেই।"</string>
@@ -2058,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\'বিরক্ত করবে না\' মোডের সেটিং বদলে গেছে"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"কী কী ব্লক করা আছে তা দেখতে ট্যাপ করুন।"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"বিজ্ঞপ্তির সেটিংস পর্যালোচনা করুন"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13 থেকে শুরু করে, বিজ্ঞপ্তি পাঠানোর জন্য আপনার ইনস্টল করা অ্যাপকে অনুমতি নিতে হবে। বর্তমান অ্যাপের জন্য এই অনুমতি পরিবর্তন করতে ট্যাপ করুন।"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"পরে মনে করিয়ে দিও"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"বাতিল করুন"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"সিস্টেম"</string>

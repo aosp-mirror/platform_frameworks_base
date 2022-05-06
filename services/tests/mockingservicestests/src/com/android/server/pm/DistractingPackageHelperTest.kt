@@ -196,9 +196,6 @@ class DistractingPackageHelperTest : PackageHelperTestBase() {
 
     @Test
     fun sendDistractingPackagesChanged_withSameVisibilityAllowList() {
-        mockAllowList(packageSetting1, allowList(10001, 10002, 10003))
-        mockAllowList(packageSetting2, allowList(10001, 10002, 10003))
-
         distractingPackageHelper.sendDistractingPackagesChanged(pms.snapshotComputer(),
                 packagesToChange, uidsToChange, TEST_USER_ID,
                 PackageManager.RESTRICTION_HIDE_NOTIFICATIONS)
@@ -216,8 +213,8 @@ class DistractingPackageHelperTest : PackageHelperTestBase() {
 
     @Test
     fun sendDistractingPackagesChanged_withDifferentVisibilityAllowList() {
-        mockAllowList(packageSetting1, allowList(10001, 10002, 10003))
-        mockAllowList(packageSetting2, allowList(10001, 10002, 10004))
+        mockDividedSeparatedBroadcastList(
+                intArrayOf(10001, 10002, 10003), intArrayOf(10001, 10002, 10007))
 
         distractingPackageHelper.sendDistractingPackagesChanged(pms.snapshotComputer(),
                 packagesToChange, uidsToChange, TEST_USER_ID,
@@ -227,20 +224,19 @@ class DistractingPackageHelperTest : PackageHelperTestBase() {
                 eq(Intent.ACTION_DISTRACTING_PACKAGES_CHANGED), nullable(), bundleCaptor.capture(),
                 anyInt(), nullable(), nullable(), any(), nullable(), nullable(), nullable())
 
-        bundleCaptor.allValues.forEach {
+        bundleCaptor.allValues.forEachIndexed { i, it ->
             var changedPackages = it.getStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST)
             var changedUids = it.getIntArray(Intent.EXTRA_CHANGED_UID_LIST)
             assertThat(changedPackages?.size).isEqualTo(1)
             assertThat(changedUids?.size).isEqualTo(1)
-            assertThat(changedPackages?.get(0)).isAnyOf(TEST_PACKAGE_1, TEST_PACKAGE_2)
-            assertThat(changedUids?.get(0)).isAnyOf(packageSetting1.appId, packageSetting2.appId)
+            assertThat(changedPackages?.get(0)).isEqualTo(packagesToChange[i])
+            assertThat(changedUids?.get(0)).isEqualTo(uidsToChange[i])
         }
     }
 
     @Test
     fun sendDistractingPackagesChanged_withNullVisibilityAllowList() {
-        mockAllowList(packageSetting1, allowList(10001, 10002, 10003))
-        mockAllowList(packageSetting2, null /* list */)
+        mockDividedSeparatedBroadcastList(intArrayOf(10001, 10002, 10003), null)
 
         distractingPackageHelper.sendDistractingPackagesChanged(pms.snapshotComputer(),
                 packagesToChange, uidsToChange, TEST_USER_ID,
@@ -250,13 +246,13 @@ class DistractingPackageHelperTest : PackageHelperTestBase() {
                 eq(Intent.ACTION_DISTRACTING_PACKAGES_CHANGED), nullable(), bundleCaptor.capture(),
                 anyInt(), nullable(), nullable(), any(), nullable(), nullable(), nullable())
 
-        bundleCaptor.allValues.forEach {
+        bundleCaptor.allValues.forEachIndexed { i, it ->
             var changedPackages = it.getStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST)
             var changedUids = it.getIntArray(Intent.EXTRA_CHANGED_UID_LIST)
             assertThat(changedPackages?.size).isEqualTo(1)
             assertThat(changedUids?.size).isEqualTo(1)
-            assertThat(changedPackages?.get(0)).isAnyOf(TEST_PACKAGE_1, TEST_PACKAGE_2)
-            assertThat(changedUids?.get(0)).isAnyOf(packageSetting1.appId, packageSetting2.appId)
+            assertThat(changedPackages?.get(0)).isEqualTo(packagesToChange[i])
+            assertThat(changedUids?.get(0)).isEqualTo(uidsToChange[i])
         }
     }
 }

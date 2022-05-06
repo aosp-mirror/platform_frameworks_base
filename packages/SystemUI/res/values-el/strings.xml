@@ -374,20 +374,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Ο οργανισμός σας κατέχει αυτήν τη συσκευή και μπορεί να παρακολουθεί την επισκεψιμότητα δικτύου."</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"Ο οργανισμός <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> κατέχει αυτήν τη συσκευή και μπορεί να παρακολουθεί την επισκεψιμότητα δικτύου."</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Αυτή η συσκευή παρέχεται από τον οργανισμό <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Αυτή η συσκευή ανήκει στον οργανισμό σας και είναι συνδεδεμένη στην εφαρμογή <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Αυτή η συσκευή ανήκει στον οργανισμό <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> και είναι συνδεδεμένη στην εφαρμογή <xliff:g id="VPN_APP">%2$s</xliff:g>."</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Αυτή η συσκευή ανήκει στον οργανισμό σας και συνδέεται στο διαδίκτυο μέσω της εφαρμογής <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Αυτή η συσκευή ανήκει στον οργανισμό <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> και συνδέεται στο διαδίκτυο μέσω της εφαρμογής <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Αυτή η συσκευή ανήκει στον οργανισμό σας."</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Αυτή η συσκευή ανήκει στον οργανισμό <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Αυτή η συσκευή ανήκει στον οργανισμό σας και είναι συνδεδεμένη σε ορισμένα VPN."</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Αυτή η συσκευή ανήκει στον οργανισμό <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> και είναι συνδεδεμένη σε ορισμένα VPN."</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Αυτή η συσκευή ανήκει στον οργανισμό σας και συνδέεται στο διαδίκτυο μέσω VPN"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Αυτή η συσκευή ανήκει στον οργανισμό <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> και συνδέεται στο διαδίκτυο μέσω VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Ο οργανισμός σας μπορεί να παρακολουθεί την επισκεψιμότητα δικτύου στο προφίλ εργασίας σας"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"Ο οργανισμός <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> μπορεί να παρακολουθεί την επισκεψιμότητα δικτύου στο προφίλ εργασίας σας"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Η δραστηριότητα δικτύου του προφίλ εργασίας είναι ορατή στον διαχειριστή IT σας"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Το δίκτυο ενδέχεται να παρακολουθείται"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Αυτή η συσκευή είναι συνδεδεμένη σε ορισμένα VPN."</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Το προφίλ εργασίας σας είναι συνδεδεμένο στην εφαρμογή <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Το προσωπικό σας προφίλ είναι συνδεδεμένο στην εφαρμογή <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Αυτή η συσκευή είναι συνδεδεμένη στην εφαρμογή <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Αυτή η συσκευή συνδέεται στο διαδίκτυο μέσω VPN"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Οι εφαρμογές εργασιών σας συνδέονται στο διαδίκτυο μέσω της εφαρμογής <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Οι προσωπικές σας εφαρμογές συνδέονται στο διαδίκτυο μέσω της εφαρμογής <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Αυτή η συσκευή συνδέεται στο διαδίκτυο μέσω της εφαρμογής <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Αυτή η συσκευή παρέχεται από τον οργανισμό <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Διαχείριση συσκευών"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -403,10 +403,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Μια αρχή έκδοσης πιστοποιητικών έχει εγκατασταθεί σε αυτήν τη συσκευή. Η ασφαλής επισκεψιμότητα δικτύου σας μπορεί να παρακολουθείται ή να τροποποιείται."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Ο διαχειριστής σας ενεργοποίησε την καταγραφή δικτύου, η οποία παρακολουθεί την επισκεψιμότητα στη συσκευή σας."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Ο διαχειριστής σας έχει ενεργοποιήσει την καταγραφή δικτύου, η οποία παρακολουθεί την επισκεψιμότητα στο προφίλ εργασίας σας, αλλά όχι στο προσωπικό προφίλ σας."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Έχετε συνδεθεί στην εφαρμογή <xliff:g id="VPN_APP">%1$s</xliff:g>, η οποία μπορεί να παρακολουθεί τη δραστηριότητα δικτύου σας, συμπεριλαμβανομένων μηνυμάτων ηλεκτρονικού ταχυδρομείου, εφαρμογών και ιστοτόπων."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Έχετε συνδεθεί στις εφαρμογές <xliff:g id="VPN_APP_0">%1$s</xliff:g> και <xliff:g id="VPN_APP_1">%2$s</xliff:g>, οι οποίες μπορούν να παρακολουθούν τη δραστηριότητα του δικτύου σας, συμπεριλαμβανομένων μηνυμάτων ηλεκτρονικού ταχυδρομείου, εφαρμογών και ιστοτόπων."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Το προφίλ εργασίας σας είναι συνδεδεμένο στο <xliff:g id="VPN_APP">%1$s</xliff:g>, το οποίο μπορεί να παρακολουθεί τη δραστηριότητα δικτύου σας, συμπεριλαμβανομένων μηνυμάτων ηλεκτρονικού ταχυδρομείου, εφαρμογών και ιστοτόπων."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Το προσωπικό προφίλ σας είναι συνδεμένο στην εφαρμογή <xliff:g id="VPN_APP">%1$s</xliff:g>, η οποία μπορεί να παρακολουθεί τη δραστηριότητα δικτύου σας, συμπεριλαμβανομένων μηνυμάτων ηλεκτρονικού ταχυδρομείου, συμπεριλαμβανομένων μηνυμάτων ηλεκτρονικού ταχυδρομείου, εφαρμογών και ιστοτόπων."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Αυτή η συσκευή συνδέεται στο διαδίκτυο μέσω της εφαρμογής <xliff:g id="VPN_APP">%1$s</xliff:g>. Η δραστηριότητα δικτύου σας, συμπεριλαμβανομένων των μηνυμάτων ηλεκτρονικού ταχυδρομείου και των δεδομένων περιήγησης, είναι ορατή στον διαχειριστή IT σας."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Αυτή η συσκευή συνδέεται στο διαδίκτυο μέσω των εφαρμογών <xliff:g id="VPN_APP_0">%1$s</xliff:g> και <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Η δραστηριότητα δικτύου σας, συμπεριλαμβανομένων των μηνυμάτων ηλεκτρονικού ταχυδρομείου και των δεδομένων περιήγησης, είναι ορατή στον διαχειριστή IT σας."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Οι εφαρμογές εργασιών σας συνδέονται στο διαδίκτυο μέσω της εφαρμογής <xliff:g id="VPN_APP">%1$s</xliff:g>. Η δραστηριότητα δικτύου σας στις εφαρμογές εργασίας, συμπεριλαμβανομένων των μηνυμάτων ηλεκτρονικού ταχυδρομείου και των δεδομένων περιήγησης, είναι ορατή στον διαχειριστή IT και τον πάροχο VPN σας."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Οι προσωπικές εφαρμογές σας συνδέονται στο διαδίκτυο μέσω της εφαρμογής <xliff:g id="VPN_APP">%1$s</xliff:g>. Η δραστηριότητα δικτύου, συμπεριλαμβανομένων των μηνυμάτων ηλεκτρονικού ταχυδρομείου και των δεδομένων περιήγησης, είναι ορατή στον πάροχο VPN."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Άνοιγμα Ρυθμίσεων VPN"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Αυτή η συσκευή είναι διαχειριζόμενη από τον γονέα σου. Ο γονέας σου μπορεί να βλέπει και να διαχειρίζεται πληροφορίες όπως οι εφαρμογές που χρησιμοποιείς, η τοποθεσία σου και ο χρόνος χρήσης."</string>
@@ -851,6 +851,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Όνομα μετάδοσης"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Κωδικός πρόσβασης"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Αποθήκευση"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Εκκίνηση…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Δεν είναι δυνατή η μετάδοση"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Αριθμός έκδοσης"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Ο αριθμός έκδοσης αντιγράφηκε στο πρόχειρο."</string>
     <string name="basic_status" msgid="2315371112182658176">"Άνοιγμα συνομιλίας"</string>

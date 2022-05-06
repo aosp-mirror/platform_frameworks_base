@@ -78,7 +78,6 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.IDisplayFoldListener;
-import android.view.IWindowManager;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
@@ -343,6 +342,22 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          * @return {@code true} if app transition state is idle on the default display.
          */
         boolean isAppTransitionStateIdle();
+
+        /**
+         * Enables the screen if all conditions are met.
+         */
+        void enableScreenIfNeeded();
+
+        /**
+         * Updates the current screen rotation based on the current state of the world.
+         *
+         * @param alwaysSendConfiguration Flag to force a new configuration to be evaluated.
+         *                                This can be used when there are other parameters in
+         *                                configuration that are changing.
+         * @param forceRelayout If true, the window manager will always do a relayout of its
+         *                      windows even if the rotation hasn't changed.
+         */
+        void updateRotation(boolean alwaysSendConfiguration, boolean forceRelayout);
     }
 
     /**
@@ -391,8 +406,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      *
      * @param context The system context we are running in.
      */
-    public void init(Context context, IWindowManager windowManager,
-            WindowManagerFuncs windowManagerFuncs);
+    void init(Context context, WindowManagerFuncs windowManagerFuncs);
 
     /**
      * Check permissions when adding a window.

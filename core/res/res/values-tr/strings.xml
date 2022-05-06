@@ -305,17 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"takviminize erişme"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS mesajları gönderme ve görüntüleme"</string>
-    <!-- no translation found for permgrouplab_storage (5570124978732352858) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Dosyalar ve dokümanlar"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"cihazınızdaki dosyalara ve dokümanlara erişme"</string>
-    <!-- no translation found for permgrouplab_readMediaAural (1858331312624942053) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaAural (7565467343667089595) -->
-    <skip />
-    <!-- no translation found for permgrouplab_readMediaVisual (4724874717811908660) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_readMediaVisual (4080463241903508688) -->
-    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Müzik ve ses"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"cihazınızdaki müziklere ve seslere erişme"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotoğraflar ve videolar"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"cihazınızdaki fotoğraflara ve videolara erişme"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ses kaydetme"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Fiziksel aktivite"</string>
@@ -631,7 +626,7 @@
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Yüz Tanıma Kilidi"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Yüz Tanıma Kilidi sorunu"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Yüz modelinizi silmek için dokunup ardından yüzünüzü yeniden ekleyin"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Yüz Tanıma Kilidi\'ni kurma"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Yüz Tanıma Kilidi\'ni kurun"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Telefonunuza bakarak kilidini açın"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Yüz Tanıma Kilidi\'ni kullanmak için Ayarlar &gt; Gizlilik bölümünden "<b>"Kamera erişimi"</b>"\'ni açın"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Kilidi açmak için daha fazla yöntem ayarlayın"</string>
@@ -639,26 +634,31 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Parmak İzi Kilidi"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Parmak izi sensörü kullanılamıyor"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Bir onarım hizmeti sağlayıcıyı ziyaret edin."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Doğru yüz verileri yakalanamadı. Tekrar deneyin."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Yüzünüzün modeli oluşturulamıyor. Tekrar deneyin."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Çok parlak. Parlaklığı daha az bir ışıklandırma deneyin."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Çok karanlık. Daha parlak ışıkta deneyin."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Telefonu uzaklaştırın."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"Telefonu yaklaştırın."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Telefonu yukarı kaldırın."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Telefonu aşağı indirin."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Telefonu sola hareket ettirin."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Telefonu sağa hareket ettirin."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Daha parlak ışıkta deneyin"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"Telefonu uzaklaştırın"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"Telefonu yaklaştırın"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Telefonu daha yukarı kaldırın"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Telefonu daha aşağı indirin"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Telefonu solunuza kaydırın"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Telefonu sağınıza kaydırın"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Lütfen cihazınıza daha doğrudan bakın."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Yüzünüz telefonun tam karşısına gelmelidir."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Yüzünüz görünmüyor. Telefonunuzu göz hizasında tutun."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Çok fazla hareket ediyorsunuz. Telefonu sabit tutun."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Lütfen yüzünüzü yeniden kaydedin."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Yüz artık tanınamıyor. Tekrar deneyin."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"Duruşunuz çok benzer, lütfen pozunuzu değiştirin."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Başınızı biraz daha az çevirin."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Başınızı biraz daha az eğin."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Başınızı biraz daha az çevirin."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"Yüz tanınamadı. Tekrar deneyin."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Başınızın konumunu hafifçe değiştirin"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Telefonunuza daha doğrudan bakın"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Telefonunuza daha doğrudan bakın"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Telefonunuza daha doğrudan bakın"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Yüzünüzün görünmesini engelleyen şeyleri kaldırın."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Siyah çubuk da dahil olmak üzere ekranınızın üst kısmını temizleyin"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Yüzünüz tamamen görünür olmalıdır"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Yüzünüz tamamen görünür olmalıdır"</string>
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Yüzünüzün modeli oluşturulamıyor. Tekrar deneyin."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Koyu renk gözlükler algılandı. Yüzünüz tamamen görünür olmalıdır."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Yüzünüzü kapattığınız algılandı. Yüzünüz tamamen görünür olmalıdır."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Yüz doğrulanamıyor. Donanım kullanılamıyor."</string>
@@ -2058,8 +2058,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Rahatsız Etmeyin modu değişti"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Nelerin engellendiğini kontrol etmek için dokunun."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Bildirim ayarlarını inceleyin"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13\'te başlayarak yüklediğiniz uygulamaların bildirim gönderebilmesi için izniniz gereklidir. Mevcut uygulamalarda bu izni değiştirmek için dokunun."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Sonra hatırlat"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Kapat"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistem"</string>

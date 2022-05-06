@@ -374,20 +374,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"ამ მოწყობილობას ფლობს თქვენი ორგანიზაცია და მას ქსელის ტრაფიკის მონიტორინგი შეუძლია"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"ამ მოწყობილობას ფლობს <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> და მას ქსელის ტრაფიკის მონიტორინგი შეუძლია"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"ამ მოწყობილობის მომწოდებელია <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"ამ მოწყობილობას ფლობს თქვენი ორგანიზაცია და ის დაკავშირებულია <xliff:g id="VPN_APP">%1$s</xliff:g>-თან"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"ამ მოწყობილობას ფლობს <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> და ის დაკავშირებულია <xliff:g id="VPN_APP">%2$s</xliff:g>-თან"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"ეს მოწყობილობა ეკუთვნის თქვენს ორგანიზაციას და დაკავშირებულია ინტერნეტთან <xliff:g id="VPN_APP">%1$s</xliff:g> აპით."</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"ეს მოწყობილობა ეკუთვნის <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ორგანიზაციას და დაკავშირებულია ინტერნეტთან <xliff:g id="VPN_APP">%2$s</xliff:g> აპით"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"ამ მოწყობილობას ფლობს თქვენი ორგანიზაცია"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"ამ მოწყობილობას ფლობს <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"ამ მოწყობილობას ფლობს თქვენი ორგანიზაცია და ის დაკავშირებულია VPN-ებთან"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"ამ მოწყობილობას ფლობს <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> და ის დაკავშირებულია VPN-ებთან"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"ეს მოწყობილობა ეკუთვნის თქვენს ორგანიზაციას დაკავშირებულია ინტერნეტთან VPN-ებით."</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"ეს მოწყობილობა ეკუთვნის <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ორგანიზაციას და დაკავშირებულია ინტერნეტთან VPN-ებით"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"თქვენს ორგანიზაციას სამსახურის პროფილში ქსელის ტრაფიკის მონიტორინგი შეუძლია"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>-ს სამსახურის პროფილში ქსელის ტრაფიკის მონიტორინგი შეუძლია"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"სამსახურის პროფილის ქსელის აქტივობა ხილულია თქვენი IT ადმინისტრატორისთვის"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"ქსელზე შესაძლოა ხორციელდებოდეს მონიტორინგი"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"ეს მოწყობილობა დაკავშირებულია VPN-ებთან"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"თქვენი სამსახურის პროფილი დაკავშირებულია <xliff:g id="VPN_APP">%1$s</xliff:g>-თან"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"თქვენი პერსონალური პროფილი დაკავშირებულია <xliff:g id="VPN_APP">%1$s</xliff:g>-თან"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"ეს მოწყობილობა დაკავშირებულია <xliff:g id="VPN_APP">%1$s</xliff:g>-თან"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"ეს მოწყობილობა დაკავშირებულია ინტერნეტთან VPN-ებით"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"თქვენი სამსახურის აპები დაკავშირებულია ინტერნეტთან <xliff:g id="VPN_APP">%1$s</xliff:g> აპით"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"თქვენი პირადი აპები დაკავშირებულია ინტერნეტთან <xliff:g id="VPN_APP">%1$s</xliff:g> აპით"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"ეს მოწყობილობა დაკავშირებულია ინტერნეტთან <xliff:g id="VPN_APP">%1$s</xliff:g> აპით"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"ამ მოწყობილობის მომწოდებელია <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"მოწყობილობის მართვა"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -403,10 +403,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"ამ მოწყობილობაზე დაინსტალირებულია სერტიფიცირების ორგანო. თქვენი ქსელის დაცული ტრაფიკი შეიძლება შეიცვალოს, ან მასზე მონიტორინგი განხორციელდეს."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"თქვენმა ადმინისტრატორმა ჩართო ქსელის ჟურნალირება, რომელიც თქვენი მოწყობილობის ტრაფიკის მონიტორინგს ახორციელებს."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"თქვენმა ადმინისტრატორმა ქსელის ჟურნალირება ჩართო, რომელიც ახორციელებს თქვენი სამსახურის პროფილის, მაგრამ არა პირადი პროფილის, ტრაფიკის მონიტორინგს."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"თქვენ დაკავშირებული ხართ <xliff:g id="VPN_APP">%1$s</xliff:g>-თან, რომელსაც შეუძლია თქვენი ქსელის აქტივობის (მათ შორის, ელფოსტის, აპებისა და ვებსაიტების) მონიტორინგი."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"თქვენ დაკავშირებული ხართ <xliff:g id="VPN_APP_0">%1$s</xliff:g>-სა და <xliff:g id="VPN_APP_1">%2$s</xliff:g>-თან, რომელთაც შეუძლია თქვენი ქსელის აქტივობის (მათ შორის, ელფოსტის, აპებისა და ვებსაიტების) მონიტორინგი."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"თქვენი სამსახურის პროფილი დაკავშირებულია <xliff:g id="VPN_APP">%1$s</xliff:g>-თან, რომელსაც შეუძლია თქვენი ქსელის აქტივობის (მათ შორის, ელფოსტის, აპებისა და ვებსაიტების) მონიტორინგი."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"თქვენი პირადი პროფილი დაკავშირებულია <xliff:g id="VPN_APP">%1$s</xliff:g>-თან, რომელსაც შეუძლია თქვენი ქსელის აქტივობის (მათ შორის, ელფოსტის, აპებისა და ვებსაიტების) მონიტორინგი."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"ეს მოწყობილობა დაკავშირებულია ინტერნეტთან <xliff:g id="VPN_APP">%1$s</xliff:g> აპით. თქვენი ქსელის აქტივობა, მათ შორის, ელფოსტები და დათვალიერების მონაცემები, ხილულია თქვენი IT ადმინისტრატორისთვის."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"ეს მოწყობილობა დაკავშირებულია ინტერნეტთან <xliff:g id="VPN_APP_0">%1$s</xliff:g> და <xliff:g id="VPN_APP_1">%2$s</xliff:g> აპებით. თქვენი ქსელის აქტივობა, მათ შორის, ელფოსტები და დათვალიერების მონაცემები, ხილულია თქვენი IT ადმინისტრატორისთვის."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"თქვენი სამსახურის აპები დაკავშირებულია ინტერნეტთან <xliff:g id="VPN_APP">%1$s</xliff:g> აპით. თქვენი ქსელის აქტივობა სამსახურის აპებში, მათ შორის, ელფოსტები და დათვალიერების მონაცემები, ხილულია IT ადმინისტრატორისა და VPN პროვაიდერისთვის."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"თქვენი პირადი აპები დაკავშირებულია ინტერნეტთან <xliff:g id="VPN_APP">%1$s</xliff:g> აპით. თქვენი ქსელის აქტივობა, მათ შორის, ელფოსტები და დათვალიერების მონაცემები, ხილულია VPN პროვაიდერისთვის."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN-ის პარამეტრების გახსნა"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"ამ მოწყობილობას თქვენი მშობელი მართავს. თქვენი მშობელი ხედავს და მართავს ისეთ ინფორმაციას, როგორიც არის თქვენ მიერ გამოყენებული აპები, თქვენი მდებარეობა და თქვენ მიერ ეკრანთან გატარებული დრო."</string>
@@ -851,6 +851,8 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"ტრანსლაციის სახელი"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"პაროლი"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"შენახვა"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"იწყება…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"ტრანსლაცია შეუძლებელია"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"ანაწყობის ნომერი"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"ანაწყობის ნომერი დაკოპირებულია გაცვლის ბუფერში."</string>
     <string name="basic_status" msgid="2315371112182658176">"მიმოწერის გახსნა"</string>
