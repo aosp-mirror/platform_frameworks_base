@@ -158,7 +158,7 @@ class SurfaceAnimationRunner {
     void continueStartingAnimations() {
         synchronized (mLock) {
             mAnimationStartDeferred = false;
-            if (!mPendingAnimations.isEmpty()) {
+            if (!mPendingAnimations.isEmpty() && mPreProcessingAnimations.isEmpty()) {
                 mChoreographer.postFrameCallback(this::startAnimations);
             }
         }
@@ -204,7 +204,7 @@ class SurfaceAnimationRunner {
 
                             mPreProcessingAnimations.remove(animationLeash);
                             mPendingAnimations.put(animationLeash, runningAnim);
-                            if (!mAnimationStartDeferred) {
+                            if (!mAnimationStartDeferred && mPreProcessingAnimations.isEmpty()) {
                                 mChoreographer.postFrameCallback(this::startAnimations);
                             }
                         }
@@ -214,7 +214,7 @@ class SurfaceAnimationRunner {
 
             if (!requiresEdgeExtension) {
                 mPendingAnimations.put(animationLeash, runningAnim);
-                if (!mAnimationStartDeferred) {
+                if (!mAnimationStartDeferred && mPreProcessingAnimations.isEmpty()) {
                     mChoreographer.postFrameCallback(this::startAnimations);
                 }
 
@@ -330,6 +330,14 @@ class SurfaceAnimationRunner {
 
     private void startAnimations(long frameTimeNanos) {
         synchronized (mLock) {
+            if (!mPreProcessingAnimations.isEmpty()) {
+                // We only want to start running animations once all mPreProcessingAnimations have
+                // been processed to ensure preprocessed animations start in sync.
+                // NOTE: This means we might delay running animations that require preprocessing if
+                // new animations that also require preprocessing are requested before the previous
+                // ones have finished (see b/227449117).
+                return;
+            }
             startPendingAnimationsLocked();
         }
         mPowerManagerInternal.setPowerBoost(Boost.INTERACTION, 0);
