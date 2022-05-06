@@ -1811,10 +1811,6 @@ public class DevicePolicyManager {
      * #EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES} array extra contain {@link
      * #PROVISIONING_MODE_MANAGED_PROFILE} and {@link #PROVISIONING_MODE_FULLY_MANAGED_DEVICE}.
      *
-     * <p>Also, if this flag is set, the admin app's {@link #ACTION_GET_PROVISIONING_MODE} activity
-     * will not receive the {@link #EXTRA_PROVISIONING_IMEI} and {@link
-     * #EXTRA_PROVISIONING_SERIAL_NUMBER} extras.
-     *
      * <p>This flag can be combined with {@link #FLAG_SUPPORTED_MODES_PERSONALLY_OWNED}. In
      * that case, the admin app's {@link #ACTION_GET_PROVISIONING_MODE} activity will have
      * the {@link #EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES} array extra contain {@link
@@ -1833,6 +1829,10 @@ public class DevicePolicyManager {
      * <p>Using this flag will cause the admin app's {@link #ACTION_GET_PROVISIONING_MODE}
      * activity to have the {@link #EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES} array extra
      * contain only {@link #PROVISIONING_MODE_MANAGED_PROFILE}.
+     *
+     * <p>Also, if this flag is set, the admin app's {@link #ACTION_GET_PROVISIONING_MODE} activity
+     * will not receive the {@link #EXTRA_PROVISIONING_IMEI} and {@link
+     * #EXTRA_PROVISIONING_SERIAL_NUMBER} extras.
      *
      * <p>This flag can be combined with {@link #FLAG_SUPPORTED_MODES_ORGANIZATION_OWNED}. In
      * that case, the admin app's {@link #ACTION_GET_PROVISIONING_MODE} activity will have the
