@@ -522,7 +522,10 @@ public class WindowOrganizerTests extends WindowTestsBase {
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
 
         assertEquals(WINDOWING_MODE_FULLSCREEN, record.getWindowingMode());
-        assertEquals(WINDOWING_MODE_PINNED, rootTask.getWindowingMode());
+        // Get the root task from the PIP activity record again, since the PIP root task may have
+        // changed when the activity entered PIP mode.
+        final Task pipRootTask = record.getRootTask();
+        assertEquals(WINDOWING_MODE_PINNED, pipRootTask.getWindowingMode());
     }
 
     @Test
@@ -1015,6 +1018,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final ActivityRecord record = createActivityRecordWithParentTask(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         record.info.flags |= ActivityInfo.FLAG_SUPPORTS_PICTURE_IN_PICTURE;
+        record.setPictureInPictureParams(new PictureInPictureParams.Builder()
+                .setAutoEnterEnabled(true).build());
         spyOn(record);
         doReturn(true).when(record).checkEnterPictureInPictureState(any(), anyBoolean());
 
@@ -1499,7 +1504,11 @@ public class WindowOrganizerTests extends WindowTestsBase {
         verify(mWm.mAtmService.mRootWindowContainer).resumeFocusedTasksTopActivities();
 
         clearInvocations(mWm.mAtmService.mRootWindowContainer);
-        t.setWindowingMode(wct, WINDOWING_MODE_FULLSCREEN);
+        // The token for the PIP root task may have changed when the task entered PIP mode, so do
+        // not reuse the one from above.
+        final WindowContainerToken newToken =
+                record.getRootTask().mRemoteToken.toWindowContainerToken();
+        t.setWindowingMode(newToken, WINDOWING_MODE_FULLSCREEN);
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
         verify(mWm.mAtmService.mRootWindowContainer).resumeFocusedTasksTopActivities();
     }
