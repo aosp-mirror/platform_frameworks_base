@@ -24,6 +24,7 @@ import static android.app.ActivityOptions.ANIM_OPEN_CROSS_PROFILE_APPS;
 import static android.app.ActivityOptions.ANIM_SCALE_UP;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_UP;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_RESOURCE_UPDATED;
 import static android.app.admin.DevicePolicyManager.EXTRA_RESOURCE_TYPE;
@@ -42,6 +43,7 @@ import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_RELAUNCH;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
+import static android.view.WindowManager.transitTypeToString;
 import static android.window.TransitionInfo.FLAG_DISPLAY_HAS_ALERT_WINDOWS;
 import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 import static android.window.TransitionInfo.FLAG_IS_VOICE_INTERACTION;
@@ -684,6 +686,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         final Rect endBounds = Transitions.isClosingType(changeMode)
                 ? mRotator.getEndBoundsInStartRotation(change)
                 : change.getEndAbsBounds();
+        final boolean isDream =
+                isTask && change.getTaskInfo().topActivityType == ACTIVITY_TYPE_DREAM;
 
         if (info.isKeyguardGoingAway()) {
             a = mTransitionAnimation.loadKeyguardExitAnimation(flags,
@@ -726,7 +730,17 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         } else {
             int animAttr = 0;
             boolean translucent = false;
-            if (wallpaperTransit == WALLPAPER_TRANSITION_INTRA_OPEN) {
+            if (isDream) {
+                if (type == TRANSIT_OPEN) {
+                    animAttr = enter
+                            ? R.styleable.WindowAnimation_dreamActivityOpenEnterAnimation
+                            : R.styleable.WindowAnimation_dreamActivityOpenExitAnimation;
+                } else if (type == TRANSIT_CLOSE) {
+                    animAttr = enter
+                            ? 0
+                            : R.styleable.WindowAnimation_dreamActivityCloseExitAnimation;
+                }
+            } else if (wallpaperTransit == WALLPAPER_TRANSITION_INTRA_OPEN) {
                 animAttr = enter
                         ? R.styleable.WindowAnimation_wallpaperIntraOpenEnterAnimation
                         : R.styleable.WindowAnimation_wallpaperIntraOpenExitAnimation;
@@ -790,6 +804,11 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                     a = mTransitionAnimation.loadDefaultAnimationAttr(animAttr, translucent);
                 }
             }
+
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                    "loadAnimation: anim=%s animAttr=0x%x type=%s isEntrance=%b", a, animAttr,
+                    transitTypeToString(type),
+                    enter);
         }
 
         if (a != null) {

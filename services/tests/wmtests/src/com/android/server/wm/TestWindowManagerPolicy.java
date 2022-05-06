@@ -26,7 +26,6 @@ import android.os.IBinder;
 import android.os.PowerManager.GoToSleepReason;
 import android.os.PowerManager.WakeReason;
 import android.util.proto.ProtoOutputStream;
-import android.view.IWindowManager;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 import android.view.animation.Animation;
@@ -50,8 +49,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void init(Context context, IWindowManager windowManager,
-            WindowManagerFuncs windowManagerFuncs) {
+    public void init(Context context, WindowManagerFuncs windowManagerFuncs) {
     }
 
     public void setDefaultDisplay(DisplayContentInfo displayContentInfo) {
