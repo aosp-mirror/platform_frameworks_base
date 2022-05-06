@@ -568,7 +568,7 @@ final class InputMonitor {
                             recentsAnimationController.getTargetAppDisplayArea();
                     if (targetDA != null) {
                         mRecentsAnimationInputConsumer.reparent(mInputTransaction, targetDA);
-                        mRecentsAnimationInputConsumer.show(mInputTransaction, MAX_VALUE - 1);
+                        mRecentsAnimationInputConsumer.show(mInputTransaction, MAX_VALUE - 2);
                         mAddRecentsAnimationInputConsumerHandle = false;
                     }
                 }
@@ -579,10 +579,14 @@ final class InputMonitor {
                     final Task rootTask = w.getTask().getRootTask();
                     mPipInputConsumer.mWindowHandle.replaceTouchableRegionWithCrop(
                             rootTask.getSurfaceControl());
+                    final DisplayArea targetDA = rootTask.getDisplayArea();
                     // We set the layer to z=MAX-1 so that it's always on top.
-                    mPipInputConsumer.reparent(mInputTransaction, rootTask);
-                    mPipInputConsumer.show(mInputTransaction, MAX_VALUE - 1);
-                    mAddPipInputConsumerHandle = false;
+                    if (targetDA != null) {
+                        mPipInputConsumer.layout(mInputTransaction, rootTask.getBounds());
+                        mPipInputConsumer.reparent(mInputTransaction, targetDA);
+                        mPipInputConsumer.show(mInputTransaction, MAX_VALUE - 1);
+                        mAddPipInputConsumerHandle = false;
+                    }
                 }
             }
 
