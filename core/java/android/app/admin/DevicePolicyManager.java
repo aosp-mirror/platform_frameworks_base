@@ -13249,8 +13249,9 @@ public class DevicePolicyManager {
      * Called by a device owner, profile owner of a managed profile or delegated app with
      * {@link #DELEGATION_NETWORK_LOGGING} to control the network logging feature.
      *
-     * <p> When network logging is enabled by a profile owner, the network logs will only include
-     * work profile network activity, not activity on the personal profile.
+     * <p> Supported for a device owner from Android 8. Supported for a profile owner of a managed
+     * profile from Android 12. When network logging is enabled by a profile owner, the network logs
+     * will only include work profile network activity, not activity on the personal profile.
      *
      * <p> Network logs contain DNS lookup and connect() library call events. The following library
      *     functions are recorded while network logging is active:
