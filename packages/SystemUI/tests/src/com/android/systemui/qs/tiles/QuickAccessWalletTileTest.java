@@ -90,6 +90,7 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
 
     private static final String CARD_ID = "card_id";
     private static final String LABEL = "QAW";
+    private static final String CARD_DESCRIPTION = "•••• 1234";
     private static final Icon CARD_IMAGE =
             Icon.createWithBitmap(Bitmap.createBitmap(70, 50, Bitmap.Config.ARGB_8888));
 
@@ -282,9 +283,7 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
         mTile.handleUpdateState(state, null);
 
         assertEquals(Tile.STATE_ACTIVE, state.state);
-        assertEquals(
-                "•••• 1234",
-                state.secondaryLabel);
+        assertEquals(CARD_DESCRIPTION, state.secondaryLabel);
         assertNotNull(state.stateDescription);
         assertNotNull(state.sideViewCustomDrawable);
     }
@@ -298,11 +297,9 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
         mTile.handleUpdateState(state, null);
 
         assertEquals(Tile.STATE_INACTIVE, state.state);
-        assertEquals(
-                mContext.getString(R.string.wallet_secondary_label_device_locked),
-                state.secondaryLabel);
+        assertEquals(CARD_DESCRIPTION, state.secondaryLabel);
         assertNotNull(state.stateDescription);
-        assertNull(state.sideViewCustomDrawable);
+        assertNotNull(state.sideViewCustomDrawable);
     }
 
     @Test
@@ -314,9 +311,7 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
         mTile.handleUpdateState(state, null);
 
         assertEquals(Tile.STATE_ACTIVE, state.state);
-        assertEquals(
-                "•••• 1234",
-                state.secondaryLabel);
+        assertEquals(CARD_DESCRIPTION, state.secondaryLabel);
         assertNotNull(state.stateDescription);
         assertNotNull(state.sideViewCustomDrawable);
     }
@@ -426,6 +421,6 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     private WalletCard createWalletCard(Context context) {
         PendingIntent pendingIntent =
                 PendingIntent.getActivity(context, 0, mWalletIntent, PendingIntent.FLAG_IMMUTABLE);
-        return new WalletCard.Builder(CARD_ID, CARD_IMAGE, "•••• 1234", pendingIntent).build();
+        return new WalletCard.Builder(CARD_ID, CARD_IMAGE, CARD_DESCRIPTION, pendingIntent).build();
     }
 }
