@@ -618,6 +618,17 @@
             android:excludeFromRecents="true"
             android:visibleToInstantApps="true"/>
 
+        <activity
+            android:name=".media.MediaProjectionAppSelectorActivity"
+            android:theme="@style/Theme.SystemUI.MediaProjectionAppSelector"
+            android:finishOnCloseSystemDialogs="true"
+            android:excludeFromRecents="true"
+            android:documentLaunchMode="never"
+            android:relinquishTaskIdentity="true"
+            android:configChanges=
+                "screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
+            android:visibleToInstantApps="true"/>
+
         <!-- started from TvNotificationPanel -->
         <activity
             android:name=".statusbar.tv.notifications.TvNotificationPanelActivity"
