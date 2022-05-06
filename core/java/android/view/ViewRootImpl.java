@@ -605,6 +605,7 @@ public final class ViewRootImpl implements ViewParent,
     int mSyncSeqId = 0;
     int mLastSyncSeqId = 0;
 
+    private boolean mUpdateSurfaceNeeded;
     boolean mFullRedrawNeeded;
     boolean mNewSurfaceNeeded;
     boolean mForceNextWindowRelayout;
@@ -2979,6 +2980,8 @@ public final class ViewRootImpl implements ViewParent,
                             !mFirst, INVALID_DISPLAY /* same display */);
                     updatedConfiguration = true;
                 }
+                final boolean updateSurfaceNeeded = mUpdateSurfaceNeeded;
+                mUpdateSurfaceNeeded = false;
 
                 surfaceSizeChanged = false;
                 if (!mLastSurfaceSize.equals(mSurfaceSize)) {
@@ -3057,7 +3060,7 @@ public final class ViewRootImpl implements ViewParent,
                     if (isHardwareEnabled()) {
                         mAttachInfo.mThreadedRenderer.destroy();
                     }
-                } else if ((surfaceReplaced || surfaceSizeChanged)
+                } else if ((surfaceReplaced || surfaceSizeChanged || updateSurfaceNeeded)
                         && mSurfaceHolder == null
                         && mAttachInfo.mThreadedRenderer != null
                         && mSurface.isValid()) {
@@ -5209,6 +5212,18 @@ public final class ViewRootImpl implements ViewParent,
             int newDisplayId) {
         if (mergedConfiguration == null) {
             throw new IllegalArgumentException("No merged config provided.");
+        }
+
+        final int lastRotation = mLastReportedMergedConfiguration.getMergedConfiguration()
+                .windowConfiguration.getRotation();
+        final int newRotation = mergedConfiguration.getMergedConfiguration()
+                .windowConfiguration.getRotation();
+        if (lastRotation != newRotation) {
+            // Trigger ThreadedRenderer#updateSurface() if the surface control doesn't change.
+            // Because even if the actual surface size is not changed, e.g. flip 180 degrees,
+            // the buffers may still have content in previous rotation. And the next draw may
+            // not update all regions, that causes some afterimages to flicker.
+            mUpdateSurfaceNeeded = true;
         }
 
         Configuration globalConfig = mergedConfiguration.getGlobalConfiguration();
