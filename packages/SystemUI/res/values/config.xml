@@ -690,7 +690,7 @@
     <string name="config_communalSourceConnector" translatable="false"></string>
 
     <!-- How often in milliseconds to jitter the dream overlay in order to avoid burn-in. -->
-    <integer name="config_dreamOverlayBurnInProtectionUpdateIntervalMillis">500</integer>
+    <integer name="config_dreamOverlayBurnInProtectionUpdateIntervalMillis">1000</integer>
 
     <!-- How long in milliseconds before full burn-in protection is achieved. -->
     <integer name="config_dreamOverlayMillisUntilFullJitter">240000</integer>
