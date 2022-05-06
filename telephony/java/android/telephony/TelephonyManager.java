@@ -8146,24 +8146,6 @@ public class TelephonyManager {
     }
 
     /**
-     * Get P-CSCF address from PCO after data connection is established or modified.
-     * @param apnType the apnType, "ims" for IMS APN, "emergency" for EMERGENCY APN
-     * @return array of P-CSCF address
-     * @hide
-     */
-    public String[] getPcscfAddress(String apnType) {
-        try {
-            ITelephony telephony = getITelephony();
-            if (telephony == null)
-                return new String[0];
-            return telephony.getPcscfAddress(apnType, getOpPackageName(), getAttributionTag());
-        } catch (RemoteException e) {
-            return new String[0];
-        }
-    }
-
-
-    /**
      * Resets the {@link android.telephony.ims.ImsService} associated with the specified sim slot.
      * Used by diagnostic apps to force the IMS stack to be disabled and re-enabled in an effort to
      * recover from scenarios where the {@link android.telephony.ims.ImsService} gets in to a bad
