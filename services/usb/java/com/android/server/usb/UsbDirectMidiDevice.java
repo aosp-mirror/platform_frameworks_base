@@ -23,6 +23,7 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
+import android.hardware.usb.UsbRequest;
 import android.media.midi.MidiDeviceInfo;
 import android.media.midi.MidiDeviceServer;
 import android.media.midi.MidiDeviceStatus;
@@ -44,6 +45,7 @@ import libcore.io.IoUtils;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 /**
@@ -73,10 +75,10 @@ public final class UsbDirectMidiDevice implements Closeable {
     // event schedulers for each input port of the physical device
     private MidiEventScheduler[] mEventSchedulers;
 
-    // Arbitrary number for timeout to not continue sending/receiving number from
-    // an inactive device. This number tries to balances the number of cycles and
-    // not being permanently stuck.
-    private static final int BULK_TRANSFER_TIMEOUT_MILLISECONDS = 100;
+    // Arbitrary number for timeout to not continue sending to
+    // an inactive device. This number tries to balances the number
+    // of cycles and not being permanently stuck.
+    private static final int BULK_TRANSFER_TIMEOUT_MILLISECONDS = 10;
 
     private ArrayList<UsbDeviceConnection> mUsbDeviceConnections;
     private ArrayList<ArrayList<UsbEndpoint>> mInputUsbEndpoints;
@@ -325,48 +327,55 @@ public final class UsbDirectMidiDevice implements Closeable {
                 new Thread("UsbDirectMidiDevice input thread " + portFinal) {
                     @Override
                     public void run() {
-                        byte[] inputBuffer = new byte[endpointFinal.getMaxPacketSize()];
-                        Log.d(TAG, "input buffer size: " + inputBuffer.length);
+                        final UsbRequest request = new UsbRequest();
                         try {
+                            request.initialize(connectionFinal, endpointFinal);
+                            byte[] inputBuffer = new byte[endpointFinal.getMaxPacketSize()];
                             while (true) {
                                 // Record time of event immediately after waking.
                                 long timestamp = System.nanoTime();
-                                synchronized (mLock) {
-                                    if (!mIsOpen) break;
+                                if (!mIsOpen) break;
+                                final ByteBuffer byteBuffer = ByteBuffer.wrap(inputBuffer);
+                                if (!request.queue(byteBuffer)) {
+                                    Log.w(TAG, "Cannot queue request");
+                                    break;
+                                }
+                                final UsbRequest response = connectionFinal.requestWait();
+                                if (response != request) {
+                                    Log.w(TAG, "Unexpected response");
+                                    continue;
+                                }
+                                int bytesRead = byteBuffer.position();
 
-                                    int nRead = connectionFinal.bulkTransfer(endpointFinal,
-                                            inputBuffer, inputBuffer.length,
-                                            BULK_TRANSFER_TIMEOUT_MILLISECONDS);
-
-                                    if (nRead > 0) {
-                                        if (DEBUG) {
-                                            logByteArray("Input before conversion ", inputBuffer,
-                                                    0, nRead);
-                                        }
-                                        byte[] convertedArray;
-                                        if (mIsUniversalMidiDevice) {
-                                            // For USB, each 32 bit word of a UMP is
-                                            // sent with the least significant byte first.
-                                            convertedArray = swapEndiannessPerWord(inputBuffer,
-                                                    nRead);
-                                        } else {
-                                            convertedArray =
-                                                    mUsbMidiPacketConverter.usbMidiToRawMidi(
-                                                             inputBuffer, nRead);
-                                        }
-
-                                        if (DEBUG) {
-                                            logByteArray("Input after conversion ", convertedArray,
-                                                    0, convertedArray.length);
-                                        }
-
-                                        outputReceivers[portFinal].send(convertedArray, 0,
-                                                convertedArray.length, timestamp);
+                                if (bytesRead > 0) {
+                                    if (DEBUG) {
+                                        logByteArray("Input before conversion ", inputBuffer,
+                                                0, bytesRead);
                                     }
+                                    byte[] convertedArray;
+                                    if (mIsUniversalMidiDevice) {
+                                        // For USB, each 32 bit word of a UMP is
+                                        // sent with the least significant byte first.
+                                        convertedArray = swapEndiannessPerWord(inputBuffer,
+                                                bytesRead);
+                                    } else {
+                                        convertedArray =
+                                                mUsbMidiPacketConverter.usbMidiToRawMidi(
+                                                         inputBuffer, bytesRead);
+                                    }
+
+                                    if (DEBUG) {
+                                        logByteArray("Input after conversion ", convertedArray,
+                                                0, convertedArray.length);
+                                    }
+                                    outputReceivers[portFinal].send(convertedArray, 0,
+                                            convertedArray.length, timestamp);
                                 }
                             }
                         } catch (IOException e) {
                             Log.d(TAG, "reader thread exiting");
+                        } finally {
+                            request.close();
                         }
                         Log.d(TAG, "input thread exit");
                     }
@@ -555,6 +564,10 @@ public final class UsbDirectMidiDevice implements Closeable {
             UsbDeviceConnection connection) {
         if (usbInterface == null) {
             Log.e(TAG, "Usb Interface is null");
+            return false;
+        }
+        if (connection == null) {
+            Log.e(TAG, "UsbDeviceConnection is null");
             return false;
         }
         if (!connection.claimInterface(usbInterface, true)) {
