@@ -1673,4 +1673,9 @@ public final class DataFailCause {
             return UNKNOWN;
         }
     }
+
+    /** @hide */
+    public static boolean isFailCauseExisting(@DataFailureCause int failCause) {
+        return sFailCauseMap.containsKey(failCause);
+    }
 }
