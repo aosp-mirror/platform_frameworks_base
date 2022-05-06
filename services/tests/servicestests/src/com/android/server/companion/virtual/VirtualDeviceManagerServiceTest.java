@@ -180,7 +180,7 @@ public class VirtualDeviceManagerServiceTest {
         LocalServices.removeServiceForTest(DisplayManagerInternal.class);
         LocalServices.addService(DisplayManagerInternal.class, mDisplayManagerInternalMock);
 
-        doNothing().when(mInputManagerInternalMock).setVirtualMousePointerDisplayId(anyInt());
+        doReturn(true).when(mInputManagerInternalMock).setVirtualMousePointerDisplayId(anyInt());
         doNothing().when(mInputManagerInternalMock).setPointerAcceleration(anyFloat(), anyInt());
         doNothing().when(mInputManagerInternalMock).setPointerIconVisible(anyBoolean(), anyInt());
         LocalServices.removeServiceForTest(InputManagerInternal.class);
