@@ -1131,6 +1131,49 @@ public class TimeDetectorStrategyImplTest {
                 .verifySystemClockWasSetAndResetCallTracking(ARBITRARY_TEST_TIME.toEpochMilli());
     }
 
+    @Test
+    public void manualY2038SuggestionsAreRejectedOnAffectedDevices() {
+        mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
+                .pokeAutoTimeDetectionEnabled(false)
+                .pokeAutoOriginPriorities(ORIGIN_TELEPHONY)
+                .pokeDeviceHasY2038Issues(true);
+
+        Instant y2038IssueTime = Instant.ofEpochMilli((1L + Integer.MAX_VALUE) * 1000L);
+        ManualTimeSuggestion timeSuggestion = mScript.generateManualTimeSuggestion(y2038IssueTime);
+        mScript.simulateManualTimeSuggestion(timeSuggestion, false /* expectedResult */)
+                .verifySystemClockWasNotSetAndResetCallTracking();
+    }
+
+    @Test
+    public void telephonyY2038SuggestionsAreRejectedOnAffectedDevices() {
+        mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
+                .pokeAutoTimeDetectionEnabled(true)
+                .pokeAutoOriginPriorities(ORIGIN_TELEPHONY)
+                .pokeDeviceHasY2038Issues(true);
+
+        final int slotIndex = 0;
+        Instant y2038IssueTime = Instant.ofEpochMilli((1L + Integer.MAX_VALUE) * 1000L);
+        TelephonyTimeSuggestion timeSuggestion =
+                mScript.generateTelephonyTimeSuggestion(slotIndex, y2038IssueTime);
+        mScript.simulateTelephonyTimeSuggestion(timeSuggestion)
+                .verifySystemClockWasNotSetAndResetCallTracking();
+    }
+
+    @Test
+    public void telephonyY2038SuggestionsAreNotRejectedOnUnaffectedDevices() {
+        mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
+                .pokeAutoTimeDetectionEnabled(true)
+                .pokeAutoOriginPriorities(ORIGIN_TELEPHONY)
+                .pokeDeviceHasY2038Issues(false);
+
+        final int slotIndex = 0;
+        Instant y2038IssueTime = Instant.ofEpochMilli((1L + Integer.MAX_VALUE) * 1000L);
+        TelephonyTimeSuggestion timeSuggestion =
+                mScript.generateTelephonyTimeSuggestion(slotIndex, y2038IssueTime);
+        mScript.simulateTelephonyTimeSuggestion(timeSuggestion)
+                .verifySystemClockWasSetAndResetCallTracking(y2038IssueTime.toEpochMilli());
+    }
+
     /**
      * A fake implementation of {@link TimeDetectorStrategyImpl.Environment}. Besides tracking
      * changes and behaving like the real thing should, it also asserts preconditions.
@@ -1143,6 +1186,7 @@ public class TimeDetectorStrategyImplTest {
         private int mSystemClockUpdateThresholdMillis = 2000;
         private int[] mAutoOriginPriorities = PROVIDERS_PRIORITY;
         private ConfigurationChangeListener mConfigChangeListener;
+        private boolean mDeviceHas2038Issues = false;
 
         // Tracking operations.
         private boolean mSystemClockWasSet;
@@ -1206,6 +1250,15 @@ public class TimeDetectorStrategyImplTest {
         public void releaseWakeLock() {
             assertWakeLockAcquired();
             mWakeLockAcquired = false;
+        }
+
+        public void setDeviceHas2038Issues(boolean hasIssues) {
+            mDeviceHas2038Issues = hasIssues;
+        }
+
+        @Override
+        public boolean deviceHasY2038Issue() {
+            return mDeviceHas2038Issues;
         }
 
         // Methods below are for managing the fake's behavior.
@@ -1301,6 +1354,11 @@ public class TimeDetectorStrategyImplTest {
 
         Script pokeAutoOriginPriorities(@Origin int... autoOriginPriorities) {
             mFakeEnvironment.pokeAutoOriginPriorities(autoOriginPriorities);
+            return this;
+        }
+
+        Script pokeDeviceHasY2038Issues(boolean hasIssues) {
+            mFakeEnvironment.setDeviceHas2038Issues(hasIssues);
             return this;
         }
 

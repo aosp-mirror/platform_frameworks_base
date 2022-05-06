@@ -17,14 +17,26 @@ package com.android.server.timedetector;
 
 import static android.app.timedetector.TimeDetector.SHELL_COMMAND_IS_AUTO_DETECTION_ENABLED;
 import static android.app.timedetector.TimeDetector.SHELL_COMMAND_SERVICE_NAME;
+import static android.app.timedetector.TimeDetector.SHELL_COMMAND_SUGGEST_EXTERNAL_TIME;
+import static android.app.timedetector.TimeDetector.SHELL_COMMAND_SUGGEST_GNSS_TIME;
+import static android.app.timedetector.TimeDetector.SHELL_COMMAND_SUGGEST_MANUAL_TIME;
+import static android.app.timedetector.TimeDetector.SHELL_COMMAND_SUGGEST_NETWORK_TIME;
+import static android.app.timedetector.TimeDetector.SHELL_COMMAND_SUGGEST_TELEPHONY_TIME;
 import static android.provider.DeviceConfig.NAMESPACE_SYSTEM_TIME;
 
 import static com.android.server.timedetector.ServerFlags.KEY_TIME_DETECTOR_LOWER_BOUND_MILLIS_OVERRIDE;
 import static com.android.server.timedetector.ServerFlags.KEY_TIME_DETECTOR_ORIGIN_PRIORITIES_OVERRIDE;
 
+import android.app.time.ExternalTimeSuggestion;
+import android.app.timedetector.GnssTimeSuggestion;
+import android.app.timedetector.ManualTimeSuggestion;
+import android.app.timedetector.NetworkTimeSuggestion;
+import android.app.timedetector.TelephonyTimeSuggestion;
 import android.os.ShellCommand;
 
 import java.io.PrintWriter;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /** Implements the shell command interface for {@link TimeDetectorService}. */
 class TimeDetectorShellCommand extends ShellCommand {
@@ -44,6 +56,16 @@ class TimeDetectorShellCommand extends ShellCommand {
         switch (cmd) {
             case SHELL_COMMAND_IS_AUTO_DETECTION_ENABLED:
                 return runIsAutoDetectionEnabled();
+            case SHELL_COMMAND_SUGGEST_MANUAL_TIME:
+                return runSuggestManualTime();
+            case SHELL_COMMAND_SUGGEST_TELEPHONY_TIME:
+                return runSuggestTelephonyTime();
+            case SHELL_COMMAND_SUGGEST_NETWORK_TIME:
+                return runSuggestNetworkTime();
+            case SHELL_COMMAND_SUGGEST_GNSS_TIME:
+                return runSuggestGnssTime();
+            case SHELL_COMMAND_SUGGEST_EXTERNAL_TIME:
+                return runSuggestExternalTime();
             default: {
                 return handleDefaultCommands(cmd);
             }
@@ -59,6 +81,53 @@ class TimeDetectorShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runSuggestManualTime() {
+        return runSuggestTime(
+                () -> ManualTimeSuggestion.parseCommandLineArg(this),
+                mInterface::suggestManualTime);
+    }
+
+    private int runSuggestTelephonyTime() {
+        return runSuggestTime(
+                () -> TelephonyTimeSuggestion.parseCommandLineArg(this),
+                mInterface::suggestTelephonyTime);
+    }
+
+    private int runSuggestNetworkTime() {
+        return runSuggestTime(
+                () -> NetworkTimeSuggestion.parseCommandLineArg(this),
+                mInterface::suggestNetworkTime);
+    }
+
+    private int runSuggestGnssTime() {
+        return runSuggestTime(
+                () -> GnssTimeSuggestion.parseCommandLineArg(this),
+                mInterface::suggestGnssTime);
+    }
+
+    private int runSuggestExternalTime() {
+        return runSuggestTime(
+                () -> ExternalTimeSuggestion.parseCommandLineArg(this),
+                mInterface::suggestExternalTime);
+    }
+
+    private <T> int runSuggestTime(Supplier<T> suggestionParser, Consumer<T> invoker) {
+        final PrintWriter pw = getOutPrintWriter();
+        try {
+            T suggestion = suggestionParser.get();
+            if (suggestion == null) {
+                pw.println("Error: suggestion not specified");
+                return 1;
+            }
+            invoker.accept(suggestion);
+            pw.println("Suggestion " + suggestion + " injected.");
+            return 0;
+        } catch (RuntimeException e) {
+            pw.println(e);
+            return 1;
+        }
+    }
+
     @Override
     public void onHelp() {
         final PrintWriter pw = getOutPrintWriter();
@@ -67,6 +136,22 @@ class TimeDetectorShellCommand extends ShellCommand {
         pw.printf("    Print this help text.\n");
         pw.printf("  %s\n", SHELL_COMMAND_IS_AUTO_DETECTION_ENABLED);
         pw.printf("    Prints true/false according to the automatic time detection setting.\n");
+        pw.println();
+        pw.printf("  %s <manual suggestion opts>\n", SHELL_COMMAND_SUGGEST_MANUAL_TIME);
+        pw.printf("  %s <telephony suggestion opts>\n", SHELL_COMMAND_SUGGEST_TELEPHONY_TIME);
+        pw.printf("  %s <network suggestion opts>\n", SHELL_COMMAND_SUGGEST_NETWORK_TIME);
+        pw.printf("  %s <gnss suggestion opts>\n", SHELL_COMMAND_SUGGEST_GNSS_TIME);
+        pw.printf("  %s <external suggestion opts>\n", SHELL_COMMAND_SUGGEST_EXTERNAL_TIME);
+        pw.println();
+        ManualTimeSuggestion.printCommandLineOpts(pw);
+        pw.println();
+        TelephonyTimeSuggestion.printCommandLineOpts(pw);
+        pw.println();
+        NetworkTimeSuggestion.printCommandLineOpts(pw);
+        pw.println();
+        GnssTimeSuggestion.printCommandLineOpts(pw);
+        pw.println();
+        ExternalTimeSuggestion.printCommandLineOpts(pw);
         pw.println();
         pw.printf("This service is also affected by the following device_config flags in the"
                 + " %s namespace:\n", NAMESPACE_SYSTEM_TIME);
