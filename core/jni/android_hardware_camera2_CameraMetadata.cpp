@@ -947,15 +947,8 @@ static jint CameraMetadata_setupGlobalVendorTagDescriptor(JNIEnv *env, jclass th
         return hardware::ICameraService::ERROR_DISCONNECTED;
     }
 
-    binder::Status res = cameraService->setUpVendorTags();
-    if (!res.isOk()) {
-        ALOGE("%s: Failed to setup vendor tags for camera providers: %s", __FUNCTION__,
-              res.toString8().string());
-        return res.serviceSpecificErrorCode();
-    }
-
     sp<VendorTagDescriptor> desc = new VendorTagDescriptor();
-    res = cameraService->getCameraVendorTagDescriptor(/*out*/ desc.get());
+    binder::Status res = cameraService->getCameraVendorTagDescriptor(/*out*/desc.get());
 
     if (res.serviceSpecificErrorCode() == hardware::ICameraService::ERROR_DISCONNECTED) {
         // No camera module available, not an error on devices with no cameras
