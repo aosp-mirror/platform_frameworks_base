@@ -2506,6 +2506,8 @@
     <string name="clipboard_edit_image_description">Edit copied image</string>
     <!-- Label for button to send copied content to a nearby device [CHAR LIMIT=NONE] -->
     <string name="clipboard_send_nearby_description">Send to nearby device</string>
+    <!-- Text informing user that copied content is hidden [CHAR LIMIT=NONE] -->
+    <string name="clipboard_text_hidden">Tap to view</string>
 
     <!-- Generic "add" string [CHAR LIMIT=NONE] -->
     <string name="add">Add</string>
