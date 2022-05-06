@@ -487,18 +487,19 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         mSelectedDevice = requireNonNull(deviceFilterPairs.get(0));
 
         final String deviceName = mSelectedDevice.getDisplayName();
-        mRequest.setDisplayName(deviceName);
-        final Spanned title = getHtmlFromResources(
-                this, R.string.confirmation_title, appLabel, deviceName);
+        final String profileName = getString(R.string.profile_name_watch);
+        final Spanned title;
         final Spanned summary;
         final Drawable profileIcon;
 
         if (deviceProfile == null) {
+            title = getHtmlFromResources(this, R.string.confirmation_title, appLabel, deviceName);
             summary = getHtmlFromResources(this, R.string.summary_generic);
             profileIcon = getIcon(this, R.drawable.ic_device_other);
             mSummary.setVisibility(View.GONE);
         } else if (deviceProfile.equals(DEVICE_PROFILE_WATCH)) {
-            summary = getHtmlFromResources(this, R.string.summary_watch, appLabel, deviceName);
+            title = getHtmlFromResources(this, R.string.confirmation_title, appLabel, profileName);
+            summary = getHtmlFromResources(this, R.string.summary_watch, deviceName, appLabel);
             profileIcon = getIcon(this, R.drawable.ic_watch);
         } else {
             throw new RuntimeException("Unsupported profile " + deviceProfile);
@@ -526,7 +527,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
             mSummary.setVisibility(View.GONE);
         } else if (deviceProfile.equals(DEVICE_PROFILE_WATCH)) {
             profileName = getString(R.string.profile_name_watch);
-            summary = getHtmlFromResources(this, R.string.summary_watch, appLabel);
+            summary = getHtmlFromResources(this, R.string.summary_watch, profileName, appLabel);
             profileIcon = getIcon(this, R.drawable.ic_watch);
         } else {
             throw new RuntimeException("Unsupported profile " + deviceProfile);
