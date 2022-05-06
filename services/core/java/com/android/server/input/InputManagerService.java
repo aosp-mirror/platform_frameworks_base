@@ -401,11 +401,14 @@ public class InputManagerService extends IInputManager.Stub
 
     @VisibleForTesting
     InputManagerService(Injector injector) {
+        // The static association map is accessed by both java and native code, so it must be
+        // initialized before initializing the native service.
+        mStaticAssociations = loadStaticInputPortAssociations();
+
         mContext = injector.getContext();
         mHandler = new InputManagerHandler(injector.getLooper());
         mNative = injector.getNativeService(this);
 
-        mStaticAssociations = loadStaticInputPortAssociations();
         mUseDevInputEventForAudioJack =
                 mContext.getResources().getBoolean(R.bool.config_useDevInputEventForAudioJack);
         Slog.i(TAG, "Initializing input manager, mUseDevInputEventForAudioJack="
