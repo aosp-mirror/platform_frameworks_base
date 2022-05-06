@@ -1811,10 +1811,6 @@ public class DevicePolicyManager {
      * #EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES} array extra contain {@link
      * #PROVISIONING_MODE_MANAGED_PROFILE} and {@link #PROVISIONING_MODE_FULLY_MANAGED_DEVICE}.
      *
-     * <p>Also, if this flag is set, the admin app's {@link #ACTION_GET_PROVISIONING_MODE} activity
-     * will not receive the {@link #EXTRA_PROVISIONING_IMEI} and {@link
-     * #EXTRA_PROVISIONING_SERIAL_NUMBER} extras.
-     *
      * <p>This flag can be combined with {@link #FLAG_SUPPORTED_MODES_PERSONALLY_OWNED}. In
      * that case, the admin app's {@link #ACTION_GET_PROVISIONING_MODE} activity will have
      * the {@link #EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES} array extra contain {@link
@@ -1833,6 +1829,10 @@ public class DevicePolicyManager {
      * <p>Using this flag will cause the admin app's {@link #ACTION_GET_PROVISIONING_MODE}
      * activity to have the {@link #EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES} array extra
      * contain only {@link #PROVISIONING_MODE_MANAGED_PROFILE}.
+     *
+     * <p>Also, if this flag is set, the admin app's {@link #ACTION_GET_PROVISIONING_MODE} activity
+     * will not receive the {@link #EXTRA_PROVISIONING_IMEI} and {@link
+     * #EXTRA_PROVISIONING_SERIAL_NUMBER} extras.
      *
      * <p>This flag can be combined with {@link #FLAG_SUPPORTED_MODES_ORGANIZATION_OWNED}. In
      * that case, the admin app's {@link #ACTION_GET_PROVISIONING_MODE} activity will have the
@@ -13249,8 +13249,9 @@ public class DevicePolicyManager {
      * Called by a device owner, profile owner of a managed profile or delegated app with
      * {@link #DELEGATION_NETWORK_LOGGING} to control the network logging feature.
      *
-     * <p> When network logging is enabled by a profile owner, the network logs will only include
-     * work profile network activity, not activity on the personal profile.
+     * <p> Supported for a device owner from Android 8. Supported for a profile owner of a managed
+     * profile from Android 12. When network logging is enabled by a profile owner, the network logs
+     * will only include work profile network activity, not activity on the personal profile.
      *
      * <p> Network logs contain DNS lookup and connect() library call events. The following library
      *     functions are recorded while network logging is active:
