@@ -31,7 +31,9 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.util.Log;
+import android.view.DisplayCutout;
 import android.view.Gravity;
 import android.view.IWindowManager;
 import android.view.Surface;
@@ -130,7 +132,9 @@ public class StatusBarWindowController {
         // Now that the status bar window encompasses the sliding panel and its
         // translucent backdrop, the entire thing is made TRANSLUCENT and is
         // hardware-accelerated.
+        Trace.beginSection("StatusBarWindowController.getBarLayoutParams");
         mLp = getBarLayoutParams(mContext.getDisplay().getRotation());
+        Trace.endSection();
 
         mWindowManager.addView(mStatusBarWindowView, mLp);
         mLpChanged.copyFrom(mLp);
@@ -223,14 +227,15 @@ public class StatusBarWindowController {
 
     private void calculateStatusBarLocationsForAllRotations() {
         Rect[] bounds = new Rect[4];
+        final DisplayCutout displayCutout = mContext.getDisplay().getCutout();
         bounds[0] = mContentInsetsProvider
-                .getBoundingRectForPrivacyChipForRotation(ROTATION_NONE);
+                .getBoundingRectForPrivacyChipForRotation(ROTATION_NONE, displayCutout);
         bounds[1] = mContentInsetsProvider
-                .getBoundingRectForPrivacyChipForRotation(ROTATION_LANDSCAPE);
+                .getBoundingRectForPrivacyChipForRotation(ROTATION_LANDSCAPE, displayCutout);
         bounds[2] = mContentInsetsProvider
-                .getBoundingRectForPrivacyChipForRotation(ROTATION_UPSIDE_DOWN);
+                .getBoundingRectForPrivacyChipForRotation(ROTATION_UPSIDE_DOWN, displayCutout);
         bounds[3] = mContentInsetsProvider
-                .getBoundingRectForPrivacyChipForRotation(ROTATION_SEASCAPE);
+                .getBoundingRectForPrivacyChipForRotation(ROTATION_SEASCAPE, displayCutout);
 
         try {
             mIWindowManager.updateStaticPrivacyIndicatorBounds(mContext.getDisplayId(), bounds);
