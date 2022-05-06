@@ -289,6 +289,7 @@ public class AppStandbyController
     static final int MSG_INFORM_LISTENERS = 3;
     static final int MSG_FORCE_IDLE_STATE = 4;
     static final int MSG_CHECK_IDLE_STATES = 5;
+    static final int MSG_TRIGGER_LISTENER_QUOTA_BUMP = 7;
     static final int MSG_REPORT_CONTENT_PROVIDER_USAGE = 8;
     static final int MSG_PAROLE_STATE_CHANGED = 9;
     static final int MSG_ONE_TIME_CHECK_IDLE_STATES = 10;
@@ -318,6 +319,12 @@ public class AppStandbyController
     /** The standby bucket that an app will be promoted on a notification-seen event */
     int mNotificationSeenPromotedBucket =
             ConstantsObserver.DEFAULT_NOTIFICATION_SEEN_PROMOTED_BUCKET;
+    /**
+     * If true, tell each {@link AppIdleStateChangeListener} to give quota bump for each
+     * notification seen event.
+     */
+    private boolean mTriggerQuotaBumpOnNotificationSeen =
+            ConstantsObserver.DEFAULT_TRIGGER_QUOTA_BUMP_ON_NOTIFICATION_SEEN;
     /** Minimum time a system update event should keep the buckets elevated. */
     long mSystemUpdateUsageTimeoutMillis = ConstantsObserver.DEFAULT_SYSTEM_UPDATE_TIMEOUT;
     /** Maximum time to wait for a prediction before using simple timeouts to downgrade buckets. */
@@ -741,6 +748,17 @@ public class AppStandbyController
                 appUsage.bucketingReason, false);
     }
 
+    /** Trigger a quota bump in the listeners. */
+    private void triggerListenerQuotaBump(String packageName, int userId) {
+        if (!mAppIdleEnabled) return;
+
+        synchronized (mPackageAccessListeners) {
+            for (AppIdleStateChangeListener listener : mPackageAccessListeners) {
+                listener.triggerTemporaryQuotaBump(packageName, userId);
+            }
+        }
+    }
+
     @VisibleForTesting
     void setChargingState(boolean isCharging) {
         if (mIsCharging != isCharging) {
@@ -1054,6 +1072,10 @@ public class AppStandbyController
         final int subReason = usageEventToSubReason(eventType);
         final int reason = REASON_MAIN_USAGE | subReason;
         if (eventType == UsageEvents.Event.NOTIFICATION_SEEN) {
+            if (mTriggerQuotaBumpOnNotificationSeen) {
+                mHandler.obtainMessage(MSG_TRIGGER_LISTENER_QUOTA_BUMP, userId, -1, pkg)
+                        .sendToTarget();
+            }
             // Notification-seen elevates to a higher bucket (depending on
             // {@link ConstantsObserver#KEY_NOTIFICATION_SEEN_PROMOTED_BUCKET}) but doesn't
             // change usage time.
@@ -2160,6 +2182,9 @@ public class AppStandbyController
         pw.print("  mNotificationSeenPromotedBucket=");
         pw.print(standbyBucketToString(mNotificationSeenPromotedBucket));
         pw.println();
+        pw.print("  mTriggerQuotaBumpOnNotificationSeen=");
+        pw.print(mTriggerQuotaBumpOnNotificationSeen);
+        pw.println();
         pw.print("  mSlicePinnedTimeoutMillis=");
         TimeUtils.formatDuration(mSlicePinnedTimeoutMillis, pw);
         pw.println();
@@ -2544,6 +2569,10 @@ public class AppStandbyController
                     checkIdleStates(UserHandle.USER_ALL);
                     break;
 
+                case MSG_TRIGGER_LISTENER_QUOTA_BUMP:
+                    triggerListenerQuotaBump((String) msg.obj, msg.arg1);
+                    break;
+
                 case MSG_REPORT_CONTENT_PROVIDER_USAGE:
                     ContentProviderUsageRecord record = (ContentProviderUsageRecord) msg.obj;
                     reportContentProviderUsage(record.name, record.packageName, record.userId);
@@ -2630,6 +2659,8 @@ public class AppStandbyController
                 "notification_seen_duration";
         private static final String KEY_NOTIFICATION_SEEN_PROMOTED_BUCKET =
                 "notification_seen_promoted_bucket";
+        private static final String KEY_TRIGGER_QUOTA_BUMP_ON_NOTIFICATION_SEEN =
+                "trigger_quota_bump_on_notification_seen";
         private static final String KEY_SLICE_PINNED_HOLD_DURATION =
                 "slice_pinned_duration";
         private static final String KEY_SYSTEM_UPDATE_HOLD_DURATION =
@@ -2682,6 +2713,7 @@ public class AppStandbyController
                 COMPRESS_TIME ? 12 * ONE_MINUTE : 12 * ONE_HOUR;
         public static final int DEFAULT_NOTIFICATION_SEEN_PROMOTED_BUCKET =
                 STANDBY_BUCKET_WORKING_SET;
+        public static final boolean DEFAULT_TRIGGER_QUOTA_BUMP_ON_NOTIFICATION_SEEN = false;
         public static final long DEFAULT_SYSTEM_UPDATE_TIMEOUT =
                 COMPRESS_TIME ? 2 * ONE_MINUTE : 2 * ONE_HOUR;
         public static final long DEFAULT_SYSTEM_INTERACTION_TIMEOUT =
@@ -2775,6 +2807,11 @@ public class AppStandbyController
                             mNotificationSeenPromotedBucket = properties.getInt(
                                     KEY_NOTIFICATION_SEEN_PROMOTED_BUCKET,
                                     DEFAULT_NOTIFICATION_SEEN_PROMOTED_BUCKET);
+                            break;
+                        case KEY_TRIGGER_QUOTA_BUMP_ON_NOTIFICATION_SEEN:
+                            mTriggerQuotaBumpOnNotificationSeen = properties.getBoolean(
+                                    KEY_TRIGGER_QUOTA_BUMP_ON_NOTIFICATION_SEEN,
+                                    DEFAULT_TRIGGER_QUOTA_BUMP_ON_NOTIFICATION_SEEN);
                             break;
                         case KEY_SLICE_PINNED_HOLD_DURATION:
                             mSlicePinnedTimeoutMillis = properties.getLong(
