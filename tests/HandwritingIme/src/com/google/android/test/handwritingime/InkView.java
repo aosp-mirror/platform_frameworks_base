@@ -30,7 +30,7 @@ import android.view.WindowManager;
 import android.view.WindowMetrics;
 
 class InkView extends View {
-    private static final long FINISH_TIMEOUT = 2500;
+    private static final long FINISH_TIMEOUT = 600;
     private final HandwritingIme.HandwritingFinisher mHwCanceller;
     private final HandwritingIme.StylusConsumer mConsumer;
     private final int mTopInset;
