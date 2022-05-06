@@ -352,12 +352,7 @@ class PackageManagerShellCommand extends ShellCommand {
                 case "set-silent-updates-policy":
                     return runSetSilentUpdatesPolicy();
                 case "art":
-                    // Remove the first arg "art" and forward to ART module.
-                    String[] args = getAllArgs();
-                    args = Arrays.copyOfRange(args, 1, args.length);
-                    return LocalManagerRegistry.getManagerOrThrow(ArtManagerLocal.class)
-                            .handleShellCommand(getTarget(), getInFileDescriptor(),
-                                    getOutFileDescriptor(), getErrFileDescriptor(), args);
+                    return runArtSubCommand();
                 default: {
                     Boolean domainVerificationResult =
                             mDomainVerificationShell.runCommand(this, cmd);
@@ -3393,6 +3388,15 @@ class PackageManagerShellCommand extends ShellCommand {
             return -1;
         }
         return 1;
+    }
+
+    private int runArtSubCommand() throws ManagerNotFoundException {
+        // Remove the first arg "art" and forward to ART module.
+        String[] args = getAllArgs();
+        args = Arrays.copyOfRange(args, 1, args.length);
+        return LocalManagerRegistry.getManagerOrThrow(ArtManagerLocal.class)
+                .handleShellCommand(getTarget(), getInFileDescriptor(), getOutFileDescriptor(),
+                        getErrFileDescriptor(), args);
     }
 
     private static String checkAbiArgument(String abi) {
