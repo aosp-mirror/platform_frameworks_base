@@ -121,6 +121,12 @@ public class ListDumper {
             sb.append(" (parent=")
                     .append(entry.getParent() != null ? entry.getParent().getKey() : null)
                     .append(")");
+
+            NotificationEntry notifEntry = entry.getRepresentativeEntry();
+            if (notifEntry != null) {
+                sb.append(" rank=")
+                        .append(notifEntry.getRanking().getRank());
+            }
         }
 
         if (entry.getSection() != null) {
