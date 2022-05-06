@@ -69,7 +69,6 @@ import com.android.systemui.statusbar.notification.row.FooterView;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ShadeController;
-import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 
 import org.junit.Assert;
@@ -110,7 +109,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
     @Mock private NotificationShelf mNotificationShelf;
     @Mock private NotificationStackSizeCalculator mNotificationStackSizeCalculator;
-    @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
     @Before
     @UiThreadTest
@@ -118,8 +116,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         allowTestableLooperAsMainThread();
 
         // Interact with real instance of AmbientState.
-        mAmbientState = new AmbientState(mContext, mNotificationSectionsManager, mBypassController,
-                mStatusBarKeyguardViewManager);
+        mAmbientState = new AmbientState(mContext, mNotificationSectionsManager, mBypassController);
 
         // Inject dependencies before initializing the layout
         mDependency.injectTestDependency(SysuiStatusBarStateController.class, mBarState);

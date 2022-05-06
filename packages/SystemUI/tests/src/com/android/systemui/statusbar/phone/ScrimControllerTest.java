@@ -1238,7 +1238,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void expansionNotificationAlpha_shadeLocked_bouncerActive_usesBouncerInterpolator() {
-        when(mStatusBarKeyguardViewManager.isBouncerInTransit()).thenReturn(true);
+        when(mStatusBarKeyguardViewManager.bouncerIsInTransit()).thenReturn(true);
 
         mScrimController.transitionTo(ScrimState.SHADE_LOCKED);
 
@@ -1254,7 +1254,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void expansionNotificationAlpha_shadeLocked_bouncerNotActive_usesShadeInterpolator() {
-        when(mStatusBarKeyguardViewManager.isBouncerInTransit()).thenReturn(false);
+        when(mStatusBarKeyguardViewManager.bouncerIsInTransit()).thenReturn(false);
 
         mScrimController.transitionTo(ScrimState.SHADE_LOCKED);
 
@@ -1291,7 +1291,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void notificationAlpha_unnocclusionAnimating_bouncerNotActive_usesKeyguardNotifAlpha() {
-        when(mStatusBarKeyguardViewManager.isBouncerInTransit()).thenReturn(false);
+        when(mStatusBarKeyguardViewManager.bouncerIsInTransit()).thenReturn(false);
 
         mScrimController.transitionTo(ScrimState.KEYGUARD);
         mScrimController.setUnocclusionAnimationRunning(true);

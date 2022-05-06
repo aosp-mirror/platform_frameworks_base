@@ -1361,6 +1361,18 @@ public class Environment {
             return false;
         }
 
+        // Apps with PROPERTY_NO_APP_DATA_STORAGE should not be allowed in scoped storage
+        final String packageName = AppGlobals.getInitialPackage();
+        try {
+            final PackageManager.Property noAppStorageProp = packageManager.getProperty(
+                    PackageManager.PROPERTY_NO_APP_DATA_STORAGE, packageName);
+            if (noAppStorageProp != null && noAppStorageProp.getBoolean()) {
+                return false;
+            }
+        } catch (PackageManager.NameNotFoundException ignore) {
+            // Property not defined for the package
+        }
+
         boolean defaultScopedStorage = Compatibility.isChangeEnabled(DEFAULT_SCOPED_STORAGE);
         boolean forceEnableScopedStorage = Compatibility.isChangeEnabled(
                 FORCE_ENABLE_SCOPED_STORAGE);

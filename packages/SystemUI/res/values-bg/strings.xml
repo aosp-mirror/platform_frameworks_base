@@ -849,10 +849,6 @@
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Запазване"</string>
     <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Стартира се…"</string>
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Предаването не е възможно"</string>
-    <!-- no translation found for media_output_broadcast_update_error (1420868236079122521) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_last_update_error (5484328807296895491) -->
-    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Номер на компилацията"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Номерът на компилацията е копиран в буферната памет."</string>
     <string name="basic_status" msgid="2315371112182658176">"Отворен разговор"</string>
