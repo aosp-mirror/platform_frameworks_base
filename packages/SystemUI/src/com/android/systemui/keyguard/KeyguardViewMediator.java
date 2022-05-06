@@ -911,12 +911,12 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                         RemoteAnimationTarget[] wallpapers,
                         RemoteAnimationTarget[] nonApps,
                         IRemoteAnimationFinishedCallback finishedCallback) throws RemoteException {
+                    setOccluded(false /* isOccluded */, true /* animate */);
+
                     if (apps == null || apps.length == 0 || apps[0] == null) {
                         Log.d(TAG, "No apps provided to unocclude runner; "
                                 + "skipping animation and unoccluding.");
-
                         finishedCallback.onAnimationFinished();
-                        setOccluded(false /* isOccluded */, true /* animate */);
                         return;
                     }
 
@@ -961,7 +961,6 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                             @Override
                             public void onAnimationEnd(Animator animation) {
                                 try {
-                                    setOccluded(false /* isOccluded */, true /* animate */);
                                     finishedCallback.onAnimationFinished();
                                     mUnoccludeAnimator = null;
                                 } catch (RemoteException e) {
