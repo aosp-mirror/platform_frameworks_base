@@ -22,8 +22,6 @@ import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 
-import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
-import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.notification.collection.EntryUtilKt.modifyEntry;
 import static com.android.systemui.util.mockito.KotlinMockitoHelpersKt.argThat;
 
@@ -58,7 +56,6 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.RankingBuilder;
-import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -94,7 +91,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock private HighPriorityProvider mHighPriorityProvider;
-    @Mock private SysuiStatusBarStateController mStatusBarStateController;
+    @Mock private StatusBarStateController mStatusBarStateController;
     @Mock private BroadcastDispatcher mBroadcastDispatcher;
     private final FakeSettings mFakeSettings = new FakeSettings();
 
@@ -182,7 +179,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
         Consumer<String> listener = mock(Consumer.class);
         mKeyguardNotificationVisibilityProvider.addOnStateChangedListener(listener);
 
-        callback.onUpcomingStateChanged(0);
+        callback.onStateChanged(0);
 
         verify(listener).accept(anyString());
     }
@@ -203,7 +200,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
         Consumer<String> listener = mock(Consumer.class);
         mKeyguardNotificationVisibilityProvider.addOnStateChangedListener(listener);
 
-        when(mStatusBarStateController.getCurrentOrUpcomingState()).thenReturn(KEYGUARD);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
         callback.onReceive(mContext, new Intent(Intent.ACTION_USER_SWITCHED));
 
         verify(listener).accept(anyString());
@@ -211,7 +208,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
 
     @Test
     public void notifyListeners_onSettingChange_lockScreenShowNotifs() {
-        when(mStatusBarStateController.getCurrentOrUpcomingState()).thenReturn(KEYGUARD);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
         Consumer<String> listener = mock(Consumer.class);
         mKeyguardNotificationVisibilityProvider.addOnStateChangedListener(listener);
 
@@ -222,7 +219,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
 
     @Test
     public void notifyListeners_onSettingChange_lockScreenAllowPrivateNotifs() {
-        when(mStatusBarStateController.getCurrentOrUpcomingState()).thenReturn(KEYGUARD);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
         Consumer<String> listener = mock(Consumer.class);
         mKeyguardNotificationVisibilityProvider.addOnStateChangedListener(listener);
 
@@ -268,7 +265,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
 
     @Test
     public void notifyListeners_onSettingChange_zenMode() {
-        when(mStatusBarStateController.getCurrentOrUpcomingState()).thenReturn(KEYGUARD);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
         Consumer<String> listener = mock(Consumer.class);
         mKeyguardNotificationVisibilityProvider.addOnStateChangedListener(listener);
 
@@ -279,7 +276,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
 
     @Test
     public void notifyListeners_onSettingChange_lockScreenShowSilentNotifs() {
-        when(mStatusBarStateController.getCurrentOrUpcomingState()).thenReturn(KEYGUARD);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
         Consumer<String> listener = mock(Consumer.class);
         mKeyguardNotificationVisibilityProvider.addOnStateChangedListener(listener);
 
@@ -301,7 +298,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
     public void keyguardNotShowing() {
         // GIVEN the lockscreen isn't showing
         setupUnfilteredState(mEntry);
-        when(mStatusBarStateController.getCurrentOrUpcomingState()).thenReturn(SHADE);
+        when(mKeyguardStateController.isShowing()).thenReturn(false);
 
         // THEN don't filter out the entry
         assertFalse(mKeyguardNotificationVisibilityProvider.shouldHideNotification(mEntry));
@@ -443,7 +440,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
      */
     private void setupUnfilteredState(NotificationEntry entry) {
         // keyguard is showing
-        when(mStatusBarStateController.getCurrentOrUpcomingState()).thenReturn(KEYGUARD);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
 
         // show notifications on the lockscreen
         when(mLockscreenUserManager.shouldShowLockscreenNotifications()).thenReturn(true);
@@ -491,7 +488,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
                     @BindsInstance NotificationLockscreenUserManager lockscreenUserManager,
                     @BindsInstance KeyguardUpdateMonitor keyguardUpdateMonitor,
                     @BindsInstance HighPriorityProvider highPriorityProvider,
-                    @BindsInstance SysuiStatusBarStateController statusBarStateController,
+                    @BindsInstance StatusBarStateController statusBarStateController,
                     @BindsInstance BroadcastDispatcher broadcastDispatcher,
                     @BindsInstance SecureSettings secureSettings,
                     @BindsInstance GlobalSettings globalSettings
