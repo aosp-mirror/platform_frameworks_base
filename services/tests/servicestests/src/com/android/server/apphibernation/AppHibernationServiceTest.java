@@ -298,7 +298,7 @@ public final class AppHibernationServiceTest {
         ArgumentCaptor<Intent> intentArgumentCaptor = ArgumentCaptor.forClass(Intent.class);
         verify(mIActivityManager, times(2)).broadcastIntentWithFeature(any(), any(),
                 intentArgumentCaptor.capture(), any(), any(), anyInt(), any(), any(), any(), any(),
-                anyInt(), any(), anyBoolean(), anyBoolean(), eq(USER_ID_1));
+                any(), anyInt(), any(), anyBoolean(), anyBoolean(), eq(USER_ID_1));
         List<Intent> capturedIntents = intentArgumentCaptor.getAllValues();
         assertEquals(capturedIntents.get(0).getAction(), Intent.ACTION_LOCKED_BOOT_COMPLETED);
         assertEquals(capturedIntents.get(1).getAction(), Intent.ACTION_BOOT_COMPLETED);

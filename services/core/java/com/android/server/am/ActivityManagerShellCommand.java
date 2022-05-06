@@ -773,8 +773,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
         pw.flush();
         Bundle bundle = mBroadcastOptions == null ? null : mBroadcastOptions.toBundle();
         mInterface.broadcastIntentWithFeature(null, null, intent, null, receiver, 0, null, null,
-                requiredPermissions, null, android.app.AppOpsManager.OP_NONE, bundle, true, false,
-                mUserId);
+                requiredPermissions, null, null, android.app.AppOpsManager.OP_NONE, bundle, true,
+                false, mUserId);
         if (!mAsync) {
             receiver.waitForFinish();
         }
