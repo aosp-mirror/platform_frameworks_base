@@ -251,18 +251,6 @@ interface IWindowManager
      */
     void refreshScreenCaptureDisabled();
 
-    // These can only be called with the SET_ORIENTATION permission.
-    /**
-     * Update the current screen rotation based on the current state of
-     * the world.
-     * @param alwaysSendConfiguration Flag to force a new configuration to
-     * be evaluated.  This can be used when there are other parameters in
-     * configuration that are changing.
-     * @param forceRelayout If true, the window manager will always do a relayout
-     * of its windows even if the rotation hasn't changed.
-     */
-    void updateRotation(boolean alwaysSendConfiguration, boolean forceRelayout);
-
     /**
      * Retrieve the current orientation of the primary screen.
      * @return Constant as per {@link android.view.Surface.Rotation}.
@@ -441,11 +429,6 @@ interface IWindowManager
      */
     @UnsupportedAppUsage
     boolean isSafeModeEnabled();
-
-    /**
-     * Enables the screen if all conditions are met.
-     */
-    void enableScreenIfNeeded();
 
     /**
      * Clears the frame statistics for a given window.
