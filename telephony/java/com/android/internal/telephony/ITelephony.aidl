@@ -978,14 +978,6 @@ interface ITelephony {
      boolean isManualNetworkSelectionAllowed(int subId);
 
     /**
-     * Get P-CSCF address from PCO after data connection is established or modified.
-     * @param apnType the apnType, "ims" for IMS APN, "emergency" for EMERGENCY APN
-     * @param callingPackage The package making the call.
-     * @param callingFeatureId The feature in the package.
-     */
-    String[] getPcscfAddress(String apnType, String callingPackage, String callingFeatureId);
-
-    /**
      * Set IMS registration state
      */
     void setImsRegistrationState(boolean registered);
