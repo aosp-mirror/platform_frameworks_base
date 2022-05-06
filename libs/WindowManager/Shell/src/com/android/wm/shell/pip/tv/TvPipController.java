@@ -293,6 +293,8 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
         }
         mTvPipBoundsState.setTvPipManuallyCollapsed(!expanding);
         mTvPipBoundsState.setTvPipExpanded(expanding);
+        mPipNotificationController.updateExpansionState();
+
         updatePinnedStackBounds();
     }
 
