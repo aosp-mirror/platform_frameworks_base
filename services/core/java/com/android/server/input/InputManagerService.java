@@ -1712,6 +1712,13 @@ public class InputManagerService extends IInputManager.Stub
             mPointerIconDisplayContext = null;
         }
 
+        synchronized (mAdditionalDisplayInputPropertiesLock) {
+            setPointerIconVisible(AdditionalDisplayInputProperties.DEFAULT_POINTER_ICON_VISIBLE,
+                    displayId);
+            setPointerAcceleration(AdditionalDisplayInputProperties.DEFAULT_POINTER_ACCELERATION,
+                    displayId);
+        }
+
         mNative.displayRemoved(displayId);
     }
 
