@@ -4146,19 +4146,8 @@ public class AudioService extends IAudioService.Stub
     {
         streamType = mStreamVolumeAlias[streamType];
 
-        if (streamType == AudioSystem.STREAM_MUSIC) {
-            flags = updateFlagsForTvPlatform(flags);
-            synchronized (mHdmiClientLock) {
-                // Don't display volume UI on a TV Playback device when using absolute volume
-                if (mHdmiCecVolumeControlEnabled && mHdmiPlaybackClient != null
-                        && (isAbsoluteVolumeDevice(device)
-                        || isA2dpAbsoluteVolumeDevice(device))) {
-                    flags &= ~AudioManager.FLAG_SHOW_UI;
-                }
-            }
-            if (isFullVolumeDevice(device)) {
-                flags &= ~AudioManager.FLAG_SHOW_UI;
-            }
+        if (streamType == AudioSystem.STREAM_MUSIC && isFullVolumeDevice(device)) {
+            flags &= ~AudioManager.FLAG_SHOW_UI;
         }
         mVolumeController.postVolumeChanged(streamType, flags);
     }
