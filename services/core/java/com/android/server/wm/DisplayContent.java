@@ -2922,7 +2922,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     DisplayCutout loadDisplayCutout(int displayWidth, int displayHeight) {
-        if (mDisplayPolicy == null) {
+        if (mDisplayPolicy == null || mInitialDisplayCutout == null) {
             return null;
         }
         return DisplayCutout.fromResourcesRectApproximation(
@@ -2931,7 +2931,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     RoundedCorners loadRoundedCorners(int displayWidth, int displayHeight) {
-        if (mDisplayPolicy == null) {
+        if (mDisplayPolicy == null || mInitialRoundedCorners == null) {
             return null;
         }
         return RoundedCorners.fromResources(
