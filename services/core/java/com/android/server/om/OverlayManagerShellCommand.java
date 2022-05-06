@@ -33,10 +33,20 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ShellCommand;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.TypedValue;
+import android.util.TypedXmlPullParser;
+import android.util.Xml;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -128,7 +138,8 @@ final class OverlayManagerShellCommand extends ShellCommand {
         out.println("    applying the current configuration and enabled overlays.");
         out.println("    For a more fine-grained alternative, use 'idmap2 lookup'.");
         out.println("  fabricate [--user USER_ID] [--target-name OVERLAYABLE] --target PACKAGE");
-        out.println("       --name NAME PACKAGE:TYPE/NAME ENCODED-TYPE-ID/TYPE-NAME ENCODED-VALUE");
+        out.println("            --name NAME [--file FILE] ");
+        out.println("            PACKAGE:TYPE/NAME ENCODED-TYPE-ID/TYPE-NAME ENCODED-VALUE");
         out.println("    Create an overlay from a single resource. Caller must be root. Example:");
         out.println("      fabricate --target android --name LighterGray \\");
         out.println("                android:color/lighter_gray 0x1c 0xffeeeeee");
@@ -243,6 +254,7 @@ final class OverlayManagerShellCommand extends ShellCommand {
         String targetPackage = "";
         String targetOverlayable = "";
         String name = "";
+        String filename = null;
         String opt;
         while ((opt = getNextOption()) != null) {
             switch (opt) {
@@ -257,6 +269,9 @@ final class OverlayManagerShellCommand extends ShellCommand {
                     break;
                 case "--name":
                     name = getNextArgRequired();
+                    break;
+                case "--file":
+                    filename = getNextArgRequired();
                     break;
                 default:
                     err.println("Error: Unknown option: " + opt);
@@ -273,44 +288,115 @@ final class OverlayManagerShellCommand extends ShellCommand {
             err.println("Error: Missing required arg '--target'");
             return 1;
         }
-
-        final String resourceName = getNextArgRequired();
-        final String typeStr = getNextArgRequired().toLowerCase();
-        final int type;
-        if (TYPE_MAP.containsKey(typeStr)) {
-            type = TYPE_MAP.get(typeStr);
-        } else {
-            if (typeStr.startsWith("0x")) {
-                type = Integer.parseUnsignedInt(typeStr.substring(2), 16);
-            } else {
-                type = Integer.parseUnsignedInt(typeStr);
-            }
-        }
-        final String dataStr = getNextArgRequired();
-        final int data;
-        if (dataStr.startsWith("0x")) {
-            data = Integer.parseUnsignedInt(dataStr.substring(2), 16);
-        } else {
-            data = Integer.parseUnsignedInt(dataStr);
-        }
-
-        final PackageManager pm = mContext.getPackageManager();
-        if (pm == null) {
-            err.println("Error: failed to get package manager");
+        if (filename != null && getRemainingArgsCount() > 0) {
+            err.println(
+                    "Error: When passing --file don't pass resource name, type, and value as well");
             return 1;
         }
-
         final String overlayPackageName = "com.android.shell";
-        final FabricatedOverlay overlay = new FabricatedOverlay.Builder(
+        FabricatedOverlay.Builder overlayBuilder = new FabricatedOverlay.Builder(
                 overlayPackageName, name, targetPackage)
-                .setTargetOverlayable(targetOverlayable)
-                .setResourceValue(resourceName, type, data)
-                .build();
+                .setTargetOverlayable(targetOverlayable);
+        if (filename != null) {
+            int result = addOverlayValuesFromXml(overlayBuilder, targetPackage, filename);
+            if (result != 0) {
+                return result;
+            }
+        } else {
+            final String resourceName = getNextArgRequired();
+            final String typeStr = getNextArgRequired();
+            final String strData = getNextArgRequired();
+            addOverlayValue(overlayBuilder, resourceName, typeStr, strData);
+        }
 
         mInterface.commit(new OverlayManagerTransaction.Builder()
-                .registerFabricatedOverlay(overlay)
-                .build());
+                .registerFabricatedOverlay(overlayBuilder.build()).build());
         return 0;
+    }
+
+    private int addOverlayValuesFromXml(
+            FabricatedOverlay.Builder overlayBuilder, String targetPackage, String filename) {
+        final PrintWriter err = getErrPrintWriter();
+        File file = new File(filename);
+        if (!file.exists()) {
+            err.println("Error: File does not exist");
+            return 1;
+        }
+        if (!file.canRead()) {
+            err.println("Error: File is unreadable");
+            return 1;
+        }
+        try (FileInputStream fis = new FileInputStream(file)) {
+            TypedXmlPullParser parser = Xml.resolvePullParser(fis);
+            int type;
+            while ((type = parser.next()) != XmlPullParser.START_TAG
+                    && type != XmlPullParser.END_DOCUMENT) {
+                continue;
+            }
+            parser.require(XmlPullParser.START_TAG, null, "overlay");
+            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
+                if (type == XmlPullParser.START_TAG) {
+                    String tagName = parser.getName();
+                    if (!tagName.equals("item")) {
+                        err.println(TextUtils.formatSimple("Error: Unexpected tag: %s at line %d",
+                                tagName, parser.getLineNumber()));
+                    } else if (!parser.isEmptyElementTag()) {
+                        err.println("Error: item tag must be empty");
+                        return 1;
+                    } else {
+                        String target = parser.getAttributeValue(null, "target");
+                        if (TextUtils.isEmpty(target)) {
+                            err.println(
+                                    "Error: target name missing at line " + parser.getLineNumber());
+                            return 1;
+                        }
+                        int index = target.indexOf('/');
+                        if (index < 0) {
+                            err.println("Error: target malformed, missing '/' at line "
+                                    + parser.getLineNumber());
+                            return 1;
+                        }
+                        String overlayType = target.substring(0, index);
+                        String value = parser.getAttributeValue(null, "value");
+                        if (TextUtils.isEmpty(value)) {
+                            err.println("Error: value missing at line " + parser.getLineNumber());
+                            return 1;
+                        }
+                        addOverlayValue(overlayBuilder, targetPackage + ':' + target,
+                                overlayType, value);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return 1;
+        } catch (XmlPullParserException e) {
+            e.printStackTrace();
+            return 1;
+        }
+        return 0;
+    }
+
+    private void addOverlayValue(FabricatedOverlay.Builder overlayBuilder,
+            String resourceName, String typeString, String valueString) {
+        final int type;
+        typeString = typeString.toLowerCase(Locale.getDefault());
+        if (TYPE_MAP.containsKey(typeString)) {
+            type = TYPE_MAP.get(typeString);
+        } else {
+            if (typeString.startsWith("0x")) {
+                type = Integer.parseUnsignedInt(typeString.substring(2), 16);
+            } else {
+                type = Integer.parseUnsignedInt(typeString);
+            }
+        }
+        final int intData;
+        if (valueString.startsWith("0x")) {
+            intData = Integer.parseUnsignedInt(valueString.substring(2), 16);
+        } else {
+            intData = Integer.parseUnsignedInt(valueString);
+        }
+        overlayBuilder.setResourceValue(resourceName, type, intData);
     }
 
     private int runEnableExclusive() throws RemoteException {
