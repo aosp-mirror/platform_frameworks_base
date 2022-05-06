@@ -486,8 +486,7 @@ public class SpatializerHelper {
 
         for (SADeviceState deviceState : mSADevices) {
             if (deviceType == deviceState.mDeviceType
-                    && (wireless && ada.getAddress().equals(deviceState.mDeviceAddress))
-                    || !wireless) {
+                    && (!wireless || ada.getAddress().equals(deviceState.mDeviceAddress))) {
                 isInList = true;
                 if (forceEnable) {
                     deviceState.mEnabled = true;
@@ -511,8 +510,7 @@ public class SpatializerHelper {
 
         for (SADeviceState deviceState : mSADevices) {
             if (deviceType == deviceState.mDeviceType
-                    && (wireless && ada.getAddress().equals(deviceState.mDeviceAddress))
-                    || !wireless) {
+                    && (!wireless || ada.getAddress().equals(deviceState.mDeviceAddress))) {
                 deviceState.mEnabled = false;
                 break;
             }
