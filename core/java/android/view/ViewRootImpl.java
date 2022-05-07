@@ -590,7 +590,6 @@ public final class ViewRootImpl implements ViewParent,
     @Nullable
     int mContentCaptureEnabled = CONTENT_CAPTURE_ENABLED_NOT_CHECKED;
     boolean mPerformContentCapture;
-    boolean mPerformAutoFill;
 
 
     boolean mReportNextDraw;
@@ -605,6 +604,7 @@ public final class ViewRootImpl implements ViewParent,
     int mSyncSeqId = 0;
     int mLastSyncSeqId = 0;
 
+    private boolean mUpdateSurfaceNeeded;
     boolean mFullRedrawNeeded;
     boolean mNewSurfaceNeeded;
     boolean mForceNextWindowRelayout;
@@ -858,6 +858,28 @@ public final class ViewRootImpl implements ViewParent,
      */
     private Bundle mRelayoutBundle = new Bundle();
 
+    private static volatile boolean sAnrReported = false;
+    static BLASTBufferQueue.TransactionHangCallback sTransactionHangCallback =
+        new BLASTBufferQueue.TransactionHangCallback() {
+            @Override
+            public void onTransactionHang(boolean isGPUHang) {
+                if (isGPUHang && !sAnrReported) {
+                    sAnrReported = true;
+                    try {
+                        ActivityManager.getService().appNotResponding(
+                            "Buffer processing hung up due to stuck fence. Indicates GPU hang");
+                    } catch (RemoteException e) {
+                        // We asked the system to crash us, but the system
+                        // already crashed. Unfortunately things may be
+                        // out of control.
+                    }
+                } else {
+                    // TODO: Do something with this later. For now we just ANR
+                    // in dequeue buffer later like we always have.
+                }
+            }
+        };
+
     private String mTag = TAG;
 
     public ViewRootImpl(Context context, Display display) {
@@ -892,7 +914,6 @@ public final class ViewRootImpl implements ViewParent,
         mPreviousTransparentRegion = new Region();
         mFirst = true; // true for the first time the view is added
         mPerformContentCapture = true; // also true for the first time the view is added
-        mPerformAutoFill = true;
         mAdded = false;
         mAttachInfo = new View.AttachInfo(mWindowSession, mWindow, display, this, mHandler, this,
                 context);
@@ -2102,6 +2123,7 @@ public final class ViewRootImpl implements ViewParent,
         }
         mBlastBufferQueue = new BLASTBufferQueue(mTag, mSurfaceControl,
                 mSurfaceSize.x, mSurfaceSize.y, mWindowAttributes.format);
+        mBlastBufferQueue.setTransactionHangCallback(sTransactionHangCallback);
         Surface blastSurface = mBlastBufferQueue.createSurface();
         // Only call transferFrom if the surface has changed to prevent inc the generation ID and
         // causing EGL resources to be recreated.
@@ -2979,6 +3001,8 @@ public final class ViewRootImpl implements ViewParent,
                             !mFirst, INVALID_DISPLAY /* same display */);
                     updatedConfiguration = true;
                 }
+                final boolean updateSurfaceNeeded = mUpdateSurfaceNeeded;
+                mUpdateSurfaceNeeded = false;
 
                 surfaceSizeChanged = false;
                 if (!mLastSurfaceSize.equals(mSurfaceSize)) {
@@ -3057,7 +3081,7 @@ public final class ViewRootImpl implements ViewParent,
                     if (isHardwareEnabled()) {
                         mAttachInfo.mThreadedRenderer.destroy();
                     }
-                } else if ((surfaceReplaced || surfaceSizeChanged)
+                } else if ((surfaceReplaced || surfaceSizeChanged || updateSurfaceNeeded)
                         && mSurfaceHolder == null
                         && mAttachInfo.mThreadedRenderer != null
                         && mSurface.isValid()) {
@@ -4308,18 +4332,6 @@ public final class ViewRootImpl implements ViewParent,
         if (mPerformContentCapture) {
             performContentCaptureInitialReport();
         }
-
-        if (mPerformAutoFill) {
-            notifyEnterForAutoFillIfNeeded();
-        }
-    }
-
-    private void notifyEnterForAutoFillIfNeeded() {
-        mPerformAutoFill = false;
-        final AutofillManager afm = getAutofillManager();
-        if (afm != null) {
-            afm.notifyViewEnteredForActivityStarted(mView);
-        }
     }
 
     /**
@@ -5211,6 +5223,18 @@ public final class ViewRootImpl implements ViewParent,
             throw new IllegalArgumentException("No merged config provided.");
         }
 
+        final int lastRotation = mLastReportedMergedConfiguration.getMergedConfiguration()
+                .windowConfiguration.getRotation();
+        final int newRotation = mergedConfiguration.getMergedConfiguration()
+                .windowConfiguration.getRotation();
+        if (lastRotation != newRotation) {
+            // Trigger ThreadedRenderer#updateSurface() if the surface control doesn't change.
+            // Because even if the actual surface size is not changed, e.g. flip 180 degrees,
+            // the buffers may still have content in previous rotation. And the next draw may
+            // not update all regions, that causes some afterimages to flicker.
+            mUpdateSurfaceNeeded = true;
+        }
+
         Configuration globalConfig = mergedConfiguration.getGlobalConfiguration();
         final Configuration overrideConfig = mergedConfiguration.getOverrideConfiguration();
         if (DEBUG_CONFIGURATION) Log.v(mTag,
@@ -6086,6 +6110,28 @@ public final class ViewRootImpl implements ViewParent,
 
         @Override
         protected int onProcess(QueuedInputEvent q) {
+            if (q.mEvent instanceof KeyEvent) {
+                final KeyEvent event = (KeyEvent) q.mEvent;
+
+                // If the new back dispatch is enabled, intercept KEYCODE_BACK before it reaches the
+                // view tree or IME, and invoke the appropriate {@link OnBackInvokedCallback}.
+                if (isBack(event)
+                        && mContext != null
+                        && WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(mContext)) {
+                    OnBackInvokedCallback topCallback =
+                            getOnBackInvokedDispatcher().getTopCallback();
+                    if (event.getAction() == KeyEvent.ACTION_UP) {
+                        if (topCallback != null) {
+                            topCallback.onBackInvoked();
+                            return FINISH_HANDLED;
+                        }
+                    } else {
+                        // Drop other actions such as {@link KeyEvent.ACTION_DOWN}.
+                        return FINISH_NOT_HANDLED;
+                    }
+                }
+            }
+
             if (mInputQueue != null && q.mEvent instanceof KeyEvent) {
                 mInputQueue.sendInputEvent(q.mEvent, q, true, this);
                 return DEFER;
@@ -6435,24 +6481,6 @@ public final class ViewRootImpl implements ViewParent,
 
             if (mUnhandledKeyManager.preViewDispatch(event)) {
                 return FINISH_HANDLED;
-            }
-
-            // If the new back dispatch is enabled, intercept KEYCODE_BACK before it reaches the
-            // view tree and invoke the appropriate {@link OnBackInvokedCallback}.
-            if (isBack(event)
-                    && mContext != null
-                    && WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(mContext)) {
-                OnBackInvokedCallback topCallback =
-                        getOnBackInvokedDispatcher().getTopCallback();
-                if (event.getAction() == KeyEvent.ACTION_UP) {
-                    if (topCallback != null) {
-                        topCallback.onBackInvoked();
-                        return FINISH_HANDLED;
-                    }
-                } else {
-                    // Drop other actions such as {@link KeyEvent.ACTION_DOWN}.
-                    return FINISH_NOT_HANDLED;
-                }
             }
 
             // Deliver the key to the view hierarchy.

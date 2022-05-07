@@ -104,6 +104,7 @@ private:
 
     struct Locked {
         Presentation presentation;
+        int32_t pointerDisplayId = ADISPLAY_ID_NONE;
 
         std::vector<gui::DisplayInfo> mDisplayInfos;
         std::unordered_map<int32_t /* displayId */, TouchSpotController> spotControllers;

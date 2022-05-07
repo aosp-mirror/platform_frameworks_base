@@ -65,7 +65,7 @@ import static android.provider.Settings.System.FONT_SCALE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_LAUNCHER_CLEAR_SNAPSHOT;
-import static android.view.WindowManager.TRANSIT_WAKE;
+import static android.view.WindowManager.TRANSIT_PIP;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS;
@@ -238,6 +238,7 @@ import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.policy.AttributeCache;
 import com.android.internal.policy.KeyguardDismissCallback;
+import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
@@ -3464,6 +3465,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             return false;
         }
 
+        // Create a transition for this pip entry. We guarantee that this gets its own transition
+        // by queueing this transition on SyncEngine. This is shared by all the entry paths.
+        final Transition transition = getTransitionController().isShellTransitionsEnabled()
+                ? new Transition(TRANSIT_PIP, 0 /* flags */,
+                        getTransitionController(), mWindowManager.mSyncEngine)
+                : null;
+
         final Runnable enterPipRunnable = () -> {
             synchronized (mGlobalLock) {
                 if (r.getParent() == null) {
@@ -3472,7 +3480,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
                 r.setPictureInPictureParams(params);
                 mRootWindowContainer.moveActivityToPinnedRootTask(r,
-                        null /* launchIntoPipHostActivity */, "enterPictureInPictureMode");
+                        null /* launchIntoPipHostActivity */, "enterPictureInPictureMode",
+                        transition);
                 final Task task = r.getTask();
                 // Continue the pausing process after entering pip.
                 if (task.getPausingActivity() == r) {
@@ -3489,12 +3498,36 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mActivityClientController.dismissKeyguard(r.token, new KeyguardDismissCallback() {
                 @Override
                 public void onDismissSucceeded() {
-                    mH.post(enterPipRunnable);
+                    if (mWindowManager.mSyncEngine.hasActiveSync()) {
+                        ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+                                "Creating Pending Pip-Enter: %s", transition);
+                        mWindowManager.mSyncEngine.queueSyncSet(
+                                () -> getTransitionController().moveToCollecting(transition),
+                                enterPipRunnable);
+                    } else {
+                        // Move to collecting immediately to "claim" the sync-engine for this
+                        // transition.
+                        if (transition != null) {
+                            getTransitionController().moveToCollecting(transition);
+                        }
+                        mH.post(enterPipRunnable);
+                    }
                 }
             }, null /* message */);
         } else {
             // Enter picture in picture immediately otherwise
-            enterPipRunnable.run();
+            if (mWindowManager.mSyncEngine.hasActiveSync()) {
+                ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+                        "Creating Pending Pip-Enter: %s", transition);
+                mWindowManager.mSyncEngine.queueSyncSet(
+                        () -> getTransitionController().moveToCollecting(transition),
+                        enterPipRunnable);
+            } else {
+                if (transition != null) {
+                    getTransitionController().moveToCollecting(transition);
+                }
+                enterPipRunnable.run();
+            }
         }
         return true;
     }

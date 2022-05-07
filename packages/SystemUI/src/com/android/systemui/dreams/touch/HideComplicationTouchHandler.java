@@ -25,6 +25,7 @@ import android.view.View;
 
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.complication.Complication;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.touch.TouchInsetManager;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -50,6 +51,7 @@ public class HideComplicationTouchHandler implements DreamTouchHandler {
 
     private final Complication.VisibilityController mVisibilityController;
     private final int mRestoreTimeout;
+    private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private final Handler mHandler;
     private final Executor mExecutor;
     private final TouchInsetManager mTouchInsetManager;
@@ -65,10 +67,12 @@ public class HideComplicationTouchHandler implements DreamTouchHandler {
     HideComplicationTouchHandler(Complication.VisibilityController visibilityController,
             @Named(COMPLICATIONS_RESTORE_TIMEOUT) int restoreTimeout,
             TouchInsetManager touchInsetManager,
+            StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             @Main Executor executor,
             @Main Handler handler) {
         mVisibilityController = visibilityController;
         mRestoreTimeout = restoreTimeout;
+        mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mHandler = handler;
         mTouchInsetManager = touchInsetManager;
         mExecutor = executor;
@@ -80,10 +84,13 @@ public class HideComplicationTouchHandler implements DreamTouchHandler {
             Log.d(TAG, "onSessionStart");
         }
 
+        final boolean bouncerShowing = mStatusBarKeyguardViewManager.isBouncerShowing();
+
         // If other sessions are interested in this touch, do not fade out elements.
-        if (session.getActiveSessionCount() > 1) {
+        if (session.getActiveSessionCount() > 1 || bouncerShowing) {
             if (DEBUG) {
-                Log.d(TAG, "multiple active touch sessions, not fading");
+                Log.d(TAG, "not fading. Active session count: " + session.getActiveSessionCount()
+                        + ". Bouncer showing: " + bouncerShowing);
             }
             session.pop();
             return;
