@@ -119,7 +119,7 @@ public class Installer extends SystemService {
             IInstalld.FLAG_CLEAR_APP_DATA_KEEP_ART_PROFILES;
 
     private final boolean mIsolated;
-
+    private volatile boolean mDeferSetFirstBoot;
     private volatile IInstalld mInstalld;
     private volatile Object mWarnIfHeld;
 
@@ -171,11 +171,21 @@ public class Installer extends SystemService {
             mInstalld = IInstalld.Stub.asInterface(binder);
             try {
                 invalidateMounts();
+                executeDeferredActions();
             } catch (InstallerException ignored) {
             }
         } else {
             Slog.w(TAG, "installd not found; trying again");
             BackgroundThread.getHandler().postDelayed(this::connect, DateUtils.SECOND_IN_MILLIS);
+        }
+    }
+
+    /**
+     * Perform any deferred actions on mInstalld while the connection could not be made.
+     */
+    private void executeDeferredActions() throws InstallerException {
+        if (mDeferSetFirstBoot) {
+            setFirstBoot();
         }
     }
 
@@ -291,8 +301,15 @@ public class Installer extends SystemService {
             return;
         }
         try {
-            mInstalld.setFirstBoot();
-        } catch (RemoteException e) {
+            // mInstalld might be null if the connection could not be established.
+            if (mInstalld != null) {
+                mInstalld.setFirstBoot();
+            } else {
+                // if it is null while trying to set the first boot, set a flag to try and set the
+                // first boot when the connection is eventually established
+                mDeferSetFirstBoot = true;
+            }
+        } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
