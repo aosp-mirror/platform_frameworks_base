@@ -143,8 +143,11 @@ public abstract class TvPipModule {
     @Provides
     static TvPipNotificationController provideTvPipNotificationController(Context context,
             PipMediaController pipMediaController,
+            PipParamsChangedForwarder pipParamsChangedForwarder,
+            TvPipBoundsState tvPipBoundsState,
             @ShellMainThread Handler mainHandler) {
-        return new TvPipNotificationController(context, pipMediaController, mainHandler);
+        return new TvPipNotificationController(context, pipMediaController,
+                pipParamsChangedForwarder, tvPipBoundsState, mainHandler);
     }
 
     @WMSingleton
