@@ -485,6 +485,14 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         if (deviceFilterPairs.isEmpty()) return;
 
         mSelectedDevice = requireNonNull(deviceFilterPairs.get(0));
+        // No need to show user consent dialog if it is a singleDevice
+        // and isSkipPrompt(true) AssociationRequest.
+        // See AssociationRequestsProcessor#mayAssociateWithoutPrompt.
+        if (mRequest.isSkipPrompt()) {
+            mSingleDeviceSpinner.setVisibility(View.GONE);
+            onUserSelectedDevice(mSelectedDevice);
+            return;
+        }
 
         final String deviceName = mSelectedDevice.getDisplayName();
         mRequest.setDisplayName(deviceName);
