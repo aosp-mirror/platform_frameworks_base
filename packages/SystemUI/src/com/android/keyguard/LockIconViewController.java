@@ -188,6 +188,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     protected void onViewAttached() {
         updateIsUdfpsEnrolled();
         updateConfiguration();
+        updateLockIconLocation();
         updateKeyguardShowing();
         mUserUnlockedWithBiometric = false;
 
@@ -340,20 +341,17 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mHeightPixels = bounds.bottom;
         mBottomPaddingPx = getResources().getDimensionPixelSize(R.dimen.lock_icon_margin_bottom);
 
-        final int defaultPaddingPx =
-                getResources().getDimensionPixelSize(R.dimen.lock_icon_padding);
-        mScaledPaddingPx = (int) (defaultPaddingPx * mAuthController.getScaleFactor());
-
         mUnlockedLabel = mView.getContext().getResources().getString(
                 R.string.accessibility_unlock_button);
         mLockedLabel = mView.getContext()
                 .getResources().getString(R.string.accessibility_lock_icon);
-
-        updateLockIconLocation();
     }
 
     private void updateLockIconLocation() {
         if (mUdfpsSupported) {
+            final int defaultPaddingPx =
+                    getResources().getDimensionPixelSize(R.dimen.lock_icon_padding);
+            mScaledPaddingPx = (int) (defaultPaddingPx * mAuthController.getScaleFactor());
             mView.setCenterLocation(mAuthController.getUdfpsLocation(),
                     mAuthController.getUdfpsRadius(), mScaledPaddingPx);
         } else {
@@ -362,8 +360,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                         mHeightPixels - mBottomPaddingPx - sLockIconRadiusPx),
                         sLockIconRadiusPx, mScaledPaddingPx);
         }
-
-        mView.getHitRect(mSensorTouchLocation);
     }
 
     @Override
@@ -386,6 +382,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         pw.println("  mCanDismissLockScreen: " + mCanDismissLockScreen);
         pw.println("  mStatusBarState: " + StatusBarState.toString(mStatusBarState));
         pw.println("  mInterpolatedDarkAmount: " + mInterpolatedDarkAmount);
+        pw.println("  mSensorTouchLocation: " + mSensorTouchLocation);
 
         if (mView != null) {
             mView.dump(pw, args);
@@ -672,6 +669,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     }
 
     private boolean inLockIconArea(MotionEvent event) {
+        mView.getHitRect(mSensorTouchLocation);
         return mSensorTouchLocation.contains((int) event.getX(), (int) event.getY())
                 && mView.getVisibility() == View.VISIBLE;
     }
@@ -692,6 +690,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mExecutor.execute(() -> {
             updateIsUdfpsEnrolled();
             updateConfiguration();
+            updateLockIconLocation();
         });
     }
 
@@ -704,6 +703,11 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         @Override
         public void onEnrollmentsChanged() {
             updateUdfpsConfig();
+        }
+
+        @Override
+        public void onUdfpsLocationChanged() {
+            updateLockIconLocation();
         }
     };
 
