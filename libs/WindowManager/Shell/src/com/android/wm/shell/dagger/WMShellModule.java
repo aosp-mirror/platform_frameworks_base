@@ -51,6 +51,7 @@ import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
+import com.android.wm.shell.pip.PipAppOpsListener;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipMediaController;
@@ -63,7 +64,6 @@ import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.PipTransitionState;
 import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.pip.phone.PhonePipMenuController;
-import com.android.wm.shell.pip.phone.PipAppOpsListener;
 import com.android.wm.shell.pip.phone.PipController;
 import com.android.wm.shell.pip.phone.PipMotionHelper;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
@@ -323,6 +323,14 @@ public class WMShellModule {
         return new PipTransition(context, pipBoundsState, pipTransitionState, pipMenuController,
                 pipBoundsAlgorithm, pipAnimationController, transitions, shellTaskOrganizer,
                 pipSurfaceTransactionHelper, splitScreenOptional);
+    }
+
+    @WMSingleton
+    @Provides
+    static PipAppOpsListener providePipAppOpsListener(Context context,
+            PipTouchHandler pipTouchHandler,
+            @ShellMainThread ShellExecutor mainExecutor) {
+        return new PipAppOpsListener(context, pipTouchHandler.getMotionHelper(), mainExecutor);
     }
 
     @WMSingleton

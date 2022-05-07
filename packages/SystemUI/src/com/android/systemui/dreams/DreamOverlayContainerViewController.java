@@ -183,22 +183,22 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
     }
 
     private void updateBurnInOffsets() {
-        int burnInOffset = mMaxBurnInOffset;
-
         // Make sure the offset starts at zero, to avoid a big jump in the overlay when it first
         // appears.
-        long millisSinceStart = System.currentTimeMillis() - mJitterStartTimeMillis;
+        final long millisSinceStart = System.currentTimeMillis() - mJitterStartTimeMillis;
+        final int burnInOffset;
         if (millisSinceStart < mMillisUntilFullJitter) {
             float lerpAmount = (float) millisSinceStart / (float) mMillisUntilFullJitter;
-            burnInOffset = Math.round(MathUtils.lerp(0f, burnInOffset, lerpAmount));
+            burnInOffset = Math.round(MathUtils.lerp(0f, mMaxBurnInOffset, lerpAmount));
+        } else {
+            burnInOffset = mMaxBurnInOffset;
         }
 
         // These translation values change slowly, and the set translation methods are idempotent,
         // so no translation occurs when the values don't change.
-        int burnInOffsetX = getBurnInOffset(burnInOffset * 2, true)
-                - burnInOffset;
-        int burnInOffsetY = getBurnInOffset(burnInOffset * 2, false)
-                - burnInOffset;
+        final int halfBurnInOffset = burnInOffset / 2;
+        final int burnInOffsetX = getBurnInOffset(burnInOffset, true) - halfBurnInOffset;
+        final int burnInOffsetY = getBurnInOffset(burnInOffset, false) - halfBurnInOffset;
         mView.setTranslationX(burnInOffsetX);
         mView.setTranslationY(burnInOffsetY);
 

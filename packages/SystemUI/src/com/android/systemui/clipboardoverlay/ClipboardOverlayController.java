@@ -38,6 +38,7 @@ import android.annotation.MainThread;
 import android.app.RemoteAction;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -128,6 +129,8 @@ public class ClipboardOverlayController {
     private final View mClipboardPreview;
     private final ImageView mImagePreview;
     private final TextView mTextPreview;
+    private final TextView mHiddenTextPreview;
+    private final TextView mHiddenImagePreview;
     private final View mPreviewBorder;
     private final OverlayActionChip mEditChip;
     private final OverlayActionChip mRemoteCopyChip;
@@ -186,6 +189,8 @@ public class ClipboardOverlayController {
         mClipboardPreview = requireNonNull(mView.findViewById(R.id.clipboard_preview));
         mImagePreview = requireNonNull(mView.findViewById(R.id.image_preview));
         mTextPreview = requireNonNull(mView.findViewById(R.id.text_preview));
+        mHiddenTextPreview = requireNonNull(mView.findViewById(R.id.hidden_text_preview));
+        mHiddenImagePreview = requireNonNull(mView.findViewById(R.id.hidden_image_preview));
         mPreviewBorder = requireNonNull(mView.findViewById(R.id.preview_border));
         mEditChip = requireNonNull(mView.findViewById(R.id.edit_chip));
         mRemoteCopyChip = requireNonNull(mView.findViewById(R.id.remote_copy_chip));
@@ -270,21 +275,32 @@ public class ClipboardOverlayController {
             mExitAnimator.cancel();
         }
         reset();
+
+        boolean isSensitive = clipData != null && clipData.getDescription().getExtras() != null
+                && clipData.getDescription().getExtras()
+                .getBoolean(ClipDescription.EXTRA_IS_SENSITIVE);
         if (clipData == null || clipData.getItemCount() == 0) {
-            showTextPreview(mContext.getResources().getString(
-                    R.string.clipboard_overlay_text_copied));
+            showTextPreview(
+                    mContext.getResources().getString(R.string.clipboard_overlay_text_copied),
+                    mTextPreview);
         } else if (!TextUtils.isEmpty(clipData.getItemAt(0).getText())) {
             ClipData.Item item = clipData.getItemAt(0);
             if (item.getTextLinks() != null) {
                 AsyncTask.execute(() -> classifyText(clipData.getItemAt(0), clipSource));
             }
-            showEditableText(item.getText());
+            if (isSensitive) {
+                showEditableText(
+                        mContext.getResources().getString(R.string.clipboard_text_hidden), true);
+            } else {
+                showEditableText(item.getText(), false);
+            }
         } else if (clipData.getItemAt(0).getUri() != null) {
             // How to handle non-image URIs?
-            showEditableImage(clipData.getItemAt(0).getUri());
+            showEditableImage(clipData.getItemAt(0).getUri(), isSensitive);
         } else {
             showTextPreview(
-                    mContext.getResources().getString(R.string.clipboard_overlay_text_copied));
+                    mContext.getResources().getString(R.string.clipboard_overlay_text_copied),
+                    mTextPreview);
         }
         Intent remoteCopyIntent = getRemoteCopyIntent(clipData);
         // Only show remote copy if it's available.
@@ -406,15 +422,23 @@ public class ClipboardOverlayController {
         animateOut();
     }
 
-    private void showTextPreview(CharSequence text) {
-        mTextPreview.setVisibility(View.VISIBLE);
+    private void showSinglePreview(View v) {
+        mTextPreview.setVisibility(View.GONE);
         mImagePreview.setVisibility(View.GONE);
-        mTextPreview.setText(text.subSequence(0, Math.min(500, text.length())));
+        mHiddenTextPreview.setVisibility(View.GONE);
+        mHiddenImagePreview.setVisibility(View.GONE);
+        v.setVisibility(View.VISIBLE);
+    }
+
+    private void showTextPreview(CharSequence text, TextView textView) {
+        showSinglePreview(textView);
+        textView.setText(text.subSequence(0, Math.min(500, text.length())));
         mEditChip.setVisibility(View.GONE);
     }
 
-    private void showEditableText(CharSequence text) {
-        showTextPreview(text);
+    private void showEditableText(CharSequence text, boolean hidden) {
+        TextView textView = hidden ? mHiddenTextPreview : mTextPreview;
+        showTextPreview(text, textView);
         mEditChip.setVisibility(View.VISIBLE);
         mActionContainerBackground.setVisibility(View.VISIBLE);
         mEditChip.setAlpha(1f);
@@ -422,32 +446,36 @@ public class ClipboardOverlayController {
                 mContext.getString(R.string.clipboard_edit_text_description));
         View.OnClickListener listener = v -> editText();
         mEditChip.setOnClickListener(listener);
-        mTextPreview.setOnClickListener(listener);
+        textView.setOnClickListener(listener);
     }
 
-    private void showEditableImage(Uri uri) {
-        ContentResolver resolver = mContext.getContentResolver();
-        try {
-            int size = mContext.getResources().getDimensionPixelSize(R.dimen.overlay_x_scale);
-            // The width of the view is capped, height maintains aspect ratio, so allow it to be
-            // taller if needed.
-            Bitmap thumbnail = resolver.loadThumbnail(uri, new Size(size, size * 4), null);
-            mImagePreview.setImageBitmap(thumbnail);
-        } catch (IOException e) {
-            Log.e(TAG, "Thumbnail loading failed", e);
-            showTextPreview(
-                    mContext.getResources().getString(R.string.clipboard_overlay_text_copied));
-            return;
-        }
-        mTextPreview.setVisibility(View.GONE);
-        mImagePreview.setVisibility(View.VISIBLE);
+    private void showEditableImage(Uri uri, boolean isSensitive) {
         mEditChip.setAlpha(1f);
         mActionContainerBackground.setVisibility(View.VISIBLE);
         View.OnClickListener listener = v -> editImage(uri);
+        if (isSensitive) {
+            showSinglePreview(mHiddenImagePreview);
+            mHiddenImagePreview.setOnClickListener(listener);
+        } else {
+            showSinglePreview(mImagePreview);
+            ContentResolver resolver = mContext.getContentResolver();
+            try {
+                int size = mContext.getResources().getDimensionPixelSize(R.dimen.overlay_x_scale);
+                // The width of the view is capped, height maintains aspect ratio, so allow it to be
+                // taller if needed.
+                Bitmap thumbnail = resolver.loadThumbnail(uri, new Size(size, size * 4), null);
+                mImagePreview.setImageBitmap(thumbnail);
+            } catch (IOException e) {
+                Log.e(TAG, "Thumbnail loading failed", e);
+                showTextPreview(
+                        mContext.getResources().getString(R.string.clipboard_overlay_text_copied),
+                        mTextPreview);
+            }
+            mImagePreview.setOnClickListener(listener);
+        }
         mEditChip.setOnClickListener(listener);
         mEditChip.setContentDescription(
                 mContext.getString(R.string.clipboard_edit_image_description));
-        mImagePreview.setOnClickListener(listener);
     }
 
     private Intent getRemoteCopyIntent(ClipData clipData) {
