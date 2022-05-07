@@ -20,27 +20,17 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.ShellCommand;
 import android.os.TimestampedValue;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Objects;
 
 /**
  * A time signal from a manual (user provided) source.
  *
- * <p>{@code unixEpochTime} is the suggested time. The {@code unixEpochTime.value} is the number of
- * milliseconds elapsed since 1/1/1970 00:00:00 UTC. The {@code unixEpochTime.referenceTimeMillis}
- * is the value of the elapsed realtime clock when the {@code unixEpochTime.value} was established.
- * Note that the elapsed realtime clock is considered accurate but it is volatile, so time
- * suggestions cannot be persisted across device resets.
- *
- * <p>{@code debugInfo} contains debugging metadata associated with the suggestion. This is used to
- * record why the suggestion exists and how it was entered. This information exists only to aid in
- * debugging and therefore is used by {@link #toString()}, but it is not for use in detection
- * logic and is not considered in {@link #hashCode()} or {@link #equals(Object)}.
+ * <p>See {@link TimeSuggestionHelper} for property information.
  *
  * @hide
  */
@@ -49,7 +39,9 @@ public final class ManualTimeSuggestion implements Parcelable {
     public static final @NonNull Creator<ManualTimeSuggestion> CREATOR =
             new Creator<ManualTimeSuggestion>() {
                 public ManualTimeSuggestion createFromParcel(Parcel in) {
-                    return ManualTimeSuggestion.createFromParcel(in);
+                    TimeSuggestionHelper helper = TimeSuggestionHelper.handleCreateFromParcel(
+                            ManualTimeSuggestion.class, in);
+                    return new ManualTimeSuggestion(helper);
                 }
 
                 public ManualTimeSuggestion[] newArray(int size) {
@@ -57,23 +49,14 @@ public final class ManualTimeSuggestion implements Parcelable {
                 }
             };
 
-    @NonNull private final TimestampedValue<Long> mUnixEpochTime;
-    @Nullable private ArrayList<String> mDebugInfo;
+    @NonNull private final TimeSuggestionHelper mTimeSuggestionHelper;
 
     public ManualTimeSuggestion(@NonNull TimestampedValue<Long> unixEpochTime) {
-        mUnixEpochTime = Objects.requireNonNull(unixEpochTime);
-        Objects.requireNonNull(unixEpochTime.getValue());
+        mTimeSuggestionHelper = new TimeSuggestionHelper(ManualTimeSuggestion.class, unixEpochTime);
     }
 
-    private static ManualTimeSuggestion createFromParcel(Parcel in) {
-        TimestampedValue<Long> unixEpochTime =
-                in.readParcelable(null /* classLoader */, android.os.TimestampedValue.class);
-        ManualTimeSuggestion suggestion = new ManualTimeSuggestion(unixEpochTime);
-        @SuppressWarnings("unchecked")
-        ArrayList<String> debugInfo = (ArrayList<String>) in.readArrayList(
-                null /* classLoader */, java.lang.String.class);
-        suggestion.mDebugInfo = debugInfo;
-        return suggestion;
+    private ManualTimeSuggestion(@NonNull TimeSuggestionHelper helper) {
+        mTimeSuggestionHelper = Objects.requireNonNull(helper);
     }
 
     @Override
@@ -83,19 +66,17 @@ public final class ManualTimeSuggestion implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeParcelable(mUnixEpochTime, 0);
-        dest.writeList(mDebugInfo);
+        mTimeSuggestionHelper.handleWriteToParcel(dest, flags);
     }
 
     @NonNull
     public TimestampedValue<Long> getUnixEpochTime() {
-        return mUnixEpochTime;
+        return mTimeSuggestionHelper.getUnixEpochTime();
     }
 
     @NonNull
     public List<String> getDebugInfo() {
-        return mDebugInfo == null
-                ? Collections.emptyList() : Collections.unmodifiableList(mDebugInfo);
+        return mTimeSuggestionHelper.getDebugInfo();
     }
 
     /**
@@ -104,10 +85,7 @@ public final class ManualTimeSuggestion implements Parcelable {
      * {@link #equals(Object)} and {@link #hashCode()}.
      */
     public void addDebugInfo(String... debugInfos) {
-        if (mDebugInfo == null) {
-            mDebugInfo = new ArrayList<>();
-        }
-        mDebugInfo.addAll(Arrays.asList(debugInfos));
+        mTimeSuggestionHelper.addDebugInfo(debugInfos);
     }
 
     @Override
@@ -119,19 +97,28 @@ public final class ManualTimeSuggestion implements Parcelable {
             return false;
         }
         ManualTimeSuggestion that = (ManualTimeSuggestion) o;
-        return Objects.equals(mUnixEpochTime, that.mUnixEpochTime);
+        return mTimeSuggestionHelper.handleEquals(that.mTimeSuggestionHelper);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mUnixEpochTime);
+        return mTimeSuggestionHelper.hashCode();
     }
 
     @Override
     public String toString() {
-        return "ManualTimeSuggestion{"
-                + "mUnixEpochTime=" + mUnixEpochTime
-                + ", mDebugInfo=" + mDebugInfo
-                + '}';
+        return mTimeSuggestionHelper.handleToString();
+    }
+
+    /** @hide */
+    public static ManualTimeSuggestion parseCommandLineArg(@NonNull ShellCommand cmd)
+            throws IllegalArgumentException {
+        return new ManualTimeSuggestion(
+                TimeSuggestionHelper.handleParseCommandLineArg(ManualTimeSuggestion.class, cmd));
+    }
+
+    /** @hide */
+    public static void printCommandLineOpts(PrintWriter pw) {
+        TimeSuggestionHelper.handlePrintCommandLineOpts(pw, "Manual", ManualTimeSuggestion.class);
     }
 }
