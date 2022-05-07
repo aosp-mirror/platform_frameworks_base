@@ -377,6 +377,7 @@ public class Transitions implements RemoteCallable<Transitions> {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Invalid root leash (%s): %s",
                     transitionToken, info);
             t.apply();
+            finishT.apply();
             onAbort(transitionToken);
             return;
         }
@@ -400,6 +401,7 @@ public class Transitions implements RemoteCallable<Transitions> {
             }
             if (nonTaskChange && transferStartingWindow) {
                 t.apply();
+                finishT.apply();
                 // Treat this as an abort since we are bypassing any merge logic and effectively
                 // finishing immediately.
                 onAbort(transitionToken);
