@@ -609,12 +609,21 @@ public class NotifCollection implements Dumpable {
         }
         checkForReentrantCall();
 
+        NotificationEntry collectionEntry = getEntry(entry.getKey());
+        String logKey = logKey(entry);
+        String collectionEntryIs = collectionEntry == null ? "null"
+                : entry == collectionEntry ? "same" : "different";
+
+        if (entry != collectionEntry) {
+            // TODO: We should probably make this throw, but that's too risky right now
+            mLogger.logEntryBeingExtendedNotInCollection(entry, extender, collectionEntryIs);
+        }
+
         if (!entry.mLifetimeExtenders.remove(extender)) {
             throw mEulogizer.record(new IllegalStateException(
-                    String.format(
-                            "Cannot end lifetime extension for extender \"%s\" (%s)",
-                            extender.getName(),
-                            extender)));
+                    String.format("Cannot end lifetime extension for extender \"%s\""
+                                    + " of entry %s (collection entry is %s)",
+                            extender.getName(), logKey, collectionEntryIs)));
         }
 
         mLogger.logLifetimeExtensionEnded(
