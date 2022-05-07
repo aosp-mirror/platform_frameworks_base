@@ -209,12 +209,11 @@ public class BackAnimationControllerTest {
         createNavigationInfo(animationTarget, null, null,
                 BackNavigationInfo.TYPE_RETURN_TO_HOME, null);
 
-        // Check that back start is dispatched.
         doMotionEvent(MotionEvent.ACTION_DOWN, 0);
-        verify(mIOnBackInvokedCallback).onBackStarted();
 
-        // Check that back progress is dispatched.
+        // Check that back start and progress is dispatched when first move.
         doMotionEvent(MotionEvent.ACTION_MOVE, 100);
+        verify(mIOnBackInvokedCallback).onBackStarted();
         ArgumentCaptor<BackEvent> backEventCaptor = ArgumentCaptor.forClass(BackEvent.class);
         verify(mIOnBackInvokedCallback).onBackProgressed(backEventCaptor.capture());
         assertEquals(animationTarget, backEventCaptor.getValue().getDepartingAnimationTarget());

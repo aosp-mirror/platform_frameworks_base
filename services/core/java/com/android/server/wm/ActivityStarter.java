@@ -2732,8 +2732,8 @@ class ActivityStarter {
         intentActivity.getTaskFragment().clearLastPausedActivity();
         Task intentTask = intentActivity.getTask();
 
-        // Only update the target-root-task when it is not indicated.
         if (mTargetRootTask == null) {
+            // Update launch target task when it is not indicated.
             if (mSourceRecord != null && mSourceRecord.mLaunchRootTask != null) {
                 // Inherit the target-root-task from source to ensure trampoline activities will be
                 // launched into the same root task.
@@ -2741,6 +2741,17 @@ class ActivityStarter {
             } else {
                 mTargetRootTask = getOrCreateRootTask(mStartActivity, mLaunchFlags, intentTask,
                         mOptions);
+            }
+        } else {
+            // If a launch target indicated, and the matching task is already in the adjacent task
+            // of the launch target. Adjust to use the adjacent task as its launch target. So the
+            // existing task will be launched into the closer one and won't be reparent redundantly.
+            // TODO(b/231541706): Migrate the logic to wm-shell after having proper APIs to help
+            //  resolve target task without actually starting the activity.
+            final Task adjacentTargetTask = mTargetRootTask.getAdjacentTaskFragment() != null
+                    ? mTargetRootTask.getAdjacentTaskFragment().asTask() : null;
+            if (adjacentTargetTask != null && intentActivity.isDescendantOf(adjacentTargetTask)) {
+                mTargetRootTask = adjacentTargetTask;
             }
         }
 
@@ -2771,7 +2782,7 @@ class ActivityStarter {
                     intentActivity.setTaskToAffiliateWith(mSourceRecord.getTask());
                 }
 
-                if (mTargetRootTask == intentActivity.getRootTask()) {
+                if (intentActivity.isDescendantOf(mTargetRootTask)) {
                     // TODO(b/151572268): Figure out a better way to move tasks in above 2-levels
                     //  tasks hierarchies.
                     if (mTargetRootTask != intentTask
@@ -2818,19 +2829,6 @@ class ActivityStarter {
         mTargetRootTask = intentActivity.getRootTask();
         mSupervisor.handleNonResizableTaskIfNeeded(intentTask, WINDOWING_MODE_UNDEFINED,
                 mRootWindowContainer.getDefaultTaskDisplayArea(), mTargetRootTask);
-
-        // We need to check if there is a launch root task in TDA for this target root task.
-        // If it exist, we need to reparent target root task from TDA to launch root task.
-        final TaskDisplayArea tda = mTargetRootTask.getDisplayArea();
-        final Task launchRootTask = tda.getLaunchRootTask(mTargetRootTask.getWindowingMode(),
-                mTargetRootTask.getActivityType(), null /** options */, mSourceRootTask,
-                mLaunchFlags);
-        // If target root task is created by organizer, let organizer handle reparent itself.
-        if (!mTargetRootTask.mCreatedByOrganizer && launchRootTask != null
-                && launchRootTask != mTargetRootTask) {
-            mTargetRootTask.reparent(launchRootTask, POSITION_TOP);
-            mTargetRootTask = launchRootTask;
-        }
     }
 
     private void resumeTargetRootTaskIfNeeded() {

@@ -971,7 +971,8 @@ public class ChooserActivity extends ResolverActivity implements
             getChooserActivityLogger().logShareTargetSelected(
                     SELECTION_TYPE_COPY,
                     "",
-                    -1);
+                    -1,
+                    false);
 
             setResult(RESULT_OK);
             finish();
@@ -1155,7 +1156,8 @@ public class ChooserActivity extends ResolverActivity implements
                     getChooserActivityLogger().logShareTargetSelected(
                             SELECTION_TYPE_NEARBY,
                             "",
-                            -1);
+                            -1,
+                            false);
                     // Action bar is user-independent, always start as primary
                     safelyStartActivityAsUser(ti, getPersonalProfileUserHandle());
                     finish();
@@ -1177,7 +1179,8 @@ public class ChooserActivity extends ResolverActivity implements
                     getChooserActivityLogger().logShareTargetSelected(
                             SELECTION_TYPE_EDIT,
                             "",
-                            -1);
+                            -1,
+                            false);
                     // Action bar is user-independent, always start as primary
                     safelyStartActivityAsUser(ti, getPersonalProfileUserHandle());
                     finish();
@@ -1754,7 +1757,8 @@ public class ChooserActivity extends ResolverActivity implements
                             target.getComponentName().getPackageName()
                                     + target.getTitle().toString(),
                             mMaxHashSaltDays);
-                    directTargetAlsoRanked = getRankedPosition((SelectableTargetInfo) targetInfo);
+                    SelectableTargetInfo selectableTargetInfo = (SelectableTargetInfo) targetInfo;
+                    directTargetAlsoRanked = getRankedPosition(selectableTargetInfo);
 
                     if (mCallerChooserTargets != null) {
                         numCallerProvided = mCallerChooserTargets.length;
@@ -1762,7 +1766,8 @@ public class ChooserActivity extends ResolverActivity implements
                     getChooserActivityLogger().logShareTargetSelected(
                             SELECTION_TYPE_SERVICE,
                             targetInfo.getResolveInfo().activityInfo.processName,
-                            value
+                            value,
+                            selectableTargetInfo.isPinned()
                     );
                     break;
                 case ChooserListAdapter.TARGET_CALLER:
@@ -1773,7 +1778,8 @@ public class ChooserActivity extends ResolverActivity implements
                     getChooserActivityLogger().logShareTargetSelected(
                             SELECTION_TYPE_APP,
                             targetInfo.getResolveInfo().activityInfo.processName,
-                            value
+                            value,
+                            targetInfo.isPinned()
                     );
                     break;
                 case ChooserListAdapter.TARGET_STANDARD_AZ:
@@ -1784,7 +1790,8 @@ public class ChooserActivity extends ResolverActivity implements
                     getChooserActivityLogger().logShareTargetSelected(
                             SELECTION_TYPE_STANDARD,
                             targetInfo.getResolveInfo().activityInfo.processName,
-                            value
+                            value,
+                            false
                     );
                     break;
             }
