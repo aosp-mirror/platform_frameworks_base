@@ -3061,6 +3061,12 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
     },
+    "898260097": {
+      "message": "Creating Pending Pip-Enter: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
+    },
     "898863925": {
       "message": "Attempted to add QS dialog window with unknown token %s.  Aborting.",
       "level": "WARN",
