@@ -145,6 +145,11 @@ public class PipTransition extends PipTransitionController {
         if (destinationBounds != null) {
             mExitDestinationBounds.set(destinationBounds);
         }
+        final PipAnimationController.PipTransitionAnimator animator =
+                mPipAnimationController.getCurrentAnimator();
+        if (animator != null && animator.isRunning()) {
+            animator.cancel();
+        }
         mExitTransition = mTransitions.startTransition(type, out, this);
     }
 
