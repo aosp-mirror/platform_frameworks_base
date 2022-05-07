@@ -9695,6 +9695,40 @@ public final class Settings {
                 "active_unlock_on_biometric_fail";
 
         /**
+         * If active unlock triggers on biometric failures, include the following error codes
+         * as a biometric failure. See {@link android.hardware.biometrics.BiometricFaceConstants}.
+         * Error codes should be separated by a pipe. For example: "1|4|5". If active unlock
+         * should never trigger on any face errors, this should be set to an empty string.
+         * A null value will use the system default value (TIMEOUT).
+         * @hide
+         */
+        public static final String ACTIVE_UNLOCK_ON_FACE_ERRORS =
+                "active_unlock_on_face_errors";
+
+        /**
+         * If active unlock triggers on biometric failures, include the following acquired info
+         * as a "biometric failure". See {@link android.hardware.biometrics.BiometricFaceConstants}.
+         * Acquired codes should be separated by a pipe. For example: "1|4|5". If active unlock
+         * should never on trigger on any acquired info messages, this should be
+         * set to an empty string. A null value will use the system default value (none).
+         * @hide
+         */
+        public static final String ACTIVE_UNLOCK_ON_FACE_ACQUIRE_INFO =
+                "active_unlock_on_face_acquire_info";
+
+        /**
+         * If active unlock triggers on biometric failures, then also request active unlock on
+         * unlock intent when each setting (BiometricType) is the only biometric type enrolled.
+         * Biometric types should be separated by a pipe. For example: "0|3" or "0". If this
+         * setting should be disabled, then this should be set to an empty string. A null value
+         * will use the system default value (0 / None).
+         *   0 = None, 1 = Any face, 2 = Any fingerprint, 3 = Under display fingerprint
+         * @hide
+         */
+        public static final String ACTIVE_UNLOCK_ON_UNLOCK_INTENT_WHEN_BIOMETRIC_ENROLLED =
+                "active_unlock_on_unlock_intent_when_biometric_enrolled";
+
+        /**
          * Whether the assist gesture should be enabled.
          *
          * @hide
