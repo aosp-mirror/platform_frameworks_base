@@ -233,7 +233,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
 
     @Test
     public void hideSilentNotificationsPerUserSettingWithHighPriorityParent() {
-        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mStatusBarStateController.getCurrentOrUpcomingState()).thenReturn(KEYGUARD);
         mFakeSettings.putBool(Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, true);
         mFakeSettings.putBool(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, false);
         GroupEntry parent = new GroupEntryBuilder()
@@ -255,7 +255,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
 
     @Test
     public void hideSilentNotificationsPerUserSetting() {
-        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mStatusBarStateController.getCurrentOrUpcomingState()).thenReturn(KEYGUARD);
         mFakeSettings.putBool(Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, true);
         mFakeSettings.putBool(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, false);
         mEntry = new NotificationEntryBuilder()

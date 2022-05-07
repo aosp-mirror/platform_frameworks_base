@@ -55,10 +55,8 @@ public final class PermissionHelper {
     private final PermissionManagerServiceInternal mPmi;
     private final IPackageManager mPackageManager;
     private final IPermissionManager mPermManager;
-    // TODO (b/194833441): Remove this boolean (but keep the isMigrationEnabled() method)
-    //  when the migration is enabled
+    // TODO (b/194833441): Remove when the migration is enabled
     private final boolean mMigrationEnabled;
-    private final boolean mIsTv;
     private final boolean mForceUserSetOnUpgrade;
 
     public PermissionHelper(PermissionManagerServiceInternal pmi, IPackageManager packageManager,
@@ -69,17 +67,10 @@ public final class PermissionHelper {
         mPermManager = permManager;
         mMigrationEnabled = migrationEnabled;
         mForceUserSetOnUpgrade = forceUserSetOnUpgrade;
-        boolean isTv;
-        try {
-            isTv = mPackageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK, 0);
-        } catch (RemoteException e) {
-            isTv = false;
-        }
-        mIsTv = isTv;
     }
 
     public boolean isMigrationEnabled() {
-        return mMigrationEnabled && !mIsTv;
+        return mMigrationEnabled;
     }
 
     /**

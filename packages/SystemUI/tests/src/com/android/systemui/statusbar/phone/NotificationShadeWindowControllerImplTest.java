@@ -26,6 +26,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -308,5 +309,18 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
             verify(mWindowManager, never()).updateViewLayout(any(), any());
         });
         verify(mWindowManager).updateViewLayout(any(), any());
+    }
+
+    @Test
+    public void bouncerShowing_OrientationNoSensor() {
+        mNotificationShadeWindowController.setKeyguardShowing(true);
+        mNotificationShadeWindowController.setKeyguardOccluded(true);
+        mNotificationShadeWindowController.setBouncerShowing(true);
+        when(mKeyguardStateController.isKeyguardScreenRotationAllowed()).thenReturn(false);
+        mNotificationShadeWindowController.onConfigChanged(new Configuration());
+
+        verify(mWindowManager, atLeastOnce()).updateViewLayout(any(), mLayoutParameters.capture());
+        assertThat(mLayoutParameters.getValue().screenOrientation)
+                .isEqualTo(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
     }
 }

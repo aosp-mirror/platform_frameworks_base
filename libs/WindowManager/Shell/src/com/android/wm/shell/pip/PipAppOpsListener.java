@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.pip.phone;
+package com.android.wm.shell.pip;
 
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.OP_PICTURE_IN_PICTURE;
@@ -28,7 +28,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.util.Pair;
 
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.pip.PipUtils;
 
 public class PipAppOpsListener {
     private static final String TAG = PipAppOpsListener.class.getSimpleName();

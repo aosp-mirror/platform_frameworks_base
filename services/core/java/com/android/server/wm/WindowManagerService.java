@@ -118,6 +118,7 @@ import static com.android.server.wm.DisplayContent.IME_TARGET_CONTROL;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_OR_RECENT_TASKS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
@@ -3046,13 +3047,22 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+
     void cleanupRecentsAnimation(@RecentsAnimationController.ReorderMode int reorderMode) {
         if (mRecentsAnimationController != null) {
             final RecentsAnimationController controller = mRecentsAnimationController;
             mRecentsAnimationController = null;
             controller.cleanupAnimation(reorderMode);
-            // TODO(mult-display): currently only default display support recents animation.
-            getDefaultDisplayContentLocked().mAppTransition.updateBooster();
+            // TODO(multi-display): currently only default display support recents animation.
+            // Cancel any existing app transition animation running in the legacy transition
+            // framework.
+            final DisplayContent dc = getDefaultDisplayContentLocked();
+            dc.mAppTransition.freeze();
+            dc.forAllWindowContainers((wc) -> {
+                if (wc.isAnimating(TRANSITION, ANIMATION_TYPE_APP_TRANSITION)) {
+                    wc.cancelAnimation();
+                }
+            });
         }
     }
 
@@ -7194,18 +7204,42 @@ public class WindowManagerService extends IWindowManager.Stub
         private float mLatestMouseX;
         private float mLatestMouseY;
 
-        void updatePosition(float x, float y) {
+        /**
+         * The display that the pointer (mouse cursor) is currently shown on. This is updated
+         * directly by InputManagerService when the pointer display changes.
+         */
+        private int mPointerDisplayId = INVALID_DISPLAY;
+
+        /**
+         * Update the mouse cursor position as a result of a mouse movement.
+         * @return true if the position was successfully updated, false otherwise.
+         */
+        boolean updatePosition(int displayId, float x, float y) {
             synchronized (this) {
                 mLatestEventWasMouse = true;
+
+                if (displayId != mPointerDisplayId) {
+                    // The display of the position update does not match the display on which the
+                    // mouse pointer is shown, so do not update the position.
+                    return false;
+                }
                 mLatestMouseX = x;
                 mLatestMouseY = y;
+                return true;
+            }
+        }
+
+        void setPointerDisplayId(int displayId) {
+            synchronized (this) {
+                mPointerDisplayId = displayId;
             }
         }
 
         @Override
         public void onPointerEvent(MotionEvent motionEvent) {
             if (motionEvent.isFromSource(InputDevice.SOURCE_MOUSE)) {
-                updatePosition(motionEvent.getRawX(), motionEvent.getRawY());
+                updatePosition(motionEvent.getDisplayId(), motionEvent.getRawX(),
+                        motionEvent.getRawY());
             } else {
                 synchronized (this) {
                     mLatestEventWasMouse = false;
@@ -7215,6 +7249,7 @@ public class WindowManagerService extends IWindowManager.Stub
     };
 
     void updatePointerIcon(IWindow client) {
+        int pointerDisplayId;
         float mouseX, mouseY;
 
         synchronized(mMousePositionTracker) {
@@ -7223,6 +7258,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             mouseX = mMousePositionTracker.mLatestMouseX;
             mouseY = mMousePositionTracker.mLatestMouseY;
+            pointerDisplayId = mMousePositionTracker.mPointerDisplayId;
         }
 
         synchronized (mGlobalLock) {
@@ -7237,6 +7273,10 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             final DisplayContent displayContent = callingWin.getDisplayContent();
             if (displayContent == null) {
+                return;
+            }
+            if (pointerDisplayId != displayContent.getDisplayId()) {
+                // Do not let the pointer icon be updated by a window on a different display.
                 return;
             }
             WindowState windowUnderPointer =
@@ -7256,7 +7296,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
     void restorePointerIconLocked(DisplayContent displayContent, float latestX, float latestY) {
         // Mouse position tracker has not been getting updates while dragging, update it now.
-        mMousePositionTracker.updatePosition(latestX, latestY);
+        if (!mMousePositionTracker.updatePosition(
+                displayContent.getDisplayId(), latestX, latestY)) {
+            // The mouse position could not be updated, so ignore this request.
+            return;
+        }
 
         WindowState windowUnderPointer =
                 displayContent.getTouchableWinAtPointLocked(latestX, latestY);
@@ -7278,6 +7322,10 @@ public class WindowManagerService extends IWindowManager.Stub
             return new PointF(mMousePositionTracker.mLatestMouseX,
                     mMousePositionTracker.mLatestMouseY);
         }
+    }
+
+    void setMousePointerDisplayId(int displayId) {
+        mMousePositionTracker.setPointerDisplayId(displayId);
     }
 
     /**
@@ -8825,16 +8873,18 @@ public class WindowManagerService extends IWindowManager.Stub
                 WindowState newFocusTarget =  displayContent == null
                         ? null : displayContent.findFocusedWindow();
                 if (newFocusTarget == null) {
-                    ProtoLog.v(WM_DEBUG_FOCUS, "grantEmbeddedWindowFocus remove request for "
-                                    + "win=%s dropped since no candidate was found",
+                    t.setFocusedWindow(null, null, displayId).apply();
+                    ProtoLog.v(WM_DEBUG_FOCUS, "grantEmbeddedWindowFocus win=%s"
+                                    + " dropped focus so setting focus to null since no candidate"
+                                    + " was found",
                             embeddedWindow);
                     return;
                 }
-                t.requestFocusTransfer(newFocusTarget.mInputChannelToken, newFocusTarget.getName(),
-                        inputToken, embeddedWindow.toString(),
+                t.setFocusedWindow(newFocusTarget.mInputChannelToken, newFocusTarget.getName(),
                         displayId).apply();
+
                 EventLog.writeEvent(LOGTAG_INPUT_FOCUS,
-                        "Transfer focus request " + newFocusTarget,
+                        "Focus request " + newFocusTarget,
                         "reason=grantEmbeddedWindowFocus(false)");
             }
             ProtoLog.v(WM_DEBUG_FOCUS, "grantEmbeddedWindowFocus win=%s grantFocus=%s",
