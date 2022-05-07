@@ -56,7 +56,6 @@ import android.os.BatteryConsumer.Dimensions;
 import android.os.BatteryStatsInternal;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
-import android.os.Build;
 import android.os.PowerExemptionManager;
 import android.os.PowerExemptionManager.ReasonCode;
 import android.os.SystemClock;
@@ -97,7 +96,7 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
     static final boolean DEBUG_BACKGROUND_BATTERY_TRACKER = false;
 
     static final boolean DEBUG_BACKGROUND_BATTERY_TRACKER_VERBOSE =
-            DEBUG_BACKGROUND_BATTERY_TRACKER | Build.IS_DEBUGGABLE;
+            DEBUG_BACKGROUND_BATTERY_TRACKER | false;
 
     // As we don't support realtime per-UID battery usage stats yet, we're polling the stats
     // in a regular time basis.

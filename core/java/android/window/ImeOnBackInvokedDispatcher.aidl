@@ -1,8 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
-/* //device/apps/common/assets/res/any/dimens.xml
+/* //device/java/android/android/os/ParcelFileDescriptor.aidl
 **
-** Copyright 2006, The Android Open Source Project
+** Copyright 2022, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
@@ -16,10 +14,7 @@
 ** See the License for the specific language governing permissions and
 ** limitations under the License.
 */
--->
-<resources>
 
-    <!-- Overload default clock widget parameters -->
-    <dimen name="widget_big_font_size">88dp</dimen>
+package android.window;
 
-</resources>
+parcelable ImeOnBackInvokedDispatcher;

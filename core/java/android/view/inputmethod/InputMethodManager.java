@@ -91,6 +91,8 @@ import android.view.View;
 import android.view.ViewRootImpl;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.autofill.AutofillManager;
+import android.window.ImeOnBackInvokedDispatcher;
+import android.window.WindowOnBackInvokedDispatcher;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.DirectBootAwareness;
@@ -105,6 +107,7 @@ import com.android.internal.inputmethod.StartInputFlags;
 import com.android.internal.inputmethod.StartInputReason;
 import com.android.internal.inputmethod.UnbindReason;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
 import com.android.internal.view.IInputMethodManager;
 import com.android.internal.view.IInputMethodSession;
@@ -277,6 +280,21 @@ public final class InputMethodManager {
      * @see InputMethodSubtype#getMode()
      */
     private static final String SUBTYPE_MODE_VOICE = "voice";
+
+    /**
+     * Provide this to {@link IInputMethodManager#startInputOrWindowGainedFocus(
+     * int, IInputMethodClient, IBinder, int, int, int, EditorInfo, IInputContext, int)} to receive
+     * {@link android.window.OnBackInvokedCallback} registrations from IME.
+     */
+    private final ImeOnBackInvokedDispatcher mImeDispatcher =
+            new ImeOnBackInvokedDispatcher(Handler.getMain()) {
+        @Override
+        public WindowOnBackInvokedDispatcher getReceivingDispatcher() {
+            synchronized (mH) {
+                return mCurRootView != null ? mCurRootView.getOnBackInvokedDispatcher() : null;
+            }
+        }
+    };
 
     /**
      * Ensures that {@link #sInstance} becomes non-{@code null} for application that have directly
@@ -740,7 +758,8 @@ public final class InputMethodManager {
                             windowFlags,
                             null,
                             null, null,
-                            mCurRootView.mContext.getApplicationInfo().targetSdkVersion);
+                            mCurRootView.mContext.getApplicationInfo().targetSdkVersion,
+                            mImeDispatcher);
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
                 }
@@ -1403,6 +1422,20 @@ public final class InputMethodManager {
     }
 
     /**
+     * Returns {@code true} if currently selected IME supports Stylus handwriting.
+     * If the method returns {@code false}, {@link #startStylusHandwriting(View)} shouldn't be
+     * called and Stylus touch should continue as normal touch input.
+     * @see #startStylusHandwriting(View)
+     */
+    public boolean isStylusHandwritingAvailable() {
+        try {
+            return mService.isStylusHandwritingAvailable();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns the list of installed input methods for the specified user.
      *
      * @param userId user ID to query
@@ -1687,6 +1720,8 @@ public final class InputMethodManager {
             mServedConnecting = false;
             clearConnectionLocked();
         }
+        // Clear the back callbacks held by the ime dispatcher to avoid memory leaks.
+        mImeDispatcher.clear();
     }
 
     public void displayCompletions(View view, CompletionInfo[] completions) {
@@ -1992,10 +2027,13 @@ public final class InputMethodManager {
      * pointers will be {@code android.view.MotionEvent#FLAG_CANCELED} cancelled.
      *
      * If Stylus handwriting mode is not supported or cannot be fulfilled for any reason by IME,
-     * request will be ignored and Stylus touch will continue as normal touch input.
+     * request will be ignored and Stylus touch will continue as normal touch input. Ideally,
+     * {@link #isStylusHandwritingAvailable()} should be called first to determine if stylus
+     * handwriting is supported by IME.
      *
      * @param view the View for which stylus handwriting is requested. It and
      * {@link View#hasWindowFocus its window} must be {@link View#hasFocus focused}.
+     * @see #isStylusHandwritingAvailable()
      */
     public void startStylusHandwriting(@NonNull View view) {
         // Re-dispatch if there is a context mismatch.
@@ -2359,7 +2397,8 @@ public final class InputMethodManager {
                         softInputMode, windowFlags, tba, servedInputConnection,
                         servedInputConnection == null ? null
                                 : servedInputConnection.asIRemoteAccessibilityInputConnection(),
-                        view.getContext().getApplicationInfo().targetSdkVersion);
+                        view.getContext().getApplicationInfo().targetSdkVersion,
+                        mImeDispatcher);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

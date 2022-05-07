@@ -101,6 +101,7 @@ import android.view.BatchedInputEventReceiver.SimpleBatchedInputEventReceiver;
 import android.view.Choreographer;
 import android.view.Gravity;
 import android.view.InputChannel;
+import android.view.InputDevice;
 import android.view.InputEventReceiver;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -134,6 +135,9 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.window.ImeOnBackInvokedDispatcher;
+import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
 import android.window.WindowMetricsHelper;
 
 import com.android.internal.annotations.GuardedBy;
@@ -345,6 +349,9 @@ public class InputMethodService extends AbstractInputMethodService {
      * A circular buffer of size MAX_EVENTS_BUFFER in case IME is taking too long to add ink view.
      **/
     private RingBuffer<MotionEvent> mPendingEvents;
+    private ImeOnBackInvokedDispatcher mImeDispatcher;
+    private Boolean mBackCallbackRegistered = false;
+    private final OnBackInvokedCallback mCompatBackCallback = this::compatHandleBack;
 
     /**
      * Returns whether {@link InputMethodService} is responsible for rendering the back button and
@@ -798,7 +805,13 @@ public class InputMethodService extends AbstractInputMethodService {
         @Override
         public final void dispatchStartInputWithToken(@Nullable InputConnection inputConnection,
                 @NonNull EditorInfo editorInfo, boolean restarting,
-                @NonNull IBinder startInputToken, @InputMethodNavButtonFlags int navButtonFlags) {
+                @NonNull IBinder startInputToken, @InputMethodNavButtonFlags int navButtonFlags,
+                @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
+            mImeDispatcher = imeDispatcher;
+            if (mWindow != null) {
+                mWindow.getOnBackInvokedDispatcher().setImeOnBackInvokedDispatcher(
+                        imeDispatcher);
+            }
             mPrivOps.reportStartInputAsync(startInputToken);
             mNavigationBarController.onNavButtonFlagsChanged(navButtonFlags);
             if (restarting) {
@@ -1497,6 +1510,10 @@ public class InputMethodService extends AbstractInputMethodService {
                 Context.LAYOUT_INFLATER_SERVICE);
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.initSoftInputWindow");
         mWindow = new SoftInputWindow(this, mTheme, mDispatcherState);
+        if (mImeDispatcher != null) {
+            mWindow.getOnBackInvokedDispatcher()
+                    .setImeOnBackInvokedDispatcher(mImeDispatcher);
+        }
         mNavigationBarController.onSoftInputWindowCreated(mWindow);
         {
             final Window window = mWindow.getWindow();
@@ -1609,6 +1626,8 @@ public class InputMethodService extends AbstractInputMethodService {
             // when IME developers are doing something unsupported.
             InputMethodPrivilegedOperationsRegistry.remove(mToken);
         }
+        unregisterCompatOnBackInvokedCallback();
+        mImeDispatcher = null;
     }
 
     /**
@@ -2569,8 +2588,46 @@ public class InputMethodService extends AbstractInputMethodService {
         cancelImeSurfaceRemoval();
         mInShowWindow = false;
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        registerCompatOnBackInvokedCallback();
     }
 
+
+    /**
+     * Registers an {@link OnBackInvokedCallback} to handle back invocation when ahead-of-time
+     *  back dispatching is enabled. We keep the {@link KeyEvent#KEYCODE_BACK} based legacy code
+     *  around to handle back on older devices.
+     */
+    private void registerCompatOnBackInvokedCallback() {
+        if (mBackCallbackRegistered) {
+            return;
+        }
+        if (mWindow != null) {
+            mWindow.getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                    OnBackInvokedDispatcher.PRIORITY_DEFAULT, mCompatBackCallback);
+            mBackCallbackRegistered = true;
+        }
+    }
+
+    private void unregisterCompatOnBackInvokedCallback() {
+        if (!mBackCallbackRegistered) {
+            return;
+        }
+        if (mWindow != null) {
+            mWindow.getOnBackInvokedDispatcher()
+                    .unregisterOnBackInvokedCallback(mCompatBackCallback);
+            mBackCallbackRegistered = false;
+        }
+    }
+
+    private KeyEvent createBackKeyEvent(int action, boolean isTracking) {
+        final long when = SystemClock.uptimeMillis();
+        return new KeyEvent(when, when, action,
+                KeyEvent.KEYCODE_BACK, 0 /* repeat */, 0 /* metaState */,
+                KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /* scancode */,
+                KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY
+                        | (isTracking ? KeyEvent.FLAG_TRACKING : 0),
+                InputDevice.SOURCE_KEYBOARD);
+    }
 
     private boolean prepareWindow(boolean showInput) {
         boolean doShowInput = false;
@@ -2659,6 +2716,7 @@ public class InputMethodService extends AbstractInputMethodService {
         }
         mLastWasInFullscreenMode = mIsFullscreen;
         updateFullscreenMode();
+        unregisterCompatOnBackInvokedCallback();
     }
 
     /**
@@ -3806,4 +3864,14 @@ public class InputMethodService extends AbstractInputMethodService {
             proto.end(token);
         }
     };
+
+    private void compatHandleBack() {
+        final KeyEvent downEvent = createBackKeyEvent(
+                KeyEvent.ACTION_DOWN, false /* isTracking */);
+        onKeyDown(KeyEvent.KEYCODE_BACK, downEvent);
+        final boolean hasStartedTracking =
+                (downEvent.getFlags() & KeyEvent.FLAG_START_TRACKING) != 0;
+        final KeyEvent upEvent = createBackKeyEvent(KeyEvent.ACTION_UP, hasStartedTracking);
+        onKeyUp(KeyEvent.KEYCODE_BACK, upEvent);
+    }
 }

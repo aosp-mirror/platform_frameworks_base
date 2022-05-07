@@ -32,6 +32,7 @@ android_app {
     ],
     static_libs: [
         "junit",
+        "SettingsLibDeviceStateRotationLock",
         "SettingsLibDisplayDensityUtils",
     ],
     platform_apis: true,
@@ -55,6 +56,7 @@ android_test {
     static_libs: [
         "androidx.test.rules",
         "mockito-target-minus-junit4",
+        "SettingsLibDeviceStateRotationLock",
         "SettingsLibDisplayDensityUtils",
         "platform-test-annotations",
         "truth-prebuilt",

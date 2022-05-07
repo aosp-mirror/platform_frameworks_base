@@ -75,6 +75,11 @@ public abstract class InputMethodManagerInternal {
     public abstract List<InputMethodInfo> getEnabledInputMethodListAsUser(@UserIdInt int userId);
 
     /**
+     * Returns {@code true} if currently selected IME supports Stylus handwriting.
+     */
+    public abstract boolean isStylusHandwritingAvailable();
+
+    /**
      * Called by the Autofill Frameworks to request an {@link InlineSuggestionsRequest} from
      * the input method.
      *
@@ -255,6 +260,11 @@ public abstract class InputMethodManagerInternal {
 
                 @Override
                 public void maybeFinishStylusHandwriting() {
+                }
+
+                @Override
+                public boolean isStylusHandwritingAvailable() {
+                    return false;
                 }
             };
 

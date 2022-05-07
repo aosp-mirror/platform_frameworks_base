@@ -24,6 +24,8 @@ import android.util.Base64;
 
 import com.android.server.companion.securechannel.CompanionSecureCommunicationsManager;
 
+import com.android.server.companion.presence.CompanionDevicePresenceMonitor;
+
 import java.io.PrintWriter;
 import java.util.List;
 
@@ -33,18 +35,22 @@ class CompanionDeviceShellCommand extends ShellCommand {
     private final CompanionDeviceManagerService mService;
     private final AssociationStore mAssociationStore;
     private final CompanionSecureCommunicationsManager mSecureCommsManager;
+    private final CompanionDevicePresenceMonitor mDevicePresenceMonitor;
 
     CompanionDeviceShellCommand(CompanionDeviceManagerService service,
             AssociationStore associationStore,
-            CompanionSecureCommunicationsManager secureCommsManager) {
+            CompanionSecureCommunicationsManager secureCommsManager,
+            CompanionDevicePresenceMonitor devicePresenceMonitor) {
         mService = service;
         mAssociationStore = associationStore;
         mSecureCommsManager = secureCommsManager;
+        mDevicePresenceMonitor = devicePresenceMonitor;
     }
 
     @Override
     public int onCommand(String cmd) {
         final PrintWriter out = getOutPrintWriter();
+        final int associationId;
         try {
             switch (cmd) {
                 case "list": {
@@ -86,7 +92,7 @@ class CompanionDeviceShellCommand extends ShellCommand {
                     break;
 
                 case "send-secure-message":
-                    final int associationId = getNextIntArgRequired();
+                    associationId = getNextIntArgRequired();
                     final byte[] message;
 
                     // The message should be either a UTF-8 String or Base64-encoded data.
@@ -108,6 +114,16 @@ class CompanionDeviceShellCommand extends ShellCommand {
                     }
 
                     mSecureCommsManager.sendSecureMessage(associationId, message);
+                    break;
+
+                case "simulate-device-appeared":
+                    associationId = getNextIntArgRequired();
+                    mDevicePresenceMonitor.simulateDeviceAppeared(associationId);
+                    break;
+
+                case "simulate-device-disappeared":
+                    associationId = getNextIntArgRequired();
+                    mDevicePresenceMonitor.simulateDeviceDisappeared(associationId);
                     break;
 
                 default:
@@ -142,7 +158,27 @@ class CompanionDeviceShellCommand extends ShellCommand {
         pw.println("  send-secure-message ASSOCIATION_ID [--base64] MESSAGE");
         pw.println("      Send a secure message to an associated companion device.");
         pw.println("  clear-association-memory-cache");
-        pw.println("      Clear the in-memory association cache and reload all association "
-                + "information from persistent storage. USE FOR DEBUGGING PURPOSES ONLY.");
+        pw.println("      Clear the in-memory association cache and reload all association ");
+        pw.println("      information from persistent storage. USE FOR DEBUGGING PURPOSES ONLY.");
+        pw.println("      USE FOR DEBUGGING AND/OR TESTING PURPOSES ONLY.");
+
+        pw.println("  simulate-device-appeared ASSOCIATION_ID");
+        pw.println("      Make CDM act as if the given companion device has appeared.");
+        pw.println("      I.e. bind the associated companion application's");
+        pw.println("      CompanionDeviceService(s) and trigger onDeviceAppeared() callback.");
+        pw.println("      The CDM will consider the devices as present for 60 seconds and then");
+        pw.println("      will act as if device disappeared, unless 'simulate-device-disappeared'");
+        pw.println("      or 'simulate-device-appeared' is called again before 60 seconds run out"
+                + ".");
+        pw.println("      USE FOR DEBUGGING AND/OR TESTING PURPOSES ONLY.");
+
+        pw.println("  simulate-device-disappeared ASSOCIATION_ID");
+        pw.println("      Make CDM act as if the given companion device has disappeared.");
+        pw.println("      I.e. unbind the associated companion application's");
+        pw.println("      CompanionDeviceService(s) and trigger onDeviceDisappeared() callback.");
+        pw.println("      NOTE: This will only have effect if 'simulate-device-appeared' was");
+        pw.println("      invoked for the same device (same ASSOCIATION_ID) no longer than");
+        pw.println("      60 seconds ago.");
+        pw.println("      USE FOR DEBUGGING AND/OR TESTING PURPOSES ONLY.");
     }
 }

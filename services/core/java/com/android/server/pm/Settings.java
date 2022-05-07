@@ -4579,7 +4579,7 @@ public final class Settings implements Watchable, Snappable {
                 pw.print(" (override=true)");
             }
             pw.println();
-            if (ps.getPkg().getQueriesPackages().isEmpty()) {
+            if (!ps.getPkg().getQueriesPackages().isEmpty()) {
                 pw.append(prefix).append("  queriesPackages=")
                         .println(ps.getPkg().getQueriesPackages());
             }

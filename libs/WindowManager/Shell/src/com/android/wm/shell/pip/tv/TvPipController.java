@@ -45,6 +45,7 @@ import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.pip.PinnedStackListenerForwarder;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
+import com.android.wm.shell.pip.PipAppOpsListener;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipParamsChangedForwarder;
@@ -97,6 +98,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
 
     private final TvPipBoundsState mTvPipBoundsState;
     private final TvPipBoundsAlgorithm mTvPipBoundsAlgorithm;
+    private final PipAppOpsListener mAppOpsListener;
     private final PipTaskOrganizer mPipTaskOrganizer;
     private final PipMediaController mPipMediaController;
     private final TvPipNotificationController mPipNotificationController;
@@ -121,6 +123,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
             Context context,
             TvPipBoundsState tvPipBoundsState,
             TvPipBoundsAlgorithm tvPipBoundsAlgorithm,
+            PipAppOpsListener pipAppOpsListener,
             PipTaskOrganizer pipTaskOrganizer,
             PipTransitionController pipTransitionController,
             TvPipMenuController tvPipMenuController,
@@ -136,6 +139,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
                 context,
                 tvPipBoundsState,
                 tvPipBoundsAlgorithm,
+                pipAppOpsListener,
                 pipTaskOrganizer,
                 pipTransitionController,
                 tvPipMenuController,
@@ -153,6 +157,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
             Context context,
             TvPipBoundsState tvPipBoundsState,
             TvPipBoundsAlgorithm tvPipBoundsAlgorithm,
+            PipAppOpsListener pipAppOpsListener,
             PipTaskOrganizer pipTaskOrganizer,
             PipTransitionController pipTransitionController,
             TvPipMenuController tvPipMenuController,
@@ -181,6 +186,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
         mTvPipMenuController = tvPipMenuController;
         mTvPipMenuController.setDelegate(this);
 
+        mAppOpsListener = pipAppOpsListener;
         mPipTaskOrganizer = pipTaskOrganizer;
         pipTransitionController.registerPipTransitionCallback(this);
 
@@ -287,6 +293,8 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
         }
         mTvPipBoundsState.setTvPipManuallyCollapsed(!expanding);
         mTvPipBoundsState.setTvPipExpanded(expanding);
+        mPipNotificationController.updateExpansionState();
+
         updatePinnedStackBounds();
     }
 
@@ -521,6 +529,12 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
             @Override
             public void onActivityPinned(String packageName, int userId, int taskId, int stackId) {
                 checkIfPinnedTaskAppeared();
+                mAppOpsListener.onActivityPinned(packageName);
+            }
+
+            @Override
+            public void onActivityUnpinned() {
+                mAppOpsListener.onActivityUnpinned();
             }
 
             @Override

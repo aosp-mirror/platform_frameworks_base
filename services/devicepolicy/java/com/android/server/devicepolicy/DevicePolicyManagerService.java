@@ -8511,6 +8511,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    private boolean isDeviceOwnerUserId(int userId) {
+        synchronized (getLockObject()) {
+            return mOwners.getDeviceOwnerComponent() != null
+                    && mOwners.getDeviceOwnerUserId() == userId;
+        }
+    }
+
     private boolean isDeviceOwnerPackage(String packageName, int userId) {
         synchronized (getLockObject()) {
             return mOwners.hasDeviceOwner()
@@ -9861,18 +9868,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private String getEncryptionStatusName(int encryptionStatus) {
         switch (encryptionStatus) {
-            case DevicePolicyManager.ENCRYPTION_STATUS_INACTIVE:
-                return "inactive";
-            case DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_DEFAULT_KEY:
-                return "block default key";
-            case DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE:
-                return "block";
             case DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_PER_USER:
                 return "per-user";
             case DevicePolicyManager.ENCRYPTION_STATUS_UNSUPPORTED:
                 return "unsupported";
-            case DevicePolicyManager.ENCRYPTION_STATUS_ACTIVATING:
-                return "activating";
             default:
                 return "unknown";
         }
@@ -12116,10 +12115,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
         final CallerIdentity caller = getCallerIdentity();
-        Preconditions.checkCallAuthorization(isProfileOwner(caller)
+        Preconditions.checkCallAuthorization((isProfileOwner(caller)
+                        && isManagedProfile(caller.getUserId()))
                         || isDefaultDeviceOwner(caller),
-                "Caller is not profile owner or device owner;"
-                        + " only profile owner or device owner may control the preferential"
+                "Caller is not managed profile owner or device owner;"
+                        + " only managed profile owner or device owner may control the preferential"
                         + " network service");
         synchronized (getLockObject()) {
             final ActiveAdmin requiredAdmin = getDeviceOrProfileOwnerAdminLocked(
@@ -12146,11 +12146,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         final CallerIdentity caller = getCallerIdentity();
-        Preconditions.checkCallAuthorization(isProfileOwner(caller)
+        Preconditions.checkCallAuthorization((isProfileOwner(caller)
+                        && isManagedProfile(caller.getUserId()))
                         || isDefaultDeviceOwner(caller),
-                "Caller is not profile owner or device owner;"
-                        + " only profile owner or device owner may retrieve the preferential"
-                        + " network service configurations");
+                "Caller is not managed profile owner or device owner;"
+                        + " only managed profile owner or device owner may retrieve the "
+                        + "preferential network service configurations");
         synchronized (getLockObject()) {
             final ActiveAdmin requiredAdmin = getDeviceOrProfileOwnerAdminLocked(
                     caller.getUserId());
@@ -18265,7 +18266,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private void updateNetworkPreferenceForUser(int userId,
             List<PreferentialNetworkServiceConfig> preferentialNetworkServiceConfigs) {
-        if (!isManagedProfile(userId)) {
+        if (!isManagedProfile(userId) && !isDeviceOwnerUserId(userId)) {
             return;
         }
         List<ProfileNetworkPreference> preferences = new ArrayList<>();

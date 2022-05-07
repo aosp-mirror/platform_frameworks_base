@@ -1237,7 +1237,7 @@
     <string name="wallet_app_button_label">Show all</string>
     <!-- Label of the button underneath the card carousel prompting user unlock device. [CHAR LIMIT=NONE] -->
     <!-- Secondary label of the quick access wallet tile if no card. [CHAR LIMIT=NONE] -->
-    <string name="wallet_secondary_label_no_card">Add a card</string>
+    <string name="wallet_secondary_label_no_card">Tap to open</string>
     <!-- Secondary label of the quick access wallet tile if wallet is still updating. [CHAR LIMIT=NONE] -->
     <string name="wallet_secondary_label_updating">Updating</string>
     <!-- Secondary label of the quick access wallet tile if device locked. [CHAR LIMIT=NONE] -->
@@ -2506,6 +2506,8 @@
     <string name="clipboard_edit_image_description">Edit copied image</string>
     <!-- Label for button to send copied content to a nearby device [CHAR LIMIT=NONE] -->
     <string name="clipboard_send_nearby_description">Send to nearby device</string>
+    <!-- Text informing user that copied content is hidden [CHAR LIMIT=NONE] -->
+    <string name="clipboard_text_hidden">Tap to view</string>
 
     <!-- Generic "add" string [CHAR LIMIT=NONE] -->
     <string name="add">Add</string>

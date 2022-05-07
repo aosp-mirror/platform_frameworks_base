@@ -44,6 +44,7 @@ import com.android.wm.shell.animation.FloatProperties;
 import com.android.wm.shell.animation.PhysicsAnimator;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
+import com.android.wm.shell.pip.PipAppOpsListener;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipTaskOrganizer;

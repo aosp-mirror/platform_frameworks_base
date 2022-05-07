@@ -142,9 +142,9 @@ TEST(ShaderCacheTest, testWriteAndRead) {
     // write to the in-memory cache without storing on disk and verify we read the same values
     sk_sp<SkData> inVS;
     setShader(inVS, "sassas");
-    ShaderCache::get().store(GrProgramDescTest(100), *inVS.get());
+    ShaderCache::get().store(GrProgramDescTest(100), *inVS.get(), SkString());
     setShader(inVS, "someVS");
-    ShaderCache::get().store(GrProgramDescTest(432), *inVS.get());
+    ShaderCache::get().store(GrProgramDescTest(432), *inVS.get(), SkString());
     ASSERT_NE((outVS = ShaderCache::get().load(GrProgramDescTest(100))), sk_sp<SkData>());
     ASSERT_TRUE(checkShader(outVS, "sassas"));
     ASSERT_NE((outVS = ShaderCache::get().load(GrProgramDescTest(432))), sk_sp<SkData>());
@@ -168,7 +168,7 @@ TEST(ShaderCacheTest, testWriteAndRead) {
 
     // change data, store to disk, read back again and verify data has been changed
     setShader(inVS, "ewData1");
-    ShaderCache::get().store(GrProgramDescTest(432), *inVS.get());
+    ShaderCache::get().store(GrProgramDescTest(432), *inVS.get(), SkString());
     ShaderCacheTestUtils::terminate(ShaderCache::get(), true);
     ShaderCache::get().initShaderDiskCache();
     ASSERT_NE((outVS2 = ShaderCache::get().load(GrProgramDescTest(432))), sk_sp<SkData>());
@@ -179,7 +179,7 @@ TEST(ShaderCacheTest, testWriteAndRead) {
     std::vector<uint8_t> dataBuffer(dataSize);
     genRandomData(dataBuffer);
     setShader(inVS, dataBuffer);
-    ShaderCache::get().store(GrProgramDescTest(432), *inVS.get());
+    ShaderCache::get().store(GrProgramDescTest(432), *inVS.get(), SkString());
     ShaderCacheTestUtils::terminate(ShaderCache::get(), true);
     ShaderCache::get().initShaderDiskCache();
     ASSERT_NE((outVS2 = ShaderCache::get().load(GrProgramDescTest(432))), sk_sp<SkData>());
@@ -227,7 +227,7 @@ TEST(ShaderCacheTest, testCacheValidation) {
         setShader(data, dataBuffer);
 
         blob = std::make_pair(key, data);
-        ShaderCache::get().store(*key.get(), *data.get());
+        ShaderCache::get().store(*key.get(), *data.get(), SkString());
     }
     ShaderCacheTestUtils::terminate(ShaderCache::get(), true);
 
