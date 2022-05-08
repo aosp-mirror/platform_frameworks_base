@@ -594,7 +594,7 @@
     <string name="guest_exit_guest" msgid="5908239569510734136">"Ukloni gosta"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Resetuj sesiju gosta"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Želite li da resetujete sesiju gosta?"</string>
-    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Želite li da uklonite gosta?"</string>
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Želite da uklonite gosta?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Resetuj"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Ukloni"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Sesija gosta se resetuje…"</string>
@@ -612,7 +612,7 @@
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Izađi iz režima gosta"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Sve aktivnosti će biti izbrisane pri izlazu"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Možete da sačuvate ili izbrišete aktivnosti pri izlazu"</string>
-    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Resetujete da biste izbrisali aktivnosti sesije odmah ili možete da sačuvate ili izbrišete aktivnosti pri izlazu"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Resetujete za brisanje aktivnosti sesije, ili sačuvajte ili izbrišite aktivnosti pri izlazu"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Slikaj"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Odaberi sliku"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Izaberite sliku"</string>
@@ -674,4 +674,7 @@
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Ako emitujete aplikaciju <xliff:g id="SWITCHAPP">%1$s</xliff:g> ili promenite izlaz, aktuelno emitovanje će se zaustaviti"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Emitujte aplikaciju <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Promenite izlaz"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"Animacije za pokret povratka sa predviđanjem"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Omogućite animacije sistema za pokret povratka sa predviđanjem."</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Ovo podešavanje omogućava animacije sistema za pokret povratka sa predviđanjem. Zahteva podešavanje dozvole enableOnBackInvokedCallback po aplikaciji na true u fajlu manifesta."</string>
 </resources>

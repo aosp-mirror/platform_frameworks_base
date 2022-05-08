@@ -674,4 +674,7 @@
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"<xliff:g id="SWITCHAPP">%1$s</xliff:g>ን ካሰራጩ ወይም ውፅዓትን ከቀየሩ የአሁኑ ስርጭትዎ ይቆማል"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> ያሰራጩ"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"ውፅዓትን ይቀይሩ"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"የግምት ጀርባ እነማዎች"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"ለግምት ጀርባ የስርዓት እንማዎችን ያንቁ።"</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"ይህ ቅንብር የስርዓት እነማዎችን ለመገመት የምልክት እነማን ያነቃል። በዝርዝር ሰነድ ፋይሉ ውስጥ በእያንዳንዱ መተግበሪያ enableOnBackInvokedCallbackን ወደ እውነት ማቀናበር ያስፈልገዋል።"</string>
 </resources>
