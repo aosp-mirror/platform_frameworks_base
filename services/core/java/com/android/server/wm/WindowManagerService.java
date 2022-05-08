@@ -173,6 +173,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -224,6 +225,7 @@ import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.MergedConfiguration;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.TimeUtils;
@@ -7762,6 +7764,13 @@ public class WindowManagerService extends IWindowManager.Stub
                     outBounds.setEmpty();
                 }
             }
+        }
+
+        @Override
+        public Pair<Matrix, MagnificationSpec> getWindowTransformationMatrixAndMagnificationSpec(
+                IBinder token) {
+            return mAccessibilityController
+                    .getWindowTransformationMatrixAndMagnificationSpec(token);
         }
 
         @Override

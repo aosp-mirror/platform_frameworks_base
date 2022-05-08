@@ -68,6 +68,7 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.database.ContentObserver;
+import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -99,6 +100,7 @@ import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
 import android.util.ArraySet;
 import android.util.IntArray;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
@@ -455,6 +457,41 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     @Override
     public boolean isAccessibilityButtonShown() {
         return mIsAccessibilityButtonShown;
+    }
+
+    @Override
+    public Pair<float[], MagnificationSpec> getWindowTransformationMatrixAndMagnificationSpec(
+            int windowId) {
+        WindowInfo windowInfo;
+        synchronized (mLock) {
+            windowInfo = mA11yWindowManager.findWindowInfoByIdLocked(windowId);
+        }
+        if (windowInfo != null) {
+            final MagnificationSpec spec = new MagnificationSpec();
+            spec.setTo(windowInfo.mMagnificationSpec);
+            return new Pair<>(windowInfo.mTransformMatrix, spec);
+        } else {
+            // If the framework doesn't track windows, we fall back to get the pair of
+            // transformation matrix and MagnificationSpe from the WindowManagerService's
+            // WindowState.
+            IBinder token;
+            synchronized (mLock) {
+                token = mA11yWindowManager.getWindowTokenForUserAndWindowIdLocked(mCurrentUserId,
+                        windowId);
+            }
+            Pair<Matrix, MagnificationSpec> pair =
+                    mWindowManagerService.getWindowTransformationMatrixAndMagnificationSpec(token);
+            final float[] outTransformationMatrix = new float[9];
+            final Matrix tmpMatrix = pair.first;
+            final MagnificationSpec spec = pair.second;
+            if (!spec.isNop()) {
+                tmpMatrix.postScale(spec.scale, spec.scale);
+                tmpMatrix.postTranslate(spec.offsetX, spec.offsetY);
+            }
+            tmpMatrix.getValues(outTransformationMatrix);
+
+            return new Pair<>(outTransformationMatrix, pair.second);
+        }
     }
 
     @Override
@@ -3750,12 +3787,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         boundsInScreenBeforeMagnification.centerY());
 
                 // Invert magnification if needed.
-                final WindowInfo windowInfo = mA11yWindowManager.findWindowInfoByIdLocked(
-                        focus.getWindowId());
+                final Pair<float[], MagnificationSpec> pair =
+                        getWindowTransformationMatrixAndMagnificationSpec(focus.getWindowId());
                 MagnificationSpec spec = null;
-                if (windowInfo != null) {
+                if (pair != null && pair.second != null) {
                     spec = new MagnificationSpec();
-                    spec.setTo(windowInfo.mMagnificationSpec);
+                    spec.setTo(pair.second);
                 }
 
                 if (spec != null && !spec.isNop()) {
