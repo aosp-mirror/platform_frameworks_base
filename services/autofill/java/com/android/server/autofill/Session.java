@@ -3307,10 +3307,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     currentView.setState(ViewState.STATE_FILL_DIALOG_SHOWN);
                     mService.logDatasetShown(id, mClientState, UI_TYPE_DIALOG);
                 }
+                // Just show fill dialog once, so disabled after shown.
+                // Note: Cannot disable before requestShowFillDialog() because the method
+                //       need to check whether fill dialog enabled.
+                setFillDialogDisabled();
                 return;
             } else {
                 setFillDialogDisabled();
             }
+
         }
 
         if (response.supportsInlineSuggestions()) {
