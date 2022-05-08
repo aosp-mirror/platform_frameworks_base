@@ -252,7 +252,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certifikácia bezdrôtového zobrazenia"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Podrobné denníky Wi‑Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Pribrzdiť vyhľadávanie sietí Wi‑Fi"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Randomizácia dočasnej adresy MAC siete Wi‑Fi"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Randomizovať dočasnú adresu MAC siete Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobilné dáta ponechať vždy aktívne"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Hardvérová akcelerácia tetheringu"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Zobrazovať zariadenia Bluetooth bez názvov"</string>
@@ -353,7 +353,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Zobraziť vo výstrižku ohraničenie, okraje a pod."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Rozloženie sprava doľava"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Vynútiť pre všetky jazyky rozloženie obrazovky sprava doľava"</string>
-    <string name="window_blurs" msgid="6831008984828425106">"Povolenie rozmazania na úrovni okna"</string>
+    <string name="window_blurs" msgid="6831008984828425106">"Povoliť rozmazanie na úrovni okna"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Vynútiť 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Povoliť 4x MSAA v aplikáciách OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Ladiť operácie s neobdĺžnikovými výstrižkami"</string>
