@@ -349,7 +349,7 @@
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"Kuva märguanded lukustatud seadmes täisekraantegevustena"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Lubab rakendusel märguandeid lukustatud seadmes täisekraantegevustena kuvada"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"Otseteede installimine"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Lubab rakendusel lisada avakuva otseteid ilma kasutaja sekkumiseta."</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"lubab rakendusel lisada avakuva otseteid ilma kasutaja sekkumiseta."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"otseteede desinstallimine"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Lubab rakendusel eemaldada avakuva otseteid ilma kasutaja sekkumiseta."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"marsruutige väljuvad kõned uuesti"</string>

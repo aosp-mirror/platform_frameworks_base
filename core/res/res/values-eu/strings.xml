@@ -343,7 +343,7 @@
     <string name="permlab_statusBar" msgid="8798267849526214017">"desgaitu edo aldatu egoera-barra"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Egoera-barra desgaitzea edo sistema-ikonoak gehitzea edo kentzea baimentzen die aplikazioei."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"bihurtu egoera-barra"</string>
-    <string name="permdesc_statusBarService" msgid="6652917399085712557">"Egoera-barra izatea baimentzen die aplikazioei."</string>
+    <string name="permdesc_statusBarService" msgid="6652917399085712557">"Egoera-barra izateko baimena ematen die aplikazioei."</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"zabaldu/tolestu egoera-barra"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Egoera-barra zabaltzeko edo tolesteko baimena ematen die aplikazioei."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"blokeatutako gailu batean jakinarazpenak pantaila osoko jarduera gisa bistaratzea"</string>
@@ -476,7 +476,7 @@
     <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"salbuetsi audioa grabatzeko murriztapenen aurrean"</string>
     <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"Salbuetsi aplikazioa audioa grabatzeko murriztapenen aurrean."</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"jarraitu beste aplikazio batean hasitako deia"</string>
-    <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Beste aplikazio batean hasitako dei bat jarraitzea baimentzen dio aplikazioari."</string>
+    <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Beste aplikazio batean hasitako dei batekin jarraitzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"irakurri telefono-zenbakiak"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Gailuaren telefono-zenbakiak atzitzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"mantendu piztuta autoko pantaila"</string>
@@ -544,7 +544,7 @@
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"NFC bidezko ordainketa-zerbitzu lehenetsiari buruzko informazioa"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"NFC bidezko ordainketa-zerbitzu lehenetsiari buruzko informazioa jasotzeko baimena ematen die aplikazioei, hala nola erregistratutako laguntzaileak eta ibilbidearen helmuga."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrolatu Near Field Communication komunikazioa"</string>
-    <string name="permdesc_nfc" msgid="8352737680695296741">"Near Field Communication (NFC) etiketekin, txartelekin eta irakurgailuekin komunikatzea baimentzen die aplikazioei."</string>
+    <string name="permdesc_nfc" msgid="8352737680695296741">"Near Field Communication (NFC) etiketekin, txartelekin eta irakurgailuekin komunikatzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"desgaitu pantailaren blokeoa"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Teklen blokeoa eta erlazionatutako pasahitz-segurtasuna desgaitzeko baimena ematen die aplikazioei. Adibidez, telefonoak teklen blokeoa desgaitzen du telefono-deiak jasotzen dituenean, eta berriro gaitzen du deiak amaitzean."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"eskatu pantailaren blokeoa konplexua izatea"</string>
@@ -625,8 +625,8 @@
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Ilunegi dago. Erabili argi gehiago."</string>
     <string name="face_acquired_too_close" msgid="1628767882971469833">"Urrundu telefonoa."</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"Hurbildu telefonoa."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Goratu telefonoa."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Beheratu telefonoa."</string>
+    <string name="face_acquired_too_high" msgid="4868033653626081839">"Igo telefonoa."</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"Jaitsi telefonoa."</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"Mugitu telefonoa ezkerretara."</string>
     <string name="face_acquired_too_left" msgid="8882499346502714350">"Mugitu telefonoa eskuinetara."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Begiratu zuzenago gailuari."</string>
@@ -683,7 +683,7 @@
     <string name="permlab_bind_incall_service" msgid="5990625112603493016">"erabili pantaila deiak abian direnean"</string>
     <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"Erabiltzaileak deiaren pantaila noiz eta nola ikusten duen kontrolatzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_bind_connection_service" msgid="5409268245525024736">"jardun interakzioan telefono-zerbitzuekin"</string>
-    <string name="permdesc_bind_connection_service" msgid="6261796725253264518">"Deiak egiteko eta jasotzeko telefonia-zerbitzuekin interakzioan aritzea baimentzen die aplikazioei."</string>
+    <string name="permdesc_bind_connection_service" msgid="6261796725253264518">"Deiak egiteko eta jasotzeko telefonia-zerbitzuekin interakzioan aritzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_control_incall_experience" msgid="6436863486094352987">"eskaini erabiltzaileentzako aukerak deiak abian direnean"</string>
     <string name="permdesc_control_incall_experience" msgid="5896723643771737534">"Deiak abian direnean erabiltzeko aukera eskaintzea baimentzen die aplikazioei."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="8470402862501573795">"irakurri sare-erabileraren historia"</string>
@@ -1929,9 +1929,9 @@
     <string name="stk_cc_ussd_to_dial" msgid="3139884150741157610">"USSD eskaera ohiko deira aldatu da"</string>
     <string name="stk_cc_ussd_to_ss" msgid="4826846653052609738">"USSD eskaera SS eskaerara aldatu da"</string>
     <string name="stk_cc_ussd_to_ussd" msgid="8343001461299302472">"USSD eskaera berrira aldatu da"</string>
-    <string name="stk_cc_ussd_to_dial_video" msgid="429118590323618623">"USSD eskaera bideo-deira aldatu da"</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="429118590323618623">"USSD eskaera bideodeira aldatu da"</string>
     <string name="stk_cc_ss_to_dial" msgid="4087396658768717077">"SS eskaera ohiko deira aldatu da"</string>
-    <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"SS eskaera bideo-deira aldatu da"</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"SS eskaera bideodeira aldatu da"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS eskaera USSD eskaerara aldatu da"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"SS eskaera berrira aldatu da"</string>
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"Phishing-alerta"</string>

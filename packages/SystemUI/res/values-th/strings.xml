@@ -47,10 +47,10 @@
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="2972273031043777851">"ตั้งค่าวิธีการป้อนข้อมูล"</string>
     <string name="status_bar_use_physical_keyboard" msgid="4849251850931213371">"แป้นพิมพ์บนเครื่อง"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"อนุญาตให้ <xliff:g id="APPLICATION">%1$s</xliff:g> เข้าถึง <xliff:g id="USB_DEVICE">%2$s</xliff:g> ไหม"</string>
-    <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"อนุญาตให้ <xliff:g id="APPLICATION">%1$s</xliff:g> เข้าถึง <xliff:g id="USB_DEVICE">%2$s</xliff:g> ไหม\nแอปนี้ไม่ได้รับอนุญาตให้อัดเสียงแต่จะอัดเสียงผ่านอุปกรณ์ USB นี้ได้"</string>
+    <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"อนุญาตให้ <xliff:g id="APPLICATION">%1$s</xliff:g> เข้าถึง <xliff:g id="USB_DEVICE">%2$s</xliff:g> ไหม\nแอปนี้ไม่ได้รับอนุญาตให้อัดเสียงแต่อาจเก็บเสียงผ่านอุปกรณ์ USB นี้ได้"</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"อนุญาตให้ <xliff:g id="APPLICATION">%1$s</xliff:g> เข้าถึง <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ไหม"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"เปิด <xliff:g id="APPLICATION">%1$s</xliff:g> เพื่อจัดการ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ไหม"</string>
-    <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"เปิด <xliff:g id="APPLICATION">%1$s</xliff:g> เพื่อจัดการ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ใช่ไหม\nแอปนี้ไม่ได้รับอนุญาตให้อัดเสียงแต่จะอัดเสียงผ่านอุปกรณ์ USB นี้ได้"</string>
+    <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"เปิด <xliff:g id="APPLICATION">%1$s</xliff:g> เพื่อจัดการ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ไหม\nแอปนี้ไม่ได้รับอนุญาตให้อัดเสียงแต่อาจเก็บเสียงผ่านอุปกรณ์ USB นี้ได้"</string>
     <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"เปิด <xliff:g id="APPLICATION">%1$s</xliff:g> เพื่อจัดการ <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ไหม"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"แอปพลิเคชันที่ติดตั้งใช้กับอุปกรณ์ USB นี้ไม่ได้ ดูข้อมูลเพิ่มเติมเกี่ยวกับอุปกรณ์เสริมนี้ที่ <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"อุปกรณ์เสริม USB"</string>
@@ -483,7 +483,7 @@
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"ต้องการนำผู้ใช้ชั่วคราวออกไหม"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ระบบจะลบแอปและข้อมูลทั้งหมดในเซสชันนี้"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"นำออก"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"ยินดีต้อนรับผู้เข้าร่วมกลับมาอีกครั้ง"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"ยินดีต้อนรับผู้ใช้ชั่วคราวกลับมาอีกครั้ง"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"คุณต้องการอยู่ในเซสชันต่อไปไหม"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"เริ่มต้นใหม่"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"ใช่ ดำเนินการต่อ"</string>
@@ -1140,7 +1140,7 @@
     <string name="audio_status" msgid="4237055636967709208">"กำลังฟัง"</string>
     <string name="game_status" msgid="1340694320630973259">"กำลังเล่น"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"เพื่อน"</string>
-    <string name="empty_status" msgid="5938893404951307749">"คืนนี้มาแชทกัน"</string>
+    <string name="empty_status" msgid="5938893404951307749">"คืนนี้คุยกันนะ"</string>
     <string name="status_before_loading" msgid="1500477307859631381">"เนื้อหาจะแสดงขึ้นเร็วๆ นี้"</string>
     <string name="missed_call" msgid="4228016077700161689">"สายที่ไม่ได้รับ"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>

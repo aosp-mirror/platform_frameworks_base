@@ -610,7 +610,7 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Isithonjana sezigxivizo zeminwe"</string>
-    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Ukuvula ubuso"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Ukuvula ngobuso"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Inkinga Ngokuvula ngobuso"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Thepha ukuze usule imodeli yakho yobuso, bese wengeza futhi ubuso"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Setha Ukuvula ngobuso"</string>

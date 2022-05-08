@@ -617,7 +617,7 @@
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"यो एप अनपिन गर्न माथितिर स्वाइप गरी स्क्रिनमा टच एण्ड होल्ड गर्नुहोस्"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"बुझेँ"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"धन्यवाद पर्दैन"</string>
-    <string name="screen_pinning_start" msgid="7483998671383371313">"एप पिन गरियो"</string>
+    <string name="screen_pinning_start" msgid="7483998671383371313">"पिन गरिएको एप"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"एप अनपिन गरियो"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"लुकाउनुहुन्छ <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"यो तपाईं सेटिङ् मा यो बारी अर्को समय देखापर्नेछ।"</string>

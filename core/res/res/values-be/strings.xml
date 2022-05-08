@@ -1283,7 +1283,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Заўсёды паказваць"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"Праграма <xliff:g id="APP_NAME">%1$s</xliff:g> была створана для несумяшчальнай версии АС Android і можа паводзіць сябе неспадзявана. Можа быць даступна абноўленая версія праграмы."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Заўсёды паказваць"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Праверыць на наяўнасць абнаўленняў"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Праверыць наяўнасць абнаўленняў"</string>
     <string name="smv_application" msgid="3775183542777792638">"Прыкладанне <xliff:g id="APPLICATION">%1$s</xliff:g> (працэс <xliff:g id="PROCESS">%2$s</xliff:g>) парушыла ўласную палітыку StrictMode."</string>
     <string name="smv_process" msgid="1398801497130695446">"Працэс <xliff:g id="PROCESS">%1$s</xliff:g> парушыў уласную палітыку StrictMode."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Абнаўленне тэлефона…"</string>
@@ -2047,7 +2047,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Праграма недаступная"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Праграма \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" цяпер недаступная."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Гэта праграма была створана для больш старой версіі Android і можа не працаваць належным чынам. Праверце наяўнасць абнаўленняў або звярніцеся да распрацоўшчыка."</string>
-    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Праверыць на наяўнасць абнаўленняў"</string>
+    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Праверыць наяўнасць абнаўленняў"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"У вас ёсць новыя паведамленні"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Праглядзець праз праграму для SMS"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Функцыі могуць быць абмежаваныя"</string>

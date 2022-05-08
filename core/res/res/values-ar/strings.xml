@@ -361,7 +361,7 @@
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"عرض الإشعارات كأنشطة بملء الشاشة على الأجهزة المُقفَلة"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"السماح للتطبيق بعرض الإشعارات كأنشطة بملء الشاشة على الأجهزة المُقفَلة"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"تثبيت اختصارات"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"للسماح لتطبيق بإضافة اختصارات على الشاشة الرئيسية بدون تدخل المستخدم."</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"السماح لتطبيق بإضافة اختصارات على الشاشة الرئيسية بدون تدخل المستخدم."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"إزالة الاختصارات"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"للسماح للتطبيق بإزالة اختصارات من الشاشة الرئيسية بدون تدخل المستخدم."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"إعادة توجيه المكالمات الصادرة"</string>
@@ -1728,7 +1728,7 @@
     <string name="display_manager_overlay_display_title" msgid="1480158037150469170">"‏<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>، <xliff:g id="DPI">%4$d</xliff:g> نقطة لكل بوصة"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="2810034719482834679">"آمن"</string>
     <string name="kg_forgot_pattern_button_text" msgid="406145459223122537">"نسيت النقش"</string>
-    <string name="kg_wrong_pattern" msgid="1342812634464179931">"النقش غير صحيح"</string>
+    <string name="kg_wrong_pattern" msgid="1342812634464179931">"النقش غير صحيح."</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"كلمة مرور خاطئة"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"رقم تعريف شخصي خاطئ"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">
@@ -1960,7 +1960,7 @@
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"العمل الثالث <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"طلب إدخال رقم التعريف الشخصي قبل إزالة التثبيت"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"طلب إدخال النقش الخاص بإلغاء القفل قبل إزالة التثبيت"</string>
-    <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"المطالبة بكلمة المرور قبل إزالة التثبيت"</string>
+    <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"طلب إدخال كلمة المرور قبل إزالة التثبيت"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"تم التثبيت بواسطة المشرف"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"تم التحديث بواسطة المشرف"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"تم الحذف بواسطة المشرف"</string>
@@ -2268,7 +2268,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> و<xliff:g id="COUNT_3">%d</xliff:g> ملف</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> وملف (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"ليس هناك أشخاص مقترحون للمشاركة معهم."</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"ما مِن أشخاص مقترحين للمشاركة معهم."</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"قائمة التطبيقات"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"‏لم يتم منح هذا التطبيق إذن تسجيل، ولكن يمكنه تسجيل الصوت من خلال جهاز USB هذا."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"الشاشة الرئيسية"</string>

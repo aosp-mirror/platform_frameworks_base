@@ -745,8 +745,8 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Status:&lt;/b&gt; classificada com menor prioridade"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Aparece na parte superior das notificações de conversa e como uma foto do perfil na tela de bloqueio"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Aparece na parte superior das notificações de conversa, como uma foto do perfil na tela de bloqueio e como um balão"</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Aparece na parte superior das notificações de conversa e como uma foto do perfil na tela de bloqueio. Interrompe o Não perturbe"</string>
-    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Aparece na parte superior das notificações de conversa, como uma foto do perfil na tela de bloqueio e como um balão. Interrompe o Não perturbe"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Aparecem na parte superior das notificações de conversa e como uma foto do perfil na tela de bloqueio. Interrompem o Não perturbe."</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Aparecem na parte superior das notificações de conversa, como uma foto do perfil na tela de bloqueio e como um balão. Interrompem o Não perturbe."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Configurações"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritárias"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"O app <xliff:g id="APP_NAME">%1$s</xliff:g> não é compatível com recursos de conversa"</string>
@@ -1117,7 +1117,7 @@
     <string name="basic_status" msgid="2315371112182658176">"Conversa aberta"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Widgets de conversa"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Toque em uma conversa para adicioná-la à tela inicial"</string>
-    <string name="no_conversations_text" msgid="5354115541282395015">"Suas conversas recentes serão exibidas aqui"</string>
+    <string name="no_conversations_text" msgid="5354115541282395015">"Suas conversas recentes vão aparecer aqui"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Conversas prioritárias"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Conversas recentes"</string>
     <string name="okay" msgid="6490552955618608554">"Ok"</string>
