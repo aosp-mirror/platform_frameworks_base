@@ -572,7 +572,7 @@
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"已取消驗證"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"未能識別"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"已取消驗證"</string>
-    <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"未設定 PIN、圖形或密碼"</string>
+    <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"未設定 PIN、圖案或密碼"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"驗證時發生錯誤"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"使用螢幕鎖定"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"如要繼續操作，請輸入螢幕鎖定解鎖憑證"</string>
@@ -754,7 +754,7 @@
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"設定裝置的全域代理伺服器"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"設定政策啟用時所要使用的裝置全域代理伺服器，只有裝置擁有者可以設定全域代理伺服器。"</string>
     <string name="policylab_expirePassword" msgid="6015404400532459169">"設定螢幕鎖定密碼期限"</string>
-    <string name="policydesc_expirePassword" msgid="9136524319325960675">"變更螢幕鎖定密碼、PIN 或圖形的更改頻率。"</string>
+    <string name="policydesc_expirePassword" msgid="9136524319325960675">"變更螢幕鎖定密碼、PIN 或圖案的更改頻率。"</string>
     <string name="policylab_encryptedStorage" msgid="9012936958126670110">"設定儲存裝置加密"</string>
     <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"必須為儲存的應用程式資料加密。"</string>
     <string name="policylab_disableCamera" msgid="5749486347810162018">"停用相機"</string>
@@ -889,7 +889,7 @@
     <string name="lockscreen_screen_locked" msgid="7364905540516041817">"螢幕已鎖定。"</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"按選單鍵解鎖或撥打緊急電話。"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"按選單鍵解鎖。"</string>
-    <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"畫出解鎖圖形來為螢幕解鎖"</string>
+    <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"畫出解鎖圖案來為螢幕解鎖"</string>
     <string name="lockscreen_emergency_call" msgid="7549683825868928636">"緊急電話"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"返回通話"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"正確！"</string>
@@ -918,12 +918,12 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"請參閱使用者指南或與客戶服務中心聯絡。"</string>
     <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM 卡處於鎖定狀態。"</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"正在解除 SIM 卡鎖定..."</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"您已畫錯解鎖圖形 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"您已畫錯解鎖圖案 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"您已輸入錯誤的密碼 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"您已輸入錯誤的 PIN 碼 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="3069635524964070596">"您已畫錯解鎖圖形 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統會要求您使用您的 Google 登入資料解開上鎖的平板電腦。\n\n請在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後再試一次。"</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="6399092175942158529">"您已畫錯解鎖圖形 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統會要求您使用 Google 登入資料將 Android TV 裝置解鎖。\n\n請在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後再試一次。"</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="5691623136957148335">"您已畫錯解鎖圖形 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統會要求您使用您的 Google 登入資料解開上鎖的手機。\n\n請在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後再試一次。"</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="3069635524964070596">"您已畫錯解鎖圖案 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統會要求您使用您的 Google 登入資料解開上鎖的平板電腦。\n\n請在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後再試一次。"</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="6399092175942158529">"您已畫錯解鎖圖案 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統會要求您使用 Google 登入資料將 Android TV 裝置解鎖。\n\n請在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後再試一次。"</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="5691623136957148335">"您已畫錯解鎖圖案 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統會要求您使用您的 Google 登入資料解開上鎖的手機。\n\n請在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後再試一次。"</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="7914445759242151426">"您嘗試解除這部平板電腦的鎖定已失敗 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次，剩餘 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次嘗試機會。如果失敗次數超過嘗試次數限制，平板電腦將恢復原廠設定，所有使用者資料均會遺失。"</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="4275591249631864248">"您已 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次無法解鎖 Android TV 裝置。如果再失敗 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次，Android TV 裝置將回復原廠設定，所有使用者資料均會遺失。"</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="1166532464798446579">"您嘗試解除這部手機的鎖定已失敗 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次，剩餘 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次嘗試機會。如果失敗次數超過嘗試次數限制，手機將恢復原廠設定，所有使用者資料均會遺失。"</string>
@@ -931,9 +931,9 @@
     <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="2205435033340091883">"您已 <xliff:g id="NUMBER">%d</xliff:g> 次無法解鎖 Android TV 裝置，Android TV 裝置現在將回復原廠設定。"</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="2203704707679895487">"您嘗試解除這部手機的鎖定已失敗 <xliff:g id="NUMBER">%d</xliff:g> 次。手機現在會重設為原廠預設值。"</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6807200118164539589">"<xliff:g id="NUMBER">%d</xliff:g> 秒後再試一次。"</string>
-    <string name="lockscreen_forgot_pattern_button_text" msgid="8362442730606839031">"忘記圖形？"</string>
+    <string name="lockscreen_forgot_pattern_button_text" msgid="8362442730606839031">"忘記圖案？"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="9218940117797602518">"帳戶解鎖"</string>
-    <string name="lockscreen_glogin_too_many_attempts" msgid="3775904917743034195">"圖形嘗試次數過多"</string>
+    <string name="lockscreen_glogin_too_many_attempts" msgid="3775904917743034195">"圖案嘗試次數過多"</string>
     <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"如要解鎖，請以 Google 帳戶登入。"</string>
     <string name="lockscreen_glogin_username_hint" msgid="6916101478673157045">"使用者名稱 (電子郵件)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="3031027901286812848">"密碼"</string>
@@ -944,12 +944,12 @@
     <string name="lockscreen_unlock_label" msgid="4648257878373307582">"解除鎖定"</string>
     <string name="lockscreen_sound_on_label" msgid="1660281470535492430">"開啟音效"</string>
     <string name="lockscreen_sound_off_label" msgid="2331496559245450053">"關閉音效"</string>
-    <string name="lockscreen_access_pattern_start" msgid="3778502525702613399">"已開始繪畫解鎖圖形"</string>
-    <string name="lockscreen_access_pattern_cleared" msgid="7493849102641167049">"已清除解鎖圖形"</string>
+    <string name="lockscreen_access_pattern_start" msgid="3778502525702613399">"已開始繪畫解鎖圖案"</string>
+    <string name="lockscreen_access_pattern_cleared" msgid="7493849102641167049">"已清除解鎖圖案"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6746676335293144163">"已加入一格"</string>
     <string name="lockscreen_access_pattern_cell_added_verbose" msgid="2931364927622563465">"已加入 <xliff:g id="CELL_INDEX">%1$s</xliff:g> 點"</string>
-    <string name="lockscreen_access_pattern_detected" msgid="3931150554035194012">"已畫出解鎖圖形"</string>
-    <string name="lockscreen_access_pattern_area" msgid="1288780416685002841">"圖形區域。"</string>
+    <string name="lockscreen_access_pattern_detected" msgid="3931150554035194012">"已畫出解鎖圖案"</string>
+    <string name="lockscreen_access_pattern_area" msgid="1288780416685002841">"圖案區域。"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="7298011259508200234">"%1$s。第 %2$d 個小工具，共 %3$d 個。"</string>
     <string name="keyguard_accessibility_add_widget" msgid="8245795023551343672">"新增小工具。"</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="544239307077644480">"空白"</string>
@@ -965,13 +965,13 @@
     <string name="keyguard_accessibility_widget_deleted" msgid="1509738950119878705">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g>小工具已刪除。"</string>
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"展開解鎖區域。"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"滑動解鎖。"</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"圖形解鎖。"</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"圖案解鎖。"</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"面孔解鎖。"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"PIN 解鎖。"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"SIM 卡 PIN 碼解鎖。"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"SIM 卡 PUK 解鎖。"</string>
     <string name="keyguard_accessibility_password_unlock" msgid="6130186108581153265">"密碼解鎖。"</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="1419570880512350689">"圖形區域。"</string>
+    <string name="keyguard_accessibility_pattern_area" msgid="1419570880512350689">"圖案區域。"</string>
     <string name="keyguard_accessibility_slide_area" msgid="4331399051142520176">"滑動區域。"</string>
     <string name="password_keyboard_label_symbol_key" msgid="2716255580853511949">"？123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="5294837425652726684">"ABC"</string>
@@ -1651,15 +1651,15 @@
     <string name="display_manager_overlay_display_name" msgid="5306088205181005861">"重疊效果 #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="1480158037150469170">"<xliff:g id="NAME">%1$s</xliff:g>：<xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>，<xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="2810034719482834679">"(安全)"</string>
-    <string name="kg_forgot_pattern_button_text" msgid="406145459223122537">"忘記了圖形"</string>
-    <string name="kg_wrong_pattern" msgid="1342812634464179931">"圖形錯誤"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="406145459223122537">"忘記了圖案"</string>
+    <string name="kg_wrong_pattern" msgid="1342812634464179931">"圖案錯誤"</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"密碼錯誤"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"PIN 錯誤"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">
       <item quantity="other">請在 <xliff:g id="NUMBER">%d</xliff:g> 秒後再試一次。</item>
       <item quantity="one">請在 1 秒後再試一次。</item>
     </plurals>
-    <string name="kg_pattern_instructions" msgid="8366024510502517748">"畫出圖形"</string>
+    <string name="kg_pattern_instructions" msgid="8366024510502517748">"畫出圖案"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"輸入 SIM 卡 PIN 碼"</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"輸入 PIN 碼"</string>
     <string name="kg_password_instructions" msgid="7179782578809398050">"輸入密碼"</string>
@@ -1672,7 +1672,7 @@
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK 碼應由 8 位數字組成。"</string>
     <string name="kg_invalid_puk" msgid="4809502818518963344">"請重新輸入正確的 PUK 碼。如果嘗試輸入的次數過多，SIM 卡將永久停用。"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="4705368340409816254">"PIN 碼不符"</string>
-    <string name="kg_login_too_many_attempts" msgid="699292728290654121">"圖形嘗試次數過多"</string>
+    <string name="kg_login_too_many_attempts" msgid="699292728290654121">"圖案嘗試次數過多"</string>
     <string name="kg_login_instructions" msgid="3619844310339066827">"如要解鎖，請以 Google 帳戶登入。"</string>
     <string name="kg_login_username_hint" msgid="1765453775467133251">"使用者名稱 (電子郵件)"</string>
     <string name="kg_login_password_hint" msgid="3330530727273164402">"密碼"</string>
@@ -1682,16 +1682,16 @@
     <string name="kg_login_checking_password" msgid="4676010303243317253">"正在檢查帳戶…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="23741434207544038">"您已輸入錯誤的 PIN 碼 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="3328686432962224215">"您已輸入錯誤的密碼 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="7357404233979139075">"您已畫錯解鎖圖形 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="7357404233979139075">"您已畫錯解鎖圖案 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="3479940221343361587">"您嘗試了 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次仍未能成功解開這部上鎖的平板電腦。如果再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，平板電腦將回復原廠設定，所有使用者資料均會失去。"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="9064457748587850217">"您已 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次無法解鎖 Android TV 裝置。如果再失敗 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次，Android TV 裝置將回復原廠設定，所有使用者資料均會遺失。"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="5955398963754432548">"您嘗試了 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次仍未能成功解開這部上鎖的手機。如果再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，手機將回復原廠設定，所有使用者資料均會失去。"</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2299099385175083308">"您嘗試了 <xliff:g id="NUMBER">%d</xliff:g> 次仍未能成功解開這部上鎖的平板電腦。平板電腦現在將回復原廠設定。"</string>
     <string name="kg_failed_attempts_now_wiping" product="tv" msgid="5045460916106267585">"您已 <xliff:g id="NUMBER">%d</xliff:g> 次無法解鎖 Android TV 裝置，Android TV 裝置現在將回復原廠設定。"</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="5043730590446071189">"您嘗試了 <xliff:g id="NUMBER">%d</xliff:g> 次仍未能成功解開這部上鎖的手機。手機現在將回復原廠設定。"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="7086799295109717623">"您已畫錯解鎖圖形 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統會要求您透過電郵帳戶解開上鎖的平板電腦。\n\n請在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後再試一次。"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4670840383567106114">"您已畫錯解鎖圖形 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。如果再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統會要求您使用電郵帳戶解鎖 Android TV 裝置。\n\n請在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後再試一次。"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"您已畫錯解鎖圖形 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統會要求您透過電郵帳戶解開上鎖的手機。\n\n請在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後再試一次。"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="7086799295109717623">"您已畫錯解鎖圖案 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統會要求您透過電郵帳戶解開上鎖的平板電腦。\n\n請在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後再試一次。"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4670840383567106114">"您已畫錯解鎖圖案 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。如果再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統會要求您使用電郵帳戶解鎖 Android TV 裝置。\n\n請在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後再試一次。"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"您已畫錯解鎖圖案 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統會要求您透過電郵帳戶解開上鎖的手機。\n\n請在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"移除"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"要調高音量 (比建議的音量更大聲) 嗎？\n\n長時間聆聽高分貝音量可能會導致您的聽力受損。"</string>
@@ -1875,7 +1875,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"第二個工作<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"第三個工作<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"取消固定時必須輸入 PIN"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"取消固定時必須提供解鎖圖形"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"取消固定時必須提供解鎖圖案"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"取消固定時必須輸入密碼"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"已由您的管理員安裝"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"已由您的管理員更新"</string>
