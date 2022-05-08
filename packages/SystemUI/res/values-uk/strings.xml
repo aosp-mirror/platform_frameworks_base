@@ -256,7 +256,7 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi-Fi не під’єднано"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Яскравість"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Інверсія кольорів"</string>
-    <string name="quick_settings_more_settings" msgid="2878235926753776694">"Більше налаштувань"</string>
+    <string name="quick_settings_more_settings" msgid="2878235926753776694">"Інші налаштування"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Налаштування користувача"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Готово"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Закрити"</string>
@@ -527,7 +527,7 @@
     <string name="feedback_prompt" msgid="3656728972307896379">"Надішліть розробнику свій відгук. Усе правильно?"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"Елементи керування сповіщеннями для додатка <xliff:g id="APP_NAME">%1$s</xliff:g> відкрито"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"Елементи керування сповіщеннями для додатка <xliff:g id="APP_NAME">%1$s</xliff:g> закрито"</string>
-    <string name="notification_more_settings" msgid="4936228656989201793">"Більше налаштувань"</string>
+    <string name="notification_more_settings" msgid="4936228656989201793">"Інші налаштування"</string>
     <string name="notification_app_settings" msgid="8963648463858039377">"Налаштувати"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"Показувати як спливаюче сповіщення"</string>
     <string name="notification_conversation_unbubble" msgid="6908427185031099868">"Вимкнути спливаючі чати"</string>

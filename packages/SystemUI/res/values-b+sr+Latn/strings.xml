@@ -336,7 +336,7 @@
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Zameni korisnika"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Dodaj korisnika"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Novi korisnik"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Želite li da uklonite gosta?"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Želite da uklonite gosta?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Sve aplikacije i podaci u ovoj sesiji će biti izbrisani."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Ukloni"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Dobro došli nazad, goste!"</string>
