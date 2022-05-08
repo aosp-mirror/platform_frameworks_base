@@ -16,12 +16,14 @@
 
 package androidx.window.extensions.embedding;
 
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.Activity;
 import android.app.WindowConfiguration;
 import android.app.WindowConfiguration.WindowingMode;
 import android.graphics.Rect;
@@ -62,6 +64,9 @@ class TaskContainer {
     final Set<IBinder> mFinishedContainer = new ArraySet<>();
 
     TaskContainer(int taskId) {
+        if (taskId == INVALID_TASK_ID) {
+            throw new IllegalArgumentException("Invalid Task id");
+        }
         mTaskId = taskId;
     }
 
@@ -129,5 +134,12 @@ class TaskContainer {
     /** Whether there is any {@link TaskFragmentContainer} below this Task. */
     boolean isEmpty() {
         return mContainers.isEmpty() && mFinishedContainer.isEmpty();
+    }
+
+    /** Removes the pending appeared activity from all TaskFragments in this Task. */
+    void cleanupPendingAppearedActivity(@NonNull Activity pendingAppearedActivity) {
+        for (TaskFragmentContainer container : mContainers) {
+            container.removePendingAppearedActivity(pendingAppearedActivity);
+        }
     }
 }

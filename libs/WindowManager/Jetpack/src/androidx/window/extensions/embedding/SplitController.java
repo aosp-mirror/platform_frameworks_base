@@ -422,6 +422,18 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         launchPlaceholderIfNecessary(activity);
     }
 
+    @VisibleForTesting
+    void onActivityDestroyed(@NonNull Activity activity) {
+        // Remove any pending appeared activity, as the server won't send finished activity to the
+        // organizer.
+        for (int i = mTaskContainers.size() - 1; i >= 0; i--) {
+            mTaskContainers.valueAt(i).cleanupPendingAppearedActivity(activity);
+        }
+        // We didn't trigger the callback if there were any pending appeared activities, so check
+        // again after the pending is removed.
+        updateCallbackIfNecessary();
+    }
+
     /**
      * Called when we have been waiting too long for the TaskFragment to become non-empty after
      * creation.
@@ -465,12 +477,12 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         if (activityInTask == null) {
             throw new IllegalArgumentException("activityInTask must not be null,");
         }
-        final TaskFragmentContainer container = new TaskFragmentContainer(activity, taskId, this);
         if (!mTaskContainers.contains(taskId)) {
             mTaskContainers.put(taskId, new TaskContainer(taskId));
         }
         final TaskContainer taskContainer = mTaskContainers.get(taskId);
-        taskContainer.mContainers.add(container);
+        final TaskFragmentContainer container = new TaskFragmentContainer(activity, taskContainer,
+                this);
         if (!taskContainer.isTaskBoundsInitialized()) {
             // Get the initial bounds before the TaskFragment has appeared.
             final Rect taskBounds = SplitPresenter.getTaskBoundsFromActivity(activityInTask);
@@ -500,14 +512,13 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         if (splitRule instanceof SplitPairRule && ((SplitPairRule) splitRule).shouldClearTop()) {
             removeExistingSecondaryContainers(wct, primaryContainer);
         }
-        mTaskContainers.get(primaryContainer.getTaskId()).mSplitContainers.add(splitContainer);
+        primaryContainer.getTaskContainer().mSplitContainers.add(splitContainer);
     }
 
     /** Cleanups all the dependencies when the TaskFragment is entering PIP. */
     private void cleanupForEnterPip(@NonNull WindowContainerTransaction wct,
             @NonNull TaskFragmentContainer container) {
-        final int taskId = container.getTaskId();
-        final TaskContainer taskContainer = mTaskContainers.get(taskId);
+        final TaskContainer taskContainer = container.getTaskContainer();
         if (taskContainer == null) {
             return;
         }
@@ -545,8 +556,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      */
     void removeContainer(@NonNull TaskFragmentContainer container) {
         // Remove all split containers that included this one
-        final int taskId = container.getTaskId();
-        final TaskContainer taskContainer = mTaskContainers.get(taskId);
+        final TaskContainer taskContainer = container.getTaskContainer();
         if (taskContainer == null) {
             return;
         }
@@ -637,8 +647,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         if (splitContainer == null) {
             return;
         }
-        final List<SplitContainer> splitContainers = mTaskContainers.get(container.getTaskId())
-                .mSplitContainers;
+        final List<SplitContainer> splitContainers = container.getTaskContainer().mSplitContainers;
         if (splitContainer != splitContainers.get(splitContainers.size() - 1)) {
             // Skip position update - it isn't the topmost split.
             return;
@@ -660,8 +669,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      */
     @Nullable
     private SplitContainer getActiveSplitForContainer(@NonNull TaskFragmentContainer container) {
-        final List<SplitContainer> splitContainers = mTaskContainers.get(container.getTaskId())
-                .mSplitContainers;
+        final List<SplitContainer> splitContainers = container.getTaskContainer().mSplitContainers;
         if (splitContainers.isEmpty()) {
             return null;
         }
@@ -683,11 +691,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     private SplitContainer getActiveSplitForContainers(
             @NonNull TaskFragmentContainer firstContainer,
             @NonNull TaskFragmentContainer secondContainer) {
-        final List<SplitContainer> splitContainers = mTaskContainers.get(firstContainer.getTaskId())
+        final List<SplitContainer> splitContainers = firstContainer.getTaskContainer()
                 .mSplitContainers;
-        if (splitContainers == null) {
-            return null;
-        }
         for (int i = splitContainers.size() - 1; i >= 0; i--) {
             final SplitContainer splitContainer = splitContainers.get(i);
             final TaskFragmentContainer primary = splitContainer.getPrimaryContainer();
@@ -866,11 +871,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         if (container == null) {
             return false;
         }
-        final List<SplitContainer> splitContainers = mTaskContainers.get(container.getTaskId())
-                .mSplitContainers;
-        if (splitContainers == null) {
-            return true;
-        }
+        final List<SplitContainer> splitContainers = container.getTaskContainer().mSplitContainers;
         for (SplitContainer splitContainer : splitContainers) {
             if (container.equals(splitContainer.getPrimaryContainer())
                     || container.equals(splitContainer.getSecondaryContainer())) {
@@ -1058,6 +1059,11 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         @Override
         public void onActivityConfigurationChanged(Activity activity) {
             SplitController.this.onActivityConfigurationChanged(activity);
+        }
+
+        @Override
+        public void onActivityPostDestroyed(Activity activity) {
+            SplitController.this.onActivityDestroyed(activity);
         }
     }
 

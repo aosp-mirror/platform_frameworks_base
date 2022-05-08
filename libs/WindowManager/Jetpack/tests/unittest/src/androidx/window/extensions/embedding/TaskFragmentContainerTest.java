@@ -76,7 +76,8 @@ public class TaskFragmentContainerTest {
 
     @Test
     public void testFinish() {
-        final TaskFragmentContainer container = new TaskFragmentContainer(mActivity, TASK_ID,
+        final TaskContainer taskContainer = new TaskContainer(TASK_ID);
+        final TaskFragmentContainer container = new TaskFragmentContainer(mActivity, taskContainer,
                 mController);
         final WindowContainerTransaction wct = new WindowContainerTransaction();
 
@@ -107,8 +108,9 @@ public class TaskFragmentContainerTest {
 
     @Test
     public void testIsWaitingActivityAppear() {
+        final TaskContainer taskContainer = new TaskContainer(TASK_ID);
         final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,
-                TASK_ID, mController);
+                taskContainer, mController);
 
         assertTrue(container.isWaitingActivityAppear());
 
@@ -127,8 +129,9 @@ public class TaskFragmentContainerTest {
 
     @Test
     public void testAppearEmptyTimeout() {
+        final TaskContainer taskContainer = new TaskContainer(TASK_ID);
         final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,
-                TASK_ID, mController);
+                taskContainer, mController);
 
         assertNull(container.mAppearEmptyTimeout);
 
