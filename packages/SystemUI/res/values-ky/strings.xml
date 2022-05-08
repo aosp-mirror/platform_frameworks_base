@@ -147,7 +147,7 @@
     <string name="phone_label" msgid="5715229948920451352">"телефонду ачуу"</string>
     <string name="voice_assist_label" msgid="3725967093735929020">"үн жардамчысысын ачуу"</string>
     <string name="camera_label" msgid="8253821920931143699">"камераны ачуу"</string>
-    <string name="cancel" msgid="1089011503403416730">"Жокко чыгаруу"</string>
+    <string name="cancel" msgid="1089011503403416730">"Жок"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Ырастоо"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Кайталоо"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"Аныктыгын текшерүүнү жокко чыгаруу үчүн таптаңыз"</string>
@@ -386,7 +386,7 @@
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Түстөрдү инверсиялоо"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Түстү тууралоо абалы"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Дагы жөндөөлөр"</string>
-    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Колдонуучунун жөндөөлөрү"</string>
+    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Колдонуучунун параметрлери"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Бүттү"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Жабуу"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Туташкан"</string>
@@ -481,7 +481,7 @@
     <string name="user_add_user" msgid="4336657383006913022">"Колдонуучу кошуу"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Жаңы колдонуучу"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Конокту алып саласызбы?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Бул сеанстагы бардык колдонмолор жана маалыматтар өчүрүлөт."</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Бул сеанстагы бардык колдонмолор жана аларга байланыштуу нерселер өчүрүлөт."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Өчүрүү"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Кайтып келишиңиз менен!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Сеансыңызды улантасызбы?"</string>
@@ -1021,7 +1021,7 @@
     <string name="music_controls_no_title" msgid="4166497066552290938">"Аталышы жок"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"Жылдыруу"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Тутум чабыттоосу жаңырды. Өзгөртүү үчүн, жөндөөлөргө өтүңүз."</string>
-    <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Тутум чабыттоосун жаңыртуу үчүн жөндөөлөргө өтүңүз"</string>
+    <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Системада чабыттоо параметрлерин өзгөртүү үчүн жөндөөлөргө өтүңүз"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Көшүү режими"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Чоңойтуу терезеси"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Чоңойтуу терезесин башкаруу каражаттары"</string>

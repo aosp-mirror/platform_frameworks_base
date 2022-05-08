@@ -284,7 +284,7 @@
     <string name="accessibility_quick_settings_less_time" msgid="9110364286464977870">"Menos tiempo."</string>
     <string name="accessibility_quick_settings_flashlight_off" msgid="7606563260714825190">"Linterna desactivada."</string>
     <string name="accessibility_quick_settings_flashlight_unavailable" msgid="7458591827288347635">"La linterna no está disponible."</string>
-    <string name="accessibility_quick_settings_flashlight_on" msgid="3785616827729850766">"Linterna activada."</string>
+    <string name="accessibility_quick_settings_flashlight_on" msgid="3785616827729850766">"Linterna encendida."</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3782375441381402599">"Linterna desactivada."</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="4747870681508334200">"Linterna activada."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="7548045840282925393">"Inversión de color desactivada."</string>
@@ -494,7 +494,7 @@
     <string name="user_logout_notification_text" msgid="7441286737342997991">"Salir de usuario actual"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"SALIR DE USUARIO"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"¿Añadir nuevo usuario?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Al añadir un nuevo usuario, debe configurar su espacio.\n\nCualquier usuario puede actualizar las aplicaciones del resto de usuarios."</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Al añadir un nuevo usuario, dicha persona debe configurar su espacio.\n\nCualquier usuario puede actualizar las aplicaciones del resto de usuarios."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Has alcanzado el límite de usuarios"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Puedes añadir hasta <xliff:g id="COUNT">%d</xliff:g> usuarios.</item>

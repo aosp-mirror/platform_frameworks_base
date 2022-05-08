@@ -497,7 +497,7 @@
     <string name="user_logout_notification_title" msgid="3644848998053832589">"Odjava uporabnika"</string>
     <string name="user_logout_notification_text" msgid="7441286737342997991">"Odjava trenutnega uporabnika"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"ODJAVA UPORABNIKA"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Dodajanje novega uporabnika?"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"Želite dodati uporabnika?"</string>
     <string name="user_add_user_message_short" msgid="2599370307878014791">"Ko dodate novega uporabnika, mora ta nastaviti svoj prostor.\n\nVsak uporabnik lahko posodobi aplikacije za vse druge uporabnike."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Omejitev uporabnikov je dosežena"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">

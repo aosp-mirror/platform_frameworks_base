@@ -494,7 +494,7 @@
     <string name="user_logout_notification_text" msgid="7441286737342997991">"現在のユーザーをログアウト"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"ユーザーをログアウト"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"新しいユーザーを追加しますか？"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"新しく追加したユーザーは各自でスペースをセットアップする必要があります。\n\nすべてのユーザーは他のユーザーに代わってアプリを更新できます。"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"新しく追加したユーザーは各自でスペースをセットアップする必要があります。\n\nすべてのユーザーがアプリを更新でき、その影響は他のユーザーにも及びます。"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"ユーザー数が上限に達しました"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">最大 <xliff:g id="COUNT">%d</xliff:g> 人のユーザーを追加できます。</item>
