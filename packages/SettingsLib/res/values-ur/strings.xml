@@ -599,7 +599,7 @@
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"ہٹائیں"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"مہمان کو ری سیٹ کرنا…"</string>
     <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"مہمان سیشن کو ری سیٹ کریں؟"</string>
-    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"یہ ایک نیا مہمان سیشن شروع کرے گا اور موجودہ سیشن سے تمام ایپس اور ڈیٹا کو حذف کر دے گا"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"اس سے ایک نیا مہمان سیشن شروع ہو گا اور موجودہ سیشن سے تمام ایپس اور ڈیٹا حذف ہو جائے گا"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"مہمان وضع سے باہر نکلیں؟"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"یہ موجودہ مہمان سیشن سے ایپس اور ڈیٹا کو حذف کر دے گا"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"باہر نکلیں"</string>

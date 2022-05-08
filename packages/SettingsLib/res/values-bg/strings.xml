@@ -603,7 +603,7 @@
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Изход от режима на гост?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Така ще изтриете приложенията и данните от текущата сесия като гост"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Изход"</string>
-    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Активност като гост – запазване?"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Запазване на активността като гост?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Можете да запазите активността от сесията или да изтриете всички прил. и данни"</string>
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Изтриване"</string>
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Запазване"</string>

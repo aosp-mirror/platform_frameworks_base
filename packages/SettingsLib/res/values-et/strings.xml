@@ -599,7 +599,7 @@
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Eemalda"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Külastajaseansi lähtestamine …"</string>
     <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Kas lähtestada külastajaseanss?"</string>
-    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"See alustab uut külastajaseanssi ning kustutab kõik praeguse seansi rakendused ja andmed"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"See alustab uut külastajaseanssi ning kustutab kõik praeguse seansi rakendused ja andmed."</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Kas väljuda külalisrežiimist?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"See kustutab praeguse külastajaseansi rakendused ja andmed"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Välju"</string>
@@ -611,8 +611,8 @@
     <string name="guest_reset_button" msgid="2515069346223503479">"Lähtesta külastajaseanss"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Välju külastajaseansist"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Kõik tegevused kustutatakse väljumisel"</string>
-    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Võite tegevused salvestada või kustutada väljumisel"</string>
-    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Lähtestage, et seansi tegevused kohe kustutada; samuti võite tegevused salvestada või kustutada väljumisel"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Võite tegevused salvestada või kustutada väljumisel."</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Seansi tegevuste kohe kustutamiseks lähtestage; või salvestage või kustutage need väljumisel."</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Pildistage"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Valige pilt"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Valige foto"</string>

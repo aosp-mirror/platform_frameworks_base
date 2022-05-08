@@ -570,7 +570,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Perfil restringido"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"¿Añadir nuevo usuario?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Puedes compartir este dispositivo si creas más usuarios. Cada uno tendrá su propio espacio y podrá personalizarlo con aplicaciones, un fondo de pantalla y mucho más. Los usuarios también pueden ajustar opciones del dispositivo, como la conexión Wi‑Fi, que afectan a todos los usuarios.\n\nCuando añadas un usuario, tendrá que configurar su espacio.\n\nCualquier usuario puede actualizar aplicaciones de todos los usuarios. Es posible que no se transfieran los servicios y opciones de accesibilidad al nuevo usuario."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Al añadir un usuario nuevo, debe configurar su espacio.\n\nCualquier usuario puede actualizar las aplicaciones del resto de usuarios."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Al añadir un nuevo usuario, dicha persona debe configurar su espacio.\n\nCualquier usuario puede actualizar las aplicaciones del resto de usuarios."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"¿Configurar usuario ahora?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Asegúrate de que la persona está disponible en este momento para usar el dispositivo y configurar su espacio."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"¿Quieres configurar un perfil ahora?"</string>
@@ -600,19 +600,19 @@
     <string name="guest_resetting" msgid="7822120170191509566">"Restableciendo invitado…"</string>
     <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"¿Restablecer sesión de invitado?"</string>
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Se iniciará una nueva sesión de invitado y se borrarán todas las aplicaciones y datos de esta sesión"</string>
-    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"¿Salir del modo Invitados?"</string>
-    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Se eliminarán todas las aplicaciones y datos de la sesión de invitado"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"¿Salir del modo Invitado?"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Se eliminarán todas las aplicaciones y datos de la sesión de invitado actual"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Salir"</string>
-    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"¿Guardar actividad de invitados?"</string>
-    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Puedes guardar la actividad de esta sesión o eliminar las aplicaciones y datos"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"¿Guardar actividad de invitado?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Puedes guardar la actividad de esta sesión o eliminar todas las aplicaciones y datos"</string>
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Eliminar"</string>
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Guardar"</string>
-    <string name="guest_exit_button" msgid="5774985819191803960">"Salir del modo Invitados"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Salir del modo Invitado"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"Restablecer sesión de invitado"</string>
-    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Salir del modo Invitados"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Salir del modo Invitado"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Toda la actividad se eliminará cuando salgas"</string>
-    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Puedes guardar o eliminar tu actividad cuando salgas"</string>
-    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Restablece la sesión para eliminar la actividad ahora, o guarda o elimina la actividad cuando salgas"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Puedes guardar o eliminar tu actividad al salir"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Restablece la sesión para eliminar la actividad ahora, o guarda o borra la actividad al salir"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Hacer foto"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Seleccionar una imagen"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Seleccionar foto"</string>

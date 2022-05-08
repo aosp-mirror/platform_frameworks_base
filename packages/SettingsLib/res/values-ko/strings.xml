@@ -599,9 +599,9 @@
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"삭제"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"게스트 재설정 중…"</string>
     <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"게스트 세션을 재설정하시겠습니까?"</string>
-    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"이렇게 하면 새로운 게스트 세션이 시작되고 기존 세션의 모든 앱과 데이터가 삭제됩니다."</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"새로운 게스트 세션이 시작되고 기존 세션의 모든 앱과 데이터가 삭제됩니다."</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"게스트 모드를 종료하시겠습니까?"</string>
-    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"기존 게스트 세션의 앱과 데이터가 삭제됩니다."</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"현재 게스트 세션의 앱과 데이터가 삭제됩니다."</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"종료"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"게스트 활동을 저장하시겠습니까?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"기존 세션의 활동을 저장하거나 모든 앱과 데이터를 삭제할 수 있습니다."</string>

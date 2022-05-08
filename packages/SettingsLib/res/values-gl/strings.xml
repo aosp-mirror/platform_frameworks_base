@@ -619,7 +619,7 @@
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Realizaches demasiados intentos incorrectos. Eliminaranse os datos deste dispositivo."</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Realizaches demasiados intentos incorrectos. Eliminarase este usuario."</string>
     <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"Realizaches demasiados intentos incorrectos. Eliminaranse este perfil de traballo e os datos asociados."</string>
-    <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"Ignorar"</string>
+    <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"Pechar"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Funcionamento predeterminado"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Desactivado"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Activado"</string>

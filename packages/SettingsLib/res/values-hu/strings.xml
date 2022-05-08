@@ -612,7 +612,7 @@
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Vendég kiléptetése"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"A kilépéssel minden tevékenység törlődik"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"A kilépéskor mentheti vagy törölheti a tevékenységeket"</string>
-    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Visszaállítással azonnal törölheti a munkamenethez tartozó tevékenységeket, illetve kilépéskor mentheti vagy törölheti a tevékenységeket"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Visszaállítással azonnal törölheti, illetve kilépéskor mentheti vagy törölheti a tevékenységeket"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Fotó készítése"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Kép kiválasztása"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Fotó kiválasztása"</string>

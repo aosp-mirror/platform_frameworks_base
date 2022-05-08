@@ -613,7 +613,7 @@
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"ဧည့်သည့်မှ ထွက်ရန်"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"ထွက်သည့်အခါ လုပ်ဆောင်ချက်အားလုံးကို ဖျက်လိုက်မည်"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"ထွက်သည့်အခါ လုပ်ဆောင်ချက်ကို သိမ်းနိုင် (သို့) ဖျက်နိုင်သည်"</string>
-    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"စက်ရှင်လုပ်ဆောင်ချက်ကို ယခုဖျက်ရန် ပြင်ဆင်သတ်မှတ်နိုင်သည် (သို့) ထွက်သည့်အခါ လုပ်ဆောင်ချက်ကို သိမ်းနိုင် (သို့) ဖျက်နိုင်သည်"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"စက်ရှင်လုပ်ဆောင်ချက်ကို ယခုဖျက်ရန် ပြင်ဆင်သတ်မှတ်နိုင်သည် (သို့) ထွက်သည့်အခါ သိမ်းနိုင်၊ ဖျက်နိုင်သည်"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ဓာတ်ပုံရိုက်ရန်"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"ပုံရွေးရန်"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ဓာတ်ပုံရွေးရန်"</string>
