@@ -1860,7 +1860,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
             float x, float y, float pressure, float size, int metaState,
             float xPrecision, float yPrecision, int deviceId, int edgeFlags) {
         return obtain(downTime, eventTime, action, x, y, pressure, size, metaState,
-                xPrecision, yPrecision, deviceId, edgeFlags, InputDevice.SOURCE_UNKNOWN,
+                xPrecision, yPrecision, deviceId, edgeFlags, InputDevice.SOURCE_CLASS_POINTER,
                 DEFAULT_DISPLAY);
     }
 
@@ -2263,8 +2263,11 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     }
 
     /**
-     * {@link #getX(int)} for the first pointer index (may be an
-     * arbitrary pointer identifier).
+     * Equivalent to {@link #getX(int)} for pointer index 0 (regardless of the
+     * pointer identifier).
+     *
+     * @return The X coordinate of the first pointer index in the coordinate
+     *      space of the view that received this motion event.
      *
      * @see #AXIS_X
      */
@@ -2273,8 +2276,11 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     }
 
     /**
-     * {@link #getY(int)} for the first pointer index (may be an
-     * arbitrary pointer identifier).
+     * Equivalent to {@link #getY(int)} for pointer index 0 (regardless of the
+     * pointer identifier).
+     *
+     * @return The Y coordinate of the first pointer index in the coordinate
+     *      space of the view that received this motion event.
      *
      * @see #AXIS_Y
      */
@@ -2416,13 +2422,20 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     }
 
     /**
-     * Returns the X coordinate of this event for the given pointer
-     * <em>index</em> (use {@link #getPointerId(int)} to find the pointer
-     * identifier for this index).
-     * Whole numbers are pixels; the
-     * value may have a fraction for input devices that are sub-pixel precise.
-     * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
-     * (the first pointer that is down) to {@link #getPointerCount()}-1.
+     * Returns the X coordinate of the pointer referenced by
+     * {@code pointerIndex} for this motion event. The coordinate is in the
+     * coordinate space of the view that received this motion event.
+     *
+     * <p>Use {@link #getPointerId(int)} to get the pointer identifier for the
+     * pointer referenced by {@code pointerIndex}.
+     *
+     * @param pointerIndex Index of the pointer for which the X coordinate is
+     *      returned. May be a value in the range of 0 (the first pointer that
+     *      is down) to {@link #getPointerCount()} - 1.
+     * @return The X coordinate of the pointer referenced by
+     *      {@code pointerIndex} for this motion event. The unit is pixels. The
+     *      value may contain a fractional portion for devices that are subpixel
+     *      precise.
      *
      * @see #AXIS_X
      */
@@ -2431,13 +2444,20 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     }
 
     /**
-     * Returns the Y coordinate of this event for the given pointer
-     * <em>index</em> (use {@link #getPointerId(int)} to find the pointer
-     * identifier for this index).
-     * Whole numbers are pixels; the
-     * value may have a fraction for input devices that are sub-pixel precise.
-     * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
-     * (the first pointer that is down) to {@link #getPointerCount()}-1.
+     * Returns the Y coordinate of the pointer referenced by
+     * {@code pointerIndex} for this motion event. The coordinate is in the
+     * coordinate space of the view that received this motion event.
+     *
+     * <p>Use {@link #getPointerId(int)} to get the pointer identifier for the
+     * pointer referenced by {@code pointerIndex}.
+     *
+     * @param pointerIndex Index of the pointer for which the Y coordinate is
+     *      returned. May be a value in the range of 0 (the first pointer that
+     *      is down) to {@link #getPointerCount()} - 1.
+     * @return The Y coordinate of the pointer referenced by
+     *      {@code pointerIndex} for this motion event. The unit is pixels. The
+     *      value may contain a fractional portion for devices that are subpixel
+     *      precise.
      *
      * @see #AXIS_Y
      */
@@ -2683,12 +2703,13 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     }
 
     /**
-     * Returns the original raw X coordinate of this event.  For touch
-     * events on the screen, this is the original location of the event
-     * on the screen, before it had been adjusted for the containing window
-     * and views.
+     * Equivalent to {@link #getRawX(int)} for pointer index 0 (regardless of
+     * the pointer identifier).
      *
-     * @see #getX(int)
+     * @return The X coordinate of the first pointer index in the coordinate
+     *      space of the device display.
+     *
+     * @see #getX()
      * @see #AXIS_X
      */
     public final float getRawX() {
@@ -2696,12 +2717,13 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     }
 
     /**
-     * Returns the original raw Y coordinate of this event.  For touch
-     * events on the screen, this is the original location of the event
-     * on the screen, before it had been adjusted for the containing window
-     * and views.
+     * Equivalent to {@link #getRawY(int)} for pointer index 0 (regardless of
+     * the pointer identifier).
      *
-     * @see #getY(int)
+     * @return The Y coordinate of the first pointer index in the coordinate
+     *      space of the device display.
+     *
+     * @see #getY()
      * @see #AXIS_Y
      */
     public final float getRawY() {
@@ -2709,13 +2731,38 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     }
 
     /**
-     * Returns the original raw X coordinate of this event.  For touch
-     * events on the screen, this is the original location of the event
-     * on the screen, before it had been adjusted for the containing window
-     * and views.
+     * Returns the X coordinate of the pointer referenced by
+     * {@code pointerIndex} for this motion event. The coordinate is in the
+     * coordinate space of the device display, irrespective of system
+     * decorations and whether or not the system is in multi-window mode. If the
+     * app spans multiple screens in a multiple-screen environment, the
+     * coordinate space includes all of the spanned screens.
      *
-     * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
-     * (the first pointer that is down) to {@link #getPointerCount()}-1.
+     * <p>In multi-window mode, the coordinate space extends beyond the bounds
+     * of the app window to encompass the entire display area. For example, if
+     * the motion event occurs in the right-hand window of split-screen mode in
+     * landscape orientation, the left edge of the screen&mdash;not the left
+     * edge of the window&mdash;is the origin from which the X coordinate is
+     * calculated.
+     *
+     * <p>In multiple-screen scenarios, the coordinate space can span screens.
+     * For example, if the app is spanning both screens of a dual-screen device,
+     * and the motion event occurs on the right-hand screen, the X coordinate is
+     * calculated from the left edge of the left-hand screen to the point of the
+     * motion event on the right-hand screen. When the app is restricted to a
+     * single screen in a multiple-screen environment, the coordinate space
+     * includes only the screen on which the app is running.
+     *
+     * <p>Use {@link #getPointerId(int)} to get the pointer identifier for the
+     * pointer referenced by {@code pointerIndex}.
+     *
+     * @param pointerIndex Index of the pointer for which the X coordinate is
+     *      returned. May be a value in the range of 0 (the first pointer that
+     *      is down) to {@link #getPointerCount()} - 1.
+     * @return The X coordinate of the pointer referenced by
+     *      {@code pointerIndex} for this motion event. The unit is pixels. The
+     *      value may contain a fractional portion for devices that are subpixel
+     *      precise.
      *
      * @see #getX(int)
      * @see #AXIS_X
@@ -2725,13 +2772,38 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     }
 
     /**
-     * Returns the original raw Y coordinate of this event.  For touch
-     * events on the screen, this is the original location of the event
-     * on the screen, before it had been adjusted for the containing window
-     * and views.
+     * Returns the Y coordinate of the pointer referenced by
+     * {@code pointerIndex} for this motion event. The coordinate is in the
+     * coordinate space of the device display, irrespective of system
+     * decorations and whether or not the system is in multi-window mode. If the
+     * app spans multiple screens in a multiple-screen environment, the
+     * coordinate space includes all of the spanned screens.
      *
-     * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
-     * (the first pointer that is down) to {@link #getPointerCount()}-1.
+     * <p>In multi-window mode, the coordinate space extends beyond the bounds
+     * of the app window to encompass the entire device screen. For example, if
+     * the motion event occurs in the lower window of split-screen mode in
+     * portrait orientation, the top edge of the screen&mdash;not the top edge
+     * of the window&mdash;is the origin from which the Y coordinate is
+     * determined.
+     *
+     * <p>In multiple-screen scenarios, the coordinate space can span screens.
+     * For example, if the app is spanning both screens of a dual-screen device
+     * that's rotated 90 degrees, and the motion event occurs on the lower
+     * screen, the Y coordinate is calculated from the top edge of the upper
+     * screen to the point of the motion event on the lower screen. When the app
+     * is restricted to a single screen in a multiple-screen environment, the
+     * coordinate space includes only the screen on which the app is running.
+     *
+     * <p>Use {@link #getPointerId(int)} to get the pointer identifier for the
+     * pointer referenced by {@code pointerIndex}.
+     *
+     * @param pointerIndex Index of the pointer for which the Y coordinate is
+     *      returned. May be a value in the range of 0 (the first pointer that
+     *      is down) to {@link #getPointerCount()} - 1.
+     * @return The Y coordinate of the pointer referenced by
+     *      {@code pointerIndex} for this motion event. The unit is pixels. The
+     *      value may contain a fractional portion for devices that are subpixel
+     *      precise.
      *
      * @see #getY(int)
      * @see #AXIS_Y
@@ -4008,6 +4080,22 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         public float orientation;
 
         /**
+         * The movement of x position of a motion event.
+         *
+         * @see MotionEvent#AXIS_RELATIVE_X
+         * @hide
+         */
+        public float relativeX;
+
+        /**
+         * The movement of y position of a motion event.
+         *
+         * @see MotionEvent#AXIS_RELATIVE_Y
+         * @hide
+         */
+        public float relativeY;
+
+        /**
          * Clears the contents of this object.
          * Resets all axes to zero.
          */
@@ -4023,6 +4111,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
             toolMajor = 0;
             toolMinor = 0;
             orientation = 0;
+            relativeX = 0;
+            relativeY = 0;
         }
 
         /**
@@ -4053,6 +4143,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
             toolMajor = other.toolMajor;
             toolMinor = other.toolMinor;
             orientation = other.orientation;
+            relativeX = other.relativeX;
+            relativeY = other.relativeY;
         }
 
         /**
@@ -4084,6 +4176,10 @@ public final class MotionEvent extends InputEvent implements Parcelable {
                     return toolMinor;
                 case AXIS_ORIENTATION:
                     return orientation;
+                case AXIS_RELATIVE_X:
+                    return relativeX;
+                case AXIS_RELATIVE_Y:
+                    return relativeY;
                 default: {
                     if (axis < 0 || axis > 63) {
                         throw new IllegalArgumentException("Axis out of range.");
@@ -4136,6 +4232,12 @@ public final class MotionEvent extends InputEvent implements Parcelable {
                     break;
                 case AXIS_ORIENTATION:
                     orientation = value;
+                    break;
+                case AXIS_RELATIVE_X:
+                    relativeX = value;
+                    break;
+                case AXIS_RELATIVE_Y:
+                    relativeY = value;
                     break;
                 default: {
                     if (axis < 0 || axis > 63) {

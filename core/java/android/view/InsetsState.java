@@ -301,7 +301,7 @@ public class InsetsState implements Parcelable {
         return mPrivacyIndicatorBounds.inset(insetLeft, insetTop, insetRight, insetBottom);
     }
 
-    public Rect calculateInsets(Rect frame, @InsetsType int types, boolean ignoreVisibility) {
+    public Insets calculateInsets(Rect frame, @InsetsType int types, boolean ignoreVisibility) {
         Insets insets = Insets.NONE;
         for (int type = FIRST_TYPE; type <= LAST_TYPE; type++) {
             InsetsSource source = mSources[type];
@@ -314,10 +314,10 @@ public class InsetsState implements Parcelable {
             }
             insets = Insets.max(source.calculateInsets(frame, ignoreVisibility), insets);
         }
-        return insets.toRect();
+        return insets;
     }
 
-    public Rect calculateVisibleInsets(Rect frame, @SoftInputModeFlags int softInputMode) {
+    public Insets calculateVisibleInsets(Rect frame, @SoftInputModeFlags int softInputMode) {
         Insets insets = Insets.NONE;
         for (int type = FIRST_TYPE; type <= LAST_TYPE; type++) {
             InsetsSource source = mSources[type];
@@ -332,7 +332,7 @@ public class InsetsState implements Parcelable {
             }
             insets = Insets.max(source.calculateVisibleInsets(frame), insets);
         }
-        return insets.toRect();
+        return insets;
     }
 
     /**
@@ -390,6 +390,17 @@ public class InsetsState implements Parcelable {
             //       mandatorySystemGestureInsets() in the Builder.
             processSourceAsPublicType(source, typeInsetsMap, typeSideMap, typeVisibilityMap,
                     insets, Type.SYSTEM_GESTURES);
+        }
+        if (type == Type.CAPTION_BAR) {
+            // Caption should also be gesture and tappable elements. This should not be needed when
+            // the caption is added from the shell, as the shell can add other types at the same
+            // time.
+            processSourceAsPublicType(source, typeInsetsMap, typeSideMap, typeVisibilityMap,
+                    insets, Type.SYSTEM_GESTURES);
+            processSourceAsPublicType(source, typeInsetsMap, typeSideMap, typeVisibilityMap,
+                    insets, Type.MANDATORY_SYSTEM_GESTURES);
+            processSourceAsPublicType(source, typeInsetsMap, typeSideMap, typeVisibilityMap,
+                    insets, Type.TAPPABLE_ELEMENT);
         }
     }
 
@@ -877,17 +888,6 @@ public class InsetsState implements Parcelable {
                 + ", mPrivacyIndicatorBounds=" + mPrivacyIndicatorBounds
                 + ", mSources= { " + joiner
                 + " }";
-    }
-
-    public @NonNull String toSourceVisibilityString() {
-        StringJoiner joiner = new StringJoiner(", ");
-        for (int i = 0; i < SIZE; i++) {
-            InsetsSource source = mSources[i];
-            if (source != null) {
-                joiner.add(typeToString(i) + ": " + (source.isVisible() ? "visible" : "invisible"));
-            }
-        }
-        return joiner.toString();
     }
 }
 

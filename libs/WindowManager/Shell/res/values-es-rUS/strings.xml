@@ -20,6 +20,7 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Cerrar"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Expandir"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Configuración"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Introducir pantalla dividida"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menú"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> está en modo de Pantalla en pantalla"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Si no quieres que <xliff:g id="NAME">%s</xliff:g> use esta función, presiona para abrir la configuración y desactivarla."</string>
@@ -72,5 +73,4 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Administrar"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Se descartó el cuadro."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"Presiona para reiniciar esta app y acceder al modo de pantalla completa."</string>
-    <string name="got_it" msgid="4428750913636945527">"Entendido"</string>
 </resources>

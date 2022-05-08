@@ -19,18 +19,16 @@ package com.android.systemui.statusbar.notification.collection.render
 import android.view.textclassifier.Log
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.notification.collection.ListEntry
-import com.android.systemui.statusbar.notification.row.ExpandableNotificationRowController
 import javax.inject.Inject
 
 /**
- * The ViewBarn is just a map from [ListEntry] to an instance of an
- * [ExpandableNotificationRowController].
+ * The ViewBarn is just a map from [ListEntry] to an instance of a [NodeController].
  */
 @SysUISingleton
 class NotifViewBarn @Inject constructor() {
-    private val rowMap = mutableMapOf<String, ExpandableNotificationRowController>()
+    private val rowMap = mutableMapOf<String, NodeController>()
 
-    fun requireView(forEntry: ListEntry): ExpandableNotificationRowController {
+    fun requireView(forEntry: ListEntry): NodeController {
         if (DEBUG) {
             Log.d(TAG, "requireView: $forEntry.key")
         }
@@ -42,7 +40,7 @@ class NotifViewBarn @Inject constructor() {
         return li
     }
 
-    fun registerViewForEntry(entry: ListEntry, controller: ExpandableNotificationRowController) {
+    fun registerViewForEntry(entry: ListEntry, controller: NodeController) {
         if (DEBUG) {
             Log.d(TAG, "registerViewForEntry: $entry.key")
         }

@@ -415,12 +415,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Penerapan WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Setel penerapan WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Pilihan ini tidak valid lagi. Coba lagi."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"Konversi ke enkripsi file"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Konversi..."</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"Sudah dienkripsi berbasis file"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"Mengonversi ke enkripsi berbasis file"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Konversi partisi data ke enkripsi berbasis file.\n !!Peringatan!! Tindakan ini akan menghapus semua data.\n Fitur ini masih dalam tahap alfa dan mungkin tidak berfungsi dengan baik.\n Tekan \'Hapus dan konversi…\' untuk melanjutkan."</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"Hapus dan konversi…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Mode warna gambar"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"Gunakan sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Dinonaktifkan"</string>

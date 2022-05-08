@@ -751,11 +751,25 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public static final int SCREEN_WIDTH_DP_UNDEFINED = 0;
 
     /**
-     * The current width of the available screen space, in dp units,
-     * corresponding to
-     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#ScreenWidthQualifier">screen
-     * width</a> resource qualifier.  Set to
+     * The current width of the available screen space in dp units, excluding
+     * the area occupied by screen decorations at the edges of the display.
+     * Corresponds to the
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#AvailableWidthHeightQualifier">
+     * available width</a> resource qualifier. Defaults to
      * {@link #SCREEN_WIDTH_DP_UNDEFINED} if no width is specified.
+     *
+     * <p>In multi-window mode, equals the width of the available display area
+     * of the app window, not the available display area of the device screen
+     * (for example, when apps are displayed side by side in split-screen mode
+     * in landscape orientation).
+     *
+     * <p>Differs from {@link android.view.WindowMetrics} by not including
+     * screen decorations in the width measurement and by expressing the
+     * measurement in dp rather than px. Use {@code screenWidthDp} to obtain the
+     * horizontal display area available to the app, excluding the area occupied
+     * by screen decorations. Use {@link android.view.WindowMetrics#getBounds()}
+     * to obtain the width of the display area available to the app, including
+     * the area occupied by screen decorations.
      */
     public int screenWidthDp;
 
@@ -766,11 +780,26 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public static final int SCREEN_HEIGHT_DP_UNDEFINED = 0;
 
     /**
-     * The current height of the available screen space, in dp units,
-     * corresponding to
-     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#ScreenHeightQualifier">screen
-     * height</a> resource qualifier.  Set to
+     * The current height of the available screen space in dp units, excluding
+     * the area occupied by screen decorations at the edges of the display (such
+     * as the status bar, navigation bar, and cutouts). Corresponds to the
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#AvailableWidthHeightQualifier">
+     * available height</a> resource qualifier. Defaults to
      * {@link #SCREEN_HEIGHT_DP_UNDEFINED} if no height is specified.
+     *
+     * <p>In multi-window mode, equals the height of the available display area
+     * of the app window, not the available display area of the device screen
+     * (for example, when apps are displayed one above another in split-screen
+     * mode in portrait orientation).
+     *
+     * <p>Differs from {@link android.view.WindowMetrics} by not including
+     * screen decorations in the height measurement and by expressing the
+     * measurement in dp rather than px. Use {@code screenHeightDp} to obtain
+     * the vertical display area available to the app, excluding the area
+     * occupied by screen decorations. Use
+     * {@link android.view.WindowMetrics#getBounds()} to obtain the height of
+     * the display area available to the app, including the area occupied by
+     * screen decorations.
      */
     public int screenHeightDp;
 

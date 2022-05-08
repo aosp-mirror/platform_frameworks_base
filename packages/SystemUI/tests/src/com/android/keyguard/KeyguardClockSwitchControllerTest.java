@@ -18,18 +18,23 @@ package com.android.keyguard;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.res.Resources;
+import android.database.ContentObserver;
+import android.net.Uri;
+import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import androidx.test.filters.SmallTest;
@@ -50,6 +55,9 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
 import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.settings.SecureSettings;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -104,11 +112,14 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     private AnimatableClockView mLargeClockView;
     @Mock
     private FrameLayout mLargeClockFrame;
+    @Mock
+    private SecureSettings mSecureSettings;
 
     private final View mFakeSmartspaceView = new View(mContext);
 
     private KeyguardClockSwitchController mController;
-    private View mStatusArea;
+    private View mSliceView;
+    private FakeExecutor mExecutor;
 
     @Before
     public void setup() {
@@ -129,6 +140,7 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
 
         when(mView.isAttachedToWindow()).thenReturn(true);
         when(mSmartspaceController.buildAndConnectView(any())).thenReturn(mFakeSmartspaceView);
+        mExecutor = new FakeExecutor(new FakeSystemClock());
         mController = new KeyguardClockSwitchController(
                 mView,
                 mStatusBarStateController,
@@ -143,14 +155,18 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
                 mSmartspaceController,
                 mKeyguardUnlockAnimationController,
                 mSmartSpaceTransitionController,
+                mSecureSettings,
+                mExecutor,
                 mResources
         );
 
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
         when(mColorExtractor.getColors(anyInt())).thenReturn(mGradientColors);
 
-        mStatusArea = new View(getContext());
-        when(mView.findViewById(R.id.keyguard_status_area)).thenReturn(mStatusArea);
+        mSliceView = new View(getContext());
+        when(mView.findViewById(R.id.keyguard_slice_view)).thenReturn(mSliceView);
+        when(mView.findViewById(R.id.keyguard_status_area)).thenReturn(
+                new LinearLayout(getContext()));
     }
 
     @Test
@@ -192,7 +208,6 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         verifyAttachment(times(1));
 
         listenerArgumentCaptor.getValue().onViewDetachedFromWindow(mView);
-
         verify(mColorExtractor).removeOnColorsChangedListener(
                 any(ColorExtractor.OnColorsChangedListener.class));
     }
@@ -215,7 +230,7 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         when(mSmartspaceController.buildAndConnectView(any())).thenReturn(mFakeSmartspaceView);
         mController.init();
 
-        assertEquals(View.GONE, mStatusArea.getVisibility());
+        assertEquals(View.GONE, mSliceView.getVisibility());
     }
 
     @Test
@@ -223,22 +238,7 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         when(mSmartspaceController.isEnabled()).thenReturn(false);
         mController.init();
 
-        assertEquals(View.VISIBLE, mStatusArea.getVisibility());
-    }
-
-    @Test
-    public void testDetachRemovesSmartspaceView() {
-        when(mSmartspaceController.isEnabled()).thenReturn(true);
-        when(mSmartspaceController.buildAndConnectView(any())).thenReturn(mFakeSmartspaceView);
-        mController.init();
-        verify(mView).addView(eq(mFakeSmartspaceView), anyInt(), any());
-
-        ArgumentCaptor<View.OnAttachStateChangeListener> listenerArgumentCaptor =
-                ArgumentCaptor.forClass(View.OnAttachStateChangeListener.class);
-        verify(mView).addOnAttachStateChangeListener(listenerArgumentCaptor.capture());
-
-        listenerArgumentCaptor.getValue().onViewDetachedFromWindow(mView);
-        verify(mView).removeView(mFakeSmartspaceView);
+        assertEquals(View.VISIBLE, mSliceView.getVisibility());
     }
 
     @Test
@@ -246,6 +246,25 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         mController.refresh();
 
         verify(mSmartspaceController).requestSmartspaceUpdate();
+    }
+
+    @Test
+    public void testChangeToDoubleLineClockSetsSmallClock() {
+        when(mSecureSettings.getInt(Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK, 1))
+                .thenReturn(0);
+        ArgumentCaptor<ContentObserver> observerCaptor =
+                ArgumentCaptor.forClass(ContentObserver.class);
+        mController.init();
+        verify(mSecureSettings).registerContentObserver(any(Uri.class),
+                anyBoolean(), observerCaptor.capture());
+        ContentObserver observer = observerCaptor.getValue();
+        mExecutor.runAllReady();
+
+        // When a settings change has occurred to the small clock, make sure the view is adjusted
+        reset(mView);
+        observer.onChange(true);
+        mExecutor.runAllReady();
+        verify(mView).switchToClock(KeyguardClockSwitch.SMALL);
     }
 
     private void verifyAttachment(VerificationMode times) {

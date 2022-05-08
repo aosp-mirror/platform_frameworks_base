@@ -108,8 +108,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // screen state returns.  Playing the animation can also be somewhat slow.
     private static final boolean USE_COLOR_FADE_ON_ANIMATION = false;
 
-    // The minimum reduction in brightness when dimmed.
-    private static final float SCREEN_DIM_MINIMUM_REDUCTION_FLOAT = 0.04f;
     private static final float SCREEN_ANIMATION_RATE_MINIMUM = 0.0f;
 
     private static final int COLOR_FADE_ON_ANIMATION_DURATION_MILLIS = 250;
@@ -199,6 +197,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     // The dim screen brightness.
     private final float mScreenBrightnessDimConfig;
+
+    // The minimum dim amount to use if the screen brightness is already below
+    // mScreenBrightnessDimConfig.
+    private final float mScreenBrightnessMinimumDimAmount;
 
     private final float mScreenBrightnessDefault;
 
@@ -378,6 +380,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private float mInitialAutoBrightness;
 
     // The controller for the automatic brightness level.
+    @Nullable
     private AutomaticBrightnessController mAutomaticBrightnessController;
 
     private Sensor mLightSensor;
@@ -484,6 +487,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 pm.getBrightnessConstraint(PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DOZE));
         mScreenBrightnessDimConfig = clampAbsoluteBrightness(
                 pm.getBrightnessConstraint(PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DIM));
+        mScreenBrightnessMinimumDimAmount = resources.getFloat(
+                com.android.internal.R.dimen.config_screenBrightnessMinimumDimAmountFloat);
+
 
         // NORMAL SCREEN SETTINGS
         mScreenBrightnessDefault = clampAbsoluteBrightness(
@@ -608,7 +614,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mPendingRbcOnOrChanged = strengthChanged || justActivated;
 
         // Reset model if strength changed OR rbc is turned off
-        if (strengthChanged || !justActivated && mAutomaticBrightnessController != null) {
+        if ((strengthChanged || !justActivated) && mAutomaticBrightnessController != null) {
             mAutomaticBrightnessController.resetShortTermModel();
         }
     }
@@ -739,13 +745,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         final IBinder token = device.getDisplayTokenLocked();
         final DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
         mHandler.post(() -> {
-            if (mDisplayDevice == device) {
-                return;
+            if (mDisplayDevice != device) {
+                mDisplayDevice = device;
+                mUniqueDisplayId = uniqueId;
+                mDisplayDeviceConfig = config;
+                loadFromDisplayDeviceConfig(token, info);
+                updatePowerState();
             }
-            mDisplayDevice = device;
-            mUniqueDisplayId = uniqueId;
-            mDisplayDeviceConfig = config;
-            loadFromDisplayDeviceConfig(token, info);
         });
     }
 
@@ -1052,11 +1058,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
         assert(state != Display.STATE_UNKNOWN);
 
-        // Initialize things the first time the power state is changed.
-        if (mustInitialize) {
-            initialize(state);
-        }
-
         // Apply the proximity sensor.
         if (mProximitySensor != null) {
             if (mPowerRequest.useProximitySensor && state != Display.STATE_OFF) {
@@ -1105,6 +1106,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 || mLogicalDisplay.getPhase() == LogicalDisplay.DISPLAY_PHASE_LAYOUT_TRANSITION
                 || mScreenOffBecauseOfProximity) {
             state = Display.STATE_OFF;
+        }
+
+        // Initialize things the first time the power state is changed.
+        if (mustInitialize) {
+            initialize(state);
         }
 
         // Animate the screen state change unless already animating.
@@ -1283,7 +1289,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         if (mPowerRequest.policy == DisplayPowerRequest.POLICY_DIM) {
             if (brightnessState > PowerManager.BRIGHTNESS_MIN) {
                 brightnessState = Math.max(
-                        Math.min(brightnessState - SCREEN_DIM_MINIMUM_REDUCTION_FLOAT,
+                        Math.min(brightnessState - mScreenBrightnessMinimumDimAmount,
                                 mScreenBrightnessDimConfig),
                         PowerManager.BRIGHTNESS_MIN);
                 mBrightnessReasonTemp.addModifier(BrightnessReason.MODIFIER_DIMMED);
@@ -1567,7 +1573,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     sendUpdatePowerStateLocked();
                     mHandler.post(mOnBrightnessChangeRunnable);
                     // TODO(b/192258832): Switch the HBMChangeCallback to a listener pattern.
-                    mAutomaticBrightnessController.update();
+                    if (mAutomaticBrightnessController != null) {
+                        mAutomaticBrightnessController.update();
+                    }
                 }, mContext);
     }
 

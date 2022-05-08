@@ -164,7 +164,7 @@ public class DozeServiceHostTest extends SysuiTestCase {
     @Test
     public void testPulseWhileDozing_notifyAuthInterrupt() {
         HashSet<Integer> reasonsWantingAuth = new HashSet<>(
-                Collections.singletonList(DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN));
+                Collections.singletonList(DozeLog.PULSE_REASON_SENSOR_WAKE_REACH));
         HashSet<Integer> reasonsSkippingAuth = new HashSet<>(
                 Arrays.asList(DozeLog.PULSE_REASON_INTENT,
                         DozeLog.PULSE_REASON_NOTIFICATION,
@@ -173,7 +173,7 @@ public class DozeServiceHostTest extends SysuiTestCase {
                         DozeLog.REASON_SENSOR_DOUBLE_TAP,
                         DozeLog.PULSE_REASON_SENSOR_LONG_PRESS,
                         DozeLog.PULSE_REASON_DOCKING,
-                        DozeLog.REASON_SENSOR_WAKE_UP,
+                        DozeLog.REASON_SENSOR_WAKE_UP_PRESENCE,
                         DozeLog.REASON_SENSOR_QUICK_PICKUP,
                         DozeLog.REASON_SENSOR_TAP));
         HashSet<Integer> reasonsThatDontPulse = new HashSet<>(

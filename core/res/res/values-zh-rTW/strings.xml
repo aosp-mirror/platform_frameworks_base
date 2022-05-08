@@ -544,7 +544,7 @@
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"判斷附近超寬頻裝置間的相對位置"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"允許應用程式判斷附近超寬頻裝置間的相對位置"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"與鄰近的 Wi-Fi 裝置互動"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"允許應用程式向鄰近的 Wi-Fi 裝置廣播、與這些裝置連線，並能判斷這些裝置的相對位置"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"允許應用程式顯示鄰近的 Wi-Fi 裝置的資料、與其連線並判斷相對位置"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"首選 NFC 付費服務資訊"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"允許應用程式取得首選 NFC 付費服務資訊，例如已註冊的輔助工具和路線目的地。"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"控制近距離無線通訊"</string>
@@ -620,6 +620,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"請輕觸這裡刪除臉部模型，然後再重新新增"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"設定人臉解鎖功能"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"看著手機就能解鎖"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"如要使用人臉解鎖功能，請前往「設定」&gt;「隱私權」開啟"<b>"攝影機存取權"</b></string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"設定更多解鎖方式"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"輕觸即可新增指紋"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"指紋解鎖"</string>
@@ -733,9 +734,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"監控螢幕解鎖嘗試次數"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"監控螢幕解鎖時密碼輸入錯誤的次數；如果密碼輸入錯誤的次數過多，則會鎖住平板電腦或全部清除平板電腦中的資料。"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"監控螢幕解鎖密碼輸入錯誤的次數。如果輸入錯誤的次數超過上限，系統會將 Android TV 裝置鎖定，或清除 Android TV 裝置的所有資料。"</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"監控密碼輸入錯誤的次數。解鎖螢幕時，如果密碼輸入錯誤次數過多，系統就會鎖住資訊娛樂系統或清除資訊娛樂系統的所有資料。"</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"監控螢幕解鎖時密碼輸入錯誤的次數；如果密碼輸入錯誤的次數過多，則會鎖住手機或清除手機的所有資料。"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"監控螢幕解鎖密碼輸入錯誤的次數；如果輸入錯誤的次數超過上限，系統會將平板電腦鎖定，或將這個使用者的資料全部清除。"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"監控螢幕解鎖密碼輸入錯誤的次數。如果輸入錯誤的次數超過上限，系統會將 Android TV 裝置鎖定，或清除這位使用者的所有資料。"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"監控螢幕解鎖時的密碼輸入錯誤次數。如果錯誤次數過多，系統就會鎖住資訊娛樂系統或清除這個設定檔的所有資料。"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"監控螢幕解鎖密碼輸入錯誤的次數；如果輸入錯誤的次數超過上限，系統會將手機鎖定，或將這個使用者的資料全部清除。"</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"變更鎖定螢幕方式"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"變更鎖定螢幕方式。"</string>
@@ -744,10 +747,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"清除所有資料"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"恢復原廠設定，不提出警告就直接清除平板電腦的資料。"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"在沒有事先警告的情況下讓系統恢復原廠設定，清除 Android TV 裝置上的資料。"</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"不事先警告就透過恢復原廠設定的方式清除資訊娛樂系統的資料。"</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"恢復原廠設定，不提出警告就直接清除手機的資料。"</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"清除使用者資料"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"清除設定檔資料"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"清除使用者資料"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"將這個使用者的資料從這台平板電腦中清除，而不事先發出警告。"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"在沒有事先警告的情況下，將這位使用者的資料從這部 Android TV 裝置中清除。"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"不事先警告就從這個資訊娛樂系統上清除這個設定檔的資料。"</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"將這個使用者的資料從這支手機中清除，而不事先發出警告。"</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"設定裝置全域 Proxy"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"設定政策啟用時要使用的裝置全域 Proxy。只有裝置擁有者可以設定全域 Proxy。"</string>
@@ -1697,7 +1703,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"啟用捷徑功能，只要同時按下兩個音量按鈕 3 秒，就能啟動無障礙功能。"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"要開啟無障礙功能快速鍵嗎？"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"同時按住音量調高鍵和調低鍵數秒，即可開啟無障礙功能。這麼做可能會改變裝置的運作方式。\n\n目前的功能：\n<xliff:g id="SERVICE">%1$s</xliff:g>\n你可以在 [設定] &gt; [無障礙設定] 中變更選取的功能。"</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"要開啟「<xliff:g id="SERVICE">%1$s</xliff:g>」快速鍵嗎？"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"同時按住音量調高鍵和調低鍵數秒，即可開啟「<xliff:g id="SERVICE">%1$s</xliff:g>」無障礙功能。這麼做可能會改變裝置的運作方式。\n\n你可以在 [設定] &gt; [無障礙設定] 中變更這個快速鍵觸發的功能。"</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"開啟"</string>

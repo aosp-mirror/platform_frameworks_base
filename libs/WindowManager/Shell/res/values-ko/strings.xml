@@ -20,6 +20,7 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"닫기"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"펼치기"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"설정"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"화면 분할 모드로 전환"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"메뉴"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g>에서 PIP 사용 중"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"<xliff:g id="NAME">%s</xliff:g>에서 이 기능이 사용되는 것을 원하지 않는 경우 탭하여 설정을 열고 기능을 사용 중지하세요."</string>
@@ -72,5 +73,4 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"관리"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"대화창을 닫았습니다."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"탭하여 이 앱을 다시 시작하고 전체 화면으로 이동합니다."</string>
-    <string name="got_it" msgid="4428750913636945527">"확인"</string>
 </resources>

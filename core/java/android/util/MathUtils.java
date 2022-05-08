@@ -165,6 +165,10 @@ public final class MathUtils {
         return start + (stop - start) * amount;
     }
 
+    public static float lerp(int start, int stop, float amount) {
+        return lerp((float) start, (float) stop, amount);
+    }
+
     /**
      * Returns the interpolation scalar (s) that satisfies the equation: {@code value = }{@link
      * #lerp}{@code (a, b, s)}

@@ -19,6 +19,7 @@ package com.android.server.biometrics.sensors.face.hidl;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.Resources;
+import android.hardware.SensorPrivacyManager;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricFaceConstants;
@@ -55,6 +56,7 @@ class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
     private final int[] mKeyguardIgnoreListVendor;
 
     private int mLastAcquire;
+    private SensorPrivacyManager mSensorPrivacyManager;
 
     FaceAuthenticationClient(@NonNull Context context,
             @NonNull LazyDaemon<IBiometricsFace> lazyDaemon,
@@ -71,6 +73,7 @@ class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
                 isKeyguardBypassEnabled);
         setRequestId(requestId);
         mUsageStats = usageStats;
+        mSensorPrivacyManager = context.getSystemService(SensorPrivacyManager.class);
 
         final Resources resources = getContext().getResources();
         mBiometricPromptIgnoreList = resources.getIntArray(
@@ -97,6 +100,15 @@ class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
 
     @Override
     protected void startHalOperation() {
+
+        if (mSensorPrivacyManager != null
+                && mSensorPrivacyManager
+                .isSensorPrivacyEnabled(SensorPrivacyManager.Sensors.CAMERA, getTargetUserId())) {
+            onError(BiometricFaceConstants.FACE_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
+            mCallback.onClientFinished(this, false /* success */);
+            return;
+        }
+
         try {
             getFreshDaemon().authenticate(mOperationId);
         } catch (RemoteException e) {

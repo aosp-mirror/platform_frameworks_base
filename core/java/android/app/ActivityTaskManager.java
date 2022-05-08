@@ -476,6 +476,19 @@ public class ActivityTaskManager {
     }
 
     /**
+     * Detaches the navigation bar from the app it was attached to during a transition.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS)
+    public void detachNavigationBarFromApp(@NonNull IBinder transition) {
+        try {
+            getService().detachNavigationBarFromApp(transition);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Information you can retrieve about a root task in the system.
      * @hide
      */

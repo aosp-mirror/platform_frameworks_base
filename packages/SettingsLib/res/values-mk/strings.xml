@@ -415,12 +415,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Примена на WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Поставете воведување WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Овој избор веќе не важи. Обидете се повторно."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"Конвертирајте до шифрирање датотеки"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Конвертирај..."</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"Датотеката е веќе шифрирана"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"Конвертирајте до шифрирање на база на датотеки"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Конвертирајте ја партицијата со податоци до шифрирање на база на датотеки.\n !!Предупредување!! Тоа ќе ги избрише сите податоци.\n Функцијава е алфа и може да не работи правилно.\n Притиснете „Избриши и конвертирај... за да продолжите."</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"Избриши и конвертирај..."</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Режим на боја на слика"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"Користи sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Оневозможено"</string>

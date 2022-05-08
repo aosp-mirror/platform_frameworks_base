@@ -89,6 +89,11 @@ public class WindowFrames {
     final Rect mCompatFrame = new Rect();
 
     /**
+     * {@code true} if the window frame is a simulated frame and attached to a decor window.
+     */
+    boolean mIsSimulatingDecorWindow = false;
+
+    /**
      * Whether the parent frame would have been different if there was no display cutout.
      */
     private boolean mParentFrameWasClippedByDisplayCutout;

@@ -23,8 +23,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 
 import com.android.systemui.R;
+import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.dagger.qualifiers.RootView;
 import com.android.systemui.plugins.qs.QS;
+import com.android.systemui.privacy.OngoingPrivacyChip;
+import com.android.systemui.qs.FooterActionsController;
+import com.android.systemui.qs.FooterActionsController.ExpansionState;
+import com.android.systemui.qs.FooterActionsControllerBuilder;
+import com.android.systemui.qs.FooterActionsView;
 import com.android.systemui.qs.QSContainerImpl;
 import com.android.systemui.qs.QSFooter;
 import com.android.systemui.qs.QSFooterView;
@@ -33,9 +39,8 @@ import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QuickQSPanel;
 import com.android.systemui.qs.QuickStatusBarHeader;
-import com.android.systemui.qs.carrier.QSCarrierGroupController;
 import com.android.systemui.qs.customize.QSCustomizer;
-import com.android.systemui.statusbar.phone.MultiUserSwitch;
+import com.android.systemui.statusbar.phone.StatusIconContainer;
 
 import javax.inject.Named;
 
@@ -49,6 +54,8 @@ import dagger.Provides;
 @Module
 public interface QSFragmentModule {
     String QS_SECURITY_FOOTER_VIEW = "qs_security_footer";
+    String QQS_FOOTER = "qqs_footer";
+    String QS_FOOTER = "qs_footer";
     String QS_USING_MEDIA_PLAYER = "qs_using_media_player";
 
     /**
@@ -72,12 +79,6 @@ public interface QSFragmentModule {
     @RootView
     static View provideRootView(QSFragment qsFragment) {
         return qsFragment.getView();
-    }
-
-    /** */
-    @Provides
-    static MultiUserSwitch providesMultiUserSWitch(QSFooterView qsFooterView) {
-        return qsFooterView.findViewById(R.id.multi_user_switch);
     }
 
     /** */
@@ -110,8 +111,52 @@ public interface QSFragmentModule {
 
     /** */
     @Provides
+    static BatteryMeterView providesBatteryMeterView(QuickStatusBarHeader quickStatusBarHeader) {
+        return quickStatusBarHeader.findViewById(R.id.batteryRemainingIcon);
+    }
+
+    /** */
+    @Provides
     static QSFooterView providesQSFooterView(@RootView View view) {
         return view.findViewById(R.id.qs_footer);
+    }
+
+    /** */
+    @Provides
+    @Named(QS_FOOTER)
+    static FooterActionsView providesQSFooterActionsView(@RootView View view) {
+        return view.findViewById(R.id.qs_footer_actions);
+    }
+
+    /** */
+    @Provides
+    @Named(QQS_FOOTER)
+    static FooterActionsView providesQQSFooterActionsView(@RootView View view) {
+        return view.findViewById(R.id.qqs_footer_actions);
+    }
+
+    /** */
+    @Provides
+    @Named(QQS_FOOTER)
+    static FooterActionsController providesQQSFooterActionsController(
+            FooterActionsControllerBuilder footerActionsControllerBuilder,
+            @Named(QQS_FOOTER) FooterActionsView qqsFooterActionsView) {
+        return footerActionsControllerBuilder
+                .withView(qqsFooterActionsView)
+                .withButtonsVisibleWhen(ExpansionState.COLLAPSED)
+                .build();
+    }
+
+    /** */
+    @Provides
+    @Named(QS_FOOTER)
+    static FooterActionsController providesQSFooterActionsController(
+            FooterActionsControllerBuilder footerActionsControllerBuilder,
+            @Named(QS_FOOTER) FooterActionsView qsFooterActionsView) {
+        return footerActionsControllerBuilder
+                .withView(qsFooterActionsView)
+                .withButtonsVisibleWhen(ExpansionState.EXPANDED)
+                .build();
     }
 
     /** */
@@ -148,7 +193,16 @@ public interface QSFragmentModule {
     }
 
     /** */
-    @Binds
-    QSCarrierGroupController.SlotIndexResolver provideSlotIndexResolver(
-            QSCarrierGroupController.SubscriptionManagerSlotIndexResolver impl);
+    @Provides
+    @QSScope
+    static OngoingPrivacyChip providesPrivacyChip(QuickStatusBarHeader qsHeader) {
+        return qsHeader.findViewById(R.id.privacy_chip);
+    }
+
+    /** */
+    @Provides
+    @QSScope
+    static StatusIconContainer providesStatusIconContainer(QuickStatusBarHeader qsHeader) {
+        return qsHeader.findViewById(R.id.statusIcons);
+    }
 }

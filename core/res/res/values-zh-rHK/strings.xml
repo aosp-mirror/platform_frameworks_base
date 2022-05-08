@@ -539,12 +539,12 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"允許應用程式探索並配對附近的藍牙裝置"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"連接附近的藍牙裝置"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"允許應用程式連接已配對的藍牙裝置"</string>
-    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"向附近的藍牙裝置宣傳"</string>
-    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"允許應用程式向附近的藍牙裝置宣傳"</string>
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"向附近的藍牙裝置顯示此裝置"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"允許應用程式向附近的藍牙裝置顯示此裝置"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"判斷附近超寬頻裝置之間的相對位置"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"允許應用程式判斷附近超寬頻裝置之間的相對位置"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"與附近的 Wi‑Fi 裝置互動"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"允許應用程式顯示附近 Wi-Fi 裝置的資料、與其連接並判斷其相對位置"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"允許應用程式向附近的 Wi-Fi 裝置顯示此裝置、連接這些裝置並判斷其相對位置"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"由用戶允許授權的 NFC 付款服務資訊"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"允許應用程式取得由用戶允許授權的 NFC 付款服務資訊 (如已註冊的付款輔助功能和最終付款對象)。"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"控制近距離無線通訊"</string>
@@ -620,6 +620,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"請輕按這裡刪除面部模型，然後再重新新增"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"設定「面孔解鎖」"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"直望手機即可解鎖"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"如要使用「面孔解鎖」，請在 [設定] &gt; [私隱] 開啟"<b>"相機存取權"</b></string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"設定更多解鎖方法"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"輕按即可新增指紋"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"指紋解鎖"</string>
@@ -733,9 +734,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"監控螢幕解鎖嘗試次數"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"監視為螢幕解鎖時輸入錯誤密碼的次數；如果輸入錯誤密碼的次數過多，則會鎖定平板電腦或清除平板電腦的所有資料。"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"監察螢幕解鎖時錯誤輸入密碼的次數，並在錯誤輸入密碼的次數過多時，將 Android TV 裝置上鎖或清除裝置上的所有資料。"</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"監察螢幕解鎖時錯誤輸入密碼的次數，如果錯誤輸入密碼的次數過多，即鎖定資訊娛樂系統或清除資訊娛樂系統中的所有資料。"</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"監視為螢幕解鎖時輸入錯誤密碼的次數，如果輸入錯誤密碼的次數過多，則會鎖定手機或清除手機的所有資料。"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"監察螢幕解鎖時錯誤輸入密碼的次數，如果錯誤輸入密碼的次數過多，即鎖定平板電腦或清除這個使用者的資料。"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"監察螢幕解鎖密碼輸入錯誤的次數，並在密碼輸入錯誤的次數超出上限時將 Android TV 裝置上鎖，或清除該使用者的所有資料。"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"監察螢幕解鎖時錯誤輸入密碼的次數，如果錯誤輸入密碼的次數過多，即鎖定資訊娛樂系統或清除這個設定檔的所有資料。"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"監察螢幕解鎖時錯誤輸入密碼的次數，如果錯誤輸入密碼的次數過多，即鎖定手機或清除這個使用者的資料。"</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"變更螢幕鎖定"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"變更螢幕鎖定。"</string>
@@ -744,10 +747,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"清除所有資料"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"重設平板電腦為原廠設定，在不提出警告的情況下直接清除平板電腦的資料。"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"系統可將 Android TV 裝置回復原廠設定，在沒有警告的情況下清除裝置的資料。"</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"回復資訊娛樂系統為原廠設定，在不提出警告的情況下直接清除資訊娛樂系統的資料。"</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"重設手機為原廠設定，在不提出警告的情況下直接清除手機的資料。"</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"清除使用者資料"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"清除個人檔案資料"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"清除使用者資料"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"清除這個使用者在這部平板電腦上的資料而不作警告。"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"在沒有警告的情況下，清除這位使用者在此 Android TV 裝置上的資料。"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"在不提出警告的情況下直接清除此設定檔在資訊娛樂系統上的資料。"</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"清除這個使用者在這部手機上的資料而不作警告。"</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"設定裝置的全域代理伺服器"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"設定政策啟用時所要使用的裝置全域代理伺服器，只有裝置擁有者可以設定全域代理伺服器。"</string>
@@ -1697,7 +1703,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"啟用快速鍵後，同時按住音量按鈕 3 秒便可啟用無障礙功能。"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"要開啟無障礙功能捷徑嗎？"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"同時按下兩個音量鍵幾秒，以開啟無障礙功能。這可能會變更裝置的運作。\n\n目前功能：\n<xliff:g id="SERVICE">%1$s</xliff:g>\n您可在「設定」&gt;「無障礙功能」中變更所選功能。"</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"要開啟 <xliff:g id="SERVICE">%1$s</xliff:g> 捷徑嗎？"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"同時按下兩個音量鍵幾秒，以開啟 <xliff:g id="SERVICE">%1$s</xliff:g> 無障礙功能。這可能會變更裝置的運作。\n\n您可在「設定」&gt;「無障礙功能」中變更此快速鍵。"</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"開啟"</string>

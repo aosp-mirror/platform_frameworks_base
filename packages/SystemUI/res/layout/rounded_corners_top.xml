@@ -29,10 +29,9 @@
 
     <FrameLayout
         android:id="@+id/privacy_dot_left_container"
-        android:layout_height="@*android:dimen/status_bar_height_portrait"
+        android:layout_height="@dimen/status_bar_height"
         android:layout_width="wrap_content"
-        android:layout_marginTop="@dimen/status_bar_padding_top"
-        android:layout_marginLeft="0dp"
+        android:paddingTop="@dimen/status_bar_padding_top"
         android:layout_gravity="left|top"
         android:visibility="invisible" >
         <ImageView
@@ -54,10 +53,9 @@
 
     <FrameLayout
         android:id="@+id/privacy_dot_right_container"
-        android:layout_height="@*android:dimen/status_bar_height_portrait"
+        android:layout_height="@dimen/status_bar_height"
         android:layout_width="wrap_content"
-        android:layout_marginTop="@dimen/status_bar_padding_top"
-        android:layout_marginRight="0dp"
+        android:paddingTop="@dimen/status_bar_padding_top"
         android:layout_gravity="right|top"
         android:visibility="invisible" >
         <ImageView
@@ -67,8 +65,6 @@
             android:layout_gravity="center_vertical|left"
             android:src="@drawable/system_animation_ongoing_dot"
             android:visibility="visible" />
-
     </FrameLayout>
-
 
 </com.android.systemui.RegionInterceptingFrameLayout>

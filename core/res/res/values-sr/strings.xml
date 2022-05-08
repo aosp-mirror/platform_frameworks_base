@@ -78,7 +78,7 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ИД позиваоца подразумевано није ограничен. Следећи позив: Није ограничен."</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Услуга није добављена."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Не можете да промените подешавање ИД-а корисника."</string>
-    <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Нема услуге преноса података преко мобилног оператера"</string>
+    <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Нема услуге мобилних података"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Хитни позиви нису доступни"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Нема гласовне услуге"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="3982069078579103087">"Нема гласовне услуге ни хитних позива"</string>
@@ -623,6 +623,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Додирните да бисте избрисали модел лица, па поново додајте своје лице"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Подесите откључавање лицем"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Откључајте телефон тако што ћете га погледати"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Да бисте користили откључавање лицем, укључите "<b>"приступ камери"</b>" у одељку Подешавања &gt; Приватност"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Подесите још начина за откључавање"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Додирните да бисте додали отисак прста"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Откључавање отиском прста"</string>
@@ -736,9 +737,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Надгледајте покушаје откључавања екрана"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Прати број нетачно унетих лозинки приликом откључавања екрана и закључава таблет или брише податке са таблета ако је нетачна лозинка унета превише пута."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Надгледа број нетачних лозинки унетих при откључавању екрана и закључава Android TV уређај или брише све податке са Android TV уређаја ако се унесе превише нетачних лозинки."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Прати број нетачно унетих лозинки при откључавању екрана и закључава систем за инфо-забаву или брише све податке са система за инфо-забаву ако је нетачна лозинка унета превише пута."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Прати број нетачно унетих лозинки при откључавању екрана и закључава телефон или брише све податке са телефона ако је нетачна лозинка унета превише пута."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Надгледа број нетачних лозинки унетих при откључавању екрана и закључава таблет или брише све податке овог корисника ако се унесе превише нетачних лозинки."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Надгледа број нетачних лозинки унетих при откључавању екрана и закључава Android TV уређај или брише све податке овог корисника ако се унесе превише нетачних лозинки."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Надгледа број нетачних лозинки унетих при откључавању екрана и закључава систем за инфо-забаву или брише све податке овог профила ако се унесе превише нетачних лозинки."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Надгледа број нетачних лозинки унетих при откључавању екрана и закључава телефон или брише све податке овог корисника ако се унесе превише нетачних лозинки."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Промена закључавања екрана"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Мења закључавање екрана."</string>
@@ -747,10 +750,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Брисање свих података"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Брисање података на таблету без упозорења ресетовањем на фабричка подешавања."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Брише податке Android TV уређаја без упозорења помоћу ресетовања на фабричка подешавања."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Брише податке на систему за инфо-забаву без упозорења ресетовањем на фабричка подешавања."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Брисање података на телефону без упозорења ресетовањем на фабричка подешавања."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Обриши податке корисника"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Брисање података профила"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Обриши податке корисника"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Брише податке овог корисника на овом таблету без упозорења."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Брише податке овог корисника на овом Android TV уређају без упозорења."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Брише податке овог профила на овом систему за инфо-забаву без упозорења."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Брише податке овог корисника на овом телефону без упозорења."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Подесите глобални прокси сервер уређаја"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Подешава глобални прокси уређаја који ће се користити док су смернице омогућене. Само власник уређаја може да подеси глобални прокси."</string>
@@ -1529,7 +1535,7 @@
     <string name="vpn_lockdown_disconnected" msgid="5573611651300764955">"Веза са увек укљученим VPN-ом је прекинута"</string>
     <string name="vpn_lockdown_error" msgid="4453048646854247947">"Повезивање на стално укључени VPN није успело"</string>
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"Промените подешавања VPN-а"</string>
-    <string name="upload_file" msgid="8651942222301634271">"Одабери датотеку"</string>
+    <string name="upload_file" msgid="8651942222301634271">"Одабери фајл"</string>
     <string name="no_file_chosen" msgid="4146295695162318057">"Није изабрана ниједна датотека"</string>
     <string name="reset" msgid="3865826612628171429">"Ресетуј"</string>
     <string name="submit" msgid="862795280643405865">"Пошаљи"</string>
@@ -1719,7 +1725,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Када је пречица укључена, притисните оба дугмета за јачину звука да бисте покренули функцију приступачности."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Желите да укључите пречицу за функције приступачности?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Ако задржите оба тастера за јачину звука пар секунди, укључиће се функције приступачности. То може да промени начин рада уређаја.\n\nПостојеће функције:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nМожете да промените изабране функције у одељку Подешавања &gt; Приступачност."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Желите да укључите пречицу за услугу <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Ако задржите оба тастера за јачину звука пар секунди, укључује се <xliff:g id="SERVICE">%1$s</xliff:g>, функција приступачности. То може да промени начин рада уређаја.\n\nМожете да промените функцију на коју се односи ова пречица у одељку Подешавања &gt; Приступачност."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Укључи"</string>
@@ -2181,7 +2187,7 @@
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Обавештења"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Брза подешавања"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Дијалог напајања"</string>
-    <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Закључани екран"</string>
+    <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Закључавање екрана"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Снимак екрана"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Пречица за приступачност на екрану"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Алатка за бирање пречица за приступачност на екрану"</string>

@@ -415,12 +415,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView хэрэгжилт"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"WebView хэрэгжилтийг тохируулах"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Энэ сонголт хүчингүй байна. Дахин оролдоно уу."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"Файлын шифрлэлт болгон хөрвүүлэх"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Хөрвүүлэх..."</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"Аль хэдийнэ файл шифрлэгдсэн"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"Шифрлэлтэд суурилсан файлыг хөрвүүлж байна"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Өгөгдлийн хуваалтыг файлд суурилсан шифрлэлтэд хөрвүүлэх.\n !!Анхааруулга!! Энэ нь таны бүх өгөгдлийг устгах болно.\n Энэ онцлог нь альфа бөгөөд зөв ажиллахгүй байж болзошгүй.\n Үргэлжлүүлэхийн тулд \"Арчаад, хөрвүүлэх...\"-г дарна уу."</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"Арчаад, хөрвүүлэх..."</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"\"Зургийн өнгө\" горим"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"sRGB-г ашиглах"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Идэвхгүй болсон"</string>

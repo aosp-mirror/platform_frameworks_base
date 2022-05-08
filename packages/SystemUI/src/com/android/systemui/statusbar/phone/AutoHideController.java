@@ -37,6 +37,7 @@ public class AutoHideController {
     private final Handler mHandler;
 
     private AutoHideUiElement mStatusBar;
+    /** For tablets, this will represent the Taskbar */
     private AutoHideUiElement mNavigationBar;
     private int mDisplayId;
 
@@ -89,7 +90,7 @@ public class AutoHideController {
         }
     }
 
-    void resumeSuspendedAutoHide() {
+    public void resumeSuspendedAutoHide() {
         if (mAutoHideSuspended) {
             scheduleAutoHide();
             Runnable checkBarModesRunnable = getCheckBarModesRunnable();
@@ -99,7 +100,7 @@ public class AutoHideController {
         }
     }
 
-    void suspendAutoHide() {
+    public void suspendAutoHide() {
         mHandler.removeCallbacks(mAutoHide);
         Runnable checkBarModesRunnable = getCheckBarModesRunnable();
         if (checkBarModesRunnable != null) {
@@ -170,5 +171,24 @@ public class AutoHideController {
         }
 
         return false;
+    }
+
+    /**
+     * Injectable factory for creating a {@link AutoHideController}.
+     */
+    public static class Factory {
+        private final Handler mHandler;
+        private final IWindowManager mIWindowManager;
+
+        @Inject
+        public Factory(@Main Handler handler, IWindowManager iWindowManager) {
+            mHandler = handler;
+            mIWindowManager = iWindowManager;
+        }
+
+        /** Create an {@link AutoHideController} */
+        public AutoHideController create(Context context) {
+            return new AutoHideController(context, mHandler, mIWindowManager);
+        }
     }
 }

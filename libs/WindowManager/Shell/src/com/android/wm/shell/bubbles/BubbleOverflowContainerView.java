@@ -142,7 +142,7 @@ public class BubbleOverflowContainerView extends LinearLayout {
         super.onAttachedToWindow();
         if (mController != null) {
             // For the overflow to get key events (e.g. back press) we need to adjust the flags
-            mController.updateWindowFlagsForOverflow(true);
+            mController.updateWindowFlagsForBackpress(true);
         }
         setOnKeyListener(mKeyListener);
     }
@@ -151,7 +151,7 @@ public class BubbleOverflowContainerView extends LinearLayout {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         if (mController != null) {
-            mController.updateWindowFlagsForOverflow(false);
+            mController.updateWindowFlagsForBackpress(false);
         }
         setOnKeyListener(null);
     }

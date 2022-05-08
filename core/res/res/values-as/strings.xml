@@ -620,6 +620,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"আপোনাৰ মুখাৱয়বৰ মডেলটো মচিবলৈ টিপক, তাৰ পাছত পুনৰ আপোনাৰ মুখাৱয়ব যোগ দিয়ক"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"ফেচ আনলক সুবিধাটো ছেট আপ কৰক"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"আপোনাৰ ফ’নটোলৈ চাই সেইটো আনলক কৰক"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"ফেচ আনলক সুবিধাটো ব্যৱহাৰ কৰিবলৈ ছেটিং &gt; গোপনীয়তাত "<b>"কেমেৰাৰ এক্সেছ"</b>" অন কৰক"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"আনলক কৰাৰ অধিক উপায় ছেট আপ কৰক"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"এটা ফিংগাৰপ্ৰিণ্ট যোগ দিবলৈ টিপক"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ফিংগাৰপ্ৰিন্ট আনলক"</string>
@@ -733,9 +734,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"স্ক্ৰীন আনলক কৰা প্ৰয়াসবোৰ নিৰীক্ষণ কৰক"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"স্ক্ৰীন আনলক কৰোঁতে টাইপ কৰা অশুদ্ধ পাছৱৰ্ডৰ সংখ্যা নিৰীক্ষণ কৰক আৰু যদিহে অত্যাধিকবাৰ অশুদ্ধ পাছৱৰ্ড টাইপ কৰা হয়, তেন্তে টেবলেটটো লক কৰক বা টেবলেটটোৰ আটাইখিনি ডেটা মচক।"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"স্ক্ৰীন আনলক কৰোঁতে টাইপ কৰা ভুল পাছৱৰ্ডবোৰৰ সংখ্যা নিৰীক্ষণ কৰক আৰু যদিহে অত্যাধিকবাৰ ভুল পাছৱৰ্ড টাইপ কৰা হয়, তেন্তে Android TV ডিভাইচটো লক কৰক অথবা আপোনাৰ Android TV ডিভাইচৰ আটাইখিনি ডেটা মচক।"</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"স্ক্ৰীন আনলক কৰোঁতে দিয়া অশুদ্ধ পাছৱৰ্ডৰ সংখ্যা নিৰীক্ষণ কৰক আৰু যদিহে অত্যধিকবাৰ অশুদ্ধ পাছৱৰ্ড দিয়া হয় তেন্তে ইনফ’টেইনমেণ্ট ছিষ্টেমটো লক কৰক অথবা এই ইনফ’টেইনমেণ্ট ছিষ্টেমটোৰ আটাইবোৰ ডেটা মোহাৰক।"</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"স্ক্ৰীন আনলক কৰোঁতে টাইপ কৰা অশুদ্ধ পাছৱৰ্ডৰ সংখ্যা নিৰীক্ষণ কৰক আৰু যদিহে অত্যাধিকবাৰ অশুদ্ধ পাছৱৰ্ড টাইপ কৰা হয়, তেন্তে ফ\'নটো লক কৰক বা ফ\'নটোৰ আটাইখিনি ডেটা মচক।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"স্ক্ৰীন আনলক কৰোঁতে টাইপ কৰা অশুদ্ধ পাছৱৰ্ডৰ সংখ্যা নিৰীক্ষণ কৰক আৰু যদিহে অত্যধিকবাৰ অশুদ্ধ পাছৱৰ্ড টাইপ কৰা হয়, তেন্তে টেবলেটটো লক কৰক বা এই ব্যৱহাৰকাৰীৰ আটাইখিনি ডেটা মচক।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"স্ক্ৰীনখন আনলক কৰোঁতে টাইপ কৰা ভুল পাছৱৰ্ডবোৰৰ সংখ্যা নিৰীক্ষণ কৰক আৰু যদিহে অত্যধিকবাৰ ভুল পাছৱৰ্ড টাইপ কৰা হয়, তেন্তে Android TV ডিভাইচটো লক কৰক অথবা এই ব্যৱহাৰকাৰীৰ আটাইখিনি ডেটা মচক।"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"স্ক্ৰীন আনলক কৰোঁতে দিয়া অশুদ্ধ পাছৱৰ্ডৰ সংখ্যা নিৰীক্ষণ কৰক আৰু যদিহে অত্যধিকবাৰ অশুদ্ধ পাছৱৰ্ড দিয়া হয় তেন্তে ইনফ’টেইনমেণ্ট ছিষ্টেমটো লক কৰক অথবা এই প্ৰ’ফাইলটোৰ আটাইবোৰ ডেটা মোহাৰক।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"স্ক্ৰীনখন আনলক কৰোঁতে টাইপ কৰা ভুল পাছৱৰ্ডবোৰৰ সংখ্যা নিৰীক্ষণ কৰক আৰু যদিহে অত্যধিকবাৰ ভুল পাছৱৰ্ড টাইপ কৰা হয়, তেন্তে ফ\'নটো লক কৰক অথবা এই ব্যৱহাৰকাৰীৰ আটাইখিনি ডেটা মচক।"</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"স্ক্ৰীন লক সলনি কৰক"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"স্ক্ৰীন লক সলনি কৰক।"</string>
@@ -744,10 +747,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"আটাইবোৰ ডেটা মচক"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"সতৰ্কবাণী প্ৰেৰণ নকৰাকৈয়ে ফেক্টৰী ডেটা ৰিছেট কৰি টেবলেটৰ ডেটা মচক।"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"কোনো সতর্কবার্তা নপঠিওৱাকৈ ফেক্টৰী ডেটা ৰিছেট কৰি আপোনাৰ Android TV ডিভাইচৰ ডেটা মচক।"</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"সর্তকবাণী নিদিয়াকৈয়ে ফেক্টৰী ডেটা ৰিছেট কৰি ইনফ’টেইনমেণ্ট ছিষ্টেমৰ ডেটা মোহাৰক।"</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"সতৰ্কবাণী প্ৰেৰণ নকৰাকৈয়ে ফেক্টৰী ডেটা ৰিছেট কৰি ফ\'নৰ ডেটা মচক।"</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"ব্য়ৱহাৰকাৰীৰ তথ্য় মচক"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"প্ৰ’ফাইলৰ ডেটা মোহাৰক"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"ব্য়ৱহাৰকাৰীৰ তথ্য় মচক"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"এই টেবলেটটোত থকা এই ব্যৱহাৰকাৰীৰ তথ্য কোনো সর্তকবাণী নিদিয়াকৈ মচি পেলাওক।"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"কোনো সতর্কবার্তা নপঠিওৱাকৈ এই Android TV ডিভাইচটোত এই ব্যৱহাৰকাৰীৰ ডেটা মচক।"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"সর্তকবাণী নিদিয়াকৈয়ে এই ইনফ’টেইনমেণ্ট ছিষ্টেমত এই প্ৰ’ফাইলটোৰ ডেটা মোহাৰক।"</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"এই ফ\'নটোত থকা এই ব্যৱহাৰকাৰীৰ তথ্য কোনো সর্তকবাণী নিদিয়াকৈ মচি পেলাওক।"</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"ডিভাইচৰ বাবে গ্ল\'বেল প্ৰক্সী ছেট কৰক"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"নীতি সক্ষম কৰি থোৱা অৱস্থাত ব্য়ৱহাৰ কৰিবৰ বাবে ডিভাইচৰ বাবে গ্ল\'বেল প্ৰক্সী ছেট কৰক। কেৱল ডিভাইচৰ গৰাকীয়েহে গ্ল\'বেল প্ৰক্সী ছেট কৰিব পাৰে।"</string>
@@ -1697,7 +1703,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"শ্বৰ্টকাটটো অন হৈ থকাৰ সময়ত দুয়োটা ভলিউম বুটাম ৩ ছেকেণ্ডৰ বাবে হেঁচি ধৰি ৰাখিলে এটা সাধ্য সুবিধা আৰম্ভ হ’ব।"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"সাধ্য সুবিধাসমূহৰ বাবে শ্বৰ্টকাট অন কৰিবনে?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"দুয়োটা ভলিউম কী কিছুসময়ৰ বাবে ধৰি থাকিলে সাধ্য-সুবিধাসমূহ অন কৰে। এইটোৱে আপোনাৰ ডিভাইচটোৱে কাম কৰাৰ ধৰণ সলনি কৰিব পাৰে।\n\nবর্তমানৰ সুবিধাসমূহ:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nআপুনি ছেটিং &gt; সাধ্য-সুবিধাত কিছুমান নিৰ্দিষ্ট সুবিধা সলনি কৰিব পাৰে।"</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"<xliff:g id="SERVICE">%1$s</xliff:g>ৰ শ্বৰ্টকাট অন কৰিবনে?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"দুয়োটা ভলিউম কী কিছুসময়ৰ বাবে ধৰি থাকিলে এটা সাধ্য- সুবিধা <xliff:g id="SERVICE">%1$s</xliff:g> অন কৰে। এইটোৱে আপোনাৰ ডিভাইচটোৱে কাম কৰাৰ ধৰণ সলনি কৰিব পাৰে।\n\nআপুনি ছেটিং &gt; সাধ্য-সুবিধাসমূহত এই শ্বৰ্টকাটটো অন্য এটা সুবিধালৈ সলনি কৰিব পাৰে।"</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"অন কৰক"</string>

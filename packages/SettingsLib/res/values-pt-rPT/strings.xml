@@ -415,12 +415,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Implementação WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Definir implementação WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Esta opção já não é válida. Tente novamente."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"Converter para a encriptação de ficheiros"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Converter..."</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"Os ficheiros já estão encriptados"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"Converter para a encriptação baseada em ficheiros"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Converter a partição de dados para a encriptação baseada em ficheiros.\n Aviso! Esta ação eliminará todos os seus dados.\n Esta funcionalidade está na fase alfa e pode não funcionar corretamente.\n Prima \"Limpar e converter...\" para continuar."</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"Limpar e converter..."</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Modo de cor da imagem"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"Utilizar sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Desativado"</string>
@@ -500,8 +494,8 @@
     <string name="status_unavailable" msgid="5279036186589861608">"Indisponível"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"O MAC é aleatório."</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
-      <item quantity="one">%1$d dispositivo ligado</item>
       <item quantity="other">%1$d dispositivos ligados</item>
+      <item quantity="one">%1$d dispositivo ligado</item>
     </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Mais tempo."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Menos tempo."</string>

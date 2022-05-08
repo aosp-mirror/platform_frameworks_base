@@ -415,12 +415,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"„WebView“ diegimas"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"„WebView“ diegimo nustatymas"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Šios parinkties nebegalima pasirinkti. Bandykite dar kartą."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"Konvertuoti į failų šifruotę"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Konvertuoti…"</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"Jau konvertuota į failų šifruotę"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"Konvertuojama į failais pagrįstą šifruotę"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Duomenų skaidinys bus konvertuotas į failais pagrįstą šifruotę.\n Įspėjimas! Visi duomenys bus ištrinti.\n Ši funkcija yra alfa versijos ir gali netinkamai veikti.\n Paspauskite „Išvalyti ir konvertuoti...“, kad galėtumėte tęsti."</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"Išvalyti ir konvertuoti…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Nuotraukos spalvos režimas"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"Naudoti sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Išjungtas"</string>

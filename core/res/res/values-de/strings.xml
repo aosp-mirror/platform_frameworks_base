@@ -544,7 +544,7 @@
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"Relative Distanz zwischen Ultrabreitband-Geräten in der Nähe bestimmen"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Ermöglicht der App, die relative Distanz zwischen Ultrabreitband-Geräten in der Nähe zu bestimmen"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"Mit WLAN-Geräten in der Nähe interagieren"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Erlaubt der App, Inhalte an WLAN-Geräte in der Nähe zu senden, sich mit ihnen zu verbinden und ihre relative Positionierung zu ermitteln"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Erlaubt der App, Inhalte an WLAN-Geräte in der Nähe zu senden, sich mit ihnen zu verbinden und ihre relative Position zu ermitteln"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informationen zum bevorzugten NFC-Zahlungsdienst"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Ermöglicht der App, Informationen zum bevorzugten NFC-Zahlungsdienst abzurufen, etwa registrierte Hilfsmittel oder das Routenziel."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"Nahfeldkommunikation steuern"</string>
@@ -620,6 +620,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Tippe, um dein Gesichtsmodell zu löschen, und füge es dann noch einmal hinzu"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Entsperrung per Gesichtserkennung einrichten"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Entsperre dein Smartphone, indem du es ansiehst"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Wenn du die Entsperrung per Gesichtserkennung verwenden möchtest, aktiviere in den Einstellungen unter „Datenschutz“ die Option "<b>"Kamerazugriff"</b></string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Weitere Möglichkeiten zum Entsperren einrichten"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Tippe, um einen Fingerabdruck hinzuzufügen"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Entsperrung per Fingerabdruck"</string>
@@ -733,9 +734,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Versuche zum Entsperren des Displays überwachen"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Anzahl der falsch eingegebenen Passwörter beim Entsperren des Displays überwachen und Tablet sperren oder alle Daten auf dem Tablet löschen, wenn zu häufig ein falsches Passwort eingegeben wird."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Es wird überwacht, wie oft beim Versuch, den Bildschirm zu entsperren, ein falsches Passwort eingegeben wird. Wenn es zu viele Fehlversuche gibt, wird das Android TV-Gerät gesperrt oder alle Daten darauf werden gelöscht."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Anzahl der falsch eingegebenen Passwörter beim Entsperren des Displays erfassen und Infotainmentsystem sperren oder alle Daten des Infotainmentsystems löschen, wenn zu häufig ein falsches Passwort eingegeben wird."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Anzahl der falsch eingegebenen Passwörter beim Entsperren des Bildschirms überwachen und Telefon sperren oder alle Daten auf dem Telefon löschen, wenn zu häufig ein falsches Passwort eingegeben wird."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Anzahl der falsch eingegebenen Passwörter beim Entsperren des Displays überwachen und Tablet sperren oder alle Daten dieses Nutzers löschen, wenn zu häufig ein falsches Passwort eingegeben wird"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Es wird überwacht, wie oft beim Versuch, den Bildschirm zu entsperren, ein falsches Passwort eingegeben wird. Wenn es zu viele Fehlversuche gibt, wird das Android TV-Gerät gesperrt oder alle Daten dieses Nutzers werden gelöscht."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Anzahl der falsch eingegebenen Passwörter beim Entsperren des Displays erfassen und Infotainmentsystem sperren oder alle Daten dieses Profils löschen, wenn zu häufig ein falsches Passwort eingegeben wird."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Anzahl der falsch eingegebenen Passwörter beim Entsperren des Displays überwachen und Smartphone sperren oder alle Daten dieses Nutzers löschen, wenn zu häufig ein falsches Passwort eingegeben wird"</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Displaysperre ändern"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Ändern der Displaysperre"</string>
@@ -744,10 +747,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Alle Daten löschen"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Auf Werkseinstellungen zurücksetzen und Daten auf dem Tablet ohne Warnung löschen"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Du kannst die Daten auf deinem Android TV-Gerät ohne vorherige Warnung löschen, indem du es auf die Werkseinstellungen zurücksetzt."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Gerät auf Werkseinstellungen zurücksetzen und damit Daten des Infotainmentsystems ohne Warnung löschen."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Gerät auf Werkseinstellungen zurücksetzen und damit Daten auf dem Telefon ohne Warnung löschen"</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Nutzerdaten löschen"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Profildaten löschen"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Nutzerdaten löschen"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Daten dieses Nutzers auf diesem Tablet ohne vorherige Warnung löschen"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Daten dieses Nutzers auf diesem Android TV-Gerät werden ohne vorherige Warnung gelöscht."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Daten dieses Profils in diesem Infotainmentsystem ohne Warnung löschen."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Daten dieses Nutzers auf diesem Smartphone ohne vorherige Warnung löschen"</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Den globalen Proxy des Geräts festlegen"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Bei aktivierter Richtlinie zu verwendenden globalen Geräteproxy festlegen. Nur der Eigentümer des Geräts kann den globalen Proxy festlegen."</string>
@@ -1697,7 +1703,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Wenn die Verknüpfung aktiviert ist, kannst du die beiden Lautstärketasten drei Sekunden lang gedrückt halten, um eine Bedienungshilfe zu starten."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Verknüpfung für Bedienungshilfen aktivieren?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Wenn du beide Lautstärketasten einige Sekunden lang gedrückt hältst, aktivierst du die Bedienungshilfen. Dadurch kann sich die Funktionsweise deines Geräts ändern.\n\nAktuelle Funktionen:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nDu kannst ausgewählte Funktionen unter \"Einstellungen\" &gt; \"Bedienungshilfen\" ändern."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Verknüpfung für <xliff:g id="SERVICE">%1$s</xliff:g> aktivieren?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Wenn du beide Lautstärketasten einige Sekunden lang gedrückt hältst, aktivierst du die Bedienungshilfe \"<xliff:g id="SERVICE">%1$s</xliff:g>\". Dadurch kann sich die Funktionsweise deines Geräts ändern.\n\nUnter \"Einstellungen &gt; \"Bedienungshilfen\" kannst du dieser Verknüpfung eine andere Funktion zuweisen."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Aktivieren"</string>

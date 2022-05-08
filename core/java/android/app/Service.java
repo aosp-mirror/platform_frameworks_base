@@ -33,8 +33,11 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.view.contentcapture.ContentCaptureManager;
+
+import com.android.internal.annotations.GuardedBy;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -733,6 +736,7 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
             mActivityManager.setServiceForeground(
                     new ComponentName(this, mClassName), mToken, id,
                     notification, 0, FOREGROUND_SERVICE_TYPE_MANIFEST);
+            clearStartForegroundServiceStackTrace();
         } catch (RemoteException ex) {
         }
     }
@@ -786,6 +790,7 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
             mActivityManager.setServiceForeground(
                     new ComponentName(this, mClassName), mToken, id,
                     notification, 0, foregroundServiceType);
+            clearStartForegroundServiceStackTrace();
         } catch (RemoteException ex) {
         }
     }
@@ -941,4 +946,34 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
     private IActivityManager mActivityManager = null;
     @UnsupportedAppUsage
     private boolean mStartCompatibility = false;
+
+    /**
+     * This keeps track of the stacktrace where Context.startForegroundService() was called
+     * for each service class. We use that when we crash the app for not calling
+     * {@link #startForeground} in time, in {@link ActivityThread#throwRemoteServiceException}.
+     */
+    @GuardedBy("sStartForegroundServiceStackTraces")
+    private static final ArrayMap<String, StackTrace> sStartForegroundServiceStackTraces =
+            new ArrayMap<>();
+
+    /** @hide */
+    public static void setStartForegroundServiceStackTrace(
+            @NonNull String className, @NonNull StackTrace stacktrace) {
+        synchronized (sStartForegroundServiceStackTraces) {
+            sStartForegroundServiceStackTraces.put(className, stacktrace);
+        }
+    }
+
+    private void clearStartForegroundServiceStackTrace() {
+        synchronized (sStartForegroundServiceStackTraces) {
+            sStartForegroundServiceStackTraces.remove(this.getClassName());
+        }
+    }
+
+    /** @hide */
+    public static StackTrace getStartForegroundServiceStackTrace(@NonNull String className) {
+        synchronized (sStartForegroundServiceStackTraces) {
+            return sStartForegroundServiceStackTraces.get(className);
+        }
+    }
 }

@@ -18,6 +18,8 @@ package com.android.wm.shell.startingsurface;
 import static android.view.Choreographer.CALLBACK_COMMIT;
 import static android.view.View.GONE;
 
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_SPLASHSCREEN_EXIT_ANIM;
+
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -42,6 +44,7 @@ import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 import android.window.SplashScreenView;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.wm.shell.R;
 import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.common.TransactionPool;
@@ -69,6 +72,7 @@ public class SplashScreenExitAnimation implements Animator.AnimatorListener {
     private final int mAppRevealDuration;
     private final int mAnimationDuration;
     private final float mIconStartAlpha;
+    private final float mBrandingStartAlpha;
     private final TransactionPool mTransactionPool;
 
     private ValueAnimator mMainAnimator;
@@ -91,9 +95,17 @@ public class SplashScreenExitAnimation implements Animator.AnimatorListener {
                 || iconView.getLayoutParams().height == 0) {
             mIconFadeOutDuration = 0;
             mIconStartAlpha = 0;
+            mBrandingStartAlpha = 0;
             mAppRevealDelay = 0;
         } else {
             iconView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+            // The branding view could only exists when the icon is present.
+            final View brandingView = view.getBrandingView();
+            if (brandingView != null) {
+                mBrandingStartAlpha = brandingView.getAlpha();
+            } else {
+                mBrandingStartAlpha = 0;
+            }
             mIconFadeOutDuration = context.getResources().getInteger(
                     R.integer.starting_window_app_reveal_icon_fade_out_duration);
             mAppRevealDelay = context.getResources().getInteger(
@@ -311,17 +323,19 @@ public class SplashScreenExitAnimation implements Animator.AnimatorListener {
 
     @Override
     public void onAnimationStart(Animator animation) {
-        // ignore
+        InteractionJankMonitor.getInstance().begin(mSplashScreenView, CUJ_SPLASHSCREEN_EXIT_ANIM);
     }
 
     @Override
     public void onAnimationEnd(Animator animation) {
         reset();
+        InteractionJankMonitor.getInstance().end(CUJ_SPLASHSCREEN_EXIT_ANIM);
     }
 
     @Override
     public void onAnimationCancel(Animator animation) {
         reset();
+        InteractionJankMonitor.getInstance().cancel(CUJ_SPLASHSCREEN_EXIT_ANIM);
     }
 
     @Override
@@ -329,13 +343,21 @@ public class SplashScreenExitAnimation implements Animator.AnimatorListener {
         // ignore
     }
 
-    private void onAnimationProgress(float linearProgress) {
-        View iconView = mSplashScreenView.getIconView();
+    private void onFadeOutProgress(float linearProgress) {
+        final float iconProgress = ICON_INTERPOLATOR.getInterpolation(
+                getProgress(linearProgress, 0 /* delay */, mIconFadeOutDuration));
+        final View iconView = mSplashScreenView.getIconView();
+        final View brandingView = mSplashScreenView.getBrandingView();
         if (iconView != null) {
-            final float iconProgress = ICON_INTERPOLATOR.getInterpolation(
-                    getProgress(linearProgress, 0 /* delay */, mIconFadeOutDuration));
             iconView.setAlpha(mIconStartAlpha * (1 - iconProgress));
         }
+        if (brandingView != null) {
+            brandingView.setAlpha(mBrandingStartAlpha * (1 - iconProgress));
+        }
+    }
+
+    private void onAnimationProgress(float linearProgress) {
+        onFadeOutProgress(linearProgress);
 
         final float revealLinearProgress = getProgress(linearProgress, mAppRevealDelay,
                 mAppRevealDuration);

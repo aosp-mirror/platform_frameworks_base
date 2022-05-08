@@ -415,12 +415,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"ການຈັດຕັ້ງປະຕິບັດ WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"ຕັ້ງການຈັດຕັ້ງປະຕິບັດ WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"ບໍ່ສາມາດໃຊ້ການເລືອກນີ້ໄດ້ອີກຕໍ່ໄປແລ້ວ. ກະລຸນາລອງໃໝ່."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"ປ່ຽນ​ເປັນ​ການ​ເຂົ້າ​ລະ​ຫັດ​ໄຟ​ລ໌"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"ປ່ຽນ..."</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"ໄຟ​ລ໌​ເຂົ້າ​ລະ​ຫັດ​ຮຽບ​ຮ້ອຍ​ແລ້ວ"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"ກຳລັງປ່ຽນເປັນການເຂົ້າລະຫັດແບບອີງໃສ່ໄຟລ໌"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"ປ່ຽນການແບ່ງສ່ວນຂໍ້ມູນເປັນການເຂົ້າລະຫັດແບບອີງໃສ່ໄຟລ໌.\n !!ຄຳເຕືອນ!! ນີ້ຈະເປັນການລຶບຂໍ້ມູນທັງໝົດຂອງທ່ານ.\n ຄຸນສົມບັດນີ້ແມ່ນຢູ່ໃນຂັ້ນທົດລອງ alpha ແລະອາດຈະເຮັດວຽກໄດ້ບໍ່ຖືກຕ້ອງດີເທື່ອ.\n ກົດ \'ລຶບ ແລະ ປ່ຽນ...\' ເພື່ອດຳເນີນການຕໍ່."</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"ລຶບ ແລະປ່ຽນ..."</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"ໂໝດ​ສີ​ຮູບ"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"ໃຊ້ sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"ປິດນຳໃຊ້ແລ້ວ"</string>

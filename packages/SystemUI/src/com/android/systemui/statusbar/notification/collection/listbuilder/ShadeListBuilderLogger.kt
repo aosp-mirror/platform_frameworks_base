@@ -47,6 +47,15 @@ class ShadeListBuilderLogger @Inject constructor(
         })
     }
 
+    fun logPreRenderInvalidated(filterName: String, pipelineState: Int) {
+        buffer.log(TAG, DEBUG, {
+            str1 = filterName
+            int1 = pipelineState
+        }, {
+            """Pre-render Invalidator "$str1" invalidated; pipeline state is $int1"""
+        })
+    }
+
     fun logPreGroupFilterInvalidated(filterName: String, pipelineState: Int) {
         buffer.log(TAG, DEBUG, {
             str1 = filterName

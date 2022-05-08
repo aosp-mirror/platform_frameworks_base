@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static android.app.ActivityManager.StopUserOnSwitch;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -205,6 +207,12 @@ public abstract class ActivityManagerInternal {
      * {@param procStateSeq}.
      */
     public abstract void notifyNetworkPolicyRulesUpdated(int uid, long procStateSeq);
+
+    /**
+     * Inform ActivityManagerService about the latest {@code blockedReasons} for an uid, which
+     * can be used to understand whether the {@code uid} is allowed to access network or not.
+     */
+    public abstract void onUidBlockedReasonsChanged(int uid, int blockedReasons);
 
     /**
      * @return true if runtime was restarted, false if it's normal boot
@@ -579,13 +587,14 @@ public abstract class ActivityManagerInternal {
      * @param uid uid
      * @param pid pid of the ProcessRecord that is pending top.
      */
-    public abstract void addPendingTopUid(int uid, int pid);
+    public abstract void addPendingTopUid(int uid, int pid, @Nullable IApplicationThread thread);
 
     /**
      * Delete uid from the ActivityManagerService PendingStartActivityUids list.
      * @param uid uid
+     * @param nowElapsed starting time of updateOomAdj
      */
-    public abstract void deletePendingTopUid(int uid);
+    public abstract void deletePendingTopUid(int uid, long nowElapsed);
 
     /**
      * Is the uid in ActivityManagerService PendingStartActivityUids list?
@@ -647,4 +656,45 @@ public abstract class ActivityManagerInternal {
      */
     @Nullable
     public abstract List<Integer> getIsolatedProcesses(int uid);
+
+    /** @see ActivityManagerService#sendIntentSender */
+    public abstract int sendIntentSender(IIntentSender target, IBinder allowlistToken, int code,
+            Intent intent, String resolvedType,
+            IIntentReceiver finishedReceiver, String requiredPermission, Bundle options);
+
+    /**
+     * Sets the provider to communicate between voice interaction manager service and
+     * ActivityManagerService.
+     */
+    public abstract void setVoiceInteractionManagerProvider(
+            @Nullable VoiceInteractionManagerProvider provider);
+
+    /**
+     * Sets whether the current foreground user (and its profiles) should be stopped after switched
+     * out.
+     */
+    public abstract void setStopUserOnSwitch(@StopUserOnSwitch int value);
+
+    /**
+     * Provides the interface to communicate between voice interaction manager service and
+     * ActivityManagerService.
+     */
+    public interface VoiceInteractionManagerProvider {
+        /**
+         * Notifies the service when a high-level activity event has been changed, for example,
+         * an activity was resumed or stopped.
+         */
+        void notifyActivityEventChanged();
+    }
+
+    /**
+     * Register the UidObserver for NetworkPolicyManager service.
+     *
+     * This is equivalent to calling
+     * {@link IActivityManager#registerUidObserver(IUidObserver, int, int, String)} but having a
+     * separate method for NetworkPolicyManager service so that it's UidObserver can be called
+     * separately outside the usual UidObserver flow.
+     */
+    public abstract void registerNetworkPolicyUidObserver(@NonNull IUidObserver observer,
+            int which, int cutpoint, @NonNull String callingPackage);
 }

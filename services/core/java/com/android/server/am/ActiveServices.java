@@ -87,13 +87,13 @@ import android.app.ActivityManagerInternal.ServiceNotificationPolicy;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
-import android.app.ForegroundServiceDidNotStartInTimeException;
 import android.app.ForegroundServiceStartNotAllowedException;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.RemoteServiceException.ForegroundServiceDidNotStartInTimeException;
 import android.app.Service;
 import android.app.ServiceStartArgs;
 import android.app.admin.DevicePolicyEventLogger;
@@ -157,6 +157,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.procstats.ServiceState;
 import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.notification.SystemNotificationChannels;
+import com.android.internal.os.SomeArgs;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
@@ -1243,7 +1244,7 @@ public final class ActiveServices {
     }
 
     void killMisbehavingService(ServiceRecord r,
-            int appUid, int appPid, String localPackageName) {
+            int appUid, int appPid, String localPackageName, int exceptionTypeId) {
         synchronized (mAm) {
             if (!r.destroying) {
                 // This service is still alive, stop it.
@@ -1257,8 +1258,8 @@ public final class ActiveServices {
                     stopServiceLocked(found, false);
                 }
             }
-            mAm.crashApplication(appUid, appPid, localPackageName, -1,
-                    "Bad notification for startForeground", true /*force*/);
+            mAm.crashApplicationWithType(appUid, appPid, localPackageName, -1,
+                    "Bad notification for startForeground", true /*force*/, exceptionTypeId);
         }
     }
 
@@ -4209,9 +4210,12 @@ public final class ActiveServices {
             if (r.app != null) {
                 Message msg = mAm.mHandler.obtainMessage(
                         ActivityManagerService.SERVICE_FOREGROUND_CRASH_MSG);
-                msg.obj = r.app;
-                msg.getData().putCharSequence(
-                    ActivityManagerService.SERVICE_RECORD_KEY, r.toString());
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = r.app;
+                args.arg2 = r.toString();
+                args.arg3 = r.getComponentName();
+
+                msg.obj = args;
                 mAm.mHandler.sendMessage(msg);
             }
         }
@@ -5276,11 +5280,14 @@ public final class ActiveServices {
         }
     }
 
-    void serviceForegroundCrash(ProcessRecord app, CharSequence serviceRecord) {
-        mAm.crashApplicationWithType(app.uid, app.getPid(), app.info.packageName, app.userId,
+    void serviceForegroundCrash(ProcessRecord app, String serviceRecord,
+            ComponentName service) {
+        mAm.crashApplicationWithTypeWithExtras(
+                app.uid, app.getPid(), app.info.packageName, app.userId,
                 "Context.startForegroundService() did not then call Service.startForeground(): "
                     + serviceRecord, false /*force*/,
-                ForegroundServiceDidNotStartInTimeException.TYPE_ID);
+                ForegroundServiceDidNotStartInTimeException.TYPE_ID,
+                ForegroundServiceDidNotStartInTimeException.createExtrasForService(service));
     }
 
     void scheduleServiceTimeoutLocked(ProcessRecord proc) {

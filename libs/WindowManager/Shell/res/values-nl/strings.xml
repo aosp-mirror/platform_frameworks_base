@@ -20,6 +20,7 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Sluiten"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Uitvouwen"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Instellingen"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Gesplitst scherm openen"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menu"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> is in scherm-in-scherm"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Als je niet wilt dat <xliff:g id="NAME">%s</xliff:g> deze functie gebruikt, tik je om de instellingen te openen en zet je de functie uit."</string>
@@ -72,5 +73,4 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Beheren"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Bubbel gesloten."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"Tik om deze app opnieuw te starten en te openen op het volledige scherm."</string>
-    <string name="got_it" msgid="4428750913636945527">"OK"</string>
 </resources>

@@ -415,12 +415,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Implementácia WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Nastaviť implementáciu WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Táto voľba už nie je platná. Skúste to znova."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"Prejsť na šifrovanie súborov"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Konvertovať…"</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"Súbory sú už šifrované"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"Konvertovanie na šifrovanie založené na súboroch"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Chystáte sa previesť dátový oddiel na šifrovanie založené na súboroch.\nPozor!!! Všetky vaše dáta budú vymazané.\nTáto funkcia je v alfa verzii a nemusí fungovať správne.\nAk chcete pokračovať, stlačte tlačidlo Vymazať a konvertovať…"</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"Vymazať a konvertovať…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Farebný režim obrázka"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"Použije sa sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Vypnuté"</string>

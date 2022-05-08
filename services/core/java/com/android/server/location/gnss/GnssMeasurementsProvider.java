@@ -52,8 +52,6 @@ public final class GnssMeasurementsProvider extends
 
     private class GnssMeasurementListenerRegistration extends GnssListenerRegistration {
 
-        private static final String GNSS_MEASUREMENTS_BUCKET = "gnss_measurement";
-
         protected GnssMeasurementListenerRegistration(
                 @Nullable GnssMeasurementRequest request,
                 CallerIdentity callerIdentity,
@@ -70,15 +68,13 @@ public final class GnssMeasurementsProvider extends
         @Nullable
         @Override
         protected void onActive() {
-            mLocationAttributionHelper.reportHighPowerLocationStart(
-                    getIdentity(), GNSS_MEASUREMENTS_BUCKET, getKey());
+            mLocationAttributionHelper.reportHighPowerLocationStart(getIdentity());
         }
 
         @Nullable
         @Override
         protected void onInactive() {
-            mLocationAttributionHelper.reportHighPowerLocationStop(
-                    getIdentity(), GNSS_MEASUREMENTS_BUCKET, getKey());
+            mLocationAttributionHelper.reportHighPowerLocationStop(getIdentity());
         }
     }
 

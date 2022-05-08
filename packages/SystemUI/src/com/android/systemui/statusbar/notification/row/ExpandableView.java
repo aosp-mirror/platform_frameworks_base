@@ -34,6 +34,7 @@ import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
+import com.android.systemui.util.DumpUtilsKt;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -743,6 +744,16 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println(getClass().getSimpleName());
+        DumpUtilsKt.withIndenting(pw, ipw -> {
+            ExpandableViewState viewState = getViewState();
+            if (viewState == null) {
+                ipw.println("no viewState!!!");
+            } else {
+                viewState.dump(fd, ipw, args);
+                ipw.println();
+            }
+        });
     }
 
     /**

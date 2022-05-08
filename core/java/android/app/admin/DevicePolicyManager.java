@@ -16,6 +16,8 @@
 
 package android.app.admin;
 
+import static android.net.NetworkCapabilities.NET_ENTERPRISE_ID_1;
+
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.Manifest.permission;
@@ -679,8 +681,9 @@ public class DevicePolicyManager {
      * A String extra holding the time zone {@link android.app.AlarmManager} that the device
      * will be set to.
      *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
-     * provisioning via an NFC bump.
+     * <p>Use only for device owner provisioning. This extra can be returned by the admin app when
+     * performing the admin-integrated provisioning flow as a result of the {@link
+     * #ACTION_GET_PROVISIONING_MODE} activity.
      */
     public static final String EXTRA_PROVISIONING_TIME_ZONE
         = "android.app.extra.PROVISIONING_TIME_ZONE";
@@ -689,8 +692,9 @@ public class DevicePolicyManager {
      * A Long extra holding the wall clock time (in milliseconds) to be set on the device's
      * {@link android.app.AlarmManager}.
      *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
-     * provisioning via an NFC bump.
+     * <p>Use only for device owner provisioning. This extra can be returned by the admin app when
+     * performing the admin-integrated provisioning flow as a result of the {@link
+     * #ACTION_GET_PROVISIONING_MODE} activity.
      */
     public static final String EXTRA_PROVISIONING_LOCAL_TIME
         = "android.app.extra.PROVISIONING_LOCAL_TIME";
@@ -699,8 +703,9 @@ public class DevicePolicyManager {
      * A String extra holding the {@link java.util.Locale} that the device will be set to.
      * Format: xx_yy, where xx is the language code, and yy the country code.
      *
-     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
-     * provisioning via an NFC bump.
+     * <p>Use only for device owner provisioning. This extra can be returned by the admin app when
+     * performing the admin-integrated provisioning flow as a result of the {@link
+     * #ACTION_GET_PROVISIONING_MODE} activity.
      */
     public static final String EXTRA_PROVISIONING_LOCALE
         = "android.app.extra.PROVISIONING_LOCALE";
@@ -996,7 +1001,10 @@ public class DevicePolicyManager {
      * The default for this extra is {@code false} - by default, the admin of a fully-managed
      * device has the ability to grant sensors-related permissions.
      *
-     * <p>Use only for device owner provisioning.
+     * <p>Use only for device owner provisioning. This extra can be returned by the
+     * admin app when performing the admin-integrated provisioning flow as a result of the
+     * {@link #ACTION_GET_PROVISIONING_MODE} activity.
+     *
      * @see #ACTION_GET_PROVISIONING_MODE
      */
     public static final String EXTRA_PROVISIONING_SENSORS_PERMISSION_GRANT_OPT_OUT =
@@ -1065,6 +1073,9 @@ public class DevicePolicyManager {
      *
      * <p>From {@link android.os.Build.VERSION_CODES#N} onwards, this is also supported for an
      * intent with action {@link #ACTION_PROVISION_MANAGED_PROFILE}.
+     *
+     * <p>This extra can also be returned by the admin app when performing the admin-integrated
+     * provisioning flow as a result of the {@link #ACTION_GET_PROVISIONING_MODE} activity.
      */
     public static final String EXTRA_PROVISIONING_SKIP_ENCRYPTION =
              "android.app.extra.PROVISIONING_SKIP_ENCRYPTION";
@@ -1104,8 +1115,9 @@ public class DevicePolicyManager {
      *
      * <p> Maximum 3 key-value pairs can be specified. The rest will be ignored.
      *
-     * <p> Use in an intent with action {@link #ACTION_PROVISION_MANAGED_PROFILE} or
-     * {@link #ACTION_PROVISION_MANAGED_DEVICE}
+     * <p> Can be used in an intent with action {@link #ACTION_PROVISION_MANAGED_PROFILE}. This
+     * extra can also be returned by the admin app when performing the admin-integrated
+     * provisioning flow as a result of the {@link #ACTION_GET_PROVISIONING_MODE} activity.
      */
     public static final String EXTRA_PROVISIONING_DISCLAIMERS =
             "android.app.extra.PROVISIONING_DISCLAIMERS";
@@ -3437,6 +3449,9 @@ public class DevicePolicyManager {
      * set on the primary {@link DevicePolicyManager} must be cleared first by calling
      * {@link #setRequiredPasswordComplexity} with {@link #PASSWORD_COMPLEXITY_NONE) first.
      *
+     * <p><string>Note:</strong> this method is ignored on
+     * {PackageManager#FEATURE_AUTOMOTIVE automotive builds}.
+     *
      * @deprecated Prefer using {@link #setRequiredPasswordComplexity(int)}, to require a password
      * that satisfies a complexity level defined by the platform, rather than specifying custom
      * password requirement.
@@ -3527,11 +3542,13 @@ public class DevicePolicyManager {
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
      * <p>
-     *
      * Apps targeting {@link android.os.Build.VERSION_CODES#R} and below can call this method on the
      * {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
      * profile.
+     *
+     * <p><string>Note:</strong> this method is ignored on
+     * {PackageManager#FEATURE_AUTOMOTIVE automotive builds}.
      *
      * @deprecated see {@link #setPasswordQuality(ComponentName, int)} for details.
      *
@@ -3610,11 +3627,13 @@ public class DevicePolicyManager {
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
      * <p>
-     *
      * Apps targeting {@link android.os.Build.VERSION_CODES#R} and below can call this method on the
      * {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
      * profile.
+     *
+     * <p><string>Note:</strong> this method is ignored on
+     * {PackageManager#FEATURE_AUTOMOTIVE automotive builds}.
      *
      * @deprecated see {@link #setPasswordQuality(ComponentName, int)} for details.
      *
@@ -3700,11 +3719,13 @@ public class DevicePolicyManager {
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
      * <p>
-     *
      * Apps targeting {@link android.os.Build.VERSION_CODES#R} and below can call this method on the
      * {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
      * profile.
+     *
+     * <p><string>Note:</strong> this method is ignored on
+     * {PackageManager#FEATURE_AUTOMOTIVE automotive builds}.
      *
      * @deprecated see {@link #setPasswordQuality(ComponentName, int)} for details.
      *
@@ -3790,11 +3811,13 @@ public class DevicePolicyManager {
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
      * <p>
-     *
      * Apps targeting {@link android.os.Build.VERSION_CODES#R} and below can call this method on the
      * {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
      * profile.
+     *
+     * <p><string>Note:</strong> this method is ignored on
+     * {PackageManager#FEATURE_AUTOMOTIVE automotive builds}.
      *
      * @deprecated see {@link #setPasswordQuality(ComponentName, int)} for details.
      *
@@ -3879,11 +3902,13 @@ public class DevicePolicyManager {
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
      * <p>
-     *
      * Apps targeting {@link android.os.Build.VERSION_CODES#R} and below can call this method on the
      * {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
      * profile.
+     *
+     * <p><string>Note:</strong> this method is ignored on
+     * {PackageManager#FEATURE_AUTOMOTIVE automotive builds}.
      *
      * @deprecated see {@link #setPasswordQuality(ComponentName, int)} for details.
      *
@@ -3968,11 +3993,13 @@ public class DevicePolicyManager {
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
      * <p>
-     *
      * Apps targeting {@link android.os.Build.VERSION_CODES#R} and below can call this method on the
      * {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
      * profile.
+     *
+     * <p><string>Note:</strong> this method is ignored on
+     * {PackageManager#FEATURE_AUTOMOTIVE automotive builds}.
      *
      * @deprecated see {@link #setPasswordQuality(ComponentName, int)} for details.
      *
@@ -4056,11 +4083,13 @@ public class DevicePolicyManager {
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
      * <p>
-     *
      * Apps targeting {@link android.os.Build.VERSION_CODES#R} and below can call this method on the
      * {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
      * profile.
+     *
+     * <p><string>Note:</strong> this method is ignored on
+     * {PackageManager#FEATURE_AUTOMOTIVE automotive builds}.
      *
      * @deprecated see {@link #setPasswordQuality(ComponentName, int)} for details.
      *
@@ -7726,27 +7755,64 @@ public class DevicePolicyManager {
     }
 
     /**
-     * @hide
-     * Sets the given package as the device owner. The package must already be installed. There
-     * must not already be a device owner.
-     * Only apps with the MANAGE_PROFILE_AND_DEVICE_OWNERS permission and the shell uid can call
-     * this method.
-     * Calling this after the setup phase of the primary user has completed is allowed only if
-     * the caller is the shell uid, and there are no additional users and no accounts.
+     * Sets the given package as the device owner.
+     *
+     * <p>Preconditions:
+     * <ul>
+     *   <li>The package must already be installed.
+     *   <li>There must not already be a device owner.
+     *   <li>Only apps with the {@code MANAGE_PROFILE_AND_DEVICE_OWNERS} permission or the
+     *       {@link Process#SHELL_UID Shell UID} can call this method.
+     * </ul>
+     *
+     * <p>Calling this after the setup phase of the device owner user has completed is allowed only
+     * if the caller is the {@link Process#SHELL_UID Shell UID}, and there are no additional users
+     * (except when the device runs on headless system user mode, in which case it could have exact
+     * one extra user, which is the current user - the device owner will be set in the
+     * {@link UserHandle#SYSTEM system} user and a profile owner will be set in the current user)
+     * and no accounts.
+     *
      * @param who the component name to be registered as device owner.
      * @param ownerName the human readable name of the institution that owns this device.
      * @param userId ID of the user on which the device owner runs.
+     *
      * @return whether the package was successfully registered as the device owner.
-     * @throws IllegalArgumentException if the package name is null or invalid
+     *
+     * @throws IllegalArgumentException if the package name is {@code null} or invalid.
      * @throws IllegalStateException If the preconditions mentioned are not met.
+     *
+     * @hide
      */
     @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
-    public boolean setDeviceOwner(
+    public boolean setDeviceOwner(@NonNull ComponentName who, @Nullable String ownerName,
+            @UserIdInt int userId) {
+        if (mService != null) {
+            try {
+                return mService.setDeviceOwner(who, ownerName, userId,
+                        /* setProfileOwnerOnCurrentUserIfNecessary= */ true);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Same as {@link #setDeviceOwner(ComponentName, String, int)}, but without setting the profile
+     * owner on current user when running on headless system user mode - should be used only by
+     * testing infra.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public boolean setDeviceOwnerOnly(
             @NonNull ComponentName who, @Nullable String ownerName, @UserIdInt int userId) {
         if (mService != null) {
             try {
-                return mService.setDeviceOwner(who, ownerName, userId);
+                return mService.setDeviceOwner(who, ownerName, userId,
+                        /* setProfileOwnerOnCurrentUserIfNecessary= */ false);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
@@ -9528,7 +9594,14 @@ public class DevicePolicyManager {
 
     /**
      * Called by a profile owner of secondary user that is affiliated with the device to stop the
-     * calling user and switch back to primary.
+     * calling user and switch back to primary user.
+     *
+     * <p>Notice that on devices running with
+     * {@link UserManager#isHeadlessSystemUserMode() headless system user mode}, there is no primary
+     * user, so it switches back to the user that was in the foreground before the first call to
+     * {@link #switchUser(ComponentName, UserHandle)} (or fails with
+     * {@link UserManager#USER_OPERATION_ERROR_UNKNOWN} if that method was not called prior to this
+     * call).
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @return one of the following result codes:
@@ -9543,6 +9616,37 @@ public class DevicePolicyManager {
         throwIfParentInstance("logoutUser");
         try {
             return mService.logoutUser(admin);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the user a {@link #logoutUser(ComponentName)} call would switch to,
+     * or {@link UserHandle#USER_NULL} if the current user is not in a session.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    public @UserIdInt int getLogoutUserId() {
+        try {
+            return mService.getLogoutUserId();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Clears the user that {@link #logoutUser(ComponentName)} would switch to.
+     *
+     * <p>Typically used by system UI after it logout a session.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    public void clearLogoutUser() {
+        try {
+            mService.clearLogoutUser();
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -10164,7 +10268,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Sets whether preferential network service is enabled on the work profile.
+     * Sets whether preferential network service is enabled.
      * For example, an organization can have a deal/agreement with a carrier that all of
      * the work data from its employees’ devices will be sent via a network service dedicated
      * for enterprise use.
@@ -10172,75 +10276,72 @@ public class DevicePolicyManager {
      * An example of a supported preferential network service is the Enterprise
      * slice on 5G networks.
      *
-     * By default, preferential network service is disabled on the work profile on supported
-     * carriers and devices. Admins can explicitly enable it with this API.
-     * On fully-managed devices this method is unsupported because all traffic is considered
-     * work traffic.
+     * By default, preferential network service is disabled on the work profile and
+     * fully managed devices, on supported carriers and devices.
+     * Admins can explicitly enable it with this API.
      *
      * <p> This method enables preferential network service with a default configuration.
-     * To fine-tune the configuration, use {@link #setPreferentialNetworkServiceConfig) instead.
+     * To fine-tune the configuration, use {@link #setPreferentialNetworkServiceConfigs) instead.
+     * <p> Before Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * this method can be called by the profile owner of a managed profile.
+     * <p> Starting from Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * This method can be called by the profile owner of a managed profile
+     * or device owner.
      *
-     * <p>This method can only be called by the profile owner of a managed profile.
      * @param enabled whether preferential network service should be enabled.
-     * @throws SecurityException if the caller is not the profile owner.
+     * @throws SecurityException if the caller is not the profile owner or device owner.
      **/
     public void setPreferentialNetworkServiceEnabled(boolean enabled) {
         throwIfParentInstance("setPreferentialNetworkServiceEnabled");
-        if (mService == null) {
-            return;
+        PreferentialNetworkServiceConfig.Builder configBuilder =
+                new PreferentialNetworkServiceConfig.Builder();
+        configBuilder.setEnabled(enabled);
+        if (enabled) {
+            configBuilder.setNetworkId(NET_ENTERPRISE_ID_1);
         }
-
-        try {
-            mService.setPreferentialNetworkServiceEnabled(enabled);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        setPreferentialNetworkServiceConfigs(List.of(configBuilder.build()));
     }
 
     /**
      * Indicates whether preferential network service is enabled.
      *
-     * <p>This method can be called by the profile owner of a managed profile.
+     * <p> Before Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * This method can be called by the profile owner of a managed profile.
+     * <p> Starting from Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * This method can be called by the profile owner of a managed profile
+     * or device owner.
      *
      * @return whether preferential network service is enabled.
-     * @throws SecurityException if the caller is not the profile owner.
+     * @throws SecurityException if the caller is not the profile owner or device owner.
      */
     public boolean isPreferentialNetworkServiceEnabled() {
         throwIfParentInstance("isPreferentialNetworkServiceEnabled");
-        if (mService == null) {
-            return false;
-        }
-        try {
-            return mService.isPreferentialNetworkServiceEnabled(myUserId());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return getPreferentialNetworkServiceConfigs().stream().anyMatch(c -> c.isEnabled());
     }
 
     /**
-     * Sets preferential network configuration on the work profile.
+     * Sets preferential network configurations.
      * {@see PreferentialNetworkServiceConfig}
      *
      * An example of a supported preferential network service is the Enterprise
      * slice on 5G networks.
      *
-     * By default, preferential network service is disabled on the work profile on supported
-     * carriers and devices. Admins can explicitly enable it with this API.
-     * On fully-managed devices this method is unsupported because all traffic is considered
-     * work traffic.
+     * By default, preferential network service is disabled on the work profile and fully managed
+     * devices, on supported carriers and devices. Admins can explicitly enable it with this API.
+     * If admin wants to have multiple enterprise slices,
+     * it can be configured by passing list of {@link PreferentialNetworkServiceConfig} objects.
      *
-     * <p>This method can only be called by the profile owner of a managed profile.
-     * @param preferentialNetworkServiceConfig preferential network configuration.
-     * @throws SecurityException if the caller is not the profile owner.
+     * @param preferentialNetworkServiceConfigs list of preferential network configurations.
+     * @throws SecurityException if the caller is not the profile owner or device owner.
      **/
-    public void setPreferentialNetworkServiceConfig(
-            @NonNull PreferentialNetworkServiceConfig preferentialNetworkServiceConfig) {
-        throwIfParentInstance("setPreferentialNetworkServiceConfig");
+    public void setPreferentialNetworkServiceConfigs(
+            @NonNull List<PreferentialNetworkServiceConfig> preferentialNetworkServiceConfigs) {
+        throwIfParentInstance("setPreferentialNetworkServiceConfigs");
         if (mService == null) {
             return;
         }
         try {
-            mService.setPreferentialNetworkServiceConfig(preferentialNetworkServiceConfig);
+            mService.setPreferentialNetworkServiceConfigs(preferentialNetworkServiceConfigs);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -10250,18 +10351,16 @@ public class DevicePolicyManager {
      * Get preferential network configuration
      * {@see PreferentialNetworkServiceConfig}
      *
-     * <p>This method can be called by the profile owner of a managed profile.
-     *
      * @return preferential network configuration.
-     * @throws SecurityException if the caller is not the profile owner.
+     * @throws SecurityException if the caller is not the profile owner or device owner.
      */
-    public @NonNull PreferentialNetworkServiceConfig getPreferentialNetworkServiceConfig() {
-        throwIfParentInstance("getPreferentialNetworkServiceConfig");
+    public @NonNull List<PreferentialNetworkServiceConfig> getPreferentialNetworkServiceConfigs() {
+        throwIfParentInstance("getPreferentialNetworkServiceConfigs");
         if (mService == null) {
-            return PreferentialNetworkServiceConfig.DEFAULT;
+            return List.of(PreferentialNetworkServiceConfig.DEFAULT);
         }
         try {
-            return mService.getPreferentialNetworkServiceConfig();
+            return mService.getPreferentialNetworkServiceConfigs();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -12705,13 +12804,18 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner to add an override APN.
+     * Called by device owner or profile owner to add an override APN.
      *
      * <p>This method may returns {@code -1} if {@code apnSetting} conflicts with an existing
      * override APN. Update the existing conflicted APN with
      * {@link #updateOverrideApn(ComponentName, int, ApnSetting)} instead of adding a new entry.
      * <p>Two override APNs are considered to conflict when all the following APIs return
      * the same values on both override APNs:
+     * <p> Before Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * Only device owners can add APNs.
+     * <p> Starting from Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * Device and profile owners can add enterprise APNs
+     * ({@link ApnSetting#TYPE_ENTERPRISE}), while only device owners can add other type of APNs.
      * <ul>
      *   <li>{@link ApnSetting#getOperatorNumeric()}</li>
      *   <li>{@link ApnSetting#getApnName()}</li>
@@ -12730,7 +12834,8 @@ public class DevicePolicyManager {
      * @param apnSetting the override APN to insert
      * @return The {@code id} of inserted override APN. Or {@code -1} when failed to insert into
      *         the database.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException If request is for enterprise APN {@code admin} is either device
+     * owner or profile owner and in all other types of APN if {@code admin} is not a device owner.
      *
      * @see #setOverrideApnsEnabled(ComponentName, boolean)
      */
@@ -12747,20 +12852,26 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner to update an override APN.
+     * Called by device owner or profile owner to update an override APN.
      *
      * <p>This method may returns {@code false} if there is no override APN with the given
      * {@code apnId}.
      * <p>This method may also returns {@code false} if {@code apnSetting} conflicts with an
      * existing override APN. Update the existing conflicted APN instead.
      * <p>See {@link #addOverrideApn} for the definition of conflict.
+     * <p> Before Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * Only device owners can update APNs.
+     * <p> Starting from Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * Device and profile owners can update enterprise APNs
+     * ({@link ApnSetting#TYPE_ENTERPRISE}), while only device owners can update other type of APNs.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
      * @param apnId the {@code id} of the override APN to update
      * @param apnSetting the override APN to update
      * @return {@code true} if the required override APN is successfully updated,
      *         {@code false} otherwise.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException If request is for enterprise APN {@code admin} is either device
+     * owner or profile owner and in all other types of APN if {@code admin} is not a device owner.
      *
      * @see #setOverrideApnsEnabled(ComponentName, boolean)
      */
@@ -12778,16 +12889,22 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner to remove an override APN.
+     * Called by device owner or profile owner to remove an override APN.
      *
      * <p>This method may returns {@code false} if there is no override APN with the given
      * {@code apnId}.
+     * <p> Before Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * Only device owners can remove APNs.
+     * <p> Starting from Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * Device and profile owners can remove enterprise APNs
+     * ({@link ApnSetting#TYPE_ENTERPRISE}), while only device owners can remove other type of APNs.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
      * @param apnId the {@code id} of the override APN to remove
      * @return {@code true} if the required override APN is successfully removed, {@code false}
      *         otherwise.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException If request is for enterprise APN {@code admin} is either device
+     * owner or profile owner and in all other types of APN if {@code admin} is not a device owner.
      *
      * @see #setOverrideApnsEnabled(ComponentName, boolean)
      */
@@ -13808,6 +13925,23 @@ public class DevicePolicyManager {
         }
         try {
             mService.setOrganizationIdForUser(packageName, enterpriseId, userId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Clears organization ID set by the DPC and resets the precomputed enrollment specific ID.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public void clearOrganizationId() {
+        if (mService == null) {
+            return;
+        }
+        try {
+            mService.clearOrganizationIdForUser(myUserId());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

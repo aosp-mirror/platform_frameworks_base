@@ -20,6 +20,7 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"關閉"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"展開"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"設定"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"進入分割畫面"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"選單"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"「<xliff:g id="NAME">%s</xliff:g>」目前在子母畫面中"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"如果你不想讓「<xliff:g id="NAME">%s</xliff:g>」使用這項功能，請輕觸開啟設定頁面，然後停用此功能。"</string>
@@ -72,5 +73,4 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"管理"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"已關閉泡泡。"</string>
     <string name="restart_button_description" msgid="5887656107651190519">"輕觸即可重新啟動這個應用程式並進入全螢幕模式。"</string>
-    <string name="got_it" msgid="4428750913636945527">"我知道了"</string>
 </resources>

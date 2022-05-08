@@ -589,8 +589,7 @@ public class UserControllerTest {
         setUpUser(userId, 0);
         mUserController.startUser(userId, /* foreground= */ false);
         verify(mInjector.mStorageManagerMock, times(1))
-                .unlockUserKey(userId, /* serialNumber= */ 0, /* token= */ null, /* secret= */
-                        null);
+                .unlockUserKey(userId, /* serialNumber= */ 0, /* secret= */ null);
         mUserStates.put(userId, mUserController.getStartedUserState(userId));
     }
 
@@ -599,8 +598,7 @@ public class UserControllerTest {
         assertThat(mUserController.startProfile(userId)).isTrue();
 
         verify(mInjector.mStorageManagerMock, times(1))
-                .unlockUserKey(userId, /* serialNumber= */ 0, /* token= */ null, /* secret= */
-                        null);
+                .unlockUserKey(userId, /* serialNumber= */ 0, /* secret= */ null);
         mUserStates.put(userId, mUserController.getStartedUserState(userId));
     }
 

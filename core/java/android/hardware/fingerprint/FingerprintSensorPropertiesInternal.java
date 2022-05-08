@@ -21,7 +21,9 @@ import static android.hardware.fingerprint.FingerprintSensorProperties.TYPE_UDFP
 import static android.hardware.fingerprint.FingerprintSensorProperties.TYPE_UDFPS_ULTRASONIC;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.hardware.biometrics.ComponentInfoInternal;
+import android.hardware.biometrics.SensorLocationInternal;
 import android.hardware.biometrics.SensorProperties;
 import android.hardware.biometrics.SensorPropertiesInternal;
 import android.os.Parcel;
@@ -38,34 +40,14 @@ public class FingerprintSensorPropertiesInternal extends SensorPropertiesInterna
      */
     public final @FingerprintSensorProperties.SensorType int sensorType;
 
-    /**
-     * The location of the center of the sensor if applicable. For example, sensors of type
-     * {@link FingerprintSensorProperties#TYPE_UDFPS_OPTICAL} would report this value as the
-     * distance in pixels, measured from the left edge of the screen.
-     */
-    public final int sensorLocationX;
-
-    /**
-     * The location of the center of the sensor if applicable. For example, sensors of type
-     * {@link FingerprintSensorProperties#TYPE_UDFPS_OPTICAL} would report this value as the
-     * distance in pixels, measured from the top edge of the screen.
-     *
-     */
-    public final int sensorLocationY;
-
-    /**
-     * The radius of the sensor if applicable. For example, sensors of type
-     * {@link FingerprintSensorProperties#TYPE_UDFPS_OPTICAL} would report this value as the radius
-     * of the sensor, in pixels.
-     */
-    public final int sensorRadius;
+    private final List<SensorLocationInternal> mSensorLocations;
 
     public FingerprintSensorPropertiesInternal(int sensorId,
             @SensorProperties.Strength int strength, int maxEnrollmentsPerUser,
             @NonNull List<ComponentInfoInternal> componentInfo,
             @FingerprintSensorProperties.SensorType int sensorType,
-            boolean resetLockoutRequiresHardwareAuthToken, int sensorLocationX, int sensorLocationY,
-            int sensorRadius) {
+            boolean resetLockoutRequiresHardwareAuthToken,
+            @NonNull List<SensorLocationInternal> sensorLocations) {
         // IBiometricsFingerprint@2.1 handles lockout in the framework, so the challenge is not
         // required as it can only be generated/attested/verified by TEE components.
         // IFingerprint@1.0 handles lockout below the HAL, but does not require a challenge. See
@@ -73,9 +55,7 @@ public class FingerprintSensorPropertiesInternal extends SensorPropertiesInterna
         super(sensorId, strength, maxEnrollmentsPerUser, componentInfo,
             resetLockoutRequiresHardwareAuthToken, false /* resetLockoutRequiresChallenge */);
         this.sensorType = sensorType;
-        this.sensorLocationX = sensorLocationX;
-        this.sensorLocationY = sensorLocationY;
-        this.sensorRadius = sensorRadius;
+        this.mSensorLocations = List.copyOf(sensorLocations);
     }
 
     /**
@@ -88,16 +68,15 @@ public class FingerprintSensorPropertiesInternal extends SensorPropertiesInterna
             boolean resetLockoutRequiresHardwareAuthToken) {
         // TODO(b/179175438): Value should be provided from the HAL
         this(sensorId, strength, maxEnrollmentsPerUser, componentInfo, sensorType,
-                resetLockoutRequiresHardwareAuthToken, 540 /* sensorLocationX */,
-                1636 /* sensorLocationY */, 130 /* sensorRadius */);
+                resetLockoutRequiresHardwareAuthToken, List.of(new SensorLocationInternal(
+                        "" /* displayId */,  540 /* sensorLocationX */, 1636 /* sensorLocationY */,
+                        130 /* sensorRadius */)));
     }
 
     protected FingerprintSensorPropertiesInternal(Parcel in) {
         super(in);
         sensorType = in.readInt();
-        sensorLocationX = in.readInt();
-        sensorLocationY = in.readInt();
-        sensorRadius = in.readInt();
+        mSensorLocations = in.createTypedArrayList(SensorLocationInternal.CREATOR);
     }
 
     public static final Creator<FingerprintSensorPropertiesInternal> CREATOR =
@@ -122,9 +101,7 @@ public class FingerprintSensorPropertiesInternal extends SensorPropertiesInterna
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeInt(sensorType);
-        dest.writeInt(sensorLocationX);
-        dest.writeInt(sensorLocationY);
-        dest.writeInt(sensorRadius);
+        dest.writeTypedList(mSensorLocations);
     }
 
     public boolean isAnyUdfpsType() {
@@ -148,6 +125,44 @@ public class FingerprintSensorPropertiesInternal extends SensorPropertiesInterna
             default:
                 return false;
         }
+    }
+
+    /**
+     * Get the default location.
+     *
+     * Use this method when the sensor's relationship to the displays on the device do not
+     * matter.
+     * @return
+     */
+    @NonNull
+    public SensorLocationInternal getLocation() {
+        final SensorLocationInternal location = getLocation("" /* displayId */);
+        return location != null ? location : SensorLocationInternal.DEFAULT;
+    }
+
+    /**
+     * Get the location of a sensor relative to a physical display layout.
+     *
+     * @param displayId stable display id
+     * @return location or null if none is specified
+     */
+    @Nullable
+    public SensorLocationInternal getLocation(String displayId) {
+        for (SensorLocationInternal location : mSensorLocations) {
+            if (location.displayId.equals(displayId)) {
+                return location;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets all locations relative to all supported display layouts.
+     * @return supported locations
+     */
+    @NonNull
+    public List<SensorLocationInternal> getAllLocations() {
+        return mSensorLocations;
     }
 
     @Override

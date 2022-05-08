@@ -1997,7 +1997,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         splitNames = source.createString8Array();
         splitSourceDirs = source.createString8Array();
         splitPublicSourceDirs = source.createString8Array();
-        splitDependencies = source.readSparseArray(null);
+        splitDependencies = source.readSparseArray(null, int[].class);
         nativeLibraryDir = source.readString8();
         secondaryNativeLibraryDir = source.readString8();
         nativeLibraryRootDir = source.readString8();

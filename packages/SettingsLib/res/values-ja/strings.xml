@@ -381,7 +381,7 @@
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"マニフェストの値に関係なく、すべてのアプリを外部ストレージに書き込めるようになります"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"アクティビティをサイズ変更可能にする"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"マニフェストの値に関係なく、マルチウィンドウですべてのアクティビティのサイズを変更できるようにします。"</string>
-    <string name="enable_freeform_support" msgid="7599125687603914253">"フリーフォーム ウィンドウの有効化"</string>
+    <string name="enable_freeform_support" msgid="7599125687603914253">"フリーフォーム ウィンドウを有効にする"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"試験運用機能のフリーフォーム ウィンドウのサポートを有効にします。"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"PC バックアップ パスワード"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"デスクトップのフルバックアップは現在保護されていません"</string>
@@ -415,12 +415,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView の実装"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"WebView の実装の設定"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"この選択は無効になりました。もう一度お試しください。"</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"ファイル暗号化に変換する"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"変換…"</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"ファイルは既に暗号化済みです"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"ファイルベースの暗号化に変換しています"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"データ パーティションをファイルベースの暗号化に変換します。\n 警告: この操作ではユーザーのデータがすべて削除されます。\n この機能はアルファ版であり、正しく機能しないおそれがあります。\n 続行するには [消去して変換] をクリックしてください。"</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"消去して変換…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"画像の色モード"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"sRGBを使用"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"無効"</string>

@@ -219,7 +219,6 @@ public class UidObserverController {
                     validateUid.setCurProcState(item.procState);
                     validateUid.setSetCapability(item.capability);
                     validateUid.setCurCapability(item.capability);
-                    validateUid.lastDispatchedProcStateSeq = item.procStateSeq;
                 }
             }
         }

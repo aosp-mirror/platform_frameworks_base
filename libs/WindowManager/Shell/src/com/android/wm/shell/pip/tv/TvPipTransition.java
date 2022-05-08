@@ -58,7 +58,8 @@ public class TvPipTransition extends PipTransitionController {
 
     @Override
     public boolean startAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
-            @NonNull SurfaceControl.Transaction t,
+            @NonNull SurfaceControl.Transaction startTransaction,
+            @android.annotation.NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         return false;
     }

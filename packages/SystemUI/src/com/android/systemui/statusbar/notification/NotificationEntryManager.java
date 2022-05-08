@@ -37,7 +37,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dumpable;
-import com.android.systemui.statusbar.FeatureFlags;
+import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationListener.NotificationHandler;
@@ -98,15 +99,16 @@ public class NotificationEntryManager implements
         CommonNotifCollection,
         Dumpable,
         VisualStabilityManager.Callback {
-    private static final String TAG = "NotificationEntryMgr";
-    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    /**
-     * Used when a notification is removed and it doesn't have a reason that maps to one of the
-     * reasons defined in NotificationListenerService
-     * (e.g. {@link NotificationListenerService#REASON_CANCEL})
-     */
-    public static final int UNDEFINED_DISMISS_REASON = 0;
+    private final NotificationEntryManagerLogger mLogger;
+    private final NotificationGroupManagerLegacy mGroupManager;
+    private final FeatureFlags mFeatureFlags;
+    private final Lazy<NotificationRowBinder> mNotificationRowBinderLazy;
+    private final Lazy<NotificationRemoteInputManager> mRemoteInputManagerLazy;
+    private final LeakDetector mLeakDetector;
+    private final ForegroundServiceDismissalFeatureController mFgsFeatureController;
+    private final IStatusBarService mStatusBarService;
+    private final DumpManager mDumpManager;
 
     private final Set<NotificationEntry> mAllNotifications = new ArraySet<>();
     private final Set<NotificationEntry> mReadOnlyAllNotifications =
@@ -129,19 +131,7 @@ public class NotificationEntryManager implements
     private final Map<NotificationEntry, NotificationLifetimeExtender> mRetainedNotifications =
             new ArrayMap<>();
 
-    private final NotificationEntryManagerLogger mLogger;
-
-    private final IStatusBarService mStatusBarService;
-
-    // Lazily retrieved dependencies
-    private final Lazy<NotificationRowBinder> mNotificationRowBinderLazy;
-    private final Lazy<NotificationRemoteInputManager> mRemoteInputManagerLazy;
-    private final LeakDetector mLeakDetector;
     private final List<NotifCollectionListener> mNotifCollectionListeners = new ArrayList<>();
-
-    private final NotificationGroupManagerLegacy mGroupManager;
-    private final FeatureFlags mFeatureFlags;
-    private final ForegroundServiceDismissalFeatureController mFgsFeatureController;
 
     private LegacyNotificationRanker mRanker = new LegacyNotificationRankerStub();
     private NotificationPresenter mPresenter;
@@ -152,6 +142,40 @@ public class NotificationEntryManager implements
             = new ArrayList<>();
     private final List<NotificationEntryListener> mNotificationEntryListeners = new ArrayList<>();
     private final List<NotificationRemoveInterceptor> mRemoveInterceptors = new ArrayList<>();
+
+    /**
+     * Injected constructor. See {@link NotificationsModule}.
+     */
+    public NotificationEntryManager(
+            NotificationEntryManagerLogger logger,
+            NotificationGroupManagerLegacy groupManager,
+            FeatureFlags featureFlags,
+            Lazy<NotificationRowBinder> notificationRowBinderLazy,
+            Lazy<NotificationRemoteInputManager> notificationRemoteInputManagerLazy,
+            LeakDetector leakDetector,
+            ForegroundServiceDismissalFeatureController fgsFeatureController,
+            IStatusBarService statusBarService,
+            DumpManager dumpManager
+    ) {
+        mLogger = logger;
+        mGroupManager = groupManager;
+        mFeatureFlags = featureFlags;
+        mNotificationRowBinderLazy = notificationRowBinderLazy;
+        mRemoteInputManagerLazy = notificationRemoteInputManagerLazy;
+        mLeakDetector = leakDetector;
+        mFgsFeatureController = fgsFeatureController;
+        mStatusBarService = statusBarService;
+        mDumpManager = dumpManager;
+    }
+
+    /** Once called, the NEM will start processing notification events from system server. */
+    public void initialize(
+            NotificationListener notificationListener,
+            LegacyNotificationRanker ranker) {
+        mRanker = ranker;
+        notificationListener.addNotificationHandler(mNotifListener);
+        mDumpManager.registerDumpable(this);
+    }
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -192,38 +216,6 @@ public class NotificationEntryManager implements
                         + entry.getValue().getClass().getName());
             }
         }
-    }
-
-    /**
-     * Injected constructor. See {@link NotificationsModule}.
-     */
-    public NotificationEntryManager(
-            NotificationEntryManagerLogger logger,
-            NotificationGroupManagerLegacy groupManager,
-            FeatureFlags featureFlags,
-            Lazy<NotificationRowBinder> notificationRowBinderLazy,
-            Lazy<NotificationRemoteInputManager> notificationRemoteInputManagerLazy,
-            LeakDetector leakDetector,
-            ForegroundServiceDismissalFeatureController fgsFeatureController,
-            IStatusBarService statusBarService
-    ) {
-        mLogger = logger;
-        mGroupManager = groupManager;
-        mFeatureFlags = featureFlags;
-        mNotificationRowBinderLazy = notificationRowBinderLazy;
-        mRemoteInputManagerLazy = notificationRemoteInputManagerLazy;
-        mLeakDetector = leakDetector;
-        mFgsFeatureController = fgsFeatureController;
-        mStatusBarService = statusBarService;
-    }
-
-    /** Once called, the NEM will start processing notification events from system server. */
-    public void attach(NotificationListener notificationListener) {
-        notificationListener.addNotificationHandler(mNotifListener);
-    }
-
-    public void setRanker(LegacyNotificationRanker ranker) {
-        mRanker = ranker;
     }
 
     /** Adds a {@link NotificationEntryListener}. */
@@ -313,9 +305,6 @@ public class NotificationEntryManager implements
             NotificationEntry entry = mPendingNotifications.get(key);
             entry.abortTask();
             mPendingNotifications.remove(key);
-            for (NotifCollectionListener listener : mNotifCollectionListeners) {
-                listener.onEntryCleanUp(entry);
-            }
             mLogger.logInflationAborted(key, "pending", reason);
         }
         NotificationEntry addedEntry = getActiveNotificationUnfiltered(key);
@@ -485,6 +474,18 @@ public class NotificationEntryManager implements
                 if (!lifetimeExtended) {
                     // At this point, we are guaranteed the notification will be removed
                     abortExistingInflation(key, "removeNotification");
+                    // Fix for b/201097913: NotifCollectionListener#onEntryRemoved specifies that
+                    //   #onEntryRemoved should be called when a notification is cancelled,
+                    //   regardless of whether the notification was pending or active.
+                    // Note that mNotificationEntryListeners are NOT notified of #onEntryRemoved
+                    //   because for that interface, #onEntryRemoved should only be called for
+                    //   active entries, NOT pending ones.
+                    for (NotifCollectionListener listener : mNotifCollectionListeners) {
+                        listener.onEntryRemoved(pendingEntry, REASON_UNKNOWN);
+                    }
+                    for (NotifCollectionListener listener : mNotifCollectionListeners) {
+                        listener.onEntryCleanUp(pendingEntry);
+                    }
                     mAllNotifications.remove(pendingEntry);
                     mLeakDetector.trackGarbage(pendingEntry);
                 }
@@ -688,8 +689,9 @@ public class NotificationEntryManager implements
         for (NotificationEntryListener listener : mNotificationEntryListeners) {
             listener.onPreEntryUpdated(entry);
         }
+        final boolean fromSystem = ranking != null;
         for (NotifCollectionListener listener : mNotifCollectionListeners) {
-            listener.onEntryUpdated(entry);
+            listener.onEntryUpdated(entry, fromSystem);
         }
 
         if (!mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
@@ -976,4 +978,14 @@ public class NotificationEntryManager implements
         /** true if the notification is for the current profiles */
         boolean isNotificationForCurrentProfiles(StatusBarNotification sbn);
     }
+
+    private static final String TAG = "NotificationEntryMgr";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+
+    /**
+     * Used when a notification is removed and it doesn't have a reason that maps to one of the
+     * reasons defined in NotificationListenerService
+     * (e.g. {@link NotificationListenerService#REASON_CANCEL})
+     */
+    public static final int UNDEFINED_DISMISS_REASON = 0;
 }

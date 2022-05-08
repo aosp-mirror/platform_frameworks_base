@@ -541,9 +541,9 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Leidžiama programai peržiūrėti „Bluetooth“ konfigūraciją planšetiniame kompiuteryje ir užmegzti bei priimti ryšius iš susietų įrenginių."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Programai leidžiama peržiūrėti „Bluetooth“ konfigūraciją „Android TV“ įrenginyje ir užmegzti bei priimti ryšius iš susietų įrenginių."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Leidžiama programai peržiūrėti „Bluetooth“ konfigūraciją telefone ir užmegzti bei priimti ryšius iš susietų įrenginių."</string>
-    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"„Bluetooth“ įr. netoliese aptikimas ir susiejimas"</string>
+    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"aptikti „Bluetooth“ įr. netoliese ir susieti"</string>
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Leidžiama programai aptikti ir susieti „Bluetooth“ įrenginius netoliese"</string>
-    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"prisijungimas prie susietų „Bluetooth“ įrenginių"</string>
+    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"prisijungti prie susietų „Bluetooth“ įrenginių"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Leidžiama programai prisijungti prie susietų „Bluetooth“ įrenginių"</string>
     <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"reklamuoti netoliese es. „Bluetooth“ įrenginiuose"</string>
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Programai leidžiama reklamuoti netoliese esančiuose „Bluetooth“ įrenginiuose"</string>
@@ -626,6 +626,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Palieskite, kad ištrintumėte veido modelį, tada iš naujo pridėkite veidą"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Atrakinimo pagal veidą nustatymas"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Atrakinkite telefoną pažiūrėję į jį"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Jei norite naudoti atrakinimą pagal veidą, įjunkite parinktį "<b>"Prieiga prie fotoaparato"</b>" skiltyje „Nustatymai“ &gt; „Privatumas“"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Daugiau atrakinimo metodų nustatymas"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Palieskite, kad pridėtumėte kontrolinį kodą"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Atrakinimas kontroliniu kodu"</string>
@@ -739,9 +740,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Stebėti bandymus atrakinti ekraną"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Stebimas neteisingai įvestų slaptažodžių skaičius atrakinant ekraną ir užrakinti planšetinį kompiuterį arba ištrinti visus jame esančius duomenis, jei įvedama per daug neteisingų slaptažodžių."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Stebėkite atrakinant ekraną įvestų netinkamų slaptažodžių skaičių ir užrakinkite „Android TV“ įrenginį arba ištrinkite visus „Android TV“ įrenginio duomenis, jei per daug kartų įvedamas netinkamas slaptažodis."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Stebėti atrakinant ekraną įvestų netinkamų slaptažodžių skaičių ir užrakinti informacinę pramoginę sistemą arba ištrinti visus informacinės pramoginės sistemos duomenis, jei per daug kartų įvedamas netinkamas slaptažodis."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Atrakindami ekraną stebėkite neteisingai įvestų slaptažodžių skaičių ir užrakinkite telefoną ar ištrinkite visus telefono duomenis, jei įvedama per daug neteisingų slaptažodžių."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Stebėkite atrakinant ekraną įvestų netinkamų slaptažodžių skaičių ir užrakinkite planšetinį kompiuterį arba ištrinkite visus šio naudotojo duomenis, jei per daug kartų įvedamas netinkamas slaptažodis."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Stebėkite atrakinant ekraną įvestų netinkamų slaptažodžių skaičių ir užrakinkite „Android TV“ įrenginį arba ištrinkite visus šio naudotojo duomenis, jei per daug kartų įvedamas netinkamas slaptažodis."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Stebėti atrakinant ekraną įvestų netinkamų slaptažodžių skaičių ir užrakinti informacinę pramoginę sistemą arba ištrinti visus šio profilio duomenis, jei per daug kartų įvedamas netinkamas slaptažodis."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Stebėkite atrakinant ekraną įvestų netinkamų slaptažodžių skaičių ir užrakinkite telefoną arba ištrinkite visus šio naudotojo duomenis, jei per daug kartų įvedamas netinkamas slaptažodis."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Pakeisti ekrano užraktą"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Pakeisti ekrano užraktą."</string>
@@ -750,10 +753,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Trinti visus duomenis"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Be įspėjimo ištrinti planšetinio kompiuterio duomenis atkuriant gamyklinius duomenis."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Neįspėjus ištrinami „Android TV“ įrenginio duomenys, atkūrus gamyklinius duomenis."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Ištrinti informacinės pramoginės sistemos be įspėjimo atliekant gamyklinių duomenų atkūrimą."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Be įspėjimo ištrinti telefono duomenis atkuriant gamyklinius duomenis."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Naudotojo duomenų ištrynimas"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Profilio duomenų ištrynimas"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Naudotojo duomenų ištrynimas"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Ištrinkite šio naudotojo duomenis šiame planšetiniame kompiuteryje be įspėjimo."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Ištrinami šio naudotojo duomenys šiame „Android TV“ įrenginyje be įspėjimo."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Ištrinti šio profilio duomenis šioje informacinėje pramoginėje sistemoje be įspėjimo."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Ištrinkite šio naudotojo duomenis šiame telefone be įspėjimo."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Nustatyti įrenginio bendrąjį tarpinį serverį"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Nustatykite įrenginio visuotinį tarpinį serverį, kuris bus naudojamas, kai politika įgalinta. Tik įrenginio savininkas gali nustatyti visuotinį tarpinį serverį."</string>
@@ -1741,7 +1747,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kai spartusis klavišas įjungtas, paspaudus abu garsumo mygtukus ir palaikius 3 sekundes bus įjungta pritaikymo neįgaliesiems funkcija."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Įjungti pritaikymo neįgaliesiems funkcijų spartųjį klavišą?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Paspaudus abu garsumo klavišus ir palaikius kelias sekundes įjungiamos pritaikymo neįgaliesiems funkcijos. Tai gali pakeisti įrenginio veikimą.\n\nDabartinės funkcijos:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nPasirinktas funkcijas galite pakeisti skiltyje „Nustatymai“ &gt; „Pritaikomumas“."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • „<xliff:g id="SERVICE">%1$s</xliff:g>“\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Įjungti „<xliff:g id="SERVICE">%1$s</xliff:g>“ spartųjį klavišą?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Paspaudus abu garsumo klavišus ir palaikius kelias sekundes įjungiama pritaikymo neįgaliesiems funkcija „<xliff:g id="SERVICE">%1$s</xliff:g>“. Tai gali pakeisti įrenginio veikimą.\n\nGalite pakeisti šį spartųjį klavišą į kitą funkciją skiltyje „Nustatymai“ &gt; „Pritaikomumas“."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Įjungti"</string>

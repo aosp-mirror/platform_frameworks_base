@@ -6,6 +6,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.Trace;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -38,6 +39,7 @@ import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
+import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.wm.shell.bubbles.Bubbles;
 
 import java.util.ArrayList;
@@ -336,12 +338,14 @@ public class NotificationIconAreaController implements
     }
 
     private void updateNotificationIcons() {
+        Trace.beginSection("NotificationIconAreaController.updateNotificationIcons");
         updateStatusBarIcons();
         updateShelfIcons();
         updateCenterIcon();
         updateAodNotificationIcons();
 
         applyNotificationIconsTint();
+        Trace.endSection();
     }
 
     private void updateShelfIcons() {

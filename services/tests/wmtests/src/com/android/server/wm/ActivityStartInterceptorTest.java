@@ -28,6 +28,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 
+import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
 import android.app.KeyguardManager;
 import android.app.admin.DevicePolicyManagerInternal;
@@ -42,6 +43,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 import android.testing.DexmakerShareClassLoaderRule;
+import android.util.SparseArray;
 
 import androidx.test.filters.SmallTest;
 
@@ -64,7 +66,7 @@ import org.mockito.MockitoAnnotations;
  * Unit tests for {@link ActivityStartInterceptorTest}.
  *
  * Build/Install/Run:
- *  atest WmTests:ActivityStartInterceptorTest
+ * atest WmTests:ActivityStartInterceptorTest
  */
 @SmallTest
 @Presubmit
@@ -114,6 +116,9 @@ public class ActivityStartInterceptorTest {
     private ActivityStartInterceptor mInterceptor;
     private ActivityInfo mAInfo = new ActivityInfo();
 
+    private SparseArray<ActivityInterceptorCallback> mActivityInterceptorCallbacks =
+            new SparseArray<>();
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -156,6 +161,9 @@ public class ActivityStartInterceptorTest {
         when(mLockTaskController.isActivityAllowed(
                 TEST_USER_ID, TEST_PACKAGE_NAME, LOCK_TASK_LAUNCH_MODE_DEFAULT))
                 .thenReturn(true);
+
+        // Mock the activity start callbacks
+        when(mService.getActivityInterceptorCallbacks()).thenReturn(mActivityInterceptorCallbacks);
 
         // Initialise activity info
         mAInfo.applicationInfo = new ApplicationInfo();
@@ -284,5 +292,39 @@ public class ActivityStartInterceptorTest {
 
         // THEN calling intercept returns false
         assertFalse(mInterceptor.intercept(null, null, mAInfo, null, null, 0, 0, null));
+    }
+
+    public void addMockInterceptorCallback(@Nullable Intent intent) {
+        int size = mActivityInterceptorCallbacks.size();
+        mActivityInterceptorCallbacks.put(size, new ActivityInterceptorCallback() {
+            @Override
+            public Intent intercept(ActivityInterceptorInfo info) {
+                return intent;
+            }
+        });
+    }
+
+    @Test
+    public void testInterceptionCallback_singleCallback() {
+        addMockInterceptorCallback(new Intent("android.test.foo"));
+
+        assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null, 0, 0, null));
+        assertEquals("android.test.foo", mInterceptor.mIntent.getAction());
+    }
+
+    @Test
+    public void testInterceptionCallback_singleCallbackReturnsNull() {
+        addMockInterceptorCallback(null);
+
+        assertFalse(mInterceptor.intercept(null, null, mAInfo, null, null, 0, 0, null));
+    }
+
+    @Test
+    public void testInterceptionCallback_fallbackToSecondCallback() {
+        addMockInterceptorCallback(null);
+        addMockInterceptorCallback(new Intent("android.test.second"));
+
+        assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null, 0, 0, null));
+        assertEquals("android.test.second", mInterceptor.mIntent.getAction());
     }
 }

@@ -535,16 +535,16 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Permite que o app acesse a configuração do Bluetooth no tablet, além de fazer e aceitar conexões com dispositivos pareados."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Permite que o app acesse a configuração do Bluetooth no dispositivo Android TV, além de fazer e aceitar conexões com dispositivos pareados."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Permite que o app acesse a configuração do Bluetooth no telefone, além de fazer e aceitar conexões com dispositivos pareados."</string>
-    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"descobrir e se parear a disp. Bluetooth por perto"</string>
+    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"descobrir e parear com disp. Bluetooth por perto"</string>
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Permite que o app descubra e se pareie a dispositivos Bluetooth por perto"</string>
-    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"conecte-se a dispositivos Bluetooth pareados"</string>
+    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"conectar a dispositivos Bluetooth pareados"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Permite que o app se conecte a dispositivos Bluetooth pareados"</string>
     <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"anunciar em dispositivos Bluetooth por perto"</string>
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Permite que o app seja anunciado em dispositivos Bluetooth por perto"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"determinar o posicionamento relativo entre dispositivos de banda ultralarga por perto"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Permitir que o app determine o posicionamento relativo entre dispositivos de banda ultralarga por perto"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"interagir com dispositivos Wi-Fi por perto"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Permite que o app veicule anúncios, conecte-se à rede e determine a posição relativa de dispositivos Wi-Fi por perto"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Permite que o app divulgue, faça conexão e determine a posição relativa de dispositivos Wi-Fi por perto."</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informações preferidas de serviço de pagamento por NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permite que o app acesse as informações preferidas de serviço de pagamento por NFC, como auxílios registrados ou destinos de trajetos."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controlar a comunicação a curta distância"</string>
@@ -620,6 +620,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Toque para excluir seu modelo de rosto e crie um novo"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Configurar o Desbloqueio facial"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Desbloqueie o smartphone olhando para ele"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Para usar o Desbloqueio facial, ative o "<b>"acesso à câmera"</b>" em Configurações &gt; Privacidade"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configure mais formas de desbloquear a tela"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Toque para adicionar uma impressão digital"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Desbloqueio por impressão digital"</string>
@@ -733,9 +734,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Monitorar tentativas de desbloqueio de tela"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Monitora quantas vezes a senha foi digitada incorretamente ao desbloquear a tela e bloqueia o telefone ou apaga todos os dados do telefone se a senha for digitada incorretamente muitas vezes."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Monitora o número de senhas incorretas digitadas ao desbloquear a tela e bloqueia o dispositivo Android TV ou limpa todos os dados nele se muitas senhas incorretas forem digitadas."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Monitora quantas vezes a senha foi digitada incorretamente ao desbloquear a tela e bloqueia o sistema de infoentretenimento ou apaga todos os dados desse sistema quando isso acontece muitas vezes."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Monitora quantas vezes a senha foi digitada incorretamente ao desbloquear a tela e bloqueia o telefone ou apaga todos os dados do telefone se a senha for digitada incorretamente muitas vezes."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Monitora o número de senhas incorretas digitadas ao desbloquear a tela e bloqueia o tablet ou limpa todos os dados do usuário se muitas senhas incorretas forem digitadas."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Monitora o número de senhas incorretas digitadas ao desbloquear a tela e bloqueia o dispositivo Android TV ou apaga todos os dados do usuário se muitas senhas incorretas forem digitadas."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Monitora quantas vezes a senha foi digitada incorretamente ao desbloquear a tela e bloqueia o sistema de infoentretenimento ou apaga todos os dados do perfil quando isso acontece muitas vezes."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Monitora o número de senhas incorretas digitadas ao desbloquear a tela e bloqueia o smartphone ou limpa todos os dados do usuário se muitas senhas incorretas forem digitadas."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Alterar o bloqueio de tela"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Altera o bloqueio de tela."</string>
@@ -744,10 +747,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Apagar todos os dados"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Apague os dados do tablet sem aviso redefinindo a configuração original."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Redefine o dispositivo Android TV para a configuração original e apaga os dados sem aviso."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Apaga os dados sem aviso, redefinindo o sistema de infoentretenimento para a configuração original."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Apaga os dados sem aviso redefinindo o smartphone para a configuração original."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Limpar dados do usuário"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Apagar dados do perfil"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Limpar dados do usuário"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Limpa os dados do usuário neste tablet sem aviso prévio."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Limpa os dados do usuário neste dispositivo Android TV sem aviso prévio."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Apaga os dados do perfil do sistema de infoentretenimento sem aviso."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Limpa os dados do usuário neste smartphone sem aviso prévio."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Definir o proxy global do dispositivo"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Configura o proxy global do dispositivo para ser usado enquanto a política está ativada. Somente o proprietário do dispositivo pode definir o proxy global."</string>
@@ -1697,7 +1703,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Quando o atalho estiver ativado, pressione os dois botões de volume por três segundos para iniciar um recurso de acessibilidade."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Ativar atalho para recursos de acessibilidade?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Manter as duas teclas de volume pressionadas por alguns segundos ativa os recursos de acessibilidade. Isso pode mudar a forma como seu dispositivo funciona.\n\nRecursos atuais:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nÉ possível mudar os recursos selecionados em \"Config. &gt; Acessibilidade\"."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Ativar atalho para <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Manter as duas teclas de volume pressionadas por alguns segundos ativa o serviço <xliff:g id="SERVICE">%1$s</xliff:g>, um recurso de acessibilidade. Isso pode mudar a forma como seu dispositivo funciona.\n\nÉ possível trocar o uso desse atalho para outro recurso em \"Config. &gt; Acessibilidade\"."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Ativar"</string>

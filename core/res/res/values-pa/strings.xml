@@ -174,7 +174,7 @@
     <string name="httpErrorTooManyRequests" msgid="2149677715552037198">"ਬਹੁਤ ਜ਼ਿਆਦਾ ਬੇਨਤੀਆਂ ਦੀ ਪ੍ਰਕਿਰਿਆ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ। ਬਾਅਦ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="notification_title" msgid="5783748077084481121">"<xliff:g id="ACCOUNT">%1$s</xliff:g> ਲਈ ਸਾਈਨਇਨ ਅਸ਼ੁੱਧੀ"</string>
     <string name="contentServiceSync" msgid="2341041749565687871">"ਸਿੰਕ ਕਰੋ"</string>
-    <string name="contentServiceSyncNotificationTitle" msgid="5766411446676388623">"ਸਮਕਾਲੀਕਿਰਤ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
+    <string name="contentServiceSyncNotificationTitle" msgid="5766411446676388623">"ਸਿੰਕ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4562226280528716090">"ਬਹੁਤ ਸਾਰੀਆਂ <xliff:g id="CONTENT_TYPE">%s</xliff:g> ਨੂੰ ਮਿਟਾਉਣ ਦੀ ਕੋਸ਼ਿਸ਼ ਕੀਤੀ ਗਈ।"</string>
     <string name="low_memory" product="tablet" msgid="5557552311566179924">"ਟੈਬਲੈੱਟ ਸਟੋਰੇਜ ਪੂਰੀ ਭਰੀ ਹੈ। ਜਗ੍ਹਾ ਖਾਲੀ ਕਰਨ ਲਈ ਕੁਝ ਫ਼ਾਈਲਾਂ ਮਿਟਾਓ।"</string>
     <string name="low_memory" product="watch" msgid="3479447988234030194">"ਘੜੀ ਸਟੋਰੇਜ ਪੂਰੀ ਭਰੀ ਹੈ। ਜਗ੍ਹਾ ਖਾਲੀ ਕਰਨ ਲਈ ਕੁਝ ਫ਼ਾਈਲਾਂ ਮਿਟਾਓ।"</string>
@@ -620,6 +620,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"ਆਪਣੇ ਚਿਹਰੇ ਦਾ ਮਾਡਲ ਮਿਟਾਉਣ ਲਈ ਟੈਪ ਕਰੋ, ਫਿਰ ਆਪਣਾ ਚਿਹਰਾ ਦੁਬਾਰਾ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"ਫ਼ੇਸ ਅਣਲਾਕ ਦਾ ਸੈੱਟਅੱਪ ਕਰੋ"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"ਆਪਣੇ ਫ਼ੋਨ ਵੱਲ ਦੇਖ ਕੇ ਇਸਨੂੰ ਅਣਲਾਕ ਕਰੋ"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"ਫ਼ੇਸ ਅਣਲਾਕ ਨੂੰ ਵਰਤਣ ਲਈ, ਸੈਟਿੰਗਾਂ &gt; ਪਰਦੇਦਾਰੀ ਵਿੱਚ ਜਾ ਕੇ "<b>"ਕੈਮਰਾ ਪਹੁੰਚ"</b>" ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"ਅਣਲਾਕ ਕਰਨ ਦੇ ਹੋਰ ਤਰੀਕਿਆਂ ਦਾ ਸੈੱਟਅੱਪ ਕਰੋ"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਸ਼ਾਮਲ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਅਣਲਾਕ"</string>
@@ -669,11 +670,11 @@
     <string name="face_error_vendor_unknown" msgid="7387005932083302070">"ਕੋਈ ਗੜਬੜ ਹੋ ਗਈ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"ਚਿਹਰਾ ਪ੍ਰਤੀਕ"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"ਸਿੰਕ ਸੈਟਿੰਗਾਂ ਪੜ੍ਹੋ"</string>
-    <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"ਐਪ ਨੂੰ ਕਿਸੇ ਖਾਤੇ ਲਈ ਸਮਕਾਲੀਕਰਨ ਸੈਟਿੰਗਾਂ ਪੜ੍ਹਨ ਦੇ ਯੋਗ ਬਣਾਉਂਦਾ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਇਹ ਪਤਾ ਕਰ ਸਕਦਾ ਹੈ ਕਿ People ਐਪ ਦਾ ਕਿਸੇ ਖਾਤੇ ਨਾਲ ਸਮਕਾਲੀਕਿਰਤ ਕੀਤਾ ਗਿਆ ਹੈ ਜਾਂ ਨਹੀਂ।"</string>
-    <string name="permlab_writeSyncSettings" msgid="6583154300780427399">"ਸਮਕਾਲੀਕਰਨ ਚਾਲੂ ਅਤੇ ਬੰਦ ਨੂੰ ਟੌਗਲ ਕਰੋ"</string>
-    <string name="permdesc_writeSyncSettings" msgid="6029151549667182687">"ਐਪ ਨੂੰ ਇੱਕ ਖਾਤੇ ਲਈ ਸਮਕਾਲੀਕਰਨ ਸੈਟਿੰਗਾਂ ਸੋਧਣ ਦੇ ਯੋਗ ਬਣਾਉਂਦਾ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਇਸਦੀ ਵਰਤੋਂ ਕਿਸੇ ਖਾਤੇ ਨਾਲ People ਐਪ ਦਾ ਸਮਕਾਲੀਕਰਨ ਚਾਲੂ ਕਰਨ ਲਈ ਕੀਤੀ ਜਾ ਸਕਦੀ ਹੈ।"</string>
+    <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"ਐਪ ਨੂੰ ਕਿਸੇ ਖਾਤੇ ਲਈ ਸਿੰਕ ਸੈਟਿੰਗਾਂ ਪੜ੍ਹਨ ਦੇ ਯੋਗ ਬਣਾਉਂਦਾ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਇਹ ਪਤਾ ਕਰ ਸਕਦਾ ਹੈ ਕਿ People ਐਪ ਨੂੰ ਕਿਸੇ ਖਾਤੇ ਨਾਲ ਸਿੰਕ ਕੀਤਾ ਗਿਆ ਹੈ ਜਾਂ ਨਹੀਂ।"</string>
+    <string name="permlab_writeSyncSettings" msgid="6583154300780427399">"ਸਿੰਕ ਚਾਲੂ ਅਤੇ ਬੰਦ ਨੂੰ ਟੌਗਲ ਕਰੋ"</string>
+    <string name="permdesc_writeSyncSettings" msgid="6029151549667182687">"ਐਪ ਨੂੰ ਇੱਕ ਖਾਤੇ ਲਈ ਸਿੰਕ ਸੈਟਿੰਗਾਂ ਸੋਧਣ ਦੇ ਯੋਗ ਬਣਾਉਂਦਾ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਇਸਦੀ ਵਰਤੋਂ ਕਿਸੇ ਖਾਤੇ ਨਾਲ People ਐਪ ਦਾ ਸਿੰਕ ਚਾਲੂ ਕਰਨ ਲਈ ਕੀਤੀ ਜਾ ਸਕਦੀ ਹੈ।"</string>
     <string name="permlab_readSyncStats" msgid="3747407238320105332">"ਸਿੰਕ ਅੰਕੜੇ ਪੜ੍ਹੋ"</string>
-    <string name="permdesc_readSyncStats" msgid="3867809926567379434">"ਐਪ ਨੂੰ ਇੱਕ ਖਾਤੇ ਲਈ ਸਮਕਾਲੀਕਰਨ ਸਥਿਤੀ ਪੜ੍ਹਨ ਦੇ ਯੋਗ ਬਣਾਉਂਦਾ ਹੈ, ਇਸ ਵਿੱਚ ਸਮਕਾਲੀਕਰਨ ਵਰਤਾਰਿਆਂ ਦਾ ਇਤਿਹਾਸ ਅਤੇ ਕਿੰਨੇ ਡਾਟਾ ਦਾ ਸਮਕਾਲੀਕਿਰਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਵੀ ਸ਼ਾਮਲ ਹੈ।"</string>
+    <string name="permdesc_readSyncStats" msgid="3867809926567379434">"ਐਪ ਨੂੰ ਇੱਕ ਖਾਤੇ ਲਈ ਸਿੰਕ ਸਥਿਤੀ ਪੜ੍ਹਨ ਦੇ ਯੋਗ ਬਣਾਉਂਦਾ ਹੈ, ਇਸ ਵਿੱਚ ਸਿੰਕ ਇਵੈਂਟਾਂ ਦਾ ਇਤਿਹਾਸ ਅਤੇ ਕਿੰਨਾ ਡਾਟਾ ਸਿੰਕ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਇਹ ਵੀ ਸ਼ਾਮਲ ਹੈ।"</string>
     <string name="permlab_sdcardRead" msgid="5791467020950064920">"ਸਮੱਗਰੀਆਂ ਪੜ੍ਹੋ"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"ਐਪ ਨੂੰ ਸਮੱਗਰੀਆਂ ਪੜ੍ਹਨ ਦਿੰਦੀ ਹੈ।"</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"ਸਮੱਗਰੀਆਂ ਦਾ ਸੰਸ਼ੋਧਨ ਕਰੋ ਜਾਂ ਮਿਟਾਓ"</string>
@@ -733,9 +734,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"ਸਕ੍ਰੀਨ ਅਣਲਾਕ ਕਰਨ ਦੀਆਂ ਕੋਸ਼ਿਸ਼ਾਂ \'ਤੇ ਨਿਗਰਾਨੀ ਰੱਖੋ"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"ਸਕ੍ਰੀਨ ਨੂੰ ਅਣਲਾਕ ਕਰਦੇ ਹੋਏ ਟਾਈਪ ਕੀਤੇ ਗਲਤ ਪਾਸਵਰਡਾਂ ਦੀ ਸੰਖਿਆ ਦਾ ਨਿਰੀਖਣ ਕਰੋ ਅਤੇ ਟੈਬਲੈੱਟ ਨੂੰ ਲਾਕ ਕਰੋ ਜਾਂ ਟੈਬਲੈੱਟ ਦਾ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ, ਜੇਕਰ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗਲਤ ਪਾਸਵਰਡ ਟਾਈਪ ਕੀਤੇ ਹਨ।"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"ਸਕ੍ਰੀਨ ਨੂੰ ਅਣਲਾਕ ਕਰਦੇ ਹੋਏ ਟਾਈਪ ਕੀਤੇ ਗਲਤ ਪਾਸਵਰਡਾਂ ਦੀ ਸੰਖਿਆ ਦਾ ਨਿਰੀਖਣ ਕਰੋ ਅਤੇ ਆਪਣੇ Android TV ਡੀਵਾਈਸ ਨੂੰ ਲਾਕ ਕਰੋ ਜਾਂ ਆਪਣੇ Android TV ਡੀਵਾਈਸ ਦਾ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ, ਜੇ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗਲਤ ਪਾਸਵਰਡ ਟਾਈਪ ਕੀਤੇ ਹਨ।"</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"ਸਕ੍ਰੀਨ ਨੂੰ ਅਣਲਾਕ ਕਰਦੇ ਸਮੇਂ ਟਾਈਪ ਕੀਤੇ ਗਲਤ ਪਾਸਵਰਡਾਂ ਦੀ ਸੰਖਿਆ ਦੀ ਨਿਗਰਾਨੀ ਕਰੋ ਅਤੇ ਜੇ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗਲਤ ਪਾਸਵਰਡ ਟਾਈਪ ਕੀਤੇ ਹਨ, ਤਾਂ ਵਾਹਨ ਆਡੀਓ ਸਿਸਟਮ ਨੂੰ ਲਾਕ ਕਰੋ ਜਾਂ ਵਾਹਨ ਆਡੀਓ ਸਿਸਟਮ ਦਾ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ।"</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"ਸਕ੍ਰੀਨ ਨੂੰ ਅਣਲਾਕ ਕਰਦੇ ਸਮੇਂ ਟਾਈਪ ਕੀਤੇ ਗਲਤ ਪਾਸਵਰਡਾਂ ਦੀ ਸੰਖਿਆ ਦਾ ਨਿਰੀਖਣ ਕਰੋ ਅਤੇ ਫ਼ੋਨ ਨੂੰ ਲਾਕ ਕਰੋ ਜਾਂ ਫ਼ੋਨ ਦਾ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ ਜੇਕਰ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗਲਤ ਪਾਸਵਰਡ ਟਾਈਪ ਕੀਤੇ ਹਨ।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"ਸਕ੍ਰੀਨ ਨੂੰ ਅਣਲਾਕ ਕਰਦੇ ਹੋਏ ਟਾਈਪ ਕੀਤੇ ਗਲਤ ਪਾਸਵਰਡਾਂ ਦੀ ਸੰਖਿਆ ਦਾ ਨਿਰੀਖਣ ਕਰੋ ਅਤੇ ਟੈਬਲੈੱਟ ਨੂੰ ਲਾਕ ਕਰੋ ਜਾਂ ਟੈਬਲੈੱਟ ਦਾ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ, ਜੇਕਰ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗਲਤ ਪਾਸਵਰਡ ਟਾਈਪ ਕੀਤੇ ਹਨ।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"ਸਕ੍ਰੀਨ ਨੂੰ ਅਣਲਾਕ ਕਰਦੇ ਹੋਏ ਟਾਈਪ ਕੀਤੇ ਗਲਤ ਪਾਸਵਰਡਾਂ ਦੀ ਸੰਖਿਆ ਦਾ ਨਿਰੀਖਣ ਕਰੋ ਅਤੇ ਆਪਣੇ Android TV ਡੀਵਾਈਸ ਨੂੰ ਲਾਕ ਕਰੋ ਜਾਂ ਇਸ ਵਰਤੋਂਕਾਰ ਦਾ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ, ਜੇ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗਲਤ ਪਾਸਵਰਡ ਟਾਈਪ ਕੀਤੇ ਹਨ।"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"ਸਕ੍ਰੀਨ ਨੂੰ ਅਣਲਾਕ ਕਰਦੇ ਸਮੇਂ ਟਾਈਪ ਕੀਤੇ ਗਲਤ ਪਾਸਵਰਡਾਂ ਦੀ ਸੰਖਿਆ ਦੀ ਨਿਗਰਾਨੀ ਕਰੋ ਅਤੇ ਜੇ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗਲਤ ਪਾਸਵਰਡ ਟਾਈਪ ਕੀਤੇ ਹਨ, ਤਾਂ ਵਾਹਨ ਆਡੀਓ ਸਿਸਟਮ ਨੂੰ ਲਾਕ ਕਰੋ ਜਾਂ ਇਸ ਪ੍ਰੋਫਾਈਲ ਦਾ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"ਸਕ੍ਰੀਨ ਨੂੰ ਅਣਲਾਕ ਕਰਦੇ ਸਮੇਂ ਟਾਈਪ ਕੀਤੇ ਗਲਤ ਪਾਸਵਰਡਾਂ ਦੀ ਸੰਖਿਆ ਦਾ ਨਿਰੀਖਣ ਕਰੋ ਅਤੇ ਫ਼ੋਨ ਨੂੰ ਲਾਕ ਕਰੋ ਜਾਂ ਫ਼ੋਨ ਦਾ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ ਜੇਕਰ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗਲਤ ਪਾਸਵਰਡ ਟਾਈਪ ਕੀਤੇ ਹਨ।"</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"ਸਕ੍ਰੀਨ ਲਾਕ ਬਦਲੋ"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"ਸਕ੍ਰੀਨ ਲਾਕ ਬਦਲੋ।"</string>
@@ -744,10 +747,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"ਇੱਕ ਫੈਕਟਰੀ ਡਾਟਾ ਰੀਸੈੱਟ ਕਰਕੇ ਚਿਤਾਵਨੀ ਤੋਂ ਬਿਨਾਂ ਟੈਬਲੈੱਟ ਦਾ ਡਾਟਾ ਮਿਟਾਓ।"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"ਫੈਕਟਰੀ ਡਾਟਾ ਰੀਸੈੱਟ ਕਰਕੇ ਬਿਨਾਂ ਚਿਤਾਵਨੀ ਦੇ ਤੁਹਾਡੇ Android TV ਡੀਵਾਈਸ ਦਾ ਡਾਟਾ ਮਿਟਾ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ।"</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"ਫੈਕਟਰੀ ਡਾਟਾ ਰੀਸੈੱਟ ਕਰਕੇ ਚਿਤਾਵਨੀ ਤੋਂ ਬਿਨਾਂ ਵਾਹਨ ਆਡੀਓ ਸਿਸਟਮ ਦਾ ਡਾਟਾ ਮਿਟਾਓ।"</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"ਇੱਕ ਫੈਕਟਰੀ ਡਾਟਾ ਰੀਸੈੱਟ ਕਰਕੇ ਚਿਤਾਵਨੀ ਤੋਂ ਬਿਨਾਂ ਫ਼ੋਨ ਦਾ ਡਾਟਾ ਮਿਟਾਓ।"</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"ਉਪਭੋਗਤਾ  ਡਾਟਾ  ਮਿਟਾਓ"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"ਪ੍ਰੋਫਾਈਲ ਡਾਟਾ ਮਿਟਾਓ"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"ਉਪਭੋਗਤਾ  ਡਾਟਾ  ਮਿਟਾਓ"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"ਬਿਨਾਂ ਚਿਤਾਵਨੀ ਦੇ ਇਸ ਟੈਬਲੈੱਟ ਤੇ ਮੌਜੂਦ ਇਸ ਵਰਤੋਂਕਾਰ ਦਾ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ।"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"ਬਿਨਾਂ ਚਿਤਾਵਨੀ ਦੇ ਇਸ Android TV ਡੀਵਾਈਸ \'ਤੇ ਮੌਜੂਦ ਇਸ ਵਰਤੋਂਕਾਰ ਦਾ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ।"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"ਇਸ ਵਾਹਨ ਆਡੀਓ ਸਿਸਟਮ \'ਤੇ ਚਿਤਾਵਨੀ ਤੋਂ ਬਿਨਾਂ ਇਸ ਪ੍ਰੋਫਾਈਲ ਦਾ ਡਾਟਾ ਮਿਟਾਓ।"</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"ਬਿਨਾਂ ਚਿਤਾਵਨੀ ਦੇ ਇਸ ਫ਼ੋਨ ਤੇ ਮੌਜੂਦ ਇਸ ਵਰਤੋਂਕਾਰ ਦਾ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ।"</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"ਡੀਵਾਈਸ ਗਲੋਬਲ ਪ੍ਰੌਕਸੀ ਸੈੱਟ ਕਰੋ"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"ਜਦੋਂ ਨੀਤੀ ਚਾਲੂ ਹੋਵੇ ਤਾਂ ਵਰਤੇ ਜਾਣ ਲਈ ਡੀਵਾਈਸ ਗਲੋਬਲ ਪ੍ਰੌਕਸੀ ਸੈੱਟ ਕਰੋ। ਕੇਵਲ ਡੀਵਾਈਸ ਮਾਲਕ ਗਲੋਬਲ ਪ੍ਰੌਕਸੀ ਸੈੱਟ ਕਰ ਸਕਦਾ ਹੈ।"</string>
@@ -1697,7 +1703,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ਸ਼ਾਰਟਕੱਟ ਚਾਲੂ ਹੋਣ \'ਤੇ, ਕਿਸੇ ਪਹੁੰਚਯੋਗਤਾ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਦੋਵੇਂ ਅਵਾਜ਼ ਬਟਨਾਂ ਨੂੰ 3 ਸਕਿੰਟ ਲਈ ਦਬਾ ਕੇ ਰੱਖੋ।"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"ਕੀ ਪਹੁੰਚਯੋਗਤਾ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਲਈ ਸ਼ਾਰਟਕੱਟ ਚਾਲੂ ਕਰਨਾ ਹੈ?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"ਕੁਝ ਸਕਿੰਟਾਂ ਲਈ ਦੋਵੇਂ ਅਵਾਜ਼ੀ ਕੁੰਜੀਆਂ ਨੂੰ ਦਬਾਈ ਰੱਖਣਾ, ਪਹੁੰਚਯੋਗਤਾ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਚਾਲੂ ਕਰ ਦਿੰਦਾ ਹੈ। ਇਹ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਦੇ ਕੰਮ ਕਰਨ ਦੇ ਤਰੀਕੇ ਨੂੰ ਬਦਲ ਸਕਦਾ ਹੈ।\n\nਮੌਜੂਦਾ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nਸੈਟਿੰਗਾਂ ਅਤੇ ਪਹੁੰਚਯੋਗਤਾ ਵਿੱਚ ਤੁਸੀਂ ਚੁਣੀਆਂ ਗਈਆਂ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਬਦਲ ਸਕਦੇ ਹੋ।"</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"ਕੀ <xliff:g id="SERVICE">%1$s</xliff:g> ਸ਼ਾਰਟਕੱਟ ਚਾਲੂ ਕਰਨਾ ਹੈ?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"ਕੁਝ ਸਕਿੰਟਾਂ ਲਈ ਦੋਵੇਂ ਅਵਾਜ਼ੀ ਕੁੰਜੀਆਂ ਨੂੰ ਦਬਾਈ ਰੱਖਣਾ <xliff:g id="SERVICE">%1$s</xliff:g>, ਇੱਕ ਪਹੁੰਚਯੋਗਤਾ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਚਾਲੂ ਕਰ ਦਿੰਦਾ ਹੈ। ਇਹ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਦੇ ਕੰਮ ਕਰਨ ਦੇ ਤਰੀਕੇ ਨੂੰ ਬਦਲ ਸਕਦਾ ਹੈ।\n\nਸੈਟਿੰਗਾਂ ਅਤੇ ਪਹੁੰਚਯੋਗਤਾ ਵਿੱਚ ਤੁਸੀਂ ਇਸ ਸ਼ਾਰਟਕੱਟ ਨੂੰ ਕਿਸੇ ਹੋਰ ਵਿਸ਼ੇਸ਼ਤਾ ਵਿੱਚ ਬਦਲ ਸਕਦੇ ਹੋ।"</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"ਚਾਲੂ ਕਰੋ"</string>

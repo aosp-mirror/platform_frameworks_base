@@ -415,12 +415,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"‏יישום WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"‏הגדרת יישום WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"אפשרות זו כבר אינה תקפה. אפשר לנסות שוב."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"המרה לצורך הצפנת קבצים"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"להמרה..."</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"הצפנת קבצים כבר מוגדרת"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"המרה להצפנה מבוססת קבצים"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"המרת מחיצת הנתונים להצפנה מבוססת-קבצים.\n אזהרה!! פעולה זו תמחק את כל הנתונים.\n תכונה זו זמינה בגרסת אלפא וייתכן שלא תפעל כראוי.\n יש להקיש על \'מחיקה והמרה…\' כדי להמשיך."</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"מחיקה והמרה…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"מצב צבע התמונה"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"‏שימוש ב-sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"מושבת"</string>

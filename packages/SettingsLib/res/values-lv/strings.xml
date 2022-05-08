@@ -201,9 +201,9 @@
     <string name="category_personal" msgid="6236798763159385225">"Privāts"</string>
     <string name="category_work" msgid="4014193632325996115">"Darba"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Izstrādātāju opcijas"</string>
-    <string name="development_settings_enable" msgid="4285094651288242183">"Izstrādātājam paredzēto opciju iespējošana"</string>
+    <string name="development_settings_enable" msgid="4285094651288242183">"Izstrādātāju opciju iespējošana"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Iestatīt lietotņu izstrādes opcijas"</string>
-    <string name="development_settings_not_available" msgid="355070198089140951">"Šim lietotājam nav pieejamas izstrādātāja opcijas."</string>
+    <string name="development_settings_not_available" msgid="355070198089140951">"Šim lietotājam nav pieejamas izstrādātāju opcijas."</string>
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"VPN iestatījumi šim lietotājam nav pieejami."</string>
     <string name="tethering_settings_not_available" msgid="266821736434699780">"Piesaistes iestatījumi šim lietotājam nav pieejami."</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Piekļuves punkta nosaukuma iestatījumi šim lietotājam nav pieejami."</string>
@@ -215,8 +215,8 @@
     <string name="adb_wireless_error" msgid="721958772149779856">"Kļūda"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Bezvadu atkļūdošana"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Lai skatītu un izmantotu pieejamās ierīces, ieslēdziet bezvadu atkļūdošanu."</string>
-    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Ierīču savienošana pārī, izmantojot QR kodu"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Savienot pārī jaunas ierīces, izmantojot QR koda skeneri"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Ierīču savienošana pārī, izmantojot kvadrātkodu"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Savienot pārī jaunas ierīces, izmantojot kvadrātkoda skeneri"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Ierīču savienošana pārī, izmantojot kodu"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Savienojiet pārī jaunas ierīces, izmantojot sešu ciparu kodu"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Pārī savienotās ierīces"</string>
@@ -230,12 +230,12 @@
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wi‑Fi kods savienošanai pārī"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Neizdevās izveidot savienojumu pārī"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Ierīcei ir jābūt izveidotam savienojumam ar to pašu tīklu."</string>
-    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Izveidojiet savienojumu pārī ar ierīci Wi‑Fi tīklā, skenējot QR kodu."</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Izveidojiet savienojumu pārī ar ierīci Wi‑Fi tīklā, skenējot kvadrātkodu."</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Notiek savienošana pārī ar ierīci…"</string>
-    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Neizdevās izveidot savienojumu pārī ar ierīci. QR kods nebija pareizs, vai ierīcei nebija izveidots savienojums ar to pašu tīklu."</string>
+    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Neizdevās izveidot savienojumu pārī ar ierīci. Kvadrātkods nebija pareizs, vai ierīcei nebija izveidots savienojums ar to pašu tīklu."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP adrese un ports"</string>
-    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR koda skenēšana"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Izveidojiet savienojumu pārī ar ierīci Wi‑Fi tīklā, skenējot QR kodu."</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Kvadrātkoda skenēšana"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Izveidojiet savienojumu pārī ar ierīci Wi‑Fi tīklā, skenējot kvadrātkodu."</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Lūdzu, izveidojiet savienojumu ar Wi-Fi tīklu"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, atkļūdošana, izstrādātājiem"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Kļūdu pārskata saīsne"</string>
@@ -415,12 +415,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView ieviešana"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Iestatīt WebView ieviešanu"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Šī iespēja vairs nav derīga. Mēģiniet vēlreiz."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"Pārvērst par failu šifrējumu"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Pārvērst…"</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"Jau šifrēts failu līmenī"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"Pārvēršana par failu līmeņa šifrējumu"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Pārvērtiet datu sadalījumu par failu līmeņa šifrējumu.\n Brīdinājums! Tiks dzēsti visi jūsu dati.\n Šī funkcija ir alfa izstrādes stadijā un var nedarboties, kā paredzēts.\n Lai turpinātu, nospiediet pogu “Dzēst un pārvērst…”"</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"Dzēst un pārvērst…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Attēla krāsu režīms"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"Izmantot sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Atspējota"</string>

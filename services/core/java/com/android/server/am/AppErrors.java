@@ -27,6 +27,7 @@ import static com.android.server.am.ActivityManagerService.MY_PID;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_FREE_RESIZE;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.AnrController;
@@ -40,6 +41,7 @@ import android.content.pm.VersionedPackage;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Message;
 import android.os.Process;
 import android.os.SystemClock;
@@ -489,7 +491,7 @@ class AppErrors {
      * @param message
      */
     void scheduleAppCrashLocked(int uid, int initialPid, String packageName, int userId,
-            String message, boolean force, int exceptionTypeId) {
+            String message, boolean force, int exceptionTypeId, @Nullable Bundle extras) {
         ProcessRecord proc = null;
 
         // Figure out which process to kill.  We don't trust that initialPid
@@ -521,7 +523,7 @@ class AppErrors {
             return;
         }
 
-        proc.scheduleCrashLocked(message, exceptionTypeId);
+        proc.scheduleCrashLocked(message, exceptionTypeId, extras);
         if (force) {
             // If the app is responsive, the scheduled crash will happen as expected
             // and then the delayed summary kill will be a no-op.
@@ -575,12 +577,14 @@ class AppErrors {
             mPackageWatchdog.onPackageFailure(r.getPackageListWithVersionCode(),
                     PackageWatchdog.FAILURE_REASON_APP_CRASH);
 
-            mService.mProcessList.noteAppKill(r, (crashInfo != null
-                      && "Native crash".equals(crashInfo.exceptionClassName))
-                      ? ApplicationExitInfo.REASON_CRASH_NATIVE
-                      : ApplicationExitInfo.REASON_CRASH,
-                      ApplicationExitInfo.SUBREASON_UNKNOWN,
-                    "crash");
+            synchronized (mService) {
+                mService.mProcessList.noteAppKill(r, (crashInfo != null
+                          && "Native crash".equals(crashInfo.exceptionClassName))
+                          ? ApplicationExitInfo.REASON_CRASH_NATIVE
+                          : ApplicationExitInfo.REASON_CRASH,
+                          ApplicationExitInfo.SUBREASON_UNKNOWN,
+                        "crash");
+            }
         }
 
         final int relaunchReason = r != null

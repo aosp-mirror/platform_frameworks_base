@@ -21,6 +21,7 @@ import com.android.systemui.qs.QSContainerImplController;
 import com.android.systemui.qs.QSFooter;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanelController;
+import com.android.systemui.qs.QSSquishinessController;
 import com.android.systemui.qs.QuickQSPanelController;
 import com.android.systemui.qs.customize.QSCustomizerController;
 
@@ -57,4 +58,7 @@ public interface QSFragmentComponent {
 
     /** Construct a {@link QSCustomizerController}. */
     QSCustomizerController getQSCustomizerController();
+
+    /** Construct a {@link QSSquishinessController}. */
+    QSSquishinessController getQSSquishinessController();
 }

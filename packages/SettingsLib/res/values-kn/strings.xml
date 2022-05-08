@@ -415,12 +415,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView ಹೊಂದಿಸಿ"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"WebView ಅನುಷ್ಠಾನಗೊಳಿಸುವಿಕೆಯನ್ನು ಹೊಂದಿಸಿ"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"ಈ ಆಯ್ಕೆಯು ಇನ್ನು ಮುಂದೆ ಮಾನ್ಯವಾಗಿರುವುದಿಲ್ಲ. ಮತ್ತೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"ಫೈಲ್ ಎನ್‌ಕ್ರಿಪ್ಶನ್‌ಗೆ ಪರಿವರ್ತಿಸು"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"ಪರಿವರ್ತಿಸು…"</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"ಫೈಲ್ ಈಗಾಗಲೇ ಎನ್‌ಕ್ರಿಪ್ಟ್ ಮಾಡಲಾಗಿದೆ"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"ಫೈಲ್ ಆಧಾರಿತ ಎನ್‌ಕ್ರಿಪ್ಶನ್‌ಗೆ ಪರಿವರ್ತಿಸಲಾಗುತ್ತಿದೆ"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"ಡೇಟಾ ವಿಭಜನೆಯನ್ನು ಫೈಲ್ ಆಧಾರಿತ ಎನ್‌ಕ್ರಿಪ್ಶನ್ ಆಗಿ ಪರಿವರ್ತಿಸಿ.\n !!ಎಚ್ಚರಿಕೆ!! ಇದು ನಿಮ್ಮ ಎಲ್ಲ ಡೇಟಾವನ್ನು ಅಳಿಸಿತ್ತದೆ.\n ಈ ವೈಶಿಷ್ಟ್ಯವು ಆಲ್ಫಾ ಆಗಿರುತ್ತದೆ ಮತ್ತು ಸರಿಯಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸದೆ ಇರಬಹುದು.\n ಮುಂದುವರಿಸಲು \'ಅಳಿಸಿ ಮತ್ತು ಪರಿವರ್ತಿಸು…\' ಒತ್ತಿರಿ."</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"ಅಳಿಸಿ ಮತ್ತು ಪರಿವರ್ತಿಸು…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"ಚಿತ್ರ ಬಣ್ಣದ ಮೋಡ್"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"sRGB ಬಳಸಿ"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>

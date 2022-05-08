@@ -23,7 +23,6 @@ import static android.hardware.fingerprint.FingerprintStateListener.STATE_IDLE;
 import static android.hardware.fingerprint.FingerprintStateListener.STATE_KEYGUARD_AUTH;
 
 import android.annotation.NonNull;
-import android.content.Context;
 import android.hardware.fingerprint.FingerprintStateListener;
 import android.hardware.fingerprint.IFingerprintStateListener;
 import android.os.RemoteException;
@@ -34,8 +33,6 @@ import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.EnrollClient;
 import com.android.server.biometrics.sensors.EnrollmentModifier;
-import com.android.server.biometrics.sensors.RemovalConsumer;
-import com.android.server.biometrics.sensors.fingerprint.hidl.FingerprintEnrollClient;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -70,7 +67,7 @@ public class FingerprintStateCallback implements BaseClientMonitor.Callback {
             } else {
                 mFingerprintState = STATE_AUTH_OTHER;
             }
-        } else if (client instanceof FingerprintEnrollClient) {
+        } else if (client instanceof EnrollClient) {
             mFingerprintState = STATE_ENROLLING;
         } else {
             Slog.w(FingerprintService.TAG,
@@ -143,6 +140,7 @@ public class FingerprintStateCallback implements BaseClientMonitor.Callback {
     /**
      * Enables clients to register a FingerprintStateListener. Used by FingerprintService to forward
      * updates in fingerprint sensor state to the SideFpNsEventHandler
+     *
      * @param listener
      */
     public void registerFingerprintStateListener(@NonNull IFingerprintStateListener listener) {

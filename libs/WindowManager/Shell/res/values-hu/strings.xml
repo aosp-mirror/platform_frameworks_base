@@ -20,6 +20,7 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Bezárás"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Kibontás"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Beállítások"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Váltás osztott képernyőre"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menü"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"A(z) <xliff:g id="NAME">%s</xliff:g> kép a képben funkciót használ"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Ha nem szeretné, hogy a(z) <xliff:g id="NAME">%s</xliff:g> használja ezt a funkciót, koppintson a beállítások megnyitásához, és kapcsolja ki."</string>
@@ -72,5 +73,4 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Kezelés"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Buborék elvetve."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"Koppintson az alkalmazás újraindításához és a teljes képernyős mód elindításához."</string>
-    <string name="got_it" msgid="4428750913636945527">"Rendben"</string>
 </resources>

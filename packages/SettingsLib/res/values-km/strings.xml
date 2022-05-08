@@ -415,12 +415,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"ការអនុវត្ត WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"កំណត់ការប្រតិបត្តិ WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"ជម្រើសនេះលែងមានសុពលភាពទៀតហើយ ព្យាយាមម្តងទៀត"</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"បំប្លែងទៅជាការអ៊ិនគ្រីបឯកសារ"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"បម្លែង…"</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"បានអ៊ីនគ្រីបឯកសាររួចហើយ"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"កំពុងបម្លែងទៅការអ៊ីនគ្រីបដែលផ្អែកលើឯកសារ"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"បំប្លែងការបែងចែកទិន្នន័យទៅជាការអ៊ិនគ្រីបដែលផ្អែកលើឯកសារ។\n !!ព្រមាន!! សកម្មភាពនេះនឹងលុបទិន្នន័យរបស់អ្នកទាំងអស់។\n មុខងារនេះសំខាន់ណាស់ ហើយអាចនឹងដំណើរការមិនប្រក្រតី។\n សូមចុច \'សម្អាត និងបំប្លែង...\' ដើម្បីបន្ត។"</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"សម្អាត និងបំប្លែង…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"របៀបនៃពណ៌រូបភាព"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"ប្រើ sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"បាន​បិទ"</string>

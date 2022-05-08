@@ -54,6 +54,7 @@ import com.android.server.wm.utils.InsetUtils;
 import com.google.android.collect.Sets;
 
 import java.io.PrintWriter;
+import java.util.Set;
 
 /**
  * When an app token becomes invisible, we take a snapshot (bitmap) of the corresponding task and
@@ -174,7 +175,10 @@ class TaskSnapshotController {
      * calling {@link #snapshotTasks} to ensure that the task has an up-to-date snapshot.
      */
     @VisibleForTesting
-    void addSkipClosingAppSnapshotTasks(ArraySet<Task> tasks) {
+    void addSkipClosingAppSnapshotTasks(Set<Task> tasks) {
+        if (shouldDisableSnapshots()) {
+            return;
+        }
         mSkipClosingAppSnapshotTasks.addAll(tasks);
     }
 
@@ -182,43 +186,46 @@ class TaskSnapshotController {
         snapshotTasks(tasks, false /* allowSnapshotHome */);
     }
 
+    void recordTaskSnapshot(Task task, boolean allowSnapshotHome) {
+        final TaskSnapshot snapshot;
+        final boolean snapshotHome = allowSnapshotHome && task.isActivityTypeHome();
+        if (snapshotHome) {
+            snapshot = snapshotTask(task);
+        } else {
+            switch (getSnapshotMode(task)) {
+                case SNAPSHOT_MODE_NONE:
+                    return;
+                case SNAPSHOT_MODE_APP_THEME:
+                    snapshot = drawAppThemeSnapshot(task);
+                    break;
+                case SNAPSHOT_MODE_REAL:
+                    snapshot = snapshotTask(task);
+                    break;
+                default:
+                    snapshot = null;
+                    break;
+            }
+        }
+        if (snapshot != null) {
+            final HardwareBuffer buffer = snapshot.getHardwareBuffer();
+            if (buffer.getWidth() == 0 || buffer.getHeight() == 0) {
+                buffer.close();
+                Slog.e(TAG, "Invalid task snapshot dimensions " + buffer.getWidth() + "x"
+                        + buffer.getHeight());
+            } else {
+                mCache.putSnapshot(task, snapshot);
+                // Don't persist or notify the change for the temporal snapshot.
+                if (!snapshotHome) {
+                    mPersister.persistSnapshot(task.mTaskId, task.mUserId, snapshot);
+                    task.onSnapshotChanged(snapshot);
+                }
+            }
+        }
+    }
+
     private void snapshotTasks(ArraySet<Task> tasks, boolean allowSnapshotHome) {
         for (int i = tasks.size() - 1; i >= 0; i--) {
-            final Task task = tasks.valueAt(i);
-            final TaskSnapshot snapshot;
-            final boolean snapshotHome = allowSnapshotHome && task.isActivityTypeHome();
-            if (snapshotHome) {
-                snapshot = snapshotTask(task);
-            } else {
-                switch (getSnapshotMode(task)) {
-                    case SNAPSHOT_MODE_NONE:
-                        continue;
-                    case SNAPSHOT_MODE_APP_THEME:
-                        snapshot = drawAppThemeSnapshot(task);
-                        break;
-                    case SNAPSHOT_MODE_REAL:
-                        snapshot = snapshotTask(task);
-                        break;
-                    default:
-                        snapshot = null;
-                        break;
-                }
-            }
-            if (snapshot != null) {
-                final HardwareBuffer buffer = snapshot.getHardwareBuffer();
-                if (buffer.getWidth() == 0 || buffer.getHeight() == 0) {
-                    buffer.close();
-                    Slog.e(TAG, "Invalid task snapshot dimensions " + buffer.getWidth() + "x"
-                            + buffer.getHeight());
-                } else {
-                    mCache.putSnapshot(task, snapshot);
-                    // Don't persist or notify the change for the temporal snapshot.
-                    if (!snapshotHome) {
-                        mPersister.persistSnapshot(task.mTaskId, task.mUserId, snapshot);
-                        task.onSnapshotChanged(snapshot);
-                    }
-                }
-            }
+            recordTaskSnapshot(tasks.valueAt(i), allowSnapshotHome);
         }
     }
 
@@ -290,11 +297,13 @@ class TaskSnapshotController {
         final WindowState mainWindow = result.second;
         final Rect contentInsets = getSystemBarInsets(mainWindow.getFrame(),
                 mainWindow.getInsetsStateWithVisibilityOverride());
-        InsetUtils.addInsets(contentInsets, activity.getLetterboxInsets());
+        final Rect letterboxInsets = activity.getLetterboxInsets();
+        InsetUtils.addInsets(contentInsets, letterboxInsets);
 
         builder.setIsRealSnapshot(true);
         builder.setId(System.currentTimeMillis());
         builder.setContentInsets(contentInsets);
+        builder.setLetterboxInsets(letterboxInsets);
 
         final boolean isWindowTranslucent = mainWindow.getAttrs().format != PixelFormat.OPAQUE;
         final boolean isShowWallpaper = mainWindow.hasWallpaper();
@@ -576,7 +585,8 @@ class TaskSnapshotController {
             return null;
         }
         final Rect contentInsets = new Rect(systemBarInsets);
-        InsetUtils.addInsets(contentInsets, topChild.getLetterboxInsets());
+        final Rect letterboxInsets = topChild.getLetterboxInsets();
+        InsetUtils.addInsets(contentInsets, letterboxInsets);
 
         // Note, the app theme snapshot is never translucent because we enforce a non-translucent
         // color above
@@ -585,9 +595,9 @@ class TaskSnapshotController {
                 topChild.mActivityComponent, hwBitmap.getHardwareBuffer(),
                 hwBitmap.getColorSpace(), mainWindow.getConfiguration().orientation,
                 mainWindow.getWindowConfiguration().getRotation(), new Point(taskWidth, taskHeight),
-                contentInsets, false /* isLowResolution */, false /* isRealSnapshot */,
-                task.getWindowingMode(), getAppearance(task), false /* isTranslucent */,
-                false /* hasImeSurface */);
+                contentInsets, letterboxInsets, false /* isLowResolution */,
+                false /* isRealSnapshot */, task.getWindowingMode(),
+                getAppearance(task), false /* isTranslucent */, false /* hasImeSurface */);
     }
 
     /**
@@ -691,7 +701,8 @@ class TaskSnapshotController {
     }
 
     static Rect getSystemBarInsets(Rect frame, InsetsState state) {
-        return state.calculateInsets(frame, Type.systemBars(), false /* ignoreVisibility */);
+        return state.calculateInsets(
+                frame, Type.systemBars(), false /* ignoreVisibility */).toRect();
     }
 
     void dump(PrintWriter pw, String prefix) {

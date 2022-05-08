@@ -91,7 +91,7 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
             final Context windowContext = mContext.createWindowContext(display,
                     TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY, /* options */ null);
             final WindowMagnificationController controller = new WindowMagnificationController(
-                    mContext,
+                    windowContext,
                     mHandler, new SfVsyncFrameCallbackProvider(), null,
                     new SurfaceControl.Transaction(), mWindowMagnifierCallback, mSysUiState);
             return new WindowMagnificationAnimationController(windowContext, controller);

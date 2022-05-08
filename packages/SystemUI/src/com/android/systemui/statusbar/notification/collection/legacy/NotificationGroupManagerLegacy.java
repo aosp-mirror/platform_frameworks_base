@@ -25,6 +25,7 @@ import android.util.Log;
 
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.StatusBarState;
@@ -60,8 +61,12 @@ import dagger.Lazy;
  * 2. Tracking group expansion states
  */
 @SysUISingleton
-public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener, StateListener,
-        GroupMembershipManager, GroupExpansionManager, Dumpable {
+public class NotificationGroupManagerLegacy implements
+        OnHeadsUpChangedListener,
+        StateListener,
+        GroupMembershipManager,
+        GroupExpansionManager,
+        Dumpable {
 
     private static final String TAG = "NotifGroupManager";
     private static final boolean DEBUG = StatusBar.DEBUG;
@@ -87,10 +92,13 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
     public NotificationGroupManagerLegacy(
             StatusBarStateController statusBarStateController,
             Lazy<PeopleNotificationIdentifier> peopleNotificationIdentifier,
-            Optional<Bubbles> bubblesOptional) {
+            Optional<Bubbles> bubblesOptional,
+            DumpManager dumpManager) {
         statusBarStateController.addCallback(this);
         mPeopleNotificationIdentifier = peopleNotificationIdentifier;
         mBubblesOptional = bubblesOptional;
+
+        dumpManager.registerDumpable(this);
     }
 
     /**
@@ -376,9 +384,9 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
         // * Only necessary when all notifications in the group use GROUP_ALERT_SUMMARY
         // * Only necessary when at least one notification in the group is on a priority channel
         if (group.summary.getSbn().getNotification().getGroupAlertBehavior()
-                != Notification.GROUP_ALERT_SUMMARY) {
+                == Notification.GROUP_ALERT_CHILDREN) {
             if (SPEW) {
-                Log.d(TAG, "getPriorityConversationAlertOverride: summary != GROUP_ALERT_SUMMARY");
+                Log.d(TAG, "getPriorityConversationAlertOverride: summary == GROUP_ALERT_CHILDREN");
             }
             return null;
         }
@@ -521,8 +529,10 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
             mIsolatedEntries.put(entry.getKey(), entry.getSbn());
             if (groupKeysChanged) {
                 updateSuppression(mGroupMap.get(oldGroupKey));
-                updateSuppression(mGroupMap.get(newGroupKey));
             }
+            // Always update the suppression of the group from which you're isolated, in case
+            // this entry was or now is the alertOverride for that group.
+            updateSuppression(mGroupMap.get(newGroupKey));
         } else if (!wasGroupChild && isGroupChild) {
             onEntryBecomingChild(entry);
         }

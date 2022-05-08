@@ -620,6 +620,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Tap to delete your face model, then add your face again"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Set up Face Unlock"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Unlock your phone by looking at it"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"To use Face Unlock, turn on "<b>"Camera access"</b>" in Settings &gt; Privacy"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Set up more ways to unlock"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Tap to add a fingerprint"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Fingerprint Unlock"</string>
@@ -733,9 +734,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Monitor screen unlock attempts"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Monitor the number of incorrect passwords typed when unlocking the screen and lock the tablet or erase all the tablet\'s data if too many incorrect passwords are typed."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Monitor the number of incorrect passwords typed when unlocking the screen, and lock your Android TV device or delete all of your Android TV device\'s data if too many incorrect passwords are typed."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Monitor the number of incorrect passwords typed when unlocking the screen, and lock the infotainment system or erase all the infotainment system\'s data if too many incorrect passwords are typed."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Monitor the number of incorrect passwords typed when unlocking the screen and lock the phone or erase all the phone\'s data if too many incorrect passwords are typed."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Monitor the number of incorrect passwords typed when unlocking the screen, and lock the tablet or erase all this user\'s data if too many incorrect passwords are typed."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Monitor the number of incorrect passwords typed when unlocking the screen, and lock your Android TV device or delete all of this user\'s data if too many incorrect passwords are typed."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Monitor the number of incorrect passwords typed when unlocking the screen, and lock the infotainment system or erase all this profile\'s data if too many incorrect passwords are typed."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Monitor the number of incorrect passwords typed when unlocking the screen, and lock the phone or erase all this user\'s data if too many incorrect passwords are typed."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Change the screen lock"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Change the screen lock."</string>
@@ -744,10 +747,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Delete all data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Erase the tablet\'s data without warning by performing a factory data reset."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Delete your Android TV device\'s data without warning by performing a factory data reset."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Erase the infotainment system\'s data without warning by performing a factory data reset."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Erase the phone\'s data without warning by performing a factory data reset."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Erase user data"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Erase profile data"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Erase user data"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Erase this user\'s data on this tablet without warning."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Delete this user\'s data on this Android TV device without warning."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Erase this profile\'s data on this infotainment system without warning."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Erase this user\'s data on this phone without warning."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Set the device global proxy"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Set the device global proxy to be used while policy is enabled. Only the device owner can set the global proxy."</string>
@@ -1697,7 +1703,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"When the shortcut is on, pressing both volume buttons for three seconds will start an accessibility feature."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Turn on shortcut for accessibility features?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Holding down both volume keys for a few seconds turns on accessibility features. This may change how your device works.\n\nCurrent features:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nYou can change selected features in Settings &gt; Accessibility."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Turn on <xliff:g id="SERVICE">%1$s</xliff:g> shortcut?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Holding down both volume keys for a few seconds turns on <xliff:g id="SERVICE">%1$s</xliff:g>, an accessibility feature. This may change how your device works.\n\nYou can change this shortcut to another feature in Settings &gt; Accessibility."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Turn on"</string>

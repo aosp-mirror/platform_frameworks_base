@@ -389,7 +389,7 @@
     <string name="permlab_systemAlertWindow" msgid="5757218350944719065">"Апликацијава може да се појави врз други апликации"</string>
     <string name="permdesc_systemAlertWindow" msgid="1145660714855738308">"Апликацијава може да се појави врз други апликации или делови од екранот. Тоа може да го попречи нормалното користење на апликацијата и да го смени начинот на кој се појавуваат другите апликации."</string>
     <string name="permlab_runInBackground" msgid="541863968571682785">"извршување во заднина"</string>
-    <string name="permdesc_runInBackground" msgid="4344539472115495141">"Апликацијава може да се извршува во заднина. Тоа може побрзо да ја троши батеријата."</string>
+    <string name="permdesc_runInBackground" msgid="4344539472115495141">"Апликацијава може да работи во заднина. Тоа може побрзо да ја троши батеријата."</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"користење мобилен интернет во заднина"</string>
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Апликацијава може да користи мобилен интернет во заднина. Тоа може да го зголеми користењето мобилен интернет."</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"направи апликацијата постојано да биде активна"</string>
@@ -544,7 +544,7 @@
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"да ја одреди релативната положба помеѓу уредите со ултраширок појас во близина"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Дозволува апликацијата да ја одреди релативната положба помеѓу уредите со ултраширок појас во близина"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"да има интеракција со уредите со Wi‑Fi во близина"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Дозволува апликацијата да рекламира, да се поврзува и да ја одредува релативната положба уредите со Wi‑Fi во близина"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Дозволува апликацијата да рекламира, да се поврзува и да ја одредува релативната положба на уреди со Wi‑Fi во близина"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Информации за претпочитаната услуга за плаќање преку NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дозволува апликацијата да добие информации за претпочитаната услуга за плаќање преку NFC, како регистрирани помагала и дестинација на маршрутата."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"контролирај комуникација на блиско поле"</string>
@@ -620,6 +620,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Допрете за да го избришете вашиот модел на лице, а потоа повторно додајте го лицето"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Поставете „Отклучување со лик“"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Отклучете го телефонот со гледање во него"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"За да користите „Отклучување со лик“, вклучете "<b>"Пристап до камерата"</b>" во „Поставки &gt; Приватност“"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Поставете уште начини за отклучување"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Допрете за да додадете отпечаток"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Отклучување со отпечаток на прст"</string>
@@ -733,9 +734,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Следи ги обидите за отклучување на екранот"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Посматрај го бројот на неточни лозинки што се напишани за да се отклучи екранот и заклучи го таблетот или избриши ги сите податоци од него ако бидат напишани премногу неточни лозинки."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Го следи бројот на погрешно внесени лозинки при отклучување на екранот и го заклучува уредот Android TV или ги брише сите податоци од уредот Android TV доколку се внесени премногу погрешни лозинки."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Набљудувај го бројот на погрешно внесени лозинки при отклучување на екранот и заклучи го системот за информации и забава или избриши ги сите негови податоци доколку се внесени премногу погрешни лозинки."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Посматрај го бројот на неточни лозинки што се напишани за да се отклучи екранот и заклучи го телефонот или избриши ги сите податоци од него ако бидат напишани премногу неточни лозинки."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Набљудувај го бројот на погрешно внесени лозинки при отклучување на екранот и заклучи го таблетот или избриши ги сите податоци од овој корисник доколку се внесени премногу погрешни лозинки."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Го следи бројот на погрешно внесени лозинки при отклучување на екранот и го заклучува уредот Android TV или ги брише сите податоци од овој корисник доколку се внесени премногу погрешни лозинки."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Набљудувај го бројот на погрешно внесени лозинки при отклучување на екранот и заклучи го системот за информации и забава или избриши ги сите податоци од овој профил доколку се внесени премногу погрешни лозинки."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Набљудувај го бројот на погрешно внесени лозинки при отклучување на екранот и заклучи го телефонот или избриши ги сите податоци од овој корисник доколку се внесени премногу погрешни лозинки."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Промени го заклучувањето на екранот"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Промени го заклучувањето на екранот."</string>
@@ -744,10 +747,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Избриши ги сите податоци"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Избриши ги податоците во таблетот без предупредување со ресетирање на фабрички податоци."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Ги брише податоците на вашиот уред Android TV без предупредување, така што ќе изврши ресетирање на фабричките податоци."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Избриши ги податоците во системот за информации и забава без предупредување со ресетирање на фабрички податоци."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Избриши ги податоците во телефонот без предупредување со ресетирање на фабрички податоци."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Избриши ги податоците на корисникот"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Избриши ги податоците на профилот"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Избриши ги податоците на корисникот"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Избриши ги податоците на овој корисник на таблетот без предупредување."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Ги брише податоците на овој корисник на уредов Android TV без предупредување."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Избриши ги податоците на профилов во системот за информации и забава без предупредување."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Избриши ги податоците на овој корисник на телефонот без предупредување."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Постави го глобалниот прокси на уредот"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Поставете го глобалниот прокси на уредот да се користи додека политиката е овозможена. Само сопственикот на уредот може да го поставува глобалниот прокси."</string>
@@ -1697,7 +1703,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Кога е вклучена кратенката, ако ги притиснете двете копчиња за јачина на звук во времетраење од 3 секунди, ќе се стартува функција за пристапност."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Да се вклучи кратенка за функциите за пристапност?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Ако ги задржите притиснати двете копчиња за јачина на звук неколку секунди, ќе се вклучат функциите за пристапност. Ова може да го промени начинот на функционирање на уредот.\n\nТековни функции:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nМоже да ги промените избраните функции во „Поставки &gt; Пристапност“."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Да се вклучи кратенка за <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Ако ги задржите притиснати двете копчиња за јачина на звук неколку секунди, ќе се вклучи функцијата за пристапност <xliff:g id="SERVICE">%1$s</xliff:g>. Ова може да го промени начинот на функционирање на уредот.\n\nМоже да ја измените кратенкава да биде за друга функција во „Поставки &gt; Пристапност“."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Вклучи"</string>

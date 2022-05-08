@@ -415,12 +415,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Primena WebView-a"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Podesite primenu WebView-a"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Ovaj izbor više nije važeći. Probajte ponovo."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"Konvertuj u šifrovanje datoteka"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Konvertuj..."</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"Već se koristi šifrovanje datoteka"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"Konvertovanje u šifrovanje pojedinačnih datoteka"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Konvertujte šifrovanje particije podataka u šifrovanje pojedinačnih datoteka.\n !!Upozorenje!! Time brišete sve podatke.\n Ovo je alfa verzija funkcije i verovatno neće raditi ispravno.\n Pritisnite „Izbriši i konvertuj...“ da biste nastavili."</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"Izbriši i konvertuj..."</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Režim boja slika"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"Koristi sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Onemogućeno je"</string>

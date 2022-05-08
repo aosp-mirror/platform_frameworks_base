@@ -543,8 +543,8 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Разрешава на приложението да рекламира на устройства с Bluetooth в близост"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"опред. на относителната позиция м/у у-вата с ултрашироколентови сигнали в близост"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Разрешаване на приложението да определя относителната позиция между устройствата с ултрашироколентови сигнали в близост"</string>
-    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"Взаимодействие с устройствата с Wi-Fi в близост"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Разрешава на приложението да рекламира, да се свързва и да определя относителната позиция на у-вата с Wi-Fi в близост"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"взаимодействие с устройствата с Wi-Fi в близост"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Разрешава на приложението да рекламира, да се свързва и да определя относителната позиция на устройствата с Wi-Fi в близост"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Информация за предпочитаната услуга за плащане чрез NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дава възможност на приложението да получава информация за предпочитаната услуга за плащане чрез NFC, като например регистрирани помощни средства и местоназначение."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"контролиране на комуникацията в близкото поле"</string>
@@ -620,6 +620,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Докоснете, за да изтриете модела на лицето си, след което добавете лицето си отново"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Настройване на отключването с лице"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Отключвайте телефона си, като го погледнете"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"За да използвате функцията „Отключване с лице“, включете "<b>"достъпа до камерата"</b>" от „Настройки &gt; Поверителност“"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Настройване на още начини за отключване на телефона"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Докоснете, за да добавите отпечатък"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Отключване с отпечатък"</string>
@@ -733,9 +734,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Наблюдаване на опитите за отключване на екрана"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Наблюдава броя въведени неправилни пароли при отключването на екрана и заключва таблета или изтрива всички данни от него, ако неправилните пароли са твърде много."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Следене на броя на неправилно въведените пароли при отключване на екрана и заключване на устройството ви с Android TV или изтриване на всички данни от него, ако неуспешните опити са твърде много."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Наблюдава броя на неправилно въведените пароли при отключването на екрана и заключва основното устройство или изтрива всички данни от него, ако неуспешните опити са твърде много."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Наблюдава броя въведени неправилни пароли при отключването на екрана и заключва телефона или изтрива всички данни от него, ако неправилните пароли са твърде много."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Наблюдава броя на неправилно въведените пароли при отключване на екрана и заключва таблета или изтрива всички данни на този потребител, ако неуспешните опити са твърде много."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Следене на броя на неправилно въведените пароли при отключване на екрана и заключване на устройството ви с Android TV или изтриване на всички данни на този потребител, ако неуспешните опити са твърде много."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Наблюдава броя на неправилно въведените пароли при отключване на екрана и заключва основното устройство или изтрива всички данни в този потребителски профил, ако неуспешните опити са твърде много."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Наблюдава броя на неправилно въведените пароли при отключване на екрана и заключва телефона или изтрива всички данни на този потребител, ако неуспешните опити са твърде много."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Промяна на заключването на екрана"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Променя заключването на екрана."</string>
@@ -744,10 +747,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Изтриване на всички данни"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Изтриване на данните в таблета без предупреждение чрез възстановяване на фабричните настройки."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Изтриване на данните от устройството ви с Android TV без предупреждение чрез възстановяване на фабричните настройки."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Изтрива данните на основното устройство без предупреждение чрез възстановяване на фабричните настройки."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Изтрива данните в телефона без предупреждение чрез възстановяване на фабричните настройки."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Изтриване на потребителските данни"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Изтриване на данните в потребителския профил"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Изтриване на потребителските данни"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Изтрива данните на този потребител от таблета без предупреждение."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Изтриване на данните на този потребител от устройството с Android TV без предупреждение."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Изтрива данните в този потребителски профил на основното устройство без предупреждение."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Изтрива данните на този потребител от телефона без предупреждение."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Задаване на глобален прокси сървър за устройството"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Задава глобалния прокси сървър за устройството, който да се използва, когато правилото е активирано. Само собственикът на устройството може да задава такъв сървър."</string>
@@ -1697,7 +1703,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Когато прекият път е включен, можете да стартирате дадена функция за достъпност, като натиснете двата бутона за силата на звука и ги задържите за 3 секунди."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Искате ли да включите прекия път за функциите за достъпност?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Натиснете двата бутона за силата на звука и ги задръжте за няколко секунди, за да включите функциите за достъпност. Това може да промени начина, по който работи устройството ви.\n\nТекущи функции:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nМожете да промените избраните функции от „Настройки“ &gt; „Достъпност“."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Искате ли да включите прекия път за <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Натиснете двата бутона за силата на звука и ги задръжте за няколко секунди, за да включите функцията за достъпност <xliff:g id="SERVICE">%1$s</xliff:g>. Това може да промени начина, по който работи устройството ви.\n\nМожете да зададете друга функция за този пряк път от „Настройки“ &gt; „Достъпност“."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Включване"</string>

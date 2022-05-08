@@ -415,12 +415,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"ৱেবভিউ প্ৰয়োগ"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"ৱেবভিউ প্ৰয়োগ ছেট কৰক"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"বাছনিটো এতিয়া আৰু মান্য় নহয়। আকৌ চেষ্টা কৰক।"</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"ফাইল এনক্ৰিপশ্বন কৰিবলৈ ৰূপান্তৰ কৰক"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"ৰূপান্তৰ কৰক…"</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"ফাইল ইতিমধ্যে এনক্ৰিপ্ট কৰা হৈছে"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"ফাইল-ভিত্তিক এনক্ৰিপশ্বনলৈ ৰূপান্তৰ কৰা হৈছে"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"ডেটা বিভাজনক ফাইল ভিত্তিক এনক্ৰিপশ্বনলৈ সলনি কৰক।\n !!সাৱধান!! ই আপোনাৰ আটাইবোৰ ডেটা মচিব।\n এই সুবিধাটো আলফা পৰীক্ষণ অৱস্থাত আছে গতিকে ই সঠিকভাৱে কাম নকৰিব পাৰে।\n অব্যাহত ৰাখিবলৈ \'মচক আৰু ৰূপান্তৰ কৰক…\' দবাওক।"</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"মচক আৰু ৰূপান্তৰ কৰক…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"চিত্ৰৰ ৰং ম’ড"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"এছআৰজিবি ব্যৱহাৰ কৰক"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"নিষ্ক্ৰিয় হৈ আছে"</string>

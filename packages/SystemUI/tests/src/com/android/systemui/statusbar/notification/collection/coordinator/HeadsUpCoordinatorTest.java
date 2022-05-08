@@ -31,7 +31,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
-import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
@@ -72,7 +71,6 @@ public class HeadsUpCoordinatorTest extends SysuiTestCase {
     @Mock private HeadsUpViewBinder mHeadsUpViewBinder;
     @Mock private NotificationInterruptStateProvider mNotificationInterruptStateProvider;
     @Mock private NotificationRemoteInputManager mRemoteInputManager;
-    @Mock private RemoteInputController mRemoteInputController;
     @Mock private NotifLifetimeExtender.OnEndLifetimeExtensionCallback mEndLifetimeExtension;
     @Mock private NodeController mHeaderController;
 
@@ -81,7 +79,6 @@ public class HeadsUpCoordinatorTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(mRemoteInputManager.getController()).thenReturn(mRemoteInputController);
 
         mCoordinator = new HeadsUpCoordinator(
                 mHeadsUpManager,
@@ -215,7 +212,7 @@ public class HeadsUpCoordinatorTest extends SysuiTestCase {
 
         // WHEN mEntry is removed from the notification collection
         mCollectionListener.onEntryRemoved(mEntry, /* cancellation reason */ 0);
-        when(mRemoteInputController.isSpinning(any())).thenReturn(false);
+        when(mRemoteInputManager.isSpinning(any())).thenReturn(false);
 
         // THEN heads up manager should remove the entry
         verify(mHeadsUpManager).removeNotification(mEntry.getKey(), false);

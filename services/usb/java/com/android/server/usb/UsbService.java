@@ -16,6 +16,7 @@
 
 package com.android.server.usb;
 
+import static android.hardware.usb.UsbOperationInternal.USB_OPERATION_ERROR_INTERNAL;
 import static android.hardware.usb.UsbPortStatus.DATA_ROLE_DEVICE;
 import static android.hardware.usb.UsbPortStatus.DATA_ROLE_HOST;
 import static android.hardware.usb.UsbPortStatus.MODE_DFP;
@@ -35,6 +36,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.hardware.usb.IUsbManager;
+import android.hardware.usb.IUsbOperationInternal;
 import android.hardware.usb.ParcelableUsbPort;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbDevice;
@@ -44,6 +46,7 @@ import android.hardware.usb.UsbPortStatus;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.service.usb.UsbServiceDumpProto;
@@ -762,19 +765,30 @@ public class UsbService extends IUsbManager.Stub {
     }
 
     @Override
-    public boolean enableUsbDataSignal(boolean enable) {
+    public boolean enableUsbData(String portId, boolean enable, int operationId,
+            IUsbOperationInternal callback) {
+        Objects.requireNonNull(portId, "enableUsbData: portId must not be null. opId:"
+                + operationId);
+        Objects.requireNonNull(callback, "enableUsbData: callback must not be null. opId:"
+                + operationId);
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
-
         final long ident = Binder.clearCallingIdentity();
+        boolean wait;
         try {
             if (mPortManager != null) {
-                return mPortManager.enableUsbDataSignal(enable);
+                wait = mPortManager.enableUsbData(portId, enable, operationId, callback, null);
             } else {
-                return false;
+                wait = false;
+                try {
+                    callback.onOperationComplete(USB_OPERATION_ERROR_INTERNAL);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "enableUsbData: Failed to call onOperationComplete", e);
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+        return wait;
     }
 
     @Override

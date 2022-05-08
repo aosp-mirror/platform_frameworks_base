@@ -415,12 +415,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"‏WebView کا نفاذ"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"‏WebView کا نفاذ سیٹ کریں"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"یہ انتخاب اب درست نہیں رہا۔ دوبارہ کوشش کریں۔"</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"فائل مرموز کاری میں بدلیں"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"بدلیں…"</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"فائل پہلے ہی مرموز شدہ ہے"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"فائل پر مبنی مرموز کاری میں بدلا جا رہا ہے"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"ڈیٹا پارٹیشن کو فائل پر مبنی مرموز کاری میں بدلیں۔\n !!تنبیہ!! اس سے آپ کا سارا ڈیٹا مٹ جائے گا۔\n یہ خصوصیت الفا ہے اور شاید ٹھیک طرح سے کام نہ کرے۔\n جاری رکھنے کیلئے \'صاف کریں اور بدلیں…\' دبائیں۔"</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"صاف کریں اور بدلیں…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"تصویری رنگ موڈ"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"‏sRGB استعمال کریں"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"غیر فعال"</string>

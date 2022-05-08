@@ -229,7 +229,7 @@
     <string name="reboot_to_update_reboot" msgid="4474726009984452312">"กำลังรีสตาร์ท…"</string>
     <string name="reboot_to_reset_title" msgid="2226229680017882787">"รีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
     <string name="reboot_to_reset_message" msgid="3347690497972074356">"กำลังรีสตาร์ท…"</string>
-    <string name="shutdown_progress" msgid="5017145516412657345">"กำลังปิด..."</string>
+    <string name="shutdown_progress" msgid="5017145516412657345">"กำลังปิดเครื่อง..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"แท็บเล็ตของคุณจะปิดการทำงาน"</string>
     <string name="shutdown_confirm" product="tv" msgid="7975942887313518330">"อุปกรณ์ Android TV จะปิดเครื่อง"</string>
     <string name="shutdown_confirm" product="watch" msgid="2977299851200240146">"นาฬิกาจะปิดการทำงาน"</string>
@@ -620,6 +620,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"แตะเพื่อลบรูปแบบใบหน้า แล้วเพิ่มใบหน้าอีกครั้ง"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"ตั้งค่าการปลดล็อกด้วยใบหน้า"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"ปลดล็อกโทรศัพท์โดยมองไปที่โทรศัพท์"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"หากต้องการใช้ปลดล็อกด้วยใบหน้า ให้เปิด"<b>"การเข้าถึงกล้อง"</b>"ในการตั้งค่าและความเป็นส่วนตัว"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"ตั้งค่าการปลดล็อกด้วยวิธีอื่น"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"แตะเพื่อเพิ่มลายนิ้วมือ"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ปลดล็อกด้วยลายนิ้วมือ"</string>
@@ -733,9 +734,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"ตรวจสอบความพยายามในการปลดล็อกหน้าจอ"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"ตรวจสอบจำนวนของรหัสผ่านที่พิมพ์ไม่ถูกต้องขณะปลดล็อกหน้าจอ และล็อกแท็บเล็ตหรือลบข้อมูลทั้งหมดในแท็บเล็ตถ้ามีการพิมพ์รหัสผ่านที่ไม่ถูกต้องมากเกินไป"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"ตรวจสอบรหัสผ่านที่พิมพ์ไม่ถูกต้องเวลาปลดล็อกหน้าจอ และล็อกอุปกรณ์ Android TV หรือลบข้อมูลทั้งหมดของอุปกรณ์ Android TV หากมีการพิมพ์รหัสผ่านไม่ถูกต้องหลายครั้งเกินไป"</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"ตรวจสอบจำนวนครั้งที่พิมพ์รหัสผ่านไม่ถูกต้องเวลาปลดล็อกหน้าจอ และล็อกระบบสาระบันเทิงหรือลบข้อมูลทั้งหมดของระบบสาระบันเทิงหากพิมพ์รหัสผ่านไม่ถูกต้องบ่อยเกินไป"</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"ตรวจสอบจำนวนการพิมพ์รหัสผ่านที่ไม่ถูกต้องขณะปลดล็อกหน้าจอ และล็อกโทรศัพท์หรือลบข้อมูลทั้งหมดในโทรศัพท์ถ้ามีการพิมพ์รหัสผ่านที่ไม่ถูกต้องมากเกินไป"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"ตรวจสอบจำนวนรหัสผ่านที่พิมพ์ไม่ถูกต้องเวลาปลดล็อกหน้าจอ และล็อกแท็บเล็ตหรือลบข้อมูลทั้งหมดของผู้ใช้นี้หากพิมพ์รหัสผ่านไม่ถูกต้องบ่อยเกินไป"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"ตรวจสอบจำนวนรหัสผ่านที่พิมพ์ไม่ถูกต้องเวลาปลดล็อกหน้าจอ และล็อกอุปกรณ์ Android TV หรือลบข้อมูลทั้งหมดของผู้ใช้นี้หากพิมพ์รหัสผ่านไม่ถูกต้องหลายครั้งเกินไป"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"ตรวจสอบจำนวนครั้งที่พิมพ์รหัสผ่านไม่ถูกต้องเวลาปลดล็อกหน้าจอ และล็อกระบบสาระบันเทิงหรือลบข้อมูลทั้งหมดของโปรไฟล์นี้หากพิมพ์รหัสผ่านไม่ถูกต้องบ่อยเกินไป"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"ตรวจสอบจำนวนรหัสผ่านที่พิมพ์ไม่ถูกต้องเวลาปลดล็อกหน้าจอ และล็อกโทรศัพท์หรือลบข้อมูลทั้งหมดของผู้ใช้นี้หากพิมพ์รหัสผ่านไม่ถูกต้องบ่อยเกินไป"</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"เปลี่ยนการล็อกหน้าจอ"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"เปลี่ยนการล็อกหน้าจอ"</string>
@@ -744,10 +747,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"ลบข้อมูลทั้งหมด"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"ลบข้อมูลของแท็บเล็ตโดยไม่มีการเตือน ด้วยการดำเนินการรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"ลบข้อมูลของอุปกรณ์ Android TV โดยไม่มีการเตือนด้วยการรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"ดำเนินการรีเซ็ตข้อมูลเป็นค่าเริ่มต้นเพื่อลบข้อมูลของระบบสาระบันเทิงโดยไม่มีการเตือน"</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"ลบข้อมูลโทรศัพท์โดยไม่มีการเตือน ด้วยการรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"ลบข้อมูลผู้ใช้"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"ลบข้อมูลโปรไฟล์"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"ลบข้อมูลผู้ใช้"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"ลบข้อมูลของผู้ใช้นี้ในแท็บเล็ตเครื่องนี้โดยไม่มีการเตือน"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"ลบข้อมูลของผู้ใช้นี้ในอุปกรณ์ Android TV เครื่องนี้โดยไม่มีการเตือน"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"ลบข้อมูลของโปรไฟล์ดังกล่าวในระบบสาระบันเทิงนี้โดยไม่มีการเตือน"</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"ลบข้อมูลของผู้ใช้นี้ในโทรศัพท์เครื่องนี้โดยไม่มีการเตือน"</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"ตั้งค่าพร็อกซีส่วนกลางของอุปกรณ์"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"ตั้งค่าพร็อกซีส่วนกลางของอุปกรณ์ที่จะใช้ขณะที่เปิดใช้นโยบายอยู่ เฉพาะเจ้าของอุปกรณ์เท่านั้นที่สามารถตั้งค่าพร็อกซีส่วนกลาง"</string>
@@ -1697,7 +1703,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"เมื่อทางลัดเปิดอยู่ การกดปุ่มปรับระดับเสียงทั้ง 2 ปุ่มนาน 3 วินาทีจะเริ่มฟีเจอร์การช่วยเหลือพิเศษ"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"เปิดใช้ทางลัดสำหรับฟีเจอร์การช่วยเหลือพิเศษใช่ไหม"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"การกดปุ่มปรับระดับเสียงทั้ง 2 ปุ่มค้างไว้ 2-3 วินาทีจะเปิดฟีเจอร์การช่วยเหลือพิเศษ การดำเนินการนี้อาจเปลี่ยนแปลงลักษณะการทำงานของอุปกรณ์\n\nฟีเจอร์ปัจจุบัน:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nคุณจะเปลี่ยนฟีเจอร์ที่เลือกไว้ได้ในการตั้งค่า &gt; การช่วยเหลือพิเศษ"</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"เปิดใช้ทางลัด <xliff:g id="SERVICE">%1$s</xliff:g> ใช่ไหม"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"การกดปุ่มปรับระดับเสียงทั้ง 2 ปุ่มค้างไว้ 2-3 วินาทีจะเปิด <xliff:g id="SERVICE">%1$s</xliff:g> ซึ่งเป็นฟีเจอร์การช่วยเหลือพิเศษ การดำเนินการนี้อาจเปลี่ยนแปลงลักษณะการทำงานของอุปกรณ์\n\nคุณแก้ไขทางลัดนี้ให้เปิดฟีเจอร์อื่นได้ในการตั้งค่า &gt; การช่วยเหลือพิเศษ"</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"เปิด"</string>

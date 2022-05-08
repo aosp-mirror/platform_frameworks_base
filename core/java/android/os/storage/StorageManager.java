@@ -82,7 +82,6 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.MediaStore;
 import android.provider.Settings;
-import android.sysprop.VoldProperties;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -287,28 +286,7 @@ public class StorageManager {
 
     /** @hide The volume is not encrypted. */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int ENCRYPTION_STATE_NONE =
-            IVold.ENCRYPTION_STATE_NONE;
-
-    /** @hide The volume has been encrypted succesfully. */
-    public static final int ENCRYPTION_STATE_OK =
-            IVold.ENCRYPTION_STATE_OK;
-
-    /** @hide The volume is in a bad state. */
-    public static final int ENCRYPTION_STATE_ERROR_UNKNOWN =
-            IVold.ENCRYPTION_STATE_ERROR_UNKNOWN;
-
-    /** @hide Encryption is incomplete */
-    public static final int ENCRYPTION_STATE_ERROR_INCOMPLETE =
-            IVold.ENCRYPTION_STATE_ERROR_INCOMPLETE;
-
-    /** @hide Encryption is incomplete and irrecoverable */
-    public static final int ENCRYPTION_STATE_ERROR_INCONSISTENT =
-            IVold.ENCRYPTION_STATE_ERROR_INCONSISTENT;
-
-    /** @hide Underlying data is corrupt */
-    public static final int ENCRYPTION_STATE_ERROR_CORRUPT =
-            IVold.ENCRYPTION_STATE_ERROR_CORRUPT;
+    public static final int ENCRYPTION_STATE_NONE = 1;
 
     private static volatile IStorageManager sStorageManager = null;
 
@@ -665,9 +643,7 @@ public class StorageManager {
     }
 
     /**
-     * Mount an Opaque Binary Blob (OBB) file. If a <code>key</code> is
-     * specified, it is supplied to the mounting process to be used in any
-     * encryption used in the OBB.
+     * Mount an Opaque Binary Blob (OBB) file.
      * <p>
      * The OBB will remain mounted for as long as the StorageManager reference
      * is held by the application. As soon as this reference is lost, the OBBs
@@ -680,19 +656,22 @@ public class StorageManager {
      * application's OBB that shares its UID.
      *
      * @param rawPath the path to the OBB file
-     * @param key secret used to encrypt the OBB; may be <code>null</code> if no
-     *            encryption was used on the OBB.
+     * @param key must be <code>null</code>. Previously, some Android device
+     *            implementations accepted a non-<code>null</code> key to mount
+     *            an encrypted OBB file. However, this never worked reliably and
+     *            is no longer supported.
      * @param listener will receive the success or failure of the operation
      * @return whether the mount call was successfully queued or not
      */
     public boolean mountObb(String rawPath, String key, OnObbStateChangeListener listener) {
         Preconditions.checkNotNull(rawPath, "rawPath cannot be null");
+        Preconditions.checkArgument(key == null, "mounting encrypted OBBs is no longer supported");
         Preconditions.checkNotNull(listener, "listener cannot be null");
 
         try {
             final String canonicalPath = new File(rawPath).getCanonicalPath();
             final int nonce = mObbActionListener.addListener(listener);
-            mStorageManager.mountObb(rawPath, canonicalPath, key, mObbActionListener, nonce,
+            mStorageManager.mountObb(rawPath, canonicalPath, mObbActionListener, nonce,
                     getObbInfo(canonicalPath));
             return true;
         } catch (IOException e) {
@@ -1528,9 +1507,9 @@ public class StorageManager {
     }
 
     /** {@hide} */
-    public void unlockUserKey(int userId, int serialNumber, byte[] token, byte[] secret) {
+    public void unlockUserKey(int userId, int serialNumber, byte[] secret) {
         try {
-            mStorageManager.unlockUserKey(userId, serialNumber, token, secret);
+            mStorageManager.unlockUserKey(userId, serialNumber, secret);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1599,18 +1578,13 @@ public class StorageManager {
     }
 
     /** {@hide}
-     * Is this device encryptable or already encrypted?
-     * @return true for encryptable or encrypted
-     *         false not encrypted and not encryptable
-     */
-    public static boolean isEncryptable() {
-        return RoSystemProperties.CRYPTO_ENCRYPTABLE;
-    }
-
-    /** {@hide}
-     * Is this device already encrypted?
-     * @return true for encrypted. (Implies isEncryptable() == true)
-     *         false not encrypted
+     * Is this device encrypted?
+     * <p>
+     * Note: all devices launching with Android 10 (API level 29) or later are
+     * required to be encrypted.  This should only ever return false for
+     * in-development devices on which encryption has not yet been configured.
+     *
+     * @return true if encrypted, false if not encrypted
      */
     public static boolean isEncrypted() {
         return RoSystemProperties.CRYPTO_ENCRYPTED;
@@ -1619,7 +1593,7 @@ public class StorageManager {
     /** {@hide}
      * Is this device file encrypted?
      * @return true for file encrypted. (Implies isEncrypted() == true)
-     *         false not encrypted or block encrypted
+     *         false not encrypted or using "managed" encryption
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static boolean isFileEncryptedNativeOnly() {
@@ -1627,70 +1601,6 @@ public class StorageManager {
             return false;
         }
         return RoSystemProperties.CRYPTO_FILE_ENCRYPTED;
-    }
-
-    /** {@hide}
-     * Is this device block encrypted?
-     * @return true for block encrypted. (Implies isEncrypted() == true)
-     *         false not encrypted or file encrypted
-     */
-    public static boolean isBlockEncrypted() {
-        if (!isEncrypted()) {
-            return false;
-        }
-        return RoSystemProperties.CRYPTO_BLOCK_ENCRYPTED;
-    }
-
-    /** {@hide}
-     * Is this device block encrypted with credentials?
-     * @return true for crediential block encrypted.
-     *         (Implies isBlockEncrypted() == true)
-     *         false not encrypted, file encrypted or default block encrypted
-     */
-    public static boolean isNonDefaultBlockEncrypted() {
-        if (!isBlockEncrypted()) {
-            return false;
-        }
-
-        try {
-            IStorageManager storageManager = IStorageManager.Stub.asInterface(
-                    ServiceManager.getService("mount"));
-            return storageManager.getPasswordType() != CRYPT_TYPE_DEFAULT;
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error getting encryption type");
-            return false;
-        }
-    }
-
-    /** {@hide}
-     * Is this device in the process of being block encrypted?
-     * @return true for encrypting.
-     *         false otherwise
-     * Whether device isEncrypted at this point is undefined
-     * Note that only system services and CryptKeeper will ever see this return
-     * true - no app will ever be launched in this state.
-     * Also note that this state will not change without a teardown of the
-     * framework, so no service needs to check for changes during their lifespan
-     */
-    public static boolean isBlockEncrypting() {
-        final String state = VoldProperties.encrypt_progress().orElse("");
-        return !"".equalsIgnoreCase(state);
-    }
-
-    /** {@hide}
-     * Is this device non default block encrypted and in the process of
-     * prompting for credentials?
-     * @return true for prompting for credentials.
-     *         (Implies isNonDefaultBlockEncrypted() == true)
-     *         false otherwise
-     * Note that only system services and CryptKeeper will ever see this return
-     * true - no app will ever be launched in this state.
-     * Also note that this state will not change without a teardown of the
-     * framework, so no service needs to check for changes during their lifespan
-     */
-    public static boolean inCryptKeeperBounce() {
-        final String status = VoldProperties.decrypt().orElse("");
-        return "trigger_restart_min_framework".equals(status);
     }
 
     /** {@hide} */
@@ -2909,25 +2819,10 @@ public class StorageManager {
     @GuardedBy("mFuseAppLoopLock")
     private @Nullable FuseAppLoop mFuseAppLoop = null;
 
-    /// Consts to match the password types in cryptfs.h
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int CRYPT_TYPE_PASSWORD = IVold.PASSWORD_TYPE_PASSWORD;
+    public static final int CRYPT_TYPE_PASSWORD = 0;
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int CRYPT_TYPE_DEFAULT = IVold.PASSWORD_TYPE_DEFAULT;
-    /** @hide */
-    public static final int CRYPT_TYPE_PATTERN = IVold.PASSWORD_TYPE_PATTERN;
-    /** @hide */
-    public static final int CRYPT_TYPE_PIN = IVold.PASSWORD_TYPE_PIN;
-
-    // Constants for the data available via StorageManagerService.getField.
-    /** @hide */
-    public static final String SYSTEM_LOCALE_KEY = "SystemLocale";
-    /** @hide */
-    public static final String OWNER_INFO_KEY = "OwnerInfo";
-    /** @hide */
-    public static final String PATTERN_VISIBLE_KEY = "PatternVisible";
-    /** @hide */
-    public static final String PASSWORD_VISIBLE_KEY = "PasswordVisible";
+    public static final int CRYPT_TYPE_DEFAULT = 1;
 }

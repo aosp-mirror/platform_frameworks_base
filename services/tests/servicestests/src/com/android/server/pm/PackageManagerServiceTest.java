@@ -16,6 +16,8 @@
 
 package com.android.server.pm;
 
+import static com.android.compatibility.common.util.ShellUtils.runShellCommand;
+
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.fail;
@@ -27,9 +29,12 @@ import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 
 import android.annotation.Nullable;
+import android.app.AppGlobals;
 import android.content.IIntentReceiver;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.os.Bundle;
+import android.os.UserHandle;
 import android.util.SparseArray;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -62,8 +67,18 @@ import java.util.regex.Pattern;
 // bit FrameworksServicesTests:com.android.server.pm.PackageManagerServiceTest
 @RunWith(AndroidJUnit4.class)
 public class PackageManagerServiceTest {
+
+    private static final String PACKAGE_NAME = "com.android.frameworks.servicestests";
+
+    private static final String TEST_DATA_PATH = "/data/local/tmp/servicestests/";
+    private static final String TEST_APP_APK = "StubTestApp.apk";
+    private static final String TEST_PKG_NAME = "com.android.servicestests.apps.stubapp";
+
+    private IPackageManager mIPackageManager;
+
     @Before
     public void setUp() throws Exception {
+        mIPackageManager = AppGlobals.getPackageManager();
     }
 
     @After
@@ -598,5 +613,27 @@ public class PackageManagerServiceTest {
         }
         Collections.sort(knownPackageIds);
         return knownPackageIds;
+    }
+
+    @Test
+    public void testSetSplashScreenTheme_samePackage_succeeds() throws Exception {
+        mIPackageManager.setSplashScreenTheme(PACKAGE_NAME, null /* themeName */,
+                UserHandle.myUserId());
+        // Invoking setSplashScreenTheme on the same package shouldn't get any exception.
+    }
+
+    @Test
+    public void testSetSplashScreenTheme_differentPackage_fails() throws Exception {
+        final File testApk = new File(TEST_DATA_PATH, TEST_APP_APK);
+        try {
+            runShellCommand("pm install " + testApk);
+            mIPackageManager.setSplashScreenTheme(TEST_PKG_NAME, null /* themeName */,
+                    UserHandle.myUserId());
+            fail("setSplashScreenTheme did not throw SecurityException as expected");
+        } catch (SecurityException e) {
+            // expected
+        } finally {
+            runShellCommand("pm uninstall " + TEST_PKG_NAME);
+        }
     }
 }

@@ -82,7 +82,7 @@ public class GroupHelper {
         }
         String combinedKey = generatePackageGroupKey(userId, sbn.getPackageName(), group);
         boolean needsOngoingFlag = notifications.size() > 0;
-        mCallback.updateAutogroupSummary(sbn.getKey(), needsOngoingFlag);
+        mCallback.updateAutogroupSummary(userId, sbn.getPackageName(), needsOngoingFlag);
     }
 
     public void onNotificationUpdated(StatusBarNotification childSbn,
@@ -211,6 +211,6 @@ public class GroupHelper {
         void removeAutoGroup(String key);
         void addAutoGroupSummary(int userId, String pkg, String triggeringKey);
         void removeAutoGroupSummary(int user, String pkg);
-        void updateAutogroupSummary(String key, boolean needsOngoingFlag);
+        void updateAutogroupSummary(int userId, String pkg, boolean needsOngoingFlag);
     }
 }

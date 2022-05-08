@@ -29,6 +29,7 @@ import android.net.Uri
 import android.os.Handler
 import android.os.UserHandle
 import android.provider.Settings
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import com.android.settingslib.Utils
@@ -42,7 +43,7 @@ import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceView
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.settings.UserTracker
-import com.android.systemui.statusbar.FeatureFlags
+import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.util.concurrency.Execution
@@ -73,27 +74,37 @@ class LockscreenSmartspaceController @Inject constructor(
     @Main private val handler: Handler,
     optionalPlugin: Optional<BcSmartspaceDataPlugin>
 ) {
+    companion object {
+        private const val TAG = "LockscreenSmartspaceController"
+    }
+
     private var session: SmartspaceSession? = null
     private val plugin: BcSmartspaceDataPlugin? = optionalPlugin.orElse(null)
-    private lateinit var smartspaceView: SmartspaceView
 
-    lateinit var view: View
-        private set
+    // Smartspace can be used on multiple displays, such as when the user casts their screen
+    private var smartspaceViews = mutableSetOf<SmartspaceView>()
 
     private var showSensitiveContentForCurrentUser = false
     private var showSensitiveContentForManagedUser = false
     private var managedUserHandle: UserHandle? = null
 
-    private val deviceProvisionedListener =
-        object : DeviceProvisionedController.DeviceProvisionedListener {
-            override fun onDeviceProvisionedChanged() {
-                connectSession()
-            }
+    var stateChangeListener = object : View.OnAttachStateChangeListener {
+        override fun onViewAttachedToWindow(v: View) {
+            smartspaceViews.add(v as SmartspaceView)
+            connectSession()
 
-            override fun onUserSetupChanged() {
-                connectSession()
+            updateTextColorFromWallpaper()
+            statusBarStateListener.onDozeAmountChanged(0f, statusBarStateController.dozeAmount)
+        }
+
+        override fun onViewDetachedFromWindow(v: View) {
+            smartspaceViews.remove(v as SmartspaceView)
+
+            if (smartspaceViews.isEmpty()) {
+                disconnect()
             }
         }
+    }
 
     private val sessionListener = SmartspaceSession.OnTargetsAvailableListener { targets ->
         execution.assertIsMainThread()
@@ -125,9 +136,20 @@ class LockscreenSmartspaceController @Inject constructor(
     private val statusBarStateListener = object : StatusBarStateController.StateListener {
         override fun onDozeAmountChanged(linear: Float, eased: Float) {
             execution.assertIsMainThread()
-            smartspaceView.setDozeAmount(eased)
+            smartspaceViews.forEach { it.setDozeAmount(eased) }
         }
     }
+
+    private val deviceProvisionedListener =
+        object : DeviceProvisionedController.DeviceProvisionedListener {
+            override fun onDeviceProvisionedChanged() {
+                connectSession()
+            }
+
+            override fun onUserSetupChanged() {
+                connectSession()
+            }
+        }
 
     init {
         deviceProvisionedController.addCallback(deviceProvisionedListener)
@@ -140,17 +162,16 @@ class LockscreenSmartspaceController @Inject constructor(
     }
 
     /**
-     * Constructs the smartspace view and connects it to the smartspace service. Subsequent calls
-     * are idempotent until [disconnect] is called.
+     * Constructs the smartspace view and connects it to the smartspace service.
      */
-    fun buildAndConnectView(parent: ViewGroup): View {
+    fun buildAndConnectView(parent: ViewGroup): View? {
         execution.assertIsMainThread()
 
         if (!isEnabled()) {
             throw RuntimeException("Cannot build view when not enabled")
         }
 
-        buildView(parent)
+        val view = buildView(parent)
         connectSession()
 
         return view
@@ -160,38 +181,38 @@ class LockscreenSmartspaceController @Inject constructor(
         session?.requestSmartspaceUpdate()
     }
 
-    private fun buildView(parent: ViewGroup) {
+    private fun buildView(parent: ViewGroup): View? {
         if (plugin == null) {
-            return
-        }
-        if (this::view.isInitialized) {
-            // Due to some oddities with a singleton smartspace view, allow reparenting
-            (view.getParent() as ViewGroup?)?.removeView(view)
-            return
+            return null
         }
 
         val ssView = plugin.getView(parent)
         ssView.registerDataProvider(plugin)
+
         ssView.setIntentStarter(object : BcSmartspaceDataPlugin.IntentStarter {
-            override fun startIntent(v: View?, i: Intent?) {
-                activityStarter.startActivity(i, true /* dismissShade */)
+            override fun startIntent(view: View, intent: Intent, showOnLockscreen: Boolean) {
+                activityStarter.startActivity(
+                    intent,
+                    true, /* dismissShade */
+                    null, /* launch animator - looks bad with the transparent smartspace bg */
+                    showOnLockscreen
+                )
             }
 
-            override fun startPendingIntent(pi: PendingIntent?) {
-                activityStarter.startPendingIntentDismissingKeyguard(pi)
+            override fun startPendingIntent(pi: PendingIntent, showOnLockscreen: Boolean) {
+                if (showOnLockscreen) {
+                    pi.send()
+                } else {
+                    activityStarter.startPendingIntentDismissingKeyguard(pi)
+                }
             }
         })
         ssView.setFalsingManager(falsingManager)
-
-        this.smartspaceView = ssView
-        this.view = ssView as View
-
-        updateTextColorFromWallpaper()
-        statusBarStateListener.onDozeAmountChanged(0f, statusBarStateController.dozeAmount)
+        return (ssView as View).apply { addOnAttachStateChangeListener(stateChangeListener) }
     }
 
     private fun connectSession() {
-        if (plugin == null || session != null || !this::smartspaceView.isInitialized) {
+        if (plugin == null || session != null || smartspaceViews.isEmpty()) {
             return
         }
 
@@ -204,6 +225,7 @@ class LockscreenSmartspaceController @Inject constructor(
 
         val newSession = smartspaceManager.createSmartspaceSession(
                 SmartspaceConfig.Builder(context, "lockscreen").build())
+        Log.d(TAG, "Starting smartspace session for lockscreen")
         newSession.addOnTargetsAvailableListener(uiExecutor, sessionListener)
         this.session = newSession
 
@@ -218,15 +240,19 @@ class LockscreenSmartspaceController @Inject constructor(
         configurationController.addCallback(configChangeListener)
         statusBarStateController.addCallback(statusBarStateListener)
 
+        plugin.registerSmartspaceEventNotifier {
+                e -> session?.notifySmartspaceEvent(e)
+        }
+
         reloadSmartspace()
     }
 
     /**
      * Disconnects the smartspace view from the smartspace service and cleans up any resources.
-     * Calling [buildAndConnectView] again will cause the same view to be reconnected to the
-     * service.
      */
     fun disconnect() {
+        if (!smartspaceViews.isEmpty()) return
+
         execution.assertIsMainThread()
 
         if (session == null) {
@@ -243,7 +269,9 @@ class LockscreenSmartspaceController @Inject constructor(
         statusBarStateController.removeCallback(statusBarStateListener)
         session = null
 
+        plugin?.registerSmartspaceEventNotifier(null)
         plugin?.onTargetsAvailable(emptyList())
+        Log.d(TAG, "Ending smartspace session for lockscreen")
     }
 
     fun addListener(listener: SmartspaceTargetListener) {
@@ -277,7 +305,7 @@ class LockscreenSmartspaceController @Inject constructor(
 
     private fun updateTextColorFromWallpaper() {
         val wallpaperTextColor = Utils.getColorAttrDefaultColor(context, R.attr.wallpaperTextColor)
-        smartspaceView.setPrimaryTextColor(wallpaperTextColor)
+        smartspaceViews.forEach { it.setPrimaryTextColor(wallpaperTextColor) }
     }
 
     private fun reloadSmartspace() {

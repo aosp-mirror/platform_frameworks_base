@@ -237,8 +237,6 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private final RebootEscrowManager mRebootEscrowManager;
 
-    private boolean mFirstCallToVold;
-
     // Current password metric for all users on the device. Updated when user unlocks
     // the device or changes password. Removed when user is stopped.
     @GuardedBy("this")
@@ -572,8 +570,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         mHandler = injector.getHandler(injector.getServiceThread());
         mStrongAuth = injector.getStrongAuth();
         mActivityManager = injector.getActivityManager();
-
-        mFirstCallToVold = true;
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_ADDED);
@@ -1370,7 +1366,7 @@ public class LockSettingsService extends ILockSettings.Stub {
      * can end up calling into other system services to process user unlock request (via
      * {@link com.android.server.SystemServiceManager#unlockUser} </em>
      */
-    private void unlockUser(int userId, byte[] token, byte[] secret) {
+    private void unlockUser(int userId, byte[] secret) {
         Slog.i(TAG, "Unlocking user " + userId + " with secret only, length "
                 + (secret != null ? secret.length : 0));
         // TODO: make this method fully async so we can update UI with progress strings
@@ -1395,7 +1391,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         };
 
         try {
-            mActivityManager.unlockUser(userId, token, secret, listener);
+            mActivityManager.unlockUser(userId, null, secret, listener);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -1722,71 +1718,22 @@ public class LockSettingsService extends ILockSettings.Stub {
             }
         }
         synchronized (mSpManager) {
-            if (shouldMigrateToSyntheticPasswordLocked(userId)) {
-                initializeSyntheticPasswordLocked(currentHandle.hash, savedCredential, userId);
-                return spBasedSetLockCredentialInternalLocked(credential, savedCredential, userId,
-                        isLockTiedToParent);
-            }
+            initializeSyntheticPasswordLocked(currentHandle.hash, savedCredential, userId);
+            return spBasedSetLockCredentialInternalLocked(credential, savedCredential, userId,
+                    isLockTiedToParent);
         }
-        if (DEBUG) Slog.d(TAG, "setLockCredentialInternal: user=" + userId);
-        byte[] enrolledHandle = enrollCredential(currentHandle.hash,
-                savedCredential.getCredential(), credential.getCredential(), userId);
-        if (enrolledHandle == null) {
-            Slog.w(TAG, String.format("Failed to enroll %s: incorrect credential",
-                    credential.isPattern() ? "pattern" : "password"));
-            return false;
-        }
-        CredentialHash willStore = CredentialHash.create(enrolledHandle, credential.getType());
-        mStorage.writeCredentialHash(willStore, userId);
-        // Still update PASSWORD_TYPE_KEY if we are running in pre-synthetic password code path,
-        // since it forms part of the state that determines the credential type
-        // @see getCredentialTypeInternal
-        setKeyguardStoredQuality(
-                LockPatternUtils.credentialTypeToPasswordQuality(credential.getType()), userId);
-        // push new secret and auth token to vold
-        GateKeeperResponse gkResponse;
-        try {
-            gkResponse = getGateKeeperService().verifyChallenge(userId, 0, willStore.hash,
-                    credential.getCredential());
-        } catch (RemoteException e) {
-            throw new IllegalStateException("Failed to verify current credential", e);
-        }
-        setUserKeyProtection(userId, credential, convertResponse(gkResponse));
-        fixateNewestUserKeyAuth(userId);
-        // Refresh the auth token
-        doVerifyCredential(credential, userId, null /* progressCallback */, 0 /* flags */);
-        synchronizeUnifiedWorkChallengeForProfiles(userId, null);
-        sendCredentialsOnChangeIfRequired(credential, userId, isLockTiedToParent);
-        return true;
     }
 
     private void onPostPasswordChanged(LockscreenCredential newCredential, int userHandle) {
-        updateEncryptionPasswordIfNeeded(newCredential, userHandle);
+        if (userHandle == UserHandle.USER_SYSTEM && isDeviceEncryptionEnabled() &&
+            shouldEncryptWithCredentials() && newCredential.isNone()) {
+            setCredentialRequiredToDecrypt(false);
+        }
         if (newCredential.isPattern()) {
             setBoolean(LockPatternUtils.PATTERN_EVER_CHOSEN_KEY, true, userHandle);
         }
         updatePasswordHistory(newCredential, userHandle);
         mContext.getSystemService(TrustManager.class).reportEnabledTrustAgentsChanged(userHandle);
-    }
-
-    /**
-     * Update device encryption password if calling user is USER_SYSTEM and device supports
-     * encryption.
-     */
-    private void updateEncryptionPasswordIfNeeded(LockscreenCredential credential, int userHandle) {
-        // Update the device encryption password.
-        if (userHandle != UserHandle.USER_SYSTEM || !isDeviceEncryptionEnabled()) {
-            return;
-        }
-        if (!shouldEncryptWithCredentials()) {
-            updateEncryptionPassword(StorageManager.CRYPT_TYPE_DEFAULT, null);
-            return;
-        }
-        if (credential.isNone()) {
-            // Set the encryption password to default.
-            setCredentialRequiredToDecrypt(false);
-        }
-        updateEncryptionPassword(credential.getStorageCryptType(), credential.getCredential());
     }
 
     /**
@@ -1883,34 +1830,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    /** Update the encryption password if it is enabled **/
-    @Override
-    public void updateEncryptionPassword(final int type, final byte[] password) {
-        if (!hasSecureLockScreen() && password != null && password.length != 0) {
-            throw new UnsupportedOperationException(
-                    "This operation requires the lock screen feature.");
-        }
-        if (!isDeviceEncryptionEnabled()) {
-            return;
-        }
-        final IBinder service = ServiceManager.getService("mount");
-        if (service == null) {
-            Slog.e(TAG, "Could not find the mount service to update the encryption password");
-            return;
-        }
-
-        // TODO(b/120484642): This is a location where we still use a String for vold
-        String passwordString = password != null ? new String(password) : null;
-        mHandler.post(() -> {
-            IStorageManager storageManager = mInjector.getStorageManager();
-            try {
-                storageManager.changeEncryptionPassword(type, passwordString);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Error changing encryption password", e);
-            }
-        });
-    }
-
     @VisibleForTesting /** Note: this method is overridden in unit tests */
     protected void tieProfileLockToParent(int userId, LockscreenCredential password) {
         if (DEBUG) Slog.v(TAG, "tieProfileLockToParent for user: " + userId);
@@ -1968,52 +1887,9 @@ public class LockSettingsService extends ILockSettings.Stub {
         mStorage.writeChildProfileLock(userId, outputStream.toByteArray());
     }
 
-    private byte[] enrollCredential(byte[] enrolledHandle,
-            byte[] enrolledCredential, byte[] toEnroll, int userId) {
-        checkWritePermission(userId);
-        GateKeeperResponse response;
-        try {
-            response = getGateKeeperService().enroll(userId, enrolledHandle,
-                    enrolledCredential, toEnroll);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Failed to enroll credential", e);
-            return null;
-        }
-
-        if (response == null) {
-            return null;
-        }
-
-        byte[] hash = response.getPayload();
-        if (hash != null) {
-            setKeystorePassword(toEnroll, userId);
-        } else {
-            // Should not happen
-            Slog.e(TAG, "Throttled while enrolling a password");
-        }
-        return hash;
-    }
-
-    private void setAuthlessUserKeyProtection(int userId, byte[] key) {
-        if (DEBUG) Slog.d(TAG, "setAuthlessUserKeyProtectiond: user=" + userId);
-        addUserKeyAuth(userId, null, key);
-    }
-
-    private void setUserKeyProtection(int userId, LockscreenCredential credential,
-            VerifyCredentialResponse vcr) {
+    private void setUserKeyProtection(int userId, byte[] key) {
         if (DEBUG) Slog.d(TAG, "setUserKeyProtection: user=" + userId);
-        if (vcr == null) {
-            throw new IllegalArgumentException("Null response verifying a credential we just set");
-        }
-        if (vcr.getResponseCode() != VerifyCredentialResponse.RESPONSE_OK) {
-            throw new IllegalArgumentException("Non-OK response verifying a credential we just set "
-                    + vcr.getResponseCode());
-        }
-        byte[] token = vcr.getGatekeeperHAT();
-        if (token == null) {
-            throw new IllegalArgumentException("Empty payload verifying a credential we just set");
-        }
-        addUserKeyAuth(userId, token, secretFromCredential(credential));
+        addUserKeyAuth(userId, key);
     }
 
     private void clearUserKeyProtection(int userId, byte[] secret) {
@@ -2021,7 +1897,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         final UserInfo userInfo = mUserManager.getUserInfo(userId);
         final long callingId = Binder.clearCallingIdentity();
         try {
-            mStorageManager.clearUserKeyAuth(userId, userInfo.serialNumber, null, secret);
+            mStorageManager.clearUserKeyAuth(userId, userInfo.serialNumber, secret);
         } catch (RemoteException e) {
             throw new IllegalStateException("clearUserKeyAuth failed user=" + userId);
         } finally {
@@ -2054,21 +1930,21 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     /** Unlock disk encryption */
-    private void unlockUserKey(int userId, byte[] token, byte[] secret) {
+    private void unlockUserKey(int userId, byte[] secret) {
         final UserInfo userInfo = mUserManager.getUserInfo(userId);
         try {
-            mStorageManager.unlockUserKey(userId, userInfo.serialNumber, token, secret);
+            mStorageManager.unlockUserKey(userId, userInfo.serialNumber, secret);
         } catch (RemoteException e) {
             throw new IllegalStateException("Failed to unlock user key " + userId, e);
 
         }
     }
 
-    private void addUserKeyAuth(int userId, byte[] token, byte[] secret) {
+    private void addUserKeyAuth(int userId, byte[] secret) {
         final UserInfo userInfo = mUserManager.getUserInfo(userId);
         final long callingId = Binder.clearCallingIdentity();
         try {
-            mStorageManager.addUserKeyAuth(userId, userInfo.serialNumber, token, secret);
+            mStorageManager.addUserKeyAuth(userId, userInfo.serialNumber, secret);
         } catch (RemoteException e) {
             throw new IllegalStateException("Failed to add new key to vold " + userId, e);
         } finally {
@@ -2336,9 +2212,8 @@ public class LockSettingsService extends ILockSettings.Stub {
             setUserPasswordMetrics(credential, userId);
             unlockKeystore(credential.getCredential(), userId);
 
-            Slog.i(TAG, "Unlocking user " + userId + " with token length "
-                    + response.getGatekeeperHAT().length);
-            unlockUser(userId, response.getGatekeeperHAT(), secretFromCredential(credential));
+            Slog.i(TAG, "Unlocking user " + userId);
+            unlockUser(userId, secretFromCredential(credential));
 
             if (isManagedProfileWithSeparatedLock(userId)) {
                 setDeviceUnlockedForUser(userId);
@@ -2410,77 +2285,6 @@ public class LockSettingsService extends ILockSettings.Stub {
             mInjector.getDevicePolicyManager().reportPasswordChanged(userId);
             LocalServices.getService(WindowManagerInternal.class).reportPasswordChanged(userId);
         });
-    }
-
-    private LockscreenCredential createPattern(String patternString) {
-        final byte[] patternBytes = patternString.getBytes();
-        LockscreenCredential pattern = LockscreenCredential.createPattern(
-                LockPatternUtils.byteArrayToPattern(patternBytes));
-        Arrays.fill(patternBytes, (byte) 0);
-        return pattern;
-    }
-
-    @Override
-    public boolean checkVoldPassword(int userId) {
-        if (!mFirstCallToVold) {
-            return false;
-        }
-        mFirstCallToVold = false;
-
-        checkPasswordReadPermission();
-
-        // There's no guarantee that this will safely connect, but if it fails
-        // we will simply show the lock screen when we shouldn't, so relatively
-        // benign. There is an outside chance something nasty would happen if
-        // this service restarted before vold stales out the password in this
-        // case. The nastiness is limited to not showing the lock screen when
-        // we should, within the first minute of decrypting the phone if this
-        // service can't connect to vold, it restarts, and then the new instance
-        // does successfully connect.
-        final IStorageManager service = mInjector.getStorageManager();
-        // TODO(b/120484642): Update vold to return a password as a byte array
-        String password;
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            password = service.getPassword();
-            service.clearPassword();
-        } catch (RemoteException e) {
-            Slog.w(TAG, "vold getPassword() failed", e);
-            return false;
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-        if (TextUtils.isEmpty(password)) {
-            return false;
-        }
-
-        try {
-            final LockscreenCredential credential;
-            switch (getCredentialTypeInternal(userId)) {
-                case CREDENTIAL_TYPE_PATTERN:
-                    credential = createPattern(password);
-                    break;
-                case CREDENTIAL_TYPE_PIN:
-                    credential = LockscreenCredential.createPin(password);
-                    break;
-                case CREDENTIAL_TYPE_PASSWORD:
-                    credential = LockscreenCredential.createPassword(password);
-                    break;
-                default:
-                    credential = null;
-                    Slog.e(TAG, "Unknown credential type");
-            }
-
-            if (credential != null
-                    && checkCredential(credential, userId, null /* progressCallback */)
-                                .getResponseCode() == GateKeeperResponse.RESPONSE_OK) {
-                return true;
-            }
-        } catch (Exception e) {
-            Slog.e(TAG, "checkVoldPassword failed: ", e);
-        }
-
-        return false;
     }
 
     private void removeUser(int userId, boolean unknownUser) {
@@ -2846,7 +2650,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 mSpManager.newSidForUser(getGateKeeperService(), auth, userId);
             }
             mSpManager.verifyChallenge(getGateKeeperService(), auth, 0L, userId);
-            setAuthlessUserKeyProtection(userId, auth.deriveDiskEncryptionKey());
+            setUserKeyProtection(userId, auth.deriveDiskEncryptionKey());
             setKeystorePassword(auth.deriveKeyStorePassword(), userId);
         } else {
             clearUserKeyProtection(userId, null);
@@ -2998,7 +2802,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         {
             final byte[] secret = authToken.deriveDiskEncryptionKey();
-            unlockUser(userId, null, secret);
+            unlockUser(userId, secret);
             Arrays.fill(secret, (byte) 0);
         }
         activateEscrowTokens(authToken, userId);
@@ -3048,7 +2852,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 // a new SID, and re-add keys to vold and keystore.
                 mSpManager.newSidForUser(getGateKeeperService(), auth, userId);
                 mSpManager.verifyChallenge(getGateKeeperService(), auth, 0L, userId);
-                setAuthlessUserKeyProtection(userId, auth.deriveDiskEncryptionKey());
+                setUserKeyProtection(userId, auth.deriveDiskEncryptionKey());
                 fixateNewestUserKeyAuth(userId);
                 setKeystorePassword(auth.deriveKeyStorePassword(), userId);
             }
@@ -3063,7 +2867,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             // Clear key from vold so ActivityManager can just unlock the user with empty secret
             // during boot. Vold storage needs to be unlocked before manipulation of the keys can
             // succeed.
-            unlockUserKey(userId, null, auth.deriveDiskEncryptionKey());
+            unlockUserKey(userId, auth.deriveDiskEncryptionKey());
             clearUserKeyProtection(userId, auth.deriveDiskEncryptionKey());
             fixateNewestUserKeyAuth(userId);
             unlockKeystore(auth.deriveKeyStorePassword(), userId);
@@ -3333,7 +3137,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 // If clearing credential, unlock the user manually in order to progress user start
                 // Call unlockUser() on a handler thread so no lock is held (either by LSS or by
                 // the caller like DPMS), otherwise it can lead to deadlock.
-                mHandler.post(() -> unlockUser(userId, null, null));
+                mHandler.post(() -> unlockUser(userId, null));
             }
             notifyPasswordChanged(userId);
             notifySeparateProfileChallengeChanged(userId);
