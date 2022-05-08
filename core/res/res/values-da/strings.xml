@@ -1701,7 +1701,7 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Vil du give <xliff:g id="SERVICE">%1$s</xliff:g> fuld kontrol over din enhed?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Hvis du aktiverer <xliff:g id="SERVICE">%1$s</xliff:g>, vil enheden ikke benytte skærmlåsen til at forbedre datakrypteringen."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Fuld kontrol er velegnet til apps, der hjælper dig med hjælpefunktioner, men ikke de fleste apps."</string>
-    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Se og styre skærm"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Se og styre skærmen"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Den kan læse alt indhold på skærmen og vise indhold oven på andre apps."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Se og udføre handlinger"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Den kan spore dine interaktioner med en app eller en hardwaresensor og interagere med apps på dine vegne."</string>

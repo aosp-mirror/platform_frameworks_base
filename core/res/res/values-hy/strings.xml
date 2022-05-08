@@ -247,10 +247,10 @@
     <string name="global_action_power_options" msgid="1185286119330160073">"Սնուցման կոճակ"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Վերագործարկել"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Շտապ կանչ"</string>
-    <string name="global_action_bug_report" msgid="5127867163044170003">"Վրիպակի զեկույց"</string>
+    <string name="global_action_bug_report" msgid="5127867163044170003">"Հաղորդում վրիպակի մասին"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Ավարտել աշխատաշրջանը"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Սքրինշոթ"</string>
-    <string name="bugreport_title" msgid="8549990811777373050">"Հաշվետվություն վրիպակի մասին"</string>
+    <string name="bugreport_title" msgid="8549990811777373050">"Հաղորդում վրիպակի մասին"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Սա տեղեկություններ կհավաքագրի ձեր սարքի առկա կարգավիճակի մասին և կուղարկի այն էլեկտրոնային նամակով: Որոշակի ժամանակ կպահանջվի վրիպակի մասին զեկուցելու պահից սկսած մինչ ուղարկելը: Խնդրում ենք փոքր-ինչ համբերատար լինել:"</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Ինտերակտիվ զեկույց"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Հիմնականում օգտագործեք այս տարբերակը: Այն ձեզ թույլ է տալիս հետևել զեկույցի ստեղծման գործընթացին, խնդրի մասին լրացուցիչ տեղեկություններ մուտքագրել և սքրինշոթներ ստեղծել: Կարող է բաց թողնել քիչ օգտագործվող որոշ բաժիններ, որոնց ստեղծումը երկար է տևում:"</string>
@@ -1385,7 +1385,7 @@
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"USB միացքը կարող է օգտագործվել"</string>
     <string name="usb_contaminant_not_detected_message" msgid="892863190942660462">"Հեռախոսում ջուր կամ աղտ չի հայտնաբերվել:"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="1582531382166919850">"Վրիպակի զեկույցի ստեղծում…"</string>
-    <string name="share_remote_bugreport_notification_title" msgid="6708897723753334999">"Տրամադրե՞լ վրիպակի զեկույցը:"</string>
+    <string name="share_remote_bugreport_notification_title" msgid="6708897723753334999">"Կիսվե՞լ վրիպակի մասին հաղորդմամբ"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="3077385149217638550">"Վրիպակի զեկույցի տրամադրում…"</string>
     <string name="share_remote_bugreport_notification_message_finished" msgid="7325635795739260135">"Այս սարքի անսարքությունների վերացման նպատակով ձեր ադմինիստրատորին անհրաժեշտ է վրիպակի հաշվետվություն: Կարող են տրամադրվել տեղեկություններ հավելվածների մասին և այլ տվյալներ։"</string>
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"ՏՐԱՄԱԴՐԵԼ"</string>
