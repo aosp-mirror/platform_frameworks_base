@@ -620,6 +620,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"फेस मॉडेल हटवण्यासाठी टॅप करा, त्यानंतर तुमचा चेहरा पुन्हा जोडा"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"फेस अनलॉक सेट करा"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"तुमच्या फोनकडे पाहून तो अनलॉक करा"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"फेस अनलॉक वापरण्यासाठी, सेटिंग्ज &gt; गोपनीयता येथे "<b>"कॅमेरा अ‍ॅक्सेस"</b>" सुरू करा"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"अनलॉक करण्याच्या आणखी पद्धती सेट करा"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"फिंगरप्रिंट जोडण्यासाठी टॅप करा"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"फिंगरप्रिंट अनलॉक"</string>
@@ -733,9 +734,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"स्क्रीन अनलॉक प्रयत्नांचे परीक्षण करा"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"टाइप केलेल्या अयोग्य पासवर्डांच्या अंकांचे परीक्षण करा. स्क्रीन अनलॉक केली जाते, तेव्हा टॅबलेट लॉक करा किंवा बरेच पासवर्ड टाइप केले असल्यास टॅबलेटचा सर्व डेटा मिटवा."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"स्क्रीन अनलॉक करताना टाइप केलेल्या चुकीच्या पासवर्ड संख्येचे परीक्षण करते आणि Android TV डिव्हाइस लॉक करते किंवा अनेक चुकीचे पासवर्ड टाइप केले असल्यास Android TV डिव्हाइसचा सर्व डेटा मिटवते."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"टाइप केलेल्या चुकीच्या पासवर्डच्या संख्येचे निरीक्षण करा. स्क्रीन अनलॉक करताना, इंफोटेनमेंट सिस्टीम लॉक करा किंवा अनेक चुकीचे पासवर्ड टाइप केले असल्यास, इंफोटेनमेंट सिस्टीमचा सर्व डेटा मिटवा."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"टाइप केलेल्या अयोग्य पासवर्डांच्या अंकांचे परीक्षण करा. स्क्रीन अनलॉक केली जाते, तेव्हा फोन लॉक करा किंवा बरेच पासवर्ड टाइप केले असल्यास फोनचा सर्व डेटा मिटवा."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"स्क्रीन अनलॉक करताना टाइप केलेल्या चुकीच्या पासवर्डांच्या संख्येचे परीक्षण करा आणि टॅबलेट लॉक करा किंवा अनेक चुकीचे पासवर्ड टाइप केले असल्यास या वापरकर्त्याचा सर्व डेटा मिटवा."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"स्क्रीन अनलॉक करताना टाइप केलेल्या चुकीच्या पासवर्ड संख्येचे परीक्षण करते आणि Android TV डिव्हाइस लॉक करते किंवा अनेक चुकीचे पासवर्ड टाइप केले असल्यास वापरकर्त्याचा सर्व डेटा मिटवते."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"स्क्रीन अनलॉक करताना टाइप केलेल्या चुकीच्या पासवर्डच्या संख्येचे निरीक्षण करा आणि इंफोटेनमेंट सिस्टीम लॉक करा किंवा अनेक चुकीचे पासवर्ड टाइप केले असल्यास, या प्रोफाइलचा सर्व डेटा मिटवा."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"टाइप केलेल्या अयोग्य पासवर्डांच्या अंकांचे परीक्षण करा. स्क्रीन अनलॉक केली जाते, तेव्हा फोन लॉक करा किंवा बरेच पासवर्ड टाइप केले असल्यास या वापरकर्त्याचा सर्व डेटा मिटवा."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"स्क्रीन लॉक बदला"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"स्क्रीन लॉक बदला."</string>
@@ -744,10 +747,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"सर्व डेटा मिटवा"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"फॅक्टरी डेटा रीसेट करून चेतावणीशिवाय टॅब्लेटचा डेटा मिटवा."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"चेतावणी न देता फॅक्टरी डेटा रीसेट करून Android TV डिव्हाइसचा डेटा मिटवा."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"फॅक्टरी डेटा रीसेट करून कोणत्याही चेतावणीशिवाय इंफोटेनमेंट सिस्टीमचा डेटा मिटवा."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"फॅक्टरी डेटा रीसेट करून चेतावणीशिवाय फोनचा डेटा मिटवा."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"वापरकर्ता डेटा मिटवा"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"प्रोफाइल डेटा मिटवा"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"वापरकर्ता डेटा मिटवा"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"कोणत्याही चेतावणी शिवाय या वापरकर्त्याचा या टॅब्लेटवरील डेटा मिटवा."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"कोणत्याही चेतावणीशिवाय या Android TV डिव्हाइसवरील वापरकर्त्याचा डेटा मिटवा."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"कोणत्याही चेतावणीशिवाय या इंफोटेनमेंट सिस्टीमवरील प्रोफाइलचा डेटा मिटवा."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"कोणत्याही चेतावणी शिवाय या वापरकर्त्याचा या फोनवरील डेटा मिटवा."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"डिव्हाइस समग्र प्रॉक्सी सेट करा"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"धोरण सक्षम असताना वापरण्यासाठी डिव्हाइस समग्र प्रॉक्सी सेट करा. फक्त डिव्हाइस मालक समग्र प्रॉक्सी सेट करु शकतो."</string>
@@ -1697,7 +1703,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"शॉर्टकट सुरू असताना, दोन्ही व्‍हॉल्‍यूम बटणे तीन सेकंदांसाठी दाबून ठेवल्याने अ‍ॅक्सेसिबिलिटी वैशिष्ट्य सुरू होईल."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"अ‍ॅक्सेसिबिलिटी वैशिष्ट्यांसाठी शॉर्टकट सुरू करायचा आहे का?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"दोन्ही व्हॉल्यूम की काही सेकंद धरून ठेवल्याने अ‍ॅक्सेसिबिलिटी वैशिष्ट्ये सुरू होतात. यामुळे तुमचे डिव्हाइस कसे काम करते हे पूर्णपणे बदलते.\n\nसध्याची वैशिष्ट्ये:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nतुम्ही हा शॉर्टकट सेटिंग्ज &gt; अ‍ॅक्सेसिबिलिटी मध्ये बदलू शकता."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"<xliff:g id="SERVICE">%1$s</xliff:g> शॉर्टकट सुरू करायचा आहे का?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"दोन्ही व्हॉल्यूम की काही सेकंद धरून ठेवल्याने <xliff:g id="SERVICE">%1$s</xliff:g>, एक अ‍ॅक्सेसिबिलिटी वैशिष्ट्य सुरू होते. यामुळे तुमचे डिव्हाइस कसे काम करते हे पूर्णपणे बदलते.\n\nतुम्ही हा शॉर्टकट सेटिंग्ज &gt; अ‍ॅक्सेसिबिलिटी मध्ये बदलू शकता."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"सुरू करा"</string>

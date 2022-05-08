@@ -544,7 +544,7 @@
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"calcular posición de dispositivos de banda ultraancha cercanos"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Permite que la aplicación determine la posición relativa de los dispositivos de banda ultraancha cercanos"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"Interactuar con dispositivos Wi-Fi cercanos"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Permite a la aplicación mostrar información de dispositivos Wi-Fi cercanos, conectarse a ellos y determinar su posición"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Permite a la aplicación mostrar, conectar y determinar la posición relativa de dispositivos Wi-Fi cercanos"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Información sobre el servicio de pago por NFC preferido"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permite que la aplicación obtenga información sobre el servicio de pago por NFC preferido, como identificadores de aplicación registrados y destinos de rutas."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controlar Comunicación de campo cercano (NFC)"</string>
@@ -620,6 +620,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Toca para eliminar tu modelo facial y luego añade de nuevo tu cara"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Configura Desbloqueo facial"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Desbloquea el teléfono con solo mirarlo"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Para usar Desbloqueo Facial, habilita el "<b>"acceso a la cámara"</b>" en Ajustes y privacidad"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configura más formas de desbloqueo"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Toca para añadir una huella digital"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Desbloqueo con huella digital"</string>
@@ -733,9 +734,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Supervisar los intentos de desbloqueo de pantalla"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Controla el número de contraseñas incorrectas introducidas al desbloquear la pantalla y bloquea el tablet o elimina todos sus datos si se introducen demasiadas contraseñas incorrectas."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Comprueba cuántas veces se han introducido contraseñas incorrectas para desbloquear la pantalla y, si te parece que han sido demasiadas, bloquea tu dispositivo Android TV o borra todos sus datos."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Controla el número de contraseñas incorrectas introducidas al desbloquear la pantalla y bloquea el sistema de infoentretenimiento o borra todos sus datos si se introducen demasiadas contraseñas incorrectas."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Controla el número de contraseñas incorrectas introducidas al desbloquear la pantalla y bloquea el teléfono o elimina todos sus datos si se introducen demasiadas contraseñas incorrectas."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Controla el número de contraseñas incorrectas introducidas para desbloquear la pantalla y bloquea el tablet o borra todos los datos del usuario si se introducen demasiadas contraseñas incorrectas."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Comprueba cuántas veces se han introducido contraseñas incorrectas para desbloquear la pantalla y, si te parece que han sido demasiadas, bloquea tu dispositivo Android TV o borra todos los datos de este usuario."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Controla el número de contraseñas incorrectas introducidas al desbloquear la pantalla y bloquea el sistema de infoentretenimiento o borra todos los datos del perfil si se introducen demasiadas contraseñas incorrectas."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Controla el número de contraseñas incorrectas introducidas para desbloquear la pantalla y bloquea el teléfono o borra todos los datos del usuario si se introducen demasiadas contraseñas incorrectas."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Cambiar el bloqueo de pantalla"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Cambia el bloqueo de pantalla"</string>
@@ -744,10 +747,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Borrar todos los datos"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Borrar los datos del tablet sin avisar restableciendo el estado de fábrica"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Restablece los datos de fábrica de tu dispositivo Android TV, eliminando sin previo aviso los datos que tuviera."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Borra los datos del sistema de infoentretenimiento sin avisar restableciendo el estado de fábrica."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Borra los datos del teléfono sin avisar restableciendo el estado de fábrica"</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Borrar datos del usuario"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Borrar datos del perfil"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Borrar datos del usuario"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Borra los datos del usuario en este tablet sin avisar."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Eliminar los datos de este usuario del dispositivo Android TV sin previo aviso."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Borra los datos del perfil de este sistema de infoentretenimiento sin avisar."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Borra los datos del usuario en este teléfono sin avisar."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Definir el servidor proxy global"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Define el servidor proxy global que se debe utilizar mientras la política esté habilitada. Solo el propietario del dispositivo puede definir el proxy global."</string>
@@ -1247,7 +1253,7 @@
     <string name="screen_compat_mode_hint" msgid="4032272159093750908">"Para volver a habilitar esta opción, accede a Ajustes &gt; Aplicaciones &gt; Descargadas."</string>
     <string name="unsupported_display_size_message" msgid="7265211375269394699">"<xliff:g id="APP_NAME">%1$s</xliff:g> no admite el tamaño de pantalla actual y es posible que funcione de forma inesperada."</string>
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Mostrar siempre"</string>
-    <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"<xliff:g id="APP_NAME">%1$s</xliff:g> se diseñó para una versión incompatible de Android OS y puede que funcione de forma inesperada. Es posible que haya una versión actualizada de la aplicación."</string>
+    <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"<xliff:g id="APP_NAME">%1$s</xliff:g> se diseñó para una versión incompatible del SO Android y puede que funcione de forma inesperada. Es posible que haya una versión actualizada de la aplicación."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Mostrar siempre"</string>
     <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Buscar actualizaciones"</string>
     <string name="smv_application" msgid="3775183542777792638">"La aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> (proceso <xliff:g id="PROCESS">%2$s</xliff:g>) ha infringido su política StrictMode autoaplicable."</string>
@@ -1697,7 +1703,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Si el acceso directo está activado, pulsa los dos botones de volumen durante 3 segundos para iniciar una función de accesibilidad."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"¿Quieres activar el acceso directo a las funciones de accesibilidad?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Al mantener pulsadas las dos teclas de volumen durante unos segundos, se activan las funciones de accesibilidad, que pueden cambiar el funcionamiento del dispositivo.\n\nFunciones actuales:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nPuedes cambiar las funciones seleccionadas en Ajustes &gt; Accesibilidad."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"¿Quieres activar el acceso directo a <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Al mantener pulsadas ambas teclas de volumen durante unos segundos se activa <xliff:g id="SERVICE">%1$s</xliff:g>, una función de accesibilidad. Esta función puede modificar el funcionamiento del dispositivo.\n\nPuedes asignar este acceso directo a otra función en Ajustes &gt; Accesibilidad."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Activar"</string>

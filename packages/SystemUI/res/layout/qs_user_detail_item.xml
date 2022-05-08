@@ -24,8 +24,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="top|center_horizontal"
-        android:paddingTop="16dp"
-        android:minHeight="112dp"
         android:clipChildren="false"
         android:clipToPadding="false"
         android:focusable="true"
@@ -39,8 +37,8 @@
             android:layout_height="@dimen/qs_framed_avatar_size"
             android:layout_marginBottom="7dp"
             systemui:frameWidth="6dp"
-            systemui:badgeDiameter="18dp"
-            systemui:badgeMargin="1dp"
+            systemui:badgeDiameter="15dp"
+            systemui:badgeMargin="5dp"
             systemui:framePadding="-1dp"
             systemui:frameColor="@color/qs_user_avatar_frame"/>
 

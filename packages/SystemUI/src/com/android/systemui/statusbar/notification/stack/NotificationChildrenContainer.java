@@ -38,6 +38,7 @@ import com.android.internal.widget.NotificationExpandButton;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.NotificationGroupingUtil;
+import com.android.systemui.statusbar.notification.NotificationFadeAware;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -51,7 +52,8 @@ import java.util.List;
 /**
  * A container containing child notifications
  */
-public class NotificationChildrenContainer extends ViewGroup {
+public class NotificationChildrenContainer extends ViewGroup
+        implements NotificationFadeAware {
 
     @VisibleForTesting
     static final int NUMBER_OF_CHILDREN_WHEN_COLLAPSED = 2;
@@ -111,6 +113,7 @@ public class NotificationChildrenContainer extends ViewGroup {
     private int mCurrentHeaderTranslation = 0;
     private float mHeaderVisibleAmount = 1.0f;
     private int mUntruncatedChildCount;
+    private boolean mContainingNotificationIsFaded = false;
 
     public NotificationChildrenContainer(Context context) {
         this(context, null);
@@ -277,6 +280,7 @@ public class NotificationChildrenContainer extends ViewGroup {
         mDividers.add(newIndex, divider);
 
         row.setContentTransformationAmount(0, false /* isLastChild */);
+        row.setNotificationFaded(mContainingNotificationIsFaded);
         // It doesn't make sense to keep old animations around, lets cancel them!
         ExpandableViewState viewState = row.getViewState();
         if (viewState != null) {
@@ -301,6 +305,7 @@ public class NotificationChildrenContainer extends ViewGroup {
         });
 
         row.setSystemChildExpanded(false);
+        row.setNotificationFaded(false);
         row.setUserLocked(false);
         if (!row.isRemoved()) {
             mGroupingUtil.restoreChildNotification(row);
@@ -1306,6 +1311,20 @@ public class NotificationChildrenContainer extends ViewGroup {
         }
         if (mNotificationHeaderWrapperLowPriority != null) {
             mNotificationHeaderWrapperLowPriority.setRecentlyAudiblyAlerted(audiblyAlertedRecently);
+        }
+    }
+
+    @Override
+    public void setNotificationFaded(boolean faded) {
+        mContainingNotificationIsFaded = faded;
+        if (mNotificationHeaderWrapper != null) {
+            mNotificationHeaderWrapper.setNotificationFaded(faded);
+        }
+        if (mNotificationHeaderWrapperLowPriority != null) {
+            mNotificationHeaderWrapperLowPriority.setNotificationFaded(faded);
+        }
+        for (ExpandableNotificationRow child : mAttachedChildren) {
+            child.setNotificationFaded(faded);
         }
     }
 }

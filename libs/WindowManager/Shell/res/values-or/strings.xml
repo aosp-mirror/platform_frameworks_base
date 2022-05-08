@@ -20,6 +20,7 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"ବଢ଼ାନ୍ତୁ"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"ସେଟିଂସ୍"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"ସ୍ପ୍ଲିଟ ସ୍କ୍ରିନ ମୋଡ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"ମେନୁ"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> \"ଛବି-ଭିତରେ-ଛବି\"ରେ ଅଛି"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"ଏହି ବୈଶିଷ୍ଟ୍ୟ <xliff:g id="NAME">%s</xliff:g> ବ୍ୟବହାର ନକରିବାକୁ ଯଦି ଆପଣ ଚାହାଁନ୍ତି, ସେଟିଙ୍ଗ ଖୋଲିବାକୁ ଟାପ୍‍ କରନ୍ତୁ ଏବଂ ଏହା ଅଫ୍‍ କରିଦିଅନ୍ତୁ।"</string>
@@ -72,5 +73,4 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"ପରିଚାଳନା କରନ୍ତୁ"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ବବଲ୍ ଖାରଜ କରାଯାଇଛି।"</string>
     <string name="restart_button_description" msgid="5887656107651190519">"ଏହି ଆପକୁ ରିଷ୍ଟାର୍ଟ କରି ପୂର୍ଣ୍ଣ ସ୍କ୍ରିନ୍ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ।"</string>
-    <string name="got_it" msgid="4428750913636945527">"ବୁଝିଗଲି"</string>
 </resources>

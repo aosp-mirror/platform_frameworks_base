@@ -539,12 +539,12 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Hiermee kan de app bluetooth-apparaten in de buurt vinden en koppelen"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"verbinding maken met gekoppelde bluetooth-apparaten"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Hiermee kan de app verbinding maken met gekoppelde bluetooth-apparaten"</string>
-    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"adverteren op bluetooth-apparaten in de buurt"</string>
-    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Hiermee kan de app adverteren op bluetooth-apparaten in de buurt"</string>
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"uitzenden naar bluetooth-apparaten in de buurt"</string>
+    <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Hiermee kan de app uitzenden naar bluetooth-apparaten in de buurt"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"relatieve positie tussen ultrabreedbandapparaten in de buurt bepalen"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"De app toestaan om de relatieve positie tussen ultrabreedbandapparaten in de buurt te bepalen"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"interactie met wifi-apparaten in de buurt"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Hiermee kan de app adverteren op, verbinding maken met en de relatieve positie bepalen van wifi-apparaten in de buurt"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Hiermee kan de app uitzenden, verbindingen maken en de relatieve positie bepalen van wifi-apparaten in de buurt"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informatie over voorkeursservice voor NFC-betaling"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Hiermee kun je zorgen dat de app informatie krijgt over de voorkeursservice voor NFC-betaling, zoals geregistreerde hulpmiddelen en routebestemmingen."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"Near Field Communication regelen"</string>
@@ -620,6 +620,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Tik om je gezichtsmodel te verwijderen en voeg je gezicht opnieuw toe"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Ontgrendelen via gezichtsherkenning instellen"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Ontgrendel je telefoon door ernaar te kijken"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Als je Ontgrendelen via gezichtsherkenning wilt gebruiken, zet je "<b>"Cameratoegang"</b>" aan via Instellingen &gt; Privacy"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Stel meer manieren in om te ontgrendelen"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Tik om een vingerafdruk toe te voegen"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Ontgrendelen met vingerafdruk"</string>
@@ -733,9 +734,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Pogingen voor schermontgrendeling bijhouden"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en de tablet vergrendelen of alle gegevens op de tablet wissen als te veel onjuiste wachtwoorden worden ingevoerd."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en het Android TV-apparaat vergrendelen of alle gegevens van het Android TV-apparaat wissen als te veel onjuiste wachtwoorden worden ingevoerd."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Bijhouden hoe vaak onjuiste wachtwoorden worden getypt als het scherm wordt ontgrendeld, en het infotainmentsysteem vergrendelen of alle gegevens op het infotainmentsysteem wissen als te veel onjuiste wachtwoorden worden getypt."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en de telefoon vergrendelen of alle gegevens op de telefoon wissen als te veel onjuiste wachtwoorden worden ingevoerd."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en de tablet vergrendelen of alle gegevens van deze gebruiker wissen als te veel onjuiste wachtwoorden worden ingevoerd."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en het Android TV-apparaat vergrendelen of alle gegevens van deze gebruiker wissen als te veel onjuiste wachtwoorden worden ingevoerd."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Bijhouden hoe vaak onjuiste wachtwoorden worden getypt als het scherm wordt ontgrendeld, en het infotainmentsysteem vergrendelen of alle gegevens van dit profiel wissen als te veel onjuiste wachtwoorden worden getypt."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en de telefoon vergrendelen of alle gegevens van deze gebruiker wissen als te veel onjuiste wachtwoorden worden ingevoerd."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"De schermvergrendeling wijzigen"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Wijzig de schermvergrendeling."</string>
@@ -744,10 +747,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Alle gegevens wissen"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"De gegevens van de tablet zonder waarschuwing wissen door de fabrieksinstellingen te herstellen."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"De gegevens van het Android TV-apparaat zonder waarschuwing wissen door de fabrieksinstellingen terug te zetten."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"De gegevens van het infotainmentsysteem zonder waarschuwing wissen door de fabrieksinstellingen terug te zetten."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Wis de gegevens van de telefoon zonder waarschuwing door de fabrieksinstellingen te herstellen."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Gebruikersgegevens wissen"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Profielgegevens wissen"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Gebruikersgegevens wissen"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"De gegevens van deze gebruiker op deze tablet zonder waarschuwing wissen."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"De gegevens van deze gebruiker op dit Android TV-apparaat zonder waarschuwing wissen."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"De gegevens van dit profiel op het infotainmentsysteem zonder waarschuwing wissen."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"De gegevens van deze gebruiker op deze telefoon zonder waarschuwing wissen."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Algemene proxy voor het apparaat instellen"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"De algemene proxy voor het apparaat instellen die moet worden gebruikt terwijl het beleid is geactiveerd. Alleen de eigenaar van het apparaat kan de algemene proxy instellen."</string>
@@ -1697,7 +1703,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Als de snelkoppeling aanstaat, houd je beide volumeknoppen 3 seconden ingedrukt om een toegankelijkheidsfunctie te starten."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Snelkoppeling voor toegankelijkheidsfuncties aanzetten?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Als je beide volumetoetsen een paar seconden ingedrukt houdt, zet je de toegankelijkheidsfuncties aan. Hierdoor kan de manier veranderen waarop je apparaat werkt.\n\nHuidige functies:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nJe kunt de geselecteerde functies wijzigen via Instellingen &gt; Toegankelijkheid."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Snelkoppeling voor <xliff:g id="SERVICE">%1$s</xliff:g> aanzetten?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Als je beide volumetoetsen een paar seconden ingedrukt houdt, wordt de toegankelijkheidsfunctie <xliff:g id="SERVICE">%1$s</xliff:g> aangezet. Hierdoor kan de manier veranderen waarop je apparaat werkt.\n\nJe kunt deze sneltoets op een andere functie instellen via Instellingen &gt; Toegankelijkheid."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Aanzetten"</string>

@@ -415,12 +415,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Utekelezaji wa WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Weka utekelezaji wa WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Chaguo hili halipo tena. Jaribu tena."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"Badilisha kuwa usimbaji fiche wa faili"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Badilisha..."</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"Tayari faili imesimbwa kwa njia fiche"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"Inabadilisha kuwa usimbaji fiche unaotegemea faili"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Badilisha sehemu za data kuwa usimbaji unaotegemea faili.\n!!Onyo!! Hatua hii itafuta data yako yote.\nKipengele hiki ni cha alpha na huenda kisifanye kazi vizuri.\nBonyeza \'Futa na ubadilishe...\'  ili uendelee."</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"Futa na uibadilishe..."</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Hali ya rangi ya picha"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"Tumia sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Imezimwa"</string>

@@ -450,9 +450,9 @@
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"Бул колдонмо каалаган убакта микрофон менен аудио файлдарды жаздыра алат."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"SIM-картага буйруктарды жөнөтүү"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Колдонмого SIM-картага буйруктарды жөнөтүү мүмкүнчүлүгүн берет. Бул абдан кооптуу."</string>
-    <string name="permlab_activityRecognition" msgid="1782303296053990884">"кыймыл-аракетти аныктоо"</string>
+    <string name="permlab_activityRecognition" msgid="1782303296053990884">"Кыймыл-аракетти аныктоо"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Бул колдонмо кыймыл-аракетиңизди аныктап турат."</string>
-    <string name="permlab_camera" msgid="6320282492904119413">"сүрөт жана видео тартуу"</string>
+    <string name="permlab_camera" msgid="6320282492904119413">"Сүрөт жана видео тартуу"</string>
     <string name="permdesc_camera" msgid="5240801376168647151">"Бул колдонмо иштеп жатканда камера менен сүрөт же видеолорду тарта алат."</string>
     <string name="permlab_backgroundCamera" msgid="7549917926079731681">"Фондо сүрөткө жана видеого тартат"</string>
     <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"Бул колдонмо каалаган убакта камера менен сүрөт же видеолорду тарта алат."</string>
@@ -535,16 +535,16 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Колдонмого планшеттин Bluetooth конфигурацияларын көрүү, жупталган түзмөктөр менен байланыш түзүү жана кабыл алуу уруксатын берет."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Android TV түзмөгүңүздөгү Bluetooth конфигурациясын көрүп, жупташтырылган түзмөктөргө туташууга жана туташуу сурамын кабыл алууга колдонмого уруксат берет."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Колдонмого телефондун Bluetooth конфигурацияларын көрүү, жупташкан түзмөктөр менен туташуу түзүү жана кабыл алуу уруксатын берет."</string>
-    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"жакын жердеги Bluetooth түзмөктөрүн аныктоо жана жупташтыруу"</string>
+    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"Жакын жердеги Bluetooth түзмөктөрүн таап, туташуу"</string>
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Колдонмого жакын жердеги Bluetooth түзмөктөрүн аныктап, жупташтырууга уруксат берет"</string>
-    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"жупташтырылган Bluetooth түзмөктөрү"</string>
-    <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Колдонмого жупташтырылган Bluetooth түзмөктөрү менен байланышууга уруксат берет"</string>
+    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"Туташып турган Bluetooth түзмөктөрүнө байланышуу"</string>
+    <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Колдонмого туташкан Bluetooth түзмөктөрүнө байланышканга уруксат берет"</string>
     <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"жакын жердеги Bluetooth түзмөктөрүнө жарнамалоо"</string>
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Колдонмого жакын жердеги Bluetooth түзмөктөрүнө жарнама көрсөтүүгө мүмкүндүк берет"</string>
-    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"кең тилкелүү тармак аркылуу туташа турган жакын жердеги түзмөктөрдү аныктоо"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"Кең тилкелүү тармак аркылуу туташа турган жакын жердеги түзмөктөрдү аныктоо"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Колдонмо кең тилкелүү тармак аркылуу туташа турган жакын жердеги түзмөктөрдү аныктай алат"</string>
-    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"жакын жердеги Wi‑Fi түзмөктөрү менен байланышуу"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Колдонмого жарнама көрсөтүүгө, байланышууга жана жакын жердеги Wi‑Fi түзмөктөрүн аныктоого мүмкүндүк берет"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"Жакын жердеги Wi‑Fi түзмөктөрүнө байланышуу"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Колдонмо жакын жердеги Wi-Fi түзмөктөргө туташып, алардын жайгашкан жерин аныктап, ар кандай нерселерди өткөрө алат."</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Тандалган NFC төлөм кызматы жөнүндө маалымат"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Колдонмого катталган жардам же көздөлгөн жерге маршрут сыяктуу тандалган nfc төлөм кызматы жөнүндө маалыматты алууга уруксат берүү."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"Near Field Communication көзөмөлү"</string>
@@ -620,6 +620,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Жүзүңүздүн үлгүсүн өчүрүү үчүн басып, жаңы үлгүнү кошуңуз"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Жүзүнөн таанып ачууну жөндөө"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Телефонуңузду карап туруп эле кулпусун ачып алыңыз"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Жүзүнөн таанып ачуу функциясын колдонуу үчүн Жөндөөлөр &gt; Купуялык бөлүмүнө өтүп, "<b>"Камераны колдонууну"</b>" күйгүзүңүз"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Кулпусун ачуунун көбүрөөк жолдорун жөндөңүз"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Манжа изин кошуу үчүн басыңыз"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Кулпуланган түзмөктү манжа изи менен ачуу"</string>
@@ -733,9 +734,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Экран кулпусун ачуу аракеттерин көзөмөлдөө"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Экрандын кулпусу ачылып жатканда туура эмес терилген сырсөздөрдүн санын текшерип, эгер алардын саны өтө эле көп болсо, планшетти кулпулаңыз же планшеттеги бардык маалыматтарды тазалап салыңыз."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Экрандын кулпусун ачуу учурунда сырсөздөр канча жолу туура эмес терилгенин тескөө жана сырсөз өтө көп жолу туура эмес терилген болсо, Android TV түзмөгүңүздү кулпулап же Android TV түзмөгүңүздөгү бардык дайын-даректериңизди тазалап салуу."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Экрандын кулпусу ачылып жатканда туура эмес терилген сырсөздөрдүн саны текшерилип, эгер алардын саны өтө эле көп болсо, инфозоок тутуму кулпуланып же инфозоок тутумундагы бардык маалыматтар өчүрүлөт."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Экрандын кулпусу ачылып жатканда туура эмес терилген сырсөздөрдүн санын текшерип, эгер алардын саны өтө эле көп болсо, телефонду кулпулаңыз же телефондогу бардык маалыматтарды тазалап салыңыз."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Экрандын кулпусун ачуу учурунда туура эмес терилген сырсөздөрдү тескөө жана сырсөз өтө көп жолу туура эмес терилген болсо, планшетти кулпулап же бул колдонуучунун бардык дайындарын тазалап салуу."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Экрандын кулпусун ачуу учурунда сырсөздөр канча жолу туура эмес терилгенин тескөө жана сырсөз өтө көп жолу туура эмес терилген болсо, Android TV түзмөгүңүздү кулпулап же колдонуучунун бардык дайындарын тазалап салуу."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Экрандын кулпусун ачуу учурунда туура эмес терилген сырсөздөрдү тескөө жана сырсөз өтө көп жолу туура эмес терилген болсо, инфозоок тутуму кулпуланып же бул профилдин бардык дайындары өчүрүлөт."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Экрандын кулпусун ачуу учурунда туура эмес терилген сырсөздөрдү тескөө жана сырсөз өтө көп жолу туура эмес терилген болсо, телефонду кулпулап же бул колдонуучунун бардык дайындарын тазалап салуу."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Экран кулпусун өзгөртүү"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Экран кулпусун өзгөртөт."</string>
@@ -744,10 +747,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Бардык маалыматты өчүрүү"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Алдын-ала эскертпестен, баштапкы абалга келтирүү функциясы менен планшеттеги бардык маалыматтарды өчүрөт."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Android TV түзмөгүңүздүн дайындарын эскертүүсүз кайра башынан жөндөө аркылуу тазалоо."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Алдын ала эскертпестен, баштапкы абалга келтирүү функциясы менен инфозоок тутумундагы бардык маалыматтар өчүрүлөт."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Алдын-ала эскертпестен, баштапкы абалга келтирүү функциясы менен телефондогу бардык маалыматтарды өчүрөт."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Колдонуучунун дайындарын тазалоо"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Профилдин маалыматын өчүрүү"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Колдонуучунун дайындарын тазалоо"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Бул колдонуучунун ушул планшеттеги дайындарын эскертүүсүз тазалоо."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Бул Android TV түзмөгүндөгү бул колдонуучу дайындарын эскертүүсүз тазалоо."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Алдын ала эскертпестен, бул инфозоок тутумундагы профилдин бардык маалыматтары өчүрүлөт."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Бул колдонуучунун ушул телефондогу дайындарын эскертүүсүз тазалоо."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Түзмөктүн глобалдык проксисин коюу"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Саясат иштетилгенде түзмөктүн глобалдык проксиси колдонулгудай кылып коюңуз. Түзмөк ээси гана глобалдык проксини коё алат."</string>
@@ -1697,7 +1703,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Атайын мүмкүнчүлүктөр функциясын пайдалануу үчүн ал күйгүзүлгөндө, үндү катуулатып/акырындаткан эки баскычты тең 3 секунддай коё бербей басып туруңуз."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Атайын мүмкүнчүлүктөрдүн ыкчам баскычын иштетесизби?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Атайын мүмкүнчүлүктөр функциясын иштетүү үчүн үндү чоңойтуп/кичирейтүү баскычтарын бир нече секунд коё бербей басып туруңуз. Ушуну менен, түзмөгүңүз бир аз башкача иштеп калышы мүмкүн.\n\nУчурдагы функциялар:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nТандалган функцияларды өзгөртүү үчүн Жөндөөлөр &gt; Атайын мүмкүнчүлүктөр бөлүмүнө өтүңүз."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"<xliff:g id="SERVICE">%1$s</xliff:g> ыкчам баскычын иштетесизби?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"<xliff:g id="SERVICE">%1$s</xliff:g> кызматын иштетүү үчүн үндү чоңойтуп/кичирейтүү баскычтарын бир нече секунд коё бербей басып туруңуз. Ушуну менен, түзмөгүңүз бир аз башкача иштеп калышы мүмкүн.\n\nБаскычтардын ушул айкалышын башка функцияга дайындоо үчүн, Жөндөөлөр &gt; Атайын мүмкүнчүлүктөр бөлүмүнө өтүңүз."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Ооба"</string>

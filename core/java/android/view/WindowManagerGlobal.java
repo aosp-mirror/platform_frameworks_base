@@ -18,6 +18,7 @@ package android.view;
 
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentCallbacks2;
@@ -707,6 +708,16 @@ public final class WindowManagerGlobal {
                     return;
                 }
             }
+        }
+    }
+
+    /** @hide */
+    @Nullable
+    public SurfaceControl mirrorWallpaperSurface(int displayId) {
+        try {
+            return getWindowManagerService().mirrorWallpaperSurface(displayId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 }

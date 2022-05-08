@@ -544,7 +544,7 @@
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"tentukan kedudukan relatif antara peranti Ultrajalur Lebar berdekatan"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Benarkan apl menentukan kedudukan relatif antara peranti Ultrajalur Lebar berdekatan"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"berinteraksi dengan peranti Wi-Fi berdekatan"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Membenarkan apl mengiklankan, menyambung dan menentukan penempatan relatif peranti Wi-Fi berdekatan"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Membenarkan apl mengiklankan, menyambung dan menentukan kedudukan relatif peranti Wi-Fi berdekatan"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Maklumat Perkhidmatan Pembayaran NFC Pilihan"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Membenarkan apl mendapatkan maklumat perkhidmatan pembayaran nfc pilihan seperti bantuan berdaftar dan destinasi laluan."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"mengawal Komunikasi Medan Dekat"</string>
@@ -620,6 +620,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Ketik untuk memadamkan model wajah anda, kemudian tambahkan wajah anda semula"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Sediakan Buka Kunci Wajah"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Buka kunci telefon anda dengan melihat telefon anda"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Untuk menggunakan Buka Kunci Wajah, hidupkan "<b>"akses Kamera"</b>" dalam Tetapan &gt; Privasi"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Sediakan lebih banyak cara untuk membuka kunci"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Ketik untuk menambahkan cap jari"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Buka Kunci Cap Jari"</string>
@@ -733,9 +734,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Pantau percubaan buka kunci skrin"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Memantau bilangan kata laluan yang tersilap ditaip apabila membuka skrin, dan mengunci tablet atau memadam semua data tablet jika terlalu banyak kesilapan menaip kata laluan."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Pantau bilangan kata laluan salah yang ditaip semasa membuka kunci skrin, dan kunci peranti Android TV anda atau padamkan semua data peranti Android TV jika terlalu banyak kata laluan yang salah ditaip."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Memantau bilangan kata laluan tidak betul yang ditaip semasa membuka kunci skrin dan mengunci sistem maklumat hibur atau memadam semua data sistem maklumat hibur jika terlalu banyak kata laluan yang tidak betul ditaip."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Memantau bilangan kata laluan salah yang ditaip semasa membuka skrin, dan mengunci telefon atau memadam semua data telefon jika terlalu banyak kata laluan salah ditaip."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Pantau bilangan kata laluan tidak betul yang ditaip semasa membuka kunci skrin dan kunci tablet atau padam semua data pengguna ini jika terlalu banyak kata laluan yang tidak betul ditaip."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Pantau bilangan kata laluan salah yang ditaip semasa membuka kunci skrin, dan kunci peranti Android TV anda atau padamkan semua data pengguna ini jika terlalu banyak kata laluan yang salah ditaip."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Memantau bilangan kata laluan tidak betul yang ditaip semasa membuka kunci skrin dan mengunci sistem maklumat hibur atau memadam semua data profil ini jika terlalu banyak kata laluan yang tidak betul ditaip."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Pantau bilangan kata laluan tidak betul yang ditaip semasa membuka kunci skrin dan kunci telefon atau padam semua data pengguna ini jika terlalu banyak kata laluan yang tidak betul ditaip."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Tukar kunci skrin"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Tukar kunci skrin."</string>
@@ -744,10 +747,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Padamkan semua data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Memadamkan data tablet tanpa amaran dengan melakukan tetapan semula data kilang."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Padamkan data peranti Android TV anda tanpa amaran dengan melaksanakan tetapan semula data kilang."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Memadam data sistem maklumat hibur tanpa amaran dengan melakukan tetapan semula data kilang."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Padamkan data telefon tanpa amaran dengan melakukan tetapan semula data kilang."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Padam data pengguna"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Padam data profil"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Padam data pengguna"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Padam data pengguna ini pada tablet ini tanpa amaran."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Padamkan data pengguna ini pada peranti Android TV tanpa amaran."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Memadam data profil pada sistem maklumat hibur ini tanpa amaran."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Padam data pengguna ini pada telefon ini tanpa amaran."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Tetapkan proksi global peranti"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Tetapkan proksi global peranti untuk digunakan sementara dasar didayakan. Hanya pemilik peranti boleh menetapkan proksi global."</string>
@@ -1697,7 +1703,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Apabila pintasan dihidupkan, tindakan menekan kedua-dua butang kelantangan selama 3 saat akan memulakan ciri kebolehaksesan."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Hidupkan pintasan untuk ciri kebolehaksesan?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Tindakan menahan kedua-dua kekunci kelantangan selama beberapa saat akan menghidupkan ciri kebolehaksesan. Hal ini mungkin mengubah cara peranti anda berfungsi.\n\nCiri semasa:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nAnda boleh menukar ciri yang dipilih dalam Tetapan &gt; Kebolehaksesan."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Hidupkan pintasan <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Tindakan menahan kedua-dua kekunci kelantangan selama beberapa saat akan menghidupkan <xliff:g id="SERVICE">%1$s</xliff:g>, iaitu satu ciri kebolehaksesan. Ini mungkin mengubah cara peranti anda berfungsi.\n\nAnda boleh menukar pintasan ini kepada ciri lain dalam Tetapan &gt; Kebolehaksesan."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Hidupkan"</string>

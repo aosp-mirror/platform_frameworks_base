@@ -247,6 +247,12 @@ public interface KeyguardStateController extends CallbackController<Callback> {
         default void onKeyguardDismissAmountChanged() {}
 
         /**
+         * Triggered when face auth becomes available or unavailable. Value should be queried with
+         * {@link KeyguardStateController#isFaceAuthEnabled()}.
+         */
+        default void onFaceAuthEnabledChanged() {}
+
+        /**
          * Triggered when the notification panel is starting or has finished
          * fading away on transition to an app.
          */

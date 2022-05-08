@@ -620,6 +620,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Üz modelinizi silmək üçün toxunun, sonra yenidən üzünüzü əlavə edin"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Üz ilə kiliddən çıxarmanı ayarlayın"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Telefona baxaraq onu kiliddən çıxarın"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Üz ilə Kiliddən Açma funksiyasını istifadə etmək üçün Ayarlar &gt; Məxfilik bölməsində "<b>"Kameraya girişi"</b>" aktiv edin"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Kiliddən çıxarmağın daha çox yolunu ayarlayın"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Barmaq izi əlavə etmək üçün toxunun"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Barmaq izi ilə kiliddən çıxarma"</string>
@@ -733,9 +734,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Ekranı kiliddən çıxarmaq üçün edilən cəhdlərə nəzarət edin"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Ekan kilidini açarkən daxil edilmiş yanlış parollara baxın və əgər həddindən çox yanlış parollar daxil edilibsə, planşeti kilidləyin və ya bütün planşet datasını silin."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Ekranı kiliddən çıxararkən yazılan yanlış parolların sayına nəzarət edin, Android TV cihazını kilidləyin və ya həddən çox yanlış parol yazılıbsa, Android TV cihazının bütün datasını silin."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Ekranı kiliddən çıxararkən yazılan yanlış parolların sayına nəzarət edin və həddindən çox yanlış parol daxil edilibsə, əyləncə-məlumat sistemini kilidləyin və ya bütün əyləncə-məlumat sistemi datasını silin."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Ekan kilidini açarkən daxil edilmiş yanlış parollara baxın və əgər həddindən çox yanlış parollar daxil edilibsə, telefonu kilidləyin və ya bütün telefon datasını silin."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Ekranı kiliddən çıxararkən yazılan yanlış parolların sayına nəzarət edin və planşeti kilidləyin və ya əgər həddən çox yanlış parol yazılıbsa, həmin istifadəçinin bütün verilənlərini silin."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Ekranı kiliddən çıxararkən yazılan yanlış parolların sayına nəzarət edin, Android TV cihazını kilidləyin və ya həddən çox yanlış parol yazılıbsa, həmin istifadəçinin bütün datasını silin."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Ekranı kiliddən çıxararkən yazılan yanlış parolların sayına nəzarət edin və həddindən çox yanlış parol daxil edilibsə, əyləncə-məlumat sistemini kilidləyin və ya bu profilin bütün datasını silin."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Ekranı kiliddən çıxararkən yazılan yanlış parolların sayına nəzarət edin və telefonu kilidləyin və ya əgər həddən çox yanlış parol yazılıbsa, həmin istifadəçinin bütün verilənlərini silin."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Ekran kilidini dəyişmək"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Ekran kilidini dəyişmək"</string>
@@ -744,10 +747,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Bütün məlumatları silmək"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Planşetin datasını xəbərdarlıq olmadan, zavod data sıfırlaması ilə silin."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Android TV cihazının datasını fabrik sıfırlaması haqqında xəbərdarlıq olmadan silin."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Xəbərdarlıq etmədən istehsalçı nizamlarına qaytarmaqla əyləncə-məlumat sistemi datasını silin."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Telefondakı bütün məlumatları xəbərdarlıqsız sıfırlayaraq məhv etmək"</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"İstifadəçi verilənlərini sil"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Profil datasını silin"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"İstifadəçi verilənlərini sil"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Xəbərdarlıq etmədən bu istifadəçinin verilənlərini bu planşetdə silin."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Bu istifadəçinin datasını xəbərdarlıq olmadan Android TV cihazında silin."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Xəbərdarlıq etmədən bu əyləncə-məlumat sistemində bu profilin datasını silin."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Xəbərdarlıq etmədən bu istifadəçinin bu telefondakı verilənlərini silin."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Cihazın qlobal proksisini ayarlayın"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Siyasət aktivləşdirilən zaman istifadə edilmək üçün cihazın qlobal proksisini təyin edin. Yalnız cihazın sahibi qlobal proksini təyin edə bilər."</string>
@@ -1697,7 +1703,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Qısayol aktiv olduqda, hər iki səs düyməsinə 3 saniyə basıb saxlamaqla əlçatımlılıq funksiyası başladılacaq."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Əlçatımlılıq funksiyaları üçün qısayol aktiv edilsin?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Hər iki səs səviyyəsi düyməsinə bir neçə saniyə basıb saxladıqda əlçatımlılıq funksiyaları aktiv olur. Cihazınızın işləmə qaydasını dəyişə bilər.\n\nCari funksiyalar:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nAyarlar və Əlçatımlılıq bölməsində seçilmiş funksiyaları dəyişə bilərsiniz."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"<xliff:g id="SERVICE">%1$s</xliff:g> qısayolu aktiv edilsin?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Hər iki səs səviyyəsi düyməsinə bir neçə saniyə basıb saxladıqda əlçatımlılıq funksiyası olan <xliff:g id="SERVICE">%1$s</xliff:g> aktiv olur. Cihazınızın işləmə qaydasını dəyişə bilər.\n\nAyarlar və Əlçatımlılıq bölməsində bu qısayolu başqa bir funksiyaya dəyişə bilərsiniz."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Aktiv edin"</string>

@@ -67,6 +67,10 @@
     <dimen name="pip_resize_handle_margin">4dp</dimen>
     <dimen name="pip_resize_handle_padding">0dp</dimen>
 
+    <!-- PIP Split icon size and margin. -->
+    <dimen name="pip_split_icon_size">24dp</dimen>
+    <dimen name="pip_split_icon_margin">12dp</dimen>
+
     <!-- PIP stash offset size, which is the width of visible PIP region when stashed. -->
     <dimen name="pip_stash_offset">32dp</dimen>
 
@@ -76,8 +80,15 @@
     <!-- How high we lift the divider when touching -->
     <dimen name="docked_stack_divider_lift_elevation">4dp</dimen>
 
+    <!-- Divider handle size for legacy split screen -->
     <dimen name="docked_divider_handle_width">16dp</dimen>
     <dimen name="docked_divider_handle_height">2dp</dimen>
+    <!-- Divider handle size for split screen -->
+    <dimen name="split_divider_handle_width">72dp</dimen>
+    <dimen name="split_divider_handle_height">3dp</dimen>
+
+    <dimen name="split_divider_bar_width">10dp</dimen>
+    <dimen name="split_divider_corner_size">42dp</dimen>
 
     <!-- One-Handed Mode -->
     <!-- Threshold for dragging distance to enable one-handed mode -->
@@ -100,12 +111,16 @@
     <dimen name="bubble_flyout_space_from_bubble">8dp</dimen>
     <!-- How much space to leave between the flyout text and the avatar displayed in the flyout. -->
     <dimen name="bubble_flyout_avatar_message_space">6dp</dimen>
+    <!-- If the screen percentage is smaller than this, we'll use this value instead.  -->
+    <dimen name="bubbles_flyout_min_width_large_screen">200dp</dimen>
     <!-- Padding between status bar and bubbles when displayed in expanded state -->
     <dimen name="bubble_padding_top">16dp</dimen>
     <!-- Space between bubbles when expanded. -->
     <dimen name="bubble_spacing">3dp</dimen>
     <!-- Size of the bubble. -->
     <dimen name="bubble_size">60dp</dimen>
+    <!-- Width of bubble name view -->
+    <dimen name="bubble_name_width">90dp</dimen>
     <!-- Size of the badge shown on the bubble. -->
     <dimen name="bubble_badge_size">24dp</dimen>
     <!-- Extra padding added to the touchable rect for bubbles so they are easier to grab. -->
@@ -122,7 +137,7 @@
          should also be updated. -->
     <dimen name="bubble_expanded_default_height">180dp</dimen>
     <!-- On large screens the width of the expanded view is restricted to this size. -->
-    <dimen name="bubble_expanded_view_tablet_width">412dp</dimen>
+    <dimen name="bubble_expanded_view_phone_landscape_overflow_width">412dp</dimen>
     <!-- Inset to apply to the icon in the overflow button. -->
     <dimen name="bubble_overflow_icon_inset">30dp</dimen>
     <!-- Default (and minimum) height of bubble overflow -->
@@ -149,9 +164,17 @@
     <!-- Extra padding around the dismiss target for bubbles -->
     <dimen name="bubble_dismiss_slop">16dp</dimen>
     <!-- Height of button allowing users to adjust settings for bubbles. -->
-    <dimen name="bubble_manage_button_height">56dp</dimen>
+    <dimen name="bubble_manage_button_height">36dp</dimen>
+    <!-- Height of manage button including margins. -->
+    <dimen name="bubble_manage_button_total_height">68dp</dimen>
+    <!-- The margin around the outside of the manage button. -->
+    <dimen name="bubble_manage_button_margin">16dp</dimen>
     <!-- Height of an item in the bubble manage menu. -->
     <dimen name="bubble_menu_item_height">60dp</dimen>
+    <!-- Padding applied to the bubble manage menu. -->
+    <dimen name="bubble_menu_padding">16dp</dimen>
+    <!-- Size of the icons in the manage menu. -->
+    <dimen name="bubble_menu_icon_size">24dp</dimen>
     <!-- Max width of the message bubble-->
     <dimen name="bubble_message_max_width">144dp</dimen>
     <!-- Min width of the message bubble -->
@@ -174,17 +197,21 @@
     <dimen name="bubble_dismiss_target_padding_x">40dp</dimen>
     <dimen name="bubble_dismiss_target_padding_y">20dp</dimen>
     <dimen name="bubble_manage_menu_elevation">4dp</dimen>
+    <!-- Size of user education views on large screens (phone is just match parent). -->
+    <dimen name="bubbles_user_education_width_large_screen">400dp</dimen>
 
-    <!-- Bubbles user education views -->
-    <dimen name="bubbles_manage_education_width">160dp</dimen>
-    <!-- The inset from the top bound of the manage button to place the user education. -->
-    <dimen name="bubbles_manage_education_top_inset">65dp</dimen>
-    <!-- Size of padding for the user education cling, this should at minimum be larger than
-        individual_bubble_size + some padding. -->
-    <dimen name="bubble_stack_user_education_side_inset">72dp</dimen>
+    <!-- Bottom and end margin for compat buttons. -->
+    <dimen name="compat_button_margin">16dp</dimen>
 
-    <!-- The width/height of the size compat restart button. -->
-    <dimen name="size_compat_button_size">48dp</dimen>
+    <!-- The radius of the corners of the compat hint bubble. -->
+    <dimen name="compat_hint_corner_radius">28dp</dimen>
+
+    <!-- The width of the compat hint point. -->
+    <dimen name="compat_hint_point_width">10dp</dimen>
+
+    <!-- The end padding for the compat hint. Computed as (compat button width (=48) / 2
+        + compat_button_margin - compat_hint_corner_radius - compat_hint_point_width / 2). -->
+    <dimen name="compat_hint_padding_end">7dp</dimen>
 
     <!-- The width of the brand image on staring surface. -->
     <dimen name="starting_surface_brand_image_width">200dp</dimen>

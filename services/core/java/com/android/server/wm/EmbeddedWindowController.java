@@ -127,7 +127,7 @@ class EmbeddedWindowController {
         }
     }
 
-    static class EmbeddedWindow {
+    static class EmbeddedWindow implements InputTarget {
         final IWindow mClient;
         @Nullable final WindowState mHostWindowState;
         @Nullable final ActivityRecord mHostActivityRecord;
@@ -166,7 +166,8 @@ class EmbeddedWindowController {
             mDisplayId = displayId;
         }
 
-        String getName() {
+        @Override
+        public String toString() {
             final String hostWindowName = (mHostWindowState != null)
                     ? mHostWindowState.getWindowTag().toString() : "Internal";
             return "EmbeddedWindow{ u" + UserHandle.getUserId(mOwnerUid) + " " + hostWindowName
@@ -183,7 +184,7 @@ class EmbeddedWindowController {
         }
 
         InputChannel openInputChannel() {
-            final String name = getName();
+            final String name = toString();
             mInputChannel = mWmService.mInputManager.createInputChannel(name);
             return mInputChannel;
         }
@@ -194,6 +195,26 @@ class EmbeddedWindowController {
                 mInputChannel.dispose();
                 mInputChannel = null;
             }
+        }
+
+        @Override
+        public WindowState getWindowState() {
+            return mHostWindowState;
+        }
+
+        @Override
+        public int getDisplayId() {
+            return mDisplayId;
+        }
+
+        @Override
+        public IWindow getIWindow() {
+            return mClient;
+        }
+
+        @Override
+        public int getPid() {
+            return mOwnerPid;
         }
     }
 }

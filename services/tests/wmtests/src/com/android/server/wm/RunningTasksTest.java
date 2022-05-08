@@ -166,7 +166,7 @@ public class RunningTasksTest extends WindowTestsBase {
         final Task task = new TaskBuilder(mAtm.mTaskSupervisor)
                 .setComponent(new ComponentName(mContext.getPackageName(), className))
                 .setTaskId(taskId)
-                .setParentTask(stack)
+                .setParentTaskFragment(stack)
                 .build();
         task.lastActiveTime = lastActiveTime;
         final ActivityRecord activity = new ActivityBuilder(mAtm)

@@ -115,6 +115,9 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
     private int mScreenState;
 
     @GuardedBy("this")
+    private int[] mPerDisplayScreenStates = null;
+
+    @GuardedBy("this")
     private boolean mUseLatestStates = true;
 
     @GuardedBy("this")
@@ -292,8 +295,8 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
     }
 
     @Override
-    public Future<?> scheduleSyncDueToScreenStateChange(
-            int flags, boolean onBattery, boolean onBatteryScreenOff, int screenState) {
+    public Future<?> scheduleSyncDueToScreenStateChange(int flags, boolean onBattery,
+            boolean onBatteryScreenOff, int screenState, int[] perDisplayScreenStates) {
         synchronized (BatteryExternalStatsWorker.this) {
             if (mCurrentFuture == null || (mUpdateFlags & UPDATE_CPU) == 0) {
                 mOnBattery = onBattery;
@@ -302,6 +305,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
             }
             // always update screen state
             mScreenState = screenState;
+            mPerDisplayScreenStates = perDisplayScreenStates;
             return scheduleSyncLocked("screen-state", flags);
         }
     }
@@ -433,6 +437,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
             final boolean onBattery;
             final boolean onBatteryScreenOff;
             final int screenState;
+            final int[] displayScreenStates;
             final boolean useLatestStates;
             synchronized (BatteryExternalStatsWorker.this) {
                 updateFlags = mUpdateFlags;
@@ -441,6 +446,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                 onBattery = mOnBattery;
                 onBatteryScreenOff = mOnBatteryScreenOff;
                 screenState = mScreenState;
+                displayScreenStates = mPerDisplayScreenStates;
                 useLatestStates = mUseLatestStates;
                 mUpdateFlags = 0;
                 mCurrentReason = null;
@@ -462,7 +468,8 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                     }
                     try {
                         updateExternalStatsLocked(reason, updateFlags, onBattery,
-                                onBatteryScreenOff, screenState, useLatestStates);
+                                onBatteryScreenOff, screenState, displayScreenStates,
+                                useLatestStates);
                     } finally {
                         if (DEBUG) {
                             Slog.d(TAG, "end updateExternalStatsSync");
@@ -507,7 +514,8 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
 
     @GuardedBy("mWorkerLock")
     private void updateExternalStatsLocked(final String reason, int updateFlags, boolean onBattery,
-            boolean onBatteryScreenOff, int screenState, boolean useLatestStates) {
+            boolean onBatteryScreenOff, int screenState, int[] displayScreenStates,
+            boolean useLatestStates) {
         // We will request data from external processes asynchronously, and wait on a timeout.
         SynchronousResultReceiver wifiReceiver = null;
         SynchronousResultReceiver bluetoothReceiver = null;
@@ -548,8 +556,31 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
             // We were asked to fetch Bluetooth data.
             final BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
             if (adapter != null) {
-                bluetoothReceiver = new SynchronousResultReceiver("bluetooth");
-                adapter.requestControllerActivityEnergyInfo(bluetoothReceiver);
+                SynchronousResultReceiver resultReceiver =
+                        new SynchronousResultReceiver("bluetooth");
+                adapter.requestControllerActivityEnergyInfo(
+                        Runnable::run,
+                        new BluetoothAdapter.OnBluetoothActivityEnergyInfoCallback() {
+                            @Override
+                            public void onBluetoothActivityEnergyInfoAvailable(
+                                    BluetoothActivityEnergyInfo info) {
+                                Bundle bundle = new Bundle();
+                                bundle.putParcelable(
+                                        BatteryStats.RESULT_RECEIVER_CONTROLLER_KEY, info);
+                                resultReceiver.send(0, bundle);
+                            }
+
+                            @Override
+                            public void onBluetoothActivityEnergyInfoError(int errorCode) {
+                                Slog.w(TAG, "error reading Bluetooth stats: " + errorCode);
+                                Bundle bundle = new Bundle();
+                                bundle.putParcelable(
+                                        BatteryStats.RESULT_RECEIVER_CONTROLLER_KEY, null);
+                                resultReceiver.send(0, bundle);
+                            }
+                        }
+                );
+                bluetoothReceiver = resultReceiver;
             }
         }
 
@@ -660,11 +691,12 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
 
             // Inform mStats about each applicable measured energy (unless addressed elsewhere).
             if (measuredEnergyDeltas != null) {
-                final long displayChargeUC = measuredEnergyDeltas.displayChargeUC;
-                if (displayChargeUC != MeasuredEnergySnapshot.UNAVAILABLE) {
-                    // If updating, pass in what BatteryExternalStatsWorker thinks screenState is.
-                    mStats.updateDisplayMeasuredEnergyStatsLocked(displayChargeUC, screenState,
-                            elapsedRealtime);
+                final long[] displayChargeUC = measuredEnergyDeltas.displayChargeUC;
+                if (displayChargeUC != null && displayChargeUC.length > 0) {
+                    // If updating, pass in what BatteryExternalStatsWorker thinks
+                    // displayScreenStates is.
+                    mStats.updateDisplayMeasuredEnergyStatsLocked(displayChargeUC,
+                            displayScreenStates, elapsedRealtime);
                 }
 
                 final long gnssChargeUC = measuredEnergyDeltas.gnssChargeUC;
@@ -953,6 +985,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                 switch (consumer.type) {
                     case EnergyConsumerType.OTHER:
                     case EnergyConsumerType.CPU_CLUSTER:
+                    case EnergyConsumerType.DISPLAY:
                         break;
                     default:
                         Slog.w(TAG, "EnergyConsumer '" + consumer.name + "' has unexpected ordinal "

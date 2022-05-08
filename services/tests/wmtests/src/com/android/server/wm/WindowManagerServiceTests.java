@@ -31,7 +31,6 @@ import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
@@ -42,7 +41,6 @@ import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -56,6 +54,7 @@ import android.platform.test.annotations.Presubmit;
 import android.view.IWindowSessionCallback;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
+import android.view.InsetsVisibilities;
 import android.view.View;
 import android.view.WindowManager;
 
@@ -107,9 +106,9 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         Task tappedTask = createTaskInRootTask(tappedRootTask, 0 /* userId */);
         spyOn(mWm.mAtmService);
 
-        mWm.handleTaskFocusChange(tappedTask);
+        mWm.handleTaskFocusChange(tappedTask, null /* window */);
 
-        verify(mWm.mAtmService).setFocusedTask(tappedTask.mTaskId);
+        verify(mWm.mAtmService).setFocusedTask(tappedTask.mTaskId, null);
     }
 
     @Test
@@ -128,9 +127,9 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         Task tappedTask = createTaskInRootTask(tappedRootTask, 0 /* userId */);
         spyOn(mWm.mAtmService);
 
-        mWm.handleTaskFocusChange(tappedTask);
+        mWm.handleTaskFocusChange(tappedTask, null /* window */);
 
-        verify(mWm.mAtmService, never()).setFocusedTask(tappedTask.mTaskId);
+        verify(mWm.mAtmService, never()).setFocusedTask(tappedTask.mTaskId, null);
     }
 
     @Test
@@ -151,19 +150,9 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         Task tappedTask = createTaskInRootTask(tappedRootTask, 0 /* userId */);
         spyOn(mWm.mAtmService);
 
-        mWm.handleTaskFocusChange(tappedTask);
+        mWm.handleTaskFocusChange(tappedTask, null /* window */);
 
-        verify(mWm.mAtmService).setFocusedTask(tappedTask.mTaskId);
-    }
-
-    @Test
-    public void testDismissKeyguardCanWakeUp() {
-        doReturn(true).when(mWm).checkCallingPermission(anyString(), anyString());
-        spyOn(mWm.mAtmInternal);
-        doReturn(true).when(mWm.mAtmInternal).isDreaming();
-        doNothing().when(mWm.mAtmService.mTaskSupervisor).wakeUp(anyString());
-        mWm.dismissKeyguard(null, "test-dismiss-keyguard");
-        verify(mWm.mAtmService.mTaskSupervisor).wakeUp(anyString());
+        verify(mWm.mAtmService).setFocusedTask(tappedTask.mTaskId, null);
     }
 
     @Test
@@ -278,7 +267,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
                 .getWindowType(eq(windowContextToken));
 
         mWm.addWindow(session, new TestIWindow(), params, View.VISIBLE, DEFAULT_DISPLAY,
-                UserHandle.USER_SYSTEM, new InsetsState(), null, new InsetsState(),
+                UserHandle.USER_SYSTEM, new InsetsVisibilities(), null, new InsetsState(),
                 new InsetsSourceControl[0]);
 
         verify(mWm.mWindowContextListenerController, never()).registerWindowContainerListener(any(),

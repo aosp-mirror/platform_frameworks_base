@@ -16,18 +16,13 @@
 
 package com.android.systemui;
 
-import static android.os.PowerManager.WAKE_REASON_UNKNOWN;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.biometrics.BiometricSourceType;
 import android.os.Build;
-import android.os.PowerManager;
-import android.os.SystemClock;
 
-import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
@@ -48,20 +43,15 @@ public class LatencyTester extends SystemUI {
     private static final String
             ACTION_FACE_WAKE =
             "com.android.systemui.latency.ACTION_FACE_WAKE";
-    private static final String
-            ACTION_TURN_ON_SCREEN =
-            "com.android.systemui.latency.ACTION_TURN_ON_SCREEN";
     private final BiometricUnlockController mBiometricUnlockController;
-    private final PowerManager mPowerManager;
     private final BroadcastDispatcher mBroadcastDispatcher;
 
     @Inject
     public LatencyTester(Context context, BiometricUnlockController biometricUnlockController,
-            PowerManager powerManager, BroadcastDispatcher broadcastDispatcher) {
+            BroadcastDispatcher broadcastDispatcher) {
         super(context);
 
         mBiometricUnlockController = biometricUnlockController;
-        mPowerManager = powerManager;
         mBroadcastDispatcher = broadcastDispatcher;
     }
 
@@ -74,7 +64,6 @@ public class LatencyTester extends SystemUI {
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_FINGERPRINT_WAKE);
         filter.addAction(ACTION_FACE_WAKE);
-        filter.addAction(ACTION_TURN_ON_SCREEN);
         mBroadcastDispatcher.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -83,20 +72,9 @@ public class LatencyTester extends SystemUI {
                     fakeWakeAndUnlock(BiometricSourceType.FINGERPRINT);
                 } else if (ACTION_FACE_WAKE.equals(action)) {
                     fakeWakeAndUnlock(BiometricSourceType.FACE);
-                } else if (ACTION_TURN_ON_SCREEN.equals(action)) {
-                    fakeTurnOnScreen();
                 }
             }
         }, filter);
-    }
-
-    private void fakeTurnOnScreen() {
-        if (LatencyTracker.isEnabled(mContext)) {
-            LatencyTracker.getInstance(mContext).onActionStart(
-                    LatencyTracker.ACTION_TURN_ON_SCREEN);
-        }
-        mPowerManager.wakeUp(
-                SystemClock.uptimeMillis(), WAKE_REASON_UNKNOWN, "android.policy:LATENCY_TESTS");
     }
 
     private void fakeWakeAndUnlock(BiometricSourceType type) {

@@ -123,11 +123,11 @@ public class FakeSettings implements SecureSettings, GlobalSettings, SystemSetti
 
         Uri uri = getUriFor(name);
         for (ContentObserver observer : mContentObservers.getOrDefault(key, new ArrayList<>())) {
-            observer.dispatchChange(false, List.of(uri), userHandle);
+            observer.dispatchChange(false, List.of(uri), 0, userHandle);
         }
         for (ContentObserver observer :
                 mContentObserversAllUsers.getOrDefault(uri.toString(), new ArrayList<>())) {
-            observer.dispatchChange(false, List.of(uri), userHandle);
+            observer.dispatchChange(false, List.of(uri), 0, userHandle);
         }
         return true;
     }

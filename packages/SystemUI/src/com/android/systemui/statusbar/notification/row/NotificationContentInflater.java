@@ -874,7 +874,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             mRow.getImageResolver().purgeCache();
         }
 
-        private class RtlEnabledContext extends ContextWrapper {
+        private static class RtlEnabledContext extends ContextWrapper {
             private RtlEnabledContext(Context packageContext) {
                 super(packageContext);
             }

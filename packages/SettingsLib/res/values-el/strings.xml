@@ -415,12 +415,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Υλοποίηση WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Ορισμός υλοποίησης WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Αυτή η επιλογή δεν είναι πια έγκυρη. Δοκιμάστε ξανά."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"Μετατροπή σε κρυπτογράφηση αρχείου"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Μετατροπή…"</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"Με κρυπτογράφηση αρχείου"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"Μετατροπή σε κρυπτογράφηση βάσει αρχείου…"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Μετατροπή τμήματος δεδομένων σε κρυπτογράφηση βάσει αρχείου.\n !!Προσοχή!! Με αυτήν την ενέργεια, θα διαγραφούν όλα τα δεδομένα σας.\n Αυτή η λειτουργία βρίσκεται σε δοκιμαστικό στάδιο alpha και ενδέχεται να μην λειτουργεί σωστά.\n Πατήστε \"Διαγραφή και μετατροπή…\" για να συνεχίσετε."</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"Διαγραφή και μετατροπή…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Λειτουργία χρώματος εικόνας"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"Χρήση sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Απενεργοποιημένο"</string>

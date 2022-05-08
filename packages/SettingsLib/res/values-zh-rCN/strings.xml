@@ -415,12 +415,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView 实现"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"设置 WebView 实现"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"此选项已失效，请重试。"</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"转换为文件加密"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"转换…"</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"文件已加密"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"正在转换为文件加密"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"将数据分区转换为文件加密。\n！！警告！！此操作将会清除您所有的数据。\n此功能为 Alpha 版功能，可能无法正常运行。\n要继续操作，请按“清除并转换…”。"</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"清除并转换…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"图片颜色模式"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"使用 sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"已停用"</string>

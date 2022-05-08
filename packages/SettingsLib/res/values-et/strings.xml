@@ -415,12 +415,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView\' rakendamine"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"WebView\' rakendamise seadistamine"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"See valik ei kehti enam. Proovige uuesti."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"Teisendamine failikrüpteeringuga andmeteks"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Teisenda …"</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"Juba failikrüpteeringuga"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"Teisendamine failipõhiseks krüpteeringuks"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Teisendage andmete sektsioon failipõhiseks krüpteeringuks.\n !!Hoiatus!! See kustutab kõik teie andmed.\n See funktsioon on alfaversioonis ega pruugi õigesti töötada.\n Jätkamiseks vajutage käsku „Kustuta ja teisenda …”."</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"Kustuta ja teisenda …"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Pildi värvirežiim"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"sRGB kasutamine"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Keelatud"</string>

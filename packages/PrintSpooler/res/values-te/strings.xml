@@ -88,7 +88,7 @@
     <string name="no_connection_to_printer" msgid="2159246915977282728">"ప్రింటర్‌కు కనెక్షన్ లేదు"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"తెలియదు"</string>
     <string name="print_service_security_warning_title" msgid="2160752291246775320">"<xliff:g id="SERVICE">%1$s</xliff:g>ని ఉపయోగించాలా?"</string>
-    <string name="print_service_security_warning_summary" msgid="1427434625361692006">"మీ పత్రం ప్రింటర్‌కు వెళ్లే మార్గంలో ఒకటి లేదా అంతకంటే ఎక్కువ సర్వర్‌ల గుండా వెళ్లవచ్చు."</string>
+    <string name="print_service_security_warning_summary" msgid="1427434625361692006">"మీ డాక్యుమెంట్‌ ప్రింటర్‌కు వెళ్లే మార్గంలో ఒకటి లేదా అంతకంటే ఎక్కువ సర్వర్‌ల గుండా వెళ్లవచ్చు."</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"నలుపు &amp; తెలుపు"</item>
     <item msgid="2762241247228983754">"రంగు"</item>

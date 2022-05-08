@@ -20,6 +20,7 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Хаах"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Дэлгэх"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Тохиргоо"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Хуваасан дэлгэцийг оруулна уу"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Цэс"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> дэлгэцэн доторх дэлгэцэд байна"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Та <xliff:g id="NAME">%s</xliff:g>-д энэ онцлогийг ашиглуулахыг хүсэхгүй байвал тохиргоог нээгээд, үүнийг унтраана уу."</string>
@@ -72,5 +73,4 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Удирдах"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Бөмбөлгийг үл хэрэгссэн."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"Энэ аппыг дахин эхлүүлж, бүтэн дэлгэцэд орохын тулд товшино уу."</string>
-    <string name="got_it" msgid="4428750913636945527">"Ойлголоо"</string>
 </resources>

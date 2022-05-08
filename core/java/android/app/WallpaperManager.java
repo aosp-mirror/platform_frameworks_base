@@ -221,10 +221,32 @@ public class WallpaperManager {
     public static final String COMMAND_REAPPLY = "android.wallpaper.reapply";
 
     /**
+     * Command for {@link #sendWallpaperCommand}: reported when the live wallpaper needs to be
+     * frozen.
+     * @hide
+     */
+    public static final String COMMAND_FREEZE = "android.wallpaper.freeze";
+
+    /**
+     * Command for {@link #sendWallpaperCommand}: reported when the live wallapper doesn't need
+     * to be frozen anymore.
+     * @hide
+     */
+    public static final String COMMAND_UNFREEZE = "android.wallpaper.unfreeze";
+
+    /**
      * Extra passed back from setWallpaper() giving the new wallpaper's assigned ID.
      * @hide
      */
     public static final String EXTRA_NEW_WALLPAPER_ID = "android.service.wallpaper.extra.ID";
+
+    /**
+     * Extra passed on {@link Intent.ACTION_WALLPAPER_CHANGED} indicating if wallpaper was set from
+     * a foreground app.
+     * @hide
+     */
+    public static final String EXTRA_FROM_FOREGROUND_APP =
+            "android.service.wallpaper.extra.FROM_FOREGROUND_APP";
 
     // flags for which kind of wallpaper to act on
 
@@ -343,17 +365,18 @@ public class WallpaperManager {
         private int mCachedWallpaperUserId;
         private Bitmap mDefaultWallpaper;
         private Handler mMainLooperHandler;
-        private ArrayMap<RectF, ArraySet<LocalWallpaperColorConsumer>> mLocalColorAreas =
-                new ArrayMap<>();
+        private ArrayMap<LocalWallpaperColorConsumer, ArraySet<RectF>> mLocalColorCallbackAreas =
+                        new ArrayMap<>();
         private ILocalWallpaperColorConsumer mLocalColorCallback =
                 new ILocalWallpaperColorConsumer.Stub() {
                     @Override
                     public void onColorsChanged(RectF area, WallpaperColors colors) {
-                        ArraySet<LocalWallpaperColorConsumer> callbacks =
-                                mLocalColorAreas.get(area);
-                        if (callbacks == null) return;
-                        for (LocalWallpaperColorConsumer callback: callbacks) {
-                            callback.onColorsChanged(area, colors);
+                        for (LocalWallpaperColorConsumer callback :
+                                mLocalColorCallbackAreas.keySet()) {
+                            ArraySet<RectF> areas = mLocalColorCallbackAreas.get(callback);
+                            if (areas != null && areas.contains(area)) {
+                                callback.onColorsChanged(area, colors);
+                            }
                         }
                     }
                 };
@@ -398,46 +421,52 @@ public class WallpaperManager {
             }
         }
 
-        public void addOnColorsChangedListener(@NonNull LocalWallpaperColorConsumer callback,
+        public void addOnColorsChangedListener(
+                @NonNull LocalWallpaperColorConsumer callback,
                 @NonNull List<RectF> regions, int which, int userId, int displayId) {
-            for (RectF area: regions) {
-                ArraySet<LocalWallpaperColorConsumer> callbacks = mLocalColorAreas.get(area);
-                if (callbacks == null) {
-                    callbacks = new ArraySet<>();
-                    mLocalColorAreas.put(area, callbacks);
+            synchronized (this) {
+                for (RectF area : regions) {
+                    ArraySet<RectF> areas = mLocalColorCallbackAreas.get(callback);
+                    if (areas == null) {
+                        areas = new ArraySet<>();
+                        mLocalColorCallbackAreas.put(callback, areas);
+                    }
+                    areas.add(area);
                 }
-                callbacks.add(callback);
-            }
-            try {
-                mService.addOnLocalColorsChangedListener(mLocalColorCallback , regions, which,
-                                                         userId, displayId);
-            } catch (RemoteException e) {
-                // Can't get colors, connection lost.
-                Log.e(TAG, "Can't register for local color updates", e);
+                try {
+                    // one way returns immediately
+                    mService.addOnLocalColorsChangedListener(mLocalColorCallback, regions, which,
+                            userId, displayId);
+                } catch (RemoteException e) {
+                    // Can't get colors, connection lost.
+                    Log.e(TAG, "Can't register for local color updates", e);
+                }
             }
         }
 
         public void removeOnColorsChangedListener(
                 @NonNull LocalWallpaperColorConsumer callback, int which, int userId,
                 int displayId) {
-            final ArrayList<RectF> removeAreas = new ArrayList<>();
-            for (RectF area : mLocalColorAreas.keySet()) {
-                ArraySet<LocalWallpaperColorConsumer> callbacks = mLocalColorAreas.get(area);
-                if (callbacks == null) continue;
-                callbacks.remove(callback);
-                if (callbacks.size() == 0) {
-                    mLocalColorAreas.remove(area);
-                    removeAreas.add(area);
+            synchronized (this) {
+                final ArraySet<RectF> removeAreas = mLocalColorCallbackAreas.remove(callback);
+                if (removeAreas == null || removeAreas.size() == 0) {
+                    return;
                 }
-            }
-            try {
-                if (removeAreas.size() > 0) {
-                    mService.removeOnLocalColorsChangedListener(
-                            mLocalColorCallback, removeAreas, which, userId, displayId);
+                for (LocalWallpaperColorConsumer cb : mLocalColorCallbackAreas.keySet()) {
+                    ArraySet<RectF> areas = mLocalColorCallbackAreas.get(cb);
+                    if (areas != null && cb != callback) removeAreas.removeAll(areas);
                 }
-            } catch (RemoteException e) {
-                // Can't get colors, connection lost.
-                Log.e(TAG, "Can't unregister for local color updates", e);
+                try {
+                    if (removeAreas.size() > 0) {
+                        // one way returns immediately
+                        mService.removeOnLocalColorsChangedListener(
+                                mLocalColorCallback, new ArrayList(removeAreas), which, userId,
+                                displayId);
+                    }
+                } catch (RemoteException e) {
+                    // Can't get colors, connection lost.
+                    Log.e(TAG, "Can't unregister for local color updates", e);
+                }
             }
         }
 
@@ -548,7 +577,7 @@ public class WallpaperManager {
             }
             if (returnDefault) {
                 Bitmap defaultWallpaper = mDefaultWallpaper;
-                if (defaultWallpaper == null) {
+                if (defaultWallpaper == null || defaultWallpaper.isRecycled()) {
                     defaultWallpaper = getDefaultWallpaper(context, which);
                     synchronized (this) {
                         mDefaultWallpaper = defaultWallpaper;
@@ -572,12 +601,12 @@ public class WallpaperManager {
 
             Rect dimensions = null;
             synchronized (this) {
+                ParcelFileDescriptor pfd = null;
                 try {
                     Bundle params = new Bundle();
+                    pfd = mService.getWallpaperWithFeature(context.getOpPackageName(),
+                            context.getAttributionTag(), this, FLAG_SYSTEM, params, userId);
                     // Let's peek user wallpaper first.
-                    ParcelFileDescriptor pfd = mService.getWallpaperWithFeature(
-                            context.getOpPackageName(), context.getAttributionTag(), this,
-                            FLAG_SYSTEM, params, userId);
                     if (pfd != null) {
                         BitmapFactory.Options options = new BitmapFactory.Options();
                         options.inJustDecodeBounds = true;
@@ -586,6 +615,13 @@ public class WallpaperManager {
                     }
                 } catch (RemoteException ex) {
                     Log.w(TAG, "peek wallpaper dimensions failed", ex);
+                } finally {
+                    if (pfd != null) {
+                        try {
+                            pfd.close();
+                        } catch (IOException ignored) {
+                        }
+                    }
                 }
             }
             // If user wallpaper is unavailable, may be the default one instead.
@@ -1452,27 +1488,18 @@ public class WallpaperManager {
                     mContext.getUserId());
             if (fd != null) {
                 FileOutputStream fos = null;
-                final Bitmap tmp = BitmapFactory.decodeStream(resources.openRawResource(resid));
+                boolean ok = false;
                 try {
-                    // If the stream can't be decoded, treat it as an invalid input.
-                    if (tmp != null) {
-                        fos = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
-                        tmp.compress(Bitmap.CompressFormat.PNG, 100, fos);
-                        // The 'close()' is the trigger for any server-side image manipulation,
-                        // so we must do that before waiting for completion.
-                        fos.close();
-                        completion.waitForCompletion();
-                    } else {
-                        throw new IllegalArgumentException(
-                                "Resource 0x" + Integer.toHexString(resid) + " is invalid");
-                    }
+                    fos = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
+                    copyStreamToWallpaperFile(resources.openRawResource(resid), fos);
+                    // The 'close()' is the trigger for any server-side image manipulation,
+                    // so we must do that before waiting for completion.
+                    fos.close();
+                    completion.waitForCompletion();
                 } finally {
                     // Might be redundant but completion shouldn't wait unless the write
                     // succeeded; this is a fallback if it threw past the close+wait.
                     IoUtils.closeQuietly(fos);
-                    if (tmp != null) {
-                        tmp.recycle();
-                    }
                 }
             }
         } catch (RemoteException e) {
@@ -1714,22 +1741,13 @@ public class WallpaperManager {
                     result, which, completion, mContext.getUserId());
             if (fd != null) {
                 FileOutputStream fos = null;
-                final Bitmap tmp = BitmapFactory.decodeStream(bitmapData);
                 try {
-                    // If the stream can't be decoded, treat it as an invalid input.
-                    if (tmp != null) {
-                        fos = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
-                        tmp.compress(Bitmap.CompressFormat.PNG, 100, fos);
-                        fos.close();
-                        completion.waitForCompletion();
-                    } else {
-                        throw new IllegalArgumentException("InputStream is invalid");
-                    }
+                    fos = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
+                    copyStreamToWallpaperFile(bitmapData, fos);
+                    fos.close();
+                    completion.waitForCompletion();
                 } finally {
                     IoUtils.closeQuietly(fos);
-                    if (tmp != null) {
-                        tmp.recycle();
-                    }
                 }
             }
         } catch (RemoteException e) {

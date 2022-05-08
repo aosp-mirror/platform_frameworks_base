@@ -22,8 +22,10 @@ import android.os.Looper;
 
 import com.android.systemui.dagger.qualifiers.Main;
 
+import java.util.Optional;
 import java.util.concurrent.Executor;
 
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Binds;
@@ -35,6 +37,7 @@ import dagger.Provides;
  */
 @Module
 public abstract class GlobalConcurrencyModule {
+    public static final String PRE_HANDLER = "pre_handler";
 
     /**
      * Binds {@link ThreadFactoryImpl} to {@link ThreadFactory}.
@@ -64,13 +67,32 @@ public abstract class GlobalConcurrencyModule {
      * Provide a Main-Thread Executor.
      */
     @Provides
+    @Singleton
     @Main
     public static Executor provideMainExecutor(Context context) {
         return context.getMainExecutor();
     }
 
+    /**
+     * Provide a Main-Thread DelayableExecutor.
+     */
+    @Provides
+    @Singleton
+    @Main
+    public static DelayableExecutor provideMainDelayableExecutor(@Main Looper looper) {
+        return new ExecutorImpl(looper);
+    }
+
+
     /** */
     @Binds
     @Singleton
     public abstract Execution provideExecution(ExecutionImpl execution);
+
+    /** */
+    @Provides
+    @Named(PRE_HANDLER)
+    public static Optional<Thread.UncaughtExceptionHandler> providesUncaughtExceptionHandler() {
+        return Optional.ofNullable(Thread.getUncaughtExceptionPreHandler());
+    }
 }

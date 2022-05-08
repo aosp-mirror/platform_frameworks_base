@@ -683,6 +683,19 @@ public final class MediaFormat {
     public static final String KEY_CHANNEL_MASK = "channel-mask";
 
     /**
+     * A key describing the maximum number of channels that can be output by an audio decoder.
+     * By default, the decoder will output the same number of channels as present in the encoded
+     * stream, if supported. Set this value to limit the number of output channels, and use
+     * the downmix information in the stream, if available.
+     * <p>Values larger than the number of channels in the content to decode behave like the number
+     * of channels in the content (if applicable), for instance passing 99 for a 5.1 audio stream
+     * behaves like passing 6.
+     * <p>This key is only used during decoding.
+     */
+    public static final String KEY_MAX_OUTPUT_CHANNEL_COUNT =
+            "max-output-channel-count";
+
+    /**
      * A key describing the number of frames to trim from the start of the decoded audio stream.
      * The associated value is an integer.
      */
@@ -1134,7 +1147,7 @@ public final class MediaFormat {
      * A key describing the per-frame average block QP (Quantization Parameter).
      * This is a part of a video 'Encoding Statistics' export feature.
      * This value is emitted from video encoder for a video frame.
-     * The average value is rounded down (using floor()) to integer value.
+     * The average value is rounded to the nearest integer value.
      *
      * The associated value is an integer.
      */

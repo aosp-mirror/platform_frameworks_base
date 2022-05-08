@@ -539,7 +539,7 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"საშუალებას აძლევს აპს, აღმოაჩინოს ახლომახლო Bluetooth მოწყობილობები დასაწყვილებლად"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"დაწყვილებულ Bluetooth მოწყობილობებთან დაკავშირება"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"საშუალებას აძლევს აპს, დაუკავშირდეს დაწყვილებულ Bluetooth მოწყობილობებს"</string>
-    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"ახლ. Bluetooth მოწყობილობებზე რეკლამის განთავსება"</string>
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"ახლ. Bluetooth მოწყობილობებზე მონაცემების მაუწყებლობა"</string>
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"საშუალებას აძლევს აპს, რეკლამა განათავსოს ახლომახლო Bluetooth მოწყობილობებზე"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"შედარებითი პოზიციის დადგენა ახლომახლო ულტრაფართო სიხშირის მოწყობილობების შესახებ"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"ნებას რთავს აპს, დაადგინოს შედარებითი პოზიცია ახლომახლო ულტრაფართო სიხშირის მოწყობილობების შესახებ"</string>
@@ -620,6 +620,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"შეეხეთ თქვენი სახის მოდელის წასაშლელად, შემდეგ დაამატეთ სახე ხელახლა"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"სახით განბლოკვის პარამეტრების დაყენება"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"განბლოკეთ თქვენი ტელეფონი შეხედვით"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"იმისთვის, რომ სახით განბლოკვით ისარგებლოთ, ჩართეთ "<b>"კამერაზე წვდომა"</b>" პარამეტრებსა და კონფიდენციალურობაში"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"დააყენეთ განბლოკვის სხვა ხერხები"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"შეეხეთ თითის ანაბეჭდის დასამატებლად"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"თითის ანაბეჭდით განბლოკვა"</string>
@@ -733,9 +734,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"ეკრანის განბლოკვის მცდელობების მონიტორინგი"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"ეკრანის განბლოკვისთვის არასწორად აკრეფილი პაროლების რაოდენობის მონიტორინგი. ტაბლეტის დაბლოკვა ან მასზე არსებული ყველა მონაცემის წაშლა ძალიან ბევრჯერ არასწორი პაროლის შეყვანის შემთხვევაში."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"ეკრანის განბლოკვისას არასწორი პაროლების შეყვანილი რაოდენობის მონიტორინგი და არასწორი პაროლის მეტისმეტად ბევრჯერ შეყვანის შემთხვევაში, Android TV მოწყობილობის დაბლოკვა ან Android TV მოწყობილობის მთელი ინფორმაციის ამოშლა."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"ეკრანის განბლოკვისას გააკონტროლეთ პაროლების არასწორად შეყვანის რაოდენობა და დაბლოკეთ გართობის/საინფორმაციო სისტემა ან წაშალეთ მისი ყველა მონაცემი იმ შემთხვევაში, თუ ძალიან ბევრჯერ მოხდა არასწორი პაროლის შეყვანა."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"ეკრანის განბლოკვისთვის არასწორად აკრეფილი პაროლების რაოდენობის მონიტორინგი. ტელეფონის დაბლოკვა ან მასზე არსებული ყველა მონაცემის წაშლა ძალიან ბევრჯერ არასწორი პაროლის შეყვანის შემთხვევაში."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"ეკრანის განბლოკვისას არასწორი პაროლების შეყვანილი რაოდენობის მონიტორინგი და ტაბლეტის დაბლოკვა ან მრავლალჯერ არასწორი პაროლის შეყვანის შემთხვევაში ამ მომხმარებლის მთელი ინფორმაციის წაშლა."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"ეკრანის განბლოკვისას არასწორი პაროლების შეყვანილი რაოდენობის მონიტორინგი და არასწორი პაროლის მეტისმეტად ბევრჯერ შეყვანის შემთხვევაში, Android TV მოწყობილობის დაბლოკვა ან ამ მომხმარებლის მთელი ინფორმაციის ამოშლა."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"ეკრანის განბლოკვისას გააკონტროლეთ პაროლების არასწორად შეყვანის რაოდენობა და დაბლოკეთ გართობის/საინფორმაციო სისტემა ან წაშალეთ ამ პროფილის ყველა მონაცემი იმ შემთხვევაში, თუ ძალიან ბევრჯერ მოხდა არასწორი პაროლის შეყვანა."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"ეკრანის განბლოკვისას არასწორი პაროლების შეყვანილი რაოდენობის მონიტორინგი და ტელეფონის დაბლოკვა ან მრავლალჯერ არასწორი პაროლის შეყვანის შემთხვევაში ამ მომხმარებლის მთელი ინფორმაციის წაშლა."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"ეკრანის დაბლოკვის შეცვლა"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"ეკრანის დაბლოკვის შეცვლა"</string>
@@ -744,10 +747,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"ყველა მონაცემის წაშლა"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"ტაბლეტის მონაცემების გაუფრთხილებლად წაშლა, ქარხნული მონაცემების აღდგენით"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"თქვენი Android TV მოწყობილობის მონაცემების გაუფრთხილებლად ამოშლა ქარხნული მონაცემების აღდგენის გზით."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"ქარხნული მონაცემების აღდგენით წაშალეთ გართობის/საინფორმაციო სისტემის მონაცემები გაფრთხილების გარეშე."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"ტელეფონის მონაცემების გაუფრთხილებლად წაშლა, ქარხნული მონაცემების აღდგენით"</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"მომხმარებლის მონაცემების წაშლა"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"პროფილის მონაცემების წაშლა"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"მომხმარებლის მონაცემების წაშლა"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"ამ მომხმარებლის მონაცემების გაუფრთხილებელი წაშლა ამ ტაბლეტზე."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"მომხმარებლის მონაცემების გაუფრთხილებლად ამოშლა Android TV მოწყობილობიდან."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"ქარხნული მონაცემების აღდგენით წაშალეთ ამ პროფილის მონაცემები ამ გართობ/საინფორმაციო სისტემაში გაფრთხილების გარეშე."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"ამ მომხმარებლის მონაცემების გაუფრთხილებელი წაშლა ამ ტელეფონზე."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"მოწყობილობის გლობალური პროქსის დაყენება"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"ჩართული პოლიტიკის დროს მოწყობილობის გლობალური პროქსის დაყენება. მხოლოდ მოწყობილობის მფლობელს შეუძლია გლობალური პროქსის დაყენება."</string>
@@ -1697,7 +1703,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"თუ მალსახმობი ჩართულია, ხმის ორივე ღილაკზე 3 წამის განმავლობაში დაჭერით მარტივი წვდომის ფუნქცია ჩაირთვება."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"ჩაირთოს მარტივი წვდომის ფუნქციების მალსახმობი?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"ხმის ორივე ღილაკზე ხანგრძლივად დაჭერა რამდენიმე წამის განმავლობაში ჩართავს მარტივი წვდომის ფუნქციებს. ამ ქმედებამ შეიძლება შეცვალოს თქვენი მოწყობილობის მუშაობის პრინციპი.\n\nამჟამინდელი ფუნქციები:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nარჩეული ფუნქციების შეცვლა შესაძლებელია აქ: პარამეტრები &gt; მარტივი წვდომა."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"ჩაირთოს <xliff:g id="SERVICE">%1$s</xliff:g>-ის მალსახმობი?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"ხმის ორივე ღილაკზე რამდენიმე წამის განმავლობაში დაჭერით ჩაირთვება <xliff:g id="SERVICE">%1$s</xliff:g>, რომელიც მარტივი წვდომის ფუნქციაა. ამან შეიძლება შეცვალოს თქვენი მოწყობილობის მუშაობის პრინციპი.\n\nამ მალსახმობის შეცვლა სხვა ფუნქციით შეგიძლიათ აქ: პარამეტრები &gt; აპები."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"ჩართვა"</string>

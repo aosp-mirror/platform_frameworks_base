@@ -115,6 +115,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     private boolean mIsHeadsetProfileConnectedFail = false;
     private boolean mIsHearingAidProfileConnectedFail = false;
     private boolean mIsLeAudioProfileConnectedFail = false;
+    private boolean mUnpairing = false;
     // Group second device for Hearing Aid
     private CachedBluetoothDevice mSubDevice;
     // Group member devices for the coordinated set
@@ -282,6 +283,12 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     public void disconnect() {
         synchronized (mProfileLock) {
+            if (getGroupId() != BluetoothCsipSetCoordinator.GROUP_ID_INVALID) {
+                for (CachedBluetoothDevice member : getMemberDevice()) {
+                    Log.d(TAG, "Disconnect the member(" + member.getAddress() + ")");
+                    member.disconnect();
+                }
+            }
             mDevice.disconnect();
         }
         // Disconnect  PBAP server in case its connected
@@ -396,6 +403,12 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
             }
 
             mDevice.connect();
+            if (getGroupId() != BluetoothCsipSetCoordinator.GROUP_ID_INVALID) {
+                for (CachedBluetoothDevice member : getMemberDevice()) {
+                    Log.d(TAG, "connect the member(" + member.getAddress() + ")");
+                    member.connect();
+                }
+            }
         }
     }
 
@@ -456,6 +469,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         if (state != BluetoothDevice.BOND_NONE) {
             final BluetoothDevice dev = mDevice;
             if (dev != null) {
+                mUnpairing = true;
                 final boolean successful = dev.removeBond();
                 if (successful) {
                     releaseLruCache();
@@ -737,7 +751,10 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         ParcelUuid[] uuids = mDevice.getUuids();
         if (uuids == null) return false;
 
-        ParcelUuid[] localUuids = mLocalAdapter.getUuids();
+        List<ParcelUuid> uuidsList = mLocalAdapter.getUuidsList();
+        ParcelUuid[] localUuids = new ParcelUuid[uuidsList.size()];
+        uuidsList.toArray(localUuids);
+
         if (localUuids == null) return false;
 
         /*
@@ -1101,7 +1118,8 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                 final boolean isOnCall = Utils.isAudioModeOngoingCall(mContext);
                 if ((mIsActiveDeviceHearingAid)
                         || (mIsActiveDeviceHeadset && isOnCall)
-                        || (mIsActiveDeviceA2dp && !isOnCall)) {
+                        || (mIsActiveDeviceA2dp && !isOnCall)
+                        || mIsActiveDeviceLeAudio) {
                     if (isTwsBatteryAvailable(leftBattery, rightBattery) && !shortSummary) {
                         stringRes = R.string.bluetooth_active_battery_level_untethered;
                     } else if (batteryLevelPercentageString != null && !shortSummary) {
@@ -1333,7 +1351,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     /**
      * Store the member devices that are in the same coordinated set.
      */
-    public void setMemberDevice(CachedBluetoothDevice memberDevice) {
+    public void addMemberDevice(CachedBluetoothDevice memberDevice) {
         mMemberDevices.add(memberDevice);
     }
 
@@ -1350,24 +1368,24 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
      * device and member devices.
      *
      * @param prevMainDevice the previous Main device, it will be added into the member device set.
-     * @param newMainDevie the new Main device, it will be removed from the member device set.
+     * @param newMainDevice the new Main device, it will be removed from the member device set.
      */
     public void switchMemberDeviceContent(CachedBluetoothDevice prevMainDevice,
-            CachedBluetoothDevice newMainDevie) {
+            CachedBluetoothDevice newMainDevice) {
         // Backup from main device
         final BluetoothDevice tmpDevice = mDevice;
         final short tmpRssi = mRssi;
         final boolean tmpJustDiscovered = mJustDiscovered;
         // Set main device from sub device
-        mDevice = newMainDevie.mDevice;
-        mRssi = newMainDevie.mRssi;
-        mJustDiscovered = newMainDevie.mJustDiscovered;
-        setMemberDevice(prevMainDevice);
-        mMemberDevices.remove(newMainDevie);
+        mDevice = newMainDevice.mDevice;
+        mRssi = newMainDevice.mRssi;
+        mJustDiscovered = newMainDevice.mJustDiscovered;
+        addMemberDevice(prevMainDevice);
+        mMemberDevices.remove(newMainDevice);
         // Set sub device from backup
-        newMainDevie.mDevice = tmpDevice;
-        newMainDevie.mRssi = tmpRssi;
-        newMainDevie.mJustDiscovered = tmpJustDiscovered;
+        newMainDevice.mDevice = tmpDevice;
+        newMainDevice.mRssi = tmpRssi;
+        newMainDevice.mJustDiscovered = tmpJustDiscovered;
         fetchActiveDevices();
     }
 
@@ -1396,5 +1414,9 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     void releaseLruCache() {
         mDrawableCache.evictAll();
+    }
+
+    boolean getUnpairing() {
+        return mUnpairing;
     }
 }

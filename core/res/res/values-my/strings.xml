@@ -544,7 +544,7 @@
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"အနီးတစ်ဝိုက်ရှိ ‘အလွန်ကျယ်ပြန့်သော လှိုင်းအလျားသုံးစက်များ’ ကြား ဆက်စပ်နေရာကို သတ်မှတ်ခြင်း"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"အနီးတစ်ဝိုက်ရှိ ‘အလွန်ကျယ်ပြန့်သော လှိုင်းအလျားသုံးစက်များ’ ကြား ဆက်စပ်နေရာကို သတ်မှတ်ရန် အက်ပ်ကို ခွင့်ပြုမည်"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"အနီးရှိ Wi-Fi စက်များနှင့် ပြန်လှန်တုံ့ပြန်ခြင်း"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"အက်ပ်ကို ကြော်ငြာရန်၊ ချိတ်ဆက်ရန်နှင့် အနီးတစ်ဝိုက်ရှိ Wi-Fi စက်များ၏ ဆက်စပ်နေရာကို သတ်မှတ်ရန် ခွင့်ပြုနိုင်သည်"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"ကြော်ငြာရန်၊ ချိတ်ဆက်ရန်နှင့် အနီးတစ်ဝိုက်ရှိ Wi-Fi စက်များ၏ နေရာကို သတ်မှတ်ရန် အက်ပ်ကို ခွင့်ပြုသည်"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ဦးစားပေး NFC ငွေပေးချေမှုဆိုင်ရာ ဝန်ဆောင်မှု အချက်အလက်များ"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"အက်ပ်အား ဦစားပေး NFC ငွေပေးချေမှုဆိုင်ရာ ဝန်ဆောင်မှု အချက်အလက်များဖြစ်သည့် မှတ်ပုံတင်ထားသော အကူအညီများနှင့် သွားလာရာ လမ်းကြောင်းတို့ကို ရယူရန် ခွင့်ပြုသည်။"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"Near Field Communicationအား ထိန်းချုပ်ရန်"</string>
@@ -620,6 +620,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"သင်၏မျက်နှာနမူနာကို ဖျက်ရန် တို့ပါ။ ထို့နောက် သင့်မျက်နှာကို ထပ်ထည့်ပါ"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"မျက်နှာပြ လော့ခ်ဖွင့်ခြင်းကို ထည့်သွင်းပါ"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"သင့်ဖုန်းကိုကြည့်၍ သော့ဖွင့်ပါ"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"မျက်နှာပြ လော့ခ်ဖွင့်ခြင်းကို သုံးရန် "<b>"ကင်မရာ သုံးခွင့်"</b>" ကို ‘ဆက်တင်များ &gt; ကန့်သတ်ဆက်တင်’ တွင်ဖွင့်ပါ"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"သော့ဖွင့်ရန် နောက်ထပ်နည်းလမ်းများကို စနစ်ထည့်သွင်းပါ"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"လက်ဗွေထည့်ရန် တို့ပါ"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"လက်ဗွေသုံး လော့ခ်ဖွင့်ခြင်း"</string>
@@ -733,9 +734,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"မျက်နှာပြင်လော့ခ်ဖွင့်ရန် ကြိုးပမ်းမှုများကို စောင့်ကြည့်ပါ"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"မျက်နှာပြင်ကို သော့ဖွင့်ရန် အတွက် စကားဝှက် မမှန်မကန် ထည့်သွင်းမှု အရေအတွက်ကို စောင့်ကြည့်လျက်၊ စကားဝှက် ရိုက်ထည့်မှု သိပ်များနေလျှင် တက်ဘလက်ကို သော့ခတ်ရန် သို့မဟုတ် တက်ဘလက် ဒေတာ အားလုံးကို ဖျက်ရန်။"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"မျက်နှာပြင်ကို လော့ခ်ဖွင့်သည့်အခါ စကားဝှက်မှားယွင်းစွာ ရိုက်သွင်းသည့်အကြိမ်ရေကို စောင့်ကြည့်ပြီး မှားယွင်းသည့်အကြိမ်ရေ အလွန်များလာပါက သင့် Android TV စက်ပစ္စည်းကို လော့ခ်ချခြင်း သို့မဟုတ် သင့် Android TV ရှိ အသုံးပြုသူဒေတာများအားလုံးကို ဖျက်ခြင်းတို့ ပြုလုပ်သွားပါမည်။"</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"ဖန်သားပြင်လော့ခ်ဖွင့်ရန် အတွက် စကားဝှက် မမှန်မကန် ထည့်သွင်းမှု အရေအတွက်ကို စောင့်ကြည့်လျက် စကားဝှက် မမှန်မကန် ရိုက်ထည့်မှု များနေလျှင် သတင်းနှင့်ဖျော်ဖြေရေး စနစ်ကို လော့ခ်ချသည် (သို့) ၎င်း၏ ဒေတာအားလုံးကို ဖျက်သည်။"</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"မျက်နှာပြင်ကို သော့ဖွင့်ရန် အတွက် စကားဝှက် မမှန်မကန် ထည့်သွင်းမှု အရေအတွက်ကို စောင့်ကြည့်လျက်၊ စကားဝှက် ရိုက်ထည့်မှု သိပ်များနေလျှင် ဖုန်းကို သော့ခတ်ရန် သို့မဟုတ် ဖုန်း ဒေတာ အားလုံးကို ဖျက်ရန်။"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"ဖန်မျက်နှာပြင်အား သော့ဖွင့်စဉ် လျှို့ဝှက်ကုဒ်အမှားများ ရိုက်သွင်းမှုအား စောင့်ကြည့်ရန်နှင့်၊ လျှို့ဝှက်ကုဒ်အမှားများ များစွာ ရိုက်သွင်းပါက တက်ဘလက်အား သော့ချခြင်း သို့မဟုတ် တက်ဘလက်၏ အချက်အလက်များအား ဖျက်ပစ်ခြင်းများ ပြုလုပ်မည်။"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"မျက်နှာပြင်ကို လော့ခ်ဖွင့်သည့်အခါ စကားဝှက်မှားယွင်းစွာ ရိုက်သွင်းသည့်အကြိမ်ရေကို စောင့်ကြည့်ပြီး မှားယွင်းသည့်အကြိမ်ရေ အလွန်များလာပါက သင့် Android TV စက်ပစ္စည်းကို လော့ခ်ချခြင်း သို့မဟုတ် ဤအသုံးပြုသူဒေတာများအားလုံးကို ဖျက်ခြင်းတို့ ပြုလုပ်သွားပါမည်။"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"ဖန်သားပြင်လော့ခ်ဖွင့်ရန် အတွက် စကားဝှက် မမှန်မကန် ထည့်သွင်းမှု အရေအတွက်ကို စောင့်ကြည့်လျက် စကားဝှက် မမှန်မကန် ရိုက်ထည့်မှု များနေလျှင် သတင်းနှင့်ဖျော်ဖြေရေး စနစ်ကို လော့ခ်ချသည် (သို့) ဤပရိုဖိုင်၏ ဒေတာအားလုံးကို ဖျက်သည်။"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"ဖန်မျက်နှာပြင်အား သော့ဖွင့်စဉ် လျှို့ဝှက်ကုဒ်အမှားများ ရိုက်သွင်းမှုအား စောင့်ကြည့်ရန်နှင့်၊ လျှို့ဝှက်ကုဒ်အမှားများ များစွာ ရိုက်သွင်းပါက ဖုန်းအား သော့ချခြင်း သို့မဟုတ် ဖုန်း၏ အချက်အလက်များအား ဖျက်ပစ်ခြင်းများ ပြုလုပ်မည်။"</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"ဖန်သားပြင်လော့ခ်ပြောင်းခြင်း"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"ဖန်သားပြင်လော့ခ်ပြောင်းသည်။"</string>
@@ -744,10 +747,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"ဒေတာအားလုံးအားဖျက်ခြင်း"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"စက်ရုံထုတ် အခြေအနေအား ပြန်ပြောင်းခြင်းဖြင့် တက်ဘလက်ရှိ အချက်အလက်များအား ကြိုတင်သတိပေးမှုမရှိပဲ ဖျက်စီးရန်"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"စက်ရုံထုတ်အခြေအနေ ပြန်ယူရန် လုပ်ဆောင်ခြင်းဖြင့် သင့် Android TV စက်ပစ္စည်းပေါ်ရှိ ဒေတာများကို သတိမပေးဘဲ ဖျက်လိုက်ပါမည်။"</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"စက်ရုံထုတ်အခြေအနေပြန်ယူခြင်းကို ဆောင်ရွက်ခြင်းဖြင့် သတင်းနှင့်ဖျော်ဖြေရေး စနစ်၏ ဒေတာကို သတိပေးချက် မပေးဘဲ ဖျက်သည်။"</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"စက်ရုံထုတ်အခြေအနေသို့ ပြန်ပြောင်းခြင်းဖြင့် ဖုန်းရှိဒေတာများကို သတိပေးခြင်း မရှိဘဲ ဖျက်သည်။"</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"အသုံးပြုသူဒေတာကို ဖျက်မည်"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"ပရိုဖိုင်ဒေတာ ဖျက်ခြင်း"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"အသုံးပြုသူဒေတာကို ဖျက်မည်"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"သတိပေးခြင်းမရှိဘဲ ဤတက်ဘလက်ပေါ်ရှိ ထိုအသုံးပြုသူ၏ဒေတာအား ဖျက်မည်။"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"ဤ Android TV စက်ပစ္စည်းပေါ်ရှိ အသုံးပြုသူဒေတာများကို သတိပေးခြင်းမရှိဘဲ ဖျက်ပါမည်။"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"ဤသတင်းနှင့်ဖျော်ဖြေရေး စနစ်ရှိ ပရိုဖိုင်၏ ဒေတာကို သတိပေးချက် မပေးဘဲ ဖျက်သည်။"</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"သတိပေးခြင်းမရှိဘဲ ဤဖုန်းပေါ်ရှိ ထိုအသုံးပြုသူ၏ဒေတာအား ဖျက်မည်။"</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"တကမာ္ဘလုံးဆိုင်ရာပရော်စီကို သတ်မှတ်ခြင်း"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"ပေါ်လစီအား ဖွင့်ထားချိန်တွင်  တစ်ကမ္ဘာလုံးဆိုင်ရာ ပရောက်စီအား အသုံးပြုရန် ကိရိယာကို သတ်မှတ်မည်။ ကိရိယာ၏ ပိုင်ရှင်သာ ကမ္ဘာလုံးဆိုင်ရာ ပရောက်စီကို သတ်မှတ်နိုင်သည်။"</string>
@@ -1697,7 +1703,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ဖြတ်လမ်းလင့်ခ်ကို ဖွင့်ထားစဉ် အသံထိန်းခလုတ် နှစ်ခုစလုံးကို ၃ စက္ကန့်ခန့် ဖိထားခြင်းဖြင့် အများသုံးနိုင်သည့် ဝန်ဆောင်မှုကို ဖွင့်နိုင်သည်။"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"အများသုံးစွဲနိုင်မှုဆိုင်ရာ ဝန်ဆောင်မှုများအတွက် ဖြတ်လမ်းကို ဖွင့်မလား။"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"အသံခလုတ်နှစ်ခုလုံးကို စက္ကန့်အနည်းငယ် ဖိထားခြင်းက အများသုံးစွဲနိုင်မှုဆိုင်ရာ ဝန်ဆောင်မှုများ ဖွင့်ပေးသည်။ ဤလုပ်ဆောင်ချက်က သင့်စက်အလုပ်လုပ်ပုံကို ပြောင်းလဲနိုင်သည်။\n\nလက်ရှိ ဝန်ဆောင်မှုများ-\n<xliff:g id="SERVICE">%1$s</xliff:g>\n\'ဆက်တင်များ &gt; အများသုံးစွဲနိုင်မှု\' တွင် ရွေးထားသည့် ဝန်ဆောင်မှုများကို ပြောင်းနိုင်သည်။"</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"<xliff:g id="SERVICE">%1$s</xliff:g> ဖြတ်လမ်းကို ဖွင့်မလား။"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"အသံခလုတ်နှစ်ခုလုံးကို စက္ကန့်အနည်းငယ် ဖိထားခြင်းက အများသုံးနိုင်သည့် ဝန်ဆောင်မှုဖြစ်သော <xliff:g id="SERVICE">%1$s</xliff:g> ကို ဖွင့်ပေးသည်။ ဤလုပ်ဆောင်ချက်က သင့်စက်အလုပ်လုပ်ပုံကို ပြောင်းလဲနိုင်သည်။\n\nဤဖြတ်လမ်းလင့်ခ်ကို ဆက်တင်များ &gt; အများသုံးနိုင်မှုတွင် နောက်ဝန်ဆောင်မှုတစ်ခုသို့ ပြောင်းနိုင်သည်။"</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"ဖွင့်ရန်"</string>

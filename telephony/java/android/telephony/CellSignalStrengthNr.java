@@ -438,13 +438,13 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
         int level;
         if (measure == CellInfo.UNAVAILABLE) {
             level = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
-        } else if (measure > thresholds[3]) {
+        } else if (measure >= thresholds[3]) {
             level = SIGNAL_STRENGTH_GREAT;
-        } else if (measure > thresholds[2]) {
+        } else if (measure >= thresholds[2]) {
             level = SIGNAL_STRENGTH_GOOD;
-        } else if (measure > thresholds[1]) {
+        } else if (measure >= thresholds[1]) {
             level = SIGNAL_STRENGTH_MODERATE;
-        }  else if (measure > thresholds[0]) {
+        }  else if (measure >= thresholds[0]) {
             level = SIGNAL_STRENGTH_POOR;
         } else {
             level = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;

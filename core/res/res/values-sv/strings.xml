@@ -620,6 +620,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Tryck för att radera ansiktsmodellen och lägg sedan till ansiktet igen"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Konfigurera ansiktslås"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Lås upp telefonen genom att titta på den"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Om du vill använda ansiktslås aktiverar du "<b>"Kameraåtkomst"</b>" i Inställningar &gt; Integritet"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Konfigurera fler sätt att låsa upp"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Tryck för att lägga till ett fingeravtryck"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Fingeravtryckslås"</string>
@@ -733,9 +734,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Övervaka försök att låsa upp skärmen"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Övervaka antalet felaktiga lösenord som angetts för skärmlåset och lås surfplattan eller ta bort alla data från surfplattan om för många felaktiga försök görs."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Övervaka antalet felaktiga lösenord som skrivits in vid upplåsning av skärmen och lås Android TV-enheten eller rensa all data på Android TV-enheten om för många felaktiga lösenord har skrivits in."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Övervaka antalet felaktiga lösenord som angetts för skärmlåset och lås infotainmentsystemet eller rensa all data från infotainmentsystemet om för många felaktiga försök görs."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Övervaka antalet felaktiga lösenord som angivits för skärmlåset och lås mobilen eller ta bort alla data från mobilen om för många felaktiga försök görs."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Övervaka antalet felaktiga lösenord som skrivits in vid upplåsning av skärmen och lås surfplattan eller rensa alla uppgifter för den här användaren om för många felaktiga lösenord har skrivits in."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Övervaka antalet felaktiga lösenord som skrivits in vid upplåsning av skärmen och lås Android TV-enheten eller rensa alla uppgifter för den här användaren om för många felaktiga lösenord har skrivits in."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Övervaka antalet felaktiga lösenord som angetts för skärmlåset och lås infotainmentsystemet eller rensa all data från profilen om för många felaktiga lösenord har skrivits in."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Övervaka antalet felaktiga lösenord som skrivits in vid upplåsning av skärmen och lås mobilen eller rensa alla uppgifter för den här användaren om för många felaktiga lösenord har skrivits in."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Ändra skärmlåset"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Ändra skärmlåset."</string>
@@ -744,10 +747,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Radera all data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Ta bort data från surfplattan utan förvarning genom att återställa standardinställningarna."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Radera data på Android TV-enheten utan förvarning genom att återställa standardinställningarna."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Rensa data från infotainmentsystemet utan förvarning genom att återställa standardinställningarna."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Ta bort data från mobilen utan förvarning genom att återställa standardinställningarna."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Radera användaruppgifter"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Rensa profildata"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Radera användaruppgifter"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Rensa användarens uppgifter på den här surfplattan utan förvarning."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Radera den här användarens data på den här Android TV-enheten utan förvarning."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Rensa profilens data i det här infotainmentsystemet utan förvarning."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Rensa användarens data på den här mobilen utan förvarning."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Ange global proxyserver"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Ange enhetens globala proxy som ska användas när policyn aktiveras. Det är bara enhetens ägare som kan ange global proxy."</string>
@@ -1697,7 +1703,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"När kortkommandot har aktiverats startar du en tillgänglighetsfunktion genom att trycka ned båda volymknapparna i tre sekunder."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Vill du aktivera genvägen till tillgänglighetsfunktioner?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Om du trycker ned båda volymknapparna i ett par sekunder aktiveras tillgänglighetsfunktionerna. Det kan få enheten ett fungera annorlunda.\n\nAktuella funktioner:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nDu kan ändra vilka funktioner som aktiveras under Inställningar &gt; Tillgänglighet."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Vill du aktivera genvägen till <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Om du trycker ned båda volymknapparna i ett par sekunder aktiveras <xliff:g id="SERVICE">%1$s</xliff:g>, en tillgänglighetsfunktion. Det kan leda till att enheten fungerar annorlunda.\n\nDu kan ändra vilken funktion som ska aktiveras med genvägen under Inställningar &gt; Tillgänglighet."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Aktivera"</string>

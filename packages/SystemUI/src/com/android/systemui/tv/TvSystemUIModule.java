@@ -70,6 +70,7 @@ import com.android.systemui.statusbar.policy.IndividualSensorPrivacyControllerIm
 import com.android.systemui.statusbar.policy.SensorPrivacyController;
 import com.android.systemui.statusbar.policy.SensorPrivacyControllerImpl;
 import com.android.systemui.statusbar.tv.notifications.TvNotificationHandler;
+import com.android.systemui.volume.dagger.VolumeModule;
 
 import javax.inject.Named;
 
@@ -83,7 +84,8 @@ import dagger.Provides;
  */
 @Module(includes = {
             PowerModule.class,
-            QSModule.class
+            QSModule.class,
+            VolumeModule.class,
         },
         subcomponents = {
         })
@@ -178,9 +180,13 @@ public abstract class TvSystemUIModule {
         return new Recents(context, recentsImplementation, commandQueue);
     }
 
-    @Binds
-    abstract DeviceProvisionedController bindDeviceProvisionedController(
-            DeviceProvisionedControllerImpl deviceProvisionedController);
+    @SysUISingleton
+    @Provides
+    static DeviceProvisionedController providesDeviceProvisionedController(
+            DeviceProvisionedControllerImpl deviceProvisionedController) {
+        deviceProvisionedController.init();
+        return deviceProvisionedController;
+    }
 
     @Binds
     abstract KeyguardViewController bindKeyguardViewController(

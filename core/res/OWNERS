@@ -22,11 +22,20 @@ patb@google.com
 shanh@google.com
 svetoslavganov@android.com
 svetoslavganov@google.com
+toddke@google.com
 tsuji@google.com
 yamasani@google.com
+
+# Resources finalization
+per-file res/xml/public-staging.xml = file:/tools/aapt2/OWNERS
+per-file res/xml/public-final.xml = file:/tools/aapt2/OWNERS
 
 # Multiuser
 per-file res/xml/config_user_types.xml = file:/MULTIUSER_OWNERS
 
 # Car
 per-file res/values/dimens_car.xml = file:/platform/packages/services/Car:/OWNERS
+
+# Telephony
+per-file res/values/config_telephony.xml = file:/platform/frameworks/opt/telephony:/OWNERS
+per-file res/xml/sms_short_codes.xml = file:/platform/frameworks/opt/telephony:/OWNERS

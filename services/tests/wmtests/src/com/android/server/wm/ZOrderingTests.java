@@ -20,9 +20,10 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ABOVE_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
@@ -37,10 +38,13 @@ import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.WindowStateAnimator.PRESERVED_SURFACE_LAYER;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -293,6 +297,7 @@ public class ZOrderingTests extends WindowTestsBase {
         final WindowState appAboveImeTarget = createWindow("appAboveImeTarget");
 
         mDisplayContent.setImeLayeringTarget(imeAppTarget);
+        mDisplayContent.setImeControlTarget(imeAppTarget);
         mDisplayContent.assignChildLayers(mTransaction);
 
         // Ime should be above all app windows except for non-fullscreen app window above it and
@@ -339,6 +344,7 @@ public class ZOrderingTests extends WindowTestsBase {
     @Test
     public void testAssignWindowLayers_ForStatusBarImeTarget() {
         mDisplayContent.setImeLayeringTarget(mStatusBarWindow);
+        mDisplayContent.setImeControlTarget(mStatusBarWindow);
         mDisplayContent.assignChildLayers(mTransaction);
 
         assertWindowHigher(mImeWindow, mChildAppWindowAbove);
@@ -399,6 +405,50 @@ public class ZOrderingTests extends WindowTestsBase {
     }
 
     @Test
+    public void testAssignWindowLayers_ForImeOnAppWithRecentsAnimating() {
+        final WindowState imeAppTarget = createWindow(null, TYPE_APPLICATION,
+                mAppWindow.mActivityRecord, "imeAppTarget");
+        mDisplayContent.setImeInputTarget(imeAppTarget);
+        mDisplayContent.setImeLayeringTarget(imeAppTarget);
+        mDisplayContent.setImeControlTarget(imeAppTarget);
+        mDisplayContent.updateImeParent();
+
+        // Simulate the ime layering target task is animating with recents animation.
+        final Task imeAppTargetTask = imeAppTarget.getTask();
+        final SurfaceAnimator imeTargetTaskAnimator = imeAppTargetTask.mSurfaceAnimator;
+        spyOn(imeTargetTaskAnimator);
+        doReturn(ANIMATION_TYPE_RECENTS).when(imeTargetTaskAnimator).getAnimationType();
+        doReturn(true).when(imeTargetTaskAnimator).isAnimating();
+
+        mDisplayContent.assignChildLayers(mTransaction);
+
+        // Ime should on top of the application window when in recents animation and keep
+        // attached on app.
+        assertTrue(mDisplayContent.shouldImeAttachedToApp());
+        assertWindowHigher(mImeWindow, imeAppTarget);
+    }
+
+    @Test
+    public void testAssignWindowLayers_ForImeOnPopupImeLayeringTarget() {
+        final WindowState imeAppTarget = createWindow(null, TYPE_APPLICATION,
+                mAppWindow.mActivityRecord, "imeAppTarget");
+        mDisplayContent.setImeInputTarget(imeAppTarget);
+        mDisplayContent.setImeLayeringTarget(imeAppTarget);
+        mDisplayContent.setImeControlTarget(imeAppTarget);
+
+        // Set a popup IME layering target and keeps the original IME control target behinds it.
+        final WindowState popupImeTargetWin = createWindow(imeAppTarget,
+                TYPE_APPLICATION_SUB_PANEL, mAppWindow.mActivityRecord, "popupImeTargetWin");
+        mDisplayContent.setImeLayeringTarget(popupImeTargetWin);
+        mDisplayContent.updateImeParent();
+
+        // Ime should on top of the popup IME layering target window.
+        mDisplayContent.assignChildLayers(mTransaction);
+        assertWindowHigher(mImeWindow, popupImeTargetWin);
+    }
+
+
+    @Test
     public void testAssignWindowLayers_ForNegativelyZOrderedSubtype() {
         // TODO(b/70040778): We should aim to eliminate the last user of TYPE_APPLICATION_MEDIA
         // then we can drop all negative layering on the windowing side.
@@ -440,24 +490,73 @@ public class ZOrderingTests extends WindowTestsBase {
 
     @Test
     public void testDockedDividerPosition() {
-        final WindowState pinnedStackWindow = createWindow(null, WINDOWING_MODE_PINNED,
-                ACTIVITY_TYPE_STANDARD, TYPE_BASE_APPLICATION, mDisplayContent,
-                "pinnedStackWindow");
-        final WindowState splitScreenWindow = createWindow(null,
-                WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD, TYPE_BASE_APPLICATION,
-                mDisplayContent, "splitScreenWindow");
-        final WindowState splitScreenSecondaryWindow = createWindow(null,
-                WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_STANDARD,
-                TYPE_BASE_APPLICATION, mDisplayContent, "splitScreenSecondaryWindow");
-        final WindowState assistantStackWindow = createWindow(null,
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_ASSISTANT, TYPE_BASE_APPLICATION,
-                mDisplayContent, "assistantStackWindow");
+        final Task pinnedTask =
+                createTask(mDisplayContent, WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD);
+        final WindowState pinnedWindow =
+                createAppWindow(pinnedTask, ACTIVITY_TYPE_STANDARD, "pinnedWindow");
+
+        final Task belowTask =
+                createTask(mDisplayContent, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        final WindowState belowTaskWindow =
+                createAppWindow(belowTask, ACTIVITY_TYPE_STANDARD, "belowTaskWindow");
+
+        final Task splitScreenTask1 =
+                createTask(mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
+        final WindowState splitWindow1 =
+                createAppWindow(splitScreenTask1, ACTIVITY_TYPE_STANDARD, "splitWindow1");
+        final Task splitScreenTask2 =
+                createTask(mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
+        final WindowState splitWindow2 =
+                createAppWindow(splitScreenTask2, ACTIVITY_TYPE_STANDARD, "splitWindow2");
+        splitScreenTask1.setAdjacentTaskFragment(splitScreenTask2, true /* moveTogether */);
+        splitScreenTask2.setAdjacentTaskFragment(splitScreenTask1, true /* moveTogether */);
+
+        final Task aboveTask =
+                createTask(mDisplayContent, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        final WindowState aboveTaskWindow =
+                createAppWindow(aboveTask, ACTIVITY_TYPE_STANDARD, "aboveTaskWindow");
 
         mDisplayContent.assignChildLayers(mTransaction);
 
-        assertWindowHigher(mDockedDividerWindow, splitScreenWindow);
-        assertWindowHigher(mDockedDividerWindow, splitScreenSecondaryWindow);
-        assertWindowHigher(pinnedStackWindow, mDockedDividerWindow);
+        assertWindowHigher(splitWindow1, belowTaskWindow);
+        assertWindowHigher(splitWindow2, belowTaskWindow);
+        assertWindowHigher(mDockedDividerWindow, splitWindow1);
+        assertWindowHigher(mDockedDividerWindow, splitWindow2);
+        assertWindowHigher(aboveTaskWindow, mDockedDividerWindow);
+        assertWindowHigher(pinnedWindow, aboveTaskWindow);
+    }
+
+
+    @Test
+    public void testDockedDividerPosition_noAboveTask() {
+        final Task pinnedTask =
+                createTask(mDisplayContent, WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD);
+        final WindowState pinnedWindow =
+                createAppWindow(pinnedTask, ACTIVITY_TYPE_STANDARD, "pinnedWindow");
+
+        final Task belowTask =
+                createTask(mDisplayContent, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        final WindowState belowTaskWindow =
+                createAppWindow(belowTask, ACTIVITY_TYPE_STANDARD, "belowTaskWindow");
+
+        final Task splitScreenTask1 =
+                createTask(mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
+        final WindowState splitWindow1 =
+                createAppWindow(splitScreenTask1, ACTIVITY_TYPE_STANDARD, "splitWindow1");
+        final Task splitScreenTask2 =
+                createTask(mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
+        final WindowState splitWindow2 =
+                createAppWindow(splitScreenTask2, ACTIVITY_TYPE_STANDARD, "splitWindow2");
+        splitScreenTask1.setAdjacentTaskFragment(splitScreenTask2, true /* moveTogether */);
+        splitScreenTask2.setAdjacentTaskFragment(splitScreenTask1, true /* moveTogether */);
+
+        mDisplayContent.assignChildLayers(mTransaction);
+
+        assertWindowHigher(splitWindow1, belowTaskWindow);
+        assertWindowHigher(splitWindow2, belowTaskWindow);
+        assertWindowHigher(mDockedDividerWindow, splitWindow1);
+        assertWindowHigher(mDockedDividerWindow, splitWindow2);
+        assertWindowHigher(pinnedWindow, mDockedDividerWindow);
     }
 
     @Test
@@ -491,6 +590,29 @@ public class ZOrderingTests extends WindowTestsBase {
 
         mDisplayContent.assignChildLayers(mTransaction);
         assertZOrderGreaterThan(mTransaction, mNavBarWindow.mToken.getSurfaceControl(),
+                mDisplayContent.getImeContainer().getSurfaceControl());
+    }
+
+    @Test
+    public void testPopupWindowAndParentIsImeTarget_expectHigherThanIme_inMultiWindow() {
+        // Simulate the app window is in multi windowing mode and being IME target
+        mAppWindow.getConfiguration().windowConfiguration.setWindowingMode(
+                WINDOWING_MODE_MULTI_WINDOW);
+        mDisplayContent.setImeLayeringTarget(mAppWindow);
+        mDisplayContent.setImeInputTarget(mAppWindow);
+
+        // Create a popupWindow
+        assertWindowHigher(mImeWindow, mAppWindow);
+        final WindowState popupWindow = createWindow(mAppWindow, TYPE_APPLICATION_PANEL,
+                mDisplayContent, "PopupWindow");
+        spyOn(popupWindow);
+
+        mDisplayContent.assignChildLayers(mTransaction);
+
+        // Verify the surface layer of the popupWindow should higher than IME
+        verify(popupWindow).needsRelativeLayeringToIme();
+        assertThat(popupWindow.needsRelativeLayeringToIme()).isTrue();
+        assertZOrderGreaterThan(mTransaction, popupWindow.getSurfaceControl(),
                 mDisplayContent.getImeContainer().getSurfaceControl());
     }
 }

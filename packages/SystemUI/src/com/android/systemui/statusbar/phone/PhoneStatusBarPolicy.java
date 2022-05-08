@@ -604,8 +604,7 @@ public class PhoneStatusBarPolicy
 
     @Override
     public void onUserSetupChanged() {
-        boolean userSetup = mProvisionedController.isUserSetup(
-                mProvisionedController.getCurrentUser());
+        boolean userSetup = mProvisionedController.isCurrentUserSetup();
         if (mCurrentUserSetup == userSetup) return;
         mCurrentUserSetup = userSetup;
         updateAlarm();

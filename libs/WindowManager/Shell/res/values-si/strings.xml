@@ -20,6 +20,7 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"වසන්න"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"දිග හරින්න"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"සැකසීම්"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"බෙදුම් තිරයට ඇතුළු වන්න"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"මෙනුව"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> පින්තූරය-තුළ-පින්තූරය තුළ වේ"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"ඔබට <xliff:g id="NAME">%s</xliff:g> මෙම විශේෂාංගය භාවිත කිරීමට අවශ්‍ය නැති නම්, සැකසීම් විවෘත කිරීමට තට්ටු කර එය ක්‍රියාවිරහිත කරන්න."</string>
@@ -72,5 +73,4 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"කළමනා කරන්න"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"බුබුල ඉවත දමා ඇත."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"මෙම යෙදුම යළි ඇරඹීමට සහ පූර්ණ තිරයට යාමට තට්ටු කරන්න."</string>
-    <string name="got_it" msgid="4428750913636945527">"තේරුණා"</string>
 </resources>

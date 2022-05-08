@@ -26,6 +26,9 @@ import java.security.PublicKey;
 /**
  * Class for presenting multiple documents to a remote verifier.
  *
+ * <p>This should be used for all interactions with a remote verifier instead of the now deprecated
+ * {@link IdentityCredential#getEntries(byte[], Map, byte[], byte[])} method.
+ *
  * Use {@link IdentityCredentialStore#createPresentationSession(int)} to create a {@link
  * PresentationSession} instance.
  */

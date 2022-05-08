@@ -18,10 +18,17 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:focusableInTouchMode="true"
     android:background="@android:color/holo_green_light">
     <EditText android:id="@+id/plain_text_input"
               android:layout_height="wrap_content"
               android:layout_width="match_parent"
+	      android:imeOptions="flagNoExtractUi"
               android:inputType="text"/>
+    <Button
+        android:id="@+id/finish_activity_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Finish activity" />
 </LinearLayout>

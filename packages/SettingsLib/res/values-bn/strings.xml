@@ -415,12 +415,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"ওয়েবভিউ প্রয়োগ"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"ওয়েবভিউ প্রয়োগ সেট করুন"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"এই পছন্দটি আর বৈধ নেই৷ আবার চেষ্টা করুন৷"</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"ফাইল এনক্রিপশান রূপান্তর করুন"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"রূপান্তর করুন..."</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"ফাইল ইতিমধ্যেই এনক্রিপ্ট করা রয়েছে"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"ফাইল ভিত্তিক এনক্রিপশানে রূপান্তর করা হচ্ছে"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"ডেটা পার্টিশানকে ফাইলভিত্তিক এনক্রিপশানে রূপান্তর করুন৷ \n !!সতর্কবাণী!! এটি আপনার সমস্ত ডেটা মুছে ফেলবে৷\n এই বৈশিষ্ট্যটি আলফা এবং সঠিকভাবে কাজ নাও করতে পারে৷\n চালিয়ে যেতে \'মুছুন ও রূপান্তর করুন...\' টিপুন৷"</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"মুছুন ও রূপান্তর করুন..."</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"ছবি রঙ মোড"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"sRGB ব্যবহার করুন"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"অক্ষম হয়েছে"</string>

@@ -543,7 +543,7 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Lehetővé teszi az alkalmazás számára, hogy közzétegye jelenlétét a közeli Bluetooth-eszközök számára"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"közeli, ultraszélessávú eszközök közötti relatív pozíció meghatározása"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Az alkalmazás meghatározhatja a közeli, ultraszélessávú eszközök közötti relatív pozíciót"</string>
-    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"műveleteket végezhet a közeli Wi‑Fi-eszközökkel"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"műveletek végrehajtása a közeli Wi‑Fi-eszközökkel"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Engedélyezi az alkalmazás számára, hogy közzétegye és meghatározza a közeli Wi-Fi-eszközök viszonylagos helyzetét, és csatlakozzon hozzájuk."</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Preferált NFC fizetési szolgáltatási információk"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Lehetővé teszi az alkalmazás számára preferált NFC fizetési szolgáltatási információk (pl. regisztrált alkalmazásazonosítók és útvonali cél) lekérését."</string>
@@ -620,6 +620,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Koppintson arcmodellje törléséhez, majd készítsen újat"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Az Arcalapú feloldás beállítása"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Feloldhatja a zárolást úgy, hogy ránéz a telefonra"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Az Arcalapú feloldás funkció használatához kapcsolja be a "<b>"Hozzáférés a kamerához"</b>" beállítást a Beállítások &gt; Adatvédelem szakaszban."</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"További feloldási módszerek beállítása"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Koppintson ide ujjlenyomat hozzáadásához"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Feloldás ujjlenyomattal"</string>
@@ -733,9 +734,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Képernyőzár-feloldási kísérletek figyelése"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Megfigyeli a képernyő feloldásakor helytelenül beírt jelszavak számát, és túl sok hibásan beírt jelszó esetén lezárja a táblagépet, vagy törli a táblagép összes adatát."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"A képernyő feloldásához megadott helytelen jelszavak számának figyelése, és az Android TV eszköz zárolása vagy az Android TV eszköz összes adatának törlése túl sok helytelen jelszó után."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Megfigyeli a képernyő feloldásakor helytelenül beírt jelszavak számát, és túl sok hibásan beírt jelszó esetén lezárja az infotainmentrendszert, vagy törli az infotainmentrendszer összes adatát."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Megfigyeli a képernyő feloldásakor helytelenül beírt jelszavak számát, és túl sok hibásan beírt jelszó esetén lezárja a telefont, vagy törli a telefon összes adatát."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"A képernyőzárolás során megadott helytelen jelszavak számának figyelése, és a táblagép zárolása vagy a felhasználó összes adatának törlése abban az esetben, ha túl sokszor adtak meg helytelen jelszót."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"A képernyő feloldásához megadott helytelen jelszavak számának figyelése, és az Android TV eszköz zárolása vagy ezen felhasználó összes adatának törlése túl sok helytelen jelszó után."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"A képernyőzárolás során megadott helytelen jelszavak számának figyelése, és az infotainmentrendszer zárolása vagy a profil összes adatának törlése abban az esetben, ha túl sokszor adtak meg helytelen jelszót."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"A képernyőzárolás során megadott helytelen jelszavak számának figyelése, és a telefon zárolása vagy a felhasználó összes adatának törlése abban az esetben, ha túl sokszor adtak meg helytelen jelszót."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"A képernyőzár módosítása"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"A képernyőzár módosítása."</string>
@@ -744,10 +747,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Minden adat törlése"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Figyelmeztetés nélkül törli a táblagép adatait, visszaállítva a gyári adatokat."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Az Android TV eszköz adatainak figyelmeztetés nélküli törlése a gyári adatok visszaállításával."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Az infotainmentrendszer adatainak törlése a gyári alapbeállítások visszaállításával anélkül, hogy figyelmeztetés jelenne meg erről."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Figyelmeztetés nélkül törli a telefon összes adatát, visszaállítva a gyári adatokat."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"A felhasználói adatok törlése"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Profiladatok törlése"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"A felhasználói adatok törlése"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"A felhasználó összes adatának törlése erről a táblagépről figyelmeztetés nélkül."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"A felhasználó összes adatának figyelmeztetés nélküli törlése erről az Android TV eszközről."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"A profil adatainak törlése erről az infotainmentrendszerről figyelmeztetés nélkül."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"A felhasználó összes adatának törlése erről a telefonról figyelmeztetés nélkül."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Az eszköz globális proxyjának beállítása"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Az eszköz globális proxyja lesz használatban, amíg a házirend engedélyezve van. A globális proxyt csak az eszköz tulajdonosa állíthatja be."</string>
@@ -1697,7 +1703,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Ha a gyorsparancs aktív, akkor a két hangerőgomb három másodpercig tartó együttes lenyomásával kisegítő funkciót indíthat el."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Bekapcsol gyorsparancsot a kisegítő lehetőségekhez?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"A kisegítő lehetőségek bekapcsolásához tartsa nyomva néhány másodpercig mindkét hangerőgombot. Ez hatással lehet az eszköz működésére.\n\nJelenlegi funkciók:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nA kiválasztott funkciókat a Beállítások &gt; Kisegítő lehetőségek pontban módosíthatja."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Bekapcsolja a(z) <xliff:g id="SERVICE">%1$s</xliff:g> szolgáltatás gyorsparancsát?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"A(z) <xliff:g id="SERVICE">%1$s</xliff:g> kisegítő lehetőség bekapcsolásához tartsa nyomva néhány másodpercig mindkét hangerőgombot. Ez hatással lehet az eszköz működésére.\n\nEzt a gyorsparancsot a Beállítások &gt; Kisegítő lehetőségek pontban módosíthatja másik funkció használatára."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Bekapcsolom"</string>

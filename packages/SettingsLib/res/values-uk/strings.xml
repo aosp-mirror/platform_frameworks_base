@@ -415,12 +415,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Застосування WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Налаштувати застосування WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Ця опція більше не дійсна. Повторіть спробу."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"Перехід до шифрування файлів"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Конвертація…"</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"Уже конвертовано в зашифрований файл"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"Конвертація в зашифрований файл"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Конвертувати розділ даних у зашифрований файл.\n Застереження. Усі дані буде стерто.\n Це альфа-версія функції. Вона може працювати неналежним чином.\n Щоб продовжити, натисніть \"Стерти та конвертувати…\"."</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"Стерти та конвертувати…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Режим кольору"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"Використовувати sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Вимкнено"</string>

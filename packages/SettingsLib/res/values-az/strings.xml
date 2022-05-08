@@ -415,12 +415,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView servisi"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"WebView servisini ayarlayın"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Bu seçim artıq etibarlı deyil. Yenidən cəhd edin."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"Fayl şifrələnməsinə çevirin"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Çevirin..."</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"Fayl artıq şifrələnib"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"Fayl əsaslı şifrələnməyə çevrilir"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Data bölgüsünü fayl əsaslı şifrələməyə çevirin.\n !!Xəbərdarlıq!! Bu, bütün datanızı siləcək.\n Bu xüsusiyyət alfadır və düzgün işləməyə bilər.\n Davam etmək üçün \'Silin və çevirin...\' düyməsinə basın."</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"Silin və çevirin..."</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Şəkil rəng rejimi"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"sRGB istifadə edin"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Deaktiv"</string>

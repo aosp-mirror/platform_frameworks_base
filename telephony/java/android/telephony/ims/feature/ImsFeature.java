@@ -375,11 +375,15 @@ public abstract class ImsFeature {
      */
     @SystemApi
     public final void setFeatureState(@ImsState int state) {
+        boolean isNotify = false;
         synchronized (mLock) {
             if (mState != state) {
                 mState = state;
-                notifyFeatureState(state);
+                isNotify = true;
             }
+        }
+        if (isNotify) {
+            notifyFeatureState(state);
         }
     }
 
@@ -412,14 +416,16 @@ public abstract class ImsFeature {
      * Internal method called by ImsFeature when setFeatureState has changed.
      */
     private void notifyFeatureState(@ImsState int state) {
-        mStatusCallbacks.broadcastAction((c) -> {
-            try {
-                c.notifyImsFeatureStatus(state);
-            } catch (RemoteException e) {
-                Log.w(LOG_TAG, e + " notifyFeatureState() - Skipping "
-                        + "callback.");
-            }
-        });
+        synchronized (mStatusCallbacks) {
+            mStatusCallbacks.broadcastAction((c) -> {
+                try {
+                    c.notifyImsFeatureStatus(state);
+                } catch (RemoteException e) {
+                    Log.w(LOG_TAG, e + " notifyFeatureState() - Skipping "
+                            + "callback.");
+                }
+            });
+        }
     }
 
     /**
@@ -491,14 +497,19 @@ public abstract class ImsFeature {
         synchronized (mLock) {
             mCapabilityStatus = caps.copy();
         }
-        mCapabilityCallbacks.broadcastAction((callback) -> {
-            try {
-                callback.onCapabilitiesStatusChanged(caps.mCapabilities);
-            } catch (RemoteException e) {
-                Log.w(LOG_TAG, e + " notifyCapabilitiesStatusChanged() - Skipping "
-                        + "callback.");
-            }
-        });
+
+        synchronized (mCapabilityCallbacks) {
+            mCapabilityCallbacks.broadcastAction((callback) -> {
+                try {
+                    Log.d(LOG_TAG, "ImsFeature notifyCapabilitiesStatusChanged Capabilities = "
+                            + caps.mCapabilities);
+                    callback.onCapabilitiesStatusChanged(caps.mCapabilities);
+                } catch (RemoteException e) {
+                    Log.w(LOG_TAG, e + " notifyCapabilitiesStatusChanged() - Skipping "
+                            + "callback.");
+                }
+            });
+        }
     }
 
     /**

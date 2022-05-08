@@ -20,9 +20,11 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SYNC_ENGINE;
 
 import android.annotation.NonNull;
 import android.util.ArraySet;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 
 /**
@@ -65,6 +67,7 @@ class BLASTSyncEngine {
     class SyncGroup {
         final int mSyncId;
         final TransactionReadyListener mListener;
+        final Runnable mOnTimeout;
         boolean mReady = false;
         final ArraySet<WindowContainer> mRootMembers = new ArraySet<>();
         private SurfaceControl.Transaction mOrphanTransaction = null;
@@ -72,6 +75,12 @@ class BLASTSyncEngine {
         private SyncGroup(TransactionReadyListener listener, int id) {
             mSyncId = id;
             mListener = listener;
+            mOnTimeout = () -> {
+                Slog.w(TAG, "Sync group " + mSyncId + " timeout");
+                synchronized (mWm.mGlobalLock) {
+                    onTimeout();
+                }
+            };
         }
 
         /**
@@ -114,6 +123,7 @@ class BLASTSyncEngine {
             }
             mListener.onTransactionReady(mSyncId, merged);
             mActiveSyncs.remove(mSyncId);
+            mWm.mH.removeCallbacks(mOnTimeout);
         }
 
         private void setReady(boolean ready) {
@@ -136,6 +146,17 @@ class BLASTSyncEngine {
         void onCancelSync(WindowContainer wc) {
             mRootMembers.remove(wc);
         }
+
+        private void onTimeout() {
+            if (!mActiveSyncs.contains(mSyncId)) return;
+            for (int i = mRootMembers.size() - 1; i >= 0; --i) {
+                final WindowContainer<?> wc = mRootMembers.valueAt(i);
+                if (!wc.isSyncFinished()) {
+                    Slog.i(TAG, "Unfinished container: " + wc);
+                }
+            }
+            finishNow();
+        }
     }
 
     private final WindowManagerService mWm;
@@ -147,11 +168,21 @@ class BLASTSyncEngine {
     }
 
     int startSyncSet(TransactionReadyListener listener) {
+        return startSyncSet(listener, WindowState.BLAST_TIMEOUT_DURATION);
+    }
+
+    int startSyncSet(TransactionReadyListener listener, long timeoutMs) {
         final int id = mNextSyncId++;
         final SyncGroup s = new SyncGroup(listener, id);
         mActiveSyncs.put(id, s);
         ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: Started for listener: %s", id, listener);
+        scheduleTimeout(s, timeoutMs);
         return id;
+    }
+
+    @VisibleForTesting
+    void scheduleTimeout(SyncGroup s, long timeoutMs) {
+        mWm.mH.postDelayed(s.mOnTimeout, timeoutMs);
     }
 
     void addToSyncSet(int id, WindowContainer wc) {
@@ -164,6 +195,10 @@ class BLASTSyncEngine {
 
     void setReady(int id) {
         setReady(id, true);
+    }
+
+    boolean isReady(int id) {
+        return mActiveSyncs.get(id).mReady;
     }
 
     /**

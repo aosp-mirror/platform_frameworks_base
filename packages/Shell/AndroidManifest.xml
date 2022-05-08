@@ -121,6 +121,8 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE"/>
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <!-- BLUETOOTH_PRIVILEGED is needed for testing purposes only. -->
+    <uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED" />
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
     <uses-permission android:name="android.permission.LOCAL_MAC_ADDRESS" />
     <uses-permission android:name="android.permission.EXPAND_STATUS_BAR" />
@@ -469,6 +471,9 @@
     <!-- Permission needed for CTS test - MatchContentFrameRateTest -->
     <uses-permission android:name="android.permission.MODIFY_REFRESH_RATE_SWITCHING_TYPE" />
 
+    <!-- Permissions needed for manual testing telephony time zone detector behavior -->
+    <uses-permission android:name="android.permission.SUGGEST_TELEPHONY_TIME_AND_ZONE" />
+
     <!-- Permissions needed for CTS test - TimeManagerTest -->
     <uses-permission android:name="android.permission.MANAGE_TIME_AND_ZONE_DETECTION" />
     <uses-permission android:name="android.permission.SUGGEST_EXTERNAL_TIME" />
@@ -508,10 +513,11 @@
     <uses-permission android:name="android.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS" />
     <uses-permission android:name="android.permission.WIFI_UPDATE_COEX_UNSAFE_CHANNELS" />
     <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES" />
+    <uses-permission android:name="android.permission.MANAGE_WIFI_INTERFACES" />
     <uses-permission android:name="android.permission.OVERRIDE_WIFI_CONFIG" />
     <!-- Permission needed for CTS test - ConcurrencyTest#testP2pExternalApprover
-         P2P external approver API sets require MANAGE_WIFI_AUTO_JOIN permission. -->
-    <uses-permission android:name="android.permission.MANAGE_WIFI_AUTO_JOIN" />
+         P2P external approver API sets require MANAGE_WIFI_NETWORK_SELECTION permission. -->
+    <uses-permission android:name="android.permission.MANAGE_WIFI_NETWORK_SELECTION" />
 
     <!-- Permission required for CTS tests to enable/disable rate limiting toasts. -->
     <uses-permission android:name="android.permission.MANAGE_TOAST_RATE_LIMITING" />
@@ -595,6 +601,7 @@
 
     <!-- Permission required to run the `vm` tool which manages on-device virtual machines -->
     <uses-permission android:name="android.permission.MANAGE_VIRTUAL_MACHINE" />
+    <uses-permission android:name="android.permission.USE_CUSTOM_VIRTUAL_MACHINE" />
     <uses-permission android:name="android.permission.DEBUG_VIRTUAL_MACHINE" />
 
     <!-- Permission required for CTS test - SettingsMultiPaneDeepLinkTest -->
@@ -602,6 +609,9 @@
 
     <!-- Permission required for ATS test - CarDevicePolicyManagerTest -->
     <uses-permission android:name="android.permission.LOCK_DEVICE" />
+
+    <!-- Permission required for CTS test - CtsKeystoreTestCases -->
+    <uses-permission android:name="android.permission.REQUEST_UNIQUE_ID_ATTESTATION" />
 
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"

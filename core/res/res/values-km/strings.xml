@@ -620,6 +620,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"ចុចដើម្បីលុប​គំរូមុខ​របស់អ្នក រួចបញ្ចូល​មុខរបស់អ្នក​ម្ដងទៀត"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"រៀបចំ​ការដោះសោ​តាមទម្រង់មុខ"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"ដោះសោទូរសព្ទ​របស់អ្នកដោយសម្លឹងមើលវា"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"ដើម្បីប្រើមុខងារដោះសោតាមទម្រង់មុខ សូមបើក"<b>"ការចូលប្រើកាមេរ៉ា"</b>"នៅក្នុងការកំណត់ &gt; ឯកជនភាព"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"រៀបចំ​វិធីច្រើនទៀត​ដើម្បី​ដោះសោ"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"ចុច​ដើម្បីបញ្ចូល​ស្នាមម្រាមដៃ"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ការដោះសោ​ដោយប្រើ​ស្នាមម្រាមដៃ"</string>
@@ -733,9 +734,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"តាមដាន​ការ​ព្យាយាម​ដោះ​សោ​អេក្រង់"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"ពិនិត្យ​ចំនួន​​បញ្ចូល​ពាក្យ​សម្ងាត់​មិន​ត្រឹមត្រូវ។ ពេល​ដោះ​សោ​អេក្រង់ និង​ចាក់​សោ​ទូរស័ព្ទ ឬ​លុប​ទិន្នន័យ​ទូរស័ព្ទ​ទាំងអស់​ ប្រសិន​បើ​មាន​ពាក្យ​សម្ងាត់​បញ្ចូល​មិន​ត្រឹមត្រូវ​ច្រើន​ដង​ពេក។"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"ពិនិត្យ​ចំនួននៃការវាយបញ្ចូលពាក្យសម្ងាត់ដែលមិនត្រឹមត្រូវ នៅពេលដោះ​សោអេក្រង់ និងចាក់​សោឧបករណ៍ Android TV របស់អ្នក ឬ​លុបទិន្នន័យ​ឧបករណ៍ Android TV របស់អ្នកទាំងអស់ ប្រសិនបើ​វាយបញ្ចូល​ពាក្យសម្ងាត់​ខុសច្រើនដងពេក។"</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"ពិនិត្យមើល​ចំនួនដងនៃការវាយបញ្ចូល​ពាក្យសម្ងាត់​មិនត្រឹមត្រូវ នៅពេល​ដោះសោ​អេក្រង់ និងចាក់សោ​ប្រព័ន្ធ​ព័ត៌មាន​និងកម្សាន្ត ឬ​លុបទិន្នន័យ​ទាំងអស់​របស់ប្រព័ន្ធ​ព័ត៌មាន​និងកម្សាន្ត ប្រសិនបើ​វាយបញ្ចូល​ពាក្យសម្ងាត់​មិនត្រឹមត្រូវ​ច្រើនដងពេក។"</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"ពិនិត្យ​ចំនួន​​បញ្ចូល​ពាក្យ​សម្ងាត់​មិន​ត្រឹមត្រូវ។ ពេល​ដោះ​សោ​អេក្រង់ និង​ចាក់​សោ​ទូរស័ព្ទ ឬ​លុប​ទិន្នន័យ​ទូរស័ព្ទ​ទាំងអស់​ ប្រសិន​បើ​មាន​ពាក្យ​សម្ងាត់​បញ្ចូល​មិន​ត្រឹមត្រូវ​ច្រើន​ដង​ពេក។"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"ត្រួតពិនិត្យចំនួននៃការវាយបញ្ចូលពាក្យសម្ងាត់ដែលមិនត្រឹមត្រូវ នៅពេលដោះសោអេក្រង់ និងចាក់សោថេប្លេត ឬលុបទិន្នន័យអ្នកប្រើនេះទាំងអស់ ប្រសិនបើមានការវាយបញ្ចូលពាក្យសម្ងាត់ខុសច្រើនដងពេក។"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"ពិនិត្យ​ចំនួននៃការវាយបញ្ចូលពាក្យសម្ងាត់ដែលមិនត្រឹមត្រូវ នៅពេលដោះ​សោអេក្រង់ និងចាក់​សោឧបករណ៍ Android TV របស់អ្នក ឬ​លុបទិន្នន័យ​របស់អ្នកប្រើប្រាស់នេះ​ទាំងអស់ ប្រសិនបើ​វាយបញ្ចូល​ពាក្យសម្ងាត់​ខុសច្រើនដងពេក។"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"ពិនិត្យមើល​ចំនួនដងនៃការវាយបញ្ចូល​ពាក្យសម្ងាត់​មិនត្រឹមត្រូវ នៅពេល​ដោះសោ​អេក្រង់ និងចាក់សោ​ប្រព័ន្ធ​ព័ត៌មាន​និងកម្សាន្ត ឬ​លុបទិន្នន័យ​ទាំងអស់​របស់កម្រងព័ត៌មាននេះ ប្រសិនបើ​វាយបញ្ចូល​ពាក្យសម្ងាត់​មិនត្រឹមត្រូវ​ច្រើនដងពេក។"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"ត្រួតពិនិត្យចំនួននៃការវាយបញ្ចូលពាក្យសម្ងាត់ដែលមិនត្រឹមត្រូវ នៅពេលដោះសោអេក្រង់ និងចាក់សោទូរស័ព្ទ ឬលុបទិន្នន័យអ្នកប្រើនេះទាំងអស់ ប្រសិនបើមានការវាយបញ្ចូលពាក្យសម្ងាត់ខុសច្រើនដងពេក។"</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"ប្តូរការចាក់សោអេក្រង់"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"ប្តូរការចាក់សោអេក្រង់។"</string>
@@ -744,10 +747,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"លុប​ទិន្នន័យ​ទាំង​អស់"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"លុប​ទិន្នន័យ​កុំព្យូទ័រ​បន្ទះ​ដោយ​មិន​​ព្រមាន​ដោយ​អនុវត្ត​ការ​កំណត់​ទិន្នន័យ​ដូច​ចេញ​ពី​រោងចក្រ។"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"លុប​ទិន្នន័យឧបករណ៍ Android TV របស់អ្នក​ដោយមិនមានការព្រមាន ដោយ​ធ្វើការកំណត់​ទិន្នន័យ​ដូច​ចេញ​ពី​រោងចក្រ។"</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"លុប​ទិន្នន័យ​របស់​ប្រព័ន្ធ​ព័ត៌មាន និងកម្សាន្ត​ដោយមិនមានការព្រមាន ដោយ​ធ្វើការកំណត់​ទិន្នន័យដូច​ចេញពី​រោងចក្រ។"</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"លុប​ទិន្នន័យ​ទូរសព្ទ​ដោយ​មិន​មានការព្រមានជាមុន ដោយ​អនុវត្ត​ការ​កំណត់​ទិន្នន័យ​ដូច​ចេញ​ពី​រោងចក្រ ។"</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"លុបទិន្នន័យរបស់អ្នកប្រើ"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"លុប​ទិន្នន័យ​កម្រង​ព័ត៌មាន"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"លុបទិន្នន័យរបស់អ្នកប្រើ"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"លុបទិន្នន័យរបស់អ្នកប្រើនេះនៅលើថេប្លេតនេះដោយគ្មានការព្រមាន។"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"លុប​ទិន្នន័យ​របស់អ្នកប្រើប្រាស់នេះនៅលើឧបករណ៍ Android TV នេះ​ដោយគ្មាន​ការព្រមាន។"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"លុបទិន្នន័យ​របស់កម្រងព័ត៌មាននេះ​នៅលើ​ប្រព័ន្ធ​ព័ត៌មាន និងកម្សាន្តនេះ​ដោយមិនមានការព្រមាន។"</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"លុបទិន្នន័យរបស់អ្នកប្រើនេះនៅលើទូរស័ព្ទនេះដោយគ្មានការព្រមាន។"</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"កំណត់​ប្រូកស៊ី​សកល​របស់​ឧបករណ៍"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"កំណត់ប្រូកស៊ីសកលឧបករណ៍ដើម្បីប្រើប្រាស់ ខណៈពេលដែលគោលការណ៍បើកដំណើរការ។ មានតែឧបករណ៍ម្ចាស់ប៉ុណ្ណោះអាចកំណត់ប្រូកស៊ីសកលនេះបាន។"</string>
@@ -1697,7 +1703,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"នៅពេលបើក​ផ្លូវកាត់ ការចុច​ប៊ូតុង​កម្រិតសំឡេង​ទាំងពីរ​រយៈពេល 3 វិនាទី​នឹង​ចាប់ផ្តើម​មុខងារ​ភាពងាយប្រើ។"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"បើក​ផ្លូវកាត់​សម្រាប់មុខងារ​ភាពងាយស្រួលឬ?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"ការសង្កត់​គ្រាប់ចុច​កម្រិតសំឡេង​ទាំងពីរ​ឱ្យជាប់​រយៈពេល​ពីរបីវិនាទី​នឹងបើក​មុខងារ​ភាពងាយប្រើ។ ការធ្វើ​បែបនេះ​អាចផ្លាស់ប្ដូរ​របៀបដែល​ឧបករណ៍​របស់អ្នក​ដំណើរការ។\n\nមុខងារ​បច្ចុប្បន្ន៖\n<xliff:g id="SERVICE">%1$s</xliff:g>\nអ្នកអាច​ប្ដូរ​មុខងារ​ដែលបាន​ជ្រើសរើស​នៅក្នុង​ការកំណត់ &gt; ភាពងាយស្រួល។"</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"បើក​ផ្លូវកាត់ <xliff:g id="SERVICE">%1$s</xliff:g> ឬ?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"ការសង្កត់​គ្រាប់ចុច​កម្រិតសំឡេង​ទាំងពីរ​ឱ្យជាប់​រយៈពេល​ពីរបីវិនាទី​នឹងបើក <xliff:g id="SERVICE">%1$s</xliff:g> ដែលជា​មុខងារ​ភាពងាយប្រើ។ ការធ្វើ​បែបនេះ​អាចផ្លាស់ប្ដូរ​របៀបដែល​ឧបករណ៍​របស់អ្នក​ដំណើរការ។\n\nអ្នកអាច​ប្ដូរផ្លូវកាត់​នេះទៅ​មុខងារ​ផ្សេងទៀត​នៅក្នុង​ការកំណត់ &gt; ភាពងាយស្រួល។"</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"បើក"</string>

@@ -17,6 +17,7 @@
 package com.android.systemui.wmshell;
 
 import static android.app.Notification.FLAG_BUBBLE;
+import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_GROUP_SUMMARY_CANCELED;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
@@ -47,6 +48,7 @@ import android.content.pm.LauncherApps;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Handler;
 import android.os.PowerManager;
+import android.os.UserHandle;
 import android.service.dreams.IDreamManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.ZenModeConfig;
@@ -62,10 +64,11 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.FeatureFlags;
+import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -90,6 +93,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
+import com.android.wm.shell.bubbles.Bubble;
 import com.android.wm.shell.bubbles.BubbleData;
 import com.android.wm.shell.bubbles.BubbleDataRepository;
 import com.android.wm.shell.bubbles.BubbleEntry;
@@ -100,6 +104,7 @@ import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 
 import org.junit.Before;
@@ -157,10 +162,15 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
     @Mock
     private AuthController mAuthController;
 
-    private SysUiState mSysUiState = new SysUiState();
+    private SysUiState mSysUiState;
+    private boolean mSysUiStateBubblesExpanded;
+    private boolean mSysUiStateBubblesManageMenuExpanded;
 
     @Captor
     private ArgumentCaptor<NotifCollectionListener> mNotifListenerCaptor;
+    @Captor
+    private ArgumentCaptor<List<Bubble>> mBubbleListCaptor;
+
     private BubblesManager mBubblesManager;
     private TestableBubbleController mBubbleController;
     private NotificationShadeWindowControllerImpl mNotificationShadeWindowController;
@@ -171,6 +181,10 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
     private ExpandableNotificationRow mNonBubbleNotifRow;
     private BubbleEntry mBubbleEntry;
     private BubbleEntry mBubbleEntry2;
+
+    private BubbleEntry mBubbleEntryUser11;
+    private BubbleEntry mBubbleEntry2User11;
+
     @Mock
     private Bubbles.BubbleExpandListener mBubbleExpandListener;
     @Mock
@@ -240,8 +254,24 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         mBubbleEntry = BubblesManager.notifToBubbleEntry(mRow);
         mBubbleEntry2 = BubblesManager.notifToBubbleEntry(mRow2);
 
+        UserHandle handle = mock(UserHandle.class);
+        when(handle.getIdentifier()).thenReturn(11);
+        mBubbleEntryUser11 = BubblesManager.notifToBubbleEntry(
+                mNotificationTestHelper.createBubble(handle));
+        mBubbleEntry2User11 = BubblesManager.notifToBubbleEntry(
+                mNotificationTestHelper.createBubble(handle));
+
         mZenModeConfig.suppressedVisualEffects = 0;
         when(mZenModeController.getConfig()).thenReturn(mZenModeConfig);
+
+        mSysUiState = new SysUiState();
+        mSysUiState.addCallback(sysUiFlags -> {
+            mSysUiStateBubblesManageMenuExpanded =
+                    (sysUiFlags
+                            & QuickStepContract.SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED) != 0;
+            mSysUiStateBubblesExpanded =
+                    (sysUiFlags & QuickStepContract.SYSUI_STATE_BUBBLES_EXPANDED) != 0;
+        });
 
         mPositioner = new TestableBubblePositioner(mContext, mWindowManager);
         mPositioner.setMaxBubbles(5);
@@ -275,7 +305,8 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
                 mPositioner,
                 mock(DisplayController.class),
                 syncExecutor,
-                mock(Handler.class));
+                mock(Handler.class),
+                mock(SyncTransactionQueue.class));
         mBubbleController.setExpandListener(mBubbleExpandListener);
         spyOn(mBubbleController);
 
@@ -310,6 +341,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
     public void testAddBubble() {
         mBubbleController.updateBubble(mBubbleEntry);
         assertTrue(mBubbleController.hasBubbles());
+        assertSysuiStates(false /* stackExpanded */, false /* mangeMenuExpanded */);
     }
 
     @Test
@@ -317,6 +349,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         assertFalse(mBubbleController.hasBubbles());
         mBubbleController.updateBubble(mBubbleEntry);
         assertTrue(mBubbleController.hasBubbles());
+        assertSysuiStates(false /* stackExpanded */, false /* mangeMenuExpanded */);
     }
 
     @Test
@@ -330,6 +363,8 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
                 mRow.getKey(), Bubbles.DISMISS_USER_GESTURE);
         assertNull(mBubbleData.getBubbleInStackWithKey(mRow.getKey()));
         verify(mNotifCallback, times(2)).invalidateNotifications(anyString());
+
+        assertSysuiStates(false /* stackExpanded */, false /* mangeMenuExpanded */);
     }
 
     @Test
@@ -392,6 +427,8 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         verify(mNotifCallback, times(3)).invalidateNotifications(anyString());
         assertNull(mBubbleData.getBubbleInStackWithKey(mRow.getKey()));
         assertNull(mBubbleData.getBubbleInStackWithKey(mRow2.getKey()));
+
+        assertSysuiStates(false /* stackExpanded */, false /* mangeMenuExpanded */);
     }
 
     @Test
@@ -410,6 +447,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         mBubbleData.setExpanded(true);
         assertStackExpanded();
         verify(mBubbleExpandListener).onBubbleExpandChanged(true, mRow.getKey());
+        assertSysuiStates(true /* stackExpanded */, false /* mangeMenuExpanded */);
 
         // Make sure the notif is suppressed
         assertBubbleNotificationSuppressedFromShade(mBubbleEntry);
@@ -418,6 +456,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         mBubbleController.collapseStack();
         verify(mBubbleExpandListener).onBubbleExpandChanged(false, mRow.getKey());
         assertStackCollapsed();
+        assertSysuiStates(false /* stackExpanded */, false /* mangeMenuExpanded */);
     }
 
     @Test
@@ -440,6 +479,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         assertStackExpanded();
         verify(mBubbleExpandListener, atLeastOnce()).onBubbleExpandChanged(
                 true, mRow2.getKey());
+        assertSysuiStates(true /* stackExpanded */, false /* mangeMenuExpanded */);
 
         // Last added is the one that is expanded
         assertEquals(mRow2.getKey(), mBubbleData.getSelectedBubble().getKey());
@@ -464,6 +504,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         // Collapse
         mBubbleController.collapseStack();
         assertStackCollapsed();
+        assertSysuiStates(false /* stackExpanded */, false /* mangeMenuExpanded */);
     }
 
     @Test
@@ -483,6 +524,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         mBubbleData.setExpanded(true);
         assertStackExpanded();
         verify(mBubbleExpandListener).onBubbleExpandChanged(true, mRow.getKey());
+        assertSysuiStates(true /* stackExpanded */, false /* mangeMenuExpanded */);
 
         // Notif is suppressed after expansion
         assertBubbleNotificationSuppressedFromShade(mBubbleEntry);
@@ -507,6 +549,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         mBubbleData.setExpanded(true);
         assertStackExpanded();
         verify(mBubbleExpandListener).onBubbleExpandChanged(true, mRow.getKey());
+        assertSysuiStates(true /* stackExpanded */, false /* mangeMenuExpanded */);
 
         // Notif is suppressed after expansion
         assertBubbleNotificationSuppressedFromShade(mBubbleEntry);
@@ -534,6 +577,8 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         // Expand
         BubbleStackView stackView = mBubbleController.getStackView();
         mBubbleData.setExpanded(true);
+
+        assertSysuiStates(true /* stackExpanded */, false /* mangeMenuExpanded */);
 
         assertStackExpanded();
         verify(mBubbleExpandListener).onBubbleExpandChanged(true, mRow2.getKey());
@@ -565,6 +610,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         assertEquals(mBubbleData.getSelectedBubble().getKey(), BubbleOverflow.KEY);
         verify(mBubbleExpandListener).onBubbleExpandChanged(true, BubbleOverflow.KEY);
         assertTrue(mBubbleController.hasBubbles());
+        assertSysuiStates(true /* stackExpanded */, false /* mangeMenuExpanded */);
     }
 
     @Test
@@ -577,6 +623,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         BubbleStackView stackView = mBubbleController.getStackView();
         mBubbleData.setExpanded(true);
 
+        assertSysuiStates(true /* stackExpanded */, false /* mangeMenuExpanded */);
         assertStackExpanded();
         verify(mBubbleExpandListener).onBubbleExpandChanged(true, mRow.getKey());
 
@@ -591,6 +638,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         // We should be collapsed
         verify(mBubbleExpandListener).onBubbleExpandChanged(false, mRow.getKey());
         assertFalse(mBubbleController.hasBubbles());
+        assertSysuiStates(false /* stackExpanded */, false /* mangeMenuExpanded */);
     }
 
 
@@ -608,6 +656,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         verify(mBubbleExpandListener, never()).onBubbleExpandChanged(false /* expanded */,
                 mRow.getKey());
         assertStackCollapsed();
+        assertSysuiStates(false /* stackExpanded */, false /* mangeMenuExpanded */);
     }
 
     @Test
@@ -623,6 +672,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         verify(mBubbleExpandListener).onBubbleExpandChanged(true /* expanded */,
                 mRow.getKey());
         assertStackExpanded();
+        assertSysuiStates(true /* stackExpanded */, false /* mangeMenuExpanded */);
     }
 
     @Test
@@ -639,6 +689,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         // Dot + flyout is hidden because notif is suppressed
         assertFalse(mBubbleData.getBubbleInStackWithKey(mRow.getKey()).showDot());
         assertFalse(mBubbleData.getBubbleInStackWithKey(mRow.getKey()).showFlyout());
+        assertSysuiStates(false /* stackExpanded */, false /* mangeMenuExpanded */);
     }
 
     @Test
@@ -660,6 +711,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         // Dot + flyout is hidden because notif is suppressed
         assertFalse(mBubbleData.getBubbleInStackWithKey(mRow.getKey()).showDot());
         assertFalse(mBubbleData.getBubbleInStackWithKey(mRow.getKey()).showFlyout());
+        assertSysuiStates(false /* stackExpanded */, false /* mangeMenuExpanded */);
     }
 
     @Test
@@ -906,6 +958,155 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
                 groupSummary.getEntry().getSbn().getGroupKey()));
     }
 
+
+    /**
+     * Verifies that when the user changes, the bubbles in the overflow list is cleared. Doesn't
+     * test the loading from the repository which would be a nice thing to add.
+     */
+    @Test
+    public void testOnUserChanged_overflowState() {
+        int firstUserId = mBubbleEntry.getStatusBarNotification().getUser().getIdentifier();
+        int secondUserId = mBubbleEntryUser11.getStatusBarNotification().getUser().getIdentifier();
+
+        mBubbleController.updateBubble(mBubbleEntry);
+        mBubbleController.updateBubble(mBubbleEntry2);
+        assertTrue(mBubbleController.hasBubbles());
+        mBubbleData.dismissAll(Bubbles.DISMISS_USER_GESTURE);
+
+        // Verify these are in the overflow
+        assertThat(mBubbleData.getOverflowBubbleWithKey(mBubbleEntry.getKey())).isNotNull();
+        assertThat(mBubbleData.getOverflowBubbleWithKey(mBubbleEntry2.getKey())).isNotNull();
+
+        // Switch users
+        mBubbleController.onUserChanged(secondUserId);
+        assertThat(mBubbleData.getOverflowBubbles()).isEmpty();
+
+        // Give this user some bubbles
+        mBubbleController.updateBubble(mBubbleEntryUser11);
+        mBubbleController.updateBubble(mBubbleEntry2User11);
+        assertTrue(mBubbleController.hasBubbles());
+        mBubbleData.dismissAll(Bubbles.DISMISS_USER_GESTURE);
+
+        // Verify these are in the overflow
+        assertThat(mBubbleData.getOverflowBubbleWithKey(mBubbleEntryUser11.getKey())).isNotNull();
+        assertThat(mBubbleData.getOverflowBubbleWithKey(mBubbleEntry2User11.getKey())).isNotNull();
+
+        // Would have loaded bubbles twice because of user switch
+        verify(mDataRepository, times(2)).loadBubbles(anyInt(), any());
+    }
+
+    /**
+     * Verifies we only load the overflow data once.
+     */
+    @Test
+    public void testOverflowLoadedOnce() {
+        when(mNotificationEntryManager.getPendingOrActiveNotif(mRow.getKey()))
+                .thenReturn(mRow);
+        when(mNotificationEntryManager.getPendingOrActiveNotif(mRow2.getKey()))
+                .thenReturn(mRow2);
+
+        mEntryListener.onEntryAdded(mRow);
+        mEntryListener.onEntryAdded(mRow2);
+        mBubbleData.dismissAll(Bubbles.DISMISS_USER_GESTURE);
+        assertThat(mBubbleData.getOverflowBubbles()).isNotEmpty();
+
+        mEntryListener.onEntryRemoved(mRow, REASON_APP_CANCEL);
+        mEntryListener.onEntryRemoved(mRow2, REASON_APP_CANCEL);
+        assertThat(mBubbleData.getOverflowBubbles()).isEmpty();
+
+        verify(mDataRepository, times(1)).loadBubbles(anyInt(), any());
+    }
+
+    /**
+     * Verifies that shortcut deletions triggers that bubble being removed from XML.
+     */
+    @Test
+    public void testDeleteShortcutsDeletesXml() throws Exception {
+        ExpandableNotificationRow row = mNotificationTestHelper.createShortcutBubble("shortcutId");
+        BubbleEntry shortcutBubbleEntry = BubblesManager.notifToBubbleEntry(row.getEntry());
+        mBubbleController.updateBubble(shortcutBubbleEntry);
+
+        mBubbleData.dismissBubbleWithKey(shortcutBubbleEntry.getKey(),
+                Bubbles.DISMISS_SHORTCUT_REMOVED);
+
+        verify(mDataRepository, atLeastOnce()).removeBubbles(anyInt(), mBubbleListCaptor.capture());
+        assertThat(mBubbleListCaptor.getValue().get(0).getKey()).isEqualTo(
+                shortcutBubbleEntry.getKey());
+    }
+
+    @Test
+    public void testShowManageMenuChangesSysuiState() {
+        mBubbleController.updateBubble(mBubbleEntry);
+        assertTrue(mBubbleController.hasBubbles());
+
+        // Expand the stack
+        BubbleStackView stackView = mBubbleController.getStackView();
+        mBubbleData.setExpanded(true);
+        assertStackExpanded();
+        assertSysuiStates(true /* stackExpanded */, false /* mangeMenuExpanded */);
+
+        // Show the menu
+        stackView.showManageMenu(true);
+        assertSysuiStates(true /* stackExpanded */, true /* mangeMenuExpanded */);
+    }
+
+    @Test
+    public void testHideManageMenuChangesSysuiState() {
+        mBubbleController.updateBubble(mBubbleEntry);
+        assertTrue(mBubbleController.hasBubbles());
+
+        // Expand the stack
+        BubbleStackView stackView = mBubbleController.getStackView();
+        mBubbleData.setExpanded(true);
+        assertStackExpanded();
+        assertSysuiStates(true /* stackExpanded */, false /* mangeMenuExpanded */);
+
+        // Show the menu
+        stackView.showManageMenu(true);
+        assertSysuiStates(true /* stackExpanded */, true /* mangeMenuExpanded */);
+
+        // Hide the menu
+        stackView.showManageMenu(false);
+        assertSysuiStates(true /* stackExpanded */, false /* mangeMenuExpanded */);
+    }
+
+    @Test
+    public void testCollapseBubbleManageMenuChangesSysuiState() {
+        mBubbleController.updateBubble(mBubbleEntry);
+        assertTrue(mBubbleController.hasBubbles());
+
+        // Expand the stack
+        BubbleStackView stackView = mBubbleController.getStackView();
+        mBubbleData.setExpanded(true);
+        assertStackExpanded();
+        assertSysuiStates(true /* stackExpanded */, false /* mangeMenuExpanded */);
+
+        // Show the menu
+        stackView.showManageMenu(true);
+        assertSysuiStates(true /* stackExpanded */, true /* mangeMenuExpanded */);
+
+        // Collapse the stack
+        mBubbleData.setExpanded(false);
+
+        assertSysuiStates(false /* stackExpanded */, false /* mangeMenuExpanded */);
+    }
+
+    @Test
+    public void testStackViewOnBackPressed_updatesBubbleDataExpandState() {
+        mBubbleController.updateBubble(mBubbleEntry);
+
+        // Expand the stack
+        mBubbleData.setExpanded(true);
+        assertStackExpanded();
+
+        // Hit back
+        BubbleStackView stackView = mBubbleController.getStackView();
+        stackView.onBackPressed();
+
+        // Make sure we're collapsed
+        assertStackCollapsed();
+    }
+
     /**
      * Sets the bubble metadata flags for this entry. These flags are normally set by
      * NotificationManagerService when the notification is sent, however, these tests do not
@@ -959,5 +1160,13 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
                 entry.getKey(), entry.getGroupKey()));
         assertFalse(mBubbleController.getImplCachedState().isBubbleNotificationSuppressedFromShade(
                 entry.getKey(), entry.getGroupKey()));
+    }
+
+    /**
+     * Asserts that the system ui states associated to bubbles are in the correct state.
+     */
+    private void assertSysuiStates(boolean stackExpanded, boolean manageMenuExpanded) {
+        assertThat(mSysUiStateBubblesExpanded).isEqualTo(stackExpanded);
+        assertThat(mSysUiStateBubblesManageMenuExpanded).isEqualTo(manageMenuExpanded);
     }
 }

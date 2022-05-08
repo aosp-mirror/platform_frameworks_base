@@ -790,7 +790,8 @@ final class DefaultPermissionGrantPolicy {
                     Intent.CATEGORY_HOME_MAIN, userId);
             grantPermissionsToSystemPackage(pm, wearPackage, userId,
                     CONTACTS_PERMISSIONS, MICROPHONE_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS);
-            grantSystemFixedPermissionsToSystemPackage(pm, wearPackage, userId, PHONE_PERMISSIONS);
+            grantSystemFixedPermissionsToSystemPackage(pm, wearPackage, userId, PHONE_PERMISSIONS,
+                                                       ACTIVITY_RECOGNITION_PERMISSIONS);
 
             // Fitness tracking on watches
             if (mContext.getResources().getBoolean(R.bool.config_trackerAppNeedsPermissions)) {
@@ -915,6 +916,11 @@ final class DefaultPermissionGrantPolicy {
         }
         grantPermissionsToSystemPackage(pm, dialerPackage, userId,
                 CONTACTS_PERMISSIONS, SMS_PERMISSIONS, MICROPHONE_PERMISSIONS, CAMERA_PERMISSIONS);
+        boolean isAndroidAutomotive =
+                mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE, 0);
+        if (isAndroidAutomotive) {
+            grantPermissionsToSystemPackage(pm, dialerPackage, userId, NEARBY_DEVICES_PERMISSIONS);
+        }
     }
 
     private void grantDefaultPermissionsToDefaultSystemSmsApp(PackageManagerWrapper pm,

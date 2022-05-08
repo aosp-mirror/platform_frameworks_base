@@ -36,4 +36,12 @@ public interface StartingSurface {
     default int getBackgroundColor(TaskInfo taskInfo) {
         return Color.BLACK;
     }
+
+    /** Set the proxy to communicate with SysUi side components. */
+    void setSysuiProxy(SysuiProxy proxy);
+
+    /** Callback to tell SysUi components execute some methods. */
+    interface SysuiProxy {
+        void requestTopUi(boolean requestTopUi, String componentTag);
+    }
 }

@@ -415,12 +415,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"वेबदृश्य अंमलबजावणी"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"वेबदृश्य अंमलबजावणी सेट करा"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"ही निवड यापुढे वैध असणार नाही. पुन्हा प्रयत्न करा."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"फाइल कूटबद्धीकरणावर रूपांतरित करा"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"रूपांतरित करा..."</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"फाइल आधीपासून एंक्रिप्ट होती"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"फाइल आधारित कूटबद्धीकरणावर रूपांतरित करणे"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"फाइल आधारित कूटबद्धीकरणावर डेटा विभाजक रूपांतरित करा.\n !!चेतावणी!! हे आपल्‍या सर्व डेटास मिटवेल.\n हे वैशिष्ट्य अल्‍फा आहे आणि कदाचित योग्यरित्या कार्य करू शकत नाही.\n सुरू ठेवण्‍यासाठी \'पुसा आणि रूपांतरित करा...\' दाबा."</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"पुसा आणि रुपांतरित करा..."</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"चित्र रंग मोड"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"sRGB वापरा"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"अक्षम केले"</string>

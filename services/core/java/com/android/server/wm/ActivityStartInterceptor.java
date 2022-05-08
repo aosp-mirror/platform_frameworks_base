@@ -51,6 +51,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.BlockedAppActivity;
@@ -178,7 +179,33 @@ class ActivityStartInterceptor {
             // before issuing the work challenge.
             return true;
         }
-        return interceptLockedManagedProfileIfNeeded();
+        if (interceptLockedManagedProfileIfNeeded()) {
+            return true;
+        }
+
+        final SparseArray<ActivityInterceptorCallback> callbacks =
+                mService.getActivityInterceptorCallbacks();
+        final ActivityInterceptorCallback.ActivityInterceptorInfo interceptorInfo =
+                new ActivityInterceptorCallback.ActivityInterceptorInfo(mRealCallingUid,
+                        mRealCallingPid, mUserId, mCallingPackage, mCallingFeatureId, mIntent,
+                        mRInfo, mAInfo, mResolvedType, mCallingPid, mCallingUid,
+                        mActivityOptions);
+
+        for (int i = 0; i < callbacks.size(); i++) {
+            final ActivityInterceptorCallback callback = callbacks.valueAt(i);
+            final Intent newIntent = callback.intercept(interceptorInfo);
+            if (newIntent == null) {
+                continue;
+            }
+            mIntent = newIntent;
+            mCallingPid = mRealCallingPid;
+            mCallingUid = mRealCallingUid;
+            mRInfo = mSupervisor.resolveIntent(mIntent, null, mUserId, 0, mRealCallingUid);
+            mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags,
+                    null /*profilerInfo*/);
+            return true;
+        }
+        return false;
     }
 
     private boolean hasCrossProfileAnimation() {

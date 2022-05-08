@@ -50,6 +50,7 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
 import com.android.wm.shell.pip.phone.PhonePipMenuController;
+import com.android.wm.shell.splitscreen.SplitScreenController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -75,10 +76,12 @@ public class PipTaskOrganizerTest extends ShellTestCase {
     @Mock private PipTransitionController mMockPipTransitionController;
     @Mock private PipSurfaceTransactionHelper mMockPipSurfaceTransactionHelper;
     @Mock private PipUiEventLogger mMockPipUiEventLogger;
-    @Mock private Optional<LegacySplitScreenController> mMockOptionalSplitScreen;
+    @Mock private Optional<LegacySplitScreenController> mMockOptionalLegacySplitScreen;
+    @Mock private Optional<SplitScreenController> mMockOptionalSplitScreen;
     @Mock private ShellTaskOrganizer mMockShellTaskOrganizer;
     private TestShellExecutor mMainExecutor;
     private PipBoundsState mPipBoundsState;
+    private PipTransitionState mPipTransitionState;
     private PipBoundsAlgorithm mPipBoundsAlgorithm;
 
     private ComponentName mComponent1;
@@ -90,15 +93,17 @@ public class PipTaskOrganizerTest extends ShellTestCase {
         mComponent1 = new ComponentName(mContext, "component1");
         mComponent2 = new ComponentName(mContext, "component2");
         mPipBoundsState = new PipBoundsState(mContext);
+        mPipTransitionState = new PipTransitionState();
         mPipBoundsAlgorithm = new PipBoundsAlgorithm(mContext, mPipBoundsState,
                 new PipSnapAlgorithm());
         mMainExecutor = new TestShellExecutor();
         mSpiedPipTaskOrganizer = spy(new PipTaskOrganizer(mContext,
-                mMockSyncTransactionQueue, mPipBoundsState,
+                mMockSyncTransactionQueue, mPipTransitionState, mPipBoundsState,
                 mPipBoundsAlgorithm, mMockPhonePipMenuController,
                 mMockPipAnimationController, mMockPipSurfaceTransactionHelper,
-                mMockPipTransitionController, mMockOptionalSplitScreen, mMockDisplayController,
-                mMockPipUiEventLogger, mMockShellTaskOrganizer, mMainExecutor));
+                mMockPipTransitionController, mMockOptionalLegacySplitScreen,
+                mMockOptionalSplitScreen, mMockDisplayController, mMockPipUiEventLogger,
+                mMockShellTaskOrganizer, mMainExecutor));
         mMainExecutor.flushAll();
         preparePipTaskOrg();
     }

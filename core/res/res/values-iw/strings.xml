@@ -626,6 +626,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"יש להקיש כדי למחוק את התבנית לזיהוי הפנים, ואז להוסיף תבנית חדשה לזיהוי הפנים"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"הגדרת התכונה \'פתיחה ע\"י זיהוי הפנים\'"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"יש להביט בטלפון כדי לבטל את נעילתו"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"‏כדי להשתמש בתכונה \'פתיחה ע\"י זיהוי הפנים\', יש להפעיל את ה"<b>"גישה למצלמה"</b>" בהגדרות &gt; פרטיות"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"אפשר להגדיר דרכים נוספות לביטול נעילה"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"יש להקיש כדי להוסיף טביעת אצבע"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ביטול הנעילה בטביעת אצבע"</string>
@@ -739,9 +740,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"מעקב אחר ניסיונות לביטול של נעילת המסך"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"ניהול מעקב אחר מספר הסיסמאות השגויות שמוקלדות במהלך ביטול נעילת המסך, וביצוע נעילה של הטאבלט, או מחיקה של כל נתוני הטאבלט, אם מוקלדות יותר מדי סיסמאות שגויות."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"‏מעקב אחר מספר הסיסמאות השגויות שהוזנו בעת ביטול נעילת המסך, כמו גם נעילה של מכשיר ה-Android TV או מחיקה של כל נתוני מכשיר ה-Android TV אם הוזנו יותר מדי סיסמאות שגויות."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"מעקב אחר מספר הסיסמאות השגויות שהוזנו במהלך ביטול נעילת המסך, נעילת מערכת המידע והבידור או מחיקה של כל נתוני מערכת המידע והבידור, אם הוזנו יותר מדי סיסמאות שגויות."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"מעקב אחר מספר הסיסמאות השגויות שהוקלדו במהלך ביטול נעילת המסך, וביצוע נעילה של הטלפון או מחיקה של כל נתוני הטלפון אם הוקלדו יותר מדי סיסמאות שגויות."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"מעקב אחר מספר הסיסמאות השגויות שהוזנו בעת ביטול נעילת המסך, כמו גם נעילת הטאבלט או מחיקה של כל נתוני המשתמש הזה אם הוזנו יותר מדי סיסמאות שגויות."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"‏מעקב אחר מספר הסיסמאות השגויות שהוזנו במהלך ביטול נעילת המסך, כמו גם נעילה של מכשיר ה-Android TV או מחיקה של כל נתוני המשתמש הזה אם הוזנו יותר מדי סיסמאות שגויות."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"מעקב אחר מספר הסיסמאות השגויות שהוזנו במהלך ביטול נעילת המסך, נעילת מערכת המידע והבידור או מחיקה של כל נתוני הפרופיל הזה, אם הוזנו יותר מדי סיסמאות שגויות."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"מעקב אחר מספר הסיסמאות השגויות שהוזנו בעת ביטול נעילת המסך, כמו גם נעילת הטלפון או מחיקה של כל נתוני המשתמש הזה אם הוזנו יותר מדי סיסמאות שגויות."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"שינוי נעילת המסך"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"שינוי של נעילת המסך."</string>
@@ -750,10 +753,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"מחיקת כל הנתונים"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"מחיקה של נתוני הטאבלט ללא אזהרה, באמצעות איפוס לנתוני היצרן."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"‏מחיקה ללא אזהרה של נתוני מכשיר ה-Android TV באמצעות איפוס לנתוני היצרן."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"מחיקה של נתוני מערכת המידע והבידור, ללא אזהרה, על ידי ביצוע איפוס לנתוני היצרן."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"מחיקה של נתוני הטלפון, ללא אזהרה, על ידי ביצוע איפוס לנתוני היצרן."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"מחיקת נתוני משתמש"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"מחיקת נתוני הפרופיל"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"מחיקת נתוני משתמש"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"מחיקה של נתוני המשתמש הזה בטאבלט, ללא אזהרה."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"‏מחיקה של נתוני המשתמש הזה במכשיר ה-Android TV, ללא אזהרה."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"מחיקה של נתוני הפרופיל במערכת המידע והבידור הזו, ללא אזהרה."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"מחיקה של נתוני המשתמש הזה בטלפון, ללא אזהרה."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"‏הגדרה של שרת ה-Proxy הכללי של המכשיר"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"‏הגדרה של שרת ה-proxy הגלובלי שבו ייעשה שימוש כשהמדיניות פועלת. רק לבעלים של המכשיר יש אפשרות להגדיר את שרת ה-proxy הגלובלי."</string>
@@ -1741,7 +1747,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"כשקיצור הדרך מופעל, לחיצה על שני לחצני עוצמת הקול למשך שלוש שניות מפעילה את תכונת הנגישות."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"האם להפעיל את מקש הקיצור לתכונות הנגישות?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"לחיצה ארוכה על שני לחצני עוצמת הקול למשך מספר שניות מפעילה את תכונות הנגישות. בעקבות זאת, ייתכן שאופן הפעולה של המכשיר ישתנה.\n\nהתכונות הנוכחיות:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nניתן לשנות את התכונות שנבחרו ב\'הגדרות\' &gt; \'נגישות\'."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"האם להפעיל את מקש הקיצור של <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"לחיצה על שני מקשי עוצמת הקול למשך מספר שניות מפעילה את תכונת הנגישות <xliff:g id="SERVICE">%1$s</xliff:g>. ייתכן שאופן הפעולה של המכשיר ישתנה בעקבות זאת.\n\nאפשר לשנות את מקשי הקיצור האלה לתכונה אחרת ב\'הגדרות\' &gt; \'נגישות\'."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"אני רוצה להפעיל"</string>

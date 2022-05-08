@@ -236,6 +236,8 @@ public final class InputMethodDebug {
                 return "HIDE_TOGGLE_SOFT_INPUT";
             case SoftInputShowHideReason.SHOW_SOFT_INPUT_BY_INSETS_API:
                 return "SHOW_SOFT_INPUT_BY_INSETS_API";
+            case SoftInputShowHideReason.HIDE_DISPLAY_IME_POLICY_HIDE:
+                return "HIDE_DISPLAY_IME_POLICY_HIDE";
             default:
                 return "Unknown=" + reason;
         }

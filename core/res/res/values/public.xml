@@ -1235,7 +1235,6 @@
   <public type="attr" name="author" id="0x010102b4" />
   <public type="attr" name="autoStart" id="0x010102b5" />
 
-
 <!-- ===============================================================
      Resources added in version 8 of the platform (Eclair MR2).
      =============================================================== -->
@@ -3200,6 +3199,27 @@
     <!-- @hide For use by platform and tools only. Developers should not specify this value. -->
     <public type="string" name="config_defaultRingtoneVibrationSound" id="0x0104003b" />
 
+  <!-- ===============================================================
+    Resources added in version S-V2 of the platform
+    =============================================================== -->
+  <eat-comment />
+
+  <staging-public-group-final type="attr" first-id="0x01ff0000">
+    <public name="shouldUseDefaultUnfoldTransition" />
+  </staging-public-group-final>
+
+  <public type="attr" name="shouldUseDefaultUnfoldTransition" id="0x0101064c" />
+
+  <staging-public-group-final type="id" first-id="0x01fe0000">
+    <public name="accessibilityActionDragStart" />
+    <public name="accessibilityActionDragDrop" />
+    <public name="accessibilityActionDragCancel" />
+  </staging-public-group-final>
+
+  <public type="id" name="accessibilityActionDragStart" id="0x01020055" />
+  <public type="id" name="accessibilityActionDragDrop" id="0x01020056" />
+  <public type="id" name="accessibilityActionDragCancel" id="0x01020057" />
+
     <!-- ===============================================================
          Resources added in version T of the platform
 
@@ -3284,5 +3304,4 @@
        Items added outside of a group may have their value recalculated
        every time something new is added to this file.
        =============================================================== -->
-
 </resources>

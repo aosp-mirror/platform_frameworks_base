@@ -544,7 +544,7 @@
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"menentukan posisi relatif antar-perangkat Ultra-Wideband di sekitar"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Mengizinkan aplikasi menentukan posisi relatif antar-perangkat Ultra-Wideband di sekitar"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"berinteraksi dengan perangkat Wi-Fi di sekitar"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Mengizinkan aplikasi menampilkan informasi, menghubungkan, dan menentukan posisi relatif perangkat Wi-Fi di sekitar"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Mengizinkan aplikasi menampilkan, menghubungkan, dan menentukan posisi relatif perangkat Wi-Fi di sekitar"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informasi Layanan Pembayaran NFC Pilihan"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Mengizinkan aplikasi untuk mendapatkan informasi layanan pembayaran NFC pilihan seperti bantuan terdaftar dan tujuan rute."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrol NFC"</string>
@@ -620,6 +620,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Ketuk untuk menghapus model wajah, lalu tambahkan wajah Anda lagi"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Siapkan Face Unlock"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Buka kunci ponsel dengan melihat ke ponsel"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Untuk menggunakan Face Unlock, aktifkan "<b>"Akses kamera"</b>" di Setelan &gt; Privasi"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Siapkan lebih banyak cara untuk membuka kunci"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Ketuk untuk menambahkan sidik jari"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Fingerprint Unlock"</string>
@@ -733,9 +734,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Pantau upaya pembukaan kunci layar"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Memantau berapa kali sandi yang dimasukkan salah saat ingin membuka kunci layar, dan mengunci tablet atau menghapus semua data tablet jika terjadi terlalu banyak kesalahan memasukkan sandi."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Memantau banyaknya sandi salah yang diketikkan saat membuka kunci layar, dan mengunci perangkat Android TV atau menghapus semua data perangkat Android TV jika terlalu banyak sandi salah diketikkan."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Memantau berapa kali sandi yang dimasukkan salah saat ingin membuka kunci layar, dan mengunci sistem infotainmen atau menghapus semua data sistem infotainmen jika terlalu banyak kesalahan memasukkan sandi."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Memantau berapa kali sandi yang dimasukkan salah saat ingin membuka kunci layar, dan mengunci ponsel atau menghapus semua data ponsel jika terjadi terlalu banyak kesalahan memasukkan sandi."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Memantau berapa kali sandi yang dimasukkan salah saat ingin membuka kunci layar, dan mengunci tablet atau menghapus semua data pengguna ini jika terjadi terlalu banyak kesalahan memasukkan sandi."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Memantau banyaknya sandi salah yang diketikkan saat membuka kunci layar, dan mengunci perangkat Android TV atau menghapus semua data pengguna ini jika terlalu banyak sandi salah diketikkan."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Memantau berapa kali sandi yang dimasukkan salah saat ingin membuka kunci layar, dan mengunci sistem infotainmen atau menghapus semua data profil ini jika terlalu banyak kesalahan memasukkan sandi."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Memantau berapa kali sandi yang dimasukkan salah saat ingin membuka kunci layar, dan mengunci ponsel atau menghapus semua data pengguna ini jika terjadi terlalu banyak kesalahan memasukkan sandi."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Mengubah kunci layar"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Mengubah kunci layar."</string>
@@ -744,10 +747,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Menghapus semua data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Menghapus data tablet tanpa peringatan dengan mereset ke setelan pabrik."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Menghapus data perangkat Android TV tanpa peringatan dengan melakukan reset ke setelan pabrik."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Menghapus data sistem infotainmen tanpa peringatan dengan melakukan reset ke setelan pabrik."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Menghapus data ponsel tanpa peringatan dengan melakukan reset ke setelan pabrik."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Menghapus data pengguna"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Hapus data profil"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Menghapus data pengguna"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Menghapus data pengguna ini di tablet ini tanpa peringatan."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Menghapus data pengguna ini di perangkat Android TV ini tanpa peringatan."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Menghapus data profil ini di sistem infotainmen ini tanpa peringatan."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Menghapus data pengguna ini di ponsel ini tanpa peringatan."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Setel proxy global perangkat"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Menyetel proxy global perangkat yang akan digunakan jika kebijakan diaktifkan. Hanya pemilik perangkat yang dapat menyetel proxy global."</string>
@@ -1697,7 +1703,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Saat pintasan aktif, menekan kedua tombol volume selama 3 detik akan memulai fitur aksesibilitas."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Aktifkan pintasan untuk fitur aksesibilitas?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Menahan kedua tombol volume selama beberapa detik akan mengaktifkan fitur aksesibilitas. Tindakan ini dapat mengubah cara kerja perangkat Anda.\n\nFitur saat ini:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nAnda dapat mengubah fitur yang dipilih di Setelan &gt; Aksesibilitas."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Aktifkan pintasan <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Menahan kedua tombol volume selama beberapa detik akan mengaktifkan <xliff:g id="SERVICE">%1$s</xliff:g>, yang merupakan fitur aksesibilitas. Tindakan ini dapat mengubah cara kerja perangkat Anda.\n\nAnda dapat mengubah pintasan ini ke fitur lain di Setelan &gt; Aksesibilitas."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Aktifkan"</string>
@@ -2007,7 +2013,7 @@
     <string name="demo_restarting_message" msgid="1160053183701746766">"Mereset perangkat..."</string>
     <string name="suspended_widget_accessibility" msgid="6331451091851326101">"<xliff:g id="LABEL">%1$s</xliff:g> dinonaktifkan"</string>
     <string name="conference_call" msgid="5731633152336490471">"Konferensi Telepon"</string>
-    <string name="tooltip_popup_title" msgid="7863719020269945722">"Keterangan alat"</string>
+    <string name="tooltip_popup_title" msgid="7863719020269945722">"Tooltip"</string>
     <string name="app_category_game" msgid="4534216074910244790">"Game"</string>
     <string name="app_category_audio" msgid="8296029904794676222">"Musik &amp; Audio"</string>
     <string name="app_category_video" msgid="2590183854839565814">"Film &amp; Video"</string>

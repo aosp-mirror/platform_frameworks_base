@@ -146,12 +146,15 @@ public final class AppHibernationServiceTest {
     }
 
     @Test
-    public void testSetHibernatingForUser_packageIsHibernating() {
+    public void testSetHibernatingForUser_packageIsHibernating() throws Exception {
         // WHEN we hibernate a package for a user
         mAppHibernationService.setHibernatingForUser(PACKAGE_NAME_1, USER_ID_1, true);
 
         // THEN the package is marked hibernating for the user
         assertTrue(mAppHibernationService.isHibernatingForUser(PACKAGE_NAME_1, USER_ID_1));
+        verify(mIActivityManager).forceStopPackage(PACKAGE_NAME_1, USER_ID_1);
+        verify(mIPackageManager).deleteApplicationCacheFilesAsUser(
+                eq(PACKAGE_NAME_1), eq(USER_ID_1), any());
     }
 
     @Test
@@ -204,6 +207,7 @@ public final class AppHibernationServiceTest {
 
         // THEN the package is marked hibernating for the user
         assertTrue(mAppHibernationService.isHibernatingGlobally(PACKAGE_NAME_1));
+        verify(mPackageManagerInternal).deleteOatArtifactsOfPackage(PACKAGE_NAME_1);
     }
 
     @Test

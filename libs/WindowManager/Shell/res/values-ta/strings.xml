@@ -20,6 +20,7 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"மூடு"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"விரி"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"அமைப்புகள்"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"திரைப் பிரிப்பு பயன்முறைக்குச் செல்"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"மெனு"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> தற்போது பிக்ச்சர்-இன்-பிக்ச்சரில் உள்ளது"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"<xliff:g id="NAME">%s</xliff:g> இந்த அம்சத்தைப் பயன்படுத்த வேண்டாம் என நினைத்தால் இங்கு தட்டி அமைப்புகளைத் திறந்து இதை முடக்கவும்."</string>
@@ -72,5 +73,4 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"நிர்வகி"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"குமிழ் நிராகரிக்கப்பட்டது."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"தட்டுவதன் மூலம் இந்த ஆப்ஸை மீண்டும் தொடங்கலாம், முழுத்திரையில் பார்க்கலாம்."</string>
-    <string name="got_it" msgid="4428750913636945527">"சரி"</string>
 </resources>

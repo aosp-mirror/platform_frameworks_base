@@ -415,12 +415,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView-megvalósítás"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"WebView-megvalósítás beállítása"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Ez a választás már nem érvényes. Próbálkozzon újra."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"Konvertálás fájlalapú titkosításra"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Konvertálás…"</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"Már fájlalapú titkosítást használ"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"Konvertálás fájlalapú titkosításra"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Konvertálja az adatalapú titkosítást használó partíciót fájlalapú titkosítást használóvá.\n FIGYELEM! A művelet minden adatot töröl.\n A funkció alfatesztelésben van, és lehet, hogy nem megfelelően működik.\n Nyomja meg a „Törlés és konvertálás…” lehetőséget a folytatáshoz."</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"Törlés és konvertálás…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Kép színe mód"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"sRGB használata"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Letiltva"</string>

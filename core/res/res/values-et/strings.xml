@@ -620,6 +620,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Puudutage näomudeli kustutamiseks, seejärel lisage oma nägu uuesti"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Näoga avamise seadistamine"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Avage telefon seda vaadates"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Näoga avamise kasutamiseks lülitage menüüs Seaded &gt; Privaatsus sisse "<b>"juurdepääs kaamerale"</b>"."</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Seadistage rohkem viise avamiseks"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Puudutage sõrmejälje lisamiseks"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Sõrmejäljega avamine"</string>
@@ -733,9 +734,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Ekraani avamiskatsete jälgimine"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Jälgib ekraani avamisel valesti sisestatud paroolide arvu ja lukustab tahvelarvuti või kustutab kõik selle andmed, kui vale parool sisestatakse liiga palju kordi."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Jälgitakse ekraanikuva avamisel sisestatud valede paroolide arvu ja lukustatakse Android TV seade või kustutatakse kõik Android TV seadme andmed, kui vale parool sisestatakse liiga palju kordi."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Jälgib ekraani avamisel valesti sisestatud paroolide arvu ning lukustab teabe ja meelelahutuse süsteemi või kustutab kõik selle andmed, kui vale parool sisestatakse liiga palju kordi."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Jälgib ekraani avamisel valesti sisestatud paroolide arvu ja lukustab telefoni või kustutab kõik selle andmed, kui vale parool sisestatakse liiga palju kordi."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Jälgitakse ekraani avamisel sisestatud valede paroolide arvu ja lukustatakse tahvelarvuti või kustutatakse kõik selle kasutaja andmed, kui vale parool sisestatakse liiga palju kordi."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Jälgitakse ekraanikuva avamisel sisestatud valede paroolide arvu ja lukustatakse Android TV seade või kustutatakse kõik selle kasutaja andmed, kui vale parool sisestatakse liiga palju kordi."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Jälgitakse ekraani avamisel sisestatud valede paroolide arvu ning lukustatakse teabe ja meelelahutuse süsteem või kustutatakse kõik selle profiili andmed, kui vale parool sisestatakse liiga palju kordi."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Jälgitakse ekraani avamisel sisestatud valede paroolide arvu ja lukustatakse telefon või kustutatakse kõik selle kasutaja andmed, kui vale parool sisestatakse liiga palju kordi."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Ekraaniluku muutmine"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Muutke ekraanilukku."</string>
@@ -744,10 +747,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Kõikide andmete kustutamine"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Kustutage tahvelarvuti andmed hoiatamata, lähtestades arvuti tehaseandmetele."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Kustutatakse teie Android TV seadme andmed ilma hoiatamata, lähtestades seadme tehase andmetele."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Teabe ja meelelahutuse süsteemi andmete hoiatamata kustutamine tehase andmetele lähtestamise abil."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Telefoniandmete hoiatuseta kustutamine, lähtestades telefoni tehaseseadetele."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Kasutaja andmete kustutamine"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Profiili andmete kustutamine"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Kasutaja andmete kustutamine"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Kustutatakse selle kasutaja andmed sellest tahvelarvutist ilma hoiatamata."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Kustutatakse selle kasutaja andmed sellest Android TV seadmest ilma hoiatamata."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Selle profiili andmete hoiatamata kustutamine teabe ja meelelahutuse süsteemist."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Kustutatakse selle kasutaja andmed sellest telefonist ilma hoiatamata."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Määra seadme globaalne puhverserver"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Määratakse kasutatava seadme üldine puhverserver, kui reegel on lubatud. Üldise puhverserveri saab määrata ainult seadme omanik."</string>
@@ -1697,7 +1703,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kui otsetee on sisse lülitatud, käivitab mõlema helitugevuse nupu kolm sekundit all hoidmine juurdepääsetavuse funktsiooni."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Kas lülitada juurdepääsufunktsioonide otsetee sisse?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Hoidke juurdepääsufunktsioonide sisselülitamiseks mõlemat helitugevuse klahvi mõni sekund all. See võib teie seadme tööviisi muuta.\n\nPraegused funktsioonid:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nValitud funktsioone saab muuta jaotises Seaded &gt; Juurdepääsetavus."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Kas lülitada teenuse <xliff:g id="SERVICE">%1$s</xliff:g> otsetee sisse?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Kui hoiate mõlemat helitugevuse klahvi mõni sekund all, lülitatakse juurdepääsufunktsioon <xliff:g id="SERVICE">%1$s</xliff:g> sisse. See võib teie seadme tööviisi muuta.\n\nSelle otsetee saab asendada muu otseteega jaotises Seaded &gt; Juurdepääsetavus."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Lülita sisse"</string>

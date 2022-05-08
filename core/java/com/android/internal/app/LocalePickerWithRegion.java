@@ -159,6 +159,14 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
     }
 
     @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        // In order to make the list view work with CollapsingToolbarLayout,
+        // we have to enable the nested scrolling feature of the list view.
+        getListView().setNestedScrollingEnabled(true);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem menuItem) {
         int id = menuItem.getItemId();
         switch (id) {

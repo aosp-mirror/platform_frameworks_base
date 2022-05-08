@@ -28,9 +28,11 @@ import static android.app.ActivityManager.INSTR_FLAG_DISABLE_ISOLATED_STORAGE;
 import static android.app.ActivityManager.INSTR_FLAG_DISABLE_TEST_API_CHECKS;
 import static android.app.ActivityManager.INSTR_FLAG_NO_RESTART;
 import static android.app.ActivityManager.INTENT_SENDER_ACTIVITY;
+import static android.app.ActivityManager.PROCESS_CAPABILITY_ALL;
 import static android.app.ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
+import static android.app.ActivityManager.StopUserOnSwitch;
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.AppOpsManager.OP_NONE;
@@ -44,6 +46,13 @@ import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.net.ConnectivityManager.BLOCKED_METERED_REASON_DATA_SAVER;
+import static android.net.ConnectivityManager.BLOCKED_METERED_REASON_USER_RESTRICTED;
+import static android.net.ConnectivityManager.BLOCKED_REASON_APP_STANDBY;
+import static android.net.ConnectivityManager.BLOCKED_REASON_BATTERY_SAVER;
+import static android.net.ConnectivityManager.BLOCKED_REASON_DOZE;
+import static android.net.ConnectivityManager.BLOCKED_REASON_LOW_POWER_STANDBY;
+import static android.net.ConnectivityManager.BLOCKED_REASON_NONE;
 import static android.os.FactoryTest.FACTORY_TEST_OFF;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_HIGH;
@@ -82,7 +91,6 @@ import static android.os.Process.killProcessQuiet;
 import static android.os.Process.myPid;
 import static android.os.Process.myUid;
 import static android.os.Process.readProcFile;
-import static android.os.Process.removeAllProcessGroups;
 import static android.os.Process.sendSignal;
 import static android.os.Process.setThreadPriority;
 import static android.os.Process.setThreadScheduler;
@@ -183,7 +191,6 @@ import android.app.PendingIntent;
 import android.app.ProcessMemoryState;
 import android.app.ProfilerInfo;
 import android.app.PropertyInvalidatedCache;
-import android.app.RemoteServiceException;
 import android.app.SyncNotedAppOp;
 import android.app.WaitResult;
 import android.app.backup.BackupManager.OperationType;
@@ -340,6 +347,7 @@ import com.android.internal.os.BinderTransactionNameResolver;
 import com.android.internal.os.ByteTransferPipe;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.ProcessCpuTracker;
+import com.android.internal.os.SomeArgs;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.os.Zygote;
 import com.android.internal.policy.AttributeCache;
@@ -1414,6 +1422,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     final ActivityThread mSystemThread;
 
     final UidObserverController mUidObserverController;
+    private volatile IUidObserver mNetworkPolicyUidObserver;
+
+    @GuardedBy("mUidNetworkBlockedReasons")
+    private final SparseIntArray mUidNetworkBlockedReasons = new SparseIntArray();
 
     private final class AppDeathRecipient implements IBinder.DeathRecipient {
         final ProcessRecord mApp;
@@ -1473,8 +1485,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int WAIT_FOR_CONTENT_PROVIDER_TIMEOUT_MSG = 73;
 
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
-
-    static final String SERVICE_RECORD_KEY = "servicerecord";
 
     /**
      * Flag whether the current user is a "monkey", i.e. whether
@@ -1551,6 +1561,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     private static final int INDEX_TOTAL_MEMTRACK_GRAPHICS = 13;
     private static final int INDEX_TOTAL_MEMTRACK_GL = 14;
     private static final int INDEX_LAST = 15;
+
+    /**
+     * Used to notify activity lifecycle events.
+     */
+    @Nullable
+    volatile ActivityManagerInternal.VoiceInteractionManagerProvider
+            mVoiceInteractionManagerProvider;
 
     final class UiHandler extends Handler {
         public UiHandler() {
@@ -1647,8 +1664,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mServices.serviceForegroundTimeout((ServiceRecord) msg.obj);
             } break;
             case SERVICE_FOREGROUND_CRASH_MSG: {
-                mServices.serviceForegroundCrash((ProcessRecord) msg.obj,
-                        msg.getData().getCharSequence(SERVICE_RECORD_KEY));
+                SomeArgs args = (SomeArgs) msg.obj;
+                mServices.serviceForegroundCrash(
+                        (ProcessRecord) args.arg1,
+                        (String) args.arg2,
+                        (ComponentName) args.arg3);
+                args.recycle();
             } break;
             case UPDATE_TIME_ZONE: {
                 synchronized (mProcLock) {
@@ -1886,6 +1907,14 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     public IAppOpsService getAppOpsService() {
         return mAppOpsService;
+    }
+
+    /**
+     * Sets the internal voice interaction manager service.
+     */
+    private void setVoiceInteractionManagerProvider(
+            @Nullable ActivityManagerInternal.VoiceInteractionManagerProvider provider) {
+        mVoiceInteractionManagerProvider = provider;
     }
 
     static class MemBinder extends Binder {
@@ -2358,8 +2387,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private void start() {
-        removeAllProcessGroups();
-
         mBatteryStatsService.publish();
         mAppOpsService.publish();
         Slog.d("AppOps", "AppOpsService published");
@@ -2739,6 +2766,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 || event == Event.ACTIVITY_DESTROYED)) {
             contentCaptureService.notifyActivityEvent(userId, activity, event);
         }
+        // TODO(b/201234353): Move the logic to client side.
+        if (mVoiceInteractionManagerProvider != null && (event == Event.ACTIVITY_PAUSED
+                || event == Event.ACTIVITY_RESUMED || event == Event.ACTIVITY_STOPPED)) {
+            mVoiceInteractionManagerProvider.notifyActivityEventChanged();
+        }
     }
 
     /**
@@ -2981,15 +3013,16 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void crashApplication(int uid, int initialPid, String packageName, int userId,
-            String message, boolean force) {
-        crashApplicationWithType(uid, initialPid, packageName, userId, message, force,
-                RemoteServiceException.TYPE_ID);
+    public void crashApplicationWithType(int uid, int initialPid, String packageName, int userId,
+            String message, boolean force, int exceptionTypeId) {
+        crashApplicationWithTypeWithExtras(uid, initialPid, packageName, userId, message,
+                force, exceptionTypeId, null);
     }
 
     @Override
-    public void crashApplicationWithType(int uid, int initialPid, String packageName, int userId,
-            String message, boolean force, int exceptionTypeId) {
+    public void crashApplicationWithTypeWithExtras(int uid, int initialPid, String packageName,
+            int userId, String message, boolean force, int exceptionTypeId,
+            @Nullable Bundle extras) {
         if (checkCallingPermission(android.Manifest.permission.FORCE_STOP_PACKAGES)
                 != PackageManager.PERMISSION_GRANTED) {
             String msg = "Permission Denial: crashApplication() from pid="
@@ -3002,7 +3035,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         synchronized(this) {
             mAppErrors.scheduleAppCrashLocked(uid, initialPid, packageName, userId,
-                    message, force, exceptionTypeId);
+                    message, force, exceptionTypeId, extras);
         }
     }
 
@@ -4168,7 +4201,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             didSomething |= mProcessList.killPackageProcessesLSP(packageName, appId, userId,
                     ProcessList.INVALID_ADJ, callerWillRestart, false /* allowRestart */, doit,
-                    evenPersistent, true /* setRemoved */,
+                    evenPersistent, true /* setRemoved */, uninstalling,
                     packageName == null ? ApplicationExitInfo.REASON_USER_STOPPED
                     : ApplicationExitInfo.REASON_USER_REQUESTED,
                     ApplicationExitInfo.SUBREASON_UNKNOWN,
@@ -4814,6 +4847,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void bootAnimationComplete() {
+        if (DEBUG_ALL) Slog.d(TAG, "bootAnimationComplete: Callers=" + Debug.getCallers(4));
+
         final boolean callFinishBooting;
         synchronized (this) {
             callFinishBooting = mCallFinishBooting;
@@ -6758,6 +6793,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         synchronized (mProcLock) {
+            if (mPendingStartActivityUids.isPendingTopUid(uid)) {
+                return PROCESS_STATE_TOP;
+            }
             return mProcessList.getUidProcStateLOSP(uid);
         }
     }
@@ -7203,6 +7241,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             ProcessList.PERSISTENT_PROC_ADJ, false /* callerWillRestart */,
                             true /* callerWillRestart */, true /* doit */,
                             true /* evenPersistent */, false /* setRemoved */,
+                            false /* uninstalling */,
                             ApplicationExitInfo.REASON_OTHER,
                             ApplicationExitInfo.SUBREASON_KILL_UID,
                             reason != null ? reason : "kill uid");
@@ -7224,6 +7263,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             ProcessList.PERSISTENT_PROC_ADJ, false /* callerWillRestart */,
                             true /* callerWillRestart */, true /* doit */,
                             true /* evenPersistent */, false /* setRemoved */,
+                            false /* uninstalling */,
                             ApplicationExitInfo.REASON_PERMISSION_CHANGE,
                             ApplicationExitInfo.SUBREASON_UNKNOWN,
                             reason != null ? reason : "kill uid");
@@ -7637,7 +7677,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         // On Automotive, at this point the system user has already been started and unlocked,
         // and some of the tasks we do here have already been done. So skip those in that case.
-        // TODO(b/132262830): this workdound shouldn't be necessary once we move the
+        // TODO(b/132262830, b/203885241): this workdound shouldn't be necessary once we move the
         // headless-user start logic to UserManager-land
         final boolean bootingSystemUser = currentUserId == UserHandle.USER_SYSTEM;
 
@@ -10347,7 +10387,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             "Native",
             "System", "Persistent", "Persistent Service", "Foreground",
             "Visible", "Perceptible", "Perceptible Low", "Perceptible Medium",
-            "Heavy Weight", "Backup",
+            "Backup", "Heavy Weight",
             "A Services", "Home",
             "Previous", "B Services", "Cached"
     };
@@ -10355,7 +10395,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             "native",
             "sys", "pers", "persvc", "fore",
             "vis", "percept", "perceptl", "perceptm",
-            "heavy", "backup",
+            "backup", "heavy",
             "servicea", "home",
             "prev", "serviceb", "cached"
     };
@@ -14419,7 +14459,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 uid, change, procState, procStateSeq, capability, ephemeral);
         if (uidRec != null) {
             uidRec.setLastReportedChange(enqueuedChange);
-            uidRec.updateLastDispatchedProcStateSeq(enqueuedChange);
         }
 
         // Directly update the power manager, since we sit on top of it and it is critical
@@ -15080,14 +15119,43 @@ public class ActivityManagerService extends IActivityManager.Stub
         return mUserController.startUser(userId, /* foreground */ true, unlockListener);
     }
 
+    /**
+     * Unlocks the given user.
+     *
+     * @param userId The ID of the user to unlock.
+     * @param token No longer used.  (This parameter cannot be removed because
+     *              this method is marked with UnsupportedAppUsage, so its
+     *              signature might not be safe to change.)
+     * @param secret The secret needed to unlock the user's credential-encrypted
+     *               storage, or null if no secret is needed.
+     * @param listener An optional progress listener.
+     *
+     * @return true if the user was successfully unlocked, otherwise false.
+     */
     @Override
-    public boolean unlockUser(int userId, byte[] token, byte[] secret, IProgressListener listener) {
-        return mUserController.unlockUser(userId, token, secret, listener);
+    public boolean unlockUser(int userId, @Nullable byte[] token, @Nullable byte[] secret,
+            @Nullable IProgressListener listener) {
+        return mUserController.unlockUser(userId, secret, listener);
     }
 
     @Override
     public boolean switchUser(final int targetUserId) {
         return mUserController.switchUser(targetUserId);
+    }
+
+    @Override
+    public String getSwitchingFromUserMessage() {
+        return mUserController.getSwitchingFromSystemUserMessage();
+    }
+
+    @Override
+    public String getSwitchingToUserMessage() {
+        return mUserController.getSwitchingToSystemUserMessage();
+    }
+
+    @Override
+    public void setStopUserOnSwitch(@StopUserOnSwitch int value) {
+        mUserController.setStopUserOnSwitch(value);
     }
 
     @Override
@@ -15528,20 +15596,26 @@ public class ActivityManagerService extends IActivityManager.Stub
                     return;
                 }
                 record.lastNetworkUpdatedProcStateSeq = procStateSeq;
-                if (record.curProcStateSeq > procStateSeq) {
-                    if (DEBUG_NETWORK) {
-                        Slog.d(TAG_NETWORK, "No need to handle older seq no., Uid: " + uid
-                                + ", curProcstateSeq: " + record.curProcStateSeq
-                                + ", procStateSeq: " + procStateSeq);
-                    }
-                    return;
-                }
-                if (record.waitingForNetwork) {
+                if (record.procStateSeqWaitingForNetwork != 0
+                        && procStateSeq >= record.procStateSeqWaitingForNetwork) {
                     if (DEBUG_NETWORK) {
                         Slog.d(TAG_NETWORK, "Notifying all blocking threads for uid: " + uid
-                                + ", procStateSeq: " + procStateSeq);
+                                + ", procStateSeq: " + procStateSeq
+                                + ", procStateSeqWaitingForNetwork: "
+                                + record.procStateSeqWaitingForNetwork);
                     }
                     record.networkStateLock.notifyAll();
+                }
+            }
+        }
+
+        @Override
+        public void onUidBlockedReasonsChanged(int uid, int blockedReasons) {
+            synchronized (mUidNetworkBlockedReasons) {
+                if (blockedReasons == BLOCKED_REASON_NONE) {
+                    mUidNetworkBlockedReasons.delete(uid);
+                } else {
+                    mUidNetworkBlockedReasons.put(uid, blockedReasons);
                 }
             }
         }
@@ -16244,13 +16318,56 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void addPendingTopUid(int uid, int pid) {
-            mPendingStartActivityUids.add(uid, pid);
+        public void addPendingTopUid(int uid, int pid, @Nullable IApplicationThread thread) {
+            final boolean isNewPending = mPendingStartActivityUids.add(uid, pid);
+            // We need to update the network rules for the app coming to the top state so that
+            // it can access network when the device or the app is in a restricted state
+            // (e.g. battery/data saver) but since waiting for updateOomAdj to complete and then
+            // informing NetworkPolicyManager might get delayed, informing the state change as soon
+            // as we know app is going to come to the top state.
+            if (isNewPending && mNetworkPolicyUidObserver != null) {
+                try {
+                    final long procStateSeq = mProcessList.getNextProcStateSeq();
+                    mNetworkPolicyUidObserver.onUidStateChanged(uid, PROCESS_STATE_TOP,
+                            procStateSeq, PROCESS_CAPABILITY_ALL);
+                    if (thread != null && isNetworkingBlockedForUid(uid)) {
+                        thread.setNetworkBlockSeq(procStateSeq);
+                    }
+                } catch (RemoteException e) {
+                    Slog.d(TAG, "Error calling setNetworkBlockSeq", e);
+                }
+            }
+        }
+
+        private boolean isNetworkingBlockedForUid(int uid) {
+            synchronized (mUidNetworkBlockedReasons) {
+                // TODO: We can consider only those blocked reasons that will be overridden
+                // by the TOP state. For other ones, there is no point in waiting.
+                // TODO: We can reuse this data in
+                // ProcessList#incrementProcStateSeqAndNotifyAppsLOSP instead of calling into
+                // NetworkManagementService.
+                final int uidBlockedReasons = mUidNetworkBlockedReasons.get(
+                        uid, BLOCKED_REASON_NONE);
+                if (uidBlockedReasons == BLOCKED_REASON_NONE) {
+                    return false;
+                }
+                final int topExemptedBlockedReasons = BLOCKED_REASON_BATTERY_SAVER
+                        | BLOCKED_REASON_DOZE
+                        | BLOCKED_REASON_APP_STANDBY
+                        | BLOCKED_REASON_LOW_POWER_STANDBY
+                        | BLOCKED_METERED_REASON_DATA_SAVER
+                        | BLOCKED_METERED_REASON_USER_RESTRICTED;
+                final int effectiveBlockedReasons =
+                        uidBlockedReasons & ~topExemptedBlockedReasons;
+                // Only consider it as blocked if it is not blocked by a reason
+                // that is not exempted by app being in the top state.
+                return effectiveBlockedReasons == BLOCKED_REASON_NONE;
+            }
         }
 
         @Override
-        public void deletePendingTopUid(int uid) {
-            mPendingStartActivityUids.delete(uid);
+        public void deletePendingTopUid(int uid, long nowElapsed) {
+            mPendingStartActivityUids.delete(uid, nowElapsed);
         }
 
         @Override
@@ -16372,6 +16489,34 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return mProcessList.getIsolatedProcessesLocked(uid);
             }
         }
+
+        /** @see ActivityManagerService#sendIntentSender */
+        @Override
+        public int sendIntentSender(IIntentSender target, IBinder allowlistToken, int code,
+                Intent intent, String resolvedType,
+                IIntentReceiver finishedReceiver, String requiredPermission, Bundle options) {
+            return ActivityManagerService.this.sendIntentSender(target, allowlistToken, code,
+                    intent, resolvedType, finishedReceiver, requiredPermission, options);
+        }
+
+        @Override
+        public void setVoiceInteractionManagerProvider(
+                @Nullable ActivityManagerInternal.VoiceInteractionManagerProvider provider) {
+            ActivityManagerService.this.setVoiceInteractionManagerProvider(provider);
+        }
+
+        @Override
+        public void setStopUserOnSwitch(int value) {
+            ActivityManagerService.this.setStopUserOnSwitch(value);
+        }
+
+        @Override
+        public void registerNetworkPolicyUidObserver(@NonNull IUidObserver observer,
+                int which, int cutpoint, @NonNull String callingPackage) {
+            mNetworkPolicyUidObserver = observer;
+            mUidObserverController.register(observer, which, cutpoint, callingPackage,
+                    Binder.getCallingUid());
+        }
     }
 
     long inputDispatchingTimedOut(int pid, final boolean aboveSystem, String reason) {
@@ -16451,23 +16596,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
         synchronized (record.networkStateLock) {
-            if (record.lastDispatchedProcStateSeq < procStateSeq) {
-                if (DEBUG_NETWORK) {
-                    Slog.d(TAG_NETWORK, "Uid state change for seq no. " + procStateSeq + " is not "
-                            + "dispatched to NPMS yet, so don't wait. Uid: " + callingUid
-                            + " lastProcStateSeqDispatchedToObservers: "
-                            + record.lastDispatchedProcStateSeq);
-                }
-                return;
-            }
-            if (record.curProcStateSeq > procStateSeq) {
-                if (DEBUG_NETWORK) {
-                    Slog.d(TAG_NETWORK, "Ignore the wait requests for older seq numbers. Uid: "
-                            + callingUid + ", curProcStateSeq: " + record.curProcStateSeq
-                            + ", procStateSeq: " + procStateSeq);
-                }
-                return;
-            }
             if (record.lastNetworkUpdatedProcStateSeq >= procStateSeq) {
                 if (DEBUG_NETWORK) {
                     Slog.d(TAG_NETWORK, "Network rules have been already updated for seq no. "
@@ -16483,9 +16611,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                         + " Uid: " + callingUid + " procStateSeq: " + procStateSeq);
                 }
                 final long startTime = SystemClock.uptimeMillis();
-                record.waitingForNetwork = true;
+                record.procStateSeqWaitingForNetwork = procStateSeq;
                 record.networkStateLock.wait(mWaitForNetworkTimeoutMs);
-                record.waitingForNetwork = false;
+                record.procStateSeqWaitingForNetwork = 0;
                 final long totalTime = SystemClock.uptimeMillis() - startTime;
                 if (totalTime >= mWaitForNetworkTimeoutMs || DEBUG_NETWORK) {
                     Slog.w(TAG_NETWORK, "Total time waited for network rules to get updated: "

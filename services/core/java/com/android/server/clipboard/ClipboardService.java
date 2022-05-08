@@ -582,7 +582,7 @@ public class ClipboardService extends SystemService {
 
     void setPrimaryClipInternal(PerUserClipboard clipboard, @Nullable ClipData clip,
             int uid) {
-        synchronized ("mLock") {
+        synchronized (mLock) {
             setPrimaryClipInternalLocked(clipboard, clip, uid, null);
         }
     }

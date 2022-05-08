@@ -302,6 +302,65 @@ public class AuthSessionTest {
         testInvokesCancel(session -> session.onDialogDismissed(DISMISSED_REASON_NEGATIVE, null));
     }
 
+    // TODO (b/208484275) : Enable these tests
+    // @Test
+    // public void testPreAuth_canAuthAndPrivacyDisabled() throws Exception {
+    //     SensorPrivacyManager manager = ExtendedMockito.mock(SensorPrivacyManager.class);
+    //     when(manager
+    //             .isSensorPrivacyEnabled(SensorPrivacyManager.Sensors.CAMERA, anyInt()))
+    //             .thenReturn(false);
+    //     when(mContext.getSystemService(SensorPrivacyManager.class))
+    //             .thenReturn(manager);
+    //     setupFace(1 /* id */, false /* confirmationAlwaysRequired */,
+    //             mock(IBiometricAuthenticator.class));
+    //     final PromptInfo promptInfo = createPromptInfo(Authenticators.BIOMETRIC_STRONG);
+    //     final PreAuthInfo preAuthInfo = createPreAuthInfo(mSensors, 0, promptInfo, false);
+    //     assertEquals(BiometricManager.BIOMETRIC_SUCCESS, preAuthInfo.getCanAuthenticateResult());
+    //     for (BiometricSensor sensor : preAuthInfo.eligibleSensors) {
+    //         assertEquals(BiometricSensor.STATE_UNKNOWN, sensor.getSensorState());
+    //     }
+    // }
+
+    // @Test
+    // public void testPreAuth_cannotAuthAndPrivacyEnabled() throws Exception {
+    //     SensorPrivacyManager manager = ExtendedMockito.mock(SensorPrivacyManager.class);
+    //     when(manager
+    //             .isSensorPrivacyEnabled(SensorPrivacyManager.Sensors.CAMERA, anyInt()))
+    //             .thenReturn(true);
+    //     when(mContext.getSystemService(SensorPrivacyManager.class))
+    //             .thenReturn(manager);
+    //     setupFace(1 /* id */, false /* confirmationAlwaysRequired */,
+    //             mock(IBiometricAuthenticator.class));
+    //     final PromptInfo promptInfo = createPromptInfo(Authenticators.BIOMETRIC_STRONG);
+    //     final PreAuthInfo preAuthInfo = createPreAuthInfo(mSensors, 0, promptInfo, false);
+    //     assertEquals(BiometricManager.BIOMETRIC_ERROR_SENSOR_PRIVACY_ENABLED,
+    //             preAuthInfo.getCanAuthenticateResult());
+    //     // Even though canAuth returns privacy enabled, we should still be able to authenticate.
+    //     for (BiometricSensor sensor : preAuthInfo.eligibleSensors) {
+    //         assertEquals(BiometricSensor.STATE_UNKNOWN, sensor.getSensorState());
+    //     }
+    // }
+
+    // @Test
+    // public void testPreAuth_canAuthAndPrivacyEnabledCredentialEnabled() throws Exception {
+    //     SensorPrivacyManager manager = ExtendedMockito.mock(SensorPrivacyManager.class);
+    //     when(manager
+    //             .isSensorPrivacyEnabled(SensorPrivacyManager.Sensors.CAMERA, anyInt()))
+    //             .thenReturn(true);
+    //     when(mContext.getSystemService(SensorPrivacyManager.class))
+    //             .thenReturn(manager);
+    //     setupFace(1 /* id */, false /* confirmationAlwaysRequired */,
+    //             mock(IBiometricAuthenticator.class));
+    //     final PromptInfo promptInfo =
+    //             createPromptInfo(Authenticators.BIOMETRIC_STRONG
+    //             | Authenticators. DEVICE_CREDENTIAL);
+    //     final PreAuthInfo preAuthInfo = createPreAuthInfo(mSensors, 0, promptInfo, false);
+    //     assertEquals(BiometricManager.BIOMETRIC_SUCCESS, preAuthInfo.getCanAuthenticateResult());
+    //     for (BiometricSensor sensor : preAuthInfo.eligibleSensors) {
+    //         assertEquals(BiometricSensor.STATE_UNKNOWN, sensor.getSensorState());
+    //     }
+    // }
+
     private void testInvokesCancel(Consumer<AuthSession> sessionConsumer) throws RemoteException {
         final IBiometricAuthenticator faceAuthenticator = mock(IBiometricAuthenticator.class);
 
@@ -331,7 +390,8 @@ public class AuthSessionTest {
                 userId,
                 promptInfo,
                 TEST_PACKAGE,
-                checkDevicePolicyManager);
+                checkDevicePolicyManager,
+                mContext);
     }
 
     private AuthSession createAuthSession(List<BiometricSensor> sensors,

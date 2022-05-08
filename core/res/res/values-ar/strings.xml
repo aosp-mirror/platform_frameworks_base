@@ -349,7 +349,7 @@
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"تنفيذ إيماءات"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"يمكن النقر والتمرير بسرعة والتصغير أو التكبير بإصبعين وتنفيذ إيماءات أخرى."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"إيماءات بصمات الإصبع:"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"يمكن أن تلتقط الإيماءات التي تم تنفيذها على جهاز استشعار بصمة الإصبع في الجهاز."</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"يمكن أن تلتقط الإيماءات من أداة استشعار بصمة الإصبع في الجهاز."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"أخذ لقطة شاشة"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"يمكن أخذ لقطة شاشة."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"إيقاف شريط الحالة أو تعديله"</string>
@@ -556,7 +556,7 @@
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"تحديد الموضع النسبي بين الأجهزة المجاورة التي تستخدم النطاق الواسع جدًا"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"يسمح هذا الإذن للتطبيق بتحديد الموضع النسبي بين الأجهزة المجاورة التي تستخدم النطاق الواسع جدًا."</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"‏التفاعل مع أجهزة Wi‑Fi المجاورة"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"‏للسماح للتطبيق بالإعلان والربط وتحديد الموقع النسبي لأجهزة Wi-Fi المجاورة."</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"‏للسماح للتطبيق بعرض الإعلانات والاتصال بالأجهزة الأخرى وتحديد الموقع النسبي لأجهزة Wi-Fi المجاورة."</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"‏معلومات الخدمات المدفوعة باستخدام الاتصال قصير المدى NFC المفضّل"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‏يسمح هذا الإذن للتطبيق بالحصول على معلومات الخدمات المدفوعة باستخدام الاتصال قصير المدى NFC المفضّل، مثلاً المساعدات المسجّلة ووجهة المسار."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"التحكم في اتصال الحقل القريب"</string>
@@ -632,6 +632,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"انقر لحذف نموذج الوجه ثم أضِف نموذجًا لوجهك مرة أخرى."</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"إعداد ميزة \"فتح الجهاز بالتعرف على الوجه\""</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"يمكنك فتح قفل هاتفك بمجرّد النظر إلى الشاشة."</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"‏لاستخدام ميزة \"فتح الجهاز بالتعرف على الوجه\"، عليك منح إذن "<b>"الوصول إلى الكاميرا"</b>" في الإعدادات &gt; الخصوصية."</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"إعداد المزيد من الطرق لفتح قفل الجهاز"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"انقر لإضافة بصمة إصبع."</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"فتح الجهاز ببصمة الإصبع"</string>
@@ -745,9 +746,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"مراقبة محاولات فتح قفل الشاشة"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"لمراقبة عدد مرات كتابة كلمات المرور غير الصحيحة عند فتح قفل الشاشة وتأمين الجهاز اللوحي أو مسح جميع بياناته في حالة كتابة الكثير من كلمات المرور غير الصحيحة."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"‏يمكنك مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند فتح قفل الشاشة، وقفل جهاز Android TV أو محو جميع بيانات جهاز Android TV إذا تمت كتابة عدد أكبر من اللازم من كلمات المرور غير الصحيحة."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"يمكنك مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند فتح قفل الشاشة، وقفل \"نظام الترفيه والمعلومات\" أو محو جميع بياناته إذا تمت كتابة عدد كبير جدًا من كلمات المرور غير الصحيحة."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند فتح قفل الشاشة، وتأمين الهاتف ومحو جميع بياناته إذا تمت كتابة عدد أكبر من اللازم من كلمات المرور غير الصحيحة."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"يمكنك مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند فتح قفل الشاشة، وتأمين الجهاز اللوحي ومحو جميع بيانات هذا المستخدم إذا تمت كتابة عدد أكبر من اللازم من كلمات المرور غير الصحيحة."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"‏يمكنك مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند فتح قفل الشاشة، وقفل جهاز Android TV أو محو جميع بيانات هذا المستخدم إذا تمت كتابة عدد أكبر من اللازم من كلمات المرور غير الصحيحة."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"يمكنك مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند فتح قفل الشاشة، وتأمين \"نظام الترفيه والمعلومات\" ومحو جميع بيانات هذا الملف الشخصي إذا تمت كتابة عدد كبير جدًا من كلمات المرور غير الصحيحة."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"يمكنك مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند فتح قفل الشاشة، وتأمين الهاتف ومحو جميع بيانات هذا المستخدم إذا تمت كتابة عدد أكبر من اللازم من كلمات المرور غير الصحيحة."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"تغيير قفل الشاشة"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"إمكانية تغيير قفل الشاشة"</string>
@@ -756,10 +759,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"محو جميع البيانات"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"يمكنك محو بيانات الجهاز اللوحي بدون تحذير، وذلك عبر إجراء إعادة الضبط على الإعدادات الأصلية."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"‏يمكنك محو بيانات جهاز Android TV بدون تحذير عن طريق تنفيذ إعادة الضبط على الإعدادات الأصلية."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"يمكنك محو بيانات \"نظام الترفيه والمعلومات\" بدون تحذير، وذلك من خلال إعادة الضبط على الإعدادات الأصلية."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"محو بيانات الهاتف بدون تحذير، وذلك من خلال إعادة ضبط البيانات على الإعدادات الأصلية"</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"محو بيانات المستخدم"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"محو بيانات الملف الشخصي"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"محو بيانات المستخدم"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"لمحو بيانات هذا المستخدم على هذا الجهاز اللوحي بدون تحذير."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"‏لمحو بيانات هذا المستخدم على جهاز Android TV هذا بدون تحذير."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"يمكنك محو بيانات هذا الملف الشخصي على \"نظام الترفيه والمعلومات\" هذا بدون تحذير."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"لمحو بيانات هذا المستخدم على هذا الهاتف بدون تحذير."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"تعيين الخادم الوكيل العمومي للجهاز"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"لضبط الخادم الوكيل العام في الجهاز على الاستخدام أثناء تفعيل السياسة. ولن يمكن لأحد سوى مالك الجهاز ضبط الخادم الوكيل العام."</string>
@@ -1548,7 +1554,7 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"للسماح لتطبيق ما بطلب حذف الحِزم."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"طلب تجاهل تحسينات البطارية"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"للسماح للتطبيق بطلب الإذن لتجاهل تحسينات البطارية في هذا التطبيق."</string>
-    <string name="permlab_queryAllPackages" msgid="2928450604653281650">"طلب البحث في كل الحِزم"</string>
+    <string name="permlab_queryAllPackages" msgid="2928450604653281650">"البحث في كل الحِزم"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"يسمح هذا الإذن للتطبيق بعرض كل الحِزم المثبّتة."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"اضغط مرتين للتحكم في التكبير أو التصغير"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"تعذرت إضافة أداة."</string>
@@ -1785,7 +1791,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"عند تفعيل الاختصار، يؤدي الضغط على زرّي التحكّم في مستوى الصوت معًا لمدة 3 ثوانٍ إلى تفعيل إحدى ميزات إمكانية الوصول."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"هل تريد تفعيل الاختصار لميزات إمكانية الوصول؟"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"يؤدي الضغط مع الاستمرار على كلا مفتاحَي التحكّم في مستوى الصوت لبضع ثوانٍ إلى تفعيل ميزات إمكانية الوصول. قد يؤدي هذا الإجراء إلى تغيير طريقة عمل جهازك.\n\nالميزات الحالية:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nيمكنك تغيير الميزات المحددة في الإعدادات &gt; إمكانية الوصول."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"هل تريد تفعيل اختصار <xliff:g id="SERVICE">%1$s</xliff:g>؟"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"‏يؤدي الضغط مع الاستمرار لبضع ثوانٍ على كلا مفتاحَي التحكّم في مستوى الصوت إلى تفعيل <xliff:g id="SERVICE">%1$s</xliff:g> وهي إحدى ميزات إمكانية الوصول. يمكن أن يؤدي هذا الإجراء إلى تغيير كيفية عمل جهازك.\n\nيمكنك تغيير هذا الاختصار لاستخدامه مع ميزة أخرى في الإعدادات &gt; أدوات تمكين الوصول."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"تفعيل"</string>

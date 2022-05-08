@@ -20,6 +20,7 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Kapat"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Genişlet"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Ayarlar"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Bölünmüş ekrana geç"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menü"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g>, pencere içinde pencere özelliğini kullanıyor"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"<xliff:g id="NAME">%s</xliff:g> uygulamasının bu özelliği kullanmasını istemiyorsanız dokunarak ayarları açın ve söz konusu özelliği kapatın."</string>
@@ -72,5 +73,4 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Yönet"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Balon kapatıldı."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"Bu uygulamayı yeniden başlatmak ve tam ekrana geçmek için dokunun."</string>
-    <string name="got_it" msgid="4428750913636945527">"Anladım"</string>
 </resources>

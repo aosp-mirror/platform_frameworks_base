@@ -20,6 +20,7 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"বন্ধ কৰক"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"বিস্তাৰ কৰক"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"ছেটিং"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"বিভাজিত স্ক্ৰীন ম’ডলৈ যাওক"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"মেনু"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> চিত্ৰৰ ভিতৰৰ চিত্ৰত আছে"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"আপুনি যদি <xliff:g id="NAME">%s</xliff:g> সুবিধাটো ব্যৱহাৰ কৰিব নোখোজে, তেন্তে ছেটিং খুলিবলৈ টিপক আৰু তালৈ গৈ ইয়াক অফ কৰক।"</string>
@@ -72,5 +73,4 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"পৰিচালনা কৰক"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"বাবল অগ্ৰাহ্য কৰা হৈছে"</string>
     <string name="restart_button_description" msgid="5887656107651190519">"এপ্‌টো ৰিষ্টাৰ্ট কৰিবলৈ আৰু পূৰ্ণ স্ক্ৰীন ব্যৱহাৰ কৰিবলৈ টিপক।"</string>
-    <string name="got_it" msgid="4428750913636945527">"বুজি পালোঁ"</string>
 </resources>

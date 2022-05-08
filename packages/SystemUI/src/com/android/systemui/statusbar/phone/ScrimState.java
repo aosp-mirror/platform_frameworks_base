@@ -19,8 +19,6 @@ package com.android.systemui.statusbar.phone;
 import android.graphics.Color;
 import android.os.Trace;
 
-import androidx.annotation.Nullable;
-
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
@@ -43,11 +41,9 @@ public enum ScrimState {
         public void prepare(ScrimState previousState) {
             mFrontTint = Color.BLACK;
             mBehindTint = Color.BLACK;
-            mBubbleTint = previousState.mBubbleTint;
 
             mFrontAlpha = 1f;
             mBehindAlpha = 1f;
-            mBubbleAlpha = previousState.mBubbleAlpha;
 
             mAnimationDuration = ScrimController.ANIMATION_DURATION_LONG;
         }
@@ -81,15 +77,24 @@ public enum ScrimState {
             mFrontTint = Color.BLACK;
             mBehindTint = Color.BLACK;
             mNotifTint = mClipQsScrim ? Color.BLACK : Color.TRANSPARENT;
-            mBubbleTint = Color.TRANSPARENT;
 
             mFrontAlpha = 0;
             mBehindAlpha = mClipQsScrim ? 1 : mScrimBehindAlphaKeyguard;
             mNotifAlpha = mClipQsScrim ? mScrimBehindAlphaKeyguard : 0;
-            mBubbleAlpha = 0;
             if (mClipQsScrim) {
                 updateScrimColor(mScrimBehind, 1f /* alpha */, Color.BLACK);
             }
+        }
+    },
+
+    AUTH_SCRIMMED_SHADE {
+        @Override
+        public void prepare(ScrimState previousState) {
+            // notif & behind scrim alpha values are determined by ScrimController#applyState
+            // based on the shade expansion
+
+            mFrontTint = Color.BLACK;
+            mFrontAlpha = .66f;
         }
     },
 
@@ -118,7 +123,6 @@ public enum ScrimState {
             mNotifAlpha = mClipQsScrim ? mDefaultScrimAlpha : 0;
             mNotifTint = Color.TRANSPARENT;
             mFrontAlpha = 0f;
-            mBubbleAlpha = 0f;
         }
     },
 
@@ -129,7 +133,6 @@ public enum ScrimState {
         @Override
         public void prepare(ScrimState previousState) {
             mBehindAlpha = 0;
-            mBubbleAlpha = 0f;
             mFrontAlpha = mDefaultScrimAlpha;
         }
     },
@@ -139,7 +142,6 @@ public enum ScrimState {
         public void prepare(ScrimState previousState) {
             mBehindAlpha = mClipQsScrim ? 1 : mDefaultScrimAlpha;
             mNotifAlpha = 1f;
-            mBubbleAlpha = 0f;
             mFrontAlpha = 0f;
             mBehindTint = Color.BLACK;
 
@@ -163,7 +165,6 @@ public enum ScrimState {
         public void prepare(ScrimState previousState) {
             mBehindAlpha = 0;
             mFrontAlpha = 0;
-            mBubbleAlpha = 0;
         }
     },
 
@@ -184,9 +185,6 @@ public enum ScrimState {
 
             mBehindTint = Color.BLACK;
             mBehindAlpha = ScrimController.TRANSPARENT;
-
-            mBubbleTint = Color.TRANSPARENT;
-            mBubbleAlpha = ScrimController.TRANSPARENT;
 
             mAnimationDuration = ScrimController.ANIMATION_DURATION_LONG;
             // DisplayPowerManager may blank the screen for us, or we might blank it for ourselves
@@ -214,7 +212,6 @@ public enum ScrimState {
         @Override
         public void prepare(ScrimState previousState) {
             mFrontAlpha = mAodFrontScrimAlpha;
-            mBubbleAlpha = 0f;
             mBehindTint = Color.BLACK;
             mFrontTint = Color.BLACK;
             mBlankScreen = mDisplayRequiresBlanking;
@@ -238,7 +235,6 @@ public enum ScrimState {
             mBehindAlpha = mClipQsScrim ? 1 : 0;
             mNotifAlpha = 0;
             mFrontAlpha = 0;
-            mBubbleAlpha = 0;
 
             mAnimationDuration = mKeyguardFadingAway
                     ? mKeyguardFadingAwayDuration
@@ -249,71 +245,22 @@ public enum ScrimState {
 
             mFrontTint = Color.TRANSPARENT;
             mBehindTint = Color.BLACK;
-            mBubbleTint = Color.TRANSPARENT;
             mBlankScreen = false;
 
             if (previousState == ScrimState.AOD) {
                 // Set all scrims black, before they fade transparent.
                 updateScrimColor(mScrimInFront, 1f /* alpha */, Color.BLACK /* tint */);
                 updateScrimColor(mScrimBehind, 1f /* alpha */, Color.BLACK /* tint */);
-                if (mScrimForBubble != null) {
-                    updateScrimColor(mScrimForBubble, 1f /* alpha */, Color.BLACK /* tint */);
-                }
 
                 // Scrims should still be black at the end of the transition.
                 mFrontTint = Color.BLACK;
                 mBehindTint = Color.BLACK;
-                mBubbleTint = Color.BLACK;
                 mBlankScreen = true;
             }
 
             if (mClipQsScrim) {
                 updateScrimColor(mScrimBehind, 1f /* alpha */, Color.BLACK);
             }
-        }
-    },
-
-    /**
-     * Unlocked with a bubble expanded.
-     */
-    BUBBLE_EXPANDED {
-        @Override
-        public void prepare(ScrimState previousState) {
-            mBehindAlpha = mClipQsScrim ? 1 : 0;
-            mNotifAlpha = 0;
-            mFrontAlpha = 0;
-
-            mAnimationDuration = mKeyguardFadingAway
-                    ? mKeyguardFadingAwayDuration
-                    : StatusBar.FADE_KEYGUARD_DURATION;
-
-            mAnimateChange = !mLaunchingAffordanceWithPreview;
-
-            mFrontTint = Color.TRANSPARENT;
-            mBehindTint = Color.BLACK;
-            mBubbleTint = Color.BLACK;
-            mBlankScreen = false;
-
-            if (previousState == ScrimState.AOD) {
-                // Set all scrims black, before they fade transparent.
-                updateScrimColor(mScrimInFront, 1f /* alpha */, Color.BLACK /* tint */);
-                updateScrimColor(mScrimBehind, 1f /* alpha */, Color.BLACK /* tint */);
-                if (mScrimForBubble != null) {
-                    updateScrimColor(mScrimForBubble, 1f /* alpha */, Color.BLACK /* tint */);
-                }
-
-                // Scrims should still be black at the end of the transition.
-                mFrontTint = Color.BLACK;
-                mBehindTint = Color.BLACK;
-                mBubbleTint = Color.BLACK;
-                mBlankScreen = true;
-            }
-
-            if (mClipQsScrim) {
-                updateScrimColor(mScrimBehind, 1f /* alpha */, Color.BLACK);
-            }
-
-            mAnimationDuration = ScrimController.ANIMATION_DURATION;
         }
     };
 
@@ -321,21 +268,18 @@ public enum ScrimState {
     long mAnimationDuration = ScrimController.ANIMATION_DURATION;
     int mFrontTint = Color.TRANSPARENT;
     int mBehindTint = Color.TRANSPARENT;
-    int mBubbleTint = Color.TRANSPARENT;
     int mNotifTint = Color.TRANSPARENT;
 
     boolean mAnimateChange = true;
     float mAodFrontScrimAlpha;
     float mFrontAlpha;
     float mBehindAlpha;
-    float mBubbleAlpha;
     float mNotifAlpha;
 
     float mScrimBehindAlphaKeyguard;
     float mDefaultScrimAlpha;
     ScrimView mScrimInFront;
     ScrimView mScrimBehind;
-    @Nullable ScrimView mScrimForBubble;
 
     DozeParameters mDozeParameters;
     DockManager mDockManager;
@@ -348,11 +292,10 @@ public enum ScrimState {
     long mKeyguardFadingAwayDuration;
     boolean mClipQsScrim;
 
-    public void init(ScrimView scrimInFront, ScrimView scrimBehind, ScrimView scrimForBubble,
-            DozeParameters dozeParameters, DockManager dockManager) {
+    public void init(ScrimView scrimInFront, ScrimView scrimBehind, DozeParameters dozeParameters,
+            DockManager dockManager) {
         mScrimInFront = scrimInFront;
         mScrimBehind = scrimBehind;
-        mScrimForBubble = scrimForBubble;
 
         mDozeParameters = dozeParameters;
         mDockManager = dockManager;
@@ -379,10 +322,6 @@ public enum ScrimState {
         return mNotifAlpha;
     }
 
-    public float getBubbleAlpha() {
-        return mBubbleAlpha;
-    }
-
     public int getFrontTint() {
         return mFrontTint;
     }
@@ -393,10 +332,6 @@ public enum ScrimState {
 
     public int getNotifTint() {
         return mNotifTint;
-    }
-
-    public int getBubbleTint() {
-        return mBubbleTint;
     }
 
     public long getAnimationDuration() {
@@ -434,10 +369,6 @@ public enum ScrimState {
 
     public void setDefaultScrimAlpha(float defaultScrimAlpha) {
         mDefaultScrimAlpha = defaultScrimAlpha;
-    }
-
-    public void setBubbleAlpha(float alpha) {
-        mBubbleAlpha = alpha;
     }
 
     public void setWallpaperSupportsAmbientMode(boolean wallpaperSupportsAmbientMode) {

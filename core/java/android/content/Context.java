@@ -463,7 +463,7 @@ public abstract class Context {
 
     /**
      * @hide Flag for {@link #bindService}: For only the case where the binding
-     * is coming from the system, set the process state to FOREGROUND_SERVICE
+     * is coming from the system, set the process state to BOUND_FOREGROUND_SERVICE
      * instead of the normal maximum of IMPORTANT_FOREGROUND.  That is, this is
      * saying that the process shouldn't participate in the normal power reduction
      * modes (removing network access etc).
@@ -3337,7 +3337,11 @@ public abstract class Context {
      * Service will call {@link android.app.Service#startForeground(int, android.app.Notification)
      * startForeground(int, android.app.Notification)} once it begins running.  The service is given
      * an amount of time comparable to the ANR interval to do this, otherwise the system
-     * will automatically stop the service and declare the app ANR.
+     * will automatically crash the process, in which case an internal exception
+     * {@code ForegroundServiceDidNotStartInTimeException} is logged on logcat on devices
+     * running SDK Version {@link android.os.Build.VERSION_CODES#S} or later. On older Android
+     * versions, an internal exception {@code RemoteServiceException} is logged instead, with
+     * a corresponding message.
      *
      * <p>Unlike the ordinary {@link #startService(Intent)}, this method can be used
      * at any time, regardless of whether the app hosting the service is in a foreground

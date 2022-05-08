@@ -415,12 +415,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Implementación de WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Configurar la implementación de WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Esta opción ya no es válida. Vuelve a intentarlo."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"Convertir a encriptación de archivo"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Convertir…"</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"Ya está encriptado"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"Convertir a encriptación basada en archivos"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Convierte la partición de datos en una encriptación basada en archivos.\n Advertencia: Esta acción borrará todos los datos.\n Esta función se encuentra en fase Alfa y es posible que no funcione correctamente.\n Para continuar, presiona la opción para borrar y convertir."</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"Borrar y convertir…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Modo de color de la imagen"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"Usa sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Inhabilitado"</string>

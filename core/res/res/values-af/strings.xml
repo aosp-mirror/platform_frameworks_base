@@ -543,7 +543,7 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Laat die program toe om op Bluetooth-toestelle in die omtrek te adverteer"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"bepaal relatiewe posisie tussen ultrabreëbandtoestelle in die omtrek"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Laat die program toe om relatiewe posisie tussen ultrabreëbandtoestelle in die omtrek te bepaal"</string>
-    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"interaksie met wi‑fi-toestelle in die omtrek te hê"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"om interaksie met wi‑fi-toestelle in die omtrek te hê"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Laat die program toe om op toestelle in die omtrek te adverteer, aan hulle te koppel en hul relatiewe posisie te bepaal"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Voorkeur-NFC-betalingdiensinligting"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Laat die program toe om voorkeur-NFC-betalingdiensinligting soos geregistreerde hulpmiddels en roetebestemming te kry."</string>
@@ -620,6 +620,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Tik om jou gesigmodel uit te vee en voeg jou gesig dan weer by"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Stel Gesigslot op"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Ontsluit jou foon deur daarna te kyk"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Skakel "<b>"kameratoegang"</b>" in Instellings &gt; Privaatheid aan om Gesigslot te gebruik"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Stel meer maniere op om te ontsluit"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Tik om \'n vingerafdruk by te voeg"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Vingerafdrukslot"</string>
@@ -733,9 +734,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Monitor pogings om skerm te ontsluit"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Monitor die aantal keer wat \'n verkeerde wagwoorde ingevoer is wanneer die skerm ontsluit word. Sluit die tablet of vee al die data uit as die wagwoord te veel keer verkeerd ingevoer word."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Monitor die aantal verkeerde wagwoorde wat ingetik word wanneer die skerm ontsluit word, en sluit jou Android TV-toestel of vee al jou Android TV-toestel se data uit as te veel verkeerde wagwoorde ingetik word."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Monitor die aantal verkeerde wagwoorde wat ingevoer word wanneer die skerm ontsluit word, en sluit die inligtingvermaakstelsel of vee al die inligtingvermaakstelsel se data uit as te veel verkeerde wagwoorde ingevoer word."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Monitor die aantal keer wat \'n verkeerde wagwoorde ingevoer is wanneer die skerm ontsluit word. Sluit die foon of vee al die data uit as die wagwoord te veel keer verkeerd ingevoer word."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Monitor die aantal verkeerde wagwoorde wat ingevoer word wanneer die skerm ontsluit word, en sluit die tablet of vee al hierdie gebruiker se data uit as te veel verkeerde wagwoorde ingevoer word."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Monitor die aantal verkeerde wagwoorde wat ingetik word wanneer die skerm ontsluit word, en sluit jou Android TV-toestel of vee al hierdie gebruiker se data uit as hulle te veel verkeerde wagwoorde intik."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Monitor die aantal verkeerde wagwoorde wat ingevoer word wanneer die skerm ontsluit word, en sluit die inligtingvermaakstelsel of vee al hierdie profiel se data uit as te veel verkeerde wagwoorde ingevoer word."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Monitor die aantal verkeerde wagwoorde wat ingevoer word wanneer die skerm ontsluit word, en sluit die foon of vee al hierdie gebruiker se data uit as te veel verkeerde wagwoorde ingevoer word."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Om die skermslot te verander"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Verander die skermslot."</string>
@@ -744,10 +747,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Om alle data uit te vee"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Vee die tablet se data uit sonder waarskuwing, deur \'n fabrieksterugstelling uit te voer."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Vee jou Android TV-toestel se data sonder waarskuwing uit deur \'n fabrieksterugstelling uit te voer."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Vee die inligtingvermaakstelsel se data sonder waarskuwing uit deur \'n fabriekterugstelling te doen."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Vee die foon se data uit sonder waarskuwing, deur \'n fabrieksterugstelling uit te voer."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Vee gebruikerdata uit"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Vee profieldata uit"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Vee gebruikerdata uit"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Vee hierdie gebruiker se data in hierdie tablet sonder waarskuwing uit."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Vee hierdie gebruiker se data op hierdie Android TV-toestel sonder waarskuwing uit."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Vee hierdie profiel se data op hierdie inligtingvermaakstelsel sonder waarskuwing uit."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Vee hierdie gebruiker se data in hierdie foon sonder waarskuwing uit."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Stel die toestel se globale instaan"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Stel die toestel se globale instaanbediener wat gebruik moet word terwyl die beleid geaktiveer is. Net die toesteladministrateur kan die globale instaanbediener stel."</string>
@@ -1697,7 +1703,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Wanneer die kortpad aan is, sal \'n toeganklikheidkenmerk begin word as albei volumeknoppies 3 sekondes lank gedruk word."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Skakel kortpad vir toeganklikheidskenmerke aan?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"As jy albei volumesleutels vir \'n paar sekondes hou, skakel dit toeganklikheidkenmerke aan. Dit kan verander hoe jou toestel werk.\n\nHuidige kenmerke:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nJy kan geselekteerde kenmerke in Instellings en Toeganklikheid verander."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Skakel <xliff:g id="SERVICE">%1$s</xliff:g>-kortpad aan?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"As jy albei volumesleutels vir \'n paar sekondes hou, skakel dit <xliff:g id="SERVICE">%1$s</xliff:g>, \'n toeganklikheidkenmerk, aan. Dit kan verander hoe jou toestel werk.\n\nJy kan hierdie kortpad na \'n ander kenmerk in Instellings en Toeganklikheid verander."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Skakel aan"</string>

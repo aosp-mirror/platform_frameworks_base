@@ -22,7 +22,7 @@ import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IME;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_INSETS;
 import static com.android.server.wm.InsetsSourceProviderProto.CAPTURED_LEASH;
 import static com.android.server.wm.InsetsSourceProviderProto.CLIENT_VISIBLE;
 import static com.android.server.wm.InsetsSourceProviderProto.CONTROL;
@@ -108,6 +108,16 @@ class InsetsSourceProvider {
 
     private final boolean mControllable;
 
+    /**
+     * Whether to forced the dimensions of the source window to the inset frame and crop out any
+     * overflow.
+     * Used to crop the taskbar inset source when a task animation is occurring to hide the taskbar
+     * rounded corners overlays.
+     *
+     * TODO: Remove when we enable shell transitions (b/202383002)
+     */
+    private boolean mCropToProvidingInsets = false;
+
     InsetsSourceProvider(InsetsSource source, InsetsStateController stateController,
             DisplayContent displayContent) {
         mClientVisible = InsetsState.getDefaultVisibility(source.getType());
@@ -163,8 +173,10 @@ class InsetsSourceProvider {
             // animate-out as new one animates-in.
             mWin.cancelAnimation();
             mWin.mProvidedInsetsSources.remove(mSource.getType());
+            mSeamlessRotating = false;
         }
-        ProtoLog.d(WM_DEBUG_IME, "InsetsSource setWin %s", win);
+        ProtoLog.d(WM_DEBUG_WINDOW_INSETS, "InsetsSource setWin %s for type %s", win,
+                InsetsState.typeToString(mSource.getType()));
         mWin = win;
         mFrameProvider = frameProvider;
         mImeFrameProvider = imeFrameProvider;
@@ -266,7 +278,7 @@ class InsetsSourceProvider {
                         && mWin.okToDisplay()) {
                     mWin.applyWithNextDraw(mSetLeashPositionConsumer);
                 } else {
-                    mSetLeashPositionConsumer.accept(mWin.getPendingTransaction());
+                    mSetLeashPositionConsumer.accept(mWin.getSyncTransaction());
                 }
             }
             if (mServerVisible && !mLastSourceFrame.equals(mSource.getFrame())) {
@@ -301,16 +313,67 @@ class InsetsSourceProvider {
         mFakeControlTarget = fakeTarget;
     }
 
+    /**
+     * Ensures that the inset source window is cropped so that anything that doesn't fit within the
+     * inset frame is cropped out until removeCropToProvidingInsetsBounds is called.
+     *
+     * The inset source surface will get cropped to the be of the size of the insets it's providing.
+     *
+     * For example, for the taskbar window which serves as the ITYPE_EXTRA_NAVIGATION_BAR inset
+     * source, the window is larger than the insets because of the rounded corners overlay, but
+     * during task animations we want to make sure that the overlay is cropped out of the window so
+     * that they don't hide the window animations.
+     *
+     * @param t The transaction to use to apply immediate overflow cropping operations.
+     *
+     * NOTE: The relies on the inset source window to have a leash (usually this would be a leash
+     * for the ANIMATION_TYPE_INSETS_CONTROL animation if the inset is controlled by the client)
+     *
+     * TODO: Remove when we migrate over to shell transitions (b/202383002)
+     */
+    void setCropToProvidingInsetsBounds(Transaction t) {
+        mCropToProvidingInsets = true;
+
+        if (mWin != null && mWin.mSurfaceAnimator.hasLeash()) {
+            // apply to existing leash
+            t.setWindowCrop(mWin.mSurfaceAnimator.mLeash, getProvidingInsetsBoundsCropRect());
+        }
+    }
+
+    /**
+     * Removes any overflow cropping and future cropping to the inset source window's leash that may
+     * have been set with a call to setCropToProvidingInsetsBounds().
+     * @param t The transaction to use to apply immediate removal of overflow cropping.
+     *
+     * TODO: Remove when we migrate over to shell transitions (b/202383002)
+     */
+    void removeCropToProvidingInsetsBounds(Transaction t) {
+        mCropToProvidingInsets = false;
+
+        // apply to existing leash
+        if (mWin != null && mWin.mSurfaceAnimator.hasLeash()) {
+            t.setWindowCrop(mWin.mSurfaceAnimator.mLeash, null);
+        }
+    }
+
+    private Rect getProvidingInsetsBoundsCropRect() {
+        Rect sourceWindowFrame = mWin.getFrame();
+        Rect insetFrame = getSource().getFrame();
+
+        // The rectangle in buffer space we want to crop to
+        return new Rect(
+                insetFrame.left - sourceWindowFrame.left,
+                insetFrame.top - sourceWindowFrame.top,
+                insetFrame.right - sourceWindowFrame.left,
+                insetFrame.bottom - sourceWindowFrame.top
+        );
+    }
+
     void updateControlForTarget(@Nullable InsetsControlTarget target, boolean force) {
         if (mSeamlessRotating) {
             // We are un-rotating the window against the display rotation. We don't want the target
             // to control the window for now.
             return;
-        }
-        if (target != null && target.getWindow() != null) {
-            // ime control target could be a different window.
-            // Refer WindowState#getImeControlTarget().
-            target = target.getWindow().getImeControlTarget();
         }
 
         if (mWin != null && mWin.getSurfaceControl() == null) {
@@ -335,7 +398,7 @@ class InsetsSourceProvider {
         if (getSource().getType() == ITYPE_IME) {
             setClientVisible(target.getRequestedVisibility(mSource.getType()));
         }
-        final Transaction t = mDisplayContent.getPendingTransaction();
+        final Transaction t = mDisplayContent.getSyncTransaction();
         mWin.startAnimation(t, mAdapter, !mClientVisible /* hidden */,
                 ANIMATION_TYPE_INSETS_CONTROL);
 
@@ -348,7 +411,7 @@ class InsetsSourceProvider {
         updateVisibility();
         mControl = new InsetsSourceControl(mSource.getType(), leash, surfacePosition,
                 mSource.calculateInsets(mWin.getBounds(), true /* ignoreVisibility */));
-        ProtoLog.d(WM_DEBUG_IME,
+        ProtoLog.d(WM_DEBUG_WINDOW_INSETS,
                 "InsetsSource Control %s for target %s", mControl, mControlTarget);
     }
 
@@ -381,8 +444,11 @@ class InsetsSourceProvider {
             return;
         }
         mClientVisible = clientVisible;
-        mDisplayContent.mWmService.mH.obtainMessage(
-                LAYOUT_AND_ASSIGN_WINDOW_LAYERS_IF_NEEDED, mDisplayContent).sendToTarget();
+        if (!mDisplayContent.mLayoutAndAssignWindowLayersScheduled) {
+            mDisplayContent.mLayoutAndAssignWindowLayersScheduled = true;
+            mDisplayContent.mWmService.mH.obtainMessage(
+                    LAYOUT_AND_ASSIGN_WINDOW_LAYERS_IF_NEEDED, mDisplayContent).sendToTarget();
+        }
         updateVisibility();
     }
 
@@ -394,8 +460,9 @@ class InsetsSourceProvider {
 
     protected void updateVisibility() {
         mSource.setVisible(mServerVisible && (isMirroredSource() || mClientVisible));
-        ProtoLog.d(WM_DEBUG_IME,
-                "InsetsSource updateVisibility serverVisible: %s clientVisible: %s",
+        ProtoLog.d(WM_DEBUG_WINDOW_INSETS,
+                "InsetsSource updateVisibility for %s, serverVisible: %s clientVisible: %s",
+                InsetsState.typeToString(mSource.getType()),
                 mServerVisible, mClientVisible);
     }
 
@@ -534,19 +601,24 @@ class InsetsSourceProvider {
 
         @Override
         public void startAnimation(SurfaceControl animationLeash, Transaction t,
-                @AnimationType int type, OnAnimationFinishedCallback finishCallback) {
+                @AnimationType int type, @NonNull OnAnimationFinishedCallback finishCallback) {
             // TODO(b/166736352): Check if we still need to control the IME visibility here.
             if (mSource.getType() == ITYPE_IME) {
                 // TODO: use 0 alpha and remove t.hide() once b/138459974 is fixed.
                 t.setAlpha(animationLeash, 1 /* alpha */);
                 t.hide(animationLeash);
             }
-            ProtoLog.i(WM_DEBUG_IME,
+            ProtoLog.i(WM_DEBUG_WINDOW_INSETS,
                     "ControlAdapter startAnimation mSource: %s controlTarget: %s", mSource,
                     mControlTarget);
 
             mCapturedLeash = animationLeash;
             t.setPosition(mCapturedLeash, mSurfacePosition.x, mSurfacePosition.y);
+
+            if (mCropToProvidingInsets) {
+                // Apply crop to hide overflow
+                t.setWindowCrop(mCapturedLeash, getProvidingInsetsBoundsCropRect());
+            }
         }
 
         @Override
@@ -557,7 +629,7 @@ class InsetsSourceProvider {
                 mControlTarget = null;
                 mAdapter = null;
                 setClientVisible(InsetsState.getDefaultVisibility(mSource.getType()));
-                ProtoLog.i(WM_DEBUG_IME,
+                ProtoLog.i(WM_DEBUG_WINDOW_INSETS,
                         "ControlAdapter onAnimationCancelled mSource: %s mControlTarget: %s",
                         mSource, mControlTarget);
             }

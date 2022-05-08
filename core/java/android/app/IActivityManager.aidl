@@ -326,10 +326,10 @@ interface IActivityManager {
     void handleApplicationStrictModeViolation(in IBinder app, int penaltyMask,
             in StrictMode.ViolationInfo crashInfo);
     boolean isTopActivityImmersive();
-    void crashApplication(int uid, int initialPid, in String packageName, int userId,
-            in String message, boolean force);
     void crashApplicationWithType(int uid, int initialPid, in String packageName, int userId,
             in String message, boolean force, int exceptionTypeId);
+    void crashApplicationWithTypeWithExtras(int uid, int initialPid, in String packageName,
+            int userId, in String message, boolean force, int exceptionTypeId, in Bundle extras);
     /** @deprecated -- use getProviderMimeTypeAsync */
     @UnsupportedAppUsage(maxTargetSdk = 29, publicAlternatives =
             "Use {@link android.content.ContentResolver#getType} public API instead.")
@@ -347,7 +347,10 @@ interface IActivityManager {
     void setPackageScreenCompatMode(in String packageName, int mode);
     @UnsupportedAppUsage
     boolean switchUser(int userid);
+    String getSwitchingFromUserMessage();
+    String getSwitchingToUserMessage();
     @UnsupportedAppUsage
+    void setStopUserOnSwitch(int value);
     boolean removeTask(int taskId);
     @UnsupportedAppUsage
     void registerProcessObserver(in IProcessObserver observer);

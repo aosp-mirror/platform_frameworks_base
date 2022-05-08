@@ -115,7 +115,7 @@ class DisplayManagerShellCommand extends ShellCommand {
     }
 
     private int resetBrightnessConfiguration() {
-        mService.resetBrightnessConfiguration();
+        mService.resetBrightnessConfigurations();
         return 0;
     }
 

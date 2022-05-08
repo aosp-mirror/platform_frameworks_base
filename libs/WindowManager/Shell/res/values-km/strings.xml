@@ -20,6 +20,7 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"បិទ"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"ពង្រីក"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"ការកំណត់"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"ចូលមុខងារ​បំបែកអេក្រង់"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"ម៉ឺនុយ"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> ស្ថិតក្នុងមុខងាររូបក្នុងរូប"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"ប្រសិនបើ​អ្នក​មិន​ចង់​ឲ្យ <xliff:g id="NAME">%s</xliff:g> ប្រើ​មុខងារ​នេះ​ សូមចុច​​បើក​ការកំណត់ រួច​បិទ​វា។"</string>
@@ -72,5 +73,4 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"គ្រប់គ្រង"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"បានច្រានចោល​សារលេចឡើង។"</string>
     <string name="restart_button_description" msgid="5887656107651190519">"ចុចដើម្បី​ចាប់ផ្ដើម​កម្មវិធី​នេះឡើងវិញ រួចចូលប្រើ​ពេញអេក្រង់។"</string>
-    <string name="got_it" msgid="4428750913636945527">"យល់ហើយ"</string>
 </resources>

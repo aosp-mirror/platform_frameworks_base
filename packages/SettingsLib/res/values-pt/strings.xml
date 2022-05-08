@@ -411,16 +411,10 @@
     <string name="transcode_notification" msgid="5560515979793436168">"Mostrar notificações de transcodificação"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Desativar cache da transcodificação"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Serviços em execução"</string>
-    <string name="runningservices_settings_summary" msgid="1046080643262665743">"Visualizar e controlar os serviços em execução no momento"</string>
+    <string name="runningservices_settings_summary" msgid="1046080643262665743">"Ver e controlar os serviços em execução no momento"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Implementação do WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Configurar implementação do WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Esta opção não é mais válida. Tente novamente."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"Converter para criptografia de arquivos"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Converter..."</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"Já criptografado com base em arquivos"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"Convertendo para criptografia baseada em arquivos"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Converter partição de dados para criptografia baseada em arquivos.\n !!Atenção!! Isso limpará todos os seus dados.\n Esse recurso é alfa e pode não funcionar corretamente.\n Pressione \"Limpar e converter...\" para continuar."</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"Limpar e converter..."</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Modo de cor da imagem"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"Usar sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Desativado"</string>

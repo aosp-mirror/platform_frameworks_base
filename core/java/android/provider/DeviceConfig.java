@@ -306,6 +306,13 @@ public final class DeviceConfig {
     public static final String NAMESPACE_MEDIA_NATIVE = "media_native";
 
     /**
+     * Namespace for all Kernel Multi-Gen LRU feature.
+     *
+     * @hide
+     */
+    public static final String NAMESPACE_MGLRU_NATIVE = "mglru_native";
+
+    /**
      * Namespace for all netd related features.
      *
      * @hide
@@ -637,6 +644,14 @@ public final class DeviceConfig {
     @TestApi
     public static final String NAMESPACE_CONSTRAIN_DISPLAY_APIS = "constrain_display_apis";
 
+    /**
+     * Namespace for App Compat Overrides related features.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final String NAMESPACE_APP_COMPAT_OVERRIDES = "app_compat_overrides";
+
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
     private static ArrayMap<OnPropertiesChangedListener, Pair<String, Executor>> sListeners =
@@ -807,7 +822,7 @@ public final class DeviceConfig {
     }
 
     /**
-     * Create a new property with the the provided name and value in the provided namespace, or
+     * Create a new property with the provided name and value in the provided namespace, or
      * update the value of such a property if it already exists. The same name can exist in multiple
      * namespaces and might have different values in any or all namespaces.
      * <p>
@@ -821,7 +836,8 @@ public final class DeviceConfig {
      * @param name        The name of the property to create or update.
      * @param value       The value to store for the property.
      * @param makeDefault Whether to make the new value the default one.
-     * @return True if the value was set, false if the storage implementation throws errors.
+     * @return {@code true} if the value was set, {@code false} if the storage implementation throws
+     * errors.
      * @hide
      * @see #resetToDefaults(int, String).
      */
@@ -845,7 +861,7 @@ public final class DeviceConfig {
      *
      * @param properties the complete set of properties to set for a specific namespace.
      * @throws BadConfigException if the provided properties are banned by RescueParty.
-     * @return True if the values were set, false otherwise.
+     * @return {@code true} if the values were set, {@code false} otherwise.
      * @hide
      */
     @SystemApi
@@ -854,6 +870,22 @@ public final class DeviceConfig {
         ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
         return Settings.Config.setStrings(contentResolver, properties.getNamespace(),
                 properties.mMap);
+    }
+
+    /**
+     * Delete a property with the provided name and value in the provided namespace
+     *
+     * @param namespace   The namespace containing the property to delete.
+     * @param name        The name of the property to delete.
+     * @return {@code true} if the property was deleted or it did not exist in the first place.
+     * Return {@code false} if the storage implementation throws errors.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(WRITE_DEVICE_CONFIG)
+    public static boolean deleteProperty(@NonNull String namespace, @NonNull String name) {
+        ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
+        return Settings.Config.deleteString(contentResolver, namespace, name);
     }
 
     /**

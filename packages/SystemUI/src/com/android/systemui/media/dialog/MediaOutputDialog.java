@@ -28,6 +28,7 @@ import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 
 /**
  * Dialog for media output transferring.
@@ -37,14 +38,14 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
     final UiEventLogger mUiEventLogger;
 
     MediaOutputDialog(Context context, boolean aboveStatusbar, MediaOutputController
-            mediaOutputController, UiEventLogger uiEventLogger) {
-        super(context, mediaOutputController);
+            mediaOutputController, UiEventLogger uiEventLogger,
+            SystemUIDialogManager dialogManager) {
+        super(context, mediaOutputController, dialogManager);
         mUiEventLogger = uiEventLogger;
-        mAdapter = new MediaOutputAdapter(mMediaOutputController);
+        mAdapter = new MediaOutputAdapter(mMediaOutputController, this);
         if (!aboveStatusbar) {
             getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
         }
-        show();
     }
 
     @Override

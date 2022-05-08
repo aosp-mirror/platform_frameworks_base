@@ -52,13 +52,11 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.doNothing
-import org.mockito.Mockito.never
 import org.mockito.Mockito.nullable
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
@@ -272,28 +270,7 @@ class DeviceControlsTileTest : SysuiTestCase() {
     }
 
     @Test
-    fun handleClick_availableAndLocked_activityStarted() {
-        verify(controlsListingController).observe(
-                any(LifecycleOwner::class.java),
-                capture(listingCallbackCaptor)
-        )
-        `when`(controlsComponent.getVisibility()).thenReturn(ControlsComponent.Visibility.AVAILABLE)
-        `when`(keyguardStateController.isUnlocked).thenReturn(false)
-
-        listingCallbackCaptor.value.onServicesUpdated(listOf(serviceInfo))
-        testableLooper.processAllMessages()
-
-        tile.click(null /* view */)
-        testableLooper.processAllMessages()
-
-        // The activity should be started right away and not require a keyguard dismiss.
-        verifyZeroInteractions(activityStarter)
-        verify(spiedContext).startActivity(intentCaptor.capture())
-        assertThat(intentCaptor.value.component?.className).isEqualTo(CONTROLS_ACTIVITY_CLASS_NAME)
-    }
-
-    @Test
-    fun handleClick_availableAndUnlocked_activityStarted() {
+    fun handleClick_available_shownOverLockscreenWhenLocked() {
         verify(controlsListingController).observe(
                 any(LifecycleOwner::class.java),
                 capture(listingCallbackCaptor)
@@ -307,16 +284,16 @@ class DeviceControlsTileTest : SysuiTestCase() {
         tile.click(null /* view */)
         testableLooper.processAllMessages()
 
-        verify(activityStarter, never()).postStartActivityDismissingKeyguard(any(), anyInt())
         verify(activityStarter).startActivity(
                 intentCaptor.capture(),
                 eq(true) /* dismissShade */,
-                nullable(ActivityLaunchAnimator.Controller::class.java))
+                nullable(ActivityLaunchAnimator.Controller::class.java),
+                eq(true) /* showOverLockscreenWhenLocked */)
         assertThat(intentCaptor.value.component?.className).isEqualTo(CONTROLS_ACTIVITY_CLASS_NAME)
     }
 
     @Test
-    fun handleClick_availableAfterUnlockAndIsLocked_keyguardDismissRequired() {
+    fun handleClick_availableAfterUnlock_notShownOverLockscreenWhenLocked() {
         verify(controlsListingController).observe(
             any(LifecycleOwner::class.java),
             capture(listingCallbackCaptor)
@@ -331,38 +308,11 @@ class DeviceControlsTileTest : SysuiTestCase() {
         tile.click(null /* view */)
         testableLooper.processAllMessages()
 
-        verify(activityStarter, never()).startActivity(
-                any(),
-                anyBoolean() /* dismissShade */,
-                nullable(ActivityLaunchAnimator.Controller::class.java))
-        verify(activityStarter).postStartActivityDismissingKeyguard(
-                intentCaptor.capture(),
-                anyInt(),
-                nullable(ActivityLaunchAnimator.Controller::class.java))
-        assertThat(intentCaptor.value.component?.className).isEqualTo(CONTROLS_ACTIVITY_CLASS_NAME)
-    }
-
-    @Test
-    fun handleClick_availableAfterUnlockAndIsUnlocked_activityStarted() {
-        verify(controlsListingController).observe(
-                any(LifecycleOwner::class.java),
-                capture(listingCallbackCaptor)
-        )
-        `when`(controlsComponent.getVisibility())
-                .thenReturn(ControlsComponent.Visibility.AVAILABLE_AFTER_UNLOCK)
-        `when`(keyguardStateController.isUnlocked).thenReturn(true)
-
-        listingCallbackCaptor.value.onServicesUpdated(listOf(serviceInfo))
-        testableLooper.processAllMessages()
-
-        tile.click(null /* view */)
-        testableLooper.processAllMessages()
-
-        verify(activityStarter, never()).postStartActivityDismissingKeyguard(any(), anyInt())
         verify(activityStarter).startActivity(
                 intentCaptor.capture(),
-                eq(true) /* dismissShade */,
-                nullable(ActivityLaunchAnimator.Controller::class.java))
+                anyBoolean() /* dismissShade */,
+                nullable(ActivityLaunchAnimator.Controller::class.java),
+                eq(false) /* showOverLockscreenWhenLocked */)
         assertThat(intentCaptor.value.component?.className).isEqualTo(CONTROLS_ACTIVITY_CLASS_NAME)
     }
 

@@ -415,12 +415,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView ක්‍රියාත්මක කිරීම"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"WebView ක්‍රියාත්මක කිරීම සකසන්න"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"මෙම තෝරා ගැනීම තව දුරටත් වලංගු නැත. නැවත උත්සාහ කරන්න."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"ගොනු සංකේතනයට පරිවර්තනය කරන්න"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"පරිවර්තනය කරන්න..."</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"දැනටමත් ගොනුව සංකේතනය කර ඇත"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"ගොනු පදනම් සංකේතනයට පරිවර්තනය කිරීම"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"දත්ත වෙන් කිරීම ගොනු පදනම් සංකේතනයට පරිවර්තනය කරන්න.\n !!අනතුරු ඇඟවීමයි!! මෙය ඔබේ සියලු දත්ත මකනු ඇත.\n මෙම විශේෂාංගය ඇල්ෆා වන අතර, නිවැරදිව ක්‍රියා නොකළ හැකිය.\n දිගටම කරගෙන යාමට \'මකා පරිවර්තනය කරන්න...\' ඔබන්න."</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"මකා පරිවර්තනය කරන්න..."</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"පින්තූර වර්ණ ප්‍රකාරය"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"sRGB භාවිතා කරන්න"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"අබලයි"</string>

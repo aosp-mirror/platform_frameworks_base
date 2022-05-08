@@ -544,7 +544,7 @@
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"আশেপাশের Ultra-Wideband ডিভাইসগুলির আপেক্ষিক অবস্থান নির্ণয় করুন"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"অ্যাপকে আশেপাশের Ultra-Wideband ডিভাইসগুলির আপেক্ষিক অবস্থান নির্ণয় করার অনুমতি দিন"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"আশপাশের ওয়াই-ফাই ডিভাইসের সাথে ইন্টার‍্যাক্ট করুন"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"এটির ফলে অ্যাপ আশপাশের ওয়াই-ফাই ডিভাইসের তথ্য দেখাতে, তাদের সাথে কানেক্ট করতে এবং ত দূরত্বে আছে সেটি জানতে পারবে"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"এটির ফলে অ্যাপ আশপাশের ওয়াই-ফাই ডিভাইসের তথ্য দেখতে, তাদের সাথে কানেক্ট করতে এবং তা কত দূরত্বে আছে সেটি জানতে পারবে"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"পছন্দের NFC পেমেন্ট পরিষেবার তথ্য"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"অ্যাপের মাধ্যমে পছন্দসই এনএফসি পেমেন্ট পরিষেবার তথ্য, যেমন রেজিস্ট্রার করার সহায়তা এবং রুট ডেস্টিনেশন সম্পর্কিত তথ্য অ্যাক্সেস করার অনুমতি দেয়।"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"নিয়ার ফিল্ড কমিউনিকেশন নিয়ন্ত্রণ করে"</string>
@@ -620,6 +620,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"আপনার ফেস মডেল মুছে দেওয়ার জন্য ট্যাপ করুন এবং তারপরে আবার ফেস যোগ করুন"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"\'ফেস আনলক\' সেট আপ করুন"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"আপনার ফোনের দিকে তাকিয়ে এটিকে আনলক করুন"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"\'ফেস আনলক\' ফিচার ব্যবহার করতে \'সেটিংস ও গোপনীয়তা\' বিকল্পে গিয়ে "<b>"ক্যামেরায় অ্যাক্সেস দিন"</b></string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"আনলক করার জন্য বিভিন্ন উপায়ে সেট আপ করুন"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"একটি আঙ্গুলের ছাপ যোগ করতে ট্যাপ করুন"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ফিঙ্গারপ্রিন্ট আনলক"</string>
@@ -733,9 +734,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"স্ক্রিন আনলক করার প্রচেষ্টাগুলির উপরে নজর রাখুন"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"স্ক্রীণ আনলক করার সময় ভুলভাবে লেখা পাসওয়ার্ড প্রবেশের সংখ্যা মনিটার করে, এবং ট্যাবলেট লক করে এবং অনেক বার পাসওয়ার্ড ভুল ভাবে লেখা হলে ট্যাবলেটের ডেটা মুছে ফেলে৷"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"স্ক্রিন আনলক করার সময় কতবার ভুল পাসওয়ার্ড লেখা হচ্ছে তা মনিটর করুন এবং Android TV ডিভাইস লক করুন অথবা অনেকবার ভুল পাসওয়ার্ড লেখা হলে ডিভাইসের সব ডেটা মুছে ফেলুন।"</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"ফোনের স্ক্রিন আনলক করার সময় কতবার ভুল পাসওয়ার্ড টাইপ করা হয়েছে তা মনিটর করুন। একাধিকবার ভুল পাসওয়ার্ড টাইপ করা হলে ইনফোটেইনমেন্ট সিস্টেম লক করুন অথবা এর সব ডেটা মুছে ফেলুন।"</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"স্ক্রীণ আনলক করার সময় ভুলভাবে লেখা পাসওয়ার্ড প্রবেশের সংখ্যা মনিটার করে, এবং ফোন লক করে এবং অনেক বার পাসওয়ার্ড ভুল ভাবে লেখা হলে ফোনের ডেটা মুছে ফেলে৷"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"স্ক্রিন আনলক করার সময় ভুলভাবে লেখা পাসওয়ার্ড প্রবেশের সংখ্যা মনিটার করে, এবং ট্যাবলেট লক করে এবং অনেক বার পাসওয়ার্ড ভুল ভাবে লেখা হলে ব্যবহারকারীর ডেটা মুছে ফেলে৷"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"স্ক্রিন আনলক করার সময় কতবার ভুল পাসওয়ার্ড লেখা হচ্ছে তা মনিটর করুন এবং Android TV ডিভাইস লক করুন অথবা অনেকবার ভুল পাসওয়ার্ড লেখা হলে সব ব্যবহারকারীর ডেটা মুছে ফেলুন।"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"ফোনের স্ক্রিন আনলক করার সময় কতবার ভুল পাসওয়ার্ড টাইপ করা হয়েছে তা মনিটর করুন। একাধিকবার ভুল পাসওয়ার্ড টাইপ করা হলে ইনফোটেইনমেন্ট সিস্টেম লক করুন অথবা এই প্রোফাইলের সব ডেটা মুছে ফেলুন।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"স্ক্রিন আনলক করার সময় ভুলভাবে লেখা পাসওয়ার্ড প্রবেশের সংখ্যা মনিটার করে, এবং ফোন লক করে এবং অনেক বার পাসওয়ার্ড ভুল ভাবে লেখা হলে ব্যবহারকারীর ডেটা মুছে ফেলে৷"</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"স্ক্রিন লক পরিবর্তন করে"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"স্ক্রিন লক পরিবর্তন করুন৷"</string>
@@ -744,10 +747,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"সমস্ত ডেটা মুছে দেয়"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"ফ্যাক্টরি ডেটা আবার সেট কার্য সম্পাদনার দ্বারা কোনো রকম সতর্কতা ছাড়াই ট্যাবলেটের ডেটা মোছে৷"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"ফ্যাক্টরি ডেটা রিসেট করে কোনও সতর্কতা ছাড়াই আপনার Android TV ডিভাইসের ডেটা মুছে ফেলুন।"</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"ফ্যাক্টরি ডেটা রিসেট করে কোনও সতর্কতা মূলক বিজ্ঞপ্তি ছাড়াই আপনার ইনফোটেইনমেন্ট সিস্টেমের ডেটা মুছে ফেলুন।"</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"ফ্যাক্টরি ডেটা রিসেট করে কোনও সতর্কতা ছাড়াই ফোনের ডেটা মোছে৷"</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"ব্যবহারকারীর ডেটা মুছুন"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"প্রোফাইল ডেটা মুছে ফেলুন"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"ব্যবহারকারীর ডেটা মুছুন"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"সতর্কীকরণ ছাড়াই এই ট্যাবলেটে থাকা ব্যাবহারকার্রী ডেটা মুছে ফেলে৷"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"কোনও সতর্কতা ছাড়াই এই ব্যবহারকারীর ডেটা Android TV ডিভাইসটি থেকে মুছুন।"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"কোনও সতর্কতা মূলক বিজ্ঞপ্তি ছাড়াই ইনফোটেইনমেন্ট সিস্টেমে থাকা এই প্রোফাইলের ডেটা মুছে ফেলুন।"</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"সতর্কীকরণ ছাড়াই এই ফোনে থাকা ব্যাবহারকার্রী ডেটা মুছে ফেলে৷"</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"ডিভাইসের বৈশ্বিক প্রক্সী সেট করে"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"নীতিযখন নীতি সক্ষম করা হয় তখন ডিভাইসের বৈশ্বিক প্রক্সী ব্যবহার করা হবে সেই হিসেবে সেট করে৷ শুধুমাত্র ডিভাইসের মালিক বৈশ্বিক প্রক্সী সেট করতে পারেন৷"</string>
@@ -1697,7 +1703,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"শর্টকাট চালু করা থাকাকালীন দুটি ভলিউম বোতাম একসাথে ৩ সেকেন্ড টিপে ধরে রাখলে একটি অ্যাকসেসিবিলিটি ফিচার চালু হবে।"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"অ্যাক্সেসিবিলিটি ফিচারের শর্টকাট বন্ধ করতে চান?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"উভয় ভলিউম কী কয়েক সেকেন্ড ধরে থাকলে অ্যাক্সেসিবিলিটি ফিচার চালু হয়ে যাবে। এর ফলে, আপনার ডিভাইস কীভাবে কাজ করবে সেটিতে পরিবর্তন হতে পারে।\n\nবর্তমান ফিচার:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nসেটিংস &gt; অ্যাক্সেসিবিলিটি বিকল্প থেকে আপনি বাছাই করা ফিচার পরিবর্তন করতে পারবেন।"</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"<xliff:g id="SERVICE">%1$s</xliff:g> শর্টকাট চালু করতে চান?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"উভয় ভলিউম কী কয়েক সেকেন্ড ধরে থাকলে <xliff:g id="SERVICE">%1$s</xliff:g> চালু হয়ে যাবে। এটি একটি অ্যাক্সেসিবিলিটি ফিচার। এর ফলে, আপনার ডিভাইস কীভাবে কাজ করবে সেটিতে পরিবর্তন হতে পারে।\n\nসেটিংস &gt; অ্যাক্সেসিবিলিটি থেকে আপনি এই শর্টকাট পরিবর্তন করতে পারবেন।"</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"চালু করুন"</string>

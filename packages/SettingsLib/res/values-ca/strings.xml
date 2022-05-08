@@ -415,12 +415,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Implementació de WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Estableix implementació de WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Aquesta opció ja no és vàlida. Torna-ho a provar."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"Converteix en encriptació de fitxers"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Converteix…"</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"El fitxer ja està encriptat"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"S\'està convertint en l\'encriptació basada en fitxers"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Converteix la partició de dades en una encriptació basada en fitxers.\n Advertiment: s\'esborraran totes les teves dades.\n Aquesta funció és alfa i és possible que no funcioni correctament.\n Per continuar, prem Esborra i converteix…"</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"Neteja i converteix…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Mode de color de la imatge"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"Utilitza sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Desactivat"</string>
@@ -483,7 +477,7 @@
     <string name="screen_zoom_summary_default" msgid="1888865694033865408">"Predeterminat"</string>
     <string name="screen_zoom_summary_large" msgid="4706951482598978984">"Gran"</string>
     <string name="screen_zoom_summary_very_large" msgid="7317423942896999029">"Més gran"</string>
-    <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"Més grans possible"</string>
+    <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"El més gran"</string>
     <string name="screen_zoom_summary_custom" msgid="3468154096832912210">"Personalitzat (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="content_description_menu_button" msgid="6254844309171779931">"Menú"</string>
     <string name="retail_demo_reset_message" msgid="5392824901108195463">"Introdueix la contrasenya per restablir les dades de fàbrica en mode de demostració"</string>

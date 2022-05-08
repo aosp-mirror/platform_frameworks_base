@@ -168,8 +168,8 @@ public class AccountManagerService
         }
 
         @Override
-        public void onUserStopping(@NonNull TargetUser user) {
-            Slog.i(TAG, "onStopUser " + user);
+        public void onUserStopped(@NonNull TargetUser user) {
+            Slog.i(TAG, "onUserStopped " + user);
             mService.purgeUserData(user.getUserIdentifier());
         }
     }

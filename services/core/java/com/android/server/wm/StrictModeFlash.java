@@ -27,6 +27,7 @@ import android.graphics.Rect;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
+import android.view.WindowManagerPolicyConstants;
 
 class StrictModeFlash {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "StrictModeFlash" : TAG_WM;
@@ -52,7 +53,7 @@ class StrictModeFlash {
                     .build();
 
             // one more than Watermark? arbitrary.
-            t.setLayer(ctrl, WindowManagerService.TYPE_LAYER_MULTIPLIER * 101);
+            t.setLayer(ctrl, WindowManagerPolicyConstants.STRICT_MODE_LAYER);
             t.setPosition(ctrl, 0, 0);
             t.show(ctrl);
             // Ensure we aren't considered as obscuring for Input purposes.

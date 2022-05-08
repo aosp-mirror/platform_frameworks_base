@@ -15,14 +15,12 @@
  */
 package com.android.systemui.qs.tiles.dialog;
 
-import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
-
 import static com.android.systemui.Prefs.Key.QS_HAS_TURNED_OFF_MOBILE_DATA;
+import static com.android.systemui.qs.tiles.dialog.InternetDialogController.MAX_WIFI_ENTRY_COUNT;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
+import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -41,11 +39,9 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.Window;
-import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -62,6 +58,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
+import com.android.settingslib.Utils;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.accessibility.floatingmenu.AnnotationLinkSpan;
@@ -83,11 +80,11 @@ public class InternetDialog extends SystemUIDialog implements
     private static final String TAG = "InternetDialog";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    static final long PROGRESS_DELAY_MS = 2000L;
+    static final long PROGRESS_DELAY_MS = 1500L;
+    static final int MAX_NETWORK_COUNT = 4;
 
     private final Handler mHandler;
     private final Executor mBackgroundExecutor;
-    private final LinearLayoutManager mLayoutManager;
 
     @VisibleForTesting
     protected InternetAdapter mAdapter;
@@ -126,17 +123,25 @@ public class InternetDialog extends SystemUIDialog implements
     private ImageView mSignalIcon;
     private TextView mMobileTitleText;
     private TextView mMobileSummaryText;
+    private TextView mAirplaneModeSummaryText;
     private Switch mMobileDataToggle;
+    private View mMobileToggleDivider;
     private Switch mWiFiToggle;
-    private FrameLayout mDoneLayout;
+    private Button mDoneButton;
+    private Button mAirplaneModeButton;
     private Drawable mBackgroundOn;
-    private int mListMaxHeight;
+    private Drawable mBackgroundOff = null;
     private int mDefaultDataSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
     private boolean mCanConfigMobileData;
 
     // Wi-Fi entries
+    private int mWifiNetworkHeight;
+    @VisibleForTesting
     protected WifiEntry mConnectedWifiEntry;
+    @VisibleForTesting
     protected int mWifiEntriesCount;
+    @VisibleForTesting
+    protected boolean mHasMoreWifiEntries;
 
     // Wi-Fi scanning progress bar
     protected boolean mIsProgressBarVisible;
@@ -149,24 +154,17 @@ public class InternetDialog extends SystemUIDialog implements
         mInternetDialogSubTitle.setText(getSubtitleText());
     };
 
-    private final ViewTreeObserver.OnGlobalLayoutListener mInternetListLayoutListener = () -> {
-        // Set max height for list
-        if (mInternetDialogLayout.getHeight() > mListMaxHeight) {
-            ViewGroup.LayoutParams params = mInternetDialogLayout.getLayoutParams();
-            params.height = mListMaxHeight;
-            mInternetDialogLayout.setLayoutParams(params);
-        }
-    };
-
     public InternetDialog(Context context, InternetDialogFactory internetDialogFactory,
             InternetDialogController internetDialogController, boolean canConfigMobileData,
             boolean canConfigWifi, boolean aboveStatusBar, UiEventLogger uiEventLogger,
             @Main Handler handler, @Background Executor executor) {
-        super(context, R.style.Theme_SystemUI_Dialog_Internet);
+        super(context);
         if (DEBUG) {
             Log.d(TAG, "Init InternetDialog");
         }
-        mContext = context;
+
+        // Save the context that is wrapped with our theme.
+        mContext = getContext();
         mHandler = handler;
         mBackgroundExecutor = executor;
         mInternetDialogFactory = internetDialogFactory;
@@ -178,14 +176,6 @@ public class InternetDialog extends SystemUIDialog implements
         mCanConfigMobileData = canConfigMobileData;
         mCanConfigWifi = canConfigWifi;
 
-        mLayoutManager = new LinearLayoutManager(mContext) {
-            @Override
-            public boolean canScrollVertically() {
-                return false;
-            }
-        };
-        mListMaxHeight = context.getResources().getDimensionPixelSize(
-                R.dimen.internet_dialog_list_max_height);
         mUiEventLogger = uiEventLogger;
         mAdapter = new InternetAdapter(mInternetDialogController);
         if (!aboveStatusBar) {
@@ -203,21 +193,12 @@ public class InternetDialog extends SystemUIDialog implements
         mDialogView = LayoutInflater.from(mContext).inflate(R.layout.internet_connectivity_dialog,
                 null);
         final Window window = getWindow();
-        final WindowManager.LayoutParams layoutParams = window.getAttributes();
-        layoutParams.gravity = Gravity.BOTTOM;
-        // Move down the dialog to overlay the navigation bar.
-        layoutParams.setFitInsetsTypes(
-                layoutParams.getFitInsetsTypes() & ~WindowInsets.Type.navigationBars());
-        layoutParams.setFitInsetsSides(WindowInsets.Side.all());
-        layoutParams.setFitInsetsIgnoringVisibility(true);
-        window.setAttributes(layoutParams);
         window.setContentView(mDialogView);
-        //Only fix the width for large screen or tablet.
-        window.setLayout(mContext.getResources().getDimensionPixelSize(
-                R.dimen.internet_dialog_list_max_width), ViewGroup.LayoutParams.WRAP_CONTENT);
+
         window.setWindowAnimations(R.style.Animation_InternetDialog);
-        window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        window.addFlags(FLAG_LAYOUT_NO_LIMITS);
+
+        mWifiNetworkHeight = mContext.getResources()
+                .getDimensionPixelSize(R.dimen.internet_dialog_wifi_network_height);
 
         mInternetDialogLayout = mDialogView.requireViewById(R.id.internet_connectivity_dialog);
         mInternetDialogTitle = mDialogView.requireViewById(R.id.internet_dialog_title);
@@ -237,21 +218,32 @@ public class InternetDialog extends SystemUIDialog implements
         mWifiSettingsIcon = mDialogView.requireViewById(R.id.wifi_settings_icon);
         mWifiRecyclerView = mDialogView.requireViewById(R.id.wifi_list_layout);
         mSeeAllLayout = mDialogView.requireViewById(R.id.see_all_layout);
-        mDoneLayout = mDialogView.requireViewById(R.id.done_layout);
+        mDoneButton = mDialogView.requireViewById(R.id.done_button);
+        mAirplaneModeButton = mDialogView.requireViewById(R.id.apm_button);
         mSignalIcon = mDialogView.requireViewById(R.id.signal_icon);
         mMobileTitleText = mDialogView.requireViewById(R.id.mobile_title);
         mMobileSummaryText = mDialogView.requireViewById(R.id.mobile_summary);
+        mAirplaneModeSummaryText = mDialogView.requireViewById(R.id.airplane_mode_summary);
+        mMobileToggleDivider = mDialogView.requireViewById(R.id.mobile_toggle_divider);
         mMobileDataToggle = mDialogView.requireViewById(R.id.mobile_toggle);
         mWiFiToggle = mDialogView.requireViewById(R.id.wifi_toggle);
         mBackgroundOn = mContext.getDrawable(R.drawable.settingslib_switch_bar_bg_on);
-        mInternetDialogLayout.getViewTreeObserver().addOnGlobalLayoutListener(
-                mInternetListLayoutListener);
         mInternetDialogTitle.setText(getDialogTitleText());
         mInternetDialogTitle.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
 
+        TypedArray typedArray = mContext.obtainStyledAttributes(
+                new int[]{android.R.attr.selectableItemBackground});
+        try {
+            mBackgroundOff = typedArray.getDrawable(0 /* index */);
+        } finally {
+            typedArray.recycle();
+        }
+
         setOnClickListener();
         mTurnWifiOnLayout.setBackground(null);
-        mWifiRecyclerView.setLayoutManager(mLayoutManager);
+        mAirplaneModeButton.setVisibility(
+                mInternetDialogController.isAirplaneModeEnabled() ? View.VISIBLE : View.GONE);
+        mWifiRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
         mWifiRecyclerView.setAdapter(mAdapter);
     }
 
@@ -289,7 +281,8 @@ public class InternetDialog extends SystemUIDialog implements
         mConnectedWifListLayout.setOnClickListener(null);
         mSeeAllLayout.setOnClickListener(null);
         mWiFiToggle.setOnCheckedChangeListener(null);
-        mDoneLayout.setOnClickListener(null);
+        mDoneButton.setOnClickListener(null);
+        mAirplaneModeButton.setOnClickListener(null);
         mInternetDialogController.onStop();
         mInternetDialogFactory.destroyDialog();
     }
@@ -313,15 +306,15 @@ public class InternetDialog extends SystemUIDialog implements
         if (DEBUG) {
             Log.d(TAG, "updateDialog");
         }
-        if (mInternetDialogController.isAirplaneModeEnabled()) {
-            mInternetDialogSubTitle.setVisibility(View.GONE);
-        } else {
-            mInternetDialogSubTitle.setText(getSubtitleText());
-        }
+        mInternetDialogTitle.setText(getDialogTitleText());
+        mInternetDialogSubTitle.setText(getSubtitleText());
+        mAirplaneModeButton.setVisibility(
+                mInternetDialogController.isAirplaneModeEnabled() ? View.VISIBLE : View.GONE);
+
         updateEthernet();
         if (shouldUpdateMobileNetwork) {
-            setMobileDataLayout(mInternetDialogController.activeNetworkIsCellular()
-                    || mInternetDialogController.isCarrierNetworkActive());
+            setMobileDataLayout(mInternetDialogController.activeNetworkIsCellular(),
+                    mInternetDialogController.isCarrierNetworkActive());
         }
 
         if (!mCanConfigWifi) {
@@ -334,12 +327,8 @@ public class InternetDialog extends SystemUIDialog implements
         final boolean isWifiScanEnabled = mInternetDialogController.isWifiScanEnabled();
         updateWifiToggle(isWifiEnabled, isDeviceLocked);
         updateConnectedWifi(isWifiEnabled, isDeviceLocked);
+        updateWifiListAndSeeAll(isWifiEnabled, isDeviceLocked);
         updateWifiScanNotify(isWifiEnabled, isWifiScanEnabled, isDeviceLocked);
-
-        final int visibility = (isDeviceLocked || !isWifiEnabled || mWifiEntriesCount <= 0)
-                ? View.GONE : View.VISIBLE;
-        mWifiRecyclerView.setVisibility(visibility);
-        mSeeAllLayout.setVisibility(visibility);
     }
 
     private void setOnClickListener() {
@@ -367,7 +356,10 @@ public class InternetDialog extends SystemUIDialog implements
                     buttonView.setChecked(isChecked);
                     mWifiManager.setWifiEnabled(isChecked);
                 });
-        mDoneLayout.setOnClickListener(v -> dismiss());
+        mDoneButton.setOnClickListener(v -> dismiss());
+        mAirplaneModeButton.setOnClickListener(v -> {
+            mInternetDialogController.setAirplaneModeDisabled();
+        });
     }
 
     @MainThread
@@ -376,37 +368,66 @@ public class InternetDialog extends SystemUIDialog implements
                 mInternetDialogController.hasEthernet() ? View.VISIBLE : View.GONE);
     }
 
-    private void setMobileDataLayout(boolean isCarrierNetworkConnected) {
-        if (mInternetDialogController.isAirplaneModeEnabled()
-                || !mInternetDialogController.hasCarrier()) {
+    private void setMobileDataLayout(boolean activeNetworkIsCellular,
+            boolean isCarrierNetworkActive) {
+        boolean isNetworkConnected = activeNetworkIsCellular || isCarrierNetworkActive;
+        // 1. Mobile network should be gone if airplane mode ON or the list of active
+        //    subscriptionId is null.
+        // 2. Carrier network should be gone if airplane mode ON and Wi-Fi is OFF.
+        if (DEBUG) {
+            Log.d(TAG, "setMobileDataLayout, isCarrierNetworkActive = " + isCarrierNetworkActive);
+        }
+
+        if (!mInternetDialogController.hasActiveSubId()
+                && (!mWifiManager.isWifiEnabled() || !isCarrierNetworkActive)) {
             mMobileNetworkLayout.setVisibility(View.GONE);
         } else {
-            mMobileDataToggle.setChecked(mInternetDialogController.isMobileDataEnabled());
             mMobileNetworkLayout.setVisibility(View.VISIBLE);
+            mMobileDataToggle.setChecked(mInternetDialogController.isMobileDataEnabled());
             mMobileTitleText.setText(getMobileNetworkTitle());
-            if (!TextUtils.isEmpty(getMobileNetworkSummary())) {
+            String summary = getMobileNetworkSummary();
+            if (!TextUtils.isEmpty(summary)) {
                 mMobileSummaryText.setText(
-                        Html.fromHtml(getMobileNetworkSummary(), Html.FROM_HTML_MODE_LEGACY));
+                        Html.fromHtml(summary, Html.FROM_HTML_MODE_LEGACY));
                 mMobileSummaryText.setVisibility(View.VISIBLE);
             } else {
                 mMobileSummaryText.setVisibility(View.GONE);
             }
-
             mBackgroundExecutor.execute(() -> {
                 Drawable drawable = getSignalStrengthDrawable();
                 mHandler.post(() -> {
                     mSignalIcon.setImageDrawable(drawable);
                 });
             });
-            mMobileTitleText.setTextAppearance(isCarrierNetworkConnected
+            mMobileTitleText.setTextAppearance(isNetworkConnected
                     ? R.style.TextAppearance_InternetDialog_Active
                     : R.style.TextAppearance_InternetDialog);
-            mMobileSummaryText.setTextAppearance(isCarrierNetworkConnected
+            int secondaryRes = isNetworkConnected
                     ? R.style.TextAppearance_InternetDialog_Secondary_Active
-                    : R.style.TextAppearance_InternetDialog_Secondary);
-            mMobileNetworkLayout.setBackground(isCarrierNetworkConnected ? mBackgroundOn : null);
+                    : R.style.TextAppearance_InternetDialog_Secondary;
+            mMobileSummaryText.setTextAppearance(secondaryRes);
+            // Set airplane mode to the summary for carrier network
+            if (mInternetDialogController.isAirplaneModeEnabled()) {
+                mAirplaneModeSummaryText.setVisibility(View.VISIBLE);
+                mAirplaneModeSummaryText.setText(mContext.getText(R.string.airplane_mode));
+                mAirplaneModeSummaryText.setTextAppearance(secondaryRes);
+            } else {
+                mAirplaneModeSummaryText.setVisibility(View.GONE);
+            }
+            mMobileNetworkLayout.setBackground(
+                    isNetworkConnected ? mBackgroundOn : mBackgroundOff);
+
+            TypedArray array = mContext.obtainStyledAttributes(
+                    R.style.InternetDialog_Divider_Active, new int[]{android.R.attr.background});
+            int dividerColor = Utils.getColorAttrDefaultColor(mContext,
+                    android.R.attr.textColorSecondary);
+            mMobileToggleDivider.setBackgroundColor(isNetworkConnected
+                    ? array.getColor(0, dividerColor) : dividerColor);
+            array.recycle();
 
             mMobileDataToggle.setVisibility(mCanConfigMobileData ? View.VISIBLE : View.INVISIBLE);
+            mMobileToggleDivider.setVisibility(
+                    mCanConfigMobileData ? View.VISIBLE : View.INVISIBLE);
         }
     }
 
@@ -435,6 +456,49 @@ public class InternetDialog extends SystemUIDialog implements
                 mInternetDialogController.getInternetWifiDrawable(mConnectedWifiEntry));
         mWifiSettingsIcon.setColorFilter(
                 mContext.getColor(R.color.connected_network_primary_color));
+    }
+
+    @MainThread
+    private void updateWifiListAndSeeAll(boolean isWifiEnabled, boolean isDeviceLocked) {
+        if (!isWifiEnabled || isDeviceLocked) {
+            mWifiRecyclerView.setVisibility(View.GONE);
+            mSeeAllLayout.setVisibility(View.GONE);
+            return;
+        }
+        final int wifiListMaxCount = getWifiListMaxCount();
+        if (mAdapter.getItemCount() > wifiListMaxCount) {
+            mHasMoreWifiEntries = true;
+        }
+        mAdapter.setMaxEntriesCount(wifiListMaxCount);
+        final int wifiListMinHeight = mWifiNetworkHeight * wifiListMaxCount;
+        if (mWifiRecyclerView.getMinimumHeight() != wifiListMinHeight) {
+            mWifiRecyclerView.setMinimumHeight(wifiListMinHeight);
+        }
+        mWifiRecyclerView.setVisibility(View.VISIBLE);
+        mSeeAllLayout.setVisibility(mHasMoreWifiEntries ? View.VISIBLE : View.INVISIBLE);
+    }
+
+    @VisibleForTesting
+    @MainThread
+    int getWifiListMaxCount() {
+        // Use the maximum count of networks to calculate the remaining count for Wi-Fi networks.
+        int count = MAX_NETWORK_COUNT;
+        if (mEthernetLayout.getVisibility() == View.VISIBLE) {
+            count -= 1;
+        }
+        if (mMobileNetworkLayout.getVisibility() == View.VISIBLE) {
+            count -= 1;
+        }
+
+        // If the remaining count is greater than the maximum count of the Wi-Fi network, the
+        // maximum count of the Wi-Fi network is used.
+        if (count > MAX_WIFI_ENTRY_COUNT) {
+            count = MAX_WIFI_ENTRY_COUNT;
+        }
+        if (mConnectedWifListLayout.getVisibility() == View.VISIBLE) {
+            count -= 1;
+        }
+        return count;
     }
 
     @MainThread
@@ -502,13 +566,13 @@ public class InternetDialog extends SystemUIDialog implements
     }
 
     private void setProgressBarVisible(boolean visible) {
-        if (mWifiManager.isWifiEnabled() && mAdapter.mHolderView != null
-                && mAdapter.mHolderView.isAttachedToWindow()) {
-            mIsProgressBarVisible = true;
+        if (mIsProgressBarVisible == visible) {
+            return;
         }
         mIsProgressBarVisible = visible;
-        mProgressBar.setVisibility(mIsProgressBarVisible ? View.VISIBLE : View.GONE);
-        mDivider.setVisibility(mIsProgressBarVisible ? View.GONE : View.VISIBLE);
+        mProgressBar.setVisibility(visible ? View.VISIBLE : View.GONE);
+        mProgressBar.setIndeterminate(visible);
+        mDivider.setVisibility(visible ? View.GONE : View.VISIBLE);
         mInternetDialogSubTitle.setText(getSubtitleText());
     }
 
@@ -608,13 +672,17 @@ public class InternetDialog extends SystemUIDialog implements
     @Override
     @WorkerThread
     public void onAccessPointsChanged(@Nullable List<WifiEntry> wifiEntries,
-            @Nullable WifiEntry connectedEntry) {
-        mConnectedWifiEntry = connectedEntry;
-        mWifiEntriesCount = wifiEntries == null ? 0 : wifiEntries.size();
-        mAdapter.setWifiEntries(wifiEntries, mWifiEntriesCount);
+            @Nullable WifiEntry connectedEntry, boolean hasMoreWifiEntries) {
+        // Should update the carrier network layout when it is connected under airplane mode ON.
+        boolean shouldUpdateCarrierNetwork = mMobileNetworkLayout.getVisibility() == View.VISIBLE
+                && mInternetDialogController.isAirplaneModeEnabled();
         mHandler.post(() -> {
+            mConnectedWifiEntry = connectedEntry;
+            mWifiEntriesCount = wifiEntries == null ? 0 : wifiEntries.size();
+            mHasMoreWifiEntries = hasMoreWifiEntries;
+            updateDialog(shouldUpdateCarrierNetwork /* shouldUpdateMobileNetwork */);
+            mAdapter.setWifiEntries(wifiEntries, mWifiEntriesCount);
             mAdapter.notifyDataSetChanged();
-            updateDialog(false /* shouldUpdateMobileNetwork */);
         });
     }
 

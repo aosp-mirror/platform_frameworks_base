@@ -864,7 +864,8 @@ public final class DisplayManager {
         if (surface != null) {
             builder.setSurface(surface);
         }
-        return createVirtualDisplay(null /* projection */, builder.build(), callback, handler);
+        return createVirtualDisplay(null /* projection */, builder.build(), callback, handler,
+                null /* windowContext */);
     }
 
     // TODO : Remove this hidden API after remove all callers. (Refer to MultiDisplayService)
@@ -882,15 +883,17 @@ public final class DisplayManager {
         if (surface != null) {
             builder.setSurface(surface);
         }
-        return createVirtualDisplay(projection, builder.build(), callback, handler);
+        return createVirtualDisplay(projection, builder.build(), callback, handler,
+                null /* windowContext */);
     }
 
     /** @hide */
     public VirtualDisplay createVirtualDisplay(@Nullable MediaProjection projection,
             @NonNull VirtualDisplayConfig virtualDisplayConfig,
-            @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
+            @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler,
+            @Nullable Context windowContext) {
         return mGlobal.createVirtualDisplay(mContext, projection, virtualDisplayConfig, callback,
-                handler);
+                handler, windowContext);
     }
 
     /**
@@ -937,6 +940,34 @@ public final class DisplayManager {
     @RequiresPermission(Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS)
     public void setBrightnessConfiguration(BrightnessConfiguration c) {
         setBrightnessConfigurationForUser(c, mContext.getUserId(), mContext.getPackageName());
+    }
+
+    /**
+     * Sets the brightness configuration for the specified display.
+     * If the specified display doesn't exist, then this will return and do nothing.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS)
+    public void setBrightnessConfigurationForDisplay(@NonNull BrightnessConfiguration c,
+            @NonNull String uniqueId) {
+        mGlobal.setBrightnessConfigurationForDisplay(c, uniqueId, mContext.getUserId(),
+                mContext.getPackageName());
+    }
+
+    /**
+     * Gets the brightness configuration for the specified display and default user.
+     * Returns the default configuration if unset or display is invalid.
+     *
+     * @hide
+     */
+    @Nullable
+    @SystemApi
+    @RequiresPermission(Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS)
+    public BrightnessConfiguration getBrightnessConfigurationForDisplay(
+            @NonNull String uniqueId) {
+        return mGlobal.getBrightnessConfigurationForDisplay(uniqueId, mContext.getUserId());
     }
 
     /**

@@ -544,7 +544,7 @@
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"të përcaktojë pozicionin e përafërt mes pajisjeve në afërsi me brezin ultra të gjerë"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Lejo që aplikacioni të përcaktojë pozicionin e përafërt mes pajisjeve në afërsi me brezin ultra të gjerë"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"të ndërveprojë me pajisjet Wi-Fi në afërsi"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Lejon që aplikacioni të reklamojë, të lidhet dhe të përcaktojë pozicionin relativ të pajisjeve Wi-Fi në afërsi"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Lejon që aplikacioni të reklamojë, të lidhet dhe të përcaktojë pozicionin përkatës të pajisjeve Wi-Fi në afërsi"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informacionet për shërbimin e preferuar të pagesës me NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Lejon aplikacionin të marrë informacione për shërbimin e preferuar të pagesës me NFC si p.sh. ndihmat e regjistruara dhe destinacionin e itinerarit."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrollo \"Komunikimin e fushës në afërsi\" NFC"</string>
@@ -620,6 +620,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Trokit për të fshirë modelin tënd të fytyrës, pastaj shtoje përsëri fytyrën tënde"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Konfiguro \"Shkyçjen me fytyrë\""</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Shkyçe telefonin duke parë tek ai"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Për të përdorur \"Shkyçjen me fytyrë\", aktivizo "<b>"Qasjen te kamera"</b>" te \"Cilësimet\" &gt; \"Privatësia\""</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Konfiguri më shumë mënyra për të shkyçur"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Trokit për të shtuar një gjurmë gishti"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Shkyçja me gjurmën e gishtit"</string>
@@ -733,9 +734,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Monitoro tentativat e shkyçjes së ekranit"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Monitoro numrin e fjalëkalimeve të shkruar gabim kur shkyç ekranin. Kyç tabletin ose fshi të gjitha të dhënat e tij, nëse shkruhen shumë fjalëkalime të pasakta."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Monitoro numrin e fjalëkalimeve të shkruara gabim kur shkyç ekranin dhe kyç pajisjen tënde Android TV ose spastro të gjitha të dhënat e pajisjes sate Android TV nëse shkruhen gabim shumë fjalëkalime."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Monitoro numrin e fjalëkalimeve të shkruara gabim kur shkyç ekranin dhe kyç sistemin info-argëtues ose spastro të gjitha të dhënat e tij nëse shkruhen shumë fjalëkalime të gabuara."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Monitoro numrin e fjalëkalimeve të shkruar gabim kur shkyç ekranin. Kyç telefonin ose fshi të gjitha të dhënat e tij, nëse shkruhen shumë fjalëkalime të pasakta."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Monitoro numrin e fjalëkalimeve të shkruara gabim kur shkyç ekranin. Kyçe tabletin ose spastro të gjitha të dhënat e këtij përdoruesi nëse shkruhen shumë fjalëkalime të gabuara."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Monitoro numrin e fjalëkalimeve të shkruara gabim kur shkyç ekranin dhe kyçe pajisjen tënde Android TV ose spastro të gjitha të dhënat e këtij përdoruesi nëse shkruhen shumë fjalëkalime të gabuara."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Monitoro numrin e fjalëkalimeve të shkruara gabim kur shkyç ekranin dhe kyç sistemin info-argëtues ose spastro të gjitha të dhënat e këtij profili nëse shkruhen shumë fjalëkalime të gabuara."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Monitoro numrin e fjalëkalimeve të shkruara gabim kur shkyç ekranin. Kyçe telefonin ose spastro të gjitha të dhënat e këtij përdoruesi nëse shkruhen shumë fjalëkalime të gabuara."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Ndryshimin e kyçjes së ekranit"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Ndryshon kyçjen e ekranit."</string>
@@ -744,10 +747,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Spastrimin e të gjitha të dhënave"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Fshi të dhënat e tabletit pa paralajmërim duke kryer një rivendosje të të dhënave në gjendje fabrike."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Spastro të dhënat e pajisjes Android TV pa paralajmërim duke kryer një rivendosje të të dhënave në gjendje fabrike."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Spastro të dhënat e sistemit info-argëtues pa paralajmërim kur kryen një rivendosje të të dhënave të fabrikës."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Fshin të dhënat e telefonit pa paralajmërim, duke kryer rivendosje të të dhënave në gjendje fabrike."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Spatro të dhënat e përdoruesit"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Spastro të dhënat e profilit"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Spatro të dhënat e përdoruesit"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Spastroji të dhënat e këtij përdoruesi në këtë tablet pa paralajmërim."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Spastroji të dhënat e këtij përdoruesi në këtë pajisje Android TV pa paralajmërim."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Spastro të dhënat e këtij profili në këtë sistem info-argëtues pa paralajmërim."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Spastroji të dhënat e këtij përdoruesi në këtë telefon pa paralajmërim."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Cakto proxy-in global të pajisjes"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Cakto proxy-in global të pajisjes që të përdoret kur të aktivizohet politika. Vetëm pronari i pajisjes mund ta caktojë proxy-in global."</string>
@@ -1697,7 +1703,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kur shkurtorja është e aktivizuar, shtypja e të dy butonave për 3 sekonda do të nisë një funksion qasshmërie."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Të aktivizohet shkurtorja për veçoritë e qasshmërisë?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Mbajtja shtypur e dy tasteve të volumit për pak sekonda aktivizon veçoritë e qasshmërisë. Kjo mund të ndryshojë mënyrën se si funksionon pajisja jote.\n\nVeçoritë aktuale:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nKe ndryshuar veçoritë e zgjedhura te Cilësimet &gt; Qasshmëria."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Të aktivizohet shkurtorja për <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Mbajtja shtypur e dy tasteve të volumit për pak sekonda aktivizon <xliff:g id="SERVICE">%1$s</xliff:g>, një veçori të qasshmërisë. Kjo mund të ndryshojë mënyrën se si funksionon pajisja jote.\n\nMund të ndryshosh këtë shkurtore te një veçori tjetër te Cilësimet &gt; Qasshmëria."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Aktivizo"</string>

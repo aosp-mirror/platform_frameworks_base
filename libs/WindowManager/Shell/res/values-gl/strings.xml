@@ -20,6 +20,7 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Pechar"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Despregar"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Configuración"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Inserir pantalla dividida"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menú"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> está na pantalla superposta"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Se non queres que <xliff:g id="NAME">%s</xliff:g> utilice esta función, toca a configuración para abrir as opcións e desactivar a función."</string>
@@ -72,5 +73,4 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Xestionar"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Ignorouse a burbulla."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"Toca o botón para reiniciar esta aplicación e abrila en pantalla completa."</string>
-    <string name="got_it" msgid="4428750913636945527">"Entendido"</string>
 </resources>

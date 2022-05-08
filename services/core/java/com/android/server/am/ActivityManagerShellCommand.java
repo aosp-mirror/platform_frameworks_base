@@ -29,6 +29,8 @@ import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_CRI
 import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_LOW;
 import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_MODERATE;
 import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_NORMAL;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.LowMemDetector.ADJ_MEM_FACTOR_NOTHING;
 
 import android.app.ActivityManager;
@@ -44,6 +46,7 @@ import android.app.IStopUserCallback;
 import android.app.IUidObserver;
 import android.app.KeyguardManager;
 import android.app.ProfilerInfo;
+import android.app.RemoteServiceException.CrashedByAdbException;
 import android.app.UserSwitchObserver;
 import android.app.WaitResult;
 import android.app.usage.AppStandbyInfo;
@@ -100,6 +103,7 @@ import com.android.internal.util.HexDump;
 import com.android.internal.util.MemInfoReader;
 import com.android.server.am.LowMemDetector.MemFactor;
 import com.android.server.compat.PlatformCompat;
+import com.android.server.utils.Slogf;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -128,6 +132,10 @@ import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.egl.EGLSurface;
 
 final class ActivityManagerShellCommand extends ShellCommand {
+
+    static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityManagerShellCommand" : TAG_AM;
+
+
     public static final String NO_CLASS_ERROR_CODE = "Error type 3";
 
     private static final String SHELL_PACKAGE_NAME = "com.android.shell";
@@ -323,6 +331,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runServiceRestartBackoff(pw);
                 case "get-isolated-pids":
                     return runGetIsolatedProcesses(pw);
+                case "set-stop-user-on-switch":
+                    return runSetStopUserOnSwitch(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -1145,7 +1155,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
         } catch (NumberFormatException e) {
             packageName = arg;
         }
-        mInterface.crashApplication(-1, pid, packageName, userId, "shell-induced crash", false);
+        mInterface.crashApplicationWithType(-1, pid, packageName, userId, "shell-induced crash",
+                false, CrashedByAdbException.TYPE_ID);
         return 0;
     }
 
@@ -3157,6 +3168,29 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runSetStopUserOnSwitch(PrintWriter pw) throws RemoteException {
+        mInternal.enforceCallingPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                "setStopUserOnSwitch()");
+        String arg = getNextArg();
+        if (arg == null) {
+            Slogf.i(TAG, "setStopUserOnSwitch(): resetting to default value");
+            mInternal.setStopUserOnSwitch(ActivityManager.STOP_USER_ON_SWITCH_DEFAULT);
+            pw.println("Reset to default value");
+            return 0;
+        }
+
+        boolean stop = Boolean.parseBoolean(arg);
+        int value = stop
+                ? ActivityManager.STOP_USER_ON_SWITCH_TRUE
+                : ActivityManager.STOP_USER_ON_SWITCH_FALSE;
+
+        Slogf.i(TAG, "runSetStopUserOnSwitch(): setting to %d (%b)", value, stop);
+        mInternal.setStopUserOnSwitch(value);
+        pw.println("Set to " + stop);
+
+        return 0;
+    }
+
     private Resources getResources(PrintWriter pw) throws RemoteException {
         // system resources does not contain all the device configuration, construct it manually.
         Configuration config = mInterface.getConfiguration();
@@ -3489,6 +3523,10 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("            Shows the restart backoff policy state for <PACKAGE_NAME>.");
             pw.println("  get-isolated-pids <UID>");
             pw.println("         Get the PIDs of isolated processes with packages in this <UID>");
+            pw.println("  set-stop-user-on-switch [true|false]");
+            pw.println("         Sets whether the current user (and its profiles) should be stopped"
+                    + " when switching to a different user.");
+            pw.println("         Without arguments, it resets to the value defined by platform.");
             pw.println();
             Intent.printIntentArgsHelp(pw, "");
         }

@@ -223,7 +223,7 @@
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Konektatuta daudenak"</string>
     <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Gailuaren xehetasunak"</string>
     <string name="adb_device_forget" msgid="193072400783068417">"Ahaztu"</string>
-    <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Gailuaren erreferentzia-gako digitala: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
+    <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Gailuaren aztarna digitala: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Ezin izan da konektatu"</string>
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Ziurtatu <xliff:g id="DEVICE_NAME">%1$s</xliff:g> sare berera konektatuta dagoela"</string>
     <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Parekatu gailuarekin"</string>
@@ -415,12 +415,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView inplementazioa"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Ezarri WebView inplementazioa"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Jada ez dago erabilgarri aukera hori. Saiatu berriro."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"Eman fitxategietan oinarritutako enkriptatzea"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Enkriptatu…"</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"Fitxategietan oinarritutako enkriptatzea dauka dagoeneko"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"Fitxategietan oinarritutako enkriptatzea ematea"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Eman datuen partizioari fitxategietan oinarritutako enkriptatzea.\n Kontuz!! Ekintza horrek ezabatu egingo ditu datu guztiak.\n Eginbidearen alpha bertsioa da; beraz, baliteke behar bezala ez funtzionatzea.\n Aurrera egiteko, sakatu \"Ezabatu eduki guztia eta enkriptatu…\"."</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"Ezabatu eduki guztia eta enkriptatu…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Irudiaren kolore modua"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"Erabili sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Desgaituta"</string>

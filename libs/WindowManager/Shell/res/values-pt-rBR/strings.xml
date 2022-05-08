@@ -20,6 +20,7 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Fechar"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Abrir"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Configurações"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Dividir tela"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menu"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> está em picture-in-picture"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Se você não quer que o app <xliff:g id="NAME">%s</xliff:g> use este recurso, toque para abrir as configurações e desativá-lo."</string>
@@ -72,5 +73,4 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Gerenciar"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Balão dispensado."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"Toque para reiniciar o app e usar tela cheia."</string>
-    <string name="got_it" msgid="4428750913636945527">"Ok"</string>
 </resources>

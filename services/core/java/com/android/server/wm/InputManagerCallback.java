@@ -30,6 +30,7 @@ import android.util.Slog;
 import android.view.InputApplicationHandle;
 import android.view.KeyEvent;
 import android.view.WindowManager;
+import android.view.WindowManagerPolicyConstants;
 
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.input.InputManagerService;
@@ -181,8 +182,8 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
     @Override
     public int getPointerLayer() {
         return mService.mPolicy.getWindowLayerFromTypeLw(WindowManager.LayoutParams.TYPE_POINTER)
-                * WindowManagerService.TYPE_LAYER_MULTIPLIER
-                + WindowManagerService.TYPE_LAYER_OFFSET;
+                * WindowManagerPolicyConstants.TYPE_LAYER_MULTIPLIER
+                + WindowManagerPolicyConstants.TYPE_LAYER_OFFSET;
     }
 
     /** Callback to get pointer display id. */

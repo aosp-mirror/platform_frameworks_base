@@ -549,7 +549,7 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Aplikaciji dovoljuje oddajanje napravam Bluetooth v bližini."</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"določanje relativne oddaljenosti med napravami UWB v bližini"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Aplikaciji dovoli, da določi relativno oddaljenost med napravami UWB v bližini."</string>
-    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"komunikacijo z napravami Wi‑Fi v bližini"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"komunikacija z napravami Wi‑Fi v bližini"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Aplikaciji dovoljuje objavljanje in določanje relativnega položaja naprav Wi‑Fi v bližini ter povezovanje z njimi."</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Podatki o prednostni storitvi za plačevanje prek povezave NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Aplikaciji omogoča pridobivanje podatkov o prednostni storitvi za plačevanje prek povezave NFC, kot so registrirani pripomočki in cilj preusmeritve."</string>
@@ -626,6 +626,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Dotaknite se, da izbrišete model obraza, in nato znova dodajte obraz."</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Nastavitev odklepanja z obrazom"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Odklenite telefon tako, da ga pogledate."</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Če želite uporabljati odklepanje z obrazom, v meniju »Nastavitve« &gt; »Zasebnost« vklopite možnost "<b>"Dostop do fotoaparata"</b>"."</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Nastavite več načinov odklepanja"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Dotaknite se, da dodate prstni odtis."</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Odklepanje s prstnim odtisom"</string>
@@ -739,9 +740,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Nadzor nad poskusi odklepanja zaslona"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Nadzoruje število nepravilno vnesenih gesel pri odklepanju zaslona in zaklene tablični računalnik ali izbriše vse podatke v njem, če je vnesenih preveč nepravilnih gesel."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Nadzira število vnesenih nepravilnih gesel pri odklepanju zaslona in zaklene napravo Android TV ali izbriše vse podatke v napravi Android TV, če je vnesenih preveč nepravilnih gesel."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Spremljanje števila nepravilno vnesenih gesel pri odklepanju zaslona in zaklenitev informativno-razvedrilnega sistema ali izbris vseh podatkov v njem v primeru preveč vnosov nepravilnih gesel"</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Spremljajte število vnesenih napačnih gesel, s katerimi želite odkleniti zaslon. Če je teh vnosov preveč, zaklenite telefon ali izbrišite vse podatke v njem."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Nadzira število vnesenih nepravilnih gesel pri odklepanju zaslona in zaklene tablični računalnik ali izbriše vse podatke lastnika, če je vnesenih preveč nepravilnih gesel."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Nadzira število vnesenih nepravilnih gesel pri odklepanju zaslona in zaklene napravo Android TV ali izbriše vse podatke tega uporabnika, če je vnesenih preveč nepravilnih gesel."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Spremljanje števila nepravilno vnesenih gesel pri odklepanju zaslona in zaklenitev informativno-razvedrilnega sistema ali izbris vseh podatkov tega profila v primeru preveč vnosov nepravilnih gesel"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Nadzira število vnesenih nepravilnih gesel pri odklepanju zaslona in zaklene telefon ali izbriše vse podatke lastnika, če je vnesenih preveč nepravilnih gesel."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Spreminjanje zaklepanja zaslona"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Spremeni zaklepanje zaslona."</string>
@@ -750,10 +753,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Brisanje vseh podatkov"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Izbris podatkov v tabličnem računalniku brez opozorila s ponastavitvijo na tovarniške nastavitve"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Brisanje podatkov v napravi Android TV z izvedbo ponastavitve na privzete tovarniške nastavitve brez opozorila."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Izbris podatkov informativno-razvedrilnega sistema brez opozorila s ponastavitvijo na tovarniške nastavitve"</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Izbris podatkov v telefonu brez opozorila s ponastavitvijo na tovarniške nastavitve."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Izbris podatkov uporabnika"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Izbris podatkov profila"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Izbris podatkov uporabnika"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Izbris podatkov uporabnika v tem tabličnem računalniku brez opozorila."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Izbris podatkov uporabnika v tej napravi Android TV brez opozorila."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Izbris podatkov tega profila v informativno-razvedrilnem sistemu brez opozorila"</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Izbris podatkov uporabnika v tem telefonu brez opozorila."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Nastavitev globalnega strežnika proxy za napravo"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Nastavitev globalnega strežnika proxy naprave, ki bo v uporabi, ko je pravilnik omogočen. Samo lastnik naprave lahko nastavi globalni strežnik proxy."</string>
@@ -1741,7 +1747,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Ko je bližnjica vklopljena, pritisnite gumba za glasnost in ju pridržite tri sekunde, če želite zagnati funkcijo za ljudi s posebnimi potrebami."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Želite vklopiti bližnjico za funkcije za ljudi s posebnimi potrebami?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Če za nekaj sekund pridržite obe tipki za glasnost, boste vklopili funkcije za ljudi s posebnimi potrebami. To lahko spremeni način delovanja naprave.\n\nTrenutne funkcije:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nIzbrane funkcije lahko spremenite v meniju »Nastavitve« &gt; »Funkcije za ljudi s posebnimi potrebami«."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Želite vklopiti bližnjico za <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Če za nekaj sekund pridržite obe tipki za glasnost, boste vklopili storitev <xliff:g id="SERVICE">%1$s</xliff:g>, ki je funkcija za ljudi s posebnimi potrebami. To lahko spremeni način delovanja naprave.\n\nTo bližnjico lahko v meniju »Nastavitve« &gt; »Funkcije za ljudi s posebnimi potrebami« spremenite, da bo uporabljena za drugo funkcijo."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Vklopi"</string>

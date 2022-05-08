@@ -159,6 +159,7 @@ import com.android.server.pm.OtaDexoptService;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.ShortcutService;
 import com.android.server.pm.UserManagerService;
+import com.android.server.pm.dex.OdsignStatsLogger;
 import com.android.server.pm.dex.SystemServerDexLoadReporter;
 import com.android.server.pm.verify.domain.DomainVerificationService;
 import com.android.server.policy.AppOpsPolicy;
@@ -205,8 +206,6 @@ import com.android.server.wm.WindowManagerGlobalLock;
 import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.VMRuntime;
-
-import com.google.android.startop.iorap.IorapForwardingService;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -283,8 +282,6 @@ public final class SystemServer implements Dumpable {
             "com.android.server.wifi.p2p.WifiP2pService";
     private static final String LOWPAN_SERVICE_CLASS =
             "com.android.server.lowpan.LowpanService";
-    private static final String ETHERNET_SERVICE_CLASS =
-            "com.android.server.ethernet.EthernetService";
     private static final String JOB_SCHEDULER_SERVICE_CLASS =
             "com.android.server.job.JobSchedulerService";
     private static final String LOCK_SETTINGS_SERVICE_CLASS =
@@ -383,6 +380,8 @@ public final class SystemServer implements Dumpable {
             "com.android.server.connectivity.IpConnectivityMetrics";
     private static final String MEDIA_COMMUNICATION_SERVICE_CLASS =
             "com.android.server.media.MediaCommunicationService";
+    private static final String APP_COMPAT_OVERRIDES_SERVICE_CLASS =
+            "com.android.server.compat.overrides.AppCompatOverridesService$Lifecycle";
 
     private static final String ROLE_SERVICE_CLASS = "com.android.role.RoleService";
     private static final String GAME_MANAGER_SERVICE_CLASS =
@@ -1383,8 +1382,9 @@ public final class SystemServer implements Dumpable {
                     Slog.i(TAG, SECONDARY_ZYGOTE_PRELOAD);
                     TimingsTraceAndSlog traceLog = TimingsTraceAndSlog.newAsyncLog();
                     traceLog.traceBegin(SECONDARY_ZYGOTE_PRELOAD);
-                    if (!Process.ZYGOTE_PROCESS.preloadDefault(Build.SUPPORTED_32_BIT_ABIS[0])) {
-                        Slog.e(TAG, "Unable to preload default resources");
+                    String[] abis32 = Build.SUPPORTED_32_BIT_ABIS;
+                    if (abis32.length > 0 && !Process.ZYGOTE_PROCESS.preloadDefault(abis32[0])) {
+                        Slog.e(TAG, "Unable to preload default resources for secondary");
                     }
                     traceLog.traceEnd();
                 } catch (Exception ex) {
@@ -1552,10 +1552,6 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(PinnerService.class);
             t.traceEnd();
 
-            t.traceBegin("IorapForwardingService");
-            mSystemServiceManager.startService(IorapForwardingService.class);
-            t.traceEnd();
-
             if (Build.IS_DEBUGGABLE && ProfcollectForwardingService.enabled()) {
                 t.traceBegin("ProfcollectForwardingService");
                 mSystemServiceManager.startService(ProfcollectForwardingService.class);
@@ -1586,6 +1582,9 @@ public final class SystemServer implements Dumpable {
             // all listeners have the chance to react with special handling.
             Settings.Global.putInt(context.getContentResolver(),
                     Settings.Global.AIRPLANE_MODE_ON, 1);
+        } else if (context.getResources().getBoolean(R.bool.config_autoResetAirplaneMode)) {
+            Settings.Global.putInt(context.getContentResolver(),
+                    Settings.Global.AIRPLANE_MODE_ON, 0);
         }
 
         StatusBarManagerService statusBar = null;
@@ -1881,13 +1880,6 @@ public final class SystemServer implements Dumpable {
                     PackageManager.FEATURE_LOWPAN)) {
                 t.traceBegin("StartLowpan");
                 mSystemServiceManager.startService(LOWPAN_SERVICE_CLASS);
-                t.traceEnd();
-            }
-
-            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_ETHERNET) ||
-                    mPackageManager.hasSystemFeature(PackageManager.FEATURE_USB_HOST)) {
-                t.traceBegin("StartEthernet");
-                mSystemServiceManager.startService(ETHERNET_SERVICE_CLASS);
                 t.traceEnd();
             }
 
@@ -2642,6 +2634,10 @@ public final class SystemServer implements Dumpable {
         mSystemServiceManager.startService(MEDIA_COMMUNICATION_SERVICE_CLASS);
         t.traceEnd();
 
+        t.traceBegin("AppCompatOverridesService");
+        mSystemServiceManager.startService(APP_COMPAT_OVERRIDES_SERVICE_CLASS);
+        t.traceEnd();
+
         // These are needed to propagate to the runnable below.
         final NetworkManagementService networkManagementF = networkManagement;
         final NetworkPolicyManagerService networkPolicyF = networkPolicy;
@@ -2893,6 +2889,14 @@ public final class SystemServer implements Dumpable {
                 setIncrementalServiceSystemReady(mIncrementalServiceHandle);
                 t.traceEnd();
             }
+
+            t.traceBegin("OdsignStatsLogger");
+            try {
+                OdsignStatsLogger.triggerStatsWrite();
+            } catch (Throwable e) {
+                reportWtf("Triggering OdsignStatsLogger", e);
+            }
+            t.traceEnd();
         }, t);
 
         t.traceBegin("StartSystemUI");

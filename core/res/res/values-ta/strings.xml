@@ -543,7 +543,7 @@
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"அருகிலுள்ள புளூடூத் சாதனங்களுக்குத் தெரியப்படுத்த ஆப்ஸை அனுமதிக்கும்"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"அருகிலுள்ள அல்ட்ரா-வைடுபேண்ட் சாதனங்களுக்கிடையிலான தூரத்தைத் தீர்மானித்தல்"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"அருகிலுள்ள அல்ட்ரா-வைடுபேண்ட் சாதனங்களுக்கிடையிலான தூரத்தைத் தீர்மானிக்க ஆப்ஸை அனுமதிக்கும்"</string>
-    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"அருகிலுள்ள வைஃபை சாதனங்களுடன் தொடர்பில் இருக்கும்"</string>
+    <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"அருகிலுள்ள வைஃபை சாதனங்களுடன் தொடர்பு கொள்ளுதல்"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"அருகிலுள்ள வைஃபை சாதனங்களைத் தெரியப்படுத்தவும் இணைக்கவும் இருப்பிடத்தைத் தீர்மானிக்கவும் இது ஆப்ஸை அனுமதிக்கும்"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"விருப்பமான NFC பேமெண்ட் சேவை தொடர்பான தகவல்கள்"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"பதிவுசெய்யப்பட்ட கருவிகள், சேருமிடத்திற்கான வழி போன்ற விருப்பமான NFC பேமெண்ட் சேவை தொடர்பான தகவல்களைப் பெற ஆப்ஸை அனுமதிக்கிறது."</string>
@@ -620,6 +620,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"முகத் தோற்றப் பதிவைத் தட்டி நீக்கிவிட்டு உங்கள் முகத்தை மீண்டும் சேர்க்கவும்"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"\'முகம் காட்டித் திறத்தல்\' அம்சத்தை அமைத்தல்"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"மொபைலைப் பார்ப்பதன் மூலம் அதை அன்லாக் செய்யலாம்"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"முகம் காட்டித் திறத்தல் அம்சத்தைப் பயன்படுத்த, அமைப்புகள் &gt; தனியுரிமை என்பதற்குச் சென்று "<b>"கேமரா அணுகலை"</b>" இயக்கவும்"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"அன்லாக் செய்ய மேலும் பல வழிகளை அமையுங்கள்"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"கைரேகையைச் சேர்க்கத் தட்டுங்கள்"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"கைரேகை அன்லாக்"</string>
@@ -733,9 +734,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"திரையை அன்லாக் செய்வதற்கான முயற்சிகளைக் கண்காணி"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"திரையைத் திறக்கும்போது உள்ளிட்ட தவறான கடவுச்சொற்களின் எண்ணிக்கையைக் கண்காணிக்கும், மேலும் கடவுச்சொற்கள் பலமுறை தவறாக உள்ளிட்டிருந்தால், டேப்லெட்டைப் பூட்டும் அல்லது டேப்லெட்டின் எல்லா தரவையும் அழிக்கும்."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"திரையைத் திறக்கும்போது எத்தனை முறை தவறான கடவுச்சொற்களை உள்ளிட்டீர்கள் என்பதைக் கண்காணிக்கும், பலமுறை தவறாக உள்ளிட்டிருந்தால் Android TVயைப் பூட்டும் அல்லது Android TVயின் அனைத்துத் தரவையும் அழிக்கும்."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"திரையை அன்லாக் செய்யும்போது உள்ளிடப்படும் தவறான கடவுச்சொற்களின் எண்ணிக்கையைக் கண்காணிக்கும். மேலும் கடவுச்சொற்கள் பலமுறை தவறாக உள்ளிடப்பட்டிருந்தால் இன்ஃபோடெயின்மென்ட் சிஸ்டமைப் பூட்டும் அல்லது அதன் அனைத்துத் தரவையும் அழிக்கும்."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"திரையைத் திறக்கும்போது உள்ளிட்ட தவறான கடவுச்சொற்களின் எண்ணிக்கையைக் கண்காணிக்கும், மேலும் கடவுச்சொற்கள் பலமுறை தவறாக உள்ளிட்டிருந்தால், மொபைலைப் பூட்டும் அல்லது மொபைலின் எல்லா தரவையும் அழிக்கும்."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"திரையைத் திறக்கும் போது, எத்தனை முறை தவறான கடவுச்சொல்லை உள்ளிட்டீர்கள் என்பதைக் கண்காணிக்கிறது மற்றும் கடவுச்சொற்களைப் பல முறை தவறாக உள்ளிட்டால், டேப்லெட்டைப் பூட்டும் அல்லது இந்தப் பயனரின் எல்லா தரவையும் அழிக்கும்."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"திரையைத் திறக்கும் போது எத்தனை முறை தவறான கடவுச்சொல்லை உள்ளிட்டீர்கள் என்பதைக் கண்காணிப்பதோடு கடவுச்சொற்களைப் பல முறை தவறாக உள்ளிட்டால் Android TVயைப் பூட்டும் அல்லது இந்தப் பயனரின் அனைத்துத் தரவையும் அழிக்கும்."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"திரையை அன்லாக் செய்யும்போது உள்ளிடப்படும் தவறான கடவுச்சொற்களின் எண்ணிக்கையைக் கண்காணிக்கும். மேலும் கடவுச்சொற்கள் பலமுறை தவறாக உள்ளிடப்பட்டிருந்தால் இன்ஃபோடெயின்மென்ட் சிஸ்டமைப் பூட்டும் அல்லது இந்தச் சுயவிவரத்தின் அனைத்துத் தரவையும் அழிக்கும்."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"திரையைத் திறக்கும் போது, எத்தனை முறை தவறான கடவுச்சொல்லை உள்ளிட்டீர்கள் என்பதைக் கண்காணிக்கிறது மற்றும் கடவுச்சொற்களைப் பல முறை தவறாக உள்ளிட்டால், ஃபோனைப் பூட்டும் அல்லது இந்தப் பயனரின் எல்லா தரவையும் அழிக்கும்."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"திரைப் பூட்டை மாற்றுதல்"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"திரைப் பூட்டை மாற்றும்."</string>
@@ -744,10 +747,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"எல்லா டேட்டாவையும் அழித்தல்"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"ஆரம்பநிலைத் தரவு மீட்டமைப்பின் மூலம் எச்சரிக்கை வழங்காமல் டேப்லெட்டின் தரவை அழிக்கலாம்."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"தரவின் ஆரம்பநிலைக்கு மீட்டமைப்பதன் மூலம் எச்சரிக்கை செய்யாமல் Android TVயின் தரவை அழிக்கும்."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"தரவின் ஆரம்பநிலை மீட்டமைப்பைச் செயல்படுத்துவதன் மூலம் எச்சரிக்கை எதுவுமின்றி இன்ஃபோடெயின்மென்ட் சிஸ்டமின் தரவை அழிக்கும்."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"ஆரம்பநிலைத் தரவு மீட்டமைப்பின் மூலம் எச்சரிக்கை வழங்காமல் மொபைலின் தரவை அழிக்கலாம்."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"பயனர் தரவை அழி"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"சுயவிவரத் தரவை அழித்தல்"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"பயனர் தரவை அழி"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"எச்சரிக்கை எதுவுமின்றி, டேப்லெட்டில் உள்ள இந்தப் பயனரின் தரவை அழிக்கும்."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"எச்சரிக்கை செய்யாமல் Android TVயில் உள்ள இந்தப் பயனரின் தரவை அழிக்கும்."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"எச்சரிக்கை எதுவுமின்றி இந்த இன்ஃபோடெயின்மென்ட் சிஸ்டத்திலுள்ள இந்தச் சுயவிவரத்தின் தரவை அழிக்கும்."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"எச்சரிக்கை எதுவுமின்றி, ஃபோனில் உள்ள இந்தப் பயனரின் தரவை அழிக்கும்."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"சாதன குளோபல் ப்ராக்ஸியை அமை"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"கொள்கை இயக்கப்பட்டிருக்கும்போது பயன்படுத்த வேண்டிய சாதன குளோபல் ப்ராக்ஸியை அமைக்கவும். சாதன உரிமையாளரால் மட்டுமே குளோபல் ப்ராக்ஸியை அமைக்க முடியும்."</string>
@@ -1282,8 +1288,8 @@
     <string name="dump_heap_notification_detail" msgid="8431586843001054050">"ஹீப் டம்ப் சேகரிக்கப்பட்டது. பகிர, தட்டவும்."</string>
     <string name="dump_heap_title" msgid="4367128917229233901">"ஹீப் டம்பைப் பகிரவா?"</string>
     <string name="dump_heap_text" msgid="1692649033835719336">"தனது நினைவக வரம்பான <xliff:g id="SIZE">%2$s</xliff:g> அளவை <xliff:g id="PROC">%1$s</xliff:g> செயலாக்கம் மீறியுள்ளது. உங்களுக்கான ஹீப் டம்ப்பினை அதன் டெவெலப்பருடன் பகிரலாம். கவனத்திற்கு: ஆப்ஸ் அணுகக்கூடிய ஏதேனும் தனிப்பட்ட தகவல் இந்த ஹீப் டம்ப்பில் இருக்கக்கூடும்."</string>
-    <string name="dump_heap_system_text" msgid="6805155514925350849">"<xliff:g id="SIZE">%2$s</xliff:g> அளவான தனது நினைவக வரம்பை <xliff:g id="PROC">%1$s</xliff:g> செயலாக்கம் மீறியுள்ளது. உங்களுக்கான ஹீப் டம்ப் பகிர்வதற்குக் கிடைக்கிறது. கவனத்திற்கு: நீங்கள் உள்ளிட்டவை உட்பட செயலாக்கத்திற்கு அணுகலுள்ள தனிப்பட்ட தகவல்கள் இந்த ஹீப் டம்பில் இருக்கக்கூடும்"</string>
-    <string name="dump_heap_ready_text" msgid="5849618132123045516">"<xliff:g id="PROC">%1$s</xliff:g> செயலாக்கத்திற்கான ஹீப் டம்ப் நீங்கள் பகிர்வதற்குக் கிடைக்கிறது. கவனத்திற்கு: நீங்கள் உள்ளிட்டவை உட்பட செயலாக்கத்திற்கு அணுகலுள்ள தனிப்பட்ட தகவல்கள் இந்த ஹீப் டம்பில் இருக்கக்கூடும்."</string>
+    <string name="dump_heap_system_text" msgid="6805155514925350849">"<xliff:g id="SIZE">%2$s</xliff:g> அளவான தனது நினைவக வரம்பை <xliff:g id="PROC">%1$s</xliff:g> செயலாக்கம் மீறியுள்ளது. உங்களுக்கான ஹீப் டம்ப் பகிர்வதற்குக் கிடைக்கிறது. கவனத்திற்கு: நீங்கள் டைப் செய்தவை உட்பட செயலாக்கத்திற்கு அணுகலுள்ள தனிப்பட்ட பாதுகாக்கப்பட வேண்டிய தகவல்கள் இந்த ஹீப் டம்பில் இருக்கக்கூடும்"</string>
+    <string name="dump_heap_ready_text" msgid="5849618132123045516">"<xliff:g id="PROC">%1$s</xliff:g> செயலாக்கத்திற்கான ஹீப் டம்ப் நீங்கள் பகிர்வதற்குக் கிடைக்கிறது. கவனத்திற்கு: நீங்கள் டைப் செய்தவை உட்பட செயலாக்கத்திற்கு அணுகலுள்ள தனிப்பட்ட பாதுகாக்கப்பட வேண்டிய தகவல்கள் இந்த ஹீப் டம்பில் இருக்கக்கூடும்."</string>
     <string name="sendText" msgid="493003724401350724">"உரைக்கான செயலைத் தேர்வுசெய்யவும்"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"ரிங்கரின் ஒலியளவு"</string>
     <string name="volume_music" msgid="7727274216734955095">"மீடியாவின் ஒலியளவு"</string>
@@ -1697,7 +1703,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ஷார்ட்கட் இயக்கத்தில் இருக்கும்போது ஒலியளவு பட்டன்கள் இரண்டையும் 3 வினாடிகளுக்கு அழுத்தினால் அணுகல்தன்மை அம்சம் இயக்கப்படும்."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"அணுகல்தன்மை அம்சங்களுக்கான ஷார்ட்கட்டை ஆன் செய்யவா?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"இரண்டு ஒலியளவு விசைகளையும் சில விநாடிகள் பிடித்திருந்தால் அணுகல்தன்மை அம்சங்கள் ஆன் செய்யப்படும். இதனால் உங்கள் சாதனம் வேலை செய்யும் முறை மாறக்கூடும்.\n\nதற்போதைய அம்சங்கள்:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nதேர்ந்தெடுத்த அம்சங்களை அமைப்புகள் &gt; அணுகல்தன்மைக்குச் சென்று உங்களால் மாற்ற முடியும்."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"<xliff:g id="SERVICE">%1$s</xliff:g> அம்சத்துக்கான ஷார்ட்கட்டை ஆன் செய்யவா?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"இரண்டு ஒலியளவு விசைகளையும் சில விநாடிகள் பிடித்திருப்பதால் அணுகல்தன்மை அம்சமான <xliff:g id="SERVICE">%1$s</xliff:g> ஆன் ஆகும். இதனால் உங்கள் சாதனம் வேலை செய்யும் முறை மாறக்கூடும்.\n\nஅமைப்புகள் &gt; அணுகல்தன்மைக்குச் சென்று இந்த ஷார்ட்கட்டை வேறு அம்சத்திற்கு மாற்ற முடியும்."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"ஆன் செய்"</string>
@@ -2108,7 +2114,7 @@
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 பதிப்பில் \'Android சூழலுக்கேற்ற அறிவிப்புகள்\' அம்சத்திற்குப் பதிலாக \'மேம்பட்ட அறிவிப்புகள்\' மாற்றப்பட்டுள்ளது. இந்த அம்சம், பரிந்துரைக்கப்படும் செயல்களையும் பதில்களையும் காட்டுவதுடன் உங்கள் அறிவிப்புகளையும் ஒழுங்கமைக்கும்.\n\nதொடர்புகளின் பெயர்கள், மெசேஜ்கள் போன்ற தனிப்பட்ட தகவல்கள் உட்பட அனைத்து அறிவிப்பு உள்ளடக்கத்தையும் \'மேம்பட்ட அறிவிப்புகள்\' அணுக முடியும். மேலும் இந்த அம்சத்தால் அறிவிப்புகளை நிராகரிக்கவும் அவற்றுக்குப் பதிலளிக்கவும் முடியும் (அழைப்புகளுக்குப் பதிலளிப்பது, \'தொந்தரவு செய்ய வேண்டாம்\' அம்சத்தைக் கட்டுப்படுத்துவது போன்றவை)."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"வழக்கமான பேட்டரி சேமிப்பானுக்கான விவர அறிவிப்பு"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"வழக்கமாகச் சார்ஜ் செய்வதற்கு முன்பே பேட்டரி தீர்ந்துபோகக்கூடும்"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"பேட்டரி நிலையை நீட்டிக்க பேட்டரி சேமிப்பான் இயக்கப்பட்டுள்ளது"</string>
+    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"பேட்டரி ஆயுளை நீட்டிக்க பேட்டரி சேமிப்பான் இயக்கப்பட்டுள்ளது"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"பேட்டரி சேமிப்பு"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"பேட்டரி சேமிப்பான் ஆஃப் செய்யப்பட்டுள்ளது"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"மொபைலில் போதுமான சார்ஜ் உள்ளது. அம்சங்கள் இனி தடையின்றி இயங்கும்."</string>

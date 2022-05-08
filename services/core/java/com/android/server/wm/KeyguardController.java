@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE;
@@ -27,6 +28,7 @@ import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_W
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
+import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS;
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_SUBTLE_WINDOW_ANIMATIONS;
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_TO_SHADE;
@@ -49,6 +51,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
+import android.view.WindowManager;
 
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.server.inputmethod.InputMethodManagerInternal;
@@ -158,6 +161,7 @@ class KeyguardController {
         final boolean keyguardChanged = (keyguardShowing != mKeyguardShowing)
                 || (mKeyguardGoingAway && keyguardShowing && !aodChanged);
         if (!keyguardChanged && !aodChanged) {
+            setWakeTransitionReady();
             return;
         }
         EventLogTags.writeWmSetKeyguardShown(
@@ -202,6 +206,15 @@ class KeyguardController {
         updateKeyguardSleepToken();
         mRootWindowContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
         InputMethodManagerInternal.get().updateImeWindowStatus(false /* disableImeIcon */);
+        setWakeTransitionReady();
+    }
+
+    private void setWakeTransitionReady() {
+        if (mWindowManager.mAtmService.getTransitionController().getCollectingTransitionType()
+                == WindowManager.TRANSIT_WAKE) {
+            mWindowManager.mAtmService.getTransitionController().setReady(
+                    mRootWindowContainer.getDefaultDisplay());
+        }
     }
 
     /**
@@ -223,8 +236,14 @@ class KeyguardController {
                     mAodShowing ? 1 : 0,
                     1 /* keyguardGoingAway */,
                     "keyguardGoingAway");
-            mRootWindowContainer.getDefaultDisplay().requestTransitionAndLegacyPrepare(
-                    TRANSIT_KEYGUARD_GOING_AWAY, convertTransitFlags(flags));
+            final int transitFlags = convertTransitFlags(flags);
+            final DisplayContent dc = mRootWindowContainer.getDefaultDisplay();
+            dc.prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY, transitFlags);
+            // We are deprecating TRANSIT_KEYGUARD_GOING_AWAY for Shell transition and use
+            // TRANSIT_FLAG_KEYGUARD_GOING_AWAY to indicate that it should animate keyguard going
+            // away.
+            dc.mAtmService.getTransitionController().requestTransitionIfNeeded(
+                    TRANSIT_TO_BACK, transitFlags, null /* trigger */, dc);
             updateKeyguardSleepToken();
 
             // Some stack visibility might change (e.g. docked stack)
@@ -264,7 +283,7 @@ class KeyguardController {
     }
 
     private int convertTransitFlags(int keyguardGoingAwayFlags) {
-        int result = 0;
+        int result = TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
         if ((keyguardGoingAwayFlags & KEYGUARD_GOING_AWAY_FLAG_TO_SHADE) != 0) {
             result |= TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE;
         }
@@ -333,6 +352,7 @@ class KeyguardController {
         for (int displayNdx = mRootWindowContainer.getChildCount() - 1;
              displayNdx >= 0; displayNdx--) {
             final DisplayContent display = mRootWindowContainer.getChildAt(displayNdx);
+            if (display.isRemoving() || display.isRemoved()) continue;
             final KeyguardDisplayState state = getDisplayState(display.mDisplayId);
             state.updateVisibility(this, display);
             requestDismissKeyguard |= state.mRequestDismissKeyguard;
@@ -354,7 +374,7 @@ class KeyguardController {
         // TODO(b/113840485): Handle app transition for individual display, and apply occluded
         // state change to secondary displays.
         // For now, only default display fully supports occluded change. Other displays only
-        // updates keygaurd sleep token on that display.
+        // updates keyguard sleep token on that display.
         if (displayId != DEFAULT_DISPLAY) {
             updateKeyguardSleepToken(displayId);
             return;
@@ -365,19 +385,10 @@ class KeyguardController {
             mService.deferWindowLayout();
             try {
                 mRootWindowContainer.getDefaultDisplay()
-                        .prepareAppTransition(
+                        .requestTransitionAndLegacyPrepare(
                                 isDisplayOccluded(DEFAULT_DISPLAY)
                                         ? TRANSIT_KEYGUARD_OCCLUDE
-                                        : TRANSIT_KEYGUARD_UNOCCLUDE);
-                // When the occluding activity also turns on the display, visibility of the activity
-                // can be committed before KEYGUARD_OCCLUDE transition is handled.
-                // Set mRequestForceTransition flag to make sure that the app transition animation
-                // is applied for such case.
-                // TODO(b/194243906): Fix this before enabling the remote keyguard animation.
-                if (WindowManagerService.sEnableRemoteKeyguardGoingAwayAnimation
-                        && topActivity != null) {
-                    topActivity.mRequestForceTransition = true;
-                }
+                                        : TRANSIT_KEYGUARD_UNOCCLUDE, 0 /* flags */);
                 updateKeyguardSleepToken(DEFAULT_DISPLAY);
                 mWindowManager.executeAppTransition();
             } finally {

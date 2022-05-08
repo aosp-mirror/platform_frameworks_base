@@ -601,14 +601,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                             && SystemProperties.getBoolean(PROPERTY_EMULATOR_CIRCULAR, false))) {
                         mInfo.flags |= DisplayDeviceInfo.FLAG_ROUND;
                     }
-                    if (res.getBoolean(
-                            com.android.internal.R.bool.config_maskMainBuiltInDisplayCutout)) {
-                        mInfo.flags |= DisplayDeviceInfo.FLAG_MASK_DISPLAY_CUTOUT;
-                    }
-                    mInfo.displayCutout = DisplayCutout.fromResourcesRectApproximation(res,
-                            mInfo.width, mInfo.height);
-                    mInfo.roundedCorners = RoundedCorners.fromResources(
-                            res, mInfo.width, mInfo.height);
                 } else {
                     if (!res.getBoolean(
                                 com.android.internal.R.bool.config_localDisplaysMirrorContent)) {
@@ -619,6 +611,15 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         mInfo.flags |= DisplayDeviceInfo.FLAG_PRIVATE;
                     }
                 }
+
+                if (DisplayCutout.getMaskBuiltInDisplayCutout(res, mInfo.uniqueId)) {
+                    mInfo.flags |= DisplayDeviceInfo.FLAG_MASK_DISPLAY_CUTOUT;
+                }
+                mInfo.displayCutout = DisplayCutout.fromResourcesRectApproximation(res,
+                        mInfo.uniqueId, mInfo.width, mInfo.height);
+
+                mInfo.roundedCorners = RoundedCorners.fromResources(
+                        res, mInfo.uniqueId, mInfo.width, mInfo.height);
 
                 if (mStaticDisplayInfo.isInternal) {
                     mInfo.type = Display.TYPE_INTERNAL;

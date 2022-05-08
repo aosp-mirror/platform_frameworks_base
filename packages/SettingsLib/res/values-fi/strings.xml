@@ -182,7 +182,7 @@
     <string name="tts_status_checking" msgid="8026559918948285013">"Tarkistetaan…"</string>
     <string name="tts_engine_settings_title" msgid="7849477533103566291">"Asetukset: <xliff:g id="TTS_ENGINE_NAME">%s</xliff:g>"</string>
     <string name="tts_engine_settings_button" msgid="477155276199968948">"Käynnistä moottorin asetukset"</string>
-    <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"Ensisijainen kone"</string>
+    <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"Ensisijainen moottori"</string>
     <string name="tts_general_section_title" msgid="8919671529502364567">"Yleiset"</string>
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"Palauta äänenkorkeus"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"Palauta tekstin lukemisen oletusäänenkorkeus"</string>
@@ -193,8 +193,8 @@
     <item msgid="1158955023692670059">"Nopea"</item>
     <item msgid="5664310435707146591">"Nopeampi"</item>
     <item msgid="5491266922147715962">"Hyvin nopea"</item>
-    <item msgid="7659240015901486196">"Nopea"</item>
-    <item msgid="7147051179282410945">"Erittäin nopea"</item>
+    <item msgid="7659240015901486196">"Vauhdikas"</item>
+    <item msgid="7147051179282410945">"Erittäin vauhdikas"</item>
     <item msgid="581904787661470707">"Nopein"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Valitse profiili"</string>
@@ -415,12 +415,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView-käyttöönotto"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Määritä WebView-käyttöönotto"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Tämä valinta ei ole enää saatavilla. Yritä uudestaan."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"Muunna tiedostojen salaukseksi"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Muunna…"</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"Tiedostot on jo salattu."</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"Muunnetaan tiedostopohjaiseksi salaukseksi"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Muunna dataosio tiedostopohjaiseksi salaukseksi.\n Varoitus! Kaikki tiedot poistetaan.\n Tämä ominaisuus on alfavaiheessa eikä välttämättä toimi oikein.\n Jatka painamalla Poista ja muunna…"</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"Poista ja muunna…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Kuvien värit"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"Ota sRGB käyttöön"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Poistettu käytöstä"</string>

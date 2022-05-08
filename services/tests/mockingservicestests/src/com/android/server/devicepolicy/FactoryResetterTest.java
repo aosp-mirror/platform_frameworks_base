@@ -48,7 +48,7 @@ import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
 
 /**
- * Run it as {@code atest FrameworksMockingCoreTests:FactoryResetterTest}
+ * Run it as {@code atest FrameworksMockingServicesTests:FactoryResetterTest}
  */
 @Presubmit
 public final class FactoryResetterTest {

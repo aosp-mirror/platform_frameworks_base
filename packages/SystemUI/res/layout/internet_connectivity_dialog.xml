@@ -19,9 +19,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:id="@+id/internet_connectivity_dialog"
-    android:layout_width="@dimen/internet_dialog_list_max_width"
-    android:layout_height="@dimen/internet_dialog_list_max_height"
-    android:background="@drawable/internet_dialog_rounded_top_corner_background"
+    android:layout_width="@dimen/large_dialog_width"
+    android:layout_height="wrap_content"
     android:orientation="vertical">
 
     <LinearLayout
@@ -35,9 +34,10 @@
 
         <TextView
             android:id="@+id/internet_dialog_title"
+            android:ellipsize="end"
             android:gravity="center_vertical|center_horizontal"
             android:layout_width="wrap_content"
-            android:layout_height="32dp"
+            android:layout_height="wrap_content"
             android:textAppearance="@style/TextAppearance.InternetDialog"
             android:textSize="24sp"/>
 
@@ -45,7 +45,7 @@
             android:id="@+id/internet_dialog_subtitle"
             android:gravity="center_vertical|center_horizontal"
             android:layout_width="wrap_content"
-            android:layout_height="20dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:ellipsize="end"
             android:maxLines="1"
@@ -53,22 +53,22 @@
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="@dimen/internet_dialog_progress_bar_width"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
         android:layout_marginBottom="@dimen/internet_dialog_network_layout_margin"
         android:orientation="vertical">
 
         <View
             android:id="@+id/divider"
-            android:layout_gravity="center_vertical|center_horizontal"
-            android:layout_width="340dp"
+            android:layout_width="match_parent"
             android:layout_height="4dp"
+            android:layout_gravity="center_vertical|center_horizontal"
             android:background="?androidprv:attr/colorSurfaceVariant"/>
 
         <ProgressBar
             android:id="@+id/wifi_searching_progress"
-            android:indeterminate="true"
-            android:layout_width="340dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:visibility="gone"
@@ -151,11 +151,26 @@
                         android:gravity="start|center_vertical">
                         <TextView
                             android:id="@+id/mobile_title"
+                            android:maxLines="1"
                             style="@style/InternetDialog.NetworkTitle"/>
                         <TextView
                             android:id="@+id/mobile_summary"
                             style="@style/InternetDialog.NetworkSummary"/>
+                        <TextView
+                            android:id="@+id/airplane_mode_summary"
+                            android:text="@string/airplane_mode"
+                            android:visibility="gone"
+                            style="@style/InternetDialog.NetworkSummary"/>
                     </LinearLayout>
+
+                    <View
+                        android:id="@+id/mobile_toggle_divider"
+                        android:layout_width="1dp"
+                        android:layout_height="28dp"
+                        android:layout_marginStart="7dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_gravity="center_vertical"
+                        android:background="?android:attr/textColorSecondary"/>
 
                     <FrameLayout
                         android:layout_width="@dimen/settingslib_switch_track_width"
@@ -178,7 +193,7 @@
                 <LinearLayout
                     android:id="@+id/turn_on_wifi_layout"
                     style="@style/InternetDialog.Network"
-                    android:layout_height="72dp"
+                    android:layout_height="@dimen/internet_dialog_wifi_network_height"
                     android:gravity="center"
                     android:clickable="false"
                     android:focusable="false">
@@ -220,7 +235,7 @@
                 <LinearLayout
                     android:id="@+id/wifi_connected_layout"
                     style="@style/InternetDialog.Network"
-                    android:layout_height="72dp"
+                    android:layout_height="@dimen/internet_dialog_wifi_network_height"
                     android:paddingStart="20dp"
                     android:paddingEnd="24dp"
                     android:background="@drawable/settingslib_switch_bar_bg_on"
@@ -242,7 +257,7 @@
                         android:orientation="vertical"
                         android:clickable="false"
                         android:layout_width="wrap_content"
-                        android:layout_height="72dp"
+                        android:layout_height="@dimen/internet_dialog_wifi_network_height"
                         android:layout_marginEnd="30dp"
                         android:layout_weight="1"
                         android:gravity="start|center_vertical">
@@ -330,7 +345,8 @@
                 android:layout_height="wrap_content"
                 android:paddingBottom="4dp"
                 android:clickable="false"
-                android:focusable="false">
+                android:focusable="false"
+                android:visibility="gone">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -363,26 +379,54 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <FrameLayout
-                android:id="@+id/done_layout"
-                android:layout_width="67dp"
-                android:layout_height="48dp"
-                android:layout_marginEnd="24dp"
-                android:layout_marginBottom="40dp"
-                android:layout_gravity="end|center_vertical"
-                android:clickable="true"
-                android:focusable="true">
-                <Button
-                    android:text="@string/inline_done_button"
-                    style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
-                    android:layout_width="match_parent"
-                    android:layout_height="36dp"
-                    android:layout_gravity="center"
-                    android:textAppearance="@style/TextAppearance.InternetDialog"
-                    android:textSize="14sp"
-                    android:background="@drawable/internet_dialog_footer_background"
-                    android:clickable="false"/>
-            </FrameLayout>
+            <LinearLayout
+                android:id="@+id/button_layout"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="@dimen/dialog_side_padding"
+                android:layout_marginEnd="@dimen/dialog_side_padding"
+                android:layout_marginBottom="@dimen/dialog_bottom_padding"
+                android:clickable="false"
+                android:focusable="false">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_gravity="start|center_vertical"
+                    android:orientation="vertical">
+                    <Button
+                        android:id="@+id/apm_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/turn_off_airplane_mode"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        style="@style/Widget.Dialog.Button.BorderButton"
+                        android:clickable="true"
+                        android:focusable="true"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_gravity="end|center_vertical">
+                    <Button
+                        android:id="@+id/done_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/inline_done_button"
+                        style="@style/Widget.Dialog.Button"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:clickable="true"
+                        android:focusable="true"/>
+                </LinearLayout>
+            </LinearLayout>
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </LinearLayout>

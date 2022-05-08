@@ -544,7 +544,7 @@
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"tukuyin ang relatibong posisyon sa pagitan ng mga kalapit na Ultra-Wideband device"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Payagan ang app na tukuyin ang relatibong posisyon sa pagitan ng mga kalapit na Ultra-Wideband device"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"makipag-ugnayan sa mga kalapit na Wi‑Fi device"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Nagbibigay-daan sa app na i-advertise, kumonekta sa, at tukuyin ang nauugnay na posisyon ng mga kalapit na Wi‑Fi device"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Nagbibigay-daan sa app na i-advertise ang, kumonekta sa, at tukuyin ang nauugnay na posisyon ng mga kalapit na Wi‑Fi device"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Impormasyon sa Gustong NFC na Serbisyo sa Pagbabayad"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Pinapayagan ang app na makakuha ng impormasyon sa gustong nfc na serbisyo sa pagbabayad tulad ng mga nakarehistrong application ID at destinasyon ng ruta."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrolin ang Near Field Communication"</string>
@@ -620,6 +620,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"I-tap para i-delete ang iyong face model, pagkatapos ay idagdag ulit ang mukha mo"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"I-set up ang Pag-unlock Gamit ang Mukha"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"I-unlock ang iyong telepono sa pamamagitan ng pagtingin dito"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Para magamit ang Pag-unlock Gamit ang Mukha, i-on ang "<b>"Access sa camera"</b>" sa Mga Setting &gt; Privacy"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Mag-set up ng higit pang paraan para mag-unlock"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"I-tap para magdagdag ng fingerprint"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Pag-unlock Gamit ang Fingerprint"</string>
@@ -733,9 +734,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Subaybayan ang mga pagsubok sa pag-unlock ng screen"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Subaybayan ang bilang ng mga hindi tamang password na na-type kapag ina-unlock ang screen, at i-lock ang tablet o burahin ang lahat ng data ng tablet kung masyadong maraming hindi tamang password ang na-type."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Subaybayan ang dami ng mga maling password na na-type kapag ina-unlock ang screen, at i-lock ang Android TV device o burahin ang lahat ng data ng Android TV device kung masyadong maraming maling password ang na-type."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Subaybayan ang bilang ng mga maling password kapag ina-unlock ang screen, at i-lock ang infotainment system o burahin ang lahat ng data ng infotainment system kung masyadong maraming maling password ang nata-type."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Subaybayan ang bilang ng mga maling password na na-type kapag ina-unlock ang screen, at i-lock ang telepono o burahin ang lahat ng data ng telepono kung masyadong maraming maling password ang na-type."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Subaybayan ang bilang ng mga maling password na na-type kapag ina-unlock ang screen, at i-lock ang tablet o burahin ang lahat ng data ng user na ito kung masyadong maraming maling password ang nata-type."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Subaybayan ang dami ng mga maling password na na-type kapag ina-unlock ang screen, at i-lock ang iyong Android TV device o burahin ang lahat ng data ng user na ito kung masyadong maraming maling password ang na-type."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Subaybayan ang bilang ng mga maling password na na-type kapag ina-unlock ang screen, at i-lock ang infotainment system o burahin ang lahat ng data ng profile na ito kung masyadong maraming maling password ang nata-type."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Subaybayan ang bilang ng mga maling password na na-type kapag ina-unlock ang screen, at i-lock ang telepono o burahin ang lahat ng data ng user na ito kung masyadong maraming maling password ang nata-type."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Palitan ang screen lock"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Palitan ang screen lock."</string>
@@ -744,10 +747,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Burahin ang lahat ng data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Burahin ang data ng tablet nang walang babala sa pamamagitan ng pagsasagawa ng pag-reset ng factory data."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Burahin ang data ng iyong Android TV device nang walang babala sa pamamagitan ng pagsasagawa ng pag-reset ng factory data."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Burahin ang data ng infotainment system nang walang babala sa pamamagitan ng pagsasagawa ng pag-reset ng factory data."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Burahin ang data ng telepono nang walang babala sa pamamagitan ng pagsasagawa ng pag-reset ng factory data."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Burahin ang data ng user"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Burahin ang data ng profile"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Burahin ang data ng user"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Burahin ang data ng user na ito sa tablet na ito nang walang babala."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Burahin ang data ng user na ito sa Android TV device na ito nang walang babala."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Burahin ang data ng profile na ito sa infotainment system na ito nang walang babala."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Burahin ang data ng user na ito sa teleponong ito nang walang babala."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Itakda ang pandaigdigang proxy ng device"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Itakda ang pandaigdigang proxy ng device na gagamitin habang naka-enable ang patakaran. Ang may-ari ng device lang ang makakapagtakda sa pandaigdigang proxy."</string>
@@ -1697,7 +1703,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kapag naka-on ang shortcut, magsisimula ang isang feature ng pagiging naa-access kapag pinindot ang parehong button ng volume."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"I-on ang shortcut para sa mga feature ng pagiging naa-access?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Mao-on ang mga feature ng accessibility kapag pinindot nang matagal ang parehong volume key nang ilang segundo. Posibleng mabago nito ang paggana ng iyong device.\n\nMga kasalukuyang feature:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nPuwede mong baguhin ang mga napiling feature sa Mga Setting &gt; Accessibility."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"I-on ang shortcut ng <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Mao-on ang feature ng accessibility na <xliff:g id="SERVICE">%1$s</xliff:g> kapag pinindot nang matagal ang parehong volume key nang ilang segundo. Posibleng mabago nito ang paggana ng iyong device.\n\nPuwede mong palitan ng ibang feature ang shortcut na ito sa Mga Setting &gt; Accessibility."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"I-on"</string>

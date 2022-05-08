@@ -17,7 +17,7 @@
 */
 -->
 
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Keyguard PIN pad styles -->
     <style name="Keyguard.TextView" parent="@android:style/Widget.DeviceDefault.TextView">
         <item name="android:textSize">@dimen/kg_status_line_font_size</item>
@@ -37,6 +37,10 @@
       <item name="android:colorControlNormal">@null</item>
       <item name="android:colorControlHighlight">?android:attr/colorAccent</item>
       <item name="android:background">@drawable/num_pad_key_background</item>
+
+      <!-- Default values for NumPadKey used in a ConstraintLayout. -->
+      <item name="layout_constraintDimensionRatio">@string/num_pad_key_ratio</item>
+      <item name="layout_constraintWidth_max">@dimen/num_pad_key_width</item>
     </style>
     <style name="Widget.TextView.NumPadKey.Digit"
            parent="@android:style/Widget.DeviceDefault.TextView">
@@ -54,12 +58,12 @@
         <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
     <style name="NumPadKey.Delete">
-        <item name="android:colorControlNormal">?android:attr/textColorSecondary</item>
+        <item name="android:colorControlNormal">@color/numpad_key_color_secondary</item>
         <item name="android:src">@drawable/ic_backspace_24dp</item>
     </style>
     <style name="NumPadKey.Enter">
-      <item name="android:colorControlNormal">?android:attr/textColorSecondary</item>
-      <item name="android:src">@drawable/ic_keyboard_tab_36dp</item>
+        <item name="android:colorControlNormal">@color/numpad_key_color_secondary</item>
+        <item name="android:src">@drawable/ic_keyboard_tab_36dp</item>
     </style>
     <style name="Widget.TextView.NumPadKey.Klondike"
            parent="@android:style/Widget.DeviceDefault.TextView">
@@ -71,9 +75,6 @@
     </style>
 
     <!-- Built-in clock widget stuff -->
-    <style name="widget_label">
-        <item name="android:textSize">@dimen/widget_label_font_size</item>
-    </style>
     <style name="widget_big">
         <item name="android:textSize">@dimen/widget_big_font_size</item>
         <item name="android:paddingBottom">@dimen/bottom_text_spacing_digital</item>
@@ -83,15 +84,7 @@
         <item name="android:shadowColor">@color/keyguard_shadow_color</item>
         <item name="android:shadowRadius">?attr/shadowRadius</item>
     </style>
-    <style name="widget_title_bold">
-        <item name="android:textStyle">bold</item>
-        <item name="android:textSize">@dimen/widget_title_font_size</item>
-        <item name="android:paddingBottom">@dimen/widget_vertical_padding_clock</item>
-        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
-        <item name="android:ellipsize">none</item>
-        <item name="android:shadowColor">@color/keyguard_shadow_color</item>
-        <item name="android:shadowRadius">?attr/shadowRadius</item>
-    </style>
+
     <style name="widget_small_bold">
         <item name="android:textStyle">bold</item>
         <item name="android:textSize">@dimen/widget_small_font_size</item>
@@ -119,7 +112,7 @@
     <style name="TextAppearance.Keyguard">
         <item name="android:textSize">@dimen/widget_title_font_size</item>
         <item name="android:lineHeight">@dimen/widget_title_line_height</item>
-        <item name="android:gravity">center</item>
+        <item name="android:gravity">start</item>
         <item name="android:ellipsize">end</item>
         <item name="android:maxLines">2</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
@@ -138,6 +131,7 @@
     <style name="TextAppearance.Keyguard.BottomArea">
         <item name="android:textSize">14sp</item>
         <item name="android:maxLines">1</item>
+        <item name="android:gravity">center</item>
         <item name="android:textColor">?attr/wallpaperTextColor</item>
         <item name="android:shadowColor">@color/keyguard_shadow_color</item>
         <item name="android:shadowRadius">?attr/shadowRadius</item>

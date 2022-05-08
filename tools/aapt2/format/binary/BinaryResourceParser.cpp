@@ -120,6 +120,13 @@ bool BinaryResourceParser::Parse() {
                                   static_cast<int>(parser.chunk()->type)));
     }
   }
+
+  if (!staged_entries_to_remove_.empty()) {
+    diag_->Error(DiagMessage(source_) << "didn't find " << staged_entries_to_remove_.size()
+                                      << " original staged resources");
+    return false;
+  }
+
   return true;
 }
 
@@ -393,6 +400,12 @@ bool BinaryResourceParser::ParseType(const ResourceTablePackage* package,
       return false;
     }
 
+    if (const auto to_remove_it = staged_entries_to_remove_.find({name, res_id});
+        to_remove_it != staged_entries_to_remove_.end()) {
+      staged_entries_to_remove_.erase(to_remove_it);
+      continue;
+    }
+
     NewResourceBuilder res_builder(name);
     res_builder.SetValue(std::move(resource_value), config)
         .SetId(res_id, OnIdConflict::CREATE_ENTRY)
@@ -533,9 +546,8 @@ bool BinaryResourceParser::ParseStagedAliases(const ResChunk_header* chunk) {
     // Since a the finalized resource entry is cloned and added to the resource table under the
     // staged resource id, remove the cloned resource entry from the table.
     if (!table_->RemoveResource(resource_name, staged_id)) {
-      diag_->Error(DiagMessage(source_) << "failed to find resource entry for staged "
-                                        << " resource ID " << staged_id);
-      return false;
+      // If we haven't seen this resource yet let's add a record to skip it when parsing.
+      staged_entries_to_remove_.insert({resource_name, staged_id});
     }
   }
   return true;

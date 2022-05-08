@@ -3634,6 +3634,7 @@ public final class MediaCodecInfo {
                         .parseIntRange(info.getString("quality-range"), mQualityRange);
             }
             if (info.containsKey("feature-bitrate-modes")) {
+                mBitControl = 0;
                 for (String mode: info.getString("feature-bitrate-modes").split(",")) {
                     mBitControl |= (1 << parseBitrateMode(mode));
                 }

@@ -195,6 +195,12 @@ public class KeyguardServiceWrapper implements IKeyguardService {
 
     @Override // Binder interface
     public void doKeyguardTimeout(Bundle options) {
+        int userId = mKeyguardStateMonitor.getCurrentUser();
+        if (mKeyguardStateMonitor.isSecure(userId)) {
+            // Preemptively inform the cache that the keyguard will soon be showing, as calls to
+            // doKeyguardTimeout are a signal to lock the device as soon as possible.
+            mKeyguardStateMonitor.onShowingStateChanged(true, userId);
+        }
         try {
             mService.doKeyguardTimeout(options);
         } catch (RemoteException e) {
@@ -259,10 +265,6 @@ public class KeyguardServiceWrapper implements IKeyguardService {
 
     public boolean isTrusted() {
         return mKeyguardStateMonitor.isTrusted();
-    }
-
-    public boolean hasLockscreenWallpaper() {
-        return mKeyguardStateMonitor.hasLockscreenWallpaper();
     }
 
     public boolean isSecure(int userId) {

@@ -208,6 +208,16 @@ droidstubs {
 /////////////////////////////////////////////////////////////////////
 
 java_defaults {
+    name: "android.jar_defaults",
+    sdk_version: "none",
+    system_modules: "none",
+    java_version: "1.8",
+    compile_dex: true,
+    defaults_visibility: ["//visibility:private"],
+    visibility: ["//visibility:public"],
+}
+
+java_defaults {
     name: "android-non-updatable_defaults_stubs_current",
     libs: ["stub-annotations"],
     static_libs: ["framework-res-package-jar"], // Export package of framework-res

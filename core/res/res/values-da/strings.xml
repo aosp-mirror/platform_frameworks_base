@@ -544,7 +544,7 @@
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"fastlægge den relative position mellem UWB-enheder i nærheden"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Tillad, at appen fastlægger den relative position mellem UWB-enheder (Ultra-Wideband) i nærheden"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"interagere med Wi‑Fi-enheder i nærheden"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Giver appen tilladelse til at informere om, oprette forbindelse til og fastslå den relative placering af Wi‑Fi -enheder i nærheden"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Giver appen tilladelse til at informere om, oprette forbindelse til og fastslå den relative placering af Wi‑Fi-enheder i nærheden"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Foretrukne oplysninger vedrørende NFC-betalingstjeneste"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Tillader, at appen får foretrukne oplysninger vedrørende NFC-betalingstjeneste, f.eks. registrerede hjælpemidler og rutedestinationer."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"administrere Near Field Communication"</string>
@@ -620,6 +620,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Tryk for at slette din ansigtsmodel, og tilføj derefter dit ansigt igen"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Konfigurer ansigtslås"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Lås din telefon op ved at kigge på den"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Hvis du vil bruge ansigtslåsen, skal du aktivere "<b>"Kameraadgang"</b>" under Indstillinger &gt; Privatliv"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Konfigurer flere måder at låse op på"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Tryk for at tilføje et fingeraftryk"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Oplåsning med fingeraftryk"</string>
@@ -733,9 +734,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Overvåg forsøg på oplåsning af skærm"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Overvåg antallet af forkert indtastede adgangskoder, når du låser skærmen op, og lås din tablet, eller slet alle data i den, hvis der er indtastet for mange forkerte adgangskoder."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Registrer antallet af forkerte adgangskoder, der angives ved oplåsning af skærmen, og lås din Android TV-enhed, eller ryd alle dataene på din Android TV-enhed, hvis adgangskoden angives forkert for mange gange."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Registrer antallet af forkert indtastede adgangskoder, når du låser skærmen op, og lås infotainmentsystemet, eller slet alle data i infotainmentsystemet, hvis der er indtastet for mange forkerte adgangskoder."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Overvåg antallet af forkerte adgangskoder ved oplåsning af skærmen, og lås telefonen eller slet alle data på telefonen, hvis der er indtastet for mange forkerte adgangskoder."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Registrer antallet af forkerte adgangskoder, der angives ved oplåsning af skærmen, og lås din tablet, eller slet alle brugerens data, hvis adgangskoden tastes forkert for mange gange."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Registrer antallet af forkerte adgangskoder, der angives ved oplåsning af skærmen, og lås din Android TV-enhed, eller ryd alle brugerens data, hvis adgangskoden angives forkert for mange gange."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Registrer antallet af forkert indtastede adgangskoder, når du låser skærmen op, og lås infotainmentsystemet, eller slet alle data på denne profil, hvis der er indtastet for mange forkerte adgangskoder."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Registrer antallet af forkerte adgangskoder, der angives ved oplåsning af skærmen, og lås telefonen, eller slet alle brugerens data, hvis adgangskoden tastes forkert for mange gange."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Skifte skærmlås"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Skifter skærmlåsen."</string>
@@ -744,10 +747,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Slette alle data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Slet din tablets data uden varsel ved at gendanne fabriksindstillingerne."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Ryd dataene på din Android TV-enhed uden at gendanne fabriksdataene."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Ryd infotainmentsystemets data uden varsel ved at gendanne fabriksindstillingerne."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Sletter telefonens data uden varsel ved at gendanne fabriksindstillingerne."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Slet brugerdata"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Ryd profildata"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Slet brugerdata"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Slet denne brugers data på denne tablet uden varsel."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Ryd denne brugers data på denne Android TV-enhed uden varsel."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Ryd denne profils data i dette infotainmentsystem uden varsel."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Slet denne brugers data på denne telefon uden varsel."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Angiv enhedens globale proxy"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Indstil den globale proxy for enheden, der skal bruges, mens politikken er aktiveret. Det er kun enhedens ejer, der kan indstille den globale proxy."</string>
@@ -1697,7 +1703,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Når genvejen er aktiveret, kan du starte en hjælpefunktion ved at trykke på begge lydstyrkeknapper i tre sekunder."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Vil du aktivere genvejen til hjælpefunktioner?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Hvis du holder begge lydstyrkeknapperne nede i et par sekunder, aktiveres hjælpefunktionerne. Det kan ændre på, hvordan din enhed fungerer.\n\nAktuelle funktioner:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nDu kan ændre de valgte funktioner i Indstillinger &gt; Hjælpefunktioner."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Vil du aktivere <xliff:g id="SERVICE">%1$s</xliff:g>-genvejen?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Hvis du holder begge lydstyrkeknapperne nede i et par sekunder, aktiveres hjælpefunktionen <xliff:g id="SERVICE">%1$s</xliff:g>. Det kan ændre på, hvordan din enhed fungerer.\n\nDu kan ændre denne genvej til en anden funktion i Indstillinger &gt; Hjælpefunktioner."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Aktivér"</string>

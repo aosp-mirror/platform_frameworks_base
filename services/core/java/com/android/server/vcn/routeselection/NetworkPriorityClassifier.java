@@ -24,6 +24,7 @@ import static android.net.vcn.VcnUnderlyingNetworkTemplate.MATCH_FORBIDDEN;
 import static android.net.vcn.VcnUnderlyingNetworkTemplate.MATCH_REQUIRED;
 
 import static com.android.server.VcnManagementService.LOCAL_LOG;
+import static com.android.server.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -34,7 +35,6 @@ import android.net.vcn.VcnManager;
 import android.net.vcn.VcnUnderlyingNetworkTemplate;
 import android.net.vcn.VcnWifiUnderlyingNetworkTemplate;
 import android.os.ParcelUuid;
-import android.os.PersistableBundle;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.util.Slog;
@@ -81,7 +81,7 @@ class NetworkPriorityClassifier {
             ParcelUuid subscriptionGroup,
             TelephonySubscriptionSnapshot snapshot,
             UnderlyingNetworkRecord currentlySelected,
-            PersistableBundle carrierConfig) {
+            PersistableBundleWrapper carrierConfig) {
         // mRouteSelectionNetworkRequest requires a network be both VALIDATED and NOT_SUSPENDED
 
         if (networkRecord.isBlocked) {
@@ -119,7 +119,7 @@ class NetworkPriorityClassifier {
             ParcelUuid subscriptionGroup,
             TelephonySubscriptionSnapshot snapshot,
             UnderlyingNetworkRecord currentlySelected,
-            PersistableBundle carrierConfig) {
+            PersistableBundleWrapper carrierConfig) {
         final NetworkCapabilities caps = networkRecord.networkCapabilities;
         final boolean isSelectedUnderlyingNetwork =
                 currentlySelected != null
@@ -181,7 +181,7 @@ class NetworkPriorityClassifier {
             VcnWifiUnderlyingNetworkTemplate networkPriority,
             UnderlyingNetworkRecord networkRecord,
             UnderlyingNetworkRecord currentlySelected,
-            PersistableBundle carrierConfig) {
+            PersistableBundleWrapper carrierConfig) {
         final NetworkCapabilities caps = networkRecord.networkCapabilities;
 
         if (!caps.hasTransport(TRANSPORT_WIFI)) {
@@ -204,7 +204,7 @@ class NetworkPriorityClassifier {
     private static boolean isWifiRssiAcceptable(
             UnderlyingNetworkRecord networkRecord,
             UnderlyingNetworkRecord currentlySelected,
-            PersistableBundle carrierConfig) {
+            PersistableBundleWrapper carrierConfig) {
         final NetworkCapabilities caps = networkRecord.networkCapabilities;
         final boolean isSelectedNetwork =
                 currentlySelected != null
@@ -314,7 +314,7 @@ class NetworkPriorityClassifier {
         return false;
     }
 
-    static int getWifiEntryRssiThreshold(@Nullable PersistableBundle carrierConfig) {
+    static int getWifiEntryRssiThreshold(@Nullable PersistableBundleWrapper carrierConfig) {
         if (carrierConfig != null) {
             return carrierConfig.getInt(
                     VcnManager.VCN_NETWORK_SELECTION_WIFI_ENTRY_RSSI_THRESHOLD_KEY,
@@ -323,7 +323,7 @@ class NetworkPriorityClassifier {
         return WIFI_ENTRY_RSSI_THRESHOLD_DEFAULT;
     }
 
-    static int getWifiExitRssiThreshold(@Nullable PersistableBundle carrierConfig) {
+    static int getWifiExitRssiThreshold(@Nullable PersistableBundleWrapper carrierConfig) {
         if (carrierConfig != null) {
             return carrierConfig.getInt(
                     VcnManager.VCN_NETWORK_SELECTION_WIFI_EXIT_RSSI_THRESHOLD_KEY,

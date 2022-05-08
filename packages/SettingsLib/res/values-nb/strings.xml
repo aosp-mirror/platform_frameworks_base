@@ -415,12 +415,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView-implementering"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Angi WebView-implementering"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Dette valget er ikke gyldig lenger. Prøv på nytt."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"Konvertér til kryptert fil"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Konvertér …"</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"Allerede kryptert og lagret som fil"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"Konvertér til filbasert kryptering"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Konvertér datapartisjonen til filbasert kryptering.\n !!Advarsel!! Dette gjør at alle dataene dine slettes.\n Dette er en alfafunksjon, som kanskje ikke fungerer som forventet.\n Trykk på «Slett og konvertér …» for å fortsette."</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"Slett og konvertér …"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Fargemodus for bilder"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"Bruk sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Slått av"</string>

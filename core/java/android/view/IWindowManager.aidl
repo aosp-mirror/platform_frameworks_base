@@ -53,12 +53,14 @@ import android.view.IWindowSessionCallback;
 import android.view.KeyEvent;
 import android.view.InputEvent;
 import android.view.InsetsState;
+import android.view.InsetsVisibilities;
 import android.view.MagnificationSpec;
 import android.view.MotionEvent;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.IInputFilter;
 import android.view.AppTransitionAnimationSpec;
+import android.view.TaskTransitionSpec;
 import android.view.WindowContentFrameStats;
 import android.view.WindowManager;
 import android.view.SurfaceControl;
@@ -345,6 +347,14 @@ interface IWindowManager
     Bitmap screenshotWallpaper();
 
     /**
+     * Mirrors the wallpaper for the given display.
+     *
+     * @param displayId ID of the display for the wallpaper.
+     * @return A SurfaceControl for the parent of the mirrored wallpaper.
+     */
+    SurfaceControl mirrorWallpaperSurface(int displayId);
+
+    /**
      * Registers a wallpaper visibility listener.
      * @return Current visibility.
      */
@@ -520,9 +530,10 @@ interface IWindowManager
     void unregisterDisplayFoldListener(IDisplayFoldListener listener);
 
     /**
-     * Registers an IDisplayContainerListener
+     * Registers an IDisplayContainerListener, and returns the set of existing display ids. The
+     * listener's onDisplayAdded() will not be called for the displays returned.
      */
-    void registerDisplayWindowListener(IDisplayWindowListener listener);
+    int[] registerDisplayWindowListener(IDisplayWindowListener listener);
 
     /**
      * Unregisters an IDisplayContainerListener.
@@ -720,14 +731,15 @@ interface IWindowManager
             int displayId, in IDisplayWindowInsetsController displayWindowInsetsController);
 
     /**
-     * Called when a remote process modifies insets on a display window container.
+     * Called when a remote process updates the requested visibilities of insets on a display window
+     * container.
      */
-    void modifyDisplayWindowInsets(int displayId, in InsetsState state);
+    void updateDisplayWindowRequestedVisibilities(int displayId, in InsetsVisibilities vis);
 
     /**
      * Called to get the expected window insets.
      *
-     * @return {@code true} if system bars are always comsumed.
+     * @return {@code true} if system bars are always consumed.
      */
     boolean getWindowInsets(in WindowManager.LayoutParams attrs, int displayId,
             out InsetsState outInsetsState);
@@ -842,6 +854,23 @@ interface IWindowManager
     void attachWindowContextToWindowToken(IBinder clientToken, IBinder token);
 
     /**
+     * Attaches a {@code clientToken} to associate with DisplayContent.
+     * <p>
+     * Note that this API should be invoked after calling
+     * {@link android.window.WindowTokenClient#attachContext(Context)}
+     * </p>
+     *
+     * @param clientToken {@link android.window.WindowContext#getWindowContextToken()
+     * the WindowContext's token}
+     * @param displayId The display associated with the window context
+     *
+     * @return the DisplayContent's {@link android.app.res.Configuration} if the Context is
+     * attached to the DisplayContent successfully. {@code null}, otherwise.
+     * @throws android.view.WindowManager.InvalidDisplayException if the display ID is invalid
+     */
+    Configuration attachToDisplayContent(IBinder clientToken, int displayId);
+
+    /**
      * Detaches {@link android.window.WindowContext} from the window manager node it's currently
      * attached to. It is no-op if the WindowContext is not attached to a window manager node.
      *
@@ -866,4 +895,24 @@ interface IWindowManager
     void unregisterCrossWindowBlurEnabledListener(ICrossWindowBlurEnabledListener listener);
 
     boolean isTaskSnapshotSupported();
+
+    /**
+     * Returns the preferred display ID to show software keyboard.
+     *
+     * @see android.window.WindowProviderService#getLaunchedDisplayId
+     */
+    int getImeDisplayId();
+
+    /**
+     * Customized the task transition animation with a task transition spec.
+     *
+     * @param spec the spec that will be used to customize the task animations
+     */
+    void setTaskTransitionSpec(in TaskTransitionSpec spec);
+
+    /**
+     * Clears any task transition spec that has been previously set and
+     * reverts to using the default task transition with no spec changes.
+     */
+    void clearTaskTransitionSpec();
 }

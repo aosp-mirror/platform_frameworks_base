@@ -14,32 +14,8 @@
      limitations under the License.
 -->
 
-<resources xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- NOTE: Adding the androidprv: namespace to this file will break the studio build. -->
-    <style name="ClearAllButtonDefaultMargins">
-        <item name="android:layout_marginStart">0dp</item>
-        <item name="android:layout_marginTop">0dp</item>
-        <item name="android:layout_marginEnd">0dp</item>
-        <item name="android:layout_marginBottom">0dp</item>
-    </style>
-
-    <style name="PipPhoneOverlayControlTheme" parent="@android:style/Theme.Material">
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:colorBackgroundCacheHint">@null</item>
-        <item name="android:statusBarColor">@*android:color/transparent</item>
-        <item name="android:windowAnimationStyle">@style/Animation.PipPhoneOverlayControl</item>
-    </style>
-
-    <style name="Animation.PipPhoneOverlayControl" parent="@android:style/Animation">
-        <item name="android:activityOpenEnterAnimation">@anim/forced_resizable_enter</item>
-
-        <!-- If the target stack doesn't have focus, we do a task to front animation. -->
-        <item name="android:taskToFrontEnterAnimation">@anim/forced_resizable_enter</item>
-        <item name="android:activityCloseExitAnimation">@anim/forced_resizable_exit</item>
-    </style>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+           xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
 
     <!-- HybridNotification themes and styles -->
 
@@ -64,17 +40,6 @@
         <item name="android:paddingEnd">4dp</item>
     </style>
 
-
-    <style name="TextAppearance.StatusBar.HeadsUp"
-        parent="@*android:style/TextAppearance.StatusBar">
-    </style>
-
-    <style name="TextAppearance.StatusBar.SystemPanel"
-        parent="@*android:style/TextAppearance.StatusBar">
-        <item name="android:textAppearance">?android:attr/textAppearance</item>
-        <item name="android:textStyle">normal</item>
-        <item name="android:textColor">#FF808080</item>
-    </style>
 
     <style name="TextAppearance.StatusBar.Clock" parent="@*android:style/TextAppearance.StatusBar.Icon">
         <item name="android:textSize">@dimen/status_bar_clock_size</item>
@@ -172,11 +137,6 @@
         <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
-    <style name="TextAppearance.QS.Subhead">
-        <item name="android:textSize">14sp</item>
-        <item name="android:textColor">@color/qs_subhead</item>
-    </style>
-
     <style name="TextAppearance.QS.SegmentedButton">
         <item name="android:textSize">16sp</item>
         <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
@@ -211,16 +171,7 @@
         <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
-    <style name="TextAppearance.QS.UserSwitcher.Activated">
-        <item name="android:fontWeight">700</item>
-        <item name="android:textStyle">bold</item>
-    </style>
-
     <!-- This is hard coded to be sans-serif-condensed to match the icons -->
-    <style name="TextAppearance.RATBadge" parent="@style/TextAppearance.QS.TileLabel.Secondary">
-        <item name="android:fontFamily">sans-serif-condensed</item>
-        <item name="android:textSize">@dimen/celltile_rat_type_size</item>
-    </style>
 
     <style name="TextAppearance.QS.Status">
         <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
@@ -247,10 +198,6 @@
         <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
-    <style name="TextAppearance.DeviceManagementDialog">
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
-    </style>
-
     <style name="TextAppearance.DeviceManagementDialog.Title" parent="@android:style/TextAppearance.DeviceDefault.DialogWindowTitle"/>
 
     <style name="TextAppearance.AuthCredential">
@@ -266,8 +213,6 @@
         <item name="android:paddingTop">12dp</item>
         <item name="android:paddingHorizontal">24dp</item>
         <item name="android:textSize">24sp</item>
-        <item name="android:singleLine">true</item>
-        <item name="android:ellipsize">marquee</item>
     </style>
 
     <style name="TextAppearance.AuthCredential.Subtitle">
@@ -275,8 +220,6 @@
         <item name="android:paddingTop">8dp</item>
         <item name="android:paddingHorizontal">24dp</item>
         <item name="android:textSize">16sp</item>
-        <item name="android:singleLine">true</item>
-        <item name="android:ellipsize">marquee</item>
     </style>
 
     <style name="TextAppearance.AuthCredential.Description">
@@ -284,8 +227,6 @@
         <item name="android:paddingTop">8dp</item>
         <item name="android:paddingHorizontal">24dp</item>
         <item name="android:textSize">14sp</item>
-        <item name="android:singleLine">true</item>
-        <item name="android:ellipsize">marquee</item>
     </style>
 
     <style name="TextAppearance.AuthCredential.Error">
@@ -318,11 +259,6 @@
 
     <style name="Animation" />
 
-    <style name="Animation.ShirtPocketPanel">
-        <item name="android:windowEnterAnimation">@*android:anim/grow_fade_in_from_bottom</item>
-        <item name="android:windowExitAnimation">@*android:anim/shrink_fade_out_from_bottom</item>
-    </style>
-
     <style name="Animation.NavigationBarFadeIn">
         <item name="android:windowEnterAnimation">@anim/navbar_fade_in</item>
         <item name="android:windowExitAnimation">@null</item>
@@ -331,12 +267,7 @@
     <style name="Animation.ShutdownUi" parent="@android:style/Animation.Toast">
     </style>
 
-    <style name="Animation.MediaOutputDialog" parent="@android:style/Animation.InputMethod">
-    </style>
-
     <!-- Standard animations for hiding and showing the status bar. -->
-    <style name="Animation.StatusBar">
-    </style>
 
     <style name="Theme.SystemUI" parent="@*android:style/Theme.DeviceDefault.SystemUI">
         <item name="lightIconTheme">@style/DualToneLightTheme</item>
@@ -420,7 +351,20 @@
         <item name="android:windowIsFloating">true</item>
     </style>
 
-    <style name="Theme.SystemUI.Dialog" parent="@android:style/Theme.DeviceDefault.Light.Dialog" />
+    <style name="Theme.SystemUI.DayNightDialog" parent="@android:style/Theme.DeviceDefault.Light.Dialog"/>
+
+    <style name="Theme.SystemUI.Dialog" parent="@style/Theme.SystemUI.DayNightDialog">
+        <item name="android:buttonCornerRadius">28dp</item>
+        <item name="android:buttonBarPositiveButtonStyle">@style/Widget.Dialog.Button</item>
+        <item name="android:buttonBarNegativeButtonStyle">@style/Widget.Dialog.Button.BorderButton</item>
+        <item name="android:buttonBarNeutralButtonStyle">@style/Widget.Dialog.Button.BorderButton</item>
+        <item name="android:colorBackground">?androidprv:attr/colorSurface</item>
+        <item name="android:alertDialogStyle">@style/AlertDialogStyle</item>
+    </style>
+
+    <style name="AlertDialogStyle" parent="@androidprv:style/AlertDialog.DeviceDefault">
+        <item name="android:layout">@layout/alert_dialog_systemui</item>
+    </style>
 
     <style name="Theme.SystemUI.Dialog.Alert" parent="@*android:style/Theme.DeviceDefault.Light.Dialog.Alert" />
 
@@ -429,26 +373,17 @@
         <item name="android:windowIsFloating">true</item>
     </style>
 
-    <style name="Theme.SystemUI.Dialog.GlobalActionsLite" parent="@android:style/Theme.DeviceDefault.Light.NoActionBar.Fullscreen">
-        <item name="android:windowIsFloating">true</item>
+    <style name="Theme.SystemUI.Dialog.GlobalActionsLite" parent="Theme.SystemUI.Dialog">
+        <!-- Settings windowFullscreen: true is necessary to be able to intercept touch events -->
+        <!-- that would otherwise be intercepted by the Shade. -->
+        <item name="android:windowFullscreen">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:backgroundDimEnabled">true</item>
-        <item name="android:windowCloseOnTouchOutside">true</item>
-    </style>
-
-    <style name="Theme.SystemUI.Dialog.MediaOutput">
-        <item name="android:windowBackground">@drawable/media_output_dialog_background</item>
     </style>
 
     <style name="QSBorderlessButton">
         <item name="android:padding">12dp</item>
         <item name="android:background">@drawable/qs_btn_borderless_rect</item>
         <item name="android:gravity">center</item>
-    </style>
-
-    <style name="SearchPanelCircle">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">match_parent</item>
     </style>
 
     <style name="UserDetailView">
@@ -511,11 +446,6 @@
         <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
-    <style name="TextAppearance.Volume.Header.Secondary">
-        <item name="android:textSize">12sp</item>
-        <item name="android:textColor">?android:attr/textColorTertiary</item>
-    </style>
-
     <style name="VolumeButtons" parent="@android:style/Widget.Material.Button.Borderless">
         <item name="android:background">@drawable/btn_borderless_rect</item>
     </style>
@@ -535,15 +465,6 @@
 
     <style name="TextAppearance.NotificationInfo">
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
-    </style>
-
-    <style name="TextAppearance.NotificationInfo.Secondary">
-        <item name="android:textSize">14sp</item>
-        <item name="android:alpha">0.62</item>
-    </style>
-
-    <style name="TextAppearance.NotificationInfo.Title">
-        <item name="android:textStyle">bold</item>
     </style>
 
     <style name="TextAppearance.NotificationInfo.Button">
@@ -912,7 +833,6 @@
     <style name="Widget.SliceView.Panel">
         <item name="titleSize">16sp</item>
         <item name="rowStyle">@style/SliceRow</item>
-        <item name="android:background">?android:attr/colorBackgroundFloating</item>
     </style>
 
     <style name="SliceRow">
@@ -936,8 +856,44 @@
         <item name="actionDividerHeight">32dp</item>
     </style>
 
-    <style name="Theme.SystemUI.Dialog.Internet">
-        <item name="android:windowBackground">@drawable/internet_dialog_background</item>
+    <style name="TextAppearance.Dialog.Title" parent="@android:style/TextAppearance.DeviceDefault.Large">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:lineHeight">32sp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+
+    <style name="TextAppearance.Dialog.Body" parent="@android:style/TextAppearance.DeviceDefault.Medium">
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:lineHeight">20sp</item>
+    </style>
+
+    <style name="TextAppearance.Dialog.Body.Message">
+        <item name="android:gravity">center</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+
+
+    <style name="Widget" />
+    <style name="Widget.Dialog" />
+    <style name="Widget.Dialog.Button">
+        <item name="android:buttonCornerRadius">28dp</item>
+        <item name="android:background">@drawable/qs_dialog_btn_filled</item>
+        <item name="android:textColor">?androidprv:attr/textColorOnAccent</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:lineHeight">20sp</item>
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:minWidth">0dp</item>
+    </style>
+
+    <style name="Widget.Dialog.Button.BorderButton">
+        <item name="android:background">@drawable/qs_dialog_btn_outline</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
     <style name="MainSwitch.Settingslib" parent="@android:style/Theme.DeviceDefault">
@@ -964,12 +920,15 @@
     <style name="InternetDialog.Network">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">88dp</item>
+        <item name="android:layout_marginStart">@dimen/internet_dialog_network_layout_margin</item>
         <item name="android:layout_marginEnd">@dimen/internet_dialog_network_layout_margin</item>
+        <item name="android:layout_gravity">center_vertical|start</item>
         <item name="android:paddingStart">22dp</item>
         <item name="android:paddingEnd">22dp</item>
         <item name="android:orientation">horizontal</item>
         <item name="android:focusable">true</item>
         <item name="android:clickable">true</item>
+        <item name="android:background">?android:attr/selectableItemBackground</item>
     </style>
 
     <style name="InternetDialog.NetworkTitle">
@@ -983,8 +942,9 @@
     </style>
 
     <style name="InternetDialog.NetworkSummary">
-        <item name="android:layout_marginEnd">34dp</item>
+        <item name="android:layout_marginEnd">7dp</item>
         <item name="android:ellipsize">end</item>
+        <item name="android:maxLines">2</item>
         <item name="android:textAppearance">@style/TextAppearance.InternetDialog.Secondary</item>
     </style>
 
@@ -1008,5 +968,11 @@
     <style name="TextAppearance.InternetDialog.Active"/>
 
     <style name="TextAppearance.InternetDialog.Secondary.Active"/>
+
+    <style name="InternetDialog.Divider">
+        <item name="android:background">?android:attr/textColorSecondary</item>
+    </style>
+
+    <style name="InternetDialog.Divider.Active"/>
 
 </resources>

@@ -185,6 +185,15 @@ public class InsetsSourceControl implements Parcelable {
         return result;
     }
 
+    @Override
+    public String toString() {
+        return "InsetsSourceControl: {"
+                + "type=" + InsetsState.typeToString(mType)
+                + ", mSurfacePosition=" + mSurfacePosition
+                + ", mInsetsHint=" + mInsetsHint
+                + "}";
+    }
+
     public void dump(String prefix, PrintWriter pw) {
         pw.print(prefix);
         pw.print("InsetsSourceControl type="); pw.print(InsetsState.typeToString(mType));

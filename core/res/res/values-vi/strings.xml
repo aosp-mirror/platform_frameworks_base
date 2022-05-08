@@ -544,7 +544,7 @@
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"xác định khoảng cách tương đối giữa các thiết bị ở gần dùng Băng tần siêu rộng"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Cho phép ứng dụng xác định khoảng cách tương đối giữa các thiết bị ở gần dùng Băng tần siêu rộng"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"tương tác với các thiết bị Wi‑Fi lân cận"</string>
-    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Cho phép ứng dụng thông báo, kết nối và xác định vị trí tương đối của các thiết bị Wi‑Fi lân cận"</string>
+    <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Cho phép ứng dụng này thông báo, kết nối và xác định vị trí tương đối của các thiết bị Wi‑Fi lân cận"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Thông tin về dịch vụ thanh toán qua công nghệ giao tiếp tầm gần (NFC) được ưu tiên"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Cho phép ứng dụng nhận thông tin về dịch vụ thanh toán qua công nghệ giao tiếp tầm gần mà bạn ưu tiên, chẳng hạn như các hình thức hỗ trợ đã đăng ký và điểm đến trong hành trình."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kiểm soát Liên lạc trường gần"</string>
@@ -620,6 +620,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Nhấn để xóa mẫu khuôn mặt, sau đó thêm lại khuôn mặt của bạn"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Thiết lập tính năng Mở khóa bằng khuôn mặt"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Mở khóa điện thoại bằng cách nhìn vào điện thoại"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Để dùng tính năng Mở khoá bằng khuôn mặt, hãy bật tuỳ chọn "<b>"Truy cập máy ảnh"</b>" trong phần Cài đặt &gt; Quyền riêng tư"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Thiết lập thêm những cách mở khóa khác"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Nhấn để thêm vân tay"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Mở khóa bằng vân tay"</string>
@@ -733,9 +734,11 @@
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Giám sát những lần thử mở khóa màn hình"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Theo dõi số lần nhập mật khẩu không chính xác khi mở khóa màn hình và khóa máy tính bảng hoặc xóa tất cả dữ liệu của máy tính bảng nếu có quá nhiều lần nhập mật khẩu không chính xác."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Giám sát số lần nhập mật khẩu không chính xác khi mở khóa màn hình, đồng thời khóa thiết bị Android TV hoặc xóa tất cả dữ liệu trên thiết bị Android TV nếu bạn nhập mật khẩu sai quá nhiều lần."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Theo dõi số lần nhập sai mật khẩu khi mở khoá màn hình và khoá hệ thống thông tin giải trí hoặc xoá tất cả dữ liệu của hệ thống này nếu có quá nhiều lần nhập sai mật khẩu."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Theo dõi số lần nhập mật khẩu không chính xác khi mở khóa màn hình và khóa điện thoại hoặc xóa tất cả dữ liệu của điện thoại nếu có quá nhiều lần nhập mật khẩu không chính xác."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Giám sát số lần nhập sai mật khẩu khi mở khóa màn hình và khóa máy tính bảng hoặc xóa tất cả dữ liệu của người dùng này nếu nhập sai mật khẩu quá nhiều lần."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Giám sát số lần nhập mật khẩu không chính xác khi mở khóa màn hình, đồng thời khóa thiết bị Android TV hoặc xóa tất cả dữ liệu của người dùng này nếu bạn nhập mật khẩu sai quá nhiều lần."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Theo dõi số lần nhập sai mật khẩu khi mở khoá màn hình và khoá hệ thống thông tin giải trí hoặc xoá tất cả dữ liệu của hồ sơ này nếu có quá nhiều lần nhập sai mật khẩu."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Giám sát số lần nhập sai mật khẩu khi mở khóa màn hình và khóa điện thoại hoặc xóa tất cả dữ liệu của người dùng này nếu nhập sai mật khẩu quá nhiều lần."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Thay đổi phương thức khóa màn hình"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Thay đổi phương thức khóa màn hình."</string>
@@ -744,10 +747,13 @@
     <string name="policylab_wipeData" msgid="1359485247727537311">"Xóa tất cả dữ liệu"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Xóa dữ liệu trên máy tính bảng mà không cần cảnh báo, bằng cách thực hiện thiết lập lại dữ liệu ban đầu."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Xóa dữ liệu trên thiết bị Android TV mà không cảnh báo bằng cách thiết lập lại dữ liệu ban đầu."</string>
+    <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Xoá dữ liệu của hệ thống thông tin giải trí mà không cảnh báo bằng cách đặt lại dữ liệu về trạng thái ban đầu."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Xóa dữ liệu trên điện thoại mà không cần cảnh báo, bằng cách thiết lập lại dữ liệu ban đầu."</string>
-    <string name="policylab_wipeData_secondaryUser" msgid="413813645323433166">"Xóa dữ liệu người dùng"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Xoá dữ liệu hồ sơ"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Xóa dữ liệu người dùng"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Xóa dữ liệu của người dùng trên máy tính bảng này mà không cảnh báo."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Xóa dữ liệu của người dùng này trên thiết bị Android TV mà không cảnh báo."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Xoá dữ liệu của hồ sơ này trên hệ thống thông tin giải trí này mà không cảnh báo."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Xóa dữ liệu của người dùng trên điện thoại này mà không cảnh báo."</string>
     <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Đặt proxy chung của điện thoại"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Đặt proxy chung của thiết bị được sử dụng trong khi chính sách bật. Chỉ chủ sở hữu thiết bị mới có thể đặt proxy chung."</string>
@@ -1697,7 +1703,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Khi phím tắt này đang bật, thao tác nhấn cả hai nút âm lượng trong 3 giây sẽ mở tính năng hỗ trợ tiếp cận."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Bật phím tắt cho các tính năng hỗ trợ tiếp cận?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Thao tác nhấn và giữ cả hai phím âm lượng trong vài giây sẽ bật các tính năng hỗ trợ tiếp cận. Việc bật các tính năng này có thể thay đổi cách thiết bị của bạn hoạt động.\n\nCác tính năng hiện tại:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nBạn có thể thay đổi những tính năng đã chọn trong phần Cài đặt &gt; Hỗ trợ tiếp cận."</string>
-    <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
+    <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Bật phím tắt cho <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Thao tác nhấn và giữ cả hai phím âm lượng trong vài giây sẽ bật <xliff:g id="SERVICE">%1$s</xliff:g>, một tính năng hỗ trợ tiếp cận. Việc bật tính năng này có thể thay đổi cách thiết bị của bạn hoạt động.\n\nBạn có thể chuyển phím tắt này thành một tính năng khác trong phần Cài đặt &gt; Hỗ trợ tiếp cận."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Bật"</string>
