@@ -71,6 +71,7 @@ public class SystemUIService extends Service {
 
         // Finish initializing dump logic
         mLogBufferFreezer.attach(mBroadcastDispatcher);
+        mDumpHandler.init();
 
         // If configured, set up a battery notification
         if (getResources().getBoolean(R.bool.config_showNotificationForUnknownBatteryState)) {

@@ -236,13 +236,6 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
 
         verifyActivityCanHandleIntent(launchIntent, callingUid, userId);
 
-        // Always show the cross profile animation
-        if (options == null) {
-            options = ActivityOptions.makeOpenCrossProfileAppsAnimation().toBundle();
-        } else {
-            options.putAll(ActivityOptions.makeOpenCrossProfileAppsAnimation().toBundle());
-        }
-
         mInjector.getActivityTaskManagerInternal()
                 .startActivityAsUser(
                         caller,

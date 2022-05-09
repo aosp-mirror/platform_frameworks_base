@@ -180,6 +180,7 @@ static struct {
     jmethodID postDynPolicyEventFromNative;
     jmethodID postRecordConfigEventFromNative;
     jmethodID postRoutingUpdatedFromNative;
+    jmethodID postVolRangeInitReqFromNative;
 } gAudioPolicyEventHandlerMethods;
 
 jclass gListClass;
@@ -582,6 +583,20 @@ android_media_AudioSystem_routing_callback()
     jclass clazz = env->FindClass(kClassPathName);
     env->CallStaticVoidMethod(clazz,
                               gAudioPolicyEventHandlerMethods.postRoutingUpdatedFromNative);
+    env->DeleteLocalRef(clazz);
+}
+
+static void android_media_AudioSystem_vol_range_init_req_callback()
+{
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    if (env == NULL) {
+        return;
+    }
+
+    // callback into java
+    jclass clazz = env->FindClass(kClassPathName);
+    env->CallStaticVoidMethod(clazz,
+                              gAudioPolicyEventHandlerMethods.postVolRangeInitReqFromNative);
     env->DeleteLocalRef(clazz);
 }
 
@@ -2063,6 +2078,11 @@ android_media_AudioSystem_registerRoutingCallback(JNIEnv *env, jobject thiz)
     AudioSystem::setRoutingCallback(android_media_AudioSystem_routing_callback);
 }
 
+static void android_media_AudioSystem_registerVolRangeInitReqCallback(JNIEnv *env, jobject thiz)
+{
+    AudioSystem::setVolInitReqCallback(android_media_AudioSystem_vol_range_init_req_callback);
+}
+
 void javaAudioFormatToNativeAudioConfig(JNIEnv *env, audio_config_t *nConfig,
                                        const jobject jFormat, bool isInput) {
     *nConfig = AUDIO_CONFIG_INITIALIZER;
@@ -2990,6 +3010,8 @@ static const JNINativeMethod gMethods[] =
           (void *)android_media_AudioSystem_registerRecordingCallback},
          {"native_register_routing_callback", "()V",
           (void *)android_media_AudioSystem_registerRoutingCallback},
+         {"native_register_vol_range_init_req_callback", "()V",
+          (void *)android_media_AudioSystem_registerVolRangeInitReqCallback},
          {"systemReady", "()I", (void *)android_media_AudioSystem_systemReady},
          {"getStreamVolumeDB", "(III)F", (void *)android_media_AudioSystem_getStreamVolumeDB},
          {"native_get_offload_support", "(IIIII)I",
@@ -3202,6 +3224,9 @@ int register_android_media_AudioSystem(JNIEnv *env)
     gAudioPolicyEventHandlerMethods.postRoutingUpdatedFromNative =
             GetStaticMethodIDOrDie(env, env->FindClass(kClassPathName),
                     "routingCallbackFromNative", "()V");
+    gAudioPolicyEventHandlerMethods.postVolRangeInitReqFromNative =
+            GetStaticMethodIDOrDie(env, env->FindClass(kClassPathName),
+                    "volRangeInitReqCallbackFromNative", "()V");
 
     jclass audioMixClass = FindClassOrDie(env, "android/media/audiopolicy/AudioMix");
     gAudioMixClass = MakeGlobalRefOrDie(env, audioMixClass);

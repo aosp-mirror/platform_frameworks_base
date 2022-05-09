@@ -29,7 +29,7 @@ import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import androidx.test.uiautomator.UiDevice
-import com.google.common.truth.Truth.assertThat
+import android.trust.test.lib.wait
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -74,9 +74,9 @@ class TemporaryAndRenewableTrustTest {
         uiDevice.sleep()
         lockStateTrackingRule.assertLocked()
 
+        uiDevice.wakeUp()
         trustAgentRule.agent.grantTrust(
             GRANT_MESSAGE, 0, FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE) {}
-        uiDevice.wakeUp()
 
         lockStateTrackingRule.assertLocked()
     }
@@ -98,9 +98,9 @@ class TemporaryAndRenewableTrustTest {
 
         lockStateTrackingRule.assertLocked()
 
+        uiDevice.wakeUp()
         trustAgentRule.agent.grantTrust(
             GRANT_MESSAGE, 0, FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE) {}
-        uiDevice.wakeUp()
 
         lockStateTrackingRule.assertUnlocked()
     }
@@ -116,6 +116,7 @@ class TemporaryAndRenewableTrustTest {
         uiDevice.sleep()
 
         lockStateTrackingRule.assertLocked()
+        uiDevice.wakeUp()
 
         Log.i(TAG, "Renewing trust and unlocking")
         var result: GrantTrustResult? = null
@@ -124,10 +125,9 @@ class TemporaryAndRenewableTrustTest {
             Log.i(TAG, "Callback received; status=${it.status}")
             result = it
         }
-        uiDevice.wakeUp()
         lockStateTrackingRule.assertUnlocked()
 
-        assertThat(result?.status).isEqualTo(STATUS_UNLOCKED_BY_GRANT)
+        wait("callback triggered") { result?.status == STATUS_UNLOCKED_BY_GRANT }
     }
 
     @Test
@@ -141,7 +141,6 @@ class TemporaryAndRenewableTrustTest {
         trustAgentRule.agent.revokeTrust()
         await(500)
         uiDevice.wakeUp()
-        await(500)
 
         trustAgentRule.agent.grantTrust(
             GRANT_MESSAGE, 0, FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE) {}

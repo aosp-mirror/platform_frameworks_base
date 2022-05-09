@@ -32,8 +32,11 @@ import android.platform.test.annotations.Presubmit;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 /**
  * Test class for {@link TaskContainer}.
@@ -47,6 +50,14 @@ import org.junit.runner.RunWith;
 public class TaskContainerTest {
     private static final int TASK_ID = 10;
     private static final Rect TASK_BOUNDS = new Rect(0, 0, 600, 1200);
+
+    @Mock
+    private SplitController mController;
+
+    @Before
+    public void setup() {
+        MockitoAnnotations.initMocks(this);
+    }
 
     @Test
     public void testIsTaskBoundsInitialized() {
@@ -126,7 +137,8 @@ public class TaskContainerTest {
 
         assertTrue(taskContainer.isEmpty());
 
-        final TaskFragmentContainer tf = new TaskFragmentContainer(null, TASK_ID);
+        final TaskFragmentContainer tf = new TaskFragmentContainer(null /* activity */, TASK_ID,
+                mController);
         taskContainer.mContainers.add(tf);
 
         assertFalse(taskContainer.isEmpty());

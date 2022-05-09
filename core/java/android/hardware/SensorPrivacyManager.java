@@ -327,6 +327,8 @@ public final class SensorPrivacyManager {
     @NonNull
     private boolean mToggleListenerRegistered = false;
 
+    private Boolean mRequiresAuthentication = null;
+
     /**
      * Private constructor to ensure only a single instance is created.
      */
@@ -758,6 +760,23 @@ public final class SensorPrivacyManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * @return whether the device is required to be unlocked to change software state.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
+    public boolean requiresAuthentication() {
+        if (mRequiresAuthentication == null) {
+            try {
+                mRequiresAuthentication = mService.requiresAuthentication();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return mRequiresAuthentication;
     }
 
     /**
