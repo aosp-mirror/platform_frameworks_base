@@ -636,10 +636,6 @@ public class MediaControlPanel {
                     mIsArtworkBound = isArtworkBound;
                 }
 
-                // Scrim bounds are set manually so it scales as expected
-                albumView.getForeground().setBounds(0, 0,
-                        Math.max(width, height), Math.max(width, height));
-
                 // Transition Colors to current color scheme
                 mColorSchemeTransition.updateColorScheme(colorScheme, mIsArtworkBound);
 

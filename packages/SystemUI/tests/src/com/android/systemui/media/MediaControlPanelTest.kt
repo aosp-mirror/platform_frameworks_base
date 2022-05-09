@@ -21,6 +21,7 @@ import android.animation.AnimatorSet
 import android.app.PendingIntent
 import android.app.smartspace.SmartspaceAction
 import android.content.Context
+import org.mockito.Mockito.`when` as whenever
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
@@ -66,8 +67,8 @@ import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.animation.TransitionLayout
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.KotlinArgumentCaptor
-import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.withArgCaptor
@@ -91,7 +92,6 @@ import org.mockito.Mockito.reset
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
-import org.mockito.Mockito.`when` as whenever
 
 private const val KEY = "TEST_KEY"
 private const val PACKAGE = "PKG"
@@ -339,7 +339,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(viewHolder.player).thenReturn(view)
         whenever(viewHolder.appIcon).thenReturn(appIcon)
         whenever(viewHolder.albumView).thenReturn(albumView)
-        whenever(albumView.foreground).thenReturn(mock(Drawable::class.java))
         whenever(viewHolder.titleText).thenReturn(titleText)
         whenever(viewHolder.artistText).thenReturn(artistText)
         whenever(seamlessBackground.getDrawable(0)).thenReturn(mock(GradientDrawable::class.java))
