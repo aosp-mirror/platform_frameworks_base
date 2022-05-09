@@ -24,9 +24,14 @@ import com.android.internal.annotations.GuardedBy;
 
 /** Rate limiter for adding errors into dropbox. */
 public class DropboxRateLimiter {
-    private static final long RATE_LIMIT_BUFFER_EXPIRY = 15 * DateUtils.SECOND_IN_MILLIS;
-    private static final long RATE_LIMIT_BUFFER_DURATION = 10 * DateUtils.SECOND_IN_MILLIS;
-    private static final int RATE_LIMIT_ALLOWED_ENTRIES = 5;
+    // After RATE_LIMIT_ALLOWED_ENTRIES have been collected (for a single breakdown of
+    // process/eventType) further entries will be rejected until RATE_LIMIT_BUFFER_DURATION has
+    // elapsed, after which the current count for this breakdown will be reset.
+    private static final long RATE_LIMIT_BUFFER_DURATION = 10 * DateUtils.MINUTE_IN_MILLIS;
+    // The time duration after which the rate limit buffer will be cleared.
+    private static final long RATE_LIMIT_BUFFER_EXPIRY = 3 * RATE_LIMIT_BUFFER_DURATION;
+    // The number of entries to keep per breakdown of process/eventType.
+    private static final int RATE_LIMIT_ALLOWED_ENTRIES = 6;
 
     @GuardedBy("mErrorClusterRecords")
     private final ArrayMap<String, ErrorRecord> mErrorClusterRecords = new ArrayMap<>();

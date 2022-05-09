@@ -49,10 +49,11 @@ public class DropboxRateLimiterTest {
         assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
         assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
         assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
         // Different processes and tags should not get rate limited either.
         assertFalse(mRateLimiter.shouldRateLimit("tag", "process2").shouldRateLimit());
         assertFalse(mRateLimiter.shouldRateLimit("tag2", "process").shouldRateLimit());
-        // The 6th entry of the same process should be rate limited.
+        // The 7th entry of the same process should be rate limited.
         assertTrue(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
     }
 
@@ -64,12 +65,13 @@ public class DropboxRateLimiterTest {
         assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
         assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
         assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
-        // The 6th entry of the same process should be rate limited.
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+        // The 7th entry of the same process should be rate limited.
         assertTrue(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
 
-        // After 11 seconds there should be nothing left in the buffer and the same type of entry
+        // After 11 minutes there should be nothing left in the buffer and the same type of entry
         // should not get rate limited anymore.
-        mClock.setOffsetMillis(11000);
+        mClock.setOffsetMillis(11 * 60 * 1000);
 
         assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
     }
@@ -86,13 +88,15 @@ public class DropboxRateLimiterTest {
                 mRateLimiter.shouldRateLimit("tag", "p").droppedCountSinceRateLimitActivated());
         assertEquals(0,
                 mRateLimiter.shouldRateLimit("tag", "p").droppedCountSinceRateLimitActivated());
+        assertEquals(0,
+                mRateLimiter.shouldRateLimit("tag", "p").droppedCountSinceRateLimitActivated());
         assertEquals(1,
                 mRateLimiter.shouldRateLimit("tag", "p").droppedCountSinceRateLimitActivated());
         assertEquals(2,
                 mRateLimiter.shouldRateLimit("tag", "p").droppedCountSinceRateLimitActivated());
 
-        // After 11 seconds the rate limiting buffer will be cleared and rate limiting will stop.
-        mClock.setOffsetMillis(11000);
+        // After 11 minutes the rate limiting buffer will be cleared and rate limiting will stop.
+        mClock.setOffsetMillis(11 * 60 * 1000);
 
         // The first call after rate limiting stops will still return the number of dropped events.
         assertEquals(2,
