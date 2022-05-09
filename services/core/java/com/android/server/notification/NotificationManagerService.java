@@ -58,6 +58,7 @@ import static android.content.Context.BIND_AUTO_CREATE;
 import static android.content.Context.BIND_FOREGROUND_SERVICE;
 import static android.content.Context.BIND_NOT_PERCEPTIBLE;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK;
+import static android.content.pm.PackageManager.FEATURE_TELECOM;
 import static android.content.pm.PackageManager.FEATURE_TELEVISION;
 import static android.content.pm.PackageManager.MATCH_ALL;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
@@ -2160,6 +2161,11 @@ public class NotificationManagerService extends SystemService {
     @VisibleForTesting
     void setAccessibilityManager(AccessibilityManager am) {
         mAccessibilityManager = am;
+    }
+
+    @VisibleForTesting
+    void setTelecomManager(TelecomManager tm) {
+        mTelecomManager = tm;
     }
 
     // TODO: All tests should use this init instead of the one-off setters above.
@@ -6979,8 +6985,13 @@ public class NotificationManagerService extends SystemService {
     private boolean isCallNotification(String pkg, int uid) {
         final long identity = Binder.clearCallingIdentity();
         try {
-            return mTelecomManager.isInManagedCall() || mTelecomManager.isInSelfManagedCall(
-                    pkg, UserHandle.getUserHandleForUid(uid));
+            if (mPackageManagerClient.hasSystemFeature(FEATURE_TELECOM)
+                    && mTelecomManager != null) {
+                return mTelecomManager.isInManagedCall()
+                        || mTelecomManager.isInSelfManagedCall(
+                                pkg, UserHandle.getUserHandleForUid(uid));
+            }
+            return false;
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -7406,6 +7417,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void run() {
             boolean appBanned = !areNotificationsEnabledForPackageInt(pkg, uid);
+            boolean isCallNotification = isCallNotification(pkg, uid);
             synchronized (mNotificationLock) {
                 try {
                     NotificationRecord r = null;
@@ -7424,8 +7436,10 @@ public class NotificationManagerService extends SystemService {
 
                     final StatusBarNotification n = r.getSbn();
                     final Notification notification = n.getNotification();
+                    boolean isCallNotificationAndCorrectStyle = isCallNotification
+                            && notification.isStyle(Notification.CallStyle.class);
 
-                    if (!notification.isMediaNotification()
+                    if (!(notification.isMediaNotification() || isCallNotificationAndCorrectStyle)
                             && (appBanned || isRecordBlockedLocked(r))) {
                         mUsageStats.registerBlocked(r);
                         if (DBG) {
