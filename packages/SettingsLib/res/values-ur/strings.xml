@@ -599,7 +599,7 @@
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"ہٹائیں"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"مہمان کو ری سیٹ کرنا…"</string>
     <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"مہمان سیشن کو ری سیٹ کریں؟"</string>
-    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"یہ ایک نیا مہمان سیشن شروع کرے گا اور موجودہ سیشن سے تمام ایپس اور ڈیٹا کو حذف کر دے گا"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"اس سے ایک نیا مہمان سیشن شروع ہو گا اور موجودہ سیشن سے تمام ایپس اور ڈیٹا حذف ہو جائے گا"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"مہمان وضع سے باہر نکلیں؟"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"یہ موجودہ مہمان سیشن سے ایپس اور ڈیٹا کو حذف کر دے گا"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"باہر نکلیں"</string>
@@ -674,4 +674,7 @@
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"اگر آپ <xliff:g id="SWITCHAPP">%1$s</xliff:g> براڈکاسٹ کرتے ہیں یا آؤٹ پٹ کو تبدیل کرتے ہیں تو آپ کا موجودہ براڈکاسٹ رک جائے گا"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> پر براڈکاسٹ کریں"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"آؤٹ پٹ تبدیل کریں"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"پیچھے جانے کے اشارے کی پیش گوئی والی اینیمیشنز"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"پیچھے جانے کے پیش گوئی والے اشارے کے لیے سسٹم اینیمیشنز فعال کریں۔"</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"‏یہ ترتیب پیش گوئی والی اشارے کی اینیمیشن کے لیے سسٹم کی اینیمیشنز کو فعال کرتی ہے۔ اس کے لیے manifest فائل میں فی ایپ enableOnBackInvokedCallback کو درست پر سیٹ کرنے کی ضرورت ہے۔"</string>
 </resources>
