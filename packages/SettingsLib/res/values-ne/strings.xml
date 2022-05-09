@@ -528,7 +528,7 @@
     <string name="done" msgid="381184316122520313">"सम्पन्न भयो"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"अलार्म र रिमाइन्डरहरू"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"अलार्म तथा रिमाइन्डर सेट गर्न दिइयोस्"</string>
-    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"घडी तथा रिमाइन्डरहरू"</string>
+    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"अलार्म तथा रिमाइन्डर"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"यो एपलाई अलार्म सेट गर्ने र समयमै पूरा गर्नु पर्ने कारबाहीहरूको रुटिन बनाउने अनुमति दिनुहोस्। यो अनुमति दिइएको छ भने यो एप ब्याकग्राउन्डमा चल्छ र धेरै ब्याट्री खपत हुन्छ।\n\nयो अनुमति दिइएको छैन भने सेट गरिएका अलार्म बज्दैनन् र यो एपले तय गरेका गतिविधि चल्दैनन्।"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"समयतालिका, अलार्म, रिमाइन्डर, घडी"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"अन गर्नुहोस्"</string>

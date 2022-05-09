@@ -2415,8 +2415,12 @@
     <!-- Is the system user the only user allowed to dream. -->
     <bool name="config_dreamsOnlyEnabledForSystemUser">false</bool>
 
+    <!-- Whether to dismiss the active dream when an activity is started. Doesn't apply to
+         assistant activities (ACTIVITY_TYPE_ASSISTANT) -->
+    <bool name="config_dismissDreamOnActivityStart">true</bool>
+
     <!-- The prefix of dream component names that are loggable. If empty, logs "other" for all. -->
-    <string name ="config_loggable_dream_prefix" translatable="false"></string>
+    <string name="config_loggable_dream_prefix" translatable="false"></string>
 
     <!-- ComponentName of a dream to show whenever the system would otherwise have
          gone to sleep.  When the PowerManager is asked to go to sleep, it will instead
@@ -5447,6 +5451,8 @@
     <bool name="config_supportsHardwareCamToggle">false</bool>
     <!-- Whether a camera intent is launched when the lens cover is toggled -->
     <bool name="config_launchCameraOnCameraLensCoverToggle">true</bool>
+    <!-- Whether changing sensor privacy SW setting requires device to be unlocked -->
+    <bool name="config_sensorPrivacyRequiresAuthentication">true</bool>
 
     <!-- List containing the allowed install sources for accessibility service. -->
     <string-array name="config_accessibility_allowed_install_source" translatable="false"/>

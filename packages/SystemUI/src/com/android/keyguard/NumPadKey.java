@@ -134,7 +134,7 @@ public class NumPadKey extends ViewGroup {
         Drawable background = getBackground();
         if (background instanceof GradientDrawable) {
             mAnimator = new NumPadAnimator(context, background.mutate(),
-                    R.style.NumPadKey, mDigitText);
+                    R.style.NumPadKey, mDigitText, null);
         } else {
             mAnimator = null;
         }

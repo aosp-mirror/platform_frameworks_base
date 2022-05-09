@@ -175,28 +175,36 @@ class UnlockedScreenOffAnimationController @Inject constructor(
                 .setDuration(duration.toLong())
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .alpha(1f)
+                .withEndAction {
+                    aodUiAnimationPlaying = false
+
+                    // Lock the keyguard if it was waiting for the screen off animation to end.
+                    keyguardViewMediatorLazy.get().maybeHandlePendingLock()
+
+                    // Tell the CentralSurfaces to become keyguard for real - we waited on that
+                    // since it is slow and would have caused the animation to jank.
+                    mCentralSurfaces.updateIsKeyguard()
+
+                    // Run the callback given to us by the KeyguardVisibilityHelper.
+                    after.run()
+
+                    // Done going to sleep, reset this flag.
+                    decidedToAnimateGoingToSleep = null
+
+                    // We need to unset the listener. These are persistent for future animators
+                    keyguardView.animate().setListener(null)
+                    interactionJankMonitor.end(CUJ_SCREEN_OFF_SHOW_AOD)
+                }
                 .setListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator?) {
-                        aodUiAnimationPlaying = false
-
-                        // Lock the keyguard if it was waiting for the screen off animation to end.
-                        keyguardViewMediatorLazy.get().maybeHandlePendingLock()
-
-                        // Tell the CentralSurfaces to become keyguard for real - we waited on that
-                        // since it is slow and would have caused the animation to jank.
-                        mCentralSurfaces.updateIsKeyguard()
-
-                        // Run the callback given to us by the KeyguardVisibilityHelper.
-                        after.run()
-
-                        // Done going to sleep, reset this flag.
-                        decidedToAnimateGoingToSleep = null
-                        // We need to unset the listener. These are persistent for future animators
-                        keyguardView.animate().setListener(null)
-                        interactionJankMonitor.end(CUJ_SCREEN_OFF_SHOW_AOD)
-                    }
-
                     override fun onAnimationCancel(animation: Animator?) {
+                        // If we're cancelled, reset state flags/listeners. The end action above
+                        // will not be called, which is what we want since that will finish the
+                        // screen off animation and show the lockscreen, which we don't want if we
+                        // were cancelled.
+                        aodUiAnimationPlaying = false
+                        decidedToAnimateGoingToSleep = null
+                        keyguardView.animate().setListener(null)
+
                         interactionJankMonitor.cancel(CUJ_SCREEN_OFF_SHOW_AOD)
                     }
 
