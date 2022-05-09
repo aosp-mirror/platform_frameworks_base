@@ -2314,9 +2314,12 @@ public class NotificationPanelViewController extends PanelViewController {
         mScrimController.setQsPosition(qsExpansionFraction, qsPanelBottomY);
         setQSClippingBounds();
 
-        // Only need to notify the notification stack when we're not in split screen mode. If we
-        // do, then the notification panel starts scrolling along with the QS.
-        if (!mShouldUseSplitNotificationShade) {
+        if (mShouldUseSplitNotificationShade) {
+            // In split shade we want to pretend that QS are always collapsed so their behaviour and
+            // interactions don't influence notifications as they do in portrait. But we want to set
+            // 0 explicitly in case we're rotating from non-split shade with QS expansion of 1.
+            mNotificationStackScrollLayoutController.setQsExpansionFraction(0);
+        } else {
             mNotificationStackScrollLayoutController.setQsExpansionFraction(qsExpansionFraction);
         }
 
