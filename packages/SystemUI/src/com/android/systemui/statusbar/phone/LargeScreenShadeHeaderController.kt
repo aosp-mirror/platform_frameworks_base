@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone
 
 import android.app.StatusBarManager
+import android.content.res.Configuration
 import android.view.View
 import android.widget.TextView
 import androidx.constraintlayout.motion.widget.MotionLayout
@@ -204,6 +205,12 @@ class LargeScreenShadeHeaderController @Inject constructor(
 
     private fun bindConfigurationListener() {
         val listener = object : ConfigurationController.ConfigurationListener {
+            override fun onConfigChanged(newConfig: Configuration?) {
+                val left = header.resources.getDimensionPixelSize(
+                    R.dimen.large_screen_shade_header_left_padding)
+                header.setPadding(
+                    left, header.paddingTop, header.paddingRight, header.paddingBottom)
+            }
             override fun onDensityOrFontScaleChanged() {
                 val qsStatusStyle = R.style.TextAppearance_QS_Status
                 FontSizeUtils.updateFontSizeFromStyle(clock, qsStatusStyle)
