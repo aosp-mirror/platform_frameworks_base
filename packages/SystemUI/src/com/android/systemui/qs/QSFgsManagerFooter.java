@@ -61,6 +61,7 @@ public class QSFgsManagerFooter implements View.OnClickListener,
     private final View mNumberContainer;
     private final TextView mNumberView;
     private final ImageView mDotView;
+    private final ImageView mCollapsedDotView;
 
     @Nullable
     private VisibilityChangedDispatcher.OnVisibilityChangedListener mVisibilityChangedListener;
@@ -75,6 +76,7 @@ public class QSFgsManagerFooter implements View.OnClickListener,
         mNumberContainer = mRootView.findViewById(R.id.fgs_number_container);
         mNumberView = mRootView.findViewById(R.id.fgs_number);
         mDotView = mRootView.findViewById(R.id.fgs_new);
+        mCollapsedDotView = mRootView.findViewById(R.id.fgs_collapsed_new);
         mContext = rootView.getContext();
         mMainExecutor = mainExecutor;
         mExecutor = executor;
@@ -147,8 +149,10 @@ public class QSFgsManagerFooter implements View.OnClickListener,
             if (mFgsManagerController.shouldUpdateFooterVisibility()) {
                 mRootView.setVisibility(mNumPackages > 0
                         && mFgsManagerController.isAvailable() ? View.VISIBLE : View.GONE);
-                mDotView.setVisibility(
-                        mFgsManagerController.getChangesSinceDialog() ? View.VISIBLE : View.GONE);
+                int dotVis =
+                        mFgsManagerController.getChangesSinceDialog() ? View.VISIBLE : View.GONE;
+                mDotView.setVisibility(dotVis);
+                mCollapsedDotView.setVisibility(dotVis);
                 if (mVisibilityChangedListener != null) {
                     mVisibilityChangedListener.onVisibilityChanged(mRootView.getVisibility());
                 }

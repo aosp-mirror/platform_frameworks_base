@@ -529,7 +529,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmes et rappels"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Autoriser à définir des alarmes et des rappels"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmes et rappels"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Autorisez cette appli à définir des alarmes et à programmer des actions à certaines heures. Elle s\'exécutera alors en arrière-plan, ce qui peut solliciter davantage la batterie.\n\nSi l\'autorisation est désactivée, les alarmes existantes et les événements programmés par l\'appli ne fonctionneront pas."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Autoriser cette appli à définir des alarmes et à programmer des actions à certaines heures. Elle s\'exécutera alors en arrière-plan, ce qui peut solliciter davantage la batterie.\n\nSi l\'autorisation est désactivée, les alarmes existantes et les événements programmés par l\'appli ne fonctionneront pas."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"définir, alarme, rappel, horloge"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Activer"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Activer le mode Ne pas déranger"</string>
