@@ -5118,9 +5118,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             case MSG_RESET_HANDWRITING: {
                 synchronized (ImfLock.class) {
                     if (mBindingController.supportsStylusHandwriting()
-                            && getCurMethodLocked() != null && mCurFocusedWindow != null) {
-                        mHwController.initializeHandwritingSpy(
-                                mCurTokenDisplayId, mCurFocusedWindow);
+                            && getCurMethodLocked() != null) {
+                        mHwController.initializeHandwritingSpy(mCurTokenDisplayId);
                     } else {
                         mHwController.reset();
                     }
@@ -5130,14 +5129,15 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             case MSG_START_HANDWRITING:
                 synchronized (ImfLock.class) {
                     IInputMethodInvoker curMethod = getCurMethodLocked();
-                    if (curMethod == null) {
+                    if (curMethod == null || mCurFocusedWindow == null) {
                         return true;
                     }
                     final HandwritingModeController.HandwritingSession session =
                             mHwController.startHandwritingSession(
                                     msg.arg1 /*requestId*/,
                                     msg.arg2 /*pid*/,
-                                    mBindingController.getCurMethodUid());
+                                    mBindingController.getCurMethodUid(),
+                                    mCurFocusedWindow);
                     if (session == null) {
                         Slog.e(TAG,
                                 "Failed to start handwriting session for requestId: " + msg.arg1);

@@ -8250,23 +8250,15 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public void replaceInputSurfaceTouchableRegionWithWindowCrop(
-                @NonNull SurfaceControl inputSurface,
-                @NonNull InputWindowHandle inputWindowHandle,
-                @NonNull IBinder windowToken) {
+        public boolean isPointInsideWindow(@NonNull IBinder windowToken, int displayId,
+                float displayX, float displayY) {
             synchronized (mGlobalLock) {
                 final WindowState w = mWindowMap.get(windowToken);
-                if (w == null) {
-                    return;
+                if (w == null || w.getDisplayId() != displayId) {
+                    return false;
                 }
-                // Make a copy of the InputWindowHandle to avoid leaking the window's
-                // SurfaceControl.
-                final InputWindowHandle localHandle = new InputWindowHandle(inputWindowHandle);
-                localHandle.replaceTouchableRegionWithCrop(w.getSurfaceControl());
-                final SurfaceControl.Transaction t = mTransactionFactory.get();
-                t.setInputWindowInfo(inputSurface, localHandle);
-                t.apply();
-                t.close();
+
+                return w.getBounds().contains((int) displayX, (int) displayY);
             }
         }
     }
