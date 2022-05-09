@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"ਤੁਹਾਡੇ ਕੈਲੰਡਰ ਤੱਕ ਪਹੁੰਚ ਕਰਨ"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS ਸੁਨੇਹੇ ਭੇਜੋ ਅਤੇ ਦੇਖੋ"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"ਫ਼ਾਈਲਾਂ ਅਤੇ ਦਸਤਾਵੇਜ਼"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"ਫ਼ਾਈਲਾਂ ਅਤੇ ਦਸਤਾਵੇਜ਼"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"ਆਪਣੇ ਡੀਵਾਈਸ \'ਤੇ ਫ਼ਾਈਲਾਂ ਅਤੇ ਦਸਤਾਵੇਜ਼ਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰੋ"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"ਸੰਗੀਤ ਅਤੇ ਹੋਰ ਆਡੀਓ"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"ਆਪਣੇ ਡੀਵਾਈਸ \'ਤੇ ਆਡੀਓ ਫ਼ਾਈਲਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰੋ"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"ਫ਼ੋਟੋਆਂ ਅਤੇ ਵੀਡੀਓ"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"ਆਪਣੇ ਡੀਵਾਈਸ \'ਤੇ ਚਿੱਤਰਾਂ ਅਤੇ ਵੀਡੀਓ ਫ਼ਾਈਲਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰੋ"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"ਸੰਗੀਤ ਅਤੇ ਆਡੀਓ"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"ਆਪਣੇ ਡੀਵਾਈਸ \'ਤੇ ਸੰਗੀਤ ਅਤੇ ਆਡੀਓ ਤੱਕ ਪਹੁੰਚ ਕਰੋ"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ਫ਼ੋਟੋਆਂ ਅਤੇ ਵੀਡੀਓ"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"ਆਪਣੇ ਡੀਵਾਈਸ \'ਤੇ ਫ਼ੋਟੋਆਂ ਅਤੇ ਵੀਡੀਓ ਤੱਕ ਪਹੁੰਚ ਕਰੋ"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"ਮਾਈਕ੍ਰੋਫ਼ੋਨ"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">" ਆਡੀਓ  ਰਿਕਾਰਡ ਕਰਨ"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"ਸਰੀਰਕ ਸਰਗਰਮੀ"</string>
@@ -350,7 +350,7 @@
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"ਕਿਸੇ ਲਾਕ ਕੀਤੇ ਡੀਵਾਈਸ \'ਤੇ ਪੂਰੀ ਸਕ੍ਰੀਨ ਵਾਲੀਆਂ ਸਰਗਰਮੀਆਂ ਵਜੋਂ ਸੂਚਨਾਵਾਂ ਦਿਖਾਓ"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"ਐਪ ਨੂੰ ਕਿਸੇ ਲਾਕ ਕੀਤੇ ਡੀਵਾਈਸ \'ਤੇ ਪੂਰੀ ਸਕ੍ਰੀਨ ਵਾਲੀਆਂ ਸਰਗਰਮੀਆਂ ਵਜੋਂ ਸੂਚਨਾਵਾਂ ਦਿਖਾਉਣ ਦਿੰਦਾ ਹੈ"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"ਸ਼ਾਰਟਕੱਟ ਸਥਾਪਤ ਕਰੋ"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"ਇੱਕ ਐਪਲੀਕੇਸ਼ਨ ਨੂੰ ਵਰਤੋਂਕਾਰ ਦੇ ਦਖ਼ਲ ਤੋਂ ਬਿਨਾਂ ਹੋਮਸਕ੍ਰੀਨ ਸ਼ਾਰਟਕੱਟ ਸ਼ਾਮਲ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"ਇੱਕ ਐਪਲੀਕੇਸ਼ਨ ਨੂੰ ਵਰਤੋਂਕਾਰ ਦੇ ਦਖਲ ਤੋਂ ਬਿਨਾਂ ਹੋਮਸਕ੍ਰੀਨ ਸ਼ਾਰਟਕੱਟ ਸ਼ਾਮਲ ਕਰਨ ਦਿੰਦੀਆਂ ਹਨ।"</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"ਸ਼ਾਰਟਕੱਟ ਅਣਸਥਾਪਤ ਕਰੋ"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"ਐਪਲੀਕੇਸ਼ਨ ਨੂੰ ਵਰਤੋਂਕਾਰ ਦਖ਼ਲ ਤੋਂ ਬਿਨਾਂ ਹੋਮਸਕ੍ਰੀਨ ਸ਼ਾਰਟਕੱਟ ਹਟਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"ਆਊਟਗੋਇੰਗ ਕਾਲਾਂ ਰੀਰੂਟ ਕਰੋ"</string>
@@ -1844,7 +1844,7 @@
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"ਤੀਸਰੀ ਕਾਰਜ-ਸਥਾਨ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"ਅਨਪਿੰਨ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਪਿੰਨ ਮੰਗੋ"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"ਅਨਪਿੰਨ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਅਣਲਾਕ ਪੈਟਰਨ ਵਾਸਤੇ ਪੁੱਛੋ"</string>
-    <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"ਅਨਪਿੰਨ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਪਾਸਵਰਡ ਮੰਗੋ"</string>
+    <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"ਅਣਪਿੰਨ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਪਾਸਵਰਡ ਮੰਗੋ"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"ਤੁਹਾਡੇ ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਸਥਾਪਤ ਕੀਤਾ ਗਿਆ"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"ਤੁਹਾਡੇ ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਅੱਪਡੇਟ ਕੀਤਾ ਗਿਆ"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"ਤੁਹਾਡੇ ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਮਿਟਾਇਆ ਗਿਆ"</string>
@@ -2053,8 +2053,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਵਿਕਲਪ ਬਦਲ ਗਿਆ ਹੈ"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"ਟੈਪ ਕਰਕੇ ਦੋਖੋ ਕਿ ਕਿਹੜੀਆਂ ਚੀਜ਼ਾਂ ਬਲਾਕ ਕੀਤੀਆਂ ਗਈਆਂ ਹਨ।"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"ਸੂਚਨਾ ਸੈਟਿੰਗਾਂ ਦੀ ਸਮੀਖਿਆ ਕਰੋ"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13 ਜਾਂ ਇਸ ਤੋਂ ਬਾਅਦ ਵਾਲੇ ਵਰਜਨਾਂ ਵਿੱਚ, ਤੁਹਾਡੇ ਵੱਲੋਂ ਸਥਾਪਤ ਕੀਤੀਆਂ ਜਾਣ ਵਾਲੀਆਂ ਐਪਾਂ ਨੂੰ ਸੂਚਨਾਵਾਂ ਭੇਜਣ ਲਈ ਤੁਹਾਡੀ ਇਜਾਜ਼ਤ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ। ਮੌਜੂਦਾ ਐਪਾਂ ਲਈ ਇਸ ਇਜਾਜ਼ਤ ਨੂੰ ਬਦਲਣ ਵਾਸਤੇ ਟੈਪ ਕਰੋ।"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"ਬਾਅਦ ਵਿੱਚ ਯਾਦ ਕਰਵਾਓ"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"ਖਾਰਜ ਕਰੋ"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"ਸਿਸਟਮ"</string>

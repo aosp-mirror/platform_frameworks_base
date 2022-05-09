@@ -39,6 +39,7 @@ import android.apex.IApexService;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
+import android.os.Environment;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.platform.test.annotations.Presubmit;
@@ -501,6 +502,48 @@ public class ApexManagerTest {
 
         assertThat(mApexManager.getActivePackageNameForApexModuleName(moduleName))
                 .isEqualTo(TEST_APEX_PKG);
+    }
+
+    @Test
+    public void testGetBackingApexFiles() throws Exception {
+        final ApexInfo apex = createApexInfoForTestPkg(true, true, 37);
+        when(mApexService.getActivePackages()).thenReturn(new ApexInfo[]{apex});
+
+        final File backingApexFile = mApexManager.getBackingApexFile(
+                new File("/apex/" + TEST_APEX_PKG + "/apk/App/App.apk"));
+        assertThat(backingApexFile.getAbsolutePath()).isEqualTo(apex.modulePath);
+    }
+
+    @Test
+    public void testGetBackingApexFile_fileNotOnApexMountPoint_returnsNull() throws Exception {
+        File result = mApexManager.getBackingApexFile(
+                new File("/data/local/tmp/whatever/does-not-matter"));
+        assertThat(result).isNull();
+    }
+
+    @Test
+    public void testGetBackingApexFiles_unknownApex_returnsNull() throws Exception {
+        final ApexInfo apex = createApexInfoForTestPkg(true, true, 37);
+        when(mApexService.getActivePackages()).thenReturn(new ApexInfo[]{apex});
+
+        final File backingApexFile = mApexManager.getBackingApexFile(
+                new File("/apex/com.wrong.apex/apk/App"));
+        assertThat(backingApexFile).isNull();
+    }
+
+    @Test
+    public void testGetBackingApexFiles_topLevelApexDir_returnsNull() throws Exception {
+        assertThat(mApexManager.getBackingApexFile(Environment.getApexDirectory())).isNull();
+        assertThat(mApexManager.getBackingApexFile(new File("/apex/"))).isNull();
+        assertThat(mApexManager.getBackingApexFile(new File("/apex//"))).isNull();
+    }
+
+    @Test
+    public void testGetBackingApexFiles_flattenedApex() throws Exception {
+        ApexManager flattenedApexManager = new ApexManager.ApexManagerFlattenedApex();
+        final File backingApexFile = flattenedApexManager.getBackingApexFile(
+                new File("/apex/com.android.apex.cts.shim/app/CtsShim/CtsShim.apk"));
+        assertThat(backingApexFile).isNull();
     }
 
     private ApexInfo createApexInfoForTestPkg(boolean isActive, boolean isFactory, int version) {

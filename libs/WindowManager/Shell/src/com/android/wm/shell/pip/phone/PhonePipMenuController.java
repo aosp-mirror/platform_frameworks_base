@@ -22,7 +22,6 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.RemoteAction;
 import android.content.Context;
-import android.content.pm.ParceledListSlice;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -120,9 +119,11 @@ public class PhonePipMenuController implements PipMenuController {
     private final SystemWindows mSystemWindows;
     private final Optional<SplitScreenController> mSplitScreenController;
     private final PipUiEventLogger mPipUiEventLogger;
-    private ParceledListSlice<RemoteAction> mAppActions;
+
+    private List<RemoteAction> mAppActions;
     private RemoteAction mCloseAction;
-    private ParceledListSlice<RemoteAction> mMediaActions;
+    private List<RemoteAction> mMediaActions;
+
     private SyncRtSurfaceTransactionApplier mApplier;
     private int mMenuState;
 
@@ -131,7 +132,7 @@ public class PhonePipMenuController implements PipMenuController {
     private ActionListener mMediaActionListener = new ActionListener() {
         @Override
         public void onMediaActionsChanged(List<RemoteAction> mediaActions) {
-            mMediaActions = new ParceledListSlice<>(mediaActions);
+            mMediaActions = new ArrayList<>(mediaActions);
             updateMenuActions();
         }
     };
@@ -183,6 +184,9 @@ public class PhonePipMenuController implements PipMenuController {
                 getPipMenuLayoutParams(MENU_WINDOW_TITLE, 0 /* width */, 0 /* height */),
                 0, SHELL_ROOT_LAYER_PIP);
         setShellRootAccessibilityWindow();
+
+        // Make sure the initial actions are set
+        updateMenuActions();
     }
 
     private void detachPipMenuView() {
@@ -457,7 +461,7 @@ public class PhonePipMenuController implements PipMenuController {
      * Sets the menu actions to the actions provided by the current PiP menu.
      */
     @Override
-    public void setAppActions(ParceledListSlice<RemoteAction> appActions,
+    public void setAppActions(List<RemoteAction> appActions,
             RemoteAction closeAction) {
         mAppActions = appActions;
         mCloseAction = closeAction;
@@ -479,7 +483,7 @@ public class PhonePipMenuController implements PipMenuController {
     /**
      * @return the best set of actions to show in the PiP menu.
      */
-    private ParceledListSlice<RemoteAction> resolveMenuActions() {
+    private List<RemoteAction> resolveMenuActions() {
         if (isValidActions(mAppActions)) {
             return mAppActions;
         }
@@ -491,17 +495,16 @@ public class PhonePipMenuController implements PipMenuController {
      */
     private void updateMenuActions() {
         if (mPipMenuView != null) {
-            final ParceledListSlice<RemoteAction> menuActions = resolveMenuActions();
             mPipMenuView.setActions(mPipBoundsState.getBounds(),
-                    menuActions == null ? null : menuActions.getList(), mCloseAction);
+                    resolveMenuActions(), mCloseAction);
         }
     }
 
     /**
      * Returns whether the set of actions are valid.
      */
-    private static boolean isValidActions(ParceledListSlice<?> actions) {
-        return actions != null && actions.getList().size() > 0;
+    private static boolean isValidActions(List<?> actions) {
+        return actions != null && actions.size() > 0;
     }
 
     /**

@@ -488,7 +488,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         pw.print(prefix); pw.print("recentCallingUid=");
         pw.println(mRecentCallingUid);
         pw.print(prefix); pw.print("allowStartForeground=");
-        pw.println(mAllowStartForeground);
+        pw.println(PowerExemptionManager.reasonCodeToString(mAllowStartForeground));
         pw.print(prefix); pw.print("startForegroundCount=");
         pw.println(mStartForegroundCount);
         pw.print(prefix); pw.print("infoAllowStartForeground=");

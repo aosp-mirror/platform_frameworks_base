@@ -46,8 +46,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -56,7 +54,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 @RequiresApi(Build.VERSION_CODES.R)
 public class LocalMediaManager implements BluetoothCallback {
-    private static final Comparator<MediaDevice> COMPARATOR = Comparator.naturalOrder();
     private static final String TAG = "LocalMediaManager";
     private static final int MAX_DISCONNECTED_DEVICE_NUM = 5;
 
@@ -65,13 +62,15 @@ public class LocalMediaManager implements BluetoothCallback {
             MediaDeviceState.STATE_CONNECTING,
             MediaDeviceState.STATE_DISCONNECTED,
             MediaDeviceState.STATE_CONNECTING_FAILED,
-            MediaDeviceState.STATE_SELECTED})
+            MediaDeviceState.STATE_SELECTED,
+            MediaDeviceState.STATE_GROUPING})
     public @interface MediaDeviceState {
         int STATE_CONNECTED = 0;
         int STATE_CONNECTING = 1;
         int STATE_DISCONNECTED = 2;
         int STATE_CONNECTING_FAILED = 3;
         int STATE_SELECTED = 4;
+        int STATE_GROUPING = 5;
     }
 
     private final Collection<DeviceCallback> mCallbacks = new CopyOnWriteArrayList<>();
@@ -322,6 +321,7 @@ public class LocalMediaManager implements BluetoothCallback {
      * @return If add device successful return {@code true}, otherwise return {@code false}
      */
     public boolean addDeviceToPlayMedia(MediaDevice device) {
+        device.setState(MediaDeviceState.STATE_GROUPING);
         return mInfoMediaManager.addDeviceToPlayMedia(device);
     }
 
@@ -332,6 +332,7 @@ public class LocalMediaManager implements BluetoothCallback {
      * @return If device stop successful return {@code true}, otherwise return {@code false}
      */
     public boolean removeDeviceFromPlayMedia(MediaDevice device) {
+        device.setState(MediaDeviceState.STATE_GROUPING);
         return mInfoMediaManager.removeDeviceFromPlayMedia(device);
     }
 
@@ -524,7 +525,6 @@ public class LocalMediaManager implements BluetoothCallback {
         @Override
         public void onDeviceListAdded(List<MediaDevice> devices) {
             synchronized (mMediaDevicesLock) {
-                Collections.sort(devices, COMPARATOR);
                 mMediaDevices.clear();
                 mMediaDevices.addAll(devices);
                 // Add disconnected bluetooth devices only when phone output device is available.

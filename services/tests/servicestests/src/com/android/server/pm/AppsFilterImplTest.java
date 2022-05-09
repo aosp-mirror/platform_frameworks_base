@@ -99,7 +99,7 @@ public class AppsFilterImplTest {
     }
 
     @Mock
-    AppsFilterImpl.FeatureConfig mFeatureConfigMock;
+    FeatureConfig mFeatureConfigMock;
     @Mock
     PackageDataSnapshot mSnapshot;
     @Mock
@@ -1283,6 +1283,7 @@ public class AppsFilterImplTest {
 
     @Test
     public void testAppsFilterRead() throws Exception {
+        when(mFeatureConfigMock.snapshot()).thenReturn(mFeatureConfigMock);
         final AppsFilterImpl appsFilter =
                 new AppsFilterImpl(mFeatureConfigMock, new String[]{}, false, null,
                         mMockExecutor);
