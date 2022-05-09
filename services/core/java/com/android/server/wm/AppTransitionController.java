@@ -68,6 +68,7 @@ import static com.android.server.wm.AppTransition.isNormalTransit;
 import static com.android.server.wm.NonAppWindowAnimationAdapter.shouldAttachNavBarToApp;
 import static com.android.server.wm.NonAppWindowAnimationAdapter.shouldStartNonAppWindowAnimationsForKeyguardExit;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.WallpaperAnimationAdapter.shouldStartWallpaperAnimation;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
@@ -912,6 +913,15 @@ public class AppTransitionController {
                     canPromote = false;
                 }
 
+                // If the current window container is task and it have adjacent task, it means
+                // both tasks will open or close app toghther but we want get their opening or
+                // closing animation target independently so do not promote.
+                if (current.asTask() != null
+                        && current.asTask().getAdjacentTaskFragment() != null
+                        && current.asTask().getAdjacentTaskFragment().asTask() != null) {
+                    canPromote = false;
+                }
+
                 // Find all siblings of the current WindowContainer in "candidates", move them into
                 // a separate list "siblings", and checks if an animation target can be promoted
                 // to its parent.
@@ -1133,13 +1143,17 @@ public class AppTransitionController {
             if (activity == null) {
                 continue;
             }
+            if (activity.isAnimating(PARENTS, ANIMATION_TYPE_RECENTS)) {
+                ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
+                        "Delaying app transition for recents animation to finish");
+                return false;
+            }
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                     "Check opening app=%s: allDrawn=%b startingDisplayed=%b "
                             + "startingMoved=%b isRelaunching()=%b startingWindow=%s",
                     activity, activity.allDrawn, activity.startingDisplayed,
                     activity.startingMoved, activity.isRelaunching(),
                     activity.mStartingWindow);
-
             final boolean allDrawn = activity.allDrawn && !activity.isRelaunching();
             if (!allDrawn && !activity.startingDisplayed && !activity.startingMoved) {
                 return false;
