@@ -62,7 +62,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
@@ -81,7 +80,6 @@ import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.text.BidiFormatter;
 import android.util.ArraySet;
 import android.util.ExceptionUtils;
 import android.util.Log;
@@ -538,20 +536,12 @@ public class CompanionDeviceManagerService extends SystemService {
             String callingPackage = component.getPackageName();
             checkCanCallNotificationApi(callingPackage);
             // TODO: check userId.
-            String packageTitle = BidiFormatter.getInstance().unicodeWrap(
-                    getPackageInfo(getContext(), userId, callingPackage)
-                            .applicationInfo
-                            .loadSafeLabel(getContext().getPackageManager(),
-                                    PackageItemInfo.DEFAULT_MAX_LABEL_SIZE_PX,
-                                    PackageItemInfo.SAFE_LABEL_FLAG_TRIM
-                                            | PackageItemInfo.SAFE_LABEL_FLAG_FIRST_LINE)
-                            .toString());
             final long identity = Binder.clearCallingIdentity();
             try {
                 return PendingIntent.getActivityAsUser(getContext(),
                         0 /* request code */,
                         NotificationAccessConfirmationActivityContract.launcherIntent(
-                                getContext(), userId, component, packageTitle),
+                                getContext(), userId, component),
                         PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_ONE_SHOT
                                 | PendingIntent.FLAG_CANCEL_CURRENT,
                         null /* options */,
