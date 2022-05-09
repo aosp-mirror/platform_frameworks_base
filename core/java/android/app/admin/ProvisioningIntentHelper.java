@@ -17,8 +17,10 @@
 package android.app.admin;
 
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE;
+import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE;
 import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME;
 import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME;
+import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_ROLE_HOLDER_EXTRAS_BUNDLE;
 import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_TRIGGER;
 import static android.app.admin.DevicePolicyManager.MIME_TYPE_PROVISIONING_NFC;
 import static android.app.admin.DevicePolicyManager.PROVISIONING_TRIGGER_NFC;
@@ -36,12 +38,14 @@ import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.os.PersistableBundle;
 import android.util.Log;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Enumeration;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * Utility class that provides functionality to create provisioning intents from nfc intents.
@@ -124,10 +128,44 @@ final class ProvisioningIntentHelper {
             ComponentName componentName = ComponentName.unflattenFromString(
                     properties.getProperty(propertyName));
             bundle.putParcelable(propertyName, componentName);
+        } else if (EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE.equals(propertyName)
+                || EXTRA_PROVISIONING_ROLE_HOLDER_EXTRAS_BUNDLE.equals(propertyName)) {
+            try {
+                bundle.putParcelable(propertyName,
+                        deserializeExtrasBundle(properties, propertyName));
+            } catch (IOException e) {
+                Log.e(TAG,
+                        "Failed to parse " + propertyName + ".", e);
+            }
         }
         else {
             bundle.putString(propertyName, properties.getProperty(propertyName));
         }
+    }
+
+    /**
+     * Get a {@link PersistableBundle} from a {@code String} property in a {@link Properties}
+     * object.
+     * @param properties the source of the extra
+     * @param extraName key into the {@link Properties} object
+     * @return the {@link PersistableBundle} or {@code null} if there was no property with the
+     * given name
+     * @throws IOException if there was an error parsing the property
+     */
+    private static PersistableBundle deserializeExtrasBundle(
+            Properties properties, String extraName) throws IOException {
+        String serializedExtras = properties.getProperty(extraName);
+        if (serializedExtras == null) {
+            return null;
+        }
+        Properties bundleProperties = new Properties();
+        bundleProperties.load(new StringReader(serializedExtras));
+        PersistableBundle extrasBundle = new PersistableBundle(bundleProperties.size());
+        Set<String> propertyNames = bundleProperties.stringPropertyNames();
+        for (String propertyName : propertyNames) {
+            extrasBundle.putString(propertyName, bundleProperties.getProperty(propertyName));
+        }
+        return extrasBundle;
     }
 
     private static Intent createProvisioningIntentFromBundle(Bundle bundle) {
