@@ -58,6 +58,7 @@ import com.android.systemui.ActivityIntentHelper
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastSender
+import com.android.systemui.media.MediaControlPanel.KEY_SMARTSPACE_APP_NAME
 import com.android.systemui.media.dialog.MediaOutputDialogFactory
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
@@ -102,6 +103,7 @@ private const val SESSION_KEY = "SESSION_KEY"
 private const val SESSION_ARTIST = "SESSION_ARTIST"
 private const val SESSION_TITLE = "SESSION_TITLE"
 private const val DISABLED_DEVICE_NAME = "DISABLED_DEVICE_NAME"
+private const val REC_APP_NAME = "REC APP NAME"
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -262,6 +264,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         // Set valid recommendation data
         val extras = Bundle()
+        extras.putString(KEY_SMARTSPACE_APP_NAME, REC_APP_NAME)
         val intent = Intent().apply {
             putExtras(extras)
             setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -1273,6 +1276,85 @@ public class MediaControlPanelTest : SysuiTestCase() {
         dismiss.callOnClick()
         verify(logger).logLongPressDismiss(anyInt(), eq(PACKAGE), eq(instanceId))
         verify(mediaDataManager).dismissSmartspaceRecommendation(eq(mediaKey), anyLong())
+    }
+
+    @Test
+    fun recommendation_gutsOpen_contentDescriptionIsForGuts() {
+        whenever(mediaViewController.isGutsVisible).thenReturn(true)
+        player.attachRecommendation(recommendationViewHolder)
+
+        val gutsTextString = "gutsText"
+        whenever(gutsText.text).thenReturn(gutsTextString)
+        player.bindRecommendation(smartspaceData)
+
+        val descriptionCaptor = ArgumentCaptor.forClass(CharSequence::class.java)
+        verify(viewHolder.player).contentDescription = descriptionCaptor.capture()
+        val description = descriptionCaptor.value.toString()
+
+        assertThat(description).isEqualTo(gutsTextString)
+    }
+
+    @Test
+    fun recommendation_gutsClosed_contentDescriptionIsForPlayer() {
+        whenever(mediaViewController.isGutsVisible).thenReturn(false)
+        player.attachRecommendation(recommendationViewHolder)
+
+        player.bindRecommendation(smartspaceData)
+
+        val descriptionCaptor = ArgumentCaptor.forClass(CharSequence::class.java)
+        verify(viewHolder.player).contentDescription = descriptionCaptor.capture()
+        val description = descriptionCaptor.value.toString()
+
+        assertThat(description).contains(REC_APP_NAME)
+    }
+
+    @Test
+    fun recommendation_gutsChangesFromOpenToClosed_contentDescriptionUpdated() {
+        // Start out open
+        whenever(mediaViewController.isGutsVisible).thenReturn(true)
+        whenever(gutsText.text).thenReturn("gutsText")
+        player.attachRecommendation(recommendationViewHolder)
+        player.bindRecommendation(smartspaceData)
+
+        // Update to closed by long pressing
+        val captor = ArgumentCaptor.forClass(View.OnLongClickListener::class.java)
+        verify(viewHolder.player).onLongClickListener = captor.capture()
+        reset(viewHolder.player)
+
+        whenever(mediaViewController.isGutsVisible).thenReturn(false)
+        captor.value.onLongClick(viewHolder.player)
+
+        // Then content description is now the player content description
+        val descriptionCaptor = ArgumentCaptor.forClass(CharSequence::class.java)
+        verify(viewHolder.player).contentDescription = descriptionCaptor.capture()
+        val description = descriptionCaptor.value.toString()
+
+        assertThat(description).contains(REC_APP_NAME)
+    }
+
+    @Test
+    fun recommendation_gutsChangesFromClosedToOpen_contentDescriptionUpdated() {
+        // Start out closed
+        whenever(mediaViewController.isGutsVisible).thenReturn(false)
+        val gutsTextString = "gutsText"
+        whenever(gutsText.text).thenReturn(gutsTextString)
+        player.attachRecommendation(recommendationViewHolder)
+        player.bindRecommendation(smartspaceData)
+
+        // Update to open by long pressing
+        val captor = ArgumentCaptor.forClass(View.OnLongClickListener::class.java)
+        verify(viewHolder.player).onLongClickListener = captor.capture()
+        reset(viewHolder.player)
+
+        whenever(mediaViewController.isGutsVisible).thenReturn(true)
+        captor.value.onLongClick(viewHolder.player)
+
+        // Then content description is now the guts content description
+        val descriptionCaptor = ArgumentCaptor.forClass(CharSequence::class.java)
+        verify(viewHolder.player).contentDescription = descriptionCaptor.capture()
+        val description = descriptionCaptor.value.toString()
+
+        assertThat(description).isEqualTo(gutsTextString)
     }
 
     /* ***** END guts tests for the recommendations ***** */
