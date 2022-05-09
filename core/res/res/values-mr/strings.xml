@@ -103,7 +103,7 @@
     <string name="serviceClassVoice" msgid="2065556932043454987">"व्हॉइस"</string>
     <string name="serviceClassData" msgid="4148080018967300248">"डेटा"</string>
     <string name="serviceClassFAX" msgid="2561653371698904118">"फॅक्स"</string>
-    <string name="serviceClassSMS" msgid="1547664561704509004">"SMS"</string>
+    <string name="serviceClassSMS" msgid="1547664561704509004">"एसएमएस"</string>
     <string name="serviceClassDataAsync" msgid="2029856900898545984">"असंकालिक"</string>
     <string name="serviceClassDataSync" msgid="7895071363569133704">"सिंक करा"</string>
     <string name="serviceClassPacket" msgid="1430642951399303804">"पॅकेट"</string>
@@ -308,7 +308,7 @@
     <string name="permgroupdesc_location" msgid="1995955142118450685">"या डिव्हाइसच्या स्थानावर प्रवेश"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"कॅलेंडर"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"आपल्या कॅलेंडरवर प्रवेश"</string>
-    <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
+    <string name="permgrouplab_sms" msgid="795737735126084874">"एसएमएस"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS मेसेज पाठवणे आणि पाहणे हे"</string>
     <string name="permgrouplab_storage" msgid="1938416135375282333">"फाइल आणि मीडिया"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"तुमच्या डिव्हाइस वरील फोटो, मीडिया आणि फायलींमध्‍ये अ‍ॅक्सेस"</string>
@@ -1704,7 +1704,7 @@
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"स्क्रीन पहा आणि नियंत्रित करा"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ते स्क्रीनवरील सर्व आशय वाचू शकते आणि इतर ॲप्सवर आशय प्रदर्शित करू शकते."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"पहा आणि क्रिया करा"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"तुम्ही ॲप किंवा हार्डवेअर सेन्सर कसे वापरता याचा हे मागोवा घेऊ शकते आणि इतर ॲप्ससोबत तुमच्या वतीने काम करू शकते."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"हे तुम्ही ॲप किंवा हार्डवेअर सेन्सर कसे वापरता ते ट्रॅक करू शकते आणि इतर ॲप्ससोबत तुमच्या वतीने संवाद साधू शकते."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"अनुमती द्या"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"नकार द्या"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"वैशिष्ट्य वापरणे सुरू करण्यासाठी त्यावर टॅप करा:"</string>

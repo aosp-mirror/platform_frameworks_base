@@ -354,7 +354,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Aplikaciji omogoča razširjanje ali strnjevanje vrstice stanja."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"Prikaz obvestil kot celozaslonskih dejavnosti v zaklenjeni napravi"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Aplikaciji dovoli, da prikaže obvestila kot celozaslonske dejavnosti v zaklenjeni napravi."</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"nameščanje bližnjic"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Nameščanje bližnjic"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Aplikaciji omogoča dodajanje bližnjic na začetni zaslon brez posredovanja uporabnika."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"odstranjevanje bližnjic"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Aplikaciji omogoča odstranjevanje bližnjic z začetnega zaslona brez posredovanja uporabnika."</string>
@@ -1762,7 +1762,7 @@
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inverzija barv"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Popravljanje barv"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Enoročni način"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Zelo zatemnjeno"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Zelo zatemnjen zaslon"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tipki za glasnost sta pridržani. Storitev <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je vklopljena."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tipki za glasnost sta pridržani. Storitev <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je izklopljena."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Za uporabo storitve <xliff:g id="SERVICE_NAME">%1$s</xliff:g> pritisnite obe tipki za glasnost in ju pridržite tri sekunde"</string>

@@ -2286,7 +2286,7 @@
     <string name="window_magnification_prompt_title" msgid="2876703640772778215">"Novas opcións de configuración de ampliación"</string>
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Xa podes ampliar parte da pantalla"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Activar en Configuración"</string>
-    <string name="dismiss_action" msgid="1728820550388704784">"Ignorar"</string>
+    <string name="dismiss_action" msgid="1728820550388704784">"Pechar"</string>
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Desbloquea o micrófono do dispositivo"</string>
     <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Desbloquea a cámara do dispositivo"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Para &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; e todas as aplicacións e servizos"</string>
