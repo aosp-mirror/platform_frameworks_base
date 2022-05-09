@@ -15,6 +15,8 @@
  */
 package com.android.server.tv.tunerresourcemanager;
 
+import android.media.tv.tunerresourcemanager.TunerResourceManager;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -61,6 +63,11 @@ public final class ClientProfile {
      * Optional nice value for TRM to reduce client’s priority.
      */
     private int mNiceValue;
+
+    /**
+     * The handle of the primary frontend resource
+     */
+    private int mPrimaryUsingFrontendHandle = TunerResourceManager.INVALID_RESOURCE_HANDLE;
 
     /**
      * List of the frontend handles that are used by the current client.
@@ -175,6 +182,22 @@ public final class ClientProfile {
     }
 
     /**
+     * Set the primary frontend used by the client
+     *
+     * @param frontendHandle being used.
+     */
+    public void setPrimaryFrontend(int frontendHandle) {
+        mPrimaryUsingFrontendHandle = frontendHandle;
+    }
+
+    /**
+     * Get the primary frontend used by the client
+     */
+    public int getPrimaryFrontend() {
+        return mPrimaryUsingFrontendHandle;
+    }
+
+    /**
      * Update the set of client that share frontend with the current client.
      *
      * @param clientId the client to share the fe with the current client.
@@ -206,6 +229,7 @@ public final class ClientProfile {
     public void releaseFrontend() {
         mUsingFrontendHandles.clear();
         mShareFeClientIds.clear();
+        mPrimaryUsingFrontendHandle = TunerResourceManager.INVALID_RESOURCE_HANDLE;
     }
 
     /**
@@ -276,6 +300,7 @@ public final class ClientProfile {
     public void reclaimAllResources() {
         mUsingFrontendHandles.clear();
         mShareFeClientIds.clear();
+        mPrimaryUsingFrontendHandle = TunerResourceManager.INVALID_RESOURCE_HANDLE;
         mUsingLnbHandles.clear();
         mUsingCasSystemId = INVALID_RESOURCE_ID;
         mUsingCiCamId = INVALID_RESOURCE_ID;
