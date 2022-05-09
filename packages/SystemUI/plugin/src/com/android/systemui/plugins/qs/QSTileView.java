@@ -26,7 +26,7 @@ import com.android.systemui.plugins.qs.QSTile.State;
 @DependsOn(target = QSIconView.class)
 @DependsOn(target = QSTile.class)
 public abstract class QSTileView extends LinearLayout {
-    public static final int VERSION = 2;
+    public static final int VERSION = 3;
 
     public QSTileView(Context context) {
         super(context);
@@ -71,4 +71,7 @@ public abstract class QSTileView extends LinearLayout {
     public View getSecondaryLabel() {
         return null;
     }
+
+    /** Sets the index of this tile in its layout */
+    public abstract void setPosition(int position);
 }

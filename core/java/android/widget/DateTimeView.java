@@ -32,6 +32,7 @@ import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.os.Build;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.PluralsMessageFormatter;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -230,7 +231,7 @@ public class DateTimeView extends TextView {
 
         // Set the text
         String text = format.format(new Date(time));
-        setText(text);
+        maybeSetText(text);
 
         // Schedule the next update
         if (display == SHOW_TIME) {
@@ -258,7 +259,7 @@ public class DateTimeView extends TextView {
         boolean past = (now >= mTimeMillis);
         String result;
         if (duration < MINUTE_IN_MILLIS) {
-            setText(mNowText);
+            maybeSetText(mNowText);
             mUpdateTimeMillis = mTimeMillis + MINUTE_IN_MILLIS + 1;
             return;
         } else if (duration < HOUR_IN_MILLIS) {
@@ -308,7 +309,19 @@ public class DateTimeView extends TextView {
                 mUpdateTimeMillis = mTimeMillis - millisIncrease * count + 1;
             }
         }
-        setText(result);
+        maybeSetText(result);
+    }
+
+    /**
+     * Sets text only if the text has actually changed. This prevents needles relayouts of this
+     * view when set to wrap_content.
+     */
+    private void maybeSetText(String text) {
+        if (TextUtils.equals(getText(), text)) {
+            return;
+        }
+
+        setText(text);
     }
 
     /**

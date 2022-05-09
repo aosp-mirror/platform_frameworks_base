@@ -21,33 +21,25 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.PointF
 import android.graphics.RectF
-import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
-import android.os.Build
-import android.os.UserHandle
-import android.provider.Settings
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
-import android.view.Surface
 import android.widget.FrameLayout
 import com.android.systemui.R
 import com.android.systemui.doze.DozeReceiver
-import com.android.systemui.biometrics.UdfpsHbmTypes.HbmType
 
 private const val TAG = "UdfpsView"
-private const val SETTING_HBM_TYPE = "com.android.systemui.biometrics.UdfpsSurfaceView.hbmType"
-@HbmType
-private const val DEFAULT_HBM_TYPE = UdfpsHbmTypes.LOCAL_HBM
 
 /**
- * A view containing 1) A SurfaceView for HBM, and 2) A normal drawable view for all other
- * animations.
+ * The main view group containing all UDFPS animations.
  */
 class UdfpsView(
     context: Context,
     attrs: AttributeSet?
 ) : FrameLayout(context, attrs), DozeReceiver, UdfpsIlluminator {
 
+    // sensorRect may be bigger than the sensor. True sensor dimensions are defined in
+    // overlayParams.sensorBounds
     private val sensorRect = RectF()
     private var hbmProvider: UdfpsHbmProvider? = null
     private val debugTextPaint = Paint().apply {
@@ -68,26 +60,14 @@ class UdfpsView(
         com.android.internal.R.integer.config_udfps_illumination_transition_ms
     ).toLong()
 
-    @HbmType
-    private val hbmType = if (Build.IS_ENG || Build.IS_USERDEBUG) {
-        Settings.Secure.getIntForUser(
-            context.contentResolver,
-            SETTING_HBM_TYPE,
-            DEFAULT_HBM_TYPE,
-            UserHandle.USER_CURRENT
-        )
-    } else {
-        DEFAULT_HBM_TYPE
-    }
-
-    // Only used for UdfpsHbmTypes.GLOBAL_HBM.
-    private var ghbmView: UdfpsSurfaceView? = null
-
     /** View controller (can be different for enrollment, BiometricPrompt, Keyguard, etc.). */
     var animationViewController: UdfpsAnimationViewController<*>? = null
 
-    /** Properties used to obtain the sensor location. */
-    var sensorProperties: FingerprintSensorPropertiesInternal? = null
+    /** Parameters that affect the position and size of the overlay. */
+    var overlayParams = UdfpsOverlayParams()
+
+    /** Whether the HAL is responsible for enabling and disabling of LHBM. */
+    var halControlsIllumination: Boolean = true
 
     /** Debug message. */
     var debugMessage: String? = null
@@ -109,12 +89,6 @@ class UdfpsView(
         return (animationViewController == null || !animationViewController!!.shouldPauseAuth())
     }
 
-    override fun onFinishInflate() {
-        if (hbmType == UdfpsHbmTypes.GLOBAL_HBM) {
-            ghbmView = findViewById(R.id.hbm_view)
-        }
-    }
-
     override fun dozeTimeTick() {
         animationViewController?.dozeTimeTick()
     }
@@ -124,13 +98,12 @@ class UdfpsView(
 
         val paddingX = animationViewController?.paddingX ?: 0
         val paddingY = animationViewController?.paddingY ?: 0
-        val sensorRadius = sensorProperties?.location?.sensorRadius ?: 0
 
         sensorRect.set(
             paddingX.toFloat(),
             paddingY.toFloat(),
-            (2 * sensorRadius + paddingX).toFloat(),
-            (2 * sensorRadius + paddingY).toFloat()
+            (overlayParams.sensorBounds.width() + paddingX).toFloat(),
+            (overlayParams.sensorBounds.height() + paddingY).toFloat()
         )
         animationViewController?.onSensorRectUpdated(RectF(sensorRect))
     }
@@ -180,28 +153,21 @@ class UdfpsView(
     override fun startIllumination(onIlluminatedRunnable: Runnable?) {
         isIlluminationRequested = true
         animationViewController?.onIlluminationStarting()
-
-        val gView = ghbmView
-        if (gView != null) {
-            gView.setGhbmIlluminationListener(this::doIlluminate)
-            gView.visibility = VISIBLE
-            gView.startGhbmIllumination(onIlluminatedRunnable)
-        } else {
-            doIlluminate(null /* surface */, onIlluminatedRunnable)
-        }
+        doIlluminate(onIlluminatedRunnable)
     }
 
-    private fun doIlluminate(surface: Surface?, onIlluminatedRunnable: Runnable?) {
-        if (ghbmView != null && surface == null) {
-            Log.e(TAG, "doIlluminate | surface must be non-null for GHBM")
-        }
-
-        hbmProvider?.enableHbm(hbmType, surface) {
-            ghbmView?.drawIlluminationDot(sensorRect)
+    private fun doIlluminate(onIlluminatedRunnable: Runnable?) {
+        // TODO(b/231335067): enableHbm with halControlsIllumination=true shouldn't make sense.
+        // This only makes sense now because vendor code may rely on the side effects of enableHbm.
+        hbmProvider?.enableHbm(halControlsIllumination) {
             if (onIlluminatedRunnable != null) {
-                // No framework API can reliably tell when a frame reaches the panel. A timeout
-                // is the safest solution.
-                postDelayed(onIlluminatedRunnable, onIlluminatedDelayMs)
+                if (halControlsIllumination) {
+                    onIlluminatedRunnable.run()
+                } else {
+                    // No framework API can reliably tell when a frame reaches the panel. A timeout
+                    // is the safest solution.
+                    postDelayed(onIlluminatedRunnable, onIlluminatedDelayMs)
+                }
             } else {
                 Log.w(TAG, "doIlluminate | onIlluminatedRunnable is null")
             }
@@ -211,10 +177,6 @@ class UdfpsView(
     override fun stopIllumination() {
         isIlluminationRequested = false
         animationViewController?.onIlluminationStopped()
-        ghbmView?.let { view ->
-            view.setGhbmIlluminationListener(null)
-            view.visibility = INVISIBLE
-        }
         hbmProvider?.disableHbm(null /* onHbmDisabled */)
     }
 }

@@ -23,9 +23,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
@@ -279,51 +277,6 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
     }
 
     /**
-     * Ensures that {@link LaunchParamsModifier} requests specifying display id during
-     * layout are honored.
-     */
-    @Test
-    public void testLayoutTaskPreferredDisplayChange() {
-        final LaunchParams params = new LaunchParams();
-        final TestDisplayContent display = createNewDisplayContent();
-        final TaskDisplayArea preferredTaskDisplayArea = display.getDefaultTaskDisplayArea();
-        params.mPreferredTaskDisplayArea = preferredTaskDisplayArea;
-        final InstrumentedPositioner positioner = new InstrumentedPositioner(RESULT_DONE, params);
-        final Task task = new TaskBuilder(mAtm.mTaskSupervisor).build();
-
-        mController.registerModifier(positioner);
-
-        doNothing().when(mRootWindowContainer).moveRootTaskToTaskDisplayArea(anyInt(), any(),
-                anyBoolean());
-        mController.layoutTask(task, null /* windowLayout */);
-        verify(mRootWindowContainer, times(1)).moveRootTaskToTaskDisplayArea(
-                eq(task.getRootTaskId()), eq(preferredTaskDisplayArea), anyBoolean());
-    }
-
-    /**
-     * Ensures that {@link LaunchParamsModifier} requests specifying windowingMode during
-     * layout are honored.
-     */
-    @Test
-    public void testLayoutTaskWindowingModeChange() {
-        final LaunchParams params = new LaunchParams();
-        final int windowingMode = WINDOWING_MODE_FREEFORM;
-        params.mWindowingMode = windowingMode;
-        final InstrumentedPositioner positioner = new InstrumentedPositioner(RESULT_DONE, params);
-        final Task task = new TaskBuilder(mAtm.mTaskSupervisor).build();
-
-        mController.registerModifier(positioner);
-
-        final int beforeWindowMode = task.getRootTask().getWindowingMode();
-        assertNotEquals(windowingMode, beforeWindowMode);
-
-        mController.layoutTask(task, null /* windowLayout */);
-
-        final int afterWindowMode = task.getRootTask().getWindowingMode();
-        assertEquals(windowingMode, afterWindowMode);
-    }
-
-    /**
      * Ensures that {@link LaunchParamsModifier} doesn't alter non-root tasks' windowingMode.
      */
     @Test
@@ -355,10 +308,10 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
         final Rect expected = new Rect(10, 20, 30, 40);
 
         final LaunchParams params = new LaunchParams();
-        params.mWindowingMode = WINDOWING_MODE_FREEFORM;
         params.mBounds.set(expected);
         final InstrumentedPositioner positioner = new InstrumentedPositioner(RESULT_DONE, params);
-        final Task task = new TaskBuilder(mAtm.mTaskSupervisor).build();
+        final Task task = new TaskBuilder(mAtm.mTaskSupervisor)
+                .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
 
         mController.registerModifier(positioner);
 
@@ -380,10 +333,10 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
         final Rect expected = new Rect(10, 20, 30, 40);
 
         final LaunchParams params = new LaunchParams();
-        params.mWindowingMode = WINDOWING_MODE_MULTI_WINDOW;
         params.mBounds.set(expected);
         final InstrumentedPositioner positioner = new InstrumentedPositioner(RESULT_DONE, params);
-        final Task task = new TaskBuilder(mAtm.mTaskSupervisor).build();
+        final Task task = new TaskBuilder(mAtm.mTaskSupervisor)
+                .setWindowingMode(WINDOWING_MODE_MULTI_WINDOW).build();
 
         mController.registerModifier(positioner);
 

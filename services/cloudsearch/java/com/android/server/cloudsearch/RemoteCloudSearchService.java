@@ -35,6 +35,7 @@ public class RemoteCloudSearchService extends
 
     private static final String TAG = "RemoteCloudSearchService";
 
+    private static final long TIMEOUT_IDLE_BOUND_TIMEOUT_MS = 10 * DateUtils.MINUTE_IN_MILLIS;
     private static final long TIMEOUT_REMOTE_REQUEST_MILLIS = 2 * DateUtils.SECOND_IN_MILLIS;
 
     private final RemoteCloudSearchServiceCallbacks mCallback;
@@ -57,7 +58,7 @@ public class RemoteCloudSearchService extends
 
     @Override
     protected long getTimeoutIdleBindMillis() {
-        return PERMANENT_BOUND_TIMEOUT_MS;
+        return TIMEOUT_IDLE_BOUND_TIMEOUT_MS;
     }
 
     @Override

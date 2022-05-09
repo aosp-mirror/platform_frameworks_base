@@ -61,7 +61,7 @@ abstract class BaseAppHelper(
         private const val APP_CLOSE_WAIT_TIME_MS = 3_000L
 
         fun isShellTransitionsEnabled() =
-                SystemProperties.getBoolean("persist.debug.shell_transit", false)
+                SystemProperties.getBoolean("persist.wm.debug.shell_transit", false)
 
         fun executeShellCommand(instrumentation: Instrumentation, cmd: String) {
             try {

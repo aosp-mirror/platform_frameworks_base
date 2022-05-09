@@ -262,7 +262,7 @@ public class WindowTokenTests extends WindowTestsBase {
     @Test
     public void testSetInsetsFrozen_notAffectImeWindowState() {
         // Pre-condition: make the IME window be controlled by IME insets provider.
-        mDisplayContent.getInsetsStateController().getSourceProvider(ITYPE_IME).setWindow(
+        mDisplayContent.getInsetsStateController().getSourceProvider(ITYPE_IME).setWindowContainer(
                 mDisplayContent.mInputMethodWindow, null, null);
 
         // Simulate an app window to be the IME layering target, assume the app window has no

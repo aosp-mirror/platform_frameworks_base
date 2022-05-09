@@ -112,17 +112,16 @@ public class UdfpsDialogMeasureAdapter {
             if (child.getId() == R.id.biometric_icon_frame) {
                 final FrameLayout iconFrame = (FrameLayout) child;
                 final View icon = iconFrame.getChildAt(0);
-
-                // Ensure that the icon is never larger than the sensor.
-                icon.measure(
-                        MeasureSpec.makeMeasureSpec(sensorDiameter, MeasureSpec.AT_MOST),
-                        MeasureSpec.makeMeasureSpec(sensorDiameter, MeasureSpec.AT_MOST));
-
                 // Create a frame that's exactly the height of the sensor circle.
                 iconFrame.measure(
                         MeasureSpec.makeMeasureSpec(
                                 child.getLayoutParams().width, MeasureSpec.EXACTLY),
                         MeasureSpec.makeMeasureSpec(sensorDiameter, MeasureSpec.EXACTLY));
+
+                // Ensure that the icon is never larger than the sensor.
+                icon.measure(
+                        MeasureSpec.makeMeasureSpec(sensorDiameter, MeasureSpec.AT_MOST),
+                        MeasureSpec.makeMeasureSpec(sensorDiameter, MeasureSpec.AT_MOST));
             } else if (child.getId() == R.id.space_above_icon) {
                 child.measure(
                         MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
@@ -139,6 +138,9 @@ public class UdfpsDialogMeasureAdapter {
                 child.measure(
                         MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
                         MeasureSpec.makeMeasureSpec(clampedSpacerHeight, MeasureSpec.EXACTLY));
+            } else if (child.getId() == R.id.description) {
+                //skip description view and compute later
+                continue;
             } else {
                 child.measure(
                         MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
@@ -150,7 +152,27 @@ public class UdfpsDialogMeasureAdapter {
             }
         }
 
+        //re-calculate the height of description
+        View description = mView.findViewById(R.id.description);
+        if (description != null && description.getVisibility() != View.GONE) {
+            totalHeight += measureDescription(description, displayHeight, width, totalHeight);
+        }
+
         return new AuthDialog.LayoutParams(width, totalHeight);
+    }
+
+    private int measureDescription(View description, int displayHeight, int currWidth,
+                                   int currHeight) {
+        //description view should be measured in AuthBiometricFingerprintView#onMeasureInternal
+        //so we could getMeasuredHeight in onMeasureInternalPortrait directly.
+        int newHeight = description.getMeasuredHeight() + currHeight;
+        int limit = (int) (displayHeight * 0.75);
+        if (newHeight > limit) {
+            description.measure(
+                    MeasureSpec.makeMeasureSpec(currWidth, MeasureSpec.EXACTLY),
+                    MeasureSpec.makeMeasureSpec(limit - currHeight, MeasureSpec.EXACTLY));
+        }
+        return description.getMeasuredHeight();
     }
 
     @NonNull
@@ -187,16 +209,15 @@ public class UdfpsDialogMeasureAdapter {
             if (child.getId() == R.id.biometric_icon_frame) {
                 final FrameLayout iconFrame = (FrameLayout) child;
                 final View icon = iconFrame.getChildAt(0);
+                // Create a frame that's exactly the height of the sensor circle.
+                iconFrame.measure(
+                        MeasureSpec.makeMeasureSpec(remeasuredWidth, MeasureSpec.EXACTLY),
+                        MeasureSpec.makeMeasureSpec(sensorDiameter, MeasureSpec.EXACTLY));
 
                 // Ensure that the icon is never larger than the sensor.
                 icon.measure(
                         MeasureSpec.makeMeasureSpec(sensorDiameter, MeasureSpec.AT_MOST),
                         MeasureSpec.makeMeasureSpec(sensorDiameter, MeasureSpec.AT_MOST));
-
-                // Create a frame that's exactly the height of the sensor circle.
-                iconFrame.measure(
-                        MeasureSpec.makeMeasureSpec(remeasuredWidth, MeasureSpec.EXACTLY),
-                        MeasureSpec.makeMeasureSpec(sensorDiameter, MeasureSpec.EXACTLY));
             } else if (child.getId() == R.id.space_above_icon) {
                 // Adjust the width and height of the top spacer if necessary.
                 final int newTopSpacerHeight = child.getLayoutParams().height

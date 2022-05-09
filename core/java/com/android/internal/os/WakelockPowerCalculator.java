@@ -62,8 +62,10 @@ public class WakelockPowerCalculator extends PowerCalculator {
                     BatteryStats.STATS_SINCE_CHARGED);
             app.setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_WAKELOCK, result.durationMs)
                     .setConsumedPower(BatteryConsumer.POWER_COMPONENT_WAKELOCK, result.powerMah);
-            totalAppDurationMs += result.durationMs;
-            appPowerMah += result.powerMah;
+            if (!app.isVirtualUid()) {
+                totalAppDurationMs += result.durationMs;
+                appPowerMah += result.powerMah;
+            }
 
             if (app.getUid() == Process.ROOT_UID) {
                 osBatteryConsumer = app;

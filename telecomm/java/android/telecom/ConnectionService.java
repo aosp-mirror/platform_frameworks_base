@@ -3171,9 +3171,14 @@ public abstract class ConnectionService extends Service {
      *
      * {@link TelecomManager#addNewIncomingCall(PhoneAccountHandle, android.os.Bundle)}.
      *
+     * @param connectionManagerPhoneAccount The connection manager account to use for managing
+     *                                      this call
+     * @param request Details about the outgoing call
+     * @return The {@code Connection} object to satisfy this call, or the result of an invocation
+     *         of {@link Connection#createFailedConnection(DisconnectCause)} to not handle the call
      * @hide
      */
-    @SystemApi
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public @Nullable Connection onCreateUnknownConnection(
             @NonNull PhoneAccountHandle connectionManagerPhoneAccount,

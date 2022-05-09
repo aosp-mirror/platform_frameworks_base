@@ -29,12 +29,8 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.ArrayMap;
 import android.util.Log;
-import android.util.Slog;
 import android.view.autofill.AutofillManager;
-
-import com.android.internal.annotations.GuardedBy;
 
 import java.util.ArrayList;
 
@@ -58,9 +54,6 @@ import java.util.ArrayList;
 public class Application extends ContextWrapper implements ComponentCallbacks2 {
     private static final String TAG = "Application";
 
-    /** Whether to enable the check to detect "duplicate application instances". */
-    private static final boolean DEBUG_DUP_APP_INSTANCES = true;
-
     @UnsupportedAppUsage
     private ArrayList<ActivityLifecycleCallbacks> mActivityLifecycleCallbacks =
             new ArrayList<ActivityLifecycleCallbacks>();
@@ -73,13 +66,6 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
     /** @hide */
     @UnsupportedAppUsage
     public LoadedApk mLoadedApk;
-
-    @GuardedBy("sInstances")
-    private static final ArrayMap<Class<?>, Application> sInstances =
-            DEBUG_DUP_APP_INSTANCES ? new ArrayMap<>(1) : null;
-
-    // Only set when DEBUG_DUP_APP_INSTANCES is true.
-    private StackTrace mConstructorStackTrace;
 
     public interface ActivityLifecycleCallbacks {
 
@@ -246,34 +232,6 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
 
     public Application() {
         super(null);
-        if (DEBUG_DUP_APP_INSTANCES) {
-            checkDuplicateInstances();
-        }
-    }
-
-    private void checkDuplicateInstances() {
-        final Class<?> myClass = this.getClass();
-
-        // We only activate this check for custom application classes.
-        // Otherwise, it'd misfire if multiple apps share the same process, if all of them use
-        // the same Application class (on the same classloader).
-        if (myClass == Application.class) {
-            return;
-        }
-        synchronized (sInstances) {
-            final Application firstInstance = sInstances.get(myClass);
-            if (firstInstance == null) {
-                this.mConstructorStackTrace = new StackTrace("First ctor was called here");
-                sInstances.put(myClass, this);
-                return;
-            }
-            final StackTrace currentStackTrace = new StackTrace("Current ctor was called here",
-                    firstInstance.mConstructorStackTrace);
-            this.mConstructorStackTrace = currentStackTrace;
-            Slog.wtf(TAG, "Application ctor called twice for " + myClass
-                    + " first LoadedApk=" + firstInstance.getLoadedApkInfo(),
-                    currentStackTrace);
-        }
     }
 
     private String getLoadedApkInfo() {

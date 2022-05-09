@@ -100,6 +100,8 @@ interface IActivityManager {
             String callingPackage);
     void unregisterUidObserver(in IUidObserver observer);
     boolean isUidActive(int uid, String callingPackage);
+    @JavaPassthrough(annotation=
+            "@android.annotation.RequiresPermission(allOf = {android.Manifest.permission.PACKAGE_USAGE_STATS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}, conditional = true)")
     int getUidProcessState(int uid, in String callingPackage);
     @UnsupportedAppUsage
     int checkPermission(in String permission, int pid, int uid);
@@ -449,7 +451,7 @@ interface IActivityManager {
 
     void requestInteractiveBugReport();
     void requestFullBugReport();
-    void requestRemoteBugReport();
+    void requestRemoteBugReport(long nonce);
     boolean launchBugReportHandlerApp();
     List<String> getBugreportWhitelistedPackages();
 
@@ -510,7 +512,6 @@ interface IActivityManager {
     void noteAlarmFinish(in IIntentSender sender, in WorkSource workSource, int sourceUid, in String tag);
     @UnsupportedAppUsage
     int getPackageProcessState(in String packageName, in String callingPackage);
-    void updateDeviceOwner(in String packageName);
 
     // Start of N transactions
     // Start Binder transaction tracking for all applications.
@@ -743,6 +744,8 @@ interface IActivityManager {
     /** Called by PendingIntent.queryIntentComponents() */
     ParceledListSlice queryIntentComponentsForIntentSender(in IIntentSender sender, int matchFlags);
 
+    @JavaPassthrough(annotation=
+            "@android.annotation.RequiresPermission(allOf = {android.Manifest.permission.PACKAGE_USAGE_STATS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}, conditional = true)")
     int getUidProcessCapabilities(int uid, in String callingPackage);
 
     /** Blocks until all broadcast queues become idle. */

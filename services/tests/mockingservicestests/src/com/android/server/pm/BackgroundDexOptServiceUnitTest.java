@@ -19,7 +19,9 @@ package com.android.server.pm;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
@@ -36,23 +38,21 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.HandlerThread;
 import android.os.PowerManager;
-import android.util.ArraySet;
 
 import com.android.server.LocalServices;
 import com.android.server.PinnerService;
 import com.android.server.pm.dex.DexManager;
-import com.android.server.pm.dex.DexoptOptions;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
@@ -66,9 +66,8 @@ public final class BackgroundDexOptServiceUnitTest {
 
     private static final long TEST_WAIT_TIMEOUT_MS = 10_000;
 
-    private static final ArraySet<String> DEFAULT_PACKAGE_LIST = new ArraySet<>(
-            Arrays.asList("aaa", "bbb"));
-    private static final ArraySet<String> EMPTY_PACKAGE_LIST = new ArraySet<>();
+    private static final List<String> DEFAULT_PACKAGE_LIST = List.of("aaa", "bbb");
+    private static final List<String> EMPTY_PACKAGE_LIST = List.of();
 
     @Mock
     private Context mContext;
@@ -116,9 +115,11 @@ public final class BackgroundDexOptServiceUnitTest {
         when(mInjector.getDataDirStorageLowBytes()).thenReturn(STORAGE_LOW_BYTES);
         when(mInjector.getDexOptThermalCutoff()).thenReturn(PowerManager.THERMAL_STATUS_CRITICAL);
         when(mInjector.getCurrentThermalStatus()).thenReturn(PowerManager.THERMAL_STATUS_NONE);
-        when(mDexOptHelper.getOptimizablePackages()).thenReturn(DEFAULT_PACKAGE_LIST);
+        when(mInjector.supportSecondaryDex()).thenReturn(true);
+        when(mDexOptHelper.getOptimizablePackages(any())).thenReturn(DEFAULT_PACKAGE_LIST);
         when(mDexOptHelper.performDexOptWithStatus(any())).thenReturn(
                 PackageDexOptimizer.DEX_OPT_PERFORMED);
+        when(mDexOptHelper.performDexOpt(any())).thenReturn(true);
 
         mService = new BackgroundDexOptService(mInjector);
     }
@@ -158,7 +159,7 @@ public final class BackgroundDexOptServiceUnitTest {
     @Test
     public void testNoExecutionForNoOptimizablePackages() {
         initUntilBootCompleted();
-        when(mDexOptHelper.getOptimizablePackages()).thenReturn(EMPTY_PACKAGE_LIST);
+        when(mDexOptHelper.getOptimizablePackages(any())).thenReturn(EMPTY_PACKAGE_LIST);
 
         assertThat(mService.onStartJob(mJobServiceForPostBoot,
                 mJobParametersForPostBoot)).isFalse();
@@ -418,26 +419,16 @@ public final class BackgroundDexOptServiceUnitTest {
         verifyPerformDexOpt(DEFAULT_PACKAGE_LIST, totalJobRuns);
     }
 
-    private void verifyPerformDexOpt(ArraySet<String> pkgs, int expectedRuns) {
-        ArgumentCaptor<DexoptOptions> dexOptOptions = ArgumentCaptor.forClass(DexoptOptions.class);
-        verify(mDexOptHelper, atLeastOnce()).performDexOptWithStatus(dexOptOptions.capture());
-        HashMap<String, Integer> primaryPkgs = new HashMap<>(); // K: pkg, V: dexopt runs left
-        for (String pkg : pkgs) {
-            primaryPkgs.put(pkg, expectedRuns);
-        }
-
-        for (DexoptOptions opt : dexOptOptions.getAllValues()) {
-            assertThat(pkgs).contains(opt.getPackageName());
-            assertThat(opt.isDexoptOnlySecondaryDex()).isFalse();
-            Integer count = primaryPkgs.get(opt.getPackageName());
-            assertThat(count).isNotNull();
-            if (count == 1) {
-                primaryPkgs.remove(opt.getPackageName());
-            } else {
-                primaryPkgs.put(opt.getPackageName(), count - 1);
+    private void verifyPerformDexOpt(List<String> pkgs, int expectedRuns) {
+        InOrder inOrder = inOrder(mDexOptHelper);
+        for (int i = 0; i < expectedRuns; i++) {
+            for (String pkg : pkgs) {
+                inOrder.verify(mDexOptHelper, times(1)).performDexOptWithStatus(argThat((option) ->
+                        option.getPackageName().equals(pkg) && !option.isDexoptOnlySecondaryDex()));
+                inOrder.verify(mDexOptHelper, times(1)).performDexOpt(argThat((option) ->
+                        option.getPackageName().equals(pkg) && option.isDexoptOnlySecondaryDex()));
             }
         }
-        assertThat(primaryPkgs).isEmpty();
     }
 
     private static class StartAndWaitThread extends Thread {

@@ -74,6 +74,10 @@ class PackageFreezerTest {
         assertThat(assertFailsWith(exceptionClass, block).message).contains(message)
     }
 
+    private fun checkPackageStartable() {
+        pms.checkPackageStartable(pms.snapshotComputer(), TEST_PACKAGE, TEST_USER_ID)
+    }
+
     @Before
     @Throws(Exception::class)
     fun setup() {
@@ -89,11 +93,11 @@ class PackageFreezerTest {
             .killApplication(eq(TEST_PACKAGE), any(), eq(TEST_USER_ID), eq(TEST_REASON))
 
         assertThrowContainsMessage(SecurityException::class, frozenMessage(TEST_PACKAGE)) {
-            pms.checkPackageStartable(TEST_PACKAGE, TEST_USER_ID)
+            checkPackageStartable()
         }
 
         freezer.close()
-        pms.checkPackageStartable(TEST_PACKAGE, TEST_USER_ID)
+        checkPackageStartable()
     }
 
     @Test
@@ -104,16 +108,16 @@ class PackageFreezerTest {
             .killApplication(eq(TEST_PACKAGE), any(), eq(TEST_USER_ID), eq(TEST_REASON))
 
         assertThrowContainsMessage(SecurityException::class, frozenMessage(TEST_PACKAGE)) {
-            pms.checkPackageStartable(TEST_PACKAGE, TEST_USER_ID)
+            checkPackageStartable()
         }
 
         freezer1.close()
         assertThrowContainsMessage(SecurityException::class, frozenMessage(TEST_PACKAGE)) {
-            pms.checkPackageStartable(TEST_PACKAGE, TEST_USER_ID)
+            checkPackageStartable()
         }
 
         freezer2.close()
-        pms.checkPackageStartable(TEST_PACKAGE, TEST_USER_ID)
+        checkPackageStartable()
     }
 
     @Test
@@ -123,13 +127,13 @@ class PackageFreezerTest {
             .killApplication(eq(TEST_PACKAGE), any(), eq(TEST_USER_ID), eq(TEST_REASON))
 
         assertThrowContainsMessage(SecurityException::class, frozenMessage(TEST_PACKAGE)) {
-            pms.checkPackageStartable(TEST_PACKAGE, TEST_USER_ID)
+            checkPackageStartable()
         }
 
         freezer = null
         System.gc()
         System.runFinalization()
 
-        pms.checkPackageStartable(TEST_PACKAGE, TEST_USER_ID)
+        checkPackageStartable()
     }
 }

@@ -39,7 +39,6 @@ import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.util.DumpUtilsKt;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -806,7 +805,7 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pwOriginal, String[] args) {
+    public void dump(PrintWriter pwOriginal, String[] args) {
         IndentingPrintWriter pw = DumpUtilsKt.asIndenting(pwOriginal);
         pw.println(getClass().getSimpleName());
         DumpUtilsKt.withIncreasedIndent(pw, () -> {
@@ -814,7 +813,7 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
             if (viewState == null) {
                 pw.println("no viewState!!!");
             } else {
-                viewState.dump(fd, pw, args);
+                viewState.dump(pw, args);
                 pw.println();
             }
         });

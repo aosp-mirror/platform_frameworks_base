@@ -115,8 +115,8 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
         };
 
         // Register to listen for changes in Settings.Secure settings.
-        mSecureSettings.registerContentObserver(
-                Settings.Secure.LOCATION_SHOW_SYSTEM_OPS, mContentObserver);
+        mSecureSettings.registerContentObserverForUser(
+                Settings.Secure.LOCATION_SHOW_SYSTEM_OPS, mContentObserver, UserHandle.USER_ALL);
 
         // Register to listen for changes in DeviceConfig settings.
         mDeviceConfigProxy.addOnPropertiesChangedListener(
@@ -219,7 +219,8 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
     }
 
     private boolean getShowSystemSetting() {
-        return mSecureSettings.getInt(Settings.Secure.LOCATION_SHOW_SYSTEM_OPS, 0) == 1;
+        return mSecureSettings.getIntForUser(Settings.Secure.LOCATION_SHOW_SYSTEM_OPS, 0,
+                UserHandle.USER_CURRENT) == 1;
     }
 
     /**

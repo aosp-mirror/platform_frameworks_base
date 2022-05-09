@@ -49,7 +49,7 @@ import java.util.concurrent.TimeUnit;
 abstract class AbstractCrossUserContentResolverTest {
     private static final int TIMEOUT_SERVICE_CONNECTION_SEC = 4;
     private static final int TIMEOUT_CONTENT_CHANGE_SEC = 4;
-    private static final int TIMEOUT_USER_UNLOCK_SEC = 4;
+    private static final int TIMEOUT_USER_UNLOCK_SEC = 10;
 
     private Context mContext;
     protected UserManager mUm;

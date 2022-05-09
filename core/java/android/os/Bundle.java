@@ -20,6 +20,7 @@ import static java.util.Objects.requireNonNull;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.util.ArrayMap;
 import android.util.Size;
@@ -876,7 +877,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     @Nullable
     public Bundle getBundle(@Nullable String key) {
         unparcel();
-        Object o = getValue(key);
+        Object o = mMap.get(key);
         if (o == null) {
             return null;
         }
@@ -899,7 +900,11 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      *
      * @param key a String, or {@code null}
      * @return a Parcelable value, or {@code null}
+     *
+     * @deprecated Use the type-safer {@link #getParcelable(String, Class)} starting from Android
+     *      {@link Build.VERSION_CODES#TIRAMISU}.
      */
+    @Deprecated
     @Nullable
     public <T extends Parcelable> T getParcelable(@Nullable String key) {
         unparcel();
@@ -916,30 +921,28 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     }
 
     /**
-     * Returns the value associated with the given key, or {@code null} if
-     * no mapping of the desired type exists for the given key or a {@code null}
-     * value is explicitly associated with the key.
+     * Returns the value associated with the given key or {@code null} if:
+     * <ul>
+     *     <li>No mapping of the desired type exists for the given key.
+     *     <li>A {@code null} value is explicitly associated with the key.
+     *     <li>The object is not of type {@code clazz}.
+     * </ul>
      *
      * <p><b>Note: </b> if the expected value is not a class provided by the Android platform,
      * you must call {@link #setClassLoader(ClassLoader)} with the proper {@link ClassLoader} first.
      * Otherwise, this method might throw an exception or return {@code null}.
      *
      * @param key a String, or {@code null}
-     * @param clazz The type of the object expected or {@code null} for performing no checks.
+     * @param clazz The type of the object expected
      * @return a Parcelable value, or {@code null}
-     *
-     * @hide
      */
     @SuppressWarnings("unchecked")
     @Nullable
     public <T> T getParcelable(@Nullable String key, @NonNull Class<T> clazz) {
-        unparcel();
-        try {
-            return getValue(key, requireNonNull(clazz));
-        } catch (ClassCastException | BadParcelableException e) {
-            typeWarning(key, /* value */ null, "Parcelable", e);
-            return null;
-        }
+        // The reason for not using <T extends Parcelable> is because the caller could provide a
+        // super class to restrict the children that doesn't implement Parcelable itself while the
+        // children do, more details at b/210800751 (same reasoning applies here).
+        return get(key, clazz);
     }
 
     /**
@@ -953,7 +956,11 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      *
      * @param key a String, or {@code null}
      * @return a Parcelable[] value, or {@code null}
+     *
+     * @deprecated Use the type-safer {@link #getParcelableArray(String, Class)} starting from
+     *      Android {@link Build.VERSION_CODES#TIRAMISU}.
      */
+    @Deprecated
     @Nullable
     public Parcelable[] getParcelableArray(@Nullable String key) {
         unparcel();
@@ -970,6 +977,39 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     }
 
     /**
+     * Returns the value associated with the given key, or {@code null} if:
+     * <ul>
+     *     <li>No mapping of the desired type exists for the given key.
+     *     <li>A {@code null} value is explicitly associated with the key.
+     *     <li>The object is not of type {@code clazz}.
+     * </ul>
+     *
+     * <p><b>Note: </b> if the expected value is not a class provided by the Android platform,
+     * you must call {@link #setClassLoader(ClassLoader)} with the proper {@link ClassLoader} first.
+     * Otherwise, this method might throw an exception or return {@code null}.
+     *
+     * @param key a String, or {@code null}
+     * @param clazz The type of the items inside the array. This is only verified when unparceling.
+     * @return a Parcelable[] value, or {@code null}
+     */
+    @SuppressLint({"ArrayReturn", "NullableCollection"})
+    @SuppressWarnings("unchecked")
+    @Nullable
+    public <T> T[] getParcelableArray(@Nullable String key, @NonNull Class<T> clazz) {
+        // The reason for not using <T extends Parcelable> is because the caller could provide a
+        // super class to restrict the children that doesn't implement Parcelable itself while the
+        // children do, more details at b/210800751 (same reasoning applies here).
+        unparcel();
+        try {
+            // In Java 12, we can pass clazz.arrayType() instead of Parcelable[] and later casting.
+            return (T[]) getValue(key, Parcelable[].class, requireNonNull(clazz));
+        } catch (ClassCastException | BadTypeParcelableException e) {
+            typeWarning(key, clazz.getCanonicalName() + "[]", e);
+            return null;
+        }
+    }
+
+    /**
      * Returns the value associated with the given key, or {@code null} if
      * no mapping of the desired type exists for the given key or a {@code null}
      * value is explicitly associated with the key.
@@ -980,7 +1020,11 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      *
      * @param key a String, or {@code null}
      * @return an ArrayList<T> value, or {@code null}
+     *
+     * @deprecated Use the type-safer {@link #getParcelable(String, Class)} starting from Android
+     *      {@link Build.VERSION_CODES#TIRAMISU}.
      */
+    @Deprecated
     @Nullable
     public <T extends Parcelable> ArrayList<T> getParcelableArrayList(@Nullable String key) {
         unparcel();
@@ -997,14 +1041,45 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     }
 
     /**
+     * Returns the value associated with the given key, or {@code null} if:
+     * <ul>
+     *     <li>No mapping of the desired type exists for the given key.
+     *     <li>A {@code null} value is explicitly associated with the key.
+     *     <li>The object is not of type {@code clazz}.
+     * </ul>
+     *
+     * <p><b>Note: </b> if the expected value is not a class provided by the Android platform,
+     * you must call {@link #setClassLoader(ClassLoader)} with the proper {@link ClassLoader} first.
+     * Otherwise, this method might throw an exception or return {@code null}.
+     *
+     * @param key   a String, or {@code null}
+     * @param clazz The type of the items inside the array list. This is only verified when
+     *     unparceling.
+     * @return an ArrayList<T> value, or {@code null}
+     */
+    @SuppressLint("NullableCollection")
+    @SuppressWarnings("unchecked")
+    @Nullable
+    public <T> ArrayList<T> getParcelableArrayList(@Nullable String key,
+            @NonNull Class<? extends T> clazz) {
+        // The reason for not using <T extends Parcelable> is because the caller could provide a
+        // super class to restrict the children that doesn't implement Parcelable itself while the
+        // children do, more details at b/210800751 (same reasoning applies here).
+        return getArrayList(key, clazz);
+    }
+
+    /**
      * Returns the value associated with the given key, or null if
      * no mapping of the desired type exists for the given key or a null
      * value is explicitly associated with the key.
      *
      * @param key a String, or null
-     *
      * @return a SparseArray of T values, or null
+     *
+     * @deprecated Use the type-safer {@link #getSparseParcelableArray(String, Class)} starting from
+     *      Android {@link Build.VERSION_CODES#TIRAMISU}.
      */
+    @Deprecated
     @Nullable
     public <T extends Parcelable> SparseArray<T> getSparseParcelableArray(@Nullable String key) {
         unparcel();
@@ -1021,17 +1096,68 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     }
 
     /**
+     * Returns the value associated with the given key, or {@code null} if:
+     * <ul>
+     *     <li>No mapping of the desired type exists for the given key.
+     *     <li>A {@code null} value is explicitly associated with the key.
+     *     <li>The object is not of type {@code clazz}.
+     * </ul>
+     *
+     * @param key a String, or null
+     * @param clazz The type of the items inside the sparse array. This is only verified when
+     *     unparceling.
+     * @return a SparseArray of T values, or null
+     */
+    @SuppressWarnings("unchecked")
+    @Nullable
+    public <T> SparseArray<T> getSparseParcelableArray(@Nullable String key,
+            @NonNull Class<? extends T> clazz) {
+        // The reason for not using <T extends Parcelable> is because the caller could provide a
+        // super class to restrict the children that doesn't implement Parcelable itself while the
+        // children do, more details at b/210800751 (same reasoning applies here).
+        unparcel();
+        try {
+            return (SparseArray<T>) getValue(key, SparseArray.class, requireNonNull(clazz));
+        } catch (ClassCastException | BadTypeParcelableException e) {
+            typeWarning(key, "SparseArray<" + clazz.getCanonicalName() + ">", e);
+            return null;
+        }
+    }
+
+    /**
      * Returns the value associated with the given key, or null if
      * no mapping of the desired type exists for the given key or a null
      * value is explicitly associated with the key.
      *
      * @param key a String, or null
      * @return a Serializable value, or null
+     *
+     * @deprecated Use the type-safer {@link #getSerializable(String, Class)} starting from Android
+     *      {@link Build.VERSION_CODES#TIRAMISU}.
      */
+    @Deprecated
     @Override
     @Nullable
     public Serializable getSerializable(@Nullable String key) {
         return super.getSerializable(key);
+    }
+
+    /**
+     * Returns the value associated with the given key, or {@code null} if:
+     * <ul>
+     *     <li>No mapping of the desired type exists for the given key.
+     *     <li>A {@code null} value is explicitly associated with the key.
+     *     <li>The object is not of type {@code clazz}.
+     * </ul>
+     *
+     * @param key   a String, or null
+     * @param clazz The expected class of the returned type
+     * @return a Serializable value, or null
+     */
+    @Nullable
+    public <T extends Serializable> T getSerializable(@Nullable String key,
+            @NonNull Class<T> clazz) {
+        return super.getSerializable(key, requireNonNull(clazz));
     }
 
     /**

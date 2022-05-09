@@ -195,13 +195,6 @@ public interface InputMethodSession {
     public void updateCursorAnchorInfo(CursorAnchorInfo cursorAnchorInfo);
 
     /**
-     * Notifies {@link android.inputmethodservice.InputMethodService} that IME has been
-     * hidden from user.
-     * @hide
-     */
-    public void notifyImeHidden();
-
-    /**
      * Notify IME directly to remove surface as it is no longer visible.
      * @hide
      */

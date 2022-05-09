@@ -167,11 +167,27 @@ public final class VibrationAttributes implements Parcelable {
     public static final int FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF = 0x2;
 
     /**
+     * Flag requesting vibration effect to be played with fresh user settings values.
+     *
+     * <p>This flag is not protected by any permission, but vibrations that use it require an extra
+     * query of user vibration intensity settings, ringer mode and other controls that affect the
+     * vibration effect playback, which can increase the latency for the overall request.
+     *
+     * <p>This is intended to be used on scenarios where the user settings might have changed
+     * recently, and needs to be applied to this vibration, like settings controllers that preview
+     * newly set intensities to the user.
+     *
+     * @hide
+     */
+    public static final int FLAG_INVALIDATE_SETTINGS_CACHE = 0x3;
+
+    /**
      * All flags supported by vibrator service, update it when adding new flag.
      * @hide
      */
     public static final int FLAG_ALL_SUPPORTED =
-            FLAG_BYPASS_INTERRUPTION_POLICY | FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF;
+            FLAG_BYPASS_INTERRUPTION_POLICY | FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF
+                    | FLAG_INVALIDATE_SETTINGS_CACHE;
 
     /** Creates a new {@link VibrationAttributes} instance with given usage. */
     public static @NonNull VibrationAttributes createForUsage(@Usage int usage) {
@@ -446,8 +462,10 @@ public final class VibrationAttributes implements Parcelable {
         }
 
         /**
-         * Set flags
-         * @param flags combination of flags to be set.
+         * Sets only the flags specified in the bitmask, leaving the other supported flag values
+         * unchanged in the builder.
+         *
+         * @param flags Combination of flags to be set.
          * @param mask Bit range that should be changed.
          * @return the same Builder instance.
          */
@@ -455,6 +473,19 @@ public final class VibrationAttributes implements Parcelable {
             mask &= FLAG_ALL_SUPPORTED;
             mFlags = (mFlags & ~mask) | (flags & mask);
             return this;
+        }
+
+        /**
+         * Set all supported flags with given combination of flags, overriding any previous values
+         * set to this builder.
+         *
+         * @param flags combination of flags to be set.
+         * @return the same Builder instance.
+         *
+         * @hide
+         */
+        public @NonNull Builder setFlags(@Flag int flags) {
+            return setFlags(flags, FLAG_ALL_SUPPORTED);
         }
     }
 }

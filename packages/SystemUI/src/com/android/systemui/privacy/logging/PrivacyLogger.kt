@@ -16,7 +16,7 @@
 
 package com.android.systemui.privacy.logging
 
-import android.permission.PermGroupUsage
+import android.permission.PermissionGroupUsage
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogLevel
 import com.android.systemui.log.LogMessage
@@ -100,7 +100,7 @@ class PrivacyLogger @Inject constructor(
         })
     }
 
-    fun logUnfilteredPermGroupUsage(contents: List<PermGroupUsage>) {
+    fun logUnfilteredPermGroupUsage(contents: List<PermissionGroupUsage>) {
         log(LogLevel.DEBUG, {
             str1 = contents.toString()
         }, {

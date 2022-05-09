@@ -53,6 +53,13 @@ public class SettingsHelper {
     private static final String SETTING_ORIGINAL_KEY_SUFFIX = "_original";
     private static final float FLOAT_TOLERANCE = 0.01f;
 
+    /** See frameworks/base/core/res/res/values/config.xml#config_longPressOnPowerBehavior **/
+    private static final int LONG_PRESS_POWER_NOTHING = 0;
+    private static final int LONG_PRESS_POWER_GLOBAL_ACTIONS = 1;
+    private static final int LONG_PRESS_POWER_FOR_ASSISTANT = 5;
+    /** See frameworks/base/core/res/res/values/config.xml#config_keyChordPowerVolumeUp **/
+    private static final int KEY_CHORD_POWER_VOLUME_UP_GLOBAL_ACTIONS = 2;
+
     private Context mContext;
     private AudioManager mAudioManager;
     private TelephonyManager mTelephonyManager;
@@ -190,6 +197,9 @@ public class SettingsHelper {
                         && !displayColorModeVendorModeHintsMatch) {
                     return;
                 }
+            } else if (Settings.Global.POWER_BUTTON_LONG_PRESS.equals(name)) {
+                setLongPressPowerBehavior(cr, value);
+                return;
             }
 
             // Default case: write the restored value to settings
@@ -371,6 +381,67 @@ public class SettingsHelper {
             mAudioManager.loadSoundEffects();
         } else {
             mAudioManager.unloadSoundEffects();
+        }
+    }
+
+    /**
+     * Correctly sets long press power button Behavior.
+     *
+     * The issue is that setting for LongPressPower button Behavior is not available on all devices
+     * and actually changes default Behavior of two properties - the long press power button
+     * and volume up + power button combo. OEM can also reconfigure these Behaviors in config.xml,
+     * so we need to be careful that we don't irreversibly change power button Behavior when
+     * restoring. Or switch to a non-default button Behavior.
+     */
+    private void setLongPressPowerBehavior(ContentResolver cr, String value) {
+        // We will not restore the value if the long press power setting option is unavailable.
+        if (!mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_longPressOnPowerForAssistantSettingAvailable)) {
+            return;
+        }
+
+        int longPressOnPowerBehavior;
+        try {
+            longPressOnPowerBehavior = Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            return;
+        }
+
+        if (longPressOnPowerBehavior < LONG_PRESS_POWER_NOTHING
+                || longPressOnPowerBehavior > LONG_PRESS_POWER_FOR_ASSISTANT) {
+            return;
+        }
+
+        // When user enables long press power for Assistant, we also switch the meaning
+        // of Volume Up + Power key chord to the "Show power menu" option.
+        // If the user disables long press power for Assistant, we switch back to default OEM
+        // Behavior configured in config.xml. If the default Behavior IS "LPP for Assistant",
+        // then we fall back to "Long press for Power Menu" Behavior.
+        if (longPressOnPowerBehavior == LONG_PRESS_POWER_FOR_ASSISTANT) {
+            Settings.Global.putInt(cr, Settings.Global.POWER_BUTTON_LONG_PRESS,
+                    LONG_PRESS_POWER_FOR_ASSISTANT);
+            Settings.Global.putInt(cr, Settings.Global.KEY_CHORD_POWER_VOLUME_UP,
+                    KEY_CHORD_POWER_VOLUME_UP_GLOBAL_ACTIONS);
+        } else {
+            // We're restoring "LPP for Assistant Disabled" state, prefer OEM config.xml Behavior
+            // if possible.
+            int longPressOnPowerDeviceBehavior = mContext.getResources().getInteger(
+                    com.android.internal.R.integer.config_longPressOnPowerBehavior);
+            if (longPressOnPowerDeviceBehavior == LONG_PRESS_POWER_FOR_ASSISTANT) {
+                // The default on device IS "LPP for Assistant Enabled" so fall back to power menu.
+                Settings.Global.putInt(cr, Settings.Global.POWER_BUTTON_LONG_PRESS,
+                        LONG_PRESS_POWER_GLOBAL_ACTIONS);
+            } else {
+                // The default is non-Assistant Behavior, so restore that default.
+                Settings.Global.putInt(cr, Settings.Global.POWER_BUTTON_LONG_PRESS,
+                        longPressOnPowerDeviceBehavior);
+            }
+
+            // Clear and restore default power + volume up Behavior as well.
+            int powerVolumeUpDefaultBehavior = mContext.getResources().getInteger(
+                    com.android.internal.R.integer.config_keyChordPowerVolumeUp);
+            Settings.Global.putInt(cr, Settings.Global.KEY_CHORD_POWER_VOLUME_UP,
+                    powerVolumeUpDefaultBehavior);
         }
     }
 

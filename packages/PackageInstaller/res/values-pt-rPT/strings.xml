@@ -53,7 +53,7 @@
     <string name="uninstall_application_title" msgid="4045420072401428123">"Desinstalar app"</string>
     <string name="uninstall_update_title" msgid="824411791011583031">"Desinstalar atualização"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> faz parte da seguinte app:"</string>
-    <string name="uninstall_application_text" msgid="3816830743706143980">"Pretende desinstalar esta app?"</string>
+    <string name="uninstall_application_text" msgid="3816830743706143980">"Desinstalar esta app?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Pretende desinstalar esta app para "<b>"todos"</b>" os utilizadores? A app e os respetivos dados serão removidos de "<b>"todos"</b>" os utilizadores do dispositivo."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Pretende desinstalar esta app para o utilizador <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Quer desinstalar esta app do seu perfil de trabalho?"</string>

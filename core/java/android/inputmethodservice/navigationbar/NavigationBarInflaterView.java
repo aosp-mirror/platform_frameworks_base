@@ -121,7 +121,7 @@ public final class NavigationBarInflaterView extends FrameLayout {
         return CONFIG_NAV_BAR_LAYOUT_HANDLE;
     }
 
-    public void setButtonDispatchers(SparseArray<ButtonDispatcher> buttonDispatchers) {
+    void setButtonDispatchers(SparseArray<ButtonDispatcher> buttonDispatchers) {
         mButtonDispatchers = buttonDispatchers;
         for (int i = 0; i < buttonDispatchers.size(); i++) {
             initiallyFill(buttonDispatchers.valueAt(i));
@@ -376,7 +376,7 @@ public final class NavigationBarInflaterView extends FrameLayout {
     }
     */
 
-    public static String extractSize(String buttonSpec) {
+    private static String extractSize(String buttonSpec) {
         if (!buttonSpec.contains(SIZE_MOD_START)) {
             return null;
         }
@@ -384,7 +384,7 @@ public final class NavigationBarInflaterView extends FrameLayout {
         return buttonSpec.substring(sizeStart + 1, buttonSpec.indexOf(SIZE_MOD_END));
     }
 
-    public static String extractButton(String buttonSpec) {
+    private static String extractButton(String buttonSpec) {
         if (!buttonSpec.contains(SIZE_MOD_START)) {
             return buttonSpec;
         }
@@ -398,9 +398,9 @@ public final class NavigationBarInflaterView extends FrameLayout {
                 mButtonDispatchers.valueAt(indexOfKey).addView(v);
             }
             if (v instanceof ViewGroup) {
-                final ViewGroup viewGroup = (ViewGroup)v;
-                final int N = viewGroup.getChildCount();
-                for (int i = 0; i < N; i++) {
+                final ViewGroup viewGroup = (ViewGroup) v;
+                final int numChildViews = viewGroup.getChildCount();
+                for (int i = 0; i < numChildViews; i++) {
                     addToDispatchers(viewGroup.getChildAt(i));
                 }
             }

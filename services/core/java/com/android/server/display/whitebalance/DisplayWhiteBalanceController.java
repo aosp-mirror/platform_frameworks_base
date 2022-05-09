@@ -346,6 +346,7 @@ public class DisplayWhiteBalanceController implements
         writer.println("DisplayWhiteBalanceController");
         writer.println("  mLoggingEnabled=" + mLoggingEnabled);
         writer.println("  mEnabled=" + mEnabled);
+        writer.println("  mStrongModeEnabled=" + mStrongModeEnabled);
         writer.println("  mDisplayPowerControllerCallbacks=" + mDisplayPowerControllerCallbacks);
         mBrightnessSensor.dump(writer);
         mBrightnessFilter.dump(writer);

@@ -25,6 +25,8 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -86,5 +88,43 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
         controller.setDozeAmount(0.5f, false /* animated */)
         controller.setDozeAmount(0.5f, false /* animated */)
         verify(listener).onDozeAmountChanged(eq(0.5f), anyFloat())
+    }
+
+    @Test
+    fun testSetState_appliesState_sameStateButDifferentUpcomingState() {
+        controller.state = StatusBarState.SHADE
+        controller.setUpcomingState(StatusBarState.KEYGUARD)
+
+        assertEquals(controller.state, StatusBarState.SHADE)
+
+        // We should return true (state change was applied) despite going from SHADE to SHADE, since
+        // the upcoming state was set to KEYGUARD.
+        assertTrue(controller.setState(StatusBarState.SHADE))
+    }
+
+    @Test
+    fun testSetState_appliesState_differentStateEqualToUpcomingState() {
+        controller.state = StatusBarState.SHADE
+        controller.setUpcomingState(StatusBarState.KEYGUARD)
+
+        assertEquals(controller.state, StatusBarState.SHADE)
+
+        // Make sure we apply a SHADE -> KEYGUARD state change when the upcoming state is KEYGUARD.
+        assertTrue(controller.setState(StatusBarState.KEYGUARD))
+    }
+
+    @Test
+    fun testSetState_doesNotApplyState_currentAndUpcomingStatesSame() {
+        controller.state = StatusBarState.SHADE
+        controller.setUpcomingState(StatusBarState.SHADE)
+
+        assertEquals(controller.state, StatusBarState.SHADE)
+
+        // We're going from SHADE -> SHADE, and the upcoming state is also SHADE, this should not do
+        // anything.
+        assertFalse(controller.setState(StatusBarState.SHADE))
+
+        // Double check that we can still force it to happen.
+        assertTrue(controller.setState(StatusBarState.SHADE, true /* force */))
     }
 }

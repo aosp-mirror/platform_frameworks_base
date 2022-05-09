@@ -122,7 +122,7 @@ public final class UserTypeFactory {
                 .setLabel(0)
                 .setDefaultRestrictions(null)
                 .setIsMediaSharedWithParent(true)
-                .setIsCredentialSharedWithParent(true);
+                .setIsCredentialSharableWithParent(true);
     }
 
     /**
@@ -154,7 +154,7 @@ public final class UserTypeFactory {
                 .setDefaultRestrictions(getDefaultManagedProfileRestrictions())
                 .setDefaultSecureSettings(getDefaultManagedProfileSecureSettings())
                 .setDefaultCrossProfileIntentFilters(getDefaultManagedCrossProfileIntentFilter())
-                .setIsCredentialSharedWithParent(true);
+                .setIsCredentialSharableWithParent(true);
     }
 
     /**

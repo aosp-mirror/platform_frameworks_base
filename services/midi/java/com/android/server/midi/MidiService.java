@@ -18,11 +18,12 @@ package com.android.server.midi;
 
 import android.annotation.NonNull;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothUuid;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
+// import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -50,6 +51,7 @@ import android.os.UserHandle;
 import android.util.EventLog;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
@@ -63,6 +65,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -128,11 +131,28 @@ public class MidiService extends IMidiManager.Stub {
 
     private final PackageManager mPackageManager;
 
+    private static final String MIDI_LEGACY_STRING = "MIDI 1.0";
+    private static final String MIDI_UNIVERSAL_STRING = "MIDI 2.0";
+
+    // Used to lock mUsbMidiLegacyDeviceOpenCount and mUsbMidiUniversalDeviceInUse.
+    private final Object mUsbMidiLock = new Object();
+
+    // Number of times a USB MIDI 1.0 device has opened, based on the device name.
+    @GuardedBy("mUsbMidiLock")
+    private final HashMap<String, Integer> mUsbMidiLegacyDeviceOpenCount =
+            new HashMap<String, Integer>();
+
+    // Whether a USB MIDI device has opened, based on the device name.
+    @GuardedBy("mUsbMidiLock")
+    private final HashSet<String> mUsbMidiUniversalDeviceInUse = new HashSet<String>();
+
     // UID of BluetoothMidiService
     private int mBluetoothServiceUid;
 
     private static final UUID MIDI_SERVICE = UUID.fromString(
             "03B80E5A-EDE8-4B33-A751-6CE34EC4C700");
+
+    private final HashSet<ParcelUuid> mNonMidiUUIDs = new HashSet<ParcelUuid>();
 
     // PackageMonitor for listening to package changes
     private final PackageMonitor mPackageMonitor = new PackageMonitor() {
@@ -154,6 +174,7 @@ public class MidiService extends IMidiManager.Stub {
     };
 
     private final class Client implements IBinder.DeathRecipient {
+        private static final String TAG = "MidiService.Client";
         // Binder token for this client
         private final IBinder mToken;
         // This client's UID
@@ -195,7 +216,9 @@ public class MidiService extends IMidiManager.Stub {
         }
 
         public void addDeviceConnection(Device device, IMidiDeviceOpenCallback callback) {
+            Log.d(TAG, "addDeviceConnection() device:" + device);
             if (mDeviceConnections.size() >= MAX_CONNECTIONS_PER_CLIENT) {
+                Log.i(TAG, "too many MIDI connections for UID = " + mUid);
                 throw new SecurityException(
                         "too many MIDI connections for UID = " + mUid);
             }
@@ -215,7 +238,7 @@ public class MidiService extends IMidiManager.Stub {
             }
         }
 
-        // called from Device.close()
+        // called from Device.closeLocked()
         public void removeDeviceConnection(DeviceConnection connection) {
             mDeviceConnections.remove(connection.getToken());
             if (mListeners.size() == 0 && mDeviceConnections.size() == 0) {
@@ -317,6 +340,7 @@ public class MidiService extends IMidiManager.Stub {
     }
 
     private final class Device implements IBinder.DeathRecipient {
+        private static final String TAG = "MidiService.Device";
         private IMidiDeviceServer mServer;
         private MidiDeviceInfo mDeviceInfo;
         private final BluetoothDevice mBluetoothDevice;
@@ -352,6 +376,7 @@ public class MidiService extends IMidiManager.Stub {
         }
 
         private void setDeviceServer(IMidiDeviceServer server) {
+            Log.i(TAG, "setDeviceServer()");
             if (server != null) {
                 if (mServer != null) {
                     Log.e(TAG, "mServer already set in setDeviceServer");
@@ -433,21 +458,28 @@ public class MidiService extends IMidiManager.Stub {
         }
 
         public void addDeviceConnection(DeviceConnection connection) {
+            Log.d(TAG, "addDeviceConnection() [A] connection:" + connection);
             synchronized (mDeviceConnections) {
+                Log.d(TAG, "  mServer:" + mServer);
                 if (mServer != null) {
+                    Log.i(TAG, "++++ A");
                     mDeviceConnections.add(connection);
                     connection.notifyClient(mServer);
                 } else if (mServiceConnection == null &&
                     (mServiceInfo != null || mBluetoothDevice != null)) {
+                    Log.i(TAG, "++++ B");
                     mDeviceConnections.add(connection);
 
                     mServiceConnection = new ServiceConnection() {
                         @Override
                         public void onServiceConnected(ComponentName name, IBinder service) {
+                            Log.i(TAG, "++++ onServiceConnected() mBluetoothDevice:"
+                                    + mBluetoothDevice);
                             IMidiDeviceServer server = null;
                             if (mBluetoothDevice != null) {
                                 IBluetoothMidiService mBluetoothMidiService =
                                         IBluetoothMidiService.Stub.asInterface(service);
+                                Log.i(TAG, "++++ mBluetoothMidiService:" + mBluetoothMidiService);
                                 if (mBluetoothMidiService != null) {
                                     try {
                                         // We need to explicitly add the device in a separate method
@@ -503,6 +535,13 @@ public class MidiService extends IMidiManager.Stub {
                 synchronized (mDeviceConnections) {
                     mDeviceConnections.remove(connection);
 
+                    if (connection.getDevice().getDeviceInfo().getType()
+                            == MidiDeviceInfo.TYPE_USB) {
+                        synchronized (mUsbMidiLock) {
+                            removeUsbMidiDeviceLocked(connection.getDevice().getDeviceInfo());
+                        }
+                    }
+
                     if (mDeviceConnections.size() == 0 && mServiceConnection != null) {
                         mContext.unbindService(mServiceConnection);
                         mServiceConnection = null;
@@ -521,6 +560,12 @@ public class MidiService extends IMidiManager.Stub {
         public void closeLocked() {
             synchronized (mDeviceConnections) {
                 for (DeviceConnection connection : mDeviceConnections) {
+                    if (connection.getDevice().getDeviceInfo().getType()
+                            == MidiDeviceInfo.TYPE_USB) {
+                        synchronized (mUsbMidiLock) {
+                            removeUsbMidiDeviceLocked(connection.getDevice().getDeviceInfo());
+                        }
+                    }
                     connection.getClient().removeDeviceConnection(connection);
                 }
                 mDeviceConnections.clear();
@@ -566,6 +611,7 @@ public class MidiService extends IMidiManager.Stub {
 
     // Represents a connection between a client and a device
     private final class DeviceConnection {
+        private static final String TAG = "MidiService.DeviceConnection";
         private final IBinder mToken = new Binder();
         private final Device mDevice;
         private final Client mClient;
@@ -590,6 +636,8 @@ public class MidiService extends IMidiManager.Stub {
         }
 
         public void notifyClient(IMidiDeviceServer deviceServer) {
+            Log.d(TAG, "notifyClient");
+
             if (mCallback != null) {
                 try {
                     mCallback.onDeviceOpened(deviceServer, (deviceServer == null ? null : mToken));
@@ -602,7 +650,9 @@ public class MidiService extends IMidiManager.Stub {
 
         @Override
         public String toString() {
-            return "DeviceConnection Device ID: " + mDevice.getDeviceInfo().getId();
+//            return "DeviceConnection Device ID: " + mDevice.getDeviceInfo().getId();
+            return  mDevice != null && mDevice.getDeviceInfo() != null
+                    ? ("" + mDevice.getDeviceInfo().getId()) : "null";
         }
     }
 
@@ -620,6 +670,58 @@ public class MidiService extends IMidiManager.Stub {
         return false;
     }
 
+    private static void dumpIntentExtras(Intent intent) {
+        String action = intent.getAction();
+        Log.d(TAG, "Intent: " + action);
+        Bundle bundle = intent.getExtras();
+        if (bundle != null) {
+            for (String key : bundle.keySet()) {
+                Log.d(TAG, "  " + key + " : "
+                        + (bundle.get(key) != null ? bundle.get(key) : "NULL"));
+            }
+        }
+    }
+
+    private static boolean isBleTransport(Intent intent) {
+        Bundle bundle = intent.getExtras();
+        boolean isBle = false;
+        if (bundle != null) {
+            isBle = bundle.getInt(BluetoothDevice.EXTRA_TRANSPORT, BluetoothDevice.TRANSPORT_AUTO)
+                    == BluetoothDevice.TRANSPORT_LE;
+        }
+        return isBle;
+    }
+
+    private void dumpUuids(BluetoothDevice btDevice) {
+        ParcelUuid[] uuidParcels = btDevice.getUuids();
+        Log.d(TAG, "dumpUuids(" + btDevice + ") numParcels:"
+                + (uuidParcels != null ? uuidParcels.length : 0));
+
+        if (uuidParcels == null) {
+            Log.d(TAG, "No UUID Parcels");
+            return;
+        }
+
+        for (ParcelUuid parcel : uuidParcels) {
+            UUID uuid = parcel.getUuid();
+            Log.d(TAG, " uuid:" + uuid);
+        }
+    }
+
+    private boolean hasNonMidiUuids(BluetoothDevice btDevice) {
+        ParcelUuid[] uuidParcels = btDevice.getUuids();
+        if (uuidParcels != null) {
+            // The assumption is that these services are indicative of devices that
+            // ARE NOT MIDI devices.
+            for (ParcelUuid parcel : uuidParcels) {
+                if (mNonMidiUUIDs.contains(parcel)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private final BroadcastReceiver mBleMidiReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -630,17 +732,36 @@ public class MidiService extends IMidiManager.Stub {
             }
 
             switch (action) {
-                case BluetoothDevice.ACTION_ACL_CONNECTED: {
+                case BluetoothDevice.ACTION_ACL_CONNECTED:
+                {
                     Log.d(TAG, "ACTION_ACL_CONNECTED");
+                    dumpIntentExtras(intent);
+                    // BLE-MIDI controllers are by definition BLE, so if this device
+                    // isn't, it CAN'T be a midi device
+                    if (!isBleTransport(intent)) {
+                        Log.i(TAG, "No BLE transport - NOT MIDI");
+                        break;
+                    }
+
+                    Log.d(TAG, "BLE Device");
                     BluetoothDevice btDevice =
                             intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                    // We can't determine here if this is a BLD-MIDI device, so go ahead and try
-                    // to open as a MIDI device, further down it will get figured out.
+                    dumpUuids(btDevice);
+
+                    // See if there are any service UUIDs and if so do any of them indicate a
+                    // Non-MIDI device (headset, headphones, QWERTY keyboard....)
+                    if (hasNonMidiUuids(btDevice)) {
+                        Log.d(TAG, "Non-MIDI service UUIDs found. NOT MIDI");
+                        break;
+                    }
+
+                    Log.d(TAG, "Potential MIDI Device.");
                     openBluetoothDevice(btDevice);
                 }
                 break;
 
-                case BluetoothDevice.ACTION_ACL_DISCONNECTED: {
+                case BluetoothDevice.ACTION_ACL_DISCONNECTED:
+                {
                     Log.d(TAG, "ACTION_ACL_DISCONNECTED");
                     BluetoothDevice btDevice =
                             intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
@@ -648,6 +769,35 @@ public class MidiService extends IMidiManager.Stub {
                     // don't bother if we are not.
                     if (isBLEMIDIDevice(btDevice)) {
                         closeBluetoothDevice(btDevice);
+                    }
+                }
+                break;
+
+                case BluetoothDevice.ACTION_BOND_STATE_CHANGED:
+//                {
+//                    Log.d(TAG, "ACTION_BOND_STATE_CHANGED");
+//                    int bondState = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, -1);
+//                    Log.d(TAG, "  bondState:" + bondState);
+//                    BluetoothDevice btDevice =
+//                            intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+//                    Log.d(TAG, "  btDevice:" + btDevice);
+//                    dumpUuids(btDevice);
+//                    if (isBLEMIDIDevice(btDevice)) {
+//                        Log.d(TAG, "BT MIDI DEVICE");
+//                        openBluetoothDevice(btDevice);
+//                    }
+//                }
+//                break;
+
+                case BluetoothDevice.ACTION_UUID:
+                {
+                    Log.d(TAG, "ACTION_UUID");
+                    BluetoothDevice btDevice =
+                            intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                    dumpUuids(btDevice);
+                    if (isBLEMIDIDevice(btDevice)) {
+                        Log.d(TAG, "BT MIDI DEVICE");
+                        openBluetoothDevice(btDevice);
                     }
                 }
                 break;
@@ -659,13 +809,30 @@ public class MidiService extends IMidiManager.Stub {
         mContext = context;
         mPackageManager = context.getPackageManager();
 
+        // TEMPORARY - Disable BTL-MIDI
+        //FIXME - b/25689266
         // Setup broadcast receivers
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
-        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
-        context.registerReceiver(mBleMidiReceiver, filter);
+//        IntentFilter filter = new IntentFilter();
+//        filter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
+//        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+//        filter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
+//        filter.addAction(BluetoothDevice.ACTION_UUID);
+//        context.registerReceiver(mBleMidiReceiver, filter);
 
         mBluetoothServiceUid = -1;
+
+        mNonMidiUUIDs.add(BluetoothUuid.A2DP_SINK);     // Headphones?
+        mNonMidiUUIDs.add(BluetoothUuid.A2DP_SOURCE);   // Headset?
+        mNonMidiUUIDs.add(BluetoothUuid.ADV_AUDIO_DIST);
+        mNonMidiUUIDs.add(BluetoothUuid.AVRCP_CONTROLLER);
+        mNonMidiUUIDs.add(BluetoothUuid.HFP);
+        mNonMidiUUIDs.add(BluetoothUuid.HSP);
+        mNonMidiUUIDs.add(BluetoothUuid.HID);
+        mNonMidiUUIDs.add(BluetoothUuid.LE_AUDIO);
+        mNonMidiUUIDs.add(BluetoothUuid.HOGP);
+        mNonMidiUUIDs.add(BluetoothUuid.HEARING_AID);
+        // This one is coming up
+        // mNonMidiUUIDs.add(BluetoothUuid.BATTERY);
     }
 
     private void onUnlockUser() {
@@ -771,11 +938,13 @@ public class MidiService extends IMidiManager.Stub {
     public void openDevice(IBinder token, MidiDeviceInfo deviceInfo,
             IMidiDeviceOpenCallback callback) {
         Client client = getClient(token);
+        Log.d(TAG, "openDevice() client:" + client);
         if (client == null) return;
 
         Device device;
         synchronized (mDevicesByInfo) {
             device = mDevicesByInfo.get(deviceInfo);
+            Log.d(TAG, "  device:" + device);
             if (device == null) {
                 throw new IllegalArgumentException("device does not exist: " + deviceInfo);
             }
@@ -784,9 +953,19 @@ public class MidiService extends IMidiManager.Stub {
             }
         }
 
+        if (deviceInfo.getType() == MidiDeviceInfo.TYPE_USB) {
+            synchronized (mUsbMidiLock) {
+                if (isUsbMidiDeviceInUseLocked(deviceInfo)) {
+                    throw new IllegalArgumentException("device already in use: " + deviceInfo);
+                }
+                addUsbMidiDeviceLocked(deviceInfo);
+            }
+        }
+
         // clear calling identity so bindService does not fail
         final long identity = Binder.clearCallingIdentity();
         try {
+            Log.i(TAG, "addDeviceConnection() [B] device:" + device);
             client.addDeviceConnection(device, callback);
         } finally {
             Binder.restoreCallingIdentity(identity);
@@ -802,6 +981,7 @@ public class MidiService extends IMidiManager.Stub {
                     @Override
                     public void onDeviceOpened(MidiDevice device) {
                         synchronized (mBleMidiDeviceMap) {
+                            Log.i(TAG, "onDeviceOpened() device:" + device);
                             mBleMidiDeviceMap.put(bluetoothDevice, device);
                         }
                     }
@@ -835,6 +1015,7 @@ public class MidiService extends IMidiManager.Stub {
 
         // Bluetooth devices are created on demand
         Device device;
+        Log.i(TAG, "alloc device...");
         synchronized (mDevicesByInfo) {
             device = mBluetoothDevices.get(bluetoothDevice);
             if (device == null) {
@@ -842,10 +1023,11 @@ public class MidiService extends IMidiManager.Stub {
                 mBluetoothDevices.put(bluetoothDevice, device);
             }
         }
-
+        Log.i(TAG, "device: " + device);
         // clear calling identity so bindService does not fail
         final long identity = Binder.clearCallingIdentity();
         try {
+            Log.i(TAG, "addDeviceConnection() [C] device:" + device);
             client.addDeviceConnection(device, callback);
         } finally {
             Binder.restoreCallingIdentity(identity);
@@ -1215,5 +1397,89 @@ public class MidiService extends IMidiManager.Stub {
             }
         }
         pw.decreaseIndent();
+    }
+
+    @GuardedBy("mUsbMidiLock")
+    private boolean isUsbMidiDeviceInUseLocked(MidiDeviceInfo info) {
+        String name = info.getProperties().getString(MidiDeviceInfo.PROPERTY_NAME);
+        if (name.length() < MIDI_LEGACY_STRING.length()) {
+            return false;
+        }
+        String deviceName = extractUsbDeviceName(name);
+        String tagName = extractUsbDeviceTag(name);
+
+        Log.i(TAG, "Checking " + deviceName + " " + tagName);
+
+        // Only one MIDI 2.0 device can be used at once.
+        // Multiple MIDI 1.0 devices can be used at once.
+        if (mUsbMidiUniversalDeviceInUse.contains(deviceName)
+                || ((tagName).equals(MIDI_UNIVERSAL_STRING)
+                && (mUsbMidiLegacyDeviceOpenCount.containsKey(deviceName)))) {
+            return true;
+        }
+        return false;
+    }
+
+    @GuardedBy("mUsbMidiLock")
+    void addUsbMidiDeviceLocked(MidiDeviceInfo info) {
+        String name = info.getProperties().getString(MidiDeviceInfo.PROPERTY_NAME);
+        if (name.length() < MIDI_LEGACY_STRING.length()) {
+            return;
+        }
+        String deviceName = extractUsbDeviceName(name);
+        String tagName = extractUsbDeviceTag(name);
+
+        Log.i(TAG, "Adding " + deviceName + " " + tagName);
+
+        if ((tagName).equals(MIDI_UNIVERSAL_STRING)) {
+            mUsbMidiUniversalDeviceInUse.add(deviceName);
+        } else if ((tagName).equals(MIDI_LEGACY_STRING)) {
+            int count = mUsbMidiLegacyDeviceOpenCount.getOrDefault(deviceName, 0) + 1;
+            mUsbMidiLegacyDeviceOpenCount.put(deviceName, count);
+        }
+    }
+
+    @GuardedBy("mUsbMidiLock")
+    void removeUsbMidiDeviceLocked(MidiDeviceInfo info) {
+        String name = info.getProperties().getString(MidiDeviceInfo.PROPERTY_NAME);
+        if (name.length() < MIDI_LEGACY_STRING.length()) {
+            return;
+        }
+        String deviceName = extractUsbDeviceName(name);
+        String tagName = extractUsbDeviceTag(name);
+
+        Log.i(TAG, "Removing " + deviceName + " " + tagName);
+
+        if ((tagName).equals(MIDI_UNIVERSAL_STRING)) {
+            mUsbMidiUniversalDeviceInUse.remove(deviceName);
+        } else if ((tagName).equals(MIDI_LEGACY_STRING)) {
+            if (mUsbMidiLegacyDeviceOpenCount.containsKey(deviceName)) {
+                int count = mUsbMidiLegacyDeviceOpenCount.get(deviceName);
+                if (count > 1) {
+                    mUsbMidiLegacyDeviceOpenCount.put(deviceName, count - 1);
+                } else {
+                    mUsbMidiLegacyDeviceOpenCount.remove(deviceName);
+                }
+            }
+        }
+    }
+
+    // The USB property name is in the form "manufacturer product#Id MIDI 1.0".
+    // This is defined in UsbDirectMidiDevice.java.
+    // This function extracts out the "manufacturer product#Id " part.
+    // Two devices would have the same device name if they had the following property name:
+    // "manufacturer product#Id MIDI 1.0"
+    // "manufacturer product#Id MIDI 2.0"
+    // Note that MIDI_LEGACY_STRING and MIDI_UNIVERSAL_STRING are the same length.
+    String extractUsbDeviceName(String propertyName) {
+        return propertyName.substring(0, propertyName.length() - MIDI_LEGACY_STRING.length());
+    }
+
+    // The USB property name is in the form "manufacturer product#Id MIDI 1.0".
+    // This is defined in UsbDirectMidiDevice.java.
+    // This function extracts the "MIDI 1.0" part.
+    // Note that MIDI_LEGACY_STRING and MIDI_UNIVERSAL_STRING are the same length.
+    String extractUsbDeviceTag(String propertyName) {
+        return propertyName.substring(propertyName.length() - MIDI_LEGACY_STRING.length());
     }
 }

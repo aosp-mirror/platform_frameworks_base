@@ -851,7 +851,8 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
     @RequiresPermission(allOf = {RECORD_AUDIO, CAPTURE_AUDIO_HOTWORD})
     public void triggerHardwareRecognitionEventForTest(int status, int soundModelHandle,
             boolean captureAvailable, int captureSession, int captureDelayMs, int capturePreambleMs,
-            boolean triggerInData, @NonNull AudioFormat captureFormat, @Nullable byte[] data) {
+            boolean triggerInData, @NonNull AudioFormat captureFormat, @Nullable byte[] data,
+            @NonNull List<KeyphraseRecognitionExtra> keyphraseRecognitionExtras) {
         Log.d(TAG, "triggerHardwareRecognitionEventForTest()");
         synchronized (mLock) {
             if (mAvailability == STATE_INVALID || mAvailability == STATE_ERROR) {
@@ -862,7 +863,8 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
                 mModelManagementService.triggerHardwareRecognitionEventForTest(
                         new KeyphraseRecognitionEvent(status, soundModelHandle, captureAvailable,
                                 captureSession, captureDelayMs, capturePreambleMs, triggerInData,
-                                captureFormat, data, null /* keyphraseExtras */),
+                                captureFormat, data, keyphraseRecognitionExtras.toArray(
+                                new KeyphraseRecognitionExtra[0])),
                         mInternalCallback);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();

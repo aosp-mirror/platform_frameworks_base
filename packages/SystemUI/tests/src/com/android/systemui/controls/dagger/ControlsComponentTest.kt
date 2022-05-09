@@ -137,7 +137,8 @@ class ControlsComponentTest : SysuiTestCase() {
         `when`(lockPatternUtils.getStrongAuthForUser(anyInt()))
             .thenReturn(STRONG_AUTH_NOT_REQUIRED)
         `when`(keyguardStateController.isUnlocked()).thenReturn(false)
-        `when`(secureSettings.getInt(eq(Settings.Secure.LOCKSCREEN_SHOW_CONTROLS), anyInt()))
+        `when`(secureSettings.getIntForUser(eq(Settings.Secure.LOCKSCREEN_SHOW_CONTROLS),
+                anyInt(), anyInt()))
             .thenReturn(1)
         val component = setupComponent(true)
 

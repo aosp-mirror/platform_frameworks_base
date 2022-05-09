@@ -36,7 +36,7 @@ import com.android.systemui.shared.system.PackageManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,7 +69,7 @@ public final class PhoneStateMonitor {
     };
 
     private final Context mContext;
-    private final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
+    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
     private final StatusBarStateController mStatusBarStateController;
 
     private boolean mLauncherShowing;
@@ -77,10 +77,11 @@ public final class PhoneStateMonitor {
 
     @Inject
     PhoneStateMonitor(Context context, BroadcastDispatcher broadcastDispatcher,
-            Lazy<Optional<StatusBar>> statusBarOptionalLazy, BootCompleteCache bootCompleteCache,
+            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
+            BootCompleteCache bootCompleteCache,
             StatusBarStateController statusBarStateController) {
         mContext = context;
-        mStatusBarOptionalLazy = statusBarOptionalLazy;
+        mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
         mStatusBarStateController = statusBarStateController;
 
         mDefaultHome = getCurrentDefaultHome();
@@ -180,7 +181,8 @@ public final class PhoneStateMonitor {
     }
 
     private boolean isBouncerShowing() {
-        return mStatusBarOptionalLazy.get().map(StatusBar::isBouncerShowing).orElse(false);
+        return mCentralSurfacesOptionalLazy.get()
+                .map(CentralSurfaces::isBouncerShowing).orElse(false);
     }
 
     private boolean isKeyguardLocked() {

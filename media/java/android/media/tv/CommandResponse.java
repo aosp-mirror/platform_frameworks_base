@@ -25,6 +25,8 @@ import android.os.Parcelable;
  * A response for command from broadcast signal.
  */
 public final class CommandResponse extends BroadcastInfoResponse implements Parcelable {
+    public static final String RESPONSE_TYPE_XML = "xml";
+    public static final String RESPONSE_TYPE_JSON = "json";
     private static final @TvInputManager.BroadcastInfoType int RESPONSE_TYPE =
             TvInputManager.BROADCAST_INFO_TYPE_COMMAND;
 
@@ -43,20 +45,23 @@ public final class CommandResponse extends BroadcastInfoResponse implements Parc
             };
 
     private final String mResponse;
+    private final String mResponseType;
 
     static CommandResponse createFromParcelBody(Parcel in) {
         return new CommandResponse(in);
     }
 
-    public CommandResponse(int requestId, int sequence,
-            @ResponseResult int responseResult, @Nullable String response) {
+    public CommandResponse(int requestId, int sequence, @ResponseResult int responseResult,
+            @Nullable String response, @NonNull String responseType) {
         super(RESPONSE_TYPE, requestId, sequence, responseResult);
         mResponse = response;
+        mResponseType = responseType;
     }
 
     CommandResponse(Parcel source) {
         super(RESPONSE_TYPE, source);
         mResponse = source.readString();
+        mResponseType = source.readString();
     }
 
     /**
@@ -68,6 +73,15 @@ public final class CommandResponse extends BroadcastInfoResponse implements Parc
         return mResponse;
     }
 
+    /**
+     * Gets the type of the command response.
+     * It could be either JSON or XML.
+     */
+    @NonNull
+    public String getResponseType() {
+        return mResponseType;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -77,5 +91,6 @@ public final class CommandResponse extends BroadcastInfoResponse implements Parc
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeString(mResponse);
+        dest.writeString(mResponseType);
     }
 }

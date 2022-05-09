@@ -17,10 +17,12 @@
 package android.content.pm;
 
 import android.Manifest;
+import android.app.UiAutomation;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.HandlerThread;
+import android.os.ParcelFileDescriptor;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.util.Log;
@@ -39,7 +41,10 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -203,11 +208,31 @@ public class PackageInstallerBenchmark {
     }
 
     private void uninstallSession(BenchmarkState state, String...packageNames)
-            throws InterruptedException {
+            throws Exception {
         state.pauseTiming();
         uninstall(true /* stop at fail */, packageNames);
         mPackageInstaller.unregisterSessionCallback(mSessionCallback);
+        executeShellCommand("pm gc");
         state.resumeTiming();
+    }
+
+    private static String executeShellCommand(String command) throws IOException {
+        UiAutomation uiAutomation = InstrumentationRegistry.getInstrumentation().getUiAutomation();
+        final ParcelFileDescriptor stdout = uiAutomation.executeShellCommand(command);
+        try (InputStream inputStream = new ParcelFileDescriptor.AutoCloseInputStream(stdout);
+             ByteArrayOutputStream result = new ByteArrayOutputStream()) {
+            writeFullStream(inputStream, result);
+            return result.toString("UTF-8");
+        }
+    }
+
+    private static void writeFullStream(InputStream inputStream, OutputStream outputStream)
+            throws IOException {
+        final byte[] buffer = new byte[1024];
+        int length;
+        while ((length = inputStream.read(buffer)) != -1) {
+            outputStream.write(buffer, 0, length);
+        }
     }
 
     @Test(timeout = 600_000L)
@@ -247,8 +272,7 @@ public class PackageInstallerBenchmark {
     }
 
     @Test(timeout = 600_000L)
-    public void commit_aMultiplePackagesSession_untilFinishBenchmark()
-            throws IOException, InterruptedException {
+    public void commit_aMultiplePackagesSession_untilFinishBenchmark() throws Exception {
         uninstall(false /* stop at fail */, TestApp.A, TestApp.B, TestApp.C);
 
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
@@ -269,8 +293,7 @@ public class PackageInstallerBenchmark {
     }
 
     @Test(timeout = 600_000L)
-    public void commit_threeMultiplePackageSessions_untilFinishBenchmark()
-            throws Exception {
+    public void commit_threeMultiplePackageSessions_untilFinishBenchmark() throws Exception {
         uninstall(false /* stop at fail */, TestApp.A, TestApp.B, TestApp.C);
 
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
@@ -293,8 +316,7 @@ public class PackageInstallerBenchmark {
     }
 
     @Test(timeout = 600_000L)
-    public void commit_aMultipleApksSession_untilFinishBenchmark()
-            throws IOException, InterruptedException {
+    public void commit_aMultipleApksSession_untilFinishBenchmark() throws Exception {
         uninstall(false /* stop at fail */, TestApp.A);
 
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();

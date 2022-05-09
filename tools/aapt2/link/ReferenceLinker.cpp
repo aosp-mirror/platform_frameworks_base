@@ -352,7 +352,7 @@ void ReferenceLinker::WriteAttributeName(const Reference& ref, const CallSite& c
   }
 
   const ResourceName& ref_name = ref.name.value();
-  CHECK_EQ(ref_name.type, ResourceType::kAttr);
+  CHECK_EQ(ref_name.type.type, ResourceType::kAttr);
 
   if (!ref_name.package.empty()) {
     *out_msg << ref_name.package << ":";
@@ -385,7 +385,7 @@ std::unique_ptr<Item> ReferenceLinker::LinkReference(const CallSite& callsite,
   Reference transformed_reference = reference;
   xml::ResolvePackage(decls, &transformed_reference);
 
-  if (transformed_reference.name.value().type == ResourceType::kMacro) {
+  if (transformed_reference.name.value().type.type == ResourceType::kMacro) {
     if (transformed_reference.name.value().package.empty()) {
       transformed_reference.name.value().package = callsite.package;
     }

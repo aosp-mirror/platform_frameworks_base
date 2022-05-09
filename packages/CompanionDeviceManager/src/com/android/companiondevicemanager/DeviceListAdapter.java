@@ -15,24 +15,23 @@
  */
 
 package com.android.companiondevicemanager;
+
+import static com.android.companiondevicemanager.Utils.getIcon;
+
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 /**
  * Adapter for the list of "found" devices.
  */
-class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.ViewHolder> implements
-        Observer<List<DeviceFilterPair<?>>> {
+class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.ViewHolder> {
     public int mSelectedPosition = RecyclerView.NO_POSITION;
 
     private final Context mContext;
@@ -60,11 +59,11 @@ class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.ViewHolde
                 R.layout.list_item_device, parent, false);
         ViewHolder viewHolder = new ViewHolder(view);
         if (viewType == TYPE_WIFI) {
-            viewHolder.mImageView.setImageDrawable(getIcon(
-                    com.android.internal.R.drawable.ic_wifi_signal_3));
+            viewHolder.mImageView.setImageDrawable(
+                    getIcon(mContext, com.android.internal.R.drawable.ic_wifi_signal_3));
         } else {
-            viewHolder.mImageView.setImageDrawable(getIcon(
-                    android.R.drawable.stat_sys_data_bluetooth));
+            viewHolder.mImageView.setImageDrawable(
+                    getIcon(mContext, android.R.drawable.stat_sys_data_bluetooth));
         }
         return viewHolder;
     }
@@ -95,9 +94,8 @@ class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.ViewHolde
         mSelectedPosition = position;
     }
 
-    @Override
-    public void onChanged(List<DeviceFilterPair<?>> deviceFilterPairs) {
-        mDevices = deviceFilterPairs;
+    void setDevices(List<DeviceFilterPair<?>> devices) {
+        mDevices = devices;
         notifyDataSetChanged();
     }
 
@@ -113,12 +111,6 @@ class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.ViewHolde
 
     private boolean isWifiDevice(int position) {
         return mDevices.get(position).getDevice() instanceof android.net.wifi.ScanResult;
-    }
-
-    private Drawable getIcon(int resId) {
-        Drawable icon = mContext.getResources().getDrawable(resId, null);
-        icon.setTint(Color.DKGRAY);
-        return icon;
     }
 
     public interface OnItemClickListener {

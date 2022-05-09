@@ -17,6 +17,7 @@
 package android.hardware;
 
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.compat.annotation.UnsupportedAppUsage;
 
 /**
@@ -664,16 +665,20 @@ public class SensorEvent {
      * The first three elements provide the transform from the (arbitrary, possibly slowly drifting)
      * reference frame to the head frame. The magnitude of this vector is in range [0, &pi;]
      * radians, while the value of individual axes is in range [-&pi;, &pi;]. The next three
-     * elements provide the estimated rotational velocity of the user's head relative to itself, in
-     * radians per second.
+     * elements optionally provide the estimated rotational velocity of the user's head relative to
+     * itself, in radians per second. If a given sensor does not support determining velocity, these
+     * elements are set to 0.
      *
      * <ul>
      *  <li> values[0] : X component of Euler vector representing rotation</li>
      *  <li> values[1] : Y component of Euler vector representing rotation</li>
      *  <li> values[2] : Z component of Euler vector representing rotation</li>
-     *  <li> values[3] : X component of Euler vector representing angular velocity</li>
-     *  <li> values[4] : Y component of Euler vector representing angular velocity</li>
-     *  <li> values[5] : Z component of Euler vector representing angular velocity</li>
+     *  <li> values[3] : X component of Euler vector representing angular velocity (if
+     *  supported, otherwise 0)</li>
+     *  <li> values[4] : Y component of Euler vector representing angular velocity (if
+     *  supported, otherwise 0)</li>
+     *  <li> values[5] : Z component of Euler vector representing angular velocity (if
+     *  supported, otherwise 0)</li>
      * </ul>
      *
      * <h4>{@link android.hardware.Sensor#TYPE_ACCELEROMETER_LIMITED_AXES
@@ -819,6 +824,21 @@ public class SensorEvent {
      * time base as {@link android.os.SystemClock#elapsedRealtimeNanos()}.
      */
     public long timestamp;
+
+    /**
+     * Set to true when this is the first sensor event after a discontinuity.
+     *
+     * The exact meaning of discontinuity depends on the sensor type. For
+     * {@link android.hardware.Sensor#TYPE_HEAD_TRACKER Sensor.TYPE_HEAD_TRACKER}, this means that
+     * the reference frame has suddenly and significantly changed, for example if the head tracking
+     * device was removed then put back.
+     *
+     * Note that this concept is either not relevant to or not supported by most sensor types,
+     * {@link android.hardware.Sensor#TYPE_HEAD_TRACKER Sensor.TYPE_HEAD_TRACKER} being the notable
+     * exception.
+     */
+    @SuppressLint("MutableBareField")
+    public boolean firstEventAfterDiscontinuity;
 
     @UnsupportedAppUsage
     SensorEvent(int valueSize) {

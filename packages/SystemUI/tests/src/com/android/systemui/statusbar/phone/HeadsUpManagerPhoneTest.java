@@ -63,7 +63,6 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
     @Mock private NotificationGroupManagerLegacy mGroupManager;
     @Mock private View mNotificationShadeWindowView;
     @Mock private VisualStabilityProvider mVSProvider;
-    @Mock private StatusBar mBar;
     @Mock private StatusBarStateController mStatusBarStateController;
     @Mock private KeyguardBypassController mBypassController;
     @Mock private ConfigurationControllerImpl mConfigurationController;

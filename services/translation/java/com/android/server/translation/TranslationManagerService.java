@@ -225,12 +225,12 @@ public final class TranslationManagerService
 
         @Override
         public void registerUiTranslationStateCallback(IRemoteCallback callback, int userId) {
-            TranslationManagerServiceImpl service;
             synchronized (mLock) {
-                service = getServiceForUserLocked(userId);
-            }
-            if (service != null) {
-                service.registerUiTranslationStateCallback(callback, Binder.getCallingUid());
+                final TranslationManagerServiceImpl service = getServiceForUserLocked(userId);
+                if (service != null) {
+                    service.registerUiTranslationStateCallbackLocked(callback,
+                            Binder.getCallingUid());
+                }
             }
         }
 
@@ -297,7 +297,7 @@ public final class TranslationManagerService
 
         /**
          * Dump the service state into the given stream. You run "adb shell dumpsys translation".
-        */
+         */
         @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) return;

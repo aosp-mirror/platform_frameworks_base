@@ -36,6 +36,7 @@ import android.os.Process;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.CaptioningManager;
 
 import androidx.test.filters.SmallTest;
 
@@ -88,6 +89,8 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
     private PackageManager mPackageManager;
     @Mock
     private WakefulnessLifecycle mWakefullnessLifcycle;
+    @Mock
+    private CaptioningManager mCaptioningManager;
 
 
     @Before
@@ -109,7 +112,7 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
         mVolumeController = new TestableVolumeDialogControllerImpl(mContext,
                 mBroadcastDispatcher, mRingerModeTracker, mThreadFactory, mAudioManager,
                 mNotificationManager, mVibrator, mIAudioService, mAccessibilityManager,
-                mPackageManager, mWakefullnessLifcycle, mCallback);
+                mPackageManager, mWakefullnessLifcycle, mCaptioningManager, mCallback);
         mVolumeController.setEnableDialogs(true, true);
     }
 
@@ -184,10 +187,11 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
                 AccessibilityManager accessibilityManager,
                 PackageManager packageManager,
                 WakefulnessLifecycle wakefulnessLifecycle,
+                CaptioningManager captioningManager,
                 C callback) {
             super(context, broadcastDispatcher, ringerModeTracker, theadFactory, audioManager,
                     notificationManager, optionalVibrator, iAudioService, accessibilityManager,
-                    packageManager, wakefulnessLifecycle);
+                    packageManager, wakefulnessLifecycle, captioningManager);
             mCallbacks = callback;
 
             ArgumentCaptor<WakefulnessLifecycle.Observer> observerCaptor =

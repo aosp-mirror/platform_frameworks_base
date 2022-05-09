@@ -1085,6 +1085,10 @@ public class SubscriptionManager {
      * <p>Refer to voice-centric mode in 3gpp 24.301 sec 4.3 and 3gpp 24.501 sec 4.3.
      * Also refer to "UE's usage setting" as defined in 3gpp 24.301 section 3.1 and 3gpp 23.221
      * Annex A.
+     *
+     * <p>Devices that support {@link PackageManager#FEATURE_TELEPHONY_CALLING} and support usage
+     * setting configuration must support setting this value via
+     * {@link CarrierConfigManager#KEY_CELLULAR_USAGE_SETTING_INT}.
      */
     public static final int USAGE_SETTING_VOICE_CENTRIC = 1;
 
@@ -1094,6 +1098,10 @@ public class SubscriptionManager {
      * <p>Refer to data-centric mode in 3gpp 24.301 sec 4.3 and 3gpp 24.501 sec 4.3.
      * Also refer to "UE's usage setting" as defined in 3gpp 24.301 section 3.1 and 3gpp 23.221
      * Annex A.
+     *
+     * <p>Devices that support {@link PackageManager#FEATURE_TELEPHONY_DATA} and support usage
+     * setting configuration must support setting this value via.
+     * {@link CarrierConfigManager#KEY_CELLULAR_USAGE_SETTING_INT}.
      */
     public static final int USAGE_SETTING_DATA_CENTRIC = 2;
 
@@ -1976,7 +1984,7 @@ public class SubscriptionManager {
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public void addSubscriptionInfoRecord(@NonNull String uniqueId, @Nullable String displayName,
-            int slotIndex, int subscriptionType) {
+            int slotIndex, @SubscriptionType int subscriptionType) {
         if (VDBG) {
             logd("[addSubscriptionInfoRecord]+ uniqueId:" + uniqueId
                     + ", displayName:" + displayName + ", slotIndex:" + slotIndex
@@ -2012,7 +2020,8 @@ public class SubscriptionManager {
      * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public void removeSubscriptionInfoRecord(@NonNull String uniqueId, int subscriptionType) {
+    public void removeSubscriptionInfoRecord(@NonNull String uniqueId,
+            @SubscriptionType int subscriptionType) {
         if (VDBG) {
             logd("[removeSubscriptionInfoRecord]+ uniqueId:" + uniqueId
                     + ", subscriptionType: " + subscriptionType);
@@ -2766,6 +2775,8 @@ public class SubscriptionManager {
                 overrideConfig.mnc = Configuration.MNC_ZERO;
                 cacheKey = null;
             }
+        } else {
+            cacheKey = null;
         }
 
         if (useRootLocale) {
@@ -3207,6 +3218,11 @@ public class SubscriptionManager {
      *
      *  @param subId sub id
      *  @param callbackIntent pending intent that will be sent after operation is done.
+     *
+     *  to-be-deprecated this API is a duplicate of {@link EuiccManager#switchToSubscription(int,
+     *  PendingIntent)} and does not support Multiple Enabled Profile(MEP). Apps should use
+     *  {@link EuiccManager#switchToSubscription(int, PendingIntent)} or
+     *  {@link EuiccManager#switchToSubscription(int, int, PendingIntent)} instead.
      */
     @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void switchToSubscription(int subId, @NonNull PendingIntent callbackIntent) {

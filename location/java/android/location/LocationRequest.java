@@ -17,7 +17,6 @@
 package android.location;
 
 import static android.Manifest.permission.LOCATION_BYPASS;
-import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
@@ -28,10 +27,12 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -665,10 +666,9 @@ public final class LocationRequest implements Parcelable {
      * @hide
      * @deprecated LocationRequests should be treated as immutable.
      */
-    // TODO: remove WRITE_SECURE_SETTINGS.
     @SystemApi
     @Deprecated
-    @RequiresPermission(anyOf = {WRITE_SECURE_SETTINGS, LOCATION_BYPASS})
+    @RequiresPermission(LOCATION_BYPASS)
     public @NonNull LocationRequest setLocationSettingsIgnored(boolean locationSettingsIgnored) {
         mBypass = locationSettingsIgnored;
         return this;
@@ -1136,9 +1136,9 @@ public final class LocationRequest implements Parcelable {
          *
          * @hide
          */
-        // TODO: remove WRITE_SECURE_SETTINGS
         @SystemApi
-        @RequiresPermission(anyOf = {WRITE_SECURE_SETTINGS, LOCATION_BYPASS})
+        @RequiresPermission(LOCATION_BYPASS)
+        @RequiresFeature(PackageManager.FEATURE_AUTOMOTIVE)
         public @NonNull Builder setAdasGnssBypass(boolean adasGnssBypass) {
             mAdasGnssBypass = adasGnssBypass;
             return this;
@@ -1155,9 +1155,8 @@ public final class LocationRequest implements Parcelable {
          *
          * @hide
          */
-        // TODO: remove WRITE_SECURE_SETTINGS
         @SystemApi
-        @RequiresPermission(anyOf = {WRITE_SECURE_SETTINGS, LOCATION_BYPASS})
+        @RequiresPermission(LOCATION_BYPASS)
         public @NonNull Builder setLocationSettingsIgnored(boolean locationSettingsIgnored) {
             mBypass = locationSettingsIgnored;
             return this;

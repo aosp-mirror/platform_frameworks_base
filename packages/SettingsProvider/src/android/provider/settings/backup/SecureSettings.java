@@ -117,6 +117,12 @@ public class SecureSettings {
         Settings.Secure.FACE_UNLOCK_DISMISSES_KEYGUARD,
         Settings.Secure.FACE_UNLOCK_APP_ENABLED,
         Settings.Secure.FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION,
+        Settings.Secure.ACTIVE_UNLOCK_ON_WAKE,
+        Settings.Secure.ACTIVE_UNLOCK_ON_UNLOCK_INTENT,
+        Settings.Secure.ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL,
+        Settings.Secure.ACTIVE_UNLOCK_ON_FACE_ERRORS,
+        Settings.Secure.ACTIVE_UNLOCK_ON_FACE_ACQUIRE_INFO,
+        Settings.Secure.ACTIVE_UNLOCK_ON_UNLOCK_INTENT_WHEN_BIOMETRIC_ENROLLED,
         Settings.Secure.VR_DISPLAY_MODE,
         Settings.Secure.NOTIFICATION_BADGING,
         Settings.Secure.NOTIFICATION_DISMISS_RTL,
@@ -146,6 +152,7 @@ public class SecureSettings {
         Settings.Secure.ACCESSIBILITY_INTERACTIVE_UI_TIMEOUT_MS,
         Settings.Secure.TRUST_AGENTS_EXTEND_UNLOCK,
         Settings.Secure.UI_NIGHT_MODE,
+        Settings.Secure.UI_NIGHT_MODE_CUSTOM_TYPE,
         Settings.Secure.DARK_THEME_CUSTOM_START_TIME,
         Settings.Secure.DARK_THEME_CUSTOM_END_TIME,
         Settings.Secure.LOCK_SCREEN_WHEN_TRUST_LOST,
@@ -193,8 +200,10 @@ public class SecureSettings {
         Settings.Secure.NOTIFICATION_BUBBLES,
         Settings.Secure.LOCATION_TIME_ZONE_DETECTION_ENABLED,
         Settings.Secure.LOCKSCREEN_SHOW_CONTROLS,
+        Settings.Secure.LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS,
         Settings.Secure.LOCKSCREEN_SHOW_WALLET,
         Settings.Secure.LOCK_SCREEN_SHOW_QR_CODE_SCANNER,
         Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK,
+        Settings.Secure.STATUS_BAR_SHOW_VIBRATE_ICON
     };
 }

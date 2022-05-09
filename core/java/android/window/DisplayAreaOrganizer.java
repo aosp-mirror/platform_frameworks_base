@@ -108,7 +108,6 @@ public class DisplayAreaOrganizer extends WindowOrganizer {
      * the position and settings of the container manually. This is useful for foldable devices
      * which require custom UX rules for the IME position (e.g. IME on one screen and the focused
      * app on another screen).
-     * @hide
      */
     public static final int FEATURE_IME = FEATURE_SYSTEM_FIRST + 8;
 

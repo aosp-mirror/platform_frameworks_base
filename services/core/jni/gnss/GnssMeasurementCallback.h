@@ -52,7 +52,7 @@ void setMeasurementData(JNIEnv* env, jobject& callbacksObj, jobject clock,
 
 class GnssMeasurementCallbackAidl : public hardware::gnss::BnGnssMeasurementCallback {
 public:
-    GnssMeasurementCallbackAidl(jobject& callbacksObj) : mCallbacksObj(callbacksObj) {}
+    GnssMeasurementCallbackAidl() : mCallbacksObj(getCallbacksObj()) {}
     android::binder::Status gnssMeasurementCb(const hardware::gnss::GnssData& data) override;
 
 private:
@@ -78,7 +78,7 @@ private:
  */
 class GnssMeasurementCallbackHidl : public hardware::gnss::V2_1::IGnssMeasurementCallback {
 public:
-    GnssMeasurementCallbackHidl(jobject& callbacksObj) : mCallbacksObj(callbacksObj) {}
+    GnssMeasurementCallbackHidl() : mCallbacksObj(getCallbacksObj()) {}
     hardware::Return<void> gnssMeasurementCb_2_1(
             const hardware::gnss::V2_1::IGnssMeasurementCallback::GnssData& data) override;
     hardware::Return<void> gnssMeasurementCb_2_0(
@@ -109,23 +109,22 @@ private:
 
 class GnssMeasurementCallback {
 public:
-    GnssMeasurementCallback(jobject& callbacksObj) : mCallbacksObj(callbacksObj) {}
+    GnssMeasurementCallback() {}
     sp<GnssMeasurementCallbackAidl> getAidl() {
         if (callbackAidl == nullptr) {
-            callbackAidl = sp<GnssMeasurementCallbackAidl>::make(mCallbacksObj);
+            callbackAidl = sp<GnssMeasurementCallbackAidl>::make();
         }
         return callbackAidl;
     }
 
     sp<GnssMeasurementCallbackHidl> getHidl() {
         if (callbackHidl == nullptr) {
-            callbackHidl = sp<GnssMeasurementCallbackHidl>::make(mCallbacksObj);
+            callbackHidl = sp<GnssMeasurementCallbackHidl>::make();
         }
         return callbackHidl;
     }
 
 private:
-    jobject& mCallbacksObj;
     sp<GnssMeasurementCallbackAidl> callbackAidl;
     sp<GnssMeasurementCallbackHidl> callbackHidl;
 };

@@ -33,6 +33,7 @@ class InkView extends View {
     private static final long FINISH_TIMEOUT = 2500;
     private final HandwritingIme.HandwritingFinisher mHwCanceller;
     private final HandwritingIme.StylusConsumer mConsumer;
+    private final int mTopInset;
     private Paint mPaint;
     private Path  mPath;
     private float mX, mY;
@@ -63,6 +64,7 @@ class InkView extends View {
         setLayoutParams(new ViewGroup.LayoutParams(
                 metrics.getBounds().width() - insets.left - insets.right,
                 metrics.getBounds().height() - insets.top - insets.bottom));
+        mTopInset = insets.top;
     }
 
     @Override
@@ -74,12 +76,14 @@ class InkView extends View {
     }
 
     private void stylusStart(float x, float y) {
+        y = y - mTopInset;
         mPath.moveTo(x, y);
         mX = x;
         mY = y;
     }
 
     private void stylusMove(float x, float y) {
+        y = y - mTopInset;
         float dx = Math.abs(x - mX);
         float dy = Math.abs(y - mY);
         if (mPath.isEmpty()) {

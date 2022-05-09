@@ -25,11 +25,9 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.app.ActivityTaskManager;
 import android.app.Instrumentation;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Bundle;
@@ -367,7 +365,7 @@ public abstract class GameSession {
     }
 
     /**
-     * Interface for returning screenshot outcome from calls to {@link #takeScreenshot}.
+     * Interface for handling result of {@link #takeScreenshot}.
      */
     public interface ScreenshotCallback {
 
@@ -402,18 +400,16 @@ public abstract class GameSession {
 
         /**
          * Called when taking the screenshot succeeded.
-         *
-         * @param bitmap The screenshot.
          */
-        void onSuccess(@NonNull Bitmap bitmap);
+        void onSuccess();
     }
 
     /**
      * Takes a screenshot of the associated game. For this call to succeed, the device screen
      * must be turned on and the game task must be visible.
      *
-     * If the callback is called with {@link ScreenshotCallback#onSuccess}, the provided {@link
-     * Bitmap} may be used.
+     * If the callback is called with {@link ScreenshotCallback#onSuccess}, the screenshot is
+     * taken successfully.
      *
      * If the callback is called with {@link ScreenshotCallback#onFailure}, the provided status
      * code should be checked.
@@ -429,6 +425,7 @@ public abstract class GameSession {
      *                 or failed.
      * @throws IllegalStateException if this method is called prior to {@link #onCreate}.
      */
+    @RequiresPermission(android.Manifest.permission.MANAGE_GAME_ACTIVITY)
     public void takeScreenshot(@NonNull Executor executor, @NonNull ScreenshotCallback callback) {
         if (mGameSessionController == null) {
             throw new IllegalStateException("Can not call before onCreate()");
@@ -460,7 +457,7 @@ public abstract class GameSession {
         @GameScreenshotResult.GameScreenshotStatus int status = result.getStatus();
         switch (status) {
             case GameScreenshotResult.GAME_SCREENSHOT_SUCCESS:
-                callback.onSuccess(result.getBitmap());
+                callback.onSuccess();
                 break;
             case GameScreenshotResult.GAME_SCREENSHOT_ERROR_INTERNAL_ERROR:
                 Slog.w(TAG, "Error taking screenshot");
@@ -513,14 +510,11 @@ public abstract class GameSession {
                             callback.onActivityResult(result.getResultCode(), result.getData());
                         }, executor);
 
-        final Intent trampolineIntent = new Intent();
-        trampolineIntent.setComponent(
-                new ComponentName(
-                        "android", "android.service.games.GameSessionTrampolineActivity"));
-        trampolineIntent.putExtra(GameSessionTrampolineActivity.INTENT_KEY, intent);
-        trampolineIntent.putExtra(GameSessionTrampolineActivity.OPTIONS_KEY, options);
-        trampolineIntent.putExtra(
-                GameSessionTrampolineActivity.FUTURE_KEY, future);
+        final Intent trampolineIntent =
+                GameSessionTrampolineActivity.createIntent(
+                        intent,
+                        options,
+                        future);
 
         try {
             int result = ActivityTaskManager.getService().startActivityFromGameSession(

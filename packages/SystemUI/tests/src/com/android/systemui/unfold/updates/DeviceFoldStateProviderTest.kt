@@ -16,6 +16,11 @@
 
 package com.android.systemui.unfold.updates
 
+import android.app.ActivityManager
+import android.app.ActivityManager.RunningTaskInfo
+import android.app.WindowConfiguration.ACTIVITY_TYPE_HOME
+import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
+import android.app.WindowConfiguration.ActivityType
 import android.hardware.devicestate.DeviceStateManager
 import android.hardware.devicestate.DeviceStateManager.FoldStateListener
 import android.os.Handler
@@ -30,7 +35,6 @@ import com.android.systemui.unfold.util.FoldableDeviceStates
 import com.android.systemui.unfold.util.FoldableTestUtils
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
-import java.lang.Exception
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -50,6 +54,8 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
     @Mock private lateinit var screenStatusProvider: ScreenStatusProvider
 
     @Mock private lateinit var deviceStateManager: DeviceStateManager
+
+    @Mock private lateinit var activityManager: ActivityManager
 
     @Mock private lateinit var handler: Handler
 
@@ -72,6 +78,9 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        overrideResource(
+            com.android.internal.R.integer.config_unfoldTransitionHalfFoldedTimeout,
+            HALF_OPENED_TIMEOUT_MILLIS.toInt())
         deviceStates = FoldableTestUtils.findDeviceStates(context)
 
         foldStateProvider =
@@ -80,6 +89,7 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
                 hingeAngleProvider,
                 screenStatusProvider,
                 deviceStateManager,
+                activityManager,
                 context.mainExecutor,
                 handler)
 
@@ -113,6 +123,9 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
             }
             null
         }
+
+        // By default, we're on launcher.
+        setupForegroundActivityType(ACTIVITY_TYPE_HOME)
     }
 
     @Test
@@ -190,6 +203,43 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
     }
 
     @Test
+    fun testUnfoldedOpenedHingeAngleEmitted_isFinishedOpeningIsFalse() {
+        setFoldState(folded = false)
+
+        sendHingeAngleEvent(10)
+
+        assertThat(foldStateProvider.isFinishedOpening).isFalse()
+    }
+
+    @Test
+    fun testFoldedHalfOpenHingeAngleEmitted_isFinishedOpeningIsFalse() {
+        setFoldState(folded = true)
+
+        sendHingeAngleEvent(10)
+
+        assertThat(foldStateProvider.isFinishedOpening).isFalse()
+    }
+
+    @Test
+    fun testFoldedFullyOpenHingeAngleEmitted_isFinishedOpeningIsTrue() {
+        setFoldState(folded = false)
+
+        sendHingeAngleEvent(180)
+
+        assertThat(foldStateProvider.isFinishedOpening).isTrue()
+    }
+
+    @Test
+    fun testUnfoldedHalfOpenOpened_afterTimeout_isFinishedOpeningIsTrue() {
+        setFoldState(folded = false)
+
+        sendHingeAngleEvent(10)
+        simulateTimeout(HALF_OPENED_TIMEOUT_MILLIS)
+
+        assertThat(foldStateProvider.isFinishedOpening).isTrue()
+    }
+
+    @Test
     fun startClosingEvent_afterTimeout_abortEmitted() {
         sendHingeAngleEvent(90)
         sendHingeAngleEvent(80)
@@ -258,6 +308,31 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
         }
     }
 
+    @Test
+    fun startClosingEvent_whileNotOnLauncher_doesNotTriggerBeforeThreshold() {
+        setupForegroundActivityType(ACTIVITY_TYPE_STANDARD)
+        sendHingeAngleEvent(180)
+
+        sendHingeAngleEvent(START_CLOSING_ON_APPS_THRESHOLD_DEGREES + 1)
+
+        assertThat(foldUpdates).isEmpty()
+    }
+
+    @Test
+    fun startClosingEvent_whileNotOnLauncher_triggersAfterThreshold() {
+        setupForegroundActivityType(ACTIVITY_TYPE_STANDARD)
+        sendHingeAngleEvent(START_CLOSING_ON_APPS_THRESHOLD_DEGREES)
+
+        sendHingeAngleEvent(START_CLOSING_ON_APPS_THRESHOLD_DEGREES - 1)
+
+        assertThat(foldUpdates).containsExactly(FOLD_UPDATE_START_CLOSING)
+    }
+
+    private fun setupForegroundActivityType(@ActivityType type: Int) {
+        val taskInfo = RunningTaskInfo().apply { topActivityType = type }
+        whenever(activityManager.getRunningTasks(1)).thenReturn(listOf(taskInfo))
+    }
+
     private fun simulateTimeout(waitTime: Long = HALF_OPENED_TIMEOUT_MILLIS) {
         val runnableDelay = scheduledRunnableDelay ?: throw Exception("No runnable scheduled.")
         if (waitTime >= runnableDelay) {
@@ -283,5 +358,9 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
 
     private fun sendHingeAngleEvent(angle: Int) {
         hingeAngleCaptor.value.accept(angle.toFloat())
+    }
+
+    companion object {
+        private const val HALF_OPENED_TIMEOUT_MILLIS = 300L
     }
 }
