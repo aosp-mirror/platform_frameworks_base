@@ -234,5 +234,10 @@ public class RestrictedPreferenceHelper {
         if (!(mPreference instanceof RestrictedTopLevelPreference)) {
             mPreference.setEnabled(!(mDisabledByAdmin || mDisabledByAppOps));
         }
+
+        if (mPreference instanceof PrimarySwitchPreference) {
+            ((PrimarySwitchPreference) mPreference)
+                    .setSwitchEnabled(!(mDisabledByAdmin || mDisabledByAppOps));
+        }
     }
 }

@@ -46,7 +46,6 @@ import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.testutils.shadow.ShadowRouter2Manager;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -259,7 +258,7 @@ public class InfoMediaManagerTest {
 
         final List<MediaRoute2Info> routes = new ArrayList<>();
         routes.add(info);
-        when(mRouterManager.getAvailableRoutes(TEST_PACKAGE_NAME)).thenReturn(routes);
+        mShadowRouter2Manager.setTransferableRoutes(routes);
 
         final MediaDevice mediaDevice = mInfoMediaManager.findMediaDevice(TEST_ID);
         assertThat(mediaDevice).isNull();
@@ -732,8 +731,14 @@ public class InfoMediaManagerTest {
     }
 
     @Test
-    @Ignore
-    public void shouldDisableMediaOutput_infosSizeEqual1_returnsTrue() {
+    public void shouldDisableMediaOutput_infosIsEmpty_returnsTrue() {
+        mShadowRouter2Manager.setTransferableRoutes(new ArrayList<>());
+
+        assertThat(mInfoMediaManager.shouldDisableMediaOutput("test")).isTrue();
+    }
+
+    @Test
+    public void shouldDisableMediaOutput_infosSizeEqual1_returnsFalse() {
         final MediaRoute2Info info = mock(MediaRoute2Info.class);
         final List<MediaRoute2Info> infos = new ArrayList<>();
         infos.add(info);
@@ -741,7 +746,7 @@ public class InfoMediaManagerTest {
 
         when(info.getType()).thenReturn(TYPE_REMOTE_SPEAKER);
 
-        assertThat(mInfoMediaManager.shouldDisableMediaOutput("test")).isTrue();
+        assertThat(mInfoMediaManager.shouldDisableMediaOutput("test")).isFalse();
     }
 
     @Test

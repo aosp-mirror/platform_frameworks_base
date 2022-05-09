@@ -828,6 +828,40 @@ public class AudioSystem
         cb.onRoutingUpdated();
     }
 
+    /**
+     * @hide
+     * Handles requests from the audio policy manager to (re-)initialize the volume ranges
+     */
+    public interface VolumeRangeInitRequestCallback {
+        /**
+         * Callback to notify volume ranges need to be initialized
+         */
+        void onVolumeRangeInitializationRequested();
+    }
+
+    @GuardedBy("AudioSystem.class")
+    private static VolumeRangeInitRequestCallback sVolRangeInitReqCallback;
+
+    /** @hide */
+    public static void setVolumeRangeInitRequestCallback(VolumeRangeInitRequestCallback cb) {
+        synchronized (AudioSystem.class) {
+            sVolRangeInitReqCallback = cb;
+            native_register_vol_range_init_req_callback();
+        }
+    }
+
+    private static void volRangeInitReqCallbackFromNative() {
+        final VolumeRangeInitRequestCallback cb;
+        synchronized (AudioSystem.class) {
+            cb = sVolRangeInitReqCallback;
+        }
+        if (cb == null) {
+            Log.e(TAG, "APM requested volume range initialization, but no callback found");
+            return;
+        }
+        cb.onVolumeRangeInitializationRequested();
+    }
+
     /*
      * Error codes used by public APIs (AudioTrack, AudioRecord, AudioManager ...)
      * Must be kept in sync with frameworks/base/core/jni/android_media_AudioErrors.h
@@ -1812,6 +1846,8 @@ public class AudioSystem
     private static native final void native_register_recording_callback();
     // declare this instance as having a routing update callback handler
     private static native void native_register_routing_callback();
+    // declare this instance as having a volume range init request handler
+    private static native void native_register_vol_range_init_req_callback();
 
     // must be kept in sync with value in include/system/audio.h
     /** @hide */ public static final int AUDIO_HW_SYNC_INVALID = 0;

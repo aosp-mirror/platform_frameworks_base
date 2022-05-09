@@ -55,6 +55,15 @@
             android:textColor="?android:attr/textColorSecondary"/>
 
         <ImageView
+            android:id="@+id/fgs_new"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/fgs_dot"
+            android:contentDescription="@string/fgs_dot_content_description"
+            />
+
+        <ImageView
             android:id="@+id/footer_icon"
             android:layout_width="@dimen/qs_footer_icon_size"
             android:layout_height="@dimen/qs_footer_icon_size"
@@ -82,7 +91,7 @@
             android:textColor="?android:attr/textColorPrimary"
             android:textSize="18sp"/>
         <ImageView
-            android:id="@+id/fgs_new"
+            android:id="@+id/fgs_collapsed_new"
             android:layout_width="12dp"
             android:layout_height="12dp"
             android:scaleType="fitCenter"

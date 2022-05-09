@@ -65,6 +65,7 @@ import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 import org.mockito.Mockito.`when` as whenever
 
+private const val HAL_CONTROLS_ILLUMINATION = true
 private const val REQUEST_ID = 2L
 
 // Dimensions for the current display resolution.
@@ -129,8 +130,8 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
             statusBarStateController, panelExpansionStateManager, statusBarKeyguardViewManager,
             keyguardUpdateMonitor, dialogManager, dumpManager, transitionController,
             configurationController, systemClock, keyguardStateController,
-            unlockedScreenOffAnimationController, hbmProvider, REQUEST_ID, reason,
-            controllerCallback, onTouch, activityLaunchAnimator)
+            unlockedScreenOffAnimationController, HAL_CONTROLS_ILLUMINATION, hbmProvider,
+            REQUEST_ID, reason, controllerCallback, onTouch, activityLaunchAnimator)
         block()
     }
 

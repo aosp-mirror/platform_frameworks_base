@@ -64,6 +64,11 @@ class MediaResumeListener @Inject constructor(
     private lateinit var mediaDataManager: MediaDataManager
 
     private var mediaBrowser: ResumeMediaBrowser? = null
+        set(value) {
+            // Always disconnect the old browser -- see b/225403871.
+            field?.disconnect()
+            field = value
+        }
     private var currentUserId: Int = context.userId
 
     @VisibleForTesting
@@ -189,7 +194,6 @@ class MediaResumeListener @Inject constructor(
         if (useMediaResumption) {
             // If this had been started from a resume state, disconnect now that it's live
             if (!key.equals(oldKey)) {
-                mediaBrowser?.disconnect()
                 mediaBrowser = null
             }
             // If we don't have a resume action, check if we haven't already
@@ -223,7 +227,6 @@ class MediaResumeListener @Inject constructor(
         Log.d(TAG, "Testing if we can connect to $componentName")
         // Set null action to prevent additional attempts to connect
         mediaDataManager.setResumeAction(key, null)
-        mediaBrowser?.disconnect()
         mediaBrowser = mediaBrowserFactory.create(
                 object : ResumeMediaBrowser.Callback() {
                     override fun onConnected() {

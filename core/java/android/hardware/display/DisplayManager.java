@@ -1436,13 +1436,5 @@ public final class DisplayManager {
          * @hide
          */
         String KEY_HIGH_REFRESH_RATE_BLACKLIST = "high_refresh_rate_blacklist";
-
-        /**
-         * Whether to allow the creation of always unlocked virtual displays by apps having the
-         * required permissions.
-         * @hide
-         */
-        String KEY_ALLOW_ALWAYS_UNLOCKED_VIRTUAL_DISPLAYS =
-                "allow_always_unlocked_virtual_displays";
     }
 }
