@@ -20,11 +20,13 @@ import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
+import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifComparator
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner
 import com.android.systemui.statusbar.notification.collection.render.NodeController
 import com.android.systemui.statusbar.notification.dagger.PeopleHeader
+import com.android.systemui.statusbar.notification.icon.ConversationIconManager
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.PeopleNotificationType
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_NON_PERSON
@@ -39,12 +41,40 @@ import javax.inject.Inject
 @CoordinatorScope
 class ConversationCoordinator @Inject constructor(
     private val peopleNotificationIdentifier: PeopleNotificationIdentifier,
+    private val conversationIconManager: ConversationIconManager,
     @PeopleHeader peopleHeaderController: NodeController
 ) : Coordinator {
 
+    private val promotedEntriesToSummaryOfSameChannel =
+        mutableMapOf<NotificationEntry, NotificationEntry>()
+
+    private val onBeforeRenderListListener = OnBeforeRenderListListener { _ ->
+        val unimportantSummaries = promotedEntriesToSummaryOfSameChannel
+            .mapNotNull { (promoted, summary) ->
+                val originalGroup = summary.parent
+                when {
+                    originalGroup == null -> null
+                    originalGroup == promoted.parent -> null
+                    originalGroup.parent == null -> null
+                    originalGroup.summary != summary -> null
+                    originalGroup.children.any { it.channel == summary.channel } -> null
+                    else -> summary.key
+                }
+            }
+        conversationIconManager.setUnimportantConversations(unimportantSummaries)
+        promotedEntriesToSummaryOfSameChannel.clear()
+    }
+
     private val notificationPromoter = object : NotifPromoter(TAG) {
         override fun shouldPromoteToTopLevel(entry: NotificationEntry): Boolean {
-            return entry.channel?.isImportantConversation == true
+            val shouldPromote = entry.channel?.isImportantConversation == true
+            if (shouldPromote) {
+                val summary = entry.parent?.summary
+                if (summary != null && entry.channel == summary.channel) {
+                    promotedEntriesToSummaryOfSameChannel[entry] = summary
+                }
+            }
+            return shouldPromote
         }
     }
 
@@ -67,6 +97,7 @@ class ConversationCoordinator @Inject constructor(
 
     override fun attach(pipeline: NotifPipeline) {
         pipeline.addPromoter(notificationPromoter)
+        pipeline.addOnBeforeRenderListListener(onBeforeRenderListListener)
     }
 
     private fun isConversation(entry: ListEntry): Boolean =

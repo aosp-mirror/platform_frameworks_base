@@ -42,6 +42,8 @@ android_test {
     static_libs: [
         "androidx.test.core",
         "androidx.test.runner",
+        "androidx.test.espresso.core",
+        "androidx.test.espresso.contrib",
         "androidx.test.ext.truth",
         "frameworks-base-testutils",
         "hamcrest-library",

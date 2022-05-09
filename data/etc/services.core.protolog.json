@@ -2575,12 +2575,6 @@
       "group": "WM_DEBUG_ANIM",
       "at": "com\/android\/server\/wm\/WindowContainer.java"
     },
-    "397105698": {
-      "message": "grantEmbeddedWindowFocus remove request for win=%s dropped since no candidate was found",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_FOCUS",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
     "397382873": {
       "message": "Moving to PAUSED: %s %s",
       "level": "VERBOSE",
@@ -3108,6 +3102,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_LOCKTASK",
       "at": "com\/android\/server\/wm\/LockTaskController.java"
+    },
+    "958338552": {
+      "message": "grantEmbeddedWindowFocus win=%s dropped focus so setting focus to null since no candidate was found",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_FOCUS",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
     "959486822": {
       "message": "setSyncGroup #%d on %s",

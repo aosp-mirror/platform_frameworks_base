@@ -30,6 +30,7 @@ import android.view.MotionEvent;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputMethodSubtype;
+import android.window.ImeOnBackInvokedDispatcher;
 
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.InputMethodNavButtonFlags;
@@ -148,10 +149,11 @@ final class IInputMethodInvoker {
 
     @AnyThread
     void startInput(IBinder startInputToken, IInputContext inputContext, EditorInfo attribute,
-            boolean restarting, @InputMethodNavButtonFlags int navButtonFlags) {
+            boolean restarting, @InputMethodNavButtonFlags int navButtonFlags,
+            @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
         try {
             mTarget.startInput(startInputToken, inputContext, attribute, restarting,
-                    navButtonFlags);
+                    navButtonFlags, imeDispatcher);
         } catch (RemoteException e) {
             logRemoteException(e);
         }

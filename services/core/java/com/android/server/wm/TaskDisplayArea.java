@@ -963,7 +963,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         } else if (candidateTask != null) {
             final int position = onTop ? POSITION_TOP : POSITION_BOTTOM;
             final Task launchRootTask = getLaunchRootTask(resolvedWindowingMode, activityType,
-                    options, sourceTask, launchFlags);
+                    options, sourceTask, launchFlags, candidateTask);
             if (launchRootTask != null) {
                 if (candidateTask.getParent() == null) {
                     launchRootTask.addChild(candidateTask, position);
@@ -1117,6 +1117,13 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
     @Nullable
     Task getLaunchRootTask(int windowingMode, int activityType, @Nullable ActivityOptions options,
             @Nullable Task sourceTask, int launchFlags) {
+        return getLaunchRootTask(windowingMode, activityType, options, sourceTask, launchFlags,
+                null /* candidateTask */);
+    }
+
+    @Nullable
+    Task getLaunchRootTask(int windowingMode, int activityType, @Nullable ActivityOptions options,
+            @Nullable Task sourceTask, int launchFlags, @Nullable Task candidateTask) {
         // Try to use the launch root task in options if available.
         if (options != null) {
             final Task launchRootTask = Task.fromWindowContainerToken(options.getLaunchRootTask());
@@ -1156,10 +1163,21 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
             }
         }
 
-        // For a better split UX, If a task is launching from a created-by-organizer task, it should
-        // be launched into the same created-by-organizer task as well.
+        // If a task is launching from a created-by-organizer task, it should be launched into the
+        // same created-by-organizer task as well. Unless, the candidate task is already positioned
+        // in the another adjacent task.
         if (sourceTask != null) {
-            return sourceTask.getCreatedByOrganizerTask();
+            Task launchTarget = sourceTask.getCreatedByOrganizerTask();
+            if (launchTarget != null && launchTarget.getAdjacentTaskFragment() != null) {
+                if (candidateTask != null) {
+                    final Task candidateRoot = candidateTask.getCreatedByOrganizerTask();
+                    if (candidateRoot != null && candidateRoot != launchTarget
+                            && launchTarget == candidateRoot.getAdjacentTaskFragment()) {
+                        launchTarget = candidateRoot;
+                    }
+                }
+                return launchTarget;
+            }
         }
 
         return null;

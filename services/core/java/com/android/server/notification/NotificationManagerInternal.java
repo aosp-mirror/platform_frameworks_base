@@ -42,4 +42,7 @@ public interface NotificationManagerInternal {
 
     /** Does the specified package/uid have permission to post notifications? */
     boolean areNotificationsEnabledForPackage(String pkg, int uid);
+
+    /** Send a notification to the user prompting them to review their notification permissions. */
+    void sendReviewPermissionsNotification();
 }

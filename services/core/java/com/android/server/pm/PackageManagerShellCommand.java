@@ -159,13 +159,14 @@ class PackageManagerShellCommand extends ShellCommand {
     private static final Map<String, Integer> SUPPORTED_PERMISSION_FLAGS = new ArrayMap<>();
     private static final List<String> SUPPORTED_PERMISSION_FLAGS_LIST;
     static {
+        SUPPORTED_PERMISSION_FLAGS_LIST = List.of("review-required", "revoked-compat",
+                "revoke-when-requested", "user-fixed", "user-set");
         SUPPORTED_PERMISSION_FLAGS.put("user-set", FLAG_PERMISSION_USER_SET);
         SUPPORTED_PERMISSION_FLAGS.put("user-fixed", FLAG_PERMISSION_USER_FIXED);
         SUPPORTED_PERMISSION_FLAGS.put("revoked-compat", FLAG_PERMISSION_REVOKED_COMPAT);
         SUPPORTED_PERMISSION_FLAGS.put("review-required", FLAG_PERMISSION_REVIEW_REQUIRED);
         SUPPORTED_PERMISSION_FLAGS.put("revoke-when-requested",
                 FLAG_PERMISSION_REVOKE_WHEN_REQUESTED);
-        SUPPORTED_PERMISSION_FLAGS_LIST = new ArrayList<>(SUPPORTED_PERMISSION_FLAGS.keySet());
     }
 
     final IPackageManager mInterface;

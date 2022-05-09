@@ -56,7 +56,6 @@ import android.os.BatteryConsumer.Dimensions;
 import android.os.BatteryStatsInternal;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
-import android.os.Build;
 import android.os.PowerExemptionManager;
 import android.os.PowerExemptionManager.ReasonCode;
 import android.os.SystemClock;
@@ -97,7 +96,7 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
     static final boolean DEBUG_BACKGROUND_BATTERY_TRACKER = false;
 
     static final boolean DEBUG_BACKGROUND_BATTERY_TRACKER_VERBOSE =
-            DEBUG_BACKGROUND_BATTERY_TRACKER | Build.IS_DEBUGGABLE;
+            DEBUG_BACKGROUND_BATTERY_TRACKER | false;
 
     // As we don't support realtime per-UID battery usage stats yet, we're polling the stats
     // in a regular time basis.
@@ -276,7 +275,9 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                         AppBackgroundRestrictionsInfo.REASON_UNKNOWN, // ExemptionReason
                         AppBackgroundRestrictionsInfo.UNKNOWN, // OptimizationLevel
                         AppBackgroundRestrictionsInfo.SDK_UNKNOWN, // TargetSdk
-                        isLowRamDeviceStatic());
+                        isLowRamDeviceStatic(),
+                        AppBackgroundRestrictionsInfo.LEVEL_UNKNOWN // previous RestrictionLevel
+                );
             }
         }
     }
@@ -304,11 +305,17 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                 bgUsage.mPercentage[BatteryUsage.BATTERY_USAGE_INDEX_BACKGROUND];
         final double usageFgs =
                 bgUsage.mPercentage[BatteryUsage.BATTERY_USAGE_INDEX_FOREGROUND_SERVICE];
+        final double usageForeground =
+                bgUsage.mPercentage[BatteryUsage.BATTERY_USAGE_INDEX_FOREGROUND];
+        final double usageCached =
+                bgUsage.mPercentage[BatteryUsage.BATTERY_USAGE_INDEX_CACHED];
         if (DEBUG_BACKGROUND_BATTERY_TRACKER_VERBOSE) {
             Slog.d(TAG, "getBatteryTrackerInfoProtoLocked uid:" + uid
                     + " allUsage:" + String.format("%4.2f%%", allUsage)
                     + " usageBackground:" + String.format("%4.2f%%", usageBackground)
-                    + " usageFgs:" + String.format("%4.2f%%", usageFgs));
+                    + " usageFgs:" + String.format("%4.2f%%", usageFgs)
+                    + " usageForeground:" + String.format("%4.2f%%", usageForeground)
+                    + " usageCached:" + String.format("%4.2f%%", usageCached));
         }
         final ProtoOutputStream proto = new ProtoOutputStream();
         proto.write(AppBackgroundRestrictionsInfo.BatteryTrackerInfo.BATTERY_24H,
@@ -317,6 +324,10 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                 usageBackground * 10000);
         proto.write(AppBackgroundRestrictionsInfo.BatteryTrackerInfo.BATTERY_USAGE_FGS,
                 usageFgs * 10000);
+        proto.write(AppBackgroundRestrictionsInfo.BatteryTrackerInfo.BATTERY_USAGE_FOREGROUND,
+                usageForeground * 10000);
+        proto.write(AppBackgroundRestrictionsInfo.BatteryTrackerInfo.BATTERY_USAGE_CACHED,
+                usageCached * 10000);
         proto.flush();
         return proto.getBytes();
     }

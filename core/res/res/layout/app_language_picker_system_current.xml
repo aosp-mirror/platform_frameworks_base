@@ -40,6 +40,6 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:src="@drawable/ic_check_24dp"
-            app:tint="#0F9D58"/>
+            app:tint="?attr/colorAccentPrimaryVariant"/>
     </LinearLayout>
 </LinearLayout>

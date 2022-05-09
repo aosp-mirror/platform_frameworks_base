@@ -117,6 +117,7 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
+import com.android.systemui.statusbar.phone.shade.transition.ShadeTransitionController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -178,6 +179,7 @@ public class NotificationStackScrollLayoutController {
     private final CentralSurfaces mCentralSurfaces;
     private final SectionHeaderController mSilentHeaderController;
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
+    private final ShadeTransitionController mShadeTransitionController;
     private final InteractionJankMonitor mJankMonitor;
     private final NotificationStackSizeCalculator mNotificationStackSizeCalculator;
     private final StackStateLogger mStackStateLogger;
@@ -647,6 +649,7 @@ public class NotificationStackScrollLayoutController {
             NotifCollection notifCollection,
             NotificationEntryManager notificationEntryManager,
             LockscreenShadeTransitionController lockscreenShadeTransitionController,
+            ShadeTransitionController shadeTransitionController,
             IStatusBarService iStatusBarService,
             UiEventLogger uiEventLogger,
             LayoutInflater layoutInflater,
@@ -675,6 +678,7 @@ public class NotificationStackScrollLayoutController {
         mLockscreenUserManager = lockscreenUserManager;
         mMetricsLogger = metricsLogger;
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
+        mShadeTransitionController = shadeTransitionController;
         mFalsingCollector = falsingCollector;
         mFalsingManager = falsingManager;
         mResources = resources;
@@ -769,6 +773,7 @@ public class NotificationStackScrollLayoutController {
         mScrimController.setScrimBehindChangeRunnable(mView::updateBackgroundDimming);
 
         mLockscreenShadeTransitionController.setStackScroller(this);
+        mShadeTransitionController.setNotificationStackScrollLayoutController(this);
 
         mLockscreenUserManager.addUserChangedListener(mLockscreenUserChangeListener);
 
@@ -1207,7 +1212,7 @@ public class NotificationStackScrollLayoutController {
      */
     public void updateShowEmptyShadeView() {
         Trace.beginSection("NSSLC.updateShowEmptyShadeView");
-        mShowEmptyShadeView = mBarState != KEYGUARD
+        mShowEmptyShadeView = mStatusBarStateController.getCurrentOrUpcomingState() != KEYGUARD
                 && !mView.isQsFullScreen()
                 && getVisibleNotificationCount() == 0;
 

@@ -70,6 +70,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.policy.SystemBarUtils;
+import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.keyguard.KeyguardSliceView;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
@@ -415,6 +416,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private boolean mForwardScrollable;
     private boolean mBackwardScrollable;
     private NotificationShelf mShelf;
+    /**
+     * Limits the number of visible notifications. The remaining are collapsed in the notification
+     * shelf. -1 when there is no limit.
+     */
     private int mMaxDisplayedNotifications = -1;
     private float mKeyguardBottomPadding = -1;
     @VisibleForTesting int mStatusBarHeight;
@@ -1309,7 +1314,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         final float endTopPosition = mTopPadding + mExtraTopInsetForFullShadeTransition
                 + mAmbientState.getOverExpansion()
                 - getCurrentOverScrollAmount(false /* top */);
-        final float fraction = mAmbientState.getExpansionFraction();
+        float fraction = mAmbientState.getExpansionFraction();
+        if (mAmbientState.isBouncerInTransit()) {
+            fraction = BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(fraction);
+        }
         final float stackY = MathUtils.lerp(0, endTopPosition, fraction);
         mAmbientState.setStackY(stackY);
         if (mOnStackYChanged != null) {
@@ -1323,7 +1331,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     private float updateStackEndHeight(float height, float bottomMargin, float topPadding) {
-        final float stackEndHeight = Math.max(0f, height - bottomMargin - topPadding);
+        final float stackEndHeight;
+        if (mMaxDisplayedNotifications != -1) {
+            // The stack intrinsic height already contains the correct value when there is a limit
+            // in the max number of notifications (e.g. as in keyguard).
+            stackEndHeight = mIntrinsicContentHeight;
+        } else {
+            stackEndHeight = Math.max(0f, height - bottomMargin - topPadding);
+        }
         mAmbientState.setStackEndHeight(stackEndHeight);
         return stackEndHeight;
     }

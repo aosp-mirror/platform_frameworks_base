@@ -71,7 +71,7 @@ public class Bubble implements BubbleViewProvider {
     private long mLastAccessed;
 
     @Nullable
-    private Bubbles.SuppressionChangedListener mSuppressionListener;
+    private Bubbles.BubbleMetadataFlagListener mBubbleMetadataFlagListener;
 
     /** Whether the bubble should show a dot for the notification indicating updated content. */
     private boolean mShowBubbleUpdateDot = true;
@@ -192,13 +192,13 @@ public class Bubble implements BubbleViewProvider {
 
     @VisibleForTesting(visibility = PRIVATE)
     public Bubble(@NonNull final BubbleEntry entry,
-            @Nullable final Bubbles.SuppressionChangedListener listener,
+            @Nullable final Bubbles.BubbleMetadataFlagListener listener,
             final Bubbles.PendingIntentCanceledListener intentCancelListener,
             Executor mainExecutor) {
         mKey = entry.getKey();
         mGroupKey = entry.getGroupKey();
         mLocusId = entry.getLocusId();
-        mSuppressionListener = listener;
+        mBubbleMetadataFlagListener = listener;
         mIntentCancelListener = intent -> {
             if (mIntent != null) {
                 mIntent.unregisterCancelListener(mIntentCancelListener);
@@ -606,8 +606,8 @@ public class Bubble implements BubbleViewProvider {
             mFlags &= ~Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
         }
 
-        if (showInShade() != prevShowInShade && mSuppressionListener != null) {
-            mSuppressionListener.onBubbleNotificationSuppressionChange(this);
+        if (showInShade() != prevShowInShade && mBubbleMetadataFlagListener != null) {
+            mBubbleMetadataFlagListener.onBubbleMetadataFlagChanged(this);
         }
     }
 
@@ -626,8 +626,8 @@ public class Bubble implements BubbleViewProvider {
         } else {
             mFlags &= ~Notification.BubbleMetadata.FLAG_SUPPRESS_BUBBLE;
         }
-        if (prevSuppressed != suppressBubble && mSuppressionListener != null) {
-            mSuppressionListener.onBubbleNotificationSuppressionChange(this);
+        if (prevSuppressed != suppressBubble && mBubbleMetadataFlagListener != null) {
+            mBubbleMetadataFlagListener.onBubbleMetadataFlagChanged(this);
         }
     }
 
@@ -771,11 +771,16 @@ public class Bubble implements BubbleViewProvider {
         return isEnabled(Notification.BubbleMetadata.FLAG_AUTO_EXPAND_BUBBLE);
     }
 
-    void setShouldAutoExpand(boolean shouldAutoExpand) {
+    @VisibleForTesting
+    public void setShouldAutoExpand(boolean shouldAutoExpand) {
+        boolean prevAutoExpand = shouldAutoExpand();
         if (shouldAutoExpand) {
             enable(Notification.BubbleMetadata.FLAG_AUTO_EXPAND_BUBBLE);
         } else {
             disable(Notification.BubbleMetadata.FLAG_AUTO_EXPAND_BUBBLE);
+        }
+        if (prevAutoExpand != shouldAutoExpand && mBubbleMetadataFlagListener != null) {
+            mBubbleMetadataFlagListener.onBubbleMetadataFlagChanged(this);
         }
     }
 
@@ -797,6 +802,10 @@ public class Bubble implements BubbleViewProvider {
 
     public boolean isEnabled(int option) {
         return (mFlags & option) != 0;
+    }
+
+    public int getFlags() {
+        return mFlags;
     }
 
     @Override

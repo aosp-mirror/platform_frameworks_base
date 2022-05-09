@@ -69,6 +69,7 @@ class DevicePolicyData {
     private static final String TAG_PASSWORD_VALIDITY = "password-validity";
     private static final String TAG_PASSWORD_TOKEN_HANDLE = "password-token";
     private static final String TAG_PROTECTED_PACKAGES = "protected-packages";
+    private static final String TAG_BYPASS_ROLE_QUALIFICATIONS = "bypass-role-qualifications";
     private static final String ATTR_VALUE = "value";
     private static final String ATTR_ALIAS = "alias";
     private static final String ATTR_ID = "id";
@@ -107,6 +108,8 @@ class DevicePolicyData {
     int mPasswordOwner = -1;
     long mLastMaximumTimeToLock = -1;
     boolean mUserSetupComplete = false;
+    boolean mBypassDevicePolicyManagementRoleQualifications = false;
+    String mCurrentRoleHolder;
     boolean mPaired = false;
     int mUserProvisioningState;
     int mPermissionPolicy;
@@ -374,6 +377,12 @@ class DevicePolicyData {
                 out.endTag(null, TAG_APPS_SUSPENDED);
             }
 
+            if (policyData.mBypassDevicePolicyManagementRoleQualifications) {
+                out.startTag(null, TAG_BYPASS_ROLE_QUALIFICATIONS);
+                out.attribute(null, ATTR_VALUE, policyData.mCurrentRoleHolder);
+                out.endTag(null, TAG_BYPASS_ROLE_QUALIFICATIONS);
+            }
+
             out.endTag(null, "policies");
 
             out.endDocument();
@@ -558,6 +567,9 @@ class DevicePolicyData {
                 } else if (TAG_APPS_SUSPENDED.equals(tag)) {
                     policy.mAppsSuspended =
                             parser.getAttributeBoolean(null, ATTR_VALUE, false);
+                } else if (TAG_BYPASS_ROLE_QUALIFICATIONS.equals(tag)) {
+                    policy.mBypassDevicePolicyManagementRoleQualifications = true;
+                    policy.mCurrentRoleHolder =  parser.getAttributeValue(null, ATTR_VALUE);
                 } else {
                     Slogf.w(TAG, "Unknown tag: %s", tag);
                     XmlUtils.skipCurrentTag(parser);

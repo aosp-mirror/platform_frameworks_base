@@ -247,6 +247,7 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
         // In order to make the list view work with CollapsingToolbarLayout,
         // we have to enable the nested scrolling feature of the list view.
         getListView().setNestedScrollingEnabled(true);
+        getListView().setDivider(null);
     }
 
     @Override

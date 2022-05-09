@@ -61,6 +61,7 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
 
     private AnimatorSet mBackgroundInAnimator = new AnimatorSet();
     private int mAlpha; // 0-255
+    private float mScaleFactor = 1;
 
     // AOD anti-burn-in offsets
     private final int mMaxBurnInOffsetX;
@@ -127,17 +128,19 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
         mBurnInProgress = MathUtils.lerp(0f, getBurnInProgressOffset(), darkAmountForAnimation);
 
         if (mAnimatingBetweenAodAndLockscreen && !mPauseAuth) {
+            mLockScreenFp.setTranslationX(mBurnInOffsetX);
+            mLockScreenFp.setTranslationY(mBurnInOffsetY);
             mBgProtection.setAlpha(1f - mInterpolatedDarkAmount);
             mLockScreenFp.setAlpha(1f - mInterpolatedDarkAmount);
         } else if (mInterpolatedDarkAmount == 0f) {
+            mLockScreenFp.setTranslationX(0);
+            mLockScreenFp.setTranslationY(0);
             mBgProtection.setAlpha(mAlpha / 255f);
             mLockScreenFp.setAlpha(mAlpha / 255f);
         } else {
             mBgProtection.setAlpha(0f);
             mLockScreenFp.setAlpha(0f);
         }
-        mLockScreenFp.setTranslationX(mBurnInOffsetX);
-        mLockScreenFp.setTranslationY(mBurnInOffsetY);
         mLockScreenFp.setProgress(1f - mInterpolatedDarkAmount);
 
         mAodFp.setTranslationX(mBurnInOffsetX);
@@ -168,6 +171,22 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
             android.R.attr.textColorPrimary);
         mBgProtection.setImageDrawable(getContext().getDrawable(R.drawable.fingerprint_bg));
         mLockScreenFp.invalidate(); // updated with a valueCallback
+    }
+
+    void setScaleFactor(float scale) {
+        mScaleFactor = scale;
+    }
+
+    void updatePadding() {
+        if (mLockScreenFp == null || mAodFp == null) {
+            return;
+        }
+
+        final int defaultPaddingPx =
+                getResources().getDimensionPixelSize(R.dimen.lock_icon_padding);
+        final int padding = (int) (defaultPaddingPx * mScaleFactor);
+        mLockScreenFp.setPadding(padding, padding, padding, padding);
+        mAodFp.setPadding(padding, padding, padding, padding);
     }
 
     /**
@@ -255,6 +274,7 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
             mLockScreenFp = view.findViewById(R.id.udfps_lockscreen_fp);
             mBgProtection = view.findViewById(R.id.udfps_keyguard_fp_bg);
 
+            updatePadding();
             updateColor();
             updateAlpha();
             parent.addView(view);

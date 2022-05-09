@@ -472,9 +472,9 @@ public class BatteryStatsImpl extends BatteryStats {
         mNumSingleUidCpuTimeReads++;
 
         LongArrayMultiStateCounter onBatteryCounter =
-                u.getProcStateTimeCounter().getCounter();
+                u.getProcStateTimeCounter(timestampMs).getCounter();
         LongArrayMultiStateCounter onBatteryScreenOffCounter =
-                u.getProcStateScreenOffTimeCounter().getCounter();
+                u.getProcStateScreenOffTimeCounter(timestampMs).getCounter();
 
         mKernelSingleUidTimeReader.addDelta(uid, onBatteryCounter, timestampMs);
         mKernelSingleUidTimeReader.addDelta(uid, onBatteryScreenOffCounter, timestampMs);
@@ -543,9 +543,9 @@ public class BatteryStatsImpl extends BatteryStats {
 
                 final long timestampMs = mClock.elapsedRealtime();
                 final LongArrayMultiStateCounter onBatteryCounter =
-                        u.getProcStateTimeCounter().getCounter();
+                        u.getProcStateTimeCounter(timestampMs).getCounter();
                 final LongArrayMultiStateCounter onBatteryScreenOffCounter =
-                        u.getProcStateScreenOffTimeCounter().getCounter();
+                        u.getProcStateScreenOffTimeCounter(timestampMs).getCounter();
 
                 if (uid == parentUid || Process.isSdkSandboxUid(uid)) {
                     mKernelSingleUidTimeReader.addDelta(parentUid, onBatteryCounter, timestampMs);
@@ -8935,8 +8935,8 @@ public class BatteryStatsImpl extends BatteryStats {
         @VisibleForTesting
         public void setProcessStateForTest(int procState, long elapsedTimeMs) {
             mProcessState = procState;
-            getProcStateTimeCounter().setState(procState, elapsedTimeMs);
-            getProcStateScreenOffTimeCounter().setState(procState, elapsedTimeMs);
+            getProcStateTimeCounter(elapsedTimeMs).setState(procState, elapsedTimeMs);
+            getProcStateScreenOffTimeCounter(elapsedTimeMs).setState(procState, elapsedTimeMs);
             final int batteryConsumerProcessState =
                     mapUidProcessStateToBatteryConsumerProcessState(procState);
             getCpuActiveTimeCounter().setState(batteryConsumerProcessState, elapsedTimeMs);
@@ -9095,12 +9095,11 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         @GuardedBy("mBsi")
-        private void ensureMultiStateCounters() {
+        private void ensureMultiStateCounters(long timestampMs) {
             if (mProcStateTimeMs != null) {
                 return;
             }
 
-            final long timestampMs = mBsi.mClock.elapsedRealtime();
             mProcStateTimeMs =
                     new TimeInFreqMultiStateCounter(mBsi.mOnBatteryTimeBase,
                             PROC_STATE_TIME_COUNTER_STATE_COUNT, mBsi.getCpuFreqCount(),
@@ -9112,14 +9111,14 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         @GuardedBy("mBsi")
-        private TimeInFreqMultiStateCounter getProcStateTimeCounter() {
-            ensureMultiStateCounters();
+        private TimeInFreqMultiStateCounter getProcStateTimeCounter(long timestampMs) {
+            ensureMultiStateCounters(timestampMs);
             return mProcStateTimeMs;
         }
 
         @GuardedBy("mBsi")
-        private TimeInFreqMultiStateCounter getProcStateScreenOffTimeCounter() {
-            ensureMultiStateCounters();
+        private TimeInFreqMultiStateCounter getProcStateScreenOffTimeCounter(long timestampMs) {
+            ensureMultiStateCounters(timestampMs);
             return mProcStateScreenOffTimeMs;
         }
 
@@ -11972,9 +11971,9 @@ public class BatteryStatsImpl extends BatteryStats {
                     mBsi.updateProcStateCpuTimesLocked(mUid, elapsedRealtimeMs);
 
                     LongArrayMultiStateCounter onBatteryCounter =
-                            getProcStateTimeCounter().getCounter();
+                            getProcStateTimeCounter(elapsedRealtimeMs).getCounter();
                     LongArrayMultiStateCounter onBatteryScreenOffCounter =
-                            getProcStateScreenOffTimeCounter().getCounter();
+                            getProcStateScreenOffTimeCounter(elapsedRealtimeMs).getCounter();
 
                     onBatteryCounter.setState(uidRunningState, elapsedRealtimeMs);
                     onBatteryScreenOffCounter.setState(uidRunningState, elapsedRealtimeMs);

@@ -959,7 +959,7 @@
     <dimen name="resolver_max_collapsed_height_with_default_with_tabs">300dp</dimen>
     <dimen name="resolver_tab_text_size">14sp</dimen>
     <dimen name="resolver_title_padding_bottom">0dp</dimen>
-    <dimen name="resolver_empty_state_container_padding_top">8dp</dimen>
+    <dimen name="resolver_empty_state_container_padding_top">48dp</dimen>
     <dimen name="resolver_empty_state_container_padding_bottom">8dp</dimen>
 
     <dimen name="chooser_action_button_icon_size">18dp</dimen>

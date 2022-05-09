@@ -89,8 +89,10 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
+import android.util.Pair;
 import android.view.Display;
 import android.view.KeyEvent;
+import android.view.MagnificationSpec;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
@@ -145,6 +147,8 @@ public class AbstractAccessibilityServiceConnectionTest {
     private static final int USER_ID = 1;
     private static final int USER_ID2 = 2;
     private static final int INTERACTION_ID = 199;
+    private static final Pair<float[], MagnificationSpec> FAKE_MATRIX_AND_MAG_SPEC =
+            new Pair<>(new float[9], new MagnificationSpec());
     private static final int PID = Process.myPid();
     private static final long TID = Process.myTid();
     private static final int UID = Process.myUid();
@@ -188,6 +192,8 @@ public class AbstractAccessibilityServiceConnectionTest {
                 .thenReturn(mMockFingerprintGestureDispatcher);
         when(mMockSystemSupport.getMagnificationProcessor())
                 .thenReturn(mMockMagnificationProcessor);
+        when(mMockSystemSupport.getWindowTransformationMatrixAndMagnificationSpec(anyInt()))
+                .thenReturn(FAKE_MATRIX_AND_MAG_SPEC);
 
         PowerManager powerManager =
                 new PowerManager(mMockContext, mMockIPowerManager, mMockIThermalService, mHandler);

@@ -152,6 +152,7 @@ final class NavigationBarController {
         private boolean mDrawLegacyNavigationBarBackground;
 
         private final Rect mTempRect = new Rect();
+        private final int[] mTempPos = new int[2];
 
         Impl(@NonNull InputMethodService inputMethodService) {
             mService = inputMethodService;
@@ -259,21 +260,28 @@ final class NavigationBarController {
                 switch (originalInsets.touchableInsets) {
                     case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME:
                         if (inputFrame.getVisibility() == View.VISIBLE) {
-                            inputFrame.getBoundsOnScreen(mTempRect);
+                            inputFrame.getLocationInWindow(mTempPos);
+                            mTempRect.set(mTempPos[0], mTempPos[1],
+                                    mTempPos[0] + inputFrame.getWidth(),
+                                    mTempPos[1] + inputFrame.getHeight());
                             touchableRegion = new Region(mTempRect);
                         }
                         break;
                     case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT:
                         if (inputFrame.getVisibility() == View.VISIBLE) {
-                            inputFrame.getBoundsOnScreen(mTempRect);
-                            mTempRect.top = originalInsets.contentTopInsets;
+                            inputFrame.getLocationInWindow(mTempPos);
+                            mTempRect.set(mTempPos[0], originalInsets.contentTopInsets,
+                                    mTempPos[0] + inputFrame.getWidth() ,
+                                    mTempPos[1] + inputFrame.getHeight());
                             touchableRegion = new Region(mTempRect);
                         }
                         break;
                     case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_VISIBLE:
                         if (inputFrame.getVisibility() == View.VISIBLE) {
-                            inputFrame.getBoundsOnScreen(mTempRect);
-                            mTempRect.top = originalInsets.visibleTopInsets;
+                            inputFrame.getLocationInWindow(mTempPos);
+                            mTempRect.set(mTempPos[0], originalInsets.visibleTopInsets,
+                                    mTempPos[0] + inputFrame.getWidth(),
+                                    mTempPos[1] + inputFrame.getHeight());
                             touchableRegion = new Region(mTempRect);
                         }
                         break;

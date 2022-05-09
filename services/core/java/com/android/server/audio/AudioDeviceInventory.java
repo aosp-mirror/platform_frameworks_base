@@ -862,8 +862,8 @@ public class AudioDeviceInventory {
     }
 
      /*package*/ void disconnectLeAudio(int device) {
-        if (device != AudioSystem.DEVICE_OUT_BLE_HEADSET ||
-                    device != AudioSystem.DEVICE_OUT_BLE_BROADCAST) {
+        if (device != AudioSystem.DEVICE_OUT_BLE_HEADSET
+                && device != AudioSystem.DEVICE_OUT_BLE_BROADCAST) {
             Log.e(TAG, "disconnectLeAudio: Can't disconnect not LE Audio device " + device);
             return;
         }
@@ -879,6 +879,8 @@ public class AudioDeviceInventory {
             new MediaMetrics.Item(mMetricsId + "disconnectLeAudio")
                     .record();
             if (toRemove.size() > 0) {
+                final int delay = checkSendBecomingNoisyIntentInt(device, 0,
+                        AudioSystem.DEVICE_NONE);
                 toRemove.stream().forEach(deviceAddress ->
                         makeLeAudioDeviceUnavailable(deviceAddress, device)
                 );

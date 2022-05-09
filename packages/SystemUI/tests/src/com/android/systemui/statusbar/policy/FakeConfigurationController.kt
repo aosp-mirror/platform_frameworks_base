@@ -23,6 +23,10 @@ class FakeConfigurationController : ConfigurationController {
         listeners.forEach { it.onThemeChanged() }
     }
 
+    fun notifyDensityOrFontScaleChanged() {
+        listeners.forEach { it.onDensityOrFontScaleChanged() }
+    }
+
     fun notifyConfigurationChanged() {
         onConfigurationChanged(newConfiguration = null)
     }
