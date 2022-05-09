@@ -418,7 +418,7 @@ public class WindowManagerService extends IWindowManager.Stub
     private static final String DENSITY_OVERRIDE = "ro.config.density_override";
     private static final String SIZE_OVERRIDE = "ro.config.size_override";
 
-    private static final String PROPERTY_EMULATOR_CIRCULAR = "ro.emulator.circular";
+    private static final String PROPERTY_EMULATOR_CIRCULAR = "ro.boot.emulator.circular";
 
     static final int MY_PID = myPid();
     static final int MY_UID = myUid();

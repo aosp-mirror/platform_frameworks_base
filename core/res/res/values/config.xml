@@ -3326,7 +3326,7 @@
     <!-- default window ShowCircularMask property -->
     <bool name="config_windowShowCircularMask">false</bool>
 
-    <!-- default value for whether circular emulators (ro.emulator.circular)
+    <!-- default value for whether circular emulators (ro.boot.emulator.circular)
          should show a display overlay on the screen -->
     <bool name="config_windowEnableCircularEmulatorDisplayOverlay">false</bool>
 
