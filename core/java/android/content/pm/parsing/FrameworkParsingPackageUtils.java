@@ -58,6 +58,7 @@ public class FrameworkParsingPackageUtils {
     private static final int MAX_FILE_NAME_SIZE = 223;
 
     public static final int PARSE_IGNORE_OVERLAY_REQUIRED_SYSTEM_PROPERTY = 1 << 7;
+    public static final int PARSE_APK_IN_APEX = 1 << 9;
 
     /**
      * Check if the given name is valid.
