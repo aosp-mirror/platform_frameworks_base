@@ -1134,7 +1134,7 @@
 
     <!-- Output switcher panel related dimensions -->
     <dimen name="media_output_dialog_list_margin">12dp</dimen>
-    <dimen name="media_output_dialog_list_max_height">364dp</dimen>
+    <dimen name="media_output_dialog_list_max_height">355dp</dimen>
     <dimen name="media_output_dialog_header_album_icon_size">72dp</dimen>
     <dimen name="media_output_dialog_header_back_icon_size">32dp</dimen>
     <dimen name="media_output_dialog_header_icon_padding">16dp</dimen>
