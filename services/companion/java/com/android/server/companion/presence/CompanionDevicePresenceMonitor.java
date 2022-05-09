@@ -16,11 +16,19 @@
 
 package com.android.server.companion.presence;
 
+import static android.os.Process.ROOT_UID;
+import static android.os.Process.SHELL_UID;
+
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
+import android.annotation.TestApi;
 import android.bluetooth.BluetoothAdapter;
 import android.companion.AssociationInfo;
 import android.content.Context;
+import android.os.Binder;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 
 import com.android.server.companion.AssociationStore;
@@ -72,6 +80,11 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
     private final @NonNull Set<Integer> mNearbyBleDevices = new HashSet<>();
     private final @NonNull Set<Integer> mReportedSelfManagedDevices = new HashSet<>();
 
+    // Tracking "simulated" presence. Used for debugging and testing only.
+    private final @NonNull Set<Integer> mSimulated = new HashSet<>();
+    private final SimulatedDevicePresenceSchedulerHelper mSchedulerHelper =
+            new SimulatedDevicePresenceSchedulerHelper();
+
     public CompanionDevicePresenceMonitor(@NonNull AssociationStore associationStore,
             @NonNull Callback callback) {
         mAssociationStore = associationStore;
@@ -106,7 +119,8 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
     public boolean isDevicePresent(int associationId) {
         return mReportedSelfManagedDevices.contains(associationId)
                 || mConnectedBtDevices.contains(associationId)
-                || mNearbyBleDevices.contains(associationId);
+                || mNearbyBleDevices.contains(associationId)
+                || mSimulated.contains(associationId);
     }
 
     /**
@@ -153,6 +167,45 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
     @Override
     public void onBleCompanionDeviceLost(int associationId) {
         onDeviceGone(mNearbyBleDevices, associationId, /* sourceLoggingTag */ "ble");
+    }
+
+    /** FOR DEBUGGING AND/OR TESTING PURPOSES ONLY. */
+    @TestApi
+    public void simulateDeviceAppeared(int associationId) {
+        // IMPORTANT: this API should only be invoked via the
+        // 'companiondevice simulate-device-appeared' Shell command, so the only uid-s allowed to
+        // make this call are SHELL and ROOT.
+        // No other caller (including SYSTEM!) should be allowed.
+        enforceCallerShellOrRoot();
+        // Make sure the association exists.
+        enforceAssociationExists(associationId);
+
+        onDevicePresent(mSimulated, associationId, /* sourceLoggingTag */ "simulated");
+
+        mSchedulerHelper.scheduleOnDeviceGoneCallForSimulatedDevicePresence(associationId);
+    }
+
+    /** FOR DEBUGGING AND/OR TESTING PURPOSES ONLY. */
+    @TestApi
+    public void simulateDeviceDisappeared(int associationId) {
+        // IMPORTANT: this API should only be invoked via the
+        // 'companiondevice simulate-device-appeared' Shell command, so the only uid-s allowed to
+        // make this call are SHELL and ROOT.
+        // No other caller (including SYSTEM!) should be allowed.
+        enforceCallerShellOrRoot();
+        // Make sure the association exists.
+        enforceAssociationExists(associationId);
+
+        mSchedulerHelper.unscheduleOnDeviceGoneCallForSimulatedDevicePresence(associationId);
+
+        onDeviceGone(mSimulated, associationId, /* sourceLoggingTag */ "simulated");
+    }
+
+    private void enforceAssociationExists(int associationId) {
+        if (mAssociationStore.getAssociationById(associationId) == null) {
+            throw new IllegalArgumentException(
+                    "Association with id " + associationId + " does not exist.");
+        }
     }
 
     private void onDevicePresent(@NonNull Set<Integer> presentDevicesForSource,
@@ -212,6 +265,7 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
         mConnectedBtDevices.remove(associationId);
         mNearbyBleDevices.remove(associationId);
         mReportedSelfManagedDevices.remove(associationId);
+        mSimulated.remove(associationId);
     }
 
     /**
@@ -231,5 +285,37 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
         // Do NOT call mCallback.onDeviceDisappeared()!
         // CompanionDeviceManagerService will know that the association is removed, and will do
         // what's needed.
+    }
+
+    private static void enforceCallerShellOrRoot() {
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid == SHELL_UID || callingUid == ROOT_UID) return;
+
+        throw new SecurityException("Caller is neither Shell nor Root");
+    }
+
+    private class SimulatedDevicePresenceSchedulerHelper extends Handler {
+        SimulatedDevicePresenceSchedulerHelper() {
+            super(Looper.getMainLooper());
+        }
+
+        void scheduleOnDeviceGoneCallForSimulatedDevicePresence(int associationId) {
+            // First, unschedule if it was scheduled previously.
+            if (hasMessages(/* what */ associationId)) {
+                removeMessages(/* what */ associationId);
+            }
+
+            sendEmptyMessageDelayed(/* what */ associationId, 60 * 1000 /* 60 seconds */);
+        }
+
+        void unscheduleOnDeviceGoneCallForSimulatedDevicePresence(int associationId) {
+            removeMessages(/* what */ associationId);
+        }
+
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            final int associationId = msg.what;
+            onDeviceGone(mSimulated, associationId, /* sourceLoggingTag */ "simulated");
+        }
     }
 }
