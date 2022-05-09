@@ -168,7 +168,8 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
 
         mController.onViewAttached();
         verify(mView, atLeast(1)).setPauseAuth(true);
-        verify(mView).onDozeAmountChanged(dozeAmount, dozeAmount, true);
+        verify(mView).onDozeAmountChanged(dozeAmount, dozeAmount,
+                UdfpsKeyguardView.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN);
     }
 
     @Test
@@ -195,7 +196,8 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
         final float eased = .65f;
         mStatusBarStateListener.onDozeAmountChanged(linear, eased);
 
-        verify(mView).onDozeAmountChanged(linear, eased, true);
+        verify(mView).onDozeAmountChanged(linear, eased,
+                UdfpsKeyguardView.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN);
     }
 
     @Test
