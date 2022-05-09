@@ -497,7 +497,7 @@
     <string name="user_logout_notification_title" msgid="3644848998053832589">"Odhlásenie používateľa"</string>
     <string name="user_logout_notification_text" msgid="7441286737342997991">"Odhlásiť aktuálneho používateľa"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"ODHLÁSIŤ POUŽÍVATEĽA"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Pridať nového používateľa?"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"Chcete pridať nového používateľa?"</string>
     <string name="user_add_user_message_short" msgid="2599370307878014791">"Keď pridáte nového používateľa, musí si nastaviť vlastný priestor.\n\nKtorýkoľvek používateľ môže aktualizovať aplikácie všetkých ostatných používateľov."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Dosiahnutý limit počtu používateľov"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">

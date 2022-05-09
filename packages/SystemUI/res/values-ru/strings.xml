@@ -871,8 +871,8 @@
     <string name="data_saver" msgid="3484013368530820763">"Экономия трафика"</string>
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Режим экономии трафика включен"</string>
     <string name="accessibility_data_saver_off" msgid="58339669022107171">"Режим экономии трафика отключен"</string>
-    <string name="switch_bar_on" msgid="1770868129120096114">"Включено"</string>
-    <string name="switch_bar_off" msgid="5669805115416379556">"Отключено"</string>
+    <string name="switch_bar_on" msgid="1770868129120096114">"Вкл."</string>
+    <string name="switch_bar_off" msgid="5669805115416379556">"Откл."</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Недоступно"</string>
     <string name="tile_disabled" msgid="373212051546573069">"Отключено"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Панель навигации"</string>

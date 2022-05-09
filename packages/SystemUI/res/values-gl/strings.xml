@@ -178,7 +178,7 @@
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"Realizaches demasiados intentos incorrectos. Eliminaranse os datos deste dispositivo."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"Realizaches demasiados intentos incorrectos. Eliminarase este usuario."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"Realizaches demasiados intentos incorrectos. Eliminaranse este perfil de traballo e os datos asociados."</string>
-    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Ignorar"</string>
+    <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"Pechar"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Toca o sensor de impresión dixital"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Icona de impresión dixital"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Non se recoñeceu a cara. Usa a impresión dixital."</string>
@@ -385,7 +385,7 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"AUTOMÁTICO"</string>
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Inverter cores"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Modo de corrección de cor"</string>
-    <string name="quick_settings_more_settings" msgid="2878235926753776694">"Máis opcións"</string>
+    <string name="quick_settings_more_settings" msgid="2878235926753776694">"Máis opcións de configuración"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Configuración de usuario"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Feito"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Pechar"</string>
@@ -774,7 +774,7 @@
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"Abríronse os controis de notificacións da aplicación <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"Pecháronse os controis de notificacións da aplicación <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_switch_accessibility" msgid="8979885820432540252">"Permitir notificacións desde esta canle"</string>
-    <string name="notification_more_settings" msgid="4936228656989201793">"Máis opcións"</string>
+    <string name="notification_more_settings" msgid="4936228656989201793">"Máis opcións de configuración"</string>
     <string name="notification_app_settings" msgid="8963648463858039377">"Personalizar"</string>
     <string name="notification_done" msgid="6215117625922713976">"Feito"</string>
     <string name="inline_undo" msgid="9026953267645116526">"Desfacer"</string>
@@ -1085,7 +1085,7 @@
     <string name="controls_media_title" msgid="1746947284862928133">"Contido multimedia"</string>
     <string name="controls_media_close_session" msgid="1193000643003066508">"Queres ocultar esta sesión multimedia?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Non se pode ocultar esta sesión multimedia."</string>
-    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Ignorar"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Pechar"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Retomar"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Configuración"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"Estase reproducindo <xliff:g id="SONG_NAME">%1$s</xliff:g>, de <xliff:g id="ARTIST_NAME">%2$s</xliff:g>, en <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>

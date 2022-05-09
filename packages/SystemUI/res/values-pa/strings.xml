@@ -607,9 +607,9 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"ਐਪ ਨੂੰ ਪਿੰਨ ਕੀਤਾ ਗਿਆ ਹੈ"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"ਇਹ ਇਸ ਨੂੰ ਤਦ ਤੱਕ ਦ੍ਰਿਸ਼ ਵਿੱਚ ਰੱਖਦਾ ਹੈ ਜਦ ਤੱਕ ਤੁਸੀਂ ਅਨਪਿੰਨ ਨਹੀਂ ਕਰਦੇ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ \'ਪਿੱਛੇ\' ਅਤੇ \'ਰੂਪ-ਰੇਖਾ\' ਨੂੰ ਸਪੱਰਸ਼ ਕਰੋ ਅਤੇ ਦਬਾ ਕੇ ਰੱਖੋ।"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਅਨਪਿੰਨ ਕੀਤੇ ਜਾਣ ਤੱਕ ਇਸਨੂੰ ਦਿਖਾਇਆ ਜਾਂਦਾ ਹੈ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ \'ਪਿੱਛੇ\' ਅਤੇ \'ਹੋਮ\' ਨੂੰ ਸਪਰਸ਼ ਕਰਕੇ ਰੱਖੋ।"</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਅਨਪਿੰਨ ਕੀਤੇ ਜਾਣ ਤੱਕ ਇਸਨੂੰ ਦਿਖਾਇਆ ਜਾਂਦਾ ਹੈ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰਕੇ ਰੱਖੋ।"</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਅਣਪਿੰਨ ਕੀਤੇ ਜਾਣ ਤੱਕ ਇਸਨੂੰ ਦਿਖਾਇਆ ਜਾਂਦਾ ਹੈ। ਅਣਪਿੰਨ ਕਰਨ ਲਈ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰਕੇ ਰੱਖੋ।"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"ਇਹ ਇਸ ਨੂੰ ਤਦ ਤੱਕ ਦ੍ਰਿਸ਼ ਵਿੱਚ ਰੱਖਦਾ ਹੈ ਜਦ ਤੱਕ ਤੁਸੀਂ ਅਨਪਿੰਨ ਨਹੀਂ ਕਰਦੇ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ \'ਰੂਪ-ਰੇਖਾ\' ਨੂੰ ਸਪੱਰਸ਼ ਕਰੋ ਅਤੇ ਦਬਾ ਕੇ ਰੱਖੋ।"</string>
-    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਅਨਪਿੰਨ ਨਾ ਕੀਤੇ ਜਾਣ ਤੱਕ ਇਸਨੂੰ ਦਿਖਾਇਆ ਜਾਂਦਾ ਹੈ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ \'ਹੋਮ\' ਨੂੰ ਸਪੱਰਸ਼ ਕਰਕੇ ਦਬਾਈ ਰੱਖੋ।"</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਅਣਪਿੰਨ ਨਾ ਕੀਤੇ ਜਾਣ ਤੱਕ ਇਸਨੂੰ ਦਿਖਾਇਆ ਜਾਂਦਾ ਹੈ। ਅਣਪਿੰਨ ਕਰਨ ਲਈ \'ਹੋਮ\' ਨੂੰ ਸਪਰਸ਼ ਕਰਕੇ  ਰੱਖੋ।"</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"ਨਿੱਜੀ ਡਾਟੇ ਤੱਕ ਪਹੁੰਚ ਕੀਤੀ ਜਾ ਸਕਦੀ ਹੈ (ਜਿਵੇਂ ਕਿ ਸੰਪਰਕ ਅਤੇ ਈਮੇਲ ਸਮੱਗਰੀ)।"</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"ਪਿੰਨ ਕੀਤੀ ਐਪ ਹੋਰ ਐਪਾਂ ਨੂੰ ਖੋਲ੍ਹ ਸਕਦੀ ਹੈ।"</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"ਇਸ ਐਪ ਨੂੰ ਅਨਪਿੰਨ ਕਰਨ ਲਈ, \'ਪਿੱਛੇ\' ਅਤੇ \'ਰੂਪ-ਰੇਖਾ\' ਬਟਨਾਂ ਨੂੰ ਸਪਰਸ਼ ਕਰਕੇ ਦਬਾਈ ਰੱਖੋ"</string>

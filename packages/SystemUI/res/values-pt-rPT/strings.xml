@@ -610,7 +610,7 @@
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Esta opção mantém o item visível até o soltar. Deslize rapidamente para cima e mantenha pressionado para soltar."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Esta opção mantém o item visível até o soltar. Toque sem soltar em Vista geral para soltar."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Esta opção mantém o item visível até o soltar. Toque sem soltar em Página inicial para soltar."</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Os dados pessoais podem ficar acessíveis (tais como contactos e conteúdo do email)."</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Os dados pessoais, tais como contactos e conteúdo do email, podem ficar acessíveis."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Uma app fixada pode abrir outras apps."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Para soltar esta app, toque sem soltar nos botões Anterior e Vista geral."</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Para soltar esta app, toque sem soltar nos botões Anterior e Página inicial."</string>

@@ -385,7 +385,7 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"स्वयंचलित"</string>
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"रंग उलटे करा"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"रंग सुधारणा मोड"</string>
-    <string name="quick_settings_more_settings" msgid="2878235926753776694">"अधिक सेटिंग्ज"</string>
+    <string name="quick_settings_more_settings" msgid="2878235926753776694">"आणखी सेटिंग्ज"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"वापरकर्ता सेटिंग्ज"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"पूर्ण झाले"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"बंद करा"</string>
@@ -494,7 +494,7 @@
     <string name="user_logout_notification_text" msgid="7441286737342997991">"वर्तमान वापरकर्ता लॉगआउट करा"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"वापरकर्त्यास लॉगआउट करा"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"नवीन वापरकर्ता जोडायचा?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"तुम्ही एक नवीन वापरकर्ता जोडता तेव्हा, त्या व्यक्तीने त्यांचे स्थान सेट करणे आवश्यक असते.\n\nकोणताही वापरकर्ता इतर सर्व वापरकर्त्यांसाठी अ‍ॅप्स अपडेट करू शकतो."</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"तुम्ही एक नवीन वापरकर्ता जोडता, तेव्हा त्या व्यक्तीने त्यांचे स्थान सेट करणे आवश्यक असते.\n\nकोणताही वापरकर्ता इतर सर्व वापरकर्त्यांसाठी अ‍ॅप्स अपडेट करू शकतो."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"वापरकर्ता मर्यादा गाठली"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">तुम्ही <xliff:g id="COUNT">%d</xliff:g> वापरकर्त्यांपर्यंत जोडू शकता.</item>
@@ -774,7 +774,7 @@
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"<xliff:g id="APP_NAME">%1$s</xliff:g> साठी सूचना नियंत्रणे खुली आहेत"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"<xliff:g id="APP_NAME">%1$s</xliff:g> साठी सूचना नियंत्रणे बंद आहेत"</string>
     <string name="notification_channel_switch_accessibility" msgid="8979885820432540252">"या चॅनेलकडील सूचनांना मान्यता द्या"</string>
-    <string name="notification_more_settings" msgid="4936228656989201793">"अधिक सेटिंग्ज"</string>
+    <string name="notification_more_settings" msgid="4936228656989201793">"आणखी सेटिंग्ज"</string>
     <string name="notification_app_settings" msgid="8963648463858039377">"कस्टमाइझ करा"</string>
     <string name="notification_done" msgid="6215117625922713976">"पूर्ण झाले"</string>
     <string name="inline_undo" msgid="9026953267645116526">"पहिल्यासारखे करा"</string>
@@ -844,7 +844,7 @@
     <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"ब्राउझर"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"संपर्क"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"ईमेल"</string>
-    <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
+    <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"एसएमएस"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"संगीत"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="5078136084632450333">"YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"कॅलेंडर"</string>

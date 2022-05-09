@@ -482,7 +482,7 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Прикажи профил"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Додај корисника"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Нови корисник"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Желите ли да уклоните госта?"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Желите да уклоните госта?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Све апликације и подаци у овој сесији ће бити избрисани."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Уклони"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Добро дошли назад, госте!"</string>
