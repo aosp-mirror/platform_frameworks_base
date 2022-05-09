@@ -50529,6 +50529,7 @@ package android.view {
     method public int getScaledDoubleTapSlop();
     method public int getScaledEdgeSlop();
     method public int getScaledFadingEdgeLength();
+    method public int getScaledHandwritingSlop();
     method public float getScaledHorizontalScrollFactor();
     method public int getScaledHoverSlop();
     method public int getScaledMaximumDrawingCacheSize();
