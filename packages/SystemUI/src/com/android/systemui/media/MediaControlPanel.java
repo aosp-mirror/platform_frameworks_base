@@ -97,7 +97,7 @@ import kotlin.Unit;
  * A view controller used for Media Playback.
  */
 public class MediaControlPanel {
-    private static final String TAG = "MediaControlPanel";
+    protected static final String TAG = "MediaControlPanel";
 
     private static final float DISABLED_ALPHA = 0.38f;
     private static final String EXPORTED_SMARTSPACE_TRAMPOLINE_ACTIVITY_NAME = "com.google"
@@ -106,7 +106,7 @@ public class MediaControlPanel {
             "com.google.android.apps.gsa.smartspace.extra.SMARTSPACE_INTENT";
     private static final String KEY_SMARTSPACE_ARTIST_NAME = "artist_name";
     private static final String KEY_SMARTSPACE_OPEN_IN_FOREGROUND = "KEY_OPEN_IN_FOREGROUND";
-    private static final String KEY_SMARTSPACE_APP_NAME = "KEY_SMARTSPACE_APP_NAME";
+    protected static final String KEY_SMARTSPACE_APP_NAME = "KEY_SMARTSPACE_APP_NAME";
 
     // Event types logged by smartspace
     private static final int SMARTSPACE_CARD_CLICK_EVENT = 760;
@@ -149,6 +149,7 @@ public class MediaControlPanel {
     private RecommendationViewHolder mRecommendationViewHolder;
     private String mKey;
     private MediaData mMediaData;
+    private SmartspaceMediaData mRecommendationData;
     private MediaViewController mMediaViewController;
     private MediaSession.Token mToken;
     private MediaController mController;
@@ -563,6 +564,8 @@ public class MediaControlPanel {
             });
     }
 
+    // We may want to look into unifying this with bindRecommendationContentDescription if/when we
+    // do a refactor of this class.
     private void bindPlayerContentDescription(MediaData data) {
         if (mMediaViewHolder == null) {
             return;
@@ -581,6 +584,26 @@ public class MediaControlPanel {
             contentDescription = null;
         }
         mMediaViewHolder.getPlayer().setContentDescription(contentDescription);
+    }
+
+    private void bindRecommendationContentDescription(SmartspaceMediaData data) {
+        if (mRecommendationViewHolder == null) {
+            return;
+        }
+
+       CharSequence contentDescription;
+        if (mMediaViewController.isGutsVisible()) {
+            contentDescription =
+                    mRecommendationViewHolder.getGutsViewHolder().getGutsText().getText();
+        } else if (data != null) {
+            contentDescription = mContext.getString(
+                    R.string.controls_media_smartspace_rec_description,
+                    data.getAppName(mContext));
+        } else {
+            contentDescription = null;
+        }
+
+        mRecommendationViewHolder.getRecommendations().setContentDescription(contentDescription);
     }
 
     private void bindArtworkAndColors(MediaData data, boolean updateBackground) {
@@ -969,6 +992,7 @@ public class MediaControlPanel {
             return;
         }
 
+        mRecommendationData = data;
         mSmartspaceId = SmallHash.hash(data.getTargetId());
         mPackageName = data.getPackageName();
         mInstanceId = data.getInstanceId();
@@ -984,6 +1008,12 @@ public class MediaControlPanel {
             return;
         }
 
+        CharSequence appName = data.getAppName(mContext);
+        if (appName == null) {
+            Log.w(TAG, "Fail to get media recommendation's app name");
+            return;
+        }
+
         PackageManager packageManager = mContext.getPackageManager();
         // Set up media source app's logo.
         Drawable icon = packageManager.getApplicationIcon(applicationInfo);
@@ -991,28 +1021,11 @@ public class MediaControlPanel {
         headerLogoImageView.setImageDrawable(icon);
         fetchAndUpdateRecommendationColors(icon);
 
-        // Set up media source app's label text.
-        CharSequence appName = getAppName(data.getCardAction());
-        if (TextUtils.isEmpty(appName)) {
-            Intent launchIntent =
-                    packageManager.getLaunchIntentForPackage(data.getPackageName());
-            if (launchIntent != null) {
-                ActivityInfo launchActivity = launchIntent.resolveActivityInfo(packageManager, 0);
-                appName = launchActivity.loadLabel(packageManager);
-            } else {
-                Log.w(TAG, "Package " + data.getPackageName()
-                        +  " does not have a main launcher activity. Fallback to full app name");
-                appName = packageManager.getApplicationLabel(applicationInfo);
-            }
-        }
-
         // Set up media rec card's tap action if applicable.
         TransitionLayout recommendationCard = mRecommendationViewHolder.getRecommendations();
         setSmartspaceRecItemOnClickListener(recommendationCard, data.getCardAction(),
                 /* interactedSubcardRank */ -1);
-        // Set up media rec card's accessibility label.
-        recommendationCard.setContentDescription(
-                mContext.getString(R.string.controls_media_smartspace_rec_description, appName));
+        bindRecommendationContentDescription(data);
 
         List<ImageView> mediaCoverItems = mRecommendationViewHolder.getMediaCoverItems();
         List<ViewGroup> mediaCoverContainers = mRecommendationViewHolder.getMediaCoverContainers();
@@ -1196,6 +1209,8 @@ public class MediaControlPanel {
         mMediaViewController.closeGuts(immediate);
         if (mMediaViewHolder != null) {
             bindPlayerContentDescription(mMediaData);
+        } else if (mRecommendationViewHolder != null) {
+            bindRecommendationContentDescription(mRecommendationData);
         }
     }
 
@@ -1212,6 +1227,8 @@ public class MediaControlPanel {
         mMediaViewController.openGuts();
         if (mMediaViewHolder != null) {
             bindPlayerContentDescription(mMediaData);
+        } else if (mRecommendationViewHolder != null) {
+            bindRecommendationContentDescription(mRecommendationData);
         }
         mLogger.logLongPressOpen(mUid, mPackageName, mInstanceId);
     }
@@ -1325,17 +1342,6 @@ public class MediaControlPanel {
             // Automatically scroll to the active player once the media is loaded.
             mMediaCarouselController.setShouldScrollToActivePlayer(true);
         });
-    }
-
-    /** Returns the upstream app name if available. */
-    @Nullable
-    private String getAppName(SmartspaceAction action) {
-        if (action == null || action.getIntent() == null
-                || action.getIntent().getExtras() == null) {
-            return null;
-        }
-
-        return action.getIntent().getExtras().getString(KEY_SMARTSPACE_APP_NAME);
     }
 
     /** Returns if the Smartspace action will open the activity in foreground. */
