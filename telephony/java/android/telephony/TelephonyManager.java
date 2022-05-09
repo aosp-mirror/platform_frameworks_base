@@ -3134,8 +3134,10 @@ public class TelephonyManager {
                 return "LTE_CA";
             case NETWORK_TYPE_NR:
                 return "NR";
-            default:
+            case NETWORK_TYPE_UNKNOWN:
                 return "UNKNOWN";
+            default:
+                return "UNKNOWN(" + type + ")";
         }
     }
 
@@ -8146,24 +8148,6 @@ public class TelephonyManager {
     }
 
     /**
-     * Get P-CSCF address from PCO after data connection is established or modified.
-     * @param apnType the apnType, "ims" for IMS APN, "emergency" for EMERGENCY APN
-     * @return array of P-CSCF address
-     * @hide
-     */
-    public String[] getPcscfAddress(String apnType) {
-        try {
-            ITelephony telephony = getITelephony();
-            if (telephony == null)
-                return new String[0];
-            return telephony.getPcscfAddress(apnType, getOpPackageName(), getAttributionTag());
-        } catch (RemoteException e) {
-            return new String[0];
-        }
-    }
-
-
-    /**
      * Resets the {@link android.telephony.ims.ImsService} associated with the specified sim slot.
      * Used by diagnostic apps to force the IMS stack to be disabled and re-enabled in an effort to
      * recover from scenarios where the {@link android.telephony.ims.ImsService} gets in to a bad
@@ -10309,7 +10293,7 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.enableDataConnectivity();
+                return telephony.enableDataConnectivity(getOpPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#enableDataConnectivity", e);
         }
@@ -10323,7 +10307,7 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.disableDataConnectivity();
+                return telephony.disableDataConnectivity(getOpPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#disableDataConnectivity", e);
         }
@@ -11700,7 +11684,7 @@ public class TelephonyManager {
             Log.d(TAG, "factoryReset: subId=" + subId);
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                telephony.factoryReset(subId);
+                telephony.factoryReset(subId, getOpPackageName());
             }
         } catch (RemoteException e) {
         }
@@ -11720,7 +11704,7 @@ public class TelephonyManager {
             Log.d(TAG, "resetSettings: subId=" + getSubId());
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                telephony.factoryReset(getSubId());
+                telephony.factoryReset(getSubId(), getOpPackageName());
             }
         } catch (RemoteException e) {
         }
@@ -12960,7 +12944,7 @@ public class TelephonyManager {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                service.setDataEnabledForReason(subId, reason, enabled);
+                service.setDataEnabledForReason(subId, reason, enabled, getOpPackageName());
             } else {
                 throw new IllegalStateException("telephony service is null.");
             }
