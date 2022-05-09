@@ -16,7 +16,8 @@
 
 package com.android.settingslib.collapsingtoolbar;
 
-import android.os.Build;
+import android.app.ActionBar;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,44 +38,33 @@ import com.google.android.material.appbar.CollapsingToolbarLayout;
  */
 public abstract class CollapsingToolbarBaseFragment extends Fragment {
 
-    private static final float TOOLBAR_LINE_SPACING_MULTIPLIER = 1.1f;
+    private class DelegateCallback implements CollapsingToolbarDelegate.HostCallback {
+        @Nullable
+        @Override
+        public ActionBar setActionBar(Toolbar toolbar) {
+            requireActivity().setActionBar(toolbar);
+            return null;
+        }
 
-    @Nullable
-    private CoordinatorLayout mCoordinatorLayout;
-    @Nullable
-    private CollapsingToolbarLayout mCollapsingToolbarLayout;
-    @Nullable
-    private AppBarLayout mAppBarLayout;
-    @NonNull
-    private Toolbar mToolbar;
-    @NonNull
-    private FrameLayout mContentFrameLayout;
+        @Override
+        public void setOuterTitle(CharSequence title) {
+            // ignore
+        }
+    }
+
+    private CollapsingToolbarDelegate mToolbardelegate;
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mToolbardelegate = new CollapsingToolbarDelegate(new DelegateCallback());
+    }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
             @Nullable Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.collapsing_toolbar_base_layout, container,
-                false);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            mCoordinatorLayout = view.findViewById(R.id.content_parent);
-        }
-        mCollapsingToolbarLayout = view.findViewById(R.id.collapsing_toolbar);
-        mAppBarLayout = view.findViewById(R.id.app_bar);
-        if (mCollapsingToolbarLayout != null) {
-            mCollapsingToolbarLayout.setLineSpacingMultiplier(TOOLBAR_LINE_SPACING_MULTIPLIER);
-        }
-        disableCollapsingToolbarLayoutScrollingBehavior();
-        mToolbar = view.findViewById(R.id.action_bar);
-        mContentFrameLayout = view.findViewById(R.id.content_frame);
-        return view;
-    }
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        requireActivity().setActionBar(mToolbar);
+        return mToolbardelegate.onCreateView(inflater, container);
     }
 
     /**
@@ -82,7 +72,7 @@ public abstract class CollapsingToolbarBaseFragment extends Fragment {
      */
     @Nullable
     public CoordinatorLayout getCoordinatorLayout() {
-        return mCoordinatorLayout;
+        return mToolbardelegate.getCoordinatorLayout();
     }
 
     /**
@@ -90,7 +80,7 @@ public abstract class CollapsingToolbarBaseFragment extends Fragment {
      */
     @Nullable
     public AppBarLayout getAppBarLayout() {
-        return mAppBarLayout;
+        return mToolbardelegate.getAppBarLayout();
     }
 
     /**
@@ -98,7 +88,7 @@ public abstract class CollapsingToolbarBaseFragment extends Fragment {
      */
     @Nullable
     public CollapsingToolbarLayout getCollapsingToolbarLayout() {
-        return mCollapsingToolbarLayout;
+        return mToolbardelegate.getCollapsingToolbarLayout();
     }
 
     /**
@@ -106,23 +96,6 @@ public abstract class CollapsingToolbarBaseFragment extends Fragment {
      */
     @NonNull
     public FrameLayout getContentFrameLayout() {
-        return mContentFrameLayout;
-    }
-
-    private void disableCollapsingToolbarLayoutScrollingBehavior() {
-        if (mAppBarLayout == null) {
-            return;
-        }
-        final CoordinatorLayout.LayoutParams params =
-                (CoordinatorLayout.LayoutParams) mAppBarLayout.getLayoutParams();
-        final AppBarLayout.Behavior behavior = new AppBarLayout.Behavior();
-        behavior.setDragCallback(
-                new AppBarLayout.Behavior.DragCallback() {
-                    @Override
-                    public boolean canDrag(@NonNull AppBarLayout appBarLayout) {
-                        return false;
-                    }
-                });
-        params.setBehavior(behavior);
+        return mToolbardelegate.getContentFrameLayout();
     }
 }

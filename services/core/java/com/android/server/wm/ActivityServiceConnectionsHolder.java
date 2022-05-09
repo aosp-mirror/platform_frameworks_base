@@ -16,10 +16,10 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.ActivityRecord.State.PAUSING;
+import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
-import static com.android.server.wm.Task.ActivityState.PAUSING;
-import static com.android.server.wm.Task.ActivityState.RESUMED;
 
 import android.util.ArraySet;
 import android.util.Slog;

@@ -63,7 +63,7 @@ public class LeakReporterTest extends SysuiTestCase {
         doAnswer(invocation -> {
             invocation.<PrintWriter>getArgument(1).println("test");
             return null;
-        }).when(mLeakDetector).dump(any(), any(), any());
+        }).when(mLeakDetector).dump(any(), any());
 
         mLeakReporter = new LeakReporter(mContext, mLeakDetector, "test@example.com");
     }

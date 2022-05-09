@@ -161,7 +161,8 @@ public class DataManager {
 
         mStatusExpReceiver = new ConversationStatusExpirationBroadcastReceiver();
         mContext.registerReceiver(mStatusExpReceiver,
-                ConversationStatusExpirationBroadcastReceiver.getFilter());
+                ConversationStatusExpirationBroadcastReceiver.getFilter(),
+                Context.RECEIVER_NOT_EXPORTED);
 
         IntentFilter shutdownIntentFilter = new IntentFilter(Intent.ACTION_SHUTDOWN);
         BroadcastReceiver shutdownBroadcastReceiver = new ShutdownBroadcastReceiver();
@@ -617,10 +618,17 @@ public class DataManager {
             IntentFilter intentFilter = new IntentFilter();
             intentFilter.addAction(TelecomManager.ACTION_DEFAULT_DIALER_CHANGED);
             intentFilter.addAction(SmsApplication.ACTION_DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL);
-            BroadcastReceiver broadcastReceiver = new PerUserBroadcastReceiver(userId);
-            mBroadcastReceivers.put(userId, broadcastReceiver);
-            mContext.registerReceiverAsUser(
-                    broadcastReceiver, UserHandle.of(userId), intentFilter, null, null);
+
+            if (mBroadcastReceivers.get(userId) == null) {
+                BroadcastReceiver broadcastReceiver = new PerUserBroadcastReceiver(userId);
+                mBroadcastReceivers.put(userId, broadcastReceiver);
+                mContext.registerReceiverAsUser(
+                        broadcastReceiver, UserHandle.of(userId), intentFilter, null, null);
+            } else {
+                // Stopped was not called on this user before setup is called again. This
+                // could happen during consecutive rapid user switching.
+                if (DEBUG) Log.d(TAG, "PerUserBroadcastReceiver was registered for: " + userId);
+            }
 
             ContentObserver contactsContentObserver = new ContactsContentObserver(
                     BackgroundThread.getHandler());
@@ -638,9 +646,15 @@ public class DataManager {
                 // Should never occur for local calls.
             }
 
-            PackageMonitor packageMonitor = new PerUserPackageMonitor();
-            packageMonitor.register(mContext, null, UserHandle.of(userId), true);
-            mPackageMonitors.put(userId, packageMonitor);
+            if (mPackageMonitors.get(userId) == null) {
+                PackageMonitor packageMonitor = new PerUserPackageMonitor();
+                packageMonitor.register(mContext, null, UserHandle.of(userId), true);
+                mPackageMonitors.put(userId, packageMonitor);
+            } else {
+                // Stopped was not called on this user before setup is called again. This
+                // could happen during consecutive rapid user switching.
+                if (DEBUG) Log.d(TAG, "PerUserPackageMonitor was registered for: " + userId);
+            }
 
             if (userId == UserHandle.USER_SYSTEM) {
                 // The call log and MMS/SMS messages are shared across user profiles. So only need

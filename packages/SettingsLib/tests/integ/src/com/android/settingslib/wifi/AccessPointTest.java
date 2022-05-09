@@ -130,7 +130,7 @@ public class AccessPointTest {
         mContext = InstrumentationRegistry.getTargetContext();
         mMaxSignalLevel = mContext.getSystemService(WifiManager.class).getMaxSignalLevel();
         mWifiInfo = new WifiInfo();
-        mWifiInfo.setSSID(WifiSsid.createFromAsciiEncoded(TEST_SSID));
+        mWifiInfo.setSSID(WifiSsid.fromString(TEST_SSID));
         mWifiInfo.setBSSID(TEST_BSSID);
         mScanResults = buildScanResultCache(TEST_SSID);
         mRoamingScans = buildScanResultCache(ROAMING_SSID);
@@ -318,7 +318,7 @@ public class AccessPointTest {
                 new NetworkInfo(ConnectivityManager.TYPE_WIFI, 2, "WIFI", "WIFI_SUBTYPE");
         AccessPoint accessPoint = new AccessPoint(mContext, configuration);
         WifiInfo wifiInfo = new WifiInfo();
-        wifiInfo.setSSID(WifiSsid.createFromAsciiEncoded(configuration.SSID));
+        wifiInfo.setSSID(WifiSsid.fromString(configuration.SSID));
         wifiInfo.setBSSID(configuration.BSSID);
         wifiInfo.setNetworkId(configuration.networkId);
         accessPoint.update(configuration, wifiInfo, networkInfo);
@@ -334,7 +334,7 @@ public class AccessPointTest {
                 new NetworkInfo(ConnectivityManager.TYPE_WIFI, 2, "WIFI", "WIFI_SUBTYPE");
         AccessPoint accessPoint = new AccessPoint(mContext, configuration);
         WifiInfo wifiInfo = new WifiInfo();
-        wifiInfo.setSSID(WifiSsid.createFromAsciiEncoded(configuration.SSID));
+        wifiInfo.setSSID(WifiSsid.fromString(configuration.SSID));
         wifiInfo.setBSSID(configuration.BSSID);
         wifiInfo.setNetworkId(configuration.networkId);
         wifiInfo.setMeteredHint(true);
@@ -367,7 +367,7 @@ public class AccessPointTest {
                 new NetworkInfo(ConnectivityManager.TYPE_WIFI, 2, "WIFI", "WIFI_SUBTYPE");
         AccessPoint accessPoint = new AccessPoint(mContext, configuration);
         WifiInfo wifiInfo = new WifiInfo();
-        wifiInfo.setSSID(WifiSsid.createFromAsciiEncoded(configuration.SSID));
+        wifiInfo.setSSID(WifiSsid.fromString(configuration.SSID));
         wifiInfo.setBSSID(configuration.BSSID);
         wifiInfo.setNetworkId(configuration.networkId);
         accessPoint.update(configuration, wifiInfo, networkInfo);
@@ -518,7 +518,7 @@ public class AccessPointTest {
         final String connectedViaAppResourceString = "Connected via ";
 
         WifiInfo wifiInfo = new WifiInfo();
-        wifiInfo.setSSID(WifiSsid.createFromAsciiEncoded(TEST_SSID));
+        wifiInfo.setSSID(WifiSsid.fromString(TEST_SSID));
         wifiInfo.setEphemeral(true);
         wifiInfo.setRequestingPackageName(appPackageName);
         wifiInfo.setRssi(rssi);
@@ -585,7 +585,7 @@ public class AccessPointTest {
     private WifiConfiguration createWifiConfiguration() {
         WifiConfiguration configuration = new WifiConfiguration();
         configuration.BSSID = "bssid";
-        configuration.SSID = "ssid";
+        configuration.SSID = "\"ssid\"";
         configuration.networkId = 123;
         return configuration;
     }
@@ -1024,7 +1024,7 @@ public class AccessPointTest {
 
         WifiInfo info = new WifiInfo();
         info.setRssi(DEFAULT_RSSI);
-        info.setSSID(WifiSsid.createFromAsciiEncoded(TEST_SSID));
+        info.setSSID(WifiSsid.fromString(TEST_SSID));
         info.setBSSID(bssid);
         info.setNetworkId(NETWORK_ID);
 

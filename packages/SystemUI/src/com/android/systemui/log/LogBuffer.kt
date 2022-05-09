@@ -16,12 +16,16 @@
 
 package com.android.systemui.log
 
+import android.os.Trace
 import android.util.Log
 import com.android.systemui.log.dagger.LogModule
 import java.io.PrintWriter
 import java.text.SimpleDateFormat
 import java.util.ArrayDeque
 import java.util.Locale
+import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.BlockingQueue
+import kotlin.concurrent.thread
 
 /**
  * A simple ring buffer of recyclable log messages
@@ -61,17 +65,41 @@ import java.util.Locale
  *
  * @param name The name of this buffer
  * @param maxLogs The maximum number of messages to keep in memory at any one time, including the
- * unused pool.
+ * unused pool. Must be >= [poolSize].
  * @param poolSize The maximum amount that the size of the buffer is allowed to flex in response to
  * sequential calls to [document] that aren't immediately followed by a matching call to [push].
  */
-class LogBuffer(
+class LogBuffer @JvmOverloads constructor(
     private val name: String,
     private val maxLogs: Int,
     private val poolSize: Int,
-    private val logcatEchoTracker: LogcatEchoTracker
+    private val logcatEchoTracker: LogcatEchoTracker,
+    private val systrace: Boolean = true
 ) {
+    init {
+        if (maxLogs < poolSize) {
+            throw IllegalArgumentException("maxLogs must be greater than or equal to poolSize, " +
+                    "but maxLogs=$maxLogs < $poolSize=poolSize")
+        }
+    }
+
     private val buffer: ArrayDeque<LogMessageImpl> = ArrayDeque()
+    private val echoMessageQueue: BlockingQueue<LogMessageImpl>? =
+            if (logcatEchoTracker.logInBackgroundThread) ArrayBlockingQueue(poolSize) else null
+
+    init {
+        if (logcatEchoTracker.logInBackgroundThread && echoMessageQueue != null) {
+            thread(start = true, priority = Thread.NORM_PRIORITY) {
+                try {
+                    while (true) {
+                        echoToDesiredEndpoints(echoMessageQueue.take())
+                    }
+                } catch (e: InterruptedException) {
+                    Thread.currentThread().interrupt()
+                }
+            }
+        }
+    }
 
     var frozen = false
         private set
@@ -167,10 +195,25 @@ class LogBuffer(
             buffer.removeFirst()
         }
         buffer.add(message as LogMessageImpl)
-        if (logcatEchoTracker.isBufferLoggable(name, message.level) ||
-                logcatEchoTracker.isTagLoggable(message.tag, message.level)) {
-            echoToLogcat(message)
+        // Log in the background thread only if echoMessageQueue exists and has capacity (checking
+        // capacity avoids the possibility of blocking this thread)
+        if (echoMessageQueue != null && echoMessageQueue.remainingCapacity() > 0) {
+            try {
+                echoMessageQueue.put(message)
+            } catch (e: InterruptedException) {
+                // the background thread has been shut down, so just log on this one
+                echoToDesiredEndpoints(message)
+            }
+        } else {
+            echoToDesiredEndpoints(message)
         }
+    }
+
+    /** Sends message to echo after determining whether to use Logcat and/or systrace. */
+    private fun echoToDesiredEndpoints(message: LogMessageImpl) {
+        val includeInLogcat = logcatEchoTracker.isBufferLoggable(name, message.level) ||
+                logcatEchoTracker.isTagLoggable(message.tag, message.level)
+        echo(message, toLogcat = includeInLogcat, toSystrace = systrace)
     }
 
     /** Converts the entire buffer to a newline-delimited string */
@@ -219,8 +262,24 @@ class LogBuffer(
         pw.println(message.printer(message))
     }
 
-    private fun echoToLogcat(message: LogMessage) {
-        val strMessage = message.printer(message)
+    private fun echo(message: LogMessage, toLogcat: Boolean, toSystrace: Boolean) {
+        if (toLogcat || toSystrace) {
+            val strMessage = message.printer(message)
+            if (toSystrace) {
+                echoToSystrace(message, strMessage)
+            }
+            if (toLogcat) {
+                echoToLogcat(message, strMessage)
+            }
+        }
+    }
+
+    private fun echoToSystrace(message: LogMessage, strMessage: String) {
+        Trace.instantForTrack(Trace.TRACE_TAG_APP, "UI Events",
+            "$name - ${message.level.shortString} ${message.tag}: $strMessage")
+    }
+
+    private fun echoToLogcat(message: LogMessage, strMessage: String) {
         when (message.level) {
             LogLevel.VERBOSE -> Log.v(message.tag, strMessage)
             LogLevel.DEBUG -> Log.d(message.tag, strMessage)

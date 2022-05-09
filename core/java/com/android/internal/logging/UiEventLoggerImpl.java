@@ -42,16 +42,21 @@ public class UiEventLoggerImpl implements UiEventLogger {
     }
 
     @Override
+    public void log(UiEventEnum event, InstanceId instanceId) {
+        logWithInstanceId(event, 0, null, instanceId);
+    }
+
+    @Override
     public void logWithInstanceId(UiEventEnum event, int uid, String packageName,
             InstanceId instance) {
         final int eventID = event.getId();
-        if ((eventID > 0)  && (instance != null)) {
+        if ((eventID > 0) && (instance != null)) {
             FrameworkStatsLog.write(FrameworkStatsLog.UI_EVENT_REPORTED,
                     /* event_id = 1 */ eventID,
                     /* uid = 2 */ uid,
                     /* package_name = 3 */ packageName,
                     /* instance_id = 4 */ instance.getId());
-        } else {
+        } else if (eventID > 0) {
             log(event, uid, packageName);
         }
     }
@@ -64,7 +69,8 @@ public class UiEventLoggerImpl implements UiEventLogger {
                     /* event_id = 1 */ eventID,
                     /* package_name = 2 */ packageName,
                     /* instance_id = 3 */ 0,
-                    /* position_picked = 4 */ position);
+                    /* position_picked = 4 */ position,
+                    /* is_pinned = 5 */ false);
         }
     }
 
@@ -77,8 +83,9 @@ public class UiEventLoggerImpl implements UiEventLogger {
                     /* event_id = 1 */ eventID,
                     /* package_name = 2 */ packageName,
                     /* instance_id = 3 */ instance.getId(),
-                    /* position_picked = 4 */ position);
-        } else {
+                    /* position_picked = 4 */ position,
+                    /* is_pinned = 5 */ false);
+        } else if ((eventID > 0)) {
             logWithPosition(event, uid, packageName, position);
         }
     }

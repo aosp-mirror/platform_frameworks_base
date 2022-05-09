@@ -19,38 +19,25 @@ package com.android.server.biometrics.sensors;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.hardware.biometrics.BiometricsProtoEnums;
+import android.hardware.biometrics.common.OperationContext;
 import android.os.IBinder;
+
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
+
+import java.util.function.Supplier;
 
 /**
  * Abstract {@link BaseClientMonitor} implementation that supports HAL operations.
  * @param <T> HAL template
  */
 public abstract class HalClientMonitor<T> extends BaseClientMonitor {
-    /**
-     * Interface that allows ClientMonitor subclasses to retrieve a fresh instance to the HAL.
-     */
-    public interface LazyDaemon<T> {
-        /**
-         * @return A fresh instance to the biometric HAL
-         */
-        T getDaemon();
-    }
-
-    /**
-     * Starts the HAL operation specific to the ClientMonitor subclass.
-     */
-    protected abstract void startHalOperation();
-
-    /**
-     * Invoked if the scheduler is unable to start the ClientMonitor (for example the HAL is null).
-     * If such a problem is detected, the scheduler will not invoke
-     * {@link #start(Callback)}.
-     */
-    public abstract void unableToStart();
+    
+    @NonNull
+    protected final Supplier<T> mLazyDaemon;
 
     @NonNull
-    protected final LazyDaemon<T> mLazyDaemon;
+    private final OperationContext mOperationContext = new OperationContext();
 
     /**
      * @param context    system_server context
@@ -61,21 +48,57 @@ public abstract class HalClientMonitor<T> extends BaseClientMonitor {
      * @param owner      name of the client that owns this
      * @param cookie     BiometricPrompt authentication cookie (to be moved into a subclass soon)
      * @param sensorId   ID of the sensor that the operation should be requested of
-     * @param statsModality One of {@link BiometricsProtoEnums} MODALITY_* constants
-     * @param statsAction   One of {@link BiometricsProtoEnums} ACTION_* constants
-     * @param statsClient   One of {@link BiometricsProtoEnums} CLIENT_* constants
+     * @param biometricLogger framework stats logger
+     * @param biometricContext system context metadata
      */
-    public HalClientMonitor(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
+    public HalClientMonitor(@NonNull Context context, @NonNull Supplier<T> lazyDaemon,
             @Nullable IBinder token, @Nullable ClientMonitorCallbackConverter listener, int userId,
-            @NonNull String owner, int cookie, int sensorId, int statsModality, int statsAction,
-            int statsClient) {
-        super(context, token, listener, userId, owner, cookie, sensorId, statsModality,
-                statsAction, statsClient);
+            @NonNull String owner, int cookie, int sensorId,
+            @NonNull BiometricLogger biometricLogger, @NonNull BiometricContext biometricContext) {
+        super(context, token, listener, userId, owner, cookie, sensorId,
+                biometricLogger, biometricContext);
         mLazyDaemon = lazyDaemon;
     }
 
     @Nullable
     public T getFreshDaemon() {
-        return mLazyDaemon.getDaemon();
+        return mLazyDaemon.get();
+    }
+
+    /**
+     * Starts the HAL operation specific to the ClientMonitor subclass.
+     */
+    protected abstract void startHalOperation();
+
+    /**
+     * Invoked if the scheduler is unable to start the ClientMonitor (for example the HAL is null).
+     * If such a problem is detected, the scheduler will not invoke
+     * {@link #start(ClientMonitorCallback)}.
+     */
+    public abstract void unableToStart();
+
+    @Override
+    public void destroy() {
+        super.destroy();
+
+        // subclasses should do this earlier in most cases, but ensure it happens now
+        unsubscribeBiometricContext();
+    }
+
+    protected OperationContext getOperationContext() {
+        return getBiometricContext().updateContext(mOperationContext, isCryptoOperation());
+    }
+
+    protected ClientMonitorCallback getBiometricContextUnsubscriber() {
+        return new ClientMonitorCallback() {
+            @Override
+            public void onClientFinished(@NonNull BaseClientMonitor monitor, boolean success) {
+                unsubscribeBiometricContext();
+            }
+        };
+    }
+
+    protected void unsubscribeBiometricContext() {
+        getBiometricContext().unsubscribe(mOperationContext);
     }
 }

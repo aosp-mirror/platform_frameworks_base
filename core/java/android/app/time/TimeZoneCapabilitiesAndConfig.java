@@ -61,8 +61,8 @@ public final class TimeZoneCapabilitiesAndConfig implements Parcelable {
 
     @NonNull
     private static TimeZoneCapabilitiesAndConfig createFromParcel(Parcel in) {
-        TimeZoneCapabilities capabilities = in.readParcelable(null);
-        TimeZoneConfiguration configuration = in.readParcelable(null);
+        TimeZoneCapabilities capabilities = in.readParcelable(null, android.app.time.TimeZoneCapabilities.class);
+        TimeZoneConfiguration configuration = in.readParcelable(null, android.app.time.TimeZoneConfiguration.class);
         return new TimeZoneCapabilitiesAndConfig(capabilities, configuration);
     }
 

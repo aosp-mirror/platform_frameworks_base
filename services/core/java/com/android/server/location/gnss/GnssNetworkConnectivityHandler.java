@@ -215,7 +215,9 @@ class GnssNetworkConnectivityHandler {
         }
         @Override
         public void onPreciseCallStateChanged(PreciseCallState state) {
-            if (state.PRECISE_CALL_STATE_ACTIVE == state.getForegroundCallState()) {
+            if (PreciseCallState.PRECISE_CALL_STATE_ACTIVE == state.getForegroundCallState()
+                    || PreciseCallState.PRECISE_CALL_STATE_DIALING
+                    == state.getForegroundCallState()) {
                 mActiveSubId = mSubId;
                 if (DEBUG) Log.d(TAG, "mActiveSubId: " + mActiveSubId);
             }
@@ -444,12 +446,11 @@ class GnssNetworkConnectivityHandler {
         capabilities = networkAttributes.mCapabilities;
         Log.i(TAG, String.format(
                 "updateNetworkState, state=%s, connected=%s, network=%s, capabilities=%s"
-                        + ", apn: %s, availableNetworkCount: %d",
+                        + ", availableNetworkCount: %d",
                 agpsDataConnStateAsString(),
                 isConnected,
                 network,
                 capabilities,
-                apn,
                 mAvailableNetworkAttributes.size()));
 
         if (native_is_agps_ril_supported()) {

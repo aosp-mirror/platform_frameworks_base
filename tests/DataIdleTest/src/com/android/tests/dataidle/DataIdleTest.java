@@ -15,19 +15,18 @@
  */
 package com.android.tests.dataidle;
 
+import static android.net.NetworkStats.METERED_YES;
+
+import android.app.usage.NetworkStats;
+import android.app.usage.NetworkStatsManager;
 import android.content.Context;
-import android.net.INetworkStatsService;
-import android.net.INetworkStatsSession;
-import android.net.NetworkStats;
-import android.net.NetworkStats.Entry;
 import android.net.NetworkTemplate;
-import android.net.TrafficStats;
 import android.os.Bundle;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.telephony.TelephonyManager;
 import android.test.InstrumentationTestCase;
 import android.util.Log;
+
+import java.util.Set;
 
 /**
  * A test that dumps data usage to instrumentation out, used for measuring data usage for idle
@@ -36,7 +35,7 @@ import android.util.Log;
 public class DataIdleTest extends InstrumentationTestCase {
 
     private TelephonyManager mTelephonyManager;
-    private INetworkStatsService mStatsService;
+    private NetworkStatsManager mStatsManager;
 
     private static final String LOG_TAG = "DataIdleTest";
     private final static int INSTRUMENTATION_IN_PROGRESS = 2;
@@ -44,8 +43,7 @@ public class DataIdleTest extends InstrumentationTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         Context c = getInstrumentation().getTargetContext();
-        mStatsService = INetworkStatsService.Stub.asInterface(
-                ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
+        mStatsManager = c.getSystemService(NetworkStatsManager.class);
         mTelephonyManager = (TelephonyManager) c.getSystemService(Context.TELEPHONY_SERVICE);
     }
 
@@ -53,7 +51,9 @@ public class DataIdleTest extends InstrumentationTestCase {
      * Test that dumps all the data usage metrics for wifi to instrumentation out.
      */
     public void testWifiIdle() {
-        NetworkTemplate template = NetworkTemplate.buildTemplateWifiWildcard();
+        final NetworkTemplate template = new NetworkTemplate
+                .Builder(NetworkTemplate.MATCH_WIFI)
+                .build();
         fetchStats(template);
     }
 
@@ -61,8 +61,11 @@ public class DataIdleTest extends InstrumentationTestCase {
      * Test that dumps all the data usage metrics for all mobile to instrumentation out.
      */
     public void testMobile() {
-        String subscriberId = mTelephonyManager.getSubscriberId();
-        NetworkTemplate template = NetworkTemplate.buildTemplateMobileAll(subscriberId);
+        final String subscriberId = mTelephonyManager.getSubscriberId();
+        NetworkTemplate template = new NetworkTemplate
+                .Builder(NetworkTemplate.MATCH_MOBILE)
+                .setMeteredness(METERED_YES)
+                .setSubscriberIds(Set.of(subscriberId)).build();
         fetchStats(template);
     }
 
@@ -72,49 +75,26 @@ public class DataIdleTest extends InstrumentationTestCase {
      * @param template {@link NetworkTemplate} to match.
      */
     private void fetchStats(NetworkTemplate template) {
-        INetworkStatsSession session = null;
         try {
-            mStatsService.forceUpdate();
-            session = mStatsService.openSession();
-            final NetworkStats stats = session.getSummaryForAllUid(
-                    template, Long.MIN_VALUE, Long.MAX_VALUE, false);
-            reportStats(stats);
-        } catch (RemoteException e) {
+            mStatsManager.forceUpdate();
+            final NetworkStats.Bucket bucket =
+                    mStatsManager.querySummaryForDevice(template, Long.MIN_VALUE, Long.MAX_VALUE);
+            reportStats(bucket);
+        } catch (RuntimeException e) {
             Log.w(LOG_TAG, "Failed to fetch network stats.");
-        } finally {
-            TrafficStats.closeQuietly(session);
         }
     }
 
     /**
      * Print network data usage stats to instrumentation out
-     * @param stats {@link NetworkorStats} to print
+     * @param bucket {@link NetworkStats} to print
      */
-    void reportStats(NetworkStats stats) {
+    void reportStats(NetworkStats.Bucket bucket) {
         Bundle result = new Bundle();
-        long rxBytes = 0;
-        long txBytes = 0;
-        long rxPackets = 0;
-        long txPackets = 0;
-        for (int i = 0; i < stats.size(); ++i) {
-            // Label will be iface_uid_tag_set
-            Entry  statsEntry = stats.getValues(i, null);
-            // Debugging use.
-            /*
-            String labelTemplate = String.format("%s_%d_%d_%d", statsEntry.iface, statsEntry.uid,
-                    statsEntry.tag, statsEntry.set) + "_%s";
-            result.putLong(String.format(labelTemplate, "rxBytes"), statsEntry.rxBytes);
-            result.putLong(String.format(labelTemplate, "txBytes"), statsEntry.txBytes);
-            */
-            rxPackets += statsEntry.rxPackets;
-            rxBytes += statsEntry.rxBytes;
-            txPackets += statsEntry.txPackets;
-            txBytes += statsEntry.txBytes;
-        }
-        result.putLong("Total rx Bytes", rxBytes);
-        result.putLong("Total tx Bytes", txBytes);
-        result.putLong("Total rx Packets", rxPackets);
-        result.putLong("Total tx Packets", txPackets);
+        result.putLong("Total rx Bytes", bucket.getRxBytes());
+        result.putLong("Total tx Bytes", bucket.getTxBytes());
+        result.putLong("Total rx Packets", bucket.getRxPackets());
+        result.putLong("Total tx Packets", bucket.getTxPackets());
         getInstrumentation().sendStatus(INSTRUMENTATION_IN_PROGRESS, result);
 
     }

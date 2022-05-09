@@ -1071,7 +1071,8 @@ public class ListPopupWindow implements ShowableListMenu {
      * @see #setModal(boolean)
      */
     public boolean onKeyPreIme(int keyCode, @NonNull KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK && isShowing()) {
+        if ((keyCode == KeyEvent.KEYCODE_BACK
+                || keyCode == KeyEvent.KEYCODE_ESCAPE) && isShowing()) {
             // special case for the back key, we do not even try to send it
             // to the drop down list but instead, consume it immediately
             final View anchorView = mDropDownAnchorView;

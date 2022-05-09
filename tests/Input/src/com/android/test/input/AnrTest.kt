@@ -19,7 +19,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.filters.MediumTest
 
+import android.app.ActivityManager
+import android.app.ApplicationExitInfo
 import android.graphics.Rect
+import android.os.Build
+import android.os.IInputConstants.UNMULTIPLIED_DEFAULT_DISPATCHING_TIMEOUT_MILLIS
 import android.os.SystemClock
 import android.provider.Settings
 import android.provider.Settings.Global.HIDE_ERROR_DIALOGS
@@ -27,10 +31,13 @@ import android.support.test.uiautomator.By
 import android.support.test.uiautomator.UiDevice
 import android.support.test.uiautomator.UiObject2
 import android.support.test.uiautomator.Until
+import android.testing.PollingCheck
 import android.view.InputDevice
 import android.view.MotionEvent
 
 import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
@@ -51,28 +58,99 @@ import org.junit.runner.RunWith
 class AnrTest {
     companion object {
         private const val TAG = "AnrTest"
+        private const val ALL_PIDS = 0
+        private const val NO_MAX = 0
     }
 
-    val mInstrumentation = InstrumentationRegistry.getInstrumentation()
-    var mHideErrorDialogs = 0
+    private val instrumentation = InstrumentationRegistry.getInstrumentation()
+    private var hideErrorDialogs = 0
+    private lateinit var PACKAGE_NAME: String
+    private val DISPATCHING_TIMEOUT = (UNMULTIPLIED_DEFAULT_DISPATCHING_TIMEOUT_MILLIS *
+            Build.HW_TIMEOUT_MULTIPLIER)
 
     @Before
     fun setUp() {
-        val contentResolver = mInstrumentation.targetContext.contentResolver
-        mHideErrorDialogs = Settings.Global.getInt(contentResolver, HIDE_ERROR_DIALOGS, 0)
+        val contentResolver = instrumentation.targetContext.contentResolver
+        hideErrorDialogs = Settings.Global.getInt(contentResolver, HIDE_ERROR_DIALOGS, 0)
         Settings.Global.putInt(contentResolver, HIDE_ERROR_DIALOGS, 0)
+        PACKAGE_NAME = UnresponsiveGestureMonitorActivity::class.java.getPackage().getName()
     }
 
     @After
     fun tearDown() {
-        val contentResolver = mInstrumentation.targetContext.contentResolver
-        Settings.Global.putInt(contentResolver, HIDE_ERROR_DIALOGS, mHideErrorDialogs)
+        val contentResolver = instrumentation.targetContext.contentResolver
+        Settings.Global.putInt(contentResolver, HIDE_ERROR_DIALOGS, hideErrorDialogs)
     }
 
     @Test
-    fun testGestureMonitorAnr() {
+    fun testGestureMonitorAnr_Close() {
+        triggerAnr()
+        clickCloseAppOnAnrDialog()
+    }
+
+    @Test
+    fun testGestureMonitorAnr_Wait() {
+        triggerAnr()
+        clickWaitOnAnrDialog()
+        SystemClock.sleep(500) // Wait at least 500ms after tapping on wait
+        // ANR dialog should reappear after a delay - find the close button on it to verify
+        clickCloseAppOnAnrDialog()
+    }
+
+    private fun clickCloseAppOnAnrDialog() {
+        // Find anr dialog and kill app
+        val uiDevice: UiDevice = UiDevice.getInstance(instrumentation)
+        val closeAppButton: UiObject2? =
+                uiDevice.wait(Until.findObject(By.res("android:id/aerr_close")), 20000)
+        if (closeAppButton == null) {
+            fail("Could not find anr dialog")
+            return
+        }
+        val initialReasons = getExitReasons()
+        closeAppButton.click()
+        /**
+         * We must wait for the app to be fully closed before exiting this test. This is because
+         * another test may again invoke 'am start' for the same activity.
+         * If the 1st process that got ANRd isn't killed by the time second 'am start' runs,
+         * the killing logic will apply to the newly launched 'am start' instance, and the second
+         * test will fail because the unresponsive activity will never be launched.
+         */
+        waitForNewExitReason(initialReasons[0].timestamp)
+    }
+
+    private fun clickWaitOnAnrDialog() {
+        // Find anr dialog and tap on wait
+        val uiDevice: UiDevice = UiDevice.getInstance(instrumentation)
+        val waitButton: UiObject2? =
+                uiDevice.wait(Until.findObject(By.res("android:id/aerr_wait")), 20000)
+        if (waitButton == null) {
+            fail("Could not find anr dialog/wait button")
+            return
+        }
+        waitButton.click()
+    }
+
+    private fun getExitReasons(): List<ApplicationExitInfo> {
+        lateinit var infos: List<ApplicationExitInfo>
+        instrumentation.runOnMainSync {
+            val am = instrumentation.getContext().getSystemService(ActivityManager::class.java)
+            infos = am.getHistoricalProcessExitReasons(PACKAGE_NAME, ALL_PIDS, NO_MAX)
+        }
+        return infos
+    }
+
+    private fun waitForNewExitReason(previousExitTimestamp: Long) {
+        PollingCheck.waitFor {
+            getExitReasons()[0].timestamp > previousExitTimestamp
+        }
+        val reasons = getExitReasons()
+        assertTrue(reasons[0].timestamp > previousExitTimestamp)
+        assertEquals(ApplicationExitInfo.REASON_ANR, reasons[0].reason)
+    }
+
+    private fun triggerAnr() {
         startUnresponsiveActivity()
-        val uiDevice: UiDevice = UiDevice.getInstance(mInstrumentation)
+        val uiDevice: UiDevice = UiDevice.getInstance(instrumentation)
         val obj: UiObject2? = uiDevice.wait(Until.findObject(
                 By.text("Unresponsive gesture monitor")), 10000)
 
@@ -87,29 +165,14 @@ class AnrTest {
                 MotionEvent.ACTION_DOWN, rect.left.toFloat(), rect.top.toFloat(), 0 /* metaState */)
         downEvent.source = InputDevice.SOURCE_TOUCHSCREEN
 
-        mInstrumentation.uiAutomation.injectInputEvent(downEvent, false /* sync*/)
+        instrumentation.uiAutomation.injectInputEvent(downEvent, false /* sync*/)
 
-        // Todo: replace using timeout from android.hardware.input.IInputManager
-        SystemClock.sleep(5000) // default ANR timeout for gesture monitors
-
-        clickCloseAppOnAnrDialog()
-    }
-
-    private fun clickCloseAppOnAnrDialog() {
-        // Find anr dialog and kill app
-        val uiDevice: UiDevice = UiDevice.getInstance(mInstrumentation)
-        val closeAppButton: UiObject2? =
-                uiDevice.wait(Until.findObject(By.res("android:id/aerr_close")), 20000)
-        if (closeAppButton == null) {
-            fail("Could not find anr dialog")
-            return
-        }
-        closeAppButton.click()
+        SystemClock.sleep(DISPATCHING_TIMEOUT.toLong()) // default ANR timeout for gesture monitors
     }
 
     private fun startUnresponsiveActivity() {
         val flags = " -W -n "
-        val startCmd = "am start $flags com.android.test.input/.UnresponsiveGestureMonitorActivity"
-        mInstrumentation.uiAutomation.executeShellCommand(startCmd)
+        val startCmd = "am start $flags $PACKAGE_NAME/.UnresponsiveGestureMonitorActivity"
+        instrumentation.uiAutomation.executeShellCommand(startCmd)
     }
 }

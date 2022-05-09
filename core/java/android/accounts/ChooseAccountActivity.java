@@ -148,7 +148,7 @@ public class ChooseAccountActivity extends Activity {
             am.setAccountVisibility(account, mCallingPackage,
                 AccountManager.VISIBILITY_USER_MANAGED_VISIBLE);
         }
-        Log.d(TAG, "selected account " + account);
+        Log.d(TAG, "selected account " + account.toSafeString());
         Bundle bundle = new Bundle();
         bundle.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
         bundle.putString(AccountManager.KEY_ACCOUNT_TYPE, account.type);

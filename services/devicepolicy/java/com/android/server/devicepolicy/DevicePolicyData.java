@@ -23,6 +23,7 @@ import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.os.FileUtils;
 import android.os.PersistableBundle;
+import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
@@ -68,6 +69,7 @@ class DevicePolicyData {
     private static final String TAG_PASSWORD_VALIDITY = "password-validity";
     private static final String TAG_PASSWORD_TOKEN_HANDLE = "password-token";
     private static final String TAG_PROTECTED_PACKAGES = "protected-packages";
+    private static final String TAG_BYPASS_ROLE_QUALIFICATIONS = "bypass-role-qualifications";
     private static final String ATTR_VALUE = "value";
     private static final String ATTR_ALIAS = "alias";
     private static final String ATTR_ID = "id";
@@ -83,7 +85,7 @@ class DevicePolicyData {
     private static final String ATTR_NEW_USER_DISCLAIMER = "new-user-disclaimer";
 
     // Values of ATTR_NEW_USER_DISCLAIMER
-    static final String NEW_USER_DISCLAIMER_SHOWN = "shown";
+    static final String NEW_USER_DISCLAIMER_ACKNOWLEDGED = "acked";
     static final String NEW_USER_DISCLAIMER_NOT_NEEDED = "not_needed";
     static final String NEW_USER_DISCLAIMER_NEEDED = "needed";
 
@@ -106,6 +108,8 @@ class DevicePolicyData {
     int mPasswordOwner = -1;
     long mLastMaximumTimeToLock = -1;
     boolean mUserSetupComplete = false;
+    boolean mBypassDevicePolicyManagementRoleQualifications = false;
+    String mCurrentRoleHolder;
     boolean mPaired = false;
     int mUserProvisioningState;
     int mPermissionPolicy;
@@ -373,6 +377,12 @@ class DevicePolicyData {
                 out.endTag(null, TAG_APPS_SUSPENDED);
             }
 
+            if (policyData.mBypassDevicePolicyManagementRoleQualifications) {
+                out.startTag(null, TAG_BYPASS_ROLE_QUALIFICATIONS);
+                out.attribute(null, ATTR_VALUE, policyData.mCurrentRoleHolder);
+                out.endTag(null, TAG_BYPASS_ROLE_QUALIFICATIONS);
+            }
+
             out.endTag(null, "policies");
 
             out.endDocument();
@@ -557,6 +567,9 @@ class DevicePolicyData {
                 } else if (TAG_APPS_SUSPENDED.equals(tag)) {
                     policy.mAppsSuspended =
                             parser.getAttributeBoolean(null, ATTR_VALUE, false);
+                } else if (TAG_BYPASS_ROLE_QUALIFICATIONS.equals(tag)) {
+                    policy.mBypassDevicePolicyManagementRoleQualifications = true;
+                    policy.mCurrentRoleHolder =  parser.getAttributeValue(null, ATTR_VALUE);
                 } else {
                     Slogf.w(TAG, "Unknown tag: %s", tag);
                     XmlUtils.skipCurrentTag(parser);
@@ -613,6 +626,28 @@ class DevicePolicyData {
         }
     }
 
+    boolean isNewUserDisclaimerAcknowledged() {
+        if (mNewUserDisclaimer == null) {
+            if (mUserId == UserHandle.USER_SYSTEM) {
+                return true;
+            }
+            Slogf.w(TAG, "isNewUserDisclaimerAcknowledged(%d): mNewUserDisclaimer is null",
+                    mUserId);
+            return false;
+        }
+        switch (mNewUserDisclaimer) {
+            case NEW_USER_DISCLAIMER_ACKNOWLEDGED:
+            case NEW_USER_DISCLAIMER_NOT_NEEDED:
+                return true;
+            case NEW_USER_DISCLAIMER_NEEDED:
+                return false;
+            default:
+                Slogf.w(TAG, "isNewUserDisclaimerAcknowledged(%d): invalid value %d", mUserId,
+                        mNewUserDisclaimer);
+                return false;
+        }
+    }
+
     void dump(IndentingPrintWriter pw) {
         pw.println();
         pw.println("Enabled Device Admins (User " + mUserId + ", provisioningState: "
@@ -638,6 +673,7 @@ class DevicePolicyData {
         pw.println();
         pw.increaseIndent();
         pw.print("mPasswordOwner="); pw.println(mPasswordOwner);
+        pw.print("mPasswordTokenHandle="); pw.println(Long.toHexString(mPasswordTokenHandle));
         pw.print("mUserControlDisabledPackages=");
         pw.println(mUserControlDisabledPackages);
         pw.print("mAppsSuspended="); pw.println(mAppsSuspended);

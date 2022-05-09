@@ -25,13 +25,19 @@ import com.android.server.usb.descriptors.report.ReportCanvas;
 public final class UsbMSMidiHeader extends UsbACInterface {
     private static final String TAG = "UsbMSMidiHeader";
 
+    private int mMidiStreamingClass;  // MSC Specification Release (BCD).
+
     public UsbMSMidiHeader(int length, byte type, byte subtype, int subclass) {
         super(length, type, subtype, subclass);
     }
 
+    public int getMidiStreamingClass() {
+        return mMidiStreamingClass;
+    }
+
     @Override
     public int parseRawDescriptors(ByteStream stream) {
-        // TODO - read data memebers
+        mMidiStreamingClass = stream.unpackUsbShort();
         stream.advance(mLength - stream.getReadCount());
         return mLength;
     }
@@ -42,6 +48,7 @@ public final class UsbMSMidiHeader extends UsbACInterface {
 
         canvas.writeHeader(3, "MS Midi Header: " + ReportCanvas.getHexString(getType())
                 + " SubType: " + ReportCanvas.getHexString(getSubclass())
-                + " Length: " + getLength());
+                + " Length: " + getLength()
+                + " MidiStreamingClass :" + getMidiStreamingClass());
     }
 }

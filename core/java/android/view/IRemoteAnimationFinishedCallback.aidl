@@ -22,7 +22,7 @@ package android.view;
  * @see IRemoteAnimationRunner
  * {@hide}
  */
-interface IRemoteAnimationFinishedCallback {
+oneway interface IRemoteAnimationFinishedCallback {
     @UnsupportedAppUsage
     void onAnimationFinished();
 }

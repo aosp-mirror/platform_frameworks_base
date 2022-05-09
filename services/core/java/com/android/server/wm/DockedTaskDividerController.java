@@ -46,7 +46,7 @@ public class DockedTaskDividerController {
     void setTouchRegion(Rect touchRegion) {
         mTouchRegion.set(touchRegion);
         // We need to report touchable region changes to accessibility.
-        if (mDisplayContent.mWmService.mAccessibilityController != null) {
+        if (mDisplayContent.mWmService.mAccessibilityController.hasCallbacks()) {
             mDisplayContent.mWmService.mAccessibilityController.onSomeWindowResizedOrMoved(
                     mDisplayContent.getDisplayId());
         }

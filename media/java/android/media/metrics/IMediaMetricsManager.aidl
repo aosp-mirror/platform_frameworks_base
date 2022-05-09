@@ -21,6 +21,7 @@ import android.media.metrics.PlaybackErrorEvent;
 import android.media.metrics.PlaybackMetrics;
 import android.media.metrics.PlaybackStateEvent;
 import android.media.metrics.TrackChangeEvent;
+import android.os.PersistableBundle;
 
 /**
  * Interface to the playback manager service.
@@ -28,10 +29,18 @@ import android.media.metrics.TrackChangeEvent;
  */
 interface IMediaMetricsManager {
     void reportPlaybackMetrics(in String sessionId, in PlaybackMetrics metrics, int userId);
+
     String getPlaybackSessionId(int userId);
     String getRecordingSessionId(int userId);
     void reportNetworkEvent(in String sessionId, in NetworkEvent event, int userId);
     void reportPlaybackErrorEvent(in String sessionId, in PlaybackErrorEvent event, int userId);
     void reportPlaybackStateEvent(in String sessionId, in PlaybackStateEvent event, int userId);
     void reportTrackChangeEvent(in String sessionId, in TrackChangeEvent event, int userId);
+
+    String getTranscodingSessionId(int userId);
+    String getEditingSessionId(int userId);
+    String getBundleSessionId(int userId);
+    void reportBundleMetrics(in String sessionId, in PersistableBundle metrics, int userId);
+
+    void releaseSessionId(in String sessionId, int userId);
 }
