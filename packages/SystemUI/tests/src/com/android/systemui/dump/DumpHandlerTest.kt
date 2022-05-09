@@ -20,6 +20,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.Dumpable
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.LogBuffer
+import com.android.systemui.shared.system.UncaughtExceptionPreHandlerManager
 import com.android.systemui.util.mockito.any
 import org.junit.Before
 import org.junit.Test
@@ -37,6 +38,8 @@ class DumpHandlerTest : SysuiTestCase() {
 
     @Mock
     private lateinit var logBufferEulogizer: LogBufferEulogizer
+    @Mock
+    private lateinit var exceptionHandlerManager: UncaughtExceptionPreHandlerManager
 
     @Mock
     private lateinit var pw: PrintWriter
@@ -59,7 +62,13 @@ class DumpHandlerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        dumpHandler = DumpHandler(mContext, dumpManager, logBufferEulogizer, mutableMapOf())
+        dumpHandler = DumpHandler(
+            mContext,
+            dumpManager,
+            logBufferEulogizer,
+            mutableMapOf(),
+            exceptionHandlerManager
+        )
     }
 
     @Test
