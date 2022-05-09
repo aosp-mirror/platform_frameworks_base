@@ -18,9 +18,12 @@ package com.android.internal.util;
 
 /**
  * Helper class that contains a strong reference to a VirtualRefBase native
- * object. This will incStrong in the ctor, and decStrong in the finalizer
+ * object. This will incStrong in the ctor, and decStrong in the finalizer.
+ * It currently does no accounting of natively allocated memory, for the
+ * benefit of either GC triggering or heap profiling.
  */
 public final class VirtualRefBasePtr {
+    // TODO(b/231729094): Convert to NativeAllocationRegistry?
     private long mNativePtr;
 
     public VirtualRefBasePtr(long ptr) {
@@ -28,6 +31,14 @@ public final class VirtualRefBasePtr {
         nIncStrong(mNativePtr);
     }
 
+    /*
+     * Return the RefBase / VirtualLightRefBase native pointer.  Warning: The
+     * caller must ensure that the VirtualRefBasePtr object remains reachable
+     * while the result is in use. Ideally, the caller should invoke
+     * {@link java.lang.ref.Reference#reachabilityFence}
+     * on the VirtualRefBasePtr object (or on an object that refers to it) as
+     * soon as the result is no longer needed.
+     */
     public long get() {
         return mNativePtr;
     }

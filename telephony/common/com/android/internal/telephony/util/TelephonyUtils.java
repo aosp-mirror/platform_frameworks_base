@@ -192,6 +192,7 @@ public final class TelephonyUtils {
             case TelephonyManager.DATA_CONNECTED: return "CONNECTED";
             case TelephonyManager.DATA_SUSPENDED: return "SUSPENDED";
             case TelephonyManager.DATA_DISCONNECTING: return "DISCONNECTING";
+            case TelephonyManager.DATA_HANDOVER_IN_PROGRESS: return "HANDOVERINPROGRESS";
             case TelephonyManager.DATA_UNKNOWN: return "UNKNOWN";
         }
         // This is the error case. The well-defined value for UNKNOWN is -1.
