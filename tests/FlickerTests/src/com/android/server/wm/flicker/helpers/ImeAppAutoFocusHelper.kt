@@ -16,6 +16,10 @@
 
 package com.android.server.wm.flicker.helpers
 
+import android.view.WindowInsets.Type.ime
+import android.view.WindowInsets.Type.navigationBars
+import android.view.WindowInsets.Type.statusBars
+
 import android.app.Instrumentation
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
@@ -24,6 +28,8 @@ import com.android.server.wm.flicker.testapp.ActivityOptions
 import com.android.server.wm.traces.common.FlickerComponentName
 import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
+
+import java.util.regex.Pattern
 
 class ImeAppAutoFocusHelper @JvmOverloads constructor(
     instr: Instrumentation,
@@ -72,6 +78,7 @@ class ImeAppAutoFocusHelper @JvmOverloads constructor(
         wmHelper.waitForAppTransitionIdle()
         wmHelper.waitForFullScreenApp(
                 ActivityOptions.DIALOG_THEMED_ACTIVITY_COMPONENT_NAME.toFlickerComponent())
+        mInstrumentation.waitForIdleSync()
     }
     fun dismissDialog(wmHelper: WindowManagerStateHelper) {
         val dialog = uiDevice.wait(
@@ -82,5 +89,28 @@ class ImeAppAutoFocusHelper @JvmOverloads constructor(
             uiDevice.pressBack()
             wmHelper.waitForAppTransitionIdle()
         }
+    }
+    fun getInsetsVisibleFromDialog(type: Int): Boolean {
+        var insetsVisibilityTextView = uiDevice.wait(
+                Until.findObject(By.res("android:id/text1")), FIND_TIMEOUT)
+        if (insetsVisibilityTextView != null) {
+            var visibility = insetsVisibilityTextView.text.toString()
+            val matcher = when (type) {
+                ime() -> {
+                    Pattern.compile("IME\\: (VISIBLE|INVISIBLE)").matcher(visibility)
+                }
+                statusBars() -> {
+                    Pattern.compile("StatusBar\\: (VISIBLE|INVISIBLE)").matcher(visibility)
+                }
+                navigationBars() -> {
+                    Pattern.compile("NavBar\\: (VISIBLE|INVISIBLE)").matcher(visibility)
+                }
+                else -> null
+            }
+            if (matcher != null && matcher.find()) {
+                return matcher.group(1).equals("VISIBLE")
+            }
+        }
+        return false
     }
 }

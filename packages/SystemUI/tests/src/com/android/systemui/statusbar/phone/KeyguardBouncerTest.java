@@ -160,7 +160,7 @@ public class KeyguardBouncerTest extends SysuiTestCase {
     @Test
     public void testShow_notifiesVisibility() {
         mBouncer.show(true);
-        verify(mViewMediatorCallback).onBouncerVisiblityChanged(eq(true));
+        verify(mKeyguardStateController).notifyBouncerShowing(eq(true));
         verify(mExpansionCallback).onStartingToShow();
 
         // Not called again when visible
@@ -238,7 +238,7 @@ public class KeyguardBouncerTest extends SysuiTestCase {
     @Test
     public void testHide_notifiesVisibility() {
         mBouncer.hide(false);
-        verify(mViewMediatorCallback).onBouncerVisiblityChanged(eq(false));
+        verify(mKeyguardStateController).notifyBouncerShowing(eq(false));
     }
 
     @Test

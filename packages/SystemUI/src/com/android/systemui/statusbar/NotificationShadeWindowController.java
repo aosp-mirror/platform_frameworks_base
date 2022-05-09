@@ -180,13 +180,6 @@ public interface NotificationShadeWindowController extends RemoteInputController
     default void setRequestTopUi(boolean requestTopUi, String componentTag) {}
 
     /**
-     * Under low light conditions, we might want to increase the display brightness on devices that
-     * don't have an IR camera.
-     * @param brightness float from 0 to 1 or {@code LayoutParams.BRIGHTNESS_OVERRIDE_NONE}
-     */
-    default void setFaceAuthDisplayBrightness(float brightness) {}
-
-    /**
      * If {@link LightRevealScrim} obscures the UI.
      * @param opaque if the scrim is opaque
      */

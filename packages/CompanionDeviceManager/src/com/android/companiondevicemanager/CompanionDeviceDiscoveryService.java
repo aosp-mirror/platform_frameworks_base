@@ -150,8 +150,6 @@ public class CompanionDeviceDiscoveryService extends Service {
         mBtAdapter = mBtManager.getAdapter();
         mBleScanner = mBtAdapter.getBluetoothLeScanner();
         mWifiManager = getSystemService(WifiManager.class);
-
-        sScanResultsLiveData.setValue(Collections.emptyList());
     }
 
     @Override
@@ -175,6 +173,7 @@ public class CompanionDeviceDiscoveryService extends Service {
 
     @Override
     public void onDestroy() {
+        sScanResultsLiveData.setValue(Collections.emptyList());
         super.onDestroy();
         if (DEBUG) Log.d(TAG, "onDestroy()");
     }
@@ -188,6 +187,7 @@ public class CompanionDeviceDiscoveryService extends Service {
         mStopAfterFirstMatch = request.isSingleDevice();
         mDiscoveryStarted = true;
         sStateLiveData.setValue(DiscoveryState.DISCOVERY_IN_PROGRESS);
+        sScanResultsLiveData.setValue(Collections.emptyList());
 
         final List<DeviceFilter<?>> allFilters = request.getDeviceFilters();
         final List<BluetoothDeviceFilter> btFilters =

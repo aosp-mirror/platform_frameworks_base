@@ -27,6 +27,7 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.util.mockito.mock
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -63,6 +64,7 @@ public class ResumeMediaBrowserTest : SysuiTestCase() {
     @Mock lateinit var callback: ResumeMediaBrowser.Callback
     @Mock lateinit var listener: MediaResumeListener
     @Mock lateinit var service: MediaBrowserService
+    @Mock lateinit var logger: ResumeMediaBrowserLogger
     @Mock lateinit var browserFactory: MediaBrowserFactory
     @Mock lateinit var browser: MediaBrowser
     @Mock lateinit var token: MediaSession.Token
@@ -81,8 +83,14 @@ public class ResumeMediaBrowserTest : SysuiTestCase() {
 
         whenever(mediaController.transportControls).thenReturn(transportControls)
 
-        resumeBrowser = TestableResumeMediaBrowser(context, callback, component, browserFactory,
-                mediaController)
+        resumeBrowser = TestableResumeMediaBrowser(
+            context,
+            callback,
+            component,
+            browserFactory,
+            logger,
+            mediaController
+        )
     }
 
     @Test
@@ -129,6 +137,24 @@ public class ResumeMediaBrowserTest : SysuiTestCase() {
     }
 
     @Test
+    fun testConnection_calledTwice_oldBrowserDisconnected() {
+        val oldBrowser = mock<MediaBrowser>()
+        whenever(browserFactory.create(any(), any(), any())).thenReturn(oldBrowser)
+
+        // When testConnection can connect to the service
+        setupBrowserConnection()
+        resumeBrowser.testConnection()
+
+        // And testConnection is called again
+        val newBrowser = mock<MediaBrowser>()
+        whenever(browserFactory.create(any(), any(), any())).thenReturn(newBrowser)
+        resumeBrowser.testConnection()
+
+        // Then we disconnect the old browser
+        verify(oldBrowser).disconnect()
+    }
+
+    @Test
     fun testFindRecentMedia_connectionFails_error() {
         // When findRecentMedia is called and we cannot connect
         setupBrowserFailed()
@@ -159,6 +185,24 @@ public class ResumeMediaBrowserTest : SysuiTestCase() {
 
         // Then it calls onConnected
         verify(callback).onConnected()
+    }
+
+    @Test
+    fun testFindRecentMedia_calledTwice_oldBrowserDisconnected() {
+        val oldBrowser = mock<MediaBrowser>()
+        whenever(browserFactory.create(any(), any(), any())).thenReturn(oldBrowser)
+
+        // When findRecentMedia is called and we connect
+        setupBrowserConnection()
+        resumeBrowser.findRecentMedia()
+
+        // And findRecentMedia is called again
+        val newBrowser = mock<MediaBrowser>()
+        whenever(browserFactory.create(any(), any(), any())).thenReturn(newBrowser)
+        resumeBrowser.findRecentMedia()
+
+        // Then we disconnect the old browser
+        verify(oldBrowser).disconnect()
     }
 
     @Test
@@ -214,6 +258,24 @@ public class ResumeMediaBrowserTest : SysuiTestCase() {
         // Then it creates a new controller and sends play command
         verify(transportControls).prepare()
         verify(transportControls).play()
+    }
+
+    @Test
+    fun testRestart_calledTwice_oldBrowserDisconnected() {
+        val oldBrowser = mock<MediaBrowser>()
+        whenever(browserFactory.create(any(), any(), any())).thenReturn(oldBrowser)
+
+        // When restart is called and we connect successfully
+        setupBrowserConnection()
+        resumeBrowser.restart()
+
+        // And restart is called again
+        val newBrowser = mock<MediaBrowser>()
+        whenever(browserFactory.create(any(), any(), any())).thenReturn(newBrowser)
+        resumeBrowser.restart()
+
+        // Then we disconnect the old browser
+        verify(oldBrowser).disconnect()
     }
 
     /**
@@ -282,8 +344,9 @@ public class ResumeMediaBrowserTest : SysuiTestCase() {
         callback: Callback,
         componentName: ComponentName,
         browserFactory: MediaBrowserFactory,
+        logger: ResumeMediaBrowserLogger,
         private val fakeController: MediaController
-    ) : ResumeMediaBrowser(context, callback, componentName, browserFactory) {
+    ) : ResumeMediaBrowser(context, callback, componentName, browserFactory, logger) {
 
         override fun createMediaController(token: MediaSession.Token): MediaController {
             return fakeController
