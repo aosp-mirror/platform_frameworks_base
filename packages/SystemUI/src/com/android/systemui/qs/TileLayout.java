@@ -17,6 +17,7 @@ import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.QSPanelControllerBase.TileRecord;
 import com.android.systemui.qs.tileimpl.HeightOverrideable;
+import com.android.systemui.qs.tileimpl.QSTileViewImplKt;
 
 import java.util.ArrayList;
 
@@ -242,7 +243,12 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
                 record.tileView.setLeftTopRightBottom(left, top, right, bottom);
             }
             record.tileView.setPosition(i);
-            mLastTileBottom = bottom;
+            if (forLayout) {
+                mLastTileBottom = record.tileView.getBottom();
+            } else {
+                float scale = QSTileViewImplKt.constrainSquishiness(mSquishinessFraction);
+                mLastTileBottom = top + (int) (record.tileView.getMeasuredHeight() * scale);
+            }
         }
     }
 

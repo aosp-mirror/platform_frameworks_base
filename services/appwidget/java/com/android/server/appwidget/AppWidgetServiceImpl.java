@@ -4414,7 +4414,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         // a given package.  Keep track of what we've done so far here; the list is
         // cleared at the start of every system restore pass, but preserved through
         // any install-time restore operations.
-        private final HashSet<String> mPrunedApps = new HashSet<>();
+        private final SparseArray<Set<String>> mPrunedAppsPerUser = new SparseArray<>();
 
         private final HashMap<Provider, ArrayList<RestoreUpdateRecord>> mUpdatesByProvider =
                 new HashMap<>();
@@ -4537,7 +4537,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 // We're starting a new "system" restore operation, so any widget restore
                 // state that we see from here on is intended to replace the current
                 // widget configuration of any/all of the affected apps.
-                mPrunedApps.clear();
+                getPrunedAppsLocked(userId).clear();
                 mUpdatesByProvider.clear();
                 mUpdatesByHost.clear();
             }
@@ -4934,8 +4934,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         // instances that are hosted by that app, and (b) all instances in other hosts
         // for which 'pkg' is the provider.  We assume that we'll be restoring all of
         // these hosts & providers, so will be reconstructing a correct live state.
+        @GuardedBy("mLock")
         private void pruneWidgetStateLocked(String pkg, int userId) {
-            if (!mPrunedApps.contains(pkg)) {
+            final Set<String> prunedApps = getPrunedAppsLocked(userId);
+            if (!prunedApps.contains(pkg)) {
                 if (DEBUG) {
                     Slog.i(TAG, "pruning widget state for restoring package " + pkg);
                 }
@@ -4958,12 +4960,21 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                         removeWidgetLocked(widget);
                     }
                 }
-                mPrunedApps.add(pkg);
+                prunedApps.add(pkg);
             } else {
                 if (DEBUG) {
                     Slog.i(TAG, "already pruned " + pkg + ", continuing normally");
                 }
             }
+        }
+
+        @GuardedBy("mLock")
+        @NonNull
+        private Set<String> getPrunedAppsLocked(int userId) {
+            if (!mPrunedAppsPerUser.contains(userId)) {
+                mPrunedAppsPerUser.set(userId, new ArraySet<>());
+            }
+            return mPrunedAppsPerUser.get(userId);
         }
 
         private boolean isProviderAndHostInUser(Widget widget, int userId) {

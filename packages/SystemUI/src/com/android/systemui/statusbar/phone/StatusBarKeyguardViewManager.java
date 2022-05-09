@@ -364,12 +364,15 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                         || mNotificationPanelViewController.isExpanding());
 
         // We don't want to translate the bounce when:
+        // • device is dozing and not pulsing
         // • Keyguard is occluded, because we're in a FLAG_SHOW_WHEN_LOCKED activity and need to
         //   conserve the original animation.
         // • The user quickly taps on the display and we show "swipe up to unlock."
         // • Keyguard will be dismissed by an action. a.k.a: FLAG_DISMISS_KEYGUARD_ACTIVITY
         // • Full-screen user switcher is displayed.
-        if (mNotificationPanelViewController.isUnlockHintRunning()) {
+        if (mDozing && !mPulsing) {
+            return;
+        } else if (mNotificationPanelViewController.isUnlockHintRunning()) {
             mBouncer.setExpansion(KeyguardBouncer.EXPANSION_HIDDEN);
         } else if (mStatusBarStateController.getState() == StatusBarState.SHADE_LOCKED
                 && mKeyguardUpdateManager.isUdfpsEnrolled()) {

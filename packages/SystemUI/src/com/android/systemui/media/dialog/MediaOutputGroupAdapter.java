@@ -101,9 +101,10 @@ public class MediaOutputGroupAdapter extends MediaOutputBaseAdapter {
             mCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 onCheckBoxClicked(isChecked, device);
             });
+            boolean isCurrentSeekbarInvisible = mSeekBar.getVisibility() == View.GONE;
             setTwoLineLayout(device, false /* bFocused */, true /* showSeekBar */,
                     false /* showProgressBar */, false /* showSubtitle*/);
-            initSeekbar(device);
+            initSeekbar(device, isCurrentSeekbarInvisible);
             final List<MediaDevice> selectedDevices = mController.getSelectedMediaDevice();
             if (isDeviceIncluded(mController.getSelectableMediaDevice(), device)) {
                 mCheckBox.setButtonDrawable(R.drawable.ic_check_box);

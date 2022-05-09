@@ -707,6 +707,10 @@ public class KeyguardSecurityContainer extends FrameLayout {
         mDisappearAnimRunning = false;
     }
 
+    void reloadColors() {
+        mViewMode.reloadColors();
+    }
+
     /**
      * Enscapsulates the differences between bouncer modes for the container.
      */
@@ -727,6 +731,9 @@ public class KeyguardSecurityContainer extends FrameLayout {
 
         /** Called when the view needs to reset or hides */
         default void reset() {};
+
+        /** Refresh colors */
+        default void reloadColors() {};
 
         /** On a successful auth, optionally handle how the view disappears */
         default void startDisappearAnimation(SecurityMode securityMode) {};
@@ -822,6 +829,17 @@ public class KeyguardSecurityContainer extends FrameLayout {
         }
 
         @Override
+        public void reloadColors() {
+            TextView header =  (TextView) mView.findViewById(R.id.user_switcher_header);
+            if (header != null) {
+                header.setTextColor(Utils.getColorAttrDefaultColor(mView.getContext(),
+                        android.R.attr.textColorPrimary));
+                header.setBackground(mView.getContext().getDrawable(
+                        R.drawable.bouncer_user_switcher_header_bg));
+            }
+        }
+
+        @Override
         public void onDestroy() {
             mUserSwitcherController.removeUserSwitchCallback(mUserSwitchCallback);
         }
@@ -911,6 +929,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
                     } else {
                         textView.setBackground(null);
                     }
+                    textView.setSelected(item == currentUser);
                     view.setEnabled(item.isSwitchToEnabled);
                     view.setAlpha(view.isEnabled() ? USER_SWITCH_ENABLED_ALPHA :
                             USER_SWITCH_DISABLED_ALPHA);

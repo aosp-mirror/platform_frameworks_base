@@ -67,6 +67,7 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -119,16 +120,18 @@ public abstract class ApexManager {
         @Nullable public final String apexModuleName;
         public final File apexDirectory;
         public final File preInstalledApexPath;
+        public final File apexFile;
 
-        private ActiveApexInfo(File apexDirectory, File preInstalledApexPath) {
-            this(null, apexDirectory, preInstalledApexPath);
+        private ActiveApexInfo(File apexDirectory, File preInstalledApexPath, File apexFile) {
+            this(null, apexDirectory, preInstalledApexPath, apexFile);
         }
 
         private ActiveApexInfo(@Nullable String apexModuleName, File apexDirectory,
-                File preInstalledApexPath) {
+                File preInstalledApexPath, File apexFile) {
             this.apexModuleName = apexModuleName;
             this.apexDirectory = apexDirectory;
             this.preInstalledApexPath = preInstalledApexPath;
+            this.apexFile = apexFile;
         }
 
         private ActiveApexInfo(ApexInfo apexInfo) {
@@ -136,7 +139,8 @@ public abstract class ApexManager {
                     apexInfo.moduleName,
                     new File(Environment.getApexDirectory() + File.separator
                             + apexInfo.moduleName),
-                    new File(apexInfo.preinstalledModulePath));
+                    new File(apexInfo.preinstalledModulePath),
+                    new File(apexInfo.modulePath));
         }
     }
 
@@ -428,6 +432,15 @@ public abstract class ApexManager {
     public abstract List<ApexSystemServiceInfo> getApexSystemServices();
 
     /**
+     * Returns an APEX file backing the mount point {@code file} is located on, or {@code null} if
+     * {@code file} doesn't belong to a {@code /apex} mount point.
+     *
+     * <p>Also returns {@code null} if device doesn't support updatable APEX packages.
+     */
+    @Nullable
+    public abstract File getBackingApexFile(@NonNull File file);
+
+    /**
      * Dumps various state information to the provided {@link PrintWriter} object.
      *
      * @param pw the {@link PrintWriter} object to send information to.
@@ -451,6 +464,7 @@ public abstract class ApexManager {
     protected static class ApexManagerImpl extends ApexManager {
         private final Object mLock = new Object();
 
+        // TODO(ioffe): this should be either List or ArrayMap.
         @GuardedBy("mLock")
         private Set<ActiveApexInfo> mActiveApexInfosCache;
 
@@ -1184,6 +1198,25 @@ public abstract class ApexManager {
             }
         }
 
+        @Override
+        public File getBackingApexFile(File file) {
+            Path path = file.toPath();
+            if (!path.startsWith(Environment.getApexDirectory().toPath())) {
+                return null;
+            }
+            if (path.getNameCount() < 2) {
+                return null;
+            }
+            String moduleName = file.toPath().getName(1).toString();
+            final List<ActiveApexInfo> apexes = getActiveApexInfos();
+            for (int i = 0; i < apexes.size(); i++) {
+                if (apexes.get(i).apexModuleName.equals(moduleName)) {
+                    return apexes.get(i).apexFile;
+                }
+            }
+            return null;
+        }
+
         /**
          * Dump information about the packages contained in a particular cache
          * @param packagesCache the cache to print information about.
@@ -1274,7 +1307,8 @@ public abstract class ApexManager {
      * An implementation of {@link ApexManager} that should be used in case device does not support
      * updating APEX packages.
      */
-    private static final class ApexManagerFlattenedApex extends ApexManager {
+    @VisibleForTesting
+    static final class ApexManagerFlattenedApex extends ApexManager {
         @Override
         public List<ActiveApexInfo> getActiveApexInfos() {
             // There is no apexd running in case of flattened apex
@@ -1293,7 +1327,8 @@ public abstract class ApexManager {
                                 // In flattened configuration, init special-cases the art directory
                                 // and bind-mounts com.android.art.debug to com.android.art.
                                 && !file.getName().equals("com.android.art.debug")) {
-                            result.add(new ActiveApexInfo(file, Environment.getRootDirectory()));
+                            result.add(
+                                    new ActiveApexInfo(file, Environment.getRootDirectory(), file));
                         }
                     }
                 }
@@ -1476,6 +1511,11 @@ public abstract class ApexManager {
             // TODO(satayev): we can't really support flattened apex use case, and need to migrate
             // the manifest entries into system's manifest asap.
             return Collections.emptyList();
+        }
+
+        @Override
+        public File getBackingApexFile(File file) {
+            return null;
         }
 
         @Override
