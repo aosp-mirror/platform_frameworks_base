@@ -68,7 +68,6 @@ import static com.android.server.wm.AppTransition.isNormalTransit;
 import static com.android.server.wm.NonAppWindowAnimationAdapter.shouldAttachNavBarToApp;
 import static com.android.server.wm.NonAppWindowAnimationAdapter.shouldStartNonAppWindowAnimationsForKeyguardExit;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.WallpaperAnimationAdapter.shouldStartWallpaperAnimation;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
@@ -1143,17 +1142,13 @@ public class AppTransitionController {
             if (activity == null) {
                 continue;
             }
-            if (activity.isAnimating(PARENTS, ANIMATION_TYPE_RECENTS)) {
-                ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
-                        "Delaying app transition for recents animation to finish");
-                return false;
-            }
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                     "Check opening app=%s: allDrawn=%b startingDisplayed=%b "
                             + "startingMoved=%b isRelaunching()=%b startingWindow=%s",
                     activity, activity.allDrawn, activity.startingDisplayed,
                     activity.startingMoved, activity.isRelaunching(),
                     activity.mStartingWindow);
+
             final boolean allDrawn = activity.allDrawn && !activity.isRelaunching();
             if (!allDrawn && !activity.startingDisplayed && !activity.startingMoved) {
                 return false;
