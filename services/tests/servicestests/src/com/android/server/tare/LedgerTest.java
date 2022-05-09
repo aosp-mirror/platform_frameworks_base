@@ -54,13 +54,13 @@ public class LedgerTest {
     @Test
     public void testMultipleTransactions() {
         final Ledger ledger = new Ledger();
-        ledger.recordTransaction(new Ledger.Transaction(0, 1000, 1, null, 5));
+        ledger.recordTransaction(new Ledger.Transaction(0, 1000, 1, null, 5, 0));
         assertEquals(5, ledger.getCurrentBalance());
         assertEquals(5, ledger.get24HourSum(1, 60_000));
-        ledger.recordTransaction(new Ledger.Transaction(2000, 2000, 1, null, 25));
+        ledger.recordTransaction(new Ledger.Transaction(2000, 2000, 1, null, 25, 0));
         assertEquals(30, ledger.getCurrentBalance());
         assertEquals(30, ledger.get24HourSum(1, 60_000));
-        ledger.recordTransaction(new Ledger.Transaction(5000, 5500, 1, null, -10));
+        ledger.recordTransaction(new Ledger.Transaction(5000, 5500, 1, null, -10, 5));
         assertEquals(20, ledger.getCurrentBalance());
         assertEquals(20, ledger.get24HourSum(1, 60_000));
     }
@@ -68,13 +68,13 @@ public class LedgerTest {
     @Test
     public void test24HourSum() {
         final Ledger ledger = new Ledger();
-        ledger.recordTransaction(new Ledger.Transaction(0, 1000, 1, null, 500));
+        ledger.recordTransaction(new Ledger.Transaction(0, 1000, 1, null, 500, 0));
         assertEquals(500, ledger.get24HourSum(1, 24 * HOUR_IN_MILLIS));
         ledger.recordTransaction(
-                new Ledger.Transaction(2 * HOUR_IN_MILLIS, 3 * HOUR_IN_MILLIS, 1, null, 2500));
+                new Ledger.Transaction(2 * HOUR_IN_MILLIS, 3 * HOUR_IN_MILLIS, 1, null, 2500, 0));
         assertEquals(3000, ledger.get24HourSum(1, 24 * HOUR_IN_MILLIS));
         ledger.recordTransaction(
-                new Ledger.Transaction(4 * HOUR_IN_MILLIS, 4 * HOUR_IN_MILLIS, 1, null, 1));
+                new Ledger.Transaction(4 * HOUR_IN_MILLIS, 4 * HOUR_IN_MILLIS, 1, null, 1, 0));
         assertEquals(3001, ledger.get24HourSum(1, 24 * HOUR_IN_MILLIS));
         assertEquals(2501, ledger.get24HourSum(1, 25 * HOUR_IN_MILLIS));
         assertEquals(2501, ledger.get24HourSum(1, 26 * HOUR_IN_MILLIS));
@@ -93,17 +93,17 @@ public class LedgerTest {
 
         final long now = getCurrentTimeMillis();
         Ledger.Transaction transaction1 = new Ledger.Transaction(
-                now - 48 * HOUR_IN_MILLIS, now - 40 * HOUR_IN_MILLIS, 1, null, 4800);
+                now - 48 * HOUR_IN_MILLIS, now - 40 * HOUR_IN_MILLIS, 1, null, 4800, 0);
         Ledger.Transaction transaction2 = new Ledger.Transaction(
-                now - 24 * HOUR_IN_MILLIS, now - 23 * HOUR_IN_MILLIS, 1, null, 600);
+                now - 24 * HOUR_IN_MILLIS, now - 23 * HOUR_IN_MILLIS, 1, null, 600, 0);
         Ledger.Transaction transaction3 = new Ledger.Transaction(
-                now - 22 * HOUR_IN_MILLIS, now - 21 * HOUR_IN_MILLIS, 1, null, 600);
+                now - 22 * HOUR_IN_MILLIS, now - 21 * HOUR_IN_MILLIS, 1, null, 600, 0);
         // Instant event
         Ledger.Transaction transaction4 = new Ledger.Transaction(
-                now - 20 * HOUR_IN_MILLIS, now - 20 * HOUR_IN_MILLIS, 1, null, 500);
+                now - 20 * HOUR_IN_MILLIS, now - 20 * HOUR_IN_MILLIS, 1, null, 500, 0);
         // Recent event
         Ledger.Transaction transaction5 = new Ledger.Transaction(
-                now - 5 * MINUTE_IN_MILLIS, now - MINUTE_IN_MILLIS, 1, null, 400);
+                now - 5 * MINUTE_IN_MILLIS, now - MINUTE_IN_MILLIS, 1, null, 400, 0);
         ledger.recordTransaction(transaction1);
         ledger.recordTransaction(transaction2);
         ledger.recordTransaction(transaction3);

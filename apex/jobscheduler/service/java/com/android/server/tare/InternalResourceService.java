@@ -23,8 +23,8 @@ import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
 import static com.android.server.tare.TareUtils.appToString;
+import static com.android.server.tare.TareUtils.cakeToString;
 import static com.android.server.tare.TareUtils.getCurrentTimeMillis;
-import static com.android.server.tare.TareUtils.narcToString;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -69,6 +69,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.pm.UserManagerInternal;
+import com.android.server.tare.EconomicPolicy.Cost;
 import com.android.server.tare.EconomyManagerInternal.TareStateChangeListener;
 
 import java.io.FileDescriptor;
@@ -100,6 +101,11 @@ public class InternalResourceService extends SystemService {
     private static final long MIN_UNUSED_TIME_MS = 3 * DAY_IN_MILLIS;
     /** The amount of time to delay reclamation by after boot. */
     private static final long RECLAMATION_STARTUP_DELAY_MS = 30_000L;
+    /**
+     * The battery level above which we may consider quantitative easing (increasing the consumption
+     * limit).
+     */
+    private static final int QUANTITATIVE_EASING_BATTERY_THRESHOLD = 50;
     private static final int PACKAGE_QUERY_FLAGS =
             PackageManager.MATCH_DIRECT_BOOT_AWARE | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
                     | PackageManager.MATCH_APEX;
@@ -121,44 +127,6 @@ public class InternalResourceService extends SystemService {
 
     @GuardedBy("mLock")
     private CompleteEconomicPolicy mCompleteEconomicPolicy;
-
-    private static final class ReclamationConfig {
-        /**
-         * ARC circulation threshold (% circulating vs scaled maximum) above which this config
-         * should come into play.
-         */
-        public final double circulationPercentageThreshold;
-        /** @see Agent#reclaimUnusedAssetsLocked(double, long, boolean) */
-        public final double reclamationPercentage;
-        /** @see Agent#reclaimUnusedAssetsLocked(double, long, boolean) */
-        public final long minUsedTimeMs;
-        /** @see Agent#reclaimUnusedAssetsLocked(double, long, boolean) */
-        public final boolean scaleMinBalance;
-
-        ReclamationConfig(double circulationPercentageThreshold, double reclamationPercentage,
-                long minUsedTimeMs, boolean scaleMinBalance) {
-            this.circulationPercentageThreshold = circulationPercentageThreshold;
-            this.reclamationPercentage = reclamationPercentage;
-            this.minUsedTimeMs = minUsedTimeMs;
-            this.scaleMinBalance = scaleMinBalance;
-        }
-    }
-
-    /**
-     * Sorted list of reclamation configs used to determine how many credits to force reclaim when
-     * the circulation percentage is too high. The list should *always* be sorted in descending
-     * order of {@link ReclamationConfig#circulationPercentageThreshold}.
-     */
-    @GuardedBy("mLock")
-    private final List<ReclamationConfig> mReclamationConfigs = List.of(
-            new ReclamationConfig(2, .75, 12 * HOUR_IN_MILLIS, true),
-            new ReclamationConfig(1.6, .5, DAY_IN_MILLIS, true),
-            new ReclamationConfig(1.4, .25, DAY_IN_MILLIS, true),
-            new ReclamationConfig(1.2, .25, 2 * DAY_IN_MILLIS, true),
-            new ReclamationConfig(1, .25, MIN_UNUSED_TIME_MS, false),
-            new ReclamationConfig(
-                    .9, DEFAULT_UNUSED_RECLAMATION_PERCENTAGE, MIN_UNUSED_TIME_MS, false)
-    );
 
     @NonNull
     @GuardedBy("mLock")
@@ -266,8 +234,7 @@ public class InternalResourceService extends SystemService {
     private static final int MSG_NOTIFY_AFFORDABILITY_CHANGE_LISTENER = 0;
     private static final int MSG_SCHEDULE_UNUSED_WEALTH_RECLAMATION_EVENT = 1;
     private static final int MSG_PROCESS_USAGE_EVENT = 2;
-    private static final int MSG_MAYBE_FORCE_RECLAIM = 3;
-    private static final int MSG_NOTIFY_STATE_CHANGE_LISTENERS = 4;
+    private static final int MSG_NOTIFY_STATE_CHANGE_LISTENERS = 3;
     private static final String ALARM_TAG_WEALTH_RECLAMATION = "*tare.reclamation*";
 
     /**
@@ -362,14 +329,19 @@ public class InternalResourceService extends SystemService {
     }
 
     @GuardedBy("mLock")
-    long getMaxCirculationLocked() {
-        return mCurrentBatteryLevel * mCompleteEconomicPolicy.getMaxSatiatedCirculation() / 100;
+    long getConsumptionLimitLocked() {
+        return mCurrentBatteryLevel * mScribe.getSatiatedConsumptionLimitLocked() / 100;
     }
 
     @GuardedBy("mLock")
     long getMinBalanceLocked(final int userId, @NonNull final String pkgName) {
         return mCurrentBatteryLevel * mCompleteEconomicPolicy.getMinSatiatedBalance(userId, pkgName)
                 / 100;
+    }
+
+    @GuardedBy("mLock")
+    long getInitialSatiatedConsumptionLimitLocked() {
+        return mCompleteEconomicPolicy.getInitialSatiatedConsumptionLimit();
     }
 
     int getUid(final int userId, @NonNull final String pkgName) {
@@ -403,12 +375,15 @@ public class InternalResourceService extends SystemService {
     void onBatteryLevelChanged() {
         synchronized (mLock) {
             final int newBatteryLevel = getCurrentBatteryLevel();
-            if (newBatteryLevel > mCurrentBatteryLevel) {
+            final boolean increased = newBatteryLevel > mCurrentBatteryLevel;
+            if (increased) {
                 mAgent.distributeBasicIncomeLocked(newBatteryLevel);
-            } else if (newBatteryLevel < mCurrentBatteryLevel) {
-                mHandler.obtainMessage(MSG_MAYBE_FORCE_RECLAIM).sendToTarget();
+            } else if (newBatteryLevel == mCurrentBatteryLevel) {
+                Slog.wtf(TAG, "Battery level stayed the same");
+                return;
             }
             mCurrentBatteryLevel = newBatteryLevel;
+            adjustCreditSupplyLocked(increased);
         }
     }
 
@@ -546,6 +521,31 @@ public class InternalResourceService extends SystemService {
         }
     }
 
+    /**
+     * Try to increase the consumption limit if apps are reaching the current limit too quickly.
+     */
+    @GuardedBy("mLock")
+    void maybePerformQuantitativeEasingLocked() {
+        // We don't need to increase the limit if the device runs out of consumable credits
+        // when the battery is low.
+        final long remainingConsumableCakes = mScribe.getRemainingConsumableCakesLocked();
+        if (mCurrentBatteryLevel <= QUANTITATIVE_EASING_BATTERY_THRESHOLD
+                || remainingConsumableCakes > 0) {
+            return;
+        }
+        final long currentConsumptionLimit = mScribe.getSatiatedConsumptionLimitLocked();
+        final long shortfall = (mCurrentBatteryLevel - QUANTITATIVE_EASING_BATTERY_THRESHOLD)
+                * currentConsumptionLimit / 100;
+        final long newConsumptionLimit = Math.min(currentConsumptionLimit + shortfall,
+                mCompleteEconomicPolicy.getHardSatiatedConsumptionLimit());
+        if (newConsumptionLimit != currentConsumptionLimit) {
+            Slog.i(TAG, "Increasing consumption limit from " + cakeToString(currentConsumptionLimit)
+                    + " to " + cakeToString(newConsumptionLimit));
+            mScribe.setConsumptionLimitLocked(newConsumptionLimit);
+            adjustCreditSupplyLocked(/* allowIncrease */ true);
+        }
+    }
+
     void postAffordabilityChanged(final int userId, @NonNull final String pkgName,
             @NonNull Agent.ActionAffordabilityNote affordabilityNote) {
         if (DEBUG) {
@@ -557,6 +557,23 @@ public class InternalResourceService extends SystemService {
         args.arg1 = pkgName;
         args.arg2 = affordabilityNote;
         mHandler.obtainMessage(MSG_NOTIFY_AFFORDABILITY_CHANGE_LISTENER, args).sendToTarget();
+    }
+
+    @GuardedBy("mLock")
+    private void adjustCreditSupplyLocked(boolean allowIncrease) {
+        final long newLimit = getConsumptionLimitLocked();
+        final long remainingConsumableCakes = mScribe.getRemainingConsumableCakesLocked();
+        if (remainingConsumableCakes == newLimit) {
+            return;
+        }
+        if (remainingConsumableCakes > newLimit) {
+            mScribe.adjustRemainingConsumableCakesLocked(newLimit - remainingConsumableCakes);
+        } else if (allowIncrease) {
+            final double perc = mCurrentBatteryLevel / 100d;
+            final long shortfall = newLimit - remainingConsumableCakes;
+            mScribe.adjustRemainingConsumableCakesLocked((long) (perc * shortfall));
+        }
+        mAgent.onCreditSupplyChanged();
     }
 
     @GuardedBy("mLock")
@@ -650,48 +667,6 @@ public class InternalResourceService extends SystemService {
         }
     }
 
-    /**
-     * Reclaim unused ARCs above apps' minimum balances if there are too many credits currently
-     * in circulation.
-     */
-    @GuardedBy("mLock")
-    private void maybeForceReclaimLocked() {
-        final long maxCirculation = getMaxCirculationLocked();
-        if (maxCirculation == 0) {
-            Slog.wtf(TAG, "Max scaled circulation is 0...");
-            mAgent.reclaimUnusedAssetsLocked(1, HOUR_IN_MILLIS, true);
-            mScribe.setLastReclamationTimeLocked(getCurrentTimeMillis());
-            scheduleUnusedWealthReclamationLocked();
-            return;
-        }
-        final long curCirculation = mScribe.getNarcsInCirculationLocked();
-        final double circulationPerc = 1.0 * curCirculation / maxCirculation;
-        if (DEBUG) {
-            Slog.d(TAG, "Circulation %: " + circulationPerc);
-        }
-        final int numConfigs = mReclamationConfigs.size();
-        if (numConfigs == 0) {
-            return;
-        }
-        // The configs are sorted in descending order of circulationPercentageThreshold, so we can
-        // short-circuit if the current circulation is lower than the lowest threshold.
-        if (circulationPerc
-                < mReclamationConfigs.get(numConfigs - 1).circulationPercentageThreshold) {
-            return;
-        }
-        // TODO: maybe exclude apps we think will be launched in the next few hours
-        for (int i = 0; i < numConfigs; ++i) {
-            final ReclamationConfig config = mReclamationConfigs.get(i);
-            if (circulationPerc >= config.circulationPercentageThreshold) {
-                mAgent.reclaimUnusedAssetsLocked(
-                        config.reclamationPercentage, config.minUsedTimeMs, config.scaleMinBalance);
-                mScribe.setLastReclamationTimeLocked(getCurrentTimeMillis());
-                scheduleUnusedWealthReclamationLocked();
-                break;
-            }
-        }
-    }
-
     private void registerListeners() {
         final IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BATTERY_LEVEL_CHANGED);
@@ -731,8 +706,18 @@ public class InternalResourceService extends SystemService {
             final boolean isFirstSetup = !mScribe.recordExists();
             if (isFirstSetup) {
                 mAgent.grantBirthrightsLocked();
+                mScribe.setConsumptionLimitLocked(
+                        mCompleteEconomicPolicy.getInitialSatiatedConsumptionLimit());
             } else {
                 mScribe.loadFromDiskLocked();
+                if (mScribe.getSatiatedConsumptionLimitLocked()
+                        < mCompleteEconomicPolicy.getInitialSatiatedConsumptionLimit()
+                        || mScribe.getSatiatedConsumptionLimitLocked()
+                        > mCompleteEconomicPolicy.getHardSatiatedConsumptionLimit()) {
+                    // Reset the consumption limit since several factors may have changed.
+                    mScribe.setConsumptionLimitLocked(
+                            mCompleteEconomicPolicy.getInitialSatiatedConsumptionLimit());
+                }
             }
             scheduleUnusedWealthReclamationLocked();
         }
@@ -746,7 +731,7 @@ public class InternalResourceService extends SystemService {
             registerListeners();
             mCurrentBatteryLevel = getCurrentBatteryLevel();
             mHandler.post(this::setupHeavyWork);
-            mCompleteEconomicPolicy.setup();
+            mCompleteEconomicPolicy.setup(mConfigObserver.getAllDeviceConfigProperties());
         }
     }
 
@@ -787,14 +772,6 @@ public class InternalResourceService extends SystemService {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_MAYBE_FORCE_RECLAIM: {
-                    removeMessages(MSG_MAYBE_FORCE_RECLAIM);
-                    synchronized (mLock) {
-                        maybeForceReclaimLocked();
-                    }
-                }
-                break;
-
                 case MSG_NOTIFY_AFFORDABILITY_CHANGE_LISTENER: {
                     final SomeArgs args = (SomeArgs) msg.obj;
                     final int userId = args.argi1;
@@ -936,12 +913,13 @@ public class InternalResourceService extends SystemService {
             synchronized (mLock) {
                 for (int i = 0; i < projectedActions.size(); ++i) {
                     AnticipatedAction action = projectedActions.get(i);
-                    final long cost = mCompleteEconomicPolicy.getCostOfAction(
+                    final Cost cost = mCompleteEconomicPolicy.getCostOfAction(
                             action.actionId, userId, pkgName);
-                    requiredBalance += cost * action.numInstantaneousCalls
-                            + cost * (action.ongoingDurationMs / 1000);
+                    requiredBalance += cost.price * action.numInstantaneousCalls
+                            + cost.price * (action.ongoingDurationMs / 1000);
                 }
-                return mAgent.getBalanceLocked(userId, pkgName) >= requiredBalance;
+                return mAgent.getBalanceLocked(userId, pkgName) >= requiredBalance
+                        && mScribe.getRemainingConsumableCakesLocked() >= requiredBalance;
             }
         }
 
@@ -960,14 +938,17 @@ public class InternalResourceService extends SystemService {
             synchronized (mLock) {
                 for (int i = 0; i < projectedActions.size(); ++i) {
                     AnticipatedAction action = projectedActions.get(i);
-                    final long cost = mCompleteEconomicPolicy.getCostOfAction(
+                    final Cost cost = mCompleteEconomicPolicy.getCostOfAction(
                             action.actionId, userId, pkgName);
-                    totalCostPerSecond += cost;
+                    totalCostPerSecond += cost.price;
                 }
                 if (totalCostPerSecond == 0) {
                     return FOREVER_MS;
                 }
-                return mAgent.getBalanceLocked(userId, pkgName) * 1000 / totalCostPerSecond;
+                final long minBalance = Math.min(
+                        mAgent.getBalanceLocked(userId, pkgName),
+                        mScribe.getRemainingConsumableCakesLocked());
+                return minBalance * 1000 / totalCostPerSecond;
             }
         }
 
@@ -1033,8 +1014,15 @@ public class InternalResourceService extends SystemService {
                     Settings.Global.getUriFor(TARE_ALARM_MANAGER_CONSTANTS), false, this);
             mContentResolver.registerContentObserver(
                     Settings.Global.getUriFor(TARE_JOB_SCHEDULER_CONSTANTS), false, this);
-            onPropertiesChanged(DeviceConfig.getProperties(DeviceConfig.NAMESPACE_TARE));
+            onPropertiesChanged(getAllDeviceConfigProperties());
             updateEnabledStatus();
+        }
+
+        @NonNull
+        DeviceConfig.Properties getAllDeviceConfigProperties() {
+            // Don't want to cache the Properties object locally in case it ends up being large,
+            // especially since it'll only be used once/infrequently (during setup or on a change).
+            return DeviceConfig.getProperties(DeviceConfig.NAMESPACE_TARE);
         }
 
         @Override
@@ -1049,6 +1037,7 @@ public class InternalResourceService extends SystemService {
 
         @Override
         public void onPropertiesChanged(DeviceConfig.Properties properties) {
+            boolean economicPolicyUpdated = false;
             synchronized (mLock) {
                 for (String name : properties.getKeyset()) {
                     if (name == null) {
@@ -1058,6 +1047,12 @@ public class InternalResourceService extends SystemService {
                         case KEY_DC_ENABLE_TARE:
                             updateEnabledStatus();
                             break;
+                        default:
+                            if (!economicPolicyUpdated
+                                    && (name.startsWith("am") || name.startsWith("js"))) {
+                                updateEconomicPolicy();
+                                economicPolicyUpdated = true;
+                            }
                     }
                 }
             }
@@ -1085,10 +1080,20 @@ public class InternalResourceService extends SystemService {
 
         private void updateEconomicPolicy() {
             synchronized (mLock) {
+                final long initialLimit =
+                        mCompleteEconomicPolicy.getInitialSatiatedConsumptionLimit();
+                final long hardLimit = mCompleteEconomicPolicy.getHardSatiatedConsumptionLimit();
                 mCompleteEconomicPolicy.tearDown();
                 mCompleteEconomicPolicy = new CompleteEconomicPolicy(InternalResourceService.this);
                 if (mIsEnabled && mBootPhase >= PHASE_SYSTEM_SERVICES_READY) {
-                    mCompleteEconomicPolicy.setup();
+                    mCompleteEconomicPolicy.setup(getAllDeviceConfigProperties());
+                    if (initialLimit != mCompleteEconomicPolicy.getInitialSatiatedConsumptionLimit()
+                            || hardLimit
+                            != mCompleteEconomicPolicy.getHardSatiatedConsumptionLimit()) {
+                        // Reset the consumption limit since several factors may have changed.
+                        mScribe.setConsumptionLimitLocked(
+                                mCompleteEconomicPolicy.getInitialSatiatedConsumptionLimit());
+                    }
                     mAgent.onPricingChangedLocked();
                 }
             }
@@ -1110,18 +1115,23 @@ public class InternalResourceService extends SystemService {
             pw.print("Current battery level: ");
             pw.println(mCurrentBatteryLevel);
 
-            final long maxCirculation = getMaxCirculationLocked();
-            pw.print("Max circulation (current/satiated): ");
-            pw.print(narcToString(maxCirculation));
+            final long consumptionLimit = getConsumptionLimitLocked();
+            pw.print("Consumption limit (current/initial-satiated/current-satiated): ");
+            pw.print(cakeToString(consumptionLimit));
             pw.print("/");
-            pw.println(narcToString(mCompleteEconomicPolicy.getMaxSatiatedCirculation()));
+            pw.print(cakeToString(mCompleteEconomicPolicy.getInitialSatiatedConsumptionLimit()));
+            pw.print("/");
+            pw.println(cakeToString(mScribe.getSatiatedConsumptionLimitLocked()));
 
-            final long currentCirculation = mScribe.getNarcsInCirculationLocked();
-            pw.print("Current GDP: ");
-            pw.print(narcToString(currentCirculation));
+            final long remainingConsumable = mScribe.getRemainingConsumableCakesLocked();
+            pw.print("Goods remaining: ");
+            pw.print(cakeToString(remainingConsumable));
             pw.print(" (");
-            pw.print(String.format("%.2f", 100f * currentCirculation / maxCirculation));
-            pw.println("% of current max)");
+            pw.print(String.format("%.2f", 100f * remainingConsumable / consumptionLimit));
+            pw.println("% of current limit)");
+
+            pw.print("Device wealth: ");
+            pw.println(cakeToString(mScribe.getCakesInCirculationForLoggingLocked()));
 
             pw.println();
             pw.print("Exempted apps", mExemptedApps);

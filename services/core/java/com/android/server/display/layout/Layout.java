@@ -67,7 +67,7 @@ public class Layout {
         // See if we're dealing with the "default" display
         if (isDefault && getById(DEFAULT_DISPLAY) != null) {
             Slog.w(TAG, "Ignoring attempt to add a second default display: " + address);
-            isDefault = false;
+            return null;
         }
 
         // Assign a logical display ID and create the new display.
@@ -75,10 +75,20 @@ public class Layout {
         // different layouts, a logical display can be destroyed and later recreated with the
         // same logical display ID.
         final int logicalDisplayId = assignDisplayIdLocked(isDefault);
-        final Display layout = new Display(address, logicalDisplayId, isEnabled);
+        final Display display = new Display(address, logicalDisplayId, isEnabled);
 
-        mDisplays.add(layout);
-        return layout;
+        mDisplays.add(display);
+        return display;
+    }
+
+    /**
+     * @param id The ID of the display to remove.
+     */
+    public void removeDisplayLocked(int id) {
+        Display display = getById(id);
+        if (display != null) {
+            mDisplays.remove(display);
+        }
     }
 
     /**

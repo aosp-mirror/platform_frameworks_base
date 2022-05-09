@@ -23,6 +23,9 @@ import java.io.PrintWriter
 import java.text.SimpleDateFormat
 import java.util.ArrayDeque
 import java.util.Locale
+import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.BlockingQueue
+import kotlin.concurrent.thread
 
 /**
  * A simple ring buffer of recyclable log messages
@@ -81,6 +84,22 @@ class LogBuffer @JvmOverloads constructor(
     }
 
     private val buffer: ArrayDeque<LogMessageImpl> = ArrayDeque()
+    private val echoMessageQueue: BlockingQueue<LogMessageImpl>? =
+            if (logcatEchoTracker.logInBackgroundThread) ArrayBlockingQueue(poolSize) else null
+
+    init {
+        if (logcatEchoTracker.logInBackgroundThread && echoMessageQueue != null) {
+            thread(start = true, priority = Thread.NORM_PRIORITY) {
+                try {
+                    while (true) {
+                        echoToDesiredEndpoints(echoMessageQueue.take())
+                    }
+                } catch (e: InterruptedException) {
+                    Thread.currentThread().interrupt()
+                }
+            }
+        }
+    }
 
     var frozen = false
         private set
@@ -176,6 +195,22 @@ class LogBuffer @JvmOverloads constructor(
             buffer.removeFirst()
         }
         buffer.add(message as LogMessageImpl)
+        // Log in the background thread only if echoMessageQueue exists and has capacity (checking
+        // capacity avoids the possibility of blocking this thread)
+        if (echoMessageQueue != null && echoMessageQueue.remainingCapacity() > 0) {
+            try {
+                echoMessageQueue.put(message)
+            } catch (e: InterruptedException) {
+                // the background thread has been shut down, so just log on this one
+                echoToDesiredEndpoints(message)
+            }
+        } else {
+            echoToDesiredEndpoints(message)
+        }
+    }
+
+    /** Sends message to echo after determining whether to use Logcat and/or systrace. */
+    private fun echoToDesiredEndpoints(message: LogMessageImpl) {
         val includeInLogcat = logcatEchoTracker.isBufferLoggable(name, message.level) ||
                 logcatEchoTracker.isTagLoggable(message.tag, message.level)
         echo(message, toLogcat = includeInLogcat, toSystrace = systrace)

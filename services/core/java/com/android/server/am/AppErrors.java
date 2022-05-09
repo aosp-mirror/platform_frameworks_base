@@ -33,6 +33,7 @@ import android.app.ActivityOptions;
 import android.app.AnrController;
 import android.app.ApplicationErrorReport;
 import android.app.ApplicationExitInfo;
+import android.app.RemoteServiceException.CrashedByAdbException;
 import android.app.usage.UsageStatsManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -523,6 +524,16 @@ class AppErrors {
             return;
         }
 
+        if (exceptionTypeId == CrashedByAdbException.TYPE_ID) {
+            String[] packages = proc.getPackageList();
+            for (int i = 0; i < packages.length; i++) {
+                if (mService.mPackageManagerInt.isPackageStateProtected(packages[i], proc.userId)) {
+                    Slog.w(TAG, "crashApplication: Can not crash protected package " + packages[i]);
+                    return;
+                }
+            }
+        }
+
         proc.scheduleCrashLocked(message, exceptionTypeId, extras);
         if (force) {
             // If the app is responsive, the scheduled crash will happen as expected
@@ -577,12 +588,14 @@ class AppErrors {
             mPackageWatchdog.onPackageFailure(r.getPackageListWithVersionCode(),
                     PackageWatchdog.FAILURE_REASON_APP_CRASH);
 
-            mService.mProcessList.noteAppKill(r, (crashInfo != null
-                      && "Native crash".equals(crashInfo.exceptionClassName))
-                      ? ApplicationExitInfo.REASON_CRASH_NATIVE
-                      : ApplicationExitInfo.REASON_CRASH,
-                      ApplicationExitInfo.SUBREASON_UNKNOWN,
-                    "crash");
+            synchronized (mService) {
+                mService.mProcessList.noteAppKill(r, (crashInfo != null
+                          && "Native crash".equals(crashInfo.exceptionClassName))
+                          ? ApplicationExitInfo.REASON_CRASH_NATIVE
+                          : ApplicationExitInfo.REASON_CRASH,
+                          ApplicationExitInfo.SUBREASON_UNKNOWN,
+                        "crash");
+            }
         }
 
         final int relaunchReason = r != null

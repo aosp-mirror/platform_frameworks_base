@@ -40,7 +40,9 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.clearInvocations;
 
+import android.app.WindowConfiguration;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -318,6 +320,7 @@ public class DisplayRotationTests {
     private void verifyOrientationListenerRegistration(int numOfInvocation) {
         final ArgumentCaptor<SensorEventListener> listenerCaptor = ArgumentCaptor.forClass(
                 SensorEventListener.class);
+        waitForUiHandler();
         verify(mMockSensorManager, times(numOfInvocation)).registerListener(
                 listenerCaptor.capture(),
                 same(mFakeSensor),
@@ -478,10 +481,14 @@ public class DisplayRotationTests {
                 SCREEN_ORIENTATION_UNSPECIFIED, Surface.ROTATION_0));
     }
 
-    private boolean waitForUiHandler() throws Exception {
+    private boolean waitForUiHandler() {
         final CountDownLatch latch = new CountDownLatch(1);
         UiThread.getHandler().post(latch::countDown);
-        return latch.await(UI_HANDLER_WAIT_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+        try {
+            return latch.await(UI_HANDLER_WAIT_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException ignored) {
+        }
+        throw new AssertionError("Failed to wait for ui handler");
     }
 
     @Test
@@ -512,6 +519,69 @@ public class DisplayRotationTests {
         assertTrue(waitForUiHandler());
 
         verify(mMockStatusBarManagerInternal).onProposedRotationChanged(Surface.ROTATION_90, true);
+    }
+
+    @Test
+    public void testAllowAllRotations_allowsUpsideDownSuggestion()
+            throws Exception {
+        mBuilder.build();
+        mTarget.updateOrientation(SCREEN_ORIENTATION_UNSPECIFIED, true);
+        configureDisplayRotation(SCREEN_ORIENTATION_LANDSCAPE, false, false);
+        when(mMockRes.getBoolean(com.android.internal.R.bool.config_allowAllRotations))
+                .thenReturn(true);
+        freezeRotation(Surface.ROTATION_0);
+        enableOrientationSensor();
+
+        mOrientationSensorListener.onSensorChanged(createSensorEvent(Surface.ROTATION_180));
+        assertTrue(waitForUiHandler());
+
+        verify(mMockStatusBarManagerInternal)
+                .onProposedRotationChanged(Surface.ROTATION_180, true);
+    }
+
+    @Test
+    public void testDoNotAllowAllRotations_doesNotAllowUpsideDownSuggestion()
+            throws Exception {
+        mBuilder.build();
+        mTarget.updateOrientation(SCREEN_ORIENTATION_UNSPECIFIED, true);
+        configureDisplayRotation(SCREEN_ORIENTATION_LANDSCAPE, false, false);
+        when(mMockRes.getBoolean(com.android.internal.R.bool.config_allowAllRotations))
+                .thenReturn(false);
+        freezeRotation(Surface.ROTATION_0);
+        enableOrientationSensor();
+
+        mOrientationSensorListener.onSensorChanged(createSensorEvent(Surface.ROTATION_180));
+        assertTrue(waitForUiHandler());
+
+        verify(mMockStatusBarManagerInternal)
+                .onProposedRotationChanged(Surface.ROTATION_180, false);
+    }
+
+    @Test
+    public void testAllowAllRotations_allowAllRotationsBecomesDisabled_forbidsUpsideDownSuggestion()
+            throws Exception {
+        mBuilder.build();
+        mTarget.updateOrientation(SCREEN_ORIENTATION_UNSPECIFIED, true);
+        configureDisplayRotation(SCREEN_ORIENTATION_LANDSCAPE, false, false);
+        when(mMockRes.getBoolean(com.android.internal.R.bool.config_allowAllRotations))
+                .thenReturn(true);
+        freezeRotation(Surface.ROTATION_0);
+        enableOrientationSensor();
+        mOrientationSensorListener.onSensorChanged(createSensorEvent(Surface.ROTATION_0));
+        assertTrue(waitForUiHandler());
+
+        // Change resource to disallow all rotations.
+        // Reset "allowAllRotations".
+        mTarget.applyCurrentRotation(Surface.ROTATION_0);
+        clearInvocations(mMockStatusBarManagerInternal);
+        when(mMockRes.getBoolean(com.android.internal.R.bool.config_allowAllRotations))
+                .thenReturn(false);
+        mTarget.resetAllowAllRotations();
+        mOrientationSensorListener.onSensorChanged(createSensorEvent(Surface.ROTATION_180));
+        assertTrue(waitForUiHandler());
+
+        verify(mMockStatusBarManagerInternal)
+                .onProposedRotationChanged(Surface.ROTATION_180, false);
     }
 
     @Test
@@ -721,14 +791,20 @@ public class DisplayRotationTests {
         doReturn(true).when(mMockDisplayPolicy).navigationBarCanMove();
         doReturn(win).when(mMockDisplayPolicy).getTopFullscreenOpaqueWindow();
         mMockDisplayContent.mCurrentFocus = win;
-        mTarget.mUpsideDownRotation = Surface.ROTATION_180;
+        // This should not affect the condition of shouldRotateSeamlessly.
+        mTarget.mUpsideDownRotation = Surface.ROTATION_90;
 
         doReturn(true).when(win.mActivityRecord).matchParentBounds();
         // The focused fullscreen opaque window without override bounds should be able to be
         // rotated seamlessly.
         assertTrue(mTarget.shouldRotateSeamlessly(
                 Surface.ROTATION_0, Surface.ROTATION_90, false /* forceUpdate */));
+        // Reject any 180 degree because non-movable navbar will be placed in a different position.
+        doReturn(false).when(mMockDisplayPolicy).navigationBarCanMove();
+        assertFalse(mTarget.shouldRotateSeamlessly(
+                Surface.ROTATION_90, Surface.ROTATION_180, false /* forceUpdate */));
 
+        doReturn(true).when(mMockDisplayPolicy).navigationBarCanMove();
         doReturn(false).when(win.mActivityRecord).matchParentBounds();
         // No seamless rotation if the window may be positioned with offset after rotation.
         assertFalse(mTarget.shouldRotateSeamlessly(
@@ -935,6 +1011,8 @@ public class DisplayRotationTests {
                     .thenReturn(WmDisplayCutout.NO_CUTOUT);
             when(mMockDisplayContent.getDefaultTaskDisplayArea())
                     .thenReturn(mock(TaskDisplayArea.class));
+            when(mMockDisplayContent.getWindowConfiguration())
+                    .thenReturn(new WindowConfiguration());
 
             mMockDisplayPolicy = mock(DisplayPolicy.class);
 

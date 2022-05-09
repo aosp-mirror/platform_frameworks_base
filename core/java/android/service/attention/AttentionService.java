@@ -128,9 +128,9 @@ public abstract class AttentionService extends Service {
 
         /** {@inheritDoc} */
         @Override
-        public void onStartProximityUpdates(IProximityCallback callback) {
+        public void onStartProximityUpdates(IProximityUpdateCallback callback) {
             Objects.requireNonNull(callback);
-            AttentionService.this.onStartProximityUpdates(new ProximityCallback(callback));
+            AttentionService.this.onStartProximityUpdates(new ProximityUpdateCallback(callback));
 
         }
 
@@ -166,11 +166,11 @@ public abstract class AttentionService extends Service {
 
     /**
      * Requests the continuous updates of proximity signal via the provided callback,
-     * until the given callback is unregistered.
+     * until {@link #onStopProximityUpdates} is called.
      *
      * @param callback the callback to return the result to
      */
-    public void onStartProximityUpdates(@NonNull ProximityCallback callback) {
+    public void onStartProximityUpdates(@NonNull ProximityUpdateCallback callback) {
         Slog.w(LOG_TAG, "Override this method.");
     }
 
@@ -213,22 +213,24 @@ public abstract class AttentionService extends Service {
         }
     }
 
-    /** Callbacks for ProximityCallback results. */
-    public static final class ProximityCallback {
-        @NonNull private final WeakReference<IProximityCallback> mCallback;
+    /** Callbacks for ProximityUpdateCallback results. */
+    public static final class ProximityUpdateCallback {
+        @NonNull private final WeakReference<IProximityUpdateCallback> mCallback;
 
-        private ProximityCallback(@NonNull IProximityCallback callback) {
+        private ProximityUpdateCallback(@NonNull IProximityUpdateCallback callback) {
             mCallback = new WeakReference<>(callback);
         }
 
         /**
          * @param distance the estimated distance of the user (in meter)
-         * The distance will be PROXIMITY_UNKNOWN if the proximity sensing was inconclusive.
-         *
+         * The distance will be {@link #PROXIMITY_UNKNOWN} if the proximity sensing
+         * was inconclusive.
          */
         public void onProximityUpdate(double distance) {
             try {
-                mCallback.get().onProximityUpdate(distance);
+                if (mCallback.get() != null) {
+                    mCallback.get().onProximityUpdate(distance);
+                }
             } catch (RemoteException e) {
                 e.rethrowFromSystemServer();
             }

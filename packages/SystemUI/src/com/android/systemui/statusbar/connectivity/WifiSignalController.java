@@ -21,19 +21,20 @@ import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_OU
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
-import android.net.NetworkScoreManager;
 import android.net.wifi.WifiManager;
+import android.os.Handler;
 import android.text.Html;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.Preconditions;
 import com.android.settingslib.SignalIcon.IconGroup;
 import com.android.settingslib.SignalIcon.MobileIconGroup;
 import com.android.settingslib.graph.SignalDrawable;
 import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.settingslib.wifi.WifiStatusTracker;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.Background;
 
 import java.io.PrintWriter;
 
@@ -45,19 +46,21 @@ public class WifiSignalController extends SignalController<WifiState, IconGroup>
     private final MobileIconGroup mCarrierMergedWifiIconGroup = TelephonyIcons.CARRIER_MERGED_WIFI;
     private final WifiManager mWifiManager;
 
+    private final Handler mBgHandler;
+
     public WifiSignalController(
             Context context,
             boolean hasMobileDataFeature,
             CallbackHandler callbackHandler,
             NetworkControllerImpl networkController,
             WifiManager wifiManager,
-            ConnectivityManager connectivityManager,
-            NetworkScoreManager networkScoreManager) {
+            WifiStatusTrackerFactory trackerFactory,
+            @Background Handler bgHandler) {
         super("WifiSignalController", context, NetworkCapabilities.TRANSPORT_WIFI,
                 callbackHandler, networkController);
+        mBgHandler = bgHandler;
         mWifiManager = wifiManager;
-        mWifiTracker = new WifiStatusTracker(mContext, wifiManager, networkScoreManager,
-                connectivityManager, this::handleStatusUpdated);
+        mWifiTracker = trackerFactory.createTracker(this::handleStatusUpdated, bgHandler);
         mWifiTracker.setListening(true);
         mHasMobileDataFeature = hasMobileDataFeature;
         if (wifiManager != null) {
@@ -175,32 +178,51 @@ public class WifiSignalController extends SignalController<WifiState, IconGroup>
      * Fetches wifi initial state replacing the initial sticky broadcast.
      */
     public void fetchInitialState() {
-        mWifiTracker.fetchInitialState();
-        copyWifiStates();
-        notifyListenersIfNecessary();
+        doInBackground(() -> {
+            mWifiTracker.fetchInitialState();
+            copyWifiStates();
+            notifyListenersIfNecessary();
+        });
     }
 
     /**
      * Extract wifi state directly from broadcasts about changes in wifi state.
      */
-    public void handleBroadcast(Intent intent) {
-        mWifiTracker.handleBroadcast(intent);
-        copyWifiStates();
-        notifyListenersIfNecessary();
+    void handleBroadcast(Intent intent) {
+        doInBackground(() -> {
+            mWifiTracker.handleBroadcast(intent);
+            copyWifiStates();
+            notifyListenersIfNecessary();
+        });
     }
 
     private void handleStatusUpdated() {
-        copyWifiStates();
-        notifyListenersIfNecessary();
+        // The WifiStatusTracker callback comes in on the main thread, but the rest of our data
+        // access happens on the bgHandler
+        doInBackground(() -> {
+            copyWifiStates();
+            notifyListenersIfNecessary();
+        });
+    }
+
+    private void doInBackground(Runnable action) {
+        if (Thread.currentThread() != mBgHandler.getLooper().getThread()) {
+            mBgHandler.post(action);
+        } else {
+            action.run();
+        }
     }
 
     private void copyWifiStates() {
+        // Data access should only happen on our bg thread
+        Preconditions.checkState(mBgHandler.getLooper().isCurrentThread());
+
         mCurrentState.enabled = mWifiTracker.enabled;
         mCurrentState.isDefault = mWifiTracker.isDefaultNetwork;
         mCurrentState.connected = mWifiTracker.connected;
         mCurrentState.ssid = mWifiTracker.ssid;
         mCurrentState.rssi = mWifiTracker.rssi;
-        notifyWifiLevelChangeIfNecessary(mWifiTracker.level);
+        boolean levelChanged = mCurrentState.level != mWifiTracker.level;
         mCurrentState.level = mWifiTracker.level;
         mCurrentState.statusLabel = mWifiTracker.statusLabel;
         mCurrentState.isCarrierMerged = mWifiTracker.isCarrierMerged;
@@ -208,11 +230,9 @@ public class WifiSignalController extends SignalController<WifiState, IconGroup>
         mCurrentState.iconGroup =
                 mCurrentState.isCarrierMerged ? mCarrierMergedWifiIconGroup
                         : mUnmergedWifiIconGroup;
-    }
 
-    void notifyWifiLevelChangeIfNecessary(int level) {
-        if (level != mCurrentState.level) {
-            mNetworkController.notifyWifiLevelChange(level);
+        if (levelChanged) {
+            mNetworkController.notifyWifiLevelChange(mCurrentState.level);
         }
     }
 
@@ -234,6 +254,7 @@ public class WifiSignalController extends SignalController<WifiState, IconGroup>
     public void dump(PrintWriter pw) {
         super.dump(pw);
         mWifiTracker.dump(pw);
+        dumpTableData(pw);
     }
 
     /**

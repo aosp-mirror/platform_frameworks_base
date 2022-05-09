@@ -80,9 +80,12 @@ import android.window.TransitionInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
+import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.server.LocalServices;
+import com.android.server.inputmethod.InputMethodManagerInternal;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -167,8 +170,11 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
      */
     private final ArraySet<WindowToken> mVisibleAtTransitionEndTokens = new ArraySet<>();
 
-    /** Set of transient activities (lifecycle initially tied to this transition). */
-    private ArraySet<ActivityRecord> mTransientLaunches = null;
+    /**
+     * Set of transient activities (lifecycle initially tied to this transition) and their
+     * restore-below tasks.
+     */
+    private ArrayMap<ActivityRecord, Task> mTransientLaunches = null;
 
     /** Custom activity-level animation options and callbacks. */
     private TransitionInfo.AnimationOptions mOverrideOptions;
@@ -183,6 +189,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     private boolean mNavBarAttachedToApp = false;
     private int mRecentsDisplayId = INVALID_DISPLAY;
 
+    /** @see #setCanPipOnFinish */
+    private boolean mCanPipOnFinish = true;
+
     Transition(@TransitionType int type, @TransitionFlags int flags,
             TransitionController controller, BLASTSyncEngine syncEngine) {
         mType = type;
@@ -196,17 +205,27 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     }
 
     /** Records an activity as transient-launch. This activity must be already collected. */
-    void setTransientLaunch(@NonNull ActivityRecord activity) {
+    void setTransientLaunch(@NonNull ActivityRecord activity, @Nullable Task restoreBelow) {
         if (mTransientLaunches == null) {
-            mTransientLaunches = new ArraySet<>();
+            mTransientLaunches = new ArrayMap<>();
         }
-        mTransientLaunches.add(activity);
+        mTransientLaunches.put(activity, restoreBelow);
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Transition %d: Set %s as "
                 + "transient-launch", mSyncId, activity);
     }
 
     boolean isTransientLaunch(@NonNull ActivityRecord activity) {
-        return mTransientLaunches != null && mTransientLaunches.contains(activity);
+        return mTransientLaunches != null && mTransientLaunches.containsKey(activity);
+    }
+
+    Task getTransientLaunchRestoreTarget(@NonNull WindowContainer container) {
+        if (mTransientLaunches == null) return null;
+        for (int i = 0; i < mTransientLaunches.size(); ++i) {
+            if (mTransientLaunches.keyAt(i).isDescendantOf(container)) {
+                return mTransientLaunches.valueAt(i);
+            }
+        }
+        return null;
     }
 
     boolean isOnDisplay(@NonNull DisplayContent dc) {
@@ -407,6 +426,21 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 t.setLayer(targetLeash, target.getLastLayer());
                 target.getRelativePosition(tmpPos);
                 t.setPosition(targetLeash, tmpPos.x, tmpPos.y);
+                final Rect clipRect;
+                // No need to clip the display in case seeing the clipped content when during the
+                // display rotation.
+                if (target.asDisplayContent() != null) {
+                    clipRect = null;
+                } else if (target.asActivityRecord() != null) {
+                    // Always use parent bounds of activity because letterbox area (e.g. fixed
+                    // aspect ratio or size compat mode) should be included.
+                    clipRect = target.getParent().getRequestedOverrideBounds();
+                    clipRect.offset(-tmpPos.x, -tmpPos.y);
+                } else {
+                    clipRect = target.getRequestedOverrideBounds();
+                    clipRect.offset(-tmpPos.x, -tmpPos.y);
+                }
+                t.setCrop(targetLeash, clipRect);
                 t.setCornerRadius(targetLeash, 0);
                 t.setShadowRadius(targetLeash, 0);
                 t.setMatrix(targetLeash, 1, 0, 0, 1);
@@ -429,6 +463,15 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         if (rootLeash.isValid()) {
             t.reparent(rootLeash, null);
         }
+    }
+
+    /**
+     * Set whether this transition can start a pip-enter transition when finished. This is usually
+     * true, but gets set to false when recents decides that it wants to finish its animation but
+     * not actually finish its animation (yeah...).
+     */
+    void setCanPipOnFinish(boolean canPipOnFinish) {
+        mCanPipOnFinish = canPipOnFinish;
     }
 
     /**
@@ -459,14 +502,25 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 // activity in a bad state.
                 if (!visibleAtTransitionEnd && !ar.isVisibleRequested()) {
                     boolean commitVisibility = true;
-                    if (ar.getDeferHidingClient() && ar.getTask() != null) {
+                    if (mCanPipOnFinish && ar.isVisible() && ar.getTask() != null) {
                         if (ar.pictureInPictureArgs != null
                                 && ar.pictureInPictureArgs.isAutoEnterEnabled()) {
+                            if (mTransientLaunches != null) {
+                                for (int j = 0; j < mTransientLaunches.size(); ++j) {
+                                    if (mTransientLaunches.keyAt(j).isVisibleRequested()) {
+                                        // force enable pip-on-task-switch now that we've committed
+                                        // to actually launching to the transient activity.
+                                        ar.supportsEnterPipOnTaskSwitch = true;
+                                        break;
+                                    }
+                                }
+                            }
                             mController.mAtm.enterPictureInPictureMode(ar, ar.pictureInPictureArgs);
                             // Avoid commit visibility to false here, or else we will get a sudden
                             // "flash" / surface going invisible for a split second.
                             commitVisibility = false;
-                        } else {
+                        } else if (ar.getDeferHidingClient()) {
+                            // Legacy PIP-enter requires pause event with user-leaving.
                             mController.mAtm.mTaskSupervisor.mUserLeaving = true;
                             ar.getTaskFragment().startPausing(false /* uiSleeping */,
                                     null /* resuming */, "finishTransition");
@@ -493,7 +547,6 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                     // Legacy dispatch relies on this (for now).
                     ar.mEnteringAnimation = visibleAtTransitionEnd;
                 }
-                mController.dispatchLegacyAppTransitionFinished(ar);
             }
             final WallpaperWindowToken wt = mParticipants.valueAt(i).asWallpaperToken();
             if (wt != null) {
@@ -503,6 +556,15 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                             "  Commit wallpaper becoming invisible: %s", wt);
                     wt.commitVisibility(false /* visible */);
                 }
+            }
+        }
+        // dispatch legacy callback in a different loop. This is because multiple legacy handlers
+        // (fixed-rotation/displaycontent) make global changes, so we want to ensure that we've
+        // processed all the participants first (in particular, we want to trigger pip-enter first)
+        for (int i = 0; i < mParticipants.size(); ++i) {
+            final ActivityRecord ar = mParticipants.valueAt(i).asActivityRecord();
+            if (ar != null) {
+                mController.dispatchLegacyAppTransitionFinished(ar);
             }
         }
         if (activitiesWentInvisible) {
@@ -526,19 +588,30 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         for (int i = 0; i < mTargetDisplays.size(); ++i) {
             final DisplayContent dc = mTargetDisplays.get(i);
             final AsyncRotationController asyncRotationController = dc.getAsyncRotationController();
-            if (asyncRotationController != null) {
+            if (asyncRotationController != null && mTargets.contains(dc)) {
                 asyncRotationController.onTransitionFinished();
             }
             if (mTransientLaunches != null) {
+                InsetsControlTarget prevImeTarget = dc.getImeTarget(
+                        DisplayContent.IME_TARGET_CONTROL);
+                InsetsControlTarget newImeTarget = null;
                 // Transient-launch activities cannot be IME target (WindowState#canBeImeTarget),
                 // so re-compute in case the IME target is changed after transition.
                 for (int t = 0; t < mTransientLaunches.size(); ++t) {
-                    if (mTransientLaunches.valueAt(t).getDisplayContent() == dc) {
-                        dc.computeImeTarget(true /* updateImeTarget */);
+                    if (mTransientLaunches.keyAt(t).getDisplayContent() == dc) {
+                        newImeTarget = dc.computeImeTarget(true /* updateImeTarget */);
                         break;
                     }
                 }
+                if (mRecentsDisplayId != INVALID_DISPLAY && prevImeTarget == newImeTarget) {
+                    // Restore IME icon only when moving the original app task to front from
+                    // recents, in case IME icon may missing if the moving task has already been
+                    // the current focused task.
+                    InputMethodManagerInternal.get().updateImeWindowStatus(
+                            false /* disableImeIcon */);
+                }
             }
+            dc.removeImeSurfaceImmediately();
             dc.handleCompleteDeferredRemoval();
         }
     }
@@ -674,7 +747,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         // This is non-null only if display has changes. It handles the visible windows that don't
         // need to be participated in the transition.
         final AsyncRotationController controller = dc.getAsyncRotationController();
-        if (controller != null) {
+        if (controller != null && mTargets.contains(dc)) {
             controller.setupStartTransaction(transaction);
         }
         mStartTransaction = transaction;
@@ -757,6 +830,26 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                         topActivity.getBounds());
                 dc.getInputMonitor().setActiveRecents(recentsActivity, topActivity);
             }
+        }
+
+        // Hiding IME/IME icon when starting quick-step with resents animation.
+        if (!mTargetDisplays.get(mRecentsDisplayId).isImeAttachedToApp()) {
+            // Hiding IME if IME window is not attached to app.
+            // Since some windowing mode is not proper to snapshot Task with IME window
+            // while the app transitioning to the next task (e.g. split-screen mode)
+            final InputMethodManagerInternal inputMethodManagerInternal =
+                    LocalServices.getService(InputMethodManagerInternal.class);
+            if (inputMethodManagerInternal != null) {
+                inputMethodManagerInternal.hideCurrentInputMethod(
+                        SoftInputShowHideReason.HIDE_RECENTS_ANIMATION);
+            }
+        } else {
+            // Disable IME icon explicitly when IME attached to the app in case
+            // IME icon might flickering while swiping to the next app task still
+            // in animating before the next app window focused, or IME icon
+            // persists on the bottom when swiping the task to recents.
+            InputMethodManagerInternal.get().updateImeWindowStatus(
+                    true /* disableImeIcon */);
         }
 
         // The rest of this function handles nav-bar reparenting
@@ -1069,7 +1162,6 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 continue;
             }
             targets.add(wc);
-            targets.mValidParticipants.add(wc);
         }
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "  Initial targets: %s",
                 targets.mArray);
@@ -1087,15 +1179,17 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     private static void populateParentChanges(Targets targets,
             ArrayMap<WindowContainer, ChangeInfo> changes) {
         final ArrayList<WindowContainer<?>> intermediates = new ArrayList<>();
-        for (int i = targets.mValidParticipants.size() - 1; i >= 0; --i) {
-            WindowContainer<?> wc = targets.mValidParticipants.get(i);
-            // Go up if the participant has been represented by its parent.
-            while (targets.mArray.indexOfValue(wc) < 0 && wc.getParent() != null) {
-                wc = wc.getParent();
-            }
+        // Make a copy to iterate because the original array may be modified.
+        final ArrayList<WindowContainer<?>> targetList = new ArrayList<>(targets.mArray.size());
+        for (int i = targets.mArray.size() - 1; i >= 0; --i) {
+            targetList.add(targets.mArray.valueAt(i));
+        }
+        for (int i = targetList.size() - 1; i >= 0; --i) {
+            final WindowContainer<?> wc = targetList.get(i);
             // Wallpaper must belong to the top (regardless of how nested it is in DisplayAreas).
             final boolean skipIntermediateReports = isWallpaper(wc);
             intermediates.clear();
+            boolean foundParentInTargets = false;
             // Collect the intermediate parents between target and top changed parent.
             for (WindowContainer<?> p = wc.getParent(); p != null; p = p.getParent()) {
                 final ChangeInfo parentChange = changes.get(p);
@@ -1109,19 +1203,19 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                     // The chain above the parent was processed.
                     break;
                 }
-                if (targets.mValidParticipants.contains(p)) {
+                if (targetList.contains(p)) {
                     if (skipIntermediateReports) {
                         changes.get(wc).mParent = p;
                     } else {
                         intermediates.add(p);
                     }
-                    // The parent reaches a participant.
+                    foundParentInTargets = true;
                     break;
                 } else if (reportIfNotTop(p) && !skipIntermediateReports) {
                     intermediates.add(p);
                 }
             }
-            if (intermediates.isEmpty()) continue;
+            if (!foundParentInTargets || intermediates.isEmpty()) continue;
             // Add any always-report parents along the way.
             changes.get(wc).mParent = intermediates.get(0);
             for (int j = 0; j < intermediates.size() - 1; j++) {
@@ -1237,11 +1331,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             }
             change.setMode(info.getTransitMode(target));
             change.setStartAbsBounds(info.mAbsoluteBounds);
-            change.setEndAbsBounds(target.getBounds());
-            change.setEndRelOffset(target.getBounds().left - target.getParent().getBounds().left,
-                    target.getBounds().top - target.getParent().getBounds().top);
             change.setFlags(info.getChangeFlags(target));
-            change.setRotation(info.mRotation, target.getWindowConfiguration().getRotation());
             final Task task = target.asTask();
             if (task != null) {
                 final ActivityManager.RunningTaskInfo tinfo = new ActivityManager.RunningTaskInfo();
@@ -1251,16 +1341,50 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 final ActivityRecord topMostActivity = task.getTopMostActivity();
                 change.setAllowEnterPip(topMostActivity != null
                         && topMostActivity.checkEnterPictureInPictureAppOpsState());
+                final ActivityRecord topRunningActivity = task.topRunningActivity();
+                if (topRunningActivity != null && task.mDisplayContent != null
+                        // Display won't be rotated for multi window Task, so the fixed rotation
+                        // won't be applied. This can happen when the windowing mode is changed
+                        // before the previous fixed rotation is applied.
+                        && !task.inMultiWindowMode()) {
+                    // If Activity is in fixed rotation, its will be applied with the next rotation,
+                    // when the Task is still in the previous rotation.
+                    final int taskRotation = task.getWindowConfiguration().getDisplayRotation();
+                    final int activityRotation = topRunningActivity.getWindowConfiguration()
+                            .getDisplayRotation();
+                    if (taskRotation != activityRotation) {
+                        change.setEndFixedRotation(activityRotation);
+                    }
+                }
             } else if ((info.mFlags & ChangeInfo.FLAG_SEAMLESS_ROTATION) != 0) {
                 change.setRotationAnimation(ROTATION_ANIMATION_SEAMLESS);
             }
+
+            final WindowContainer<?> parent = target.getParent();
+            final Rect bounds = target.getBounds();
+            final Rect parentBounds = parent.getBounds();
+            change.setEndRelOffset(bounds.left - parentBounds.left,
+                    bounds.top - parentBounds.top);
+            int endRotation = target.getWindowConfiguration().getRotation();
             final ActivityRecord activityRecord = target.asActivityRecord();
             if (activityRecord != null) {
                 final Task arTask = activityRecord.getTask();
                 final int backgroundColor = ColorUtils.setAlphaComponent(
                         arTask.getTaskDescription().getBackgroundColor(), 255);
                 change.setBackgroundColor(backgroundColor);
+                // TODO(b/227427984): Shell needs to aware letterbox.
+                // Always use parent bounds of activity because letterbox area (e.g. fixed aspect
+                // ratio or size compat mode) should be included in the animation.
+                change.setEndAbsBounds(parentBounds);
+                if (activityRecord.getRelativeDisplayRotation() != 0
+                        && !activityRecord.mTransitionController.useShellTransitionsRotation()) {
+                    // Use parent rotation because shell doesn't know the surface is rotated.
+                    endRotation = parent.getWindowConfiguration().getRotation();
+                }
+            } else {
+                change.setEndAbsBounds(bounds);
             }
+            change.setRotation(info.mRotation, endRotation);
 
             out.addChange(change);
         }
@@ -1456,6 +1580,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             if (task != null && task.voiceSession != null) {
                 flags |= FLAG_IS_VOICE_INTERACTION;
             }
+            if (task != null && task.isTranslucent(null)) {
+                flags |= FLAG_TRANSLUCENT;
+            }
             final ActivityRecord record = wc.asActivityRecord();
             if (record != null) {
                 if (record.mUseTransferredAnimation) {
@@ -1581,8 +1708,6 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     private static class Targets {
         /** All targets. Its keys (depth) are sorted in ascending order naturally. */
         final SparseArray<WindowContainer<?>> mArray = new SparseArray<>();
-        /** The initial participants which have changes. */
-        final ArrayList<WindowContainer<?>> mValidParticipants = new ArrayList<>();
         /** The targets which were represented by their parent. */
         private ArrayList<WindowContainer<?>> mRemovedTargets;
         private int mDepthFactor;

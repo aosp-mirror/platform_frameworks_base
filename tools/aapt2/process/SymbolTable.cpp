@@ -185,7 +185,7 @@ std::unique_ptr<SymbolTable::Symbol> ResourceTableSymbolSource::FindByName(
     const ResourceName& name) {
   std::optional<ResourceTable::SearchResult> result = table_->FindResource(name);
   if (!result) {
-    if (name.type == ResourceType::kAttr) {
+    if (name.type.type == ResourceType::kAttr) {
       // Recurse and try looking up a private attribute.
       return FindByName(ResourceName(name.package, ResourceType::kAttrPrivate, name.entry));
     }
@@ -203,7 +203,7 @@ std::unique_ptr<SymbolTable::Symbol> ResourceTableSymbolSource::FindByName(
         (sr.entry->id.value().package_id() == 0) || sr.entry->visibility.staged_api;
   }
 
-  if (name.type == ResourceType::kAttr || name.type == ResourceType::kAttrPrivate) {
+  if (name.type.type == ResourceType::kAttr || name.type.type == ResourceType::kAttrPrivate) {
     const ConfigDescription kDefaultConfig;
     ResourceConfigValue* config_value = sr.entry->FindValue(kDefaultConfig);
     if (config_value) {
@@ -366,7 +366,7 @@ std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindByName(
   }
 
   std::unique_ptr<SymbolTable::Symbol> s;
-  if (real_name.type == ResourceType::kAttr) {
+  if (real_name.type.type == ResourceType::kAttr) {
     s = LookupAttributeInTable(asset_manager_, res_id);
   } else {
     s = util::make_unique<SymbolTable::Symbol>();
@@ -413,7 +413,7 @@ std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindById(
 
   ResourceName& name = maybe_name.value();
   std::unique_ptr<SymbolTable::Symbol> s;
-  if (name.type == ResourceType::kAttr) {
+  if (name.type.type == ResourceType::kAttr) {
     s = LookupAttributeInTable(asset_manager_, id);
   } else {
     s = util::make_unique<SymbolTable::Symbol>();

@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import static android.content.pm.PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
+import static android.content.pm.SigningDetails.CapabilityMergeRule.MERGE_RESTRICTED_CAPABILITY;
 
 import static com.android.server.pm.PackageManagerService.SCAN_BOOTING;
 import static com.android.server.pm.PackageManagerService.SCAN_DONT_KILL_APP;
@@ -176,6 +177,19 @@ final class ReconcilePackageUtils {
                         SigningDetails mergedDetails = sharedSigningDetails.mergeLineageWith(
                                 signingDetails);
                         if (mergedDetails != sharedSigningDetails) {
+                            // Use the restricted merge rule with the signing lineages from the
+                            // other packages in the sharedUserId to ensure if any revoke a
+                            // capability from a previous signer then this is reflected in the
+                            // shared lineage.
+                            for (AndroidPackage androidPackage : sharedUserSetting.getPackages()) {
+                                if (androidPackage.getPackageName() != null
+                                        && !androidPackage.getPackageName().equals(
+                                        parsedPackage.getPackageName())) {
+                                    mergedDetails = mergedDetails.mergeLineageWith(
+                                            androidPackage.getSigningDetails(),
+                                            MERGE_RESTRICTED_CAPABILITY);
+                                }
+                            }
                             sharedUserSetting.signatures.mSigningDetails =
                                     mergedDetails;
                         }

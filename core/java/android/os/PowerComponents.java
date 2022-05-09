@@ -292,6 +292,10 @@ class PowerComponents {
                 procState = BatteryUsageStatsAtomsProto.BatteryConsumerData.PowerComponentUsageSlice
                         .FOREGROUND_SERVICE;
                 break;
+            case BatteryConsumer.PROCESS_STATE_CACHED:
+                procState = BatteryUsageStatsAtomsProto.BatteryConsumerData.PowerComponentUsageSlice
+                        .CACHED;
+                break;
             default:
                 throw new IllegalArgumentException("Unknown process state: " + processState);
         }

@@ -31,7 +31,6 @@ import androidx.annotation.WorkerThread
 import com.android.systemui.Dumpable
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.util.Assert
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.lang.IllegalStateException
 import java.lang.ref.WeakReference
@@ -128,6 +127,12 @@ class UserTrackerImpl internal constructor(
         }
     }
 
+    override fun createCurrentUserContext(context: Context): Context {
+        synchronized(mutex) {
+            return context.createContextAsUser(userHandle, 0)
+        }
+    }
+
     private fun setUserIdInternal(user: Int): Pair<Context, List<UserInfo>> {
         val profiles = userManager.getProfiles(user)
         val handle = UserHandle(user)
@@ -199,7 +204,7 @@ class UserTrackerImpl internal constructor(
         }
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("Initialized: $initialized")
         if (initialized) {
             pw.println("userId: $userId")

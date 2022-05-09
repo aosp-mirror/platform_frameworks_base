@@ -38,7 +38,6 @@ import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.notification.AssistantFeedbackController;
-import com.android.systemui.statusbar.notification.ForegroundServiceDismissalFeatureController;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManagerLogger;
@@ -69,12 +68,14 @@ import com.android.systemui.statusbar.notification.collection.render.GroupExpans
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManagerImpl;
 import com.android.systemui.statusbar.notification.collection.render.NotifGutsViewManager;
-import com.android.systemui.statusbar.notification.collection.render.NotifPanelEventSourceModule;
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
+import com.android.systemui.statusbar.notification.icon.ConversationIconManager;
+import com.android.systemui.statusbar.notification.icon.IconManager;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.init.NotificationsControllerImpl;
 import com.android.systemui.statusbar.notification.init.NotificationsControllerStub;
+import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProviderModule;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
@@ -85,15 +86,19 @@ import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.OnUserInteractionCallback;
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager;
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
+import com.android.systemui.statusbar.phone.NotifActivityLaunchEventsModule;
+import com.android.systemui.statusbar.phone.NotifPanelEventsModule;
 import com.android.systemui.statusbar.phone.ShadeController;
-import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.leak.LeakDetector;
 import com.android.systemui.wmshell.BubblesManager;
 
 import java.util.Optional;
 import java.util.concurrent.Executor;
+
+import javax.inject.Provider;
 
 import dagger.Binds;
 import dagger.Lazy;
@@ -105,8 +110,10 @@ import dagger.Provides;
  */
 @Module(includes = {
         CoordinatorsModule.class,
+        KeyguardNotificationVisibilityProviderModule.class,
+        NotifActivityLaunchEventsModule.class,
+        NotifPanelEventsModule.class,
         NotifPipelineChoreographerModule.class,
-        NotifPanelEventSourceModule.class,
         NotificationSectionHeadersModule.class,
 })
 public interface NotificationsModule {
@@ -128,7 +135,6 @@ public interface NotificationsModule {
             Lazy<NotificationRowBinder> notificationRowBinderLazy,
             Lazy<NotificationRemoteInputManager> notificationRemoteInputManagerLazy,
             LeakDetector leakDetector,
-            ForegroundServiceDismissalFeatureController fgsFeatureController,
             IStatusBarService statusBarService,
             NotifLiveDataStoreImpl notifLiveDataStore,
             DumpManager dumpManager) {
@@ -139,7 +145,6 @@ public interface NotificationsModule {
                 notificationRowBinderLazy,
                 notificationRemoteInputManagerLazy,
                 leakDetector,
-                fgsFeatureController,
                 statusBarService,
                 notifLiveDataStore,
                 dumpManager);
@@ -150,7 +155,7 @@ public interface NotificationsModule {
     @Provides
     static NotificationGutsManager provideNotificationGutsManager(
             Context context,
-            Lazy<Optional<StatusBar>> statusBarOptionalLazy,
+            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             @Main Handler mainHandler,
             @Background Handler bgHandler,
             AccessibilityManager accessibilityManager,
@@ -170,7 +175,7 @@ public interface NotificationsModule {
             DumpManager dumpManager) {
         return new NotificationGutsManager(
                 context,
-                statusBarOptionalLazy,
+                centralSurfacesOptionalLazy,
                 mainHandler,
                 bgHandler,
                 accessibilityManager,
@@ -279,8 +284,8 @@ public interface NotificationsModule {
     @Provides
     static NotificationsController provideNotificationsController(
             Context context,
-            Lazy<NotificationsControllerImpl> realController,
-            Lazy<NotificationsControllerStub> stubController) {
+            Provider<NotificationsControllerImpl> realController,
+            Provider<NotificationsControllerStub> stubController) {
         if (context.getResources().getBoolean(R.bool.config_renderNotifications)) {
             return realController.get();
         } else {
@@ -364,6 +369,10 @@ public interface NotificationsModule {
     /** */
     @Binds
     NotifInflater bindNotifInflater(NotifInflaterImpl notifInflaterImpl);
+
+    /** */
+    @Binds
+    ConversationIconManager bindConversationIconManager(IconManager iconManager);
 
     /** */
     @Binds

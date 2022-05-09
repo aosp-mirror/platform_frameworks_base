@@ -69,7 +69,6 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.SideLabelTileLayout;
 import com.android.systemui.qs.logging.QSLogger;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -116,7 +115,8 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
 
     private String mTileSpec;
     @Nullable
-    private EnforcedAdmin mEnforcedAdmin;
+    @VisibleForTesting
+    protected EnforcedAdmin mEnforcedAdmin;
     private boolean mShowingDetail;
     private int mIsFullQs;
 
@@ -330,6 +330,11 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         refreshState(null);
     }
 
+    @Override
+    public final boolean isListening() {
+        return getLifecycle().getCurrentState().isAtLeast(RESUMED);
+    }
+
     protected final void refreshState(@Nullable Object arg) {
         mHandler.obtainMessage(H.REFRESH_STATE, arg).sendToTarget();
     }
@@ -415,7 +420,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     @Nullable
     public abstract Intent getLongClickIntent();
 
-    protected void handleRefreshState(@Nullable Object arg) {
+    protected final void handleRefreshState(@Nullable Object arg) {
         handleUpdateState(mTmpState, arg);
         boolean changed = mTmpState.copyTo(mState);
         if (mReadyState == READY_STATE_READYING) {
@@ -729,7 +734,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
      * This may be used for CTS testing of tiles.
      */
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println(this.getClass().getSimpleName() + ":");
         pw.print("    "); pw.println(getState().toString());
     }

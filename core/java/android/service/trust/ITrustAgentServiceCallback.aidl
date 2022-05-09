@@ -18,13 +18,15 @@ package android.service.trust;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.UserHandle;
+import com.android.internal.infra.AndroidFuture;
 
 /**
  * Communication channel from the TrustAgentService back to TrustManagerService.
  * @hide
  */
 oneway interface ITrustAgentServiceCallback {
-    void grantTrust(CharSequence message, long durationMs, int flags);
+    void grantTrust(
+        CharSequence message, long durationMs, int flags, in AndroidFuture resultCallback);
     void revokeTrust();
     void lockUser();
     void setManagingTrust(boolean managingTrust);

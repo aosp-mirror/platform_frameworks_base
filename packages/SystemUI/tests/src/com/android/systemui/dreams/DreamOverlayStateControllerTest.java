@@ -61,7 +61,7 @@ public class DreamOverlayStateControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testStateChange() {
+    public void testStateChange_overlayActive() {
         final DreamOverlayStateController stateController = new DreamOverlayStateController(
                 mExecutor);
         stateController.addCallback(mCallback);
@@ -126,6 +126,7 @@ public class DreamOverlayStateControllerTest extends SysuiTestCase {
     public void testComplicationFilteringWhenShouldShowComplications() {
         final DreamOverlayStateController stateController =
                 new DreamOverlayStateController(mExecutor);
+        stateController.setShouldShowComplications(true);
 
         final Complication alwaysAvailableComplication = Mockito.mock(Complication.class);
         final Complication weatherComplication = Mockito.mock(Complication.class);

@@ -37,7 +37,6 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
-import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -101,26 +100,6 @@ class ScreenOnCoordinatorTest : SysuiTestCase() {
         screenOnCoordinator.onScreenTurningOn(runnable)
 
         // Should be called when only keyguard drawn
-        verify(runnable).run()
-    }
-
-    @Test
-    fun testWakeAndUnlockDelaysRunnable() {
-        // GIVEN wakeAndUnlocking has been set to true
-        screenOnCoordinator.wakeAndUnlocking = true
-
-        // WHEN the screen turns on and two tasks have completed
-        screenOnCoordinator.onScreenTurningOn(runnable)
-        onUnfoldOverlayReady()
-        onFoldAodReady()
-
-        // THEN the runnable should not have run yet
-        verify(runnable, never()).run()
-
-        // WHEN the value of wakeAndUnlocking changes
-        screenOnCoordinator.wakeAndUnlocking = false
-
-        // THEN the runnable should have run, as it is the last task to complete
         verify(runnable).run()
     }
 

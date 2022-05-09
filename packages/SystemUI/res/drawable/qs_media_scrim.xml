@@ -16,7 +16,6 @@
   -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <corners android:radius="@dimen/notification_corner_radius"/>
     <!-- gradient from 25% in the center to 100% at edges -->
     <gradient
         android:type="radial"

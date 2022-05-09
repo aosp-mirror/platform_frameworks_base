@@ -279,7 +279,7 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     public void notifPaddingMakesUpToFullMarginInSplitShade() {
         when(mResources.getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin))
                 .thenReturn(100);
-        when(mResources.getDimensionPixelSize(R.dimen.split_shade_header_height))
+        when(mResources.getDimensionPixelSize(R.dimen.large_screen_shade_header_height))
                 .thenReturn(70);
         mClockPositionAlgorithm.loadDimens(mResources);
         givenLockScreen();
@@ -336,7 +336,7 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
         // WHEN the position algorithm is run
         positionClock();
         // THEN the padding DOESN'T adjust for keyguard status height.
-        assertThat(mClockPositionAlgorithm.getMinStackScrollerPadding())
+        assertThat(mClockPositionAlgorithm.getLockscreenMinStackScrollerPadding())
                 .isEqualTo(mKeyguardStatusBarHeaderHeight);
     }
 

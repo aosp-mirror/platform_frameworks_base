@@ -16,6 +16,9 @@
 
 package com.android.wm.shell.flicker.bubble
 
+import android.platform.test.annotations.Presubmit
+import android.view.WindowInsets
+import android.view.WindowManager
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import androidx.test.uiautomator.By
@@ -24,6 +27,8 @@ import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
+import org.junit.Assume
 import org.junit.runner.RunWith
 import org.junit.Test
 import org.junit.runners.Parameterized
@@ -56,6 +61,16 @@ class LaunchBubbleFromLockScreen(testSpec: FlickerTestParameter) : BaseBubbleScr
                 }
             }
             transitions {
+                // Swipe & wait for the notification shade to expand so all can be seen
+                val wm = context.getSystemService(WindowManager::class.java)
+                val metricInsets = wm.getCurrentWindowMetrics().windowInsets
+                val insets = metricInsets.getInsetsIgnoringVisibility(
+                        WindowInsets.Type.statusBars()
+                        or WindowInsets.Type.displayCutout())
+                device.swipe(100, insets.top + 100, 100, device.getDisplayHeight() / 2, 4)
+                device.waitForIdle(2000)
+                instrumentation.uiAutomation.syncInputTransactions()
+
                 val notification = device.wait(Until.findObject(
                     By.text("BubbleChat")), FIND_OBJECT_TIMEOUT)
                 notification?.click() ?: error("Notification not found")
@@ -69,9 +84,19 @@ class LaunchBubbleFromLockScreen(testSpec: FlickerTestParameter) : BaseBubbleScr
             }
         }
 
-    @FlakyTest
+    @Presubmit
     @Test
     fun testAppIsVisibleAtEnd() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
+        testSpec.assertLayersEnd {
+            this.isVisible(testApp.component)
+        }
+    }
+
+    @FlakyTest
+    @Test
+    fun testAppIsVisibleAtEnd_ShellTransit() {
+        Assume.assumeTrue(isShellTransitionsEnabled)
         testSpec.assertLayersEnd {
             this.isVisible(testApp.component)
         }

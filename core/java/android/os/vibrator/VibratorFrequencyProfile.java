@@ -18,6 +18,7 @@ package android.os.vibrator;
 
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.os.VibratorInfo;
 
 import com.android.internal.util.Preconditions;
@@ -38,7 +39,9 @@ import com.android.internal.util.Preconditions;
  * frequency increment between each pair of amplitude values.
  *
  * <p>Vibrators without independent frequency control do not have a frequency profile.
+ * @hide
  */
+@TestApi
 public final class VibratorFrequencyProfile {
 
     private final VibratorInfo.FrequencyProfile mFrequencyProfile;

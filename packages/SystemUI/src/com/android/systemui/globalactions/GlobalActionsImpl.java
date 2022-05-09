@@ -41,26 +41,23 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import javax.inject.Inject;
 
-import dagger.Lazy;
-
 public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks {
 
     private final Context mContext;
-    private final Lazy<GlobalActionsDialogLite> mGlobalActionsDialogLazy;
     private final KeyguardStateController mKeyguardStateController;
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final BlurUtils mBlurUtils;
     private final CommandQueue mCommandQueue;
-    private GlobalActionsDialogLite mGlobalActionsDialog;
+    private final GlobalActionsDialogLite mGlobalActionsDialog;
     private boolean mDisabled;
 
     @Inject
     public GlobalActionsImpl(Context context, CommandQueue commandQueue,
-            Lazy<GlobalActionsDialogLite> globalActionsDialogLazy, BlurUtils blurUtils,
+            GlobalActionsDialogLite globalActionsDialog, BlurUtils blurUtils,
             KeyguardStateController keyguardStateController,
             DeviceProvisionedController deviceProvisionedController) {
         mContext = context;
-        mGlobalActionsDialogLazy = globalActionsDialogLazy;
+        mGlobalActionsDialog = globalActionsDialog;
         mKeyguardStateController = keyguardStateController;
         mDeviceProvisionedController = deviceProvisionedController;
         mCommandQueue = commandQueue;
@@ -71,16 +68,12 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
     @Override
     public void destroy() {
         mCommandQueue.removeCallback(this);
-        if (mGlobalActionsDialog != null) {
-            mGlobalActionsDialog.destroy();
-            mGlobalActionsDialog = null;
-        }
+        mGlobalActionsDialog.destroy();
     }
 
     @Override
     public void showGlobalActions(GlobalActionsManager manager) {
         if (mDisabled) return;
-        mGlobalActionsDialog = mGlobalActionsDialogLazy.get();
         mGlobalActionsDialog.showOrHideDialog(mKeyguardStateController.isShowing(),
                 mDeviceProvisionedController.isDeviceProvisioned(), null /* view */);
     }
@@ -189,7 +182,7 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
         final boolean disabled = (state2 & DISABLE2_GLOBAL_ACTIONS) != 0;
         if (displayId != mContext.getDisplayId() || disabled == mDisabled) return;
         mDisabled = disabled;
-        if (disabled && mGlobalActionsDialog != null) {
+        if (disabled) {
             mGlobalActionsDialog.dismissDialog();
         }
     }

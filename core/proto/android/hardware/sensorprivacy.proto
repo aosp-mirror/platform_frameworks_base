@@ -128,7 +128,7 @@ message SensorPrivacyToggleSourceProto {
         DIALOG = 3;
         SHELL = 4;
         OTHER = 5;
-        SAFETY_HUB = 6;
+        SAFETY_CENTER = 6;
     }
 
     // Source for which sensor privacy was toggled.

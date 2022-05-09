@@ -193,7 +193,6 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
     protected void showWorkProfileOffEmptyState(ResolverListAdapter activeListAdapter,
             View.OnClickListener listener) {
         showEmptyState(activeListAdapter,
-                R.drawable.ic_work_apps_off,
                 getWorkAppPausedTitle(),
                 /* subtitle = */ null,
                 listener);
@@ -203,12 +202,10 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
     protected void showNoPersonalToWorkIntentsEmptyState(ResolverListAdapter activeListAdapter) {
         if (mIsSendAction) {
             showEmptyState(activeListAdapter,
-                    R.drawable.ic_sharing_disabled,
                     getCrossProfileBlockedTitle(),
                     getCantShareWithWorkMessage());
         } else {
             showEmptyState(activeListAdapter,
-                    R.drawable.ic_sharing_disabled,
                     getCrossProfileBlockedTitle(),
                     getCantAccessWorkMessage());
         }
@@ -218,12 +215,10 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
     protected void showNoWorkToPersonalIntentsEmptyState(ResolverListAdapter activeListAdapter) {
         if (mIsSendAction) {
             showEmptyState(activeListAdapter,
-                    R.drawable.ic_sharing_disabled,
                     getCrossProfileBlockedTitle(),
                     getCantShareWithPersonalMessage());
         } else {
             showEmptyState(activeListAdapter,
-                    R.drawable.ic_sharing_disabled,
                     getCrossProfileBlockedTitle(),
                     getCantAccessPersonalMessage());
         }
@@ -231,70 +226,64 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
 
     @Override
     protected void showNoPersonalAppsAvailableEmptyState(ResolverListAdapter listAdapter) {
-        showEmptyState(listAdapter,
-                R.drawable.ic_no_apps,
-                getNoPersonalAppsAvailableMessage(),
-                /* subtitle= */ null);
+        showEmptyState(listAdapter, getNoPersonalAppsAvailableMessage(), /* subtitle= */ null);
 
     }
 
     @Override
     protected void showNoWorkAppsAvailableEmptyState(ResolverListAdapter listAdapter) {
-        showEmptyState(listAdapter,
-                R.drawable.ic_no_apps,
-                getNoWorkAppsAvailableMessage(),
-                /* subtitle = */ null);
+        showEmptyState(listAdapter, getNoWorkAppsAvailableMessage(), /* subtitle = */ null);
     }
 
     private String getWorkAppPausedTitle() {
-        return getContext().getSystemService(DevicePolicyManager.class).getString(
+        return getContext().getSystemService(DevicePolicyManager.class).getResources().getString(
                 RESOLVER_WORK_PAUSED_TITLE,
                 () -> getContext().getString(R.string.resolver_turn_on_work_apps));
     }
 
     private String getCrossProfileBlockedTitle() {
-        return getContext().getSystemService(DevicePolicyManager.class).getString(
+        return getContext().getSystemService(DevicePolicyManager.class).getResources().getString(
                 RESOLVER_CROSS_PROFILE_BLOCKED_TITLE,
                 () -> getContext().getString(R.string.resolver_cross_profile_blocked));
     }
 
     private String getCantShareWithWorkMessage() {
-        return getContext().getSystemService(DevicePolicyManager.class).getString(
+        return getContext().getSystemService(DevicePolicyManager.class).getResources().getString(
                 RESOLVER_CANT_SHARE_WITH_WORK,
                 () -> getContext().getString(
                         R.string.resolver_cant_share_with_work_apps_explanation));
     }
 
     private String getCantShareWithPersonalMessage() {
-        return getContext().getSystemService(DevicePolicyManager.class).getString(
+        return getContext().getSystemService(DevicePolicyManager.class).getResources().getString(
                 RESOLVER_CANT_SHARE_WITH_PERSONAL,
                 () -> getContext().getString(
                         R.string.resolver_cant_share_with_personal_apps_explanation));
     }
 
     private String getCantAccessWorkMessage() {
-        return getContext().getSystemService(DevicePolicyManager.class).getString(
+        return getContext().getSystemService(DevicePolicyManager.class).getResources().getString(
                 RESOLVER_CANT_ACCESS_WORK,
                 () -> getContext().getString(
                         R.string.resolver_cant_access_work_apps_explanation));
     }
 
     private String getCantAccessPersonalMessage() {
-        return getContext().getSystemService(DevicePolicyManager.class).getString(
+        return getContext().getSystemService(DevicePolicyManager.class).getResources().getString(
                 RESOLVER_CANT_ACCESS_PERSONAL,
                 () -> getContext().getString(
                         R.string.resolver_cant_access_personal_apps_explanation));
     }
 
     private String getNoWorkAppsAvailableMessage() {
-        return getContext().getSystemService(DevicePolicyManager.class).getString(
+        return getContext().getSystemService(DevicePolicyManager.class).getResources().getString(
                 RESOLVER_NO_WORK_APPS,
                 () -> getContext().getString(
                         R.string.resolver_no_work_apps_available));
     }
 
     private String getNoPersonalAppsAvailableMessage() {
-        return getContext().getSystemService(DevicePolicyManager.class).getString(
+        return getContext().getSystemService(DevicePolicyManager.class).getResources().getString(
                 RESOLVER_NO_PERSONAL_APPS,
                 () -> getContext().getString(
                         R.string.resolver_no_personal_apps_available));

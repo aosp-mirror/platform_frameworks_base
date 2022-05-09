@@ -785,6 +785,25 @@ public final class PrintManager {
     }
 
     /**
+     * Checks whether a given print service is enabled. The provided service must share UID
+     * with the calling package, otherwise a {@link SecurityException} is thrown.
+     *
+     * @return true if the given print service is enabled
+     */
+    public boolean isPrintServiceEnabled(@NonNull ComponentName service) {
+        if (mService == null) {
+            Log.w(LOG_TAG, "Feature android.software.print not available");
+            return false;
+        }
+        try {
+            return mService.isPrintServiceEnabled(service, mUserId);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error sampling enabled/disabled " + service, re);
+            return false;
+        }
+    }
+
+    /**
      * @hide
      */
     public static final class PrintDocumentAdapterDelegate extends IPrintDocumentAdapter.Stub

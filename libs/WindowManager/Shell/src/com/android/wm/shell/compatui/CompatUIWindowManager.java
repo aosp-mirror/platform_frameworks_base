@@ -59,9 +59,7 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
     int mCameraCompatControlState = CAMERA_COMPAT_CONTROL_HIDDEN;
 
     @VisibleForTesting
-    boolean mShouldShowSizeCompatHint;
-    @VisibleForTesting
-    boolean mShouldShowCameraCompatHint;
+    CompatUIHintsState mCompatUIHintsState;
 
     @Nullable
     @VisibleForTesting
@@ -70,13 +68,12 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
     CompatUIWindowManager(Context context, TaskInfo taskInfo,
             SyncTransactionQueue syncQueue, CompatUICallback callback,
             ShellTaskOrganizer.TaskListener taskListener, DisplayLayout displayLayout,
-            boolean hasShownSizeCompatHint, boolean hasShownCameraCompatHint) {
+            CompatUIHintsState compatUIHintsState) {
         super(context, taskInfo, syncQueue, taskListener, displayLayout);
         mCallback = callback;
         mHasSizeCompat = taskInfo.topActivityInSizeCompat;
         mCameraCompatControlState = taskInfo.cameraCompatControlState;
-        mShouldShowSizeCompatHint = !hasShownSizeCompatHint;
-        mShouldShowCameraCompatHint = !hasShownCameraCompatHint;
+        mCompatUIHintsState = compatUIHintsState;
     }
 
     @Override
@@ -212,18 +209,18 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
         }
         // Size Compat mode restart button.
         mLayout.setRestartButtonVisibility(mHasSizeCompat);
-        if (mHasSizeCompat && mShouldShowSizeCompatHint) {
+        // Only show by default for the first time.
+        if (mHasSizeCompat && !mCompatUIHintsState.mHasShownSizeCompatHint) {
             mLayout.setSizeCompatHintVisibility(/* show= */ true);
-            // Only show by default for the first time.
-            mShouldShowSizeCompatHint = false;
+            mCompatUIHintsState.mHasShownSizeCompatHint = true;
         }
 
         // Camera control for stretched issues.
         mLayout.setCameraControlVisibility(shouldShowCameraControl());
-        if (shouldShowCameraControl() && mShouldShowCameraCompatHint) {
+        // Only show by default for the first time.
+        if (shouldShowCameraControl() && !mCompatUIHintsState.mHasShownCameraCompatHint) {
             mLayout.setCameraCompatHintVisibility(/* show= */ true);
-            // Only show by default for the first time.
-            mShouldShowCameraCompatHint = false;
+            mCompatUIHintsState.mHasShownCameraCompatHint = true;
         }
         if (shouldShowCameraControl()) {
             mLayout.updateCameraTreatmentButton(mCameraCompatControlState);
@@ -233,5 +230,16 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
     private boolean shouldShowCameraControl() {
         return mCameraCompatControlState != CAMERA_COMPAT_CONTROL_HIDDEN
                 && mCameraCompatControlState != CAMERA_COMPAT_CONTROL_DISMISSED;
+    }
+
+    /**
+     * A class holding the state of the compat UI hints, which is shared between all compat UI
+     * window managers.
+     */
+    static class CompatUIHintsState {
+        @VisibleForTesting
+        boolean mHasShownSizeCompatHint;
+        @VisibleForTesting
+        boolean mHasShownCameraCompatHint;
     }
 }

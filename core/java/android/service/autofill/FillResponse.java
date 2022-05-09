@@ -26,6 +26,7 @@ import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.app.Activity;
+import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.ParceledListSlice;
 import android.os.Bundle;
@@ -305,6 +306,13 @@ public final class FillResponse implements Parcelable {
          * {@link android.view.autofill.AutofillManager#EXTRA_AUTHENTICATION_RESULT} extra
          * with the fully populated {@link FillResponse response} (or {@code null} if the screen
          * cannot be autofilled).
+         *
+         * <p> <b>IMPORTANT</b>: Extras must be non-null on the intent being set for Android 12
+         * otherwise it will cause a crash. Do not use {@link Activity#setResult(int)}, instead use
+         * {@link Activity#setResult(int, Intent) with non-null extras. Consider setting {
+         * @link android.view.autofill.AutofillManager#EXTRA_AUTHENTICATION_RESULT} to null or use
+         * {@link Bundle#EMPTY} with {@link Intent#putExtras(Bundle)} on the intent when
+         * finishing activity to avoid crash). </p>
          *
          * <p>For example, if you provided an empty {@link FillResponse response} because the
          * user's data was locked and marked that the response needs an authentication then

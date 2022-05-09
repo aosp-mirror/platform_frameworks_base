@@ -88,6 +88,40 @@ public class RotationUtils {
     }
 
     /**
+     * Rotates inOutBounds together with the parent for a given rotation delta. This assumes that
+     * the parent starts at 0,0 and remains at 0,0 after the rotation. The inOutBounds will remain
+     * at the same physical position within the parent.
+     *
+     * Only 'inOutBounds' is mutated.
+     */
+    public static void rotateBounds(Rect inOutBounds, int parentWidth, int parentHeight,
+            @Rotation int rotation) {
+        final int origLeft = inOutBounds.left;
+        final int origTop = inOutBounds.top;
+        switch (rotation) {
+            case ROTATION_0:
+                return;
+            case ROTATION_90:
+                inOutBounds.left = inOutBounds.top;
+                inOutBounds.top = parentWidth - inOutBounds.right;
+                inOutBounds.right = inOutBounds.bottom;
+                inOutBounds.bottom = parentWidth - origLeft;
+                return;
+            case ROTATION_180:
+                inOutBounds.left = parentWidth - inOutBounds.right;
+                inOutBounds.right = parentWidth - origLeft;
+                inOutBounds.top = parentHeight - inOutBounds.bottom;
+                inOutBounds.bottom = parentHeight - origTop;
+                return;
+            case ROTATION_270:
+                inOutBounds.left = parentHeight - inOutBounds.bottom;
+                inOutBounds.bottom = inOutBounds.right;
+                inOutBounds.right = parentHeight - inOutBounds.top;
+                inOutBounds.top = origLeft;
+        }
+    }
+
+    /**
      * Rotates bounds as if parentBounds and bounds are a group. The group is rotated by `delta`
      * 90-degree counter-clockwise increments. This assumes that parentBounds is at 0,0 and
      * remains at 0,0 after rotation. The bounds will be at the same physical position in
@@ -96,29 +130,7 @@ public class RotationUtils {
      * Only 'inOutBounds' is mutated.
      */
     public static void rotateBounds(Rect inOutBounds, Rect parentBounds, @Rotation int rotation) {
-        final int origLeft = inOutBounds.left;
-        final int origTop = inOutBounds.top;
-        switch (rotation) {
-            case ROTATION_0:
-                return;
-            case ROTATION_90:
-                inOutBounds.left = inOutBounds.top;
-                inOutBounds.top = parentBounds.right - inOutBounds.right;
-                inOutBounds.right = inOutBounds.bottom;
-                inOutBounds.bottom = parentBounds.right - origLeft;
-                return;
-            case ROTATION_180:
-                inOutBounds.left = parentBounds.right - inOutBounds.right;
-                inOutBounds.right = parentBounds.right - origLeft;
-                inOutBounds.top = parentBounds.bottom - inOutBounds.bottom;
-                inOutBounds.bottom = parentBounds.bottom - origTop;
-                return;
-            case ROTATION_270:
-                inOutBounds.left = parentBounds.bottom - inOutBounds.bottom;
-                inOutBounds.bottom = inOutBounds.right;
-                inOutBounds.right = parentBounds.bottom - inOutBounds.top;
-                inOutBounds.top = origLeft;
-        }
+        rotateBounds(inOutBounds, parentBounds.right, parentBounds.bottom, rotation);
     }
 
     /** @return the rotation needed to rotate from oldRotation to newRotation. */

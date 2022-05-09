@@ -48,8 +48,8 @@ import java.util.function.Consumer;
  * @hide
  */
 public final class NavigationBarView extends FrameLayout {
-    final static boolean DEBUG = false;
-    final static String TAG = "NavBarView";
+    private static final boolean DEBUG = false;
+    private static final String TAG = "NavBarView";
 
     // Copied from com.android.systemui.animation.Interpolators#FAST_OUT_SLOW_IN
     private static final Interpolator FAST_OUT_SLOW_IN = new PathInterpolator(0.4f, 0f, 0.2f, 1f);
@@ -139,7 +139,7 @@ public final class NavigationBarView extends FrameLayout {
     }
 
     /**
-     * Applies {@param consumer} to each of the nav bar views.
+     * Applies {@code consumer} to each of the nav bar views.
      */
     public void forEachView(Consumer<View> consumer) {
         if (mHorizontal != null) {
@@ -181,7 +181,7 @@ public final class NavigationBarView extends FrameLayout {
         }
     }
 
-    public KeyButtonDrawable getBackDrawable() {
+    private KeyButtonDrawable getBackDrawable() {
         KeyButtonDrawable drawable = getDrawable(com.android.internal.R.drawable.ic_ime_nav_back);
         orientBackButton(drawable);
         return drawable;
@@ -211,7 +211,7 @@ public final class NavigationBarView extends FrameLayout {
         // Animate the back button's rotation to the new degrees and only in portrait move up the
         // back button to line up with the other buttons
         float targetY = useAltBack
-                ? - dpToPx(NAVBAR_BACK_BUTTON_IME_OFFSET, getResources())
+                ? -dpToPx(NAVBAR_BACK_BUTTON_IME_OFFSET, getResources())
                 : 0;
         ObjectAnimator navBarAnimator = ObjectAnimator.ofPropertyValuesHolder(drawable,
                 PropertyValuesHolder.ofFloat(KeyButtonDrawable.KEY_DRAWABLE_ROTATE, degrees),
@@ -233,6 +233,11 @@ public final class NavigationBarView extends FrameLayout {
         super.setLayoutDirection(layoutDirection);
     }
 
+    /**
+     * Updates the navigation icons based on {@code hints}.
+     *
+     * @param hints bit flags defined in {@link StatusBarManager}.
+     */
     public void setNavigationIconHints(int hints) {
         if (hints == mNavigationIconHints) return;
         final boolean newBackAlt = (hints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0;
@@ -250,15 +255,7 @@ public final class NavigationBarView extends FrameLayout {
         updateNavButtonIcons();
     }
 
-    public void setDisabledFlags(int disabledFlags) {
-        if (mDisabledFlags == disabledFlags) return;
-
-        mDisabledFlags = disabledFlags;
-
-        updateNavButtonIcons();
-    }
-
-    public void updateNavButtonIcons() {
+    private void updateNavButtonIcons() {
         // We have to replace or restore the back and home button icons when exiting or entering
         // carmode, respectively. Recents are not available in CarMode in nav bar so change
         // to recent icon is not required.
@@ -319,7 +316,7 @@ public final class NavigationBarView extends FrameLayout {
         mHorizontal.setVisibility(View.GONE);
     }
 
-    public void reorient() {
+    private void reorient() {
         updateCurrentView();
 
         final android.inputmethodservice.navigationbar.NavigationBarFrame frame =
@@ -372,6 +369,11 @@ public final class NavigationBarView extends FrameLayout {
         }
     }
 
+    /**
+     * Updates the dark intensity.
+     *
+     * @param intensity The intensity of darkness from {@code 0.0f} to {@code 1.0f}.
+     */
     public void setDarkIntensity(@FloatRange(from = 0.0f, to = 1.0f) float intensity) {
         for (int i = 0; i < mButtonDispatchers.size(); ++i) {
             mButtonDispatchers.valueAt(i).setDarkIntensity(intensity);

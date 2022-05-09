@@ -206,6 +206,16 @@ public class SoundTriggerHw3Compat implements ISoundTriggerHal {
         public void onResourcesAvailable() {
             mDelegate.onResourcesAvailable();
         }
+
+        @Override
+        public int getInterfaceVersion() {
+            return ISoundTriggerHwGlobalCallback.VERSION;
+        }
+
+        @Override
+        public String getInterfaceHash() {
+            return ISoundTriggerHwGlobalCallback.HASH;
+        }
     }
 
     private static class ModelCallbackAdaper extends ISoundTriggerHwCallback.Stub {
@@ -232,6 +242,16 @@ public class SoundTriggerHw3Compat implements ISoundTriggerHal {
             // A FORCED status implies that recognition is still active after the event.
             event.recognitionStillActive |= event.status == RecognitionStatus.FORCED;
             mDelegate.recognitionCallback(model, event);
+        }
+
+        @Override
+        public int getInterfaceVersion() {
+            return ISoundTriggerHwCallback.VERSION;
+        }
+
+        @Override
+        public String getInterfaceHash() {
+            return ISoundTriggerHwCallback.HASH;
         }
     }
 }

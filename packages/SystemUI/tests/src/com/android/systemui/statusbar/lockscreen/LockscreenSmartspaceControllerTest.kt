@@ -128,6 +128,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     private val execution = FakeExecution()
     private val fakeParent = FrameLayout(context)
     private val fakePrivateLockscreenSettingUri = Uri.Builder().appendPath("test").build()
+    private val fakeNotifOnLockscreenSettingUri = Uri.Builder().appendPath("notif").build()
 
     private val userHandlePrimary: UserHandle = UserHandle(0)
     private val userHandleManaged: UserHandle = UserHandle(2)
@@ -149,6 +150,8 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
 
         `when`(secureSettings.getUriFor(PRIVATE_LOCKSCREEN_SETTING))
                 .thenReturn(fakePrivateLockscreenSettingUri)
+        `when`(secureSettings.getUriFor(NOTIF_ON_LOCKSCREEN_SETTING))
+                .thenReturn(fakeNotifOnLockscreenSettingUri)
         `when`(smartspaceManager.createSmartspaceSession(any())).thenReturn(smartspaceSession)
         `when`(plugin.getView(any())).thenReturn(createSmartspaceView(), createSmartspaceView())
         `when`(userTracker.userProfiles).thenReturn(userList)
@@ -160,6 +163,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         setAllowPrivateNotifications(userHandlePrimary, true)
         setAllowPrivateNotifications(userHandleManaged, true)
         setAllowPrivateNotifications(userHandleSecondary, true)
+        setShowNotifications(userHandlePrimary, true)
 
         controller = LockscreenSmartspaceController(
                 context,
@@ -341,6 +345,26 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testAllTargetsAreFilteredExceptWeatherWhenNotificationsAreDisabled() {
+        // GIVEN the active user doesn't allow any notifications on lockscreen
+        setShowNotifications(userHandlePrimary, false)
+        connectSession()
+
+        // WHEN we receive a list of targets
+        val targets = listOf(
+                makeTarget(1, userHandlePrimary, isSensitive = true),
+                makeTarget(2, userHandlePrimary),
+                makeTarget(3, userHandleManaged),
+                makeTarget(4, userHandlePrimary, featureType = SmartspaceTarget.FEATURE_WEATHER)
+        )
+
+        sessionListener.onTargetsAvailable(targets)
+
+        // THEN all non-sensitive content is still shown
+        verify(plugin).onTargetsAvailable(eq(listOf(targets[3])))
+    }
+
+    @Test
     fun testSensitiveTargetsAreFilteredOutForAppropriateUsers() {
         // GIVEN the active and managed users don't allow sensitive lockscreen content
         setAllowPrivateNotifications(userHandlePrimary, false)
@@ -391,6 +415,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     fun testRecognizeSwitchToSecondaryUser() {
         // GIVEN an inactive secondary user that doesn't allow sensitive content
         setAllowPrivateNotifications(userHandleSecondary, false)
+        setShowNotifications(userHandleSecondary, true)
         connectSession()
 
         // WHEN the secondary user becomes the active user
@@ -518,13 +543,15 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     fun makeTarget(
         id: Int,
         userHandle: UserHandle,
-        isSensitive: Boolean = false
+        isSensitive: Boolean = false,
+        featureType: Int = 0
     ): SmartspaceTarget {
         return SmartspaceTarget.Builder(
                 "target$id",
                 ComponentName("testpackage", "testclass$id"),
                 userHandle)
                 .setSensitive(isSensitive)
+                .setFeatureType(featureType)
                 .build()
     }
 
@@ -536,12 +563,23 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         ).thenReturn(if (value) 1 else 0)
     }
 
+    private fun setShowNotifications(user: UserHandle, value: Boolean) {
+        `when`(secureSettings.getIntForUser(
+                eq(NOTIF_ON_LOCKSCREEN_SETTING),
+                anyInt(),
+                eq(user.identifier))
+        ).thenReturn(if (value) 1 else 0)
+    }
+
     private fun createSmartspaceView(): SmartspaceView {
         return spy(object : View(context), SmartspaceView {
             override fun registerDataProvider(plugin: BcSmartspaceDataPlugin?) {
             }
 
             override fun setPrimaryTextColor(color: Int) {
+            }
+
+            override fun setIsDreaming(isDreaming: Boolean) {
             }
 
             override fun setDozeAmount(amount: Float) {
@@ -571,3 +609,5 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
 
 private const val PRIVATE_LOCKSCREEN_SETTING =
         Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS
+private const val NOTIF_ON_LOCKSCREEN_SETTING =
+        Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS

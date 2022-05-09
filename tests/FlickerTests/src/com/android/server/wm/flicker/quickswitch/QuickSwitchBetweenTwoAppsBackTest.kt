@@ -17,12 +17,12 @@
 package com.android.server.wm.flicker.quickswitch
 
 import android.app.Instrumentation
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
 import androidx.test.platform.app.InstrumentationRegistry
+import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -66,6 +66,7 @@ import org.junit.runners.Parameterized
 @Group1
 open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestParameter) {
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
+    private val taplInstrumentation = LauncherInstrumentation()
 
     private val testApp1 = SimpleAppHelper(instrumentation)
     private val testApp2 = NonResizeableAppHelper(instrumentation)
@@ -81,6 +82,10 @@ open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestPa
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
             setup {
+                test {
+                    taplInstrumentation.setExpectedRotation(testSpec.startRotation)
+                }
+
                 eachRun {
                     testApp1.launchViaIntent(wmHelper)
                     wmHelper.waitForFullScreenApp(testApp1.component)
@@ -90,20 +95,10 @@ open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestPa
                 }
             }
             transitions {
-                // Swipe right from bottom to quick switch back
-                // NOTE: We don't perform an edge-to-edge swipe but instead only swipe in the middle
-                // as to not accidentally trigger a swipe back or forward action which would result
-                // in the same behavior but not testing quick swap.
-                device.swipe(
-                        startDisplayBounds.bounds.right / 3,
-                        startDisplayBounds.bounds.bottom,
-                        2 * startDisplayBounds.bounds.right / 3,
-                        startDisplayBounds.bounds.bottom,
-                        if (testSpec.isLandscapeOrSeascapeAtStart) 75 else 30
-                )
-
+                taplInstrumentation.launchedAppState.quickSwitchToPreviousApp()
                 wmHelper.waitForFullScreenApp(testApp1.component)
                 wmHelper.waitForAppTransitionIdle()
+                wmHelper.waitForNavBarStatusBarVisible()
             }
 
             teardown {
@@ -119,7 +114,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestPa
      * Checks that the transition starts with [testApp2]'s windows filling/covering exactly the
      * entirety of the display.
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun startsWithApp2WindowsCoverFullScreen() {
         testSpec.assertWmStart {
@@ -131,7 +126,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestPa
      * Checks that the transition starts with [testApp2]'s layers filling/covering exactly the
      * entirety of the display.
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun startsWithApp2LayersCoverFullScreen() {
         testSpec.assertLayersStart {
@@ -154,7 +149,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestPa
      * Checks that [testApp1] windows fill the entire screen (i.e. is "fullscreen") at the end of the
      * transition once we have fully quick switched from [testApp2] back to the [testApp1].
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun endsWithApp1WindowsCoveringFullScreen() {
         testSpec.assertWmEnd {
@@ -166,7 +161,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestPa
      * Checks that [testApp1] layers fill the entire screen (i.e. is "fullscreen") at the end of the
      * transition once we have fully quick switched from [testApp2] back to the [testApp1].
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun endsWithApp1LayersCoveringFullScreen() {
         testSpec.assertLayersEnd {
@@ -178,7 +173,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestPa
      * Checks that [testApp1] is the top window at the end of the transition once we have fully quick
      * switched from [testApp2] back to the [testApp1].
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun endsWithApp1BeingOnTop() {
         testSpec.assertWmEnd {
@@ -190,7 +185,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestPa
      * Checks that [testApp1]'s window starts off invisible and becomes visible at some point before
      * the end of the transition and then stays visible until the end of the transition.
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun app1WindowBecomesAndStaysVisible() {
         testSpec.assertWm {
@@ -206,7 +201,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestPa
      * Checks that [testApp1]'s layer starts off invisible and becomes visible at some point before
      * the end of the transition and then stays visible until the end of the transition.
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun app1LayerBecomesAndStaysVisible() {
         testSpec.assertLayers {
@@ -220,7 +215,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestPa
      * Checks that [testApp2]'s window starts off visible and becomes invisible at some point before
      * the end of the transition and then stays invisible until the end of the transition.
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun app2WindowBecomesAndStaysInvisible() {
         testSpec.assertWm {
@@ -234,7 +229,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestPa
      * Checks that [testApp2]'s layer starts off visible and becomes invisible at some point before
      * the end of the transition and then stays invisible until the end of the transition.
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun app2LayerBecomesAndStaysInvisible() {
         testSpec.assertLayers {
@@ -249,7 +244,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestPa
      * Ensures that at any point, either [testApp1] or [testApp2]'s windows are at least partially
      * visible.
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun app1WindowIsVisibleOnceApp2WindowIsInvisible() {
         testSpec.assertWm {
@@ -269,7 +264,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestPa
      * Ensures that at any point, either [testApp1] or [testApp2]'s windows are at least partially
      * visible.
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun app1LayerIsVisibleOnceApp2LayerIsInvisible() {
         testSpec.assertLayers {
@@ -286,7 +281,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestPa
     /**
      * Checks that the navbar window is visible throughout the entire transition.
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsVisible()
 

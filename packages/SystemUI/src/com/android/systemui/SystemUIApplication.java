@@ -27,6 +27,7 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -38,13 +39,13 @@ import android.util.DumpableContainer;
 import android.util.Log;
 import android.util.TimingsTraceLog;
 import android.view.SurfaceControl;
+import android.view.ThreadedRenderer;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.systemui.dagger.ContextComponentHelper;
 import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.shared.system.ThreadedRendererCompat;
 import com.android.systemui.util.NotificationChannels;
 
 import java.lang.reflect.Constructor;
@@ -105,6 +106,10 @@ public class SystemUIApplication extends Application implements
         mBootCompleteCache = mSysUIComponent.provideBootCacheImpl();
         log.traceEnd();
 
+        // Enable Looper trace points.
+        // This allows us to see Handler callbacks on traces.
+        Looper.getMainLooper().setTraceTag(Trace.TRACE_TAG_APP);
+
         // Set the application theme that is inherited by all services. Note that setting the
         // application theme in the manifest does only work for activities. Keep this in sync with
         // the theme set there.
@@ -118,11 +123,11 @@ public class SystemUIApplication extends Application implements
             // The priority is defaulted at medium.
             int sfPriority = SurfaceControl.getGPUContextPriority();
             Log.i(TAG, "Found SurfaceFlinger's GPU Priority: " + sfPriority);
-            if (sfPriority == ThreadedRendererCompat.EGL_CONTEXT_PRIORITY_REALTIME_NV) {
+            if (sfPriority == ThreadedRenderer.EGL_CONTEXT_PRIORITY_REALTIME_NV) {
                 Log.i(TAG, "Setting SysUI's GPU Context priority to: "
-                        + ThreadedRendererCompat.EGL_CONTEXT_PRIORITY_HIGH_IMG);
-                ThreadedRendererCompat.setContextPriority(
-                        ThreadedRendererCompat.EGL_CONTEXT_PRIORITY_HIGH_IMG);
+                        + ThreadedRenderer.EGL_CONTEXT_PRIORITY_HIGH_IMG);
+                ThreadedRenderer.setContextPriority(
+                        ThreadedRenderer.EGL_CONTEXT_PRIORITY_HIGH_IMG);
             }
 
             // Enable binder tracing on system server for calls originating from SysUI
@@ -192,6 +197,7 @@ public class SystemUIApplication extends Application implements
         Map<Class<?>, Provider<CoreStartable>> sortedStartables = new TreeMap<>(
                 Comparator.comparing(Class::getName));
         sortedStartables.putAll(SystemUIFactory.getInstance().getStartableComponents());
+        sortedStartables.putAll(SystemUIFactory.getInstance().getStartableComponentsPerUser());
         startServicesIfNeeded(
                 sortedStartables, "StartServices", vendorComponent);
     }
@@ -335,8 +341,7 @@ public class SystemUIApplication extends Application implements
 
         // TODO(b/217567642): replace com.android.systemui.dump.Dumpable by
         // com.android.util.Dumpable and get rid of the intermediate lambda
-        mDumpManager.registerDumpable(dumpable.getDumpableName(),
-                (fd, pw, args) -> dumpable.dump(pw, args));
+        mDumpManager.registerDumpable(dumpable.getDumpableName(), dumpable::dump);
         return true;
     }
 

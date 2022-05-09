@@ -68,7 +68,7 @@ import java.util.Arrays;
  *
  * @hide
  */
-public final class LowPowerStandbyController {
+public class LowPowerStandbyController {
     private static final String TAG = "LowPowerStandbyController";
     private static final boolean DEBUG = false;
     private static final boolean DEFAULT_ACTIVE_DURING_MAINTENANCE = false;
@@ -173,7 +173,9 @@ public final class LowPowerStandbyController {
         mSettingsObserver = new SettingsObserver(mHandler);
     }
 
-    void systemReady() {
+    /** Call when system services are ready */
+    @VisibleForTesting
+    public void systemReady() {
         final Resources resources = mContext.getResources();
         synchronized (mLock) {
             mSupportedConfig = resources.getBoolean(
@@ -435,7 +437,9 @@ public final class LowPowerStandbyController {
         }
     }
 
-    void setActiveDuringMaintenance(boolean activeDuringMaintenance) {
+    /** Set whether Low Power Standby should be active during doze maintenance mode. */
+    @VisibleForTesting
+    public void setActiveDuringMaintenance(boolean activeDuringMaintenance) {
         synchronized (mLock) {
             if (!mSupportedConfig) {
                 Slog.w(TAG, "Low Power Standby settings cannot be changed "

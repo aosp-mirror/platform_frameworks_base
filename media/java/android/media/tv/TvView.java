@@ -1083,7 +1083,7 @@ public class TvView extends ViewGroup {
          * @param inputId The ID of the TV input bound to this view.
          * @param strength The current signal strength.
          */
-        public void onSignalStrength(
+        public void onSignalStrengthUpdated(
                 @NonNull String inputId, @TvInputManager.SignalStrength int strength) {
         }
 
@@ -1406,16 +1406,16 @@ public class TvView extends ViewGroup {
         }
 
         @Override
-        public void onSignalStrength(Session session, int strength) {
+        public void onSignalStrengthUpdated(Session session, int strength) {
             if (DEBUG) {
-                Log.d(TAG, "onSignalStrength(strength=" + strength + ")");
+                Log.d(TAG, "onSignalStrengthUpdated(strength=" + strength + ")");
             }
             if (this != mSessionCallback) {
-                Log.w(TAG, "onSignalStrength - session not created");
+                Log.w(TAG, "onSignalStrengthUpdated - session not created");
                 return;
             }
             if (mCallback != null) {
-                mCallback.onSignalStrength(mInputId, strength);
+                mCallback.onSignalStrengthUpdated(mInputId, strength);
             }
         }
 

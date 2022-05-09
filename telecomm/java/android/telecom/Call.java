@@ -701,15 +701,8 @@ public final class Call {
          */
         public static final int PROPERTY_CROSS_SIM = 0x00004000;
 
-        /**
-         * Connection is a tethered external call.
-         * Indicates that the {@link Connection} is fixed on this device but the audio streams are
-         * re-routed to another device.
-         */
-        public static final int PROPERTY_TETHERED_CALL = 0x00008000;
-
         //******************************************************************************************
-        // Next PROPERTY value: 0x00010000
+        // Next PROPERTY value: 0x00004000
         //******************************************************************************************
 
         private final @CallState int mState;
@@ -905,9 +898,6 @@ public final class Call {
             }
             if (hasProperty(properties, PROPERTY_CROSS_SIM)) {
                 builder.append(" PROPERTY_CROSS_SIM");
-            }
-            if (hasProperty(properties, PROPERTY_TETHERED_CALL)) {
-                builder.append(" PROPERTY_TETHERED_CALL");
             }
             builder.append("]");
             return builder.toString();
@@ -1486,12 +1476,21 @@ public final class Call {
         /**
          * Invoked when the RTT session failed to initiate for some reason, including rejection
          * by the remote party.
+         * <p>
+         * This callback will ONLY be invoked to report a failure related to a user initiated
+         * session modification request (i.e. {@link Call#sendRttRequest()}).
+         * <p>
+         * If a call is initiated with {@link TelecomManager#EXTRA_START_CALL_WITH_RTT} specified,
+         * the availability of RTT can be determined by checking {@link Details#PROPERTY_RTT}
+         * once the call enters state {@link Details#STATE_ACTIVE}.
+         *
          * @param call The call which the RTT initiation failure occurred on.
          * @param reason One of the status codes defined in
-         *               {@link android.telecom.Connection.RttModifyStatus}, with the exception of
-         *               {@link android.telecom.Connection.RttModifyStatus#SESSION_MODIFY_REQUEST_SUCCESS}.
+         *      {@link android.telecom.Connection.RttModifyStatus}, with the exception of
+         *      {@link android.telecom.Connection.RttModifyStatus#SESSION_MODIFY_REQUEST_SUCCESS}.
          */
-        public void onRttInitiationFailure(Call call, int reason) {}
+        public void onRttInitiationFailure(Call call,
+                @android.telecom.Connection.RttModifyStatus.RttSessionModifyStatus int reason) {}
 
         /**
          * Invoked when Call handover from one {@link PhoneAccount} to other {@link PhoneAccount}

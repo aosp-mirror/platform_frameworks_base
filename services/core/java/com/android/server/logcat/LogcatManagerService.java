@@ -16,349 +16,520 @@
 
 package com.android.server.logcat;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.ActivityManagerInternal;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Build;
+import android.os.Handler;
 import android.os.ILogd;
+import android.os.Looper;
+import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.logcat.ILogcatManagerService;
+import android.util.ArrayMap;
 import android.util.Slog;
 
-import com.android.internal.R;
-import com.android.internal.notification.SystemNotificationChannels;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
-import java.util.Arrays;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Supplier;
+
 
 /**
  * Service responsible for managing the access to Logcat.
  */
 public final class LogcatManagerService extends SystemService {
-
     private static final String TAG = "LogcatManagerService";
-    private final Context mContext;
-    private final BinderService mBinderService;
-    private final ExecutorService mThreadExecutor;
-    private ILogd mLogdService;
-    private NotificationManager mNotificationManager;
-    private @NonNull ActivityManager mActivityManager;
-    private ActivityManagerInternal mActivityManagerInternal;
-    private static final int MAX_UID_IMPORTANCE_COUNT_LISTENER = 2;
-    private static int sUidImportanceListenerCount = 0;
-    private static final int AID_SHELL_UID = 2000;
+    private static final boolean DEBUG = false;
 
-    // TODO This allowlist is just a temporary workaround for the tests:
-    //      FrameworksServicesTests
-    //      PlatformRuleTests
-    // After adapting the test suites, the allowlist will be removed in
-    // the upcoming bug fix patches.
-    private static final String[] ALLOWABLE_TESTING_PACKAGES = {
-            "android.platform.test.rule.tests",
-            "com.android.frameworks.servicestests"
-    };
-
-    // TODO Same as the above ALLOWABLE_TESTING_PACKAGES.
-    private boolean isAllowableTestingPackage(int uid) {
-        PackageManager pm = mContext.getPackageManager();
-
-        String[] packageNames = pm.getPackagesForUid(uid);
-
-        if (ArrayUtils.isEmpty(packageNames)) {
-            return false;
-        }
-
-        for (String name : packageNames) {
-            Slog.e(TAG, "isAllowableTestingPackage: " + name);
-
-            if (Arrays.asList(ALLOWABLE_TESTING_PACKAGES).contains(name)) {
-                return true;
-            }
-        }
-
-        return false;
-    };
-
-    private final class BinderService extends ILogcatManagerService.Stub {
-        @Override
-        public void startThread(int uid, int gid, int pid, int fd) {
-            mThreadExecutor.execute(new LogdMonitor(uid, gid, pid, fd, true));
-        }
-
-        @Override
-        public void finishThread(int uid, int gid, int pid, int fd) {
-            // TODO This thread will be used to notify the AppOpsManager that
-            // the logd data access is finished.
-            mThreadExecutor.execute(new LogdMonitor(uid, gid, pid, fd, false));
-        }
-
-        @Override
-        public void approve(int uid, int gid, int pid, int fd) {
-            try {
-                getLogdService().approve(uid, gid, pid, fd);
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-        }
-
-        @Override
-        public void decline(int uid, int gid, int pid, int fd) {
-            try {
-                getLogdService().decline(uid, gid, pid, fd);
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private ILogd getLogdService() {
-        synchronized (LogcatManagerService.this) {
-            if (mLogdService == null) {
-                LogcatManagerService.this.addLogdService();
-            }
-            return mLogdService;
-        }
-    }
-
-    private String getBodyString(Context context, String callingPackage, int uid) {
-        PackageManager pm = context.getPackageManager();
-        try {
-            return context.getString(
-                com.android.internal.R.string.log_access_confirmation_body,
-                pm.getApplicationInfoAsUser(callingPackage, PackageManager.MATCH_DIRECT_BOOT_AUTO,
-                    UserHandle.getUserId(uid)).loadLabel(pm));
-        } catch (NameNotFoundException e) {
-            // App name is unknown.
-            return null;
-        }
-    }
-
-    private void sendNotification(int notificationId, String clientInfo, int uid, int gid, int pid,
-            int fd) {
-
-        final ActivityManagerInternal activityManagerInternal =
-                LocalServices.getService(ActivityManagerInternal.class);
-
-        PackageManager pm = mContext.getPackageManager();
-        String packageName = activityManagerInternal.getPackageNameByPid(pid);
-        if (packageName != null) {
-            String notificationBody = getBodyString(mContext, packageName, uid);
-
-            final Intent mIntent = LogAccessConfirmationActivity.createIntent(mContext,
-                    packageName, null, uid, gid, pid, fd);
-
-            if (notificationBody == null) {
-                // Decline the logd access if the nofitication body is unknown
-                Slog.e(TAG, "Unknown notification body, declining the logd access");
-                declineLogdAccess(uid, gid, pid, fd);
-                return;
-            }
-
-            // TODO Next version will replace notification with dialogue
-            // per UX guidance.
-            generateNotificationWithBodyContent(notificationId, clientInfo, notificationBody,
-                    mIntent);
-            return;
-
-        }
-
-        String[] packageNames = pm.getPackagesForUid(uid);
-
-        if (ArrayUtils.isEmpty(packageNames)) {
-            // Decline the logd access if the app name is unknown
-            Slog.e(TAG, "Unknown calling package name, declining the logd access");
-            declineLogdAccess(uid, gid, pid, fd);
-            return;
-        }
-
-        String firstPackageName = packageNames[0];
-
-        if (firstPackageName == null || firstPackageName.length() == 0) {
-            // Decline the logd access if the package name from uid is unknown
-            Slog.e(TAG, "Unknown calling package name, declining the logd access");
-            declineLogdAccess(uid, gid, pid, fd);
-            return;
-        }
-
-        String notificationBody = getBodyString(mContext, firstPackageName, uid);
-
-        final Intent mIntent = LogAccessConfirmationActivity.createIntent(mContext,
-                firstPackageName, null, uid, gid, pid, fd);
-
-        if (notificationBody == null) {
-            Slog.e(TAG, "Unknown notification body, declining the logd access");
-            declineLogdAccess(uid, gid, pid, fd);
-            return;
-        }
-
-        // TODO Next version will replace notification with dialogue
-        // per UX guidance.
-        generateNotificationWithBodyContent(notificationId, clientInfo,
-                notificationBody, mIntent);
-    }
-
-    private void declineLogdAccess(int uid, int gid, int pid, int fd) {
-        try {
-            getLogdService().decline(uid, gid, pid, fd);
-        } catch (RemoteException ex) {
-            Slog.e(TAG, "Fails to call remote functions ", ex);
-        }
-    }
-
-    private void generateNotificationWithBodyContent(int notificationId, String clientInfo,
-            String notificationBody, Intent intent) {
-        final Notification.Builder notificationBuilder = new Notification.Builder(
-                mContext,
-                SystemNotificationChannels.ACCESSIBILITY_SECURITY_POLICY);
-        intent.setFlags(
-                Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        intent.setIdentifier(String.valueOf(notificationId) + clientInfo);
-        intent.putExtra("body", notificationBody);
-
-        notificationBuilder
-            .setSmallIcon(R.drawable.ic_info)
-            .setContentTitle(
-                mContext.getString(R.string.log_access_confirmation_title))
-            .setContentText(notificationBody)
-            .setContentIntent(
-                PendingIntent.getActivity(mContext, 0, intent,
-                    PendingIntent.FLAG_IMMUTABLE))
-            .setTicker(mContext.getString(R.string.log_access_confirmation_title))
-            .setOnlyAlertOnce(true)
-            .setAutoCancel(true);
-        mNotificationManager.notify(notificationId, notificationBuilder.build());
-    }
+    /** How long to wait for the user to approve/decline before declining automatically */
+    @VisibleForTesting
+    static final int PENDING_CONFIRMATION_TIMEOUT_MILLIS = Build.IS_DEBUGGABLE ? 70000 : 400000;
 
     /**
-     * A class which watches an uid for background access and notifies the logdMonitor when
-     * the package status becomes foreground (importance change)
-     */
-    private class UidImportanceListener implements ActivityManager.OnUidImportanceListener {
-        private final int mExpectedUid;
-        private final int mExpectedGid;
-        private final int mExpectedPid;
-        private final int mExpectedFd;
-        private int mExpectedImportance;
-        private int mCurrentImportance = RunningAppProcessInfo.IMPORTANCE_GONE;
+     * How long an approved / declined status is valid for.
+     *
+     * After a client has been approved/declined log access, if they try to access logs again within
+     * this timeout, the new request will be automatically approved/declined.
+     * Only after this timeout expires will a new request generate another prompt to the user.
+     **/
+    @VisibleForTesting
+    static final int STATUS_EXPIRATION_TIMEOUT_MILLIS = 60 * 1000;
 
-        UidImportanceListener(int uid, int gid, int pid, int fd, int importance) {
-            mExpectedUid = uid;
-            mExpectedGid = gid;
-            mExpectedPid = pid;
-            mExpectedFd = fd;
-            mExpectedImportance = importance;
+    private static final int MSG_LOG_ACCESS_REQUESTED = 0;
+    private static final int MSG_APPROVE_LOG_ACCESS = 1;
+    private static final int MSG_DECLINE_LOG_ACCESS = 2;
+    private static final int MSG_LOG_ACCESS_FINISHED = 3;
+    private static final int MSG_PENDING_TIMEOUT = 4;
+    private static final int MSG_LOG_ACCESS_STATUS_EXPIRED = 5;
+
+    private static final int STATUS_NEW_REQUEST = 0;
+    private static final int STATUS_PENDING = 1;
+    private static final int STATUS_APPROVED = 2;
+    private static final int STATUS_DECLINED = 3;
+
+    @IntDef(prefix = {"STATUS_"}, value = {
+            STATUS_NEW_REQUEST,
+            STATUS_PENDING,
+            STATUS_APPROVED,
+            STATUS_DECLINED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface LogAccessRequestStatus {
+    }
+
+    private final Context mContext;
+    private final Injector mInjector;
+    private final Supplier<Long> mClock;
+    private final BinderService mBinderService;
+    private final LogcatManagerServiceInternal mLocalService;
+    private final Handler mHandler;
+    private ActivityManagerInternal mActivityManagerInternal;
+    private ILogd mLogdService;
+
+    private static final class LogAccessClient {
+        final int mUid;
+        @NonNull
+        final String mPackageName;
+
+        LogAccessClient(int uid, @NonNull String packageName) {
+            mUid = uid;
+            mPackageName = packageName;
         }
 
         @Override
-        public void onUidImportance(int uid, int importance) {
-            if (uid == mExpectedUid) {
-                mCurrentImportance = importance;
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof LogAccessClient)) return false;
+            LogAccessClient that = (LogAccessClient) o;
+            return mUid == that.mUid && Objects.equals(mPackageName, that.mPackageName);
+        }
 
-                /**
-                 * 1) If the process status changes to foreground, send a notification
-                 * for user consent.
-                 * 2) If the process status remains background, we decline logd access request.
-                 **/
-                if (importance <= RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE) {
-                    String clientInfo = getClientInfo(uid, mExpectedGid, mExpectedPid, mExpectedFd);
-                    sendNotification(0, clientInfo, uid, mExpectedGid, mExpectedPid,
-                            mExpectedFd);
-                    mActivityManager.removeOnUidImportanceListener(this);
+        @Override
+        public int hashCode() {
+            return Objects.hash(mUid, mPackageName);
+        }
 
-                    synchronized (LogcatManagerService.this) {
-                        sUidImportanceListenerCount--;
-                    }
-                } else {
-                    try {
-                        getLogdService().decline(uid, mExpectedGid, mExpectedPid, mExpectedFd);
-                    } catch (RemoteException ex) {
-                        Slog.e(TAG, "Fails to call remote functions ", ex);
-                    }
-                }
-            }
+        @Override
+        public String toString() {
+            return "LogAccessClient{"
+                    + "mUid=" + mUid
+                    + ", mPackageName=" + mPackageName
+                    + '}';
         }
     }
 
-    private static String getClientInfo(int uid, int gid, int pid, int fd) {
-        return "UID=" + Integer.toString(uid) + " GID=" + Integer.toString(gid) + " PID="
-            + Integer.toString(pid) + " FD=" + Integer.toString(fd);
-    }
+    private static final class LogAccessRequest {
+        final int mUid;
+        final int mGid;
+        final int mPid;
+        final int mFd;
 
-    private class LogdMonitor implements Runnable {
-
-        private final int mUid;
-        private final int mGid;
-        private final int mPid;
-        private final int mFd;
-        private final boolean mStart;
-
-        /**
-         * For starting a thread, the start value is true.
-         * For finishing a thread, the start value is false.
-         */
-        LogdMonitor(int uid, int gid, int pid, int fd, boolean start) {
+        private LogAccessRequest(int uid, int gid, int pid, int fd) {
             mUid = uid;
             mGid = gid;
             mPid = pid;
             mFd = fd;
-            mStart = start;
         }
 
-        /**
-         * LogdMonitor generates a prompt for users.
-         * The users decide whether the logd access is allowed.
-         */
         @Override
-        public void run() {
-            if (mLogdService == null) {
-                LogcatManagerService.this.addLogdService();
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof LogAccessRequest)) return false;
+            LogAccessRequest that = (LogAccessRequest) o;
+            return mUid == that.mUid && mGid == that.mGid && mPid == that.mPid && mFd == that.mFd;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mUid, mGid, mPid, mFd);
+        }
+
+        @Override
+        public String toString() {
+            return "LogAccessRequest{"
+                    + "mUid=" + mUid
+                    + ", mGid=" + mGid
+                    + ", mPid=" + mPid
+                    + ", mFd=" + mFd
+                    + '}';
+        }
+    }
+
+    private static final class LogAccessStatus {
+        @LogAccessRequestStatus
+        int mStatus = STATUS_NEW_REQUEST;
+        final List<LogAccessRequest> mPendingRequests = new ArrayList<>();
+    }
+
+    private final Map<LogAccessClient, LogAccessStatus> mLogAccessStatus = new ArrayMap<>();
+    private final Map<LogAccessClient, Integer> mActiveLogAccessCount = new ArrayMap<>();
+
+    private final class BinderService extends ILogcatManagerService.Stub {
+        @Override
+        public void startThread(int uid, int gid, int pid, int fd) {
+            final LogAccessRequest logAccessRequest = new LogAccessRequest(uid, gid, pid, fd);
+            if (DEBUG) {
+                Slog.d(TAG, "New log access request: " + logAccessRequest);
             }
+            final Message msg = mHandler.obtainMessage(MSG_LOG_ACCESS_REQUESTED, logAccessRequest);
+            mHandler.sendMessageAtTime(msg, mClock.get());
+        }
 
-            if (mStart) {
+        @Override
+        public void finishThread(int uid, int gid, int pid, int fd) {
+            final LogAccessRequest logAccessRequest = new LogAccessRequest(uid, gid, pid, fd);
+            if (DEBUG) {
+                Slog.d(TAG, "Log access finished: " + logAccessRequest);
+            }
+            final Message msg = mHandler.obtainMessage(MSG_LOG_ACCESS_FINISHED, logAccessRequest);
+            mHandler.sendMessageAtTime(msg, mClock.get());
+        }
+    }
 
-                // TODO Temporarily approve all the requests to unblock testing failures.
-                try {
-                    getLogdService().approve(mUid, mGid, mPid, mFd);
-                } catch (RemoteException e) {
-                    e.printStackTrace();
+    final class LogcatManagerServiceInternal {
+        public void approveAccessForClient(int uid, @NonNull String packageName) {
+            final LogAccessClient client = new LogAccessClient(uid, packageName);
+            if (DEBUG) {
+                Slog.d(TAG, "Approving log access for client: " + client);
+            }
+            final Message msg = mHandler.obtainMessage(MSG_APPROVE_LOG_ACCESS, client);
+            mHandler.sendMessageAtTime(msg, mClock.get());
+        }
+
+        public void declineAccessForClient(int uid, @NonNull String packageName) {
+            final LogAccessClient client = new LogAccessClient(uid, packageName);
+            if (DEBUG) {
+                Slog.d(TAG, "Declining log access for client: " + client);
+            }
+            final Message msg = mHandler.obtainMessage(MSG_DECLINE_LOG_ACCESS, client);
+            mHandler.sendMessageAtTime(msg, mClock.get());
+        }
+    }
+
+    private ILogd getLogdService() {
+        if (mLogdService == null) {
+            mLogdService = mInjector.getLogdService();
+        }
+        return mLogdService;
+    }
+
+    private static class LogAccessRequestHandler extends Handler {
+        private final LogcatManagerService mService;
+
+        LogAccessRequestHandler(Looper looper, LogcatManagerService service) {
+            super(looper);
+            mService = service;
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_LOG_ACCESS_REQUESTED: {
+                    LogAccessRequest request = (LogAccessRequest) msg.obj;
+                    mService.onLogAccessRequested(request);
+                    break;
                 }
-                return;
+                case MSG_APPROVE_LOG_ACCESS: {
+                    LogAccessClient client = (LogAccessClient) msg.obj;
+                    mService.onAccessApprovedForClient(client);
+                    break;
+                }
+                case MSG_DECLINE_LOG_ACCESS: {
+                    LogAccessClient client = (LogAccessClient) msg.obj;
+                    mService.onAccessDeclinedForClient(client);
+                    break;
+                }
+                case MSG_LOG_ACCESS_FINISHED: {
+                    LogAccessRequest request = (LogAccessRequest) msg.obj;
+                    mService.onLogAccessFinished(request);
+                    break;
+                }
+                case MSG_PENDING_TIMEOUT: {
+                    LogAccessClient client = (LogAccessClient) msg.obj;
+                    mService.onPendingTimeoutExpired(client);
+                    break;
+                }
+                case MSG_LOG_ACCESS_STATUS_EXPIRED: {
+                    LogAccessClient client = (LogAccessClient) msg.obj;
+                    mService.onAccessStatusExpired(client);
+                    break;
+                }
             }
         }
     }
 
+    static class Injector {
+        protected Supplier<Long> createClock() {
+            return SystemClock::uptimeMillis;
+        }
+
+        protected Looper getLooper() {
+            return Looper.getMainLooper();
+        }
+
+        protected ILogd getLogdService() {
+            return ILogd.Stub.asInterface(ServiceManager.getService("logd"));
+        }
+    }
+
     public LogcatManagerService(Context context) {
+        this(context, new Injector());
+    }
+
+    public LogcatManagerService(Context context, Injector injector) {
         super(context);
         mContext = context;
+        mInjector = injector;
+        mClock = injector.createClock();
         mBinderService = new BinderService();
-        mThreadExecutor = Executors.newCachedThreadPool();
-        mActivityManager = context.getSystemService(ActivityManager.class);
-        mNotificationManager = mContext.getSystemService(NotificationManager.class);
+        mLocalService = new LogcatManagerServiceInternal();
+        mHandler = new LogAccessRequestHandler(injector.getLooper(), this);
     }
 
     @Override
     public void onStart() {
         try {
+            mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
             publishBinderService("logcat", mBinderService);
+            publishLocalService(LogcatManagerServiceInternal.class, mLocalService);
         } catch (Throwable t) {
             Slog.e(TAG, "Could not start the LogcatManagerService.", t);
         }
     }
 
-    private void addLogdService() {
-        mLogdService = ILogd.Stub.asInterface(ServiceManager.getService("logd"));
+    @VisibleForTesting
+    LogcatManagerServiceInternal getLocalService() {
+        return mLocalService;
+    }
+
+    @VisibleForTesting
+    ILogcatManagerService getBinderService() {
+        return mBinderService;
+    }
+
+    @Nullable
+    private LogAccessClient getClientForRequest(LogAccessRequest request) {
+        final String packageName = getPackageName(request);
+        if (packageName == null) {
+            return null;
+        }
+
+        return new LogAccessClient(request.mUid, packageName);
+    }
+
+    /**
+     * Returns the package name.
+     * If we cannot retrieve the package name, it returns null and we decline the full device log
+     * access
+     */
+    private String getPackageName(LogAccessRequest request) {
+        if (mActivityManagerInternal != null) {
+            String packageName = mActivityManagerInternal.getPackageNameByPid(request.mPid);
+            if (packageName != null) {
+                return packageName;
+            }
+        }
+
+        PackageManager pm = mContext.getPackageManager();
+        if (pm == null) {
+            // Decline the logd access if PackageManager is null
+            Slog.e(TAG, "PackageManager is null, declining the logd access");
+            return null;
+        }
+
+        String[] packageNames = pm.getPackagesForUid(request.mUid);
+
+        if (ArrayUtils.isEmpty(packageNames)) {
+            // Decline the logd access if the app name is unknown
+            Slog.e(TAG, "Unknown calling package name, declining the logd access");
+            return null;
+        }
+
+        String firstPackageName = packageNames[0];
+
+        if (firstPackageName == null || firstPackageName.isEmpty()) {
+            // Decline the logd access if the package name from uid is unknown
+            Slog.e(TAG, "Unknown calling package name, declining the logd access");
+            return null;
+        }
+
+        return firstPackageName;
+    }
+
+    void onLogAccessRequested(LogAccessRequest request) {
+        final LogAccessClient client = getClientForRequest(request);
+        if (client == null) {
+            declineRequest(request);
+            return;
+        }
+
+        LogAccessStatus logAccessStatus = mLogAccessStatus.get(client);
+        if (logAccessStatus == null) {
+            logAccessStatus = new LogAccessStatus();
+            mLogAccessStatus.put(client, logAccessStatus);
+        }
+
+        switch (logAccessStatus.mStatus) {
+            case STATUS_NEW_REQUEST:
+                logAccessStatus.mPendingRequests.add(request);
+                processNewLogAccessRequest(client);
+                break;
+            case STATUS_PENDING:
+                logAccessStatus.mPendingRequests.add(request);
+                return;
+            case STATUS_APPROVED:
+                approveRequest(client, request);
+                break;
+            case STATUS_DECLINED:
+                declineRequest(request);
+                break;
+        }
+    }
+
+    private boolean shouldShowConfirmationDialog(LogAccessClient client) {
+        // If the process is foreground, show a dialog for user consent
+        final int procState = mActivityManagerInternal.getUidProcessState(client.mUid);
+        return procState == ActivityManager.PROCESS_STATE_TOP;
+    }
+
+    private void processNewLogAccessRequest(LogAccessClient client) {
+        boolean isInstrumented = mActivityManagerInternal.isUidCurrentlyInstrumented(client.mUid);
+
+        // The instrumented apks only run for testing, so we don't check user permission.
+        if (isInstrumented) {
+            onAccessApprovedForClient(client);
+            return;
+        }
+
+        if (!shouldShowConfirmationDialog(client)) {
+            onAccessDeclinedForClient(client);
+            return;
+        }
+
+        final LogAccessStatus logAccessStatus = mLogAccessStatus.get(client);
+        logAccessStatus.mStatus = STATUS_PENDING;
+
+        mHandler.sendMessageAtTime(mHandler.obtainMessage(MSG_PENDING_TIMEOUT, client),
+                mClock.get() + PENDING_CONFIRMATION_TIMEOUT_MILLIS);
+        final Intent mIntent = createIntent(client);
+        mContext.startActivityAsUser(mIntent, UserHandle.SYSTEM);
+    }
+
+    void onAccessApprovedForClient(LogAccessClient client) {
+        scheduleStatusExpiry(client);
+
+        LogAccessStatus logAccessStatus = mLogAccessStatus.get(client);
+        if (logAccessStatus != null) {
+            for (LogAccessRequest request : logAccessStatus.mPendingRequests) {
+                approveRequest(client, request);
+            }
+            logAccessStatus.mStatus = STATUS_APPROVED;
+            logAccessStatus.mPendingRequests.clear();
+        }
+    }
+
+    void onAccessDeclinedForClient(LogAccessClient client) {
+        scheduleStatusExpiry(client);
+
+        LogAccessStatus logAccessStatus = mLogAccessStatus.get(client);
+        if (logAccessStatus != null) {
+            for (LogAccessRequest request : logAccessStatus.mPendingRequests) {
+                declineRequest(request);
+            }
+            logAccessStatus.mStatus = STATUS_DECLINED;
+            logAccessStatus.mPendingRequests.clear();
+        }
+    }
+
+    private void scheduleStatusExpiry(LogAccessClient client) {
+        mHandler.removeMessages(MSG_PENDING_TIMEOUT, client);
+        mHandler.removeMessages(MSG_LOG_ACCESS_STATUS_EXPIRED, client);
+        mHandler.sendMessageAtTime(mHandler.obtainMessage(MSG_LOG_ACCESS_STATUS_EXPIRED, client),
+                mClock.get() + STATUS_EXPIRATION_TIMEOUT_MILLIS);
+    }
+
+    void onPendingTimeoutExpired(LogAccessClient client) {
+        final LogAccessStatus logAccessStatus = mLogAccessStatus.get(client);
+        if (logAccessStatus != null && logAccessStatus.mStatus == STATUS_PENDING) {
+            onAccessDeclinedForClient(client);
+        }
+    }
+
+    void onAccessStatusExpired(LogAccessClient client) {
+        if (DEBUG) {
+            Slog.d(TAG, "Log access status expired for " + client);
+        }
+        mLogAccessStatus.remove(client);
+    }
+
+    void onLogAccessFinished(LogAccessRequest request) {
+        final LogAccessClient client = getClientForRequest(request);
+        final int activeCount = mActiveLogAccessCount.getOrDefault(client, 1) - 1;
+
+        if (activeCount == 0) {
+            mActiveLogAccessCount.remove(client);
+            if (DEBUG) {
+                Slog.d(TAG, "Client is no longer accessing logs: " + client);
+            }
+            // TODO This will be used to notify the AppOpsManager that the logd data access
+            // is finished.
+        } else {
+            mActiveLogAccessCount.put(client, activeCount);
+        }
+    }
+
+    private void approveRequest(LogAccessClient client, LogAccessRequest request) {
+        if (DEBUG) {
+            Slog.d(TAG, "Approving log access: " + request);
+        }
+        try {
+            getLogdService().approve(request.mUid, request.mGid, request.mPid, request.mFd);
+            Integer activeCount = mActiveLogAccessCount.getOrDefault(client, 0);
+            mActiveLogAccessCount.put(client, activeCount + 1);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Fails to call remote functions", e);
+        }
+    }
+
+    private void declineRequest(LogAccessRequest request) {
+        if (DEBUG) {
+            Slog.d(TAG, "Declining log access: " + request);
+        }
+        try {
+            getLogdService().decline(request.mUid, request.mGid, request.mPid, request.mFd);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Fails to call remote functions", e);
+        }
+    }
+
+    /**
+     * Create the Intent for LogAccessDialogActivity.
+     */
+    public Intent createIntent(LogAccessClient client) {
+        final Intent intent = new Intent(mContext, LogAccessDialogActivity.class);
+
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+        intent.putExtra(Intent.EXTRA_PACKAGE_NAME, client.mPackageName);
+        intent.putExtra(Intent.EXTRA_UID, client.mUid);
+
+        return intent;
     }
 }

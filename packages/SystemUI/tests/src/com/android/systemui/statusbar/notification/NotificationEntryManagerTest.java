@@ -201,7 +201,6 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                 () -> mNotificationRowBinder,
                 () -> mRemoteInputManager,
                 mLeakDetector,
-                mock(ForegroundServiceDismissalFeatureController.class),
                 mock(IStatusBarService.class),
                 NotifLiveDataStoreMocksKt.createNotifLiveDataStoreImplMock(),
                 mock(DumpManager.class)

@@ -16,6 +16,7 @@
 
 package android.app.usage;
 
+import android.Manifest;
 import android.annotation.CurrentTimeMillisLong;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -787,6 +788,23 @@ public final class UsageStatsManager {
     }
 
     /**
+     * Return the lowest bucket this app can ever enter.
+     *
+     * @param packageName the package for which to fetch the minimum allowed standby bucket.
+     * {@hide}
+     */
+    @StandbyBuckets
+    @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
+    public int getAppMinStandbyBucket(String packageName) {
+        try {
+            return mService.getAppMinStandbyBucket(packageName, mContext.getOpPackageName(),
+                    mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Changes an app's estimated launch time. An app is considered "launched" when a user opens
      * one of its {@link android.app.Activity Activities}. The provided time is persisted across
      * reboots and is used unless 1) the time is more than a week in the future and the platform
@@ -1429,7 +1447,7 @@ public final class UsageStatsManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
+    @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS)
     @UserHandleAware
     @NonNull
     public List<BroadcastResponseStats> queryBroadcastResponseStats(
@@ -1462,7 +1480,7 @@ public final class UsageStatsManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
+    @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS)
     @UserHandleAware
     public void clearBroadcastResponseStats(@Nullable String packageName,
             @IntRange(from = 0) long id) {
@@ -1479,11 +1497,22 @@ public final class UsageStatsManager {
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
+    @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS)
     @UserHandleAware
     public void clearBroadcastEvents() {
         try {
             mService.clearBroadcastEvents(mContext.getOpPackageName(), mContext.getUserId());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /** @hide */
+    @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
+    @Nullable
+    public String getAppStandbyConstant(@NonNull String key) {
+        try {
+            return mService.getAppStandbyConstant(key);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

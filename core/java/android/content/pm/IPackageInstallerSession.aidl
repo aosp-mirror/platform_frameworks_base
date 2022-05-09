@@ -57,4 +57,5 @@ interface IPackageInstallerSession {
     int getParentSessionId();
 
     boolean isStaged();
+    int getInstallFlags();
 }

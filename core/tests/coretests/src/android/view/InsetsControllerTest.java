@@ -30,6 +30,7 @@ import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.InsetsState.LAST_TYPE;
+import static android.view.ViewRootImpl.CAPTION_ON_SHELL;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.navigationBars;
 import static android.view.WindowInsets.Type.statusBars;
@@ -758,6 +759,11 @@ public class InsetsControllerTest {
 
     @Test
     public void testCaptionInsetsStateAssemble() {
+        if (CAPTION_ON_SHELL) {
+            // For this case, the test is covered by WindowContainerInsetsSourceProviderTest, This
+            // test can be removed after the caption is moved to shell completely.
+            return;
+        }
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             mController.onFrameChanged(new Rect(0, 0, 100, 300));
             final InsetsState state = new InsetsState(mController.getState(), true);
@@ -769,6 +775,7 @@ public class InsetsControllerTest {
             assertEquals(captionFrame, currentState.peekSource(ITYPE_CAPTION_BAR).getFrame());
             assertTrue(currentState.equals(state, true /* excludingCaptionInsets*/,
                     true /* excludeInvisibleIme */));
+            // Test update to remove the caption bar
             mController.setCaptionInsetsHeight(0);
             mController.onStateChanged(state);
             // The caption bar source should not be there at all, because we don't add empty
@@ -779,6 +786,11 @@ public class InsetsControllerTest {
 
     @Test
     public void testNotifyCaptionInsetsOnlyChange() {
+        if (CAPTION_ON_SHELL) {
+            // For this case, the test is covered by WindowContainerInsetsSourceProviderTest, This
+            // test can be removed after the caption is moved to shell completely.
+            return;
+        }
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             final InsetsState state = new InsetsState(mController.getState(), true);
             reset(mTestHost);

@@ -112,7 +112,7 @@ public class ZenModeFiltering {
         }
         if (zen == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS) {
             if (consolidatedPolicy.allowRepeatCallers()
-                    && REPEAT_CALLERS.isRepeat(context, extras)) {
+                    && REPEAT_CALLERS.isRepeat(context, extras, null)) {
                 ZenLog.traceMatchesCallFilter(true, "repeat caller");
                 return true;
             }
@@ -229,7 +229,8 @@ public class ZenModeFiltering {
                 }
                 if (isCall(record)) {
                     if (policy.allowRepeatCallers()
-                            && REPEAT_CALLERS.isRepeat(mContext, extras(record))) {
+                            && REPEAT_CALLERS.isRepeat(
+                                    mContext, extras(record), record.getPhoneNumbers())) {
                         ZenLog.traceNotIntercepted(record, "repeatCaller");
                         return false;
                     }
@@ -350,6 +351,9 @@ public class ZenModeFiltering {
         private final ArrayMap<String, Long> mOtherCalls = new ArrayMap<>();
         private int mThresholdMinutes;
 
+        // Record all people URIs in the extras bundle as well as the provided phoneNumbers set
+        // as callers. The phoneNumbers set is used to pass in any additional phone numbers
+        // associated with the people URIs as separately retrieved from contacts.
         private synchronized void recordCall(Context context, Bundle extras,
                 ArraySet<String> phoneNumbers) {
             setThresholdMinutes(context);
@@ -362,7 +366,13 @@ public class ZenModeFiltering {
             recordCallers(extraPeople, phoneNumbers, now);
         }
 
-        private synchronized boolean isRepeat(Context context, Bundle extras) {
+        // Determine whether any people in the provided extras bundle or phone number set is
+        // a repeat caller. The extras bundle contains the people associated with a specific
+        // notification, and will suffice for most callers; the phoneNumbers array may be used
+        // to additionally check any specific phone numbers previously retrieved from contacts
+        // associated with the people in the extras bundle.
+        private synchronized boolean isRepeat(Context context, Bundle extras,
+                ArraySet<String> phoneNumbers) {
             setThresholdMinutes(context);
             if (mThresholdMinutes <= 0 || extras == null) return false;
             final String[] extraPeople = ValidateNotificationPeople.getExtraPeople(extras);
@@ -370,7 +380,7 @@ public class ZenModeFiltering {
             final long now = System.currentTimeMillis();
             cleanUp(mTelCalls, now);
             cleanUp(mOtherCalls, now);
-            return checkCallers(context, extraPeople);
+            return checkCallers(context, extraPeople, phoneNumbers);
         }
 
         private synchronized void cleanUp(ArrayMap<String, Long> calls, long now) {
@@ -433,7 +443,31 @@ public class ZenModeFiltering {
             }
         }
 
-        private synchronized boolean checkCallers(Context context, String[] people) {
+        // helper function to check mTelCalls array for a number, and also check its decoded
+        // version
+        private synchronized boolean checkForNumber(String number, String defaultCountryCode) {
+            if (mTelCalls.containsKey(number)) {
+                // check directly via map first
+                return true;
+            } else {
+                // see if a number that matches via areSameNumber exists
+                String numberToCheck = Uri.decode(number);
+                if (numberToCheck != null) {
+                    for (String prev : mTelCalls.keySet()) {
+                        if (PhoneNumberUtils.areSamePhoneNumber(
+                                numberToCheck, prev, defaultCountryCode)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        // Check whether anyone in the provided array of people URIs or phone number set matches a
+        // previously recorded phone call.
+        private synchronized boolean checkCallers(Context context, String[] people,
+                ArraySet<String> phoneNumbers) {
             // get the default country code for checking telephone numbers
             final String defaultCountryCode =
                     context.getSystemService(TelephonyManager.class).getNetworkCountryIso();
@@ -443,20 +477,8 @@ public class ZenModeFiltering {
                 final Uri uri = Uri.parse(person);
                 if ("tel".equals(uri.getScheme())) {
                     String number = uri.getSchemeSpecificPart();
-                    if (mTelCalls.containsKey(number)) {
-                        // check directly via map first
+                    if (checkForNumber(number, defaultCountryCode)) {
                         return true;
-                    } else {
-                        // see if a number that matches via areSameNumber exists
-                        String numberToCheck = Uri.decode(number);
-                        if (numberToCheck != null) {
-                            for (String prev : mTelCalls.keySet()) {
-                                if (PhoneNumberUtils.areSamePhoneNumber(
-                                        numberToCheck, prev, defaultCountryCode)) {
-                                    return true;
-                                }
-                            }
-                        }
                     }
                 } else {
                     if (mOtherCalls.containsKey(person)) {
@@ -464,6 +486,17 @@ public class ZenModeFiltering {
                     }
                 }
             }
+
+            // also check any passed-in phone numbers
+            if (phoneNumbers != null) {
+                for (String num : phoneNumbers) {
+                    if (checkForNumber(num, defaultCountryCode)) {
+                        return true;
+                    }
+                }
+            }
+
+            // no matches
             return false;
         }
     }

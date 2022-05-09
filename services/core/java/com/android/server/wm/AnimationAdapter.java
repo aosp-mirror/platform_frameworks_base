@@ -43,7 +43,7 @@ interface AnimationAdapter {
 
     /**
      * @return Whether we should show a background behind the animating windows.
-     * @see Animation#getShowBackground()
+     * @see Animation#getShowBackdrop()
      */
     default boolean getShowBackground() {
         return false;
@@ -51,7 +51,7 @@ interface AnimationAdapter {
 
     /**
      * @return The background color to use during an animation if getShowBackground returns true.
-     * @see Animation#getBackgroundColor()
+     * @see Animation#getBackdropColor()
      */
     default int getBackgroundColor() {
         return 0;

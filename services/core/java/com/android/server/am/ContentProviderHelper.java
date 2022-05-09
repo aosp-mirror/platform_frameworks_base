@@ -112,6 +112,13 @@ public class ContentProviderHelper {
     ContentProviderHolder getContentProvider(IApplicationThread caller, String callingPackage,
             String name, int userId, boolean stable) {
         mService.enforceNotIsolatedCaller("getContentProvider");
+        if (Process.isSdkSandboxUid(Binder.getCallingUid())) {
+            // TODO(b/226318628): for sdk sandbox processes only allow accessing CPs registered by
+            //  the WebView apk.
+            Slog.w(TAG, "Sdk sandbox process " + Binder.getCallingUid()
+                    + " is accessing content provider " + name
+                    + ". This access will most likely be blocked in the future");
+        }
         if (caller == null) {
             String msg = "null IApplicationThread when getting content provider " + name;
             Slog.w(TAG, msg);
@@ -630,7 +637,7 @@ public class ContentProviderHelper {
             return;
         }
 
-        mService.enforceNotIsolatedCaller("publishContentProviders");
+        mService.enforceNotIsolatedOrSdkSandboxCaller("publishContentProviders");
         synchronized (mService) {
             final ProcessRecord r = mService.getRecordForAppLOSP(caller);
             if (DEBUG_MU) {
@@ -717,7 +724,7 @@ public class ContentProviderHelper {
      * Drop a content provider from a ProcessRecord's bookkeeping
      */
     void removeContentProvider(IBinder connection, boolean stable) {
-        mService.enforceNotIsolatedCaller("removeContentProvider");
+        mService.enforceNotIsolatedOrSdkSandboxCaller("removeContentProvider");
         final long ident = Binder.clearCallingIdentity();
         try {
             ContentProviderConnection conn;

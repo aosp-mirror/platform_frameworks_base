@@ -18,6 +18,7 @@ package com.android.server.app;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -26,7 +27,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.content.ComponentName;
@@ -49,6 +49,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.SystemService;
+import com.android.server.app.GameServiceConfiguration.GameServiceComponentConfiguration;
 
 import com.google.common.collect.ImmutableList;
 
@@ -137,10 +138,10 @@ public final class GameServiceProviderSelectorImplTest {
                 GAME_SERVICE_META_DATA_RES_ID,
                 "res/xml/game_service_metadata_valid.xml");
 
-        GameServiceProviderConfiguration gameServiceProviderConfiguration =
+        GameServiceConfiguration gameServiceConfiguration =
                 mGameServiceProviderSelector.get(null, null);
 
-        assertThat(gameServiceProviderConfiguration).isNull();
+        assertThat(gameServiceConfiguration).isNull();
     }
 
     @Test
@@ -154,15 +155,16 @@ public final class GameServiceProviderSelectorImplTest {
                 GAME_SERVICE_META_DATA_RES_ID,
                 "res/xml/game_service_metadata_valid.xml");
 
-        GameServiceProviderConfiguration gameServiceProviderConfiguration =
+        GameServiceConfiguration gameServiceConfiguration =
                 mGameServiceProviderSelector.get(managedTargetUser(USER_HANDLE_10), null);
 
-        assertThat(gameServiceProviderConfiguration).isNull();
+        assertThat(gameServiceConfiguration).isNull();
     }
 
     @Test
     public void get_noSystemGameService_returnsNull()
             throws Exception {
+        seedSystemGameServicePackageName("");
         seedGameServiceResolveInfos(GAME_SERVICE_PACKAGE_NAME, USER_HANDLE_10,
                 resolveInfo(GAME_SERVICE_SERVICE_INFO));
         seedServiceServiceInfo(GAME_SESSION_SERVICE_COMPONENT);
@@ -170,14 +172,14 @@ public final class GameServiceProviderSelectorImplTest {
                 GAME_SERVICE_META_DATA_RES_ID,
                 "res/xml/game_service_metadata_valid.xml");
 
-        GameServiceProviderConfiguration gameServiceProviderConfiguration =
+        GameServiceConfiguration gameServiceConfiguration =
                 mGameServiceProviderSelector.get(eligibleTargetUser(USER_HANDLE_10), null);
 
-        assertThat(gameServiceProviderConfiguration).isNull();
+        assertThat(gameServiceConfiguration).isNull();
     }
 
     @Test
-    public void get_noGameServiceProvidersAvailable_returnsNull()
+    public void get_noGameServiceProvidersAvailable_returnsGameServicePackageName()
             throws Exception {
         seedSystemGameServicePackageName(GAME_SERVICE_PACKAGE_NAME);
         seedGameServiceResolveInfos(GAME_SERVICE_PACKAGE_NAME, USER_HANDLE_10);
@@ -186,28 +188,30 @@ public final class GameServiceProviderSelectorImplTest {
                 GAME_SERVICE_META_DATA_RES_ID,
                 "res/xml/game_service_metadata_valid.xml");
 
-        GameServiceProviderConfiguration gameServiceProviderConfiguration =
+        GameServiceConfiguration gameServiceConfiguration =
                 mGameServiceProviderSelector.get(eligibleTargetUser(USER_HANDLE_10), null);
 
-        assertThat(gameServiceProviderConfiguration).isNull();
+        assertThat(gameServiceConfiguration).isEqualTo(
+                new GameServiceConfiguration(GAME_SERVICE_PACKAGE_NAME, null));
     }
 
     @Test
-    public void get_gameServiceProviderHasNoMetaData_returnsNull()
+    public void get_gameServiceProviderHasNoMetaData_returnsGameServicePackageName()
             throws Exception {
         seedSystemGameServicePackageName(GAME_SERVICE_PACKAGE_NAME);
         seedGameServiceResolveInfos(GAME_SERVICE_PACKAGE_NAME, USER_HANDLE_10,
                 resolveInfo(GAME_SERVICE_SERVICE_INFO_WITHOUT_META_DATA));
         seedServiceServiceInfo(GAME_SESSION_SERVICE_COMPONENT);
 
-        GameServiceProviderConfiguration gameServiceProviderConfiguration =
+        GameServiceConfiguration gameServiceConfiguration =
                 mGameServiceProviderSelector.get(eligibleTargetUser(USER_HANDLE_10), null);
 
-        assertThat(gameServiceProviderConfiguration).isNull();
+        assertThat(gameServiceConfiguration).isEqualTo(
+                new GameServiceConfiguration(GAME_SERVICE_PACKAGE_NAME, null));
     }
 
     @Test
-    public void get_gameSessionServiceDoesNotExist_returnsNull()
+    public void get_gameSessionServiceDoesNotExist_returnsGameServicePackageName()
             throws Exception {
         seedSystemGameServicePackageName(GAME_SERVICE_PACKAGE_NAME);
         seedGameServiceResolveInfos(GAME_SERVICE_PACKAGE_NAME, USER_HANDLE_10,
@@ -217,14 +221,15 @@ public final class GameServiceProviderSelectorImplTest {
                 GAME_SERVICE_META_DATA_RES_ID,
                 "res/xml/game_service_metadata_valid.xml");
 
-        GameServiceProviderConfiguration gameServiceProviderConfiguration =
+        GameServiceConfiguration gameServiceConfiguration =
                 mGameServiceProviderSelector.get(eligibleTargetUser(USER_HANDLE_10), null);
 
-        assertThat(gameServiceProviderConfiguration).isNull();
+        assertThat(gameServiceConfiguration).isEqualTo(
+                new GameServiceConfiguration(GAME_SERVICE_PACKAGE_NAME, null));
     }
 
     @Test
-    public void get_metaDataWrongFirstTag_returnsNull() throws Exception {
+    public void get_metaDataWrongFirstTag_returnsGameServicePackageName() throws Exception {
         seedSystemGameServicePackageName(GAME_SERVICE_PACKAGE_NAME);
         seedGameServiceResolveInfos(GAME_SERVICE_PACKAGE_NAME, USER_HANDLE_10,
                 resolveInfo(GAME_SERVICE_SERVICE_INFO));
@@ -233,10 +238,11 @@ public final class GameServiceProviderSelectorImplTest {
                 GAME_SERVICE_META_DATA_RES_ID,
                 "res/xml/game_service_metadata_wrong_first_tag.xml");
 
-        GameServiceProviderConfiguration gameServiceProviderConfiguration =
+        GameServiceConfiguration gameServiceConfiguration =
                 mGameServiceProviderSelector.get(eligibleTargetUser(USER_HANDLE_10), null);
 
-        assertThat(gameServiceProviderConfiguration).isNull();
+        assertThat(gameServiceConfiguration).isEqualTo(
+                new GameServiceConfiguration(GAME_SERVICE_PACKAGE_NAME, null));
     }
 
     @Test
@@ -250,15 +256,17 @@ public final class GameServiceProviderSelectorImplTest {
                 GAME_SERVICE_META_DATA_RES_ID,
                 "res/xml/game_service_metadata_valid.xml");
 
-        GameServiceProviderConfiguration gameServiceProviderConfiguration =
+        GameServiceConfiguration gameServiceConfiguration =
                 mGameServiceProviderSelector.get(eligibleTargetUser(USER_HANDLE_10), null);
 
-        GameServiceProviderConfiguration expectedGameServiceProviderConfiguration =
-                new GameServiceProviderConfiguration(USER_HANDLE_10,
-                        GAME_SERVICE_COMPONENT,
-                        GAME_SESSION_SERVICE_COMPONENT);
-        assertThat(gameServiceProviderConfiguration).isEqualTo(
-                expectedGameServiceProviderConfiguration);
+        GameServiceConfiguration expectedGameServiceConfiguration =
+                new GameServiceConfiguration(
+                        GAME_SERVICE_PACKAGE_NAME,
+                        new GameServiceComponentConfiguration(USER_HANDLE_10,
+                                GAME_SERVICE_COMPONENT,
+                                GAME_SESSION_SERVICE_COMPONENT));
+        assertThat(gameServiceConfiguration).isEqualTo(
+                expectedGameServiceConfiguration);
     }
 
     @Test
@@ -276,15 +284,17 @@ public final class GameServiceProviderSelectorImplTest {
                 GAME_SERVICE_META_DATA_RES_ID,
                 "res/xml/game_service_metadata_valid.xml");
 
-        GameServiceProviderConfiguration gameServiceProviderConfiguration =
+        GameServiceConfiguration gameServiceConfiguration =
                 mGameServiceProviderSelector.get(eligibleTargetUser(USER_HANDLE_10), null);
 
-        GameServiceProviderConfiguration expectedGameServiceProviderConfiguration =
-                new GameServiceProviderConfiguration(USER_HANDLE_10,
-                        GAME_SERVICE_B_COMPONENT,
-                        GAME_SESSION_SERVICE_COMPONENT);
-        assertThat(gameServiceProviderConfiguration).isEqualTo(
-                expectedGameServiceProviderConfiguration);
+        GameServiceConfiguration expectedGameServiceConfiguration =
+                new GameServiceConfiguration(
+                        GAME_SERVICE_PACKAGE_NAME,
+                        new GameServiceComponentConfiguration(USER_HANDLE_10,
+                                GAME_SERVICE_B_COMPONENT,
+                                GAME_SESSION_SERVICE_COMPONENT));
+        assertThat(gameServiceConfiguration).isEqualTo(
+                expectedGameServiceConfiguration);
     }
 
     @Test
@@ -299,15 +309,17 @@ public final class GameServiceProviderSelectorImplTest {
                 GAME_SERVICE_META_DATA_RES_ID,
                 "res/xml/game_service_metadata_valid.xml");
 
-        GameServiceProviderConfiguration gameServiceProviderConfiguration =
+        GameServiceConfiguration gameServiceConfiguration =
                 mGameServiceProviderSelector.get(eligibleTargetUser(USER_HANDLE_10), null);
 
-        GameServiceProviderConfiguration expectedGameServiceProviderConfiguration =
-                new GameServiceProviderConfiguration(USER_HANDLE_10,
-                        GAME_SERVICE_COMPONENT,
-                        GAME_SESSION_SERVICE_COMPONENT);
-        assertThat(gameServiceProviderConfiguration).isEqualTo(
-                expectedGameServiceProviderConfiguration);
+        GameServiceConfiguration expectedGameServiceConfiguration =
+                new GameServiceConfiguration(
+                        GAME_SERVICE_PACKAGE_NAME,
+                        new GameServiceComponentConfiguration(USER_HANDLE_10,
+                                GAME_SERVICE_COMPONENT,
+                                GAME_SESSION_SERVICE_COMPONENT));
+        assertThat(gameServiceConfiguration).isEqualTo(
+                expectedGameServiceConfiguration);
     }
 
     @Test
@@ -322,16 +334,19 @@ public final class GameServiceProviderSelectorImplTest {
                 GAME_SERVICE_META_DATA_RES_ID,
                 "res/xml/game_service_metadata_valid.xml");
 
-        GameServiceProviderConfiguration gameServiceProviderConfiguration =
+        GameServiceConfiguration gameServiceConfiguration =
                 mGameServiceProviderSelector.get(eligibleTargetUser(USER_HANDLE_10),
                         GAME_SERVICE_PACKAGE_NAME);
 
-        GameServiceProviderConfiguration expectedGameServiceProviderConfiguration =
-                new GameServiceProviderConfiguration(USER_HANDLE_10,
-                        GAME_SERVICE_COMPONENT,
-                        GAME_SESSION_SERVICE_COMPONENT);
-        assertThat(gameServiceProviderConfiguration).isEqualTo(
-                expectedGameServiceProviderConfiguration);
+        GameServiceConfiguration expectedGameServiceConfiguration =
+                new GameServiceConfiguration(
+                        GAME_SERVICE_PACKAGE_NAME,
+                        new GameServiceComponentConfiguration(
+                                USER_HANDLE_10,
+                                GAME_SERVICE_COMPONENT,
+                                GAME_SESSION_SERVICE_COMPONENT));
+        assertThat(gameServiceConfiguration).isEqualTo(
+                expectedGameServiceConfiguration);
     }
 
     private void seedSystemGameServicePackageName(String gameServicePackageName) {

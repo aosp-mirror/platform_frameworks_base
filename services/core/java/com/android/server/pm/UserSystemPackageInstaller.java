@@ -95,7 +95,7 @@ import java.util.Set;
  * </code></pre>
  */
 class UserSystemPackageInstaller {
-    private static final String TAG = "UserManagerService";
+    private static final String TAG = UserSystemPackageInstaller.class.getSimpleName();
 
     private static final boolean DEBUG = false;
 

@@ -47,7 +47,8 @@ import android.os.UserHandle;
 
 import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
-import androidx.core.os.BuildCompat;
+
+import com.android.settingslib.utils.BuildCompatUtils;
 
 /**
  * Converts the user avatar icon to a circularly clipped one with an optional badge and frame
@@ -87,7 +88,7 @@ public class UserIconDrawable extends Drawable implements Drawable.Callback {
      * @return drawable containing just the badge
      */
     public static Drawable getManagedUserDrawable(Context context) {
-        if (BuildCompat.isAtLeastT()) {
+        if (BuildCompatUtils.isAtLeastT()) {
             return getUpdatableManagedUserDrawable(context);
         } else {
             return getDrawableForDisplayDensity(
@@ -98,7 +99,7 @@ public class UserIconDrawable extends Drawable implements Drawable.Callback {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private static Drawable getUpdatableManagedUserDrawable(Context context) {
         DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
-        return dpm.getDrawableForDensity(
+        return dpm.getResources().getDrawableForDensity(
                 WORK_PROFILE_USER_ICON,
                 SOLID_COLORED,
                 context.getResources().getDisplayMetrics().densityDpi,
@@ -176,6 +177,10 @@ public class UserIconDrawable extends Drawable implements Drawable.Callback {
         return this;
     }
 
+    public boolean isEmpty() {
+        return getUserIcon() == null && getUserDrawable() == null;
+    }
+
     public UserIconDrawable setBadge(Drawable badge) {
         mBadge = badge;
         if (mBadge != null) {
@@ -222,7 +227,7 @@ public class UserIconDrawable extends Drawable implements Drawable.Callback {
     }
 
     private static Drawable getManagementBadge(Context context) {
-        if (BuildCompat.isAtLeastT()) {
+        if (BuildCompatUtils.isAtLeastT()) {
             return getUpdatableManagementBadge(context);
         } else {
             return getDrawableForDisplayDensity(
@@ -233,7 +238,7 @@ public class UserIconDrawable extends Drawable implements Drawable.Callback {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private static Drawable getUpdatableManagementBadge(Context context) {
         DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
-        return dpm.getDrawableForDensity(
+        return dpm.getResources().getDrawableForDensity(
                 WORK_PROFILE_ICON,
                 SOLID_COLORED,
                 context.getResources().getDisplayMetrics().densityDpi,

@@ -327,28 +327,6 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
     void revokePostNotificationPermissionWithoutKillForTest(String packageName, int userId);
 
     /**
-     * Triggers the revocation of one or more permissions for a package, under the following
-     * conditions:
-     * <ul>
-     * <li>The package {@code packageName} must be under the same UID as the calling process
-     *   (typically, the target package is the calling package).
-     * <li>Each permission in {@code permissions} must be granted to the package
-     * {@code packageName}.
-     * <li>Each permission in {@code permissions} must be a runtime permission.
-     * </ul>
-     * <p>
-     * Background permissions which have no corresponding foreground permission still granted once
-     * the revocation is effective will also be revoked.
-     * <p>
-     * This revocation happens asynchronously and kills all processes running in the same UID as
-     * {@code packageName}. It will be triggered once it is safe to do so.
-     *
-     * @param packageName The name of the package for which the permissions will be revoked.
-     * @param permissions List of permissions to be revoked.
-     */
-    void revokeOwnPermissionsOnKill(String packageName, List<String> permissions);
-
-    /**
      * Get whether you should show UI with rationale for requesting a permission. You should do this
      * only if you do not have the permission and the context in which the permission is requested
      * does not clearly communicate to the user what would be the benefit from grating this

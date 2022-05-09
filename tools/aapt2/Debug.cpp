@@ -80,7 +80,7 @@ class ValueHeadlinePrinter : public ConstValueVisitor {
           printer_->Print(parent_name.package);
           printer_->Print(":");
         }
-        printer_->Print(to_string(parent_name.type));
+        printer_->Print(parent_name.type.to_string());
         printer_->Print("/");
         printer_->Print(parent_name.entry);
         if (parent_ref.id) {

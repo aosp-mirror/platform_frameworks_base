@@ -285,11 +285,18 @@ public class Build {
         public static final String RELEASE = getString("ro.build.version.release");
 
         /**
-         * The version string we show to the user; may be {@link #RELEASE} or
-         * {@link #CODENAME} if not a final release build.
+         * The version string.  May be {@link #RELEASE} or {@link #CODENAME} if
+         * not a final release build.
          */
         @NonNull public static final String RELEASE_OR_CODENAME = getString(
                 "ro.build.version.release_or_codename");
+
+        /**
+         * The version string we show to the user; may be {@link #RELEASE} or
+         * a descriptive string if not a final release build.
+         */
+        @NonNull public static final String RELEASE_OR_PREVIEW_DISPLAY = getString(
+                "ro.build.version.release_or_preview_display");
 
         /**
          * The base OS build the product is based on.
@@ -399,7 +406,7 @@ public class Build {
         public static final String CODENAME = getString("ro.build.version.codename");
 
         /**
-         * All known codenames starting from {@link VERSION_CODES.Q}.
+         * All known codenames that are present in {@link VERSION_CODES}.
          *
          * <p>This includes in development codenames as well, i.e. if {@link #CODENAME} is not "REL"
          * then the value of that is present in this set.
@@ -1159,7 +1166,7 @@ public class Build {
         /**
          * Tiramisu.
          */
-        public static final int TIRAMISU = CUR_DEVELOPMENT;
+        public static final int TIRAMISU = 33;
     }
 
     /** The type of build, like "user" or "eng". */

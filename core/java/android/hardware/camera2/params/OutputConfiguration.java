@@ -224,9 +224,10 @@ public final class OutputConfiguration implements Parcelable {
      * display subsystem for smoother display of camera frames. An output target of SurfaceView
      * uses this time base by default.</p>
      *
-     * <p>The choreographer synchronized timestamps are also reasonable to use when drawing to a
-     * TextureView. So this timestamp base can be used for a SurfaceTexture as part of a
-     * TextureView, in addition to SurfaceView.</p>
+     * <p>This timestamp base isn't applicable to SurfaceTexture targets. SurfaceTexture's
+     * {@link android.graphics.SurfaceTexture#updateTexImage updateTexImage} function always
+     * uses the latest image from the camera stream. In the case of a TextureView, the image is
+     * displayed right away.</p>
      *
      * <p>Timestamps with this time base cannot directly match the timestamps in
      * {@link CameraCaptureSession.CaptureCallback#onCaptureStarted} or the sensor timestamps in
@@ -421,7 +422,7 @@ public final class OutputConfiguration implements Parcelable {
      * {@link android.media.MediaCodec} etc.)
      * or {@link ImageFormat#YCBCR_P010}.</p>
      */
-    public void setDynamicRangeProfile(@Profile int profile) {
+    public void setDynamicRangeProfile(@Profile long profile) {
         mDynamicRangeProfile = profile;
     }
 
@@ -430,7 +431,7 @@ public final class OutputConfiguration implements Parcelable {
      *
      * @return the currently set dynamic range profile
      */
-    public @Profile int getDynamicRangeProfile() {
+    public @Profile long getDynamicRangeProfile() {
         return mDynamicRangeProfile;
     }
 
@@ -918,9 +919,9 @@ public final class OutputConfiguration implements Parcelable {
      * @throws IllegalArgumentException If the streamUseCase isn't within the range of valid
      *                                  values.
      */
-    public void setStreamUseCase(@StreamUseCase int streamUseCase) {
+    public void setStreamUseCase(@StreamUseCase long streamUseCase) {
         // Verify that the value is in range
-        int maxUseCaseValue = CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_CALL;
+        long maxUseCaseValue = CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_CALL;
         if (streamUseCase > maxUseCaseValue &&
                 streamUseCase < CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_VENDOR_START) {
             throw new IllegalArgumentException("Not a valid stream use case value " +
@@ -938,7 +939,7 @@ public final class OutputConfiguration implements Parcelable {
      *
      * @return the currently set stream use case
      */
-    public int getStreamUseCase() {
+    public long getStreamUseCase() {
         return mStreamUseCase;
     }
 
@@ -1067,10 +1068,10 @@ public final class OutputConfiguration implements Parcelable {
         String physicalCameraId = source.readString();
         boolean isMultiResolutionOutput = source.readInt() == 1;
         int[] sensorPixelModesUsed = source.createIntArray();
-        int streamUseCase = source.readInt();
+        long streamUseCase = source.readLong();
 
         checkArgumentInRange(rotation, ROTATION_0, ROTATION_270, "Rotation constant");
-        int dynamicRangeProfile = source.readInt();
+        long dynamicRangeProfile = source.readLong();
         DynamicRangeProfiles.checkProfileValue(dynamicRangeProfile);
 
         int timestampBase = source.readInt();
@@ -1217,8 +1218,8 @@ public final class OutputConfiguration implements Parcelable {
         dest.writeInt(mIsMultiResolution ? 1 : 0);
         // writeList doesn't seem to work well with Integer list.
         dest.writeIntArray(convertIntegerToIntList(mSensorPixelModesUsed));
-        dest.writeInt(mDynamicRangeProfile);
-        dest.writeInt(mStreamUseCase);
+        dest.writeLong(mDynamicRangeProfile);
+        dest.writeLong(mStreamUseCase);
         dest.writeInt(mTimestampBase);
         dest.writeInt(mMirrorMode);
     }
@@ -1335,9 +1336,9 @@ public final class OutputConfiguration implements Parcelable {
     // The sensor pixel modes that this OutputConfiguration will use
     private ArrayList<Integer> mSensorPixelModesUsed;
     // Dynamic range profile
-    private int mDynamicRangeProfile;
+    private long mDynamicRangeProfile;
     // Stream use case
-    private int mStreamUseCase;
+    private long mStreamUseCase;
     // Timestamp base
     private int mTimestampBase;
     // Mirroring mode

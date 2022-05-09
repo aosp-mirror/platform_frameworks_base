@@ -108,7 +108,7 @@ public class VpnManager {
      * <ul>
      *   <li>{@link #EXTRA_SESSION_KEY}, a {@code String} for the session key, as returned by
      *       {@link #startProvisionedVpnProfileSession}.
-     *   <li>{@link #EXTRA_TIMESTAMP}, a long for the timestamp at which the error occurred,
+     *   <li>{@link #EXTRA_TIMESTAMP_MILLIS}, a long for the timestamp at which the error occurred,
      *       in milliseconds since the epoch, as returned by
      *       {@link java.lang.System#currentTimeMillis}.
      *   <li>{@link #EXTRA_UNDERLYING_NETWORK}, a {@link Network} containing the underlying
@@ -161,6 +161,23 @@ public class VpnManager {
             "android.net.category.EVENT_DEACTIVATED_BY_USER";
 
     /**
+     * The always-on state of this VPN was changed
+     *
+     * <p>This may be the result of a user changing VPN settings, or a Device Policy Manager app
+     * having changed the VPN policy.
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_EVENT_ALWAYS_ON_STATE_CHANGED =
+            "android.net.category.EVENT_ALWAYS_ON_STATE_CHANGED";
+
+    /**
+     * The VpnProfileState at the time that this event occurred.
+     *
+     * <p>This extra may be null if the VPN was revoked by the user, or the profile was deleted.
+     */
+    public static final String EXTRA_VPN_PROFILE_STATE = "android.net.extra.VPN_PROFILE_STATE";
+
+    /**
      * The key of the session that experienced this event, as a {@code String}.
      *
      * This is the same key that was returned by {@link #startProvisionedVpnProfileSession}.
@@ -196,7 +213,7 @@ public class VpnManager {
      * This is a number of milliseconds since the epoch, suitable to be compared with
      * {@link java.lang.System#currentTimeMillis}.
      */
-    public static final String EXTRA_TIMESTAMP = "android.net.extra.TIMESTAMP";
+    public static final String EXTRA_TIMESTAMP_MILLIS = "android.net.extra.TIMESTAMP_MILLIS";
 
     /**
      * Extra for the error class, as an {@code int}.
@@ -397,6 +414,21 @@ public class VpnManager {
     public VpnConfig getVpnConfig(@UserIdInt int userId) {
         try {
             return mService.getVpnConfig(userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Retrieve the VpnProfileState for the profile provisioned by the calling package.
+     *
+     * @return the VpnProfileState with current information, or null if there was no profile
+     *         provisioned by the calling package.
+     */
+    @Nullable
+    public VpnProfileState getProvisionedVpnProfileState() {
+        try {
+            return mService.getProvisionedVpnProfileState(mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

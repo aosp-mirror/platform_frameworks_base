@@ -8,6 +8,7 @@ import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.annotation.Nullable;
 
@@ -16,6 +17,7 @@ import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.QSPanelControllerBase.TileRecord;
 import com.android.systemui.qs.tileimpl.HeightOverrideable;
+import com.android.systemui.qs.tileimpl.QSTileViewImplKt;
 
 import java.util.ArrayList;
 
@@ -240,7 +242,13 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
             } else {
                 record.tileView.setLeftTopRightBottom(left, top, right, bottom);
             }
-            mLastTileBottom = bottom;
+            record.tileView.setPosition(i);
+            if (forLayout) {
+                mLastTileBottom = record.tileView.getBottom();
+            } else {
+                float scale = QSTileViewImplKt.constrainSquishiness(mSquishinessFraction);
+                mLastTileBottom = top + (int) (record.tileView.getMeasuredHeight() * scale);
+            }
         }
     }
 
@@ -295,5 +303,12 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
                 ((HeightOverrideable) record.tileView).setSquishinessFraction(mSquishinessFraction);
             }
         }
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfoInternal(info);
+        info.setCollectionInfo(
+                new AccessibilityNodeInfo.CollectionInfo(mRecords.size(), 1, false));
     }
 }

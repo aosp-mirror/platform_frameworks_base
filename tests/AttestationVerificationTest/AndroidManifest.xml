@@ -24,6 +24,7 @@
     <application>
         <uses-library android:name="android.test.runner"/>
         <activity android:name=".SystemAttestationVerificationTest$TestActivity" />
+        <activity android:name=".PeerDeviceSystemAttestationVerificationTest$TestActivity" />
     </application>
 
     <!--  self-instrumenting test package. -->

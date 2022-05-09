@@ -165,6 +165,7 @@ public abstract class BatteryConsumer {
             PROCESS_STATE_FOREGROUND,
             PROCESS_STATE_BACKGROUND,
             PROCESS_STATE_FOREGROUND_SERVICE,
+            PROCESS_STATE_CACHED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProcessState {
@@ -175,8 +176,9 @@ public abstract class BatteryConsumer {
     public static final int PROCESS_STATE_FOREGROUND = 1;
     public static final int PROCESS_STATE_BACKGROUND = 2;
     public static final int PROCESS_STATE_FOREGROUND_SERVICE = 3;
+    public static final int PROCESS_STATE_CACHED = 4;
 
-    public static final int PROCESS_STATE_COUNT = 4;
+    public static final int PROCESS_STATE_COUNT = 5;
 
     private static final String[] sProcessStateNames = new String[PROCESS_STATE_COUNT];
 
@@ -186,6 +188,7 @@ public abstract class BatteryConsumer {
         sProcessStateNames[PROCESS_STATE_FOREGROUND] = "fg";
         sProcessStateNames[PROCESS_STATE_BACKGROUND] = "bg";
         sProcessStateNames[PROCESS_STATE_FOREGROUND_SERVICE] = "fgs";
+        sProcessStateNames[PROCESS_STATE_CACHED] = "cached";
     }
 
     private static final int[] SUPPORTED_POWER_COMPONENTS_PER_PROCESS_STATE = {
