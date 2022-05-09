@@ -122,16 +122,9 @@ public class TrustAgentWrapper {
             if (!TrustManagerService.ENABLE_ACTIVE_UNLOCK_FLAG) {
                 return;
             }
-            if (!mWaitingForTrustableDowngrade) {
-                return;
-            }
             // are these the broadcasts we want to listen to
-            if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())
-                    || Intent.ACTION_USER_PRESENT.equals(intent.getAction())) {
-                mTrusted = false;
-                mTrustable = true;
-                mWaitingForTrustableDowngrade = false;
-                mTrustManagerService.updateTrust(mUserId, 0);
+            if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
+                downgradeToTrustable();
             }
         }
     };
@@ -480,8 +473,7 @@ public class TrustAgentWrapper {
         final String pathUri = mAlarmIntent.toUri(Intent.URI_INTENT_SCHEME);
         alarmFilter.addDataPath(pathUri, PatternMatcher.PATTERN_LITERAL);
 
-        IntentFilter trustableFilter = new IntentFilter(Intent.ACTION_USER_PRESENT);
-        trustableFilter.addAction(Intent.ACTION_SCREEN_OFF);
+        IntentFilter trustableFilter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
 
         // Schedules a restart for when connecting times out. If the connection succeeds,
         // the restart is canceled in mCallback's onConnected.
@@ -666,6 +658,19 @@ public class TrustAgentWrapper {
     /** Set the trustagent as not trustable */
     public void setUntrustable() {
         mTrustable = false;
+    }
+
+    /**
+     * Downgrades the trustagent to trustable as a result of a keyguard or screen related event, and
+     * then updates the trust state of the phone to reflect the change.
+     */
+    public void downgradeToTrustable() {
+        if (mWaitingForTrustableDowngrade) {
+            mWaitingForTrustableDowngrade = false;
+            mTrusted = false;
+            mTrustable = true;
+            mTrustManagerService.updateTrust(mUserId, 0);
+        }
     }
 
     public boolean isManagingTrust() {

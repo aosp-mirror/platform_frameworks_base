@@ -27,7 +27,7 @@
 
     <dimen name="qqs_layout_padding_bottom">40dp</dimen>
 
-    <dimen name="notification_panel_margin_horizontal">96dp</dimen>
+    <dimen name="notification_panel_margin_horizontal">80dp</dimen>
     <dimen name="notification_side_paddings">40dp</dimen>
     <dimen name="notification_section_divider_height">16dp</dimen>
 </resources>

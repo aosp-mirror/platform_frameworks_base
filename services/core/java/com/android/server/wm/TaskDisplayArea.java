@@ -1163,20 +1163,21 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
             }
         }
 
-        // For a better split UX, If a task is launching from a created-by-organizer task, it should
-        // be launched into the same created-by-organizer task as well. Unless, the candidate task
-        // is already positioned in the split.
-        Task preferredRootInSplit = sourceTask != null && sourceTask.inSplitScreen()
-                ? sourceTask.getCreatedByOrganizerTask() : null;
-        if (preferredRootInSplit != null) {
-            if (candidateTask != null) {
-                final Task candidateRoot = candidateTask.getCreatedByOrganizerTask();
-                if (candidateRoot != null && candidateRoot != preferredRootInSplit
-                        && preferredRootInSplit == candidateRoot.getAdjacentTaskFragment()) {
-                    preferredRootInSplit = candidateRoot;
+        // If a task is launching from a created-by-organizer task, it should be launched into the
+        // same created-by-organizer task as well. Unless, the candidate task is already positioned
+        // in the another adjacent task.
+        if (sourceTask != null) {
+            Task launchTarget = sourceTask.getCreatedByOrganizerTask();
+            if (launchTarget != null && launchTarget.getAdjacentTaskFragment() != null) {
+                if (candidateTask != null) {
+                    final Task candidateRoot = candidateTask.getCreatedByOrganizerTask();
+                    if (candidateRoot != null && candidateRoot != launchTarget
+                            && launchTarget == candidateRoot.getAdjacentTaskFragment()) {
+                        launchTarget = candidateRoot;
+                    }
                 }
+                return launchTarget;
             }
-            return preferredRootInSplit;
         }
 
         return null;

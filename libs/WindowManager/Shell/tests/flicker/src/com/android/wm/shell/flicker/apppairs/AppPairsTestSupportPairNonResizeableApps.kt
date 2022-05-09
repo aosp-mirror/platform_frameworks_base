@@ -16,9 +16,7 @@
 
 package com.android.wm.shell.flicker.apppairs
 
-import android.platform.test.annotations.Presubmit
 import android.view.Display
-import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -33,6 +31,7 @@ import com.android.wm.shell.flicker.helpers.MultiWindowHelper.Companion.setSuppo
 import org.junit.After
 import org.junit.Before
 import org.junit.FixMethodOrder
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -89,23 +88,23 @@ class AppPairsTestSupportPairNonResizeableApps(
         resetMultiWindowConfig(instrumentation)
     }
 
-    @Presubmit
+    @Ignore
     @Test
     override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
 
-    @FlakyTest
+    @Ignore
     @Test
     override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
 
-    @FlakyTest(bugId = 206753786)
+    @Ignore
     @Test
     override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
 
-    @Presubmit
+    @Ignore
     @Test
     fun appPairsDividerIsVisibleAtEnd() = testSpec.appPairsDividerIsVisibleAtEnd()
 
-    @Presubmit
+    @Ignore
     @Test
     fun bothAppWindowVisible() {
         val nonResizeableApp = nonResizeableApp

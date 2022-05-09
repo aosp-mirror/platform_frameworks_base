@@ -47,9 +47,11 @@ class TaskContainer {
     private int mWindowingMode = WINDOWING_MODE_UNDEFINED;
 
     /** Active TaskFragments in this Task. */
+    @NonNull
     final List<TaskFragmentContainer> mContainers = new ArrayList<>();
 
     /** Active split pairs in this Task. */
+    @NonNull
     final List<SplitContainer> mSplitContainers = new ArrayList<>();
 
     /**
@@ -106,7 +108,7 @@ class TaskContainer {
     int getWindowingModeForSplitTaskFragment(@Nullable Rect taskFragmentBounds) {
         // Only set to multi-windowing mode if the pair are showing side-by-side. Otherwise, it
         // will be set to UNDEFINED which will then inherit the Task windowing mode.
-        if (taskFragmentBounds == null || taskFragmentBounds.isEmpty()) {
+        if (taskFragmentBounds == null || taskFragmentBounds.isEmpty() || isInPictureInPicture()) {
             return WINDOWING_MODE_UNDEFINED;
         }
         // We use WINDOWING_MODE_MULTI_WINDOW when the Task is fullscreen.
