@@ -47,6 +47,7 @@ import android.hardware.graphics.common.AlphaInterpretation;
 import android.hardware.graphics.common.DisplayDecorationSupport;
 import android.os.Handler;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings.Secure;
 import android.util.DisplayUtils;
@@ -899,8 +900,8 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         final DisplayInfo displayInfo = new DisplayInfo();
         mContext.getDisplay().getDisplayInfo(displayInfo);
         return DisplayUtils.getPhysicalPixelDisplaySizeRatio(
-                stableDisplaySize.x, stableDisplaySize.y, displayInfo.logicalWidth,
-                displayInfo.logicalHeight);
+                stableDisplaySize.x, stableDisplaySize.y, displayInfo.getNaturalWidth(),
+                displayInfo.getNaturalHeight());
     }
 
     @Override
@@ -1067,15 +1068,22 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
     }
 
     private void updateLayoutParams() {
-        if (mOverlays == null) {
-            return;
+        //ToDo: We should skip unnecessary call to update view layout.
+        Trace.beginSection("ScreenDecorations#updateLayoutParams");
+        if (mScreenDecorHwcWindow != null) {
+            mWindowManager.updateViewLayout(mScreenDecorHwcWindow, getHwcWindowLayoutParams());
         }
-        for (int i = 0; i < BOUNDS_POSITION_LENGTH; i++) {
-            if (mOverlays[i] == null) {
-                continue;
+
+        if (mOverlays != null) {
+            for (int i = 0; i < BOUNDS_POSITION_LENGTH; i++) {
+                if (mOverlays[i] == null) {
+                    continue;
+                }
+                mWindowManager.updateViewLayout(
+                        mOverlays[i].getRootView(), getWindowLayoutParams(i));
             }
-            mWindowManager.updateViewLayout(mOverlays[i].getRootView(), getWindowLayoutParams(i));
         }
+        Trace.endSection();
     }
 
     @Override

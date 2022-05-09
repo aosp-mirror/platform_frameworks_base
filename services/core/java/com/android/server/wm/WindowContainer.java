@@ -1584,6 +1584,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return true;
     }
 
+    void forAllWindowContainers(Consumer<WindowContainer> callback) {
+        callback.accept(this);
+        final int count = mChildren.size();
+        for (int i = 0; i < count; i++) {
+            mChildren.get(i).forAllWindowContainers(callback);
+        }
+    }
+
     /**
      * For all windows at or below this container call the callback.
      * @param   callback Calls the {@link ToBooleanFunction#apply} method for each window found and
@@ -3741,8 +3749,16 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             }
             // Otherwise this is the "root" of a synced subtree, so continue on to preparation.
         }
+
         // This container's situation has changed so we need to restart its sync.
-        mSyncState = SYNC_STATE_NONE;
+        // We cannot reset the sync without a chance of a deadlock since it will request a new
+        // buffer from the app process. This could cause issues if the app has run out of buffers
+        // since the previous buffer was already synced and is still held in a transaction.
+        // Resetting syncState violates the policies outlined in BlastSyncEngine.md so for now
+        // disable this when shell transitions is disabled.
+        if (mTransitionController.isShellTransitionsEnabled()) {
+            mSyncState = SYNC_STATE_NONE;
+        }
         prepareSync();
     }
 

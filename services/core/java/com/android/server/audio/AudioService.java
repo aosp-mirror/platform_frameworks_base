@@ -223,7 +223,8 @@ import java.util.stream.Collectors;
 public class AudioService extends IAudioService.Stub
         implements AccessibilityManager.TouchExplorationStateChangeListener,
             AccessibilityManager.AccessibilityServicesStateChangeListener,
-            AudioSystemAdapter.OnRoutingUpdatedListener {
+            AudioSystemAdapter.OnRoutingUpdatedListener,
+            AudioSystemAdapter.OnVolRangeInitRequestListener {
 
     private static final String TAG = "AS.AudioService";
 
@@ -1137,6 +1138,9 @@ public class AudioService extends IAudioService.Stub
 
         // monitor routing updates coming from native
         mAudioSystem.setRoutingListener(this);
+        // monitor requests for volume range initialization coming from native (typically when
+        // errors are found by AudioPolicyManager
+        mAudioSystem.setVolRangeInitReqListener(this);
 
         // done with service initialization, continue additional work in our Handler thread
         queueMsgUnderWakeLock(mAudioHandler, MSG_INIT_STREAMS_VOLUMES,
@@ -1355,6 +1359,14 @@ public class AudioService extends IAudioService.Stub
             mSpatializerHelper.onRoutingUpdated();
         }
         checkMuteAwaitConnection();
+    }
+
+    //-----------------------------------------------------------------
+    // monitoring requests for volume range initialization
+    @Override // AudioSystemAdapter.OnVolRangeInitRequestListener
+    public void onVolumeRangeInitRequestFromNative() {
+        sendMsg(mAudioHandler, MSG_REINIT_VOLUMES, SENDMSG_REPLACE, 0, 0,
+                "onVolumeRangeInitRequestFromNative" /*obj: caller, for dumpsys*/, /*delay*/ 0);
     }
 
     //-----------------------------------------------------------------
@@ -9123,6 +9135,8 @@ public class AudioService extends IAudioService.Stub
         if (timeOutMs <= 0 || usages.length == 0) {
             throw new IllegalArgumentException("Invalid timeOutMs/usagesToMute");
         }
+        Log.i(TAG, "muteAwaitConnection dev:" + device + " timeOutMs:" + timeOutMs
+                + " usages:" + usages);
 
         if (mDeviceBroker.isDeviceConnected(device)) {
             // not throwing an exception as there could be a race between a connection (server-side,
@@ -9166,7 +9180,7 @@ public class AudioService extends IAudioService.Stub
                 Log.i(TAG, "cancelMuteAwaitConnection ignored, no expected device");
                 return;
             }
-            if (!device.equals(mMutingExpectedDevice)) {
+            if (!device.equalTypeAddress(mMutingExpectedDevice)) {
                 Log.e(TAG, "cancelMuteAwaitConnection ignored, got " + device
                         + "] but expected device is" + mMutingExpectedDevice);
                 throw new IllegalStateException("cancelMuteAwaitConnection for wrong device");

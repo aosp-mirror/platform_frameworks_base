@@ -97,6 +97,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private int mLastOrientation = Configuration.ORIENTATION_UNDEFINED;
 
     private SecurityMode mCurrentSecurityMode = SecurityMode.Invalid;
+    private UserSwitcherController.UserSwitchCallback mUserSwitchCallback =
+            () -> showPrimarySecurityScreen(false);
 
     @VisibleForTesting
     final Gefingerpoken mGlobalTouchListener = new Gefingerpoken() {
@@ -219,10 +221,10 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                 mKeyguardSecurityCallback.userActivity();
                 showMessage(null, null);
             }
-            if (mUpdateMonitor.isFaceEnrolled()
-                    && mUpdateMonitor.mRequestActiveUnlockOnUnlockIntent) {
-                mUpdateMonitor.requestActiveUnlock("unlock-intent, reason=swipeUpOnBouncer",
-                        true);
+            if (mUpdateMonitor.isFaceEnrolled()) {
+                mUpdateMonitor.requestActiveUnlock(
+                        ActiveUnlockConfig.ACTIVE_UNLOCK_REQUEST_ORIGIN.UNLOCK_INTENT,
+                        "swipeUpOnBouncer");
             }
         }
     };
@@ -230,12 +232,12 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             new ConfigurationController.ConfigurationListener() {
                 @Override
                 public void onThemeChanged() {
-                    mSecurityViewFlipperController.reloadColors();
+                    reloadColors();
                 }
 
                 @Override
                 public void onUiModeChanged() {
-                    mSecurityViewFlipperController.reloadColors();
+                    reloadColors();
                 }
             };
     private final KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback =
@@ -295,6 +297,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mView.setSwipeListener(mSwipeListener);
         mView.addMotionEventListener(mGlobalTouchListener);
         mConfigurationController.addCallback(mConfigurationListener);
+        mUserSwitcherController.addUserSwitchCallback(mUserSwitchCallback);
     }
 
     @Override
@@ -302,6 +305,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mUpdateMonitor.removeCallback(mKeyguardUpdateMonitorCallback);
         mConfigurationController.removeCallback(mConfigurationListener);
         mView.removeMotionEventListener(mGlobalTouchListener);
+        mUserSwitcherController.removeUserSwitchCallback(mUserSwitchCallback);
     }
 
     /** */
@@ -629,6 +633,11 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     /** Update keyguard position based on a tapped X coordinate. */
     public void updateKeyguardPosition(float x) {
         mView.updatePositionByTouchX(x);
+    }
+
+    private void reloadColors() {
+        mSecurityViewFlipperController.reloadColors();
+        mView.reloadColors();
     }
 
     static class Factory {

@@ -1559,9 +1559,18 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 Slog.e(TAG, "Error sending input show up notification", e);
             }
         }
+    }
+
+    // AutoFillUiCallback
+    @Override
+    public void requestFallbackFromFillDialog() {
+        setFillDialogDisabled();
         synchronized (mLock) {
-            // stop to show fill dialog
-            mSessionFlags.mFillDialogDisabled = true;
+            if (mCurrentViewId == null) {
+                return;
+            }
+            final ViewState currentView = mViewStates.get(mCurrentViewId);
+            currentView.maybeCallOnFillReady(mFlags);
         }
     }
 
@@ -3208,16 +3217,24 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return;
         }
 
-        if (requestShowFillDialog(response, filledId, filterText, flags)) {
-            synchronized (mLock) {
-                final ViewState currentView = mViewStates.get(mCurrentViewId);
-                currentView.setState(ViewState.STATE_FILL_DIALOG_SHOWN);
-                mService.logDatasetShown(id, mClientState, UI_TYPE_DIALOG);
+        final AutofillId[] ids = response.getFillDialogTriggerIds();
+        if (ids != null && ArrayUtils.contains(ids, filledId)) {
+            if (requestShowFillDialog(response, filledId, filterText, flags)) {
+                synchronized (mLock) {
+                    final ViewState currentView = mViewStates.get(mCurrentViewId);
+                    currentView.setState(ViewState.STATE_FILL_DIALOG_SHOWN);
+                    mService.logDatasetShown(id, mClientState, UI_TYPE_DIALOG);
+                }
+                // Just show fill dialog once, so disabled after shown.
+                // Note: Cannot disable before requestShowFillDialog() because the method
+                //       need to check whether fill dialog enabled.
+                setFillDialogDisabled();
+                return;
+            } else {
+                setFillDialogDisabled();
             }
-            return;
-        }
 
-        setFillDialogDisabled();
+        }
 
         if (response.supportsInlineSuggestions()) {
             synchronized (mLock) {
@@ -3324,15 +3341,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return false;
         }
 
-        final AutofillId[] ids = response.getFillDialogTriggerIds();
-        if (ids == null || !ArrayUtils.contains(ids, filledId)) {
-            return false;
-        }
-
         final Drawable serviceIcon = getServiceIcon();
 
         getUiForShowing().showFillDialog(filledId, response, filterText,
-                mService.getServicePackageName(), mComponentName, serviceIcon, this);
+                mService.getServicePackageName(), mComponentName, serviceIcon, this,
+                id, mCompatMode);
         return true;
     }
 
