@@ -125,10 +125,11 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
         if (mApplier == null) {
             mApplier = new SyncRtSurfaceTransactionApplier(mViewRoot.mView);
         }
-        if (mViewRoot.mView.isHardwareAccelerated()) {
+        if (mViewRoot.mView.isHardwareAccelerated() && isVisibleToUser()) {
             mApplier.scheduleApply(params);
         } else {
-            // Window doesn't support hardware acceleration, no synchronization for now.
+            // Synchronization requires hardware acceleration for now.
+            // If the window isn't visible, drawing is paused and the applier won't run.
             // TODO(b/149342281): use mViewRoot.mSurface.getNextFrameNumber() to sync on every
             //  frame instead.
             final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
@@ -171,8 +172,9 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
     public void setSystemBarsAppearance(int appearance, int mask) {
         mViewRoot.mWindowAttributes.privateFlags |= PRIVATE_FLAG_APPEARANCE_CONTROLLED;
         final InsetsFlags insetsFlags = mViewRoot.mWindowAttributes.insetsFlags;
-        if (insetsFlags.appearance != appearance) {
-            insetsFlags.appearance = (insetsFlags.appearance & ~mask) | (appearance & mask);
+        final int newAppearance = (insetsFlags.appearance & ~mask) | (appearance & mask);
+        if (insetsFlags.appearance != newAppearance) {
+            insetsFlags.appearance = newAppearance;
             mViewRoot.mWindowAttributesChanged = true;
             mViewRoot.scheduleTraversals();
         }
@@ -267,5 +269,9 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
             return mViewRoot.mTranslator;
         }
         return null;
+    }
+
+    private boolean isVisibleToUser() {
+        return mViewRoot.getHostVisibility() == View.VISIBLE;
     }
 }

@@ -32,6 +32,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.util.ArrayMap;
@@ -39,7 +40,7 @@ import android.util.ArraySet;
 import android.util.Printer;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
-import android.view.OnBackInvokedCallback;
+import android.window.OnBackInvokedCallback;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Parcelling;
@@ -1865,7 +1866,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     }
 
     public ApplicationInfo() {
-        createTimestamp = System.currentTimeMillis();
+        createTimestamp = SystemClock.uptimeMillis();
     }
 
     public ApplicationInfo(ApplicationInfo orig) {
@@ -1939,7 +1940,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         nativeHeapZeroInitialized = orig.nativeHeapZeroInitialized;
         requestRawExternalStorageAccess = orig.requestRawExternalStorageAccess;
         localeConfigRes = orig.localeConfigRes;
-        createTimestamp = System.currentTimeMillis();
+        createTimestamp = SystemClock.uptimeMillis();
     }
 
     public String toString() {
@@ -2083,7 +2084,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         splitNames = source.createString8Array();
         splitSourceDirs = source.createString8Array();
         splitPublicSourceDirs = source.createString8Array();
-        splitDependencies = source.readSparseArray(null);
+        splitDependencies = source.readSparseArray(null, int[].class);
         nativeLibraryDir = source.readString8();
         secondaryNativeLibraryDir = source.readString8();
         nativeLibraryRootDir = source.readString8();
@@ -2581,7 +2582,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     }
 
     /**
-     * Returns whether the application will use the {@link android.view.OnBackInvokedCallback}
+     * Returns whether the application will use the {@link android.window.OnBackInvokedCallback}
      * navigation system instead of the {@link android.view.KeyEvent#KEYCODE_BACK} and related
      * callbacks.
      *
@@ -2749,6 +2750,23 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         mKnownActivityEmbeddingCerts = new ArraySet<>();
         for (String knownCert : knownActivityEmbeddingCerts) {
             mKnownActivityEmbeddingCerts.add(knownCert.toUpperCase(Locale.US));
+        }
+    }
+
+    /**
+     * Sets whether the application will use the {@link android.window.OnBackInvokedCallback}
+     * navigation system instead of the {@link android.view.KeyEvent#KEYCODE_BACK} and related
+     * callbacks. Intended to be used from tests only.
+     *
+     * @see #isOnBackInvokedCallbackEnabled()
+     * @hide
+     */
+    @TestApi
+    public void setEnableOnBackInvokedCallback(boolean isEnable) {
+        if (isEnable) {
+            privateFlagsExt |= PRIVATE_FLAG_EXT_ENABLE_ON_BACK_INVOKED_CALLBACK;
+        } else {
+            privateFlagsExt &= ~PRIVATE_FLAG_EXT_ENABLE_ON_BACK_INVOKED_CALLBACK;
         }
     }
 }

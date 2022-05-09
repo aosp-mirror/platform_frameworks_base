@@ -15,6 +15,6 @@
   ~ limitations under the License.
   -->
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
-        android:color="@android:color/system_accent1_10">
+        android:color="@color/letterbox_education_dismiss_button_background_ripple">
     <item android:drawable="@drawable/letterbox_education_dismiss_button_background"/>
 </ripple>

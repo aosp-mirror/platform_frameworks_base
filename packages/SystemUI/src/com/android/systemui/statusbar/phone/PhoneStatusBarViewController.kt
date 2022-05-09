@@ -31,6 +31,7 @@ import com.android.systemui.unfold.UNFOLD_STATUS_BAR
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
 import com.android.systemui.util.ViewController
 import com.android.systemui.util.kotlin.getOrNull
+import com.android.systemui.util.view.ViewUtil
 
 import java.util.Optional
 
@@ -43,6 +44,7 @@ class PhoneStatusBarViewController private constructor(
     @Named(UNFOLD_STATUS_BAR) private val progressProvider: ScopedUnfoldTransitionProgressProvider?,
     private val moveFromCenterAnimationController: StatusBarMoveFromCenterAnimationController?,
     private val userSwitcherController: StatusBarUserSwitcherController,
+    private val viewUtil: ViewUtil,
     touchEventHandler: PhoneStatusBarView.TouchEventHandler,
     private val configurationController: ConfigurationController
 ) : ViewController<PhoneStatusBarView>(view) {
@@ -118,12 +120,7 @@ class PhoneStatusBarViewController private constructor(
      * view's range and false otherwise.
      */
     fun touchIsWithinView(x: Float, y: Float): Boolean {
-        val left = mView.locationOnScreen[0]
-        val top = mView.locationOnScreen[1]
-        return left <= x &&
-                x <= left + mView.width &&
-                top <= y &&
-                y <= top + mView.height
+        return viewUtil.touchIsWithinView(mView, x, y)
     }
 
     class StatusBarViewsCenterProvider : UnfoldMoveFromCenterAnimator.ViewCenterProvider {
@@ -163,6 +160,7 @@ class PhoneStatusBarViewController private constructor(
         @Named(UNFOLD_STATUS_BAR)
         private val progressProvider: Optional<ScopedUnfoldTransitionProgressProvider>,
         private val userSwitcherController: StatusBarUserSwitcherController,
+        private val viewUtil: ViewUtil,
         private val configurationController: ConfigurationController
     ) {
         fun create(
@@ -174,6 +172,7 @@ class PhoneStatusBarViewController private constructor(
                 progressProvider.getOrNull(),
                 unfoldComponent.getOrNull()?.getStatusBarMoveFromCenterAnimationController(),
                 userSwitcherController,
+                viewUtil,
                 touchEventHandler,
                 configurationController
             )

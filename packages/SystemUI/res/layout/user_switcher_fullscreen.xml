@@ -21,9 +21,8 @@
     android:id="@+id/user_switcher_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginBottom="40dp"
-    android:layout_marginEnd="60dp"
-    android:layout_marginStart="60dp">
+    android:layout_marginVertical="40dp"
+    android:layout_marginHorizontal="60dp">
 
   <androidx.constraintlayout.helper.widget.Flow
       android:id="@+id/flow"
@@ -36,7 +35,7 @@
       app:flow_horizontalBias="0.5"
       app:flow_verticalAlign="center"
       app:flow_wrapMode="chain"
-      app:flow_horizontalGap="64dp"
+      app:flow_horizontalGap="@dimen/user_switcher_fullscreen_horizontal_gap"
       app:flow_verticalGap="44dp"
       app:flow_horizontalStyle="packed"/>
 
@@ -56,16 +55,17 @@
 
   <TextView
       android:id="@+id/add"
-      android:visibility="gone"
+      style="@style/Widget.Dialog.Button.BorderButton"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_gravity="center"
       android:gravity="center"
-      app:layout_constraintHeight_min="48dp"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintBottom_toBottomOf="parent"
       android:paddingHorizontal="@dimen/user_switcher_fullscreen_button_padding"
-      android:textSize="@dimen/user_switcher_fullscreen_button_text_size"
+      android:text="@string/add"
       android:textColor="?androidprv:attr/colorAccentPrimary"
-      android:text="@string/add" />
+      android:textSize="@dimen/user_switcher_fullscreen_button_text_size"
+      android:visibility="gone"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintHeight_min="48dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

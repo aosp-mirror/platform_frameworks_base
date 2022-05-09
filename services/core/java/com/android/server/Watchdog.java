@@ -143,10 +143,12 @@ public class Watchdog {
             "android.hardware.media.omx@1.0::IOmx",
             "android.hardware.media.omx@1.0::IOmxStore",
             "android.hardware.neuralnetworks@1.0::IDevice",
+            "android.hardware.power@1.0::IPower",
             "android.hardware.power.stats@1.0::IPowerStats",
             "android.hardware.sensors@1.0::ISensors",
             "android.hardware.sensors@2.0::ISensors",
             "android.hardware.sensors@2.1::ISensors",
+            "android.hardware.vibrator@1.0::IVibrator",
             "android.hardware.vr@1.0::IVr",
             "android.system.suspend@1.0::ISystemSuspend"
     );
@@ -155,7 +157,10 @@ public class Watchdog {
             "android.hardware.biometrics.face.IFace/",
             "android.hardware.biometrics.fingerprint.IFingerprint/",
             "android.hardware.light.ILights/",
+            "android.hardware.power.IPower/",
             "android.hardware.power.stats.IPowerStats/",
+            "android.hardware.vibrator.IVibrator/",
+            "android.hardware.vibrator.IVibratorManager/"
     };
 
     private static Watchdog sWatchdog;

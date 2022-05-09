@@ -580,6 +580,24 @@ public class NetworkPolicyManager {
     }
 
     /**
+     * Notifies that the specified {@link NetworkStatsProvider} has reached its warning threshold
+     * which was set through {@link NetworkStatsProvider#onSetWarningAndLimit(String, long, long)}.
+     *
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK})
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public void notifyStatsProviderWarningReached() {
+        try {
+            mService.notifyStatsProviderWarningOrLimitReached();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Notifies that the specified {@link NetworkStatsProvider} has reached its quota
      * which was set through {@link NetworkStatsProvider#onSetLimit(String, long)} or
      * {@link NetworkStatsProvider#onSetWarningAndLimit(String, long, long)}.
@@ -590,7 +608,7 @@ public class NetworkPolicyManager {
             NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
             android.Manifest.permission.NETWORK_STACK})
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public void notifyStatsProviderWarningOrLimitReached() {
+    public void notifyStatsProviderLimitReached() {
         try {
             mService.notifyStatsProviderWarningOrLimitReached();
         } catch (RemoteException e) {
@@ -799,11 +817,13 @@ public class NetworkPolicyManager {
     public static final class UidState {
         public int uid;
         public int procState;
+        public long procStateSeq;
         public int capability;
 
-        public UidState(int uid, int procState, int capability) {
+        public UidState(int uid, int procState, long procStateSeq, int capability) {
             this.uid = uid;
             this.procState = procState;
+            this.procStateSeq = procStateSeq;
             this.capability = capability;
         }
 
@@ -812,6 +832,8 @@ public class NetworkPolicyManager {
             final StringBuilder sb = new StringBuilder();
             sb.append("{procState=");
             sb.append(procStateToString(procState));
+            sb.append(",seq=");
+            sb.append(procStateSeq);
             sb.append(",cap=");
             ActivityManager.printCapabilitiesSummary(sb, capability);
             sb.append("}");

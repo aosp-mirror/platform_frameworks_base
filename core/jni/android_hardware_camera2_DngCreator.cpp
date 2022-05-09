@@ -48,6 +48,7 @@
 
 #include <jni.h>
 #include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedUtfChars.h>
 
 using namespace android;
 using namespace img_utils;
@@ -1264,16 +1265,14 @@ static void DngCreator_init(JNIEnv* env, jobject thiz, jobject characteristicsPt
 
     sp<NativeContext> nativeContext = new NativeContext(characteristics, results);
 
-    const char* captureTime = env->GetStringUTFChars(formattedCaptureTime, nullptr);
-
-    size_t len = strlen(captureTime) + 1;
-    if (len != NativeContext::DATETIME_COUNT) {
+    ScopedUtfChars captureTime(env, formattedCaptureTime);
+    if (captureTime.size() + 1 != NativeContext::DATETIME_COUNT) {
         jniThrowException(env, "java/lang/IllegalArgumentException",
                 "Formatted capture time string length is not required 20 characters");
         return;
     }
 
-    nativeContext->setCaptureTime(String8(captureTime));
+    nativeContext->setCaptureTime(String8(captureTime.c_str()));
 
     DngCreator_setNativeContext(env, thiz, nativeContext);
 }

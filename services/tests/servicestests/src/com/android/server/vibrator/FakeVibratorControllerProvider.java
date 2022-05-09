@@ -34,6 +34,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Provides {@link VibratorController} with controlled vibrator hardware capabilities and
@@ -43,8 +44,8 @@ final class FakeVibratorControllerProvider {
     private static final int EFFECT_DURATION = 20;
 
     private final Map<Long, PrebakedSegment> mEnabledAlwaysOnEffects = new HashMap<>();
-    private final List<VibrationEffectSegment> mEffectSegments = new ArrayList<>();
-    private final List<Integer> mBraking = new ArrayList<>();
+    private final Map<Long, List<VibrationEffectSegment>> mEffectSegments = new TreeMap<>();
+    private final Map<Long, List<Integer>> mBraking = new HashMap<>();
     private final List<Float> mAmplitudes = new ArrayList<>();
     private final List<Boolean> mExternalControlStates = new ArrayList<>();
     private final Handler mHandler;
@@ -67,6 +68,14 @@ final class FakeVibratorControllerProvider {
     private float mQFactor = Float.NaN;
     private float[] mMaxAmplitudes;
 
+    void recordEffectSegment(long vibrationId, VibrationEffectSegment segment) {
+        mEffectSegments.computeIfAbsent(vibrationId, k -> new ArrayList<>()).add(segment);
+    }
+
+    void recordBraking(long vibrationId, int braking) {
+        mBraking.computeIfAbsent(vibrationId, k -> new ArrayList<>()).add(braking);
+    }
+
     private final class FakeNativeWrapper extends VibratorController.NativeWrapper {
         public int vibratorId;
         public OnVibrationCompleteListener listener;
@@ -86,7 +95,7 @@ final class FakeVibratorControllerProvider {
 
         @Override
         public long on(long milliseconds, long vibrationId) {
-            mEffectSegments.add(new StepSegment(VibrationEffect.DEFAULT_AMPLITUDE,
+            recordEffectSegment(vibrationId, new StepSegment(VibrationEffect.DEFAULT_AMPLITUDE,
                     /* frequencyHz= */ 0, (int) milliseconds));
             applyLatency();
             scheduleListener(milliseconds, vibrationId);
@@ -110,7 +119,8 @@ final class FakeVibratorControllerProvider {
                     || Arrays.binarySearch(mSupportedEffects, (int) effect) < 0) {
                 return 0;
             }
-            mEffectSegments.add(new PrebakedSegment((int) effect, false, (int) strength));
+            recordEffectSegment(vibrationId,
+                    new PrebakedSegment((int) effect, false, (int) strength));
             applyLatency();
             scheduleListener(EFFECT_DURATION, vibrationId);
             return EFFECT_DURATION;
@@ -121,7 +131,7 @@ final class FakeVibratorControllerProvider {
             long duration = 0;
             for (PrimitiveSegment primitive : effects) {
                 duration += EFFECT_DURATION + primitive.getDelay();
-                mEffectSegments.add(primitive);
+                recordEffectSegment(vibrationId, primitive);
             }
             applyLatency();
             scheduleListener(duration, vibrationId);
@@ -133,9 +143,9 @@ final class FakeVibratorControllerProvider {
             long duration = 0;
             for (RampSegment primitive : primitives) {
                 duration += primitive.getDuration();
-                mEffectSegments.add(primitive);
+                recordEffectSegment(vibrationId, primitive);
             }
-            mBraking.add(braking);
+            recordBraking(vibrationId, braking);
             applyLatency();
             scheduleListener(duration, vibrationId);
             return duration;
@@ -304,15 +314,35 @@ final class FakeVibratorControllerProvider {
     }
 
     /** Return the braking values passed to the compose PWLE method. */
-    public List<Integer> getBraking() {
-        return mBraking;
+    public List<Integer> getBraking(long vibrationId) {
+        if (mBraking.containsKey(vibrationId)) {
+            return new ArrayList<>(mBraking.get(vibrationId));
+        } else {
+            return new ArrayList<>();
+        }
     }
 
     /** Return list of {@link VibrationEffectSegment} played by this controller, in order. */
-    public List<VibrationEffectSegment> getEffectSegments() {
-        return new ArrayList<>(mEffectSegments);
+    public List<VibrationEffectSegment> getEffectSegments(long vibrationId) {
+        if (mEffectSegments.containsKey(vibrationId)) {
+            return new ArrayList<>(mEffectSegments.get(vibrationId));
+        } else {
+            return new ArrayList<>();
+        }
     }
 
+    /**
+     * Returns a list of all vibrations' effect segments, for external-use where vibration IDs
+     * aren't exposed.
+     */
+    public List<VibrationEffectSegment> getAllEffectSegments() {
+        // Returns segments in order of vibrationId, which increases over time. TreeMap gives order.
+        ArrayList<VibrationEffectSegment> result = new ArrayList<>();
+        for (List<VibrationEffectSegment> subList : mEffectSegments.values()) {
+            result.addAll(subList);
+        }
+        return result;
+    }
     /** Return list of states set for external control to the fake vibrator hardware. */
     public List<Boolean> getExternalControlStates() {
         return mExternalControlStates;

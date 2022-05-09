@@ -27,12 +27,11 @@ import javax.inject.Inject
  * A service that acts as a bridge between (1) external clients that have data on nearby devices
  * that are able to play media and (2) internal clients (like media Output Switcher) that need data
  * on these nearby devices.
- *
- * TODO(b/216313420): Add logging to this class.
  */
 @SysUISingleton
 class NearbyMediaDevicesManager @Inject constructor(
-    commandQueue: CommandQueue
+    commandQueue: CommandQueue,
+    private val logger: NearbyMediaDevicesLogger
 ) {
     private var providers: MutableList<INearbyMediaDevicesProvider> = mutableListOf()
     private var activeCallbacks: MutableList<INearbyMediaDevicesUpdateCallback> = mutableListOf()
@@ -46,13 +45,17 @@ class NearbyMediaDevicesManager @Inject constructor(
                 newProvider.registerNearbyDevicesCallback(it)
             }
             providers.add(newProvider)
+            logger.logProviderRegistered(providers.size)
             newProvider.asBinder().linkToDeath(deathRecipient, /* flags= */ 0)
         }
 
         override fun unregisterNearbyMediaDevicesProvider(
             newProvider: INearbyMediaDevicesProvider
         ) {
-            providers.remove(newProvider)
+            val isRemoved = providers.remove(newProvider)
+            if (isRemoved) {
+                logger.logProviderUnregistered(providers.size)
+            }
         }
     }
 
@@ -99,6 +102,7 @@ class NearbyMediaDevicesManager @Inject constructor(
             for (i in providers.size - 1 downTo 0) {
                 if (providers[i].asBinder() == who) {
                     providers.removeAt(i)
+                    logger.logProviderBinderDied(providers.size)
                     break
                 }
             }

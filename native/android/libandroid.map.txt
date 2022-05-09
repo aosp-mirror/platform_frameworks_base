@@ -29,12 +29,12 @@ LIBANDROID {
     AChoreographer_postFrameCallbackDelayed64; # introduced=29
     AChoreographer_registerRefreshRateCallback; # introduced=30
     AChoreographer_unregisterRefreshRateCallback; # introduced=30
-    AChoreographer_postExtendedFrameCallback;  # introduced=33
+    AChoreographer_postVsyncCallback;  # introduced=33
     AChoreographerFrameCallbackData_getFrameTimeNanos;  # introduced=33
     AChoreographerFrameCallbackData_getFrameTimelinesLength;  # introduced=33
     AChoreographerFrameCallbackData_getPreferredFrameTimelineIndex;  # introduced=33
     AChoreographerFrameCallbackData_getFrameTimelineVsyncId;  # introduced=33
-    AChoreographerFrameCallbackData_getFrameTimelineExpectedPresentTimeNanos;  # introduced=33
+    AChoreographerFrameCallbackData_getFrameTimelineExpectedPresentationTimeNanos;  # introduced=33
     AChoreographerFrameCallbackData_getFrameTimelineDeadlineNanos;  # introduced=33
     AConfiguration_copy;
     AConfiguration_delete;

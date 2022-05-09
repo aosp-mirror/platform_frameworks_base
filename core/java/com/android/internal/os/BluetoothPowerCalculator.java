@@ -139,8 +139,10 @@ public class BluetoothPowerCalculator extends PowerCalculator {
                         BatteryConsumer.POWER_COMPONENT_BLUETOOTH, powerAndDuration.powerMah,
                         powerModel);
 
-        powerAndDuration.totalDurationMs += powerAndDuration.durationMs;
-        powerAndDuration.totalPowerMah += powerAndDuration.powerMah;
+        if (!app.isVirtualUid()) {
+            powerAndDuration.totalDurationMs += powerAndDuration.durationMs;
+            powerAndDuration.totalPowerMah += powerAndDuration.powerMah;
+        }
 
         if (query.isProcessStateDataNeeded() && powerAndDuration.keys != null) {
             for (int j = 0; j < powerAndDuration.keys.length; j++) {

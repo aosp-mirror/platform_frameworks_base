@@ -97,13 +97,19 @@ public final class FillRequest implements Parcelable {
      */
     public static final @RequestFlags int FLAG_VIEW_NOT_FOCUSED = 0x10;
 
-    // The flag value 0x20 has been defined in AutofillManager.
+    // The flag value 0x20 has been used.
 
     /**
-     * Indicates the request is coming from the activity just started.
+     * Indicates the request supports fill dialog presentation for the fields, the
+     * system will send the request when the activity just started.
+     */
+    public static final @RequestFlags int FLAG_SUPPORTS_FILL_DIALOG = 0x40;
+
+    /**
+     * Indicates the ime is showing while request coming.
      * @hide
      */
-    public static final @RequestFlags int FLAG_ACTIVITY_START = 0x40;
+    public static final @RequestFlags int FLAG_IME_SHOWING = 0x80;
 
     /** @hide */
     public static final int INVALID_REQUEST_ID = Integer.MIN_VALUE;
@@ -140,8 +146,10 @@ public final class FillRequest implements Parcelable {
     /**
      * Gets the flags associated with this request.
      *
-     * @return any combination of {@link #FLAG_MANUAL_REQUEST} and
+     * @return any combination of {@link #FLAG_MANUAL_REQUEST},
+     *         {@link #FLAG_SUPPORTS_FILL_DIALOG} and
      *         {@link #FLAG_COMPATIBILITY_MODE_REQUEST}.
+     *
      */
     private final @RequestFlags int mFlags;
 
@@ -199,7 +207,8 @@ public final class FillRequest implements Parcelable {
         FLAG_COMPATIBILITY_MODE_REQUEST,
         FLAG_PASSWORD_INPUT_TYPE,
         FLAG_VIEW_NOT_FOCUSED,
-        FLAG_ACTIVITY_START
+        FLAG_SUPPORTS_FILL_DIALOG,
+        FLAG_IME_SHOWING
     })
     @Retention(RetentionPolicy.SOURCE)
     @DataClass.Generated.Member
@@ -223,8 +232,10 @@ public final class FillRequest implements Parcelable {
                     return "FLAG_PASSWORD_INPUT_TYPE";
             case FLAG_VIEW_NOT_FOCUSED:
                     return "FLAG_VIEW_NOT_FOCUSED";
-            case FLAG_ACTIVITY_START:
-                    return "FLAG_ACTIVITY_START";
+            case FLAG_SUPPORTS_FILL_DIALOG:
+                    return "FLAG_SUPPORTS_FILL_DIALOG";
+            case FLAG_IME_SHOWING:
+                    return "FLAG_IME_SHOWING";
             default: return Integer.toHexString(value);
         }
     }
@@ -253,7 +264,8 @@ public final class FillRequest implements Parcelable {
      * @param flags
      *   Gets the flags associated with this request.
      *
-     *   @return any combination of {@link #FLAG_MANUAL_REQUEST} and
+     *   @return any combination of {@link #FLAG_MANUAL_REQUEST},
+     *           {@link #FLAG_SUPPORTS_FILL_DIALOG} and
      *           {@link #FLAG_COMPATIBILITY_MODE_REQUEST}.
      * @param inlineSuggestionsRequest
      *   Gets the {@link InlineSuggestionsRequest} associated
@@ -299,7 +311,8 @@ public final class FillRequest implements Parcelable {
                         | FLAG_COMPATIBILITY_MODE_REQUEST
                         | FLAG_PASSWORD_INPUT_TYPE
                         | FLAG_VIEW_NOT_FOCUSED
-                        | FLAG_ACTIVITY_START);
+                        | FLAG_SUPPORTS_FILL_DIALOG
+                        | FLAG_IME_SHOWING);
         this.mInlineSuggestionsRequest = inlineSuggestionsRequest;
         this.mDelayedFillIntentSender = delayedFillIntentSender;
 
@@ -347,7 +360,8 @@ public final class FillRequest implements Parcelable {
     /**
      * Gets the flags associated with this request.
      *
-     * @return any combination of {@link #FLAG_MANUAL_REQUEST} and
+     * @return any combination of {@link #FLAG_MANUAL_REQUEST},
+     *         {@link #FLAG_SUPPORTS_FILL_DIALOG} and
      *         {@link #FLAG_COMPATIBILITY_MODE_REQUEST}.
      */
     @DataClass.Generated.Member
@@ -458,7 +472,8 @@ public final class FillRequest implements Parcelable {
                         | FLAG_COMPATIBILITY_MODE_REQUEST
                         | FLAG_PASSWORD_INPUT_TYPE
                         | FLAG_VIEW_NOT_FOCUSED
-                        | FLAG_ACTIVITY_START);
+                        | FLAG_SUPPORTS_FILL_DIALOG
+                        | FLAG_IME_SHOWING);
         this.mInlineSuggestionsRequest = inlineSuggestionsRequest;
         this.mDelayedFillIntentSender = delayedFillIntentSender;
 
@@ -480,10 +495,10 @@ public final class FillRequest implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1643386870464L,
+            time = 1647856966565L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/service/autofill/FillRequest.java",
-            inputSignatures = "public static final @android.service.autofill.FillRequest.RequestFlags int FLAG_MANUAL_REQUEST\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_COMPATIBILITY_MODE_REQUEST\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_PASSWORD_INPUT_TYPE\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_VIEW_NOT_FOCUSED\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_ACTIVITY_START\npublic static final  int INVALID_REQUEST_ID\nprivate final  int mId\nprivate final @android.annotation.NonNull java.util.List<android.service.autofill.FillContext> mFillContexts\nprivate final @android.annotation.Nullable android.os.Bundle mClientState\nprivate final @android.service.autofill.FillRequest.RequestFlags int mFlags\nprivate final @android.annotation.Nullable android.view.inputmethod.InlineSuggestionsRequest mInlineSuggestionsRequest\nprivate final @android.annotation.Nullable android.content.IntentSender mDelayedFillIntentSender\nprivate  void onConstructed()\nclass FillRequest extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genToString=true, genHiddenConstructor=true, genHiddenConstDefs=true)")
+            inputSignatures = "public static final @android.service.autofill.FillRequest.RequestFlags int FLAG_MANUAL_REQUEST\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_COMPATIBILITY_MODE_REQUEST\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_PASSWORD_INPUT_TYPE\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_VIEW_NOT_FOCUSED\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_SUPPORTS_FILL_DIALOG\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_IME_SHOWING\npublic static final  int INVALID_REQUEST_ID\nprivate final  int mId\nprivate final @android.annotation.NonNull java.util.List<android.service.autofill.FillContext> mFillContexts\nprivate final @android.annotation.Nullable android.os.Bundle mClientState\nprivate final @android.service.autofill.FillRequest.RequestFlags int mFlags\nprivate final @android.annotation.Nullable android.view.inputmethod.InlineSuggestionsRequest mInlineSuggestionsRequest\nprivate final @android.annotation.Nullable android.content.IntentSender mDelayedFillIntentSender\nprivate  void onConstructed()\nclass FillRequest extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genToString=true, genHiddenConstructor=true, genHiddenConstDefs=true)")
     @Deprecated
     private void __metadata() {}
 

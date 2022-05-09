@@ -24,6 +24,9 @@ import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_RESTART;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_TIMEOUT;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_USER_REQUEST;
 
+import android.animation.Animator;
+import android.animation.AnimatorSet;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
@@ -32,6 +35,10 @@ import android.view.View;
 
 import com.android.internal.widget.LockscreenCredential;
 import com.android.systemui.R;
+import com.android.systemui.animation.Interpolators;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A Pin based Keyguard input view
@@ -187,5 +194,49 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView 
     public CharSequence getTitle() {
         return getContext().getString(
                 com.android.internal.R.string.keyguard_accessibility_pin_unlock);
+    }
+
+    /**
+     * Begins an error animation for this view.
+     **/
+    public void startErrorAnimation() {
+        AnimatorSet animatorSet = new AnimatorSet();
+        List<Animator> animators = new ArrayList();
+        List<View> buttons = new ArrayList<>();
+        for (int i = 1; i <= 9; i++) {
+            buttons.add(mButtons[i]);
+        }
+        buttons.add(mDeleteButton);
+        buttons.add(mButtons[0]);
+        buttons.add(mOkButton);
+
+        int delay = 0;
+        for (int i = 0; i < buttons.size(); i++) {
+            final View button = buttons.get(i);
+            AnimatorSet animateWrapper = new AnimatorSet();
+            animateWrapper.setStartDelay(delay);
+
+            ValueAnimator scaleDownAnimator =  ValueAnimator.ofFloat(1f, 0.8f);
+            scaleDownAnimator.setInterpolator(Interpolators.STANDARD);
+            scaleDownAnimator.addUpdateListener(valueAnimator -> {
+                button.setScaleX((float) valueAnimator.getAnimatedValue());
+                button.setScaleY((float) valueAnimator.getAnimatedValue());
+            });
+            scaleDownAnimator.setDuration(50);
+
+            ValueAnimator scaleUpAnimator =  ValueAnimator.ofFloat(0.8f, 1f);
+            scaleUpAnimator.setInterpolator(Interpolators.STANDARD);
+            scaleUpAnimator.addUpdateListener(valueAnimator -> {
+                button.setScaleX((float) valueAnimator.getAnimatedValue());
+                button.setScaleY((float) valueAnimator.getAnimatedValue());
+            });
+            scaleUpAnimator.setDuration(617);
+
+            animateWrapper.playSequentially(scaleDownAnimator, scaleUpAnimator);
+            animators.add(animateWrapper);
+            delay += 33;
+        }
+        animatorSet.playTogether(animators);
+        animatorSet.start();
     }
 }

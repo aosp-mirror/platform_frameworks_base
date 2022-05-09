@@ -1079,16 +1079,24 @@ public final class InputManager {
     }
 
     /**
-     * Gets the key code produced by the specified location on a US keyboard layout.
-     * Key code as defined in {@link android.view.KeyEvent}.
-     * This API is only functional for devices with {@link InputDevice#SOURCE_KEYBOARD} available
-     * which can alter their key mapping using country specific keyboard layouts.
+     * Gets the {@link android.view.KeyEvent key code} produced by the given location on a reference
+     * QWERTY keyboard layout.
+     * <p>
+     * This API is useful for querying the physical location of keys that change the character
+     * produced based on the current locale and keyboard layout.
+     * <p>
+     * @see InputDevice#getKeyCodeForKeyLocation(int) for examples.
      *
-     * @param deviceId The input device id.
-     * @param locationKeyCode The location of a key on a US keyboard layout.
-     * @return The key code produced when pressing the key at the specified location, given the
-     *         active keyboard layout. Returns {@link KeyEvent#KEYCODE_UNKNOWN} if the requested
-     *         mapping could not be determined, or if an error occurred.
+     * @param locationKeyCode The location of a key specified as a key code on the QWERTY layout.
+     * This provides a consistent way of referring to the physical location of a key independently
+     * of the current keyboard layout. Also see the
+     * <a href="https://www.w3.org/TR/2017/CR-uievents-code-20170601/#key-alphanumeric-writing-system">
+     * hypothetical keyboard</a> provided by the W3C, which may be helpful for identifying the
+     * physical location of a key.
+     * @return The key code produced by the key at the specified location, given the current
+     * keyboard layout. Returns {@link KeyEvent#KEYCODE_UNKNOWN} if the device does not specify
+     * {@link InputDevice#SOURCE_KEYBOARD} or the requested mapping cannot be determined.
+     *
      * @hide
      */
     public int getKeyCodeForKeyLocation(int deviceId, int locationKeyCode) {
@@ -1413,8 +1421,11 @@ public final class InputManager {
             }
 
             mInputDevices = new SparseArray<InputDevice>();
-            for (int i = 0; i < ids.length; i++) {
-                mInputDevices.put(ids[i], null);
+            // TODO(b/223905476): remove when the rootcause is fixed.
+            if (ids != null) {
+                for (int i = 0; i < ids.length; i++) {
+                    mInputDevices.put(ids[i], null);
+                }
             }
         }
     }

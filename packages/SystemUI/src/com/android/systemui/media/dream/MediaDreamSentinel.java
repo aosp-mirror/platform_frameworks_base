@@ -56,13 +56,13 @@ public class MediaDreamSentinel extends CoreStartable {
 
         @Override
         public void onSmartspaceMediaDataLoaded(@NonNull String key,
-                @NonNull SmartspaceMediaData data, boolean shouldPrioritize,
-                boolean isSsReactivated) {
+                @NonNull SmartspaceMediaData data, boolean shouldPrioritize) {
         }
 
         @Override
         public void onMediaDataLoaded(@NonNull String key, @Nullable String oldKey,
-                @NonNull MediaData data, boolean immediately, int receivedSmartspaceCardLatency) {
+                @NonNull MediaData data, boolean immediately, int receivedSmartspaceCardLatency,
+                boolean isSsReactivated) {
             if (mAdded) {
                 return;
             }

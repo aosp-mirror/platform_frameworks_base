@@ -22,6 +22,10 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMA
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIVATE;
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PROTECTED;
+
 import android.annotation.Nullable;
 import android.app.TaskInfo;
 import android.content.Context;
@@ -110,7 +114,8 @@ public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowMana
      * @param canShow whether the layout is allowed to be shown by the parent controller.
      * @return whether the layout is eligible to be shown.
      */
-    protected boolean createLayout(boolean canShow) {
+    @VisibleForTesting(visibility = PROTECTED)
+    public boolean createLayout(boolean canShow) {
         if (!eligibleToShowLayout()) {
             return false;
         }
@@ -184,7 +189,8 @@ public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowMana
      * @param canShow whether the layout is allowed to be shown by the parent controller.
      * @return whether the layout is eligible to be shown.
      */
-    protected boolean updateCompatInfo(TaskInfo taskInfo,
+    @VisibleForTesting(visibility = PROTECTED)
+    public boolean updateCompatInfo(TaskInfo taskInfo,
             ShellTaskOrganizer.TaskListener taskListener, boolean canShow) {
         final Configuration prevTaskConfig = mTaskConfig;
         final ShellTaskOrganizer.TaskListener prevTaskListener = mTaskListener;
@@ -201,7 +207,8 @@ public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowMana
 
         View layout = getLayout();
         if (layout == null || prevTaskListener != taskListener) {
-            // TaskListener changed, recreate the layout for new surface parent.
+            // Layout wasn't created yet or TaskListener changed, recreate the layout for new
+            // surface parent.
             release();
             return createLayout(canShow);
         }
@@ -227,7 +234,8 @@ public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowMana
      *
      * @param canShow whether the layout is allowed to be shown by the parent controller.
      */
-    void updateVisibility(boolean canShow) {
+    @VisibleForTesting(visibility = PACKAGE)
+    public void updateVisibility(boolean canShow) {
         View layout = getLayout();
         if (layout == null) {
             // Layout may not have been created because it was hidden previously.
@@ -242,7 +250,8 @@ public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowMana
     }
 
     /** Called when display layout changed. */
-    void updateDisplayLayout(DisplayLayout displayLayout) {
+    @VisibleForTesting(visibility = PACKAGE)
+    public void updateDisplayLayout(DisplayLayout displayLayout) {
         final Rect prevStableBounds = mStableBounds;
         final Rect curStableBounds = new Rect();
         displayLayout.getStableBounds(curStableBounds);
@@ -255,7 +264,7 @@ public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowMana
     }
 
     /** Called when the surface is ready to be placed under the task surface. */
-    @VisibleForTesting
+    @VisibleForTesting(visibility = PRIVATE)
     void attachToParentSurface(SurfaceControl.Builder b) {
         mTaskListener.attachChildSurfaceToTask(mTaskId, b);
     }
@@ -347,8 +356,9 @@ public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowMana
         return result;
     }
 
-    @VisibleForTesting
-    SurfaceControlViewHost createSurfaceViewHost() {
+    /** Creates a {@link SurfaceControlViewHost} for this window manager. */
+    @VisibleForTesting(visibility = PRIVATE)
+    public SurfaceControlViewHost createSurfaceViewHost() {
         return new SurfaceControlViewHost(mContext, mContext.getDisplay(), this);
     }
 

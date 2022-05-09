@@ -15,6 +15,9 @@
  */
 package com.android.server.autofill.ui;
 
+import static android.service.autofill.FillEventHistory.Event.UI_TYPE_DIALOG;
+import static android.service.autofill.FillEventHistory.Event.UI_TYPE_MENU;
+
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sVerbose;
 
@@ -31,6 +34,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.service.autofill.Dataset;
+import android.service.autofill.FillEventHistory;
 import android.service.autofill.FillResponse;
 import android.service.autofill.SaveInfo;
 import android.service.autofill.ValueFinder;
@@ -81,7 +85,8 @@ public final class AutoFillUI {
     public interface AutoFillUiCallback {
         void authenticate(int requestId, int datasetIndex, @NonNull IntentSender intent,
                 @Nullable Bundle extras, boolean authenticateInline);
-        void fill(int requestId, int datasetIndex, @NonNull Dataset dataset);
+        void fill(int requestId, int datasetIndex, @NonNull Dataset dataset,
+                @FillEventHistory.Event.UiType int uiType);
         void save();
         void cancelSave();
         void requestShowFillUi(AutofillId id, int width, int height,
@@ -92,6 +97,7 @@ public final class AutoFillUI {
         void dispatchUnhandledKey(AutofillId id, KeyEvent keyEvent);
         void cancelSession();
         void requestShowSoftInput(AutofillId id);
+        void requestFallbackFromFillDialog();
     }
 
     public AutoFillUI(@NonNull Context context) {
@@ -236,7 +242,8 @@ public final class AutoFillUI {
                     hideFillUiUiThread(callback, true);
                     if (mCallback != null) {
                         final int datasetIndex = response.getDatasets().indexOf(dataset);
-                        mCallback.fill(response.getRequestId(), datasetIndex, dataset);
+                        mCallback.fill(response.getRequestId(), datasetIndex,
+                                dataset, UI_TYPE_MENU);
                     }
                 }
 
@@ -382,13 +389,19 @@ public final class AutoFillUI {
     public void showFillDialog(@NonNull AutofillId focusedId, @NonNull FillResponse response,
             @Nullable String filterText, @Nullable String servicePackageName,
             @NonNull ComponentName componentName, @Nullable Drawable serviceIcon,
-            @NonNull AutoFillUiCallback callback) {
+            @NonNull AutoFillUiCallback callback, int sessionId, boolean compatMode) {
         if (sVerbose) {
             Slog.v(TAG, "showFillDialog for "
                     + componentName.toShortString() + ": " + response);
         }
 
-        // TODO: enable LogMaker
+        final LogMaker log = Helper
+                .newLogMaker(MetricsEvent.AUTOFILL_FILL_UI, componentName, servicePackageName,
+                        sessionId, compatMode)
+                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_FILTERTEXT_LEN,
+                        filterText == null ? 0 : filterText.length())
+                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUM_DATASETS,
+                        response.getDatasets() == null ? 0 : response.getDatasets().size());
 
         mHandler.post(() -> {
             if (callback != mCallback) {
@@ -400,6 +413,7 @@ public final class AutoFillUI {
                     mUiModeMgr.isNightMode(), new DialogFillUi.UiCallback() {
                         @Override
                         public void onResponsePicked(FillResponse response) {
+                            log(MetricsEvent.TYPE_DETAIL);
                             hideFillDialogUiThread(callback);
                             if (mCallback != null) {
                                 mCallback.authenticate(response.getRequestId(),
@@ -411,22 +425,38 @@ public final class AutoFillUI {
 
                         @Override
                         public void onDatasetPicked(Dataset dataset) {
+                            log(MetricsEvent.TYPE_ACTION);
                             hideFillDialogUiThread(callback);
                             if (mCallback != null) {
                                 final int datasetIndex = response.getDatasets().indexOf(dataset);
-                                mCallback.fill(response.getRequestId(), datasetIndex, dataset);
+                                mCallback.fill(response.getRequestId(), datasetIndex, dataset,
+                                        UI_TYPE_DIALOG);
                             }
                         }
 
                         @Override
-                        public void onCanceled() {
+                        public void onDismissed() {
+                            log(MetricsEvent.TYPE_DISMISS);
                             hideFillDialogUiThread(callback);
                             callback.requestShowSoftInput(focusedId);
                         }
 
                         @Override
+                        public void onCanceled() {
+                            log(MetricsEvent.TYPE_CLOSE);
+                            hideFillDialogUiThread(callback);
+                            callback.requestShowSoftInput(focusedId);
+                            callback.requestFallbackFromFillDialog();
+                        }
+
+                        @Override
                         public void startIntentSender(IntentSender intentSender) {
                             mCallback.startIntentSenderAndFinishSession(intentSender);
+                        }
+
+                        private void log(int type) {
+                            log.setType(type);
+                            mMetricsLogger.write(log);
                         }
                     });
         });

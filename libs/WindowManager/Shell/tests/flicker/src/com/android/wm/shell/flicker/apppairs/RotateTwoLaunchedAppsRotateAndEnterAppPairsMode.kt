@@ -16,9 +16,7 @@
 
 package com.android.wm.shell.flicker.apppairs
 
-import android.platform.test.annotations.Presubmit
 import android.view.Surface
-import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -32,6 +30,7 @@ import com.android.wm.shell.flicker.appPairsSecondaryBoundsIsVisibleAtEnd
 import com.android.wm.shell.flicker.helpers.AppPairsHelper.Companion.waitAppsShown
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import org.junit.FixMethodOrder
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -60,31 +59,31 @@ class RotateTwoLaunchedAppsRotateAndEnterAppPairsMode(
             }
         }
 
-    @Presubmit
+    @Ignore
     @Test
     fun appPairsDividerIsVisibleAtEnd() = testSpec.appPairsDividerIsVisibleAtEnd()
 
-    @Presubmit
+    @Ignore
     @Test
     override fun navBarWindowIsVisible() = super.navBarWindowIsVisible()
 
-    @Presubmit
+    @Ignore
     @Test
     override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
 
-    @Presubmit
+    @Ignore
     @Test
     override fun statusBarWindowIsVisible() = super.statusBarWindowIsVisible()
 
-    @Presubmit
+    @Ignore
     @Test
     override fun statusBarLayerIsVisible() = super.statusBarLayerIsVisible()
 
-    @FlakyTest(bugId = 206753786)
+    @Ignore
     @Test
     override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
 
-    @Presubmit
+    @Ignore
     @Test
     fun bothAppWindowsVisible() {
         testSpec.assertWmEnd {
@@ -93,13 +92,13 @@ class RotateTwoLaunchedAppsRotateAndEnterAppPairsMode(
         }
     }
 
-    @Presubmit
+    @Ignore
     @Test
     fun appPairsPrimaryBoundsIsVisibleAtEnd() =
         testSpec.appPairsPrimaryBoundsIsVisibleAtEnd(testSpec.endRotation,
             primaryApp.component)
 
-    @Presubmit
+    @Ignore
     @Test
     fun appPairsSecondaryBoundsIsVisibleAtEnd() =
         testSpec.appPairsSecondaryBoundsIsVisibleAtEnd(testSpec.endRotation,

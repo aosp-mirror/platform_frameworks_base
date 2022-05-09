@@ -116,7 +116,7 @@ bool Reference::Equals(const Value* value) const {
 }
 
 bool Reference::Flatten(android::Res_value* out_value) const {
-  if (name && name.value().type == ResourceType::kMacro) {
+  if (name && name.value().type.type == ResourceType::kMacro) {
     return false;
   }
 
@@ -192,7 +192,7 @@ static void PrettyPrintReferenceImpl(const Reference& ref, bool print_package, P
     if (print_package) {
       printer->Print(name.to_string());
     } else {
-      printer->Print(to_string(name.type));
+      printer->Print(name.type.to_string());
       printer->Print("/");
       printer->Print(name.entry);
     }

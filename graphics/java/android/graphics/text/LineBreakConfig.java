@@ -26,7 +26,7 @@ import java.util.Objects;
 /**
  * Indicates the strategies can be used when calculating the text wrapping.
  *
- * See <a href="https://drafts.csswg.org/css-text/#line-break-property">the line-break property</a>
+ * See <a href="https://www.w3.org/TR/css-text-3/#line-break-property">the line-break property</a>
  */
 public final class LineBreakConfig {
 
@@ -78,21 +78,87 @@ public final class LineBreakConfig {
     @Retention(RetentionPolicy.SOURCE)
     public @interface LineBreakWordStyle {}
 
-    private @LineBreakStyle int mLineBreakStyle = LINE_BREAK_STYLE_NONE;
-    private @LineBreakWordStyle int mLineBreakWordStyle = LINE_BREAK_WORD_STYLE_NONE;
+    /**
+     * A builder for creating {@link LineBreakConfig}.
+     */
+    public static final class Builder {
+        // The line break style for the LineBreakConfig.
+        private @LineBreakStyle int mLineBreakStyle = LineBreakConfig.LINE_BREAK_STYLE_NONE;
 
-    public LineBreakConfig() {
+        // The line break word style for the LineBreakConfig.
+        private @LineBreakWordStyle int mLineBreakWordStyle =
+                LineBreakConfig.LINE_BREAK_WORD_STYLE_NONE;
+
+        /**
+         * Builder constructor with line break parameters.
+         */
+        public Builder() {
+        }
+
+        /**
+         * Set the line break style.
+         *
+         * @param lineBreakStyle the new line break style.
+         * @return this Builder
+         */
+        public @NonNull Builder setLineBreakStyle(@LineBreakStyle int lineBreakStyle) {
+            mLineBreakStyle = lineBreakStyle;
+            return this;
+        }
+
+        /**
+         * Set the line break word style.
+         *
+         * @param lineBreakWordStyle the new line break word style.
+         * @return this Builder
+         */
+        public @NonNull Builder setLineBreakWordStyle(@LineBreakWordStyle int lineBreakWordStyle) {
+            mLineBreakWordStyle = lineBreakWordStyle;
+            return this;
+        }
+
+        /**
+         * Build the {@link LineBreakConfig}
+         *
+         * @return the LineBreakConfig instance.
+         */
+        public @NonNull LineBreakConfig build() {
+            return new LineBreakConfig(mLineBreakStyle, mLineBreakWordStyle);
+        }
     }
 
     /**
-     * Set the line break configuration.
+     * Create the LineBreakConfig instance.
      *
-     * @param lineBreakConfig the new line break configuration.
+     * @param lineBreakStyle the line break style for text wrapping.
+     * @param lineBreakWordStyle the line break word style for text wrapping.
+     * @return the {@link LineBreakConfig} instance.
+     * @hide
      */
-    public void set(@NonNull LineBreakConfig lineBreakConfig) {
-        Objects.requireNonNull(lineBreakConfig);
-        mLineBreakStyle = lineBreakConfig.getLineBreakStyle();
-        mLineBreakWordStyle = lineBreakConfig.getLineBreakWordStyle();
+    public static @NonNull LineBreakConfig getLineBreakConfig(@LineBreakStyle int lineBreakStyle,
+            @LineBreakWordStyle int lineBreakWordStyle) {
+        LineBreakConfig.Builder builder = new LineBreakConfig.Builder();
+        return builder.setLineBreakStyle(lineBreakStyle)
+                .setLineBreakWordStyle(lineBreakWordStyle)
+                .build();
+    }
+
+    /** @hide */
+    public static final LineBreakConfig NONE =
+            new Builder().setLineBreakStyle(LINE_BREAK_STYLE_NONE)
+                    .setLineBreakWordStyle(LINE_BREAK_WORD_STYLE_NONE).build();
+
+    private final @LineBreakStyle int mLineBreakStyle;
+    private final @LineBreakWordStyle int mLineBreakWordStyle;
+
+    /**
+     * Constructor with the line break parameters.
+     * Use the {@link LineBreakConfig.Builder} to create the LineBreakConfig instance.
+     */
+    private LineBreakConfig(@LineBreakStyle int lineBreakStyle,
+            @LineBreakWordStyle int lineBreakWordStyle) {
+        mLineBreakStyle = lineBreakStyle;
+        mLineBreakWordStyle = lineBreakWordStyle;
     }
 
     /**
@@ -105,30 +171,12 @@ public final class LineBreakConfig {
     }
 
     /**
-     * Set the line break style.
-     *
-     * @param lineBreakStyle the new line break style.
-     */
-    public void setLineBreakStyle(@LineBreakStyle int lineBreakStyle) {
-        mLineBreakStyle = lineBreakStyle;
-    }
-
-    /**
      * Get the line break word style.
      *
      * @return The current line break word style to be used for the text wrapping.
      */
     public @LineBreakWordStyle int getLineBreakWordStyle() {
         return mLineBreakWordStyle;
-    }
-
-    /**
-     * Set the line break word style.
-     *
-     * @param lineBreakWordStyle the new line break word style.
-     */
-    public void setLineBreakWordStyle(@LineBreakWordStyle int lineBreakWordStyle) {
-        mLineBreakWordStyle = lineBreakWordStyle;
     }
 
     @Override

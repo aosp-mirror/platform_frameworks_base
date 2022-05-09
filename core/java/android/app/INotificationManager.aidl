@@ -57,6 +57,7 @@ interface INotificationManager
     @UnsupportedAppUsage
     void cancelNotificationWithTag(String pkg, String opPkg, String tag, int id, int userId);
 
+    boolean isInCall(String pkg, int uid);
     void setShowBadge(String pkg, int uid, boolean showBadge);
     boolean canShowBadge(String pkg, int uid);
     boolean hasSentValidMsg(String pkg, int uid);
@@ -116,7 +117,7 @@ interface INotificationManager
     ParceledListSlice getNotificationChannelGroups(String pkg);
     boolean onlyHasDefaultChannel(String pkg, int uid);
     boolean areChannelsBypassingDnd();
-    ParceledListSlice getNotificationChannelsBypassingDnd(String pkg, int userId);
+    ParceledListSlice getNotificationChannelsBypassingDnd(String pkg, int uid);
     boolean isPackagePaused(String pkg);
     void deleteNotificationHistoryItem(String pkg, int uid, long postedTime);
     boolean isPermissionFixed(String pkg, int userId);

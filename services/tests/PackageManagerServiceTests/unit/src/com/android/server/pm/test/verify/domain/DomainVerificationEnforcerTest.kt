@@ -20,8 +20,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.SigningDetails
-import com.android.server.pm.pkg.component.ParsedActivityImpl
-import com.android.server.pm.pkg.component.ParsedIntentInfoImpl
 import android.content.pm.verify.domain.DomainVerificationManager
 import android.content.pm.verify.domain.DomainVerificationState
 import android.os.Build
@@ -30,10 +28,12 @@ import android.util.ArraySet
 import android.util.IndentingPrintWriter
 import android.util.SparseArray
 import androidx.test.platform.app.InstrumentationRegistry
+import com.android.server.pm.Computer
 import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.android.server.pm.pkg.PackageStateInternal
 import com.android.server.pm.pkg.PackageUserStateInternal
-import com.android.server.pm.test.verify.domain.DomainVerificationTestUtils.mockPackageStates
+import com.android.server.pm.pkg.component.ParsedActivityImpl
+import com.android.server.pm.pkg.component.ParsedIntentInfoImpl
 import com.android.server.pm.verify.domain.DomainVerificationEnforcer
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal
 import com.android.server.pm.verify.domain.DomainVerificationService
@@ -100,11 +100,15 @@ class DomainVerificationEnforcerTest {
                     mockThrowOnUnmocked {
                         whenever(callingUid) { callingUidInt.get() }
                         whenever(callingUserId) { callingUserIdInt.get() }
-                        mockPackageStates {
-                            when (it) {
-                                VISIBLE_PKG -> visiblePkgState
-                                INVISIBLE_PKG -> invisiblePkgState
-                                else -> null
+                        whenever(snapshot()) {
+                            mockThrowOnUnmocked {
+                                whenever(getPackageStateInternal(anyString())) {
+                                    when (getArgument<String>(0)) {
+                                        VISIBLE_PKG -> visiblePkgState
+                                        INVISIBLE_PKG -> invisiblePkgState
+                                        else -> null
+                                    }
+                                }
                             }
                         }
                         whenever(schedule(anyInt(), any()))
@@ -211,9 +215,8 @@ class DomainVerificationEnforcerTest {
                     printState(mock(IndentingPrintWriter::class.java), null, null)
                 },
                 service(Type.QUERENT, "printStateInternal") {
-                    printState(mock(IndentingPrintWriter::class.java), null, null) {
-                        mockPkgState(it, UUID.randomUUID())
-                    }
+                    printState(mock(Computer::class.java), mock(IndentingPrintWriter::class.java),
+                        null, null)
                 },
                 service(Type.VERIFIER, "setStatus") {
                     setDomainVerificationStatus(

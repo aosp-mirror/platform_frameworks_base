@@ -55,20 +55,28 @@ public class RcsUceAdapter {
      * This carrier supports User Capability Exchange as, defined by the framework using
      * SIP OPTIONS. If set, the RcsFeature should support capability exchange. If not set, this
      * RcsFeature should not publish capabilities or service capability requests.
+     * @deprecated Use {@link ImsRcsManager#CAPABILITY_TYPE_OPTIONS_UCE} instead.
      * @hide
      */
+    @Deprecated
     public static final int CAPABILITY_TYPE_OPTIONS_UCE = 1 << 0;
 
     /**
      * This carrier supports User Capability Exchange as, defined by the framework using a
      * presence server. If set, the RcsFeature should support capability exchange. If not set, this
      * RcsFeature should not publish capabilities or service capability requests.
+     * @deprecated Use {@link ImsRcsManager#CAPABILITY_TYPE_PRESENCE_UCE} instead.
      * @hide
      */
+    @Deprecated
     @SystemApi
     public static final int CAPABILITY_TYPE_PRESENCE_UCE = 1 << 1;
 
-    /**@hide*/
+    /**
+     * @deprecated Use {@link ImsRcsManager.RcsImsCapabilityFlag} instead.
+     * @hide
+     */
+    @Deprecated
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = "CAPABILITY_TYPE_", value = {
             CAPABILITY_TYPE_OPTIONS_UCE,

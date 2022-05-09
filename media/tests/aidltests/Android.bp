@@ -33,7 +33,6 @@ android_test {
     libs: [
         "framework",
     ],
-    sdk_version: "current",
     platform_apis: true,
     test_suites: ["device-tests"],
     certificate: "platform",

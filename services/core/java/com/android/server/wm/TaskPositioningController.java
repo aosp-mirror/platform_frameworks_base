@@ -83,17 +83,18 @@ class TaskPositioningController {
             return;
         }
 
-        mTransaction.show(mInputSurface);
-        mTransaction.setInputWindowInfo(mInputSurface, h);
-        mTransaction.setLayer(mInputSurface, Integer.MAX_VALUE);
-
         final Display display = dc.getDisplay();
         final Point p = new Point();
         display.getRealSize(p);
-
         mTmpClipRect.set(0, 0, p.x, p.y);
-        mTransaction.setWindowCrop(mInputSurface, mTmpClipRect);
-        mTransaction.syncInputWindows().apply();
+
+        mTransaction.show(mInputSurface)
+                .setInputWindowInfo(mInputSurface, h)
+                .setLayer(mInputSurface, Integer.MAX_VALUE)
+                .setPosition(mInputSurface, 0, 0)
+                .setCrop(mInputSurface, mTmpClipRect)
+                .syncInputWindows()
+                .apply();
     }
 
     boolean startMovingTask(IWindow window, float startX, float startY) {

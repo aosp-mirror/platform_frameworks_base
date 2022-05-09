@@ -21,11 +21,19 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
-// An existing module name is reused to avoid merge conflicts.
-// TODO: fix the font file name.
 filegroup {
     name: "UpdatableSystemFontTest_NotoColorEmoji.ttf",
-    srcs: ["NotoColorEmoji.ttf"],
+    srcs: ["UpdatableSystemFontTest_NotoColorEmoji.ttf"],
+}
+
+filegroup {
+    name: "UpdatableSystemFontTest_NotoSerif-Regular.ttf",
+    srcs: ["UpdatableSystemFontTest_NotoSerif-Regular.ttf"],
+}
+
+filegroup {
+    name: "UpdatableSystemFontTest_NotoSerif-Bold.ttf",
+    srcs: ["UpdatableSystemFontTest_NotoSerif-Bold.ttf"],
 }
 
 filegroup {
@@ -41,10 +49,6 @@ filegroup {
 filegroup {
     name: "UpdatableSystemFontTestCertDer",
     srcs: ["UpdatableSystemFontTestCert.der"],
-}
-
-genrule_defaults {
-    name: "updatable_system_font_increment_font_revision_default",
 }
 
 genrule {
@@ -124,13 +128,13 @@ genrule {
 genrule {
     name: "UpdatableSystemFontTest_NotoSerif-Regular.sig",
     defaults: ["updatable_system_font_sig_gen_default"],
-    srcs: [":NotoSerif-Regular.ttf"],
+    srcs: ["UpdatableSystemFontTest_NotoSerif-Regular.ttf"],
     out: ["UpdatableSystemFontTest_NotoSerif-Regular.sig"],
 }
 
 genrule {
     name: "UpdatableSystemFontTest_NotoSerif-Bold.sig",
     defaults: ["updatable_system_font_sig_gen_default"],
-    srcs: [":NotoSerif-Bold.ttf"],
+    srcs: ["UpdatableSystemFontTest_NotoSerif-Bold.ttf"],
     out: ["UpdatableSystemFontTest_NotoSerif-Bold.sig"],
 }

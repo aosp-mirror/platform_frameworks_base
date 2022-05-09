@@ -19,6 +19,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Camera;
 import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
@@ -752,13 +753,65 @@ public class CameraExtensionsProxyService extends Service {
         public ISessionProcessorImpl getSessionProcessor() {
             return new SessionProcessorImplStub(mAdvancedExtender.createSessionProcessor());
         }
+
+        @Override
+        public CameraMetadataNative getAvailableCaptureRequestKeys(String cameraId) {
+            if (RESULT_API_SUPPORTED) {
+                List<CaptureRequest.Key> supportedCaptureKeys =
+                        mAdvancedExtender.getAvailableCaptureRequestKeys();
+
+                if ((supportedCaptureKeys != null) && !supportedCaptureKeys.isEmpty()) {
+                    CameraMetadataNative ret = new CameraMetadataNative();
+                    long vendorId = mMetadataVendorIdMap.containsKey(cameraId) ?
+                            mMetadataVendorIdMap.get(cameraId) : Long.MAX_VALUE;
+                    ret.setVendorId(vendorId);
+                    int requestKeyTags [] = new int[supportedCaptureKeys.size()];
+                    int i = 0;
+                    for (CaptureRequest.Key key : supportedCaptureKeys) {
+                        requestKeyTags[i++] = CameraMetadataNative.getTag(key.getName(), vendorId);
+                    }
+                    ret.set(CameraCharacteristics.REQUEST_AVAILABLE_REQUEST_KEYS, requestKeyTags);
+
+                    return ret;
+                }
+            }
+
+            return null;
+        }
+
+        @Override
+        public CameraMetadataNative getAvailableCaptureResultKeys(String cameraId) {
+            if (RESULT_API_SUPPORTED) {
+                List<CaptureResult.Key> supportedResultKeys =
+                        mAdvancedExtender.getAvailableCaptureResultKeys();
+
+                if ((supportedResultKeys != null) && !supportedResultKeys.isEmpty()) {
+                    CameraMetadataNative ret = new CameraMetadataNative();
+                    long vendorId = mMetadataVendorIdMap.containsKey(cameraId) ?
+                            mMetadataVendorIdMap.get(cameraId) : Long.MAX_VALUE;
+                    ret.setVendorId(vendorId);
+                    int resultKeyTags [] = new int[supportedResultKeys.size()];
+                    int i = 0;
+                    for (CaptureResult.Key key : supportedResultKeys) {
+                        resultKeyTags[i++] = CameraMetadataNative.getTag(key.getName(), vendorId);
+                    }
+                    ret.set(CameraCharacteristics.REQUEST_AVAILABLE_RESULT_KEYS, resultKeyTags);
+
+                    return ret;
+                }
+            }
+
+            return null;
+        }
     }
 
     private class CaptureCallbackStub implements SessionProcessorImpl.CaptureCallback {
         private final ICaptureCallback mCaptureCallback;
+        private final String mCameraId;
 
-        private CaptureCallbackStub(ICaptureCallback captureCallback) {
+        private CaptureCallbackStub(ICaptureCallback captureCallback, String cameraId) {
             mCaptureCallback = captureCallback;
+            mCameraId = cameraId;
         }
 
         @Override
@@ -818,6 +871,29 @@ public class CameraExtensionsProxyService extends Service {
                     Log.e(TAG, "Failed to notify capture sequence abort due to remote " +
                             "exception!");
                 }
+            }
+        }
+
+        @Override
+        public void onCaptureCompleted(long timestamp, int requestId,
+                Map<CaptureResult.Key, Object> result) {
+
+            if (result == null) {
+                Log.e(TAG, "Invalid capture result received!");
+            }
+
+            CameraMetadataNative captureResults = new CameraMetadataNative();
+            if (mMetadataVendorIdMap.containsKey(mCameraId)) {
+                captureResults.setVendorId(mMetadataVendorIdMap.get(mCameraId));
+            }
+            for (Map.Entry<CaptureResult.Key, Object> entry : result.entrySet()) {
+                captureResults.set(entry.getKey(), entry.getValue());
+            }
+
+            try {
+                mCaptureCallback.onCaptureCompleted(timestamp, requestId, captureResults);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to notify capture complete due to remote exception!");
             }
         }
     }
@@ -1124,7 +1200,7 @@ public class CameraExtensionsProxyService extends Service {
 
         @Override
         public int startRepeating(ICaptureCallback callback) {
-            return mSessionProcessor.startRepeating(new CaptureCallbackStub(callback));
+            return mSessionProcessor.startRepeating(new CaptureCallbackStub(callback, mCameraId));
         }
 
         @Override
@@ -1133,12 +1209,29 @@ public class CameraExtensionsProxyService extends Service {
         }
 
         @Override
-        public int startCapture(ICaptureCallback callback, int jpegRotation, int jpegQuality) {
+        public void setParameters(CaptureRequest captureRequest) {
             HashMap<CaptureRequest.Key<?>, Object> paramMap = new HashMap<>();
-            paramMap.put(CaptureRequest.JPEG_ORIENTATION, jpegRotation);
-            paramMap.put(CaptureRequest.JPEG_QUALITY, jpegQuality);
+            for (CaptureRequest.Key captureRequestKey : captureRequest.getKeys()) {
+                paramMap.put(captureRequestKey, captureRequest.get(captureRequestKey));
+            }
+
             mSessionProcessor.setParameters(paramMap);
-            return mSessionProcessor.startCapture(new CaptureCallbackStub(callback));
+        }
+
+        @Override
+        public int startTrigger(CaptureRequest captureRequest, ICaptureCallback callback) {
+            HashMap<CaptureRequest.Key<?>, Object> triggerMap = new HashMap<>();
+            for (CaptureRequest.Key captureRequestKey : captureRequest.getKeys()) {
+                triggerMap.put(captureRequestKey, captureRequest.get(captureRequestKey));
+            }
+
+            return mSessionProcessor.startTrigger(triggerMap,
+                    new CaptureCallbackStub(callback, mCameraId));
+        }
+
+        @Override
+        public int startCapture(ICaptureCallback callback) {
+            return mSessionProcessor.startCapture(new CaptureCallbackStub(callback, mCameraId));
         }
     }
 

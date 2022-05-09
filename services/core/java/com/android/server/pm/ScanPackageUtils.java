@@ -165,25 +165,15 @@ final class ScanPackageUtils {
             }
         }
 
-        int previousAppId = Process.INVALID_UID;
-
         if (pkgSetting != null && oldSharedUserSetting != sharedUserSetting) {
-            if (oldSharedUserSetting != null && sharedUserSetting == null) {
-                previousAppId = pkgSetting.getAppId();
-                // Log that something is leaving shareduid and keep going
-                Slog.i(TAG,
-                        "Package " + parsedPackage.getPackageName() + " shared user changed from "
-                                + oldSharedUserSetting.name + " to " + "<nothing>.");
-            } else {
-                PackageManagerService.reportSettingsProblem(Log.WARN,
-                        "Package " + parsedPackage.getPackageName() + " shared user changed from "
-                                + (oldSharedUserSetting != null
-                                ? oldSharedUserSetting.name : "<nothing>")
-                                + " to "
-                                + (sharedUserSetting != null ? sharedUserSetting.name : "<nothing>")
-                                + "; replacing with new");
-                pkgSetting = null;
-            }
+            PackageManagerService.reportSettingsProblem(Log.WARN,
+                    "Package " + parsedPackage.getPackageName() + " shared user changed from "
+                            + (oldSharedUserSetting != null
+                            ? oldSharedUserSetting.name : "<nothing>")
+                            + " to "
+                            + (sharedUserSetting != null ? sharedUserSetting.name : "<nothing>")
+                            + "; replacing with new");
+            pkgSetting = null;
         }
 
         String[] usesSdkLibraries = null;
@@ -474,8 +464,8 @@ final class ScanPackageUtils {
 
         return new ScanResult(request, true, pkgSetting, changedAbiCodePath,
                 !createNewPackage /* existingSettingCopied */,
-                previousAppId, sdkLibraryInfo, staticSharedLibraryInfo,
-                dynamicSharedLibraryInfos);
+                Process.INVALID_UID /* previousAppId */ , sdkLibraryInfo,
+                staticSharedLibraryInfo, dynamicSharedLibraryInfos);
     }
 
     /**
@@ -700,16 +690,14 @@ final class ScanPackageUtils {
 
     public static void assertMinSignatureSchemeIsValid(AndroidPackage pkg,
             @ParsingPackageUtils.ParseFlags int parseFlags) throws PackageManagerException {
-        if ((parseFlags & ParsingPackageUtils.PARSE_IS_SYSTEM_DIR) == 0) {
-            int minSignatureSchemeVersion =
-                    ApkSignatureVerifier.getMinimumSignatureSchemeVersionForTargetSdk(
-                            pkg.getTargetSdkVersion());
-            if (pkg.getSigningDetails().getSignatureSchemeVersion()
-                    < minSignatureSchemeVersion) {
-                throw new PackageManagerException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
-                        "No signature found in package of version " + minSignatureSchemeVersion
-                                + " or newer for package " + pkg.getPackageName());
-            }
+        int minSignatureSchemeVersion =
+                ApkSignatureVerifier.getMinimumSignatureSchemeVersionForTargetSdk(
+                        pkg.getTargetSdkVersion());
+        if (pkg.getSigningDetails().getSignatureSchemeVersion()
+                < minSignatureSchemeVersion) {
+            throw new PackageManagerException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
+                    "No signature found in package of version " + minSignatureSchemeVersion
+                            + " or newer for package " + pkg.getPackageName());
         }
     }
 

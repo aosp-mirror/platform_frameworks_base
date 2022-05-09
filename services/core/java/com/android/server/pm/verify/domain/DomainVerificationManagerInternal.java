@@ -25,7 +25,6 @@ import android.content.Intent;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.PackageSettingsSnapshotProvider;
 import android.content.pm.ResolveInfo;
 import android.content.pm.verify.domain.DomainVerificationInfo;
 import android.content.pm.verify.domain.DomainVerificationManager;
@@ -37,7 +36,7 @@ import android.util.Pair;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 
-import com.android.server.pm.PackageManagerService;
+import com.android.server.pm.Computer;
 import com.android.server.pm.PackageSetting;
 import com.android.server.pm.Settings;
 import com.android.server.pm.pkg.PackageStateInternal;
@@ -227,14 +226,14 @@ public interface DomainVerificationManagerInternal {
      * assumed nothing has changed since the device rebooted.
      * <p>
      * If this is a new install, state will be restored from a previous call to {@link
-     * #restoreSettings(TypedXmlPullParser)}, or a new one will be generated. In either case, a
+     * #restoreSettings(Computer, TypedXmlPullParser)}, or a new one will be generated. In either case, a
      * broadcast will be sent to the domain verification agent so it may re-run any verification
      * logic for the newly associated domains.
      * <p>
      * This will mutate internal {@link DomainVerificationPkgState} and so will hold the internal
      * lock. This should never be called from within the domain verification classes themselves.
      * <p>
-     * This will NOT call {@link #writeSettings(TypedXmlSerializer, boolean, int)}. That must be
+     * This will NOT call {@link #writeSettings(Computer, TypedXmlSerializer, boolean, int)}. That must be
      * handled by the caller.
      */
     void addPackage(@NonNull PackageStateInternal newPkgSetting);
@@ -249,7 +248,7 @@ public interface DomainVerificationManagerInternal {
      * This will mutate internal {@link DomainVerificationPkgState} and so will hold the internal
      * lock. This should never be called from within the domain verification classes themselves.
      * <p>
-     * This will NOT call {@link #writeSettings(TypedXmlSerializer, boolean, int)}. That must be
+     * This will NOT call {@link #writeSettings(Computer, TypedXmlSerializer, boolean, int)}. That must be
      * handled by the caller.
      */
     void migrateState(@NonNull PackageStateInternal oldPkgSetting,
@@ -259,24 +258,24 @@ public interface DomainVerificationManagerInternal {
      * Serializes the entire internal state. This is equivalent to a full backup of the existing
      * verification state. This write includes legacy state, as a sibling tag the modern state.
      *
+     * @param snapshot
      * @param includeSignatures Whether to include the package signatures in the output, mainly
      *                          used for backing up the user settings and ensuring they're
      *                          re-attached to the same package.
      * @param userId The user to write out. Supports {@link UserHandle#USER_ALL} if all users
-     *               should be written.
      */
-    void writeSettings(@NonNull TypedXmlSerializer serializer, boolean includeSignatures,
-            @UserIdInt int userId) throws IOException;
+    void writeSettings(@NonNull Computer snapshot, @NonNull TypedXmlSerializer serializer,
+            boolean includeSignatures, @UserIdInt int userId) throws IOException;
 
     /**
      * Read back a list of {@link DomainVerificationPkgState}s previously written by {@link
-     * #writeSettings(TypedXmlSerializer, boolean, int)}. Assumes that the
+     * #writeSettings(Computer, TypedXmlSerializer, boolean, int)}. Assumes that the
      * {@link DomainVerificationPersistence#TAG_DOMAIN_VERIFICATIONS} tag has already been entered.
      * <p>
      * This is expected to only be used to re-attach states for packages already known to be on the
-     * device. If restoring from a backup, use {@link #restoreSettings(TypedXmlPullParser)}.
+     * device. If restoring from a backup, use {@link #restoreSettings(Computer, TypedXmlPullParser)}.
      */
-    void readSettings(@NonNull TypedXmlPullParser parser)
+    void readSettings(@NonNull Computer snapshot, @NonNull TypedXmlPullParser parser)
             throws IOException, XmlPullParserException;
 
     /**
@@ -306,7 +305,7 @@ public interface DomainVerificationManagerInternal {
 
     /**
      * Restore a list of {@link DomainVerificationPkgState}s previously written by {@link
-     * #writeSettings(TypedXmlSerializer, boolean, int)}. Assumes that the
+     * #writeSettings(Computer, TypedXmlSerializer, boolean, int)}. Assumes that the
      * {@link DomainVerificationPersistence#TAG_DOMAIN_VERIFICATIONS}
      * tag has already been entered.
      * <p>
@@ -321,7 +320,7 @@ public interface DomainVerificationManagerInternal {
      * TODO(b/170746586): Figure out how to verify that package signatures match at snapshot time
      *  and restore time.
      */
-    void restoreSettings(@NonNull TypedXmlPullParser parser)
+    void restoreSettings(@NonNull Computer snapshot, @NonNull TypedXmlPullParser parser)
             throws IOException, XmlPullParserException;
 
     /**
@@ -349,17 +348,14 @@ public interface DomainVerificationManagerInternal {
     /**
      * Print the verification state and user selection state of a package.
      *
+     * @param snapshot
      * @param packageName        the package whose state to change, or all packages if none is
      *                           specified
      * @param userId             the specific user to print, or null to skip printing user selection
-     *                           states, supports {@link android.os.UserHandle#USER_ALL}
-     * @param pkgSettingFunction the method by which to retrieve package data; if this is called
-     *                           from {@link PackageManagerService}, it is expected to pass in the
-     *                           snapshot of {@link PackageStateInternal} objects
+ *                           states, supports {@link UserHandle#USER_ALL}
      */
-    void printState(@NonNull IndentingPrintWriter writer, @Nullable String packageName,
-            @Nullable @UserIdInt Integer userId,
-            @NonNull Function<String, PackageStateInternal> pkgSettingFunction)
+    void printState(@NonNull Computer snapshot, @NonNull IndentingPrintWriter writer,
+            @Nullable String packageName, @Nullable @UserIdInt Integer userId)
             throws NameNotFoundException;
 
     @NonNull
@@ -406,12 +402,11 @@ public interface DomainVerificationManagerInternal {
             @NonNull Set<String> domains, int state) throws NameNotFoundException;
 
 
-    interface Connection extends DomainVerificationEnforcer.Callback,
-            PackageSettingsSnapshotProvider {
+    interface Connection extends DomainVerificationEnforcer.Callback {
 
         /**
          * Notify that a settings change has been made and that eventually
-         * {@link #writeSettings(TypedXmlSerializer, boolean, int)} should be invoked by the parent.
+         * {@link #writeSettings(Computer, TypedXmlSerializer, boolean, int)} should be invoked by the parent.
          */
         void scheduleWriteSettings();
 
@@ -433,5 +428,8 @@ public interface DomainVerificationManagerInternal {
 
         @UserIdInt
         int[] getAllUserIds();
+
+        @NonNull
+        Computer snapshot();
     }
 }

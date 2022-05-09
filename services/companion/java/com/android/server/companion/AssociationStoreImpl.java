@@ -23,6 +23,7 @@ import android.annotation.UserIdInt;
 import android.companion.AssociationInfo;
 import android.net.MacAddress;
 import android.util.Log;
+import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
@@ -80,7 +81,7 @@ class AssociationStoreImpl implements AssociationStore {
 
         synchronized (mLock) {
             if (mIdMap.containsKey(id)) {
-                if (DEBUG) Log.w(TAG, "Association already stored.");
+                Slog.e(TAG, "Association with id " + id + " already exists.");
                 return;
             }
             mIdMap.put(id, association);
@@ -171,12 +172,20 @@ class AssociationStoreImpl implements AssociationStore {
         broadcastChange(CHANGE_TYPE_REMOVED, association);
     }
 
+    /**
+     * @return a "snapshot" of the current state of the existing associations.
+     */
     public @NonNull Collection<AssociationInfo> getAssociations() {
-        final Collection<AssociationInfo> allAssociations;
         synchronized (mLock) {
-            allAssociations = mIdMap.values();
+            // IMPORTANT: make and return a COPY of the mIdMap.values(), NOT a "direct" reference.
+            // The HashMap.values() returns a collection which is backed by the HashMap, so changes
+            // to the HashMap are reflected in this collection.
+            // For us this means that if mIdMap is modified while the iteration over mIdMap.values()
+            // is in progress it may lead to "undefined results" (according to the HashMap's
+            // documentation) or cause ConcurrentModificationExceptions in the iterator (according
+            // to the bugreports...).
+            return List.copyOf(mIdMap.values());
         }
-        return Collections.unmodifiableCollection(allAssociations);
     }
 
     public @NonNull List<AssociationInfo> getAssociationsForUser(@UserIdInt int userId) {

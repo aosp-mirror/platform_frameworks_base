@@ -512,12 +512,24 @@ public class BroadcastDispatcher {
      */
     public boolean isEmpty() {
         synchronized (mLock) {
+            return isIdle()
+                    && getBootCompletedBroadcastsUidsSize(Intent.ACTION_LOCKED_BOOT_COMPLETED) == 0
+                    && getBootCompletedBroadcastsUidsSize(Intent.ACTION_BOOT_COMPLETED) == 0;
+        }
+    }
+
+    /**
+     * Have less check than {@link #isEmpty()}.
+     * The dispatcher is considered as idle even with deferred LOCKED_BOOT_COMPLETED/BOOT_COMPLETED
+     * broadcasts because those can be deferred until the first time the uid's process is started.
+     * @return
+     */
+    public boolean isIdle() {
+        synchronized (mLock) {
             return mCurrentBroadcast == null
                     && mOrderedBroadcasts.isEmpty()
                     && isDeferralsListEmpty(mDeferredBroadcasts)
-                    && isDeferralsListEmpty(mAlarmBroadcasts)
-                    && getBootCompletedBroadcastsUidsSize(Intent.ACTION_LOCKED_BOOT_COMPLETED) == 0
-                    && getBootCompletedBroadcastsUidsSize(Intent.ACTION_BOOT_COMPLETED) == 0;
+                    && isDeferralsListEmpty(mAlarmBroadcasts);
         }
     }
 
@@ -580,6 +592,11 @@ public class BroadcastDispatcher {
     // ----------------------------------
     // BroadcastQueue operation support
     void enqueueOrderedBroadcastLocked(BroadcastRecord r) {
+        if (r.receivers == null || r.receivers.isEmpty()) {
+            mOrderedBroadcasts.add(r);
+            return;
+        }
+
         if (Intent.ACTION_LOCKED_BOOT_COMPLETED.equals(r.intent.getAction())) {
             // Create one BroadcastRecord for each UID that can be deferred.
             final SparseArray<BroadcastRecord> deferred =

@@ -65,7 +65,6 @@ import com.android.systemui.util.Assert;
 import com.android.systemui.util.Compile;
 import com.android.systemui.util.leak.LeakDetector;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -111,7 +110,6 @@ public class NotificationEntryManager implements
     private final Lazy<NotificationRowBinder> mNotificationRowBinderLazy;
     private final Lazy<NotificationRemoteInputManager> mRemoteInputManagerLazy;
     private final LeakDetector mLeakDetector;
-    private final ForegroundServiceDismissalFeatureController mFgsFeatureController;
     private final IStatusBarService mStatusBarService;
     private final NotifLiveDataStoreImpl mNotifLiveDataStore;
     private final DumpManager mDumpManager;
@@ -159,7 +157,6 @@ public class NotificationEntryManager implements
             Lazy<NotificationRowBinder> notificationRowBinderLazy,
             Lazy<NotificationRemoteInputManager> notificationRemoteInputManagerLazy,
             LeakDetector leakDetector,
-            ForegroundServiceDismissalFeatureController fgsFeatureController,
             IStatusBarService statusBarService,
             NotifLiveDataStoreImpl notifLiveDataStore,
             DumpManager dumpManager
@@ -170,7 +167,6 @@ public class NotificationEntryManager implements
         mNotificationRowBinderLazy = notificationRowBinderLazy;
         mRemoteInputManagerLazy = notificationRemoteInputManagerLazy;
         mLeakDetector = leakDetector;
-        mFgsFeatureController = fgsFeatureController;
         mStatusBarService = statusBarService;
         mNotifLiveDataStore = notifLiveDataStore;
         mDumpManager = dumpManager;
@@ -186,7 +182,7 @@ public class NotificationEntryManager implements
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("NotificationEntryManager state:");
         pw.println("  mAllNotifications=");
         if (mAllNotifications.size() == 0) {
@@ -958,7 +954,7 @@ public class NotificationEntryManager implements
         Trace.endSection();
     }
 
-    /** dump the current active notification list. Called from StatusBar */
+    /** dump the current active notification list. Called from CentralSurfaces */
     public void dump(PrintWriter pw, String indent) {
         pw.println("NotificationEntryManager (Legacy)");
         int filteredLen = mSortedAndFiltered.size();

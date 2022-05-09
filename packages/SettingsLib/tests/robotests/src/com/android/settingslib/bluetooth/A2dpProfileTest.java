@@ -206,9 +206,8 @@ public class A2dpProfileTest {
 
         when(config.isMandatoryCodec()).thenReturn(false);
         when(config.getCodecType()).thenReturn(4);
-        when(config.getCodecName()).thenReturn("LDAC");
         assertThat(mProfile.getHighQualityAudioOptionLabel(mDevice)).isEqualTo(
-                String.format(KNOWN_CODEC_LABEL, config.getCodecName()));
+                String.format(KNOWN_CODEC_LABEL, "LDAC"));
     }
 
     @Test

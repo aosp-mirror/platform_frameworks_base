@@ -29,7 +29,6 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Fut fjalëkalimin e enkriptimit të pajisjes tënde më poshtë. Ai do të përdoret gjithashtu për të enkriptuar arkivin e rezervimit."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Fut një fjalëkalim për të enkriptuar të dhënat e rezervimit të plotë. Nëse hapësira lihet bosh, do të përdoret fjalëkalimi aktual i rezervimit:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Nëse dëshiron të enkriptosh të dhënat e plota të rezervimit, fut një fjalëkalim më poshtë:"</string>
-    <string name="backup_enc_password_required" msgid="7889652203371654149">"Meqenëse pajisja jote është e enkriptuar, të kërkohet ta enkriptosh rezervimin tënd. Fut një fjalëkalim më poshtë:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Nëse të dhënat e restaurimit janë të enkriptuara, fut një fjalëkalim më poshtë:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Rezervimi po fillon..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Rezervimi përfundoi"</string>

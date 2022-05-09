@@ -16,8 +16,6 @@
 
 package com.android.server.location.contexthub;
 
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-
 import android.Manifest;
 import android.content.Context;
 import android.hardware.contexthub.V1_0.AsyncEventType;
@@ -297,19 +295,14 @@ import java.util.List;
     }
 
     /**
-     * Checks for location hardware permissions.
+     * Checks for ACCESS_CONTEXT_HUB permissions.
      *
      * @param context the context of the service
      */
     /* package */
     static void checkPermissions(Context context) {
-        boolean hasAccessContextHubPermission = (context.checkCallingPermission(
-                CONTEXT_HUB_PERMISSION) == PERMISSION_GRANTED);
-
-        if (!hasAccessContextHubPermission) {
-            throw new SecurityException(
-                    "ACCESS_CONTEXT_HUB permission required to use Context Hub");
-        }
+        context.enforceCallingOrSelfPermission(CONTEXT_HUB_PERMISSION,
+                "ACCESS_CONTEXT_HUB permission required to use Context Hub");
     }
 
     /**

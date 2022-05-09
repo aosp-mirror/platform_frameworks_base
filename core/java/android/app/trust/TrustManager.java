@@ -92,10 +92,25 @@ public class TrustManager {
      * Reports that the user {@code userId} is likely interested in unlocking the device.
      *
      * Requires the {@link android.Manifest.permission#ACCESS_KEYGUARD_SECURE_STORAGE} permission.
+     *
+     * @param dismissKeyguard whether the user wants to dismiss keyguard
      */
-    public void reportUserRequestedUnlock(int userId) {
+    public void reportUserRequestedUnlock(int userId, boolean dismissKeyguard) {
         try {
-            mService.reportUserRequestedUnlock(userId);
+            mService.reportUserRequestedUnlock(userId, dismissKeyguard);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Reports that the user {@code userId} may want to unlock the device soon.
+     *
+     * Requires the {@link android.Manifest.permission#ACCESS_KEYGUARD_SECURE_STORAGE} permission.
+     */
+    public void reportUserMayRequestUnlock(int userId) {
+        try {
+            mService.reportUserMayRequestUnlock(userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -93,15 +93,4 @@ abstract class ExitPipTransition(testSpec: FlickerTestParameter) : PipTransition
                 .isVisible(LAUNCHER_COMPONENT)
         }
     }
-
-    /**
-     * Checks that the focus doesn't change between windows during the transition
-     */
-    @Presubmit
-    @Test
-    open fun focusDoesNotChange() {
-        testSpec.assertEventLog {
-            this.focusDoesNotChange()
-        }
-    }
 }

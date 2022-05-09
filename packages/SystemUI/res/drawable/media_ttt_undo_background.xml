@@ -14,9 +14,14 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
 -->
-<shape
+<ripple
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
-    <solid android:color="?androidprv:attr/colorAccentPrimary" />
-    <corners android:radius="24dp" />
-</shape>
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+    android:color="?android:textColorPrimary">
+    <item android:id="@android:id/background">
+        <shape>
+            <solid android:color="?androidprv:attr/colorAccentPrimary"/>
+            <corners android:radius="24dp" />
+        </shape>
+    </item>
+</ripple>

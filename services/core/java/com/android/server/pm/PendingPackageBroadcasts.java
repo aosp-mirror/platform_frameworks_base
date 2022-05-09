@@ -16,12 +16,17 @@
 
 package com.android.server.pm;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.util.ArrayMap;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Set of pending broadcasts for aggregating enable/disable of components.
@@ -29,65 +34,111 @@ import java.util.ArrayList;
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
 public final class PendingPackageBroadcasts {
 
+    private final Object mLock = new PackageManagerTracedLock();
+
     // for each user id, a map of <package name -> components within that package>
+    @GuardedBy("mLock")
     final SparseArray<ArrayMap<String, ArrayList<String>>> mUidMap;
 
     public PendingPackageBroadcasts() {
         mUidMap = new SparseArray<>(2);
     }
 
-    public ArrayList<String> get(int userId, String packageName) {
-        ArrayMap<String, ArrayList<String>> packages = getOrAllocate(userId);
-        return packages.get(packageName);
+    public boolean hasPackage(@UserIdInt int userId, @NonNull String packageName) {
+        synchronized (mLock) {
+            final ArrayMap<String, ArrayList<String>> packages = mUidMap.get(userId);
+            return packages != null && packages.containsKey(packageName);
+        }
     }
 
     public void put(int userId, String packageName, ArrayList<String> components) {
-        ArrayMap<String, ArrayList<String>> packages = getOrAllocate(userId);
-        packages.put(packageName, components);
+        synchronized (mLock) {
+            ArrayMap<String, ArrayList<String>> packages = getOrAllocate(userId);
+            packages.put(packageName, components);
+        }
+    }
+
+    public void addComponent(@UserIdInt int userId, @NonNull String packageName,
+            @NonNull String componentClassName) {
+        synchronized (mLock) {
+            ArrayList<String> components = getOrAllocate(userId, packageName);
+            if (!components.contains(componentClassName)) {
+                components.add(componentClassName);
+            }
+        }
+    }
+
+    public void addComponents(@UserIdInt int userId, @NonNull String packageName,
+            @NonNull List<String> componentClassNames) {
+        synchronized (mLock) {
+            ArrayList<String> components = getOrAllocate(userId, packageName);
+            for (int index = 0; index < componentClassNames.size(); index++) {
+                String componentClassName = componentClassNames.get(index);
+                if (!components.contains(componentClassName)) {
+                    components.add(componentClassName);
+                }
+            }
+        }
     }
 
     public void remove(int userId, String packageName) {
-        ArrayMap<String, ArrayList<String>> packages = mUidMap.get(userId);
-        if (packages != null) {
-            packages.remove(packageName);
+        synchronized (mLock) {
+            ArrayMap<String, ArrayList<String>> packages = mUidMap.get(userId);
+            if (packages != null) {
+                packages.remove(packageName);
+            }
         }
     }
 
     public void remove(int userId) {
-        mUidMap.remove(userId);
-    }
-
-    public int userIdCount() {
-        return mUidMap.size();
-    }
-
-    public int userIdAt(int n) {
-        return mUidMap.keyAt(n);
-    }
-
-    public ArrayMap<String, ArrayList<String>> packagesForUserId(int userId) {
-        return mUidMap.get(userId);
-    }
-
-    public int size() {
-        // total number of pending broadcast entries across all userIds
-        int num = 0;
-        for (int i = 0; i < mUidMap.size(); i++) {
-            num += mUidMap.valueAt(i).size();
+        synchronized (mLock) {
+            mUidMap.remove(userId);
         }
-        return num;
+    }
+
+    @Nullable
+    public SparseArray<ArrayMap<String, ArrayList<String>>> copiedMap() {
+        synchronized (mLock) {
+            SparseArray<ArrayMap<String, ArrayList<String>>> copy = new SparseArray<>();
+            for (int userIdIndex = 0; userIdIndex < mUidMap.size(); userIdIndex++) {
+                final ArrayMap<String, ArrayList<String>> packages = mUidMap.valueAt(userIdIndex);
+                ArrayMap<String, ArrayList<String>> packagesCopy = new ArrayMap<>();
+                for (int packagesIndex = 0; packagesIndex < packages.size(); packagesIndex++) {
+                    packagesCopy.put(packages.keyAt(packagesIndex),
+                            new ArrayList<>(packages.valueAt(packagesIndex)));
+                }
+                copy.put(mUidMap.keyAt(userIdIndex), packagesCopy);
+            }
+            return copy;
+        }
     }
 
     public void clear() {
-        mUidMap.clear();
+        synchronized (mLock) {
+            mUidMap.clear();
+        }
     }
 
     private ArrayMap<String, ArrayList<String>> getOrAllocate(int userId) {
-        ArrayMap<String, ArrayList<String>> map = mUidMap.get(userId);
-        if (map == null) {
-            map = new ArrayMap<>();
-            mUidMap.put(userId, map);
+        synchronized (mLock) {
+            ArrayMap<String, ArrayList<String>> map = mUidMap.get(userId);
+            if (map == null) {
+                map = new ArrayMap<>();
+                mUidMap.put(userId, map);
+            }
+            return map;
         }
-        return map;
+    }
+
+    private ArrayList<String> getOrAllocate(int userId, @NonNull String packageName) {
+        synchronized (mLock) {
+            ArrayMap<String, ArrayList<String>> map = mUidMap.get(userId);
+            if (map == null) {
+                map = new ArrayMap<>();
+                mUidMap.put(userId, map);
+            }
+
+            return map.computeIfAbsent(packageName, k -> new ArrayList<>());
+        }
     }
 }

@@ -18,9 +18,9 @@ package android.app;
 
 import static android.app.admin.DevicePolicyResources.Drawables.Style.SOLID_COLORED;
 import static android.app.admin.DevicePolicyResources.Drawables.Style.SOLID_NOT_COLORED;
-import static android.app.admin.DevicePolicyResources.Drawables.UNDEFINED;
 import static android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_ICON;
 import static android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_ICON_BADGE;
+import static android.app.admin.DevicePolicyResources.UNDEFINED;
 import static android.content.pm.Checksum.TYPE_PARTIAL_MERKLE_ROOT_1M_SHA256;
 import static android.content.pm.Checksum.TYPE_PARTIAL_MERKLE_ROOT_1M_SHA512;
 import static android.content.pm.Checksum.TYPE_WHOLE_MD5;
@@ -165,50 +165,35 @@ public class ApplicationPackageManager extends PackageManager {
     public static final String PERMISSION_CONTROLLER_RESOURCE_PACKAGE =
             "com.android.permissioncontroller";
 
-    private final Object mLock = new Object();
-
-    @GuardedBy("mLock")
-    private UserManager mUserManager;
-    @GuardedBy("mLock")
-    private PermissionManager mPermissionManager;
-    @GuardedBy("mLock")
-    private PackageInstaller mInstaller;
-    @GuardedBy("mLock")
-    private ArtManager mArtManager;
-    @GuardedBy("mLock")
-    private DevicePolicyManager mDevicePolicyManager;
+    private volatile UserManager mUserManager;
+    private volatile PermissionManager mPermissionManager;
+    private volatile PackageInstaller mInstaller;
+    private volatile ArtManager mArtManager;
+    private volatile DevicePolicyManager mDevicePolicyManager;
+    private volatile String mPermissionsControllerPackageName;
 
     @GuardedBy("mDelegates")
     private final ArrayList<MoveCallbackDelegate> mDelegates = new ArrayList<>();
 
-    @GuardedBy("mLock")
-    private String mPermissionsControllerPackageName;
-
     UserManager getUserManager() {
-        synchronized (mLock) {
-            if (mUserManager == null) {
-                mUserManager = UserManager.get(mContext);
-            }
-            return mUserManager;
+        if (mUserManager == null) {
+            mUserManager = UserManager.get(mContext);
         }
+        return mUserManager;
     }
 
     DevicePolicyManager getDevicePolicyManager() {
-        synchronized (mLock) {
-            if (mDevicePolicyManager == null) {
-                mDevicePolicyManager = mContext.getSystemService(DevicePolicyManager.class);
-            }
-            return mDevicePolicyManager;
+        if (mDevicePolicyManager == null) {
+            mDevicePolicyManager = mContext.getSystemService(DevicePolicyManager.class);
         }
+        return mDevicePolicyManager;
     }
 
     private PermissionManager getPermissionManager() {
-        synchronized (mLock) {
-            if (mPermissionManager == null) {
-                mPermissionManager = mContext.getSystemService(PermissionManager.class);
-            }
-            return mPermissionManager;
+        if (mPermissionManager == null) {
+            mPermissionManager = mContext.getSystemService(PermissionManager.class);
         }
+        return mPermissionManager;
     }
 
     @Override
@@ -851,25 +836,23 @@ public class ApplicationPackageManager extends PackageManager {
      */
     @Override
     public String getPermissionControllerPackageName() {
-        synchronized (mLock) {
-            if (mPermissionsControllerPackageName == null) {
-                try {
-                    mPermissionsControllerPackageName = mPM.getPermissionControllerPackageName();
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                }
+        if (mPermissionsControllerPackageName == null) {
+            try {
+                mPermissionsControllerPackageName = mPM.getPermissionControllerPackageName();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
             }
-            return mPermissionsControllerPackageName;
         }
+        return mPermissionsControllerPackageName;
     }
 
     /**
      * @hide
      */
     @Override
-    public String getSupplementalProcessPackageName() {
+    public String getSdkSandboxPackageName() {
         try {
-            return mPM.getSupplementalProcessPackageName();
+            return mPM.getSdkSandboxPackageName();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1903,7 +1886,7 @@ public class ApplicationPackageManager extends PackageManager {
             return icon;
         }
 
-        final Drawable badgeForeground = getDevicePolicyManager().getDrawable(
+        final Drawable badgeForeground = getDevicePolicyManager().getResources().getDrawable(
                 getUpdatableUserIconBadgeId(user),
                 SOLID_COLORED,
                 () -> getDefaultUserIconBadge(user));
@@ -1955,11 +1938,12 @@ public class ApplicationPackageManager extends PackageManager {
             return null;
         }
 
-        final Drawable badgeForeground = getDevicePolicyManager().getDrawableForDensity(
-                getUpdatableUserBadgeId(user),
-                SOLID_COLORED,
-                density,
-                () -> getDefaultUserBadgeForDensity(user, density));
+        final Drawable badgeForeground = getDevicePolicyManager().getResources()
+                .getDrawableForDensity(
+                        getUpdatableUserBadgeId(user),
+                        SOLID_COLORED,
+                        density,
+                        () -> getDefaultUserBadgeForDensity(user, density));
 
         badgeForeground.setTint(getUserBadgeColor(user, false));
         Drawable badge = new LayerDrawable(new Drawable[] {badgeColor, badgeForeground });
@@ -1985,7 +1969,7 @@ public class ApplicationPackageManager extends PackageManager {
             return null;
         }
 
-        final Drawable badge = getDevicePolicyManager().getDrawableForDensity(
+        final Drawable badge = getDevicePolicyManager().getResources().getDrawableForDensity(
                 getUpdatableUserBadgeId(user),
                 SOLID_NOT_COLORED,
                 density,
@@ -3235,17 +3219,15 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public PackageInstaller getPackageInstaller() {
-        synchronized (mLock) {
-            if (mInstaller == null) {
-                try {
-                    mInstaller = new PackageInstaller(mPM.getPackageInstaller(),
-                            mContext.getPackageName(), mContext.getAttributionTag(), getUserId());
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                }
+        if (mInstaller == null) {
+            try {
+                mInstaller = new PackageInstaller(mPM.getPackageInstaller(),
+                        mContext.getPackageName(), mContext.getAttributionTag(), getUserId());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
             }
-            return mInstaller;
         }
+        return mInstaller;
     }
 
     @Override
@@ -3583,16 +3565,14 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public ArtManager getArtManager() {
-        synchronized (mLock) {
-            if (mArtManager == null) {
-                try {
-                    mArtManager = new ArtManager(mContext, mPM.getArtManager());
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                }
+        if (mArtManager == null) {
+            try {
+                mArtManager = new ArtManager(mContext, mPM.getArtManager());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
             }
-            return mArtManager;
         }
+        return mArtManager;
     }
 
     @Override
@@ -3851,6 +3831,15 @@ public class ApplicationPackageManager extends PackageManager {
             throw new RuntimeException(e);
         } catch (RemoteException re) {
             throw re.rethrowAsRuntimeException();
+        }
+    }
+
+    @Override
+    public void makeUidVisible(int recipientUid, int visibleUid) {
+        try {
+            mPM.makeUidVisible(recipientUid, visibleUid);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
         }
     }
 }

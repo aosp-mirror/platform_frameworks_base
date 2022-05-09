@@ -349,7 +349,7 @@ bool TableMerger::MergeFile(const ResourceFile& file_desc, bool overlay, io::IFi
   file_ref->file = file;
 
   ResourceTablePackage* pkg = table.FindOrCreatePackage(file_desc.name.package);
-  pkg->FindOrCreateType(file_desc.name.type)
+  pkg->FindOrCreateType(file_desc.name.type.type)
       ->FindOrCreateEntry(file_desc.name.entry)
       ->FindOrCreateValue(file_desc.config, {})
       ->value = std::move(file_ref);

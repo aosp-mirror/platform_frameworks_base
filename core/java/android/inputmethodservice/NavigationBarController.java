@@ -16,7 +16,6 @@
 
 package android.inputmethodservice;
 
-import static android.content.Intent.ACTION_OVERLAY_CHANGED;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 
 import android.animation.ValueAnimator;
@@ -24,18 +23,12 @@ import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.StatusBarManager;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.inputmethodservice.navigationbar.NavigationBarFrame;
 import android.inputmethodservice.navigationbar.NavigationBarView;
-import android.os.PatternMatcher;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -48,6 +41,8 @@ import android.view.WindowInsetsController.Appearance;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
+
+import com.android.internal.inputmethod.InputMethodNavButtonFlags;
 
 import java.util.Objects;
 
@@ -77,8 +72,7 @@ final class NavigationBarController {
         default void onDestroy() {
         }
 
-        default void setShouldShowImeSwitcherWhenImeIsShown(
-                boolean shouldShowImeSwitcherWhenImeIsShown) {
+        default void onNavButtonFlagsChanged(@InputMethodNavButtonFlags int navButtonFlags) {
         }
 
         default String toDebugString() {
@@ -117,8 +111,8 @@ final class NavigationBarController {
         mImpl.onDestroy();
     }
 
-    void setShouldShowImeSwitcherWhenImeIsShown(boolean shouldShowImeSwitcherWhenImeIsShown) {
-        mImpl.setShouldShowImeSwitcherWhenImeIsShown(shouldShowImeSwitcherWhenImeIsShown);
+    void onNavButtonFlagsChanged(@InputMethodNavButtonFlags int navButtonFlags) {
+        mImpl.onNavButtonFlagsChanged(navButtonFlags);
     }
 
     String toDebugString() {
@@ -144,9 +138,6 @@ final class NavigationBarController {
         @Nullable
         Insets mLastInsets;
 
-        @Nullable
-        private BroadcastReceiver mSystemOverlayChangedReceiver;
-
         private boolean mShouldShowImeSwitcherWhenImeIsShown;
 
         @Appearance
@@ -159,6 +150,9 @@ final class NavigationBarController {
         private ValueAnimator mTintAnimator;
 
         private boolean mDrawLegacyNavigationBarBackground;
+
+        private final Rect mTempRect = new Rect();
+        private final int[] mTempPos = new int[2];
 
         Impl(@NonNull InputMethodService inputMethodService) {
             mService = inputMethodService;
@@ -266,23 +260,29 @@ final class NavigationBarController {
                 switch (originalInsets.touchableInsets) {
                     case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME:
                         if (inputFrame.getVisibility() == View.VISIBLE) {
-                            touchableRegion = new Region(inputFrame.getLeft(),
-                                    inputFrame.getTop(), inputFrame.getRight(),
-                                    inputFrame.getBottom());
+                            inputFrame.getLocationInWindow(mTempPos);
+                            mTempRect.set(mTempPos[0], mTempPos[1],
+                                    mTempPos[0] + inputFrame.getWidth(),
+                                    mTempPos[1] + inputFrame.getHeight());
+                            touchableRegion = new Region(mTempRect);
                         }
                         break;
                     case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT:
                         if (inputFrame.getVisibility() == View.VISIBLE) {
-                            touchableRegion = new Region(inputFrame.getLeft(),
-                                    originalInsets.contentTopInsets, inputFrame.getRight(),
-                                    inputFrame.getBottom());
+                            inputFrame.getLocationInWindow(mTempPos);
+                            mTempRect.set(mTempPos[0], originalInsets.contentTopInsets,
+                                    mTempPos[0] + inputFrame.getWidth() ,
+                                    mTempPos[1] + inputFrame.getHeight());
+                            touchableRegion = new Region(mTempRect);
                         }
                         break;
                     case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_VISIBLE:
                         if (inputFrame.getVisibility() == View.VISIBLE) {
-                            touchableRegion = new Region(inputFrame.getLeft(),
-                                    originalInsets.visibleTopInsets, inputFrame.getRight(),
-                                    inputFrame.getBottom());
+                            inputFrame.getLocationInWindow(mTempPos);
+                            mTempRect.set(mTempPos[0], originalInsets.visibleTopInsets,
+                                    mTempPos[0] + inputFrame.getWidth(),
+                                    mTempPos[1] + inputFrame.getHeight());
+                            touchableRegion = new Region(mTempRect);
                         }
                         break;
                     case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION:
@@ -290,21 +290,21 @@ final class NavigationBarController {
                         touchableRegion.set(originalInsets.touchableRegion);
                         break;
                 }
-                final Rect navBarRect = new Rect(decor.getLeft(),
-                        decor.getBottom() - systemInsets.bottom,
+                // Hereafter "mTempRect" means a navigation bar rect.
+                mTempRect.set(decor.getLeft(), decor.getBottom() - systemInsets.bottom,
                         decor.getRight(), decor.getBottom());
                 if (touchableRegion == null) {
-                    touchableRegion = new Region(navBarRect);
+                    touchableRegion = new Region(mTempRect);
                 } else {
-                    touchableRegion.union(navBarRect);
+                    touchableRegion.union(mTempRect);
                 }
 
                 dest.touchableRegion.set(touchableRegion);
                 dest.setTouchableInsets(
                         ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
 
-                // TODO(b/205803355): See if we can use View#OnLayoutChangeListener().
-                // TODO(b/205803355): See if we can replace DecorView#mNavigationColorViewState.view
+                // TODO(b/215443343): See if we can use View#OnLayoutChangeListener().
+                // TODO(b/215443343): See if we can replace DecorView#mNavigationColorViewState.view
                 boolean zOrderChanged = false;
                 if (decor instanceof ViewGroup) {
                     ViewGroup decorGroup = (ViewGroup) decor;
@@ -359,14 +359,6 @@ final class NavigationBarController {
             });
         }
 
-        private boolean imeDrawsImeNavBar() {
-            final Resources resources = mService.getResources();
-            if (resources == null) {
-                return false;
-            }
-            return resources.getBoolean(com.android.internal.R.bool.config_imeDrawsImeNavBar);
-        }
-
         @Override
         public void onSoftInputWindowCreated(@NonNull SoftInputWindow softInputWindow) {
             final Window window = softInputWindow.getWindow();
@@ -379,27 +371,6 @@ final class NavigationBarController {
             if (mDestroyed) {
                 return;
             }
-            mImeDrawsImeNavBar = imeDrawsImeNavBar();
-            if (mSystemOverlayChangedReceiver == null) {
-                final IntentFilter intentFilter = new IntentFilter(ACTION_OVERLAY_CHANGED);
-                intentFilter.addDataScheme(IntentFilter.SCHEME_PACKAGE);
-                intentFilter.addDataSchemeSpecificPart("android", PatternMatcher.PATTERN_LITERAL);
-                mSystemOverlayChangedReceiver = new BroadcastReceiver() {
-                    @Override
-                    public void onReceive(Context context, Intent intent) {
-                        if (mDestroyed) {
-                            return;
-                        }
-                        mImeDrawsImeNavBar = imeDrawsImeNavBar();
-                        if (mImeDrawsImeNavBar) {
-                            installNavigationBarFrameIfNecessary();
-                        } else {
-                            uninstallNavigationBarFrameIfNecessary();
-                        }
-                    }
-                };
-                mService.registerReceiver(mSystemOverlayChangedReceiver, intentFilter);
-            }
             installNavigationBarFrameIfNecessary();
         }
 
@@ -411,10 +382,6 @@ final class NavigationBarController {
             if (mTintAnimator != null) {
                 mTintAnimator.cancel();
                 mTintAnimator = null;
-            }
-            if (mSystemOverlayChangedReceiver != null) {
-                mService.unregisterReceiver(mSystemOverlayChangedReceiver);
-                mSystemOverlayChangedReceiver = null;
             }
             mDestroyed = true;
         }
@@ -448,28 +415,43 @@ final class NavigationBarController {
         }
 
         @Override
-        public void setShouldShowImeSwitcherWhenImeIsShown(
-                boolean shouldShowImeSwitcherWhenImeIsShown) {
+        public void onNavButtonFlagsChanged(@InputMethodNavButtonFlags int navButtonFlags) {
             if (mDestroyed) {
                 return;
             }
-            if (mShouldShowImeSwitcherWhenImeIsShown == shouldShowImeSwitcherWhenImeIsShown) {
-                return;
-            }
+
+            final boolean imeDrawsImeNavBar =
+                    (navButtonFlags & InputMethodNavButtonFlags.IME_DRAWS_IME_NAV_BAR) != 0;
+            final boolean shouldShowImeSwitcherWhenImeIsShown =
+                    (navButtonFlags & InputMethodNavButtonFlags.SHOW_IME_SWITCHER_WHEN_IME_IS_SHOWN)
+                    != 0;
+
+            mImeDrawsImeNavBar = imeDrawsImeNavBar;
+            final boolean prevShouldShowImeSwitcherWhenImeIsShown =
+                    mShouldShowImeSwitcherWhenImeIsShown;
             mShouldShowImeSwitcherWhenImeIsShown = shouldShowImeSwitcherWhenImeIsShown;
 
-            if (mNavigationBarFrame == null) {
-                return;
+            if (imeDrawsImeNavBar) {
+                installNavigationBarFrameIfNecessary();
+                if (mNavigationBarFrame == null) {
+                    return;
+                }
+                if (mShouldShowImeSwitcherWhenImeIsShown
+                        == prevShouldShowImeSwitcherWhenImeIsShown) {
+                    return;
+                }
+                final NavigationBarView navigationBarView = mNavigationBarFrame.findViewByPredicate(
+                        NavigationBarView.class::isInstance);
+                if (navigationBarView == null) {
+                    return;
+                }
+                final int hints = StatusBarManager.NAVIGATION_HINT_BACK_ALT
+                        | (shouldShowImeSwitcherWhenImeIsShown
+                                ? StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_SHOWN : 0);
+                navigationBarView.setNavigationIconHints(hints);
+            } else {
+                uninstallNavigationBarFrameIfNecessary();
             }
-            final NavigationBarView navigationBarView =
-                    mNavigationBarFrame.findViewByPredicate(NavigationBarView.class::isInstance);
-            if (navigationBarView == null) {
-                return;
-            }
-            final int hints = StatusBarManager.NAVIGATION_HINT_BACK_ALT
-                    | (shouldShowImeSwitcherWhenImeIsShown
-                    ? StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_SHOWN : 0);
-            navigationBarView.setNavigationIconHints(hints);
         }
 
         @Override

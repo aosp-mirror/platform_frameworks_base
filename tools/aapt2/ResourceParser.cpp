@@ -604,7 +604,8 @@ bool ResourceParser::ParseResource(xml::XmlPullParser* parser,
       return false;
     }
 
-    out_resource->name.type = ResourceType::kId;
+    out_resource->name.type =
+        ResourceNamedTypeWithDefaultName(ResourceType::kId).ToResourceNamedType();
     out_resource->name.entry = maybe_name.value().to_string();
 
     // Ids either represent a unique resource id or reference another resource id
@@ -623,7 +624,7 @@ bool ResourceParser::ParseResource(xml::XmlPullParser* parser,
         // A null reference also means there is no inner element when ids are in the form:
         //    <id name="name"/>
         out_resource->value = util::make_unique<Id>();
-      } else if (!ref || ref->name.value().type != ResourceType::kId) {
+      } else if (!ref || ref->name.value().type.type != ResourceType::kId) {
         // If an inner element exists, the inner element must be a reference to another resource id
         diag_->Error(DiagMessage(out_resource->source)
                          << "<" << parser->element_name()
@@ -640,7 +641,8 @@ bool ResourceParser::ParseResource(xml::XmlPullParser* parser,
       return false;
     }
 
-    out_resource->name.type = ResourceType::kMacro;
+    out_resource->name.type =
+        ResourceNamedTypeWithDefaultName(ResourceType::kMacro).ToResourceNamedType();
     out_resource->name.entry = maybe_name.value().to_string();
     return ParseMacro(parser, out_resource);
   }
@@ -656,7 +658,8 @@ bool ResourceParser::ParseResource(xml::XmlPullParser* parser,
         return false;
       }
 
-      out_resource->name.type = item_iter->second.type;
+      out_resource->name.type =
+          ResourceNamedTypeWithDefaultName(item_iter->second.type).ToResourceNamedType();
       out_resource->name.entry = maybe_name.value().to_string();
 
       // Only use the implied format of the type when there is no explicit format.
@@ -699,7 +702,7 @@ bool ResourceParser::ParseResource(xml::XmlPullParser* parser,
   if (can_be_item) {
     // Try parsing the elementName (or type) as a resource. These shall only be
     // resources like 'layout' or 'xml' and they can only be references.
-    const ResourceType* parsed_type = ParseResourceType(resource_type);
+    std::optional<ResourceNamedTypeRef> parsed_type = ParseResourceNamedType(resource_type);
     if (parsed_type) {
       if (!maybe_name) {
         diag_->Error(DiagMessage(out_resource->source)
@@ -708,7 +711,7 @@ bool ResourceParser::ParseResource(xml::XmlPullParser* parser,
         return false;
       }
 
-      out_resource->name.type = *parsed_type;
+      out_resource->name.type = parsed_type->ToResourceNamedType();
       out_resource->name.entry = maybe_name.value().to_string();
       out_resource->value = ParseXml(parser, android::ResTable_map::TYPE_REFERENCE, kNoRawString);
       if (!out_resource->value) {
@@ -933,7 +936,7 @@ bool ResourceParser::ParsePublic(xml::XmlPullParser* parser, ParsedResource* out
     return false;
   }
 
-  const ResourceType* parsed_type = ParseResourceType(maybe_type.value());
+  std::optional<ResourceNamedTypeRef> parsed_type = ParseResourceNamedType(maybe_type.value());
   if (!parsed_type) {
     diag_->Error(DiagMessage(out_resource->source) << "invalid resource type '"
                                                    << maybe_type.value()
@@ -941,7 +944,7 @@ bool ResourceParser::ParsePublic(xml::XmlPullParser* parser, ParsedResource* out
     return false;
   }
 
-  out_resource->name.type = *parsed_type;
+  out_resource->name.type = parsed_type->ToResourceNamedType();
 
   if (std::optional<StringPiece> maybe_id_str = xml::FindNonEmptyAttribute(parser, "id")) {
     std::optional<ResourceId> maybe_id = ResourceUtils::ParseResourceId(maybe_id_str.value());
@@ -953,7 +956,7 @@ bool ResourceParser::ParsePublic(xml::XmlPullParser* parser, ParsedResource* out
     out_resource->id = maybe_id.value();
   }
 
-  if (*parsed_type == ResourceType::kId) {
+  if (parsed_type->type == ResourceType::kId) {
     // An ID marked as public is also the definition of an ID.
     out_resource->value = util::make_unique<Id>();
   }
@@ -978,7 +981,7 @@ bool static ParseGroupImpl(xml::XmlPullParser* parser, ParsedResource* out_resou
     return false;
   }
 
-  const ResourceType* parsed_type = ParseResourceType(maybe_type.value());
+  std::optional<ResourceNamedTypeRef> parsed_type = ParseResourceNamedType(maybe_type.value());
   if (!parsed_type) {
     diag->Error(DiagMessage(out_resource->source)
                 << "invalid resource type '" << maybe_type.value() << "' in <" << tag_name << ">");
@@ -1032,6 +1035,13 @@ bool static ParseGroupImpl(xml::XmlPullParser* parser, ParsedResource* out_resou
       if (xml::FindNonEmptyAttribute(parser, "type")) {
         diag->Error(DiagMessage(item_source) << "'type' is ignored within <" << tag_name << ">");
         error = true;
+        continue;
+      }
+
+      if (maybe_name.value().substr(0, std::strlen("removed_")) == "removed_") {
+        // Skip resources that have been removed from the framework, but leave a hole so that
+        // other staged resources don't shift and break apps previously compiled against them
+        next_id.id++;
         continue;
       }
 
@@ -1096,7 +1106,7 @@ bool ResourceParser::ParseSymbolImpl(xml::XmlPullParser* parser,
     return false;
   }
 
-  const ResourceType* parsed_type = ParseResourceType(maybe_type.value());
+  std::optional<ResourceNamedTypeRef> parsed_type = ParseResourceNamedType(maybe_type.value());
   if (!parsed_type) {
     diag_->Error(DiagMessage(out_resource->source)
                  << "invalid resource type '" << maybe_type.value() << "' in <"
@@ -1104,7 +1114,7 @@ bool ResourceParser::ParseSymbolImpl(xml::XmlPullParser* parser,
     return false;
   }
 
-  out_resource->name.type = *parsed_type;
+  out_resource->name.type = parsed_type->ToResourceNamedType();
   return true;
 }
 
@@ -1208,8 +1218,8 @@ bool ResourceParser::ParseOverlayable(xml::XmlPullParser* parser, ParsedResource
         continue;
       }
 
-      const ResourceType* type = ParseResourceType(item_type.value());
-      if (type == nullptr) {
+      std::optional<ResourceNamedTypeRef> type = ParseResourceNamedType(item_type.value());
+      if (!type) {
         diag_->Error(DiagMessage(element_source)
                      << "invalid resource type '" << item_type.value()
                      << "' in <item> within an <overlayable>");
@@ -1223,7 +1233,7 @@ bool ResourceParser::ParseOverlayable(xml::XmlPullParser* parser, ParsedResource
       overlayable_item.source = element_source;
 
       ParsedResource child_resource{};
-      child_resource.name.type = *type;
+      child_resource.name.type = type->ToResourceNamedType();
       child_resource.name.entry = item_name.value().to_string();
       child_resource.overlayable_item = overlayable_item;
       out_resource->child_resources.push_back(std::move(child_resource));
@@ -1289,7 +1299,8 @@ bool ResourceParser::ParseAttr(xml::XmlPullParser* parser,
 
 bool ResourceParser::ParseAttrImpl(xml::XmlPullParser* parser,
                                    ParsedResource* out_resource, bool weak) {
-  out_resource->name.type = ResourceType::kAttr;
+  out_resource->name.type =
+      ResourceNamedTypeWithDefaultName(ResourceType::kAttr).ToResourceNamedType();
 
   // Attributes only end up in default configuration.
   if (out_resource->config != ConfigDescription::DefaultConfig()) {
@@ -1475,7 +1486,8 @@ std::optional<Attribute::Symbol> ResourceParser::ParseEnumOrFlagItem(xml::XmlPul
   }
 
   return Attribute::Symbol{
-      Reference(ResourceNameRef({}, ResourceType::kId, maybe_name.value())),
+      Reference(ResourceNameRef({}, ResourceNamedTypeWithDefaultName(ResourceType::kId),
+                                maybe_name.value())),
       val.data, val.dataType};
 }
 
@@ -1509,7 +1521,7 @@ bool ResourceParser::ParseStyleItem(xml::XmlPullParser* parser, Style* style) {
 
 bool ResourceParser::ParseStyle(const ResourceType type, xml::XmlPullParser* parser,
                                 ParsedResource* out_resource) {
-  out_resource->name.type = type;
+  out_resource->name.type = ResourceNamedTypeWithDefaultName(type).ToResourceNamedType();
 
   std::unique_ptr<Style> style = util::make_unique<Style>();
 
@@ -1535,7 +1547,8 @@ bool ResourceParser::ParseStyle(const ResourceType type, xml::XmlPullParser* par
     size_t pos = style_name.find_last_of(u'.');
     if (pos != std::string::npos) {
       style->parent_inferred = true;
-      style->parent = Reference(ResourceName({}, ResourceType::kStyle, style_name.substr(0, pos)));
+      style->parent = Reference(ResourceName(
+          {}, ResourceNamedTypeWithDefaultName(ResourceType::kStyle), style_name.substr(0, pos)));
     }
   }
 
@@ -1591,7 +1604,8 @@ bool ResourceParser::ParseStringArray(xml::XmlPullParser* parser, ParsedResource
 bool ResourceParser::ParseArrayImpl(xml::XmlPullParser* parser,
                                     ParsedResource* out_resource,
                                     const uint32_t typeMask) {
-  out_resource->name.type = ResourceType::kArray;
+  out_resource->name.type =
+      ResourceNamedTypeWithDefaultName(ResourceType::kArray).ToResourceNamedType();
 
   std::unique_ptr<Array> array = util::make_unique<Array>();
 
@@ -1646,7 +1660,8 @@ bool ResourceParser::ParseArrayImpl(xml::XmlPullParser* parser,
 
 bool ResourceParser::ParsePlural(xml::XmlPullParser* parser,
                                  ParsedResource* out_resource) {
-  out_resource->name.type = ResourceType::kPlurals;
+  out_resource->name.type =
+      ResourceNamedTypeWithDefaultName(ResourceType::kPlurals).ToResourceNamedType();
 
   std::unique_ptr<Plural> plural = util::make_unique<Plural>();
 
@@ -1727,7 +1742,8 @@ bool ResourceParser::ParsePlural(xml::XmlPullParser* parser,
 
 bool ResourceParser::ParseDeclareStyleable(xml::XmlPullParser* parser,
                                            ParsedResource* out_resource) {
-  out_resource->name.type = ResourceType::kStyleable;
+  out_resource->name.type =
+      ResourceNamedTypeWithDefaultName(ResourceType::kStyleable).ToResourceNamedType();
 
   if (!options_.preserve_visibility_of_styleables) {
     // This was added in change Idd21b5de4d20be06c6f8c8eb5a22ccd68afc4927 to mimic aapt1, but no one

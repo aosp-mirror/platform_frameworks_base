@@ -28,8 +28,8 @@ import static com.android.server.tare.EconomicPolicy.TYPE_REWARD;
 import static com.android.server.tare.EconomicPolicy.eventToString;
 import static com.android.server.tare.EconomicPolicy.getEventType;
 import static com.android.server.tare.TareUtils.appToString;
+import static com.android.server.tare.TareUtils.cakeToString;
 import static com.android.server.tare.TareUtils.getCurrentTimeMillis;
-import static com.android.server.tare.TareUtils.narcToString;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -55,9 +55,6 @@ import com.android.server.pm.UserManagerInternal;
 import com.android.server.usage.AppStandbyInternal;
 import com.android.server.utils.AlarmQueue;
 
-import libcore.util.EmptyArray;
-
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -105,54 +102,13 @@ class Agent {
     private final BalanceThresholdAlarmQueue mBalanceThresholdAlarmQueue;
 
     /**
-     * Comparator to use to sort apps before we distribute ARCs so that we try to give the most
-     * important apps ARCs first.
+     * Check the affordability notes of all apps.
      */
-    @VisibleForTesting
-    final Comparator<PackageInfo> mPackageDistributionComparator =
-            new Comparator<PackageInfo>() {
-                @Override
-                public int compare(PackageInfo pi1, PackageInfo pi2) {
-                    final ApplicationInfo appInfo1 = pi1.applicationInfo;
-                    final ApplicationInfo appInfo2 = pi2.applicationInfo;
-                    // Put any packages that don't declare an application at the end. A missing
-                    // <application> tag likely means the app won't be doing any work anyway.
-                    if (appInfo1 == null) {
-                        if (appInfo2 == null) {
-                            return 0;
-                        }
-                        return 1;
-                    } else if (appInfo2 == null) {
-                        return -1;
-                    }
-                    // Privileged apps eat first. They're likely required for the device to
-                    // function properly.
-                    // TODO: include headless system apps
-                    if (appInfo1.isPrivilegedApp()) {
-                        if (!appInfo2.isPrivilegedApp()) {
-                            return -1;
-                        }
-                    } else if (appInfo2.isPrivilegedApp()) {
-                        return 1;
-                    }
-
-                    // Sort by most recently used.
-                    final long timeSinceLastUsedMs1 =
-                            mAppStandbyInternal.getTimeSinceLastUsedByUser(
-                                    pi1.packageName, UserHandle.getUserId(pi1.applicationInfo.uid));
-                    final long timeSinceLastUsedMs2 =
-                            mAppStandbyInternal.getTimeSinceLastUsedByUser(
-                                    pi2.packageName, UserHandle.getUserId(pi2.applicationInfo.uid));
-                    if (timeSinceLastUsedMs1 < timeSinceLastUsedMs2) {
-                        return -1;
-                    } else if (timeSinceLastUsedMs1 > timeSinceLastUsedMs2) {
-                        return 1;
-                    }
-                    return 0;
-                }
-            };
-
-    private static final int MSG_CHECK_BALANCE = 0;
+    private static final int MSG_CHECK_ALL_AFFORDABILITY = 0;
+    /**
+     * Check the affordability notes of a single app.
+     */
+    private static final int MSG_CHECK_INDIVIDUAL_AFFORDABILITY = 1;
 
     Agent(@NonNull InternalResourceService irs, @NonNull Scribe scribe) {
         mLock = irs.getLock();
@@ -179,7 +135,7 @@ class Agent {
 
         @Override
         public void accept(OngoingEvent ongoingEvent) {
-            mTotal += getActualDeltaLocked(ongoingEvent, mLedger, mNowElapsed, mNow);
+            mTotal += getActualDeltaLocked(ongoingEvent, mLedger, mNowElapsed, mNow).price;
         }
     }
 
@@ -204,6 +160,11 @@ class Agent {
     }
 
     @GuardedBy("mLock")
+    private boolean isAffordableLocked(long balance, long price, long ctp) {
+        return balance >= price && mScribe.getRemainingConsumableCakesLocked() >= ctp;
+    }
+
+    @GuardedBy("mLock")
     void noteInstantaneousEventLocked(final int userId, @NonNull final String pkgName,
             final int eventId, @Nullable String tag) {
         if (mIrs.isSystem(userId, pkgName)) {
@@ -218,10 +179,13 @@ class Agent {
         final int eventType = getEventType(eventId);
         switch (eventType) {
             case TYPE_ACTION:
-                final long actionCost = economicPolicy.getCostOfAction(eventId, userId, pkgName);
+                final EconomicPolicy.Cost actionCost =
+                        economicPolicy.getCostOfAction(eventId, userId, pkgName);
 
                 recordTransactionLocked(userId, pkgName, ledger,
-                        new Ledger.Transaction(now, now, eventId, tag, -actionCost), true);
+                        new Ledger.Transaction(now, now, eventId, tag,
+                                -actionCost.price, actionCost.costToProduce),
+                        true);
                 break;
 
             case TYPE_REWARD:
@@ -231,7 +195,7 @@ class Agent {
                     final long rewardVal = Math.max(0,
                             Math.min(reward.maxDailyReward - rewardSum, reward.instantReward));
                     recordTransactionLocked(userId, pkgName, ledger,
-                            new Ledger.Transaction(now, now, eventId, tag, rewardVal), true);
+                            new Ledger.Transaction(now, now, eventId, tag, rewardVal, 0), true);
                 }
                 break;
 
@@ -268,11 +232,12 @@ class Agent {
         final int eventType = getEventType(eventId);
         switch (eventType) {
             case TYPE_ACTION:
-                final long actionCost = economicPolicy.getCostOfAction(eventId, userId, pkgName);
+                final EconomicPolicy.Cost actionCost =
+                        economicPolicy.getCostOfAction(eventId, userId, pkgName);
 
                 if (ongoingEvent == null) {
                     ongoingEvents.add(eventId, tag,
-                            new OngoingEvent(eventId, tag, null, startElapsed, -actionCost));
+                            new OngoingEvent(eventId, tag, startElapsed, actionCost));
                 } else {
                     ongoingEvent.refCount++;
                 }
@@ -283,7 +248,7 @@ class Agent {
                 if (reward != null) {
                     if (ongoingEvent == null) {
                         ongoingEvents.add(eventId, tag, new OngoingEvent(
-                                eventId, tag, reward, startElapsed, reward.ongoingRewardPerSecond));
+                                eventId, tag, startElapsed, reward));
                     } else {
                         ongoingEvent.refCount++;
                     }
@@ -306,52 +271,7 @@ class Agent {
 
     @GuardedBy("mLock")
     void onPricingChangedLocked() {
-        final long now = getCurrentTimeMillis();
-        final long nowElapsed = SystemClock.elapsedRealtime();
-        final CompleteEconomicPolicy economicPolicy = mIrs.getCompleteEconomicPolicyLocked();
-
-        mCurrentOngoingEvents.forEach((userId, pkgName, ongoingEvents) -> {
-            final ArraySet<ActionAffordabilityNote> actionAffordabilityNotes =
-                    mActionAffordabilityNotes.get(userId, pkgName);
-            final boolean[] wasAffordable;
-            if (actionAffordabilityNotes != null) {
-                final int size = actionAffordabilityNotes.size();
-                wasAffordable = new boolean[size];
-                for (int i = 0; i < size; ++i) {
-                    final ActionAffordabilityNote note = actionAffordabilityNotes.valueAt(i);
-                    final long originalBalance =
-                            mScribe.getLedgerLocked(userId, pkgName).getCurrentBalance();
-                    wasAffordable[i] = originalBalance >= note.getCachedModifiedPrice();
-                }
-            } else {
-                wasAffordable = EmptyArray.BOOLEAN;
-            }
-            ongoingEvents.forEach((ongoingEvent) -> {
-                // Disable balance check & affordability notifications here because we're in the
-                // middle of updating ongoing action costs/prices and sending out notifications
-                // or rescheduling the balance check alarm would be a waste since we'll have to
-                // redo them again after all of our internal state is updated.
-                stopOngoingActionLocked(userId, pkgName, ongoingEvent.eventId,
-                        ongoingEvent.tag, nowElapsed, now, false, false);
-                noteOngoingEventLocked(userId, pkgName, ongoingEvent.eventId, ongoingEvent.tag,
-                        nowElapsed, false);
-            });
-            if (actionAffordabilityNotes != null) {
-                final int size = actionAffordabilityNotes.size();
-                for (int i = 0; i < size; ++i) {
-                    final ActionAffordabilityNote note = actionAffordabilityNotes.valueAt(i);
-                    note.recalculateModifiedPrice(economicPolicy, userId, pkgName);
-                    final long newBalance =
-                            mScribe.getLedgerLocked(userId, pkgName).getCurrentBalance();
-                    final boolean isAffordable = newBalance >= note.getCachedModifiedPrice();
-                    if (wasAffordable[i] != isAffordable) {
-                        note.setNewAffordability(isAffordable);
-                        mIrs.postAffordabilityChanged(userId, pkgName, note);
-                    }
-                }
-            }
-            scheduleBalanceCheckLocked(userId, pkgName);
-        });
+        onAnythingChangedLocked(true);
     }
 
     @GuardedBy("mLock")
@@ -365,40 +285,21 @@ class Agent {
             SparseArrayMap<String, OngoingEvent> ongoingEvents =
                     mCurrentOngoingEvents.get(userId, pkgName);
             if (ongoingEvents != null) {
+                mOngoingEventUpdater.reset(userId, pkgName, now, nowElapsed);
+                ongoingEvents.forEach(mOngoingEventUpdater);
                 final ArraySet<ActionAffordabilityNote> actionAffordabilityNotes =
                         mActionAffordabilityNotes.get(userId, pkgName);
-                final boolean[] wasAffordable;
                 if (actionAffordabilityNotes != null) {
                     final int size = actionAffordabilityNotes.size();
-                    wasAffordable = new boolean[size];
+                    final long newBalance =
+                            mScribe.getLedgerLocked(userId, pkgName).getCurrentBalance();
                     for (int n = 0; n < size; ++n) {
                         final ActionAffordabilityNote note = actionAffordabilityNotes.valueAt(n);
-                        final long originalBalance =
-                                mScribe.getLedgerLocked(userId, pkgName).getCurrentBalance();
-                        wasAffordable[n] = originalBalance >= note.getCachedModifiedPrice();
-                    }
-                } else {
-                    wasAffordable = EmptyArray.BOOLEAN;
-                }
-                ongoingEvents.forEach((ongoingEvent) -> {
-                    // Disable balance check & affordability notifications here because we're in the
-                    // middle of updating ongoing action costs/prices and sending out notifications
-                    // or rescheduling the balance check alarm would be a waste since we'll have to
-                    // redo them again after all of our internal state is updated.
-                    stopOngoingActionLocked(userId, pkgName, ongoingEvent.eventId,
-                            ongoingEvent.tag, nowElapsed, now, false, false);
-                    noteOngoingEventLocked(userId, pkgName, ongoingEvent.eventId, ongoingEvent.tag,
-                            nowElapsed, false);
-                });
-                if (actionAffordabilityNotes != null) {
-                    final int size = actionAffordabilityNotes.size();
-                    for (int n = 0; n < size; ++n) {
-                        final ActionAffordabilityNote note = actionAffordabilityNotes.valueAt(n);
-                        note.recalculateModifiedPrice(economicPolicy, userId, pkgName);
-                        final long newBalance =
-                                mScribe.getLedgerLocked(userId, pkgName).getCurrentBalance();
-                        final boolean isAffordable = newBalance >= note.getCachedModifiedPrice();
-                        if (wasAffordable[n] != isAffordable) {
+                        note.recalculateCosts(economicPolicy, userId, pkgName);
+                        final boolean isAffordable =
+                                isAffordableLocked(newBalance,
+                                        note.getCachedModifiedPrice(), note.getCtp());
+                        if (note.isCurrentlyAffordable() != isAffordable) {
                             note.setNewAffordability(isAffordable);
                             mIrs.postAffordabilityChanged(userId, pkgName, note);
                         }
@@ -410,15 +311,68 @@ class Agent {
     }
 
     @GuardedBy("mLock")
+    private void onAnythingChangedLocked(final boolean updateOngoingEvents) {
+        final long now = getCurrentTimeMillis();
+        final long nowElapsed = SystemClock.elapsedRealtime();
+        final CompleteEconomicPolicy economicPolicy = mIrs.getCompleteEconomicPolicyLocked();
+
+        for (int uIdx = mCurrentOngoingEvents.numMaps() - 1; uIdx >= 0; --uIdx) {
+            final int userId = mCurrentOngoingEvents.keyAt(uIdx);
+
+            for (int pIdx = mCurrentOngoingEvents.numElementsForKey(userId) - 1; pIdx >= 0;
+                    --pIdx) {
+                final String pkgName = mCurrentOngoingEvents.keyAt(uIdx, pIdx);
+
+                SparseArrayMap<String, OngoingEvent> ongoingEvents =
+                        mCurrentOngoingEvents.valueAt(uIdx, pIdx);
+                if (ongoingEvents != null) {
+                    if (updateOngoingEvents) {
+                        mOngoingEventUpdater.reset(userId, pkgName, now, nowElapsed);
+                        ongoingEvents.forEach(mOngoingEventUpdater);
+                    }
+                    scheduleBalanceCheckLocked(userId, pkgName);
+                }
+            }
+        }
+        for (int uIdx = mActionAffordabilityNotes.numMaps() - 1; uIdx >= 0; --uIdx) {
+            final int userId = mActionAffordabilityNotes.keyAt(uIdx);
+
+            for (int pIdx = mActionAffordabilityNotes.numElementsForKey(userId) - 1; pIdx >= 0;
+                    --pIdx) {
+                final String pkgName = mActionAffordabilityNotes.keyAt(uIdx, pIdx);
+
+                final ArraySet<ActionAffordabilityNote> actionAffordabilityNotes =
+                        mActionAffordabilityNotes.valueAt(uIdx, pIdx);
+
+                if (actionAffordabilityNotes != null) {
+                    final int size = actionAffordabilityNotes.size();
+                    final long newBalance = getBalanceLocked(userId, pkgName);
+                    for (int n = 0; n < size; ++n) {
+                        final ActionAffordabilityNote note = actionAffordabilityNotes.valueAt(n);
+                        note.recalculateCosts(economicPolicy, userId, pkgName);
+                        final boolean isAffordable =
+                                isAffordableLocked(newBalance,
+                                        note.getCachedModifiedPrice(), note.getCtp());
+                        if (note.isCurrentlyAffordable() != isAffordable) {
+                            note.setNewAffordability(isAffordable);
+                            mIrs.postAffordabilityChanged(userId, pkgName, note);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @GuardedBy("mLock")
     void stopOngoingActionLocked(final int userId, @NonNull final String pkgName, final int eventId,
             @Nullable String tag, final long nowElapsed, final long now) {
         stopOngoingActionLocked(userId, pkgName, eventId, tag, nowElapsed, now, true, true);
     }
 
     /**
-     * @param updateBalanceCheck          Whether or not to reschedule the affordability/balance
+     * @param updateBalanceCheck          Whether to reschedule the affordability/balance
      *                                    check alarm.
-     * @param notifyOnAffordabilityChange Whether or not to evaluate the app's ability to afford
+     * @param notifyOnAffordabilityChange Whether to evaluate the app's ability to afford
      *                                    registered bills and notify listeners about any changes.
      */
     @GuardedBy("mLock")
@@ -453,9 +407,11 @@ class Agent {
         if (ongoingEvent.refCount <= 0) {
             final long startElapsed = ongoingEvent.startTimeElapsed;
             final long startTime = now - (nowElapsed - startElapsed);
-            final long actualDelta = getActualDeltaLocked(ongoingEvent, ledger, nowElapsed, now);
+            final EconomicPolicy.Cost actualDelta =
+                    getActualDeltaLocked(ongoingEvent, ledger, nowElapsed, now);
             recordTransactionLocked(userId, pkgName, ledger,
-                    new Ledger.Transaction(startTime, now, eventId, tag, actualDelta),
+                    new Ledger.Transaction(startTime, now, eventId, tag, actualDelta.price,
+                            actualDelta.costToProduce),
                     notifyOnAffordabilityChange);
 
             ongoingEvents.delete(eventId, tag);
@@ -466,17 +422,20 @@ class Agent {
     }
 
     @GuardedBy("mLock")
-    private long getActualDeltaLocked(@NonNull OngoingEvent ongoingEvent, @NonNull Ledger ledger,
-            long nowElapsed, long now) {
+    @NonNull
+    private EconomicPolicy.Cost getActualDeltaLocked(@NonNull OngoingEvent ongoingEvent,
+            @NonNull Ledger ledger, long nowElapsed, long now) {
         final long startElapsed = ongoingEvent.startTimeElapsed;
         final long durationSecs = (nowElapsed - startElapsed) / 1000;
-        final long computedDelta = durationSecs * ongoingEvent.deltaPerSec;
+        final long computedDelta = durationSecs * ongoingEvent.getDeltaPerSec();
         if (ongoingEvent.reward == null) {
-            return computedDelta;
+            return new EconomicPolicy.Cost(
+                    durationSecs * ongoingEvent.getCtpPerSec(), computedDelta);
         }
         final long rewardSum = ledger.get24HourSum(ongoingEvent.eventId, now);
-        return Math.max(0,
-                Math.min(ongoingEvent.reward.maxDailyReward - rewardSum, computedDelta));
+        return new EconomicPolicy.Cost(0,
+                Math.max(0,
+                        Math.min(ongoingEvent.reward.maxDailyReward - rewardSum, computedDelta)));
     }
 
     @VisibleForTesting
@@ -494,22 +453,6 @@ class Agent {
             return;
         }
         final CompleteEconomicPolicy economicPolicy = mIrs.getCompleteEconomicPolicyLocked();
-        final long maxCirculationAllowed = mIrs.getMaxCirculationLocked();
-        final long curNarcsInCirculation = mScribe.getNarcsInCirculationLocked();
-        final long newArcsInCirculation = curNarcsInCirculation + transaction.delta;
-        if (transaction.delta > 0 && newArcsInCirculation > maxCirculationAllowed) {
-            // Set lower bound at 0 so we don't accidentally take away credits when we were trying
-            // to _give_ the app credits.
-            final long newDelta = Math.max(0, maxCirculationAllowed - curNarcsInCirculation);
-            Slog.i(TAG, "Would result in too many credits in circulation. Decreasing transaction "
-                    + eventToString(transaction.eventId)
-                    + (transaction.tag == null ? "" : ":" + transaction.tag)
-                    + " for " + appToString(userId, pkgName)
-                    + " by " + narcToString(transaction.delta - newDelta));
-            transaction = new Ledger.Transaction(
-                    transaction.startTimeMs, transaction.endTimeMs,
-                    transaction.eventId, transaction.tag, newDelta);
-        }
         final long originalBalance = ledger.getCurrentBalance();
         if (transaction.delta > 0
                 && originalBalance + transaction.delta > economicPolicy.getMaxSatiatedBalance()) {
@@ -521,13 +464,13 @@ class Agent {
                     + eventToString(transaction.eventId)
                     + (transaction.tag == null ? "" : ":" + transaction.tag)
                     + " for " + appToString(userId, pkgName)
-                    + " by " + narcToString(transaction.delta - newDelta));
+                    + " by " + cakeToString(transaction.delta - newDelta));
             transaction = new Ledger.Transaction(
                     transaction.startTimeMs, transaction.endTimeMs,
-                    transaction.eventId, transaction.tag, newDelta);
+                    transaction.eventId, transaction.tag, newDelta, transaction.ctp);
         }
         ledger.recordTransaction(transaction);
-        mScribe.adjustNarcsInCirculationLocked(transaction.delta);
+        mScribe.adjustRemainingConsumableCakesLocked(-transaction.ctp);
         if (transaction.delta != 0 && notifyOnAffordabilityChange) {
             final ArraySet<ActionAffordabilityNote> actionAffordabilityNotes =
                     mActionAffordabilityNotes.get(userId, pkgName);
@@ -535,13 +478,19 @@ class Agent {
                 final long newBalance = ledger.getCurrentBalance();
                 for (int i = 0; i < actionAffordabilityNotes.size(); ++i) {
                     final ActionAffordabilityNote note = actionAffordabilityNotes.valueAt(i);
-                    final boolean isAffordable = newBalance >= note.getCachedModifiedPrice();
+                    final boolean isAffordable =
+                            isAffordableLocked(newBalance,
+                                    note.getCachedModifiedPrice(), note.getCtp());
                     if (note.isCurrentlyAffordable() != isAffordable) {
                         note.setNewAffordability(isAffordable);
                         mIrs.postAffordabilityChanged(userId, pkgName, note);
                     }
                 }
             }
+        }
+        if (transaction.ctp != 0) {
+            mHandler.sendEmptyMessage(MSG_CHECK_ALL_AFFORDABILITY);
+            mIrs.maybePerformQuantitativeEasingLocked();
         }
     }
 
@@ -599,8 +548,8 @@ class Agent {
                         }
 
                         recordTransactionLocked(userId, pkgName, ledger,
-                                new Ledger.Transaction(
-                                        now, now, REGULATION_WEALTH_RECLAMATION, null, -toReclaim),
+                                new Ledger.Transaction(now, now, REGULATION_WEALTH_RECLAMATION,
+                                        null, -toReclaim, 0),
                                 true);
                     }
                 }
@@ -648,7 +597,7 @@ class Agent {
             final long now = getCurrentTimeMillis();
             final Ledger ledger = mScribe.getLedgerLocked(userId, pkgName);
             recordTransactionLocked(userId, pkgName, ledger,
-                    new Ledger.Transaction(now, now, REGULATION_DEMOTION, null, -toReclaim),
+                    new Ledger.Transaction(now, now, REGULATION_DEMOTION, null, -toReclaim, 0),
                     true);
         }
     }
@@ -665,10 +614,13 @@ class Agent {
         return !mIrs.isSystem(userId, packageInfo.packageName);
     }
 
+    void onCreditSupplyChanged() {
+        mHandler.sendEmptyMessage(MSG_CHECK_ALL_AFFORDABILITY);
+    }
+
     @GuardedBy("mLock")
     void distributeBasicIncomeLocked(int batteryLevel) {
         List<PackageInfo> pkgs = mIrs.getInstalledPackages();
-        pkgs.sort(mPackageDistributionComparator);
 
         final long now = getCurrentTimeMillis();
         for (int i = 0; i < pkgs.size(); ++i) {
@@ -686,7 +638,7 @@ class Agent {
             if (shortfall > 0) {
                 recordTransactionLocked(userId, pkgName, ledger,
                         new Ledger.Transaction(now, now, REGULATION_BASIC_INCOME,
-                                null, (long) (perc * shortfall)), true);
+                                null, (long) (perc * shortfall), 0), true);
             }
         }
     }
@@ -705,11 +657,7 @@ class Agent {
     @GuardedBy("mLock")
     void grantBirthrightsLocked(final int userId) {
         final List<PackageInfo> pkgs = mIrs.getInstalledPackages(userId);
-        final long maxBirthright =
-                mIrs.getMaxCirculationLocked() / mIrs.getInstalledPackages().size();
         final long now = getCurrentTimeMillis();
-
-        pkgs.sort(mPackageDistributionComparator);
 
         for (int i = 0; i < pkgs.size(); ++i) {
             final PackageInfo packageInfo = pkgs.get(i);
@@ -726,7 +674,7 @@ class Agent {
 
             recordTransactionLocked(userId, pkgName, ledger,
                     new Ledger.Transaction(now, now, REGULATION_BIRTHRIGHT, null,
-                            Math.min(maxBirthright, mIrs.getMinBalanceLocked(userId, pkgName))),
+                            mIrs.getMinBalanceLocked(userId, pkgName), 0),
                     true);
         }
     }
@@ -740,14 +688,11 @@ class Agent {
             return;
         }
 
-        List<PackageInfo> pkgs = mIrs.getInstalledPackages();
-        final int numPackages = pkgs.size();
-        final long maxBirthright = mIrs.getMaxCirculationLocked() / numPackages;
         final long now = getCurrentTimeMillis();
 
         recordTransactionLocked(userId, pkgName, ledger,
                 new Ledger.Transaction(now, now, REGULATION_BIRTHRIGHT, null,
-                        Math.min(maxBirthright, mIrs.getMinBalanceLocked(userId, pkgName))), true);
+                        mIrs.getMinBalanceLocked(userId, pkgName), 0), true);
     }
 
     @GuardedBy("mLock")
@@ -762,7 +707,7 @@ class Agent {
         final long now = getCurrentTimeMillis();
 
         recordTransactionLocked(userId, pkgName, ledger,
-                new Ledger.Transaction(now, now, REGULATION_PROMOTION, null, missing), true);
+                new Ledger.Transaction(now, now, REGULATION_PROMOTION, null, missing, 0), true);
     }
 
     @GuardedBy("mLock")
@@ -779,7 +724,7 @@ class Agent {
     private void reclaimAssetsLocked(final int userId, @NonNull final String pkgName) {
         final Ledger ledger = mScribe.getLedgerLocked(userId, pkgName);
         if (ledger.getCurrentBalance() != 0) {
-            mScribe.adjustNarcsInCirculationLocked(-ledger.getCurrentBalance());
+            mScribe.adjustRemainingConsumableCakesLocked(-ledger.getCurrentBalance());
         }
         mScribe.discardLedgerLocked(userId, pkgName);
         mCurrentOngoingEvents.delete(userId, pkgName);
@@ -803,6 +748,7 @@ class Agent {
         static final long WILL_NOT_CROSS_THRESHOLD = -1;
 
         private long mCurBalance;
+        private long mRemainingConsumableCredits;
         /**
          * The maximum change in credits per second towards the upper threshold
          * {@link #mUpperThreshold}. A value of 0 means the current ongoing events will never
@@ -815,15 +761,25 @@ class Agent {
          * result in the app crossing the lower threshold.
          */
         private long mMaxDeltaPerSecToLowerThreshold;
+        /**
+         * The maximum change in credits per second towards the highest CTP threshold below the
+         * remaining consumable credits (cached in {@link #mCtpThreshold}). A value of 0 means
+         * the current ongoing events will never result in the app crossing the lower threshold.
+         */
+        private long mMaxDeltaPerSecToCtpThreshold;
         private long mUpperThreshold;
         private long mLowerThreshold;
+        private long mCtpThreshold;
 
-        void reset(long curBalance,
+        void reset(long curBalance, long remainingConsumableCredits,
                 @Nullable ArraySet<ActionAffordabilityNote> actionAffordabilityNotes) {
             mCurBalance = curBalance;
+            mRemainingConsumableCredits = remainingConsumableCredits;
             mMaxDeltaPerSecToUpperThreshold = mMaxDeltaPerSecToLowerThreshold = 0;
+            mMaxDeltaPerSecToCtpThreshold = 0;
             mUpperThreshold = Long.MIN_VALUE;
             mLowerThreshold = Long.MAX_VALUE;
+            mCtpThreshold = 0;
             if (actionAffordabilityNotes != null) {
                 for (int i = 0; i < actionAffordabilityNotes.size(); ++i) {
                     final ActionAffordabilityNote note = actionAffordabilityNotes.valueAt(i);
@@ -834,6 +790,10 @@ class Agent {
                     } else {
                         mUpperThreshold = (mUpperThreshold == Long.MIN_VALUE)
                                 ? price : Math.min(mUpperThreshold, price);
+                    }
+                    final long ctp = note.getCtp();
+                    if (ctp <= mRemainingConsumableCredits) {
+                        mCtpThreshold = Math.max(mCtpThreshold, ctp);
                     }
                 }
             }
@@ -847,13 +807,23 @@ class Agent {
          * threshold.
          */
         long getTimeToCrossLowerThresholdMs() {
-            if (mMaxDeltaPerSecToLowerThreshold == 0) {
-                // Will never cross upper threshold based on current events.
+            if (mMaxDeltaPerSecToLowerThreshold == 0 && mMaxDeltaPerSecToCtpThreshold == 0) {
+                // Will never cross lower threshold based on current events.
                 return WILL_NOT_CROSS_THRESHOLD;
             }
-            // deltaPerSec is a negative value, so do threshold-balance to cancel out the negative.
-            final long minSeconds =
-                    (mLowerThreshold - mCurBalance) / mMaxDeltaPerSecToLowerThreshold;
+            long minSeconds = Long.MAX_VALUE;
+            if (mMaxDeltaPerSecToLowerThreshold != 0) {
+                // deltaPerSec is a negative value, so do threshold-balance to cancel out the
+                // negative.
+                minSeconds = (mLowerThreshold - mCurBalance) / mMaxDeltaPerSecToLowerThreshold;
+            }
+            if (mMaxDeltaPerSecToCtpThreshold != 0) {
+                minSeconds = Math.min(minSeconds,
+                        // deltaPerSec is a negative value, so do threshold-balance to cancel
+                        // out the negative.
+                        (mCtpThreshold - mRemainingConsumableCredits)
+                                / mMaxDeltaPerSecToCtpThreshold);
+            }
             return minSeconds * 1000;
         }
 
@@ -876,10 +846,15 @@ class Agent {
 
         @Override
         public void accept(OngoingEvent ongoingEvent) {
-            if (mCurBalance >= mLowerThreshold && ongoingEvent.deltaPerSec < 0) {
-                mMaxDeltaPerSecToLowerThreshold += ongoingEvent.deltaPerSec;
-            } else if (mCurBalance < mUpperThreshold && ongoingEvent.deltaPerSec > 0) {
-                mMaxDeltaPerSecToUpperThreshold += ongoingEvent.deltaPerSec;
+            final long deltaPerSec = ongoingEvent.getDeltaPerSec();
+            if (mCurBalance >= mLowerThreshold && deltaPerSec < 0) {
+                mMaxDeltaPerSecToLowerThreshold += deltaPerSec;
+            } else if (mCurBalance < mUpperThreshold && deltaPerSec > 0) {
+                mMaxDeltaPerSecToUpperThreshold += deltaPerSec;
+            }
+            final long ctpPerSec = ongoingEvent.getCtpPerSec();
+            if (mRemainingConsumableCredits >= mCtpThreshold && deltaPerSec < 0) {
+                mMaxDeltaPerSecToCtpThreshold -= ctpPerSec;
             }
         }
     }
@@ -896,8 +871,9 @@ class Agent {
             mBalanceThresholdAlarmQueue.removeAlarmForKey(new Package(userId, pkgName));
             return;
         }
-        mTrendCalculator.reset(
-                getBalanceLocked(userId, pkgName), mActionAffordabilityNotes.get(userId, pkgName));
+        mTrendCalculator.reset(getBalanceLocked(userId, pkgName),
+                mScribe.getRemainingConsumableCakesLocked(),
+                mActionAffordabilityNotes.get(userId, pkgName));
         ongoingEvents.forEach(mTrendCalculator);
         final long lowerTimeMs = mTrendCalculator.getTimeToCrossLowerThresholdMs();
         final long upperTimeMs = mTrendCalculator.getTimeToCrossUpperThresholdMs();
@@ -931,19 +907,78 @@ class Agent {
         public final String tag;
         @Nullable
         public final EconomicPolicy.Reward reward;
-        public final long deltaPerSec;
+        @Nullable
+        public final EconomicPolicy.Cost actionCost;
         public int refCount;
 
-        OngoingEvent(int eventId, @Nullable String tag,
-                @Nullable EconomicPolicy.Reward reward, long startTimeElapsed, long deltaPerSec) {
+        OngoingEvent(int eventId, @Nullable String tag, long startTimeElapsed,
+                @NonNull EconomicPolicy.Reward reward) {
             this.startTimeElapsed = startTimeElapsed;
             this.eventId = eventId;
             this.tag = tag;
             this.reward = reward;
-            this.deltaPerSec = deltaPerSec;
+            this.actionCost = null;
             refCount = 1;
         }
+
+        OngoingEvent(int eventId, @Nullable String tag, long startTimeElapsed,
+                @NonNull EconomicPolicy.Cost actionCost) {
+            this.startTimeElapsed = startTimeElapsed;
+            this.eventId = eventId;
+            this.tag = tag;
+            this.reward = null;
+            this.actionCost = actionCost;
+            refCount = 1;
+        }
+
+        long getDeltaPerSec() {
+            if (actionCost != null) {
+                return -actionCost.price;
+            }
+            if (reward != null) {
+                return reward.ongoingRewardPerSecond;
+            }
+            Slog.wtfStack(TAG, "No action or reward in ongoing event?!??!");
+            return 0;
+        }
+
+        long getCtpPerSec() {
+            if (actionCost != null) {
+                return actionCost.costToProduce;
+            }
+            return 0;
+        }
     }
+
+    private class OngoingEventUpdater implements Consumer<OngoingEvent> {
+        private int mUserId;
+        private String mPkgName;
+        private long mNow;
+        private long mNowElapsed;
+
+        private void reset(int userId, String pkgName, long now, long nowElapsed) {
+            mUserId = userId;
+            mPkgName = pkgName;
+            mNow = now;
+            mNowElapsed = nowElapsed;
+        }
+
+        @Override
+        public void accept(OngoingEvent ongoingEvent) {
+            // Disable balance check & affordability notifications here because
+            // we're in the middle of updating ongoing action costs/prices and
+            // sending out notifications or rescheduling the balance check alarm
+            // would be a waste since we'll have to redo them again after all of
+            // our internal state is updated.
+            final boolean updateBalanceCheck = false;
+            stopOngoingActionLocked(mUserId, mPkgName, ongoingEvent.eventId, ongoingEvent.tag,
+                    mNowElapsed, mNow, updateBalanceCheck, /* notifyOnAffordabilityChange */ false);
+            noteOngoingEventLocked(mUserId, mPkgName, ongoingEvent.eventId, ongoingEvent.tag,
+                    mNowElapsed, updateBalanceCheck);
+        }
+    }
+
+    private final OngoingEventUpdater mOngoingEventUpdater = new OngoingEventUpdater();
 
     private static final class Package {
         public final String packageName;
@@ -996,7 +1031,8 @@ class Agent {
         protected void processExpiredAlarms(@NonNull ArraySet<Package> expired) {
             for (int i = 0; i < expired.size(); ++i) {
                 Package p = expired.valueAt(i);
-                mHandler.obtainMessage(MSG_CHECK_BALANCE, p.userId, 0, p.packageName)
+                mHandler.obtainMessage(
+                        MSG_CHECK_INDIVIDUAL_AFFORDABILITY, p.userId, 0, p.packageName)
                         .sendToTarget();
             }
         }
@@ -1023,9 +1059,10 @@ class Agent {
                 note.setNewAffordability(true);
                 return;
             }
-            note.recalculateModifiedPrice(economicPolicy, userId, pkgName);
+            note.recalculateCosts(economicPolicy, userId, pkgName);
             note.setNewAffordability(
-                    getBalanceLocked(userId, pkgName) >= note.getCachedModifiedPrice());
+                    isAffordableLocked(getBalanceLocked(userId, pkgName),
+                            note.getCachedModifiedPrice(), note.getCtp()));
             mIrs.postAffordabilityChanged(userId, pkgName, note);
             // Update ongoing alarm
             scheduleBalanceCheckLocked(userId, pkgName);
@@ -1052,6 +1089,7 @@ class Agent {
     static final class ActionAffordabilityNote {
         private final EconomyManagerInternal.ActionBill mActionBill;
         private final EconomyManagerInternal.AffordabilityChangeListener mListener;
+        private long mCtp;
         private long mModifiedPrice;
         private boolean mIsAffordable;
 
@@ -1086,22 +1124,29 @@ class Agent {
             return mModifiedPrice;
         }
 
+        private long getCtp() {
+            return mCtp;
+        }
+
         @VisibleForTesting
-        long recalculateModifiedPrice(@NonNull EconomicPolicy economicPolicy,
+        void recalculateCosts(@NonNull EconomicPolicy economicPolicy,
                 int userId, @NonNull String pkgName) {
             long modifiedPrice = 0;
+            long ctp = 0;
             final List<EconomyManagerInternal.AnticipatedAction> anticipatedActions =
                     mActionBill.getAnticipatedActions();
             for (int i = 0; i < anticipatedActions.size(); ++i) {
                 final EconomyManagerInternal.AnticipatedAction aa = anticipatedActions.get(i);
 
-                final long actionCost =
+                final EconomicPolicy.Cost actionCost =
                         economicPolicy.getCostOfAction(aa.actionId, userId, pkgName);
-                modifiedPrice += actionCost * aa.numInstantaneousCalls
-                        + actionCost * (aa.ongoingDurationMs / 1000);
+                modifiedPrice += actionCost.price * aa.numInstantaneousCalls
+                        + actionCost.price * (aa.ongoingDurationMs / 1000);
+                ctp += actionCost.costToProduce * aa.numInstantaneousCalls
+                        + actionCost.costToProduce * (aa.ongoingDurationMs / 1000);
             }
             mModifiedPrice = modifiedPrice;
-            return modifiedPrice;
+            mCtp = ctp;
         }
 
         boolean isCurrentlyAffordable() {
@@ -1138,7 +1183,15 @@ class Agent {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_CHECK_BALANCE: {
+                case MSG_CHECK_ALL_AFFORDABILITY: {
+                    synchronized (mLock) {
+                        removeMessages(MSG_CHECK_ALL_AFFORDABILITY);
+                        onAnythingChangedLocked(false);
+                    }
+                }
+                break;
+
+                case MSG_CHECK_INDIVIDUAL_AFFORDABILITY: {
                     final int userId = msg.arg1;
                     final String pkgName = (String) msg.obj;
                     synchronized (mLock) {
@@ -1151,8 +1204,8 @@ class Agent {
                             for (int i = 0; i < actionAffordabilityNotes.size(); ++i) {
                                 final ActionAffordabilityNote note =
                                         actionAffordabilityNotes.valueAt(i);
-                                final boolean isAffordable =
-                                        newBalance >= note.getCachedModifiedPrice();
+                                final boolean isAffordable = isAffordableLocked(
+                                        newBalance, note.getCachedModifiedPrice(), note.getCtp());
                                 if (note.isCurrentlyAffordable() != isAffordable) {
                                     note.setNewAffordability(isAffordable);
                                     mIrs.postAffordabilityChanged(userId, pkgName, note);
@@ -1207,7 +1260,12 @@ class Agent {
                         pw.print(" runtime=");
                         TimeUtils.formatDuration(nowElapsed - ongoingEvent.startTimeElapsed, pw);
                         pw.print(" delta/sec=");
-                        pw.print(ongoingEvent.deltaPerSec);
+                        pw.print(cakeToString(ongoingEvent.getDeltaPerSec()));
+                        final long ctp = ongoingEvent.getCtpPerSec();
+                        if (ctp != 0) {
+                            pw.print(" ctp/sec=");
+                            pw.print(cakeToString(ongoingEvent.getCtpPerSec()));
+                        }
                         pw.print(" refCount=");
                         pw.print(ongoingEvent.refCount);
                         pw.println();

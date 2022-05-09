@@ -36,6 +36,7 @@ import com.android.internal.app.MediaRouteDialogPresenter;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
+import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -191,15 +192,22 @@ public class CastTile extends QSTileImpl<BooleanState> {
                     mContext,
                     ROUTE_TYPE_REMOTE_DISPLAY,
                     v -> {
-                        mDialogLaunchAnimator.disableAllCurrentDialogsExitAnimations();
-                        holder.mDialog.dismiss();
+                        ActivityLaunchAnimator.Controller controller =
+                                mDialogLaunchAnimator.createActivityLaunchController(v);
+
+                        if (controller == null) {
+                            holder.mDialog.dismiss();
+                        }
+
                         mActivityStarter
-                                .postStartActivityDismissingKeyguard(getLongClickIntent(), 0);
-                    });
+                                .postStartActivityDismissingKeyguard(getLongClickIntent(), 0,
+                                        controller);
+                    }, R.style.Theme_SystemUI_Dialog_Cast, false /* showProgressBarWhenEmpty */);
             holder.init(dialog);
             SystemUIDialog.setShowForAllUsers(dialog, true);
             SystemUIDialog.registerDismissListener(dialog);
             SystemUIDialog.setWindowOnTop(dialog, mKeyguard.isShowing());
+            SystemUIDialog.setDialogSize(dialog);
 
             mUiHandler.post(() -> {
                 if (view != null) {

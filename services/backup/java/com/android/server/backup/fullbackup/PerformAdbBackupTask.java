@@ -320,12 +320,6 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
         try {
             boolean encrypting = (mEncryptPassword != null && mEncryptPassword.length() > 0);
 
-            // Only allow encrypted backups of encrypted devices
-            if (mUserBackupManagerService.deviceIsEncrypted() && !encrypting) {
-                Slog.e(TAG, "Unencrypted backup of encrypted device; aborting");
-                return;
-            }
-
             OutputStream finalOutput = ofstream;
 
             // Verify that the given password matches the currently-active

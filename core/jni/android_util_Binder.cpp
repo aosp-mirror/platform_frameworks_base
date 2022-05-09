@@ -396,6 +396,9 @@ protected:
     {
         JNIEnv* env = javavm_to_jnienv(mVM);
 
+        LOG_ALWAYS_FATAL_IF(env == nullptr,
+                            "Binder thread started or Java binder used, but env null. Attach JVM?");
+
         ALOGV("onTransact() on %p calling object %p in env %p vm %p\n", this, mObject, env, mVM);
 
         IPCThreadState* thread_state = IPCThreadState::self();

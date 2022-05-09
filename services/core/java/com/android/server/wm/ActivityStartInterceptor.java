@@ -188,10 +188,7 @@ class ActivityStartInterceptor {
         final SparseArray<ActivityInterceptorCallback> callbacks =
                 mService.getActivityInterceptorCallbacks();
         final ActivityInterceptorCallback.ActivityInterceptorInfo interceptorInfo =
-                new ActivityInterceptorCallback.ActivityInterceptorInfo(mRealCallingUid,
-                        mRealCallingPid, mUserId, mCallingPackage, mCallingFeatureId, mIntent,
-                        mRInfo, mAInfo, mResolvedType, mCallingPid, mCallingUid,
-                        mActivityOptions);
+                getInterceptorInfo(null /* clearOptionsAnimation */);
 
         for (int i = 0; i < callbacks.size(); i++) {
             final ActivityInterceptorCallback callback = callbacks.valueAt(i);
@@ -358,10 +355,10 @@ class ActivityStartInterceptor {
      * @return The intercepting intent if needed.
      */
     private Intent interceptWithConfirmCredentialsIfNeeded(ActivityInfo aInfo, int userId) {
-        if (!mService.mAmInternal.shouldConfirmCredentials(userId)) {
+        if ((aInfo.flags & ActivityInfo.FLAG_SHOW_WHEN_LOCKED) != 0
+                || !mService.mAmInternal.shouldConfirmCredentials(userId)) {
             return null;
         }
-        // TODO(b/28935539): should allow certain activities to bypass work challenge
         final IntentSender target = createIntentSenderForOriginalIntent(mCallingUid,
                 FLAG_CANCEL_CURRENT | FLAG_ONE_SHOT | FLAG_IMMUTABLE);
         final KeyguardManager km = (KeyguardManager) mServiceContext
@@ -409,12 +406,22 @@ class ActivityStartInterceptor {
     /**
      * Called when an activity is successfully launched.
      */
-    void onActivityLaunched(TaskInfo taskInfo, ActivityInfo activityInfo) {
+    void onActivityLaunched(TaskInfo taskInfo, ActivityRecord r) {
         final SparseArray<ActivityInterceptorCallback> callbacks =
                 mService.getActivityInterceptorCallbacks();
+        ActivityInterceptorCallback.ActivityInterceptorInfo info = getInterceptorInfo(
+                r::clearOptionsAnimationForSiblings);
         for (int i = 0; i < callbacks.size(); i++) {
             final ActivityInterceptorCallback callback = callbacks.valueAt(i);
-            callback.onActivityLaunched(taskInfo, activityInfo);
+            callback.onActivityLaunched(taskInfo, r.info, info);
         }
+    }
+
+    private ActivityInterceptorCallback.ActivityInterceptorInfo getInterceptorInfo(
+            @Nullable Runnable clearOptionsAnimation) {
+        return new ActivityInterceptorCallback.ActivityInterceptorInfo(mRealCallingUid,
+                mRealCallingPid, mUserId, mCallingPackage, mCallingFeatureId, mIntent,
+                mRInfo, mAInfo, mResolvedType, mCallingPid, mCallingUid,
+                mActivityOptions, clearOptionsAnimation);
     }
 }

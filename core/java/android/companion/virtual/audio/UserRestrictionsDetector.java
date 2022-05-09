@@ -60,7 +60,6 @@ final class UserRestrictionsDetector extends BroadcastReceiver {
     /** Registers user restrictions change. */
     void register(@NonNull UserRestrictionsCallback callback) {
         mUserRestrictionsCallback = callback;
-
         IntentFilter filter = new IntentFilter();
         filter.addAction(UserManager.ACTION_USER_RESTRICTIONS_CHANGED);
         mContext.registerReceiver(/* receiver= */ this, filter);
@@ -73,8 +72,10 @@ final class UserRestrictionsDetector extends BroadcastReceiver {
 
     /** Unregisters user restrictions change. */
     void unregister() {
-        mUserRestrictionsCallback = null;
-        mContext.unregisterReceiver(/* receiver= */ this);
+        if (mUserRestrictionsCallback != null) {
+            mUserRestrictionsCallback = null;
+            mContext.unregisterReceiver(/* receiver= */ this);
+        }
     }
 
     @Override

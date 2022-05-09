@@ -31,8 +31,8 @@ import android.util.Slog;
 
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
+import com.android.server.biometrics.sensors.BiometricStateCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
-import com.android.server.biometrics.sensors.fingerprint.FingerprintStateCallback;
 import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 
 import java.util.ArrayList;
@@ -53,7 +53,7 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
     @NonNull private final Context mContext;
     private final int mSensorId;
     @NonNull private final ITestSessionCallback mCallback;
-    @NonNull private final FingerprintStateCallback mFingerprintStateCallback;
+    @NonNull private final BiometricStateCallback mBiometricStateCallback;
     @NonNull private final Fingerprint21 mFingerprint21;
     @NonNull private final Fingerprint21.HalResultController mHalResultController;
     @NonNull private final Set<Integer> mEnrollmentIds;
@@ -119,14 +119,14 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
 
     BiometricTestSessionImpl(@NonNull Context context, int sensorId,
             @NonNull ITestSessionCallback callback,
-            @NonNull FingerprintStateCallback fingerprintStateCallback,
+            @NonNull BiometricStateCallback biometricStateCallback,
             @NonNull Fingerprint21 fingerprint21,
             @NonNull Fingerprint21.HalResultController halResultController) {
         mContext = context;
         mSensorId = sensorId;
         mCallback = callback;
         mFingerprint21 = fingerprint21;
-        mFingerprintStateCallback = fingerprintStateCallback;
+        mBiometricStateCallback = biometricStateCallback;
         mHalResultController = halResultController;
         mEnrollmentIds = new HashSet<>();
         mRandom = new Random();

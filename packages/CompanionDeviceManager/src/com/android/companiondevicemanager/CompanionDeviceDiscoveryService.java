@@ -173,6 +173,7 @@ public class CompanionDeviceDiscoveryService extends Service {
 
     @Override
     public void onDestroy() {
+        sScanResultsLiveData.setValue(Collections.emptyList());
         super.onDestroy();
         if (DEBUG) Log.d(TAG, "onDestroy()");
     }

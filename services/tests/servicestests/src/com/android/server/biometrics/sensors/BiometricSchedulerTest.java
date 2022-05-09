@@ -196,7 +196,8 @@ public class BiometricSchedulerTest {
         // Schedule a BiometricPrompt authentication request
         mScheduler.scheduleClientMonitor(client1, callback1);
 
-        assertNotEquals(0, mScheduler.mCurrentOperation.isReadyToStart());
+        assertNotEquals(0, mScheduler.mCurrentOperation.isReadyToStart(
+                mock(ClientMonitorCallback.class)));
         assertEquals(client1, mScheduler.mCurrentOperation.getClientMonitor());
         assertEquals(0, mScheduler.mPendingOperations.size());
 
@@ -436,7 +437,8 @@ public class BiometricSchedulerTest {
             if (started || isEnroll) { // prep'd auth clients and enroll clients
                 assertTrue(mScheduler.mCurrentOperation.isStarted());
             } else {
-                assertNotEquals(0, mScheduler.mCurrentOperation.isReadyToStart());
+                assertNotEquals(0, mScheduler.mCurrentOperation.isReadyToStart(
+                        mock(ClientMonitorCallback.class)));
             }
         }
     }

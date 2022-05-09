@@ -76,7 +76,6 @@ import com.android.internal.annotations.Immutable;
 import com.android.internal.util.CollectionUtils;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -193,6 +192,17 @@ public final class PermissionManager {
      */
     public static final boolean DEBUG_TRACE_PERMISSION_UPDATES = false;
 
+    /**
+     * Intent extra: List of PermissionGroupUsages
+     * <p>
+     * Type: {@code List<PermissionGroupUsage>}
+     * </p>
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_PERMISSION_USAGES =
+            "android.permission.extra.PERMISSION_USAGES";
+
     private final @NonNull Context mContext;
 
     private final IPackageManager mPackageManager;
@@ -240,6 +250,10 @@ public final class PermissionManager {
      * will evaluate the permission access based on the current fg/bg state of the app and
      * leave a record that the data was accessed.
      *
+     * <p>Requires the start of the AttributionSource chain to have the UPDATE_APP_OPS_STATS
+     * permission for the app op accesses to be given the TRUSTED_PROXY/PROXIED flags, otherwise the
+     * accesses will have the UNTRUSTED flags.
+     *
      * @param permission The permission to check.
      * @param attributionSource the permission identity
      * @param message A message describing the reason the permission was checked
@@ -249,6 +263,7 @@ public final class PermissionManager {
      * @see #checkPermissionForPreflight(String, AttributionSource)
      */
     @PermissionCheckerManager.PermissionResult
+    @RequiresPermission(value = Manifest.permission.UPDATE_APP_OPS_STATS, conditional = true)
     public int checkPermissionForDataDelivery(@NonNull String permission,
             @NonNull AttributionSource attributionSource, @Nullable String message) {
         return PermissionChecker.checkPermissionForDataDelivery(mContext, permission,
@@ -268,9 +283,14 @@ public final class PermissionManager {
      * @return The permission check result which is either {@link #PERMISSION_GRANTED}
      *     or {@link #PERMISSION_SOFT_DENIED} or {@link #PERMISSION_HARD_DENIED}.
      *
+     * <p>Requires the start of the AttributionSource chain to have the UPDATE_APP_OPS_STATS
+     * permission for the app op accesses to be given the TRUSTED_PROXY/PROXIED flags, otherwise the
+     * accesses will have the UNTRUSTED flags.
+     *
      * @see #checkPermissionForDataDelivery(String, AttributionSource, String)
      */
     @PermissionCheckerManager.PermissionResult
+    @RequiresPermission(value = Manifest.permission.UPDATE_APP_OPS_STATS, conditional = true)
     public int checkPermissionForStartDataDelivery(@NonNull String permission,
             @NonNull AttributionSource attributionSource, @Nullable String message) {
         return PermissionChecker.checkPermissionForDataDelivery(mContext, permission,
@@ -310,6 +330,10 @@ public final class PermissionManager {
      * will evaluate the permission access based on the current fg/bg state of the app and
      * leave a record that the data was accessed.
      *
+     * <p>Requires the start of the AttributionSource chain to have the UPDATE_APP_OPS_STATS
+     * permission for the app op accesses to be given the TRUSTED_PROXY/PROXIED flags, otherwise the
+     * accesses will have the UNTRUSTED flags.
+     *
      * @param permission The permission to check.
      * @param attributionSource the permission identity
      * @param message A message describing the reason the permission was checked
@@ -319,6 +343,7 @@ public final class PermissionManager {
      * @see #checkPermissionForPreflight(String, AttributionSource)
      */
     @PermissionCheckerManager.PermissionResult
+    @RequiresPermission(value = Manifest.permission.UPDATE_APP_OPS_STATS, conditional = true)
     public int checkPermissionForDataDeliveryFromDataSource(@NonNull String permission,
             @NonNull AttributionSource attributionSource, @Nullable String message) {
         return PermissionChecker.checkPermissionForDataDeliveryFromDataSource(mContext, permission,
@@ -609,19 +634,6 @@ public final class PermissionManager {
         try {
             mPermissionManager
                     .revokeRuntimePermission(packageName, permName, user.getIdentifier(), reason);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * @see Context#revokeOwnPermissionsOnKill(Collection)
-     * @hide
-     */
-    public void revokeOwnPermissionsOnKill(@NonNull Collection<String> permissions) {
-        try {
-            mPermissionManager.revokeOwnPermissionsOnKill(mContext.getPackageName(),
-                    new ArrayList<String>(permissions));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1108,7 +1120,7 @@ public final class PermissionManager {
     @TestApi
     @NonNull
     @RequiresPermission(Manifest.permission.GET_APP_OPS_STATS)
-    public List<PermGroupUsage> getIndicatorAppOpUsageData() {
+    public List<PermissionGroupUsage> getIndicatorAppOpUsageData() {
         return getIndicatorAppOpUsageData(new AudioManager().isMicrophoneMute());
     }
 
@@ -1122,7 +1134,7 @@ public final class PermissionManager {
     @TestApi
     @NonNull
     @RequiresPermission(Manifest.permission.GET_APP_OPS_STATS)
-    public List<PermGroupUsage> getIndicatorAppOpUsageData(boolean micMuted) {
+    public List<PermissionGroupUsage> getIndicatorAppOpUsageData(boolean micMuted) {
         // Lazily initialize the usage helper
         initializeUsageHelper();
         return mUsageHelper.getOpUsageData(micMuted);
@@ -1474,6 +1486,10 @@ public final class PermissionManager {
         }
     }
 
+    // Only warn once for assuming that root or system UID has a permission
+    // to reduce duplicate logcat output.
+    private static volatile boolean sShouldWarnMissingActivityManager = true;
+
     /* @hide */
     private static int checkPermissionUncached(@Nullable String permission, int pid, int uid) {
         final IActivityManager am = ActivityManager.getService();
@@ -1483,8 +1499,11 @@ public final class PermissionManager {
             // permission this is.
             final int appId = UserHandle.getAppId(uid);
             if (appId == Process.ROOT_UID || appId == Process.SYSTEM_UID) {
-                Slog.w(LOG_TAG, "Missing ActivityManager; assuming " + uid + " holds "
-                        + permission);
+                if (sShouldWarnMissingActivityManager) {
+                    Slog.w(LOG_TAG, "Missing ActivityManager; assuming " + uid + " holds "
+                            + permission);
+                    sShouldWarnMissingActivityManager = false;
+                }
                 return PackageManager.PERMISSION_GRANTED;
             }
             Slog.w(LOG_TAG, "Missing ActivityManager; assuming " + uid + " does not hold "
@@ -1492,6 +1511,7 @@ public final class PermissionManager {
             return PackageManager.PERMISSION_DENIED;
         }
         try {
+            sShouldWarnMissingActivityManager = true;
             return am.checkPermission(permission, pid, uid);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
