@@ -149,7 +149,6 @@ public class ScreenshotView extends FrameLayout implements
     private ImageView mActionsContainerBackground;
     private HorizontalScrollView mActionsContainer;
     private LinearLayout mActionsView;
-    private ImageView mBackgroundProtection;
     private FrameLayout mDismissButton;
     private OverlayActionChip mShareChip;
     private OverlayActionChip mEditChip;
@@ -345,8 +344,6 @@ public class ScreenshotView extends FrameLayout implements
                 R.id.actions_container_background));
         mActionsContainer = requireNonNull(findViewById(R.id.actions_container));
         mActionsView = requireNonNull(findViewById(R.id.screenshot_actions));
-        mBackgroundProtection = requireNonNull(
-                findViewById(R.id.screenshot_actions_background));
         mDismissButton = requireNonNull(findViewById(R.id.screenshot_dismiss_button));
         mScrollablePreview = requireNonNull(findViewById(R.id.screenshot_scrollable_preview));
         mScreenshotFlash = requireNonNull(findViewById(R.id.screenshot_flash));
@@ -394,14 +391,6 @@ public class ScreenshotView extends FrameLayout implements
                 }
                 mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SWIPE_DISMISSED, 0,
                         mPackageName);
-                animator.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationStart(Animator animation) {
-                        super.onAnimationStart(animation);
-                        mBackgroundProtection.animate()
-                                .alpha(0).setDuration(animation.getDuration()).start();
-                    }
-                });
             }
 
             @Override
@@ -704,7 +693,6 @@ public class ScreenshotView extends FrameLayout implements
 
         animator.addUpdateListener(animation -> {
             float t = animation.getAnimatedFraction();
-            mBackgroundProtection.setAlpha(t);
             float containerAlpha = t < alphaFraction ? t / alphaFraction : 1;
             mActionsContainer.setAlpha(containerAlpha);
             mActionsContainerBackground.setAlpha(containerAlpha);
@@ -910,7 +898,6 @@ public class ScreenshotView extends FrameLayout implements
         }
         mDismissButton.setVisibility(View.GONE);
         mActionsContainer.setVisibility(View.GONE);
-        mBackgroundProtection.setVisibility(View.GONE);
         // set these invisible, but not gone, so that the views are laid out correctly
         mActionsContainerBackground.setVisibility(View.INVISIBLE);
         mScreenshotPreviewBorder.setVisibility(View.INVISIBLE);
@@ -932,7 +919,6 @@ public class ScreenshotView extends FrameLayout implements
             mDismissButton.setVisibility(View.VISIBLE);
         }
         mActionsContainer.setVisibility(View.VISIBLE);
-        mBackgroundProtection.setVisibility(View.VISIBLE);
         mActionsContainerBackground.setVisibility(View.VISIBLE);
         mScreenshotPreviewBorder.setVisibility(View.VISIBLE);
         mScreenshotPreview.setVisibility(View.VISIBLE);
@@ -969,7 +955,6 @@ public class ScreenshotView extends FrameLayout implements
         mPendingSharedTransition = false;
         mActionsContainerBackground.setVisibility(View.GONE);
         mActionsContainer.setVisibility(View.GONE);
-        mBackgroundProtection.setAlpha(0f);
         mDismissButton.setVisibility(View.GONE);
         mScrollingScrim.setVisibility(View.GONE);
         mScrollablePreview.setVisibility(View.GONE);
@@ -1016,7 +1001,6 @@ public class ScreenshotView extends FrameLayout implements
             mDismissButton.setAlpha(alpha);
             mActionsContainerBackground.setAlpha(alpha);
             mActionsContainer.setAlpha(alpha);
-            mBackgroundProtection.setAlpha(alpha);
             mScreenshotPreviewBorder.setAlpha(alpha);
         });
         alphaAnim.setDuration(600);
