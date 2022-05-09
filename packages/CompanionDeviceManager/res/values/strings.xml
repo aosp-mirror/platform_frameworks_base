@@ -116,4 +116,10 @@
         apps installed on your watch during setup will use the same permissions as your phone.\n\n
         These permissions may include access to your watch\u2019s microphone and location.</string>
 
+    <!--Description for vendor icon [CHAR LIMIT=30]-->
+    <string name="vendor_icon_description">App Icon</string>
+
+    <!--Description for information icon [CHAR LIMIT=30]-->
+    <string name="vendor_header_button_description">More Information Button</string>
+
 </resources>
