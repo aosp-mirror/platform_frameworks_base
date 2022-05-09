@@ -1091,6 +1091,12 @@ public class BrightnessTrackerTest {
         }
 
         @Override
+        public AtomicFile getLegacyFile(String filename) {
+            // Don't have the test write / read from anywhere.
+            return null;
+        }
+
+        @Override
         public long currentTimeMillis() {
             return mCurrentTimeMillis;
         }
