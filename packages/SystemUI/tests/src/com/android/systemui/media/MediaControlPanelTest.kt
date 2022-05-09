@@ -1122,6 +1122,91 @@ public class MediaControlPanelTest : SysuiTestCase() {
         verify(mediaCarouselController).removePlayer(eq(mediaKey), eq(false), eq(false))
     }
 
+    @Test
+    fun player_gutsOpen_contentDescriptionIsForGuts() {
+        whenever(mediaViewController.isGutsVisible).thenReturn(true)
+        player.attachPlayer(viewHolder)
+
+        val gutsTextString = "gutsText"
+        whenever(gutsText.text).thenReturn(gutsTextString)
+        player.bindPlayer(mediaData, KEY)
+
+        val descriptionCaptor = ArgumentCaptor.forClass(CharSequence::class.java)
+        verify(viewHolder.player).contentDescription = descriptionCaptor.capture()
+        val description = descriptionCaptor.value.toString()
+
+        assertThat(description).isEqualTo(gutsTextString)
+    }
+
+    @Test
+    fun player_gutsClosed_contentDescriptionIsForPlayer() {
+        whenever(mediaViewController.isGutsVisible).thenReturn(false)
+        player.attachPlayer(viewHolder)
+
+        val app = "appName"
+        player.bindPlayer(mediaData.copy(app = app), KEY)
+
+        val descriptionCaptor = ArgumentCaptor.forClass(CharSequence::class.java)
+        verify(viewHolder.player).contentDescription = descriptionCaptor.capture()
+        val description = descriptionCaptor.value.toString()
+
+        assertThat(description).contains(mediaData.song!!)
+        assertThat(description).contains(mediaData.artist!!)
+        assertThat(description).contains(app)
+    }
+
+    @Test
+    fun player_gutsChangesFromOpenToClosed_contentDescriptionUpdated() {
+        // Start out open
+        whenever(mediaViewController.isGutsVisible).thenReturn(true)
+        whenever(gutsText.text).thenReturn("gutsText")
+        player.attachPlayer(viewHolder)
+        val app = "appName"
+        player.bindPlayer(mediaData.copy(app = app), KEY)
+
+        // Update to closed by long pressing
+        val captor = ArgumentCaptor.forClass(View.OnLongClickListener::class.java)
+        verify(viewHolder.player).onLongClickListener = captor.capture()
+        reset(viewHolder.player)
+
+        whenever(mediaViewController.isGutsVisible).thenReturn(false)
+        captor.value.onLongClick(viewHolder.player)
+
+        // Then content description is now the player content description
+        val descriptionCaptor = ArgumentCaptor.forClass(CharSequence::class.java)
+        verify(viewHolder.player).contentDescription = descriptionCaptor.capture()
+        val description = descriptionCaptor.value.toString()
+
+        assertThat(description).contains(mediaData.song!!)
+        assertThat(description).contains(mediaData.artist!!)
+        assertThat(description).contains(app)
+    }
+
+    @Test
+    fun player_gutsChangesFromClosedToOpen_contentDescriptionUpdated() {
+        // Start out closed
+        whenever(mediaViewController.isGutsVisible).thenReturn(false)
+        val gutsTextString = "gutsText"
+        whenever(gutsText.text).thenReturn(gutsTextString)
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(mediaData.copy(app = "appName"), KEY)
+
+        // Update to open by long pressing
+        val captor = ArgumentCaptor.forClass(View.OnLongClickListener::class.java)
+        verify(viewHolder.player).onLongClickListener = captor.capture()
+        reset(viewHolder.player)
+
+        whenever(mediaViewController.isGutsVisible).thenReturn(true)
+        captor.value.onLongClick(viewHolder.player)
+
+        // Then content description is now the guts content description
+        val descriptionCaptor = ArgumentCaptor.forClass(CharSequence::class.java)
+        verify(viewHolder.player).contentDescription = descriptionCaptor.capture()
+        val description = descriptionCaptor.value.toString()
+
+        assertThat(description).isEqualTo(gutsTextString)
+    }
+
     /* ***** END guts tests for the player ***** */
 
     /* ***** Guts tests for the recommendations ***** */
