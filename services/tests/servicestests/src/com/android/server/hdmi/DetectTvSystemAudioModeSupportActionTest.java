@@ -56,7 +56,7 @@ public class DetectTvSystemAudioModeSupportActionTest {
         mDeviceInfoForTests = HdmiDeviceInfo.hardwarePort(1001, 1234);
         HdmiControlService hdmiControlService =
                 new HdmiControlService(InstrumentationRegistry.getTargetContext(),
-                        Collections.emptyList()) {
+                        Collections.emptyList(), new FakeAudioDeviceVolumeManagerWrapper()) {
 
                     @Override
                     void sendCecCommand(

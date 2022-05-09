@@ -22,7 +22,7 @@
         android:interpolator="@interpolator/standard"
         android:duration="@android:integer/config_activityDefaultDur" />
     <translate
-        android:fromYDelta="20dp"
+        android:fromYDelta="@android:dimen/popup_enter_animation_from_y_delta"
         android:toYDelta="0"
         android:interpolator="@interpolator/standard"
         android:duration="@android:integer/config_activityDefaultDur" />

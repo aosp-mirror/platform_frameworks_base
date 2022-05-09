@@ -37,7 +37,6 @@ import androidx.annotation.Nullable;
 
 import com.android.wm.shell.common.annotations.ExternalThread;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -251,7 +250,7 @@ public interface Bubbles {
     void onConfigChanged(Configuration newConfig);
 
     /** Description of current bubble state. */
-    void dump(FileDescriptor fd, PrintWriter pw, String[] args);
+    void dump(PrintWriter pw, String[] args);
 
     /** Listener to find out about stack expansion / collapse events. */
     interface BubbleExpandListener {
@@ -264,10 +263,10 @@ public interface Bubbles {
         void onBubbleExpandChanged(boolean isExpanding, String key);
     }
 
-    /** Listener to be notified when the flags for notification or bubble suppression changes.*/
-    interface SuppressionChangedListener {
-        /** Called when the notification suppression state of a bubble changes. */
-        void onBubbleNotificationSuppressionChange(Bubble bubble);
+    /** Listener to be notified when the flags on BubbleMetadata have changed. */
+    interface BubbleMetadataFlagListener {
+        /** Called when the flags on BubbleMetadata have changed for the provided bubble. */
+        void onBubbleMetadataFlagChanged(Bubble bubble);
     }
 
     /** Listener to be notified when a pending intent has been canceled for a bubble. */

@@ -30,7 +30,6 @@ import com.android.keyguard.KeyguardBiometricLockoutLogger.PrimaryAuthRequiredEv
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.SessionTracker
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -120,7 +119,7 @@ class KeyguardBiometricLockoutLogger @Inject constructor(
     private fun log(event: PrimaryAuthRequiredEvent) =
             uiEventLogger.log(event, sessionTracker.getSessionId(SESSION_KEYGUARD))
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<String>) {
+    override fun dump(pw: PrintWriter, args: Array<String>) {
         pw.println("  mFingerprintLockedOut=$fingerprintLockedOut")
         pw.println("  mFaceLockedOut=$faceLockedOut")
         pw.println("  mIsEncryptedOrLockdown=$encryptedOrLockdown")

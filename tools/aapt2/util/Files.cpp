@@ -349,7 +349,7 @@ std::optional<std::vector<std::string>> FindFiles(const android::StringPiece& pa
   const std::string root_dir = path.to_string();
   std::unique_ptr<DIR, decltype(closedir)*> d(opendir(root_dir.data()), closedir);
   if (!d) {
-    diag->Error(DiagMessage() << SystemErrorCodeToString(errno));
+    diag->Error(DiagMessage() << SystemErrorCodeToString(errno) << ": " << root_dir);
     return {};
   }
 

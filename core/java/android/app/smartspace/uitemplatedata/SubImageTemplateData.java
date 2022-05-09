@@ -60,21 +60,18 @@ public final class SubImageTemplateData extends BaseTemplateData {
     }
 
     private SubImageTemplateData(@SmartspaceTarget.UiTemplateType int templateType,
-            @Nullable Text titleText,
-            @Nullable Icon titleIcon,
-            @Nullable Text subtitleText,
-            @Nullable Icon subTitleIcon,
-            @Nullable TapAction primaryTapAction,
-            @Nullable Text supplementalSubtitleText,
-            @Nullable Icon supplementalSubtitleIcon,
-            @Nullable TapAction supplementalSubtitleTapAction,
-            @Nullable Text supplementalAlarmText,
+            @Nullable SubItemInfo primaryItem,
+            @Nullable SubItemInfo subtitleItem,
+            @Nullable SubItemInfo subtitleSupplementalItem,
+            @Nullable SubItemInfo supplementalLineItem,
+            @Nullable SubItemInfo supplementalAlarmItem,
+            int layoutWeight,
             @NonNull List<Text> subImageTexts,
             @NonNull List<Icon> subImages,
             @Nullable TapAction subImageAction) {
-        super(templateType, titleText, titleIcon, subtitleText, subTitleIcon, primaryTapAction,
-                supplementalSubtitleText, supplementalSubtitleIcon, supplementalSubtitleTapAction,
-                supplementalAlarmText);
+        super(templateType, primaryItem, subtitleItem, subtitleSupplementalItem,
+                supplementalLineItem, supplementalAlarmItem, layoutWeight);
+
         mSubImageTexts = subImageTexts;
         mSubImages = subImages;
         mSubImageAction = subImageAction;
@@ -192,10 +189,10 @@ public final class SubImageTemplateData extends BaseTemplateData {
          */
         @NonNull
         public SubImageTemplateData build() {
-            return new SubImageTemplateData(getTemplateType(), getTitleText(),
-                    getTitleIcon(), getSubtitleText(), getSubtitleIcon(), getPrimaryTapAction(),
-                    getSupplementalSubtitleText(), getSupplementalSubtitleIcon(),
-                    getSupplementalSubtitleTapAction(), getSupplementalAlarmText(), mSubImageTexts,
+            return new SubImageTemplateData(getTemplateType(), getPrimaryItem(),
+                    getSubtitleItem(), getSubtitleSupplemtnalItem(),
+                    getSupplementalLineItem(), getSupplementalAlarmItem(), getLayoutWeight(),
+                    mSubImageTexts,
                     mSubImages,
                     mSubImageAction);
         }

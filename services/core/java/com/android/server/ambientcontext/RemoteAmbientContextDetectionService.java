@@ -49,6 +49,12 @@ final class RemoteAmbientContextDetectionService
         connect();
     }
 
+    @Override
+    protected long getAutoDisconnectTimeoutMs() {
+        // Disable automatic unbinding.
+        return -1;
+    }
+
     /**
      * Asks the implementation to start detection.
      *

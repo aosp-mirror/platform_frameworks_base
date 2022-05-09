@@ -549,6 +549,11 @@ public class ViewInputConnectionTest {
         }
 
         @Override
+        public boolean requestCursorUpdates(int cursorUpdateMode, int cursorUpdateFilter) {
+            return false;
+        }
+
+        @Override
         public Handler getHandler() {
             return null;
         }

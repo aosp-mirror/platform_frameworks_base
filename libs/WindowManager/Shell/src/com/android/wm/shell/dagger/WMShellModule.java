@@ -44,15 +44,18 @@ import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ChoreographerSfVsync;
 import com.android.wm.shell.common.annotations.ShellMainThread;
+import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.freeform.FreeformTaskListener;
 import com.android.wm.shell.fullscreen.FullscreenUnfoldController;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
+import com.android.wm.shell.pip.PipAppOpsListener;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipMediaController;
+import com.android.wm.shell.pip.PipParamsChangedForwarder;
 import com.android.wm.shell.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipTaskOrganizer;
@@ -61,7 +64,6 @@ import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.PipTransitionState;
 import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.pip.phone.PhonePipMenuController;
-import com.android.wm.shell.pip.phone.PipAppOpsListener;
 import com.android.wm.shell.pip.phone.PipController;
 import com.android.wm.shell.pip.phone.PipMotionHelper;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
@@ -109,6 +111,7 @@ public class WMShellModule {
             ShellTaskOrganizer organizer,
             DisplayController displayController,
             @DynamicOverride Optional<OneHandedController> oneHandedOptional,
+            DragAndDropController dragAndDropController,
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler,
             TaskViewTransitions taskViewTransitions,
@@ -117,7 +120,7 @@ public class WMShellModule {
                 floatingContentCoordinator, statusBarService, windowManager,
                 windowManagerShellWrapper, launcherApps, taskStackListener,
                 uiEventLogger, organizer, displayController, oneHandedOptional,
-                mainExecutor, mainHandler, taskViewTransitions, syncQueue);
+                dragAndDropController, mainExecutor, mainHandler, taskViewTransitions, syncQueue);
     }
 
     //
@@ -212,12 +215,14 @@ public class WMShellModule {
             PipTouchHandler pipTouchHandler, PipTransitionController pipTransitionController,
             WindowManagerShellWrapper windowManagerShellWrapper,
             TaskStackListenerImpl taskStackListener,
+            PipParamsChangedForwarder pipParamsChangedForwarder,
             Optional<OneHandedController> oneHandedController,
             @ShellMainThread ShellExecutor mainExecutor) {
         return Optional.ofNullable(PipController.create(context, displayController,
-                pipAppOpsListener, pipBoundsAlgorithm, pipBoundsState, pipMediaController,
-                phonePipMenuController, pipTaskOrganizer, pipTouchHandler, pipTransitionController,
-                windowManagerShellWrapper, taskStackListener, oneHandedController, mainExecutor));
+                pipAppOpsListener, pipBoundsAlgorithm, pipBoundsState,
+                pipMediaController, phonePipMenuController, pipTaskOrganizer,
+                pipTouchHandler, pipTransitionController, windowManagerShellWrapper,
+                taskStackListener, pipParamsChangedForwarder, oneHandedController, mainExecutor));
     }
 
     @WMSingleton
@@ -285,15 +290,15 @@ public class WMShellModule {
             PipAnimationController pipAnimationController,
             PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
             PipTransitionController pipTransitionController,
-            Optional<LegacySplitScreenController> splitScreenOptional,
-            Optional<SplitScreenController> newSplitScreenOptional,
+            PipParamsChangedForwarder pipParamsChangedForwarder,
+            Optional<SplitScreenController> splitScreenControllerOptional,
             DisplayController displayController,
             PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new PipTaskOrganizer(context,
                 syncTransactionQueue, pipTransitionState, pipBoundsState, pipBoundsAlgorithm,
                 menuPhoneController, pipAnimationController, pipSurfaceTransactionHelper,
-                pipTransitionController, splitScreenOptional, newSplitScreenOptional,
+                pipTransitionController, pipParamsChangedForwarder, splitScreenControllerOptional,
                 displayController, pipUiEventLogger, shellTaskOrganizer, mainExecutor);
     }
 
@@ -316,6 +321,14 @@ public class WMShellModule {
         return new PipTransition(context, pipBoundsState, pipTransitionState, pipMenuController,
                 pipBoundsAlgorithm, pipAnimationController, transitions, shellTaskOrganizer,
                 pipSurfaceTransactionHelper, splitScreenOptional);
+    }
+
+    @WMSingleton
+    @Provides
+    static PipAppOpsListener providePipAppOpsListener(Context context,
+            PipTouchHandler pipTouchHandler,
+            @ShellMainThread ShellExecutor mainExecutor) {
+        return new PipAppOpsListener(context, pipTouchHandler.getMotionHelper(), mainExecutor);
     }
 
     @WMSingleton
@@ -379,5 +392,11 @@ public class WMShellModule {
                 context,
                 rootTaskDisplayAreaOrganizer
         );
+    }
+
+    @WMSingleton
+    @Provides
+    static PipParamsChangedForwarder providePipParamsChangedForwarder() {
+        return new PipParamsChangedForwarder();
     }
 }

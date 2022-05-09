@@ -32,7 +32,7 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.dagger.StatusBarModule;
+import com.android.systemui.statusbar.dagger.CentralSurfacesModule;
 import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.DynamicChildBindController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
@@ -45,7 +45,6 @@ import com.android.systemui.statusbar.notification.collection.legacy.VisualStabi
 import com.android.systemui.statusbar.notification.collection.render.NotifStackController;
 import com.android.systemui.statusbar.notification.collection.render.NotifStats;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.statusbar.notification.stack.ForegroundServiceSectionController;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -97,7 +96,6 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
     private final Optional<Bubbles> mBubblesOptional;
     private final DynamicPrivacyController mDynamicPrivacyController;
     private final KeyguardBypassController mBypassController;
-    private final ForegroundServiceSectionController mFgsSectionController;
     private final NotifPipelineFlags mNotifPipelineFlags;
     private AssistantFeedbackController mAssistantFeedbackController;
     private final KeyguardStateController mKeyguardStateController;
@@ -115,7 +113,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
     private boolean mIsHandleDynamicPrivacyChangeScheduled;
 
     /**
-     * Injected constructor. See {@link StatusBarModule}.
+     * Injected constructor. See {@link CentralSurfacesModule}.
      */
     public NotificationViewHierarchyManager(
             Context context,
@@ -129,7 +127,6 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             KeyguardBypassController bypassController,
             Optional<Bubbles> bubblesOptional,
             DynamicPrivacyController privacyController,
-            ForegroundServiceSectionController fgsSectionController,
             DynamicChildBindController dynamicChildBindController,
             LowPriorityInflationHelper lowPriorityInflationHelper,
             AssistantFeedbackController assistantFeedbackController,
@@ -145,7 +142,6 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
         mVisualStabilityManager = visualStabilityManager;
         mStatusBarStateController = (SysuiStatusBarStateController) statusBarStateController;
         mEntryManager = notificationEntryManager;
-        mFgsSectionController = fgsSectionController;
         mNotifPipelineFlags = notifPipelineFlags;
         Resources res = context.getResources();
         mAlwaysExpandNonGroupedNotification =
@@ -417,8 +413,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
                 && mBubblesOptional.get().isBubbleNotificationSuppressedFromShade(
                         ent.getKey(), ent.getSbn().getGroupKey());
         if (ent.isRowDismissed() || ent.isRowRemoved()
-                || isBubbleNotificationSuppressedFromShade
-                || mFgsSectionController.hasEntry(ent)) {
+                || isBubbleNotificationSuppressedFromShade) {
             // we want to suppress removed notifications because they could
             // temporarily become children if they were isolated before.
             return true;

@@ -107,20 +107,32 @@ public class ScribeTest {
     @Test
     public void testWriteHighLevelStateToDisk() {
         long lastReclamationTime = System.currentTimeMillis();
-        long narcsInCirculation = 2000L;
+        long remainingConsumableCakes = 2000L;
+        long consumptionLimit = 500_000L;
+        when(mIrs.getConsumptionLimitLocked()).thenReturn(consumptionLimit);
 
         Ledger ledger = mScribeUnderTest.getLedgerLocked(TEST_USER_ID, TEST_PACKAGE);
-        ledger.recordTransaction(new Ledger.Transaction(0, 1000L, 1, null, 2000));
+        ledger.recordTransaction(new Ledger.Transaction(0, 1000L, 1, null, 2000, 0));
         // Negative ledger balance shouldn't affect the total circulation value.
         ledger = mScribeUnderTest.getLedgerLocked(TEST_USER_ID + 1, TEST_PACKAGE);
-        ledger.recordTransaction(new Ledger.Transaction(0, 1000L, 1, null, -5000));
+        ledger.recordTransaction(new Ledger.Transaction(0, 1000L, 1, null, -5000, 3000));
         mScribeUnderTest.setLastReclamationTimeLocked(lastReclamationTime);
-        mScribeUnderTest.writeImmediatelyForTesting();
+        mScribeUnderTest.setConsumptionLimitLocked(consumptionLimit);
+        mScribeUnderTest.adjustRemainingConsumableCakesLocked(
+                remainingConsumableCakes - consumptionLimit);
 
+        assertEquals(lastReclamationTime, mScribeUnderTest.getLastReclamationTimeLocked());
+        assertEquals(remainingConsumableCakes,
+                mScribeUnderTest.getRemainingConsumableCakesLocked());
+        assertEquals(consumptionLimit, mScribeUnderTest.getSatiatedConsumptionLimitLocked());
+
+        mScribeUnderTest.writeImmediatelyForTesting();
         mScribeUnderTest.loadFromDiskLocked();
 
         assertEquals(lastReclamationTime, mScribeUnderTest.getLastReclamationTimeLocked());
-        assertEquals(narcsInCirculation, mScribeUnderTest.getNarcsInCirculationLocked());
+        assertEquals(remainingConsumableCakes,
+                mScribeUnderTest.getRemainingConsumableCakesLocked());
+        assertEquals(consumptionLimit, mScribeUnderTest.getSatiatedConsumptionLimitLocked());
     }
 
     @Test
@@ -135,9 +147,9 @@ public class ScribeTest {
     @Test
     public void testWritingPopulatedLedgerToDisk() {
         final Ledger ogLedger = mScribeUnderTest.getLedgerLocked(TEST_USER_ID, TEST_PACKAGE);
-        ogLedger.recordTransaction(new Ledger.Transaction(0, 1000, 1, null, 51));
-        ogLedger.recordTransaction(new Ledger.Transaction(1500, 2000, 2, "green", 52));
-        ogLedger.recordTransaction(new Ledger.Transaction(2500, 3000, 3, "blue", 3));
+        ogLedger.recordTransaction(new Ledger.Transaction(0, 1000, 1, null, 51, 0));
+        ogLedger.recordTransaction(new Ledger.Transaction(1500, 2000, 2, "green", 52, -1));
+        ogLedger.recordTransaction(new Ledger.Transaction(2500, 3000, 3, "blue", 3, 12));
         mScribeUnderTest.writeImmediatelyForTesting();
 
         mScribeUnderTest.loadFromDiskLocked();
@@ -156,11 +168,11 @@ public class ScribeTest {
                 addInstalledPackage(userId, pkgName);
                 final Ledger ledger = mScribeUnderTest.getLedgerLocked(userId, pkgName);
                 ledger.recordTransaction(new Ledger.Transaction(
-                        0, 1000L * u + l, 1, null, 51L * u + l));
+                        0, 1000L * u + l, 1, null, -51L * u + l, 50));
                 ledger.recordTransaction(new Ledger.Transaction(
-                        1500L * u + l, 2000L * u + l, 2 * u + l, "green" + u + l, 52L * u + l));
+                        1500L * u + l, 2000L * u + l, 2 * u + l, "green" + u + l, 52L * u + l, 0));
                 ledger.recordTransaction(new Ledger.Transaction(
-                        2500L * u + l, 3000L * u + l, 3 * u + l, "blue" + u + l, 3L * u + l));
+                        2500L * u + l, 3000L * u + l, 3 * u + l, "blue" + u + l, 3L * u + l, 0));
                 ledgers.add(userId, pkgName, ledger);
             }
         }
@@ -174,9 +186,9 @@ public class ScribeTest {
     @Test
     public void testDiscardLedgerFromDisk() {
         final Ledger ogLedger = mScribeUnderTest.getLedgerLocked(TEST_USER_ID, TEST_PACKAGE);
-        ogLedger.recordTransaction(new Ledger.Transaction(0, 1000, 1, null, 51));
-        ogLedger.recordTransaction(new Ledger.Transaction(1500, 2000, 2, "green", 52));
-        ogLedger.recordTransaction(new Ledger.Transaction(2500, 3000, 3, "blue", 3));
+        ogLedger.recordTransaction(new Ledger.Transaction(0, 1000, 1, null, 51, 1));
+        ogLedger.recordTransaction(new Ledger.Transaction(1500, 2000, 2, "green", 52, 0));
+        ogLedger.recordTransaction(new Ledger.Transaction(2500, 3000, 3, "blue", 3, 1));
         mScribeUnderTest.writeImmediatelyForTesting();
 
         mScribeUnderTest.loadFromDiskLocked();
@@ -195,9 +207,9 @@ public class ScribeTest {
     public void testLoadingMissingPackageFromDisk() {
         final String pkgName = TEST_PACKAGE + ".uninstalled";
         final Ledger ogLedger = mScribeUnderTest.getLedgerLocked(TEST_USER_ID, pkgName);
-        ogLedger.recordTransaction(new Ledger.Transaction(0, 1000, 1, null, 51));
-        ogLedger.recordTransaction(new Ledger.Transaction(1500, 2000, 2, "green", 52));
-        ogLedger.recordTransaction(new Ledger.Transaction(2500, 3000, 3, "blue", 3));
+        ogLedger.recordTransaction(new Ledger.Transaction(0, 1000, 1, null, 51, 1));
+        ogLedger.recordTransaction(new Ledger.Transaction(1500, 2000, 2, "green", 52, 2));
+        ogLedger.recordTransaction(new Ledger.Transaction(2500, 3000, 3, "blue", 3, 3));
         mScribeUnderTest.writeImmediatelyForTesting();
 
         // Package isn't installed, so make sure it's not saved to memory after loading.
@@ -209,14 +221,45 @@ public class ScribeTest {
     public void testLoadingMissingUserFromDisk() {
         final int userId = TEST_USER_ID + 1;
         final Ledger ogLedger = mScribeUnderTest.getLedgerLocked(userId, TEST_PACKAGE);
-        ogLedger.recordTransaction(new Ledger.Transaction(0, 1000, 1, null, 51));
-        ogLedger.recordTransaction(new Ledger.Transaction(1500, 2000, 2, "green", 52));
-        ogLedger.recordTransaction(new Ledger.Transaction(2500, 3000, 3, "blue", 3));
+        ogLedger.recordTransaction(new Ledger.Transaction(0, 1000, 1, null, 51, 0));
+        ogLedger.recordTransaction(new Ledger.Transaction(1500, 2000, 2, "green", 52, 1));
+        ogLedger.recordTransaction(new Ledger.Transaction(2500, 3000, 3, "blue", 3, 3));
         mScribeUnderTest.writeImmediatelyForTesting();
 
         // User doesn't show up with any packages, so make sure nothing is saved after loading.
         mScribeUnderTest.loadFromDiskLocked();
         assertLedgersEqual(new Ledger(), mScribeUnderTest.getLedgerLocked(userId, TEST_PACKAGE));
+    }
+
+    @Test
+    public void testChangingConsumable() {
+        assertEquals(0, mScribeUnderTest.getSatiatedConsumptionLimitLocked());
+        assertEquals(0, mScribeUnderTest.getRemainingConsumableCakesLocked());
+
+        // Limit increased, so remaining value should be adjusted as well
+        mScribeUnderTest.setConsumptionLimitLocked(1000);
+        assertEquals(1000, mScribeUnderTest.getSatiatedConsumptionLimitLocked());
+        assertEquals(1000, mScribeUnderTest.getRemainingConsumableCakesLocked());
+
+        // Limit decreased below remaining, so remaining value should be adjusted as well
+        mScribeUnderTest.setConsumptionLimitLocked(500);
+        assertEquals(500, mScribeUnderTest.getSatiatedConsumptionLimitLocked());
+        assertEquals(500, mScribeUnderTest.getRemainingConsumableCakesLocked());
+
+        mScribeUnderTest.adjustRemainingConsumableCakesLocked(-100);
+        assertEquals(500, mScribeUnderTest.getSatiatedConsumptionLimitLocked());
+        assertEquals(400, mScribeUnderTest.getRemainingConsumableCakesLocked());
+
+        // Limit increased, so remaining value should be adjusted by the difference as well
+        mScribeUnderTest.setConsumptionLimitLocked(1000);
+        assertEquals(1000, mScribeUnderTest.getSatiatedConsumptionLimitLocked());
+        assertEquals(900, mScribeUnderTest.getRemainingConsumableCakesLocked());
+
+
+        // Limit decreased, but above remaining, so remaining value should left alone
+        mScribeUnderTest.setConsumptionLimitLocked(950);
+        assertEquals(950, mScribeUnderTest.getSatiatedConsumptionLimitLocked());
+        assertEquals(900, mScribeUnderTest.getRemainingConsumableCakesLocked());
     }
 
     private void assertLedgersEqual(Ledger expected, Ledger actual) {
@@ -245,6 +288,7 @@ public class ScribeTest {
         assertEquals(expected.eventId, actual.eventId);
         assertEquals(expected.tag, actual.tag);
         assertEquals(expected.delta, actual.delta);
+        assertEquals(expected.ctp, actual.ctp);
     }
 
     private void addInstalledPackage(int userId, String pkgName) {

@@ -49,7 +49,7 @@ open class DisplayCutoutBaseView : View, RegionInterceptableView {
     private val shouldDrawCutout: Boolean = DisplayCutout.getFillBuiltInDisplayCutout(
             context.resources, context.display?.uniqueId)
     private var displayMode: Display.Mode? = null
-    private val location = IntArray(2)
+    protected val location = IntArray(2)
     protected var displayRotation = 0
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
@@ -65,7 +65,8 @@ open class DisplayCutoutBaseView : View, RegionInterceptableView {
     @JvmField val protectionPath: Path = Path()
     private val protectionRectOrig: RectF = RectF()
     private val protectionPathOrig: Path = Path()
-    private var cameraProtectionProgress: Float = HIDDEN_CAMERA_PROTECTION_SCALE
+    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
+    var cameraProtectionProgress: Float = HIDDEN_CAMERA_PROTECTION_SCALE
     private var cameraProtectionAnimator: ValueAnimator? = null
 
     constructor(context: Context) : super(context)
@@ -78,6 +79,8 @@ open class DisplayCutoutBaseView : View, RegionInterceptableView {
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         updateCutout()
+        updateProtectionBoundingPath()
+        onUpdate()
     }
 
     fun onDisplayChanged(displayId: Int) {
@@ -92,6 +95,7 @@ open class DisplayCutoutBaseView : View, RegionInterceptableView {
         if (displayId == display.displayId) {
             updateCutout()
             updateProtectionBoundingPath()
+            onUpdate()
         }
     }
 
@@ -99,7 +103,12 @@ open class DisplayCutoutBaseView : View, RegionInterceptableView {
         displayRotation = rotation
         updateCutout()
         updateProtectionBoundingPath()
+        onUpdate()
     }
+
+    // Called after the cutout and protection bounding path change. Subclasses
+    // should make any changes that need to happen based on the change.
+    open fun onUpdate() = Unit
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     public override fun onDraw(canvas: Canvas) {
@@ -219,20 +228,34 @@ open class DisplayCutoutBaseView : View, RegionInterceptableView {
         if (pendingRotationChange) {
             return
         }
+        val m = Matrix()
+        // Apply display ratio.
+        val physicalPixelDisplaySizeRatio = getPhysicalPixelDisplaySizeRatio()
+        m.postScale(physicalPixelDisplaySizeRatio, physicalPixelDisplaySizeRatio)
+
+        // Apply rotation.
         val lw: Int = displayInfo.logicalWidth
         val lh: Int = displayInfo.logicalHeight
         val flipped = (displayInfo.rotation == Surface.ROTATION_90 ||
                 displayInfo.rotation == Surface.ROTATION_270)
         val dw = if (flipped) lh else lw
         val dh = if (flipped) lw else lh
-        val m = Matrix()
         transformPhysicalToLogicalCoordinates(displayInfo.rotation, dw, dh, m)
+
         if (!protectionPathOrig.isEmpty) {
             // Reset the protection path so we don't aggregate rotations
             protectionPath.set(protectionPathOrig)
             protectionPath.transform(m)
             m.mapRect(protectionRect, protectionRectOrig)
         }
+    }
+
+    @VisibleForTesting
+    open fun getPhysicalPixelDisplaySizeRatio(): Float {
+        displayInfo.displayCutout?.let {
+            return it.cutoutPathParserInfo.physicalPixelDisplaySizeRatio
+        }
+        return 1f
     }
 
     private fun displayModeChanged(oldMode: Display.Mode?, newMode: Display.Mode?): Boolean {
@@ -256,17 +279,17 @@ open class DisplayCutoutBaseView : View, RegionInterceptableView {
             out: Matrix
         ) {
             when (rotation) {
-                Surface.ROTATION_0 -> out.reset()
+                Surface.ROTATION_0 -> return
                 Surface.ROTATION_90 -> {
-                    out.setRotate(270f)
+                    out.postRotate(270f)
                     out.postTranslate(0f, physicalWidth.toFloat())
                 }
                 Surface.ROTATION_180 -> {
-                    out.setRotate(180f)
+                    out.postRotate(180f)
                     out.postTranslate(physicalWidth.toFloat(), physicalHeight.toFloat())
                 }
                 Surface.ROTATION_270 -> {
-                    out.setRotate(90f)
+                    out.postRotate(90f)
                     out.postTranslate(physicalHeight.toFloat(), 0f)
                 }
                 else -> throw IllegalArgumentException("Unknown rotation: $rotation")

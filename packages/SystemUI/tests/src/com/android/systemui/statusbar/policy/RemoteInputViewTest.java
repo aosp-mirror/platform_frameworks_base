@@ -16,6 +16,8 @@ package com.android.systemui.statusbar.policy;
 
 import static android.view.ContentInfo.SOURCE_CLIPBOARD;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
@@ -114,15 +116,13 @@ public class RemoteInputViewTest extends SysuiTestCase {
         mContext.unregisterReceiver(mReceiver);
     }
 
-    private void setTestPendingIntent(RemoteInputView view, RemoteInputViewController controller) {
+    private void setTestPendingIntent(RemoteInputViewController controller) {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0,
                 new Intent(TEST_ACTION), PendingIntent.FLAG_MUTABLE);
         RemoteInput input = new RemoteInput.Builder(TEST_RESULT_KEY).build();
         RemoteInput[] inputs = {input};
 
-        view.setPendingIntent(pendingIntent);
         controller.setPendingIntent(pendingIntent);
-        view.setRemoteInput(inputs, input, null /* editedSuggestionInfo */);
         controller.setRemoteInput(input);
         controller.setRemoteInputs(inputs);
     }
@@ -137,7 +137,7 @@ public class RemoteInputViewTest extends SysuiTestCase {
         RemoteInputView view = RemoteInputView.inflate(mContext, null, row.getEntry(), mController);
         RemoteInputViewController controller = bindController(view, row.getEntry());
 
-        setTestPendingIntent(view, controller);
+        setTestPendingIntent(controller);
 
         view.focus();
 
@@ -176,12 +176,15 @@ public class RemoteInputViewTest extends SysuiTestCase {
                 toUser);
         RemoteInputView view = RemoteInputView.inflate(mContext, null, row.getEntry(), mController);
         RemoteInputViewController controller = bindController(view, row.getEntry());
+        EditText editText = view.findViewById(R.id.remote_input_text);
 
-        setTestPendingIntent(view, controller);
+        setTestPendingIntent(controller);
+        assertThat(editText.isEnabled()).isFalse();
+        view.onVisibilityAggregated(true);
+        assertThat(editText.isEnabled()).isTrue();
 
         view.focus();
 
-        EditText editText = view.findViewById(R.id.remote_input_text);
         EditorInfo editorInfo = new EditorInfo();
         editorInfo.packageName = DUMMY_MESSAGE_APP_PKG;
         editorInfo.fieldId = editText.getId();
@@ -235,7 +238,7 @@ public class RemoteInputViewTest extends SysuiTestCase {
         RemoteInputView view = RemoteInputView.inflate(mContext, null, row.getEntry(), mController);
         RemoteInputViewController controller = bindController(view, row.getEntry());
 
-        setTestPendingIntent(view, controller);
+        setTestPendingIntent(controller);
 
         // Open view, send a reply
         view.focus();
@@ -265,7 +268,7 @@ public class RemoteInputViewTest extends SysuiTestCase {
         RemoteInputView view = RemoteInputView.inflate(mContext, null, row.getEntry(), mController);
         RemoteInputViewController controller = bindController(view, row.getEntry());
 
-        setTestPendingIntent(view, controller);
+        setTestPendingIntent(controller);
 
         // Open view, attach an image
         view.focus();

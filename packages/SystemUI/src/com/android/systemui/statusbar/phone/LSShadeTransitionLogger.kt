@@ -44,7 +44,7 @@ class LSShadeTransitionLogger @Inject constructor(
 
     fun logDragDownAborted() {
         buffer.log(TAG, LogLevel.INFO, {}, {
-            "The drag down was reset"
+            "The drag down was aborted and reset to 0f."
         })
     }
 
@@ -80,6 +80,12 @@ class LSShadeTransitionLogger @Inject constructor(
             0 /* velocityDp */)
         lockscreenGestureLogger.log(
             LockscreenGestureLogger.LockscreenUiEvent.LOCKSCREEN_PULL_SHADE_OPEN)
+    }
+
+    fun logDragDownAmountReset() {
+        buffer.log(TAG, LogLevel.DEBUG, {}, {
+            "The drag down amount has been reset to 0f."
+        })
     }
 
     fun logDefaultGoToFullShadeAnimation(delay: Long) {

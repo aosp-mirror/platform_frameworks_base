@@ -1058,31 +1058,35 @@ public class ContextHubService extends IContextHubService.Stub {
         }
 
         int msgVersion = 0;
-        int callbacksCount = mCallbacksList.beginBroadcast();
-        if (DEBUG_LOG_ENABLED) {
-            Log.v(TAG, "Sending message " + msgType + " version " + msgVersion + " from hubHandle "
-                    + contextHubHandle + ", appInstance " + appInstance + ", callBackCount "
-                    + callbacksCount);
-        }
-
-        if (callbacksCount < 1) {
+        // Synchronize access to mCallbacksList to prevent more than one outstanding broadcast as
+        // that will cause a crash.
+        synchronized (mCallbacksList) {
+            int callbacksCount = mCallbacksList.beginBroadcast();
             if (DEBUG_LOG_ENABLED) {
-                Log.v(TAG, "No message callbacks registered.");
+                Log.v(TAG, "Sending message " + msgType + " version " + msgVersion
+                        + " from hubHandle " + contextHubHandle + ", appInstance " + appInstance
+                        + ", callBackCount " + callbacksCount);
             }
-            return 0;
-        }
 
-        ContextHubMessage msg = new ContextHubMessage(msgType, msgVersion, data);
-        for (int i = 0; i < callbacksCount; ++i) {
-            IContextHubCallback callback = mCallbacksList.getBroadcastItem(i);
-            try {
-                callback.onMessageReceipt(contextHubHandle, appInstance, msg);
-            } catch (RemoteException e) {
-                Log.i(TAG, "Exception (" + e + ") calling remote callback (" + callback + ").");
-                continue;
+            if (callbacksCount < 1) {
+                if (DEBUG_LOG_ENABLED) {
+                    Log.v(TAG, "No message callbacks registered.");
+                }
+                return 0;
             }
+
+            ContextHubMessage msg = new ContextHubMessage(msgType, msgVersion, data);
+            for (int i = 0; i < callbacksCount; ++i) {
+                IContextHubCallback callback = mCallbacksList.getBroadcastItem(i);
+                try {
+                    callback.onMessageReceipt(contextHubHandle, appInstance, msg);
+                } catch (RemoteException e) {
+                    Log.i(TAG, "Exception (" + e + ") calling remote callback (" + callback + ").");
+                    continue;
+                }
+            }
+            mCallbacksList.finishBroadcast();
         }
-        mCallbacksList.finishBroadcast();
         return 0;
     }
 

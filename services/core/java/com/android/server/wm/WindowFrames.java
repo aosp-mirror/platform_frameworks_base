@@ -81,6 +81,8 @@ public class WindowFrames {
 
     private boolean mContentChanged;
 
+    private boolean mInsetsChanged;
+
     public void setFrames(Rect parentFrame, Rect displayFrame) {
         mParentFrame.set(parentFrame);
         mDisplayFrame.set(displayFrame);
@@ -158,6 +160,20 @@ public class WindowFrames {
         return mContentChanged;
     }
 
+    /**
+     * Sets whether we need to report {@link android.view.InsetsState} to the client.
+     */
+    void setInsetsChanged(boolean insetsChanged) {
+        mInsetsChanged = insetsChanged;
+    }
+
+    /**
+     * @see #setInsetsChanged(boolean)
+     */
+    boolean hasInsetsChanged() {
+        return mInsetsChanged;
+    }
+
     public void dumpDebug(@NonNull ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         mParentFrame.dumpDebug(proto, PARENT_FRAME);
@@ -169,9 +185,10 @@ public class WindowFrames {
 
     public void dump(PrintWriter pw, String prefix) {
         pw.println(prefix + "Frames: parent=" + mParentFrame.toShortString(sTmpSB)
-                + " display=" + mDisplayFrame.toShortString(sTmpSB));
-        pw.println(prefix + "mFrame=" + mFrame.toShortString(sTmpSB)
-                + " last=" + mLastFrame.toShortString(sTmpSB));
+                + " display=" + mDisplayFrame.toShortString(sTmpSB)
+                + " frame=" + mFrame.toShortString(sTmpSB)
+                + " last=" + mLastFrame.toShortString(sTmpSB)
+                + " insetsChanged=" + mInsetsChanged);
     }
 
     String getInsetsChangedInfo() {

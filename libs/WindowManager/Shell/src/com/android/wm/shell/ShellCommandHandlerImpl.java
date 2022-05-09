@@ -21,6 +21,7 @@ import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSIT
 import com.android.wm.shell.apppairs.AppPairsController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutoutController;
+import com.android.wm.shell.kidsmode.KidsModeTaskOrganizer;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.Pip;
@@ -46,11 +47,13 @@ public final class ShellCommandHandlerImpl {
     private final Optional<AppPairsController> mAppPairsOptional;
     private final Optional<RecentTasksController> mRecentTasks;
     private final ShellTaskOrganizer mShellTaskOrganizer;
+    private final KidsModeTaskOrganizer mKidsModeTaskOrganizer;
     private final ShellExecutor mMainExecutor;
     private final HandlerImpl mImpl = new HandlerImpl();
 
     public ShellCommandHandlerImpl(
             ShellTaskOrganizer shellTaskOrganizer,
+            KidsModeTaskOrganizer kidsModeTaskOrganizer,
             Optional<LegacySplitScreenController> legacySplitScreenOptional,
             Optional<SplitScreenController> splitScreenOptional,
             Optional<Pip> pipOptional,
@@ -60,6 +63,7 @@ public final class ShellCommandHandlerImpl {
             Optional<RecentTasksController> recentTasks,
             ShellExecutor mainExecutor) {
         mShellTaskOrganizer = shellTaskOrganizer;
+        mKidsModeTaskOrganizer = kidsModeTaskOrganizer;
         mRecentTasks = recentTasks;
         mLegacySplitScreenOptional = legacySplitScreenOptional;
         mSplitScreenOptional = splitScreenOptional;
@@ -92,6 +96,9 @@ public final class ShellCommandHandlerImpl {
         pw.println();
         pw.println();
         mRecentTasks.ifPresent(recentTasks -> recentTasks.dump(pw, ""));
+        pw.println();
+        pw.println();
+        mKidsModeTaskOrganizer.dump(pw, "");
     }
 
 
@@ -112,8 +119,6 @@ public final class ShellCommandHandlerImpl {
                 return runRemoveFromSideStage(args, pw);
             case "setSideStagePosition":
                 return runSetSideStagePosition(args, pw);
-            case "setSideStageVisibility":
-                return runSetSideStageVisibility(args, pw);
             case "help":
                 return runHelp(pw);
             default:
@@ -179,18 +184,6 @@ public final class ShellCommandHandlerImpl {
         return true;
     }
 
-    private boolean runSetSideStageVisibility(String[] args, PrintWriter pw) {
-        if (args.length < 3) {
-            // First arguments are "WMShell" and command name.
-            pw.println("Error: side stage visibility should be provided as arguments");
-            return false;
-        }
-        final Boolean visible = new Boolean(args[2]);
-
-        mSplitScreenOptional.ifPresent(split -> split.setSideStageVisibility(visible));
-        return true;
-    }
-
     private boolean runHelp(PrintWriter pw) {
         pw.println("Window Manager Shell commands:");
         pw.println("  help");
@@ -208,8 +201,6 @@ public final class ShellCommandHandlerImpl {
         pw.println("    Enable/Disable outline on the side-stage.");
         pw.println("  setSideStagePosition <SideStagePosition>");
         pw.println("    Sets the position of the side-stage.");
-        pw.println("  setSideStageVisibility <true/false>");
-        pw.println("    Show/hide side-stage.");
         return true;
     }
 

@@ -621,9 +621,9 @@ public class ImsMmTelManager implements RegistrationManager {
 
         ITelephony iTelephony = getITelephony();
         if (iTelephony == null) {
-            throw new RuntimeException("Could not find Telephony Service.");
+            Log.w("ImsMmTelManager", "Could not find Telephony Service.");
+            return;
         }
-
         try {
             iTelephony.unregisterMmTelCapabilityCallback(mSubId, c.getBinder());
         } catch (RemoteException e) {

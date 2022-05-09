@@ -17,6 +17,7 @@
 package com.android.server.trust;
 
 import static android.service.trust.TrustAgentService.FLAG_GRANT_TRUST_DISPLAY_MESSAGE;
+import static android.service.trust.TrustAgentService.FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE;
 
 import android.annotation.TargetApi;
 import android.app.AlarmManager;
@@ -39,11 +40,15 @@ import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.service.trust.GrantTrustResult;
 import android.service.trust.ITrustAgentService;
 import android.service.trust.ITrustAgentServiceCallback;
 import android.service.trust.TrustAgentService;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
+
+import com.android.internal.infra.AndroidFuture;
 
 import java.util.Collections;
 import java.util.List;
@@ -117,16 +122,9 @@ public class TrustAgentWrapper {
             if (!TrustManagerService.ENABLE_ACTIVE_UNLOCK_FLAG) {
                 return;
             }
-            if (!mWaitingForTrustableDowngrade) {
-                return;
-            }
             // are these the broadcasts we want to listen to
-            if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())
-                    || Intent.ACTION_USER_PRESENT.equals(intent.getAction())) {
-                mTrusted = false;
-                mTrustable = true;
-                mWaitingForTrustableDowngrade = false;
-                mTrustManagerService.updateTrust(mUserId, 0);
+            if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
+                downgradeToTrustable();
             }
         }
     };
@@ -155,10 +153,12 @@ public class TrustAgentWrapper {
                     }
                     mTrusted = true;
                     mTrustable = false;
-                    mMessage = (CharSequence) msg.obj;
+                    Pair<CharSequence, AndroidFuture<GrantTrustResult>> pair = (Pair) msg.obj;
+                    mMessage = pair.first;
+                    AndroidFuture<GrantTrustResult> resultCallback = pair.second;
                     int flags = msg.arg1;
                     mDisplayTrustGrantedMessage = (flags & FLAG_GRANT_TRUST_DISPLAY_MESSAGE) != 0;
-                    if ((flags & TrustAgentService.FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE) != 0) {
+                    if ((flags & FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE) != 0) {
                         mWaitingForTrustableDowngrade = true;
                     } else {
                         mWaitingForTrustableDowngrade = false;
@@ -188,7 +188,7 @@ public class TrustAgentWrapper {
                     mTrustManagerService.mArchive.logGrantTrust(mUserId, mName,
                             (mMessage != null ? mMessage.toString() : null),
                             durationMs, flags);
-                    mTrustManagerService.updateTrust(mUserId, flags);
+                    mTrustManagerService.updateTrust(mUserId, flags, resultCallback);
                     break;
                 case MSG_TRUST_TIMEOUT:
                     if (DEBUG) Slog.d(TAG, "Trust timed out : " + mName.flattenToShortString());
@@ -197,6 +197,8 @@ public class TrustAgentWrapper {
                     // Fall through.
                 case MSG_REVOKE_TRUST:
                     mTrusted = false;
+                    mTrustable = false;
+                    mWaitingForTrustableDowngrade = false;
                     mDisplayTrustGrantedMessage = false;
                     mMessage = null;
                     mHandler.removeMessages(MSG_TRUST_TIMEOUT);
@@ -311,13 +313,18 @@ public class TrustAgentWrapper {
     private ITrustAgentServiceCallback mCallback = new ITrustAgentServiceCallback.Stub() {
 
         @Override
-        public void grantTrust(CharSequence message, long durationMs, int flags) {
+        public void grantTrust(
+                CharSequence message,
+                long durationMs,
+                int flags,
+                AndroidFuture resultCallback) {
             if (DEBUG) {
                 Slog.d(TAG, "enableTrust(" + message + ", durationMs = " + durationMs
                         + ", flags = " + flags + ")");
             }
 
-            Message msg = mHandler.obtainMessage(MSG_GRANT_TRUST, flags, 0, message);
+            Message msg = mHandler.obtainMessage(
+                    MSG_GRANT_TRUST, flags, 0, Pair.create(message, resultCallback));
             msg.getData().putLong(DATA_DURATION, durationMs);
             msg.sendToTarget();
         }
@@ -466,8 +473,7 @@ public class TrustAgentWrapper {
         final String pathUri = mAlarmIntent.toUri(Intent.URI_INTENT_SCHEME);
         alarmFilter.addDataPath(pathUri, PatternMatcher.PATTERN_LITERAL);
 
-        IntentFilter trustableFilter = new IntentFilter(Intent.ACTION_USER_PRESENT);
-        trustableFilter.addAction(Intent.ACTION_SCREEN_OFF);
+        IntentFilter trustableFilter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
 
         // Schedules a restart for when connecting times out. If the connection succeeds,
         // the restart is canceled in mCallback's onConnected.
@@ -511,12 +517,23 @@ public class TrustAgentWrapper {
     }
 
     /**
-     * @see android.service.trust.TrustAgentService#onUserRequestedUnlock()
+     * @see android.service.trust.TrustAgentService#onUserRequestedUnlock(boolean)
      */
-    public void onUserRequestedUnlock() {
+    public void onUserRequestedUnlock(boolean dismissKeyguard) {
         try {
             if (mTrustAgentService != null) {
-                mTrustAgentService.onUserRequestedUnlock();
+                mTrustAgentService.onUserRequestedUnlock(dismissKeyguard);
+            }
+        } catch (RemoteException e) {
+            onError(e);
+        }
+    }
+
+    /** @see android.service.trust.TrustAgentService#onUserMayRequestUnlock() */
+    public void onUserMayRequestUnlock() {
+        try {
+            if (mTrustAgentService != null) {
+                mTrustAgentService.onUserMayRequestUnlock();
             }
         } catch (RemoteException e) {
             onError(e);
@@ -638,6 +655,24 @@ public class TrustAgentWrapper {
         return mTrustable && mManagingTrust && !mTrustDisabledByDpm;
     }
 
+    /** Set the trustagent as not trustable */
+    public void setUntrustable() {
+        mTrustable = false;
+    }
+
+    /**
+     * Downgrades the trustagent to trustable as a result of a keyguard or screen related event, and
+     * then updates the trust state of the phone to reflect the change.
+     */
+    public void downgradeToTrustable() {
+        if (mWaitingForTrustableDowngrade) {
+            mWaitingForTrustableDowngrade = false;
+            mTrusted = false;
+            mTrustable = true;
+            mTrustManagerService.updateTrust(mUserId, 0);
+        }
+    }
+
     public boolean isManagingTrust() {
         return mManagingTrust && !mTrustDisabledByDpm;
     }
@@ -665,6 +700,7 @@ public class TrustAgentWrapper {
         mContext.unbindService(mConnection);
         mBound = false;
         mContext.unregisterReceiver(mBroadcastReceiver);
+        mContext.unregisterReceiver(mTrustableDowngradeReceiver);
         mTrustAgentService = null;
         mSetTrustAgentFeaturesToken = null;
         mHandler.sendEmptyMessage(MSG_REVOKE_TRUST);

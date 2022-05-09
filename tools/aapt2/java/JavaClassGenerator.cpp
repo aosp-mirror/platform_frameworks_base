@@ -229,8 +229,8 @@ static FieldReference GetRFieldReference(const ResourceName& name,
   const std::string package_name =
       name.package.empty() ? fallback_package_name.to_string() : name.package;
   const std::string entry = JavaClassGenerator::TransformToFieldName(name.entry);
-  return FieldReference(
-      StringPrintf("%s.R.%s.%s", package_name.c_str(), to_string(name.type).data(), entry.c_str()));
+  return FieldReference(StringPrintf("%s.R.%s.%s", package_name.c_str(),
+                                     name.type.to_string().data(), entry.c_str()));
 }
 
 bool JavaClassGenerator::ProcessStyleable(const ResourceNameRef& name, const ResourceId& id,
@@ -451,7 +451,7 @@ void JavaClassGenerator::ProcessResource(const ResourceNameRef& name, const Reso
                                          MethodDefinition* out_rewrite_method,
                                          text::Printer* r_txt_printer) {
   ResourceId real_id = id;
-  if (context_->GetMinSdkVersion() < SDK_O && name.type == ResourceType::kId &&
+  if (context_->GetMinSdkVersion() < SDK_O && name.type.type == ResourceType::kId &&
       id.package_id() > kAppPackageId) {
     // Workaround for feature splits using package IDs > 0x7F.
     // See b/37498913.
@@ -489,7 +489,7 @@ void JavaClassGenerator::ProcessResource(const ResourceNameRef& name, const Reso
 
   if (r_txt_printer != nullptr) {
     r_txt_printer->Print("int ")
-        .Print(to_string(name.type))
+        .Print(name.type.to_string())
         .Print(" ")
         .Print(field_name)
         .Print(" ")
@@ -497,7 +497,7 @@ void JavaClassGenerator::ProcessResource(const ResourceNameRef& name, const Reso
   }
 
   if (out_rewrite_method != nullptr) {
-    const StringPiece& type_str = to_string(name.type);
+    const std::string type_str = name.type.to_string();
     out_rewrite_method->AppendStatement(
         StringPrintf("%s.%s = (%s.%s & 0x00ffffff) | packageIdBits;", type_str.data(),
                      field_name.data(), type_str.data(), field_name.data()));
@@ -561,7 +561,7 @@ bool JavaClassGenerator::ProcessType(const StringPiece& package_name_to_generate
       return false;
     }
 
-    if (resource_name.type == ResourceType::kStyleable) {
+    if (resource_name.type.type == ResourceType::kStyleable) {
       CHECK(!entry->values.empty());
       const auto styleable = reinterpret_cast<const Styleable*>(entry->values.front()->value.get());
       if (!ProcessStyleable(resource_name, id, *styleable, package_name_to_generate,

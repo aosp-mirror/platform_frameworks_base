@@ -35,10 +35,10 @@ interface IDynamicSystemService
      * @param name The DSU partition name
      * @param size Size of the DSU image in bytes
      * @param readOnly True if this partition is readOnly
-     * @return true if the call succeeds
+     * @return IGsiService.INSTALL_* status code
      */
     @EnforcePermission("MANAGE_DYNAMIC_SYSTEM")
-    boolean createPartition(@utf8InCpp String name, long size, boolean readOnly);
+    int createPartition(@utf8InCpp String name, long size, boolean readOnly);
 
     /**
      * Complete the current partition installation.

@@ -202,9 +202,7 @@ public interface UsbPortHal {
      *                      implementation as needed.
      * @param callback callback object to be invoked to invoke the status of the operation upon
      *                 completion.
-     * @param callback callback object to be invoked to invoke the status of the operation upon
-     *                 completion.
      */
-    public boolean resetUsbPort(String portName, long transactionId,
+    public void resetUsbPort(String portName, long transactionId,
             IUsbOperationInternal callback);
 }

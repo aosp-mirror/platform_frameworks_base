@@ -1588,24 +1588,33 @@ public class RemoteViews implements Parcelable, Filter {
 
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         ArrayList<Bitmap> mBitmaps;
+        SparseIntArray mBitmapHashes;
         int mBitmapMemory = -1;
 
         public BitmapCache() {
             mBitmaps = new ArrayList<>();
+            mBitmapHashes = new SparseIntArray();
         }
 
         public BitmapCache(Parcel source) {
             mBitmaps = source.createTypedArrayList(Bitmap.CREATOR);
+            mBitmapHashes = source.readSparseIntArray();
         }
 
         public int getBitmapId(Bitmap b) {
             if (b == null) {
                 return -1;
             } else {
-                if (mBitmaps.contains(b)) {
-                    return mBitmaps.indexOf(b);
+                int hash = b.hashCode();
+                int hashId = mBitmapHashes.get(hash, -1);
+                if (hashId != -1) {
+                    return hashId;
                 } else {
+                    if (b.isMutable()) {
+                        b = b.asShared();
+                    }
                     mBitmaps.add(b);
+                    mBitmapHashes.put(mBitmaps.size() - 1, hash);
                     mBitmapMemory = -1;
                     return (mBitmaps.size() - 1);
                 }
@@ -1616,13 +1625,13 @@ public class RemoteViews implements Parcelable, Filter {
         public Bitmap getBitmapForId(int id) {
             if (id == -1 || id >= mBitmaps.size()) {
                 return null;
-            } else {
-                return mBitmaps.get(id);
             }
+            return mBitmaps.get(id);
         }
 
         public void writeBitmapsToParcel(Parcel dest, int flags) {
             dest.writeTypedList(mBitmaps, flags);
+            dest.writeSparseIntArray(mBitmapHashes);
         }
 
         public int getBitmapMemory() {
@@ -6681,7 +6690,13 @@ public class RemoteViews implements Parcelable, Filter {
                 opts = ActivityOptions.makeBasic();
                 opts.setPendingIntentLaunchFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             }
-            opts.setLaunchDisplayId(view.getDisplay().getDisplayId());
+            if (view.getDisplay() != null) {
+                opts.setLaunchDisplayId(view.getDisplay().getDisplayId());
+            } else {
+                // TODO(b/218409359): Remove once bug is fixed.
+                Log.w(LOG_TAG, "getLaunchOptions: view.getDisplay() is null!",
+                        new Exception());
+            }
             return Pair.create(intent, opts);
         }
     }

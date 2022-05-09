@@ -1494,6 +1494,16 @@
             android:permission="android.permission.BIND_SETTINGS_SUGGESTIONS_SERVICE"
             android:exported="true"/>
 
+        <service
+            android:name="com.android.internal.infra.ServiceConnectorTest$TestService"
+            android:process=":ServiceConnectorRemoteService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BIND_TEST_SERVICE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </service>
+
         <provider android:name="android.app.activity.LocalProvider"
                 android:authorities="com.android.frameworks.coretests.LocalProvider">
             <meta-data android:name="com.android.frameworks.coretests.string" android:value="foo" />

@@ -24,6 +24,8 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.LinearLayout;
 
+import java.io.PrintWriter;
+
 /**
  * This class is the root view for the selection toolbar. It is responsible for
  * detecting the click on the item and to also transfer input focus to the application.
@@ -38,7 +40,10 @@ public class FloatingToolbarRoot extends LinearLayout {
 
     private final IBinder mTargetInputToken;
     private final SelectionToolbarRenderService.TransferTouchListener mTransferTouchListener;
-    private Rect mContentRect;
+    private final Rect mContentRect = new Rect();
+
+    private int mLastDownX = -1;
+    private int mLastDownY = -1;
 
     public FloatingToolbarRoot(Context context, IBinder targetInputToken,
             SelectionToolbarRenderService.TransferTouchListener transferTouchListener) {
@@ -52,20 +57,20 @@ public class FloatingToolbarRoot extends LinearLayout {
      * Sets the Rect that shows the selection toolbar content.
      */
     public void setContentRect(Rect contentRect) {
-        mContentRect = contentRect;
+        mContentRect.set(contentRect);
     }
 
     @Override
     @SuppressLint("ClickableViewAccessibility")
     public boolean dispatchTouchEvent(MotionEvent event) {
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-            int downX = (int) event.getX();
-            int downY = (int) event.getY();
+            mLastDownX = (int) event.getX();
+            mLastDownY = (int) event.getY();
             if (DEBUG) {
-                Log.d(TAG, "downX=" + downX + " downY=" + downY);
+                Log.d(TAG, "downX=" + mLastDownX + " downY=" + mLastDownY);
             }
             // TODO(b/215497659): Check FLAG_WINDOW_IS_PARTIALLY_OBSCURED
-            if (!mContentRect.contains(downX, downY)) {
+            if (!mContentRect.contains(mLastDownX, mLastDownY)) {
                 if (DEBUG) {
                     Log.d(TAG, "Transfer touch focus to application.");
                 }
@@ -74,5 +79,11 @@ public class FloatingToolbarRoot extends LinearLayout {
             }
         }
         return super.dispatchTouchEvent(event);
+    }
+
+    void dump(String prefix, PrintWriter pw) {
+        pw.print(prefix); pw.println("FloatingToolbarRoot:");
+        pw.print(prefix + "  "); pw.print("last down X: "); pw.println(mLastDownX);
+        pw.print(prefix + "  "); pw.print("last down Y: "); pw.println(mLastDownY);
     }
 }

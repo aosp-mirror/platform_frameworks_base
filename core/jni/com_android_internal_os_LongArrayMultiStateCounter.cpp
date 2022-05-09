@@ -111,17 +111,17 @@ static void native_writeToParcel(JNIEnv *env, jobject self, jlong nativePtr, job
                                  jint flags) {
     battery::LongArrayMultiStateCounter *counter =
             reinterpret_cast<battery::LongArrayMultiStateCounter *>(nativePtr);
-    AParcel *parcel = AParcel_fromJavaParcel(env, jParcel);
+    ndk::ScopedAParcel parcel(AParcel_fromJavaParcel(env, jParcel));
 
     uint16_t stateCount = counter->getStateCount();
-    THROW_ON_WRITE_ERROR(AParcel_writeInt32(parcel, stateCount));
+    THROW_ON_WRITE_ERROR(AParcel_writeInt32(parcel.get(), stateCount));
 
     // LongArrayMultiStateCounter has at least state 0
     const std::vector<uint64_t> &anyState = counter->getCount(0);
-    THROW_ON_WRITE_ERROR(AParcel_writeInt32(parcel, anyState.size()));
+    THROW_ON_WRITE_ERROR(AParcel_writeInt32(parcel.get(), anyState.size()));
 
     for (battery::state_t state = 0; state < stateCount; state++) {
-        THROW_ON_WRITE_ERROR(ndk::AParcel_writeVector(parcel, counter->getCount(state)));
+        THROW_ON_WRITE_ERROR(ndk::AParcel_writeVector(parcel.get(), counter->getCount(state)));
     }
 }
 
@@ -139,13 +139,13 @@ static void throwReadRE(JNIEnv *env, binder_status_t status) {
     }
 
 static jlong native_initFromParcel(JNIEnv *env, jclass theClass, jobject jParcel) {
-    AParcel *parcel = AParcel_fromJavaParcel(env, jParcel);
+    ndk::ScopedAParcel parcel(AParcel_fromJavaParcel(env, jParcel));
 
     int32_t stateCount;
-    THROW_ON_READ_ERROR(AParcel_readInt32(parcel, &stateCount));
+    THROW_ON_READ_ERROR(AParcel_readInt32(parcel.get(), &stateCount));
 
     int32_t arrayLength;
-    THROW_ON_READ_ERROR(AParcel_readInt32(parcel, &arrayLength));
+    THROW_ON_READ_ERROR(AParcel_readInt32(parcel.get(), &arrayLength));
 
     battery::LongArrayMultiStateCounter *counter =
             new battery::LongArrayMultiStateCounter(stateCount, std::vector<uint64_t>(arrayLength));
@@ -154,7 +154,7 @@ static jlong native_initFromParcel(JNIEnv *env, jclass theClass, jobject jParcel
     value.reserve(arrayLength);
 
     for (battery::state_t state = 0; state < stateCount; state++) {
-        THROW_ON_READ_ERROR(ndk::AParcel_readVector(parcel, &value));
+        THROW_ON_READ_ERROR(ndk::AParcel_readVector(parcel.get(), &value));
         counter->setValue(state, value);
     }
 

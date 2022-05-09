@@ -70,9 +70,14 @@ public class GnssConfiguration {
             "USE_EMERGENCY_PDN_FOR_EMERGENCY_SUPL";
     private static final String CONFIG_GPS_LOCK = "GPS_LOCK";
     private static final String CONFIG_ES_EXTENSION_SEC = "ES_EXTENSION_SEC";
-    public static final String CONFIG_NFW_PROXY_APPS = "NFW_PROXY_APPS";
-    public static final String CONFIG_ENABLE_PSDS_PERIODIC_DOWNLOAD =
+    static final String CONFIG_NFW_PROXY_APPS = "NFW_PROXY_APPS";
+    private static final String CONFIG_ENABLE_PSDS_PERIODIC_DOWNLOAD =
             "ENABLE_PSDS_PERIODIC_DOWNLOAD";
+    static final String CONFIG_LONGTERM_PSDS_SERVER_1 = "LONGTERM_PSDS_SERVER_1";
+    static final String CONFIG_LONGTERM_PSDS_SERVER_2 = "LONGTERM_PSDS_SERVER_2";
+    static final String CONFIG_LONGTERM_PSDS_SERVER_3 = "LONGTERM_PSDS_SERVER_3";
+    static final String CONFIG_NORMAL_PSDS_SERVER = "NORMAL_PSDS_SERVER";
+    static final String CONFIG_REALTIME_PSDS_SERVER = "REALTIME_PSDS_SERVER";
     // Limit on NI emergency mode time extension after emergency sessions ends
     private static final int MAX_EMERGENCY_MODE_EXTENSION_SECONDS = 300;  // 5 minute maximum
 
@@ -199,6 +204,15 @@ public class GnssConfiguration {
      */
     boolean isPsdsPeriodicDownloadEnabled() {
         return getBooleanConfig(CONFIG_ENABLE_PSDS_PERIODIC_DOWNLOAD, false);
+    }
+
+    /**
+     * Returns true if a long-term PSDS server is configured.
+     */
+    boolean isLongTermPsdsServerConfigured() {
+        return (mProperties.getProperty(CONFIG_LONGTERM_PSDS_SERVER_1) != null
+                || mProperties.getProperty(CONFIG_LONGTERM_PSDS_SERVER_2) != null
+                || mProperties.getProperty(CONFIG_LONGTERM_PSDS_SERVER_3) != null);
     }
 
     /**

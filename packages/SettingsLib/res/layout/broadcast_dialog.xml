@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2022 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/dialog_bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/broadcast_dialog_margin"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/dialog_icon"
+                android:layout_width="@dimen/broadcast_dialog_icon_size"
+                android:layout_height="@dimen/broadcast_dialog_icon_size"
+                android:layout_marginTop="@dimen/broadcast_dialog_icon_margin_top"
+                android:layout_marginBottom="@dimen/broadcast_dialog_title_img_margin_top"
+                android:layout_gravity="center"
+                android:src="@drawable/settings_input_antenna"/>
+
+            <TextView
+                style="@style/BroadcastDialogTitleStyle"
+                android:id="@+id/dialog_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_gravity="center"/>
+
+            <TextView
+                style="@style/BroadcastDialogBodyStyle"
+                android:id="@+id/dialog_subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_gravity="center"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/broadcast_dialog_margin"
+            android:layout_marginBottom="@dimen/broadcast_dialog_margin"
+            android:orientation="vertical">
+
+            <Button
+                android:layout_marginBottom="@dimen/broadcast_dialog_btn_margin_bottom"
+                android:id="@+id/positive_btn"
+                style="@style/BroadcastDialogButtonStyle"/>
+
+            <Button
+                android:layout_marginBottom="@dimen/broadcast_dialog_btn_margin_bottom"
+                android:id="@+id/negative_btn"
+                android:text="@string/bt_le_audio_broadcast_dialog_different_output"
+                style="@style/BroadcastDialogButtonStyle"/>
+
+            <Button
+                android:id="@+id/neutral_btn"
+                android:text="@android:string/cancel"
+                style="@style/BroadcastDialogButtonStyle"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</FrameLayout>

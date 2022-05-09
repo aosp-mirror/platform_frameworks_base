@@ -19,6 +19,7 @@ package com.android.server.pm.parsing.library;
 import android.util.ArrayMap;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.modules.utils.build.UnboundedSdkLevel;
 import com.android.server.SystemConfig;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 
@@ -51,8 +52,11 @@ public class ApexSharedLibraryUpdater extends PackageSharedLibraryUpdater {
 
     private void updateSharedLibraryForPackage(SystemConfig.SharedLibraryEntry entry,
             ParsedPackage parsedPackage) {
-        if (entry.onBootclasspathBefore != 0
-                && parsedPackage.getTargetSdkVersion() < entry.onBootclasspathBefore) {
+        if (entry.onBootclasspathBefore != null
+                && isTargetSdkAtMost(
+                        parsedPackage.getTargetSdkVersion(),
+                        entry.onBootclasspathBefore)
+                && UnboundedSdkLevel.isAtLeast(entry.onBootclasspathBefore)) {
             // this package targets an API where this library was in the BCP, so add
             // the library transparently in case the package is using it
             prefixRequiredLibrary(parsedPackage, entry.name);
@@ -63,5 +67,20 @@ public class ApexSharedLibraryUpdater extends PackageSharedLibraryUpdater {
             // it a second time
             removeLibrary(parsedPackage, entry.name);
         }
+    }
+
+    private static boolean isTargetSdkAtMost(int targetSdk, String onBcpBefore) {
+        if (isCodename(onBcpBefore)) {
+            return targetSdk < 10000;
+        }
+        return targetSdk < Integer.parseInt(onBcpBefore);
+    }
+
+    private static boolean isCodename(String version) {
+        if (version.length() == 0) {
+            throw new IllegalArgumentException();
+        }
+        // assume Android codenames start with upper case letters.
+        return Character.isUpperCase((version.charAt(0)));
     }
 }

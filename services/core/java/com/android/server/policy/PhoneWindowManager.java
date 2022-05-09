@@ -27,7 +27,6 @@ import static android.content.pm.PackageManager.FEATURE_LEANBACK;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.os.BatteryManager.BATTERY_PLUGGED_WIRELESS;
 import static android.os.Build.VERSION_CODES.M;
 import static android.os.Build.VERSION_CODES.O;
 import static android.provider.Settings.Secure.VOLUME_HUSH_OFF;
@@ -130,7 +129,6 @@ import android.media.AudioManagerInternal;
 import android.media.AudioSystem;
 import android.media.IAudioService;
 import android.media.session.MediaSessionLegacyHelper;
-import android.os.BatteryManagerInternal;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.DeviceIdleManager;
@@ -330,6 +328,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static public final String SYSTEM_DIALOG_REASON_HOME_KEY = "homekey";
     static public final String SYSTEM_DIALOG_REASON_ASSIST = "assist";
     static public final String SYSTEM_DIALOG_REASON_SCREENSHOT = "screenshot";
+    static public final String SYSTEM_DIALOG_REASON_GESTURE_NAV = "gestureNav";
 
     private static final String TALKBACK_LABEL = "TalkBack";
 
@@ -395,7 +394,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     PowerManagerInternal mPowerManagerInternal;
     IStatusBarService mStatusBarService;
     StatusBarManagerInternal mStatusBarManagerInternal;
-    BatteryManagerInternal mBatteryManagerInternal;
     AudioManagerInternal mAudioManagerInternal;
     DisplayManager mDisplayManager;
     DisplayManagerInternal mDisplayManagerInternal;
@@ -790,8 +788,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         @Override
         public void onWakeUp() {
             synchronized (mLock) {
-                if (shouldEnableWakeGestureLp()
-                        && mBatteryManagerInternal.getPlugType() != BATTERY_PLUGGED_WIRELESS) {
+                if (shouldEnableWakeGestureLp()) {
                     performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY, false,
                             "Wake Up");
                     wakeUp(SystemClock.uptimeMillis(), mAllowTheaterModeWakeFromWakeGesture,
@@ -848,15 +845,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    BatteryManagerInternal getBatteryManagerInternal() {
-        synchronized (mServiceAcquireLock) {
-            if (mBatteryManagerInternal == null) {
-                mBatteryManagerInternal =
-                        LocalServices.getService(BatteryManagerInternal.class);
-            }
-            return mBatteryManagerInternal;
-        }
-    }
 
     // returns true if the key was handled and should not be passed to the user
     private boolean backKeyPress() {
@@ -1022,7 +1010,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 }
                 case SHORT_PRESS_POWER_LOCK_OR_SLEEP: {
-                    if (keyguardOn()) {
+                    if (mKeyguardDelegate == null || !mKeyguardDelegate.hasKeyguard()
+                            || !mKeyguardDelegate.isSecure(mCurrentUserId) || keyguardOn()) {
                         sleepDefaultDisplayFromPowerButton(eventTime, 0);
                     } else {
                         lockNow(null /*options*/);
@@ -1489,11 +1478,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private long getAccessibilityShortcutTimeout() {
-        ViewConfiguration config = ViewConfiguration.get(mContext);
-        return Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, 0, mCurrentUserId) == 0
-                ? config.getAccessibilityShortcutKeyTimeout()
-                : config.getAccessibilityShortcutKeyTimeoutAfterConfirmation();
+        final ViewConfiguration config = ViewConfiguration.get(mContext);
+        final boolean hasDialogShown = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, 0, mCurrentUserId) != 0;
+        final boolean skipTimeoutRestriction =
+                Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.SKIP_ACCESSIBILITY_SHORTCUT_DIALOG_TIMEOUT_RESTRICTION, 0,
+                        mCurrentUserId) != 0;
+
+        // If users manually set the volume key shortcut for any accessibility service, the
+        // system would bypass the timeout restriction of the shortcut dialog.
+        return hasDialogShown || skipTimeoutRestriction
+                ? config.getAccessibilityShortcutKeyTimeoutAfterConfirmation()
+                : config.getAccessibilityShortcutKeyTimeout();
     }
 
     private long getScreenshotChordLongPressDelay() {
@@ -2123,7 +2120,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void initKeyCombinationRules() {
-        mKeyCombinationManager = new KeyCombinationManager();
+        mKeyCombinationManager = new KeyCombinationManager(mHandler);
         final boolean screenshotChordEnabled = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_enableScreenshotChord);
 
@@ -2214,10 +2211,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             mBackKeyHandled = true;
                             interceptAccessibilityGestureTv();
                         }
-
                         @Override
                         void cancel() {
                             cancelAccessibilityGestureTv();
+                        }
+                        @Override
+                        long getKeyInterceptDelayMs() {
+                            // Use a timeout of 0 to prevent additional latency in processing of
+                            // this key. This will potentially cause some unwanted UI actions if the
+                            // user does end up triggering the key combination later, but in most
+                            // cases, the user will simply hit a single key, and this will allow us
+                            // to process it without first waiting to see if the combination is
+                            // going to be triggered.
+                            return 0;
                         }
                     });
 
@@ -2228,10 +2234,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             mBackKeyHandled = true;
                             interceptBugreportGestureTv();
                         }
-
                         @Override
                         void cancel() {
                             cancelBugreportGestureTv();
+                        }
+                        @Override
+                        long getKeyInterceptDelayMs() {
+                            return 0;
                         }
                     });
         }
@@ -4504,6 +4513,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     // Called on the PowerManager's Notifier thread.
     @Override
+    public void onPowerGroupWakefulnessChanged(int groupId, int wakefulness,
+            @PowerManager.GoToSleepReason int pmSleepReason, int globalWakefulness) {
+        if (wakefulness != globalWakefulness
+                && wakefulness != PowerManagerInternal.WAKEFULNESS_AWAKE
+                && groupId == Display.DEFAULT_DISPLAY_GROUP
+                && mKeyguardDelegate != null) {
+            mKeyguardDelegate.doKeyguardTimeout(null);
+        }
+    }
+
+    // Called on the PowerManager's Notifier thread.
+    @Override
     public void startedWakingUp(@PowerManager.WakeReason int pmWakeReason) {
         EventLogTags.writeScreenToggled(1);
         if (DEBUG_WAKEUP) {
@@ -5432,8 +5453,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         VibrationAttributes attrs = getVibrationAttributes(effectId);
         if (always) {
             attrs = new VibrationAttributes.Builder(attrs)
-                    .setFlags(VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF,
-                            VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF)
+                    .setFlags(VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF)
                     .build();
         }
         mVibrator.vibrate(uid, packageName, effect, reason, attrs);

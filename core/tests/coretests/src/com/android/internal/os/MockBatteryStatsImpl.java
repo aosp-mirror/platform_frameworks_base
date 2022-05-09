@@ -26,6 +26,7 @@ import android.net.NetworkStats;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidActiveTimeReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidClusterTimeReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader;
@@ -190,6 +191,18 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
 
     public MockBatteryStatsImpl setOnBatteryInternal(boolean onBatteryInternal) {
         mOnBatteryInternal = onBatteryInternal;
+        return this;
+    }
+
+    @GuardedBy("this")
+    public MockBatteryStatsImpl setMaxHistoryFiles(int maxHistoryFiles) {
+        mConstants.MAX_HISTORY_FILES = maxHistoryFiles;
+        return this;
+    }
+
+    @GuardedBy("this")
+    public MockBatteryStatsImpl setMaxHistoryBuffer(int maxHistoryBuffer) {
+        mConstants.MAX_HISTORY_BUFFER = maxHistoryBuffer;
         return this;
     }
 

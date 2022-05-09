@@ -144,7 +144,7 @@ class NotificationShelfTest : SysuiTestCase() {
     }
 
     private fun setFractionToShade(fraction: Float) {
-        shelf.setFractionToShade(fraction)
+        whenever(ambientState.fractionToShade).thenReturn(fraction)
     }
 
     private fun setOnLockscreen(isOnLockscreen: Boolean) {

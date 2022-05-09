@@ -679,9 +679,9 @@ public class LocationManager {
      *
      * @hide
      */
-    // TODO: remove WRITE_SECURE_SETTINGS.
     @SystemApi
-    @RequiresPermission(anyOf = {WRITE_SECURE_SETTINGS, LOCATION_BYPASS})
+    @RequiresPermission(LOCATION_BYPASS)
+    @RequiresFeature(PackageManager.FEATURE_AUTOMOTIVE)
     public void setAdasGnssLocationEnabled(boolean enabled) {
         try {
             mService.setAdasGnssLocationEnabledForUser(enabled, mContext.getUser().getIdentifier());

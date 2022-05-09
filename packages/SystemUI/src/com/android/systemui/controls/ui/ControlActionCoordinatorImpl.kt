@@ -16,14 +16,20 @@
 
 package com.android.systemui.controls.ui
 
+import android.annotation.AnyThread
 import android.annotation.MainThread
+import android.app.AlertDialog
 import android.app.Dialog
 import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
+import android.database.ContentObserver
+import android.net.Uri
+import android.os.Handler
+import android.os.UserHandle
 import android.os.VibrationEffect
+import android.provider.Settings.Secure
 import android.service.controls.Control
 import android.service.controls.actions.BooleanAction
 import android.service.controls.actions.CommandAction
@@ -31,13 +37,20 @@ import android.service.controls.actions.FloatAction
 import android.util.Log
 import android.view.HapticFeedbackConstants
 import com.android.internal.annotations.VisibleForTesting
+import com.android.systemui.R
+import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.controls.ControlsMetricsLogger
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.statusbar.VibratorHelper
+import com.android.systemui.statusbar.phone.SystemUIDialog
+import com.android.systemui.statusbar.policy.DeviceControlsControllerImpl.Companion.PREFS_CONTROLS_FILE
+import com.android.systemui.statusbar.policy.DeviceControlsControllerImpl.Companion.PREFS_SETTINGS_DIALOG_ATTEMPTS
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.settings.SecureSettings
 import com.android.wm.shell.TaskViewFactory
 import java.util.Optional
 import javax.inject.Inject
@@ -48,20 +61,61 @@ class ControlActionCoordinatorImpl @Inject constructor(
     private val bgExecutor: DelayableExecutor,
     @Main private val uiExecutor: DelayableExecutor,
     private val activityStarter: ActivityStarter,
+    private val broadcastSender: BroadcastSender,
     private val keyguardStateController: KeyguardStateController,
     private val taskViewFactory: Optional<TaskViewFactory>,
     private val controlsMetricsLogger: ControlsMetricsLogger,
-    private val vibrator: VibratorHelper
+    private val vibrator: VibratorHelper,
+    private val secureSettings: SecureSettings,
+    private val userContextProvider: UserContextProvider,
+    @Main mainHandler: Handler
 ) : ControlActionCoordinator {
     private var dialog: Dialog? = null
     private var pendingAction: Action? = null
     private var actionsInProgress = mutableSetOf<String>()
     private val isLocked: Boolean
         get() = !keyguardStateController.isUnlocked()
+    private var mAllowTrivialControls: Boolean = secureSettings.getIntForUser(
+            Secure.LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS, 0, UserHandle.USER_CURRENT) != 0
+    private var mShowDeviceControlsInLockscreen: Boolean = secureSettings.getIntForUser(
+            Secure.LOCKSCREEN_SHOW_CONTROLS, 0, UserHandle.USER_CURRENT) != 0
     override lateinit var activityContext: Context
 
     companion object {
         private const val RESPONSE_TIMEOUT_IN_MILLIS = 3000L
+        private const val MAX_NUMBER_ATTEMPTS_CONTROLS_DIALOG = 2
+    }
+
+    init {
+        val lockScreenShowControlsUri =
+            secureSettings.getUriFor(Secure.LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS)
+        val showControlsUri =
+                secureSettings.getUriFor(Secure.LOCKSCREEN_SHOW_CONTROLS)
+        val controlsContentObserver = object : ContentObserver(mainHandler) {
+            override fun onChange(selfChange: Boolean, uri: Uri?) {
+                super.onChange(selfChange, uri)
+                when (uri) {
+                    lockScreenShowControlsUri -> {
+                        mAllowTrivialControls = secureSettings.getIntForUser(
+                                Secure.LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS,
+                                0, UserHandle.USER_CURRENT) != 0
+                    }
+                    showControlsUri -> {
+                        mShowDeviceControlsInLockscreen = secureSettings
+                                .getIntForUser(Secure.LOCKSCREEN_SHOW_CONTROLS,
+                                        0, UserHandle.USER_CURRENT) != 0
+                    }
+                }
+            }
+        }
+        secureSettings.registerContentObserverForUser(
+            lockScreenShowControlsUri,
+            false /* notifyForDescendants */, controlsContentObserver, UserHandle.USER_ALL
+        )
+        secureSettings.registerContentObserverForUser(
+            showControlsUri,
+            false /* notifyForDescendants */, controlsContentObserver, UserHandle.USER_ALL
+        )
     }
 
     override fun closeDialogs() {
@@ -78,9 +132,9 @@ class ControlActionCoordinatorImpl @Inject constructor(
                     cvh.layout.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
                     cvh.action(BooleanAction(templateId, !isChecked))
                 },
-                true /* blockable */
-            ),
-            isAuthRequired(cvh)
+                true /* blockable */,
+                cvh.cws.control?.isAuthRequired ?: true /* authIsRequired */
+            )
         )
     }
 
@@ -98,9 +152,9 @@ class ControlActionCoordinatorImpl @Inject constructor(
                         cvh.action(CommandAction(templateId))
                     }
                 },
-                blockable
-            ),
-            isAuthRequired(cvh)
+                blockable /* blockable */,
+                cvh.cws.control?.isAuthRequired ?: true /* authIsRequired */
+            )
         )
     }
 
@@ -118,9 +172,9 @@ class ControlActionCoordinatorImpl @Inject constructor(
             createAction(
                 cvh.cws.ci.controlId,
                 { cvh.action(FloatAction(templateId, newValue)) },
-                false /* blockable */
-            ),
-            isAuthRequired(cvh)
+                false /* blockable */,
+                cvh.cws.control?.isAuthRequired ?: true /* authIsRequired */
+            )
         )
     }
 
@@ -137,15 +191,16 @@ class ControlActionCoordinatorImpl @Inject constructor(
                         showDetail(cvh, it.getAppIntent())
                     }
                 },
-                false /* blockable */
-            ),
-            isAuthRequired(cvh)
+                false /* blockable */,
+                cvh.cws.control?.isAuthRequired ?: true /* authIsRequired */
+            )
         )
     }
 
     override fun runPendingAction(controlId: String) {
         if (isLocked) return
         if (pendingAction?.controlId == controlId) {
+            showSettingsDialogIfNeeded(pendingAction!!)
             pendingAction?.invoke()
             pendingAction = null
         }
@@ -155,8 +210,6 @@ class ControlActionCoordinatorImpl @Inject constructor(
     override fun enableActionOnTouch(controlId: String) {
         actionsInProgress.remove(controlId)
     }
-
-    private fun isAuthRequired(cvh: ControlViewHolder) = cvh.cws.control?.isAuthRequired() ?: true
 
     private fun shouldRunAction(controlId: String) =
         if (actionsInProgress.add(controlId)) {
@@ -168,11 +221,14 @@ class ControlActionCoordinatorImpl @Inject constructor(
             false
         }
 
+    @AnyThread
     @VisibleForTesting
-    fun bouncerOrRun(action: Action, authRequired: Boolean) {
+    fun bouncerOrRun(action: Action) {
+        val authRequired = action.authIsRequired || !mAllowTrivialControls
+
         if (keyguardStateController.isShowing() && authRequired) {
             if (isLocked) {
-                context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
+                broadcastSender.closeSystemDialogs()
 
                 // pending actions will only run after the control state has been refreshed
                 pendingAction = action
@@ -183,6 +239,7 @@ class ControlActionCoordinatorImpl @Inject constructor(
                 true
             }, { pendingAction = null }, true /* afterKeyguardGone */)
         } else {
+            showSettingsDialogIfNeeded(action)
             action.invoke()
         }
     }
@@ -202,7 +259,10 @@ class ControlActionCoordinatorImpl @Inject constructor(
                 // make sure the intent is valid before attempting to open the dialog
                 if (activities.isNotEmpty() && taskViewFactory.isPresent) {
                     taskViewFactory.get().create(context, uiExecutor, {
-                        dialog = DetailDialog(activityContext, it, pendingIntent, cvh).also {
+                        dialog = DetailDialog(
+                            activityContext, broadcastSender,
+                            it, pendingIntent, cvh
+                        ).also {
                             it.setOnDismissListener { _ -> dialog = null }
                             it.show()
                         }
@@ -214,11 +274,91 @@ class ControlActionCoordinatorImpl @Inject constructor(
         }
     }
 
-    @VisibleForTesting
-    fun createAction(controlId: String, f: () -> Unit, blockable: Boolean) =
-        Action(controlId, f, blockable)
+    private fun showSettingsDialogIfNeeded(action: Action) {
+        if (action.authIsRequired) {
+            return
+        }
+        val prefs = userContextProvider.userContext.getSharedPreferences(
+                PREFS_CONTROLS_FILE, Context.MODE_PRIVATE)
+        val attempts = prefs.getInt(PREFS_SETTINGS_DIALOG_ATTEMPTS, 0)
+        if (attempts >= MAX_NUMBER_ATTEMPTS_CONTROLS_DIALOG ||
+                (mShowDeviceControlsInLockscreen && mAllowTrivialControls)) {
+            return
+        }
+        val builder = AlertDialog
+                .Builder(activityContext, R.style.Theme_SystemUI_Dialog)
+                .setIcon(R.drawable.ic_warning)
+                .setOnCancelListener {
+                    if (attempts < MAX_NUMBER_ATTEMPTS_CONTROLS_DIALOG) {
+                        prefs.edit().putInt(PREFS_SETTINGS_DIALOG_ATTEMPTS, attempts + 1)
+                                .commit()
+                    }
+                    true
+                }
+                .setNeutralButton(R.string.controls_settings_dialog_neutral_button) { _, _ ->
+                    if (attempts != MAX_NUMBER_ATTEMPTS_CONTROLS_DIALOG) {
+                        prefs.edit().putInt(PREFS_SETTINGS_DIALOG_ATTEMPTS,
+                                MAX_NUMBER_ATTEMPTS_CONTROLS_DIALOG)
+                                .commit()
+                    }
+                    true
+                }
 
-    inner class Action(val controlId: String, val f: () -> Unit, val blockable: Boolean) {
+        if (mShowDeviceControlsInLockscreen) {
+            dialog = builder
+                    .setTitle(R.string.controls_settings_trivial_controls_dialog_title)
+                    .setMessage(R.string.controls_settings_trivial_controls_dialog_message)
+                    .setPositiveButton(R.string.controls_settings_dialog_positive_button) { _, _ ->
+                        if (attempts != MAX_NUMBER_ATTEMPTS_CONTROLS_DIALOG) {
+                            prefs.edit().putInt(PREFS_SETTINGS_DIALOG_ATTEMPTS,
+                                    MAX_NUMBER_ATTEMPTS_CONTROLS_DIALOG)
+                                    .commit()
+                        }
+                        secureSettings.putIntForUser(Secure.LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS, 1,
+                                UserHandle.USER_CURRENT)
+                        true
+                    }
+                    .create()
+        } else {
+            dialog = builder
+                    .setTitle(R.string.controls_settings_show_controls_dialog_title)
+                    .setMessage(R.string.controls_settings_show_controls_dialog_message)
+                    .setPositiveButton(R.string.controls_settings_dialog_positive_button) { _, _ ->
+                        if (attempts != MAX_NUMBER_ATTEMPTS_CONTROLS_DIALOG) {
+                            prefs.edit().putInt(PREFS_SETTINGS_DIALOG_ATTEMPTS,
+                                    MAX_NUMBER_ATTEMPTS_CONTROLS_DIALOG)
+                                    .commit()
+                        }
+                        secureSettings.putIntForUser(Secure.LOCKSCREEN_SHOW_CONTROLS,
+                                1, UserHandle.USER_CURRENT)
+                        secureSettings.putIntForUser(Secure.LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS,
+                                1, UserHandle.USER_CURRENT)
+                        true
+                    }
+                    .create()
+        }
+
+        SystemUIDialog.registerDismissListener(dialog)
+        SystemUIDialog.setDialogSize(dialog)
+
+        dialog?.create()
+        dialog?.show()
+    }
+
+    @VisibleForTesting
+    fun createAction(
+        controlId: String,
+        f: () -> Unit,
+        blockable: Boolean,
+        authIsRequired: Boolean
+    ) = Action(controlId, f, blockable, authIsRequired)
+
+    inner class Action(
+        val controlId: String,
+        val f: () -> Unit,
+        val blockable: Boolean,
+        val authIsRequired: Boolean
+    ) {
         fun invoke() {
             if (!blockable || shouldRunAction(controlId)) {
                 f.invoke()

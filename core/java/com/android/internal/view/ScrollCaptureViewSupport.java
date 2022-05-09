@@ -76,6 +76,7 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
         ContentResolver contentResolver = context.getContentResolver();
         mPostScrollDelayMillis = Settings.Global.getLong(contentResolver,
                 SETTING_CAPTURE_DELAY, SETTING_CAPTURE_DELAY_DEFAULT);
+        Log.d(TAG, "screenshot.scroll_capture_delay = " + mPostScrollDelayMillis);
     }
 
     /** Based on ViewRootImpl#updateColorModeIfNeeded */
@@ -271,6 +272,13 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
         Rect viewCaptureArea = new Rect(scrollResult.availableArea);
         viewCaptureArea.offset(0, -scrollResult.scrollDelta);
 
+        view.postOnAnimationDelayed(
+                () -> doCapture(scrollResult, view, viewCaptureArea, onComplete),
+                mPostScrollDelayMillis);
+    }
+
+    private void doCapture(ScrollResult scrollResult, V view, Rect viewCaptureArea,
+            Consumer<Rect> onComplete) {
         int result = mRenderer.renderView(view, viewCaptureArea);
         if (result == HardwareRenderer.SYNC_OK
                 || result == HardwareRenderer.SYNC_REDRAW_REQUESTED) {

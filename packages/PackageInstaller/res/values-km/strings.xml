@@ -46,7 +46,7 @@
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"មិន​អាច​ដំឡើង <xliff:g id="APP_NAME">%1$s</xliff:g> បានទេ។ សូម​បង្កើន​ទំហំ​ផ្ទុក​ទំនេរ​មួយចំនួន​ រួច​ព្យាយាម​ម្ដង​ទៀត។"</string>
     <string name="app_not_found_dlg_title" msgid="5107924008597470285">"រក​មិន​ឃើញ​កម្មវិធីទេ"</string>
     <string name="app_not_found_dlg_text" msgid="5219983779377811611">"រក​មិន​ឃើញ​កម្មវិធី​នេះ​នៅ​ក្នុង​បញ្ជី​កម្មវិធី​ដែល​បាន​ដំឡើងទេ។"</string>
-    <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"មិន​អនុញ្ញាត​ទេ"</string>
+    <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"មិន​បានអនុញ្ញាត​"</string>
     <string name="user_is_not_allowed_dlg_text" msgid="3468447791330611681">"មិនអនុញ្ញាតឱ្យអ្នកប្រើប្រាស់បច្ចុប្បន្ន​ធ្វើការលុបនេះទេ។"</string>
     <string name="generic_error_dlg_title" msgid="5863195085927067752">"បញ្ហា"</string>
     <string name="generic_error_dlg_text" msgid="5287861443265795232">"មិនអាចលុបកម្មវិធីបានទេ។"</string>

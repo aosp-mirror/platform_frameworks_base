@@ -15,5 +15,14 @@
      limitations under the License.
 -->
 <resources>
+    <!-- DialogLaunchAnimator -->
     <item type="id" name="launch_animation_running"/>
+
+    <!-- ViewBoundsAnimator -->
+    <item type="id" name="tag_animator"/>
+    <item type="id" name="tag_layout_listener"/>
+    <item type="id" name="tag_override_bottom"/>
+    <item type="id" name="tag_override_left"/>
+    <item type="id" name="tag_override_right"/>
+    <item type="id" name="tag_override_top"/>
 </resources>

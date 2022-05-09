@@ -76,6 +76,56 @@ public final class CompanionDeviceManager {
     private static final String LOG_TAG = "CompanionDeviceManager";
 
     /**
+     * The result code to propagate back to the originating activity, indicates the association
+     * dialog is explicitly declined by the users.
+     *
+     * @hide
+     */
+    public static final int RESULT_USER_REJECTED = 1;
+
+    /**
+     * The result code to propagate back to the originating activity, indicates the association
+     * dialog is dismissed if there's no device found after 20 seconds.
+     *
+     * @hide
+     */
+    public static final int RESULT_DISCOVERY_TIMEOUT = 2;
+
+    /**
+     * The result code to propagate back to the originating activity, indicates the internal error
+     * in CompanionDeviceManager.
+     *
+     * @hide
+     */
+    public static final int RESULT_INTERNAL_ERROR = 3;
+
+    /**
+     *  Requesting applications will receive the String in {@link Callback#onFailure} if the
+     *  association dialog is explicitly declined by the users. e.g. press the Don't allow button.
+     *
+     * @hide
+     */
+    public static final String REASON_USER_REJECTED = "user_rejected";
+
+    /**
+     *  Requesting applications will receive the String in {@link Callback#onFailure} if there's
+     *  no device found after 20 seconds.
+     *
+     * @hide
+     */
+    public static final String REASON_DISCOVERY_TIMEOUT = "discovery_timeout";
+
+    /**
+     *  Requesting applications will receive the String in {@link Callback#onFailure} if the
+     *  association dialog is in-explicitly declined by the users. e.g. phone is locked, switch to
+     *  another app or press outside the dialog.
+     *
+     * @hide
+     */
+    public static final String REASON_CANCELED = "canceled";
+
+
+    /**
      * A device, returned in the activity result of the {@link IntentSender} received in
      * {@link Callback#onDeviceFound}
      *

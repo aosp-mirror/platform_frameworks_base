@@ -16,6 +16,7 @@
 
 package com.android.systemui.hdmi;
 
+import android.os.UserHandle;
 import android.provider.Settings;
 
 import com.android.internal.app.LocalePicker;
@@ -50,8 +51,8 @@ public class HdmiCecSetMenuLanguageHelper {
             SecureSettings secureSettings) {
         mBackgroundExecutor = executor;
         mSecureSettings = secureSettings;
-        String denylist = mSecureSettings.getString(
-                Settings.Secure.HDMI_CEC_SET_MENU_LANGUAGE_DENYLIST);
+        String denylist = mSecureSettings.getStringForUser(
+                Settings.Secure.HDMI_CEC_SET_MENU_LANGUAGE_DENYLIST, UserHandle.USER_CURRENT);
         mDenylist = new HashSet<>(denylist == null
                 ? Collections.EMPTY_SET
                 : Arrays.asList(denylist.split(SEPARATOR)));
@@ -91,7 +92,7 @@ public class HdmiCecSetMenuLanguageHelper {
      */
     public void declineLocale() {
         mDenylist.add(mLocale.toLanguageTag());
-        mSecureSettings.putString(Settings.Secure.HDMI_CEC_SET_MENU_LANGUAGE_DENYLIST,
-                String.join(SEPARATOR, mDenylist));
+        mSecureSettings.putStringForUser(Settings.Secure.HDMI_CEC_SET_MENU_LANGUAGE_DENYLIST,
+                String.join(SEPARATOR, mDenylist), UserHandle.USER_CURRENT);
     }
 }

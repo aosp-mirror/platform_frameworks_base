@@ -24,7 +24,6 @@ import android.annotation.Nullable;
 import android.hardware.display.DisplayManager.VirtualDisplayFlag;
 import android.media.projection.MediaProjection;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.Surface;
@@ -95,11 +94,10 @@ public final class VirtualDisplayConfig implements Parcelable {
     private int mDisplayIdToMirror = DEFAULT_DISPLAY;
 
     /**
-     * The window token of the level of the WindowManager hierarchy to mirror, or null if mirroring
-     * should not be performed.
+     * Indicates if WindowManager is responsible for mirroring content to this VirtualDisplay, or
+     * if DisplayManager should record contents instead.
      */
-    @Nullable
-    private IBinder mWindowTokenClientToMirror = null;
+    private boolean mWindowManagerMirroring = false;
 
 
 
@@ -126,7 +124,7 @@ public final class VirtualDisplayConfig implements Parcelable {
             @Nullable Surface surface,
             @Nullable String uniqueId,
             int displayIdToMirror,
-            @Nullable IBinder windowTokenClientToMirror) {
+            boolean windowManagerMirroring) {
         this.mName = name;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mName);
@@ -148,7 +146,7 @@ public final class VirtualDisplayConfig implements Parcelable {
         this.mSurface = surface;
         this.mUniqueId = uniqueId;
         this.mDisplayIdToMirror = displayIdToMirror;
-        this.mWindowTokenClientToMirror = windowTokenClientToMirror;
+        this.mWindowManagerMirroring = windowManagerMirroring;
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -227,12 +225,12 @@ public final class VirtualDisplayConfig implements Parcelable {
     }
 
     /**
-     * The window token of the level of the WindowManager hierarchy to mirror, or null if mirroring
-     * should not be performed.
+     * Indicates if WindowManager is responsible for mirroring content to this VirtualDisplay, or
+     * if DisplayManager should record contents instead.
      */
     @DataClass.Generated.Member
-    public @Nullable IBinder getWindowTokenClientToMirror() {
-        return mWindowTokenClientToMirror;
+    public boolean isWindowManagerMirroring() {
+        return mWindowManagerMirroring;
     }
 
     @Override
@@ -242,9 +240,9 @@ public final class VirtualDisplayConfig implements Parcelable {
         // void parcelFieldName(Parcel dest, int flags) { ... }
 
         int flg = 0;
+        if (mWindowManagerMirroring) flg |= 0x100;
         if (mSurface != null) flg |= 0x20;
         if (mUniqueId != null) flg |= 0x40;
-        if (mWindowTokenClientToMirror != null) flg |= 0x100;
         dest.writeInt(flg);
         dest.writeString(mName);
         dest.writeInt(mWidth);
@@ -254,7 +252,6 @@ public final class VirtualDisplayConfig implements Parcelable {
         if (mSurface != null) dest.writeTypedObject(mSurface, flags);
         if (mUniqueId != null) dest.writeString(mUniqueId);
         dest.writeInt(mDisplayIdToMirror);
-        if (mWindowTokenClientToMirror != null) dest.writeStrongBinder(mWindowTokenClientToMirror);
     }
 
     @Override
@@ -269,6 +266,7 @@ public final class VirtualDisplayConfig implements Parcelable {
         // static FieldType unparcelFieldName(Parcel in) { ... }
 
         int flg = in.readInt();
+        boolean windowManagerMirroring = (flg & 0x100) != 0;
         String name = in.readString();
         int width = in.readInt();
         int height = in.readInt();
@@ -277,7 +275,6 @@ public final class VirtualDisplayConfig implements Parcelable {
         Surface surface = (flg & 0x20) == 0 ? null : (Surface) in.readTypedObject(Surface.CREATOR);
         String uniqueId = (flg & 0x40) == 0 ? null : in.readString();
         int displayIdToMirror = in.readInt();
-        IBinder windowTokenClientToMirror = (flg & 0x100) == 0 ? null : (IBinder) in.readStrongBinder();
 
         this.mName = name;
         com.android.internal.util.AnnotationValidations.validate(
@@ -300,7 +297,7 @@ public final class VirtualDisplayConfig implements Parcelable {
         this.mSurface = surface;
         this.mUniqueId = uniqueId;
         this.mDisplayIdToMirror = displayIdToMirror;
-        this.mWindowTokenClientToMirror = windowTokenClientToMirror;
+        this.mWindowManagerMirroring = windowManagerMirroring;
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -334,7 +331,7 @@ public final class VirtualDisplayConfig implements Parcelable {
         private @Nullable Surface mSurface;
         private @Nullable String mUniqueId;
         private int mDisplayIdToMirror;
-        private @Nullable IBinder mWindowTokenClientToMirror;
+        private boolean mWindowManagerMirroring;
 
         private long mBuilderFieldsSet = 0L;
 
@@ -470,14 +467,14 @@ public final class VirtualDisplayConfig implements Parcelable {
         }
 
         /**
-         * The window token of the level of the WindowManager hierarchy to mirror, or null if mirroring
-         * should not be performed.
+         * Indicates if WindowManager is responsible for mirroring content to this VirtualDisplay, or
+         * if DisplayManager should record contents instead.
          */
         @DataClass.Generated.Member
-        public @NonNull Builder setWindowTokenClientToMirror(@NonNull IBinder value) {
+        public @NonNull Builder setWindowManagerMirroring(boolean value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x100;
-            mWindowTokenClientToMirror = value;
+            mWindowManagerMirroring = value;
             return this;
         }
 
@@ -499,7 +496,7 @@ public final class VirtualDisplayConfig implements Parcelable {
                 mDisplayIdToMirror = DEFAULT_DISPLAY;
             }
             if ((mBuilderFieldsSet & 0x100) == 0) {
-                mWindowTokenClientToMirror = null;
+                mWindowManagerMirroring = false;
             }
             VirtualDisplayConfig o = new VirtualDisplayConfig(
                     mName,
@@ -510,7 +507,7 @@ public final class VirtualDisplayConfig implements Parcelable {
                     mSurface,
                     mUniqueId,
                     mDisplayIdToMirror,
-                    mWindowTokenClientToMirror);
+                    mWindowManagerMirroring);
             return o;
         }
 
@@ -523,10 +520,10 @@ public final class VirtualDisplayConfig implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1643938791506L,
+            time = 1646227247934L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/hardware/display/VirtualDisplayConfig.java",
-            inputSignatures = "private @android.annotation.NonNull java.lang.String mName\nprivate @android.annotation.IntRange int mWidth\nprivate @android.annotation.IntRange int mHeight\nprivate @android.annotation.IntRange int mDensityDpi\nprivate @android.hardware.display.DisplayManager.VirtualDisplayFlag int mFlags\nprivate @android.annotation.Nullable android.view.Surface mSurface\nprivate @android.annotation.Nullable java.lang.String mUniqueId\nprivate  int mDisplayIdToMirror\nprivate @android.annotation.Nullable android.os.IBinder mWindowTokenClientToMirror\nclass VirtualDisplayConfig extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genParcelable=true, genAidl=true, genBuilder=true)")
+            inputSignatures = "private @android.annotation.NonNull java.lang.String mName\nprivate @android.annotation.IntRange int mWidth\nprivate @android.annotation.IntRange int mHeight\nprivate @android.annotation.IntRange int mDensityDpi\nprivate @android.hardware.display.DisplayManager.VirtualDisplayFlag int mFlags\nprivate @android.annotation.Nullable android.view.Surface mSurface\nprivate @android.annotation.Nullable java.lang.String mUniqueId\nprivate  int mDisplayIdToMirror\nprivate  boolean mWindowManagerMirroring\nclass VirtualDisplayConfig extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genParcelable=true, genAidl=true, genBuilder=true)")
     @Deprecated
     private void __metadata() {}
 

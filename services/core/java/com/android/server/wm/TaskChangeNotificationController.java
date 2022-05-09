@@ -20,6 +20,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ITaskStackListener;
 import android.app.TaskInfo;
+import android.app.TaskStackListener;
 import android.content.ComponentName;
 import android.os.Binder;
 import android.os.Handler;
@@ -286,6 +287,9 @@ class TaskChangeNotificationController {
         if (listener instanceof Binder) {
             synchronized (mLocalTaskStackListeners) {
                 if (!mLocalTaskStackListeners.contains(listener)) {
+                    if (listener instanceof TaskStackListener) {
+                        ((TaskStackListener) listener).setIsLocal();
+                    }
                     mLocalTaskStackListeners.add(listener);
                 }
             }

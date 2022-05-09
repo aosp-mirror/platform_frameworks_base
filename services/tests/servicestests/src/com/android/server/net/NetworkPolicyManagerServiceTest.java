@@ -118,6 +118,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.Signature;
 import android.content.pm.UserInfo;
 import android.net.ConnectivityManager;
@@ -166,6 +167,7 @@ import com.android.internal.util.test.BroadcastInterceptingContext.FutureIntent;
 import com.android.internal.util.test.FsUtil;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.usage.AppStandbyInternal;
 
 import com.google.common.util.concurrent.AbstractFuture;
@@ -216,6 +218,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -274,6 +277,7 @@ public class NetworkPolicyManagerServiceTest {
             ArgumentCaptor.forClass(ConnectivityManager.NetworkCallback.class);
 
     private ActivityManagerInternal mActivityManagerInternal;
+    private PackageManagerInternal mPackageManagerInternal;
 
     private IUidObserver mUidObserver;
     private INetworkManagementEventObserver mNetworkObserver;
@@ -335,6 +339,7 @@ public class NetworkPolicyManagerServiceTest {
         when(usageStats.getIdleUidsForUser(anyInt())).thenReturn(new int[]{});
 
         mActivityManagerInternal = addLocalServiceMock(ActivityManagerInternal.class);
+        mPackageManagerInternal = addLocalServiceMock(PackageManagerInternal.class);
 
         final PowerSaveState state = new PowerSaveState.Builder()
                 .setBatterySaverEnabled(false).build();
@@ -436,14 +441,14 @@ public class NetworkPolicyManagerServiceTest {
         setNetpolicyXml(context);
 
         doAnswer(new Answer<Void>() {
-
             @Override
             public Void answer(InvocationOnMock invocation) throws Throwable {
                 mUidObserver = (IUidObserver) invocation.getArguments()[0];
                 Log.d(TAG, "set mUidObserver to " + mUidObserver);
                 return null;
             }
-        }).when(mActivityManager).registerUidObserver(any(), anyInt(), anyInt(), any(String.class));
+        }).when(mActivityManagerInternal).registerNetworkPolicyUidObserver(any(),
+                anyInt(), anyInt(), any(String.class));
 
         mFutureIntent = newRestrictBackgroundChangedFuture();
         mDeps = new TestDependencies(mServiceContext);
@@ -483,8 +488,15 @@ public class NetworkPolicyManagerServiceTest {
                 .thenReturn(buildApplicationInfo(PKG_NAME_B, UID_B));
         when(mPackageManager.getApplicationInfo(eq(PKG_NAME_C), anyInt()))
                 .thenReturn(buildApplicationInfo(PKG_NAME_C, UID_C));
-        when(mPackageManager.getInstalledApplications(anyInt())).thenReturn(
-                buildInstalledApplicationInfoList());
+        doAnswer(arg -> {
+            final Consumer<AndroidPackage> consumer =
+                    (Consumer<AndroidPackage>) arg.getArguments()[0];
+            for (AndroidPackage androidPackage : buildInstalledPackageList()) {
+                consumer.accept(androidPackage);
+            }
+            return null;
+        }).when(mPackageManagerInternal).forEachInstalledPackage(
+                any(Consumer.class), anyInt());
         when(mUserManager.getUsers()).thenReturn(buildUserInfoList());
         when(mNetworkManager.isBandwidthControlEnabled()).thenReturn(true);
         when(mNetworkManager.setDataSaverModeEnabled(anyBoolean())).thenReturn(true);
@@ -536,6 +548,7 @@ public class NetworkPolicyManagerServiceTest {
         LocalServices.removeServiceForTest(DeviceIdleInternal.class);
         LocalServices.removeServiceForTest(AppStandbyInternal.class);
         LocalServices.removeServiceForTest(UsageStatsManagerInternal.class);
+        LocalServices.removeServiceForTest(PackageManagerInternal.class);
     }
 
     @After
@@ -978,19 +991,20 @@ public class NetworkPolicyManagerServiceTest {
     @Test
     public void testUidForeground() throws Exception {
         // push all uids into background
-        callOnUidStateChanged(UID_A, ActivityManager.PROCESS_STATE_SERVICE, 0);
-        callOnUidStateChanged(UID_B, ActivityManager.PROCESS_STATE_SERVICE, 0);
+        long procStateSeq = 0;
+        callOnUidStateChanged(UID_A, ActivityManager.PROCESS_STATE_SERVICE, procStateSeq++);
+        callOnUidStateChanged(UID_B, ActivityManager.PROCESS_STATE_SERVICE, procStateSeq++);
         assertFalse(mService.isUidForeground(UID_A));
         assertFalse(mService.isUidForeground(UID_B));
 
         // push one of the uids into foreground
-        callOnUidStateChanged(UID_A, ActivityManager.PROCESS_STATE_TOP, 0);
+        callOnUidStateChanged(UID_A, ActivityManager.PROCESS_STATE_TOP, procStateSeq++);
         assertTrue(mService.isUidForeground(UID_A));
         assertFalse(mService.isUidForeground(UID_B));
 
         // and swap another uid into foreground
-        callOnUidStateChanged(UID_A, ActivityManager.PROCESS_STATE_SERVICE, 0);
-        callOnUidStateChanged(UID_B, ActivityManager.PROCESS_STATE_TOP, 0);
+        callOnUidStateChanged(UID_A, ActivityManager.PROCESS_STATE_SERVICE, procStateSeq++);
+        callOnUidStateChanged(UID_B, ActivityManager.PROCESS_STATE_TOP, procStateSeq++);
         assertFalse(mService.isUidForeground(UID_A));
         assertTrue(mService.isUidForeground(UID_B));
     }
@@ -2037,12 +2051,18 @@ public class NetworkPolicyManagerServiceTest {
         return ai;
     }
 
-    private List<ApplicationInfo> buildInstalledApplicationInfoList() {
-        final List<ApplicationInfo> installedApps = new ArrayList<>();
-        installedApps.add(buildApplicationInfo(PKG_NAME_A, UID_A));
-        installedApps.add(buildApplicationInfo(PKG_NAME_B, UID_B));
-        installedApps.add(buildApplicationInfo(PKG_NAME_C, UID_C));
+    private List<AndroidPackage> buildInstalledPackageList() {
+        final List<AndroidPackage> installedApps = new ArrayList<>();
+        installedApps.add(createPackageMock(UID_A));
+        installedApps.add(createPackageMock(UID_B));
+        installedApps.add(createPackageMock(UID_C));
         return installedApps;
+    }
+
+    private AndroidPackage createPackageMock(int uid) {
+        final AndroidPackage androidPackage = mock(AndroidPackage.class);
+        when(androidPackage.getUid()).thenReturn(uid);
+        return androidPackage;
     }
 
     private List<UserInfo> buildUserInfoList() {

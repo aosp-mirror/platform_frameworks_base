@@ -16,8 +16,8 @@
 package android.util;
 
 import static android.app.admin.DevicePolicyResources.Drawables.Style.SOLID_COLORED;
-import static android.app.admin.DevicePolicyResources.Drawables.UNDEFINED;
 import static android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_ICON_BADGE;
+import static android.app.admin.DevicePolicyResources.UNDEFINED;
 
 import android.annotation.UserIdInt;
 import android.app.admin.DevicePolicyManager;
@@ -88,7 +88,7 @@ public class IconDrawableFactory {
         }
         if (mUm.hasBadge(userId)) {
 
-            Drawable badge = mDpm.getDrawable(
+            Drawable badge = mDpm.getResources().getDrawable(
                     getUpdatableUserIconBadgeId(userId),
                     SOLID_COLORED,
                     () -> getDefaultUserIconBadge(userId));

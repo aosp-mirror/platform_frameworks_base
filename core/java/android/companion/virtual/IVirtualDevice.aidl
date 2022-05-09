@@ -17,7 +17,8 @@
 package android.companion.virtual;
 
 import android.app.PendingIntent;
-import android.companion.virtual.audio.IAudioSessionCallback;
+import android.companion.virtual.audio.IAudioConfigChangedCallback;
+import android.companion.virtual.audio.IAudioRoutingCallback;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.hardware.input.VirtualKeyEvent;
@@ -51,7 +52,8 @@ interface IVirtualDevice {
      */
     void onAudioSessionStarting(
             int displayId,
-            IAudioSessionCallback callback);
+            IAudioRoutingCallback routingCallback,
+            IAudioConfigChangedCallback configChangedCallback);
 
     void onAudioSessionEnded();
 

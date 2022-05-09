@@ -37,7 +37,7 @@ A fullscreen user switching activity, supporting add guest/user actions if confi
 
 Renders user switching as a dialog over the current surface, and supports add guest user/actions if configured.
 
-[1]: /frameworks/base/packages/SystemUI/docs/keyguard/bouncer.md
+[1]: /frameworks/base/packages/SystemUI/docs/device-entry/bouncer.md
 [2]: /frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/phone/MultiUserController.java
 [3]: /frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/policy/UserSwitcherController.java
 [4]: /frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/policy/KeyguardQsUserSwitchController.java

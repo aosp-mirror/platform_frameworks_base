@@ -88,14 +88,14 @@ class RingerModeLiveDataTest : SysuiTestCase() {
     fun testOnActive_broadcastRegistered() {
         liveData.observeForever(observer)
         verify(broadcastDispatcher)
-                .registerReceiver(any(), any(), eq(executor), eq(UserHandle.ALL), anyInt())
+                .registerReceiver(any(), any(), eq(executor), eq(UserHandle.ALL), anyInt(), any())
     }
 
     @Test
     fun testOnActive_intentFilterHasIntent() {
         liveData.observeForever(observer)
         verify(broadcastDispatcher).registerReceiver(any(), capture(intentFilterCaptor), any(),
-                any(), anyInt())
+                any(), anyInt(), any())
         assertTrue(intentFilterCaptor.value.hasAction(INTENT))
     }
 

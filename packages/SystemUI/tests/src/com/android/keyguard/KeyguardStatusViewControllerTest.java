@@ -22,8 +22,6 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.communal.CommunalStateController;
-import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -50,15 +48,11 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
     @Mock
     private KeyguardStateController mKeyguardStateController;
     @Mock
-    private CommunalStateController mCommunalStateController;
-    @Mock
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock
     ConfigurationController mConfigurationController;
     @Mock
     DozeParameters mDozeParameters;
-    @Mock
-    KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     @Mock
     ScreenOffAnimationController mScreenOffAnimationController;
     @Captor
@@ -76,10 +70,8 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
                 mKeyguardClockSwitchController,
                 mKeyguardStateController,
                 mKeyguardUpdateMonitor,
-                mCommunalStateController,
                 mConfigurationController,
                 mDozeParameters,
-                mKeyguardUnlockAnimationController,
                 mScreenOffAnimationController);
     }
 
@@ -115,5 +107,14 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
 
         mKeyguardUpdateMonitorCallbackCaptor.getValue().onUserSwitchComplete(0);
         verify(mKeyguardClockSwitchController).refreshFormat();
+    }
+
+    @Test
+    public void setTranslationYExcludingMedia_forwardsCallToView() {
+        float translationY = 123f;
+
+        mController.setTranslationYExcludingMedia(translationY);
+
+        verify(mKeyguardStatusView).setChildrenTranslationYExcludingMediaView(translationY);
     }
 }

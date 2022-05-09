@@ -963,6 +963,25 @@ public class WifiNl80211Manager {
     }
 
     /**
+     * Get the max number of SSIDs that the driver supports per scan.
+     *
+     * @param ifaceName Name of the interface.
+     */
+    public int getMaxSsidsPerScan(@NonNull String ifaceName) {
+        IWifiScannerImpl scannerImpl = getScannerImpl(ifaceName);
+        if (scannerImpl == null) {
+            Log.e(TAG, "No valid wificond scanner interface handler for iface=" + ifaceName);
+            return 0;
+        }
+        try {
+            return scannerImpl.getMaxSsidsPerScan();
+        } catch (RemoteException e1) {
+            Log.e(TAG, "Failed to getMaxSsidsPerScan");
+        }
+        return 0;
+    }
+
+    /**
      * Return scan type for the parcelable {@link SingleScanSettings}
      */
     private static int getScanType(@WifiAnnotations.ScanType int scanType) {
