@@ -18,8 +18,6 @@ package com.android.systemui.media
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
-import android.animation.AnimatorSet
-import com.android.internal.annotations.VisibleForTesting
 
 /**
  * MetadataAnimationHandler controls the current state of the MediaControlPanel's transition motion.
@@ -33,37 +31,37 @@ internal open class MetadataAnimationHandler(
     private val enterAnimator: Animator
 ) : AnimatorListenerAdapter() {
 
-    private val animator: AnimatorSet
     private var postExitUpdate: (() -> Unit)? = null
     private var postEnterUpdate: (() -> Unit)? = null
     private var targetData: Any? = null
 
     val isRunning: Boolean
-        get() = animator.isRunning
+        get() = enterAnimator.isRunning || exitAnimator.isRunning
 
     fun setNext(targetData: Any, postExit: () -> Unit, postEnter: () -> Unit): Boolean {
         if (targetData != this.targetData) {
             this.targetData = targetData
             postExitUpdate = postExit
             postEnterUpdate = postEnter
-            if (!animator.isRunning) {
-                animator.start()
+            if (!isRunning) {
+                exitAnimator.start()
             }
             return true
         }
         return false
     }
 
-    override fun onAnimationEnd(animator: Animator) {
-        if (animator === exitAnimator) {
+    override fun onAnimationEnd(anim: Animator) {
+        if (anim === exitAnimator) {
             postExitUpdate?.let { it() }
             postExitUpdate = null
+            enterAnimator.start()
         }
 
-        if (animator === enterAnimator) {
+        if (anim === enterAnimator) {
             // Another new update appeared while entering
             if (postExitUpdate != null) {
-                this.animator.start()
+                exitAnimator.start()
             } else {
                 postEnterUpdate?.let { it() }
                 postEnterUpdate = null
@@ -74,13 +72,5 @@ internal open class MetadataAnimationHandler(
     init {
         exitAnimator.addListener(this)
         enterAnimator.addListener(this)
-        animator = buildAnimatorSet(exitAnimator, enterAnimator)
-    }
-
-    @VisibleForTesting
-    protected open fun buildAnimatorSet(exit: Animator, enter: Animator): AnimatorSet {
-        val result = AnimatorSet()
-        result.playSequentially(exitAnimator, enterAnimator)
-        return result
     }
 }

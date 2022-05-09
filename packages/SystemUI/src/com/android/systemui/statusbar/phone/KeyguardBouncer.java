@@ -220,7 +220,7 @@ public class KeyguardBouncer {
                 DejankUtils.postAfterTraversal(mShowRunnable);
             }
 
-            mCallback.onBouncerVisiblityChanged(true /* shown */);
+            mKeyguardStateController.notifyBouncerShowing(true /* showing */);
             dispatchStartingToShow();
         } finally {
             Trace.endSection();
@@ -334,7 +334,7 @@ public class KeyguardBouncer {
         }
         mIsScrimmed = false;
         mFalsingCollector.onBouncerHidden();
-        mCallback.onBouncerVisiblityChanged(false /* shown */);
+        mKeyguardStateController.notifyBouncerShowing(false /* showing */);
         cancelShowRunnable();
         if (mKeyguardViewController != null) {
             mKeyguardViewController.cancelDismissAction();

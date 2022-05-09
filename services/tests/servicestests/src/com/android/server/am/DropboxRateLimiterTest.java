@@ -90,6 +90,16 @@ public class DropboxRateLimiterTest {
                 mRateLimiter.shouldRateLimit("tag", "p").droppedCountSinceRateLimitActivated());
         assertEquals(2,
                 mRateLimiter.shouldRateLimit("tag", "p").droppedCountSinceRateLimitActivated());
+
+        // After 11 seconds the rate limiting buffer will be cleared and rate limiting will stop.
+        mClock.setOffsetMillis(11000);
+
+        // The first call after rate limiting stops will still return the number of dropped events.
+        assertEquals(2,
+                mRateLimiter.shouldRateLimit("tag", "p").droppedCountSinceRateLimitActivated());
+        // The next call should show that the dropped event counter was reset.
+        assertEquals(0,
+                mRateLimiter.shouldRateLimit("tag", "p").droppedCountSinceRateLimitActivated());
     }
 
     private static class TestClock implements DropboxRateLimiter.Clock {

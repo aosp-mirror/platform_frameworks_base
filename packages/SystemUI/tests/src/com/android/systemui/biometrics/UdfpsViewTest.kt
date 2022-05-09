@@ -36,6 +36,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.nullable
@@ -43,7 +44,6 @@ import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 import org.mockito.Mockito.`when` as whenever
 
-private const val DISPLAY_ID = "" // default display id
 private const val SENSOR_X = 50
 private const val SENSOR_Y = 250
 private const val SENSOR_RADIUS = 10
@@ -146,7 +146,7 @@ class UdfpsViewTest : SysuiTestCase() {
         view.startIllumination(onDone)
 
         val illuminator = withArgCaptor<Runnable> {
-            verify(hbmProvider).enableHbm(capture())
+            verify(hbmProvider).enableHbm(anyBoolean(), capture())
         }
 
         assertThat(view.isIlluminationRequested).isTrue()

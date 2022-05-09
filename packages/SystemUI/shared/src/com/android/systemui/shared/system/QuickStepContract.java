@@ -123,6 +123,8 @@ public class QuickStepContract {
     public static final int SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED = 1 << 23;
     // The current app is in immersive mode
     public static final int SYSUI_STATE_IMMERSIVE_MODE = 1 << 24;
+    // The voice interaction session window is showing
+    public static final int SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING = 1 << 25;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SYSUI_STATE_SCREEN_PINNING,
@@ -149,7 +151,8 @@ public class QuickStepContract {
             SYSUI_STATE_DEVICE_DOZING,
             SYSUI_STATE_BACK_DISABLED,
             SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED,
-            SYSUI_STATE_IMMERSIVE_MODE
+            SYSUI_STATE_IMMERSIVE_MODE,
+            SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING
     })
     public @interface SystemUiStateFlags {}
 
@@ -184,6 +187,7 @@ public class QuickStepContract {
         str.add((flags & SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED) != 0
                 ? "bubbles_mange_menu_expanded" : "");
         str.add((flags & SYSUI_STATE_IMMERSIVE_MODE) != 0 ? "immersive_mode" : "");
+        str.add((flags & SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING) != 0 ? "vis_win_showing" : "");
         return str.toString();
     }
 
@@ -254,9 +258,11 @@ public class QuickStepContract {
      * disabled.
      */
     public static boolean isBackGestureDisabled(int sysuiStateFlags) {
-        // Always allow when the bouncer/global actions is showing (even on top of the keyguard)
+        // Always allow when the bouncer/global actions/voice session is showing (even on top of
+        // the keyguard)
         if ((sysuiStateFlags & SYSUI_STATE_BOUNCER_SHOWING) != 0
-                || (sysuiStateFlags & SYSUI_STATE_DIALOG_SHOWING) != 0) {
+                || (sysuiStateFlags & SYSUI_STATE_DIALOG_SHOWING) != 0
+                || (sysuiStateFlags & SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING) != 0) {
             return false;
         }
         if ((sysuiStateFlags & SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY) != 0) {

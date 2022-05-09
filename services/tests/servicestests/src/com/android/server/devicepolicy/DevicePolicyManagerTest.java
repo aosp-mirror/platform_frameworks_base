@@ -8613,8 +8613,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     private File getProfileOwnerPoliciesFile() {
-        File parentDir = dpms.mMockInjector.environmentGetUserSystemDirectory(
-                CALLER_USER_HANDLE);
+        File parentDir = getServices().pathProvider.getUserSystemDirectory(CALLER_USER_HANDLE);
         return getPoliciesFile(parentDir);
     }
 

@@ -37,6 +37,11 @@ public class ActivityOptions {
             new ComponentName(FLICKER_APP_PACKAGE,
                     FLICKER_APP_PACKAGE + ".ImeActivity");
 
+    public static final String IME_ACTIVITY_INITIALIZE_LAUNCHER_NAME = "ImeStateInitializeActivity";
+    public static final ComponentName IME_ACTIVITY_INITIALIZE_COMPONENT_NAME =
+            new ComponentName(FLICKER_APP_PACKAGE,
+                    FLICKER_APP_PACKAGE + ".ImeStateInitializeActivity");
+
     public static final String SIMPLE_ACTIVITY_LAUNCHER_NAME = "SimpleApp";
     public static final ComponentName SIMPLE_ACTIVITY_AUTO_FOCUS_COMPONENT_NAME =
             new ComponentName(FLICKER_APP_PACKAGE,

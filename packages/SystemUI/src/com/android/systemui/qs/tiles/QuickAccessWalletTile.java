@@ -147,16 +147,9 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
         if (mController.getWalletClient().isWalletServiceAvailable()
                 && mController.getWalletClient().isWalletFeatureAvailable()) {
             if (mSelectedCard != null) {
-                if (isDeviceLocked) {
-                    state.state = Tile.STATE_INACTIVE;
-                    state.secondaryLabel =
-                            mContext.getString(R.string.wallet_secondary_label_device_locked);
-                    state.sideViewCustomDrawable = null;
-                } else {
-                    state.state = Tile.STATE_ACTIVE;
-                    state.secondaryLabel = mSelectedCard.getContentDescription();
-                    state.sideViewCustomDrawable = mCardViewDrawable;
-                }
+                state.state = isDeviceLocked ? Tile.STATE_INACTIVE : Tile.STATE_ACTIVE;
+                state.secondaryLabel = mSelectedCard.getContentDescription();
+                state.sideViewCustomDrawable = mCardViewDrawable;
             } else {
                 state.state = Tile.STATE_INACTIVE;
                 state.secondaryLabel =
