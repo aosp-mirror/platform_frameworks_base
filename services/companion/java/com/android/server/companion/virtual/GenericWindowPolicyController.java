@@ -48,7 +48,6 @@ import com.android.internal.app.BlockedAppStreamingActivity;
 
 import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
 
 
 /**
@@ -66,6 +65,14 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         void onRunningAppsChanged(ArraySet<Integer> runningUids);
     }
 
+    /**
+     * For communicating when activities are blocked from running on the display by this policy
+     * controller.
+     */
+    public interface ActivityBlockedCallback {
+        /** Called when an activity is blocked.*/
+        void onActivityBlocked(int displayId, ActivityInfo activityInfo);
+    }
     private static final ComponentName BLOCKED_APP_STREAMING_COMPONENT =
             new ComponentName("android", BlockedAppStreamingActivity.class.getName());
 
@@ -89,7 +96,8 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     private final Object mGenericWindowPolicyControllerLock = new Object();
     @ActivityPolicy
     private final int mDefaultActivityPolicy;
-    private final Consumer<ActivityInfo> mActivityBlockedCallback;
+    private final ActivityBlockedCallback mActivityBlockedCallback;
+    private int mDisplayId = Display.INVALID_DISPLAY;
 
     @NonNull
     @GuardedBy("mGenericWindowPolicyControllerLock")
@@ -98,6 +106,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final ArraySet<RunningAppsChangedListener> mRunningAppsChangedListener =
             new ArraySet<>();
+    @Nullable
     private final @AssociationRequest.DeviceProfile String mDeviceProfile;
 
     /**
@@ -119,8 +128,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
      *   {@link VirtualDeviceParams#ACTIVITY_POLICY_DEFAULT_ALLOWED}
      * @param defaultActivityPolicy Whether activities are default allowed to be displayed or
      *   blocked.
-     * @param activityListener Activity listener to listen for activity changes. The display ID
-     *   is not populated in this callback and is always {@link Display#INVALID_DISPLAY}.
+     * @param activityListener Activity listener to listen for activity changes.
      * @param activityBlockedCallback Callback that is called when an activity is blocked from
      *   launching.
      * @param deviceProfile The {@link AssociationRequest.DeviceProfile} of this virtual device.
@@ -133,7 +141,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             @NonNull Set<ComponentName> blockedActivities,
             @ActivityPolicy int defaultActivityPolicy,
             @NonNull ActivityListener activityListener,
-            @NonNull Consumer<ActivityInfo> activityBlockedCallback,
+            @NonNull ActivityBlockedCallback activityBlockedCallback,
             @AssociationRequest.DeviceProfile String deviceProfile) {
         super();
         mAllowedUsers = allowedUsers;
@@ -146,6 +154,13 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         setInterestedWindowFlags(windowFlags, systemWindowFlags);
         mActivityListener = activityListener;
         mDeviceProfile = deviceProfile;
+    }
+
+    /**
+     * Expected to be called once this object is associated with a newly created display.
+     */
+    public void setDisplayId(int displayId) {
+        mDisplayId = displayId;
     }
 
     /** Register a listener for running applications changes. */
@@ -169,7 +184,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         for (int i = 0; i < activityCount; i++) {
             final ActivityInfo aInfo = activities.get(i);
             if (!canContainActivity(aInfo, /* windowFlags= */ 0, /* systemWindowFlags= */ 0)) {
-                mActivityBlockedCallback.accept(aInfo);
+                mActivityBlockedCallback.onActivityBlocked(mDisplayId, aInfo);
                 return false;
             }
         }
@@ -191,7 +206,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         }
 
         if (!canContainActivity(activityInfo, /* windowFlags= */  0, /* systemWindowFlags= */ 0)) {
-            mActivityBlockedCallback.accept(activityInfo);
+            mActivityBlockedCallback.onActivityBlocked(mDisplayId, activityInfo);
             return false;
         }
 
@@ -201,14 +216,14 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         if (isNewTask && !mBlockedCrossTaskNavigations.isEmpty()
                 && mBlockedCrossTaskNavigations.contains(activityComponent)) {
             Slog.d(TAG, "Virtual device blocking cross task navigation of " + activityComponent);
-            mActivityBlockedCallback.accept(activityInfo);
+            mActivityBlockedCallback.onActivityBlocked(mDisplayId, activityInfo);
             return false;
         }
         if (isNewTask && !mAllowedCrossTaskNavigations.isEmpty()
                 && !mAllowedCrossTaskNavigations.contains(activityComponent)) {
             Slog.d(TAG, "Virtual device not allowing cross task navigation of "
                     + activityComponent);
-            mActivityBlockedCallback.accept(activityInfo);
+            mActivityBlockedCallback.onActivityBlocked(mDisplayId, activityInfo);
             return false;
         }
 
@@ -220,7 +235,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     public boolean keepActivityOnWindowFlagsChanged(ActivityInfo activityInfo, int windowFlags,
             int systemWindowFlags) {
         if (!canContainActivity(activityInfo, windowFlags, systemWindowFlags)) {
-            mActivityBlockedCallback.accept(activityInfo);
+            mActivityBlockedCallback.onActivityBlocked(mDisplayId, activityInfo);
             return false;
         }
         return true;
@@ -234,7 +249,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         if (mActivityListener != null && topActivity != null) {
             // Post callback on the main thread so it doesn't block activity launching
             mHandler.post(() ->
-                    mActivityListener.onTopActivityChanged(Display.INVALID_DISPLAY, topActivity));
+                    mActivityListener.onTopActivityChanged(mDisplayId, topActivity));
         }
     }
 
@@ -245,7 +260,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             mRunningUids.addAll(runningUids);
             if (mActivityListener != null && mRunningUids.isEmpty()) {
                 // Post callback on the main thread so it doesn't block activity launching
-                mHandler.post(() -> mActivityListener.onDisplayEmpty(Display.INVALID_DISPLAY));
+                mHandler.post(() -> mActivityListener.onDisplayEmpty(mDisplayId));
             }
         }
         mHandler.post(() -> {
@@ -257,7 +272,10 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
 
     @Override
     public boolean canShowTasksInRecents() {
-        // TODO(b/234075973) : Remove this once proper API is ready.
+        if (mDeviceProfile == null) {
+            return true;
+        }
+       // TODO(b/234075973) : Remove this once proper API is ready.
         switch (mDeviceProfile) {
             case DEVICE_PROFILE_AUTOMOTIVE_PROJECTION:
                 return false;
