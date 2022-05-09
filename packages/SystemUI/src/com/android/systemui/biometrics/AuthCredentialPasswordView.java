@@ -16,12 +16,20 @@
 
 package com.android.systemui.biometrics;
 
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.view.WindowInsets.Type.ime;
+
 import android.annotation.NonNull;
 import android.content.Context;
+import android.graphics.Insets;
 import android.os.UserHandle;
 import android.text.InputType;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
+import android.view.View;
+import android.view.View.OnApplyWindowInsetsListener;
+import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImeAwareEditText;
@@ -31,18 +39,24 @@ import com.android.internal.widget.LockPatternChecker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.VerifyCredentialResponse;
+import com.android.systemui.Dumpable;
 import com.android.systemui.R;
+
+import java.io.PrintWriter;
 
 /**
  * Pin and Password UI
  */
 public class AuthCredentialPasswordView extends AuthCredentialView
-        implements TextView.OnEditorActionListener {
+        implements TextView.OnEditorActionListener, OnApplyWindowInsetsListener, Dumpable {
 
     private static final String TAG = "BiometricPrompt/AuthCredentialPasswordView";
 
     private final InputMethodManager mImm;
     private ImeAwareEditText mPasswordField;
+    private ViewGroup mAuthCredentialHeader;
+    private ViewGroup mAuthCredentialInput;
+    private int mBottomInset = 0;
 
     public AuthCredentialPasswordView(Context context,
             AttributeSet attrs) {
@@ -53,6 +67,9 @@ public class AuthCredentialPasswordView extends AuthCredentialView
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+
+        mAuthCredentialHeader = findViewById(R.id.auth_credential_header);
+        mAuthCredentialInput = findViewById(R.id.auth_credential_input);
         mPasswordField = findViewById(R.id.lockPassword);
         mPasswordField.setOnEditorActionListener(this);
         // TODO: De-dupe the logic with AuthContainerView
@@ -66,6 +83,8 @@ public class AuthCredentialPasswordView extends AuthCredentialView
             }
             return true;
         });
+
+        setOnApplyWindowInsetsListener(this);
     }
 
     @Override
@@ -126,5 +145,66 @@ public class AuthCredentialPasswordView extends AuthCredentialView
         } else {
             mPasswordField.setText("");
         }
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+
+        if (mAuthCredentialInput == null || mAuthCredentialHeader == null
+                || mSubtitleView == null || mPasswordField == null || mErrorView == null) {
+            return;
+        }
+
+        // b/157910732 In AuthContainerView#getLayoutParams() we used to prevent jank risk when
+        // resizing by IME show or hide, we used to setFitInsetsTypes `~WindowInsets.Type.ime()` to
+        // LP. As a result this view needs to listen onApplyWindowInsets() and handle onLayout.
+        int inputLeftBound;
+        int inputTopBound;
+        int headerRightBound = right;
+        if (getResources().getConfiguration().orientation == ORIENTATION_LANDSCAPE) {
+            inputTopBound = (bottom - (mPasswordField.getHeight() + mErrorView.getHeight())) / 2;
+            inputLeftBound = (right - left) / 2;
+            headerRightBound = inputLeftBound;
+        } else {
+            inputTopBound = mSubtitleView.getBottom() + (bottom - mSubtitleView.getBottom()) / 2;
+            inputLeftBound = (right - left - mAuthCredentialInput.getWidth()) / 2;
+        }
+
+        mAuthCredentialHeader.layout(left, top, headerRightBound, bottom);
+        mAuthCredentialInput.layout(inputLeftBound, inputTopBound, right, bottom);
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        final int newHeight = MeasureSpec.getSize(heightMeasureSpec) - mBottomInset;
+
+        setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), newHeight);
+
+        measureChildren(widthMeasureSpec,
+                MeasureSpec.makeMeasureSpec(newHeight, MeasureSpec.AT_MOST));
+    }
+
+    @NonNull
+    @Override
+    public WindowInsets onApplyWindowInsets(@NonNull View v, WindowInsets insets) {
+
+        final Insets bottomInset = insets.getInsets(ime());
+        if (v instanceof AuthCredentialPasswordView && mBottomInset != bottomInset.bottom) {
+            mBottomInset = bottomInset.bottom;
+            requestLayout();
+        }
+        return insets;
+    }
+
+    @Override
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
+        pw.println(TAG + "State:");
+        pw.println("  mBottomInset=" + mBottomInset);
+        pw.println("  mAuthCredentialHeader size=(" + mAuthCredentialHeader.getWidth() + ","
+                + mAuthCredentialHeader.getHeight());
+        pw.println("  mAuthCredentialInput size=(" + mAuthCredentialInput.getWidth() + ","
+                + mAuthCredentialInput.getHeight());
     }
 }
