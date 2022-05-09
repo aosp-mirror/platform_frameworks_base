@@ -4263,31 +4263,52 @@ public class ComputerEngine implements Computer {
     @Override
     public int checkUidSignatures(int uid1, int uid2) {
         final int callingUid = Binder.getCallingUid();
-        final SigningDetails p1SigningDetails = getSigningDetailsAndFilterAccess(uid1, callingUid);
-        final SigningDetails p2SigningDetails = getSigningDetailsAndFilterAccess(uid2, callingUid);
+        final int callingUserId = UserHandle.getUserId(callingUid);
+        final SigningDetails p1SigningDetails =
+                getSigningDetailsAndFilterAccess(uid1, callingUid, callingUserId);
+        final SigningDetails p2SigningDetails =
+                getSigningDetailsAndFilterAccess(uid2, callingUid, callingUserId);
         if (p1SigningDetails == null || p2SigningDetails == null) {
             return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
         }
         return checkSignaturesInternal(p1SigningDetails, p2SigningDetails);
     }
 
-    private SigningDetails getSigningDetailsAndFilterAccess(int uid, int callingUid) {
+    @Override
+    public int checkUidSignaturesForAllUsers(int uid1, int uid2) {
+        final int callingUid = Binder.getCallingUid();
+        final int userId1 = UserHandle.getUserId(uid1);
+        final int userId2 = UserHandle.getUserId(uid2);
+        enforceCrossUserPermission(callingUid, userId1, false /* requireFullPermission */,
+                false /* checkShell */, "checkUidSignaturesForAllUsers");
+        enforceCrossUserPermission(callingUid, userId2, false /* requireFullPermission */,
+                false /* checkShell */, "checkUidSignaturesForAllUsers");
+        final SigningDetails p1SigningDetails =
+                getSigningDetailsAndFilterAccess(uid1, callingUid, userId1);
+        final SigningDetails p2SigningDetails =
+                getSigningDetailsAndFilterAccess(uid2, callingUid, userId2);
+        if (p1SigningDetails == null || p2SigningDetails == null) {
+            return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
+        }
+        return checkSignaturesInternal(p1SigningDetails, p2SigningDetails);
+    }
+
+    private SigningDetails getSigningDetailsAndFilterAccess(int uid, int callingUid, int userId) {
         // Map to base uids.
         final int appId = UserHandle.getAppId(uid);
-        final int callingUserId = UserHandle.getUserId(callingUid);
         final Object obj = mSettings.getSettingBase(appId);
         if (obj == null) {
             return null;
         }
         if (obj instanceof SharedUserSetting) {
             final SharedUserSetting sus = (SharedUserSetting) obj;
-            if (shouldFilterApplicationIncludingUninstalled(sus, callingUid, callingUserId)) {
+            if (shouldFilterApplicationIncludingUninstalled(sus, callingUid, userId)) {
                 return null;
             }
             return sus.signatures.mSigningDetails;
         } else if (obj instanceof PackageSetting) {
             final PackageSetting ps = (PackageSetting) obj;
-            if (shouldFilterApplicationIncludingUninstalled(ps, callingUid, callingUserId)) {
+            if (shouldFilterApplicationIncludingUninstalled(ps, callingUid, userId)) {
                 return null;
             }
             return ps.getSigningDetails();
@@ -4356,7 +4377,9 @@ public class ComputerEngine implements Computer {
     public boolean hasUidSigningCertificate(int uid, @NonNull byte[] certificate,
             @PackageManager.CertificateInputType int type) {
         final int callingUid = Binder.getCallingUid();
-        final SigningDetails signingDetails = getSigningDetailsAndFilterAccess(uid, callingUid);
+        final int callingUserId = UserHandle.getUserId(callingUid);
+        final SigningDetails signingDetails =
+                getSigningDetailsAndFilterAccess(uid, callingUid, callingUserId);
         if (signingDetails == null) {
             return false;
         }

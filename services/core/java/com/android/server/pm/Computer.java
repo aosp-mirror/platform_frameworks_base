@@ -397,6 +397,8 @@ public interface Computer extends PackageDataSnapshot {
 
     int checkUidSignatures(int uid1, int uid2);
 
+    int checkUidSignaturesForAllUsers(int uid1, int uid2);
+
     boolean hasSigningCertificate(@NonNull String packageName, @NonNull byte[] certificate,
             @PackageManager.CertificateInputType int type);
 

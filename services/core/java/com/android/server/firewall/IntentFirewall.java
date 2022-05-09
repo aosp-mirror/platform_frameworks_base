@@ -25,6 +25,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.os.Binder;
 import android.os.Environment;
 import android.os.FileObserver;
 import android.os.Handler;
@@ -623,12 +624,13 @@ public class IntentFirewall {
     }
 
     boolean signaturesMatch(int uid1, int uid2) {
+        final long token = Binder.clearCallingIdentity();
         try {
-            IPackageManager pm = AppGlobals.getPackageManager();
-            return pm.checkUidSignatures(uid1, uid2) == PackageManager.SIGNATURE_MATCH;
-        } catch (RemoteException ex) {
-            Slog.e(TAG, "Remote exception while checking signatures", ex);
-            return false;
+            // Compare signatures of two packages for different users.
+            return LocalServices.getService(PackageManagerInternal.class)
+                    .checkUidSignaturesForAllUsers(uid1, uid2) == PackageManager.SIGNATURE_MATCH;
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
