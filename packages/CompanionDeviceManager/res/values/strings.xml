@@ -114,4 +114,10 @@
     <string name="permission_sync_summary">&lt;p&gt;This may include Microphone, Camera, and Location access, and other sensitive permissions on &lt;strong&gt;<xliff:g id="companion_device_name" example="Galaxy Watch 5">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt;
         &lt;p&gt;You can change these permissions any time in your Settings on &lt;strong&gt;<xliff:g id="companion_device_name" example="Galaxy Watch 5">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt;</string>
 
+    <!--Description for vendor icon [CHAR LIMIT=30]-->
+    <string name="vendor_icon_description">App Icon</string>
+
+    <!--Description for information icon [CHAR LIMIT=30]-->
+    <string name="vendor_header_button_description">More Information Button</string>
+
 </resources>
