@@ -20,7 +20,9 @@ class StatusBarLaunchAnimatorController(
 
     override fun onIntentStarted(willAnimate: Boolean) {
         delegate.onIntentStarted(willAnimate)
-        if (!willAnimate) {
+        if (willAnimate) {
+            centralSurfaces.notificationPanelViewController.setIsLaunchAnimationRunning(true)
+        } else {
             centralSurfaces.collapsePanelOnMainThread()
         }
     }
@@ -51,6 +53,7 @@ class StatusBarLaunchAnimatorController(
 
     override fun onLaunchAnimationCancelled() {
         delegate.onLaunchAnimationCancelled()
+        centralSurfaces.notificationPanelViewController.setIsLaunchAnimationRunning(false)
         centralSurfaces.onLaunchAnimationCancelled(isLaunchForActivity)
     }
 }
