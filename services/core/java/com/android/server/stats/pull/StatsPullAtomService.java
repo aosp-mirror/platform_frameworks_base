@@ -4352,7 +4352,8 @@ public class StatsPullAtomService extends SystemService {
             }
             RkpErrorStats atom = atomWrapper.payload.getRkpErrorStats();
             pulledData.add(FrameworkStatsLog.buildStatsEvent(
-                    FrameworkStatsLog.RKP_ERROR_STATS, atom.rkpError, atomWrapper.count));
+                    FrameworkStatsLog.RKP_ERROR_STATS, atom.rkpError, atomWrapper.count,
+                    atom.security_level));
         }
         return StatsManager.PULL_SUCCESS;
     }
