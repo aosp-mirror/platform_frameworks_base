@@ -1684,7 +1684,7 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"เปิด"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ปิด"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"อนุญาตให้ <xliff:g id="SERVICE">%1$s</xliff:g> ควบคุมอุปกรณ์อย่างเต็มที่ไหม"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"การควบคุมอย่างเต็มที่เหมาะสำหรับแอปที่ช่วยคุณในเรื่องความต้องการความช่วยเหลือพิเศษแต่ไม่เหมาะสำหรับแอปส่วนใหญ่"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"การควบคุมอย่างเต็มที่เหมาะสำหรับแอปเกี่ยวกับความช่วยเหลือพิเศษ แต่ไม่เหมาะสำหรับแอปส่วนใหญ่"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"ดูและควบคุมหน้าจอ"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"การควบคุมนี้สามารถอ่านเนื้อหาทั้งหมดบนหน้าจอและแสดงเนื้อหาทับแอปอื่นๆ"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"ดูและดำเนินการ"</string>
@@ -1717,7 +1717,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"กำลังเปลี่ยนเป็น <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"กำลังออกจากระบบ <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="8713560351570795743">"เจ้าของ"</string>
-    <string name="guest_name" msgid="8502103277839834324">"ผู้มาเยือน"</string>
+    <string name="guest_name" msgid="8502103277839834324">"ผู้ใช้ชั่วคราว"</string>
     <string name="error_message_title" msgid="4082495589294631966">"ข้อผิดพลาด"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"ผู้ดูแลระบบไม่อนุญาตให้ทำการเปลี่ยนแปลงนี้"</string>
     <string name="app_not_found" msgid="3429506115332341800">"ไม่พบแอปพลิเคชันสำหรับการทำงานนี้"</string>
@@ -1963,7 +1963,7 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"เชื่อมต่อ <xliff:g id="PRODUCT_NAME">%1$s</xliff:g> แล้ว"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"แตะเพื่อดูไฟล์"</string>
     <string name="pin_target" msgid="8036028973110156895">"ปักหมุด"</string>
-    <string name="pin_specific_target" msgid="7824671240625957415">"ตรึง <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="pin_specific_target" msgid="7824671240625957415">"ปักหมุด <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="unpin_target" msgid="3963318576590204447">"เลิกปักหมุด"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"เลิกปักหมุด <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="app_info" msgid="6113278084877079851">"ข้อมูลแอป"</string>
