@@ -1626,7 +1626,6 @@ public class InputMethodService extends AbstractInputMethodService {
             // when IME developers are doing something unsupported.
             InputMethodPrivilegedOperationsRegistry.remove(mToken);
         }
-        unregisterCompatOnBackInvokedCallback();
         mImeDispatcher = null;
     }
 
@@ -2789,6 +2788,11 @@ public class InputMethodService extends AbstractInputMethodService {
         if (mInkWindow != null) {
             finishStylusHandwriting();
         }
+        // Back callback is typically unregistered in {@link #hideWindow()}, but it's possible
+        // for {@link #doFinishInput()} to be called without {@link #hideWindow()} so we also
+        // unregister here.
+        // TODO(b/232341407): Add CTS to verify back behavior after screen on / off.
+        unregisterCompatOnBackInvokedCallback();
     }
 
     void doStartInput(InputConnection ic, EditorInfo attribute, boolean restarting) {
