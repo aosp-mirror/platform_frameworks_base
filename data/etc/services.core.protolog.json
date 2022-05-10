@@ -2497,12 +2497,6 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "323235828": {
-      "message": "Delaying app transition for recents animation to finish",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_APP_TRANSITIONS",
-      "at": "com\/android\/server\/wm\/AppTransitionController.java"
-    },
     "327461496": {
       "message": "Complete pause: %s",
       "level": "VERBOSE",

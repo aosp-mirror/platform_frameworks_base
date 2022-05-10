@@ -530,12 +530,36 @@ public class BrightnessTracker {
         }
     }
 
+    // Return the path to the given file, either the new path
+    // /data/system/$filename, or the old path /data/system_de/$filename if the
+    // file exists there but not at the new path.  Only use this for EVENTS_FILE
+    // and AMBIENT_BRIGHTNESS_STATS_FILE.
+    //
+    // Explanation: this service previously incorrectly stored these two files
+    // directly in /data/system_de, instead of in /data/system where they should
+    // have been.  As system_server no longer has write access to
+    // /data/system_de itself, these files were moved to /data/system.  To
+    // lazily migrate the files, we simply read from the old path if it exists
+    // and the new one doesn't, and always write to the new path.  Note that
+    // system_server doesn't have permission to delete the old files.
+    private AtomicFile getFileWithLegacyFallback(String filename) {
+        AtomicFile file = mInjector.getFile(filename);
+        if (file != null && !file.exists()) {
+            AtomicFile legacyFile = mInjector.getLegacyFile(filename);
+            if (legacyFile != null && legacyFile.exists()) {
+                Slog.i(TAG, "Reading " + filename + " from old location");
+                return legacyFile;
+            }
+        }
+        return file;
+    }
+
     private void readEvents() {
         synchronized (mEventsLock) {
             // Read might prune events so mark as dirty.
             mEventsDirty = true;
             mEvents.clear();
-            final AtomicFile readFrom = mInjector.getFile(EVENTS_FILE);
+            final AtomicFile readFrom = getFileWithLegacyFallback(EVENTS_FILE);
             if (readFrom != null && readFrom.exists()) {
                 FileInputStream input = null;
                 try {
@@ -553,7 +577,7 @@ public class BrightnessTracker {
 
     private void readAmbientBrightnessStats() {
         mAmbientBrightnessStatsTracker = new AmbientBrightnessStatsTracker(mUserManager, null);
-        final AtomicFile readFrom = mInjector.getFile(AMBIENT_BRIGHTNESS_STATS_FILE);
+        final AtomicFile readFrom = getFileWithLegacyFallback(AMBIENT_BRIGHTNESS_STATS_FILE);
         if (readFrom != null && readFrom.exists()) {
             FileInputStream input = null;
             try {
@@ -1123,6 +1147,10 @@ public class BrightnessTracker {
         }
 
         public AtomicFile getFile(String filename) {
+            return new AtomicFile(new File(Environment.getDataSystemDirectory(), filename));
+        }
+
+        public AtomicFile getLegacyFile(String filename) {
             return new AtomicFile(new File(Environment.getDataSystemDeDirectory(), filename));
         }
 

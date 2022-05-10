@@ -58,6 +58,7 @@ import static android.content.Context.BIND_AUTO_CREATE;
 import static android.content.Context.BIND_FOREGROUND_SERVICE;
 import static android.content.Context.BIND_NOT_PERCEPTIBLE;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK;
+import static android.content.pm.PackageManager.FEATURE_TELECOM;
 import static android.content.pm.PackageManager.FEATURE_TELEVISION;
 import static android.content.pm.PackageManager.MATCH_ALL;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
@@ -656,10 +657,10 @@ public class NotificationManagerService extends SystemService {
 
     private int mWarnRemoteViewsSizeBytes;
     private int mStripRemoteViewsSizeBytes;
-    final boolean mEnableAppSettingMigration;
     private boolean mForceUserSetOnUpgrade;
 
     private MetricsLogger mMetricsLogger;
+    private NotificationChannelLogger mNotificationChannelLogger;
     private TriPredicate<String, Integer, String> mAllowedManagedServicePackages;
 
     private final SavePolicyFileRunnable mSavePolicyFile = new SavePolicyFileRunnable();
@@ -1999,12 +2000,6 @@ public class NotificationManagerService extends SystemService {
         mNotificationRecordLogger = notificationRecordLogger;
         mNotificationInstanceIdSequence = notificationInstanceIdSequence;
         Notification.processAllowlistToken = ALLOWLIST_TOKEN;
-        // TODO (b/194833441): remove when OS is ready for migration. This flag is checked once
-        // rather than having a settings observer because some of the behaviors (e.g. readXml) only
-        // happen on reboot
-        mEnableAppSettingMigration = Settings.Secure.getIntForUser(
-                getContext().getContentResolver(),
-                Settings.Secure.NOTIFICATION_PERMISSION_ENABLED, 0, USER_SYSTEM) == 1;
     }
 
     // TODO - replace these methods with new fields in the VisibleForTesting constructor
@@ -2162,6 +2157,11 @@ public class NotificationManagerService extends SystemService {
         mAccessibilityManager = am;
     }
 
+    @VisibleForTesting
+    void setTelecomManager(TelecomManager tm) {
+        mTelecomManager = tm;
+    }
+
     // TODO: All tests should use this init instead of the one-off setters above.
     @VisibleForTesting
     void init(WorkerHandler handler, RankingHandler rankingHandler,
@@ -2179,7 +2179,7 @@ public class NotificationManagerService extends SystemService {
             TelephonyManager telephonyManager, ActivityManagerInternal ami,
             MultiRateLimiter toastRateLimiter, PermissionHelper permissionHelper,
             UsageStatsManagerInternal usageStatsManagerInternal,
-            TelecomManager telecomManager) {
+            TelecomManager telecomManager, NotificationChannelLogger channelLogger) {
         mHandler = handler;
         Resources resources = getContext().getResources();
         mMaxPackageEnqueueRate = Settings.Global.getFloat(getContext().getContentResolver(),
@@ -2276,12 +2276,13 @@ public class NotificationManagerService extends SystemService {
             }
         });
         mPermissionHelper = permissionHelper;
+        mNotificationChannelLogger = channelLogger;
         mPreferencesHelper = new PreferencesHelper(getContext(),
                 mPackageManagerClient,
                 mRankingHandler,
                 mZenModeHelper,
                 mPermissionHelper,
-                new NotificationChannelLoggerImpl(),
+                mNotificationChannelLogger,
                 mAppOps,
                 new SysUiStatsEvent.BuilderFactory());
         mRankingHelper = new RankingHelper(getContext(),
@@ -2362,9 +2363,6 @@ public class NotificationManagerService extends SystemService {
                 mPackageManagerClient.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE, 0);
         mNotificationEffectsEnabledForAutomotive =
                 resources.getBoolean(R.bool.config_enableServerNotificationEffectsForAutomotive);
-
-        mPreferencesHelper.lockChannelsForOEM(getContext().getResources().getStringArray(
-                com.android.internal.R.array.config_nonBlockableNotificationPackages));
 
         mZenModeHelper.setPriorityOnlyDndExemptPackages(getContext().getResources().getStringArray(
                 com.android.internal.R.array.config_priorityOnlyDndExemptPackages));
@@ -2505,10 +2503,11 @@ public class NotificationManagerService extends SystemService {
                 LocalServices.getService(ActivityManagerInternal.class),
                 createToastRateLimiter(), new PermissionHelper(LocalServices.getService(
                         PermissionManagerServiceInternal.class), AppGlobals.getPackageManager(),
-                        AppGlobals.getPermissionManager(), mEnableAppSettingMigration,
+                        AppGlobals.getPermissionManager(),
                         mForceUserSetOnUpgrade),
                 LocalServices.getService(UsageStatsManagerInternal.class),
-                getContext().getSystemService(TelecomManager.class));
+                getContext().getSystemService(TelecomManager.class),
+                new NotificationChannelLoggerImpl());
 
         publishBinderService(Context.NOTIFICATION_SERVICE, mService, /* allowIsolated= */ false,
                 DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PRIORITY_NORMAL);
@@ -2800,7 +2799,7 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private void updateNotificationChannelInt(String pkg, int uid, NotificationChannel channel,
+    void updateNotificationChannelInt(String pkg, int uid, NotificationChannel channel,
             boolean fromListener) {
         if (channel.getImportance() == NotificationManager.IMPORTANCE_NONE) {
             // cancel
@@ -2822,11 +2821,9 @@ public class NotificationManagerService extends SystemService {
                 mPreferencesHelper.getNotificationChannel(pkg, uid, channel.getId(), true);
 
         mPreferencesHelper.updateNotificationChannel(pkg, uid, channel, true);
-        if (mEnableAppSettingMigration) {
-            if (mPreferencesHelper.onlyHasDefaultChannel(pkg, uid)) {
-                mPermissionHelper.setNotificationPermission(pkg, UserHandle.getUserId(uid),
-                        channel.getImportance() != IMPORTANCE_NONE, true);
-            }
+        if (mPreferencesHelper.onlyHasDefaultChannel(pkg, uid)) {
+            mPermissionHelper.setNotificationPermission(pkg, UserHandle.getUserId(uid),
+                    channel.getImportance() != IMPORTANCE_NONE, true);
         }
         maybeNotifyChannelOwner(pkg, uid, preUpdate, channel);
 
@@ -3475,36 +3472,19 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void setNotificationsEnabledForPackage(String pkg, int uid, boolean enabled) {
             enforceSystemOrSystemUI("setNotificationsEnabledForPackage");
-            if (mEnableAppSettingMigration) {
-                boolean wasEnabled = mPermissionHelper.hasPermission(uid);
-                if (wasEnabled == enabled) {
-                    return;
-                }
-                mPermissionHelper.setNotificationPermission(
-                        pkg, UserHandle.getUserId(uid), enabled, true);
-                sendAppBlockStateChangedBroadcast(pkg, uid, !enabled);
-            } else {
-                synchronized (mNotificationLock) {
-                    boolean wasEnabled = mPreferencesHelper.getImportance(pkg, uid)
-                            != NotificationManager.IMPORTANCE_NONE;
-
-                    if (wasEnabled == enabled) {
-                        return;
-                    }
-                }
-
-                mPreferencesHelper.setEnabled(pkg, uid, enabled);
-                // TODO (b/194833441): this is being ignored by app ops now that the permission
-                // exists, so send the broadcast manually
-                mAppOps.setMode(AppOpsManager.OP_POST_NOTIFICATION, uid, pkg,
-                        enabled ? MODE_ALLOWED : AppOpsManager.MODE_IGNORED);
-
-                sendAppBlockStateChangedBroadcast(pkg, uid, !enabled);
+            boolean wasEnabled = mPermissionHelper.hasPermission(uid);
+            if (wasEnabled == enabled) {
+                return;
             }
+            mPermissionHelper.setNotificationPermission(
+                    pkg, UserHandle.getUserId(uid), enabled, true);
+            sendAppBlockStateChangedBroadcast(pkg, uid, !enabled);
+
             mMetricsLogger.write(new LogMaker(MetricsEvent.ACTION_BAN_APP_NOTES)
                     .setType(MetricsEvent.TYPE_ACTION)
                     .setPackageName(pkg)
                     .setSubtype(enabled ? 1 : 0));
+            mNotificationChannelLogger.logAppNotificationsAllowed(uid, pkg, enabled);
             // Now, cancel any outstanding notifications that are part of a just-disabled app
             if (!enabled) {
                 cancelAllNotificationsInt(MY_UID, MY_PID, pkg, null, 0, 0, true,
@@ -3530,8 +3510,6 @@ public class NotificationManagerService extends SystemService {
         public void setNotificationsEnabledWithImportanceLockForPackage(
                 String pkg, int uid, boolean enabled) {
             setNotificationsEnabledForPackage(pkg, uid, enabled);
-
-            mPreferencesHelper.setAppImportanceLocked(pkg, uid);
         }
 
         /**
@@ -3647,14 +3625,10 @@ public class NotificationManagerService extends SystemService {
         @Override
         public int getPackageImportance(String pkg) {
             checkCallerIsSystemOrSameApp(pkg);
-            if (mEnableAppSettingMigration) {
-                if (mPermissionHelper.hasPermission(Binder.getCallingUid())) {
-                    return IMPORTANCE_DEFAULT;
-                } else {
-                    return IMPORTANCE_NONE;
-                }
+            if (mPermissionHelper.hasPermission(Binder.getCallingUid())) {
+                return IMPORTANCE_DEFAULT;
             } else {
-                return mPreferencesHelper.getImportance(pkg, Binder.getCallingUid());
+                return IMPORTANCE_NONE;
             }
         }
 
@@ -5886,8 +5860,7 @@ public class NotificationManagerService extends SystemService {
     NotificationRecord createAutoGroupSummary(int userId, String pkg, String triggeringKey,
             boolean needsOngoingFlag) {
         NotificationRecord summaryRecord = null;
-        boolean isPermissionFixed = mPermissionHelper.isMigrationEnabled()
-                ? mPermissionHelper.isPermissionFixed(pkg, userId) : false;
+        boolean isPermissionFixed = mPermissionHelper.isPermissionFixed(pkg, userId);
         synchronized (mNotificationLock) {
             NotificationRecord notificationRecord = mNotificationsByKey.get(triggeringKey);
             if (notificationRecord == null) {
@@ -5896,10 +5869,6 @@ public class NotificationManagerService extends SystemService {
                 return null;
             }
             NotificationChannel channel = notificationRecord.getChannel();
-            boolean isImportanceFixed = mPermissionHelper.isMigrationEnabled()
-                    ? isPermissionFixed
-                    : (channel.isImportanceLockedByOEM()
-                            || channel.isImportanceLockedByCriticalDeviceFunction());
             final StatusBarNotification adjustedSbn = notificationRecord.getSbn();
             userId = adjustedSbn.getUser().getIdentifier();
             int uid =  adjustedSbn.getUid();
@@ -5945,7 +5914,7 @@ public class NotificationManagerService extends SystemService {
                                 System.currentTimeMillis());
                 summaryRecord = new NotificationRecord(getContext(), summarySbn,
                         notificationRecord.getChannel());
-                summaryRecord.setImportanceFixed(isImportanceFixed);
+                summaryRecord.setImportanceFixed(isPermissionFixed);
                 summaryRecord.setIsAppImportanceLocked(
                         notificationRecord.getIsAppImportanceLocked());
                 summaries.put(pkg, summarySbn.getKey());
@@ -5993,10 +5962,6 @@ public class NotificationManagerService extends SystemService {
     @VisibleForTesting
     protected ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>>
             getAllUsersNotificationPermissions() {
-        // don't bother if migration is not enabled
-        if (!mEnableAppSettingMigration) {
-            return null;
-        }
         ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> allPermissions = new ArrayMap<>();
         final List<UserInfo> allUsers = mUm.getUsers();
         // for each of these, get the package notification permissions that are associated
@@ -6510,13 +6475,8 @@ public class NotificationManagerService extends SystemService {
                     + ", notificationUid=" + notificationUid
                     + ", notification=" + notification;
             Slog.e(TAG, noChannelStr);
-            boolean appNotificationsOff;
-            if (mEnableAppSettingMigration) {
-                appNotificationsOff = !mPermissionHelper.hasPermission(notificationUid);
-            } else {
-                appNotificationsOff = mPreferencesHelper.getImportance(pkg, notificationUid)
-                        == NotificationManager.IMPORTANCE_NONE;
-            }
+            boolean appNotificationsOff = !mPermissionHelper.hasPermission(notificationUid);
+
 
             if (!appNotificationsOff) {
                 doChannelWarningToast(notificationUid,
@@ -6528,14 +6488,11 @@ public class NotificationManagerService extends SystemService {
         }
 
         final NotificationRecord r = new NotificationRecord(getContext(), n, channel);
-        r.setIsAppImportanceLocked(mPreferencesHelper.getIsAppImportanceLocked(pkg, callingUid));
+        r.setIsAppImportanceLocked(mPermissionHelper.isPermissionUserSet(pkg, userId));
         r.setPostSilently(postSilently);
         r.setFlagBubbleRemoved(false);
         r.setPkgAllowedAsConvo(mMsgPkgsAllowedAsConvos.contains(pkg));
-        boolean isImportanceFixed = mPermissionHelper.isMigrationEnabled()
-                ? mPermissionHelper.isPermissionFixed(pkg, userId)
-                : (channel.isImportanceLockedByOEM()
-                        || channel.isImportanceLockedByCriticalDeviceFunction());
+        boolean isImportanceFixed = mPermissionHelper.isPermissionFixed(pkg, userId);
         r.setImportanceFixed(isImportanceFixed);
 
         if ((notification.flags & Notification.FLAG_FOREGROUND_SERVICE) != 0) {
@@ -6979,19 +6936,20 @@ public class NotificationManagerService extends SystemService {
     private boolean isCallNotification(String pkg, int uid) {
         final long identity = Binder.clearCallingIdentity();
         try {
-            return mTelecomManager.isInManagedCall() || mTelecomManager.isInSelfManagedCall(
-                    pkg, UserHandle.getUserHandleForUid(uid));
+            if (mPackageManagerClient.hasSystemFeature(FEATURE_TELECOM)
+                    && mTelecomManager != null) {
+                return mTelecomManager.isInManagedCall()
+                        || mTelecomManager.isInSelfManagedCall(
+                                pkg, UserHandle.getUserHandleForUid(uid));
+            }
+            return false;
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
     }
 
     private boolean areNotificationsEnabledForPackageInt(String pkg, int uid) {
-        if (mEnableAppSettingMigration) {
-            return mPermissionHelper.hasPermission(uid);
-        } else {
-            return mPreferencesHelper.getImportance(pkg, uid) != IMPORTANCE_NONE;
-        }
+        return mPermissionHelper.hasPermission(uid);
     }
 
     protected int getNotificationCount(String pkg, int userId, int excludedId,
@@ -7406,6 +7364,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void run() {
             boolean appBanned = !areNotificationsEnabledForPackageInt(pkg, uid);
+            boolean isCallNotification = isCallNotification(pkg, uid);
             synchronized (mNotificationLock) {
                 try {
                     NotificationRecord r = null;
@@ -7424,8 +7383,10 @@ public class NotificationManagerService extends SystemService {
 
                     final StatusBarNotification n = r.getSbn();
                     final Notification notification = n.getNotification();
+                    boolean isCallNotificationAndCorrectStyle = isCallNotification
+                            && notification.isStyle(Notification.CallStyle.class);
 
-                    if (!notification.isMediaNotification()
+                    if (!(notification.isMediaNotification() || isCallNotificationAndCorrectStyle)
                             && (appBanned || isRecordBlockedLocked(r))) {
                         mUsageStats.registerBlocked(r);
                         if (DBG) {
