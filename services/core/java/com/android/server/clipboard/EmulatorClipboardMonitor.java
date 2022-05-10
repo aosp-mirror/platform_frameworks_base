@@ -25,6 +25,7 @@ import android.system.OsConstants;
 import android.system.VmSocketAddress;
 import android.util.Slog;
 
+import java.io.EOFException;
 import java.io.FileDescriptor;
 import java.io.InterruptedIOException;
 import java.net.SocketException;
@@ -93,16 +94,16 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
         }
     }
 
-    private byte[] receiveMessage() throws ErrnoException, InterruptedIOException {
+    private byte[] receiveMessage() throws ErrnoException, InterruptedIOException, EOFException {
         final byte[] lengthBits = new byte[4];
-        Os.read(mPipe, lengthBits, 0, lengthBits.length);
+        readFully(mPipe, lengthBits, 0, lengthBits.length);
 
         final ByteBuffer bb = ByteBuffer.wrap(lengthBits);
         bb.order(ByteOrder.LITTLE_ENDIAN);
         final int msgLen = bb.getInt();
 
         final byte[] msg = new byte[msgLen];
-        Os.read(mPipe, msg, 0, msg.length);
+        readFully(mPipe, msg, 0, msg.length);
 
         return msg;
     }
@@ -115,8 +116,8 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
         bb.order(ByteOrder.LITTLE_ENDIAN);
         bb.putInt(msg.length);
 
-        Os.write(fd, lengthBits, 0, lengthBits.length);
-        Os.write(fd, msg, 0, msg.length);
+        writeFully(fd, lengthBits, 0, lengthBits.length);
+        writeFully(fd, msg, 0, msg.length);
     }
 
     EmulatorClipboardMonitor(final Consumer<ClipData> setAndroidClipboard) {
@@ -141,7 +142,7 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
                         Slog.i(TAG, "Setting the guest clipboard to '" + str + "'");
                     }
                     setAndroidClipboard.accept(clip);
-                } catch (ErrnoException | InterruptedIOException e) {
+                } catch (ErrnoException | EOFException | InterruptedIOException e) {
                     closePipe();
                 } catch (InterruptedException | IllegalArgumentException e) {
                 }
@@ -180,6 +181,34 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
                 }
             });
             t.start();
+        }
+    }
+
+    private static void readFully(final FileDescriptor fd,
+                                  final byte[] buf, int offset, int size)
+                                  throws ErrnoException, InterruptedIOException, EOFException {
+        while (size > 0) {
+            final int r = Os.read(fd, buf, offset, size);
+            if (r > 0) {
+                offset += r;
+                size -= r;
+            } else {
+                throw new EOFException();
+            }
+        }
+    }
+
+    private static void writeFully(final FileDescriptor fd,
+                                   final byte[] buf, int offset, int size)
+                                   throws ErrnoException, InterruptedIOException {
+        while (size > 0) {
+            final int r = Os.write(fd, buf, offset, size);
+            if (r > 0) {
+                offset += r;
+                size -= r;
+            } else {
+                throw new ErrnoException("write", OsConstants.EIO);
+            }
         }
     }
 }
