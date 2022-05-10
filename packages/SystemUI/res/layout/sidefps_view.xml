@@ -14,11 +14,13 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<com.android.systemui.biometrics.SidefpsView
+<com.airbnb.lottie.LottieAnimationView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:systemui="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/sidefps_view"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:contentDescription="@string/accessibility_fingerprint_label">
-</com.android.systemui.biometrics.SidefpsView>
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/sidefps_animation"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    app:lottie_autoPlay="true"
+    app:lottie_loop="true"
+    app:lottie_rawRes="@raw/sfps_pulse"
+    android:contentDescription="@string/accessibility_fingerprint_label"/>

@@ -54,11 +54,11 @@ class DualToneHandler(context: Context) {
                 Utils.getThemeAttr(context, R.attr.lightIconTheme))
         darkColor = Color(
                 Utils.getColorAttrDefaultColor(dualToneDarkTheme, R.attr.singleToneColor),
-                Utils.getColorAttrDefaultColor(dualToneDarkTheme, R.attr.backgroundColor),
+                Utils.getColorAttrDefaultColor(dualToneDarkTheme, R.attr.iconBackgroundColor),
                 Utils.getColorAttrDefaultColor(dualToneDarkTheme, R.attr.fillColor))
         lightColor = Color(
                 Utils.getColorAttrDefaultColor(dualToneLightTheme, R.attr.singleToneColor),
-                Utils.getColorAttrDefaultColor(dualToneLightTheme, R.attr.backgroundColor),
+                Utils.getColorAttrDefaultColor(dualToneLightTheme, R.attr.iconBackgroundColor),
                 Utils.getColorAttrDefaultColor(dualToneLightTheme, R.attr.fillColor))
     }
 

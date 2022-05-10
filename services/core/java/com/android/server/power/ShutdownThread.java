@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManagerInternal;
 import android.media.AudioAttributes;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -213,7 +214,7 @@ public final class ShutdownThread extends Thread {
         CloseDialogReceiver(Context context) {
             mContext = context;
             IntentFilter filter = new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-            context.registerReceiver(this, filter);
+            context.registerReceiver(this, filter, Context.RECEIVER_EXPORTED);
         }
 
         @Override
@@ -315,15 +316,15 @@ public final class ShutdownThread extends Thread {
                             com.android.internal.R.string.reboot_to_update_reboot));
             }
         } else if (mReason != null && mReason.equals(PowerManager.REBOOT_RECOVERY)) {
-            if (showSysuiReboot()) {
-                return null;
-            } else if (RescueParty.isAttemptingFactoryReset()) {
+            if (RescueParty.isAttemptingFactoryReset()) {
                 // We're not actually doing a factory reset yet; we're rebooting
                 // to ask the user if they'd like to reset, so give them a less
                 // scary dialog message.
                 pd.setTitle(context.getText(com.android.internal.R.string.power_off));
                 pd.setMessage(context.getText(com.android.internal.R.string.shutdown_progress));
                 pd.setIndeterminate(true);
+            } else if (showSysuiReboot()) {
+                return null;
             } else {
                 // Factory reset path. Set the dialog message accordingly.
                 pd.setTitle(context.getText(com.android.internal.R.string.reboot_to_reset_title));
@@ -525,8 +526,7 @@ public final class ShutdownThread extends Thread {
         shutdownTimingLog.traceBegin("ShutdownPackageManager");
         metricStarted(METRIC_PM);
 
-        final PackageManagerService pm = (PackageManagerService)
-            ServiceManager.getService("package");
+        final PackageManagerInternal pm = LocalServices.getService(PackageManagerInternal.class);
         if (pm != null) {
             pm.shutdown();
         }

@@ -63,8 +63,12 @@ public class ExtensionControllerImplTest extends SysuiTestCase {
         mPluginManager = mDependency.injectMockDependency(PluginManager.class);
         mTunerService = mDependency.injectMockDependency(TunerService.class);
         mConfigurationController = mDependency.injectMockDependency(ConfigurationController.class);
-        mExtensionController = new ExtensionControllerImpl(mContext,
-                mock(LeakDetector.class), mPluginManager, mTunerService, mConfigurationController);
+        mExtensionController = new ExtensionControllerImpl(
+                mContext,
+                mock(LeakDetector.class),
+                mPluginManager,
+                mTunerService,
+                mConfigurationController);
     }
 
     @Test

@@ -24,6 +24,11 @@ using namespace android;
 
 static jclass gAudioDeviceAttributesClass;
 static jmethodID gAudioDeviceAttributesCstor;
+static struct {
+    jfieldID mAddress;
+    jfieldID mNativeType;
+    // other fields unused by JNI
+} gAudioDeviceAttributesFields;
 
 namespace android {
 
@@ -33,10 +38,23 @@ jint createAudioDeviceAttributesFromNative(JNIEnv *env, jobject *jAudioDeviceAtt
     jint jNativeType = (jint)devTypeAddr->mType;
     ScopedLocalRef<jstring> jAddress(env, env->NewStringUTF(devTypeAddr->getAddress()));
 
-    *jAudioDeviceAttributes = env->NewObject(gAudioDeviceAttributesClass, gAudioDeviceAttributesCstor,
-            jNativeType, jAddress.get());
+    *jAudioDeviceAttributes =
+        env->NewObject(gAudioDeviceAttributesClass, gAudioDeviceAttributesCstor,
+                       jNativeType, jAddress.get());
 
     return jStatus;
+}
+
+jint createAudioDeviceTypeAddrFromJava(JNIEnv *env, AudioDeviceTypeAddr *devTypeAddr,
+                                       const jobject jAudioDeviceAttributes) {
+    devTypeAddr->mType = (audio_devices_t)env->GetIntField(jAudioDeviceAttributes,
+                         gAudioDeviceAttributesFields.mNativeType);
+
+    jstring jAddress = (jstring)env->GetObjectField(jAudioDeviceAttributes,
+                       gAudioDeviceAttributesFields.mAddress);
+    devTypeAddr->setAddress(ScopedUtfChars(env, jAddress).c_str());
+
+    return AUDIO_JAVA_SUCCESS;
 }
 
 } // namespace android
@@ -47,6 +65,11 @@ int register_android_media_AudioDeviceAttributes(JNIEnv *env) {
     gAudioDeviceAttributesClass = MakeGlobalRefOrDie(env, audioDeviceTypeAddressClass);
     gAudioDeviceAttributesCstor =
             GetMethodIDOrDie(env, audioDeviceTypeAddressClass, "<init>", "(ILjava/lang/String;)V");
+
+    gAudioDeviceAttributesFields.mNativeType =
+            GetFieldIDOrDie(env, gAudioDeviceAttributesClass, "mNativeType", "I");
+    gAudioDeviceAttributesFields.mAddress =
+            GetFieldIDOrDie(env, gAudioDeviceAttributesClass, "mAddress", "Ljava/lang/String;");
 
     return 0;
 }
