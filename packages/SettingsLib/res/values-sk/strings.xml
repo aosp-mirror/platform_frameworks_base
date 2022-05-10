@@ -280,7 +280,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certifikácia bezdrôtového zobrazenia"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Podrobné denníky Wi‑Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Pribrzdiť vyhľadávanie sietí Wi‑Fi"</string>
-    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Randomizácia dočasnej adresy MAC siete Wi‑Fi"</string>
+    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Randomizovať dočasnú adresu MAC siete Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobilné dáta ponechať vždy aktívne"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Hardvérová akcelerácia tetheringu"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Zobrazovať zariadenia Bluetooth bez názvov"</string>
@@ -381,7 +381,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Zobraziť vo výstrižku ohraničenie, okraje a pod."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Rozloženie sprava doľava"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Vynútiť pre všetky jazyky rozloženie obrazovky sprava doľava"</string>
-    <string name="window_blurs" msgid="6831008984828425106">"Povolenie rozmazania na úrovni okna"</string>
+    <string name="window_blurs" msgid="6831008984828425106">"Povoliť rozmazanie na úrovni okna"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Vynútiť 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Povoliť 4x MSAA v aplikáciách OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Ladiť operácie s neobdĺžnikovými výstrižkami"</string>
@@ -600,11 +600,11 @@
     <string name="guest_resetting" msgid="7822120170191509566">"Relácia hosťa sa resetuje…"</string>
     <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Chcete resetovať reláciu hosťa?"</string>
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Týmto sa spustí nová relácia hosťa a odstránia sa všetky aplikácie a údaje z aktuálnej relácie"</string>
-    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Chcete skončiť režim pre hostí?"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Chcete ukončiť režim pre hostí?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Ukončí sa režim pre hostí a odstránia sa aplikácie a údaje z relácie hosťa"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Ukončiť"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Chcete uložiť aktivitu hosťa?"</string>
-    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Aktivitu v aktuálnej relácii uložte alebo odstráňte všetky aplikácie a údaje"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Môžte uložiť aktivitu aktuálnej relácie alebo odstrániť všetky aplikácie a údaje"</string>
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Odstrániť"</string>
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Uložiť"</string>
     <string name="guest_exit_button" msgid="5774985819191803960">"Ukončiť režim pre hostí"</string>
@@ -612,7 +612,7 @@
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Ukončiť režim pre hostí"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Pri ukončení sa všetka aktivita odstráni"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Aktivitu môžete pri ukončení uložiť alebo odstrániť"</string>
-    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Resetovaním ihneď odstráňte aktivitu relácie alebo ju uložte či odstráňte pri ukončení relácie"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Resetovaním ihneď odstránite aktivitu relácie alebo ju uložte či odstráňte pri ukončení relácie"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Odfotiť"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Vybrať obrázok"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Vybrať fotku"</string>
@@ -674,4 +674,7 @@
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Ak vysielate aplikáciu <xliff:g id="SWITCHAPP">%1$s</xliff:g> alebo zmeníte výstup, aktuálne vysielanie bude zastavené"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Vysielanie aplikácie <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Zmena výstupu"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"Prediktívne animácie gesta Späť"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Povoľte animácie v systéme pre prediktívne gesto Späť"</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Toto nastavenie povoľuje animácie v systéme na účely prediktívnej animácie gest. Vyžaduje nastavenie povolenia enableOnBackInvokedCallback na pravdu v súbore manifestu konkrétnej aplikácie."</string>
 </resources>

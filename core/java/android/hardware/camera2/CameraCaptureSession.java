@@ -1241,8 +1241,9 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * {@link #onCaptureStarted}. Unlike {@link #onCaptureStarted}, instead of passing
          * a timestamp of start of exposure, this callback passes a timestamp of start of
          * camera data readout. This is useful because for a camera running at fixed frame
-         * rate, the start of readout is at fixed interval, but not necessary for the start
-         * of exposure.</p>
+         * rate, the start of readout is at fixed interval, which is not necessarily true for
+         * the start of exposure, particularly when autoexposure is changing exposure duration
+         * between frames.</p>
          *
          * <p>This timestamp may not match {@link CaptureResult#SENSOR_TIMESTAMP the result
          * timestamp field}. It will, however, match the timestamp of buffers sent to the

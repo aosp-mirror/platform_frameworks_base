@@ -127,9 +127,9 @@
     <item msgid="578444932039713369">"Włączony"</item>
   </string-array>
   <string-array name="tile_states_reverse">
-    <item msgid="3574611556622963971">"Niedostępny"</item>
-    <item msgid="8707481475312432575">"Wyłączony"</item>
-    <item msgid="8031106212477483874">"Włączony"</item>
+    <item msgid="3574611556622963971">"Niedostępne"</item>
+    <item msgid="8707481475312432575">"Wyłączone"</item>
+    <item msgid="8031106212477483874">"Włączone"</item>
   </string-array>
   <string-array name="tile_states_reduce_brightness">
     <item msgid="1839836132729571766">"Niedostępny"</item>
@@ -171,4 +171,7 @@
     <item msgid="146088982397753810">"Wyłączony"</item>
     <item msgid="460891964396502657">"Włączony"</item>
   </string-array>
+    <!-- no translation found for tile_states_dream:0 (6184819793571079513) -->
+    <!-- no translation found for tile_states_dream:1 (8014986104355098744) -->
+    <!-- no translation found for tile_states_dream:2 (5966994759929723339) -->
 </resources>

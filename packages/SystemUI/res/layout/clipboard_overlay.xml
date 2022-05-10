@@ -67,7 +67,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="@dimen/overlay_offset_x"
-        android:layout_marginBottom="@dimen/overlay_offset_y"
+        android:layout_marginBottom="8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="@id/actions_container_background"
         android:elevation="7dp"
