@@ -19,15 +19,14 @@ package android.app.time;
 import android.annotation.CurrentTimeMillisLong;
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.app.timedetector.TimeSuggestionHelper;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.ShellCommand;
 import android.os.TimestampedValue;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Objects;
 
@@ -75,7 +74,9 @@ public final class ExternalTimeSuggestion implements Parcelable {
     public static final @NonNull Creator<ExternalTimeSuggestion> CREATOR =
             new Creator<ExternalTimeSuggestion>() {
                 public ExternalTimeSuggestion createFromParcel(Parcel in) {
-                    return ExternalTimeSuggestion.createFromParcel(in);
+                    TimeSuggestionHelper helper = TimeSuggestionHelper.handleCreateFromParcel(
+                            ExternalTimeSuggestion.class, in);
+                    return new ExternalTimeSuggestion(helper);
                 }
 
                 public ExternalTimeSuggestion[] newArray(int size) {
@@ -83,10 +84,7 @@ public final class ExternalTimeSuggestion implements Parcelable {
                 }
             };
 
-    @NonNull
-    private final TimestampedValue<Long> mUnixEpochTime;
-    @Nullable
-    private ArrayList<String> mDebugInfo;
+    @NonNull private final TimeSuggestionHelper mTimeSuggestionHelper;
 
     /**
      * Creates a time suggestion cross-referenced to the elapsed realtime clock. See {@link
@@ -98,17 +96,12 @@ public final class ExternalTimeSuggestion implements Parcelable {
      */
     public ExternalTimeSuggestion(@ElapsedRealtimeLong long elapsedRealtimeMillis,
             @CurrentTimeMillisLong long suggestionMillis) {
-        mUnixEpochTime = new TimestampedValue(elapsedRealtimeMillis, suggestionMillis);
+        mTimeSuggestionHelper = new TimeSuggestionHelper(ExternalTimeSuggestion.class,
+                new TimestampedValue<>(elapsedRealtimeMillis, suggestionMillis));
     }
 
-    private static ExternalTimeSuggestion createFromParcel(Parcel in) {
-        TimestampedValue<Long> utcTime = in.readParcelable(null /* classLoader */);
-        ExternalTimeSuggestion suggestion =
-                new ExternalTimeSuggestion(utcTime.getReferenceTimeMillis(), utcTime.getValue());
-        @SuppressWarnings("unchecked")
-        ArrayList<String> debugInfo = (ArrayList<String>) in.readArrayList(null /* classLoader */);
-        suggestion.mDebugInfo = debugInfo;
-        return suggestion;
+    private ExternalTimeSuggestion(@NonNull TimeSuggestionHelper helper) {
+        mTimeSuggestionHelper = Objects.requireNonNull(helper);
     }
 
     @Override
@@ -118,8 +111,7 @@ public final class ExternalTimeSuggestion implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeParcelable(mUnixEpochTime, 0);
-        dest.writeList(mDebugInfo);
+        mTimeSuggestionHelper.handleWriteToParcel(dest, flags);
     }
 
     /**
@@ -127,7 +119,7 @@ public final class ExternalTimeSuggestion implements Parcelable {
      */
     @NonNull
     public TimestampedValue<Long> getUnixEpochTime() {
-        return mUnixEpochTime;
+        return mTimeSuggestionHelper.getUnixEpochTime();
     }
 
     /**
@@ -135,9 +127,7 @@ public final class ExternalTimeSuggestion implements Parcelable {
      */
     @NonNull
     public List<String> getDebugInfo() {
-        return mDebugInfo == null
-                ? Collections.emptyList()
-                : Collections.unmodifiableList(mDebugInfo);
+        return mTimeSuggestionHelper.getDebugInfo();
     }
 
     /**
@@ -146,10 +136,7 @@ public final class ExternalTimeSuggestion implements Parcelable {
      * #equals(Object)} and {@link #hashCode()}.
      */
     public void addDebugInfo(@NonNull String... debugInfos) {
-        if (mDebugInfo == null) {
-            mDebugInfo = new ArrayList<>();
-        }
-        mDebugInfo.addAll(Arrays.asList(debugInfos));
+        mTimeSuggestionHelper.addDebugInfo(debugInfos);
     }
 
     @Override
@@ -161,18 +148,29 @@ public final class ExternalTimeSuggestion implements Parcelable {
             return false;
         }
         ExternalTimeSuggestion that = (ExternalTimeSuggestion) o;
-        return Objects.equals(mUnixEpochTime, that.mUnixEpochTime);
+        return mTimeSuggestionHelper.handleEquals(that.mTimeSuggestionHelper);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mUnixEpochTime);
+        return mTimeSuggestionHelper.hashCode();
     }
 
     @Override
     public String toString() {
-        return "ExternalTimeSuggestion{" + "mUnixEpochTime=" + mUnixEpochTime
-                + ", mDebugInfo=" + mDebugInfo
-                + '}';
+        return mTimeSuggestionHelper.handleToString();
+    }
+
+    /** @hide */
+    public static ExternalTimeSuggestion parseCommandLineArg(@NonNull ShellCommand cmd)
+            throws IllegalArgumentException {
+        return new ExternalTimeSuggestion(
+                TimeSuggestionHelper.handleParseCommandLineArg(ExternalTimeSuggestion.class, cmd));
+    }
+
+    /** @hide */
+    public static void printCommandLineOpts(PrintWriter pw) {
+        TimeSuggestionHelper.handlePrintCommandLineOpts(
+                pw, "External", ExternalTimeSuggestion.class);
     }
 }
