@@ -569,7 +569,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Utilizador"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Perfil restrito"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Adicionar novo utilizador?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Pode partilhar este dispositivo com outras pessoas ao criar utilizadores adicionais. Cada utilizador possui o seu próprio espaço, que pode ser personalizado com aplicações, imagens de fundo, etc. Os utilizadores também podem ajustar as definições do dispositivo, como o Wi‑Fi, que afetam os restantes utilizadores.\n\nAo adicionar um novo utilizador, essa pessoa tem de configurar o respetivo espaço.\n\nQualquer utilizador pode atualizar aplicações para todos os outros utilizadores. Os serviços e as definições de acessibilidade podem não ser transferidos para o novo utilizador."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Pode partilhar este dispositivo com outras pessoas ao criar utilizadores adicionais. Cada utilizador possui o seu próprio espaço, que pode ser personalizado com apps, imagens de fundo, etc. Os utilizadores também podem ajustar as definições do dispositivo, como o Wi‑Fi, que afetam os restantes utilizadores.\n\nAo adicionar um novo utilizador, essa pessoa tem de configurar o respetivo espaço.\n\nQualquer utilizador pode atualizar apps para todos os outros utilizadores. Os serviços e as definições de acessibilidade podem não ser transferidos para o novo utilizador."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Ao adicionar um novo utilizador, essa pessoa tem de configurar o respetivo espaço.\n\nQualquer utilizador pode atualizar aplicações para todos os outros utilizadores."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Configurar o utilizador agora?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Certifique-se de que a pessoa está disponível para levar o dispositivo e configurar o seu espaço"</string>
@@ -607,12 +607,12 @@
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Pode guardar a atividade da sessão atual ou eliminar todas as apps e dados"</string>
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Eliminar"</string>
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Guardar"</string>
-    <string name="guest_exit_button" msgid="5774985819191803960">"Sair do modo de convidado"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Sair do modo convidado"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"Repor sessão de convidado"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Sair do modo de convidado"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Toda a atividade é eliminada ao sair"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Pode guardar ou eliminar a sua atividade ao sair"</string>
-    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Reponha para eliminar agora a atividade da sessão. Em alternativa, pode guardar ou eliminar a atividade ao sair"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Reponha para eliminar agora a atividade da sessão. Pode ainda guardar ou eliminar a atividade ao sair"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Tirar uma foto"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Escolher uma imagem"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Selecionar foto"</string>
@@ -674,4 +674,7 @@
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Se transmitir a app <xliff:g id="SWITCHAPP">%1$s</xliff:g> ou alterar a saída, a sua transmissão atual é interrompida"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Transmita a app <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Altere a saída"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"Animações de gestos para voltar preditivos"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Ative as animações do sistema para gestos para voltar preditivos."</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Esta definição ativa animações do sistema para a animação de gestos preditivos. Requer a definição do atributo enableOnBackInvokedCallback por app como verdadeiro no ficheiro de manifesto."</string>
 </resources>
