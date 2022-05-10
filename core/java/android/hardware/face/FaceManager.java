@@ -1369,13 +1369,17 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
             case FACE_ACQUIRED_TOO_FAR:
                 return context.getString(R.string.face_acquired_too_far);
             case FACE_ACQUIRED_TOO_HIGH:
-                return context.getString(R.string.face_acquired_too_high);
-            case FACE_ACQUIRED_TOO_LOW:
+                // TODO(b/181269243) Change back once error codes are fixed.
                 return context.getString(R.string.face_acquired_too_low);
+            case FACE_ACQUIRED_TOO_LOW:
+                // TODO(b/181269243) Change back once error codes are fixed.
+                return context.getString(R.string.face_acquired_too_high);
             case FACE_ACQUIRED_TOO_RIGHT:
-                return context.getString(R.string.face_acquired_too_right);
-            case FACE_ACQUIRED_TOO_LEFT:
+                // TODO(b/181269243) Change back once error codes are fixed.
                 return context.getString(R.string.face_acquired_too_left);
+            case FACE_ACQUIRED_TOO_LEFT:
+                // TODO(b/181269243) Change back once error codes are fixed.
+                return context.getString(R.string.face_acquired_too_right);
             case FACE_ACQUIRED_POOR_GAZE:
                 return context.getString(R.string.face_acquired_poor_gaze);
             case FACE_ACQUIRED_PAN_TOO_EXTREME:
