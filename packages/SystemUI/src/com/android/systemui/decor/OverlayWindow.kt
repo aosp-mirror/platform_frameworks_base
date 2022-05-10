@@ -16,11 +16,13 @@
 package com.android.systemui.decor
 
 import android.annotation.IdRes
+import android.annotation.NonNull
 import android.content.Context
 import android.view.Surface
 import android.view.View
 import android.view.ViewGroup
 import com.android.systemui.RegionInterceptingFrameLayout
+import java.io.PrintWriter
 
 class OverlayWindow(private val context: Context) {
 
@@ -98,6 +100,15 @@ class OverlayWindow(private val context: Context) {
                         displayUniqueId = displayUniqueId,
                         rotation = rotation)
             }
+        }
+    }
+
+    fun dump(@NonNull pw: PrintWriter, name: String) {
+        pw.println("  $name=")
+        pw.println("    rootView=$rootView")
+        for (i in 0 until rootView.childCount) {
+            val child = rootView.getChildAt(i)
+            pw.println("    child[$i]=$child")
         }
     }
 }
