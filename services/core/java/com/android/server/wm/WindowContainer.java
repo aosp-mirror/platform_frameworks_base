@@ -1584,6 +1584,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return true;
     }
 
+    void forAllWindowContainers(Consumer<WindowContainer> callback) {
+        callback.accept(this);
+        final int count = mChildren.size();
+        for (int i = 0; i < count; i++) {
+            mChildren.get(i).forAllWindowContainers(callback);
+        }
+    }
+
     /**
      * For all windows at or below this container call the callback.
      * @param   callback Calls the {@link ToBooleanFunction#apply} method for each window found and
