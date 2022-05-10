@@ -31,19 +31,23 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.quicksettings.IQSService;
 import android.service.quicksettings.IQSTileService;
-import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
 import android.util.ArraySet;
 import android.util.Log;
 
-import androidx.annotation.VisibleForTesting;
+import androidx.annotation.Nullable;
 
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.qualifiers.Main;
 
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedFactory;
+import dagger.assisted.AssistedInject;
 
 /**
  * Manages the lifecycle of a TileService.
@@ -85,6 +89,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     private final BroadcastDispatcher mBroadcastDispatcher;
 
     private Set<Integer> mQueuedMessages = new ArraySet<>();
+    @Nullable
     private QSTileServiceWrapper mWrapper;
     private boolean mListening;
     private IBinder mClickBinder;
@@ -95,20 +100,15 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     private AtomicBoolean mPackageReceiverRegistered = new AtomicBoolean(false);
     private AtomicBoolean mUserReceiverRegistered = new AtomicBoolean(false);
     private boolean mUnbindImmediate;
+    @Nullable
     private TileChangeListener mChangeListener;
     // Return value from bindServiceAsUser, determines whether safe to call unbind.
     private boolean mIsBound;
 
-    public TileLifecycleManager(Handler handler, Context context, IQSService service, Tile tile,
-            Intent intent, UserHandle user, BroadcastDispatcher broadcastDispatcher) {
-        this(handler, context, service, tile, intent, user, new PackageManagerAdapter(context),
-                broadcastDispatcher);
-    }
-
-    @VisibleForTesting
-    TileLifecycleManager(Handler handler, Context context, IQSService service, Tile tile,
-            Intent intent, UserHandle user, PackageManagerAdapter packageManagerAdapter,
-            BroadcastDispatcher broadcastDispatcher) {
+    @AssistedInject
+    TileLifecycleManager(@Main Handler handler, Context context, IQSService service,
+            PackageManagerAdapter packageManagerAdapter, BroadcastDispatcher broadcastDispatcher,
+            @Assisted Intent intent, @Assisted UserHandle user) {
         mContext = context;
         mHandler = handler;
         mIntent = intent;
@@ -118,6 +118,13 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         mPackageManagerAdapter = packageManagerAdapter;
         mBroadcastDispatcher = broadcastDispatcher;
         if (DEBUG) Log.d(TAG, "Creating " + mIntent + " " + mUser);
+    }
+
+    /** Injectable factory for TileLifecycleManager. */
+    @AssistedFactory
+    public interface Factory {
+        /** */
+        TileLifecycleManager create(Intent intent, UserHandle userHandle);
     }
 
     public ComponentName getComponent() {
@@ -197,6 +204,9 @@ public class TileLifecycleManager extends BroadcastReceiver implements
                                 | Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS
                                 | Context.BIND_WAIVE_PRIORITY,
                         mUser);
+                if (!mIsBound) {
+                    mContext.unbindService(this);
+                }
             } catch (SecurityException e) {
                 Log.e(TAG, "Failed to bind to service", e);
                 mIsBound = false;
@@ -329,7 +339,8 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         filter.addDataScheme("package");
         try {
             mPackageReceiverRegistered.set(true);
-            mContext.registerReceiverAsUser(this, mUser, filter, null, mHandler);
+            mContext.registerReceiverAsUser(
+                    this, mUser, filter, null, mHandler, Context.RECEIVER_EXPORTED);
         } catch (Exception ex) {
             mPackageReceiverRegistered.set(false);
             Log.e(TAG, "Could not register package receiver", ex);
@@ -465,6 +476,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         }
     }
 
+    @Nullable
     @Override
     public IBinder asBinder() {
         return mWrapper != null ? mWrapper.asBinder() : null;

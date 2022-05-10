@@ -35,7 +35,7 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.Utils
-import java.io.FileDescriptor
+import com.android.systemui.util.time.SystemClock
 import java.io.PrintWriter
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.Executor
@@ -53,15 +53,22 @@ class MediaResumeListener @Inject constructor(
     @Background private val backgroundExecutor: Executor,
     private val tunerService: TunerService,
     private val mediaBrowserFactory: ResumeMediaBrowserFactory,
-    dumpManager: DumpManager
+    dumpManager: DumpManager,
+    private val systemClock: SystemClock
 ) : MediaDataManager.Listener, Dumpable {
 
     private var useMediaResumption: Boolean = Utils.useMediaResumption(context)
-    private val resumeComponents: ConcurrentLinkedQueue<ComponentName> = ConcurrentLinkedQueue()
+    private val resumeComponents: ConcurrentLinkedQueue<Pair<ComponentName, Long>> =
+            ConcurrentLinkedQueue()
 
     private lateinit var mediaDataManager: MediaDataManager
 
     private var mediaBrowser: ResumeMediaBrowser? = null
+        set(value) {
+            // Always disconnect the old browser -- see b/225403871.
+            field?.disconnect()
+            field = value
+        }
     private var currentUserId: Int = context.userId
 
     @VisibleForTesting
@@ -131,14 +138,32 @@ class MediaResumeListener @Inject constructor(
         val listString = prefs.getString(MEDIA_PREFERENCE_KEY + currentUserId, null)
         val components = listString?.split(ResumeMediaBrowser.DELIMITER.toRegex())
             ?.dropLastWhile { it.isEmpty() }
+        var needsUpdate = false
         components?.forEach {
             val info = it.split("/")
             val packageName = info[0]
             val className = info[1]
             val component = ComponentName(packageName, className)
-            resumeComponents.add(component)
+
+            val lastPlayed = if (info.size == 3) {
+                try {
+                    info[2].toLong()
+                } catch (e: NumberFormatException) {
+                    needsUpdate = true
+                    systemClock.currentTimeMillis()
+                }
+            } else {
+                needsUpdate = true
+                systemClock.currentTimeMillis()
+            }
+            resumeComponents.add(component to lastPlayed)
         }
         Log.d(TAG, "loaded resume components ${resumeComponents.toArray().contentToString()}")
+
+        if (needsUpdate) {
+            // Save any missing times that we had to fill in
+            writeSharedPrefs()
+        }
     }
 
     /**
@@ -149,9 +174,12 @@ class MediaResumeListener @Inject constructor(
             return
         }
 
+        val now = systemClock.currentTimeMillis()
         resumeComponents.forEach {
-            val browser = mediaBrowserFactory.create(mediaBrowserCallback, it)
-            browser.findRecentMedia()
+            if (now.minus(it.second) <= RESUME_MEDIA_TIMEOUT) {
+                val browser = mediaBrowserFactory.create(mediaBrowserCallback, it.first)
+                browser.findRecentMedia()
+            }
         }
     }
 
@@ -160,16 +188,16 @@ class MediaResumeListener @Inject constructor(
         oldKey: String?,
         data: MediaData,
         immediately: Boolean,
+        receivedSmartspaceCardLatency: Int,
         isSsReactivated: Boolean
     ) {
         if (useMediaResumption) {
             // If this had been started from a resume state, disconnect now that it's live
             if (!key.equals(oldKey)) {
-                mediaBrowser?.disconnect()
                 mediaBrowser = null
             }
             // If we don't have a resume action, check if we haven't already
-            if (data.resumeAction == null && !data.hasCheckedForResume && data.isLocalSession) {
+            if (data.resumeAction == null && !data.hasCheckedForResume && data.isLocalSession()) {
                 // TODO also check for a media button receiver intended for restarting (b/154127084)
                 Log.d(TAG, "Checking for service component for " + data.packageName)
                 val pm = context.packageManager
@@ -199,7 +227,6 @@ class MediaResumeListener @Inject constructor(
         Log.d(TAG, "Testing if we can connect to $componentName")
         // Set null action to prevent additional attempts to connect
         mediaDataManager.setResumeAction(key, null)
-        mediaBrowser?.disconnect()
         mediaBrowser = mediaBrowserFactory.create(
                 object : ResumeMediaBrowser.Callback() {
                     override fun onConnected() {
@@ -234,18 +261,24 @@ class MediaResumeListener @Inject constructor(
      */
     private fun updateResumptionList(componentName: ComponentName) {
         // Remove if exists
-        resumeComponents.remove(componentName)
+        resumeComponents.remove(resumeComponents.find { it.first.equals(componentName) })
         // Insert at front of queue
-        resumeComponents.add(componentName)
+        val currentTime = systemClock.currentTimeMillis()
+        resumeComponents.add(componentName to currentTime)
         // Remove old components if over the limit
         if (resumeComponents.size > ResumeMediaBrowser.MAX_RESUMPTION_CONTROLS) {
             resumeComponents.remove()
         }
 
-        // Save changes
+        writeSharedPrefs()
+    }
+
+    private fun writeSharedPrefs() {
         val sb = StringBuilder()
         resumeComponents.forEach {
-            sb.append(it.flattenToString())
+            sb.append(it.first.flattenToString())
+            sb.append("/")
+            sb.append(it.second)
             sb.append(ResumeMediaBrowser.DELIMITER)
         }
         val prefs = context.getSharedPreferences(MEDIA_PREFERENCES, Context.MODE_PRIVATE)
@@ -262,7 +295,7 @@ class MediaResumeListener @Inject constructor(
         }
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.apply {
             println("resumeComponents: $resumeComponents")
         }

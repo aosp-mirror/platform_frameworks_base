@@ -36,13 +36,8 @@ import java.lang.annotation.RetentionPolicy;
 public class DemuxCapabilities {
 
     /** @hide */
-    @IntDef(flag = true, value = {
-            Filter.TYPE_TS,
-            Filter.TYPE_MMTP,
-            Filter.TYPE_IP,
-            Filter.TYPE_TLV,
-            Filter.TYPE_ALP
-    })
+    @IntDef(value = {Filter.TYPE_TS, Filter.TYPE_MMTP, Filter.TYPE_IP, Filter.TYPE_TLV,
+                    Filter.TYPE_ALP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface FilterCapabilities {}
 

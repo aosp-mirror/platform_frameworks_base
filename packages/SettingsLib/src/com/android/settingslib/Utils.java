@@ -1,7 +1,10 @@
 package com.android.settingslib;
 
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_USER_LABEL;
+
 import android.annotation.ColorInt;
 import android.annotation.Nullable;
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -19,7 +22,6 @@ import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.media.AudioManager;
@@ -28,6 +30,7 @@ import android.net.TetheringManager;
 import android.net.vcn.VcnTransportInfo;
 import android.net.wifi.WifiInfo;
 import android.os.BatteryManager;
+import android.os.Build;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -39,14 +42,17 @@ import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.core.graphics.drawable.RoundedBitmapDrawable;
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.UserIcons;
+import com.android.launcher3.icons.BaseIconFactory.IconOptions;
 import com.android.launcher3.icons.IconFactory;
 import com.android.settingslib.drawable.UserIconDrawable;
 import com.android.settingslib.fuelgauge.BatteryStatus;
+import com.android.settingslib.utils.BuildCompatUtils;
 
 import java.text.NumberFormat;
 
@@ -124,9 +130,11 @@ public class Utils {
         String name = info != null ? info.name : null;
         if (info.isManagedProfile()) {
             // We use predefined values for managed profiles
-            return context.getString(R.string.managed_user_title);
+            return  BuildCompatUtils.isAtLeastT()
+                    ? getUpdatableManagedUserTitle(context)
+                    : context.getString(R.string.managed_user_title);
         } else if (info.isGuest()) {
-            name = context.getString(R.string.user_guest);
+            name = context.getString(com.android.internal.R.string.guest_name);
         }
         if (name == null && info != null) {
             name = Integer.toString(info.id);
@@ -136,11 +144,18 @@ public class Utils {
         return context.getResources().getString(R.string.running_process_item_user_label, name);
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private static String getUpdatableManagedUserTitle(Context context) {
+        return context.getSystemService(DevicePolicyManager.class).getResources().getString(
+                WORK_PROFILE_USER_LABEL,
+                () -> context.getString(R.string.managed_user_title));
+    }
+
     /**
      * Returns a circular icon for a user.
      */
     public static Drawable getUserIcon(Context context, UserManager um, UserInfo user) {
-        final int iconSize = UserIconDrawable.getSizeForList(context);
+        final int iconSize = UserIconDrawable.getDefaultSize(context);
         if (user.isManagedProfile()) {
             Drawable drawable = UserIconDrawable.getManagedUserDrawable(context);
             drawable.setBounds(0, 0, iconSize, iconSize);
@@ -190,9 +205,11 @@ public class Utils {
      * @param context the context
      * @param batteryChangedIntent battery broadcast intent received from {@link
      *                             Intent.ACTION_BATTERY_CHANGED}.
+     * @param compactStatus to present compact battery charging string if {@code true}
      * @return battery status string
      */
-    public static String getBatteryStatus(Context context, Intent batteryChangedIntent) {
+    public static String getBatteryStatus(Context context, Intent batteryChangedIntent,
+            boolean compactStatus) {
         final int status = batteryChangedIntent.getIntExtra(BatteryManager.EXTRA_STATUS,
                 BatteryManager.BATTERY_STATUS_UNKNOWN);
         final Resources res = context.getResources();
@@ -201,10 +218,14 @@ public class Utils {
         final BatteryStatus batteryStatus = new BatteryStatus(batteryChangedIntent);
 
         if (batteryStatus.isCharged()) {
-            statusString = res.getString(R.string.battery_info_status_full);
+            statusString = res.getString(compactStatus
+                    ? R.string.battery_info_status_full_charged
+                    : R.string.battery_info_status_full);
         } else {
             if (status == BatteryManager.BATTERY_STATUS_CHARGING) {
-                if (batteryStatus.isPluggedInWired()) {
+                if (compactStatus) {
+                    statusString = res.getString(R.string.battery_info_status_charging);
+                } else if (batteryStatus.isPluggedInWired()) {
                     switch (batteryStatus.getChargingSpeed(context)) {
                         case BatteryStatus.CHARGING_FAST:
                             statusString = res.getString(
@@ -525,9 +546,9 @@ public class Utils {
     /** Get the corresponding adaptive icon drawable. */
     public static Drawable getBadgedIcon(Context context, Drawable icon, UserHandle user) {
         try (IconFactory iconFactory = IconFactory.obtain(context)) {
-            final Bitmap iconBmp = iconFactory.createBadgedIconBitmap(icon, user,
-                    true /* shrinkNonAdaptiveIcons */).icon;
-            return new BitmapDrawable(context.getResources(), iconBmp);
+            return iconFactory
+                    .createBadgedIconBitmap(icon, new IconOptions().setUser(user))
+                    .newIcon(context);
         }
     }
 

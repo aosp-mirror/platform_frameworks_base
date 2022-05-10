@@ -358,13 +358,13 @@ public class SyncOperation {
         return sourcePeriodicId != NO_JOB_ID;
     }
 
-    int findPriority() {
+    int getJobBias() {
         if (isInitialization()) {
-            return JobInfo.PRIORITY_SYNC_INITIALIZATION;
+            return JobInfo.BIAS_SYNC_INITIALIZATION;
         } else if (isExpedited()) {
-            return JobInfo.PRIORITY_SYNC_EXPEDITED;
+            return JobInfo.BIAS_SYNC_EXPEDITED;
         }
-        return JobInfo.PRIORITY_DEFAULT;
+        return JobInfo.BIAS_DEFAULT;
     }
 
     private String toKey() {

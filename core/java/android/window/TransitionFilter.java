@@ -17,12 +17,17 @@
 package android.window;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.view.WindowManager.TransitionType;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.WindowConfiguration;
+import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.WindowManager;
 
 /**
  * A parcelable filter that can be used for rerouting transitions to a remote. This is a local
@@ -33,11 +38,29 @@ import android.os.Parcelable;
  */
 public final class TransitionFilter implements Parcelable {
 
+    /** The associated requirement doesn't care about the z-order. */
+    public static final int CONTAINER_ORDER_ANY = 0;
+    /** The associated requirement only matches the top-most (z-order) container. */
+    public static final int CONTAINER_ORDER_TOP = 1;
+
+    /** @hide */
+    @IntDef(prefix = { "CONTAINER_ORDER_" }, value = {
+            CONTAINER_ORDER_ANY,
+            CONTAINER_ORDER_TOP,
+    })
+    public @interface ContainerOrder {}
+
     /**
      * When non-null: this is a list of transition types that this filter applies to. This filter
      * will fail for transitions that aren't one of these types.
      */
-    @Nullable public int[] mTypeSet = null;
+    @Nullable public @TransitionType int[] mTypeSet = null;
+
+    /** All flags must be set on a transition. */
+    public @WindowManager.TransitionFlags int mFlags = 0;
+
+    /** All flags must NOT be set on a transition. */
+    public @WindowManager.TransitionFlags int mNotFlags = 0;
 
     /**
      * A list of required changes. To pass, a transition must meet all requirements.
@@ -49,6 +72,8 @@ public final class TransitionFilter implements Parcelable {
 
     private TransitionFilter(Parcel in) {
         mTypeSet = in.createIntArray();
+        mFlags = in.readInt();
+        mNotFlags = in.readInt();
         mRequirements = in.createTypedArray(Requirement.CREATOR);
     }
 
@@ -65,10 +90,19 @@ public final class TransitionFilter implements Parcelable {
             }
             if (!typePass) return false;
         }
+        if ((info.getFlags() & mFlags) != mFlags) {
+            return false;
+        }
+        if ((info.getFlags() & mNotFlags) != 0) {
+            return false;
+        }
         // Make sure info meets all of the requirements.
         if (mRequirements != null) {
             for (int i = 0; i < mRequirements.length; ++i) {
-                if (!mRequirements[i].matches(info)) return false;
+                final boolean matches = mRequirements[i].matches(info);
+                if (matches == mRequirements[i].mNot) {
+                    return false;
+                }
             }
         }
         return true;
@@ -78,6 +112,8 @@ public final class TransitionFilter implements Parcelable {
     /** @hide */
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeIntArray(mTypeSet);
+        dest.writeInt(mFlags);
+        dest.writeInt(mNotFlags);
         dest.writeTypedArray(mRequirements, flags);
     }
 
@@ -107,10 +143,12 @@ public final class TransitionFilter implements Parcelable {
         sb.append("{types=[");
         if (mTypeSet != null) {
             for (int i = 0; i < mTypeSet.length; ++i) {
-                sb.append((i == 0 ? "" : ",") + mTypeSet[i]);
+                sb.append((i == 0 ? "" : ",") + WindowManager.transitTypeToString(mTypeSet[i]));
             }
         }
-        sb.append("] checks=[");
+        sb.append("] flags=0x" + Integer.toHexString(mFlags));
+        sb.append("] notFlags=0x" + Integer.toHexString(mNotFlags));
+        sb.append(" checks=[");
         if (mRequirements != null) {
             for (int i = 0; i < mRequirements.length; ++i) {
                 sb.append((i == 0 ? "" : ",") + mRequirements[i]);
@@ -125,22 +163,47 @@ public final class TransitionFilter implements Parcelable {
      */
     public static final class Requirement implements Parcelable {
         public int mActivityType = ACTIVITY_TYPE_UNDEFINED;
+
+        /** This only matches if the change is independent of its parents. */
+        public boolean mMustBeIndependent = true;
+
+        /** If this matches, the parent filter will fail */
+        public boolean mNot = false;
+
         public int[] mModes = null;
+
+        /** Matches only if all the flags here are set on the change. */
+        public @TransitionInfo.ChangeFlags int mFlags = 0;
+
+        /** If this needs to be a task. */
+        public boolean mMustBeTask = false;
+
+        public @ContainerOrder int mOrder = CONTAINER_ORDER_ANY;
+        public ComponentName mTopActivity;
 
         public Requirement() {
         }
 
         private Requirement(Parcel in) {
             mActivityType = in.readInt();
+            mMustBeIndependent = in.readBoolean();
+            mNot = in.readBoolean();
             mModes = in.createIntArray();
+            mFlags = in.readInt();
+            mMustBeTask = in.readBoolean();
+            mOrder = in.readInt();
+            mTopActivity = in.readTypedObject(ComponentName.CREATOR);
         }
 
         /** Go through changes and find if at-least one change matches this filter */
         boolean matches(@NonNull TransitionInfo info) {
             for (int i = info.getChanges().size() - 1; i >= 0; --i) {
                 final TransitionInfo.Change change = info.getChanges().get(i);
-                if (!TransitionInfo.isIndependent(change, info)) {
+                if (mMustBeIndependent && !TransitionInfo.isIndependent(change, info)) {
                     // Only look at independent animating windows.
+                    continue;
+                }
+                if (mOrder == CONTAINER_ORDER_TOP && i > 0) {
                     continue;
                 }
                 if (mActivityType != ACTIVITY_TYPE_UNDEFINED) {
@@ -149,6 +212,7 @@ public final class TransitionFilter implements Parcelable {
                         continue;
                     }
                 }
+                if (!matchesTopActivity(change.getTaskInfo())) continue;
                 if (mModes != null) {
                     boolean pass = false;
                     for (int m = 0; m < mModes.length; ++m) {
@@ -159,24 +223,44 @@ public final class TransitionFilter implements Parcelable {
                     }
                     if (!pass) continue;
                 }
+                if ((change.getFlags() & mFlags) != mFlags) {
+                    continue;
+                }
+                if (mMustBeTask && change.getTaskInfo() == null) {
+                    continue;
+                }
                 return true;
             }
             return false;
         }
 
+        private boolean matchesTopActivity(ActivityManager.RunningTaskInfo info) {
+            if (mTopActivity == null) return true;
+            if (info == null) return false;
+            final ComponentName component = info.topActivity;
+            return mTopActivity.equals(component);
+        }
+
         /** Check if the request matches this filter. It may generate false positives */
         boolean matches(@NonNull TransitionRequestInfo request) {
-            // Can't check modes since the transition hasn't been built at this point.
+            // Can't check modes/order since the transition hasn't been built at this point.
             if (mActivityType == ACTIVITY_TYPE_UNDEFINED) return true;
             return request.getTriggerTask() != null
-                    && request.getTriggerTask().getActivityType() == mActivityType;
+                    && request.getTriggerTask().getActivityType() == mActivityType
+                    && matchesTopActivity(request.getTriggerTask());
         }
 
         @Override
         /** @hide */
         public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeInt(mActivityType);
+            dest.writeBoolean(mMustBeIndependent);
+            dest.writeBoolean(mNot);
             dest.writeIntArray(mModes);
+            dest.writeInt(mFlags);
+            dest.writeBoolean(mMustBeTask);
+            dest.writeInt(mOrder);
+            dest.writeTypedObject(mTopActivity, flags);
         }
 
         @NonNull
@@ -202,14 +286,31 @@ public final class TransitionFilter implements Parcelable {
         @Override
         public String toString() {
             StringBuilder out = new StringBuilder();
-            out.append("{atype=" + WindowConfiguration.activityTypeToString(mActivityType));
+            out.append('{');
+            if (mNot) out.append("NOT ");
+            out.append("atype=" + WindowConfiguration.activityTypeToString(mActivityType));
+            out.append(" independent=" + mMustBeIndependent);
             out.append(" modes=[");
             if (mModes != null) {
                 for (int i = 0; i < mModes.length; ++i) {
                     out.append((i == 0 ? "" : ",") + TransitionInfo.modeToString(mModes[i]));
                 }
             }
-            return out.append("]}").toString();
+            out.append("]").toString();
+            out.append(" flags=" + TransitionInfo.flagsToString(mFlags));
+            out.append(" mustBeTask=" + mMustBeTask);
+            out.append(" order=" + containerOrderToString(mOrder));
+            out.append(" topActivity=").append(mTopActivity);
+            out.append("}");
+            return out.toString();
         }
+    }
+
+    private static String containerOrderToString(int order) {
+        switch (order) {
+            case CONTAINER_ORDER_ANY: return "ANY";
+            case CONTAINER_ORDER_TOP: return "TOP";
+        }
+        return "UNKNOWN(" + order + ")";
     }
 }

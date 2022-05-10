@@ -94,13 +94,4 @@ public class KeyguardSecurityModel {
                 throw new IllegalStateException("Unknown security quality:" + security);
         }
     }
-
-    /**
-     * Returns whether the given security view should be used in a "one handed" way. This can be
-     * used to change how the security view is drawn (e.g. take up less of the screen, and align to
-     * one side).
-     */
-    public static boolean isSecurityViewOneHanded(SecurityMode securityMode) {
-        return securityMode == SecurityMode.Pattern || securityMode == SecurityMode.PIN;
-    }
 }

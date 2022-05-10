@@ -32,12 +32,15 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.statusbar.FeatureFlags
+import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.statusbar.gesture.SwipeStatusBarAwayGestureHandler
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
+import com.android.systemui.statusbar.window.StatusBarWindowController
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.time.FakeSystemClock
@@ -47,8 +50,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.anyBoolean
-import org.mockito.ArgumentMatchers.nullable
+import org.mockito.ArgumentMatchers.*
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.eq
@@ -58,6 +60,7 @@ import org.mockito.Mockito.reset
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import java.util.*
 
 private const val CALL_UID = 900
 
@@ -79,9 +82,13 @@ class OngoingCallControllerTest : SysuiTestCase() {
     private lateinit var controller: OngoingCallController
     private lateinit var notifCollectionListener: NotifCollectionListener
 
+    @Mock private lateinit var mockOngoingCallFlags: OngoingCallFlags
+    @Mock private lateinit var mockSwipeStatusBarAwayGestureHandler: SwipeStatusBarAwayGestureHandler
     @Mock private lateinit var mockOngoingCallListener: OngoingCallListener
     @Mock private lateinit var mockActivityStarter: ActivityStarter
     @Mock private lateinit var mockIActivityManager: IActivityManager
+    @Mock private lateinit var mockStatusBarWindowController: StatusBarWindowController
+    @Mock private lateinit var mockStatusBarStateController: StatusBarStateController
 
     private lateinit var chipView: View
 
@@ -93,18 +100,23 @@ class OngoingCallControllerTest : SysuiTestCase() {
         }
 
         MockitoAnnotations.initMocks(this)
-        val featureFlags = mock(FeatureFlags::class.java)
-        `when`(featureFlags.isOngoingCallStatusBarChipEnabled).thenReturn(true)
+        `when`(mockOngoingCallFlags.isStatusBarChipEnabled()).thenReturn(true)
         val notificationCollection = mock(CommonNotifCollection::class.java)
 
         controller = OngoingCallController(
+                context,
                 notificationCollection,
-                featureFlags,
+                mockOngoingCallFlags,
                 clock,
                 mockActivityStarter,
                 mainExecutor,
                 mockIActivityManager,
-                OngoingCallLogger(uiEventLoggerFake))
+                OngoingCallLogger(uiEventLoggerFake),
+                DumpManager(),
+                Optional.of(mockStatusBarWindowController),
+                Optional.of(mockSwipeStatusBarAwayGestureHandler),
+                mockStatusBarStateController,
+            )
         controller.init()
         controller.addCallback(mockOngoingCallListener)
         controller.setChipView(chipView)
@@ -127,6 +139,13 @@ class OngoingCallControllerTest : SysuiTestCase() {
         notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
 
         verify(mockOngoingCallListener).onOngoingCallStateChanged(anyBoolean())
+    }
+
+    @Test
+    fun onEntryUpdated_isOngoingCallNotif_windowControllerUpdated() {
+        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+
+        verify(mockStatusBarWindowController).setOngoingProcessRequiresStatusBarVisible(true)
     }
 
     @Test
@@ -185,17 +204,48 @@ class OngoingCallControllerTest : SysuiTestCase() {
 
     /** Regression test for b/194731244. */
     @Test
-    fun onEntryUpdated_calledManyTimes_uidObserverUnregisteredManyTimes() {
-        val numCalls = 4
-
-        for (i in 0 until numCalls) {
+    fun onEntryUpdated_calledManyTimes_uidObserverOnlyRegisteredOnce() {
+        for (i in 0 until 4) {
             // Re-create the notification each time so that it's considered a different object and
-            // observers will get re-registered (and hopefully unregistered).
+            // will re-trigger the whole flow.
             notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
         }
 
-        // There should be 1 observer still registered, so we should unregister n-1 times.
-        verify(mockIActivityManager, times(numCalls - 1)).unregisterUidObserver(any())
+        verify(mockIActivityManager, times(1))
+            .registerUidObserver(any(), any(), any(), any())
+    }
+
+    /** Regression test for b/216248574. */
+    @Test
+    fun entryUpdated_getUidProcessStateThrowsException_noCrash() {
+        `when`(mockIActivityManager.getUidProcessState(eq(CALL_UID), nullable(String::class.java)))
+                .thenThrow(SecurityException())
+
+        // No assert required, just check no crash
+        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+    }
+
+    /** Regression test for b/216248574. */
+    @Test
+    fun entryUpdated_registerUidObserverThrowsException_noCrash() {
+        `when`(mockIActivityManager.registerUidObserver(
+            any(), any(), any(), nullable(String::class.java)
+        )).thenThrow(SecurityException())
+
+        // No assert required, just check no crash
+        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+    }
+
+    /** Regression test for b/216248574. */
+    @Test
+    fun entryUpdated_packageNameProvidedToActivityManager() {
+        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+
+        val packageNameCaptor = ArgumentCaptor.forClass(String::class.java)
+        verify(mockIActivityManager).registerUidObserver(
+            any(), any(), any(), packageNameCaptor.capture()
+        )
+        assertThat(packageNameCaptor.value).isNotNull()
     }
 
     /**
@@ -220,6 +270,16 @@ class OngoingCallControllerTest : SysuiTestCase() {
         verify(mockOngoingCallListener).onOngoingCallStateChanged(anyBoolean())
     }
 
+    @Test
+    fun onEntryUpdated_callNotifAddedThenRemoved_windowControllerUpdated() {
+        val ongoingCallNotifEntry = createOngoingCallNotifEntry()
+        notifCollectionListener.onEntryAdded(ongoingCallNotifEntry)
+
+        notifCollectionListener.onEntryRemoved(ongoingCallNotifEntry, REASON_USER_STOPPED)
+
+        verify(mockStatusBarWindowController).setOngoingProcessRequiresStatusBarVisible(false)
+    }
+
     /** Regression test for b/188491504. */
     @Test
     fun onEntryRemoved_removedNotifHasSameKeyAsAddedNotif_listenerNotified() {
@@ -236,7 +296,6 @@ class OngoingCallControllerTest : SysuiTestCase() {
 
         verify(mockOngoingCallListener).onOngoingCallStateChanged(anyBoolean())
     }
-
 
     @Test
     fun onEntryRemoved_notifKeyDoesNotMatchOngoingCallNotif_listenerNotNotified() {
@@ -363,7 +422,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
         // Update the process to visible.
         uidObserver.onUidStateChanged(CALL_UID, PROC_STATE_VISIBLE, 0, 0)
         mainExecutor.advanceClockToLast()
-        mainExecutor.runAllReady();
+        mainExecutor.runAllReady()
 
         verify(mockOngoingCallListener).onOngoingCallStateChanged(anyBoolean())
     }
@@ -384,7 +443,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
         // Update the process to invisible.
         uidObserver.onUidStateChanged(CALL_UID, PROC_STATE_INVISIBLE, 0, 0)
         mainExecutor.advanceClockToLast()
-        mainExecutor.runAllReady();
+        mainExecutor.runAllReady()
 
         verify(mockOngoingCallListener).onOngoingCallStateChanged(anyBoolean())
     }
@@ -424,6 +483,120 @@ class OngoingCallControllerTest : SysuiTestCase() {
     // Other tests for notifyChipVisibilityChanged are in [OngoingCallLogger], since
     // [OngoingCallController.notifyChipVisibilityChanged] just delegates to that class.
 
+    @Test
+    fun callNotificationAdded_chipIsClickable() {
+        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+
+        assertThat(chipView.hasOnClickListeners()).isTrue()
+    }
+
+    @Test
+    fun fullscreenIsTrue_thenCallNotificationAdded_chipNotClickable() {
+        `when`(mockOngoingCallFlags.isInImmersiveChipTapEnabled()).thenReturn(false)
+
+        getStateListener().onFullscreenStateChanged(/* isFullscreen= */ true)
+        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+
+        assertThat(chipView.hasOnClickListeners()).isFalse()
+    }
+
+    @Test
+    fun callNotificationAdded_thenFullscreenIsTrue_chipNotClickable() {
+        `when`(mockOngoingCallFlags.isInImmersiveChipTapEnabled()).thenReturn(false)
+
+        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+        getStateListener().onFullscreenStateChanged(/* isFullscreen= */ true)
+
+        assertThat(chipView.hasOnClickListeners()).isFalse()
+    }
+
+    @Test
+    fun fullscreenChangesToFalse_chipClickable() {
+        `when`(mockOngoingCallFlags.isInImmersiveChipTapEnabled()).thenReturn(false)
+
+        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+        // First, update to true
+        getStateListener().onFullscreenStateChanged(/* isFullscreen= */ true)
+        // Then, update to false
+        getStateListener().onFullscreenStateChanged(/* isFullscreen= */ false)
+
+        assertThat(chipView.hasOnClickListeners()).isTrue()
+    }
+
+    @Test
+    fun fullscreenIsTrue_butChipClickInImmersiveEnabled_chipClickable() {
+        `when`(mockOngoingCallFlags.isInImmersiveChipTapEnabled()).thenReturn(true)
+
+        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+        getStateListener().onFullscreenStateChanged(/* isFullscreen= */ true)
+
+        assertThat(chipView.hasOnClickListeners()).isTrue()
+    }
+
+    // Swipe gesture tests
+
+    @Test
+    fun callStartedInImmersiveMode_swipeGestureCallbackAdded() {
+        getStateListener().onFullscreenStateChanged(true)
+
+        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+
+        verify(mockSwipeStatusBarAwayGestureHandler)
+            .addOnGestureDetectedCallback(anyString(), any())
+    }
+
+    @Test
+    fun callStartedNotInImmersiveMode_swipeGestureCallbackNotAdded() {
+        getStateListener().onFullscreenStateChanged(false)
+
+        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+
+        verify(mockSwipeStatusBarAwayGestureHandler, never())
+            .addOnGestureDetectedCallback(anyString(), any())
+    }
+
+    @Test
+    fun transitionToImmersiveMode_swipeGestureCallbackAdded() {
+        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+
+        getStateListener().onFullscreenStateChanged(true)
+
+        verify(mockSwipeStatusBarAwayGestureHandler)
+            .addOnGestureDetectedCallback(anyString(), any())
+    }
+
+    @Test
+    fun transitionOutOfImmersiveMode_swipeGestureCallbackRemoved() {
+        getStateListener().onFullscreenStateChanged(true)
+        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+        reset(mockSwipeStatusBarAwayGestureHandler)
+
+        getStateListener().onFullscreenStateChanged(false)
+
+        verify(mockSwipeStatusBarAwayGestureHandler)
+            .removeOnGestureDetectedCallback(anyString())
+    }
+
+    @Test
+    fun callEndedWhileInImmersiveMode_swipeGestureCallbackRemoved() {
+        getStateListener().onFullscreenStateChanged(true)
+        val ongoingCallNotifEntry = createOngoingCallNotifEntry()
+        notifCollectionListener.onEntryAdded(ongoingCallNotifEntry)
+        reset(mockSwipeStatusBarAwayGestureHandler)
+
+        notifCollectionListener.onEntryRemoved(ongoingCallNotifEntry, REASON_USER_STOPPED)
+
+        verify(mockSwipeStatusBarAwayGestureHandler)
+            .removeOnGestureDetectedCallback(anyString())
+    }
+
+    // TODO(b/195839150): Add test
+    //  swipeGesturedTriggeredPreviously_entersImmersiveModeAgain_callbackNotAdded(). That's
+    //  difficult to add now because we have no way to trigger [SwipeStatusBarAwayGestureHandler]'s
+    //  callbacks in test.
+
+    // END swipe gesture tests
+
     private fun createOngoingCallNotifEntry() = createCallNotifEntry(ongoingCallStyle)
 
     private fun createScreeningCallNotifEntry() = createCallNotifEntry(screeningCallStyle)
@@ -447,6 +620,13 @@ class OngoingCallControllerTest : SysuiTestCase() {
     }
 
     private fun createNotCallNotifEntry() = NotificationEntryBuilder().build()
+
+    private fun getStateListener(): StatusBarStateController.StateListener {
+        val statusBarStateListenerCaptor = ArgumentCaptor.forClass(
+            StatusBarStateController.StateListener::class.java)
+        verify(mockStatusBarStateController).addCallback(statusBarStateListenerCaptor.capture())
+        return statusBarStateListenerCaptor.value!!
+    }
 }
 
 private val person = Person.Builder().setName("name").build()

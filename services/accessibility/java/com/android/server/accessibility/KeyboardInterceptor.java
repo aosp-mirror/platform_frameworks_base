@@ -16,6 +16,8 @@
 
 package com.android.server.accessibility;
 
+import static android.accessibilityservice.AccessibilityTrace.FLAGS_INPUT_FILTER;
+
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
@@ -64,6 +66,10 @@ public class KeyboardInterceptor extends BaseEventStreamTransformation implement
 
     @Override
     public void onKeyEvent(KeyEvent event, int policyFlags) {
+        if (mAms.getTraceManager().isA11yTracingEnabledForTypes(FLAGS_INPUT_FILTER)) {
+            mAms.getTraceManager().logTrace(LOG_TAG + ".onKeyEvent",
+                    FLAGS_INPUT_FILTER, "event=" + event + ";policyFlags=" + policyFlags);
+        }
         /*
          * Certain keys have system-level behavior that affects accessibility services.
          * Let that behavior settle before handling the keys

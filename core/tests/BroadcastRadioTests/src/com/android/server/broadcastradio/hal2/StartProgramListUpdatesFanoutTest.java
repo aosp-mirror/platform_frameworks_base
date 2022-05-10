@@ -65,6 +65,7 @@ public class StartProgramListUpdatesFanoutTest {
     @Mock ITunerSession mHalTunerSessionMock;
     private android.hardware.radio.ITunerCallback[] mAidlTunerCallbackMocks;
 
+    private final Object mLock = new Object();
     // RadioModule under test
     private RadioModule mRadioModule;
 
@@ -96,7 +97,7 @@ public class StartProgramListUpdatesFanoutTest {
 
         mRadioModule = new RadioModule(mBroadcastRadioMock, new RadioManager.ModuleProperties(0, "",
                   0, "", "", "", "", 0, 0, false, false, null, false, new int[] {}, new int[] {},
-                  null, null));
+                  null, null), mLock);
 
         doAnswer((Answer) invocation -> {
             mHalTunerCallback = (ITunerCallback) invocation.getArguments()[0];
@@ -165,7 +166,8 @@ public class StartProgramListUpdatesFanoutTest {
                 new HashSet<ProgramSelector.Identifier>(), true, false);
 
         // Start updates on the clients in order. The HAL filter should get updated after each
-        // client except [2].
+        // client except [2]. Client [2] should update received chunk with an empty program
+        // list
         mTunerSessions[0].startProgramListUpdates(idFilter);
         ProgramFilter halFilter = Convert.programFilterToHal(idFilter);
         verify(mHalTunerSessionMock, times(1)).startProgramListUpdates(halFilter);
@@ -176,6 +178,9 @@ public class StartProgramListUpdatesFanoutTest {
 
         mTunerSessions[2].startProgramListUpdates(typeFilterWithoutModifications);
         verify(mHalTunerSessionMock, times(2)).startProgramListUpdates(any());
+        verifyAidlClientReceivedChunk(mAidlTunerCallbackMocks[2], true, Arrays.asList(),
+                null);
+        verify(mAidlTunerCallbackMocks[2], CB_TIMEOUT.times(1)).onProgramListUpdated(any());
 
         mTunerSessions[3].startProgramListUpdates(typeFilterWithModifications);
         halFilter.excludeModifications = false;
@@ -206,7 +211,7 @@ public class StartProgramListUpdatesFanoutTest {
         updateHalProgramInfo(false, Arrays.asList(mDabEnsembleInfo), null);
         verify(mAidlTunerCallbackMocks[0], CB_TIMEOUT.times(1)).onProgramListUpdated(any());
         verify(mAidlTunerCallbackMocks[1], CB_TIMEOUT.times(2)).onProgramListUpdated(any());
-        verify(mAidlTunerCallbackMocks[2], CB_TIMEOUT.times(1)).onProgramListUpdated(any());
+        verify(mAidlTunerCallbackMocks[2], CB_TIMEOUT.times(2)).onProgramListUpdated(any());
         verify(mAidlTunerCallbackMocks[3], CB_TIMEOUT.times(2)).onProgramListUpdated(any());
     }
 

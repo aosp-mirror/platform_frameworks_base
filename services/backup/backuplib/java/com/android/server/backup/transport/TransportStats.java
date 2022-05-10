@@ -25,7 +25,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-/** Responsible for aggregating {@link TransportClient} relevant times. */
+/** Responsible for aggregating {@link TransportConnection} relevant times. */
 public class TransportStats {
     private final Object mStatsLock = new Object();
     private final Map<ComponentName, Stats> mTransportStats = new HashMap<>();

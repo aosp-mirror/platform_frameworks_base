@@ -43,12 +43,12 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * Ranks and compares packages based on usage stats and uses the {@link ResolverRankerService}.
@@ -83,6 +83,7 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
     private ResolverRankerServiceConnection mConnection;
     private Context mContext;
     private CountDownLatch mConnectSignal;
+    private ResolverRankerServiceComparatorModel mComparatorModel;
 
     public ResolverRankerServiceResolverComparator(Context context, Intent intent,
                 String referrerPackage, AfterCompute afterCompute,
@@ -99,6 +100,8 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
         mRankerServiceName = new ComponentName(mContext, this.getClass());
         setCallBack(afterCompute);
         setChooserActivityLogger(chooserActivityLogger);
+
+        mComparatorModel = buildUpdatedModel();
     }
 
     @Override
@@ -125,6 +128,7 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
             }
             if (isUpdated) {
                 mRankerServiceName = mResolvedRankerName;
+                mComparatorModel = buildUpdatedModel();
             }
         } else {
             Log.e(TAG, "Sizes of sent and received ResolverTargets diff.");
@@ -218,83 +222,25 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
             }
         }
         predictSelectProbabilities(mTargets);
+
+        mComparatorModel = buildUpdatedModel();
     }
 
     @Override
     public int compare(ResolveInfo lhs, ResolveInfo rhs) {
-        if (mStats != null) {
-            final ResolverTarget lhsTarget = mTargetsDict.get(new ComponentName(
-                    lhs.activityInfo.packageName, lhs.activityInfo.name));
-            final ResolverTarget rhsTarget = mTargetsDict.get(new ComponentName(
-                    rhs.activityInfo.packageName, rhs.activityInfo.name));
-
-            if (lhsTarget != null && rhsTarget != null) {
-                final int selectProbabilityDiff = Float.compare(
-                        rhsTarget.getSelectProbability(), lhsTarget.getSelectProbability());
-
-                if (selectProbabilityDiff != 0) {
-                    return selectProbabilityDiff > 0 ? 1 : -1;
-                }
-            }
-        }
-
-        CharSequence  sa = lhs.loadLabel(mPm);
-        if (sa == null) sa = lhs.activityInfo.name;
-        CharSequence  sb = rhs.loadLabel(mPm);
-        if (sb == null) sb = rhs.activityInfo.name;
-
-        return mCollator.compare(sa.toString().trim(), sb.toString().trim());
+        return mComparatorModel.getComparator().compare(lhs, rhs);
     }
 
     @Override
     public float getScore(ComponentName name) {
-        final ResolverTarget target = mTargetsDict.get(name);
-        if (target != null) {
-            return target.getSelectProbability();
-        }
-        return 0;
-    }
-
-    @Override
-    List<ComponentName> getTopComponentNames(int topK) {
-        return mTargetsDict.entrySet().stream()
-                .sorted((o1, o2) -> -Float.compare(getScore(o1.getKey()), getScore(o2.getKey())))
-                .limit(topK)
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toList());
+        return mComparatorModel.getScore(name);
     }
 
     // update ranking model when the connection to it is valid.
     @Override
     public void updateModel(ComponentName componentName) {
         synchronized (mLock) {
-            if (mRanker != null) {
-                try {
-                    int selectedPos = new ArrayList<ComponentName>(mTargetsDict.keySet())
-                            .indexOf(componentName);
-                    if (selectedPos >= 0 && mTargets != null) {
-                        final float selectedProbability = getScore(componentName);
-                        int order = 0;
-                        for (ResolverTarget target : mTargets) {
-                            if (target.getSelectProbability() > selectedProbability) {
-                                order++;
-                            }
-                        }
-                        logMetrics(order);
-                        mRanker.train(mTargets, selectedPos);
-                    } else {
-                        if (DEBUG) {
-                            Log.d(TAG, "Selected a unknown component: " + componentName);
-                        }
-                    }
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Error in Train: " + e);
-                }
-            } else {
-                if (DEBUG) {
-                    Log.d(TAG, "Ranker is null; skip updateModel.");
-                }
-            }
+            mComparatorModel.notifyOnTargetSelected(componentName);
         }
     }
 
@@ -310,19 +256,6 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
         afterCompute();
         if (DEBUG) {
             Log.d(TAG, "Unbinded Resolver Ranker.");
-        }
-    }
-
-    // records metrics for evaluation.
-    private void logMetrics(int selectedPos) {
-        if (mRankerServiceName != null) {
-            MetricsLogger metricsLogger = new MetricsLogger();
-            LogMaker log = new LogMaker(MetricsEvent.ACTION_TARGET_SELECTED);
-            log.setComponentName(mRankerServiceName);
-            int isCategoryUsed = (mAnnotations == null) ? 0 : 1;
-            log.addTaggedData(MetricsEvent.FIELD_IS_CATEGORY_USED, isCategoryUsed);
-            log.addTaggedData(MetricsEvent.FIELD_RANKED_POSITION, selectedPos);
-            metricsLogger.write(log);
         }
     }
 
@@ -426,6 +359,7 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
             }
             synchronized (mLock) {
                 mRanker = IResolverRankerService.Stub.asInterface(service);
+                mComparatorModel = buildUpdatedModel();
                 mConnectSignal.countDown();
             }
         }
@@ -443,6 +377,7 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
         public void destroy() {
             synchronized (mLock) {
                 mRanker = null;
+                mComparatorModel = buildUpdatedModel();
             }
         }
     }
@@ -453,6 +388,7 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
         mTargetsDict.clear();
         mTargets = null;
         mRankerServiceName = new ComponentName(mContext, this.getClass());
+        mComparatorModel = buildUpdatedModel();
         mResolvedRankerName = null;
         initRanker(mContext);
     }
@@ -507,5 +443,156 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
                     ApplicationInfo.FLAG_PERSISTENT) != 0;
         }
         return false;
+    }
+
+    /**
+     * Re-construct a {@code ResolverRankerServiceComparatorModel} to replace the current model
+     * instance (if any) using the up-to-date {@code ResolverRankerServiceResolverComparator} ivar
+     * values.
+     *
+     * TODO: each time we replace the model instance, we're either updating the model to use
+     * adjusted data (which is appropriate), or we're providing a (late) value for one of our ivars
+     * that wasn't available the last time the model was updated. For those latter cases, we should
+     * just avoid creating the model altogether until we have all the prerequisites we'll need. Then
+     * we can probably simplify the logic in {@code ResolverRankerServiceComparatorModel} since we
+     * won't need to handle edge cases when the model data isn't fully prepared.
+     * (In some cases, these kinds of "updates" might interleave -- e.g., we might have finished
+     * initializing the first time and now want to adjust some data, but still need to wait for
+     * changes to propagate to the other ivars before rebuilding the model.)
+     */
+    private ResolverRankerServiceComparatorModel buildUpdatedModel() {
+        // TODO: we don't currently guarantee that the underlying target list/map won't be mutated,
+        // so the ResolverComparatorModel may provide inconsistent results. We should make immutable
+        // copies of the data (waiting for any necessary remaining data before creating the model).
+        return new ResolverRankerServiceComparatorModel(
+                mStats,
+                mTargetsDict,
+                mTargets,
+                mCollator,
+                mRanker,
+                mRankerServiceName,
+                (mAnnotations != null),
+                mPm);
+    }
+
+    /**
+     * Implementation of a {@code ResolverComparatorModel} that provides the same ranking logic as
+     * the legacy {@code ResolverRankerServiceResolverComparator}, as a refactoring step toward
+     * removing the complex legacy API.
+     */
+    static class ResolverRankerServiceComparatorModel implements ResolverComparatorModel {
+        private final Map<String, UsageStats> mStats;  // Treat as immutable.
+        private final Map<ComponentName, ResolverTarget> mTargetsDict;  // Treat as immutable.
+        private final List<ResolverTarget> mTargets;  // Treat as immutable.
+        private final Collator mCollator;
+        private final IResolverRankerService mRanker;
+        private final ComponentName mRankerServiceName;
+        private final boolean mAnnotationsUsed;
+        private final PackageManager mPm;
+
+        // TODO: it doesn't look like we should have to pass both targets and targetsDict, but it's
+        // not written in a way that makes it clear whether we can derive one from the other (at
+        // least in this constructor).
+        ResolverRankerServiceComparatorModel(
+                Map<String, UsageStats> stats,
+                Map<ComponentName, ResolverTarget> targetsDict,
+                List<ResolverTarget> targets,
+                Collator collator,
+                IResolverRankerService ranker,
+                ComponentName rankerServiceName,
+                boolean annotationsUsed,
+                PackageManager pm) {
+            mStats = stats;
+            mTargetsDict = targetsDict;
+            mTargets = targets;
+            mCollator = collator;
+            mRanker = ranker;
+            mRankerServiceName = rankerServiceName;
+            mAnnotationsUsed = annotationsUsed;
+            mPm = pm;
+        }
+
+        @Override
+        public Comparator<ResolveInfo> getComparator() {
+            // TODO: doCompute() doesn't seem to be concerned about null-checking mStats. Is that
+            // a bug there, or do we have a way of knowing it will be non-null under certain
+            // conditions?
+            return (lhs, rhs) -> {
+                if (mStats != null) {
+                    final ResolverTarget lhsTarget = mTargetsDict.get(new ComponentName(
+                            lhs.activityInfo.packageName, lhs.activityInfo.name));
+                    final ResolverTarget rhsTarget = mTargetsDict.get(new ComponentName(
+                            rhs.activityInfo.packageName, rhs.activityInfo.name));
+
+                    if (lhsTarget != null && rhsTarget != null) {
+                        final int selectProbabilityDiff = Float.compare(
+                                rhsTarget.getSelectProbability(), lhsTarget.getSelectProbability());
+
+                        if (selectProbabilityDiff != 0) {
+                            return selectProbabilityDiff > 0 ? 1 : -1;
+                        }
+                    }
+                }
+
+                CharSequence  sa = lhs.loadLabel(mPm);
+                if (sa == null) sa = lhs.activityInfo.name;
+                CharSequence  sb = rhs.loadLabel(mPm);
+                if (sb == null) sb = rhs.activityInfo.name;
+
+                return mCollator.compare(sa.toString().trim(), sb.toString().trim());
+            };
+        }
+
+        @Override
+        public float getScore(ComponentName name) {
+            final ResolverTarget target = mTargetsDict.get(name);
+            if (target != null) {
+                return target.getSelectProbability();
+            }
+            return 0;
+        }
+
+        @Override
+        public void notifyOnTargetSelected(ComponentName componentName) {
+            if (mRanker != null) {
+                try {
+                    int selectedPos = new ArrayList<ComponentName>(mTargetsDict.keySet())
+                            .indexOf(componentName);
+                    if (selectedPos >= 0 && mTargets != null) {
+                        final float selectedProbability = getScore(componentName);
+                        int order = 0;
+                        for (ResolverTarget target : mTargets) {
+                            if (target.getSelectProbability() > selectedProbability) {
+                                order++;
+                            }
+                        }
+                        logMetrics(order);
+                        mRanker.train(mTargets, selectedPos);
+                    } else {
+                        if (DEBUG) {
+                            Log.d(TAG, "Selected a unknown component: " + componentName);
+                        }
+                    }
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Error in Train: " + e);
+                }
+            } else {
+                if (DEBUG) {
+                    Log.d(TAG, "Ranker is null; skip updateModel.");
+                }
+            }
+        }
+
+        /** Records metrics for evaluation. */
+        private void logMetrics(int selectedPos) {
+            if (mRankerServiceName != null) {
+                MetricsLogger metricsLogger = new MetricsLogger();
+                LogMaker log = new LogMaker(MetricsEvent.ACTION_TARGET_SELECTED);
+                log.setComponentName(mRankerServiceName);
+                log.addTaggedData(MetricsEvent.FIELD_IS_CATEGORY_USED, mAnnotationsUsed ? 1 : 0);
+                log.addTaggedData(MetricsEvent.FIELD_RANKED_POSITION, selectedPos);
+                metricsLogger.write(log);
+            }
+        }
     }
 }

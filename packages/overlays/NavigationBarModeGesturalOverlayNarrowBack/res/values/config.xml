@@ -30,6 +30,9 @@
     <!-- Controls whether the navigation bar lets through taps. -->
     <bool name="config_navBarTapThrough">true</bool>
 
+    <!-- Controls whether the IME renders the back and IME switcher buttons or not. -->
+    <bool name="config_imeDrawsImeNavBar">true</bool>
+
     <!-- Controls the size of the back gesture inset. -->
     <dimen name="config_backGestureInset">18dp</dimen>
 

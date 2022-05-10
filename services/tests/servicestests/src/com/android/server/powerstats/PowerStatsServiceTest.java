@@ -30,6 +30,7 @@ import android.hardware.power.stats.PowerEntity;
 import android.hardware.power.stats.State;
 import android.hardware.power.stats.StateResidency;
 import android.hardware.power.stats.StateResidencyResult;
+import android.os.Looper;
 
 import androidx.test.InstrumentationRegistry;
 
@@ -145,12 +146,12 @@ public class PowerStatsServiceTest {
         }
 
         @Override
-        PowerStatsLogger createPowerStatsLogger(Context context, File dataStoragePath,
-                String meterFilename, String meterCacheFilename,
+        PowerStatsLogger createPowerStatsLogger(Context context, Looper looper,
+                File dataStoragePath, String meterFilename, String meterCacheFilename,
                 String modelFilename, String modelCacheFilename,
                 String residencyFilename, String residencyCacheFilename,
                 IPowerStatsHALWrapper powerStatsHALWrapper) {
-            mPowerStatsLogger = new PowerStatsLogger(context, dataStoragePath,
+            mPowerStatsLogger = new PowerStatsLogger(context, looper, dataStoragePath,
                 meterFilename, meterCacheFilename,
                 modelFilename, modelCacheFilename,
                 residencyFilename, residencyCacheFilename,

@@ -888,7 +888,30 @@ public class ArrayUtils {
         }
     }
 
+    /**
+     * Returns the {@code i}-th item in {@code items}, if it exists and {@code items} is not {@code
+     * null}, otherwise returns {@code null}.
+     */
+    @Nullable
+    public static <T> T getOrNull(@Nullable T[] items, int i) {
+        return (items != null && items.length > i) ? items[i] : null;
+    }
+
     public static @Nullable <T> T firstOrNull(T[] items) {
         return items.length > 0 ? items[0] : null;
+    }
+
+    /**
+     * Creates a {@link List} from an array. Different from {@link Arrays#asList(Object[])} as that
+     * will use the parameter as the backing array, meaning changes are not isolated.
+     */
+    public static <T> List<T> toList(T[] array) {
+        List<T> list = new ArrayList<>(array.length);
+        //noinspection ManualArrayToCollectionCopy
+        for (T item : array) {
+            //noinspection UseBulkOperation
+            list.add(item);
+        }
+        return list;
     }
 }

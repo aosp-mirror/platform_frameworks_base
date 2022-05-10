@@ -22,8 +22,13 @@ import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Objects;
+
 /**
  * Holds the characteristics of the reflecting plane that a satellite signal has bounced from.
+ *
+ * <p>Starting with Android T, this class supports {@link #equals} and {@link #hashCode}, which
+ * are not supported before that.
  *
  * @hide
  */
@@ -107,24 +112,41 @@ public final class GnssReflectingPlane implements Parcelable {
                 }
             };
 
-    @NonNull
-    @Override
-    public String toString() {
-        final String format = "   %-29s = %s\n";
-        StringBuilder builder = new StringBuilder("ReflectingPlane:\n");
-        builder.append(String.format(format, "LatitudeDegrees = ", mLatitudeDegrees));
-        builder.append(String.format(format, "LongitudeDegrees = ", mLongitudeDegrees));
-        builder.append(String.format(format, "AltitudeMeters = ", mAltitudeMeters));
-        builder.append(String.format(format, "AzimuthDegrees = ", mAzimuthDegrees));
-        return builder.toString();
-    }
-
     @Override
     public void writeToParcel(@NonNull Parcel parcel, int flags) {
         parcel.writeDouble(mLatitudeDegrees);
         parcel.writeDouble(mLongitudeDegrees);
         parcel.writeDouble(mAltitudeMeters);
         parcel.writeDouble(mAzimuthDegrees);
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder("ReflectingPlane[");
+        builder.append(" LatitudeDegrees=").append(mLatitudeDegrees);
+        builder.append(" LongitudeDegrees=").append(mLongitudeDegrees);
+        builder.append(" AltitudeMeters=").append(mAltitudeMeters);
+        builder.append(" AzimuthDegrees=").append(mAzimuthDegrees);
+        builder.append(']');
+        return builder.toString();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof GnssReflectingPlane) {
+            GnssReflectingPlane that = (GnssReflectingPlane) obj;
+            return Double.compare(this.mLatitudeDegrees, that.mLatitudeDegrees) == 0
+                    && Double.compare(this.mLongitudeDegrees, that.mLongitudeDegrees) == 0
+                    && Double.compare(this.mAltitudeMeters, that.mAltitudeMeters) == 0
+                    && Double.compare(this.mAzimuthDegrees, that.mAzimuthDegrees) == 0;
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mLatitudeDegrees, mLatitudeDegrees, mAltitudeMeters, mAzimuthDegrees);
     }
 
     /** Builder for {@link GnssReflectingPlane} */

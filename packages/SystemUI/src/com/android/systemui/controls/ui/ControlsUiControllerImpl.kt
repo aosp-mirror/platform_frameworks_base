@@ -25,12 +25,10 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.res.Configuration
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.service.controls.Control
 import android.util.Log
-import android.util.TypedValue
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
@@ -51,6 +49,7 @@ import com.android.systemui.controls.CustomIconCache
 import com.android.systemui.controls.controller.ControlInfo
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.controller.StructureInfo
+import com.android.systemui.controls.management.ControlAdapter
 import com.android.systemui.controls.management.ControlsEditingActivity
 import com.android.systemui.controls.management.ControlsFavoritingActivity
 import com.android.systemui.controls.management.ControlsListingController
@@ -120,7 +119,7 @@ class ControlsUiControllerImpl @Inject constructor (
     private val onSeedingComplete = Consumer<Boolean> {
         accepted ->
             if (accepted) {
-                selectedStructure = controlsController.get().getFavorites().maxBy {
+                selectedStructure = controlsController.get().getFavorites().maxByOrNull {
                     it.controls.size
                 } ?: EMPTY_STRUCTURE
                 updatePreferences(selectedStructure)
@@ -256,13 +255,13 @@ class ControlsUiControllerImpl @Inject constructor (
         // Force animations when transitioning from a dialog to an activity
         intent.putExtra(ControlsUiController.EXTRA_ANIMATE, true)
 
-        if (keyguardStateController.isUnlocked()) {
+        if (keyguardStateController.isShowing()) {
+            activityStarter.postStartActivityDismissingKeyguard(intent, 0 /* delay */)
+        } else {
             activityContext.startActivity(
                 intent,
                 ActivityOptions.makeSceneTransitionAnimation(activityContext as Activity).toBundle()
             )
-        } else {
-            activityStarter.postStartActivityDismissingKeyguard(intent, 0 /* delay */)
         }
     }
 
@@ -386,7 +385,7 @@ class ControlsUiControllerImpl @Inject constructor (
             visibility = View.VISIBLE
         }
 
-        val maxColumns = findMaxColumns()
+        val maxColumns = ControlAdapter.findMaxColumns(activityContext.resources)
 
         val listView = parent.requireViewById(R.id.global_actions_controls_list) as ViewGroup
         var lastRow: ViewGroup = createRow(inflater, listView)
@@ -430,32 +429,6 @@ class ControlsUiControllerImpl @Inject constructor (
             lastRow.addView(Space(context), lp)
             spacersToAdd--
         }
-    }
-
-    /**
-     * For low-dp width screens that also employ an increased font scale, adjust the
-     * number of columns. This helps prevent text truncation on these devices.
-     */
-    private fun findMaxColumns(): Int {
-        val res = context.resources
-        var maxColumns = res.getInteger(R.integer.controls_max_columns)
-        val maxColumnsAdjustWidth =
-            res.getInteger(R.integer.controls_max_columns_adjust_below_width_dp)
-
-        val outValue = TypedValue()
-        res.getValue(R.dimen.controls_max_columns_adjust_above_font_scale, outValue, true)
-        val maxColumnsAdjustFontScale = outValue.getFloat()
-
-        val config = res.configuration
-        val isPortrait = config.orientation == Configuration.ORIENTATION_PORTRAIT
-        if (isPortrait &&
-            config.screenWidthDp != Configuration.SCREEN_WIDTH_DP_UNDEFINED &&
-            config.screenWidthDp <= maxColumnsAdjustWidth &&
-            config.fontScale >= maxColumnsAdjustFontScale) {
-            maxColumns--
-        }
-
-        return maxColumns
     }
 
     override fun getPreferredStructure(structures: List<StructureInfo>): StructureInfo {

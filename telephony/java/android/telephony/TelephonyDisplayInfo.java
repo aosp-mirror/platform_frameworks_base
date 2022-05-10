@@ -79,7 +79,7 @@ public final class TelephonyDisplayInfo implements Parcelable {
      *   <li>The device is connected to the NR cellular network on millimeter wave bands. </li>
      *   <li>The device is connected to the specific network which the carrier is using
      *   proprietary means to provide a faster overall data connection than would be otherwise
-     *   possible. This may include using other bands unique to the carrier, or carrier
+     *   possible.  This may include using other bands unique to the carrier, or carrier
      *   aggregation, for example.</li>
      * </ul>
      * One of the use case is that UX can show a different icon, for example, "5G+"
