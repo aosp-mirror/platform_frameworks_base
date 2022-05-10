@@ -43,17 +43,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
+import android.hardware.power.Boost;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.PowerManagerInternal;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.IVoiceInteractionSessionService;
+import android.service.voice.VisibleActivityInfo;
 import android.service.voice.VoiceInteractionService;
 import android.service.voice.VoiceInteractionSession;
 import android.util.Slog;
@@ -62,21 +65,39 @@ import android.view.IWindowManager;
 import com.android.internal.app.AssistUtils;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractor;
+import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.am.AssistDataRequester;
 import com.android.server.am.AssistDataRequester.AssistDataRequesterCallbacks;
+import com.android.server.power.LowPowerStandbyControllerInternal;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.wm.ActivityAssistInfo;
+import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.PrintWriter;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 final class VoiceInteractionSessionConnection implements ServiceConnection,
         AssistDataRequesterCallbacks {
 
-    final static String TAG = "VoiceInteractionServiceManager";
+    static final String TAG = "VoiceInteractionServiceManager";
+    static final boolean DEBUG = false;
+    static final int POWER_BOOST_TIMEOUT_MS = Integer.parseInt(
+            System.getProperty("vendor.powerhal.interaction.max", "200"));
+    static final int BOOST_TIMEOUT_MS = 300;
+    /**
+     * The maximum time an app can stay on the Low Power Standby allowlist when
+     * the session is shown. There to safeguard against apps that don't call hide.
+     */
+    private static final int LOW_POWER_STANDBY_ALLOWLIST_TIMEOUT_MS = 120_000;
+    // TODO: To avoid ap doesn't call hide, only 10 secs for now, need a better way to manage it
+    //  in the future.
+    static final int MAX_POWER_BOOST_TIMEOUT = 10_000;
 
     final IBinder mToken = new Binder();
     final Object mLock;
@@ -104,6 +125,53 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
     ArrayList<IVoiceInteractionSessionShowCallback> mPendingShowCallbacks = new ArrayList<>();
     private List<ActivityAssistInfo> mPendingHandleAssistWithoutData = new ArrayList<>();
     AssistDataRequester mAssistDataRequester;
+    private boolean mListeningVisibleActivity;
+    private final ScheduledExecutorService mScheduledExecutorService =
+            Executors.newSingleThreadScheduledExecutor();
+    private final List<VisibleActivityInfo> mVisibleActivityInfos = new ArrayList<>();
+    private final PowerManagerInternal mPowerManagerInternal;
+    private final LowPowerStandbyControllerInternal mLowPowerStandbyControllerInternal;
+    private final Runnable mRemoveFromLowPowerStandbyAllowlistRunnable =
+            this::removeFromLowPowerStandbyAllowlist;
+    private boolean mLowPowerStandbyAllowlisted;
+    private PowerBoostSetter mSetPowerBoostRunnable;
+    private final Handler mFgHandler;
+
+    class PowerBoostSetter implements Runnable {
+
+        private boolean mCanceled;
+        private final Instant mExpiryTime;
+
+        PowerBoostSetter(Instant expiryTime) {
+            mExpiryTime = expiryTime;
+        }
+
+        @Override
+        public void run() {
+            synchronized (mLock) {
+                if (mCanceled) {
+                    return;
+                }
+                // To avoid voice interaction service does not call hide to cancel setting
+                // power boost. We will cancel set boost when reaching the max timeout.
+                if (Instant.now().isBefore(mExpiryTime)) {
+                    mPowerManagerInternal.setPowerBoost(Boost.INTERACTION, BOOST_TIMEOUT_MS);
+                    if (mSetPowerBoostRunnable != null) {
+                        mFgHandler.postDelayed(mSetPowerBoostRunnable, POWER_BOOST_TIMEOUT_MS);
+                    }
+                } else {
+                    Slog.w(TAG, "Reset power boost INTERACTION because reaching max timeout.");
+                    mPowerManagerInternal.setPowerBoost(Boost.INTERACTION, /* durationMs */ -1);
+                }
+            }
+        }
+
+        void cancel() {
+            synchronized (mLock) {
+                mCanceled =  true;
+            }
+        }
+    }
 
     IVoiceInteractionSessionShowCallback mShowCallback =
             new IVoiceInteractionSessionShowCallback.Stub() {
@@ -152,7 +220,11 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
         mUgmInternal = LocalServices.getService(UriGrantsManagerInternal.class);
         mIWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
+        mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
+        mLowPowerStandbyControllerInternal = LocalServices.getService(
+                LowPowerStandbyControllerInternal.class);
         mAppOps = context.getSystemService(AppOpsManager.class);
+        mFgHandler = FgThread.getHandler();
         mAssistDataRequester = new AssistDataRequester(mContext, mIWindowManager,
                 (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE),
                 this, mLock, OP_ASSIST_STRUCTURE, OP_ASSIST_SCREENSHOT);
@@ -255,6 +327,22 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
                     mPendingHandleAssistWithoutData = topActivities;
                 }
             }
+            // remove if already existing one.
+            if (mSetPowerBoostRunnable != null) {
+                mSetPowerBoostRunnable.cancel();
+            }
+            mSetPowerBoostRunnable = new PowerBoostSetter(
+                    Instant.now().plusMillis(MAX_POWER_BOOST_TIMEOUT));
+            mFgHandler.post(mSetPowerBoostRunnable);
+
+            if (mLowPowerStandbyControllerInternal != null) {
+                mLowPowerStandbyControllerInternal.addToAllowlist(mCallingUid);
+                mLowPowerStandbyAllowlisted = true;
+                mFgHandler.removeCallbacks(mRemoveFromLowPowerStandbyAllowlistRunnable);
+                mFgHandler.postDelayed(mRemoveFromLowPowerStandbyAllowlistRunnable,
+                        LOW_POWER_STANDBY_ALLOWLIST_TIMEOUT_MS);
+            }
+
             mCallback.onSessionShown(this);
             return true;
         }
@@ -420,6 +508,15 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
                     } catch (RemoteException e) {
                     }
                 }
+                if (mSetPowerBoostRunnable != null) {
+                    mSetPowerBoostRunnable.cancel();
+                    mSetPowerBoostRunnable = null;
+                }
+                // A negative value indicates canceling previous boost.
+                mPowerManagerInternal.setPowerBoost(Boost.INTERACTION, /* durationMs */ -1);
+                if (mLowPowerStandbyControllerInternal != null) {
+                    removeFromLowPowerStandbyAllowlist();
+                }
                 mCallback.onSessionHidden(this);
             }
             if (mFullyBound) {
@@ -432,6 +529,8 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
     }
 
     public void cancelLocked(boolean finishTask) {
+        mListeningVisibleActivity = false;
+        mVisibleActivityInfos.clear();
         hideLocked();
         mCanceled = true;
         if (mBound) {
@@ -503,6 +602,166 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
             }
         }
         mPendingShowCallbacks.clear();
+    }
+
+    void startListeningVisibleActivityChangedLocked() {
+        if (DEBUG) {
+            Slog.d(TAG, "startListeningVisibleActivityChangedLocked");
+        }
+        mListeningVisibleActivity = true;
+        mVisibleActivityInfos.clear();
+
+        mScheduledExecutorService.execute(() -> {
+            if (DEBUG) {
+                Slog.d(TAG, "call updateVisibleActivitiesLocked from enable listening");
+            }
+            synchronized (mLock) {
+                updateVisibleActivitiesLocked();
+            }
+        });
+    }
+
+    void stopListeningVisibleActivityChangedLocked() {
+        if (DEBUG) {
+            Slog.d(TAG, "stopListeningVisibleActivityChangedLocked");
+        }
+        mListeningVisibleActivity = false;
+        mVisibleActivityInfos.clear();
+    }
+
+    void notifyActivityEventChangedLocked() {
+        if (DEBUG) {
+            Slog.d(TAG, "notifyActivityEventChangedLocked");
+        }
+        if (!mListeningVisibleActivity) {
+            if (DEBUG) {
+                Slog.d(TAG, "not enable listening visible activity");
+            }
+            return;
+        }
+        mScheduledExecutorService.execute(() -> {
+            if (DEBUG) {
+                Slog.d(TAG, "call updateVisibleActivitiesLocked from activity event");
+            }
+            synchronized (mLock) {
+                updateVisibleActivitiesLocked();
+            }
+        });
+    }
+
+    private List<VisibleActivityInfo> getVisibleActivityInfosLocked() {
+        if (DEBUG) {
+            Slog.d(TAG, "getVisibleActivityInfosLocked");
+        }
+        List<ActivityAssistInfo> allVisibleActivities =
+                LocalServices.getService(ActivityTaskManagerInternal.class)
+                        .getTopVisibleActivities();
+        if (DEBUG) {
+            Slog.d(TAG,
+                    "getVisibleActivityInfosLocked: allVisibleActivities=" + allVisibleActivities);
+        }
+        if (allVisibleActivities == null || allVisibleActivities.isEmpty()) {
+            Slog.w(TAG, "no visible activity");
+            return null;
+        }
+        final int count = allVisibleActivities.size();
+        final List<VisibleActivityInfo> visibleActivityInfos = new ArrayList<>(count);
+        for (int i = 0; i < count; i++) {
+            ActivityAssistInfo info = allVisibleActivities.get(i);
+            if (DEBUG) {
+                Slog.d(TAG, " : activityToken=" + info.getActivityToken()
+                        + ", assistToken=" + info.getAssistToken()
+                        + ", taskId=" + info.getTaskId());
+            }
+            visibleActivityInfos.add(
+                    new VisibleActivityInfo(info.getTaskId(), info.getAssistToken()));
+        }
+        return visibleActivityInfos;
+    }
+
+    private void updateVisibleActivitiesLocked() {
+        if (DEBUG) {
+            Slog.d(TAG, "updateVisibleActivitiesLocked");
+        }
+        if (mSession == null) {
+            return;
+        }
+        if (!mShown || !mListeningVisibleActivity || mCanceled) {
+            return;
+        }
+        final List<VisibleActivityInfo> newVisibleActivityInfos = getVisibleActivityInfosLocked();
+
+        if (newVisibleActivityInfos == null || newVisibleActivityInfos.isEmpty()) {
+            updateVisibleActivitiesChangedLocked(mVisibleActivityInfos,
+                    VisibleActivityInfo.TYPE_ACTIVITY_REMOVED);
+            mVisibleActivityInfos.clear();
+            return;
+        }
+        if (mVisibleActivityInfos.isEmpty()) {
+            updateVisibleActivitiesChangedLocked(newVisibleActivityInfos,
+                    VisibleActivityInfo.TYPE_ACTIVITY_ADDED);
+            mVisibleActivityInfos.addAll(newVisibleActivityInfos);
+            return;
+        }
+
+        final List<VisibleActivityInfo> addedActivities = new ArrayList<>();
+        final List<VisibleActivityInfo> removedActivities = new ArrayList<>();
+
+        removedActivities.addAll(mVisibleActivityInfos);
+        for (int i = 0; i < newVisibleActivityInfos.size(); i++) {
+            final VisibleActivityInfo candidateVisibleActivityInfo = newVisibleActivityInfos.get(i);
+            if (!removedActivities.isEmpty() && removedActivities.contains(
+                    candidateVisibleActivityInfo)) {
+                removedActivities.remove(candidateVisibleActivityInfo);
+            } else {
+                addedActivities.add(candidateVisibleActivityInfo);
+            }
+        }
+
+        if (!addedActivities.isEmpty()) {
+            updateVisibleActivitiesChangedLocked(addedActivities,
+                    VisibleActivityInfo.TYPE_ACTIVITY_ADDED);
+        }
+        if (!removedActivities.isEmpty()) {
+            updateVisibleActivitiesChangedLocked(removedActivities,
+                    VisibleActivityInfo.TYPE_ACTIVITY_REMOVED);
+        }
+
+        mVisibleActivityInfos.clear();
+        mVisibleActivityInfos.addAll(newVisibleActivityInfos);
+    }
+
+    private void updateVisibleActivitiesChangedLocked(
+            List<VisibleActivityInfo> visibleActivityInfos, int type) {
+        if (visibleActivityInfos == null || visibleActivityInfos.isEmpty()) {
+            return;
+        }
+        if (mSession == null) {
+            return;
+        }
+        try {
+            for (int i = 0; i < visibleActivityInfos.size(); i++) {
+                mSession.updateVisibleActivityInfo(visibleActivityInfos.get(i), type);
+            }
+        } catch (RemoteException e) {
+            if (DEBUG) {
+                Slog.w(TAG, "updateVisibleActivitiesChangedLocked RemoteException : " + e);
+            }
+        }
+        if (DEBUG) {
+            Slog.d(TAG, "updateVisibleActivitiesChangedLocked type=" + type + ", count="
+                    + visibleActivityInfos.size());
+        }
+    }
+
+    private void removeFromLowPowerStandbyAllowlist() {
+        synchronized (mLock) {
+            if (mLowPowerStandbyAllowlisted) {
+                mFgHandler.removeCallbacks(mRemoveFromLowPowerStandbyAllowlistRunnable);
+                mLowPowerStandbyControllerInternal.removeFromAllowlist(mCallingUid);
+                mLowPowerStandbyAllowlisted = false;
+            }
+        }
     }
 
     @Override

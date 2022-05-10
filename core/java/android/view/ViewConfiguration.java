@@ -17,6 +17,7 @@
 package android.view;
 
 import android.annotation.FloatRange;
+import android.annotation.NonNull;
 import android.annotation.TestApi;
 import android.annotation.UiContext;
 import android.app.Activity;
@@ -346,6 +347,7 @@ public class ViewConfiguration {
     private final long mScreenshotChordKeyTimeout;
     private final int mSmartSelectionInitializedTimeout;
     private final int mSmartSelectionInitializingTimeout;
+    private final int mPreferKeepClearForFocusDelay;
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123768915)
     private boolean sHasPermanentMenuKey;
@@ -391,6 +393,7 @@ public class ViewConfiguration {
         mMinScalingSpan = 0;
         mSmartSelectionInitializedTimeout = SMART_SELECTION_INITIALIZED_TIMEOUT_IN_MILLISECOND;
         mSmartSelectionInitializingTimeout = SMART_SELECTION_INITIALIZING_TIMEOUT_IN_MILLISECOND;
+        mPreferKeepClearForFocusDelay = -1;
     }
 
     /**
@@ -405,7 +408,7 @@ public class ViewConfiguration {
      * @see #get(android.content.Context)
      * @see android.util.DisplayMetrics
      */
-    private ViewConfiguration(@UiContext Context context) {
+    private ViewConfiguration(@NonNull @UiContext Context context) {
         mConstructedWithContext = true;
         final Resources res = context.getResources();
         final DisplayMetrics metrics = res.getDisplayMetrics();
@@ -433,9 +436,8 @@ public class ViewConfiguration {
         mAmbiguousGestureMultiplier = Math.max(1.0f, multiplierValue.getFloat());
 
         // Size of the screen in bytes, in ARGB_8888 format
-        final WindowManager windowManager = context.getSystemService(WindowManager.class);
-        final Rect maxWindowBounds = windowManager.getMaximumWindowMetrics().getBounds();
-        mMaximumDrawingCacheSize = 4 * maxWindowBounds.width() * maxWindowBounds.height();
+        final Rect maxBounds = config.windowConfiguration.getMaxBounds();
+        mMaximumDrawingCacheSize = 4 * maxBounds.width() * maxBounds.height();
 
         mOverscrollDistance = (int) (sizeAndDensity * OVERSCROLL_DISTANCE + 0.5f);
         mOverflingDistance = (int) (sizeAndDensity * OVERFLING_DISTANCE + 0.5f);
@@ -506,6 +508,8 @@ public class ViewConfiguration {
                 com.android.internal.R.integer.config_smartSelectionInitializedTimeoutMillis);
         mSmartSelectionInitializingTimeout = res.getInteger(
                 com.android.internal.R.integer.config_smartSelectionInitializingTimeoutMillis);
+        mPreferKeepClearForFocusDelay = res.getInteger(
+                com.android.internal.R.integer.config_preferKeepClearForFocusDelayMillis);
     }
 
     /**
@@ -518,7 +522,7 @@ public class ViewConfiguration {
      *                {@link Context#createWindowContext(int, Bundle)}.
      */
     // TODO(b/182007470): Use @ConfigurationContext instead
-    public static ViewConfiguration get(@UiContext Context context) {
+    public static ViewConfiguration get(@NonNull @UiContext Context context) {
         StrictMode.assertConfigurationContext(context, "ViewConfiguration");
 
         final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
@@ -600,6 +604,8 @@ public class ViewConfiguration {
     }
 
     /**
+     * Used for both key and motion events.
+     *
      * @return the duration in milliseconds before a press turns into
      * a long press
      */
@@ -1091,6 +1097,16 @@ public class ViewConfiguration {
      */
     public int getSmartSelectionInitializingTimeout() {
         return mSmartSelectionInitializingTimeout;
+    }
+
+    /**
+     * @return The delay in milliseconds before focused Views set themselves as preferred to keep
+     *         clear, or -1 if Views should not set themselves as preferred to keep clear.
+     * @hide
+     */
+    @TestApi
+    public int getPreferKeepClearForFocusDelay() {
+        return mPreferKeepClearForFocusDelay;
     }
 
     /**

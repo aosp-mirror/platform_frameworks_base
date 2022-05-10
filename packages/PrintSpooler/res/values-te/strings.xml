@@ -83,7 +83,7 @@
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>ను రద్దు చేస్తోంది"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"ప్రింటర్ ఎర్రర్ <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"ప్రింటర్ <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>ను బ్లాక్ చేసింది"</string>
-    <string name="cancel" msgid="4373674107267141885">"రద్దు చేయి"</string>
+    <string name="cancel" msgid="4373674107267141885">"రద్దు చేయండి"</string>
     <string name="restart" msgid="2472034227037808749">"పునఃప్రారంభించు"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"ప్రింటర్‌కు కనెక్షన్ లేదు"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"తెలియదు"</string>

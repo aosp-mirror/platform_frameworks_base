@@ -30,15 +30,15 @@ import android.util.PackageUtils;
 import android.util.SparseArray;
 
 import com.android.internal.util.CollectionUtils;
-import com.android.server.pm.PackageSetting;
+import com.android.server.pm.Computer;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.verify.domain.models.DomainVerificationInternalUserState;
 import com.android.server.pm.verify.domain.models.DomainVerificationPkgState;
 import com.android.server.pm.verify.domain.models.DomainVerificationStateMap;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Function;
 
 @SuppressWarnings("PointlessBooleanExpression")
 public class DomainVerificationDebug {
@@ -62,8 +62,7 @@ public class DomainVerificationDebug {
     }
 
     public void printState(@NonNull IndentingPrintWriter writer, @Nullable String packageName,
-            @Nullable @UserIdInt Integer userId,
-            @NonNull Function<String, PackageSetting> pkgSettingFunction,
+            @Nullable @UserIdInt Integer userId, @NonNull Computer snapshot,
             @NonNull DomainVerificationStateMap<DomainVerificationPkgState> stateMap)
             throws NameNotFoundException {
         ArrayMap<String, Integer> reusedMap = new ArrayMap<>();
@@ -74,7 +73,7 @@ public class DomainVerificationDebug {
             for (int index = 0; index < size; index++) {
                 DomainVerificationPkgState pkgState = stateMap.valueAt(index);
                 String pkgName = pkgState.getPackageName();
-                PackageSetting pkgSetting = pkgSettingFunction.apply(pkgName);
+                PackageStateInternal pkgSetting = snapshot.getPackageStateInternal(pkgName);
                 if (pkgSetting == null || pkgSetting.getPkg() == null) {
                     continue;
                 }
@@ -90,7 +89,7 @@ public class DomainVerificationDebug {
                 throw DomainVerificationUtils.throwPackageUnavailable(packageName);
             }
 
-            PackageSetting pkgSetting = pkgSettingFunction.apply(packageName);
+            PackageStateInternal pkgSetting = snapshot.getPackageStateInternal(packageName);
             if (pkgSetting == null || pkgSetting.getPkg() == null) {
                 throw DomainVerificationUtils.throwPackageUnavailable(packageName);
             }
@@ -182,10 +181,10 @@ public class DomainVerificationDebug {
 
         if (!reusedMap.isEmpty()) {
             if (!wasHeaderPrinted) {
-                Signature[] signatures = pkg.getSigningDetails().signatures;
+                Signature[] signatures = pkg.getSigningDetails().getSignatures();
                 String signaturesDigest = signatures == null ? null : Arrays.toString(
                         PackageUtils.computeSignaturesSha256Digests(
-                                pkg.getSigningDetails().signatures, ":"));
+                                pkg.getSigningDetails().getSignatures(), ":"));
 
                 writer.println(pkgState.getPackageName() + ":");
                 writer.increaseIndent();

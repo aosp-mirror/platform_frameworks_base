@@ -29,7 +29,7 @@ import android.os.UserHandle;
 interface ICrossProfileApps {
     void startActivityAsUser(in IApplicationThread caller, in String callingPackage,
             in String callingFeatureId, in ComponentName component, int userId,
-            boolean launchMainActivity);
+            boolean launchMainActivity, in IBinder task, in Bundle options);
     void startActivityAsUserByIntent(in IApplicationThread caller, in String callingPackage,
             in String callingFeatureId, in Intent intent, int userId, in IBinder callingActivity,
             in Bundle options);

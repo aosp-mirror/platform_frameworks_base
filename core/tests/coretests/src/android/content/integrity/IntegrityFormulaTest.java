@@ -54,6 +54,20 @@ public class IntegrityFormulaTest {
     }
 
     @Test
+    public void createEqualsFormula_appCertificateLineage() {
+        String appCertificate = "com.test.app";
+        IntegrityFormula formula =
+                IntegrityFormula.Application.certificateLineageContains(appCertificate);
+
+        AtomicFormula.StringAtomicFormula stringAtomicFormula =
+                (AtomicFormula.StringAtomicFormula) formula;
+
+        assertThat(stringAtomicFormula.getKey()).isEqualTo(AtomicFormula.APP_CERTIFICATE_LINEAGE);
+        assertThat(stringAtomicFormula.getValue()).matches(appCertificate);
+        assertThat(stringAtomicFormula.getIsHashedValue()).isTrue();
+    }
+
+    @Test
     public void createEqualsFormula_installerName() {
         String installerName = "com.test.app";
         IntegrityFormula formula = IntegrityFormula.Installer.packageNameEquals(installerName);
@@ -138,8 +152,10 @@ public class IntegrityFormulaTest {
         IntegrityFormula formula1 = IntegrityFormula.Application.packageNameEquals(packageName);
         IntegrityFormula formula2 =
                 IntegrityFormula.Application.certificatesContain(certificateName);
+        IntegrityFormula formula3 =
+                IntegrityFormula.Application.certificateLineageContains(certificateName);
 
-        IntegrityFormula compoundFormula = IntegrityFormula.all(formula1, formula2);
+        IntegrityFormula compoundFormula = IntegrityFormula.all(formula1, formula2, formula3);
 
         assertThat(compoundFormula.getTag()).isEqualTo(COMPOUND_FORMULA_TAG);
     }
@@ -151,8 +167,10 @@ public class IntegrityFormulaTest {
         IntegrityFormula formula1 = IntegrityFormula.Application.packageNameEquals(packageName);
         IntegrityFormula formula2 =
                 IntegrityFormula.Application.certificatesContain(certificateName);
+        IntegrityFormula formula3 =
+                IntegrityFormula.Application.certificateLineageContains(certificateName);
 
-        IntegrityFormula compoundFormula = IntegrityFormula.any(formula1, formula2);
+        IntegrityFormula compoundFormula = IntegrityFormula.any(formula1, formula2, formula3);
 
         assertThat(compoundFormula.getTag()).isEqualTo(COMPOUND_FORMULA_TAG);
     }

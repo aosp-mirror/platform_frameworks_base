@@ -219,22 +219,25 @@ public class ImsSmsImplBase {
      */
     public final void onSmsReceived(int token, @SmsMessage.Format String format, byte[] pdu)
             throws RuntimeException {
+        IImsSmsListener listener = null;
         synchronized (mLock) {
-            if (mListener == null) {
-                throw new RuntimeException("Feature not ready.");
-            }
-            try {
-                mListener.onSmsReceived(token, format, pdu);
-            } catch (RemoteException e) {
-                Log.e(LOG_TAG, "Can not deliver sms: " + e.getMessage());
-                SmsMessage message = SmsMessage.createFromPdu(pdu, format);
-                if (message != null && message.mWrappedSmsMessage != null) {
-                    acknowledgeSms(token, message.mWrappedSmsMessage.mMessageRef,
-                            DELIVER_STATUS_ERROR_GENERIC);
-                } else {
-                    Log.w(LOG_TAG, "onSmsReceived: Invalid pdu entered.");
-                    acknowledgeSms(token, 0, DELIVER_STATUS_ERROR_GENERIC);
-                }
+            listener = mListener;
+        }
+
+        if (listener == null) {
+            throw new RuntimeException("Feature not ready.");
+        }
+        try {
+            listener.onSmsReceived(token, format, pdu);
+        } catch (RemoteException e) {
+            Log.e(LOG_TAG, "Can not deliver sms: " + e.getMessage());
+            SmsMessage message = SmsMessage.createFromPdu(pdu, format);
+            if (message != null && message.mWrappedSmsMessage != null) {
+                acknowledgeSms(token, message.mWrappedSmsMessage.mMessageRef,
+                        DELIVER_STATUS_ERROR_GENERIC);
+            } else {
+                Log.w(LOG_TAG, "onSmsReceived: Invalid pdu entered.");
+                acknowledgeSms(token, 0, DELIVER_STATUS_ERROR_GENERIC);
             }
         }
     }
@@ -254,16 +257,19 @@ public class ImsSmsImplBase {
      */
     public final void onSendSmsResultSuccess(int token,
             @IntRange(from = 0, to = 65535) int messageRef) throws RuntimeException {
+        IImsSmsListener listener = null;
         synchronized (mLock) {
-            if (mListener == null) {
-                throw new RuntimeException("Feature not ready.");
-            }
-            try {
-                mListener.onSendSmsResult(token, messageRef, SEND_STATUS_OK,
-                        SmsManager.RESULT_ERROR_NONE, RESULT_NO_NETWORK_ERROR);
-            } catch (RemoteException e) {
-                e.rethrowFromSystemServer();
-            }
+            listener = mListener;
+        }
+
+        if (listener == null) {
+            throw new RuntimeException("Feature not ready.");
+        }
+        try {
+            listener.onSendSmsResult(token, messageRef, SEND_STATUS_OK,
+                    SmsManager.RESULT_ERROR_NONE, RESULT_NO_NETWORK_ERROR);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -288,16 +294,19 @@ public class ImsSmsImplBase {
     @Deprecated
     public final void onSendSmsResult(int token, @IntRange(from = 0, to = 65535) int messageRef,
             @SendStatusResult int status, @SmsManager.Result int reason) throws RuntimeException {
+        IImsSmsListener listener = null;
         synchronized (mLock) {
-            if (mListener == null) {
-                throw new RuntimeException("Feature not ready.");
-            }
-            try {
-                mListener.onSendSmsResult(token, messageRef, status, reason,
-                        RESULT_NO_NETWORK_ERROR);
-            } catch (RemoteException e) {
-                e.rethrowFromSystemServer();
-            }
+            listener = mListener;
+        }
+
+        if (listener == null) {
+            throw new RuntimeException("Feature not ready.");
+        }
+        try {
+            listener.onSendSmsResult(token, messageRef, status, reason,
+                    RESULT_NO_NETWORK_ERROR);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -322,15 +331,18 @@ public class ImsSmsImplBase {
     public final void onSendSmsResultError(int token,
             @IntRange(from = 0, to = 65535) int messageRef, @SendStatusResult int status,
             @SmsManager.Result int reason, int networkErrorCode) throws RuntimeException {
+        IImsSmsListener listener = null;
         synchronized (mLock) {
-            if (mListener == null) {
-                throw new RuntimeException("Feature not ready.");
-            }
-            try {
-                mListener.onSendSmsResult(token, messageRef, status, reason, networkErrorCode);
-            } catch (RemoteException e) {
-                e.rethrowFromSystemServer();
-            }
+            listener = mListener;
+        }
+
+        if (listener == null) {
+            throw new RuntimeException("Feature not ready.");
+        }
+        try {
+            listener.onSendSmsResult(token, messageRef, status, reason, networkErrorCode);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -357,16 +369,19 @@ public class ImsSmsImplBase {
     public final void onSmsStatusReportReceived(int token,
             @IntRange(from = 0, to = 65535) int messageRef, @SmsMessage.Format String format,
             byte[] pdu) throws RuntimeException {
+        IImsSmsListener listener = null;
         synchronized (mLock) {
-            if (mListener == null) {
-                throw new RuntimeException("Feature not ready.");
-            }
-            try {
-                mListener.onSmsStatusReportReceived(token, format, pdu);
-            } catch (RemoteException e) {
-                Log.e(LOG_TAG, "Can not process sms status report: " + e.getMessage());
-                acknowledgeSmsReport(token, messageRef, STATUS_REPORT_STATUS_ERROR);
-            }
+            listener = mListener;
+        }
+
+        if (listener == null) {
+            throw new RuntimeException("Feature not ready.");
+        }
+        try {
+            listener.onSmsStatusReportReceived(token, format, pdu);
+        } catch (RemoteException e) {
+            Log.e(LOG_TAG, "Can not process sms status report: " + e.getMessage());
+            acknowledgeSmsReport(token, messageRef, STATUS_REPORT_STATUS_ERROR);
         }
     }
 
@@ -386,24 +401,27 @@ public class ImsSmsImplBase {
      */
     public final void onSmsStatusReportReceived(int token, @SmsMessage.Format String format,
             byte[] pdu) throws RuntimeException {
+        IImsSmsListener listener = null;
         synchronized (mLock) {
-            if (mListener == null) {
-                throw new RuntimeException("Feature not ready.");
-            }
-            try {
-                mListener.onSmsStatusReportReceived(token, format, pdu);
-            } catch (RemoteException e) {
-                Log.e(LOG_TAG, "Can not process sms status report: " + e.getMessage());
-                SmsMessage message = SmsMessage.createFromPdu(pdu, format);
-                if (message != null && message.mWrappedSmsMessage != null) {
-                    acknowledgeSmsReport(
-                            token,
-                            message.mWrappedSmsMessage.mMessageRef,
-                            STATUS_REPORT_STATUS_ERROR);
-                } else {
-                    Log.w(LOG_TAG, "onSmsStatusReportReceived: Invalid pdu entered.");
-                    acknowledgeSmsReport(token, 0, STATUS_REPORT_STATUS_ERROR);
-                }
+            listener = mListener;
+        }
+
+        if (listener == null) {
+            throw new RuntimeException("Feature not ready.");
+        }
+        try {
+            listener.onSmsStatusReportReceived(token, format, pdu);
+        } catch (RemoteException e) {
+            Log.e(LOG_TAG, "Can not process sms status report: " + e.getMessage());
+            SmsMessage message = SmsMessage.createFromPdu(pdu, format);
+            if (message != null && message.mWrappedSmsMessage != null) {
+                acknowledgeSmsReport(
+                        token,
+                        message.mWrappedSmsMessage.mMessageRef,
+                        STATUS_REPORT_STATUS_ERROR);
+            } else {
+                Log.w(LOG_TAG, "onSmsStatusReportReceived: Invalid pdu entered.");
+                acknowledgeSmsReport(token, 0, STATUS_REPORT_STATUS_ERROR);
             }
         }
     }

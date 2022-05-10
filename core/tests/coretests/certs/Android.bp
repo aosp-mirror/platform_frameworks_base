@@ -10,16 +10,6 @@ package {
 }
 
 android_app_certificate {
-    name: "FrameworksCoreTests_keyset_A_cert",
-    certificate: "keyset_A",
-}
-
-android_app_certificate {
-    name: "FrameworksCoreTests_keyset_B_cert",
-    certificate: "keyset_B",
-}
-
-android_app_certificate {
     name: "FrameworksCoreTests_unit_test_cert",
     certificate: "unit_test",
 }

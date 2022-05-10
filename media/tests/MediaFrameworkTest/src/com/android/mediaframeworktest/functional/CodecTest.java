@@ -16,12 +16,6 @@
 
 package com.android.mediaframeworktest.functional;
 
-
-
-//import android.content.Resources;
-import com.android.mediaframeworktest.MediaFrameworkTest;
-import com.android.mediaframeworktest.MediaNames;
-
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -36,15 +30,12 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
 
-import java.io.File;
-import java.io.FileWriter;
+import com.android.mediaframeworktest.MediaFrameworkTest;
+import com.android.mediaframeworktest.MediaNames;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.Writer;
-import java.io.FileOutputStream;
 import java.util.HashSet;
-import java.util.Random;
 import java.util.Set;
 /**
  * Junit / Instrumentation test case for the media player api
@@ -539,14 +530,16 @@ public class CodecTest {
         try{
             BitmapFactory mBitmapFactory = new BitmapFactory();
 
-            MediaMetadataRetriever mMediaMetadataRetriever = new MediaMetadataRetriever();
-            try {
-                mMediaMetadataRetriever.setDataSource(filePath);
-            } catch(Exception e) {
-                e.printStackTrace();
-                return false;
+            Bitmap outThumbnail;
+            try (MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever()) {
+                try {
+                    mediaMetadataRetriever.setDataSource(filePath);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return false;
+                }
+                outThumbnail = mediaMetadataRetriever.getFrameAtTime(-1);
             }
-            Bitmap outThumbnail = mMediaMetadataRetriever.getFrameAtTime(-1);
 
             //Verify the thumbnail
             Bitmap goldenBitmap = mBitmapFactory.decodeFile(goldenPath);
@@ -567,7 +560,7 @@ public class CodecTest {
                     return false;
                 }
            }
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.v(TAG, e.toString());
             return false;
         }

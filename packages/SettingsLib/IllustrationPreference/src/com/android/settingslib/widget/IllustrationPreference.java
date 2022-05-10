@@ -17,6 +17,7 @@
 package com.android.settingslib.widget;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Animatable2;
@@ -50,7 +51,9 @@ public class IllustrationPreference extends Preference {
     private static final String TAG = "IllustrationPreference";
 
     private static final boolean IS_ENABLED_LOTTIE_ADAPTIVE_COLOR = false;
+    private static final int SIZE_UNSPECIFIED = -1;
 
+    private int mMaxHeight = SIZE_UNSPECIFIED;
     private int mImageResId;
     private boolean mIsAutoScale;
     private Uri mImageUri;
@@ -98,6 +101,8 @@ public class IllustrationPreference extends Preference {
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
 
+        final ImageView backgroundView =
+                (ImageView) holder.findViewById(R.id.background_view);
         final FrameLayout middleGroundLayout =
                 (FrameLayout) holder.findViewById(R.id.middleground_layout);
         final LottieAnimationView illustrationView =
@@ -115,6 +120,7 @@ public class IllustrationPreference extends Preference {
         illustrationFrame.setLayoutParams(lp);
 
         handleImageWithAnimation(illustrationView);
+        handleImageFrameMaxHeight(backgroundView, illustrationView);
 
         if (mIsAutoScale) {
             illustrationView.setScaleType(mIsAutoScale
@@ -170,7 +176,14 @@ public class IllustrationPreference extends Preference {
     }
 
     /**
-     * Sets image drawable to display image in {@link LottieAnimationView}
+     * Gets the lottie illustration resource id.
+     */
+    public int getLottieAnimationResId() {
+        return mImageResId;
+    }
+
+    /**
+     * Sets the image drawable to display image in {@link LottieAnimationView}.
      *
      * @param imageDrawable the drawable of an image
      */
@@ -183,7 +196,16 @@ public class IllustrationPreference extends Preference {
     }
 
     /**
-     * Sets image uri to display image in {@link LottieAnimationView}
+     * Gets the image drawable from display image in {@link LottieAnimationView}.
+     *
+     * @return the drawable of an image
+     */
+    public Drawable getImageDrawable() {
+        return mImageDrawable;
+    }
+
+    /**
+     * Sets the image uri to display image in {@link LottieAnimationView}.
      *
      * @param imageUri the Uri of an image
      */
@@ -191,6 +213,28 @@ public class IllustrationPreference extends Preference {
         if (imageUri != mImageUri) {
             resetImageResourceCache();
             mImageUri = imageUri;
+            notifyChanged();
+        }
+    }
+
+    /**
+     * Gets the image uri from display image in {@link LottieAnimationView}.
+     *
+     * @return the Uri of an image
+     */
+    public Uri getImageUri() {
+        return mImageUri;
+    }
+
+    /**
+     * Sets the maximum height of the views, still use the specific one if the maximum height was
+     * larger than the specific height from XML.
+     *
+     * @param maxHeight the maximum height of the frame views in terms of pixels.
+     */
+    public void setMaxHeight(int maxHeight) {
+        if (maxHeight != mMaxHeight) {
+            mMaxHeight = maxHeight;
             notifyChanged();
         }
     }
@@ -247,6 +291,23 @@ public class IllustrationPreference extends Preference {
                 startLottieAnimationWith(illustrationView, mImageResId);
             }
         }
+    }
+
+    private void handleImageFrameMaxHeight(ImageView backgroundView, ImageView illustrationView) {
+        if (mMaxHeight == SIZE_UNSPECIFIED) {
+            return;
+        }
+
+        final Resources res = backgroundView.getResources();
+        final int frameWidth = res.getDimensionPixelSize(R.dimen.settingslib_illustration_width);
+        final int frameHeight = res.getDimensionPixelSize(R.dimen.settingslib_illustration_height);
+        final int restrictedMaxHeight = Math.min(mMaxHeight, frameHeight);
+        backgroundView.setMaxHeight(restrictedMaxHeight);
+        illustrationView.setMaxHeight(restrictedMaxHeight);
+
+        // Ensures the illustration view size is smaller than or equal to the background view size.
+        final float aspectRatio = (float) frameWidth / frameHeight;
+        illustrationView.setMaxWidth((int) (restrictedMaxHeight * aspectRatio));
     }
 
     private void startAnimation(Drawable drawable) {

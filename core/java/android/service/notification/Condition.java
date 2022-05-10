@@ -114,7 +114,7 @@ public final class Condition implements Parcelable {
     }
 
     public Condition(Parcel source) {
-        this((Uri)source.readParcelable(Condition.class.getClassLoader()),
+        this((Uri)source.readParcelable(Condition.class.getClassLoader(), android.net.Uri.class),
                 source.readString(),
                 source.readString(),
                 source.readString(),

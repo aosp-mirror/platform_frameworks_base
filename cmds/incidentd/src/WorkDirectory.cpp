@@ -280,7 +280,7 @@ void ReportFile::addReport(const IncidentReportArgs& args) {
                 // Lower privacy policy (less restrictive) wins.
                 report->set_privacy_policy(args.getPrivacyPolicy());
             }
-            report->set_all_sections(report->all_sections() | args.all());
+            report->set_all_sections(report->all_sections() || args.all());
             for (int section: args.sections()) {
                 if (!has_section(*report, section)) {
                     report->add_section(section);
@@ -533,7 +533,7 @@ status_t ReportFile::load_envelope_impl(bool cleanup) {
 WorkDirectory::WorkDirectory()
         :mDirectory("/data/misc/incidents"),
          mMaxFileCount(100),
-         mMaxDiskUsageBytes(100 * 1024 * 1024) {  // Incident reports can take up to 100MB on disk.
+         mMaxDiskUsageBytes(400 * 1024 * 1024) {  // Incident reports can take up to 400MB on disk.
                                                  // TODO: Should be a flag.
     create_directory(mDirectory.c_str());
 }

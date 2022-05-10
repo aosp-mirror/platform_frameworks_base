@@ -19,25 +19,26 @@ package com.android.server.pm.test.verify.domain
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.pm.PackageUserState
-import android.content.pm.parsing.component.ParsedActivity
-import android.content.pm.parsing.component.ParsedIntentInfo
+import android.content.pm.SigningDetails
 import android.content.pm.verify.domain.DomainVerificationManager
 import android.content.pm.verify.domain.DomainVerificationState
 import android.os.Build
 import android.os.Process
 import android.util.ArraySet
+import android.util.IndentingPrintWriter
 import android.util.SparseArray
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.pm.PackageSetting
+import com.android.server.pm.Computer
 import com.android.server.pm.parsing.pkg.AndroidPackage
-import com.android.server.pm.test.verify.domain.DomainVerificationTestUtils.mockPackageSettings
+import com.android.server.pm.pkg.PackageStateInternal
+import com.android.server.pm.pkg.PackageUserStateInternal
+import com.android.server.pm.pkg.component.ParsedActivityImpl
+import com.android.server.pm.pkg.component.ParsedIntentInfoImpl
 import com.android.server.pm.verify.domain.DomainVerificationEnforcer
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal
 import com.android.server.pm.verify.domain.DomainVerificationService
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxy
 import com.android.server.testutils.mockThrowOnUnmocked
-import com.android.server.testutils.spyThrowOnUnmocked
 import com.android.server.testutils.whenever
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -47,8 +48,8 @@ import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.anyLong
 import org.mockito.Mockito.anyString
 import org.mockito.Mockito.eq
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.verifyNoMoreInteractions
-import java.io.File
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
@@ -74,9 +75,9 @@ class DomainVerificationEnforcerTest {
         @Parameterized.Parameters(name = "{0}")
         fun parameters(): Array<Any> {
             val visiblePkg = mockPkg(VISIBLE_PKG)
-            val visiblePkgSetting = mockPkgSetting(VISIBLE_PKG, VISIBLE_UUID)
+            val visiblePkgState = mockPkgState(VISIBLE_PKG, VISIBLE_UUID)
             val invisiblePkg = mockPkg(INVISIBLE_PKG)
-            val invisiblePkgSetting = mockPkgSetting(INVISIBLE_PKG, INVISIBLE_UUID)
+            val invisiblePkgState = mockPkgState(INVISIBLE_PKG, INVISIBLE_UUID)
 
             val makeEnforcer: (Context) -> DomainVerificationEnforcer = {
                 DomainVerificationEnforcer(it).apply {
@@ -99,11 +100,15 @@ class DomainVerificationEnforcerTest {
                     mockThrowOnUnmocked {
                         whenever(callingUid) { callingUidInt.get() }
                         whenever(callingUserId) { callingUserIdInt.get() }
-                        mockPackageSettings {
-                            when (it) {
-                                VISIBLE_PKG -> visiblePkgSetting
-                                INVISIBLE_PKG -> invisiblePkgSetting
-                                else -> null
+                        whenever(snapshot()) {
+                            mockThrowOnUnmocked {
+                                whenever(getPackageStateInternal(anyString())) {
+                                    when (getArgument<String>(0)) {
+                                        VISIBLE_PKG -> visiblePkgState
+                                        INVISIBLE_PKG -> invisiblePkgState
+                                        else -> null
+                                    }
+                                }
                             }
                         }
                         whenever(schedule(anyInt(), any()))
@@ -143,8 +148,8 @@ class DomainVerificationEnforcerTest {
                 callingUidInt.set(it.callingUid)
                 callingUserIdInt.set(it.callingUserId)
                 service.proxy = it.proxy
-                service.addPackage(visiblePkgSetting)
-                service.addPackage(invisiblePkgSetting)
+                service.addPackage(visiblePkgState)
+                service.addPackage(invisiblePkgState)
                 service.block(it)
             }
 
@@ -205,6 +210,13 @@ class DomainVerificationEnforcerTest {
                 },
                 service(Type.QUERENT, "getInfo") {
                     getDomainVerificationInfo(it.targetPackageName)
+                },
+                service(Type.QUERENT, "printState") {
+                    printState(mock(IndentingPrintWriter::class.java), null, null)
+                },
+                service(Type.QUERENT, "printStateInternal") {
+                    printState(mock(Computer::class.java), mock(IndentingPrintWriter::class.java),
+                        null, null)
                 },
                 service(Type.VERIFIER, "setStatus") {
                     setDomainVerificationStatus(
@@ -297,49 +309,42 @@ class DomainVerificationEnforcerTest {
             whenever(isEnabled) { true }
             whenever(activities) {
                 listOf(
-                    ParsedActivity().apply {
+                    ParsedActivityImpl().apply {
                         addIntent(
-                            ParsedIntentInfo().apply {
-                                autoVerify = true
-                                addAction(Intent.ACTION_VIEW)
-                                addCategory(Intent.CATEGORY_BROWSABLE)
-                                addCategory(Intent.CATEGORY_DEFAULT)
-                                addDataScheme("https")
-                                addDataAuthority("example.com", null)
+                            ParsedIntentInfoImpl()
+                                .apply {
+                                intentFilter.apply {
+                                    autoVerify = true
+                                    addAction(Intent.ACTION_VIEW)
+                                    addCategory(Intent.CATEGORY_BROWSABLE)
+                                    addCategory(Intent.CATEGORY_DEFAULT)
+                                    addDataScheme("https")
+                                    addDataAuthority("example.com", null)
+                                }
                             }
                         )
                     }
                 )
             }
+            whenever(signingDetails) { SigningDetails.UNKNOWN }
         }
 
-        fun mockPkgSetting(packageName: String, domainSetId: UUID) = spyThrowOnUnmocked(
-            PackageSetting(
-                packageName,
-                packageName,
-                File("/test"),
-                null,
-                null,
-                null,
-                null,
-                1,
-                0,
-                0,
-                0,
-                null,
-                null,
-                null,
-                domainSetId
-            )
-        ) {
-            whenever(getName()) { packageName }
-            whenever(getPkg()) { mockPkg(packageName) }
-            whenever(this.domainSetId) { domainSetId }
-            whenever(readUserState(0)) { PackageUserState() }
-            whenever(readUserState(1)) { PackageUserState() }
-            whenever(getInstantApp(anyInt())) { false }
-            whenever(isSystem()) { false }
-        }
+        fun mockPkgState(packageName: String, domainSetId: UUID) =
+            mockThrowOnUnmocked<PackageStateInternal> {
+                whenever(this.packageName) { packageName }
+                whenever(pkg) { mockPkg(packageName) }
+                whenever(this.domainSetId) { domainSetId }
+                whenever(getUserStateOrDefault(0)) { PackageUserStateInternal.DEFAULT }
+                whenever(getUserStateOrDefault(1)) { PackageUserStateInternal.DEFAULT }
+                whenever(userStates) {
+                    SparseArray<PackageUserStateInternal>().apply {
+                        this[0] = PackageUserStateInternal.DEFAULT
+                        this[1] = PackageUserStateInternal.DEFAULT
+                    }
+                }
+                whenever(isSystem) { false }
+                whenever(signingDetails) { SigningDetails.UNKNOWN }
+            }
     }
 
     @Parameterized.Parameter(0)
@@ -385,6 +390,7 @@ class DomainVerificationEnforcerTest {
         val allowUserState = AtomicBoolean(false)
         val allowPreferredApps = AtomicBoolean(false)
         val allowQueryAll = AtomicBoolean(false)
+        val allowDump = AtomicBoolean(false)
         val context: Context = mockThrowOnUnmocked {
             initPermission(
                 allowUserState,
@@ -395,6 +401,7 @@ class DomainVerificationEnforcerTest {
                 android.Manifest.permission.SET_PREFERRED_APPLICATIONS
             )
             initPermission(allowQueryAll, android.Manifest.permission.QUERY_ALL_PACKAGES)
+            initPermission(allowDump, android.Manifest.permission.DUMP)
         }
         val target = params.construct(context)
 
@@ -421,6 +428,10 @@ class DomainVerificationEnforcerTest {
         allowQueryAll.set(true)
 
         assertFails { runMethod(target, NON_VERIFIER_UID) }
+
+        allowDump.set(true)
+
+        runMethod(target, NON_VERIFIER_UID)
     }
 
     private fun approvedVerifier() {
@@ -806,8 +817,12 @@ class DomainVerificationEnforcerTest {
             }
 
             val valueAsInt = value as? Int
-            if (valueAsInt != null && valueAsInt == DomainVerificationManager.STATUS_OK) {
-                throw AssertionError("Expected call to return false, was $value")
+            if (valueAsInt != null) {
+                if (valueAsInt == DomainVerificationManager.STATUS_OK) {
+                    throw AssertionError("Expected call to return false, was $value")
+                }
+            } else {
+                throw AssertionError("Expected call to fail")
             }
         } catch (e: SecurityException) {
         } catch (e: PackageManager.NameNotFoundException) {
@@ -819,7 +834,7 @@ class DomainVerificationEnforcerTest {
         // System/shell only
         INTERNAL,
 
-        // INTERNAL || non-legacy domain verification agent
+        // INTERNAL || non-legacy domain verification agent || DUMP permission
         QUERENT,
 
         // INTERNAL || domain verification agent

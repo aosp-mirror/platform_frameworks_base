@@ -75,6 +75,9 @@ TEST(ConfigTest, shouldSelectBestDensity) {
   configs.add(buildDensityConfig(int(ResTable_config::DENSITY_HIGH) + 20));
   ASSERT_EQ(expectedBest, selectBest(deviceConfig, configs));
 
+  configs.add(buildDensityConfig(int(ResTable_config::DENSITY_XHIGH) - 1));
+  ASSERT_EQ(expectedBest, selectBest(deviceConfig, configs));
+
   expectedBest = buildDensityConfig(ResTable_config::DENSITY_XHIGH);
   configs.add(expectedBest);
   ASSERT_EQ(expectedBest, selectBest(deviceConfig, configs));
