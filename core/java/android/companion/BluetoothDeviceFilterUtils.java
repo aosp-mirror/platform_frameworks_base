@@ -22,7 +22,6 @@ import static android.text.TextUtils.firstNotEmpty;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.le.ScanFilter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.net.wifi.ScanResult;
 import android.os.Build;
@@ -30,9 +29,13 @@ import android.os.ParcelUuid;
 import android.os.Parcelable;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 /** @hide */
@@ -73,12 +76,19 @@ public class BluetoothDeviceFilterUtils {
 
     static boolean matchesServiceUuid(ParcelUuid serviceUuid, ParcelUuid serviceUuidMask,
             BluetoothDevice device) {
-        ParcelUuid[] uuids = device.getUuids();
-        final boolean result = serviceUuid == null ||
-                ScanFilter.matchesServiceUuids(
-                        serviceUuid,
-                        serviceUuidMask,
-                        uuids == null ? Collections.emptyList() : Arrays.asList(uuids));
+        boolean result = false;
+        List<ParcelUuid> deviceUuids = device.getUuids() == null
+                ? Collections.emptyList() : Arrays.asList(device.getUuids());
+        if (serviceUuid == null) {
+            result = true;
+        } else {
+            for (ParcelUuid parcelUuid : deviceUuids) {
+                UUID uuidMask = serviceUuidMask == null ? null : serviceUuidMask.getUuid();
+                if (uuidsMaskedEquals(parcelUuid.getUuid(), serviceUuid.getUuid(), uuidMask)) {
+                    result = true;
+                }
+            }
+        }
         if (DEBUG) debugLogMatchResult(result, device, serviceUuid);
         return result;
     }
@@ -142,5 +152,24 @@ public class BluetoothDeviceFilterUtils {
         } else {
             throw new IllegalArgumentException("Unknown device type: " + device);
         }
+    }
+
+    /**
+     * Compares two {@link #UUID} with a {@link #UUID} mask.
+     *
+     * @param data first {@link #UUID}.
+     * @param uuid second {@link #UUID}.
+     * @param mask mask {@link #UUID}.
+     * @return true if both UUIDs are equals when masked, false otherwise.
+     */
+    @VisibleForTesting
+    public static boolean uuidsMaskedEquals(UUID data, UUID uuid, UUID mask) {
+        if (mask == null) {
+            return Objects.equals(data, uuid);
+        }
+        return (data.getLeastSignificantBits() & mask.getLeastSignificantBits())
+                == (uuid.getLeastSignificantBits() & mask.getLeastSignificantBits())
+                && (data.getMostSignificantBits() & mask.getMostSignificantBits())
+                == (uuid.getMostSignificantBits() & mask.getMostSignificantBits());
     }
 }

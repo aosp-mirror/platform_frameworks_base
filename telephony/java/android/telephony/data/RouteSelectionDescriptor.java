@@ -120,35 +120,15 @@ public final class RouteSelectionDescriptor implements Parcelable {
     private final List<String> mDnn;
 
     /** @hide */
-    RouteSelectionDescriptor(android.hardware.radio.V1_6.RouteSelectionDescriptor rsd) {
-        this(rsd.precedence, rsd.sessionType.value(), rsd.sscMode.value(), rsd.sliceInfo,
-                rsd.dnn);
-    }
-
-    /** @hide */
     public RouteSelectionDescriptor(int precedence, int sessionType, int sscMode,
-            List<android.hardware.radio.V1_6.SliceInfo> sliceInfo, List<String> dnn) {
+            List<NetworkSliceInfo> sliceInfo, List<String> dnn) {
         mPrecedence = precedence;
         mSessionType = sessionType;
         mSscMode = sscMode;
-        mSliceInfo = new ArrayList<NetworkSliceInfo>();
-        for (android.hardware.radio.V1_6.SliceInfo si : sliceInfo) {
-            mSliceInfo.add(sliceInfoBuilder(si));
-        }
-        mDnn = new ArrayList<String>();
+        mSliceInfo = new ArrayList<>();
+        mSliceInfo.addAll(sliceInfo);
+        mDnn = new ArrayList<>();
         mDnn.addAll(dnn);
-    }
-
-    private NetworkSliceInfo sliceInfoBuilder(android.hardware.radio.V1_6.SliceInfo si) {
-        NetworkSliceInfo.Builder builder = new NetworkSliceInfo.Builder()
-                .setSliceServiceType(si.sst)
-                .setMappedHplmnSliceServiceType(si.mappedHplmnSst);
-        if (si.sliceDifferentiator != NetworkSliceInfo.SLICE_DIFFERENTIATOR_NO_SLICE) {
-            builder
-                .setSliceDifferentiator(si.sliceDifferentiator)
-                .setMappedHplmnSliceDifferentiator(si.mappedHplmnSD);
-        }
-        return builder.build();
     }
 
     private RouteSelectionDescriptor(Parcel p) {
@@ -156,7 +136,7 @@ public final class RouteSelectionDescriptor implements Parcelable {
         mSessionType = p.readInt();
         mSscMode = p.readInt();
         mSliceInfo = p.createTypedArrayList(NetworkSliceInfo.CREATOR);
-        mDnn = new ArrayList<String>();
+        mDnn = new ArrayList<>();
         p.readStringList(mDnn);
     }
 

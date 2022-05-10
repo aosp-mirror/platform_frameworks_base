@@ -19,6 +19,7 @@ package com.android.wm.shell.draganddrop;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_ACTIVITY;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_SHORTCUT;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_TASK;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.DragEvent.ACTION_DRAG_ENDED;
 import static android.view.DragEvent.ACTION_DRAG_ENTERED;
 import static android.view.DragEvent.ACTION_DRAG_EXITED;
@@ -48,13 +49,19 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
+import androidx.annotation.VisibleForTesting;
+
+import com.android.internal.logging.InstanceId;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
-import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 /**
@@ -67,14 +74,36 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
 
     private final Context mContext;
     private final DisplayController mDisplayController;
+    private final DragAndDropEventLogger mLogger;
+    private final IconProvider mIconProvider;
     private SplitScreenController mSplitScreen;
+    private ShellExecutor mMainExecutor;
+    private DragAndDropImpl mImpl;
+    private ArrayList<DragAndDropListener> mListeners = new ArrayList<>();
 
     private final SparseArray<PerDisplay> mDisplayDropTargets = new SparseArray<>();
     private final SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
 
-    public DragAndDropController(Context context, DisplayController displayController) {
+    /**
+     * Listener called during drag events, currently just onDragStarted.
+     */
+    public interface DragAndDropListener {
+        /** Called when a drag has started. */
+        void onDragStarted();
+    }
+
+    public DragAndDropController(Context context, DisplayController displayController,
+            UiEventLogger uiEventLogger, IconProvider iconProvider, ShellExecutor mainExecutor) {
         mContext = context;
         mDisplayController = displayController;
+        mLogger = new DragAndDropEventLogger(uiEventLogger);
+        mIconProvider = iconProvider;
+        mMainExecutor = mainExecutor;
+        mImpl = new DragAndDropImpl();
+    }
+
+    public DragAndDrop asDragAndDrop() {
+        return mImpl;
     }
 
     public void initialize(Optional<SplitScreenController> splitscreen) {
@@ -82,9 +111,30 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
         mDisplayController.addDisplayWindowListener(this);
     }
 
+    /** Adds a listener to be notified of drag and drop events. */
+    public void addListener(DragAndDropListener listener) {
+        mListeners.add(listener);
+    }
+
+    /** Removes a drag and drop listener. */
+    public void removeListener(DragAndDropListener listener) {
+        mListeners.remove(listener);
+    }
+
+    private void notifyListeners() {
+        for (int i = 0; i < mListeners.size(); i++) {
+            mListeners.get(i).onDragStarted();
+        }
+    }
+
     @Override
     public void onDisplayAdded(int displayId) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP, "Display added: %d", displayId);
+        if (displayId != DEFAULT_DISPLAY) {
+            // Ignore non-default displays for now
+            return;
+        }
+
         final Context context = mDisplayController.getDisplayContext(displayId)
                 .createWindowContext(TYPE_APPLICATION_OVERLAY, null);
         final WindowManager wm = context.getSystemService(WindowManager.class);
@@ -106,16 +156,22 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
                 R.layout.global_drop_target, null);
         rootView.setOnDragListener(this);
         rootView.setVisibility(View.INVISIBLE);
-        DragLayout dragLayout = new DragLayout(context, mSplitScreen);
+        DragLayout dragLayout = new DragLayout(context, mSplitScreen, mIconProvider);
         rootView.addView(dragLayout,
                 new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
         try {
             wm.addView(rootView, layoutParams);
-            mDisplayDropTargets.put(displayId,
-                    new PerDisplay(displayId, context, wm, rootView, dragLayout));
+            addDisplayDropTarget(displayId, context, wm, rootView, dragLayout);
         } catch (WindowManager.InvalidDisplayException e) {
             Slog.w(TAG, "Unable to add view for display id: " + displayId);
         }
+    }
+
+    @VisibleForTesting
+    void addDisplayDropTarget(int displayId, Context context, WindowManager wm,
+            FrameLayout rootView, DragLayout dragLayout) {
+        mDisplayDropTargets.put(displayId,
+                new PerDisplay(displayId, context, wm, rootView, dragLayout));
     }
 
     @Override
@@ -175,13 +231,16 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
                     Slog.w(TAG, "Unexpected drag start during an active drag");
                     return false;
                 }
+                InstanceId loggerSessionId = mLogger.logStart(event);
                 pd.activeDragCount++;
                 pd.dragLayout.prepare(mDisplayController.getDisplayLayout(displayId),
-                        event.getClipData());
+                        event.getClipData(), loggerSessionId);
                 setDropTargetWindowVisibility(pd, View.VISIBLE);
+                notifyListeners();
                 break;
             case ACTION_DRAG_ENTERED:
                 pd.dragLayout.show();
+                pd.dragLayout.update(event);
                 break;
             case ACTION_DRAG_LOCATION:
                 pd.dragLayout.update(event);
@@ -198,7 +257,9 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
             case ACTION_DRAG_ENDED:
                 // TODO(b/169894807): Ensure sure it's not possible to get ENDED without DROP
                 // or EXITED
-                if (!pd.dragLayout.hasDropped()) {
+                if (pd.dragLayout.hasDropped()) {
+                    mLogger.logDrop();
+                } else {
                     pd.activeDragCount--;
                     pd.dragLayout.hide(event, () -> {
                         if (pd.activeDragCount == 0) {
@@ -208,6 +269,7 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
                         }
                     });
                 }
+                mLogger.logEnd();
                 break;
         }
         return true;
@@ -224,10 +286,6 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
                 // Hide the window if another drag hasn't been started while animating the drop
                 setDropTargetWindowVisibility(pd, View.INVISIBLE);
             }
-
-            // Clean up the drag surface
-            mTransaction.reparent(dragSurface, null);
-            mTransaction.apply();
         });
     }
 
@@ -252,6 +310,18 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
         return mimeTypes;
     }
 
+    private void onThemeChange() {
+        for (int i = 0; i < mDisplayDropTargets.size(); i++) {
+            mDisplayDropTargets.get(i).dragLayout.onThemeChange();
+        }
+    }
+
+    private void onConfigChanged(Configuration newConfig) {
+        for (int i = 0; i < mDisplayDropTargets.size(); i++) {
+            mDisplayDropTargets.get(i).dragLayout.onConfigChanged(newConfig);
+        }
+    }
+
     private static class PerDisplay {
         final int displayId;
         final Context context;
@@ -270,6 +340,23 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
             wm = w;
             rootView = rv;
             dragLayout = dl;
+        }
+    }
+
+    private class DragAndDropImpl implements DragAndDrop {
+
+        @Override
+        public void onThemeChanged() {
+            mMainExecutor.execute(() -> {
+                DragAndDropController.this.onThemeChange();
+            });
+        }
+
+        @Override
+        public void onConfigChanged(Configuration newConfig) {
+            mMainExecutor.execute(() -> {
+                DragAndDropController.this.onConfigChanged(newConfig);
+            });
         }
     }
 }

@@ -22,6 +22,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.app.ActivityManager;
 import android.app.Notification;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -33,10 +34,10 @@ import android.graphics.Color;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.Parcelable;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
@@ -57,8 +58,10 @@ import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.notification.NotificationIconDozeHelper;
 import com.android.systemui.statusbar.notification.NotificationUtils;
+import com.android.systemui.util.drawable.DrawableSize;
 
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class StatusBarIconView extends AnimatedImageView implements StatusIconDisplayable {
@@ -83,16 +86,6 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     public static final int STATE_ICON = 0;
     public static final int STATE_DOT = 1;
     public static final int STATE_HIDDEN = 2;
-
-    /**
-     * Maximum allowed byte count for an icon bitmap
-     * @see android.graphics.RecordingCanvas.MAX_BITMAP_SIZE
-     */
-    private static final int MAX_BITMAP_SIZE = 100 * 1024 * 1024; // 100 MB
-    /**
-     * Maximum allowed width or height for an icon drawable, if we can't get byte count
-     */
-    private static final int MAX_IMAGE_SIZE = 5000;
 
     private static final String TAG = "StatusBarIconView";
     private static final Property<StatusBarIconView, Float> ICON_APPEAR_AMOUNT
@@ -379,29 +372,17 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         }
         Drawable drawable;
         try {
+            Trace.beginSection("StatusBarIconView#updateDrawable()");
             drawable = getIcon(mIcon);
         } catch (OutOfMemoryError e) {
             Log.w(TAG, "OOM while inflating " + mIcon.icon + " for slot " + mSlot);
             return false;
+        } finally {
+            Trace.endSection();
         }
 
         if (drawable == null) {
             Log.w(TAG, "No icon for slot " + mSlot + "; " + mIcon.icon);
-            return false;
-        }
-
-        if (drawable instanceof BitmapDrawable && ((BitmapDrawable) drawable).getBitmap() != null) {
-            // If it's a bitmap we can check the size directly
-            int byteCount = ((BitmapDrawable) drawable).getBitmap().getByteCount();
-            if (byteCount > MAX_BITMAP_SIZE) {
-                Log.w(TAG, "Drawable is too large (" + byteCount + " bytes) " + mIcon);
-                return false;
-            }
-        } else if (drawable.getIntrinsicWidth() > MAX_IMAGE_SIZE
-                || drawable.getIntrinsicHeight() > MAX_IMAGE_SIZE) {
-            // Otherwise, check dimensions
-            Log.w(TAG, "Drawable is too large (" + drawable.getIntrinsicWidth() + "x"
-                    + drawable.getIntrinsicHeight() + ") " + mIcon);
             return false;
         }
 
@@ -432,7 +413,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
      * @return Drawable for this item, or null if the package or item could not
      *         be found
      */
-    public static Drawable getIcon(Context sysuiContext,
+    private Drawable getIcon(Context sysuiContext,
             Context context, StatusBarIcon statusBarIcon) {
         int userId = statusBarIcon.user.getIdentifier();
         if (userId == UserHandle.USER_ALL) {
@@ -445,6 +426,18 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         sysuiContext.getResources().getValue(R.dimen.status_bar_icon_scale_factor,
                 typedValue, true);
         float scaleFactor = typedValue.getFloat();
+
+        if (icon != null) {
+            // We downscale the loaded drawable to reasonable size to protect against applications
+            // using too much memory. The size can be tweaked in config.xml. Drawables that are
+            // already sized properly won't be touched.
+            boolean isLowRamDevice = ActivityManager.isLowRamDeviceStatic();
+            Resources res = sysuiContext.getResources();
+            int maxIconSize = res.getDimensionPixelSize(isLowRamDevice
+                    ? com.android.internal.R.dimen.notification_small_icon_size_low_ram
+                    : com.android.internal.R.dimen.notification_small_icon_size);
+            icon = DrawableSize.downscaleToSize(res, icon, maxIconSize, maxIconSize);
+        }
 
         // No need to scale the icon, so return it as is.
         if (scaleFactor == 1.f) {
@@ -580,11 +573,10 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         } catch (RuntimeException e) {
             Log.e(TAG, "Unable to recover builder", e);
             // Trying to get the app name from the app info instead.
-            Parcelable appInfo = n.extras.getParcelable(
-                    Notification.EXTRA_BUILDER_APPLICATION_INFO);
-            if (appInfo instanceof ApplicationInfo) {
-                appName = String.valueOf(((ApplicationInfo) appInfo).loadLabel(
-                        c.getPackageManager()));
+            ApplicationInfo appInfo = n.extras.getParcelable(
+                    Notification.EXTRA_BUILDER_APPLICATION_INFO, ApplicationInfo.class);
+            if (appInfo != null) {
+                appName = String.valueOf(appInfo.loadLabel(c.getPackageManager()));
             }
         }
 
@@ -975,8 +967,8 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     }
 
     @Override
-    public void onDarkChanged(Rect area, float darkIntensity, int tint) {
-        int areaTint = getTint(area, this, tint);
+    public void onDarkChanged(ArrayList<Rect> areas, float darkIntensity, int tint) {
+        int areaTint = getTint(areas, this, tint);
         ColorStateList color = ColorStateList.valueOf(areaTint);
         setImageTintList(color);
         setDecorColor(areaTint);

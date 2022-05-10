@@ -110,6 +110,17 @@ public class AAAPlusPlusVerifySysuiRequiredTestPropertiesTest extends SysuiTestC
     private Collection<String> getClassNamesFromClassPath() {
         ClassPathScanner scanner = new ClassPathScanner(mContext.getPackageCodePath());
 
+        ChainedClassNameFilter filter = makeClassNameFilter();
+
+        try {
+            return scanner.getClassPathEntries(filter);
+        } catch (IOException e) {
+            Log.e(getTag(), "Failed to scan classes", e);
+        }
+        return Collections.emptyList();
+    }
+
+    protected ChainedClassNameFilter makeClassNameFilter() {
         ChainedClassNameFilter filter = new ChainedClassNameFilter();
 
         filter.add(new ExternalClassNameFilter());
@@ -122,13 +133,7 @@ public class AAAPlusPlusVerifySysuiRequiredTestPropertiesTest extends SysuiTestC
         // the main SystemUI process. Therefore, exclude this package
         // from the base class whitelist.
         filter.add(s -> !s.startsWith("com.android.systemui.screenshot"));
-
-        try {
-            return scanner.getClassPathEntries(filter);
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to scan classes", e);
-        }
-        return Collections.emptyList();
+        return filter;
     }
 
     private String getClsStr() {
@@ -212,8 +217,12 @@ public class AAAPlusPlusVerifySysuiRequiredTestPropertiesTest extends SysuiTestC
      * as loggable to limit log spam during normal use.
      */
     private void logDebug(String msg) {
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, msg);
+        if (Log.isLoggable(getTag(), Log.DEBUG)) {
+            Log.d(getTag(), msg);
         }
+    }
+
+    protected String getTag() {
+        return TAG;
     }
 }

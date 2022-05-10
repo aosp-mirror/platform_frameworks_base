@@ -17,6 +17,9 @@
 package android.telephony;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -26,8 +29,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -64,10 +69,10 @@ public final class SignalStrengthUpdateRequest implements Parcelable {
     private final IBinder mLiveToken;
 
     private SignalStrengthUpdateRequest(
-            @NonNull List<SignalThresholdInfo> signalThresholdInfos,
+            @Nullable List<SignalThresholdInfo> signalThresholdInfos,
             boolean isReportingRequestedWhileIdle,
             boolean isSystemThresholdReportingRequestedWhileIdle) {
-        validate(signalThresholdInfos);
+        validate(signalThresholdInfos, isSystemThresholdReportingRequestedWhileIdle);
 
         mSignalThresholdInfos = signalThresholdInfos;
         mIsReportingRequestedWhileIdle = isReportingRequestedWhileIdle;
@@ -101,9 +106,11 @@ public final class SignalStrengthUpdateRequest implements Parcelable {
             }
 
             mSignalThresholdInfos = new ArrayList<>(signalThresholdInfos);
-            // Sort the collection with RAN ascending order, make the ordering not matter for equals
+            // Sort the collection with RAN and then SignalMeasurementType ascending order, make the
+            // ordering not matter for equals
             mSignalThresholdInfos.sort(
-                    Comparator.comparingInt(SignalThresholdInfo::getRadioAccessNetworkType));
+                    Comparator.comparingInt(SignalThresholdInfo::getRadioAccessNetworkType)
+                            .thenComparing(SignalThresholdInfo::getSignalMeasurementType));
             return this;
         }
 
@@ -124,13 +131,19 @@ public final class SignalStrengthUpdateRequest implements Parcelable {
         /**
          * Set the builder object if require reporting on the system thresholds when device is idle.
          *
-         * This can only used by the system caller.
+         * <p>This is intended to be used by the system privileged caller only. When setting to
+         * {@code true}, signal strength update request through
+         * {@link TelephonyManager#setSignalStrengthUpdateRequest(SignalStrengthUpdateRequest)}
+         * will require permission
+         * {@link android.Manifest.permission#LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH}.
          *
          * @param isSystemThresholdReportingRequestedWhileIdle true if request reporting on the
          *                                                     system thresholds when device is idle
          * @return the builder to facilitate the chaining
          * @hide
          */
+        @SystemApi
+        @RequiresPermission(android.Manifest.permission.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH)
         public @NonNull Builder setSystemThresholdReportingRequestedWhileIdle(
                 boolean isSystemThresholdReportingRequestedWhileIdle) {
             mIsSystemThresholdReportingRequestedWhileIdle =
@@ -144,7 +157,7 @@ public final class SignalStrengthUpdateRequest implements Parcelable {
          * @return the SignalStrengthUpdateRequest object
          *
          * @throws IllegalArgumentException if the SignalThresholdInfo collection is empty size, the
-         * radio access network type in the collection is not unique
+         * signal measurement type for the same RAN in the collection is not unique
          */
         public @NonNull SignalStrengthUpdateRequest build() {
             return new SignalStrengthUpdateRequest(mSignalThresholdInfos,
@@ -183,6 +196,7 @@ public final class SignalStrengthUpdateRequest implements Parcelable {
      *
      * @hide
      */
+    @SystemApi
     public boolean isSystemThresholdReportingRequestedWhileIdle() {
         return mIsSystemThresholdReportingRequestedWhileIdle;
     }
@@ -258,14 +272,27 @@ public final class SignalStrengthUpdateRequest implements Parcelable {
     }
 
     /**
-     * Throw IAE when the RAN in the collection is not unique.
+     * Throw IAE if SignalThresholdInfo collection is null or empty,
+     * or the SignalMeasurementType for the same RAN in the collection is not unique.
      */
-    private static void validate(Collection<SignalThresholdInfo> infos) {
-        Set<Integer> uniqueRan = new HashSet<>(infos.size());
+    private static void validate(Collection<SignalThresholdInfo> infos,
+            boolean isSystemThresholdReportingRequestedWhileIdle) {
+        // System app (like Bluetooth) can specify the request to report system thresholds while
+        // device is idle (with permission protection). In this case, the request doesn't need to
+        // provide a non-empty list of SignalThresholdInfo which is only asked for public apps.
+        if (infos == null || (infos.isEmpty() && !isSystemThresholdReportingRequestedWhileIdle)) {
+            throw new IllegalArgumentException("SignalThresholdInfo collection is null or empty");
+        }
+
+        // Map from RAN to set of SignalMeasurementTypes
+        Map<Integer, Set<Integer>> ranToTypes = new HashMap<>(infos.size());
         for (SignalThresholdInfo info : infos) {
             final int ran = info.getRadioAccessNetworkType();
-            if (!uniqueRan.add(ran)) {
-                throw new IllegalArgumentException("RAN: " + ran + " is not unique");
+            final int type = info.getSignalMeasurementType();
+            ranToTypes.putIfAbsent(ran, new HashSet<>());
+            if (!ranToTypes.get(ran).add(type)) {
+                throw new IllegalArgumentException(
+                        "SignalMeasurementType " + type + " for RAN " + ran + " is not unique");
             }
         }
     }

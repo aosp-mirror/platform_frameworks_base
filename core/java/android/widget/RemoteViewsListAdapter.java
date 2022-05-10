@@ -89,8 +89,7 @@ public class RemoteViewsListAdapter extends BaseAdapter {
             RemoteViews rv = mRemoteViewsList.get(position);
             rv.addFlags(RemoteViews.FLAG_WIDGET_IS_COLLECTION_CHILD);
             View v;
-            if (convertView != null && rv != null &&
-                    convertView.getId() == rv.getLayoutId()) {
+            if (convertView != null && convertView.getId() == rv.getLayoutId()) {
                 v = convertView;
                 rv.reapply(mContext, v, null /* handler */, null /* size */, mColorResources);
             } else {

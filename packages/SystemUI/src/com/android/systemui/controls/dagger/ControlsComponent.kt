@@ -19,6 +19,7 @@ package com.android.systemui.controls.dagger
 import android.content.ContentResolver
 import android.content.Context
 import android.database.ContentObserver
+import android.os.UserHandle
 import android.provider.Settings
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.management.ControlsListingController
@@ -29,6 +30,8 @@ import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.settings.SecureSettings
 import com.android.internal.widget.LockPatternUtils
 import com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT
+import com.android.systemui.controls.controller.ControlsTileResourceConfiguration
+import com.android.systemui.controls.controller.ControlsTileResourceConfigurationImpl
 import dagger.Lazy
 import java.util.Optional
 import javax.inject.Inject
@@ -49,12 +52,19 @@ class ControlsComponent @Inject constructor(
     private val lockPatternUtils: LockPatternUtils,
     private val keyguardStateController: KeyguardStateController,
     private val userTracker: UserTracker,
-    private val secureSettings: SecureSettings
+    private val secureSettings: SecureSettings,
+    private val optionalControlsTileResourceConfiguration:
+        Optional<ControlsTileResourceConfiguration>
 ) {
     private val contentResolver: ContentResolver
         get() = context.contentResolver
 
     private var canShowWhileLockedSetting = false
+
+    private val controlsTileResourceConfiguration: ControlsTileResourceConfiguration =
+        optionalControlsTileResourceConfiguration.orElse(
+            ControlsTileResourceConfigurationImpl()
+        )
 
     val showWhileLockedObserver = object : ContentObserver(null) {
         override fun onChange(selfChange: Boolean) {
@@ -64,10 +74,11 @@ class ControlsComponent @Inject constructor(
 
     init {
         if (featureEnabled) {
-            secureSettings.registerContentObserver(
+            secureSettings.registerContentObserverForUser(
                 Settings.Secure.getUriFor(Settings.Secure.LOCKSCREEN_SHOW_CONTROLS),
                 false, /* notifyForDescendants */
-                showWhileLockedObserver
+                showWhileLockedObserver,
+                UserHandle.USER_ALL
             )
             updateShowWhileLocked()
         }
@@ -114,11 +125,19 @@ class ControlsComponent @Inject constructor(
     }
 
     private fun updateShowWhileLocked() {
-        canShowWhileLockedSetting = secureSettings.getInt(
-            Settings.Secure.LOCKSCREEN_SHOW_CONTROLS, 0) != 0
+        canShowWhileLockedSetting = secureSettings.getIntForUser(
+            Settings.Secure.LOCKSCREEN_SHOW_CONTROLS, 0, UserHandle.USER_CURRENT) != 0
     }
 
     enum class Visibility {
         AVAILABLE, AVAILABLE_AFTER_UNLOCK, UNAVAILABLE
+    }
+
+    fun getTileTitleId(): Int {
+        return controlsTileResourceConfiguration.getTileTitleId()
+    }
+
+    fun getTileImageId(): Int {
+        return controlsTileResourceConfiguration.getTileImageId()
     }
 }

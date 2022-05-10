@@ -66,6 +66,7 @@ struct SensorOffsets
     jfieldID    flags;
     //methods
     jmethodID   setType;
+    jmethodID   setId;
     jmethodID   setUuid;
     jmethodID   init;
 } gSensorOffsets;
@@ -112,6 +113,7 @@ nativeClassInit (JNIEnv *_env, jclass _this)
     sensorOffsets.flags = GetFieldIDOrDie(_env,sensorClass, "mFlags", "I");
 
     sensorOffsets.setType = GetMethodIDOrDie(_env,sensorClass, "setType", "(I)Z");
+    sensorOffsets.setId = GetMethodIDOrDie(_env,sensorClass, "setId", "(I)V");
     sensorOffsets.setUuid = GetMethodIDOrDie(_env,sensorClass, "setUuid", "(JJ)V");
     sensorOffsets.init = GetMethodIDOrDie(_env,sensorClass, "<init>", "()V");
 
@@ -129,6 +131,18 @@ nativeClassInit (JNIEnv *_env, jclass _this)
     ScopedLocalRef<jstring> empty(_env, _env->NewStringUTF(""));
     stringOffsets.emptyString = (jstring)
             MakeGlobalRefOrDie(_env, _env->CallObjectMethod(empty.get(), stringOffsets.intern));
+}
+
+uint64_t htonll(uint64_t ll) {
+    constexpr uint32_t kBytesToTest = 0x12345678;
+    constexpr uint8_t kFirstByte = (const uint8_t &)kBytesToTest;
+    constexpr bool kIsLittleEndian = kFirstByte == 0x78;
+
+    if constexpr (kIsLittleEndian) {
+        return static_cast<uint64_t>(htonl(ll & 0xffffffff)) << 32 | htonl(ll >> 32);
+    } else {
+        return ll;
+    }
 }
 
 static jstring getJavaInternedString(JNIEnv *env, const String8 &string) {
@@ -188,9 +202,11 @@ translateNativeSensorToJavaSensor(JNIEnv *env, jobject sensor, const Sensor& nat
             env->SetObjectField(sensor, sensorOffsets.stringType, stringType);
         }
 
-        // TODO(b/29547335): Rename "setUuid" method to "setId".
-        int64_t id = nativeSensor.getId();
-        env->CallVoidMethod(sensor, sensorOffsets.setUuid, id, 0);
+        int32_t id = nativeSensor.getId();
+        env->CallVoidMethod(sensor, sensorOffsets.setId, id);
+        Sensor::uuid_t uuid = nativeSensor.getUuid();
+        env->CallVoidMethod(sensor, sensorOffsets.setUuid, htonll(uuid.i64[0]),
+                            htonll(uuid.i64[1]));
     }
     return sensor;
 }

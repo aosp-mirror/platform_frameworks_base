@@ -34,7 +34,6 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
-import android.util.PackageUtils;
 import android.util.Slog;
 import android.util.Xml;
 
@@ -43,16 +42,22 @@ import com.android.internal.util.CollectionUtils;
 import com.android.server.LocalServices;
 import com.android.server.role.RoleServicePlatformHelper;
 
+import libcore.util.HexEncoding;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.ByteArrayOutputStream;
+import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -299,14 +304,22 @@ public class RoleServicePlatformHelperImpl implements RoleServicePlatformHelper 
     public String computePackageStateHash(@UserIdInt int userId) {
         PackageManagerInternal packageManagerInternal = LocalServices.getService(
                 PackageManagerInternal.class);
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
+        final MessageDigestOutputStream mdos = new MessageDigestOutputStream();
+
+        DataOutputStream dataOutputStream = new DataOutputStream(new BufferedOutputStream(mdos));
         packageManagerInternal.forEachInstalledPackage(pkg -> {
             try {
                 dataOutputStream.writeUTF(pkg.getPackageName());
                 dataOutputStream.writeLong(pkg.getLongVersionCode());
                 dataOutputStream.writeInt(packageManagerInternal.getApplicationEnabledState(
                         pkg.getPackageName(), userId));
+
+                final List<String> requestedPermissions = pkg.getRequestedPermissions();
+                final int requestedPermissionsSize = requestedPermissions.size();
+                dataOutputStream.writeInt(requestedPermissionsSize);
+                for (int i = 0; i < requestedPermissionsSize; i++) {
+                    dataOutputStream.writeUTF(requestedPermissions.get(i));
+                }
 
                 final ArraySet<String> enabledComponents =
                         packageManagerInternal.getEnabledComponents(pkg.getPackageName(), userId);
@@ -323,14 +336,47 @@ public class RoleServicePlatformHelperImpl implements RoleServicePlatformHelper 
                     dataOutputStream.writeUTF(disabledComponents.valueAt(i));
                 }
 
-                for (final Signature signature : pkg.getSigningDetails().signatures) {
+                for (final Signature signature : pkg.getSigningDetails().getSignatures()) {
                     dataOutputStream.write(signature.toByteArray());
                 }
             } catch (IOException e) {
-                // Never happens for ByteArrayOutputStream and DataOutputStream.
+                // Never happens for MessageDigestOutputStream and DataOutputStream.
                 throw new AssertionError(e);
             }
         }, userId);
-        return PackageUtils.computeSha256Digest(byteArrayOutputStream.toByteArray());
+        return mdos.getDigestAsString();
+    }
+
+    private static class MessageDigestOutputStream extends OutputStream {
+        private final MessageDigest mMessageDigest;
+
+        MessageDigestOutputStream() {
+            try {
+                mMessageDigest = MessageDigest.getInstance("SHA256");
+            } catch (NoSuchAlgorithmException e) {
+                /* can't happen */
+                throw new RuntimeException("Failed to create MessageDigest", e);
+            }
+        }
+
+        @NonNull
+        String getDigestAsString() {
+            return HexEncoding.encodeToString(mMessageDigest.digest(), true /* uppercase */);
+        }
+
+        @Override
+        public void write(int b) throws IOException {
+            mMessageDigest.update((byte) b);
+        }
+
+        @Override
+        public void write(byte[] b) throws IOException {
+            mMessageDigest.update(b);
+        }
+
+        @Override
+        public void write(byte[] b, int off, int len) throws IOException {
+            mMessageDigest.update(b, off, len);
+        }
     }
 }

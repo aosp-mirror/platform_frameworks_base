@@ -288,14 +288,27 @@ public class SystemActionPerformer {
                     showGlobalActions();
                     return true;
                 }
-                case AccessibilityService.GLOBAL_ACTION_TOGGLE_SPLIT_SCREEN:
-                    return toggleSplitScreen();
                 case AccessibilityService.GLOBAL_ACTION_LOCK_SCREEN:
                     return lockScreen();
                 case AccessibilityService.GLOBAL_ACTION_TAKE_SCREENSHOT:
                     return takeScreenshot();
                 case AccessibilityService.GLOBAL_ACTION_KEYCODE_HEADSETHOOK :
                     sendDownAndUpKeyEvents(KeyEvent.KEYCODE_HEADSETHOOK);
+                    return true;
+                case AccessibilityService.GLOBAL_ACTION_DPAD_UP:
+                    sendDownAndUpKeyEvents(KeyEvent.KEYCODE_DPAD_UP);
+                    return true;
+                case AccessibilityService.GLOBAL_ACTION_DPAD_DOWN:
+                    sendDownAndUpKeyEvents(KeyEvent.KEYCODE_DPAD_DOWN);
+                    return true;
+                case AccessibilityService.GLOBAL_ACTION_DPAD_LEFT:
+                    sendDownAndUpKeyEvents(KeyEvent.KEYCODE_DPAD_LEFT);
+                    return true;
+                case AccessibilityService.GLOBAL_ACTION_DPAD_RIGHT:
+                    sendDownAndUpKeyEvents(KeyEvent.KEYCODE_DPAD_RIGHT);
+                    return true;
+                case AccessibilityService.GLOBAL_ACTION_DPAD_CENTER:
+                    sendDownAndUpKeyEvents(KeyEvent.KEYCODE_DPAD_CENTER);
                     return true;
                 default:
                     Slog.e(TAG, "Invalid action id: " + actionId);
@@ -367,21 +380,6 @@ public class SystemActionPerformer {
 
     private void showGlobalActions() {
         mWindowManagerService.showGlobalActions();
-    }
-
-    private boolean toggleSplitScreen() {
-        final long token = Binder.clearCallingIdentity();
-        try {
-            StatusBarManagerInternal statusBarService = LocalServices.getService(
-                    StatusBarManagerInternal.class);
-            if (statusBarService == null) {
-                return false;
-            }
-            statusBarService.toggleSplitScreen();
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-        return true;
     }
 
     private boolean lockScreen() {

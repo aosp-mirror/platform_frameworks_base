@@ -16,13 +16,16 @@
 package com.android.server.pm;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.pm.PackageInfo;
 import android.content.pm.ShortcutInfo;
+import android.graphics.Bitmap;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 
 import org.json.JSONException;
@@ -36,7 +39,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 /**
- * All methods should be guarded by {@code #mShortcutUser.mService.mLock}.
+ * All methods should be either guarded by {@code #mShortcutUser.mService.mLock} or {@code #mLock}.
  */
 abstract class ShortcutPackageItem {
     private static final String TAG = ShortcutService.TAG;
@@ -49,6 +52,11 @@ abstract class ShortcutPackageItem {
 
     protected ShortcutUser mShortcutUser;
 
+    @GuardedBy("mLock")
+    protected ShortcutBitmapSaver mShortcutBitmapSaver;
+
+    protected final Object mLock = new Object();
+
     protected ShortcutPackageItem(@NonNull ShortcutUser shortcutUser,
             int packageUserId, @NonNull String packageName,
             @NonNull ShortcutPackageInfo packageInfo) {
@@ -56,6 +64,7 @@ abstract class ShortcutPackageItem {
         mPackageUserId = packageUserId;
         mPackageName = Preconditions.checkStringNotEmpty(packageName);
         mPackageInfo = Objects.requireNonNull(packageInfo);
+        mShortcutBitmapSaver = new ShortcutBitmapSaver(shortcutUser.mService);
     }
 
     /**
@@ -98,7 +107,7 @@ abstract class ShortcutPackageItem {
         }
         final ShortcutService s = mShortcutUser.mService;
         mPackageInfo.refreshSignature(s, this);
-        s.scheduleSaveUser(getOwnerUserId());
+        scheduleSave();
     }
 
     public void attemptToRestoreIfNeededAndSave() {
@@ -138,7 +147,7 @@ abstract class ShortcutPackageItem {
         // Either way, it's no longer a shadow.
         mPackageInfo.setShadow(false);
 
-        s.scheduleSaveUser(mPackageUserId);
+        scheduleSave();
     }
 
     protected abstract boolean canRestoreAnyVersion();
@@ -148,7 +157,8 @@ abstract class ShortcutPackageItem {
     public abstract void saveToXml(@NonNull TypedXmlSerializer out, boolean forBackup)
             throws IOException, XmlPullParserException;
 
-    public void saveToFile(File path, boolean forBackup) {
+    @GuardedBy("mLock")
+    public void saveToFileLocked(File path, boolean forBackup) {
         final AtomicFile file = new AtomicFile(path);
         FileOutputStream os = null;
         try {
@@ -176,6 +186,11 @@ abstract class ShortcutPackageItem {
         }
     }
 
+    @GuardedBy("mLock")
+    void scheduleSaveToAppSearchLocked() {
+
+    }
+
     public JSONObject dumpCheckin(boolean clear) throws JSONException {
         final JSONObject result = new JSONObject();
         result.put(KEY_NAME, mPackageName);
@@ -187,4 +202,65 @@ abstract class ShortcutPackageItem {
      */
     public void verifyStates() {
     }
+
+    public void scheduleSave() {
+        mShortcutUser.mService.injectPostToHandlerDebounced(
+                mSaveShortcutPackageRunner, mSaveShortcutPackageRunner);
+    }
+
+    private final Runnable mSaveShortcutPackageRunner = this::saveShortcutPackageItem;
+
+    void saveShortcutPackageItem() {
+        // Wait for bitmap saves to conclude before proceeding to saving shortcuts.
+        waitForBitmapSaves();
+        // Save each ShortcutPackageItem in a separate Xml file.
+        final File path = getShortcutPackageItemFile();
+        if (ShortcutService.DEBUG || ShortcutService.DEBUG_REBOOT) {
+            Slog.d(TAG, "Saving package item " + getPackageName() + " to " + path);
+        }
+        synchronized (mLock) {
+            path.getParentFile().mkdirs();
+            // TODO: Since we are persisting shortcuts into AppSearch, we should read from/write to
+            //  AppSearch as opposed to maintaining a separate XML file.
+            saveToFileLocked(path, false /*forBackup*/);
+            scheduleSaveToAppSearchLocked();
+        }
+    }
+
+    public boolean waitForBitmapSaves() {
+        synchronized (mLock) {
+            return mShortcutBitmapSaver.waitForAllSavesLocked();
+        }
+    }
+
+    public void saveBitmap(ShortcutInfo shortcut,
+            int maxDimension, Bitmap.CompressFormat format, int quality) {
+        synchronized (mLock) {
+            mShortcutBitmapSaver.saveBitmapLocked(shortcut, maxDimension, format, quality);
+        }
+    }
+
+    /**
+     * Wait for all pending saves to finish, and then return the given shortcut's bitmap path.
+     */
+    @Nullable
+    public String getBitmapPathMayWait(ShortcutInfo shortcut) {
+        synchronized (mLock) {
+            return mShortcutBitmapSaver.getBitmapPathMayWaitLocked(shortcut);
+        }
+    }
+
+    public void removeIcon(ShortcutInfo shortcut) {
+        synchronized (mLock) {
+            mShortcutBitmapSaver.removeIcon(shortcut);
+        }
+    }
+
+    void removeShortcutPackageItem() {
+        synchronized (mLock) {
+            getShortcutPackageItemFile().delete();
+        }
+    }
+
+    protected abstract File getShortcutPackageItemFile();
 }

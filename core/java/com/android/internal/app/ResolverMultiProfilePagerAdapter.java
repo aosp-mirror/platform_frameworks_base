@@ -16,9 +16,16 @@
 
 package com.android.internal.app;
 
+import static android.app.admin.DevicePolicyResources.Strings.Core.RESOLVER_CANT_ACCESS_PERSONAL;
+import static android.app.admin.DevicePolicyResources.Strings.Core.RESOLVER_CANT_ACCESS_WORK;
+import static android.app.admin.DevicePolicyResources.Strings.Core.RESOLVER_CROSS_PROFILE_BLOCKED_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Core.RESOLVER_NO_PERSONAL_APPS;
+import static android.app.admin.DevicePolicyResources.Strings.Core.RESOLVER_NO_WORK_APPS;
+import static android.app.admin.DevicePolicyResources.Strings.Core.RESOLVER_WORK_PAUSED_TITLE;
+
 import android.annotation.Nullable;
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
-import android.content.res.Resources;
 import android.os.UserHandle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -64,24 +71,6 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
                 createProfileDescriptor(workAdapter)
         };
         mShouldShowNoCrossProfileIntentsEmptyState = shouldShowNoCrossProfileIntentsEmptyState;
-    }
-
-    @Override
-    void updateAfterConfigChange() {
-        super.updateAfterConfigChange();
-        for (ResolverProfileDescriptor descriptor : mItems) {
-            View emptyStateCont =
-                    descriptor.rootView.findViewById(R.id.resolver_empty_state_container);
-            Resources resources = getContext().getResources();
-            emptyStateCont.setPadding(
-                    emptyStateCont.getPaddingLeft(),
-                    resources.getDimensionPixelSize(
-                            R.dimen.resolver_empty_state_container_padding_top),
-                    emptyStateCont.getPaddingRight(),
-                    resources.getDimensionPixelSize(
-                            R.dimen.resolver_empty_state_container_padding_bottom));
-
-        }
     }
 
     private ResolverProfileDescriptor createProfileDescriptor(
@@ -195,42 +184,77 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
     protected void showWorkProfileOffEmptyState(ResolverListAdapter activeListAdapter,
             View.OnClickListener listener) {
         showEmptyState(activeListAdapter,
-                R.drawable.ic_work_apps_off,
-                R.string.resolver_turn_on_work_apps,
-                /* subtitleRes */ 0,
+                getWorkAppPausedTitle(),
+                /* subtitle = */ null,
                 listener);
     }
 
     @Override
     protected void showNoPersonalToWorkIntentsEmptyState(ResolverListAdapter activeListAdapter) {
         showEmptyState(activeListAdapter,
-                R.drawable.ic_sharing_disabled,
-                R.string.resolver_cross_profile_blocked,
-                R.string.resolver_cant_access_work_apps_explanation);
+                getCrossProfileBlockedTitle(),
+                getCantAccessWorkMessage());
     }
 
     @Override
     protected void showNoWorkToPersonalIntentsEmptyState(ResolverListAdapter activeListAdapter) {
         showEmptyState(activeListAdapter,
-                R.drawable.ic_sharing_disabled,
-                R.string.resolver_cross_profile_blocked,
-                R.string.resolver_cant_access_personal_apps_explanation);
+                getCrossProfileBlockedTitle(),
+                getCantAccessPersonalMessage());
     }
 
     @Override
     protected void showNoPersonalAppsAvailableEmptyState(ResolverListAdapter listAdapter) {
         showEmptyState(listAdapter,
-                R.drawable.ic_no_apps,
-                R.string.resolver_no_personal_apps_available,
-                /* subtitleRes */ 0);
+                getNoPersonalAppsAvailableMessage(),
+                /* subtitle = */ null);
     }
 
     @Override
     protected void showNoWorkAppsAvailableEmptyState(ResolverListAdapter listAdapter) {
         showEmptyState(listAdapter,
-                R.drawable.ic_no_apps,
-                R.string.resolver_no_work_apps_available,
-                /* subtitleRes */ 0);
+                getNoWorkAppsAvailableMessage(),
+                /* subtitle= */ null);
+    }
+
+    private String getWorkAppPausedTitle() {
+        return getContext().getSystemService(DevicePolicyManager.class).getResources().getString(
+                RESOLVER_WORK_PAUSED_TITLE,
+                () -> getContext().getString(R.string.resolver_turn_on_work_apps));
+    }
+
+    private String getCrossProfileBlockedTitle() {
+        return getContext().getSystemService(DevicePolicyManager.class).getResources().getString(
+                RESOLVER_CROSS_PROFILE_BLOCKED_TITLE,
+                () -> getContext().getString(R.string.resolver_cross_profile_blocked));
+    }
+
+    private String getCantAccessWorkMessage() {
+        return getContext().getSystemService(DevicePolicyManager.class).getResources().getString(
+                RESOLVER_CANT_ACCESS_WORK,
+                () -> getContext().getString(
+                        R.string.resolver_cant_access_work_apps_explanation));
+    }
+
+    private String getCantAccessPersonalMessage() {
+        return getContext().getSystemService(DevicePolicyManager.class).getResources().getString(
+                RESOLVER_CANT_ACCESS_PERSONAL,
+                () -> getContext().getString(
+                        R.string.resolver_cant_access_personal_apps_explanation));
+    }
+
+    private String getNoWorkAppsAvailableMessage() {
+        return getContext().getSystemService(DevicePolicyManager.class).getResources().getString(
+                RESOLVER_NO_WORK_APPS,
+                () -> getContext().getString(
+                        R.string.resolver_no_work_apps_available));
+    }
+
+    private String getNoPersonalAppsAvailableMessage() {
+        return getContext().getSystemService(DevicePolicyManager.class).getResources().getString(
+                RESOLVER_NO_PERSONAL_APPS,
+                () -> getContext().getString(
+                        R.string.resolver_no_personal_apps_available));
     }
 
     void setUseLayoutWithDefault(boolean useLayoutWithDefault) {
