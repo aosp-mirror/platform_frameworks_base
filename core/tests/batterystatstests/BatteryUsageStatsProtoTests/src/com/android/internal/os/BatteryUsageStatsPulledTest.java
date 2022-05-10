@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 
 import android.os.BatteryConsumer;
 import android.os.BatteryUsageStats;
+import android.os.UidBatteryConsumer;
 import android.os.nano.BatteryUsageStatsAtomsProto;
 import android.os.nano.BatteryUsageStatsAtomsProto.BatteryConsumerData.PowerComponentUsage;
 
@@ -67,6 +68,7 @@ public class BatteryUsageStatsPulledTest {
                 bus.getStatsEndTimestamp() - bus.getStatsStartTimestamp(),
                 proto.sessionDurationMillis);
         assertEquals(bus.getDischargePercentage(), proto.sessionDischargePercentage);
+        assertEquals(bus.getDischargeDurationMs(), proto.dischargeDurationMillis);
 
         assertEquals(3, proto.deviceBatteryConsumer.powerComponents.length); // Only 3 are non-empty
         assertSameBatteryConsumer("For deviceBatteryConsumer",
@@ -134,6 +136,43 @@ public class BatteryUsageStatsPulledTest {
                         componentProto.durationMillis);
             }
         }
+
+        for (int componentId = 0; componentId < BatteryConsumer.POWER_COMPONENT_COUNT;
+                componentId++) {
+            final BatteryConsumer.Key[] keys = consumer.getKeys(componentId);
+            if (keys == null || keys.length <= 1) {
+                continue;
+            }
+
+            for (BatteryConsumer.Key key : keys) {
+                if (key.processState == 0) {
+                    continue;
+                }
+
+                BatteryUsageStatsAtomsProto.BatteryConsumerData.PowerComponentUsageSlice
+                        sliceProto = null;
+                for (BatteryUsageStatsAtomsProto.BatteryConsumerData.PowerComponentUsageSlice
+                        slice : consumerProto.slices) {
+                    if (slice.powerComponent.component == componentId
+                            && slice.processState == key.processState) {
+                        sliceProto = slice;
+                        break;
+                    }
+                }
+
+                final long expectedPowerDc = convertMahToDc(consumer.getConsumedPower(key));
+                final long expectedUsageDurationMillis = consumer.getUsageDurationMillis(key);
+                if (expectedPowerDc == 0 && expectedUsageDurationMillis == 0) {
+                    assertThat(sliceProto).isNull();
+                } else {
+                    assertThat(sliceProto).isNotNull();
+                    assertThat(sliceProto.powerComponent.powerDeciCoulombs)
+                            .isEqualTo(expectedPowerDc);
+                    assertThat(sliceProto.powerComponent.durationMillis)
+                            .isEqualTo(expectedUsageDurationMillis);
+                }
+            }
+        }
     }
 
     private void assertSameUidBatteryConsumer(
@@ -172,14 +211,18 @@ public class BatteryUsageStatsPulledTest {
         final BatteryStatsImpl.Uid batteryStatsUid3 = batteryStats.getUidStatsLocked(UID_3);
 
         final BatteryUsageStats.Builder builder =
-                new BatteryUsageStats.Builder(new String[]{"CustomConsumer1", "CustomConsumer2"})
+                new BatteryUsageStats.Builder(new String[]{"CustomConsumer1", "CustomConsumer2"},
+                        /* includePowerModels */ true,
+                        /* includeProcessStats */true)
                         .setDischargePercentage(20)
                         .setDischargedPowerRange(1000, 2000)
+                        .setDischargeDurationMs(1234)
                         .setStatsStartTimestamp(1000);
-        builder.getOrCreateUidBatteryConsumerBuilder(batteryStatsUid0)
+        final UidBatteryConsumer.Builder uidBuilder = builder.getOrCreateUidBatteryConsumerBuilder(
+                batteryStatsUid0)
                 .setPackageWithHighestDrain("myPackage0")
-                .setTimeInStateMs(android.os.UidBatteryConsumer.STATE_FOREGROUND, 1000)
-                .setTimeInStateMs(android.os.UidBatteryConsumer.STATE_BACKGROUND, 2000)
+                .setTimeInStateMs(UidBatteryConsumer.STATE_FOREGROUND, 1000)
+                .setTimeInStateMs(UidBatteryConsumer.STATE_BACKGROUND, 2000)
                 .setConsumedPower(
                         BatteryConsumer.POWER_COMPONENT_SCREEN, 300)
                 .setConsumedPower(
@@ -192,6 +235,24 @@ public class BatteryUsageStatsPulledTest {
                         BatteryConsumer.POWER_COMPONENT_CPU, 600)
                 .setUsageDurationForCustomComponentMillis(
                         BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID + 1, 800);
+
+        final BatteryConsumer.Key keyFg = uidBuilder.getKey(BatteryConsumer.POWER_COMPONENT_CPU,
+                BatteryConsumer.PROCESS_STATE_FOREGROUND);
+        final BatteryConsumer.Key keyBg = uidBuilder.getKey(BatteryConsumer.POWER_COMPONENT_CPU,
+                BatteryConsumer.PROCESS_STATE_BACKGROUND);
+        final BatteryConsumer.Key keyFgs = uidBuilder.getKey(BatteryConsumer.POWER_COMPONENT_CPU,
+                BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE);
+        final BatteryConsumer.Key keyCached = uidBuilder.getKey(BatteryConsumer.POWER_COMPONENT_CPU,
+                BatteryConsumer.PROCESS_STATE_CACHED);
+
+        uidBuilder.setConsumedPower(keyFg, 9100, BatteryConsumer.POWER_MODEL_POWER_PROFILE)
+                .setUsageDurationMillis(keyFg, 8100)
+                .setConsumedPower(keyBg, 9200, BatteryConsumer.POWER_MODEL_MEASURED_ENERGY)
+                .setUsageDurationMillis(keyBg, 8200)
+                .setConsumedPower(keyFgs, 9300, BatteryConsumer.POWER_MODEL_MEASURED_ENERGY)
+                .setUsageDurationMillis(keyFgs, 8300)
+                .setConsumedPower(keyCached, 9400, BatteryConsumer.POWER_MODEL_MEASURED_ENERGY)
+                .setUsageDurationMillis(keyFgs, 8400);
 
         builder.getOrCreateUidBatteryConsumerBuilder(batteryStatsUid1)
                 .setPackageWithHighestDrain("myPackage1")
@@ -234,8 +295,8 @@ public class BatteryUsageStatsPulledTest {
         final BatteryUsageStats.Builder builder =
                 new BatteryUsageStats.Builder(new String[0]);
         // If not truncated, this BatteryUsageStats object would generate a proto buffer
-        // larger than 70 Kb
-        for (int i = 0; i < 20000; i++) {
+        // significantly larger than 50 Kb
+        for (int i = 0; i < 3000; i++) {
             BatteryStatsImpl.Uid mockUid = mock(BatteryStatsImpl.Uid.class);
             when(mockUid.getUid()).thenReturn(i);
             builder.getOrCreateUidBatteryConsumerBuilder(mockUid)
@@ -246,7 +307,7 @@ public class BatteryUsageStatsPulledTest {
         }
 
         // Add a UID with much larger battery footprint
-        final int largeConsumerUid = 20001;
+        final int largeConsumerUid = 3001;
         BatteryStatsImpl.Uid largeConsumerMockUid = mock(BatteryStatsImpl.Uid.class);
         when(largeConsumerMockUid.getUid()).thenReturn(largeConsumerUid);
         builder.getOrCreateUidBatteryConsumerBuilder(largeConsumerMockUid)
@@ -256,7 +317,7 @@ public class BatteryUsageStatsPulledTest {
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_CPU, 400);
 
         // Add a UID with much larger usage duration
-        final int highUsageUid = 20002;
+        final int highUsageUid = 3002;
         BatteryStatsImpl.Uid highUsageMockUid = mock(BatteryStatsImpl.Uid.class);
         when(highUsageMockUid.getUid()).thenReturn(highUsageUid);
         builder.getOrCreateUidBatteryConsumerBuilder(highUsageMockUid)

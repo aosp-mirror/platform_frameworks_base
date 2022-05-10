@@ -57,6 +57,10 @@ static inline SkImageInfo createImageInfo(int32_t width, int32_t height, int32_t
             colorType = kRGBA_F16_SkColorType;
             alphaType = kPremul_SkAlphaType;
             break;
+        case AHARDWAREBUFFER_FORMAT_R8_UNORM:
+            colorType = kAlpha_8_SkColorType;
+            alphaType = kPremul_SkAlphaType;
+            break;
         default:
             ALOGV("Unsupported format: %d, return unknown by default", format);
             break;
@@ -90,6 +94,8 @@ uint32_t ColorTypeToBufferFormat(SkColorType colorType) {
             // Hardcoding the value from android::PixelFormat
             static constexpr uint64_t kRGBA4444 = 7;
             return kRGBA4444;
+        case kAlpha_8_SkColorType:
+              return AHARDWAREBUFFER_FORMAT_R8_UNORM;
         default:
             ALOGV("Unsupported colorType: %d, return RGBA_8888 by default", (int)colorType);
             return AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
@@ -159,6 +165,14 @@ android_dataspace ColorSpaceToADataSpace(SkColorSpace* colorSpace, SkColorType c
         if (SkColorSpace::Equals(colorSpace, rec2020PQ.get())) {
             return HAL_DATASPACE_BT2020_PQ;
         }
+        // HLG
+        const auto hlgFn = GetHLGScaleTransferFunction();
+        if (hlgFn.has_value()) {
+            auto rec2020HLG = SkColorSpace::MakeRGB(hlgFn.value(), SkNamedGamut::kRec2020);
+            if (SkColorSpace::Equals(colorSpace, rec2020HLG.get())) {
+                return static_cast<android_dataspace>(HAL_DATASPACE_BT2020_HLG);
+            }
+        }
         LOG_ALWAYS_FATAL("Only select non-numerical transfer functions are supported");
     }
 
@@ -219,6 +233,7 @@ sk_sp<SkColorSpace> DataSpaceToColorSpace(android_dataspace dataspace) {
             gamut = SkNamedGamut::kSRGB;
             break;
         case HAL_DATASPACE_STANDARD_BT2020:
+        case HAL_DATASPACE_STANDARD_BT2020_CONSTANT_LUMINANCE:
             gamut = SkNamedGamut::kRec2020;
             break;
         case HAL_DATASPACE_STANDARD_DCI_P3:
@@ -233,12 +248,19 @@ sk_sp<SkColorSpace> DataSpaceToColorSpace(android_dataspace dataspace) {
         case HAL_DATASPACE_STANDARD_BT601_625_UNADJUSTED:
         case HAL_DATASPACE_STANDARD_BT601_525:
         case HAL_DATASPACE_STANDARD_BT601_525_UNADJUSTED:
-        case HAL_DATASPACE_STANDARD_BT2020_CONSTANT_LUMINANCE:
         case HAL_DATASPACE_STANDARD_BT470M:
         case HAL_DATASPACE_STANDARD_FILM:
         default:
             ALOGV("Unsupported Gamut: %d", dataspace);
             return nullptr;
+    }
+
+    // HLG
+    if ((dataspace & HAL_DATASPACE_TRANSFER_MASK) == HAL_DATASPACE_TRANSFER_HLG) {
+        const auto hlgFn = GetHLGScaleTransferFunction();
+        if (hlgFn.has_value()) {
+            return SkColorSpace::MakeRGB(hlgFn.value(), gamut);
+        }
     }
 
     switch (dataspace & HAL_DATASPACE_TRANSFER_MASK) {
@@ -258,7 +280,6 @@ sk_sp<SkColorSpace> DataSpaceToColorSpace(android_dataspace dataspace) {
             return SkColorSpace::MakeRGB(SkNamedTransferFn::kRec2020, gamut);
         case HAL_DATASPACE_TRANSFER_UNSPECIFIED:
             return nullptr;
-        case HAL_DATASPACE_TRANSFER_HLG:
         default:
             ALOGV("Unsupported Gamma: %d", dataspace);
             return nullptr;
@@ -373,6 +394,17 @@ skcms_TransferFunction GetPQSkTransferFunction(float sdr_white_level) {
     fn.a = ws * fn.a;
     fn.b = ws * fn.b;
     return fn;
+}
+
+// Skia skcms' default HLG maps encoded [0, 1] to linear [1, 12] in order to follow ARIB
+// but LinearEffect expects a decoded [0, 1] range instead to follow Rec 2100.
+std::optional<skcms_TransferFunction> GetHLGScaleTransferFunction() {
+    skcms_TransferFunction hlgFn;
+    if (skcms_TransferFunction_makeScaledHLGish(&hlgFn, 1.f / 12.f, 2.f, 2.f, 1.f / 0.17883277f,
+                                                0.28466892f, 0.55991073f)) {
+        return std::make_optional<skcms_TransferFunction>(hlgFn);
+    }
+    return {};
 }
 
 }  // namespace uirenderer

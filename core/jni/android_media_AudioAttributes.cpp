@@ -57,8 +57,8 @@ static struct {
     jmethodID setUsage;
     jmethodID setSystemUsage;
     jmethodID setInternalCapturePreset;
-    jmethodID setContentType;
-    jmethodID setFlags;
+    jmethodID setInternalContentType;
+    jmethodID replaceFlags;
     jmethodID addTag;
 } gAudioAttributesBuilderMethods;
 
@@ -127,10 +127,10 @@ static jint nativeAudioAttributesToJavaAudioAttributes(
                           gAudioAttributesBuilderMethods.setInternalCapturePreset,
                           attributes.source);
     env->CallObjectMethod(jAttributeBuilder.get(),
-                          gAudioAttributesBuilderMethods.setContentType,
+                          gAudioAttributesBuilderMethods.setInternalContentType,
                           attributes.content_type);
     env->CallObjectMethod(jAttributeBuilder.get(),
-                          gAudioAttributesBuilderMethods.setFlags,
+                          gAudioAttributesBuilderMethods.replaceFlags,
                           attributes.flags);
     env->CallObjectMethod(jAttributeBuilder.get(),
                           gAudioAttributesBuilderMethods.addTag,
@@ -202,11 +202,11 @@ int register_android_media_AudioAttributes(JNIEnv *env)
     gAudioAttributesBuilderMethods.setInternalCapturePreset = GetMethodIDOrDie(
                 env, audioAttributesBuilderClass, "setInternalCapturePreset",
                 "(I)Landroid/media/AudioAttributes$Builder;");
-    gAudioAttributesBuilderMethods.setContentType = GetMethodIDOrDie(
-                env, audioAttributesBuilderClass, "setContentType",
-                "(I)Landroid/media/AudioAttributes$Builder;");
-    gAudioAttributesBuilderMethods.setFlags = GetMethodIDOrDie(
-                env, audioAttributesBuilderClass, "setFlags",
+    gAudioAttributesBuilderMethods.setInternalContentType =
+            GetMethodIDOrDie(env, audioAttributesBuilderClass, "setInternalContentType",
+                             "(I)Landroid/media/AudioAttributes$Builder;");
+    gAudioAttributesBuilderMethods.replaceFlags = GetMethodIDOrDie(
+                env, audioAttributesBuilderClass, "replaceFlags",
                 "(I)Landroid/media/AudioAttributes$Builder;");
     gAudioAttributesBuilderMethods.addTag = GetMethodIDOrDie(
                 env, audioAttributesBuilderClass, "addTag",

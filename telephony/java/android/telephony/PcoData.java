@@ -19,6 +19,9 @@ package android.telephony;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 /**
  * Contains Carrier-specific (and opaque) Protocol configuration Option
  * Data.  In general this is only passed on to carrier-specific applications
@@ -83,5 +86,23 @@ public class PcoData implements Parcelable {
     public String toString() {
         return "PcoData(" + cid + ", " + bearerProto + ", " + pcoId + ", contents[" +
                 contents.length + "])";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PcoData pcoData = (PcoData) o;
+        return cid == pcoData.cid
+                && pcoId == pcoData.pcoId
+                && Objects.equals(bearerProto, pcoData.bearerProto)
+                && Arrays.equals(contents, pcoData.contents);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(cid, bearerProto, pcoId);
+        result = 31 * result + Arrays.hashCode(contents);
+        return result;
     }
 }

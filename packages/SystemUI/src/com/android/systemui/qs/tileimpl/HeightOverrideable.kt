@@ -21,9 +21,8 @@ interface HeightOverrideable {
         const val NO_OVERRIDE = -1
     }
 
-    var heightOverride: Int
+    abstract var heightOverride: Int
+    abstract fun resetOverride()
 
-    fun resetOverride() {
-        heightOverride = NO_OVERRIDE
-    }
+    abstract var squishinessFraction: Float
 }

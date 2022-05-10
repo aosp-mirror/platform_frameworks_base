@@ -38,23 +38,18 @@ public class StatusBarState {
     public static final int SHADE_LOCKED = 2;
 
     /**
-     * Status bar is locked and shows the full screen user switcher.
+     * Returns the textual representation of the status bar state.
      */
-    public static final int FULLSCREEN_USER_SWITCHER = 3;
-
-
-    public static String toShortString(int x) {
-        switch (x) {
+    public static String toString(int state) {
+        switch (state) {
             case SHADE:
-                return "SHD";
+                return "SHADE";
             case SHADE_LOCKED:
-                return "SHD_LCK";
+                return "SHADE_LOCKED";
             case KEYGUARD:
-                return "KGRD";
-            case FULLSCREEN_USER_SWITCHER:
-                return "FS_USRSW";
+                return "KEYGUARD";
             default:
-                return "bad_value_" + x;
+                return "UNKNOWN: " + state;
         }
     }
 }
