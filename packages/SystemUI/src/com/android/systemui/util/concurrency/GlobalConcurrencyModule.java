@@ -21,8 +21,10 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dagger.qualifiers.UiBackground;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import javax.inject.Singleton;
 
@@ -35,6 +37,7 @@ import dagger.Provides;
  */
 @Module
 public abstract class GlobalConcurrencyModule {
+    public static final String PRE_HANDLER = "pre_handler";
 
     /**
      * Binds {@link ThreadFactoryImpl} to {@link ThreadFactory}.
@@ -61,12 +64,44 @@ public abstract class GlobalConcurrencyModule {
     }
 
     /**
+     * @deprecated Use @Main Handler.
+     */
+    @Deprecated
+    @Provides
+    public static Handler provideHandler() {
+        return new Handler();
+    }
+
+    /**
+     * Provide an Executor specifically for running UI operations on a separate thread.
+     *
+     * Keep submitted runnables short and to the point, just as with any other UI code.
+     */
+    @Provides
+    @Singleton
+    @UiBackground
+    public static Executor provideUiBackgroundExecutor() {
+        return Executors.newSingleThreadExecutor();
+    }
+
+    /**
      * Provide a Main-Thread Executor.
      */
     @Provides
+    @Singleton
     @Main
     public static Executor provideMainExecutor(Context context) {
         return context.getMainExecutor();
+    }
+
+    /**
+     * Provide a Main-Thread DelayableExecutor.
+     */
+    @Provides
+    @Singleton
+    @Main
+    public static DelayableExecutor provideMainDelayableExecutor(@Main Looper looper) {
+        return new ExecutorImpl(looper);
     }
 
     /** */

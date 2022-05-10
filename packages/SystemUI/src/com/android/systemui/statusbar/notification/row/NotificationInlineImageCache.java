@@ -21,7 +21,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -82,16 +81,8 @@ public class NotificationInlineImageCache implements NotificationInlineImageReso
 
         @Override
         protected Drawable doInBackground(Uri... uris) {
-            Drawable drawable = null;
             Uri target = uris[0];
-
-            try {
-                drawable = mResolver.resolveImage(target);
-            } catch (IOException | SecurityException ex) {
-                Log.d(TAG, "PreloadImageTask: Resolve failed from " + target, ex);
-            }
-
-            return drawable;
+            return mResolver.resolveImage(target);
         }
     }
 }

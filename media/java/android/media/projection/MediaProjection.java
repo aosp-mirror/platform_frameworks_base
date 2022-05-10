@@ -16,19 +16,23 @@
 
 package android.media.projection;
 
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.hardware.display.VirtualDisplayConfig;
-import android.media.projection.IMediaProjection;
-import android.media.projection.IMediaProjectionCallback;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.view.ContentRecordingSession;
+import android.view.IWindowManager;
 import android.view.Surface;
+import android.view.WindowManagerGlobal;
+import android.window.WindowContainerToken;
 
 import java.util.Map;
 
@@ -100,19 +104,18 @@ public final class MediaProjection {
     public VirtualDisplay createVirtualDisplay(@NonNull String name,
             int width, int height, int dpi, boolean isSecure, @Nullable Surface surface,
             @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
-        DisplayManager dm = (DisplayManager) mContext.getSystemService(Context.DISPLAY_SERVICE);
         int flags = DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR
                 | DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION;
         if (isSecure) {
             flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE;
         }
         final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(name, width,
-                height, dpi);
-        builder.setFlags(flags);
+                height, dpi).setFlags(flags);
         if (surface != null) {
             builder.setSurface(surface);
         }
-        return dm.createVirtualDisplay(this, builder.build(), callback, handler);
+        VirtualDisplay virtualDisplay = createVirtualDisplay(builder, callback, handler);
+        return virtualDisplay;
     }
 
     /**
@@ -142,12 +145,12 @@ public final class MediaProjection {
             int width, int height, int dpi, int flags, @Nullable Surface surface,
             @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
         final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(name, width,
-                height, dpi);
-        builder.setFlags(flags);
+                height, dpi).setFlags(flags);
         if (surface != null) {
             builder.setSurface(surface);
         }
-        return createVirtualDisplay(builder.build(), callback, handler);
+        VirtualDisplay virtualDisplay = createVirtualDisplay(builder, callback, handler);
+        return virtualDisplay;
     }
 
     /**
@@ -156,20 +159,52 @@ public final class MediaProjection {
      *
      * @param virtualDisplayConfig The arguments for the virtual display configuration. See
      * {@link VirtualDisplayConfig} for using it.
-     * @param callback Callback to call when the virtual display's state
-     * changes, or null if none.
-     * @param handler The {@link android.os.Handler} on which the callback should be
-     * invoked, or null if the callback should be invoked on the calling
-     * thread's main {@link android.os.Looper}.
+     * @param callback Callback to call when the virtual display's state changes, or null if none.
+     * @param handler The {@link android.os.Handler} on which the callback should be invoked, or
+     *                null if the callback should be invoked on the calling thread's main
+     *                {@link android.os.Looper}.
      *
      * @see android.hardware.display.VirtualDisplay
      * @hide
      */
     @Nullable
-    public VirtualDisplay createVirtualDisplay(@NonNull VirtualDisplayConfig virtualDisplayConfig,
+    public VirtualDisplay createVirtualDisplay(
+            @NonNull VirtualDisplayConfig.Builder virtualDisplayConfig,
             @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
-        DisplayManager dm = mContext.getSystemService(DisplayManager.class);
-        return dm.createVirtualDisplay(this, virtualDisplayConfig, callback, handler);
+        try {
+            final IWindowManager wmService = WindowManagerGlobal.getWindowManagerService();
+            final WindowContainerToken taskWindowContainerToken =
+                    mImpl.getTaskRecordingWindowContainerToken();
+            Context windowContext = null;
+            ContentRecordingSession session;
+            if (taskWindowContainerToken == null) {
+                windowContext = mContext.createWindowContext(mContext.getDisplayNoVerify(),
+                        TYPE_APPLICATION, null /* options */);
+                session = ContentRecordingSession.createDisplaySession(
+                        windowContext.getWindowContextToken());
+            } else {
+                session = ContentRecordingSession.createTaskSession(
+                        taskWindowContainerToken.asBinder());
+            }
+            virtualDisplayConfig.setWindowManagerMirroring(true);
+            final DisplayManager dm = mContext.getSystemService(DisplayManager.class);
+            final VirtualDisplay virtualDisplay = dm.createVirtualDisplay(this,
+                    virtualDisplayConfig.build(), callback, handler, windowContext);
+            if (virtualDisplay == null) {
+                // Since WM handling a new display and DM creating a new VirtualDisplay is async,
+                // WM may have tried to start task recording and encountered an error that required
+                // stopping recording entirely. The VirtualDisplay would then be null when the
+                // MediaProjection is no longer active.
+                return null;
+            }
+            session.setDisplayId(virtualDisplay.getDisplay().getDisplayId());
+            // Successfully set up, so save the current session details.
+            wmService.setContentRecordingSession(session);
+            return virtualDisplay;
+        } catch (RemoteException e) {
+            // Can not capture if WMS is not accessible, so bail out.
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**

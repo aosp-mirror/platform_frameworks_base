@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"להסיר את ההתקנה של האפליקציה הזו?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"להסיר את האפליקציה הזו עבור "<b>"כל"</b>" המשתמשים? האפליקציה והנתונים שלה יוסרו עבור "<b>"כל"</b>" המשתמשים במכשיר."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"להסיר את ההתקנה של האפליקציה הזו עבור <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"רוצה להסיר את האפליקציה הזו מפרופיל העבודה?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"להחליף את האפליקציה הזאת בגרסת היצרן? כל הנתונים יוסרו."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"האם להחליף את האפליקציה הזאת בגרסת היצרן? כל הנתונים יוסרו. הפעולה תשפיע על כל משתמשי המכשיר, כולל משתמשים בעלי פרופיל עבודה."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"שמירת <xliff:g id="SIZE">%1$s</xliff:g> מנתוני האפליקציה."</string>

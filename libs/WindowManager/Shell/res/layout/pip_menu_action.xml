@@ -22,6 +22,14 @@
     android:forceHasOverlappingRendering="false">
 
     <ImageView
+        android:id="@+id/custom_close_bg"
+        android:layout_width="@dimen/pip_custom_close_bg_size"
+        android:layout_height="@dimen/pip_custom_close_bg_size"
+        android:layout_gravity="center"
+        android:src="@drawable/pip_custom_close_bg"
+        android:visibility="gone"/>
+
+    <ImageView
         android:id="@+id/image"
         android:layout_width="@dimen/pip_action_inner_size"
         android:layout_height="@dimen/pip_action_inner_size"

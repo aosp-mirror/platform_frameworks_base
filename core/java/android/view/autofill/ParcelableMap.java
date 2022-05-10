@@ -56,8 +56,8 @@ class ParcelableMap extends HashMap<AutofillId, AutofillValue> implements Parcel
                     ParcelableMap map = new ParcelableMap(size);
 
                     for (int i = 0; i < size; i++) {
-                        AutofillId key = source.readParcelable(null);
-                        AutofillValue value = source.readParcelable(null);
+                        AutofillId key = source.readParcelable(null, android.view.autofill.AutofillId.class);
+                        AutofillValue value = source.readParcelable(null, android.view.autofill.AutofillValue.class);
 
                         map.put(key, value);
                     }

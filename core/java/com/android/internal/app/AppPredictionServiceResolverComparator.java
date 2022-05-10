@@ -18,6 +18,7 @@ package com.android.internal.app;
 
 import static android.app.prediction.AppTargetEvent.ACTION_LAUNCH;
 
+import android.annotation.Nullable;
 import android.app.prediction.AppPredictor;
 import android.app.prediction.AppTarget;
 import android.app.prediction.AppTargetEvent;
@@ -33,12 +34,11 @@ import android.util.Log;
 import com.android.internal.app.ResolverActivity.ResolvedComponentInfo;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 /**
  * Uses an {@link AppPredictor} to sort Resolver targets. If the AppPredictionService appears to be
@@ -58,7 +58,9 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
     private final String mReferrerPackage;
     // If this is non-null (and this is not destroyed), it means APS is disabled and we should fall
     // back to using the ResolverRankerService.
+    // TODO: responsibility for this fallback behavior can live outside of the AppPrediction client.
     private ResolverRankerServiceResolverComparator mResolverRankerService;
+    private AppPredictionServiceComparatorModel mComparatorModel;
 
     AppPredictionServiceResolverComparator(
             Context context,
@@ -74,25 +76,12 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
         mUser = user;
         mReferrerPackage = referrerPackage;
         setChooserActivityLogger(chooserActivityLogger);
+        mComparatorModel = buildUpdatedModel();
     }
 
     @Override
     int compare(ResolveInfo lhs, ResolveInfo rhs) {
-        if (mResolverRankerService != null) {
-            return mResolverRankerService.compare(lhs, rhs);
-        }
-        Integer lhsRank = mTargetRanks.get(new ComponentName(lhs.activityInfo.packageName,
-                lhs.activityInfo.name));
-        Integer rhsRank = mTargetRanks.get(new ComponentName(rhs.activityInfo.packageName,
-                rhs.activityInfo.name));
-        if (lhsRank == null && rhsRank == null) {
-            return 0;
-        } else if (lhsRank == null) {
-            return -1;
-        } else if (rhsRank == null) {
-            return 1;
-        }
-        return lhsRank - rhsRank;
+        return mComparatorModel.getComparator().compare(lhs, rhs);
     }
 
     @Override
@@ -121,6 +110,7 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
                                         mContext, mIntent, mReferrerPackage,
                                         () -> mHandler.sendEmptyMessage(RANKER_SERVICE_RESULT),
                                         getChooserActivityLogger());
+                        mComparatorModel = buildUpdatedModel();
                         mResolverRankerService.compute(targets);
                     } else {
                         Log.i(TAG, "AppPredictionService response received");
@@ -163,6 +153,7 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
             mTargetRanks.put(componentName, i);
             Log.i(TAG, "handleSortedAppTargets, sortedAppTargets #" + i + ": " + componentName);
         }
+        mComparatorModel = buildUpdatedModel();
     }
 
     private boolean checkAppTargetRankValid(List<AppTarget> sortedAppTargets) {
@@ -176,43 +167,12 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
 
     @Override
     float getScore(ComponentName name) {
-        if (mResolverRankerService != null) {
-            return mResolverRankerService.getScore(name);
-        }
-        Integer rank = mTargetRanks.get(name);
-        if (rank == null) {
-            Log.w(TAG, "Score requested for unknown component. Did you call compute yet?");
-            return 0f;
-        }
-        int consecutiveSumOfRanks = (mTargetRanks.size() - 1) * (mTargetRanks.size()) / 2;
-        return 1.0f - (((float) rank) / consecutiveSumOfRanks);
-    }
-
-    @Override
-    List<ComponentName> getTopComponentNames(int topK) {
-        if (mResolverRankerService != null) {
-            return mResolverRankerService.getTopComponentNames(topK);
-        }
-        return mTargetRanks.entrySet().stream()
-                .sorted(Entry.comparingByValue())
-                .limit(topK)
-                .map(Entry::getKey)
-                .collect(Collectors.toList());
+        return mComparatorModel.getScore(name);
     }
 
     @Override
     void updateModel(ComponentName componentName) {
-        if (mResolverRankerService != null) {
-            mResolverRankerService.updateModel(componentName);
-            return;
-        }
-        mAppPredictor.notifyAppTargetEvent(
-                new AppTargetEvent.Builder(
-                    new AppTarget.Builder(
-                        new AppTargetId(componentName.toString()),
-                        componentName.getPackageName(), mUser)
-                        .setClassName(componentName.getClassName()).build(),
-                    ACTION_LAUNCH).build());
+        mComparatorModel.notifyOnTargetSelected(componentName);
     }
 
     @Override
@@ -220,6 +180,97 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
         if (mResolverRankerService != null) {
             mResolverRankerService.destroy();
             mResolverRankerService = null;
+            mComparatorModel = buildUpdatedModel();
+        }
+    }
+
+    /**
+     * Re-construct an {@code AppPredictionServiceComparatorModel} to replace the current model
+     * instance (if any) using the up-to-date {@code AppPredictionServiceResolverComparator} ivar
+     * values.
+     *
+     * TODO: each time we replace the model instance, we're either updating the model to use
+     * adjusted data (which is appropriate), or we're providing a (late) value for one of our ivars
+     * that wasn't available the last time the model was updated. For those latter cases, we should
+     * just avoid creating the model altogether until we have all the prerequisites we'll need. Then
+     * we can probably simplify the logic in {@code AppPredictionServiceComparatorModel} since we
+     * won't need to handle edge cases when the model data isn't fully prepared.
+     * (In some cases, these kinds of "updates" might interleave -- e.g., we might have finished
+     * initializing the first time and now want to adjust some data, but still need to wait for
+     * changes to propagate to the other ivars before rebuilding the model.)
+     */
+    private AppPredictionServiceComparatorModel buildUpdatedModel() {
+        return new AppPredictionServiceComparatorModel(
+                mAppPredictor, mResolverRankerService, mUser, mTargetRanks);
+    }
+
+    // TODO: Finish separating behaviors of AbstractResolverComparator, then (probably) make this a
+    // standalone class once clients are written in terms of ResolverComparatorModel.
+    static class AppPredictionServiceComparatorModel implements ResolverComparatorModel {
+        private final AppPredictor mAppPredictor;
+        private final ResolverRankerServiceResolverComparator mResolverRankerService;
+        private final UserHandle mUser;
+        private final Map<ComponentName, Integer> mTargetRanks;  // Treat as immutable.
+
+        AppPredictionServiceComparatorModel(
+                AppPredictor appPredictor,
+                @Nullable ResolverRankerServiceResolverComparator resolverRankerService,
+                UserHandle user,
+                Map<ComponentName, Integer> targetRanks) {
+            mAppPredictor = appPredictor;
+            mResolverRankerService = resolverRankerService;
+            mUser = user;
+            mTargetRanks = targetRanks;
+        }
+
+        @Override
+        public Comparator<ResolveInfo> getComparator() {
+            return (lhs, rhs) -> {
+                if (mResolverRankerService != null) {
+                    return mResolverRankerService.compare(lhs, rhs);
+                }
+                Integer lhsRank = mTargetRanks.get(new ComponentName(lhs.activityInfo.packageName,
+                        lhs.activityInfo.name));
+                Integer rhsRank = mTargetRanks.get(new ComponentName(rhs.activityInfo.packageName,
+                        rhs.activityInfo.name));
+                if (lhsRank == null && rhsRank == null) {
+                    return 0;
+                } else if (lhsRank == null) {
+                    return -1;
+                } else if (rhsRank == null) {
+                    return 1;
+                }
+                return lhsRank - rhsRank;
+            };
+        }
+
+        @Override
+        public float getScore(ComponentName name) {
+            if (mResolverRankerService != null) {
+                return mResolverRankerService.getScore(name);
+            }
+            Integer rank = mTargetRanks.get(name);
+            if (rank == null) {
+                Log.w(TAG, "Score requested for unknown component. Did you call compute yet?");
+                return 0f;
+            }
+            int consecutiveSumOfRanks = (mTargetRanks.size() - 1) * (mTargetRanks.size()) / 2;
+            return 1.0f - (((float) rank) / consecutiveSumOfRanks);
+        }
+
+        @Override
+        public void notifyOnTargetSelected(ComponentName componentName) {
+            if (mResolverRankerService != null) {
+                mResolverRankerService.updateModel(componentName);
+                return;
+            }
+            mAppPredictor.notifyAppTargetEvent(
+                    new AppTargetEvent.Builder(
+                        new AppTarget.Builder(
+                            new AppTargetId(componentName.toString()),
+                            componentName.getPackageName(), mUser)
+                            .setClassName(componentName.getClassName()).build(),
+                        ACTION_LAUNCH).build());
         }
     }
 }

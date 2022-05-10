@@ -56,7 +56,7 @@ class Visitor : public xml::PackageAwareVisitor {
       return;
     }
 
-    Maybe<Reference> ref = ResourceUtils::ParseXmlAttributeName(attr->value);
+    std::optional<Reference> ref = ResourceUtils::ParseXmlAttributeName(attr->value);
     if (!ref) {
       context_->GetDiagnostics()->Error(DiagMessage(src) << "invalid XML attribute '" << attr->value
                                                          << "'");
@@ -65,7 +65,7 @@ class Visitor : public xml::PackageAwareVisitor {
     }
 
     const ResourceName& name = ref.value().name.value();
-    Maybe<xml::ExtractedPackage> maybe_pkg = TransformPackageAlias(name.package);
+    std::optional<xml::ExtractedPackage> maybe_pkg = TransformPackageAlias(name.package);
     if (!maybe_pkg) {
       context_->GetDiagnostics()->Error(DiagMessage(src)
                                         << "invalid namespace prefix '" << name.package << "'");

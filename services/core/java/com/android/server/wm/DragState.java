@@ -44,6 +44,7 @@ import android.hardware.input.InputManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.InputConfig;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -106,7 +107,7 @@ class DragState {
     ClipDescription mDataDescription;
     int mTouchSource;
     boolean mDragResult;
-    boolean mRelinquishDragSurface;
+    boolean mRelinquishDragSurfaceToDropTarget;
     float mOriginalAlpha;
     float mOriginalX, mOriginalY;
     float mCurrentX, mCurrentY;
@@ -127,7 +128,7 @@ class DragState {
 
     @Nullable private ValueAnimator mAnimator;
     private final Interpolator mCubicEaseOutInterpolator = new DecelerateInterpolator(1.5f);
-    private Point mDisplaySize = new Point();
+    private final Point mDisplaySize = new Point();
 
     // A surface used to catch input events for the drag-and-drop operation.
     SurfaceControl mInputSurface;
@@ -160,8 +161,7 @@ class DragState {
 
     private void showInputSurface() {
         if (mInputSurface == null) {
-            mInputSurface = mService.makeSurfaceBuilder(
-                    mService.mRoot.getDisplayContent(mDisplayContent.getDisplayId()).getSession())
+            mInputSurface = mService.makeSurfaceBuilder(mDisplayContent.getSession())
                     .setContainerLayer()
                     .setName("Drag and Drop Input Consumer")
                     .setCallsite("DragState.showInputSurface")
@@ -174,17 +174,18 @@ class DragState {
             return;
         }
 
-        mTransaction.show(mInputSurface);
-        mTransaction.setInputWindowInfo(mInputSurface, h);
-        mTransaction.setLayer(mInputSurface, Integer.MAX_VALUE);
-
+        // Crop the input surface to the display size.
         mTmpClipRect.set(0, 0, mDisplaySize.x, mDisplaySize.y);
-        mTransaction.setWindowCrop(mInputSurface, mTmpClipRect);
+
+        mTransaction.show(mInputSurface)
+                .setInputWindowInfo(mInputSurface, h)
+                .setLayer(mInputSurface, Integer.MAX_VALUE)
+                .setCrop(mInputSurface, mTmpClipRect);
 
         // syncInputWindows here to ensure the input window info is sent before the
         // transferTouchFocus is called.
-        mTransaction.syncInputWindows();
-        mTransaction.apply(true);
+        mTransaction.syncInputWindows()
+                .apply(true /*sync*/);
     }
 
     /**
@@ -214,13 +215,19 @@ class DragState {
             for (WindowState ws : mNotifiedWindows) {
                 float x = 0;
                 float y = 0;
+                SurfaceControl dragSurface = null;
                 if (!mDragResult && (ws.mSession.mPid == mPid)) {
                     // Report unconsumed drop location back to the app that started the drag.
                     x = mCurrentX;
                     y = mCurrentY;
+                    if (relinquishDragSurfaceToDragSource()) {
+                        // If requested (and allowed), report the drag surface back to the app
+                        // starting the drag to handle the return animation
+                        dragSurface = mSurfaceControl;
+                    }
                 }
                 DragEvent event = DragEvent.obtain(DragEvent.ACTION_DRAG_ENDED,
-                        x, y, mThumbOffsetX, mThumbOffsetY, null, null, null, null, null,
+                        x, y, mThumbOffsetX, mThumbOffsetY, null, null, null, dragSurface, null,
                         mDragResult);
                 try {
                     ws.mClient.dispatchDragEvent(event);
@@ -249,11 +256,11 @@ class DragState {
             mInputSurface = null;
         }
         if (mSurfaceControl != null) {
-            if (!mRelinquishDragSurface) {
+            if (!mRelinquishDragSurfaceToDropTarget && !relinquishDragSurfaceToDragSource()) {
                 mTransaction.reparent(mSurfaceControl, null).apply();
             } else {
                 mDragDropController.sendTimeoutMessage(MSG_REMOVE_DRAG_SURFACE_TIMEOUT,
-                        mSurfaceControl);
+                        mSurfaceControl, DragDropController.DRAG_TIMEOUT_MS);
             }
             mSurfaceControl = null;
         }
@@ -276,9 +283,9 @@ class DragState {
      * Notify the drop target and tells it about the data. If the drop event is not sent to the
      * target, invokes {@code endDragLocked} immediately.
      */
-    void reportDropWindowLock(IBinder token, float x, float y) {
+    boolean reportDropWindowLock(IBinder token, float x, float y) {
         if (mAnimator != null) {
-            return;
+            return false;
         }
 
         final WindowState touchedWin = mService.mInputToWindowMap.get(token);
@@ -288,7 +295,7 @@ class DragState {
             mDragResult = false;
             endDragLocked();
             if (DEBUG_DRAG) Slog.d(TAG_WM, "Drop outside a valid window " + touchedWin);
-            return;
+            return false;
         }
 
         if (DEBUG_DRAG) Slog.d(TAG_WM, "sending DROP to " + touchedWin);
@@ -322,16 +329,19 @@ class DragState {
             touchedWin.mClient.dispatchDragEvent(event);
 
             // 5 second timeout for this window to respond to the drop
-            mDragDropController.sendTimeoutMessage(MSG_DRAG_END_TIMEOUT, clientToken);
+            mDragDropController.sendTimeoutMessage(MSG_DRAG_END_TIMEOUT, clientToken,
+                    DragDropController.DRAG_TIMEOUT_MS);
         } catch (RemoteException e) {
             Slog.w(TAG_WM, "can't send drop notification to win " + touchedWin);
             endDragLocked();
+            return false;
         } finally {
             if (myPid != touchedWin.mSession.mPid) {
                 event.recycle();
             }
         }
         mToken = clientToken;
+        return true;
     }
 
     class InputInterceptor {
@@ -352,28 +362,19 @@ class DragState {
                     display.getDisplayId());
             mDragWindowHandle.name = "drag";
             mDragWindowHandle.token = mClientChannel.getToken();
-            mDragWindowHandle.layoutParamsFlags = 0;
             mDragWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_DRAG;
             mDragWindowHandle.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
-            mDragWindowHandle.visible = true;
-            // Allows the system to consume keys when dragging is active. This can also be used to
-            // modify the drag state on key press. Example, cancel drag on escape key.
-            mDragWindowHandle.focusable = true;
-            mDragWindowHandle.hasWallpaper = false;
-            mDragWindowHandle.paused = false;
             mDragWindowHandle.ownerPid = Process.myPid();
             mDragWindowHandle.ownerUid = Process.myUid();
-            mDragWindowHandle.inputFeatures = 0;
             mDragWindowHandle.scaleFactor = 1.0f;
+
+            // Keep the default behavior of this window to be focusable, which allows the system
+            // to consume keys when dragging is active. This can also be used to modify the drag
+            // state on key press. For example, cancel drag on escape key.
+            mDragWindowHandle.inputConfig = InputConfig.PREVENT_SPLITTING;
 
             // The drag window cannot receive new touches.
             mDragWindowHandle.touchableRegion.setEmpty();
-
-            // The drag window covers the entire display
-            mDragWindowHandle.frameLeft = 0;
-            mDragWindowHandle.frameTop = 0;
-            mDragWindowHandle.frameRight = mDisplaySize.x;
-            mDragWindowHandle.frameBottom = mDisplaySize.y;
 
             // Pause rotations before a drag.
             ProtoLog.d(WM_DEBUG_ORIENTATION, "Pausing rotation during drag");
@@ -464,7 +465,8 @@ class DragState {
         if (mDragInProgress && isValidDropTarget(newWin, containsAppExtras, interceptsGlobalDrag)) {
             // Only allow the extras to be dispatched to a global-intercepting drag target
             ClipData data = interceptsGlobalDrag ? mData.copyForTransferWithActivityInfo() : null;
-            DragEvent event = obtainDragEvent(DragEvent.ACTION_DRAG_STARTED, touchX, touchY,
+            DragEvent event = obtainDragEvent(DragEvent.ACTION_DRAG_STARTED,
+                    newWin.translateToWindowX(touchX), newWin.translateToWindowY(touchY),
                     data, false /* includeDragSurface */,
                     null /* dragAndDropPermission */);
             try {
@@ -552,7 +554,7 @@ class DragState {
         }
     }
 
-    private boolean isWindowNotified(WindowState newWin) {
+    boolean isWindowNotified(WindowState newWin) {
         for (WindowState ws : mNotifiedWindows) {
             if (ws == newWin) {
                 return true;
@@ -566,8 +568,10 @@ class DragState {
             return;
         }
         if (!mDragResult) {
-            mAnimator = createReturnAnimationLocked();
-            return;  // Will call closeLocked() when the animation is done.
+            if (!isAccessibilityDragDrop() && !relinquishDragSurfaceToDragSource()) {
+                mAnimator = createReturnAnimationLocked();
+                return;  // Will call closeLocked() when the animation is done.
+            }
         }
         closeLocked();
     }
@@ -576,7 +580,7 @@ class DragState {
         if (mAnimator != null) {
             return;
         }
-        if (!mDragInProgress || skipAnimation) {
+        if (!mDragInProgress || skipAnimation || isAccessibilityDragDrop()) {
             // mDragInProgress is false if an app invokes Session#cancelDragAndDrop before
             // Session#performDrag. Reset the drag state without playing the cancel animation
             // because H.DRAG_START_TIMEOUT may be sent to WindowManagerService, which will cause
@@ -720,5 +724,13 @@ class DragState {
             // AnimationThread.
             mDragDropController.sendHandlerMessage(MSG_ANIMATION_END, null);
         }
+    }
+
+    boolean isAccessibilityDragDrop() {
+        return (mFlags & View.DRAG_FLAG_ACCESSIBILITY_ACTION) != 0;
+    }
+
+    private boolean relinquishDragSurfaceToDragSource() {
+        return (mFlags & View.DRAG_FLAG_REQUEST_SURFACE_FOR_RETURN_ANIMATION) != 0;
     }
 }

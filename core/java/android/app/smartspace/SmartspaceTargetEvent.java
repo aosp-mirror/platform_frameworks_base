@@ -96,7 +96,7 @@ public final class SmartspaceTargetEvent implements Parcelable {
     }
 
     private SmartspaceTargetEvent(Parcel parcel) {
-        mSmartspaceTarget = parcel.readParcelable(null);
+        mSmartspaceTarget = parcel.readParcelable(null, android.app.smartspace.SmartspaceTarget.class);
         mSmartspaceActionId = parcel.readString();
         mEventType = parcel.readInt();
     }

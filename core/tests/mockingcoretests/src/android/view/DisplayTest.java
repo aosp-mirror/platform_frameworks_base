@@ -27,6 +27,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSess
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.app.WindowConfiguration;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Point;
@@ -34,7 +35,6 @@ import android.graphics.Rect;
 import android.hardware.display.DisplayManagerGlobal;
 import android.platform.test.annotations.Presubmit;
 import android.util.DisplayMetrics;
-import android.view.DisplayAdjustments.FixedRotationAdjustments;
 
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -48,8 +48,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.quality.Strictness;
-
-import java.util.function.Consumer;
 
 /**
  * Tests for {@link Display}.
@@ -96,14 +94,12 @@ public class DisplayTest {
 
         // Ensure no adjustments are set before each test.
         mApplicationContext = ApplicationProvider.getApplicationContext();
-        DisplayAdjustments displayAdjustments =
-                mApplicationContext.getResources().getDisplayAdjustments();
-        displayAdjustments.setFixedRotationAdjustments(null);
-        mApplicationContext.getResources().overrideDisplayAdjustments(null);
         mApplicationContext.getResources().getConfiguration().windowConfiguration.setAppBounds(
                 null);
         mApplicationContext.getResources().getConfiguration().windowConfiguration.setMaxBounds(
                 null);
+        mApplicationContext.getResources().getConfiguration().windowConfiguration
+                .setDisplayRotation(WindowConfiguration.ROTATION_UNDEFINED);
         mDisplayInfo.rotation = ROTATION_0;
 
         mDisplayManagerGlobal = mock(DisplayManagerGlobal.class);
@@ -151,41 +147,11 @@ public class DisplayTest {
     }
 
     @Test
-    public void testGetRotation_displayAdjustmentsWithoutOverride_rotationNotAdjusted() {
-        // GIVEN display is not rotated.
-        setDisplayInfoPortrait(mDisplayInfo);
-        // GIVEN fixed rotation adjustments are rotated, but no override is set.
-        DisplayAdjustments displayAdjustments = DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
-        final FixedRotationAdjustments fixedRotationAdjustments =
-                new FixedRotationAdjustments(ROTATION_90, APP_WIDTH, APP_HEIGHT,
-                        DisplayCutout.NO_CUTOUT);
-        displayAdjustments.setFixedRotationAdjustments(fixedRotationAdjustments);
-        // GIVEN display is constructed with display adjustments.
-        final Display display = new Display(mDisplayManagerGlobal, DEFAULT_DISPLAY, mDisplayInfo,
-                displayAdjustments);
-        // THEN rotation is not adjusted since no override was set.
-        assertThat(display.getRotation()).isEqualTo(ROTATION_0);
-    }
-
-    @Test
-    public void testGetRotation_resourcesWithoutOverride_rotationNotAdjusted() {
-        // GIVEN display is not rotated.
-        setDisplayInfoPortrait(mDisplayInfo);
-        // GIVEN fixed rotation adjustments are rotated, but no override is set.
-        setFixedRotationAdjustments(mApplicationContext.getResources(), ROTATION_90);
-        // GIVEN display is constructed with default resources.
-        final Display display = new Display(mDisplayManagerGlobal, DEFAULT_DISPLAY, mDisplayInfo,
-                mApplicationContext.getResources());
-        // THEN rotation is not adjusted since no override is set.
-        assertThat(display.getRotation()).isEqualTo(ROTATION_0);
-    }
-
-    @Test
     public void testGetRotation_resourcesWithOverrideDisplayAdjustments_rotationAdjusted() {
         // GIVEN display is not rotated.
         setDisplayInfoPortrait(mDisplayInfo);
         // GIVEN fixed rotation adjustments are rotated, and an override is set.
-        setOverrideFixedRotationAdjustments(mApplicationContext.getResources(), ROTATION_90);
+        setLocalDisplayInConfig(mApplicationContext.getResources(), ROTATION_90);
         // GIVEN display is constructed with default resources.
         final Display display = new Display(mDisplayManagerGlobal, DEFAULT_DISPLAY, mDisplayInfo,
                 mApplicationContext.getResources());
@@ -234,37 +200,11 @@ public class DisplayTest {
     }
 
     @Test
-    public void testGetRealSize_resourcesPortraitWithFixedRotation_notRotatedLogicalSize() {
-        // GIVEN display is rotated.
-        setDisplayInfoLandscape(mDisplayInfo);
-        // GIVEN fixed rotation adjustments are rotated.
-        setFixedRotationAdjustments(mApplicationContext.getResources(), ROTATION_0);
-        // GIVEN display is constructed with default resources.
-        final Display display = new Display(mDisplayManagerGlobal, DEFAULT_DISPLAY, mDisplayInfo,
-                mApplicationContext.getResources());
-        // THEN real size matches display orientation.
-        verifyRealSizeIsLandscape(display);
-    }
-
-    @Test
-    public void testGetRealSize_resourcesWithLandscapeFixedRotation_notRotatedLogicalSize() {
-        // GIVEN display is not rotated.
-        setDisplayInfoPortrait(mDisplayInfo);
-        // GIVEN fixed rotation adjustments are rotated.
-        setFixedRotationAdjustments(mApplicationContext.getResources(), ROTATION_90);
-        // GIVEN display is constructed with default resources.
-        final Display display = new Display(mDisplayManagerGlobal, DEFAULT_DISPLAY, mDisplayInfo,
-                mApplicationContext.getResources());
-        // THEN real size matches display orientation.
-        verifyRealSizeIsPortrait(display);
-    }
-
-    @Test
     public void testGetRealSize_resourcesWithPortraitOverrideRotation_rotatedLogicalSize() {
         // GIVEN display is rotated.
         setDisplayInfoLandscape(mDisplayInfo);
         // GIVEN fixed rotation adjustments are rotated, and an override is set.
-        setOverrideFixedRotationAdjustments(mApplicationContext.getResources(), ROTATION_0);
+        setLocalDisplayInConfig(mApplicationContext.getResources(), ROTATION_0);
         // GIVEN display is constructed with default resources.
         final Display display = new Display(mDisplayManagerGlobal, DEFAULT_DISPLAY, mDisplayInfo,
                 mApplicationContext.getResources());
@@ -277,7 +217,7 @@ public class DisplayTest {
         // GIVEN display is not rotated.
         setDisplayInfoPortrait(mDisplayInfo);
         // GIVEN fixed rotation adjustments are rotated, and an override is set.
-        setOverrideFixedRotationAdjustments(mApplicationContext.getResources(), ROTATION_90);
+        setLocalDisplayInConfig(mApplicationContext.getResources(), ROTATION_90);
         // GIVEN display is constructed with default resources.
         final Display display = new Display(mDisplayManagerGlobal, DEFAULT_DISPLAY, mDisplayInfo,
                 mApplicationContext.getResources());
@@ -380,37 +320,11 @@ public class DisplayTest {
     }
 
     @Test
-    public void testGetRealMetrics_resourcesPortraitWithFixedRotation_notRotatedLogicalSize() {
-        // GIVEN display is rotated.
-        setDisplayInfoLandscape(mDisplayInfo);
-        // GIVEN fixed rotation adjustments are rotated.
-        setFixedRotationAdjustments(mApplicationContext.getResources(), ROTATION_0);
-        // GIVEN display is constructed with default resources.
-        final Display display = new Display(mDisplayManagerGlobal, DEFAULT_DISPLAY, mDisplayInfo,
-                mApplicationContext.getResources());
-        // THEN real metrics matches display orientation.
-        verifyRealMetricsIsLandscape(display);
-    }
-
-    @Test
-    public void testGetRealMetrics_resourcesWithLandscapeFixedRotation_notRotatedLogicalSize() {
-        // GIVEN display is not rotated.
-        setDisplayInfoPortrait(mDisplayInfo);
-        // GIVEN fixed rotation adjustments are rotated.
-        setFixedRotationAdjustments(mApplicationContext.getResources(), ROTATION_90);
-        // GIVEN display is constructed with default resources.
-        final Display display = new Display(mDisplayManagerGlobal, DEFAULT_DISPLAY, mDisplayInfo,
-                mApplicationContext.getResources());
-        // THEN real metrics matches display orientation.
-        verifyRealMetricsIsPortrait(display);
-    }
-
-    @Test
     public void testGetRealMetrics_resourcesWithPortraitOverrideRotation_rotatedLogicalSize() {
         // GIVEN display is rotated.
         setDisplayInfoLandscape(mDisplayInfo);
         // GIVEN fixed rotation adjustments are rotated with an override.
-        setOverrideFixedRotationAdjustments(mApplicationContext.getResources(), ROTATION_0);
+        setLocalDisplayInConfig(mApplicationContext.getResources(), ROTATION_0);
         // GIVEN display is constructed with default resources.
         final Display display = new Display(mDisplayManagerGlobal, DEFAULT_DISPLAY, mDisplayInfo,
                 mApplicationContext.getResources());
@@ -423,7 +337,7 @@ public class DisplayTest {
         // GIVEN display is not rotated.
         setDisplayInfoPortrait(mDisplayInfo);
         // GIVEN fixed rotation adjustments are rotated.
-        setOverrideFixedRotationAdjustments(mApplicationContext.getResources(), ROTATION_90);
+        setLocalDisplayInConfig(mApplicationContext.getResources(), ROTATION_90);
         // GIVEN display is constructed with default resources.
         final Display display = new Display(mDisplayManagerGlobal, DEFAULT_DISPLAY, mDisplayInfo,
                 mApplicationContext.getResources());
@@ -569,27 +483,8 @@ public class DisplayTest {
         assertThat(metrics.heightPixels).isEqualTo(bounds.height());
     }
 
-    private static FixedRotationAdjustments setOverrideFixedRotationAdjustments(
-            Resources resources, @Surface.Rotation int rotation) {
-        FixedRotationAdjustments fixedRotationAdjustments =
-                setFixedRotationAdjustments(resources, rotation);
-        resources.overrideDisplayAdjustments(
-                buildOverrideRotationAdjustments(fixedRotationAdjustments));
-        return fixedRotationAdjustments;
-    }
-
-    private static FixedRotationAdjustments setFixedRotationAdjustments(Resources resources,
+    private static void setLocalDisplayInConfig(Resources resources,
             @Surface.Rotation int rotation) {
-        final FixedRotationAdjustments fixedRotationAdjustments =
-                new FixedRotationAdjustments(rotation, APP_WIDTH, APP_HEIGHT,
-                        DisplayCutout.NO_CUTOUT);
-        resources.getDisplayAdjustments().setFixedRotationAdjustments(fixedRotationAdjustments);
-        return fixedRotationAdjustments;
-    }
-
-    private static Consumer<DisplayAdjustments> buildOverrideRotationAdjustments(
-            FixedRotationAdjustments fixedRotationAdjustments) {
-        return consumedDisplayAdjustments
-                -> consumedDisplayAdjustments.setFixedRotationAdjustments(fixedRotationAdjustments);
+        resources.getConfiguration().windowConfiguration.setDisplayRotation(rotation);
     }
 }

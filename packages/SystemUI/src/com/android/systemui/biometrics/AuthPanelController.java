@@ -117,24 +117,6 @@ public class AuthPanelController extends ViewOutlineProvider {
         mUseFullScreen = fullScreen;
     }
 
-    public ValueAnimator getTranslationAnimator(float relativeTranslationY) {
-        final ValueAnimator animator = ValueAnimator.ofFloat(
-                mPanelView.getY(), mPanelView.getY() - relativeTranslationY);
-        animator.addUpdateListener(animation -> {
-            final float translation = (float) animation.getAnimatedValue();
-            mPanelView.setTranslationY(translation);
-        });
-        return animator;
-    }
-
-    public ValueAnimator getAlphaAnimator(float alpha) {
-        final ValueAnimator animator = ValueAnimator.ofFloat(mPanelView.getAlpha(), alpha);
-        animator.addUpdateListener(animation -> {
-            mPanelView.setAlpha((float) animation.getAnimatedValue());
-        });
-        return animator;
-    }
-
     public void updateForContentDimensions(int contentWidth, int contentHeight,
             int animateDurationMs) {
         if (DEBUG) {

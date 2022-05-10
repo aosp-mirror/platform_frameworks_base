@@ -29,6 +29,8 @@ import android.view.accessibility.IWindowMagnificationConnection;
 import android.view.accessibility.IWindowMagnificationConnectionCallback;
 import android.view.accessibility.MagnificationAnimationCallback;
 
+import com.android.server.accessibility.AccessibilityTraceManager;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -45,6 +47,8 @@ public class WindowMagnificationConnectionWrapperTest {
 
     private IWindowMagnificationConnection mConnection;
     @Mock
+    private AccessibilityTraceManager mTrace;
+    @Mock
     private IWindowMagnificationConnectionCallback mCallback;
     @Mock
     private MagnificationAnimationCallback mAnimationCallback;
@@ -57,13 +61,13 @@ public class WindowMagnificationConnectionWrapperTest {
         MockitoAnnotations.initMocks(this);
         mMockWindowMagnificationConnection = new MockWindowMagnificationConnection();
         mConnection = mMockWindowMagnificationConnection.getConnection();
-        mConnectionWrapper = new WindowMagnificationConnectionWrapper(mConnection);
+        mConnectionWrapper = new WindowMagnificationConnectionWrapper(mConnection, mTrace);
     }
 
     @Test
     public void enableWindowMagnification() throws RemoteException {
         mConnectionWrapper.enableWindowMagnification(TEST_DISPLAY, 2, 100f, 200f,
-                mAnimationCallback);
+                0f, 0f, mAnimationCallback);
 
         verify(mAnimationCallback).onResult(true);
     }
@@ -87,6 +91,14 @@ public class WindowMagnificationConnectionWrapperTest {
     public void moveWindowMagnifier() throws RemoteException {
         mConnectionWrapper.moveWindowMagnifier(TEST_DISPLAY, 100, 150);
         verify(mConnection).moveWindowMagnifier(TEST_DISPLAY, 100, 150);
+    }
+
+    @Test
+    public void moveWindowMagnifierToPosition() throws RemoteException {
+        mConnectionWrapper.moveWindowMagnifierToPosition(TEST_DISPLAY, 100, 150,
+                mAnimationCallback);
+        verify(mConnection).moveWindowMagnifierToPosition(eq(TEST_DISPLAY),
+                eq(100f), eq(150f), any(IRemoteMagnificationAnimationCallback.class));
     }
 
     @Test

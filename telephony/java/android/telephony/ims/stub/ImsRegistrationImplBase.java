@@ -31,10 +31,18 @@ import android.telephony.ims.aidl.IImsRegistrationCallback;
 import android.util.Log;
 
 import com.android.internal.telephony.util.RemoteCallbackListExt;
+import com.android.internal.telephony.util.TelephonyUtils;
 import com.android.internal.util.ArrayUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 /**
  * Controls IMS registration for this ImsService and notifies the framework when the IMS
@@ -42,9 +50,7 @@ import java.lang.annotation.RetentionPolicy;
  * <p>
  * Note: There is no guarantee on the thread that the calls from the framework will be called on. It
  * is the implementors responsibility to handle moving the calls to a working thread if required.
- * @hide
  */
-@SystemApi
 public class ImsRegistrationImplBase {
 
     private static final String LOG_TAG = "ImsRegistrationImplBase";
@@ -85,6 +91,12 @@ public class ImsRegistrationImplBase {
      */
     public static final int REGISTRATION_TECH_NR = 3;
 
+    /**
+     * This is used to check the upper range of registration tech
+     * @hide
+     */
+    public static final int REGISTRATION_TECH_MAX = REGISTRATION_TECH_NR + 1;
+
     // Registration states, used to notify new ImsRegistrationImplBase#Callbacks of the current
     // state.
     // The unknown state is set as the initialization state. This is so that we do not call back
@@ -92,39 +104,118 @@ public class ImsRegistrationImplBase {
     // yet.
     private static final int REGISTRATION_STATE_UNKNOWN = -1;
 
+    private Executor mExecutor;
+
+    /**
+     * Create a new ImsRegistration.
+     * <p>
+     * Method stubs called from the framework will be called asynchronously. To specify the
+     * {@link Executor} that the methods stubs will be called, use
+     * {@link ImsRegistrationImplBase#ImsRegistrationImplBase(Executor)} instead.
+     * @hide This API is not part of the Android public SDK API
+     */
+    @SystemApi
+    public ImsRegistrationImplBase() {
+        super();
+    }
+
+    /**
+     * Create a ImsRegistration using the Executor specified for methods being called by the
+     * framework.
+     * @param executor The executor for the framework to use when executing the methods overridden
+     * by the implementation of ImsRegistration.
+     * @hide This API is not part of the Android public SDK API
+     */
+    @SystemApi
+    public ImsRegistrationImplBase(@NonNull Executor executor) {
+        super();
+        mExecutor = executor;
+    }
+
     private final IImsRegistration mBinder = new IImsRegistration.Stub() {
 
         @Override
         public @ImsRegistrationTech int getRegistrationTechnology() throws RemoteException {
-            synchronized (mLock) {
-                return (mRegistrationAttributes == null) ? REGISTRATION_TECH_NONE
-                        : mRegistrationAttributes.getRegistrationTechnology();
-            }
+            return executeMethodAsyncForResult(() -> (mRegistrationAttributes == null)
+                    ? REGISTRATION_TECH_NONE : mRegistrationAttributes.getRegistrationTechnology(),
+                    "getRegistrationTechnology");
         }
 
         @Override
         public void addRegistrationCallback(IImsRegistrationCallback c) throws RemoteException {
-            ImsRegistrationImplBase.this.addRegistrationCallback(c);
+            AtomicReference<RemoteException> exceptionRef = new AtomicReference<>();
+            executeMethodAsync(() -> {
+                try {
+                    ImsRegistrationImplBase.this.addRegistrationCallback(c);
+                } catch (RemoteException e) {
+                    exceptionRef.set(e);
+                }
+            }, "addRegistrationCallback");
+
+            if (exceptionRef.get() != null) {
+                throw exceptionRef.get();
+            }
         }
 
         @Override
         public void removeRegistrationCallback(IImsRegistrationCallback c) throws RemoteException {
-            ImsRegistrationImplBase.this.removeRegistrationCallback(c);
+            executeMethodAsync(() -> ImsRegistrationImplBase.this.removeRegistrationCallback(c),
+                    "removeRegistrationCallback");
         }
 
         @Override
         public void triggerFullNetworkRegistration(int sipCode, String sipReason) {
-            ImsRegistrationImplBase.this.triggerFullNetworkRegistration(sipCode, sipReason);
+            executeMethodAsyncNoException(() -> ImsRegistrationImplBase.this
+                    .triggerFullNetworkRegistration(sipCode, sipReason),
+                    "triggerFullNetworkRegistration");
         }
 
         @Override
         public void triggerUpdateSipDelegateRegistration() {
-            ImsRegistrationImplBase.this.updateSipDelegateRegistration();
+            executeMethodAsyncNoException(() -> ImsRegistrationImplBase.this
+                    .updateSipDelegateRegistration(), "triggerUpdateSipDelegateRegistration");
         }
 
         @Override
         public void triggerSipDelegateDeregistration() {
-            ImsRegistrationImplBase.this.triggerSipDelegateDeregistration();
+            executeMethodAsyncNoException(() -> ImsRegistrationImplBase.this
+                    .triggerSipDelegateDeregistration(), "triggerSipDelegateDeregistration");
+        }
+
+        // Call the methods with a clean calling identity on the executor and wait indefinitely for
+        // the future to return.
+        private void executeMethodAsync(Runnable r, String errorLogName) throws RemoteException {
+            try {
+                CompletableFuture.runAsync(
+                        () -> TelephonyUtils.runWithCleanCallingIdentity(r), mExecutor).join();
+            } catch (CancellationException | CompletionException e) {
+                Log.w(LOG_TAG, "ImsRegistrationImplBase Binder - " + errorLogName + " exception: "
+                        + e.getMessage());
+                throw new RemoteException(e.getMessage());
+            }
+        }
+
+        private void executeMethodAsyncNoException(Runnable r, String errorLogName) {
+            try {
+                CompletableFuture.runAsync(
+                        () -> TelephonyUtils.runWithCleanCallingIdentity(r), mExecutor).join();
+            } catch (CancellationException | CompletionException e) {
+                Log.w(LOG_TAG, "ImsRegistrationImplBase Binder - " + errorLogName + " exception: "
+                        + e.getMessage());
+            }
+        }
+
+        private <T> T executeMethodAsyncForResult(Supplier<T> r,
+                String errorLogName) throws RemoteException {
+            CompletableFuture<T> future = CompletableFuture.supplyAsync(
+                    () -> TelephonyUtils.runWithCleanCallingIdentity(r), mExecutor);
+            try {
+                return future.get();
+            } catch (ExecutionException | InterruptedException e) {
+                Log.w(LOG_TAG, "ImsRegistrationImplBase Binder - " + errorLogName + " exception: "
+                        + e.getMessage());
+                throw new RemoteException(e.getMessage());
+            }
         }
     };
 
@@ -166,7 +257,9 @@ public class ImsRegistrationImplBase {
      * If the SIP delegate feature tag configuration has changed, then this method will be
      * called in order to let the ImsService know that it can pick up these changes in the IMS
      * registration.
+     * @hide This API is not part of the Android public SDK API
      */
+    @SystemApi
     public void updateSipDelegateRegistration() {
         // Stub implementation, ImsService should implement this
     }
@@ -182,7 +275,9 @@ public class ImsRegistrationImplBase {
      * <p>
      * This should not affect the registration of features managed by the ImsService itself, such as
      * feature tags related to MMTEL registration.
+     * @hide This API is not part of the Android public SDK API
      */
+    @SystemApi
     public void triggerSipDelegateDeregistration() {
         // Stub implementation, ImsService should implement this
     }
@@ -200,7 +295,9 @@ public class ImsRegistrationImplBase {
      *    be carrier specific.
      * @param sipReason The reason associated with the SIP error code. {@code null} if there was no
      *    reason associated with the error.
+     * @hide This API is not part of the Android public SDK API
      */
+    @SystemApi
     public void triggerFullNetworkRegistration(@IntRange(from = 100, to = 699) int sipCode,
             @Nullable String sipReason) {
         // Stub implementation, ImsService should implement this
@@ -211,7 +308,9 @@ public class ImsRegistrationImplBase {
      * Notify the framework that the device is connected to the IMS network.
      *
      * @param imsRadioTech the radio access technology.
+     * @hide This API is not part of the Android public SDK API
      */
+    @SystemApi
     public final void onRegistered(@ImsRegistrationTech int imsRadioTech) {
         onRegistered(new ImsRegistrationAttributes.Builder(imsRadioTech).build());
     }
@@ -220,7 +319,9 @@ public class ImsRegistrationImplBase {
      * Notify the framework that the device is connected to the IMS network.
      *
      * @param attributes The attributes associated with the IMS registration.
+     * @hide This API is not part of the Android public SDK API
      */
+    @SystemApi
     public final void onRegistered(@NonNull ImsRegistrationAttributes attributes) {
         updateToState(attributes, RegistrationManager.REGISTRATION_STATE_REGISTERED);
         mCallbacks.broadcastAction((c) -> {
@@ -236,7 +337,9 @@ public class ImsRegistrationImplBase {
      * Notify the framework that the device is trying to connect the IMS network.
      *
      * @param imsRadioTech the radio access technology.
+     * @hide This API is not part of the Android public SDK API
      */
+    @SystemApi
     public final void onRegistering(@ImsRegistrationTech int imsRadioTech) {
         onRegistering(new ImsRegistrationAttributes.Builder(imsRadioTech).build());
     }
@@ -245,7 +348,9 @@ public class ImsRegistrationImplBase {
      * Notify the framework that the device is trying to connect the IMS network.
      *
      * @param attributes The attributes associated with the IMS registration.
+     * @hide This API is not part of the Android public SDK API
      */
+    @SystemApi
     public final void onRegistering(@NonNull ImsRegistrationAttributes attributes) {
         updateToState(attributes, RegistrationManager.REGISTRATION_STATE_REGISTERING);
         mCallbacks.broadcastAction((c) -> {
@@ -272,7 +377,9 @@ public class ImsRegistrationImplBase {
      * result.
      *
      * @param info the {@link ImsReasonInfo} associated with why registration was disconnected.
+     * @hide This API is not part of the Android public SDK API
      */
+    @SystemApi
     public final void onDeregistered(ImsReasonInfo info) {
         updateToDisconnectedState(info);
         // ImsReasonInfo should never be null.
@@ -293,7 +400,9 @@ public class ImsRegistrationImplBase {
      * {@link #REGISTRATION_TECH_LTE}, {@link #REGISTRATION_TECH_IWLAN} and
      * {@link #REGISTRATION_TECH_CROSS_SIM}.
      * @param info The {@link ImsReasonInfo} for the failure to change technology.
+     * @hide This API is not part of the Android public SDK API
      */
+    @SystemApi
     public final void onTechnologyChangeFailed(@ImsRegistrationTech int imsRadioTech,
             ImsReasonInfo info) {
         final ImsReasonInfo reasonInfo = (info != null) ? info : new ImsReasonInfo();
@@ -312,7 +421,9 @@ public class ImsRegistrationImplBase {
      *
      * The {@link Uri}s are not guaranteed to be different between subsequent calls.
      * @param uris changed uris
+     * @hide This API is not part of the Android public SDK API
      */
+    @SystemApi
     public final void onSubscriberAssociatedUriChanged(Uri[] uris) {
         synchronized (mLock) {
             mUris = ArrayUtils.cloneOrNull(uris);
@@ -392,6 +503,18 @@ public class ImsRegistrationImplBase {
         }
         if (urisSet) {
             onSubscriberAssociatedUriChanged(c, uris);
+        }
+    }
+
+    /**
+     * Set default Executor from ImsService.
+     * @param executor The default executor for the framework to use when executing the methods
+     * overridden by the implementation of Registration.
+     * @hide
+     */
+    public final void setDefaultExecutor(@NonNull Executor executor) {
+        if (mExecutor == null) {
+            mExecutor = executor;
         }
     }
 }

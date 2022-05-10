@@ -33,6 +33,7 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.provider.Settings.Global;
 import android.providers.settings.SettingsOperationProto;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -47,6 +48,7 @@ import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
 
 import libcore.io.IoUtils;
@@ -343,7 +345,6 @@ final class SettingsState {
     }
 
     // The settings provider must hold its lock when calling here.
-    @GuardedBy("mLock")
     public Setting getSettingLocked(String name) {
         if (TextUtils.isEmpty(name)) {
             return mNullSetting;
@@ -383,7 +384,6 @@ final class SettingsState {
     }
 
     // The settings provider must hold its lock when calling here.
-    @GuardedBy("mLock")
     public boolean insertSettingOverrideableByRestoreLocked(String name, String value, String tag,
             boolean makeDefault, String packageName) {
         return insertSettingLocked(name, value, tag, makeDefault, false, packageName,
@@ -618,7 +618,7 @@ final class SettingsState {
             return;
         }
         HistoricalOperation operation = new HistoricalOperation(
-                SystemClock.elapsedRealtime(), type,
+                System.currentTimeMillis(), type,
                 setting != null ? new Setting(setting) : null);
         if (mNextHistoricalOpIdx >= mHistoricalOperations.size()) {
             mHistoricalOperations.add(operation);
@@ -806,7 +806,14 @@ final class SettingsState {
 
                 final int settingCount = settings.size();
                 for (int i = 0; i < settingCount; i++) {
+
                     Setting setting = settings.valueAt(i);
+                    if (setting.isTransient()) {
+                        if (DEBUG_PERSISTENCE) {
+                            Slog.i(LOG_TAG, "[SKIPPED PERSISTING]" + setting.getName());
+                        }
+                        continue;
+                    }
 
                     if (writeSingleSetting(mVersion, serializer, setting.getId(), setting.getName(),
                             setting.getValue(), setting.getDefaultValue(), setting.getPackageName(),
@@ -843,16 +850,20 @@ final class SettingsState {
             } catch (Throwable t) {
                 Slog.wtf(LOG_TAG, "Failed to write settings, restoring backup", t);
                 if (t instanceof IOException) {
-                    // we failed to create a directory, so log the permissions and existence
-                    // state for the settings file and directory
-                    logSettingsDirectoryInformation(destination.getBaseFile());
+                    if (DEBUG) {
+                        // we failed to create a directory, so log the permissions and existence
+                        // state for the settings file and directory
+                        logSettingsDirectoryInformation(destination.getBaseFile());
+                    }
                     if (t.getMessage().contains("Couldn't create directory")) {
                         // attempt to create the directory with Files.createDirectories, which
                         // throws more informative errors than File.mkdirs.
                         Path parentPath = destination.getBaseFile().getParentFile().toPath();
                         try {
                             Files.createDirectories(parentPath);
-                            Slog.i(LOG_TAG, "Successfully created " + parentPath);
+                            if (DEBUG) {
+                                Slog.i(LOG_TAG, "Successfully created " + parentPath);
+                            }
                         } catch (Throwable t2) {
                             Slog.e(LOG_TAG, "Failed to write " + parentPath
                                     + " with Files.writeDirectories", t2);
@@ -1005,7 +1016,9 @@ final class SettingsState {
             in = file.openRead();
         } catch (FileNotFoundException fnfe) {
             Slog.w(LOG_TAG, "No settings state " + mStatePersistFile);
-            logSettingsDirectoryInformation(mStatePersistFile);
+            if (DEBUG) {
+                logSettingsDirectoryInformation(mStatePersistFile);
+            }
             addHistoricalOperationLocked(HISTORICAL_OPERATION_INITIALIZE, null);
             return;
         }
@@ -1016,7 +1029,7 @@ final class SettingsState {
         // Settings file exists but is corrupted. Retry with the fallback file
         final File statePersistFallbackFile = new File(
                 mStatePersistFile.getAbsolutePath() + FALLBACK_FILE_SUFFIX);
-        Slog.i(LOG_TAG, "Failed parsing settings file: " + mStatePersistFile
+        Slog.w(LOG_TAG, "Failed parsing settings file: " + mStatePersistFile
                 + ", retrying with fallback file: " + statePersistFallbackFile);
         try {
             in = new AtomicFile(statePersistFallbackFile).openRead();
@@ -1300,6 +1313,14 @@ final class SettingsState {
             // modification.
             return update(this.defaultValue, false, packageName, null, true, true,
                     /* resetToDefault */ true);
+        }
+
+        public boolean isTransient() {
+            switch (getTypeFromKey(getKey())) {
+                case SETTINGS_TYPE_GLOBAL:
+                    return ArrayUtils.contains(Global.TRANSIENT_SETTINGS, getName());
+            }
+            return false;
         }
 
         public boolean update(String value, boolean setDefault, String packageName, String tag,
