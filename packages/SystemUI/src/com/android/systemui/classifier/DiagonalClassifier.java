@@ -19,6 +19,7 @@ package com.android.systemui.classifier;
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_DIAGONAL_HORIZONTAL_ANGLE_RANGE;
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_DIAGONAL_VERTICAL_ANGLE_RANGE;
 import static com.android.systemui.classifier.Classifier.LEFT_AFFORDANCE;
+import static com.android.systemui.classifier.Classifier.LOCK_ICON;
 import static com.android.systemui.classifier.Classifier.RIGHT_AFFORDANCE;
 
 import android.provider.DeviceConfig;
@@ -71,7 +72,9 @@ class DiagonalClassifier extends FalsingClassifier {
             return Result.passed(0);
         }
 
-        if (interactionType == LEFT_AFFORDANCE || interactionType == RIGHT_AFFORDANCE) {
+        if (interactionType == LEFT_AFFORDANCE
+                || interactionType == RIGHT_AFFORDANCE
+                || interactionType == LOCK_ICON) {
             return Result.passed(0);
         }
 

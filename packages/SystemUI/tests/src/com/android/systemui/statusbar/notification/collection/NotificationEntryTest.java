@@ -229,6 +229,41 @@ public class NotificationEntryTest extends SysuiTestCase {
         assertTrue(entry.isLastMessageFromReply());
     }
 
+    @Test
+    public void notificationDataEntry_testIsLastMessageFromReply_invalidPerson_noCrash() {
+        Person.Builder person = new Person.Builder()
+                .setName("name")
+                .setKey("abc")
+                .setUri("uri")
+                .setBot(true);
+
+        Bundle bundle = new Bundle();
+        // should be Person.class
+        bundle.putParcelable(Notification.EXTRA_MESSAGING_PERSON, new Bundle());
+        Bundle[] messagesBundle = new Bundle[]{new Notification.MessagingStyle.Message(
+                "text", 0, person.build()).toBundle()};
+        bundle.putParcelableArray(Notification.EXTRA_MESSAGES, messagesBundle);
+
+        Notification notification = new Notification.Builder(mContext, "test")
+                .addExtras(bundle)
+                .build();
+
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setPkg("pkg")
+                .setOpPkg("pkg")
+                .setTag("tag")
+                .setNotification(notification)
+                .setUser(mContext.getUser())
+                .setOverrideGroupKey("")
+                .build();
+        entry.setHasSentReply();
+
+        entry.isLastMessageFromReply();
+
+        // no crash, good
+    }
+
+
     private Notification.Action createContextualAction(String title) {
         return new Notification.Action.Builder(
                 Icon.createWithResource(getContext(), android.R.drawable.sym_def_app_icon),

@@ -20,8 +20,8 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -96,7 +96,7 @@ public class WalletScreenControllerTest extends SysuiTestCase {
     @Mock
     UiEventLogger mUiEventLogger;
     @Captor
-    ArgumentCaptor<Intent> mIntentCaptor;
+    ArgumentCaptor<PendingIntent> mIntentCaptor;
     @Captor
     ArgumentCaptor<QuickAccessWalletClient.OnWalletCardsRetrievedCallback> mCallbackCaptor;
     private WalletScreenController mController;
@@ -324,6 +324,7 @@ public class WalletScreenControllerTest extends SysuiTestCase {
         assertEquals(GONE, mWalletView.getCardCarousel().getVisibility());
         assertEquals(VISIBLE, mWalletView.getEmptyStateView().getVisibility());
         assertEquals(GONE, mWalletView.getErrorView().getVisibility());
+        assertTrue(mWalletView.getAppButton().hasOnClickListeners());
     }
 
     @Test
@@ -374,10 +375,12 @@ public class WalletScreenControllerTest extends SysuiTestCase {
 
         mController.onCardClicked(walletCardViewInfo);
 
-        verify(mActivityStarter).startActivity(mIntentCaptor.capture(), eq(true));
+        verify(mActivityStarter).startPendingIntentDismissingKeyguard(mIntentCaptor.capture());
 
-        assertEquals(mWalletIntent.getAction(), mIntentCaptor.getValue().getAction());
-        assertEquals(mWalletIntent.getComponent(), mIntentCaptor.getValue().getComponent());
+        Intent actualIntent = mIntentCaptor.getValue().getIntent();
+
+        assertEquals(mWalletIntent.getAction(), actualIntent.getAction());
+        assertEquals(mWalletIntent.getComponent(), actualIntent.getComponent());
 
         verify(mUiEventLogger, times(1)).log(WalletUiEvent.QAW_CLICK_CARD);
     }

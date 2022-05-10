@@ -36,10 +36,12 @@ import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
-import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -57,10 +59,10 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
 
     private HeadsUpManagerPhone mHeadsUpManager;
 
+    @Mock private HeadsUpManagerLogger mHeadsUpManagerLogger;
     @Mock private NotificationGroupManagerLegacy mGroupManager;
     @Mock private View mNotificationShadeWindowView;
-    @Mock private VisualStabilityManager mVSManager;
-    @Mock private StatusBar mBar;
+    @Mock private VisualStabilityProvider mVSProvider;
     @Mock private StatusBarStateController mStatusBarStateController;
     @Mock private KeyguardBypassController mBypassController;
     @Mock private ConfigurationControllerImpl mConfigurationController;
@@ -69,15 +71,22 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
     private final class TestableHeadsUpManagerPhone extends HeadsUpManagerPhone {
         TestableHeadsUpManagerPhone(
                 Context context,
+                HeadsUpManagerLogger headsUpManagerLogger,
                 NotificationGroupManagerLegacy groupManager,
-                VisualStabilityManager vsManager,
+                VisualStabilityProvider visualStabilityProvider,
                 StatusBarStateController statusBarStateController,
                 KeyguardBypassController keyguardBypassController,
                 ConfigurationController configurationController
         ) {
-            super(context, statusBarStateController, keyguardBypassController,
-                    groupManager, configurationController);
-            setup(vsManager);
+            super(
+                    context,
+                    headsUpManagerLogger,
+                    statusBarStateController,
+                    keyguardBypassController,
+                    groupManager,
+                    visualStabilityProvider,
+                    configurationController
+            );
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
             mAutoDismissNotificationDecay = TEST_AUTO_DISMISS_TIME;
         }
@@ -93,13 +102,26 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                 mDependency.injectMockDependency(AccessibilityManagerWrapper.class);
         when(accessibilityMgr.getRecommendedTimeoutMillis(anyInt(), anyInt()))
                 .thenReturn(TEST_AUTO_DISMISS_TIME);
-        when(mVSManager.isReorderingAllowed()).thenReturn(true);
+        when(mVSProvider.isReorderingAllowed()).thenReturn(true);
         mDependency.injectMockDependency(NotificationShadeWindowController.class);
         mDependency.injectMockDependency(ConfigurationController.class);
-        mHeadsUpManager = new TestableHeadsUpManagerPhone(mContext, mGroupManager, mVSManager,
-                mStatusBarStateController, mBypassController, mConfigurationController);
+        mHeadsUpManager = new TestableHeadsUpManagerPhone(
+                mContext,
+                mHeadsUpManagerLogger,
+                mGroupManager,
+                mVSProvider,
+                mStatusBarStateController,
+                mBypassController,
+                mConfigurationController
+        );
         super.setUp();
+        mHeadsUpManager.mHandler.removeCallbacksAndMessages(null);
         mHeadsUpManager.mHandler = mTestHandler;
+    }
+
+    @After
+    public void tearDown() {
+        mTestHandler.removeCallbacksAndMessages(null);
     }
 
     @Test

@@ -25,11 +25,10 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 import static com.android.server.wm.utils.CommonUtils.runWithShellPermissionIdentity;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import android.app.Activity;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.TaskDescription;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
@@ -57,7 +56,6 @@ import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
 
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -73,49 +71,42 @@ import java.util.function.Predicate;
 @MediumTest
 public class TaskStackChangedListenerTest {
 
-    private static final int VIRTUAL_DISPLAY_WIDTH = 800;
-    private static final int VIRTUAL_DISPLAY_HEIGHT = 600;
-    private static final int VIRTUAL_DISPLAY_DENSITY = 160;
-
     private ITaskStackListener mTaskStackListener;
-    private DisplayManager mDisplayManager;
     private VirtualDisplay mVirtualDisplay;
+    private ImageReader mImageReader;
 
     private static final int WAIT_TIMEOUT_MS = 5000;
     private static final Object sLock = new Object();
 
-    @Before
-    public void setUp() {
-        mDisplayManager = getInstrumentation().getContext().getSystemService(
-                DisplayManager.class);
-        mVirtualDisplay = createVirtualDisplay(
-                getClass().getSimpleName() + "_virtualDisplay",
-                VIRTUAL_DISPLAY_WIDTH, VIRTUAL_DISPLAY_HEIGHT, VIRTUAL_DISPLAY_DENSITY);
-    }
-
     @After
     public void tearDown() throws Exception {
-        ActivityTaskManager.getService().unregisterTaskStackListener(mTaskStackListener);
-        mTaskStackListener = null;
-        mVirtualDisplay.release();
+        if (mTaskStackListener != null) {
+            ActivityTaskManager.getService().unregisterTaskStackListener(mTaskStackListener);
+        }
+        if (mVirtualDisplay != null) {
+            mVirtualDisplay.release();
+            mImageReader.close();
+        }
     }
 
-    private VirtualDisplay createVirtualDisplay(String name, int width, int height, int density) {
-        VirtualDisplay virtualDisplay = null;
-        try (ImageReader reader = ImageReader.newInstance(width, height,
-                /* format= */ PixelFormat.RGBA_8888, /* maxImages= */ 2)) {
-            int flags = VIRTUAL_DISPLAY_FLAG_PRESENTATION | VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
-                    | VIRTUAL_DISPLAY_FLAG_PUBLIC;
-            virtualDisplay = mDisplayManager.createVirtualDisplay(
-                    name, width, height, density, reader.getSurface(), flags);
-            virtualDisplay.setSurface(reader.getSurface());
-        }
-        assertTrue("display id must be unique",
-                virtualDisplay.getDisplay().getDisplayId() != Display.DEFAULT_DISPLAY);
+    private VirtualDisplay createVirtualDisplay() {
+        final int width = 800;
+        final int height = 600;
+        final int density = 160;
+        final DisplayManager displayManager = getInstrumentation().getContext().getSystemService(
+                DisplayManager.class);
+        mImageReader = ImageReader.newInstance(width, height, PixelFormat.RGBA_8888,
+                2 /* maxImages */);
+        final int flags = VIRTUAL_DISPLAY_FLAG_PRESENTATION | VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
+                | VIRTUAL_DISPLAY_FLAG_PUBLIC;
+        final String name = getClass().getSimpleName() + "_VirtualDisplay";
+        mVirtualDisplay = displayManager.createVirtualDisplay(name, width, height, density,
+                mImageReader.getSurface(), flags);
+        mVirtualDisplay.setSurface(mImageReader.getSurface());
         assertNotNull("display must be registered",
-                Arrays.asList(mDisplayManager.getDisplays()).stream().filter(
+                Arrays.stream(displayManager.getDisplays()).filter(
                         d -> d.getName().equals(name)).findAny());
-        return virtualDisplay;
+        return mVirtualDisplay;
     }
 
     @Test
@@ -163,11 +154,10 @@ public class TaskStackChangedListenerTest {
                 mTaskId = taskId;
             }
             @Override
-            public void onTaskDescriptionChanged(int taskId, TaskDescription td)
-                    throws RemoteException {
-                if (mTaskId == taskId && !TextUtils.isEmpty(td.getLabel())) {
-                    params[0] = taskId;
-                    params[1] = td;
+            public void onTaskDescriptionChanged(RunningTaskInfo info) {
+                if (mTaskId == info.taskId && !TextUtils.isEmpty(info.taskDescription.getLabel())) {
+                    params[0] = info.taskId;
+                    params[1] = info.taskDescription;
                     latch.countDown();
                 }
             }
@@ -211,75 +201,71 @@ public class TaskStackChangedListenerTest {
     @Test
     @Presubmit
     public void testTaskChangeCallBacks() throws Exception {
-        final Object[] params = new Object[2];
         final CountDownLatch taskCreatedLaunchLatch = new CountDownLatch(1);
         final CountDownLatch taskMovedToFrontLatch = new CountDownLatch(1);
         final CountDownLatch taskRemovedLatch = new CountDownLatch(1);
         final CountDownLatch taskRemovalStartedLatch = new CountDownLatch(1);
-        final CountDownLatch onDetachedFromWindowLatch = new CountDownLatch(1);
+        final int[] expectedTaskId = { -1 };
+        final int[] receivedTaskId = { -1 };
+        final ComponentName expectedName = new ComponentName(getInstrumentation().getContext(),
+                ActivityTaskChangeCallbacks.class);
         registerTaskStackChangedListener(new TaskStackListener() {
             @Override
-            public void onTaskCreated(int taskId, ComponentName componentName)
-                    throws RemoteException {
-                params[0] = taskId;
-                params[1] = componentName;
-                taskCreatedLaunchLatch.countDown();
+            public void onTaskCreated(int taskId, ComponentName componentName) {
+                receivedTaskId[0] = taskId;
+                if (expectedName.equals(componentName)) {
+                    taskCreatedLaunchLatch.countDown();
+                }
             }
 
             @Override
-            public void onTaskMovedToFront(int taskId) throws RemoteException {
-                params[0] = taskId;
+            public void onTaskMovedToFront(RunningTaskInfo info) {
+                receivedTaskId[0] = info.taskId;
                 taskMovedToFrontLatch.countDown();
             }
 
             @Override
-            public void onTaskRemovalStarted(int taskId) {
-                params[0] = taskId;
-                taskRemovalStartedLatch.countDown();
+            public void onTaskRemovalStarted(RunningTaskInfo info) {
+                if (expectedTaskId[0] == info.taskId) {
+                    taskRemovalStartedLatch.countDown();
+                }
             }
 
             @Override
-            public void onTaskRemoved(int taskId) throws RemoteException {
-                if (taskCreatedLaunchLatch.getCount() == 1) {
-                    // The test activity hasn't started. Ignore the noise from previous test.
-                    return;
+            public void onTaskRemoved(int taskId) {
+                if (expectedTaskId[0] == taskId) {
+                    taskRemovedLatch.countDown();
                 }
-                params[0] = taskId;
-                taskRemovedLatch.countDown();
             }
         });
 
         final ActivityTaskChangeCallbacks activity =
                 (ActivityTaskChangeCallbacks) startTestActivity(ActivityTaskChangeCallbacks.class);
-        activity.setDetachedFromWindowLatch(onDetachedFromWindowLatch);
-        final int id = activity.getTaskId();
+        expectedTaskId[0] = activity.getTaskId();
 
         // Test for onTaskCreated and onTaskMovedToFront
         waitForCallback(taskMovedToFrontLatch);
         assertEquals(0, taskCreatedLaunchLatch.getCount());
-        assertEquals(id, params[0]);
-        ComponentName componentName = (ComponentName) params[1];
-        assertEquals(ActivityTaskChangeCallbacks.class.getName(), componentName.getClassName());
+        assertEquals(expectedTaskId[0], receivedTaskId[0]);
 
+        // Ensure that the window is attached before removal so there will be a detached callback.
+        waitForCallback(activity.mOnAttachedToWindowCountDownLatch);
         // Test for onTaskRemovalStarted.
         assertEquals(1, taskRemovalStartedLatch.getCount());
         assertEquals(1, taskRemovedLatch.getCount());
         activity.finishAndRemoveTask();
         waitForCallback(taskRemovalStartedLatch);
         // onTaskRemovalStarted happens before the activity's window is removed.
-        assertFalse(activity.mOnDetachedFromWindowCalled);
-        assertEquals(id, params[0]);
+        assertEquals(1, activity.mOnDetachedFromWindowCountDownLatch.getCount());
 
         // Test for onTaskRemoved.
         waitForCallback(taskRemovedLatch);
-        assertEquals(id, params[0]);
-        waitForCallback(onDetachedFromWindowLatch);
-        assertTrue(activity.mOnDetachedFromWindowCalled);
+        waitForCallback(activity.mOnDetachedFromWindowCountDownLatch);
     }
 
     @Test
     public void testTaskDisplayChanged() throws Exception {
-        int virtualDisplayId = mVirtualDisplay.getDisplay().getDisplayId();
+        final int virtualDisplayId = createVirtualDisplay().getDisplay().getDisplayId();
 
         // Launch a Activity inside VirtualDisplay
         CountDownLatch displayChangedLatch1 = new CountDownLatch(1);
@@ -498,17 +484,17 @@ public class TaskStackChangedListenerTest {
     }
 
     public static class ActivityTaskChangeCallbacks extends TestActivity {
-        public boolean mOnDetachedFromWindowCalled = false;
-        private CountDownLatch mOnDetachedFromWindowCountDownLatch;
+        final CountDownLatch mOnAttachedToWindowCountDownLatch = new CountDownLatch(1);
+        final CountDownLatch mOnDetachedFromWindowCountDownLatch = new CountDownLatch(1);
+
+        @Override
+        public void onAttachedToWindow() {
+            mOnAttachedToWindowCountDownLatch.countDown();
+        }
 
         @Override
         public void onDetachedFromWindow() {
-            mOnDetachedFromWindowCalled = true;
             mOnDetachedFromWindowCountDownLatch.countDown();
-        }
-
-        void setDetachedFromWindowLatch(CountDownLatch countDownLatch) {
-            mOnDetachedFromWindowCountDownLatch = countDownLatch;
         }
     }
 

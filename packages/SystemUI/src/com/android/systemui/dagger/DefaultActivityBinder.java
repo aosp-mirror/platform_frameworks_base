@@ -19,18 +19,20 @@ package com.android.systemui.dagger;
 import android.app.Activity;
 
 import com.android.systemui.ForegroundServicesDialog;
+import com.android.systemui.hdmi.HdmiCecSetMenuLanguageActivity;
 import com.android.systemui.keyguard.WorkLockActivity;
 import com.android.systemui.people.PeopleSpaceActivity;
 import com.android.systemui.people.widget.LaunchConversationActivity;
-import com.android.systemui.screenrecord.ScreenRecordDialog;
 import com.android.systemui.screenshot.LongScreenshotActivity;
 import com.android.systemui.sensorprivacy.SensorUseStartedActivity;
 import com.android.systemui.sensorprivacy.television.TvUnblockSensorActivity;
 import com.android.systemui.settings.brightness.BrightnessDialog;
 import com.android.systemui.statusbar.tv.notifications.TvNotificationPanelActivity;
 import com.android.systemui.tuner.TunerActivity;
+import com.android.systemui.usb.UsbConfirmActivity;
 import com.android.systemui.usb.UsbDebuggingActivity;
 import com.android.systemui.usb.UsbDebuggingSecondaryUserActivity;
+import com.android.systemui.usb.UsbPermissionActivity;
 import com.android.systemui.user.CreateUserActivity;
 
 import dagger.Binds;
@@ -67,12 +69,6 @@ public abstract class DefaultActivityBinder {
     @ClassKey(BrightnessDialog.class)
     public abstract Activity bindBrightnessDialog(BrightnessDialog activity);
 
-    /** Inject into ScreenRecordDialog */
-    @Binds
-    @IntoMap
-    @ClassKey(ScreenRecordDialog.class)
-    public abstract Activity bindScreenRecordDialog(ScreenRecordDialog activity);
-
     /** Inject into UsbDebuggingActivity. */
     @Binds
     @IntoMap
@@ -85,6 +81,18 @@ public abstract class DefaultActivityBinder {
     @ClassKey(UsbDebuggingSecondaryUserActivity.class)
     public abstract Activity bindUsbDebuggingSecondaryUserActivity(
             UsbDebuggingSecondaryUserActivity activity);
+
+    /** Inject into UsbPermissionActivity. */
+    @Binds
+    @IntoMap
+    @ClassKey(UsbPermissionActivity.class)
+    public abstract Activity bindUsbPermissionActivity(UsbPermissionActivity activity);
+
+    /** Inject into UsbConfirmActivity. */
+    @Binds
+    @IntoMap
+    @ClassKey(UsbConfirmActivity.class)
+    public abstract Activity bindUsbConfirmActivity(UsbConfirmActivity activity);
 
     /** Inject into CreateUserActivity. */
     @Binds
@@ -127,4 +135,11 @@ public abstract class DefaultActivityBinder {
     @IntoMap
     @ClassKey(TvUnblockSensorActivity.class)
     public abstract Activity bindTvUnblockSensorActivity(TvUnblockSensorActivity activity);
+
+    /** Inject into HdmiCecSetMenuLanguageActivity. */
+    @Binds
+    @IntoMap
+    @ClassKey(HdmiCecSetMenuLanguageActivity.class)
+    public abstract Activity bindHdmiCecSetMenuLanguageActivity(
+            HdmiCecSetMenuLanguageActivity activity);
 }

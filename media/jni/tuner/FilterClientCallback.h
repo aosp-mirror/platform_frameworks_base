@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The Android Open Source Project
+ * Copyright 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,20 +17,21 @@
 #ifndef _ANDROID_MEDIA_TV_FILTER_CLIENT_CALLBACK_H_
 #define _ANDROID_MEDIA_TV_FILTER_CLIENT_CALLBACK_H_
 
-using ::android::hardware::tv::tuner::V1_0::DemuxFilterEvent;
-using ::android::hardware::tv::tuner::V1_0::DemuxFilterStatus;
-using ::android::hardware::tv::tuner::V1_1::DemuxFilterEventExt;
+#include <aidl/android/hardware/tv/tuner/DemuxFilterEvent.h>
+#include <aidl/android/hardware/tv/tuner/DemuxFilterStatus.h>
+#include <utils/RefBase.h>
+
+using ::aidl::android::hardware::tv::tuner::DemuxFilterEvent;
+using ::aidl::android::hardware::tv::tuner::DemuxFilterStatus;
 
 using namespace std;
 
 namespace android {
 
 struct FilterClientCallback : public RefBase {
-    virtual void onFilterEvent_1_1(const DemuxFilterEvent& filterEvent,
-            const DemuxFilterEventExt& filterEventExt);
-    virtual void onFilterEvent(const DemuxFilterEvent& filterEvent);
+    virtual void onFilterEvent(const vector<DemuxFilterEvent>& filterEvents);
     virtual void onFilterStatus(const DemuxFilterStatus status);
 };
 }  // namespace android
 
-#endif  // _ANDROID_MEDIA_TV_FILTER_CLIENT_CALLBACK_H_
+#endif // _ANDROID_MEDIA_TV_FILTER_CLIENT_CALLBACK_H_

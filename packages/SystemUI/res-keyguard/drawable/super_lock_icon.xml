@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2021 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+<animated-selector
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--
+        State corresponds with the following icons:
+            state_first => lock icon
+            state_middle => fingerprint icon
+            state_last => unlocked icon
+
+        state_single
+            = true => AOD
+            = false => LS
+    -->
+
+    <item
+        android:id="@+id/locked"
+        android:drawable="@drawable/ic_lock"
+        android:state_first="true"
+        android:state_single="false"/>
+
+    <item
+        android:id="@+id/locked_fp"
+        android:state_middle="true"
+        android:state_single="false"
+        android:drawable="@drawable/ic_kg_fingerprint" />
+
+    <item
+        android:id="@+id/unlocked"
+        android:state_last="true"
+        android:state_single="false"
+        android:drawable="@drawable/ic_unlocked" />
+
+    <item
+        android:id="@+id/locked_aod"
+        android:state_first="true"
+        android:state_single="true"
+        android:drawable="@drawable/ic_lock_aod" />
+    <item
+        android:id="@+id/unlocked_aod"
+        android:state_last="true"
+        android:state_single="true"
+        android:drawable="@drawable/ic_unlocked_aod" />
+
+    <item
+        android:id="@+id/no_icon"
+        android:drawable="@color/transparent" />
+
+    <transition
+        android:fromId="@id/locked"
+        android:toId="@id/unlocked"
+        android:drawable="@drawable/lock_to_unlock" />
+
+    <transition
+        android:fromId="@id/locked_fp"
+        android:toId="@id/unlocked"
+        android:drawable="@drawable/fp_to_unlock" />
+
+    <transition
+        android:fromId="@id/unlocked"
+        android:toId="@id/locked_fp"
+        android:drawable="@drawable/unlock_to_fp" />
+
+    <transition
+        android:fromId="@id/locked_aod"
+        android:toId="@id/locked"
+        android:drawable="@drawable/lock_aod_to_ls" />
+
+    <transition
+        android:fromId="@id/locked"
+        android:toId="@id/locked_aod"
+        android:drawable="@drawable/lock_ls_to_aod" />
+
+    <transition
+        android:fromId="@id/unlocked_aod"
+        android:toId="@id/unlocked"
+        android:drawable="@drawable/unlocked_aod_to_ls" />
+
+    <transition
+        android:fromId="@id/unlocked"
+        android:toId="@id/unlocked_aod"
+        android:drawable="@drawable/unlocked_ls_to_aod" />
+
+    <transition
+        android:fromId="@id/unlocked"
+        android:toId="@id/locked_aod"
+        android:drawable="@drawable/unlocked_to_aod_lock" />
+</animated-selector>
