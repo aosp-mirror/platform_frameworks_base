@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wrong-tag xmlns:android="http://schemas.android.com/apk/res/android"
+           android:gameSessionService="com.game.service.provider.GameSessionService"/>

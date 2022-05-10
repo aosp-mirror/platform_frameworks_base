@@ -15,6 +15,7 @@
  */
 package com.android.server.am;
 
+import static android.content.ContentProvider.isAuthorityRedirectedForCloneProfile;
 import static android.os.Process.PROC_CHAR;
 import static android.os.Process.PROC_OUT_LONG;
 import static android.os.Process.PROC_PARENS;
@@ -46,6 +47,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PathPermission;
 import android.content.pm.ProviderInfo;
+import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
@@ -72,6 +74,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.RescueParty;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.FileDescriptor;
@@ -109,6 +112,13 @@ public class ContentProviderHelper {
     ContentProviderHolder getContentProvider(IApplicationThread caller, String callingPackage,
             String name, int userId, boolean stable) {
         mService.enforceNotIsolatedCaller("getContentProvider");
+        if (Process.isSdkSandboxUid(Binder.getCallingUid())) {
+            // TODO(b/226318628): for sdk sandbox processes only allow accessing CPs registered by
+            //  the WebView apk.
+            Slog.w(TAG, "Sdk sandbox process " + Binder.getCallingUid()
+                    + " is accessing content provider " + name
+                    + ". This access will most likely be blocked in the future");
+        }
         if (caller == null) {
             String msg = "null IApplicationThread when getting content provider " + name;
             Slog.w(TAG, msg);
@@ -177,12 +187,22 @@ public class ContentProviderHelper {
                 cpr = mProviderMap.getProviderByName(name, UserHandle.USER_SYSTEM);
                 if (cpr != null) {
                     cpi = cpr.info;
+
                     if (mService.isSingleton(
                             cpi.processName, cpi.applicationInfo, cpi.name, cpi.flags)
                                 && mService.isValidSingletonCall(
                                         r == null ? callingUid : r.uid, cpi.applicationInfo.uid)) {
                         userId = UserHandle.USER_SYSTEM;
                         checkCrossUser = false;
+                    } else if (isAuthorityRedirectedForCloneProfile(name)) {
+                        UserManagerInternal umInternal = LocalServices.getService(
+                                UserManagerInternal.class);
+                        UserInfo userInfo = umInternal.getUserInfo(userId);
+
+                        if (userInfo != null && userInfo.isCloneProfile()) {
+                            userId = umInternal.getProfileParentId(userId);
+                            checkCrossUser = false;
+                        }
                     } else {
                         cpr = null;
                         cpi = null;
@@ -352,7 +372,13 @@ public class ContentProviderHelper {
                 checkTime(startTime, "getContentProviderImpl: before getProviderByClass");
                 cpr = mProviderMap.getProviderByClass(comp, userId);
                 checkTime(startTime, "getContentProviderImpl: after getProviderByClass");
-                boolean firstClass = cpr == null;
+
+                // The old stable connection's client should be killed during proc cleaning up,
+                // so do not re-use the old ContentProviderRecord, otherwise the new clients
+                // could get killed unexpectedly. Meanwhile, we should retrieve the latest
+                // application info from package manager instead of reusing the info from
+                // the dying one, as the package could have been updated.
+                boolean firstClass = cpr == null || (dyingProc == cpr.proc && dyingProc != null);
                 if (firstClass) {
                     final long ident = Binder.clearCallingIdentity();
 
@@ -381,13 +407,6 @@ public class ContentProviderHelper {
                     } finally {
                         Binder.restoreCallingIdentity(ident);
                     }
-                } else if (dyingProc == cpr.proc && dyingProc != null) {
-                    // The old stable connection's client should be killed during proc cleaning up,
-                    // so do not re-use the old ContentProviderRecord, otherwise the new clients
-                    // could get killed unexpectedly.
-                    cpr = new ContentProviderRecord(cpr);
-                    // This is sort of "firstClass"
-                    firstClass = true;
                 }
 
                 checkTime(startTime, "getContentProviderImpl: now have ContentProviderRecord");
@@ -618,7 +637,7 @@ public class ContentProviderHelper {
             return;
         }
 
-        mService.enforceNotIsolatedCaller("publishContentProviders");
+        mService.enforceNotIsolatedOrSdkSandboxCaller("publishContentProviders");
         synchronized (mService) {
             final ProcessRecord r = mService.getRecordForAppLOSP(caller);
             if (DEBUG_MU) {
@@ -705,7 +724,7 @@ public class ContentProviderHelper {
      * Drop a content provider from a ProcessRecord's bookkeeping
      */
     void removeContentProvider(IBinder connection, boolean stable) {
-        mService.enforceNotIsolatedCaller("removeContentProvider");
+        mService.enforceNotIsolatedOrSdkSandboxCaller("removeContentProvider");
         final long ident = Binder.clearCallingIdentity();
         try {
             ContentProviderConnection conn;
@@ -1027,10 +1046,21 @@ public class ContentProviderHelper {
      * at the given authority and user.
      */
     String checkContentProviderAccess(String authority, int userId) {
+        boolean checkUser = true;
         if (userId == UserHandle.USER_ALL) {
             mService.mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, TAG);
             userId = UserHandle.getCallingUserId();
+        }
+
+        if (isAuthorityRedirectedForCloneProfile(authority)) {
+            UserManagerInternal umInternal = LocalServices.getService(UserManagerInternal.class);
+            UserInfo userInfo = umInternal.getUserInfo(userId);
+
+            if (userInfo != null && userInfo.isCloneProfile()) {
+                userId = umInternal.getProfileParentId(userId);
+                checkUser = false;
+            }
         }
 
         ProviderInfo cpi = null;
@@ -1061,7 +1091,7 @@ public class ContentProviderHelper {
         }
 
         return checkContentProviderPermission(cpi, callingPid, Binder.getCallingUid(),
-                userId, true, appName);
+                userId, checkUser, appName);
     }
 
     int checkContentProviderUriPermission(Uri uri, int userId, int callingUid, int modeFlags) {

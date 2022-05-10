@@ -16,24 +16,24 @@
 
 #define LOG_TAG "VerityUtils"
 
+#include <android-base/unique_fd.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <linux/fs.h>
+#include <linux/fsverity.h>
+#include <linux/stat.h>
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedPrimitiveArray.h>
 #include <nativehelper/ScopedUtfChars.h>
-#include <utils/Log.h>
-#include "jni.h"
-
-#include <errno.h>
-#include <fcntl.h>
-#include <linux/fsverity.h>
-#include <linux/stat.h>
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-
-#include <android-base/unique_fd.h>
+#include <utils/Log.h>
 
 #include <type_traits>
+
+#include "jni.h"
 
 namespace android {
 
@@ -73,18 +73,31 @@ int enableFsverity(JNIEnv *env, jobject /* clazz */, jstring filePath, jbyteArra
 int statxForFsverity(JNIEnv *env, jobject /* clazz */, jstring filePath) {
     ScopedUtfChars path(env, filePath);
 
+    // Call statx and check STATX_ATTR_VERITY.
     struct statx out = {};
     if (statx(AT_FDCWD, path.c_str(), 0 /* flags */, STATX_ALL, &out) != 0) {
         return -errno;
     }
 
-    // Validity check.
-    if ((out.stx_attributes_mask & STATX_ATTR_VERITY) == 0) {
-        ALOGE("Unexpected, STATX_ATTR_VERITY not supported by kernel");
-        return -ENOSYS;
+    if (out.stx_attributes_mask & STATX_ATTR_VERITY) {
+        return (out.stx_attributes & STATX_ATTR_VERITY) != 0;
     }
 
-    return (out.stx_attributes & STATX_ATTR_VERITY) != 0;
+    // STATX_ATTR_VERITY is not supported for the file path.
+    // In this case, call ioctl(FS_IOC_GETFLAGS) and check FS_VERITY_FL.
+    ::android::base::unique_fd rfd(open(path.c_str(), O_RDONLY | O_CLOEXEC));
+    if (rfd.get() < 0) {
+        ALOGE("open failed at %s", path.c_str());
+        return -errno;
+    }
+
+    unsigned int flags;
+    if (ioctl(rfd.get(), FS_IOC_GETFLAGS, &flags) < 0) {
+        ALOGE("ioctl(FS_IOC_GETFLAGS) failed at %s", path.c_str());
+        return -errno;
+    }
+
+    return (flags & FS_VERITY_FL) != 0;
 }
 
 int measureFsverity(JNIEnv *env, jobject /* clazz */, jstring filePath, jbyteArray digest) {

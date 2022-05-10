@@ -1,4 +1,3 @@
 third_party {
-  # would be NOTICE save for libs/usb/tests/accessorytest/f_accessory.h
-  license_type: RESTRICTED
+  license_type: RECIPROCAL
 }

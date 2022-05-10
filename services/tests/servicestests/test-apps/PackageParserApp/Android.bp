@@ -74,3 +74,17 @@ android_test_helper_app {
     resource_dirs: ["res"],
     manifest: "AndroidManifestApp4.xml",
 }
+
+android_test_helper_app {
+    name: "PackageParserTestApp5",
+    sdk_version: "current",
+    srcs: ["**/*.java"],
+    dex_preopt: {
+        enabled: false,
+    },
+    optimize: {
+        enabled: false,
+    },
+    resource_dirs: ["res"],
+    manifest: "AndroidManifestApp5.xml",
+}

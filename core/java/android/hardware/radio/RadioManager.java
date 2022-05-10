@@ -436,7 +436,8 @@ public class RadioManager {
             mNumAudioSources = in.readInt();
             mIsInitializationRequired = in.readInt() == 1;
             mIsCaptureSupported = in.readInt() == 1;
-            Parcelable[] tmp = in.readParcelableArray(BandDescriptor.class.getClassLoader());
+            Parcelable[] tmp = in.readParcelableArray(BandDescriptor.class.getClassLoader(),
+                    BandDescriptor.class);
             mBands = new BandDescriptor[tmp.length];
             for (int i = 0; i < tmp.length; i++) {
                 mBands[i] = (BandDescriptor) tmp[i];

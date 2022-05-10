@@ -33,7 +33,6 @@ import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.IAudioService;
 import android.media.IVolumeController;
-import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
 import android.media.RoutingSessionInfo;
 import android.media.VolumePolicy;
@@ -47,15 +46,14 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.VibrationEffect;
-import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.notification.Condition;
 import android.service.notification.ZenModeConfig;
-import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.CaptioningManager;
 
 import androidx.lifecycle.Observer;
 
@@ -68,17 +66,16 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.qs.tiles.DndTile;
+import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.util.RingerModeLiveData;
 import com.android.systemui.util.RingerModeTracker;
 import com.android.systemui.util.concurrency.ThreadFactory;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.inject.Inject;
@@ -132,10 +129,11 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     private final Receiver mReceiver = new Receiver();
     private final RingerModeObservers mRingerModeObservers;
     private final MediaSessions mMediaSessions;
+    private final CaptioningManager mCaptioningManager;
     protected C mCallbacks = new C();
     private final State mState = new State();
     protected final MediaSessionsCallbacks mMediaSessionsCallbacksW;
-    private final Optional<Vibrator> mVibrator;
+    private final VibratorHelper mVibrator;
     private final boolean mHasVibrator;
     private boolean mShowA11yStream;
     private boolean mShowVolumeDialog;
@@ -173,11 +171,12 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
             ThreadFactory theadFactory,
             AudioManager audioManager,
             NotificationManager notificationManager,
-            Optional<Vibrator> optionalVibrator,
+            VibratorHelper vibrator,
             IAudioService iAudioService,
             AccessibilityManager accessibilityManager,
             PackageManager packageManager,
-            WakefulnessLifecycle wakefulnessLifecycle) {
+            WakefulnessLifecycle wakefulnessLifecycle,
+            CaptioningManager captioningManager) {
         mContext = context.getApplicationContext();
         mPackageManager = packageManager;
         mWakefulnessLifecycle = wakefulnessLifecycle;
@@ -199,9 +198,10 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         mBroadcastDispatcher = broadcastDispatcher;
         mObserver.init();
         mReceiver.init();
-        mVibrator = optionalVibrator;
-        mHasVibrator = mVibrator.isPresent() && mVibrator.get().hasVibrator();
+        mVibrator = vibrator;
+        mHasVibrator = mVibrator.hasVibrator();
         mAudioService = iAudioService;
+        mCaptioningManager = captioningManager;
 
         boolean accessibilityVolumeStreamActive = accessibilityManager
                 .isAccessibilityVolumeStreamActive();
@@ -270,7 +270,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         return new MediaSessions(context, looper, callbacks);
     }
 
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println(VolumeDialogControllerImpl.class.getSimpleName() + " state:");
         pw.print("  mDestroyed: "); pw.println(mDestroyed);
         pw.print("  mVolumePolicy: "); pw.println(mVolumePolicy);
@@ -309,20 +309,11 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     }
 
     public boolean areCaptionsEnabled() {
-        int currentValue = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.ODI_CAPTIONS_ENABLED, 0, UserHandle.USER_CURRENT);
-        return currentValue == 1;
+        return mCaptioningManager.isSystemAudioCaptioningEnabled();
     }
 
     public void setCaptionsEnabled(boolean isEnabled) {
-        Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                Settings.Secure.ODI_CAPTIONS_ENABLED, isEnabled ? 1 : 0, UserHandle.USER_CURRENT);
-    }
-
-    @Override
-    public boolean isCaptionStreamOptedOut() {
-        // TODO(b/129768185): Removing secure setting, to be replaced by sound event listener
-        return false;
+        mCaptioningManager.setSystemAudioCaptioningEnabled(isEnabled);
     }
 
     public void getCaptionsComponentState(boolean fromTooltip) {
@@ -384,7 +375,8 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     private void playTouchFeedback() {
         if (System.currentTimeMillis() - mLastToggledRingerOn < TOUCH_FEEDBACK_TIMEOUT_MS) {
             try {
-                mAudioService.playSoundEffect(AudioManager.FX_KEYPRESS_STANDARD);
+                mAudioService.playSoundEffect(AudioManager.FX_KEYPRESS_STANDARD,
+                        UserHandle.USER_CURRENT);
             } catch (RemoteException e) {
                 // ignore
             }
@@ -392,8 +384,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     }
 
     public void vibrate(VibrationEffect effect) {
-        mVibrator.ifPresent(
-                vibrator -> vibrator.vibrate(effect, SONIFICIATION_VIBRATION_ATTRIBUTES));
+        mVibrator.vibrate(effect, SONIFICIATION_VIBRATION_ATTRIBUTES);
     }
 
     public boolean hasVibrator() {
@@ -401,7 +392,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     }
 
     private void onNotifyVisibleW(boolean visible) {
-        if (mDestroyed) return; 
+        if (mDestroyed) return;
         mAudio.notifyVolumeControllerVisible(mVolumeController, visible);
         if (!visible) {
             if (updateActiveStreamW(-1)) {
@@ -425,34 +416,8 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     }
 
     private void onGetCaptionsComponentStateW(boolean fromTooltip) {
-        try {
-            String componentNameString = mContext.getString(
-                    com.android.internal.R.string.config_defaultSystemCaptionsService);
-            if (TextUtils.isEmpty(componentNameString)) {
-                // component doesn't exist
-                mCallbacks.onCaptionComponentStateChanged(false, fromTooltip);
-                return;
-            }
-
-            if (D.BUG) {
-                Log.i(TAG, String.format(
-                        "isCaptionsServiceEnabled componentNameString=%s", componentNameString));
-            }
-
-            ComponentName componentName = ComponentName.unflattenFromString(componentNameString);
-            if (componentName == null) {
-                mCallbacks.onCaptionComponentStateChanged(false, fromTooltip);
-                return;
-            }
-
-            mCallbacks.onCaptionComponentStateChanged(
-                    mPackageManager.getComponentEnabledSetting(componentName)
-                    == PackageManager.COMPONENT_ENABLED_STATE_ENABLED, fromTooltip);
-        } catch (Exception ex) {
-            Log.e(TAG,
-                    "isCaptionsServiceEnabled failed to check for captions component", ex);
-            mCallbacks.onCaptionComponentStateChanged(false, fromTooltip);
-        }
+        mCallbacks.onCaptionComponentStateChanged(
+                mCaptioningManager.isSystemAudioCaptioningUiEnabled(), fromTooltip);
     }
 
     private void onAccessibilityModeChanged(Boolean showA11yStream) {
@@ -462,11 +427,15 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     private boolean checkRoutedToBluetoothW(int stream) {
         boolean changed = false;
         if (stream == AudioManager.STREAM_MUSIC) {
+            // Note: Here we didn't use DEVICE_OUT_BLE_SPEAKER and DEVICE_OUT_BLE_BROADCAST
+            //       Since their values overlap with DEVICE_OUT_EARPIECE and DEVICE_OUT_SPEAKER.
+            //       Anyway, we can check BLE devices by using just DEVICE_OUT_BLE_HEADSET.
             final boolean routedToBluetooth =
                     (mAudio.getDevicesForStream(AudioManager.STREAM_MUSIC) &
                             (AudioManager.DEVICE_OUT_BLUETOOTH_A2DP |
                             AudioManager.DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES |
-                            AudioManager.DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER)) != 0;
+                            AudioManager.DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER |
+                            AudioManager.DEVICE_OUT_BLE_HEADSET)) != 0;
             changed |= updateStreamRoutedToBluetoothW(stream, routedToBluetooth);
         }
         return changed;

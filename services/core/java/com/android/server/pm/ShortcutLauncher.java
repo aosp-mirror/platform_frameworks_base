@@ -420,4 +420,14 @@ class ShortcutLauncher extends ShortcutPackageItem {
     ArraySet<String> getAllPinnedShortcutsForTest(String packageName, int packageUserId) {
         return new ArraySet<>(mPinnedShortcuts.get(PackageWithUser.of(packageUserId, packageName)));
     }
+
+    @Override
+    protected File getShortcutPackageItemFile() {
+        final File path = new File(mShortcutUser.mService.injectUserDataPath(
+                mShortcutUser.getUserId()), ShortcutUser.DIRECTORY_LUANCHERS);
+        // Package user id and owner id can have different values for ShortcutLaunchers. Adding
+        // user Id to the file name to create a unique path. Owner id is used in the root path.
+        final String fileName = getPackageName() + getPackageUserId() + ".xml";
+        return new File(path, fileName);
+    }
 }

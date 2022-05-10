@@ -99,6 +99,12 @@ public class MidiFramer extends MidiReceiver {
                 }
             } else { // data byte
                 if (!mInSysEx) {
+                    // Hack to avoid crashing if we start parsing in the middle
+                    // of a data stream
+                    if (mNeeded <= 0) {
+                        break;
+                    }
+
                     mBuffer[mCount++] = currentByte;
                     if (--mNeeded == 0) {
                         if (mRunningStatus != 0) {

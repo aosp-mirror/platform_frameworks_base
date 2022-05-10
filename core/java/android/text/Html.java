@@ -858,9 +858,17 @@ class HtmlToSpannedConverter implements ContentHandler {
         } else if (tag.equalsIgnoreCase("span")) {
             endCssStyle(mSpannableStringBuilder);
         } else if (tag.equalsIgnoreCase("strong")) {
-            end(mSpannableStringBuilder, Bold.class, new StyleSpan(Typeface.BOLD));
+            Application application = ActivityThread.currentApplication();
+            int fontWeightAdjustment =
+                    application.getResources().getConfiguration().fontWeightAdjustment;
+            end(mSpannableStringBuilder, Bold.class, new StyleSpan(Typeface.BOLD,
+                    fontWeightAdjustment));
         } else if (tag.equalsIgnoreCase("b")) {
-            end(mSpannableStringBuilder, Bold.class, new StyleSpan(Typeface.BOLD));
+            Application application = ActivityThread.currentApplication();
+            int fontWeightAdjustment =
+                    application.getResources().getConfiguration().fontWeightAdjustment;
+            end(mSpannableStringBuilder, Bold.class, new StyleSpan(Typeface.BOLD,
+                    fontWeightAdjustment));
         } else if (tag.equalsIgnoreCase("em")) {
             end(mSpannableStringBuilder, Italic.class, new StyleSpan(Typeface.ITALIC));
         } else if (tag.equalsIgnoreCase("cite")) {
@@ -1028,8 +1036,11 @@ class HtmlToSpannedConverter implements ContentHandler {
         // Their ranges should not include the newlines at the end
         Heading h = getLast(text, Heading.class);
         if (h != null) {
+            Application application = ActivityThread.currentApplication();
+            int fontWeightAdjustment =
+                    application.getResources().getConfiguration().fontWeightAdjustment;
             setSpanFromMark(text, h, new RelativeSizeSpan(HEADING_SIZES[h.mLevel]),
-                    new StyleSpan(Typeface.BOLD));
+                    new StyleSpan(Typeface.BOLD, fontWeightAdjustment));
         }
 
         endBlockElement(text);

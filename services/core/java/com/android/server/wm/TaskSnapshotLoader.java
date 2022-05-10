@@ -20,7 +20,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.app.ActivityManager;
-import android.window.TaskSnapshot;
 import android.content.ComponentName;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -30,6 +29,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
 import android.util.Slog;
+import android.window.TaskSnapshot;
 
 import com.android.server.wm.nano.WindowManagerProtos.TaskSnapshotProto;
 
@@ -196,6 +196,8 @@ class TaskSnapshotLoader {
             return new TaskSnapshot(proto.id, topActivityComponent, buffer,
                     hwBitmap.getColorSpace(), proto.orientation, proto.rotation, taskSize,
                     new Rect(proto.insetLeft, proto.insetTop, proto.insetRight, proto.insetBottom),
+                    new Rect(proto.letterboxInsetLeft, proto.letterboxInsetTop,
+                            proto.letterboxInsetRight, proto.letterboxInsetBottom),
                     loadLowResolutionBitmap, proto.isRealSnapshot, proto.windowingMode,
                     proto.appearance, proto.isTranslucent, false /* hasImeSurface */);
         } catch (IOException e) {

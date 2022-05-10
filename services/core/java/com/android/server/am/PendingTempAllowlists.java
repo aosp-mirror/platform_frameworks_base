@@ -31,29 +31,38 @@ final class PendingTempAllowlists {
     }
 
     void put(int uid, ActivityManagerService.PendingTempAllowlist value) {
-        mPendingTempAllowlist.put(uid, value);
-        mService.mAtmInternal.onUidAddedToPendingTempAllowlist(uid, value.tag);
+        synchronized (mPendingTempAllowlist) {
+            mPendingTempAllowlist.put(uid, value);
+        }
     }
 
     void removeAt(int index) {
-        final int uid = mPendingTempAllowlist.keyAt(index);
-        mPendingTempAllowlist.removeAt(index);
-        mService.mAtmInternal.onUidRemovedFromPendingTempAllowlist(uid);
+        synchronized (mPendingTempAllowlist) {
+            mPendingTempAllowlist.removeAt(index);
+        }
     }
 
     ActivityManagerService.PendingTempAllowlist get(int uid) {
-        return mPendingTempAllowlist.get(uid);
+        synchronized (mPendingTempAllowlist) {
+            return mPendingTempAllowlist.get(uid);
+        }
     }
 
     int size() {
-        return mPendingTempAllowlist.size();
+        synchronized (mPendingTempAllowlist) {
+            return mPendingTempAllowlist.size();
+        }
     }
 
     ActivityManagerService.PendingTempAllowlist valueAt(int index) {
-        return mPendingTempAllowlist.valueAt(index);
+        synchronized (mPendingTempAllowlist) {
+            return mPendingTempAllowlist.valueAt(index);
+        }
     }
 
     int indexOfKey(int key) {
-        return mPendingTempAllowlist.indexOfKey(key);
+        synchronized (mPendingTempAllowlist) {
+            return mPendingTempAllowlist.indexOfKey(key);
+        }
     }
 }
