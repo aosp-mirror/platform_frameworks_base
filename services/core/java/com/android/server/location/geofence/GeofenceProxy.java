@@ -67,7 +67,7 @@ public final class GeofenceProxy implements ServiceListener<BoundServiceInfo> {
         mGpsGeofenceHardware = Objects.requireNonNull(gpsGeofence);
         mServiceWatcher = ServiceWatcher.create(context,
                 "GeofenceProxy",
-                new CurrentUserServiceSupplier(context, SERVICE_ACTION,
+                CurrentUserServiceSupplier.createFromConfig(context, SERVICE_ACTION,
                         com.android.internal.R.bool.config_enableGeofenceOverlay,
                         com.android.internal.R.string.config_geofenceProviderPackageName),
                 this);

@@ -17,11 +17,10 @@
 package com.android.server.hdmi;
 
 import android.hardware.hdmi.HdmiControlManager;
-import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.util.Slog;
 
-import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
+import com.android.internal.annotations.VisibleForTesting;
 
 /**
  * Feature action for routing control. Exchanges routing-related commands with other devices
@@ -41,22 +40,11 @@ final class RoutingControlAction extends HdmiCecFeatureAction {
 
     // State in which we wait for <Routing Information> to arrive. If timed out, we use the
     // latest routing path to set the new active source.
-    private static final int STATE_WAIT_FOR_ROUTING_INFORMATION = 1;
-
-    // State in which we wait for <Report Power Status> in response to <Give Device Power Status>
-    // we have sent. If the response tells us the device power is on, we send <Set Stream Path>
-    // to make it the active source. Otherwise we do not send <Set Stream Path>, and possibly
-    // just show the blank screen.
-    private static final int STATE_WAIT_FOR_REPORT_POWER_STATUS = 2;
+    @VisibleForTesting
+    static final int STATE_WAIT_FOR_ROUTING_INFORMATION = 1;
 
     // Time out in millseconds used for <Routing Information>
     private static final int TIMEOUT_ROUTING_INFORMATION_MS = 1000;
-
-    // Time out in milliseconds used for <Report Power Status>
-    private static final int TIMEOUT_REPORT_POWER_STATUS_MS = 1000;
-
-    // true if <Give Power Status> should be sent once the new active routing path is determined.
-    private final boolean mQueryDevicePowerStatus;
 
     // If set to true, call {@link HdmiControlService#invokeInputChangeListener()} when
     // the routing control/active source change happens. The listener should be called if
@@ -67,11 +55,9 @@ final class RoutingControlAction extends HdmiCecFeatureAction {
     // The latest routing path. Updated by each <Routing Information> from CEC switches.
     private int mCurrentRoutingPath;
 
-    RoutingControlAction(HdmiCecLocalDevice localDevice, int path, boolean queryDevicePowerStatus,
-            IHdmiControlCallback callback) {
+    RoutingControlAction(HdmiCecLocalDevice localDevice, int path, IHdmiControlCallback callback) {
         super(localDevice, callback);
         mCurrentRoutingPath = path;
-        mQueryDevicePowerStatus = queryDevicePowerStatus;
         // Callback is non-null when routing control action is brought up by binder API. Use
         // this as an indicator for the input change notification. These API calls will get
         // the result through this callback, not through notification. Any other events that
@@ -104,37 +90,14 @@ final class RoutingControlAction extends HdmiCecFeatureAction {
             removeActionExcept(RoutingControlAction.class, this);
             addTimer(mState, TIMEOUT_ROUTING_INFORMATION_MS);
             return true;
-        } else if (mState == STATE_WAIT_FOR_REPORT_POWER_STATUS
-                  && opcode == Constants.MESSAGE_REPORT_POWER_STATUS) {
-            handleReportPowerStatus(cmd.getParams()[0]);
-            return true;
         }
         return false;
-    }
-
-    private void handleReportPowerStatus(int devicePowerStatus) {
-        if (isPowerOnOrTransient(getTvPowerStatus())) {
-            updateActiveInput();
-            if (isPowerOnOrTransient(devicePowerStatus)) {
-                sendSetStreamPath();
-            }
-        }
-        finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
     }
 
     private void updateActiveInput() {
         HdmiCecLocalDeviceTv tv = tv();
         tv.setPrevPortId(tv.getActivePortId());
         tv.updateActiveInput(mCurrentRoutingPath, mNotifyInputChange);
-    }
-
-    private int getTvPowerStatus() {
-        return tv().getPowerStatus();
-    }
-
-    private static boolean isPowerOnOrTransient(int status) {
-        return status == HdmiControlManager.POWER_STATUS_ON
-                || status == HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON;
     }
 
     private void sendSetStreamPath() {
@@ -150,46 +113,13 @@ final class RoutingControlAction extends HdmiCecFeatureAction {
         }
         switch (timeoutState) {
             case STATE_WAIT_FOR_ROUTING_INFORMATION:
-                HdmiDeviceInfo device =
-                        localDevice().mService.getHdmiCecNetwork().getDeviceInfoByPath(
-                                mCurrentRoutingPath);
-                if (device != null && mQueryDevicePowerStatus) {
-                    int deviceLogicalAddress = device.getLogicalAddress();
-                    queryDevicePowerStatus(deviceLogicalAddress, new SendMessageCallback() {
-                        @Override
-                        public void onSendCompleted(int error) {
-                            handlDevicePowerStatusAckResult(
-                                    error == HdmiControlManager.RESULT_SUCCESS);
-                        }
-                    });
-                } else {
-                    updateActiveInput();
-                    finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
-                }
-                return;
-            case STATE_WAIT_FOR_REPORT_POWER_STATUS:
-                if (isPowerOnOrTransient(getTvPowerStatus())) {
-                    updateActiveInput();
-                    sendSetStreamPath();
-                }
+                updateActiveInput();
+                sendSetStreamPath();
                 finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
                 return;
-        }
-    }
-
-    private void queryDevicePowerStatus(int address, SendMessageCallback callback) {
-        sendCommand(HdmiCecMessageBuilder.buildGiveDevicePowerStatus(getSourceAddress(), address),
-                callback);
-    }
-
-    private void handlDevicePowerStatusAckResult(boolean acked) {
-        if (acked) {
-            mState = STATE_WAIT_FOR_REPORT_POWER_STATUS;
-            addTimer(mState, TIMEOUT_REPORT_POWER_STATUS_MS);
-        } else {
-            updateActiveInput();
-            sendSetStreamPath();
-            finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
+            default:
+                Slog.e("CEC", "Invalid timeoutState (" + timeoutState + ").");
+                return;
         }
     }
 }

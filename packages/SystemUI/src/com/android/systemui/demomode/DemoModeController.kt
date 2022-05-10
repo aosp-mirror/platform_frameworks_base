@@ -29,7 +29,6 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.policy.CallbackController
 import com.android.systemui.util.Assert
 import com.android.systemui.util.settings.GlobalSettings
-import java.io.FileDescriptor
 import java.io.PrintWriter
 
 /**
@@ -81,7 +80,7 @@ class DemoModeController constructor(
         val demoFilter = IntentFilter()
         demoFilter.addAction(ACTION_DEMO)
         context.registerReceiverAsUser(broadcastReceiver, UserHandle.ALL, demoFilter,
-                android.Manifest.permission.DUMP, null)
+                android.Manifest.permission.DUMP, null, Context.RECEIVER_EXPORTED)
     }
 
     override fun addCallback(listener: DemoMode) {
@@ -176,7 +175,7 @@ class DemoModeController constructor(
         }
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("DemoModeController state -")
         pw.println("  isInDemoMode=$isInDemoMode")
         pw.println("  isDemoModeAllowed=$isAvailable")

@@ -41,7 +41,7 @@ public class PowerStatusMonitorAction extends HdmiCecFeatureAction {
     private static final int INVALID_POWER_STATUS = POWER_STATUS_UNKNOWN - 1;
 
     // Monitoring interval (60s)
-    private static final int MONITORING_INTERNAL_MS = 60000;
+    private static final int MONITORING_INTERVAL_MS = 60000;
 
     // Timeout once sending <Give Device Power Status>
     private static final int REPORT_POWER_STATUS_TIMEOUT_MS = 5000;
@@ -142,7 +142,7 @@ public class PowerStatusMonitorAction extends HdmiCecFeatureAction {
         mState = STATE_WAIT_FOR_REPORT_POWER_STATUS;
 
         // Add both timers, monitoring and timeout.
-        addTimer(STATE_WAIT_FOR_NEXT_MONITORING, MONITORING_INTERNAL_MS);
+        addTimer(STATE_WAIT_FOR_NEXT_MONITORING, MONITORING_INTERVAL_MS);
         addTimer(STATE_WAIT_FOR_REPORT_POWER_STATUS, REPORT_POWER_STATUS_TIMEOUT_MS);
     }
 

@@ -33,6 +33,7 @@ import static android.appwidget.AppWidgetManager.OPTION_APPWIDGET_SIZES;
 import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 import static android.util.TypedValue.COMPLEX_UNIT_PX;
 
+import static com.android.launcher3.icons.FastBitmapDrawable.getDisabledColorFilter;
 import static com.android.systemui.people.PeopleSpaceUtils.STARRED_CONTACT;
 import static com.android.systemui.people.PeopleSpaceUtils.VALID_CONTACT;
 import static com.android.systemui.people.PeopleSpaceUtils.convertDrawableToBitmap;
@@ -45,8 +46,6 @@ import android.app.people.PeopleSpaceTile;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
 import android.graphics.ImageDecoder;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
@@ -75,7 +74,6 @@ import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 import androidx.core.math.MathUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.launcher3.icons.FastBitmapDrawable;
 import com.android.systemui.R;
 import com.android.systemui.people.widget.LaunchConversationActivity;
 import com.android.systemui.people.widget.PeopleSpaceWidgetProvider;
@@ -339,8 +337,9 @@ public class PeopleTileViewHelper {
             views = new RemoteViews(mContext.getPackageName(),
                     R.layout.people_tile_suppressed_layout);
         }
-        Drawable appIcon = mContext.getDrawable(R.drawable.ic_conversation_icon);
-        Bitmap disabledBitmap = convertDrawableToDisabledBitmap(appIcon);
+        Drawable appIcon = mContext.getDrawable(R.drawable.ic_conversation_icon).mutate();
+        appIcon.setColorFilter(getDisabledColorFilter());
+        Bitmap disabledBitmap = convertDrawableToBitmap(appIcon);
         views.setImageViewBitmap(R.id.icon, disabledBitmap);
         return views;
     }
@@ -707,7 +706,7 @@ public class PeopleTileViewHelper {
                 Drawable drawable = resolveImage(imageUri, mContext);
                 Bitmap bitmap = convertDrawableToBitmap(drawable);
                 views.setImageViewBitmap(R.id.image, bitmap);
-            } catch (IOException e) {
+            } catch (IOException | SecurityException e) {
                 Log.e(TAG, "Could not decode image: " + e);
                 // If we couldn't load the image, show text that we have a new image.
                 views.setTextViewText(R.id.text_content, newImageDescription);
@@ -755,7 +754,7 @@ public class PeopleTileViewHelper {
         return views;
     }
 
-    private Drawable resolveImage(Uri uri, Context context) throws IOException {
+     Drawable resolveImage(Uri uri, Context context) throws IOException {
         final ImageDecoder.Source source =
                 ImageDecoder.createSource(context.getContentResolver(), uri);
         final Drawable drawable =
@@ -1262,8 +1261,9 @@ public class PeopleTileViewHelper {
             Context context, PeopleSpaceTile tile, int maxAvatarSize, boolean hasNewStory) {
         Icon icon = tile.getUserIcon();
         if (icon == null) {
-            Drawable placeholder = context.getDrawable(R.drawable.ic_avatar_with_badge);
-            return convertDrawableToDisabledBitmap(placeholder);
+            Drawable placeholder = context.getDrawable(R.drawable.ic_avatar_with_badge).mutate();
+            placeholder.setColorFilter(getDisabledColorFilter());
+            return convertDrawableToBitmap(placeholder);
         }
         PeopleStoryIconFactory storyIcon = new PeopleStoryIconFactory(context,
                 context.getPackageManager(),
@@ -1276,10 +1276,7 @@ public class PeopleTileViewHelper {
                 hasNewStory);
 
         if (isDndBlockingTileData(tile)) {
-            // If DND is blocking the conversation, then display the icon in grayscale.
-            ColorMatrix colorMatrix = new ColorMatrix();
-            colorMatrix.setSaturation(0);
-            personDrawable.setColorFilter(new ColorMatrixColorFilter(colorMatrix));
+            personDrawable.setColorFilter(getDisabledColorFilter());
         }
 
         return convertDrawableToBitmap(personDrawable);
@@ -1374,12 +1371,5 @@ public class PeopleTileViewHelper {
             mRemoteViews = remoteViews;
             mAvatarSize = avatarSize;
         }
-    }
-
-    private static Bitmap convertDrawableToDisabledBitmap(Drawable icon) {
-        Bitmap appIconAsBitmap = convertDrawableToBitmap(icon);
-        FastBitmapDrawable drawable = new FastBitmapDrawable(appIconAsBitmap);
-        drawable.setIsDisabled(true);
-        return convertDrawableToBitmap(drawable);
     }
 }

@@ -70,9 +70,9 @@ public class RampDownAdapterTest {
     @Test
     public void testRampAndStepSegments_withNoOffSegment_keepsListUnchanged() {
         List<VibrationEffectSegment> segments = new ArrayList<>(Arrays.asList(
-                new StepSegment(/* amplitude= */ 0.5f, /* frequency= */ 0, /* duration= */ 100),
+                new StepSegment(/* amplitude= */ 0.5f, /* frequencyHz= */ 0, /* duration= */ 100),
                 new RampSegment(/* startAmplitude= */ 0.8f, /* endAmplitude= */ 0.2f,
-                        /* startFrequency= */ 10, /* endFrequency= */ -5, /* duration= */ 20)));
+                        /* startFrequencyHz= */ 10, /* endFrequencyHz= */ 50, /* duration= */ 20)));
         List<VibrationEffectSegment> originalSegments = new ArrayList<>(segments);
 
         assertEquals(-1, mAdapter.apply(segments, -1, TEST_VIBRATOR_INFO));
@@ -86,12 +86,12 @@ public class RampDownAdapterTest {
         mAdapter = new RampDownAdapter(/* rampDownDuration= */ 0, TEST_STEP_DURATION);
 
         List<VibrationEffectSegment> segments = new ArrayList<>(Arrays.asList(
-                new StepSegment(/* amplitude= */ 1, /* frequency= */ 0, /* duration= */ 10),
-                new StepSegment(/* amplitude= */ 0, /* frequency= */ 0, /* duration= */ 100),
+                new StepSegment(/* amplitude= */ 1, /* frequencyHz= */ 0, /* duration= */ 10),
+                new StepSegment(/* amplitude= */ 0, /* frequencyHz= */ 0, /* duration= */ 100),
                 new RampSegment(/* startAmplitude= */ 0.8f, /* endAmplitude= */ 0.2f,
-                        /* startFrequency= */ 10, /* endFrequency= */ -5, /* duration= */ 20),
+                        /* startFrequencyHz= */ 10, /* endFrequencyHz= */ 50, /* duration= */ 20),
                 new RampSegment(/* startAmplitude= */ 0, /* endAmplitude= */ 0,
-                        /* startFrequency= */ 0, /* endFrequency= */ 0, /* duration= */ 50)));
+                        /* startFrequencyHz= */ 0, /* endFrequencyHz= */ 0, /* duration= */ 50)));
         List<VibrationEffectSegment> originalSegments = new ArrayList<>(segments);
 
         assertEquals(-1, mAdapter.apply(segments, -1, TEST_VIBRATOR_INFO));
@@ -102,46 +102,101 @@ public class RampDownAdapterTest {
     @Test
     public void testStepSegments_withShortZeroSegment_replaceWithStepsDown() {
         List<VibrationEffectSegment> segments = new ArrayList<>(Arrays.asList(
-                new StepSegment(/* amplitude= */ 1, /* frequency= */ 0, /* duration= */ 10),
-                new StepSegment(/* amplitude= */ 0, /* frequency= */ 0, /* duration= */ 10),
-                new StepSegment(/* amplitude= */ 0.8f, /* frequency= */ 0, /* duration= */ 100)));
+                new StepSegment(/* amplitude= */ 1, /* frequencyHz= */ 0, /* duration= */ 10),
+                new StepSegment(/* amplitude= */ 0, /* frequencyHz= */ 0, /* duration= */ 10)));
         List<VibrationEffectSegment> expectedSegments = Arrays.asList(
-                new StepSegment(/* amplitude= */ 1, /* frequency= */ 0, /* duration= */ 10),
-                new StepSegment(/* amplitude= */ 0.5f, /* frequency= */ 0, /* duration= */ 5),
-                new StepSegment(/* amplitude= */ 0, /* frequency= */ 0, /* duration= */ 5),
-                new StepSegment(/* amplitude= */ 0.8f, /* frequency= */ 0, /* duration= */ 100));
+                new StepSegment(/* amplitude= */ 1, /* frequencyHz= */ 0, /* duration= */ 10),
+                new StepSegment(/* amplitude= */ 0.5f, /* frequencyHz= */ 0, /* duration= */ 5),
+                new StepSegment(/* amplitude= */ 0, /* frequencyHz= */ 0, /* duration= */ 5));
 
-        assertEquals(1, mAdapter.apply(segments, 1, TEST_VIBRATOR_INFO));
-
+        assertEquals(-1, mAdapter.apply(segments, -1, TEST_VIBRATOR_INFO));
         assertEquals(expectedSegments, segments);
     }
 
     @Test
-    public void testStepSegments_withLongZeroSegment_replaceWithStepsDown() {
+    public void testStepSegments_withLongZeroSegment_replaceWithStepsDownWithRemainingOffSegment() {
         List<VibrationEffectSegment> segments = new ArrayList<>(Arrays.asList(
-                new StepSegment(/* amplitude= */ 1, /* frequency= */ 0, /* duration= */ 10),
+                new StepSegment(/* amplitude= */ 1, /* frequencyHz= */ 0, /* duration= */ 10),
                 new RampSegment(/* startAmplitude= */ 0, /* endAmplitude= */ 0,
-                        /* startFrequency= */ 0, /* endFrequency= */ 0, /* duration= */ 50),
-                new StepSegment(/* amplitude= */ 0.8f, /* frequency= */ 0, /* duration= */ 100)));
+                        /* startFrequencyHz= */ 0, /* endFrequencyHz= */ 0, /* duration= */ 50),
+                new StepSegment(/* amplitude= */ 0.8f, /* frequencyHz= */ 0, /* duration= */ 100)));
         List<VibrationEffectSegment> expectedSegments = Arrays.asList(
-                new StepSegment(/* amplitude= */ 1, /* frequency= */ 0, /* duration= */ 10),
-                new StepSegment(/* amplitude= */ 0.75f, /* frequency= */ 0, /* duration= */ 5),
-                new StepSegment(/* amplitude= */ 0.5f, /* frequency= */ 0, /* duration= */ 5),
-                new StepSegment(/* amplitude= */ 0.25f, /* frequency= */ 0, /* duration= */ 5),
-                new StepSegment(/* amplitude= */ 0, /* frequency= */ 0, /* duration= */ 35),
-                new StepSegment(/* amplitude= */ 0.8f, /* frequency= */ 0, /* duration= */ 100));
+                new StepSegment(/* amplitude= */ 1, /* frequencyHz= */ 0, /* duration= */ 10),
+                new StepSegment(/* amplitude= */ 0.75f, /* frequencyHz= */ 0, /* duration= */ 5),
+                new StepSegment(/* amplitude= */ 0.5f, /* frequencyHz= */ 0, /* duration= */ 5),
+                new StepSegment(/* amplitude= */ 0.25f, /* frequencyHz= */ 0, /* duration= */ 5),
+                new StepSegment(/* amplitude= */ 0, /* frequencyHz= */ 0, /* duration= */ 35),
+                new StepSegment(/* amplitude= */ 0.8f, /* frequencyHz= */ 0, /* duration= */ 100));
+
+        assertEquals(-1, mAdapter.apply(segments, -1, TEST_VIBRATOR_INFO));
+        assertEquals(expectedSegments, segments);
+    }
+
+    @Test
+    public void testStepSegments_withZeroSegmentBeforeRepeat_fixesRepeat() {
+        List<VibrationEffectSegment> segments = new ArrayList<>(Arrays.asList(
+                new StepSegment(/* amplitude= */ 1, /* frequencyHz= */ 0, /* duration= */ 10),
+                new StepSegment(/* amplitude= */ 0, /* frequencyHz= */ 0, /* duration= */ 50),
+                new StepSegment(/* amplitude= */ 0.8f, /* frequencyHz= */ 0, /* duration= */ 100)));
+        List<VibrationEffectSegment> expectedSegments = Arrays.asList(
+                new StepSegment(/* amplitude= */ 1, /* frequencyHz= */ 0, /* duration= */ 10),
+                new StepSegment(/* amplitude= */ 0.75f, /* frequencyHz= */ 0, /* duration= */ 5),
+                new StepSegment(/* amplitude= */ 0.5f, /* frequencyHz= */ 0, /* duration= */ 5),
+                new StepSegment(/* amplitude= */ 0.25f, /* frequencyHz= */ 0, /* duration= */ 5),
+                new StepSegment(/* amplitude= */ 0, /* frequencyHz= */ 0, /* duration= */ 35),
+                new StepSegment(/* amplitude= */ 0.8f, /* frequencyHz= */ 0, /* duration= */ 100));
 
         // Repeat index fixed after intermediate steps added
         assertEquals(5, mAdapter.apply(segments, 2, TEST_VIBRATOR_INFO));
+        assertEquals(expectedSegments, segments);
+    }
 
+    @Test
+    public void testStepSegments_withZeroSegmentAfterRepeat_preservesRepeat() {
+        List<VibrationEffectSegment> segments = new ArrayList<>(Arrays.asList(
+                new StepSegment(/* amplitude= */ 1, /* frequencyHz= */ 0, /* duration= */ 10),
+                new StepSegment(/* amplitude= */ 0, /* frequencyHz= */ 0, /* duration= */ 10),
+                new StepSegment(/* amplitude= */ 0.8f, /* frequencyHz= */ 0, /* duration= */ 100)));
+        List<VibrationEffectSegment> expectedSegments = Arrays.asList(
+                new StepSegment(/* amplitude= */ 1, /* frequencyHz= */ 0, /* duration= */ 10),
+                new StepSegment(/* amplitude= */ 0.5f, /* frequencyHz= */ 0, /* duration= */ 5),
+                new StepSegment(/* amplitude= */ 0, /* frequencyHz= */ 0, /* duration= */ 5),
+                new StepSegment(/* amplitude= */ 0.8f, /* frequencyHz= */ 0, /* duration= */ 100));
+
+        assertEquals(3, mAdapter.apply(segments, 2, TEST_VIBRATOR_INFO));
+        assertEquals(expectedSegments, segments);
+    }
+
+    @Test
+    public void testStepSegments_withZeroSegmentAtRepeat_fixesRepeatAndAppendOriginalToListEnd() {
+        List<VibrationEffectSegment> segments = new ArrayList<>(Arrays.asList(
+                new StepSegment(/* amplitude= */ 1, /* frequencyHz= */ 0, /* duration= */ 10),
+                new StepSegment(/* amplitude= */ 0, /* frequencyHz= */ 0, /* duration= */ 50),
+                new StepSegment(/* amplitude= */ 1, /* frequencyHz= */ 0, /* duration= */ 100)));
+        List<VibrationEffectSegment> expectedSegments = Arrays.asList(
+                new StepSegment(/* amplitude= */ 1, /* frequencyHz= */ 0, /* duration= */ 10),
+                new StepSegment(/* amplitude= */ 0.75f, /* frequencyHz= */ 0, /* duration= */ 5),
+                new StepSegment(/* amplitude= */ 0.5f, /* frequencyHz= */ 0, /* duration= */ 5),
+                new StepSegment(/* amplitude= */ 0.25f, /* frequencyHz= */ 0, /* duration= */ 5),
+                new StepSegment(/* amplitude= */ 0, /* frequencyHz= */ 0, /* duration= */ 35),
+                new StepSegment(/* amplitude= */ 1, /* frequencyHz= */ 0, /* duration= */ 100),
+                // Original zero segment appended to the end of new looping vibration,
+                // then converted to ramp down as well.
+                new StepSegment(/* amplitude= */ 0.75f, /* frequencyHz= */ 0, /* duration= */ 5),
+                new StepSegment(/* amplitude= */ 0.5f, /* frequencyHz= */ 0, /* duration= */ 5),
+                new StepSegment(/* amplitude= */ 0.25f, /* frequencyHz= */ 0, /* duration= */ 5),
+                new StepSegment(/* amplitude= */ 0, /* frequencyHz= */ 0, /* duration= */ 35));
+
+        // Repeat index fixed after intermediate steps added
+        assertEquals(5, mAdapter.apply(segments, 1, TEST_VIBRATOR_INFO));
         assertEquals(expectedSegments, segments);
     }
 
     @Test
     public void testStepSegments_withRepeatToNonZeroSegment_keepsOriginalSteps() {
         List<VibrationEffectSegment> segments = new ArrayList<>(Arrays.asList(
-                new StepSegment(/* amplitude= */ 0.8f, /* frequency= */ 0, /* duration= */ 10),
-                new StepSegment(/* amplitude= */ 0.5f, /* frequency= */ 0, /* duration= */ 100)));
+                new StepSegment(/* amplitude= */ 0.8f, /* frequencyHz= */ 0, /* duration= */ 10),
+                new StepSegment(/* amplitude= */ 0.5f, /* frequencyHz= */ 0, /* duration= */ 100)));
         List<VibrationEffectSegment> originalSegments = new ArrayList<>(segments);
 
         assertEquals(0, mAdapter.apply(segments, 0, TEST_VIBRATOR_INFO));
@@ -153,14 +208,14 @@ public class RampDownAdapterTest {
     public void testStepSegments_withRepeatToShortZeroSegment_skipAndAppendRampDown() {
         List<VibrationEffectSegment> segments = new ArrayList<>(Arrays.asList(
                 new RampSegment(/* startAmplitude= */ 0, /* endAmplitude= */ 0,
-                        /* startFrequency= */ 0, /* endFrequency= */ 0, /* duration= */ 10),
-                new StepSegment(/* amplitude= */ 1, /* frequency= */ 0, /* duration= */ 30)));
+                        /* startfrequencyHz= */ 0, /* endfrequencyHz= */ 0, /* duration= */ 10),
+                new StepSegment(/* amplitude= */ 1, /* frequencyHz= */ 0, /* duration= */ 30)));
         List<VibrationEffectSegment> expectedSegments = Arrays.asList(
                 new RampSegment(/* startAmplitude= */ 0, /* endAmplitude= */ 0,
-                        /* startFrequency= */ 0, /* endFrequency= */ 0, /* duration= */ 10),
-                new StepSegment(/* amplitude= */ 1, /* frequency= */ 0, /* duration= */ 30),
-                new StepSegment(/* amplitude= */ 0.5f, /* frequency= */ 0, /* duration= */ 5),
-                new StepSegment(/* amplitude= */ 0, /* frequency= */ 0, /* duration= */ 5));
+                        /* startfrequencyHz= */ 0, /* endfrequencyHz= */ 0, /* duration= */ 10),
+                new StepSegment(/* amplitude= */ 1, /* frequencyHz= */ 0, /* duration= */ 30),
+                new StepSegment(/* amplitude= */ 0.5f, /* frequencyHz= */ 0, /* duration= */ 5),
+                new StepSegment(/* amplitude= */ 0, /* frequencyHz= */ 0, /* duration= */ 5));
 
         // Shift repeat index to the right to use append instead of zero segment.
         assertEquals(1, mAdapter.apply(segments, 0, TEST_VIBRATOR_INFO));
@@ -171,17 +226,17 @@ public class RampDownAdapterTest {
     @Test
     public void testStepSegments_withRepeatToLongZeroSegment_splitAndAppendRampDown() {
         List<VibrationEffectSegment> segments = new ArrayList<>(Arrays.asList(
-                new StepSegment(/* amplitude= */ 0, /* frequency= */ 0, /* duration= */ 120),
-                new StepSegment(/* amplitude= */ 1, /* frequency= */ 0, /* duration= */ 30)));
+                new StepSegment(/* amplitude= */ 0, /* frequencyHz= */ 0, /* duration= */ 120),
+                new StepSegment(/* amplitude= */ 1, /* frequencyHz= */ 0, /* duration= */ 30)));
         List<VibrationEffectSegment> expectedSegments = Arrays.asList(
                 // Split long zero segment to skip part of it.
-                new StepSegment(/* amplitude= */ 0, /* frequency= */ 0, /* duration= */ 20),
-                new StepSegment(/* amplitude= */ 0, /* frequency= */ 0, /* duration= */ 100),
-                new StepSegment(/* amplitude= */ 1, /* frequency= */ 0, /* duration= */ 30),
-                new StepSegment(/* amplitude= */ 0.75f, /* frequency= */ 0, /* duration= */ 5),
-                new StepSegment(/* amplitude= */ 0.5f, /* frequency= */ 0, /* duration= */ 5),
-                new StepSegment(/* amplitude= */ 0.25f, /* frequency= */ 0, /* duration= */ 5),
-                new StepSegment(/* amplitude= */ 0, /* frequency= */ 0, /* duration= */ 5));
+                new StepSegment(/* amplitude= */ 0, /* frequencyHz= */ 0, /* duration= */ 20),
+                new StepSegment(/* amplitude= */ 0, /* frequencyHz= */ 0, /* duration= */ 100),
+                new StepSegment(/* amplitude= */ 1, /* frequencyHz= */ 0, /* duration= */ 30),
+                new StepSegment(/* amplitude= */ 0.75f, /* frequencyHz= */ 0, /* duration= */ 5),
+                new StepSegment(/* amplitude= */ 0.5f, /* frequencyHz= */ 0, /* duration= */ 5),
+                new StepSegment(/* amplitude= */ 0.25f, /* frequencyHz= */ 0, /* duration= */ 5),
+                new StepSegment(/* amplitude= */ 0, /* frequencyHz= */ 0, /* duration= */ 5));
 
         // Shift repeat index to the right to use append with part of the zero segment.
         assertEquals(1, mAdapter.apply(segments, 0, TEST_VIBRATOR_INFO));
@@ -193,18 +248,20 @@ public class RampDownAdapterTest {
     public void testRampSegments_withShortZeroSegment_replaceWithRampDown() {
         List<VibrationEffectSegment> segments = new ArrayList<>(Arrays.asList(
                 new RampSegment(/* startAmplitude= */ 0.5f, /* endAmplitude*/ 0.5f,
-                        /* startFrequency= */ -1, /* endFrequency= */ -1, /* duration= */ 10),
+                        /* startFrequencyHz= */ 100, /* endFrequencyHz= */ 100, /* duration= */ 10),
                 new RampSegment(/* startAmplitude= */ 0, /* endAmplitude= */ 0,
-                        /* startFrequency= */ -1, /* endFrequency= */ -1, /* duration= */ 20),
+                        /* startFrequencyHz= */ 100, /* endFrequencyHz= */ 100, /* duration= */ 20),
                 new RampSegment(/* startAmplitude= */ 1, /* endAmplitude= */ 1,
-                        /* startFrequency= */ 1, /* endFrequency= */ 1, /* duration= */ 30)));
+                        /* startFrequencyHz= */ 200, /* endFrequencyHz= */ 200,
+                        /* duration= */ 30)));
         List<VibrationEffectSegment> expectedSegments = Arrays.asList(
                 new RampSegment(/* startAmplitude= */ 0.5f, /* endAmplitude*/ 0.5f,
-                        /* startFrequency= */ -1, /* endFrequency= */ -1, /* duration= */ 10),
+                        /* startFrequencyHz= */ 100, /* endFrequencyHz= */ 100, /* duration= */ 10),
                 new RampSegment(/* startAmplitude= */ 0.5f, /* endAmplitude= */ 0,
-                        /* startFrequency= */ -1, /* endFrequency= */ -1, /* duration= */ 20),
+                        /* startFrequencyHz= */ 100, /* endFrequencyHz= */ 100, /* duration= */ 20),
                 new RampSegment(/* startAmplitude= */ 1, /* endAmplitude= */ 1,
-                        /* startFrequency= */ 1, /* endFrequency= */ 1, /* duration= */ 30));
+                        /* startFrequencyHz= */ 200, /* endFrequencyHz= */ 200,
+                        /* duration= */ 30));
 
         assertEquals(2, mAdapter.apply(segments, 2, TEST_VIBRATOR_INFO));
 
@@ -214,20 +271,23 @@ public class RampDownAdapterTest {
     @Test
     public void testRampSegments_withLongZeroSegment_splitAndAddRampDown() {
         List<VibrationEffectSegment> segments = new ArrayList<>(Arrays.asList(
-                new RampSegment(/* startAmplitude= */ 0.5f, /* endAmplitude*/ 0.5f,
-                        /* startFrequency= */ -1, /* endFrequency= */ -1, /* duration= */ 10),
-                new StepSegment(/* amplitude= */ 0, /* frequency= */ 0, /* duration= */ 150),
+                new RampSegment(/* startAmplitude= */ 0.5f, /* endAmplitude= */ 0.5f,
+                        /* startFrequencyHz= */ 100, /* endFrequencyHz= */ 100, /* duration= */ 10),
+                new StepSegment(/* amplitude= */ 0, /* frequencyHz= */ 150, /* duration= */ 150),
                 new RampSegment(/* startAmplitude= */ 1, /* endAmplitude= */ 1,
-                        /* startFrequency= */ 1, /* endFrequency= */ 1, /* duration= */ 30)));
+                        /* startFrequencyHz= */ 200, /* endFrequencyHz= */ 200,
+                        /* duration= */ 30)));
         List<VibrationEffectSegment> expectedSegments = Arrays.asList(
                 new RampSegment(/* startAmplitude= */ 0.5f, /* endAmplitude*/ 0.5f,
-                        /* startFrequency= */ -1, /* endFrequency= */ -1, /* duration= */ 10),
+                        /* startFrequencyHz= */ 100, /* endFrequencyHz= */ 100, /* duration= */ 10),
                 new RampSegment(/* startAmplitude= */ 0.5f, /* endAmplitude= */ 0,
-                        /* startFrequency= */ -1, /* endFrequency= */ -1, /* duration= */ 20),
+                        /* startFrequencyHz= */ 100, /* endFrequencyHz= */ 100, /* duration= */ 20),
                 new RampSegment(/* startAmplitude= */ 0, /* endAmplitude= */ 0,
-                        /* startFrequency= */ -1, /* endFrequency= */ -1, /* duration= */ 130),
+                        /* startFrequencyHz= */ 100, /* endFrequencyHz= */ 100,
+                        /* duration= */ 130),
                 new RampSegment(/* startAmplitude= */ 1, /* endAmplitude= */ 1,
-                        /* startFrequency= */ 1, /* endFrequency= */ 1, /* duration= */ 30));
+                        /* startFrequencyHz= */ 200, /* endFrequencyHz= */ 200,
+                        /* duration= */ 30));
 
         // Repeat index fixed after intermediate steps added
         assertEquals(3, mAdapter.apply(segments, 2, TEST_VIBRATOR_INFO));
@@ -239,9 +299,10 @@ public class RampDownAdapterTest {
     public void testRampSegments_withRepeatToNonZeroSegment_keepsOriginalSteps() {
         List<VibrationEffectSegment> segments = new ArrayList<>(Arrays.asList(
                 new RampSegment(/* startAmplitude= */ 0.5f, /* endAmplitude*/ 0.5f,
-                        /* startFrequency= */ -1, /* endFrequency= */ -1, /* duration= */ 10),
+                        /* startFrequencyHz= */ 100, /* endFrequencyHz= */ 100, /* duration= */ 10),
                 new RampSegment(/* startAmplitude= */ 1, /* endAmplitude= */ 1,
-                        /* startFrequency= */ 1, /* endFrequency= */ 1, /* duration= */ 30)));
+                        /* startFrequencyHz= */ 200, /* endFrequencyHz= */ 200,
+                        /* duration= */ 30)));
         List<VibrationEffectSegment> originalSegments = new ArrayList<>(segments);
 
         assertEquals(0, mAdapter.apply(segments, 0, TEST_VIBRATOR_INFO));
@@ -252,15 +313,15 @@ public class RampDownAdapterTest {
     @Test
     public void testRampSegments_withRepeatToShortZeroSegment_skipAndAppendRampDown() {
         List<VibrationEffectSegment> segments = new ArrayList<>(Arrays.asList(
-                new StepSegment(/* amplitude= */ 0, /* frequency= */ 1, /* duration= */ 20),
+                new StepSegment(/* amplitude= */ 0, /* frequencyHz= */ 200, /* duration= */ 20),
                 new RampSegment(/* startAmplitude= */ 0, /* endAmplitude*/ 1,
-                        /* startFrequency= */ 0, /* endFrequency= */ 1, /* duration= */ 20)));
+                        /* startFrequencyHz= */ 40, /* endFrequencyHz= */ 80, /* duration= */ 20)));
         List<VibrationEffectSegment> expectedSegments = Arrays.asList(
-                new StepSegment(/* amplitude= */ 0, /* frequency= */ 1, /* duration= */ 20),
+                new StepSegment(/* amplitude= */ 0, /* frequencyHz= */ 200, /* duration= */ 20),
                 new RampSegment(/* startAmplitude= */ 0, /* endAmplitude= */ 1,
-                        /* startFrequency= */ 0, /* endFrequency= */ 1, /* duration= */ 20),
+                        /* startFrequencyHz= */ 40, /* endFrequencyHz= */ 80, /* duration= */ 20),
                 new RampSegment(/* startAmplitude= */ 1, /* endAmplitude= */ 0,
-                        /* startFrequency= */ 1, /* endFrequency= */ 1, /* duration= */ 20));
+                        /* startFrequencyHz= */ 80, /* endFrequencyHz= */ 80, /* duration= */ 20));
 
         // Shift repeat index to the right to use append instead of zero segment.
         assertEquals(1, mAdapter.apply(segments, 0, TEST_VIBRATOR_INFO));
@@ -272,19 +333,19 @@ public class RampDownAdapterTest {
     public void testRampSegments_withRepeatToLongZeroSegment_splitAndAppendRampDown() {
         List<VibrationEffectSegment> segments = new ArrayList<>(Arrays.asList(
                 new RampSegment(/* startAmplitude= */ 0, /* endAmplitude*/ 0,
-                        /* startFrequency= */ 1, /* endFrequency= */ 1, /* duration= */ 70),
+                        /* startFrequencyHz= */ 1, /* endFrequencyHz= */ 1, /* duration= */ 70),
                 new RampSegment(/* startAmplitude= */ 0, /* endAmplitude= */ 1,
-                        /* startFrequency= */ 1, /* endFrequency= */ 1, /* duration= */ 30)));
+                        /* startFrequencyHz= */ 1, /* endFrequencyHz= */ 1, /* duration= */ 30)));
         List<VibrationEffectSegment> expectedSegments = Arrays.asList(
                 // Split long zero segment to skip part of it.
                 new RampSegment(/* startAmplitude= */ 0, /* endAmplitude*/ 0,
-                        /* startFrequency= */ 1, /* endFrequency= */ 1, /* duration= */ 20),
+                        /* startFrequencyHz= */ 1, /* endFrequencyHz= */ 1, /* duration= */ 20),
                 new RampSegment(/* startAmplitude= */ 0, /* endAmplitude*/ 0,
-                        /* startFrequency= */ 1, /* endFrequency= */ 1, /* duration= */ 50),
+                        /* startFrequencyHz= */ 1, /* endFrequencyHz= */ 1, /* duration= */ 50),
                 new RampSegment(/* startAmplitude= */ 0, /* endAmplitude= */ 1,
-                        /* startFrequency= */ 1, /* endFrequency= */ 1, /* duration= */ 30),
+                        /* startFrequencyHz= */ 1, /* endFrequencyHz= */ 1, /* duration= */ 30),
                 new RampSegment(/* startAmplitude= */ 1, /* endAmplitude= */ 0,
-                        /* startFrequency= */ 1, /* endFrequency= */ 1, /* duration= */ 20));
+                        /* startFrequencyHz= */ 1, /* endFrequencyHz= */ 1, /* duration= */ 20));
 
         // Shift repeat index to the right to use append with part of the zero segment.
         assertEquals(1, mAdapter.apply(segments, 0, TEST_VIBRATOR_INFO));

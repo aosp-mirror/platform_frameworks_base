@@ -87,7 +87,7 @@ final class ContentCaptureServerSession {
         mId = sessionId;
         mUid = uid;
         mContentCaptureContext = new ContentCaptureContext(/* clientContext= */ null,
-                activityId, appComponentName, displayId, flags);
+                activityId, appComponentName, displayId, activityToken, flags);
         mSessionStateReceiver = sessionStateReceiver;
         try {
             sessionStateReceiver.asBinder().linkToDeath(() -> onClientDeath(), 0);
