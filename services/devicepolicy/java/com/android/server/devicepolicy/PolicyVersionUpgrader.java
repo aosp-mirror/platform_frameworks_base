@@ -222,7 +222,6 @@ public class PolicyVersionUpgrader {
             int userId, int loadVersion, ComponentName ownerComponent) {
         DevicePolicyData policy = new DevicePolicyData(userId);
         DevicePolicyData.load(policy,
-                !mProvider.storageManagerIsFileBasedEncryptionEnabled(),
                 mProvider.makeDevicePoliciesJournaledFile(userId),
                 mProvider.getAdminInfoSupplier(userId),
                 ownerComponent);
@@ -230,10 +229,7 @@ public class PolicyVersionUpgrader {
     }
 
     private boolean writeDataForUser(int userId, DevicePolicyData policy) {
-        return DevicePolicyData.store(
-                policy,
-                mProvider.makeDevicePoliciesJournaledFile(userId),
-                !mProvider.storageManagerIsFileBasedEncryptionEnabled());
+        return DevicePolicyData.store(policy, mProvider.makeDevicePoliciesJournaledFile(userId));
     }
 
     private JournaledFile getVersionFile() {

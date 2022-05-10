@@ -67,7 +67,6 @@ class DevicePolicyData {
     private static final String TAG_CURRENT_INPUT_METHOD_SET = "current-ime-set";
     private static final String TAG_OWNER_INSTALLED_CA_CERT = "owner-installed-ca-cert";
     private static final String TAG_INITIALIZATION_BUNDLE = "initialization-bundle";
-    private static final String TAG_PASSWORD_VALIDITY = "password-validity";
     private static final String TAG_PASSWORD_TOKEN_HANDLE = "password-token";
     private static final String TAG_PROTECTED_PACKAGES = "protected-packages";
     private static final String TAG_BYPASS_ROLE_QUALIFICATIONS = "bypass-role-qualifications";
@@ -184,7 +183,7 @@ class DevicePolicyData {
     /**
      * Serializes DevicePolicyData object as XML.
      */
-    static boolean store(DevicePolicyData policyData, JournaledFile file, boolean isFdeDevice) {
+    static boolean store(DevicePolicyData policyData, JournaledFile file) {
         FileOutputStream stream = null;
         File chooseForWrite = null;
         try {
@@ -267,15 +266,6 @@ class DevicePolicyData {
                 out.startTag(null, "failed-password-attempts");
                 out.attributeInt(null, "value", policyData.mFailedPasswordAttempts);
                 out.endTag(null, "failed-password-attempts");
-            }
-
-            // For FDE devices only, we save this flag so we can report on password sufficiency
-            // before the user enters their password for the first time after a reboot.  For
-            // security reasons, we don't want to store the full set of active password metrics.
-            if (isFdeDevice) {
-                out.startTag(null, TAG_PASSWORD_VALIDITY);
-                out.attributeBoolean(null, ATTR_VALUE, policyData.mPasswordValidAtLastCheckpoint);
-                out.endTag(null, TAG_PASSWORD_VALIDITY);
             }
 
             for (int i = 0; i < policyData.mAcceptedCaCertificates.size(); i++) {
@@ -405,7 +395,7 @@ class DevicePolicyData {
      * @param adminInfoSupplier function that queries DeviceAdminInfo from PackageManager
      * @param ownerComponent device or profile owner component if any.
      */
-    static void load(DevicePolicyData policy, boolean isFdeDevice, JournaledFile journaledFile,
+    static void load(DevicePolicyData policy, JournaledFile journaledFile,
             Function<ComponentName, DeviceAdminInfo> adminInfoSupplier,
             ComponentName ownerComponent) {
         FileInputStream stream = null;
@@ -545,12 +535,6 @@ class DevicePolicyData {
                     policy.mAdminBroadcastPending = Boolean.toString(true).equals(pending);
                 } else if (TAG_INITIALIZATION_BUNDLE.equals(tag)) {
                     policy.mInitBundle = PersistableBundle.restoreFromXml(parser);
-                } else if (TAG_PASSWORD_VALIDITY.equals(tag)) {
-                    if (isFdeDevice) {
-                        // This flag is only used for FDE devices
-                        policy.mPasswordValidAtLastCheckpoint =
-                                parser.getAttributeBoolean(null, ATTR_VALUE, false);
-                    }
                 } else if (TAG_PASSWORD_TOKEN_HANDLE.equals(tag)) {
                     policy.mPasswordTokenHandle = parser.getAttributeLong(null, ATTR_VALUE);
                 } else if (TAG_CURRENT_INPUT_METHOD_SET.equals(tag)) {
