@@ -27,6 +27,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.service.dreams.IDreamManager;
 import android.service.quicksettings.Tile;
@@ -42,6 +43,7 @@ import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dreams.dagger.DreamModule;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile;
@@ -53,16 +55,19 @@ import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.util.settings.SecureSettings;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 /** Quick settings tile: Screensaver (dream) **/
 public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
 
     private static final String LOG_TAG = "QSDream";
     private final IDreamManager mDreamManager;
-    private final SecureSettings mSecureSettings;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final SettingObserver mEnabledSettingObserver;
     private final SettingObserver mDreamSettingObserver;
+    private final UserManager mUserManager;
+    private final boolean mDreamSupported;
+    private final boolean mDreamOnlyEnabledForSystemUser;
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
@@ -83,12 +88,15 @@ public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
             QSLogger qsLogger,
             IDreamManager dreamManager,
             SecureSettings secureSettings,
-            BroadcastDispatcher broadcastDispatcher
+            BroadcastDispatcher broadcastDispatcher,
+            UserManager userManager,
+            @Named(DreamModule.DREAM_SUPPORTED) boolean dreamSupported,
+            @Named(DreamModule.DREAM_ONLY_ENABLED_FOR_SYSTEM_USER)
+                    boolean dreamOnlyEnabledForSystemUser
     ) {
         super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mDreamManager = dreamManager;
-        mSecureSettings = secureSettings;
         mBroadcastDispatcher = broadcastDispatcher;
         mEnabledSettingObserver = new SettingObserver(secureSettings, mHandler,
                 Settings.Secure.SCREENSAVER_ENABLED) {
@@ -104,6 +112,9 @@ public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
                 refreshState();
             }
         };
+        mUserManager = userManager;
+        mDreamSupported = dreamSupported;
+        mDreamOnlyEnabledForSystemUser = dreamOnlyEnabledForSystemUser;
     }
 
     @Override
@@ -177,8 +188,11 @@ public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
 
     @Override
     public boolean isAvailable() {
-        // For now, only present on userdebug devices.
-        return Build.isDebuggable();
+        // Only enable for devices that have dreams for the user(s) that can dream.
+        // For now, restrict to debug users.
+        return Build.isDebuggable()
+                && mDreamSupported
+                && (!mDreamOnlyEnabledForSystemUser || mUserManager.isSystemUser());
     }
 
     @VisibleForTesting
