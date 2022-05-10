@@ -130,7 +130,7 @@ public class IntentFirewall {
         mObserver.startWatching();
     }
 
-    private PackageManagerInternal getPackageManager() {
+    PackageManagerInternal getPackageManager() {
         if (mPackageManager == null) {
             mPackageManager = LocalServices.getService(PackageManagerInternal.class);
         }
@@ -627,7 +627,7 @@ public class IntentFirewall {
         final long token = Binder.clearCallingIdentity();
         try {
             // Compare signatures of two packages for different users.
-            return LocalServices.getService(PackageManagerInternal.class)
+            return getPackageManager()
                     .checkUidSignaturesForAllUsers(uid1, uid2) == PackageManager.SIGNATURE_MATCH;
         } finally {
             Binder.restoreCallingIdentity(token);
