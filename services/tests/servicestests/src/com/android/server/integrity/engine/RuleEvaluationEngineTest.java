@@ -183,6 +183,7 @@ public class RuleEvaluationEngineTest {
         return new AppInstallMetadata.Builder()
                 .setPackageName("abc")
                 .setAppCertificates(Collections.singletonList("abc"))
+                .setAppCertificateLineage(Collections.singletonList("abc"))
                 .setInstallerCertificates(Collections.singletonList("abc"))
                 .setInstallerName("abc")
                 .setVersionCode(-1)

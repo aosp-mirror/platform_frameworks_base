@@ -24,7 +24,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
 import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
-import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_LAST;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -63,6 +62,7 @@ import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowManager;
+import android.window.DisplayAreaInfo;
 import android.window.IDisplayAreaOrganizer;
 
 import com.google.android.collect.Lists;
@@ -75,6 +75,7 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * Tests for the {@link DisplayArea} container.
@@ -152,7 +153,7 @@ public class DisplayAreaTest extends WindowTestsBase {
     public void testForAllTaskDisplayAreas_onlyTraversesDisplayAreaOfTypeAny() {
         final RootDisplayArea root =
                 new DisplayAreaPolicyBuilderTest.SurfacelessDisplayAreaRoot(mWm);
-        final Function<TaskDisplayArea, Boolean> callback0 = tda -> false;
+        final Predicate<TaskDisplayArea> callback0 = tda -> false;
         final Consumer<TaskDisplayArea> callback1 = tda -> { };
         final BiFunction<TaskDisplayArea, Integer, Integer> callback2 = (tda, result) -> result;
         final Function<TaskDisplayArea, TaskDisplayArea> callback3 = tda -> null;
@@ -567,6 +568,31 @@ public class DisplayAreaTest extends WindowTestsBase {
         assertNull(displayArea.mOrganizer);
         verify(mWm.mAtmService.mWindowOrganizerController.mDisplayAreaOrganizerController)
                 .onDisplayAreaVanished(mockDisplayAreaOrganizer, displayArea);
+    }
+
+    @Test
+    public void testGetDisplayAreaInfo() {
+        final DisplayArea<WindowContainer> displayArea = new DisplayArea<>(
+                mWm, BELOW_TASKS, "NewArea", FEATURE_VENDOR_FIRST);
+        mDisplayContent.addChild(displayArea, 0);
+        final DisplayAreaInfo info = displayArea.getDisplayAreaInfo();
+
+        assertThat(info.token).isEqualTo(displayArea.mRemoteToken.toWindowContainerToken());
+        assertThat(info.configuration).isEqualTo(displayArea.getConfiguration());
+        assertThat(info.displayId).isEqualTo(mDisplayContent.getDisplayId());
+        assertThat(info.featureId).isEqualTo(displayArea.mFeatureId);
+        assertThat(info.rootDisplayAreaId).isEqualTo(mDisplayContent.mFeatureId);
+
+        final TaskDisplayArea tda = mDisplayContent.getDefaultTaskDisplayArea();
+        final int tdaIndex = tda.getParent().mChildren.indexOf(tda);
+        final RootDisplayArea root =
+                new DisplayAreaGroup(mWm, "TestRoot", FEATURE_VENDOR_FIRST + 1);
+        mDisplayContent.addChild(root, tdaIndex + 1);
+        displayArea.reparent(root, 0);
+
+        final DisplayAreaInfo info2 = displayArea.getDisplayAreaInfo();
+
+        assertThat(info2.rootDisplayAreaId).isEqualTo(root.mFeatureId);
     }
 
     @Test

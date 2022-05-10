@@ -62,8 +62,7 @@
     <com.android.systemui.statusbar.LightRevealScrim
             android:id="@+id/light_reveal_scrim"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone" />
+            android:layout_height="match_parent" />
 
     <include layout="@layout/status_bar_expanded"
         android:layout_width="match_parent"
@@ -81,9 +80,11 @@
     />
 
     <!-- Keyguard messages -->
-    <FrameLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <LinearLayout
+        android:id="@+id/keyguard_message_area_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
         android:layout_marginTop="@dimen/status_bar_height"
         android:layout_gravity="top|center_horizontal"
         android:gravity="center_horizontal">
@@ -97,7 +98,14 @@
             android:singleLine="true"
             android:ellipsize="marquee"
             android:focusable="true" />
-    </FrameLayout>
+        <FrameLayout android:id="@+id/keyguard_bouncer_container"
+                     android:layout_height="0dp"
+                     android:layout_width="match_parent"
+                     android:layout_weight="1"
+                     android:background="@android:color/transparent"
+                     android:clipChildren="false"
+                     android:clipToPadding="false" />
+    </LinearLayout>
 
     <com.android.systemui.biometrics.AuthRippleView
         android:id="@+id/auth_ripple"

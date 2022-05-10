@@ -17,10 +17,11 @@
 package com.android.wm.shell.flicker.helpers
 
 import android.app.Instrumentation
+import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.wm.shell.flicker.testapp.Components
 
 class FixedAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
     instrumentation,
     Components.FixedActivity.LABEL,
-    Components.FixedActivity.COMPONENT
+    Components.FixedActivity.COMPONENT.toFlickerComponent()
 )

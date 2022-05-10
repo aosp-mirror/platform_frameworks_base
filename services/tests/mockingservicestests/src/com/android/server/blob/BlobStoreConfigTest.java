@@ -29,7 +29,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.server.testables.TestableDeviceConfig;
+import com.android.modules.utils.testing.TestableDeviceConfig;
 
 import org.junit.Before;
 import org.junit.Rule;

@@ -221,11 +221,10 @@ public abstract class BaseLockSettingsServiceTests {
                 Object[] args = invocation.getArguments();
                 mStorageManager.addUserKeyAuth((int) args[0] /* userId */,
                         (int) args[1] /* serialNumber */,
-                        (byte[]) args[2] /* token */,
-                        (byte[]) args[3] /* secret */);
+                        (byte[]) args[2] /* secret */);
                 return null;
             }
-        }).when(sm).addUserKeyAuth(anyInt(), anyInt(), any(), any());
+        }).when(sm).addUserKeyAuth(anyInt(), anyInt(), any());
 
         doAnswer(new Answer<Void>() {
             @Override
@@ -233,11 +232,10 @@ public abstract class BaseLockSettingsServiceTests {
                 Object[] args = invocation.getArguments();
                 mStorageManager.clearUserKeyAuth((int) args[0] /* userId */,
                         (int) args[1] /* serialNumber */,
-                        (byte[]) args[2] /* token */,
-                        (byte[]) args[3] /* secret */);
+                        (byte[]) args[2] /* secret */);
                 return null;
             }
-        }).when(sm).clearUserKeyAuth(anyInt(), anyInt(), any(), any());
+        }).when(sm).clearUserKeyAuth(anyInt(), anyInt(), any());
 
         doAnswer(
                 new Answer<Void>() {

@@ -115,7 +115,7 @@ public final class MidiDeviceStatus implements Parcelable {
         new Parcelable.Creator<MidiDeviceStatus>() {
         public MidiDeviceStatus createFromParcel(Parcel in) {
             ClassLoader classLoader = MidiDeviceInfo.class.getClassLoader();
-            MidiDeviceInfo deviceInfo = in.readParcelable(classLoader);
+            MidiDeviceInfo deviceInfo = in.readParcelable(classLoader, android.media.midi.MidiDeviceInfo.class);
             boolean[] inputPortOpen = in.createBooleanArray();
             int[] outputPortOpenCount = in.createIntArray();
             return new MidiDeviceStatus(deviceInfo, inputPortOpen, outputPortOpenCount);

@@ -28,6 +28,8 @@
 namespace android {
 
 static struct {
+    jclass clazz;
+    jmethodID ctor;
     jfieldID ptr;
     jfieldID name;
     jfieldID dispatchingTimeoutMillis;
@@ -101,6 +103,15 @@ std::shared_ptr<InputApplicationHandle> android_view_InputApplicationHandle_getH
     return *handle;
 }
 
+jobject android_view_InputApplicationHandle_fromInputApplicationInfo(
+        JNIEnv* env, gui::InputApplicationInfo inputApplicationInfo) {
+    jobject binderObject = javaObjectForIBinder(env, inputApplicationInfo.token);
+    ScopedLocalRef<jstring> name(env, env->NewStringUTF(inputApplicationInfo.name.data()));
+    return env->NewObject(gInputApplicationHandleClassInfo.clazz,
+                          gInputApplicationHandleClassInfo.ctor, binderObject, name.get(),
+                          inputApplicationInfo.dispatchingTimeoutMillis);
+}
+
 // --- JNI ---
 
 static void android_view_InputApplicationHandle_nativeDispose(JNIEnv* env, jobject obj) {
@@ -131,6 +142,10 @@ static const JNINativeMethod gInputApplicationHandleMethods[] = {
         var = env->GetFieldID(clazz, fieldName, fieldDescriptor); \
         LOG_FATAL_IF(! (var), "Unable to find field " fieldName);
 
+#define GET_METHOD_ID(var, clazz, methodName, methodSignature)  \
+    var = env->GetMethodID(clazz, methodName, methodSignature); \
+    LOG_ALWAYS_FATAL_IF(!(var), "Unable to find method " methodName);
+
 int register_android_view_InputApplicationHandle(JNIEnv* env) {
     int res = jniRegisterNativeMethods(env, "android/view/InputApplicationHandle",
             gInputApplicationHandleMethods, NELEM(gInputApplicationHandleMethods));
@@ -139,6 +154,10 @@ int register_android_view_InputApplicationHandle(JNIEnv* env) {
 
     jclass clazz;
     FIND_CLASS(clazz, "android/view/InputApplicationHandle");
+    gInputApplicationHandleClassInfo.clazz = MakeGlobalRefOrDie(env, clazz);
+
+    GET_METHOD_ID(gInputApplicationHandleClassInfo.ctor, clazz, "<init>",
+                  "(Landroid/os/IBinder;Ljava/lang/String;J)V");
 
     GET_FIELD_ID(gInputApplicationHandleClassInfo.ptr, clazz,
             "ptr", "J");

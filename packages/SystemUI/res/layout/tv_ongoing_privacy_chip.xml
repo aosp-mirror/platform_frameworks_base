@@ -26,7 +26,7 @@
 
     <ImageView
         android:id="@+id/chip_drawable"
-        android:layout_width="51dp"
+        android:layout_width="@dimen/privacy_chip_max_width"
         android:layout_height="@dimen/privacy_chip_height"
         android:minWidth="@dimen/privacy_chip_dot_bg_width"
         android:minHeight="@dimen/privacy_chip_dot_bg_height"
