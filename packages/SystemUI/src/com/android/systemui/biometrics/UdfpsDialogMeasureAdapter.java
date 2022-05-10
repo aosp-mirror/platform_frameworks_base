@@ -64,15 +64,16 @@ public class UdfpsDialogMeasureAdapter {
 
     @NonNull
     AuthDialog.LayoutParams onMeasureInternal(
-            int width, int height, @NonNull AuthDialog.LayoutParams layoutParams) {
+            int width, int height, @NonNull AuthDialog.LayoutParams layoutParams,
+            float scaleFactor) {
 
         final int displayRotation = mView.getDisplay().getRotation();
         switch (displayRotation) {
             case Surface.ROTATION_0:
-                return onMeasureInternalPortrait(width, height);
+                return onMeasureInternalPortrait(width, height, scaleFactor);
             case Surface.ROTATION_90:
             case Surface.ROTATION_270:
-                return onMeasureInternalLandscape(width, height);
+                return onMeasureInternalLandscape(width, height, scaleFactor);
             default:
                 Log.e(TAG, "Unsupported display rotation: " + displayRotation);
                 return layoutParams;
@@ -90,7 +91,8 @@ public class UdfpsDialogMeasureAdapter {
     }
 
     @NonNull
-    private AuthDialog.LayoutParams onMeasureInternalPortrait(int width, int height) {
+    private AuthDialog.LayoutParams onMeasureInternalPortrait(int width, int height,
+            float scaleFactor) {
         final WindowMetrics windowMetrics = mWindowManager.getMaximumWindowMetrics();
 
         // Figure out where the bottom of the sensor anim should be.
@@ -101,12 +103,13 @@ public class UdfpsDialogMeasureAdapter {
         final Insets navbarInsets = getNavbarInsets(windowMetrics);
         mBottomSpacerHeight = calculateBottomSpacerHeightForPortrait(
                 mSensorProps, displayHeight, textIndicatorHeight, buttonBarHeight,
-                dialogMargin, navbarInsets.bottom);
+                dialogMargin, navbarInsets.bottom, scaleFactor);
 
         // Go through each of the children and do the custom measurement.
         int totalHeight = 0;
         final int numChildren = mView.getChildCount();
-        final int sensorDiameter = mSensorProps.getLocation().sensorRadius * 2;
+        final int sensorDiameter =
+                (int) (scaleFactor * mSensorProps.getLocation().sensorRadius * 2);
         for (int i = 0; i < numChildren; i++) {
             final View child = mView.getChildAt(i);
             if (child.getId() == R.id.biometric_icon_frame) {
@@ -176,7 +179,8 @@ public class UdfpsDialogMeasureAdapter {
     }
 
     @NonNull
-    private AuthDialog.LayoutParams onMeasureInternalLandscape(int width, int height) {
+    private AuthDialog.LayoutParams onMeasureInternalLandscape(int width, int height,
+            float scaleFactor) {
         final WindowMetrics windowMetrics = mWindowManager.getMaximumWindowMetrics();
 
         // Find the spacer height needed to vertically align the icon with the sensor.
@@ -197,9 +201,10 @@ public class UdfpsDialogMeasureAdapter {
         final int dialogMargin = getDialogMarginPx();
         final int horizontalInset = navbarInsets.left + navbarInsets.right;
         final int horizontalSpacerWidth = calculateHorizontalSpacerWidthForLandscape(
-                mSensorProps, displayWidth, dialogMargin, horizontalInset);
+                mSensorProps, displayWidth, dialogMargin, horizontalInset, scaleFactor);
 
-        final int sensorDiameter = mSensorProps.getLocation().sensorRadius * 2;
+        final int sensorDiameter =
+                (int) (scaleFactor * mSensorProps.getLocation().sensorRadius * 2);
         final int remeasuredWidth = sensorDiameter + 2 * horizontalSpacerWidth;
 
         int remeasuredHeight = 0;
@@ -281,11 +286,11 @@ public class UdfpsDialogMeasureAdapter {
     static int calculateBottomSpacerHeightForPortrait(
             @NonNull FingerprintSensorPropertiesInternal sensorProperties, int displayHeightPx,
             int textIndicatorHeightPx, int buttonBarHeightPx, int dialogMarginPx,
-            int navbarBottomInsetPx) {
+            int navbarBottomInsetPx, float scaleFactor) {
         final SensorLocationInternal location = sensorProperties.getLocation();
         final int sensorDistanceFromBottom = displayHeightPx
-                - location.sensorLocationY
-                - location.sensorRadius;
+                - (int) (scaleFactor * location.sensorLocationY)
+                - (int) (scaleFactor * location.sensorRadius);
 
         final int spacerHeight = sensorDistanceFromBottom
                 - textIndicatorHeightPx
@@ -298,7 +303,8 @@ public class UdfpsDialogMeasureAdapter {
                     + ", Distance from bottom: " + sensorDistanceFromBottom
                     + ", Bottom margin: " + dialogMarginPx
                     + ", Navbar bottom inset: " + navbarBottomInsetPx
-                    + ", Bottom spacer height (portrait): " + spacerHeight);
+                    + ", Bottom spacer height (portrait): " + spacerHeight
+                    + ", Scale Factor: " + scaleFactor);
         }
 
         return spacerHeight;
@@ -346,11 +352,11 @@ public class UdfpsDialogMeasureAdapter {
     @VisibleForTesting
     static int calculateHorizontalSpacerWidthForLandscape(
             @NonNull FingerprintSensorPropertiesInternal sensorProperties, int displayWidthPx,
-            int dialogMarginPx, int navbarHorizontalInsetPx) {
+            int dialogMarginPx, int navbarHorizontalInsetPx, float scaleFactor) {
         final SensorLocationInternal location = sensorProperties.getLocation();
         final int sensorDistanceFromEdge = displayWidthPx
-                - location.sensorLocationY
-                - location.sensorRadius;
+                - (int) (scaleFactor * location.sensorLocationY)
+                - (int) (scaleFactor * location.sensorRadius);
 
         final int horizontalPadding = sensorDistanceFromEdge
                 - dialogMarginPx
@@ -361,7 +367,8 @@ public class UdfpsDialogMeasureAdapter {
                     + ", Distance from edge: " + sensorDistanceFromEdge
                     + ", Dialog margin: " + dialogMarginPx
                     + ", Navbar horizontal inset: " + navbarHorizontalInsetPx
-                    + ", Horizontal spacer width (landscape): " + horizontalPadding);
+                    + ", Horizontal spacer width (landscape): " + horizontalPadding
+                    + ", Scale Factor: " + scaleFactor);
         }
 
         return horizontalPadding;
