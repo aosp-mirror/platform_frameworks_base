@@ -18,10 +18,26 @@ package android.app.admin;
 
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE;
 import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE;
+import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_ALLOW_OFFLINE;
 import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME;
+import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_DEVICE_ADMIN_MINIMUM_VERSION_CODE;
 import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME;
+import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_KEEP_ACCOUNT_ON_MIGRATION;
+import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_KEEP_SCREEN_ON;
+import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED;
+import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_LOCAL_TIME;
+import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_RETURN_BEFORE_POLICY_COMPLIANCE;
 import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_ROLE_HOLDER_EXTRAS_BUNDLE;
+import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_SENSORS_PERMISSION_GRANT_OPT_OUT;
+import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_SHOULD_LAUNCH_RESULT_INTENT;
+import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_SKIP_EDUCATION_SCREENS;
+import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_SKIP_ENCRYPTION;
+import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_SKIP_OWNERSHIP_DISCLAIMER;
+import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_SUPPORTED_MODES;
 import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_TRIGGER;
+import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_USE_MOBILE_DATA;
+import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_WIFI_HIDDEN;
+import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_WIFI_PROXY_PORT;
 import static android.app.admin.DevicePolicyManager.MIME_TYPE_PROVISIONING_NFC;
 import static android.app.admin.DevicePolicyManager.PROVISIONING_TRIGGER_NFC;
 import static android.nfc.NfcAdapter.EXTRA_NDEF_MESSAGES;
@@ -44,6 +60,8 @@ import android.util.Log;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -51,6 +69,8 @@ import java.util.Set;
  * Utility class that provides functionality to create provisioning intents from nfc intents.
  */
 final class ProvisioningIntentHelper {
+
+    private static final Map<String, Class> EXTRAS_TO_CLASS_MAP = createExtrasToClassMap();
 
     private static final String TAG = "ProvisioningIntentHelper";
 
@@ -124,12 +144,11 @@ final class ProvisioningIntentHelper {
 
     private static void addPropertyToBundle(
             String propertyName, Properties properties, Bundle bundle) {
-        if(EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME.equals(propertyName)) {
+        if (EXTRAS_TO_CLASS_MAP.get(propertyName) == ComponentName.class) {
             ComponentName componentName = ComponentName.unflattenFromString(
                     properties.getProperty(propertyName));
             bundle.putParcelable(propertyName, componentName);
-        } else if (EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE.equals(propertyName)
-                || EXTRA_PROVISIONING_ROLE_HOLDER_EXTRAS_BUNDLE.equals(propertyName)) {
+        } else if (EXTRAS_TO_CLASS_MAP.get(propertyName) == PersistableBundle.class) {
             try {
                 bundle.putParcelable(propertyName,
                         deserializeExtrasBundle(properties, propertyName));
@@ -137,6 +156,13 @@ final class ProvisioningIntentHelper {
                 Log.e(TAG,
                         "Failed to parse " + propertyName + ".", e);
             }
+        } else if (EXTRAS_TO_CLASS_MAP.get(propertyName) == Boolean.class) {
+            bundle.putBoolean(propertyName,
+                    Boolean.parseBoolean(properties.getProperty(propertyName)));
+        } else if (EXTRAS_TO_CLASS_MAP.get(propertyName) == Long.class) {
+            bundle.putLong(propertyName, Long.parseLong(properties.getProperty(propertyName)));
+        } else if (EXTRAS_TO_CLASS_MAP.get(propertyName) == Integer.class) {
+            bundle.putInt(propertyName, Integer.parseInt(properties.getProperty(propertyName)));
         }
         else {
             bundle.putString(propertyName, properties.getProperty(propertyName));
@@ -212,5 +238,62 @@ final class ProvisioningIntentHelper {
 
         Log.i(TAG, "No compatible records found on nfcIntent");
         return null;
+    }
+
+    private static Map<String, Class> createExtrasToClassMap() {
+        Map<String, Class> map = new HashMap<>();
+        for (String extra : getBooleanExtras()) {
+            map.put(extra, Boolean.class);
+        }
+        for (String extra : getLongExtras()) {
+            map.put(extra, Long.class);
+        }
+        for (String extra : getIntExtras()) {
+            map.put(extra, Integer.class);
+        }
+        for (String extra : getComponentNameExtras()) {
+            map.put(extra, ComponentName.class);
+        }
+        for (String extra : getPersistableBundleExtras()) {
+            map.put(extra, PersistableBundle.class);
+        }
+        return map;
+    }
+
+    private static Set<String> getPersistableBundleExtras() {
+        return Set.of(
+                EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE,
+                EXTRA_PROVISIONING_ROLE_HOLDER_EXTRAS_BUNDLE);
+    }
+
+    private static Set<String> getComponentNameExtras() {
+        return Set.of(EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME);
+    }
+
+    private static Set<String> getIntExtras() {
+        return Set.of(
+                EXTRA_PROVISIONING_WIFI_PROXY_PORT,
+                EXTRA_PROVISIONING_DEVICE_ADMIN_MINIMUM_VERSION_CODE,
+                EXTRA_PROVISIONING_SUPPORTED_MODES);
+    }
+
+    private static Set<String> getLongExtras() {
+        return Set.of(EXTRA_PROVISIONING_LOCAL_TIME);
+    }
+
+    private static Set<String> getBooleanExtras() {
+        return Set.of(
+                EXTRA_PROVISIONING_ALLOW_OFFLINE,
+                EXTRA_PROVISIONING_SHOULD_LAUNCH_RESULT_INTENT,
+                EXTRA_PROVISIONING_KEEP_ACCOUNT_ON_MIGRATION,
+                EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED,
+                EXTRA_PROVISIONING_WIFI_HIDDEN,
+                EXTRA_PROVISIONING_SENSORS_PERMISSION_GRANT_OPT_OUT,
+                EXTRA_PROVISIONING_SKIP_ENCRYPTION,
+                EXTRA_PROVISIONING_SKIP_EDUCATION_SCREENS,
+                EXTRA_PROVISIONING_USE_MOBILE_DATA,
+                EXTRA_PROVISIONING_SKIP_OWNERSHIP_DISCLAIMER,
+                EXTRA_PROVISIONING_RETURN_BEFORE_POLICY_COMPLIANCE,
+                EXTRA_PROVISIONING_KEEP_SCREEN_ON);
     }
 }
