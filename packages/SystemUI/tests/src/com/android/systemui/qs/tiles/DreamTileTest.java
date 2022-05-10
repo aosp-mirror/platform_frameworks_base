@@ -17,6 +17,8 @@
 package com.android.systemui.qs.tiles;
 
 import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertTrue;
 
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -25,6 +27,7 @@ import static org.mockito.Mockito.when;
 import android.content.ComponentName;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.service.dreams.IDreamManager;
 import android.service.quicksettings.Tile;
@@ -70,6 +73,8 @@ public class DreamTileTest extends SysuiTestCase {
     private IDreamManager mDreamManager;
     @Mock
     private BroadcastDispatcher mBroadcastDispatcher;
+    @Mock
+    private UserManager mUserManager;
 
     private TestableLooper mTestableLooper;
 
@@ -94,18 +99,7 @@ public class DreamTileTest extends SysuiTestCase {
         when(mHost.getUserId()).thenReturn(DEFAULT_USER);
         when(mHost.getContext()).thenReturn(mContext);
 
-        mTile = spy(new DreamTile(
-                mHost,
-                mTestableLooper.getLooper(),
-                new Handler(mTestableLooper.getLooper()),
-                new FalsingManagerFake(),
-                mMetricsLogger,
-                mStatusBarStateController,
-                mActivityStarter,
-                mQSLogger,
-                mDreamManager,
-                mSecureSettings,
-                mBroadcastDispatcher));
+        mTile = spy(constructTileForTest(true, false));
 
         mTestableLooper.processAllMessages();
         mTile.initialize();
@@ -195,8 +189,45 @@ public class DreamTileTest extends SysuiTestCase {
                 mTile.getContentDescription(testDreamName));
     }
 
+    @Test
+    public void testUserAvailability() {
+        DreamTile unsupportedTile = constructTileForTest(false, true);
+        assertFalse(unsupportedTile.isAvailable());
+
+        DreamTile supportedTileAllUsers = constructTileForTest(true, false);
+
+        when(mUserManager.isSystemUser()).thenReturn(true);
+        assertTrue(supportedTileAllUsers.isAvailable());
+        when(mUserManager.isSystemUser()).thenReturn(false);
+        assertTrue(supportedTileAllUsers.isAvailable());
+
+        DreamTile supportedTileOnlySystemUser = constructTileForTest(true, true);
+        when(mUserManager.isSystemUser()).thenReturn(true);
+        assertTrue(supportedTileOnlySystemUser.isAvailable());
+        when(mUserManager.isSystemUser()).thenReturn(false);
+        assertFalse(supportedTileOnlySystemUser.isAvailable());
+    }
+
     private void setScreensaverEnabled(boolean enabled) {
         mSecureSettings.putIntForUser(Settings.Secure.SCREENSAVER_ENABLED, enabled ? 1 : 0,
                 DEFAULT_USER);
+    }
+
+    private DreamTile constructTileForTest(boolean dreamSupported,
+            boolean dreamOnlyEnabledForSystemUser) {
+        return new DreamTile(
+                mHost,
+                mTestableLooper.getLooper(),
+                new Handler(mTestableLooper.getLooper()),
+                new FalsingManagerFake(),
+                mMetricsLogger,
+                mStatusBarStateController,
+                mActivityStarter,
+                mQSLogger,
+                mDreamManager,
+                mSecureSettings,
+                mBroadcastDispatcher,
+                mUserManager,
+                dreamSupported, dreamOnlyEnabledForSystemUser);
     }
 }
