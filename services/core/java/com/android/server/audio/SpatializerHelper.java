@@ -125,6 +125,8 @@ public class SpatializerHelper {
     private int mCapableSpatLevel = Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE;
     private boolean mTransauralSupported = false;
     private boolean mBinauralSupported = false;
+    private boolean mIsHeadTrackingSupported = false;
+    private int[] mSupportedHeadTrackingModes = new int[0];
     private int mActualHeadTrackingMode = Spatializer.HEAD_TRACKING_MODE_UNSUPPORTED;
     private int mDesiredHeadTrackingMode = Spatializer.HEAD_TRACKING_MODE_RELATIVE_WORLD;
     private boolean mHeadTrackerAvailable = false;
@@ -137,9 +139,9 @@ public class SpatializerHelper {
     private int mSpatOutput = 0;
     private @Nullable ISpatializer mSpat;
     private @Nullable SpatializerCallback mSpatCallback;
-    private @Nullable SpatializerHeadTrackingCallback mSpatHeadTrackingCallback;
+    private @Nullable SpatializerHeadTrackingCallback mSpatHeadTrackingCallback =
+            new SpatializerHeadTrackingCallback();
     private @Nullable HelperDynamicSensorCallback mDynSensorCallback;
-    private boolean mIsHeadTrackingSupported = false;
 
     // default attributes and format that determine basic availability of spatialization
     private static final AudioAttributes DEFAULT_ATTRIBUTES = new AudioAttributes.Builder()
@@ -195,6 +197,8 @@ public class SpatializerHelper {
             return;
         }
         // capabilities of spatializer?
+        resetCapabilities();
+
         try {
             byte[] levels = spat.getSupportedLevels();
             if (levels == null
@@ -213,6 +217,38 @@ public class SpatializerHelper {
                     break;
                 }
             }
+
+            // Note: head tracking support must be initialized before spatialization modes as
+            // addCompatibleAudioDevice() calls onRoutingUpdated() which will initialize the
+            // sensors according to mIsHeadTrackingSupported.
+            mIsHeadTrackingSupported = spat.isHeadTrackingSupported();
+            if (mIsHeadTrackingSupported) {
+                final byte[] values = spat.getSupportedHeadTrackingModes();
+                ArrayList<Integer> list = new ArrayList<>(0);
+                for (byte value : values) {
+                    switch (value) {
+                        case SpatializerHeadTrackingMode.OTHER:
+                        case SpatializerHeadTrackingMode.DISABLED:
+                            // not expected here, skip
+                            break;
+                        case SpatializerHeadTrackingMode.RELATIVE_WORLD:
+                        case SpatializerHeadTrackingMode.RELATIVE_SCREEN:
+                            list.add(headTrackingModeTypeToSpatializerInt(value));
+                            break;
+                        default:
+                            Log.e(TAG, "Unexpected head tracking mode:" + value,
+                                    new IllegalArgumentException("invalid mode"));
+                            break;
+                    }
+                }
+                mSupportedHeadTrackingModes = new int[list.size()];
+                for (int i = 0; i < list.size(); i++) {
+                    mSupportedHeadTrackingModes[i] = list.get(i);
+                }
+                mActualHeadTrackingMode =
+                        headTrackingModeTypeToSpatializerInt(spat.getActualHeadTrackingMode());
+            }
+
             byte[] spatModes = spat.getSupportedModes();
             for (byte mode : spatModes) {
                 switch (mode) {
@@ -258,7 +294,7 @@ public class SpatializerHelper {
             }
             // TODO read persisted states
         } catch (RemoteException e) {
-            /* capable level remains at NONE*/
+            resetCapabilities();
         } finally {
             if (spat != null) {
                 try {
@@ -285,10 +321,17 @@ public class SpatializerHelper {
         releaseSpat();
         mState = STATE_UNINITIALIZED;
         mSpatLevel = Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE;
-        mCapableSpatLevel = Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE;
         mActualHeadTrackingMode = Spatializer.HEAD_TRACKING_MODE_UNSUPPORTED;
         init(true);
         setSpatializerEnabledInt(featureEnabled);
+    }
+
+    private void resetCapabilities() {
+        mCapableSpatLevel = Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE;
+        mBinauralSupported = false;
+        mTransauralSupported = false;
+        mIsHeadTrackingSupported = false;
+        mSupportedHeadTrackingModes = new int[0];
     }
 
     //------------------------------------------------------
@@ -852,18 +895,19 @@ public class SpatializerHelper {
     private void createSpat() {
         if (mSpat == null) {
             mSpatCallback = new SpatializerCallback();
-            mSpatHeadTrackingCallback = new SpatializerHeadTrackingCallback();
             mSpat = AudioSystem.getSpatializer(mSpatCallback);
             try {
-                mIsHeadTrackingSupported = mSpat.isHeadTrackingSupported();
                 //TODO: register heatracking callback only when sensors are registered
                 if (mIsHeadTrackingSupported) {
+                    mActualHeadTrackingMode =
+                            headTrackingModeTypeToSpatializerInt(mSpat.getActualHeadTrackingMode());
                     mSpat.registerHeadTrackingCallback(mSpatHeadTrackingCallback);
                 }
             } catch (RemoteException e) {
                 Log.e(TAG, "Can't configure head tracking", e);
                 mState = STATE_NOT_SUPPORTED;
                 mCapableSpatLevel = Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE;
+                mActualHeadTrackingMode = Spatializer.HEAD_TRACKING_MODE_UNSUPPORTED;
             }
         }
     }
@@ -883,7 +927,6 @@ public class SpatializerHelper {
             } catch (RemoteException e) {
                 Log.e(TAG, "Can't set release spatializer cleanly", e);
             }
-            mIsHeadTrackingSupported = false;
             mSpat = null;
         }
     }
@@ -951,76 +994,11 @@ public class SpatializerHelper {
     }
 
     synchronized int[] getSupportedHeadTrackingModes() {
-        switch (mState) {
-            case STATE_UNINITIALIZED:
-                return new int[0];
-            case STATE_NOT_SUPPORTED:
-                // return an empty list when Spatializer functionality is not supported
-                // because the list of head tracking modes you can set is actually empty
-                // as defined in {@link Spatializer#getSupportedHeadTrackingModes()}
-                return new int[0];
-            case STATE_ENABLED_UNAVAILABLE:
-            case STATE_DISABLED_UNAVAILABLE:
-            case STATE_DISABLED_AVAILABLE:
-            case STATE_ENABLED_AVAILABLE:
-                if (mSpat == null) {
-                    return new int[0];
-                }
-                break;
-        }
-        // mSpat != null
-        try {
-            final byte[] values = mSpat.getSupportedHeadTrackingModes();
-            ArrayList<Integer> list = new ArrayList<>(0);
-            for (byte value : values) {
-                switch (value) {
-                    case SpatializerHeadTrackingMode.OTHER:
-                    case SpatializerHeadTrackingMode.DISABLED:
-                        // not expected here, skip
-                        break;
-                    case SpatializerHeadTrackingMode.RELATIVE_WORLD:
-                    case SpatializerHeadTrackingMode.RELATIVE_SCREEN:
-                        list.add(headTrackingModeTypeToSpatializerInt(value));
-                        break;
-                    default:
-                        Log.e(TAG, "Unexpected head tracking mode:" + value,
-                                new IllegalArgumentException("invalid mode"));
-                        break;
-                }
-            }
-            int[] modes = new int[list.size()];
-            for (int i = 0; i < list.size(); i++) {
-                modes[i] = list.get(i);
-            }
-            return modes;
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling getSupportedHeadTrackingModes", e);
-            return new int[] { Spatializer.HEAD_TRACKING_MODE_UNSUPPORTED };
-        }
+        return mSupportedHeadTrackingModes;
     }
 
     synchronized int getActualHeadTrackingMode() {
-        switch (mState) {
-            case STATE_UNINITIALIZED:
-                return Spatializer.HEAD_TRACKING_MODE_DISABLED;
-            case STATE_NOT_SUPPORTED:
-                return Spatializer.HEAD_TRACKING_MODE_UNSUPPORTED;
-            case STATE_ENABLED_UNAVAILABLE:
-            case STATE_DISABLED_UNAVAILABLE:
-            case STATE_DISABLED_AVAILABLE:
-            case STATE_ENABLED_AVAILABLE:
-                if (mSpat == null) {
-                    return Spatializer.HEAD_TRACKING_MODE_DISABLED;
-                }
-                break;
-        }
-        // mSpat != null
-        try {
-            return headTrackingModeTypeToSpatializerInt(mSpat.getActualHeadTrackingMode());
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling getActualHeadTrackingMode", e);
-            return Spatializer.HEAD_TRACKING_MODE_UNSUPPORTED;
-        }
+        return mActualHeadTrackingMode;
     }
 
     synchronized int getDesiredHeadTrackingMode() {
@@ -1465,19 +1443,19 @@ public class SpatializerHelper {
         pw.println("\tmState:" + mState);
         pw.println("\tmSpatLevel:" + mSpatLevel);
         pw.println("\tmCapableSpatLevel:" + mCapableSpatLevel);
-        pw.println("\tmActualHeadTrackingMode:"
-                + Spatializer.headtrackingModeToString(mActualHeadTrackingMode));
-        pw.println("\tmDesiredHeadTrackingMode:"
-                + Spatializer.headtrackingModeToString(mDesiredHeadTrackingMode));
-        pw.println("\tsupports binaural:" + mBinauralSupported + " / transaural:"
-                + mTransauralSupported);
+        pw.println("\tmIsHeadTrackingSupported:" + mIsHeadTrackingSupported);
         StringBuilder modesString = new StringBuilder();
-        int[] modes = getSupportedHeadTrackingModes();
-        for (int mode : modes) {
+        for (int mode : mSupportedHeadTrackingModes) {
             modesString.append(Spatializer.headtrackingModeToString(mode)).append(" ");
         }
         pw.println("\tsupported head tracking modes:" + modesString);
+        pw.println("\tmDesiredHeadTrackingMode:"
+                + Spatializer.headtrackingModeToString(mDesiredHeadTrackingMode));
+        pw.println("\tmActualHeadTrackingMode:"
+                + Spatializer.headtrackingModeToString(mActualHeadTrackingMode));
         pw.println("\theadtracker available:" + mHeadTrackerAvailable);
+        pw.println("\tsupports binaural:" + mBinauralSupported + " / transaural:"
+                + mTransauralSupported);
         pw.println("\tmSpatOutput:" + mSpatOutput);
         pw.println("\tdevices:");
         for (SADeviceState device : mSADevices) {
