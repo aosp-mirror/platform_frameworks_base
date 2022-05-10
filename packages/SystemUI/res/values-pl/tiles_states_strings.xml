@@ -122,9 +122,9 @@
     <item msgid="578444932039713369">"Włączony"</item>
   </string-array>
   <string-array name="tile_states_reverse">
-    <item msgid="3574611556622963971">"Niedostępny"</item>
-    <item msgid="8707481475312432575">"Wyłączony"</item>
-    <item msgid="8031106212477483874">"Włączony"</item>
+    <item msgid="3574611556622963971">"Niedostępne"</item>
+    <item msgid="8707481475312432575">"Wyłączone"</item>
+    <item msgid="8031106212477483874">"Włączone"</item>
   </string-array>
   <string-array name="tile_states_reduce_brightness">
     <item msgid="1839836132729571766">"Niedostępny"</item>
