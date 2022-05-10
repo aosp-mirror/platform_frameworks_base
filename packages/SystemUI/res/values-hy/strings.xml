@@ -78,8 +78,7 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Փորձեք նորից"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Չհաջողվեց պահել սքրինշոթը"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Հավելվածը կամ ձեր կազմակերպությունը չի թույլատրում սքրինշոթի ստացումը"</string>
-    <!-- no translation found for screenshot_blocked_by_admin (5486757604822795797) -->
-    <skip />
+    <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Ձեր ՏՏ ադմինիստրատորն արգելափակել է սքրինշոթներ անելու հնարավորությունը"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Փոփոխել"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Փոփոխել սքրինշոթը"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Ուղարկել սքրինշոթ"</string>
@@ -466,7 +465,8 @@
     <string name="wallet_title" msgid="5369767670735827105">"Դրամապանակ"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Վճարեք հեռախոսով՝ ավելի արագ և ապահով"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Ցույց տալ բոլորը"</string>
-    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Ավելացնել քարտ"</string>
+    <!-- no translation found for wallet_secondary_label_no_card (8488069304491125713) -->
+    <skip />
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Թարմացվում է"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Ապակողպել՝ օգտագործելու համար"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Չհաջողվեց բեռնել քարտերը։ Նորից փորձեք։"</string>
@@ -726,8 +726,7 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"Միացնել էներգախնայումը, երբ մարտկոցի լիցքը գրեթե սպառված է"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Ոչ"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
-    <!-- no translation found for ongoing_privacy_dialog_a11y_title (2205794093673327974) -->
-    <skip />
+    <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"Օգտագործվում է"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Հավելվածներն օգտագործում են ձեր <xliff:g id="TYPES_LIST">%s</xliff:g>:"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" և "</string>
@@ -825,7 +824,6 @@
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Ավելի մոտ եկեք՝ <xliff:g id="DEVICENAME">%1$s</xliff:g> սարքում նվագարկելու համար"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Ավելի մոտեցեք «<xliff:g id="DEVICENAME">%1$s</xliff:g>» սարքին՝ նվագարկումը սկսելու համար"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Նվագարկվում է «<xliff:g id="DEVICENAME">%1$s</xliff:g>» սարքում"</string>
-    <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Նվագարկվում է այս հեռախոսում"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Սխալ առաջացավ։ Նորից փորձեք։"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Ակտիվ չէ, ստուգեք հավելվածը"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Չի գտնվել"</string>
@@ -855,6 +853,8 @@
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Պահել"</string>
     <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Սկսվում է…"</string>
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Չհաջողվեց հեռարձակել"</string>
+    <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Չհաջողվեց պահել։ Նորից փորձեք։"</string>
+    <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Չհաջողվեց պահել։"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Կառուցման համարը"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Կառուցման համարը պատճենվեց սեղմատախտակին։"</string>
     <string name="basic_status" msgid="2315371112182658176">"Բաց զրույց"</string>
@@ -939,6 +939,8 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Փոփոխել պատճենված տեքստը"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Փոփոխել պատճենված պատկերը"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Ուղարկել մոտակա սարքի"</string>
+    <!-- no translation found for clipboard_text_hidden (7926899867471812305) -->
+    <skip />
     <string name="add" msgid="81036585205287996">"Ավելացնել"</string>
     <string name="manage_users" msgid="1823875311934643849">"Օգտատերերի կառավարում"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Այս ծանուցումը հնարավոր չէ քաշել տրոհված էկրանի մեկ հատվածից մյուսը։"</string>
