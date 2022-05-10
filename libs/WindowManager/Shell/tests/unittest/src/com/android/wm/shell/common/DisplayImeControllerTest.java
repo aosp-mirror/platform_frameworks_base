@@ -58,7 +58,7 @@ public class DisplayImeControllerTest {
         mT = mock(SurfaceControl.Transaction.class);
         mMock = mock(IInputMethodManager.class);
         mExecutor = spy(Runnable::run);
-        mPerDisplay = new DisplayImeController(null, null, mExecutor, new TransactionPool() {
+        mPerDisplay = new DisplayImeController(null, null, null, mExecutor, new TransactionPool() {
             @Override
             public SurfaceControl.Transaction acquire() {
                 return mT;

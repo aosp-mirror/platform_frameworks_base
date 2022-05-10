@@ -19,6 +19,9 @@ package com.android.keyguard;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
+import static com.android.keyguard.KeyguardClockSwitch.LARGE;
+import static com.android.keyguard.KeyguardClockSwitch.SMALL;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.mock;
@@ -94,6 +97,7 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
         mLargeClockFrame = mKeyguardClockSwitch.findViewById(R.id.lockscreen_clock_view_large);
         mLargeClockView = mKeyguardClockSwitch.findViewById(R.id.animatable_clock_view_large);
         mBigClock = new TextClock(getContext());
+        mKeyguardClockSwitch.mChildrenAreLaidOut = true;
         MockitoAnnotations.initMocks(this);
     }
 
@@ -246,5 +250,57 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
         mKeyguardClockSwitch.setStyle(style);
 
         verify(plugin).setStyle(style);
+    }
+
+    @Test
+    public void switchingToBigClockWithAnimation_makesSmallClockDisappear() {
+        mKeyguardClockSwitch.switchToClock(LARGE, /* animate */ true);
+
+        mKeyguardClockSwitch.mClockInAnim.end();
+        mKeyguardClockSwitch.mClockOutAnim.end();
+
+        assertThat(mLargeClockFrame.getAlpha()).isEqualTo(1);
+        assertThat(mLargeClockFrame.getVisibility()).isEqualTo(VISIBLE);
+        assertThat(mClockFrame.getAlpha()).isEqualTo(0);
+    }
+
+    @Test
+    public void switchingToBigClockNoAnimation_makesSmallClockDisappear() {
+        mKeyguardClockSwitch.switchToClock(LARGE, /* animate */ false);
+
+        assertThat(mLargeClockFrame.getAlpha()).isEqualTo(1);
+        assertThat(mLargeClockFrame.getVisibility()).isEqualTo(VISIBLE);
+        assertThat(mClockFrame.getAlpha()).isEqualTo(0);
+    }
+
+    @Test
+    public void switchingToSmallClockWithAnimation_makesBigClockDisappear() {
+        mKeyguardClockSwitch.switchToClock(SMALL, /* animate */ true);
+
+        mKeyguardClockSwitch.mClockInAnim.end();
+        mKeyguardClockSwitch.mClockOutAnim.end();
+
+        assertThat(mClockFrame.getAlpha()).isEqualTo(1);
+        assertThat(mClockFrame.getVisibility()).isEqualTo(VISIBLE);
+        // only big clock is removed at switch
+        assertThat(mLargeClockFrame.getParent()).isNull();
+        assertThat(mLargeClockFrame.getAlpha()).isEqualTo(0);
+    }
+
+    @Test
+    public void switchingToSmallClockNoAnimation_makesBigClockDisappear() {
+        mKeyguardClockSwitch.switchToClock(SMALL, false);
+
+        assertThat(mClockFrame.getAlpha()).isEqualTo(1);
+        assertThat(mClockFrame.getVisibility()).isEqualTo(VISIBLE);
+        // only big clock is removed at switch
+        assertThat(mLargeClockFrame.getParent()).isNull();
+        assertThat(mLargeClockFrame.getAlpha()).isEqualTo(0);
+    }
+
+    @Test
+    public void switchingToBigClock_returnsTrueOnlyWhenItWasNotVisibleBefore() {
+        assertThat(mKeyguardClockSwitch.switchToClock(LARGE, /* animate */ true)).isTrue();
+        assertThat(mKeyguardClockSwitch.switchToClock(LARGE, /* animate */ true)).isFalse();
     }
 }

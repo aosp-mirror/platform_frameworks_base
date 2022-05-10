@@ -59,7 +59,9 @@ public class CameraSessionStats implements Parcelable {
     private long mRequestCount;
     private long mResultErrorCount;
     private boolean mDeviceError;
+    private float mMaxPreviewFps;
     private ArrayList<CameraStreamStats> mStreamStats;
+    private String mUserTag;
 
     public CameraSessionStats() {
         mFacing = -1;
@@ -67,6 +69,7 @@ public class CameraSessionStats implements Parcelable {
         mApiLevel = -1;
         mIsNdk = false;
         mLatencyMs = -1;
+        mMaxPreviewFps = 0;
         mSessionType = -1;
         mInternalReconfigure = -1;
         mRequestCount = 0;
@@ -77,7 +80,7 @@ public class CameraSessionStats implements Parcelable {
 
     public CameraSessionStats(String cameraId, int facing, int newCameraState,
             String clientName, int apiLevel, boolean isNdk, int creationDuration,
-            int sessionType, int internalReconfigure) {
+            float maxPreviewFps, int sessionType, int internalReconfigure) {
         mCameraId = cameraId;
         mFacing = facing;
         mNewCameraState = newCameraState;
@@ -85,6 +88,7 @@ public class CameraSessionStats implements Parcelable {
         mApiLevel = apiLevel;
         mIsNdk = isNdk;
         mLatencyMs = creationDuration;
+        mMaxPreviewFps = maxPreviewFps;
         mSessionType = sessionType;
         mInternalReconfigure = internalReconfigure;
         mStreamStats = new ArrayList<CameraStreamStats>();
@@ -121,12 +125,14 @@ public class CameraSessionStats implements Parcelable {
         dest.writeInt(mApiLevel);
         dest.writeBoolean(mIsNdk);
         dest.writeInt(mLatencyMs);
+        dest.writeFloat(mMaxPreviewFps);
         dest.writeInt(mSessionType);
         dest.writeInt(mInternalReconfigure);
         dest.writeLong(mRequestCount);
         dest.writeLong(mResultErrorCount);
         dest.writeBoolean(mDeviceError);
         dest.writeTypedList(mStreamStats);
+        dest.writeString(mUserTag);
     }
 
     public void readFromParcel(Parcel in) {
@@ -137,6 +143,7 @@ public class CameraSessionStats implements Parcelable {
         mApiLevel = in.readInt();
         mIsNdk = in.readBoolean();
         mLatencyMs = in.readInt();
+        mMaxPreviewFps = in.readFloat();
         mSessionType = in.readInt();
         mInternalReconfigure = in.readInt();
         mRequestCount = in.readLong();
@@ -146,6 +153,8 @@ public class CameraSessionStats implements Parcelable {
         ArrayList<CameraStreamStats> streamStats = new ArrayList<CameraStreamStats>();
         in.readTypedList(streamStats, CameraStreamStats.CREATOR);
         mStreamStats = streamStats;
+
+        mUserTag = in.readString();
     }
 
     public String getCameraId() {
@@ -176,6 +185,10 @@ public class CameraSessionStats implements Parcelable {
         return mLatencyMs;
     }
 
+    public float getMaxPreviewFps() {
+        return mMaxPreviewFps;
+    }
+
     public int getSessionType() {
         return mSessionType;
     }
@@ -198,5 +211,9 @@ public class CameraSessionStats implements Parcelable {
 
     public List<CameraStreamStats> getStreamStats() {
         return mStreamStats;
+    }
+
+    public String getUserTag() {
+        return mUserTag;
     }
 }

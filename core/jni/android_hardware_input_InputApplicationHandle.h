@@ -19,7 +19,7 @@
 
 #include <string>
 
-#include <input/InputApplication.h>
+#include <gui/InputApplication.h>
 
 #include <nativehelper/JNIHelp.h>
 #include "jni.h"
@@ -41,6 +41,9 @@ private:
 
 extern std::shared_ptr<InputApplicationHandle> android_view_InputApplicationHandle_getHandle(
         JNIEnv* env, jobject inputApplicationHandleObj);
+
+extern jobject android_view_InputApplicationHandle_fromInputApplicationInfo(
+        JNIEnv* env, gui::InputApplicationInfo inputApplicationInfo);
 
 } // namespace android
 

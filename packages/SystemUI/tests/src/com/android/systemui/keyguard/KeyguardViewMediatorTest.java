@@ -18,6 +18,9 @@ package com.android.systemui.keyguard;
 
 import static android.view.WindowManagerPolicyConstants.OFF_BECAUSE_OF_USER;
 
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
+
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,19 +43,25 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardDisplayManager;
+import com.android.keyguard.KeyguardSecurityView;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.mediator.ScreenOnCoordinator;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollectorFake;
+import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
+import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.util.DeviceConfigProxy;
@@ -61,14 +70,15 @@ import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import dagger.Lazy;
+
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper(setAsMainLooper = true)
+@TestableLooper.RunWithLooper
 @SmallTest
 public class KeyguardViewMediatorTest extends SysuiTestCase {
     private KeyguardViewMediator mViewMediator;
@@ -90,7 +100,12 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock KeyguardStateController mKeyguardStateController;
     private @Mock NotificationShadeDepthController mNotificationShadeDepthController;
     private @Mock KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
-    private @Mock UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+    private @Mock ScreenOffAnimationController mScreenOffAnimationController;
+    private @Mock InteractionJankMonitor mInteractionJankMonitor;
+    private @Mock ScreenOnCoordinator mScreenOnCoordinator;
+    private @Mock Lazy<NotificationShadeWindowController> mNotificationShadeWindowControllerLazy;
+    private @Mock DreamOverlayStateController mDreamOverlayStateController;
+    private @Mock ActivityLaunchAnimator mActivityLaunchAnimator;
     private DeviceConfigProxy mDeviceConfig = new DeviceConfigProxyFake();
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
 
@@ -103,7 +118,92 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
         when(mLockPatternUtils.getDevicePolicyManager()).thenReturn(mDevicePolicyManager);
         when(mPowerManager.newWakeLock(anyInt(), any())).thenReturn(mock(WakeLock.class));
+        when(mInteractionJankMonitor.begin(any(), anyInt())).thenReturn(true);
+        when(mInteractionJankMonitor.end(anyInt())).thenReturn(true);
 
+        createAndStartViewMediator();
+    }
+
+    @Test
+    public void testOnGoingToSleep_UpdatesKeyguardGoingAway() {
+        mViewMediator.onStartedGoingToSleep(OFF_BECAUSE_OF_USER);
+        verify(mUpdateMonitor).dispatchKeyguardGoingAway(false);
+        verify(mStatusBarKeyguardViewManager, never()).setKeyguardGoingAwayState(anyBoolean());
+    }
+
+    @Test
+    public void testRegisterDumpable() {
+        verify(mDumpManager).registerDumpable(KeyguardViewMediator.class.getName(), mViewMediator);
+        verify(mStatusBarKeyguardViewManager, never()).setKeyguardGoingAwayState(anyBoolean());
+    }
+
+    @Test
+    public void testKeyguardGone_notGoingaway() {
+        mViewMediator.mViewMediatorCallback.keyguardGone();
+        verify(mStatusBarKeyguardViewManager).setKeyguardGoingAwayState(eq(false));
+    }
+
+    @Test
+    public void testIsAnimatingScreenOff() {
+        when(mDozeParameters.shouldControlUnlockedScreenOff()).thenReturn(true);
+        when(mDozeParameters.shouldAnimateDozingChange()).thenReturn(true);
+
+        mViewMediator.onFinishedGoingToSleep(OFF_BECAUSE_OF_USER, false);
+        mViewMediator.setDozing(true);
+
+        // Mid-doze, we should be animating the screen off animation.
+        mViewMediator.onDozeAmountChanged(0.5f, 0.5f);
+        assertTrue(mViewMediator.isAnimatingScreenOff());
+
+        // Once we're 100% dozed, the screen off animation should be completed.
+        mViewMediator.onDozeAmountChanged(1f, 1f);
+        assertFalse(mViewMediator.isAnimatingScreenOff());
+    }
+
+    @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    public void restoreBouncerWhenSimLockedAndKeyguardIsGoingAway() {
+        // When showing and provisioned
+        mViewMediator.onSystemReady();
+        when(mUpdateMonitor.isDeviceProvisioned()).thenReturn(true);
+        mViewMediator.setShowingLocked(true);
+
+        // and a SIM becomes locked and requires a PIN
+        mViewMediator.mUpdateCallback.onSimStateChanged(
+                1 /* subId */,
+                0 /* slotId */,
+                TelephonyManager.SIM_STATE_PIN_REQUIRED);
+
+        // and the keyguard goes away
+        mViewMediator.setShowingLocked(false);
+        when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(false);
+        mViewMediator.mUpdateCallback.onKeyguardVisibilityChanged(false);
+
+        TestableLooper.get(this).processAllMessages();
+
+        // then make sure it comes back
+        verify(mStatusBarKeyguardViewManager, atLeast(1)).show(null);
+    }
+
+    @Test
+    public void testBouncerPrompt_deviceLockedByAdmin() {
+        // GIVEN no trust agents enabled and biometrics aren't enrolled
+        when(mUpdateMonitor.isTrustUsuallyManaged(anyInt())).thenReturn(false);
+        when(mUpdateMonitor.isUnlockingWithBiometricsPossible(anyInt())).thenReturn(false);
+
+        // WHEN the strong auth reason is AFTER_DPM_LOCK_NOW
+        KeyguardUpdateMonitor.StrongAuthTracker strongAuthTracker =
+                mock(KeyguardUpdateMonitor.StrongAuthTracker.class);
+        when(mUpdateMonitor.getStrongAuthTracker()).thenReturn(strongAuthTracker);
+        when(strongAuthTracker.getStrongAuthForUser(anyInt())).thenReturn(
+                STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW);
+
+        // THEN the bouncer prompt reason should return PROMPT_REASON_DEVICE_ADMIN
+        assertEquals(KeyguardSecurityView.PROMPT_REASON_DEVICE_ADMIN,
+                mViewMediator.mViewMediatorCallback.getBouncerPromptReason());
+    }
+
+    private void createAndStartViewMediator() {
         mViewMediator = new KeyguardViewMediator(
                 mContext,
                 mFalsingCollector,
@@ -124,70 +224,13 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mStatusBarStateController,
                 mKeyguardStateController,
                 () -> mKeyguardUnlockAnimationController,
-                mUnlockedScreenOffAnimationController,
-                () -> mNotificationShadeDepthController);
+                mScreenOffAnimationController,
+                () -> mNotificationShadeDepthController,
+                mScreenOnCoordinator,
+                mInteractionJankMonitor,
+                mDreamOverlayStateController,
+                mNotificationShadeWindowControllerLazy,
+                () -> mActivityLaunchAnimator);
         mViewMediator.start();
-        mViewMediator.onSystemReady();
-    }
-
-    @Ignore("flaky, b/223385977")
-    @Test
-    public void testOnGoingToSleep_UpdatesKeyguardGoingAway() {
-        mViewMediator.onStartedGoingToSleep(OFF_BECAUSE_OF_USER);
-        verify(mUpdateMonitor).dispatchKeyguardGoingAway(false);
-        verify(mStatusBarKeyguardViewManager, never()).setKeyguardGoingAwayState(anyBoolean());
-    }
-
-    @Ignore("flaky, b/223385977")
-    @Test
-    public void testRegisterDumpable() {
-        verify(mDumpManager).registerDumpable(KeyguardViewMediator.class.getName(), mViewMediator);
-        verify(mStatusBarKeyguardViewManager, never()).setKeyguardGoingAwayState(anyBoolean());
-    }
-
-    @Ignore("flaky, b/223385977")
-    @Test
-    public void testKeyguardGone_notGoingaway() {
-        mViewMediator.mViewMediatorCallback.keyguardGone();
-        verify(mStatusBarKeyguardViewManager).setKeyguardGoingAwayState(eq(false));
-    }
-
-    @Test
-    public void testIsAnimatingScreenOff() {
-        when(mDozeParameters.shouldControlUnlockedScreenOff()).thenReturn(true);
-
-        mViewMediator.onFinishedGoingToSleep(OFF_BECAUSE_OF_USER, false);
-        mViewMediator.setDozing(true);
-
-        // Mid-doze, we should be animating the screen off animation.
-        mViewMediator.onDozeAmountChanged(0.5f, 0.5f);
-        assertTrue(mViewMediator.isAnimatingScreenOff());
-
-        // Once we're 100% dozed, the screen off animation should be completed.
-        mViewMediator.onDozeAmountChanged(1f, 1f);
-        assertFalse(mViewMediator.isAnimatingScreenOff());
-    }
-
-    @Test
-    public void restoreBouncerWhenSimLockedAndKeyguardIsGoingAway() {
-        // When showing and provisioned
-        when(mUpdateMonitor.isDeviceProvisioned()).thenReturn(true);
-        mViewMediator.setShowingLocked(true);
-
-        // and a SIM becomes locked and requires a PIN
-        mViewMediator.mUpdateCallback.onSimStateChanged(
-                1 /* subId */,
-                0 /* slotId */,
-                TelephonyManager.SIM_STATE_PIN_REQUIRED);
-
-        // and the keyguard goes away
-        mViewMediator.setShowingLocked(false);
-        when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(false);
-        mViewMediator.mUpdateCallback.onKeyguardVisibilityChanged(false);
-
-        TestableLooper.get(this).processAllMessages();
-
-        // then make sure it comes back
-        verify(mStatusBarKeyguardViewManager, atLeast(1)).show(null);
     }
 }

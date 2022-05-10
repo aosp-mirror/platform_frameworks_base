@@ -20,14 +20,14 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.media.permission.Identity;
 import android.media.permission.IdentityContext;
+import android.media.soundtrigger.ModelParameterRange;
+import android.media.soundtrigger.PhraseRecognitionEvent;
+import android.media.soundtrigger.PhraseSoundModel;
+import android.media.soundtrigger.RecognitionConfig;
+import android.media.soundtrigger.RecognitionEvent;
+import android.media.soundtrigger.SoundModel;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
-import android.media.soundtrigger_middleware.ModelParameterRange;
-import android.media.soundtrigger_middleware.PhraseRecognitionEvent;
-import android.media.soundtrigger_middleware.PhraseSoundModel;
-import android.media.soundtrigger_middleware.RecognitionConfig;
-import android.media.soundtrigger_middleware.RecognitionEvent;
-import android.media.soundtrigger_middleware.SoundModel;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -57,9 +57,10 @@ import java.util.Objects;
  *     }
  * }
  * </code></pre>
- * The actual handling of these events is then done inside of {@link #logReturnWithObject(Object,
- * String, Object, Object[])}, {@link #logVoidReturnWithObject(Object, String, Object[])} and {@link
- * #logExceptionWithObject(Object, String, Exception, Object[])}.
+ * The actual handling of these events is then done inside of
+ * {@link #logReturnWithObject(Object, Identity, String, Object, Object[])},
+ * {@link #logVoidReturnWithObject(Object, Identity, String, Object[])} and {@link
+ * #logExceptionWithObject(Object, Identity, String, Exception, Object[])}.
  */
 public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInternal, Dumpable {
     private static final String TAG = "SoundTriggerMiddlewareLogging";
@@ -94,23 +95,6 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
             logException("attach", e, handle, callback);
             throw e;
         }
-    }
-
-    @Override
-    public void setCaptureState(boolean active) throws RemoteException {
-        try {
-            mDelegate.setCaptureState(active);
-            logVoidReturn("setCaptureState", active);
-        } catch (Exception e) {
-            logException("setCaptureState", e, active);
-            throw e;
-        }
-    }
-
-    @Override
-    public IBinder asBinder() {
-        throw new UnsupportedOperationException(
-                "This implementation is not inteded to be used directly with Binder.");
     }
 
     // Override toString() in order to have the delegate's ID in it.
@@ -298,10 +282,10 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
             }
 
             @Override
-            public void onRecognition(int modelHandle, RecognitionEvent event)
+            public void onRecognition(int modelHandle, RecognitionEvent event, int captureSession)
                     throws RemoteException {
                 try {
-                    mCallbackDelegate.onRecognition(modelHandle, event);
+                    mCallbackDelegate.onRecognition(modelHandle, event, captureSession);
                     logVoidReturn("onRecognition", modelHandle, event);
                 } catch (Exception e) {
                     logException("onRecognition", e, modelHandle, event);
@@ -310,10 +294,11 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
             }
 
             @Override
-            public void onPhraseRecognition(int modelHandle, PhraseRecognitionEvent event)
+            public void onPhraseRecognition(int modelHandle, PhraseRecognitionEvent event,
+                    int captureSession)
                     throws RemoteException {
                 try {
-                    mCallbackDelegate.onPhraseRecognition(modelHandle, event);
+                    mCallbackDelegate.onPhraseRecognition(modelHandle, event, captureSession);
                     logVoidReturn("onPhraseRecognition", modelHandle, event);
                 } catch (Exception e) {
                     logException("onPhraseRecognition", e, modelHandle, event);
@@ -322,12 +307,23 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
             }
 
             @Override
-            public void onRecognitionAvailabilityChange(boolean available) throws RemoteException {
+            public void onModelUnloaded(int modelHandle) throws RemoteException {
                 try {
-                    mCallbackDelegate.onRecognitionAvailabilityChange(available);
-                    logVoidReturn("onRecognitionAvailabilityChange", available);
+                    mCallbackDelegate.onModelUnloaded(modelHandle);
+                    logVoidReturn("onModelUnloaded", modelHandle);
                 } catch (Exception e) {
-                    logException("onRecognitionAvailabilityChange", e, available);
+                    logException("onModelUnloaded", e, modelHandle);
+                    throw e;
+                }
+            }
+
+            @Override
+            public void onResourcesAvailable() throws RemoteException {
+                try {
+                    mCallbackDelegate.onResourcesAvailable();
+                    logVoidReturn("onResourcesAvailable");
+                } catch (Exception e) {
+                    logException("onResourcesAvailable", e);
                     throw e;
                 }
             }
@@ -391,7 +387,7 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
     }
 
     private static void printObject(@NonNull StringBuilder builder, @Nullable Object obj) {
-        ObjectPrinter.print(builder, obj, true, 16);
+        ObjectPrinter.print(builder, obj, 16);
     }
 
     private static String printObject(@Nullable Object obj) {

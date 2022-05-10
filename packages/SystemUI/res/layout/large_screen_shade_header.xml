@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2021 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:systemui="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/split_shade_status_bar"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/large_screen_shade_header_height"
+    android:minHeight="@dimen/large_screen_shade_header_min_height"
+    android:clickable="false"
+    android:focusable="true"
+    android:paddingLeft="@dimen/qs_panel_padding"
+    android:paddingRight="@dimen/qs_panel_padding"
+    android:visibility="gone"
+    android:theme="@style/Theme.SystemUI.QuickSettings.Header">
+
+    <com.android.systemui.statusbar.policy.Clock
+        android:id="@+id/clock"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:minWidth="48dp"
+        android:minHeight="@dimen/large_screen_shade_header_min_height"
+        android:gravity="start|center_vertical"
+        android:paddingStart="@dimen/status_bar_left_clock_starting_padding"
+        android:paddingEnd="@dimen/status_bar_left_clock_end_padding"
+        android:singleLine="true"
+        android:textAppearance="@style/TextAppearance.QS.Status" />
+
+    <com.android.systemui.statusbar.policy.DateView
+        android:id="@+id/date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|center_vertical"
+        android:gravity="center_vertical"
+        android:singleLine="true"
+        android:textAppearance="@style/TextAppearance.QS.Status"
+        systemui:datePattern="@string/abbrev_wday_month_day_no_year_alarm" />
+
+    <FrameLayout
+        android:id="@+id/rightLayout"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="end">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="end|center_vertical">
+
+            <include
+                android:id="@+id/carrier_group"
+                layout="@layout/qs_carrier_group"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="end|center_vertical"
+                android:layout_marginStart="8dp"
+                android:focusable="false"
+                android:minHeight="@dimen/large_screen_shade_header_min_height"
+                android:minWidth="48dp" />
+
+            <com.android.systemui.statusbar.phone.StatusIconContainer
+                android:id="@+id/statusIcons"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:paddingEnd="@dimen/signal_cluster_battery_padding" />
+
+            <com.android.systemui.battery.BatteryMeterView
+                android:id="@+id/batteryRemainingIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                systemui:textAppearance="@style/TextAppearance.QS.Status" />
+            <FrameLayout
+                android:id="@+id/privacy_container"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:minHeight="48dp"
+                android:layout_weight="1"
+                android:paddingStart="16dp">
+
+                <include layout="@layout/ongoing_privacy_chip" />
+
+            </FrameLayout>
+        </LinearLayout>
+    </FrameLayout>
+
+</LinearLayout>

@@ -34,9 +34,9 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.RemoteException;
 
-import com.android.internal.backup.IBackupTransport;
 import com.android.server.backup.TransportManager;
-import com.android.server.backup.transport.TransportClient;
+import com.android.server.backup.transport.BackupTransportClient;
+import com.android.server.backup.transport.TransportConnection;
 import com.android.server.backup.transport.TransportNotAvailableException;
 import com.android.server.backup.transport.TransportNotRegisteredException;
 
@@ -91,9 +91,9 @@ public class TransportTestUtils {
                 || status == TransportStatus.REGISTERED_UNAVAILABLE) {
             // Transport registered
             when(transportManager.getCurrentTransportClient(any()))
-                    .thenReturn(transportMock.transportClient);
+                    .thenReturn(transportMock.mTransportConnection);
             when(transportManager.getCurrentTransportClientOrThrow(any()))
-                    .thenReturn(transportMock.transportClient);
+                    .thenReturn(transportMock.mTransportConnection);
         } else {
             // Transport not registered
             when(transportManager.getCurrentTransportClient(any())).thenReturn(null);
@@ -123,9 +123,9 @@ public class TransportTestUtils {
                 || status == TransportStatus.REGISTERED_UNAVAILABLE) {
             // Transport registered
             when(transportManager.getTransportClient(eq(transportName), any()))
-                    .thenReturn(transportMock.transportClient);
+                    .thenReturn(transportMock.mTransportConnection);
             when(transportManager.getTransportClientOrThrow(eq(transportName), any()))
-                    .thenReturn(transportMock.transportClient);
+                    .thenReturn(transportMock.mTransportConnection);
             when(transportManager.getTransportName(transportComponent)).thenReturn(transportName);
             when(transportManager.getTransportDirName(eq(transportName)))
                     .thenReturn(transportDirName);
@@ -150,28 +150,28 @@ public class TransportTestUtils {
     }
 
     public static TransportMock mockTransport(TransportData transport) throws Exception {
-        final TransportClient transportClientMock;
+        final TransportConnection transportConnectionMock;
         int status = transport.transportStatus;
         ComponentName transportComponent = transport.getTransportComponent();
         if (status == TransportStatus.REGISTERED_AVAILABLE
                 || status == TransportStatus.REGISTERED_UNAVAILABLE) {
             // Transport registered
-            transportClientMock = mock(TransportClient.class);
-            when(transportClientMock.getTransportComponent()).thenReturn(transportComponent);
+            transportConnectionMock = mock(TransportConnection.class);
+            when(transportConnectionMock.getTransportComponent()).thenReturn(transportComponent);
             if (status == TransportStatus.REGISTERED_AVAILABLE) {
                 // Transport registered and available
-                IBackupTransport transportMock = mockTransportBinder(transport);
-                when(transportClientMock.connectOrThrow(any())).thenReturn(transportMock);
-                when(transportClientMock.connect(any())).thenReturn(transportMock);
+                BackupTransportClient transportMock = mockTransportBinder(transport);
+                when(transportConnectionMock.connectOrThrow(any())).thenReturn(transportMock);
+                when(transportConnectionMock.connect(any())).thenReturn(transportMock);
 
-                return new TransportMock(transport, transportClientMock, transportMock);
+                return new TransportMock(transport, transportConnectionMock, transportMock);
             } else {
                 // Transport registered but unavailable
-                when(transportClientMock.connectOrThrow(any()))
+                when(transportConnectionMock.connectOrThrow(any()))
                         .thenThrow(TransportNotAvailableException.class);
-                when(transportClientMock.connect(any())).thenReturn(null);
+                when(transportConnectionMock.connect(any())).thenReturn(null);
 
-                return new TransportMock(transport, transportClientMock, null);
+                return new TransportMock(transport, transportConnectionMock, null);
             }
         } else {
             // Transport not registered
@@ -179,8 +179,9 @@ public class TransportTestUtils {
         }
     }
 
-    private static IBackupTransport mockTransportBinder(TransportData transport) throws Exception {
-        IBackupTransport transportBinder = mock(IBackupTransport.class);
+    private static BackupTransportClient mockTransportBinder(TransportData transport)
+            throws Exception {
+        BackupTransportClient transportBinder = mock(BackupTransportClient.class);
         try {
             when(transportBinder.name()).thenReturn(transport.transportName);
             when(transportBinder.transportDirName()).thenReturn(transport.transportDirName);
@@ -198,15 +199,15 @@ public class TransportTestUtils {
 
     public static class TransportMock {
         public final TransportData transportData;
-        @Nullable public final TransportClient transportClient;
-        @Nullable public final IBackupTransport transport;
+        @Nullable public final TransportConnection mTransportConnection;
+        @Nullable public final BackupTransportClient transport;
 
         private TransportMock(
                 TransportData transportData,
-                @Nullable TransportClient transportClient,
-                @Nullable IBackupTransport transport) {
+                @Nullable TransportConnection transportConnection,
+                @Nullable BackupTransportClient transport) {
             this.transportData = transportData;
-            this.transportClient = transportClient;
+            this.mTransportConnection = transportConnection;
             this.transport = transport;
         }
     }

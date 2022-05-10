@@ -1,3 +1,4 @@
+
 # SystemUI Plugins
 
 Plugins provide an easy way to rapidly prototype SystemUI features.  Plugins are APKs that will be installable only on Build.IS_DEBUGGABLE (dogfood) builds, that can change the behavior of SystemUI at runtime.  This is done by creating a basic set of interfaces that the plugins can expect to be in SysUI, then the portion of code controlled by the interface can be iterated on faster than currently.

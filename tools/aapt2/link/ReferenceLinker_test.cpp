@@ -317,12 +317,12 @@ TEST(ReferenceLinkerTest, ReferenceWithNoPackageUsesCallSitePackage) {
                                                                 CallSite{"com.app.test"},
                                                                 context.get(), &table);
   ASSERT_THAT(s, NotNull());
-  EXPECT_THAT(s->id, Eq(make_value<ResourceId>(0x7f010000)));
+  EXPECT_THAT(s->id, Eq(0x7f010000));
 
   s = ReferenceLinker::ResolveSymbol(*test::BuildReference("string/foo"), CallSite{"com.app.lib"},
                                      context.get(), &table);
   ASSERT_THAT(s, NotNull());
-  EXPECT_THAT(s->id, Eq(make_value<ResourceId>(0x7f010001)));
+  EXPECT_THAT(s->id, Eq(0x7f010001));
 
   EXPECT_THAT(ReferenceLinker::ResolveSymbol(*test::BuildReference("string/foo"),
                                              CallSite{"com.app.bad"}, context.get(), &table),
@@ -348,7 +348,7 @@ TEST(ReferenceLinkerTest, ReferenceSymbolFromOtherSplit) {
                                                                 CallSite{"com.app.test"},
                                                                 context.get(), &table);
   ASSERT_THAT(s, NotNull());
-  EXPECT_THAT(s->id, Eq(make_value<ResourceId>(0x80010000)));
+  EXPECT_THAT(s->id, Eq(0x80010000));
 
   s = ReferenceLinker::ResolveSymbol(*test::BuildReference("string/foo"), CallSite{"com.app.lib"},
                                      context.get(), &table);
