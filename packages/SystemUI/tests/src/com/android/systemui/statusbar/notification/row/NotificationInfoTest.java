@@ -44,12 +44,15 @@ import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
+import android.app.PendingIntent;
+import android.app.Person;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
+import android.telecom.TelecomManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -116,10 +119,14 @@ public class NotificationInfoTest extends SysuiTestCase {
     private ChannelEditorDialogController mChannelEditorDialogController;
     @Mock
     private AssistantFeedbackController mAssistantFeedbackController;
+    @Mock
+    private TelecomManager mTelecomManager;
 
     @Before
     public void setUp() throws Exception {
         mTestableLooper = TestableLooper.get(this);
+
+        mContext.addMockSystemService(TelecomManager.class, mTelecomManager);
 
         mDependency.injectTestDependency(Dependency.BG_LOOPER, mTestableLooper.getLooper());
         mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
@@ -161,7 +168,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 IMPORTANCE_LOW);
         mDefaultNotificationChannelSet.add(mDefaultNotificationChannel);
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID, 0,
-                new Notification(), UserHandle.CURRENT, null, 0);
+                new Notification(), UserHandle.getUserHandleForUid(TEST_UID), null, 0);
         mEntry = new NotificationEntryBuilder().setSbn(mSbn).build();
         when(mAssistantFeedbackController.isFeedbackEnabled()).thenReturn(false);
         when(mAssistantFeedbackController.getInlineDescriptionResource(any()))
@@ -629,6 +636,92 @@ public class NotificationInfoTest extends SysuiTestCase {
                 view.getText());
         assertEquals(GONE,
                 mNotificationInfo.findViewById(R.id.interruptiveness_settings).getVisibility());
+    }
+
+    @Test
+    public void testBindNotification_whenCurrentlyInCall() throws Exception {
+        when(mMockINotificationManager.isInCall(anyString(), anyInt())).thenReturn(true);
+
+        Person person = new Person.Builder()
+                .setName("caller")
+                .build();
+        Notification.Builder nb = new Notification.Builder(
+                mContext, mNotificationChannel.getId())
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setStyle(Notification.CallStyle.forOngoingCall(
+                        person, mock(PendingIntent.class)))
+                .setFullScreenIntent(mock(PendingIntent.class), true)
+                .addAction(new Notification.Action.Builder(null, "test", null).build());
+
+        mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID, 0,
+                nb.build(), UserHandle.getUserHandleForUid(TEST_UID), null, 0);
+        mEntry.setSbn(mSbn);
+        mNotificationInfo.bindNotification(
+                mMockPackageManager,
+                mMockINotificationManager,
+                mOnUserInteractionCallback,
+                mChannelEditorDialogController,
+                TEST_PACKAGE_NAME,
+                mNotificationChannel,
+                mNotificationChannelSet,
+                mEntry,
+                null,
+                null,
+                mUiEventLogger,
+                true,
+                false,
+                true,
+                mAssistantFeedbackController);
+        final TextView view = mNotificationInfo.findViewById(R.id.non_configurable_call_text);
+        assertEquals(View.VISIBLE, view.getVisibility());
+        assertEquals(mContext.getString(R.string.notification_unblockable_call_desc),
+                view.getText());
+        assertEquals(GONE,
+                mNotificationInfo.findViewById(R.id.interruptiveness_settings).getVisibility());
+        assertEquals(GONE,
+                mNotificationInfo.findViewById(R.id.non_configurable_text).getVisibility());
+    }
+
+    @Test
+    public void testBindNotification_whenCurrentlyInCall_notCall() throws Exception {
+        when(mMockINotificationManager.isInCall(anyString(), anyInt())).thenReturn(true);
+
+        Person person = new Person.Builder()
+                .setName("caller")
+                .build();
+        Notification.Builder nb = new Notification.Builder(
+                mContext, mNotificationChannel.getId())
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setFullScreenIntent(mock(PendingIntent.class), true)
+                .addAction(new Notification.Action.Builder(null, "test", null).build());
+
+        mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID, 0,
+                nb.build(), UserHandle.getUserHandleForUid(TEST_UID), null, 0);
+        mEntry.setSbn(mSbn);
+        mNotificationInfo.bindNotification(
+                mMockPackageManager,
+                mMockINotificationManager,
+                mOnUserInteractionCallback,
+                mChannelEditorDialogController,
+                TEST_PACKAGE_NAME,
+                mNotificationChannel,
+                mNotificationChannelSet,
+                mEntry,
+                null,
+                null,
+                mUiEventLogger,
+                true,
+                false,
+                true,
+                mAssistantFeedbackController);
+        assertEquals(GONE,
+                mNotificationInfo.findViewById(R.id.non_configurable_call_text).getVisibility());
+        assertEquals(VISIBLE,
+                mNotificationInfo.findViewById(R.id.interruptiveness_settings).getVisibility());
+        assertEquals(GONE,
+                mNotificationInfo.findViewById(R.id.non_configurable_text).getVisibility());
     }
 
     @Test

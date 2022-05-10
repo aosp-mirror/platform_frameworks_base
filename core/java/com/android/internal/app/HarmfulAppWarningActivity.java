@@ -16,6 +16,8 @@
 
 package com.android.internal.app;
 
+import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -27,6 +29,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+
 import com.android.internal.R;
 
 /**
@@ -48,6 +51,7 @@ public class HarmfulAppWarningActivity extends AlertActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        getWindow().addSystemFlags(SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
         final Intent intent = getIntent();
         mPackageName = intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME);
         mTarget = intent.getParcelableExtra(Intent.EXTRA_INTENT);

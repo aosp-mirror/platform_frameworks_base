@@ -14,23 +14,16 @@ Copyright (C) 2019 The Android Open Source Project
     limitations under the License.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-        android:height="36dp"
-        android:width="34dp"
-        android:viewportHeight="36"
-        android:viewportWidth="34">
-    <path
-        android:fillColor="#FF000000"
-        android:pathData="M13.75 27.5 C15.13,27.5 16.25,26.38 16.25,25 C16.25,23.62 15.13,22.5 13.75,22.5 C12.37,22.5 11.25,23.62 11.25,25 C11.25,26.38 12.37,27.5 13.75,27.5c " />
-    <path
-        android:strokeColor="#FF000000"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"
-        android:strokeWidth="2.5"
-        android:pathData=" M4.5 15 C4.5,15 23,15 23,15 C24.1,15 25,15.9 25,17 C25,17 25,33 25,33 C25,34.1 24.1,35 23,35 C23,35 4.5,35 4.5,35 C3.4,35 2.5,34.1 2.5,33 C2.5,33 2.5,17 2.5,17 C2.5,15.9 3.4,15 4.5,15c " />
-    <path
-        android:strokeColor="#FF000000"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"
-        android:strokeWidth="2.5"
-        android:pathData="M20 15 C20,15 20,8.61 20,8.61 C20,5.24 22.8,2.5 26.25,2.5 C29.7,2.5 32.5,5.24 32.5,8.61 C32.5,8.61 32.5,15 32.5,15 " />
+    android:width="32dp"
+    android:height="32dp"
+    android:viewportWidth="32"
+    android:viewportHeight="32">
+    <group>
+        <clip-path
+            android:pathData="M0,0h32v32h-32z"/>
+        <path
+            android:pathData="M22.25,6.8889C22.25,4.9055 23.9023,3.25 26,3.25C28.0977,3.25 29.75,4.9055 29.75,6.8889V12H32.25V6.8889C32.25,3.4721 29.4251,0.75 26,0.75C22.5749,0.75 19.75,3.4721 19.75,6.8889V10.75H9C7.2051,10.75 5.75,12.2051 5.75,14V26C5.75,27.7949 7.2051,29.25 9,29.25H23C24.7949,29.25 26.25,27.7949 26.25,26V14C26.25,12.2051 24.7949,10.75 23,10.75H22.25V6.8889ZM9,13.25C8.5858,13.25 8.25,13.5858 8.25,14V26C8.25,26.4142 8.5858,26.75 9,26.75H23C23.4142,26.75 23.75,26.4142 23.75,26V14C23.75,13.5858 23.4142,13.25 23,13.25H9ZM16,22C17.1046,22 18,21.1046 18,20C18,18.8954 17.1046,18 16,18C14.8954,18 14,18.8954 14,20C14,21.1046 14.8954,22 16,22Z"
+            android:fillColor="#FF000000"
+            android:fillType="evenOdd"/>
+    </group>
 </vector>

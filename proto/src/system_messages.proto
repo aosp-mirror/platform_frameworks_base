@@ -276,6 +276,20 @@ message SystemMessage {
     // Package: android
     NOTE_UNBLOCK_CAM_TOGGLE = 66;
 
+    // Notify the user that a CA certificate is pending for the wifi connection.
+    NOTE_SERVER_CA_CERTIFICATE = 67;
+
+    // Notify the user to set up dream
+    NOTE_SETUP_DREAM = 68;
+
+    // Inform the user that MTE override is active.
+    // Package: android
+    NOTE_MTE_OVERRIDE_ENABLED = 69;
+
+    // Inform the user of notification permissions changes.
+    // Package: android
+    NOTE_REVIEW_NOTIFICATION_PERMISSIONS = 71;
+
     // ADD_NEW_IDS_ABOVE_THIS_LINE
     // Legacy IDs with arbitrary values appear below
     // Legacy IDs existed as stable non-conflicting constants prior to the O release
@@ -356,5 +370,11 @@ message SystemMessage {
     // Notify the user that some accessibility service has view and control permissions.
     // package: android
     NOTE_A11Y_VIEW_AND_CONTROL_ACCESS = 1005;
+
+    // Notify the user an abusive background app has been detected.
+    // Package: android
+    // Note: this is a base ID, multiple notifications will be posted for each
+    // abusive apps, with notification ID based off this ID.
+    NOTE_ABUSIVE_BG_APPS_BASE = 0xc1b2508; // 203105544
   }
 }

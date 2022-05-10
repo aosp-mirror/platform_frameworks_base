@@ -17,6 +17,7 @@
 package com.android.internal.util;
 
 import java.io.Closeable;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ProtocolException;
@@ -28,8 +29,8 @@ import java.nio.charset.StandardCharsets;
  * requires each line boundary to be explicitly acknowledged using
  * {@link #finishLine()}. Assumes {@link StandardCharsets#US_ASCII} encoding.
  * <p>
- * Currently doesn't support formats based on {@code \0}, tabs, or repeated
- * delimiters.
+ * Currently doesn't support formats based on {@code \0}, tabs.
+ * Consecutive spaces are treated as a single delimiter.
  */
 public class ProcFileReader implements Closeable {
     private final InputStream mStream;
@@ -47,6 +48,9 @@ public class ProcFileReader implements Closeable {
     public ProcFileReader(InputStream stream, int bufferSize) throws IOException {
         mStream = stream;
         mBuffer = new byte[bufferSize];
+        if (stream.markSupported()) {
+            mStream.mark(0);
+        }
 
         // read enough to answer hasMoreData
         fillBuf();
@@ -75,6 +79,11 @@ public class ProcFileReader implements Closeable {
     private void consumeBuf(int count) throws IOException {
         // TODO: consider moving to read pointer, but for now traceview says
         // these copies aren't a bottleneck.
+
+        // skip all consecutive delimiters.
+        while (count < mTail && mBuffer[count] == ' ') {
+            count++;
+        }
         System.arraycopy(mBuffer, count, mBuffer, 0, mTail - count);
         mTail -= count;
         if (mTail == 0) {
@@ -159,11 +168,18 @@ public class ProcFileReader implements Closeable {
      * Parse and return next token as base-10 encoded {@code long}.
      */
     public long nextLong() throws IOException {
+        return nextLong(false);
+    }
+
+    /**
+     * Parse and return next token as base-10 encoded {@code long}.
+     */
+    public long nextLong(boolean stopAtInvalid) throws IOException {
         final int tokenIndex = nextTokenIndex();
         if (tokenIndex == -1) {
             throw new ProtocolException("Missing required long");
         } else {
-            return parseAndConsumeLong(tokenIndex);
+            return parseAndConsumeLong(tokenIndex, stopAtInvalid);
         }
     }
 
@@ -176,7 +192,7 @@ public class ProcFileReader implements Closeable {
         if (tokenIndex == -1) {
             return def;
         } else {
-            return parseAndConsumeLong(tokenIndex);
+            return parseAndConsumeLong(tokenIndex, false);
         }
     }
 
@@ -186,7 +202,10 @@ public class ProcFileReader implements Closeable {
         return s;
     }
 
-    private long parseAndConsumeLong(int tokenIndex) throws IOException {
+    /**
+     * If stopAtInvalid is true, don't throw IOException but return whatever parsed so far.
+     */
+    private long parseAndConsumeLong(int tokenIndex, boolean stopAtInvalid) throws IOException {
         final boolean negative = mBuffer[0] == '-';
 
         // TODO: refactor into something like IntegralToString
@@ -194,7 +213,11 @@ public class ProcFileReader implements Closeable {
         for (int i = negative ? 1 : 0; i < tokenIndex; i++) {
             final int digit = mBuffer[i] - '0';
             if (digit < 0 || digit > 9) {
-                throw invalidLong(tokenIndex);
+                if (stopAtInvalid) {
+                    break;
+                } else {
+                    throw invalidLong(tokenIndex);
+                }
             }
 
             // always parse as negative number and apply sign later; this
@@ -224,6 +247,36 @@ public class ProcFileReader implements Closeable {
             throw new NumberFormatException("parsed value larger than integer");
         }
         return (int) value;
+    }
+
+    /**
+     * Bypass the next token.
+     */
+    public void nextIgnored() throws IOException {
+        final int tokenIndex = nextTokenIndex();
+        if (tokenIndex == -1) {
+            throw new ProtocolException("Missing required token");
+        } else {
+            consumeBuf(tokenIndex + 1);
+        }
+    }
+
+    /**
+     * Reset file position and internal buffer
+     * @throws IOException
+     */
+    public void rewind() throws IOException {
+        if (mStream instanceof FileInputStream) {
+            ((FileInputStream) mStream).getChannel().position(0);
+        } else if (mStream.markSupported()) {
+            mStream.reset();
+        } else {
+            throw new IOException("The InputStream is NOT markable");
+        }
+
+        mTail = 0;
+        mLineFinished = false;
+        fillBuf();
     }
 
     @Override

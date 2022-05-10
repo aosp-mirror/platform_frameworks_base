@@ -29,16 +29,19 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.service.SensorPrivacyIndividualEnabledSensorProto;
+import android.service.SensorPrivacySensorProto;
 import android.service.SensorPrivacyToggleSourceProto;
 import android.util.ArrayMap;
+import android.util.Log;
 import android.util.Pair;
-import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -46,6 +49,8 @@ import java.util.concurrent.Executor;
  */
 @SystemService(Context.SENSOR_PRIVACY_SERVICE)
 public final class SensorPrivacyManager {
+
+    private static final String LOG_TAG = SensorPrivacyManager.class.getSimpleName();
 
     /**
      * Unique Id of this manager to identify to the service
@@ -67,10 +72,8 @@ public final class SensorPrivacyManager {
     public static final String EXTRA_ALL_SENSORS = SensorPrivacyManager.class.getName()
             + ".extra.all_sensors";
 
-    private final SparseArray<Boolean> mToggleSupportCache = new SparseArray<>();
-
     /**
-     * Individual sensors not listed in {@link Sensors}
+     * Sensor constants which are used in {@link SensorPrivacyManager}
      */
     public static class Sensors {
 
@@ -79,12 +82,12 @@ public final class SensorPrivacyManager {
         /**
          * Constant for the microphone
          */
-        public static final int MICROPHONE = SensorPrivacyIndividualEnabledSensorProto.MICROPHONE;
+        public static final int MICROPHONE = SensorPrivacySensorProto.MICROPHONE;
 
         /**
          * Constant for the camera
          */
-        public static final int CAMERA = SensorPrivacyIndividualEnabledSensorProto.CAMERA;
+        public static final int CAMERA = SensorPrivacySensorProto.CAMERA;
 
         /**
          * Individual sensors not listed in {@link Sensors}
@@ -133,6 +136,11 @@ public final class SensorPrivacyManager {
         public static final int OTHER = SensorPrivacyToggleSourceProto.OTHER;
 
         /**
+         * Constant for SAFETY_CENTER.
+         */
+        public static final int SAFETY_CENTER = SensorPrivacyToggleSourceProto.SAFETY_CENTER;
+
+        /**
          * Source for toggling sensors
          *
          * @hide
@@ -142,10 +150,67 @@ public final class SensorPrivacyManager {
                 SETTINGS,
                 DIALOG,
                 SHELL,
-                OTHER
+                OTHER,
+                SAFETY_CENTER
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface Source {}
+
+    }
+
+
+    /**
+     * Constant for software toggle.
+     */
+    public static final int TOGGLE_TYPE_SOFTWARE =
+            SensorPrivacyIndividualEnabledSensorProto.SOFTWARE;
+
+    /**
+     * Constant for hardware toggle.
+     */
+    public static final int TOGGLE_TYPE_HARDWARE =
+            SensorPrivacyIndividualEnabledSensorProto.HARDWARE;
+
+    /**
+     * Types of toggles which can exist for sensor privacy
+     *
+     * @hide
+     */
+    @IntDef(value = {
+            TOGGLE_TYPE_SOFTWARE,
+            TOGGLE_TYPE_HARDWARE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ToggleType {}
+
+    /**
+     * Types of state which can exist for the sensor privacy toggle
+     * @hide
+     */
+    public static class StateTypes {
+        private StateTypes() {}
+
+        /**
+         * Constant indicating privacy is enabled.
+         */
+        public static final int ENABLED = SensorPrivacyIndividualEnabledSensorProto.ENABLED;
+
+        /**
+         * Constant indicating privacy is disabled.
+         */
+        public static final int DISABLED = SensorPrivacyIndividualEnabledSensorProto.DISABLED;
+
+        /**
+         * Types of state which can exist for a sensor privacy toggle
+         *
+         * @hide
+         */
+        @IntDef(value = {
+                ENABLED,
+                DISABLED
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface StateType {}
 
     }
 
@@ -161,13 +226,56 @@ public final class SensorPrivacyManager {
         /**
          * Callback invoked when the sensor privacy state changes.
          *
+         * @param params Parameters describing the new state
+         */
+        default void onSensorPrivacyChanged(@NonNull SensorPrivacyChangedParams params) {
+            onSensorPrivacyChanged(params.mSensor, params.mEnabled);
+        }
+
+        /**
+         * Callback invoked when the sensor privacy state changes.
+         *
          * @param sensor the sensor whose state is changing
          * @param enabled true if sensor privacy is enabled, false otherwise.
+         *
+         * @deprecated Please use
+         * {@link #onSensorPrivacyChanged(SensorPrivacyChangedParams)}
          */
+        @Deprecated
         void onSensorPrivacyChanged(int sensor, boolean enabled);
+
+        /**
+         * A class containing information about what the sensor privacy state has changed to.
+         */
+        class SensorPrivacyChangedParams {
+
+            private int mToggleType;
+            private int mSensor;
+            private boolean mEnabled;
+
+            private SensorPrivacyChangedParams(int toggleType, int sensor, boolean enabled) {
+                mToggleType = toggleType;
+                mSensor = sensor;
+                mEnabled = enabled;
+            }
+
+            public @ToggleType int getToggleType() {
+                return mToggleType;
+            }
+
+            public @Sensors.Sensor int getSensor() {
+                return mSensor;
+            }
+
+            public boolean isEnabled() {
+                return mEnabled;
+            }
+        }
     }
 
     private static final Object sInstanceLock = new Object();
+
+    private final Object mLock = new Object();
 
     @GuardedBy("sInstanceLock")
     private static SensorPrivacyManager sInstance;
@@ -178,12 +286,48 @@ public final class SensorPrivacyManager {
     @NonNull
     private final ISensorPrivacyManager mService;
 
+    @GuardedBy("mLock")
+    private final ArrayMap<Pair<Integer, Integer>, Boolean> mToggleSupportCache = new ArrayMap<>();
+
     @NonNull
     private final ArrayMap<OnAllSensorPrivacyChangedListener, ISensorPrivacyListener> mListeners;
 
+    /** Registered listeners */
+    @GuardedBy("mLock")
     @NonNull
-    private final ArrayMap<Pair<OnSensorPrivacyChangedListener, Integer>, ISensorPrivacyListener>
-            mIndividualListeners;
+    private final ArrayMap<OnSensorPrivacyChangedListener, Executor> mToggleListeners =
+            new ArrayMap<>();
+
+    /** Listeners registered using the deprecated APIs and which
+     * OnSensorPrivacyChangedListener they're using. */
+    @GuardedBy("mLock")
+    @NonNull
+    private final ArrayMap<Pair<Integer, OnSensorPrivacyChangedListener>,
+            OnSensorPrivacyChangedListener> mLegacyToggleListeners = new ArrayMap<>();
+
+    /** The singleton ISensorPrivacyListener for IPC which will be used to dispatch to local
+     * listeners */
+    @NonNull
+    private final ISensorPrivacyListener mIToggleListener = new ISensorPrivacyListener.Stub() {
+        @Override
+        public void onSensorPrivacyChanged(int toggleType, int sensor, boolean enabled) {
+            synchronized (mLock) {
+                for (int i = 0; i < mToggleListeners.size(); i++) {
+                    OnSensorPrivacyChangedListener listener = mToggleListeners.keyAt(i);
+                    mToggleListeners.valueAt(i).execute(() -> listener
+                            .onSensorPrivacyChanged(new OnSensorPrivacyChangedListener
+                                    .SensorPrivacyChangedParams(toggleType, sensor, enabled)));
+                }
+            }
+        }
+    };
+
+    /** Whether the singleton ISensorPrivacyListener has been registered */
+    @GuardedBy("mLock")
+    @NonNull
+    private boolean mToggleListenerRegistered = false;
+
+    private Boolean mRequiresAuthentication = null;
 
     /**
      * Private constructor to ensure only a single instance is created.
@@ -192,7 +336,6 @@ public final class SensorPrivacyManager {
         mContext = context;
         mService = service;
         mListeners = new ArrayMap<>();
-        mIndividualListeners = new ArrayMap<>();
     }
 
     /**
@@ -216,30 +359,56 @@ public final class SensorPrivacyManager {
     }
 
     /**
+     * Returns the single instance of the SensorPrivacyManager.
+     *
+     * @hide
+     */
+    public static SensorPrivacyManager getInstance(Context context, ISensorPrivacyManager service) {
+        synchronized (sInstanceLock) {
+            sInstance = new SensorPrivacyManager(context, service);
+            return sInstance;
+        }
+    }
+
+    /**
      * Checks if the given toggle is supported on this device
      * @param sensor The sensor to check
      * @return whether the toggle for the sensor is supported on this device.
      */
     public boolean supportsSensorToggle(@Sensors.Sensor int sensor) {
+        return supportsSensorToggle(TOGGLE_TYPE_SOFTWARE, sensor);
+    }
+
+    /**
+     * Checks if the given toggle is supported on this device
+     * @param sensor The sensor to check
+     * @return whether the toggle for the sensor is supported on this device.
+     *
+     */
+    public boolean supportsSensorToggle(@ToggleType int toggleType, @Sensors.Sensor int sensor) {
         try {
-            Boolean val = mToggleSupportCache.get(sensor);
-            if (val == null) {
-                val = mService.supportsSensorToggle(sensor);
-                mToggleSupportCache.put(sensor, val);
+            Pair key = new Pair(toggleType, sensor);
+            synchronized (mLock) {
+                Boolean val = mToggleSupportCache.get(key);
+                if (val == null) {
+                    val = mService.supportsSensorToggle(toggleType, sensor);
+                    mToggleSupportCache.put(key, val);
+                }
+                return val;
             }
-            return val;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
+     *
      * Registers a new listener to receive notification when the state of sensor privacy
      * changes.
      *
      * @param sensor the sensor to listen to changes to
      * @param listener the OnSensorPrivacyChangedListener to be notified when the state of sensor
-     *                 privacy changes.
+     *                       privacy changes.
      *
      * @hide
      */
@@ -247,11 +416,11 @@ public final class SensorPrivacyManager {
     @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
     public void addSensorPrivacyListener(@Sensors.Sensor int sensor,
             @NonNull OnSensorPrivacyChangedListener listener) {
-        addSensorPrivacyListener(sensor, mContext.getUserId(), mContext.getMainExecutor(),
-                listener);
+        addSensorPrivacyListener(sensor, mContext.getMainExecutor(), listener);
     }
 
     /**
+     *
      * Registers a new listener to receive notification when the state of sensor privacy
      * changes.
      *
@@ -263,19 +432,20 @@ public final class SensorPrivacyManager {
      * @hide
      */
     @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
-    public void addSensorPrivacyListener(@Sensors.Sensor int sensor, @UserIdInt int userId,
+    public void addSensorPrivacyListener(@Sensors.Sensor int sensor, int userId,
             @NonNull OnSensorPrivacyChangedListener listener) {
-        addSensorPrivacyListener(sensor, userId, mContext.getMainExecutor(), listener);
+        addSensorPrivacyListener(sensor, mContext.getMainExecutor(), listener);
     }
 
     /**
+     *
      * Registers a new listener to receive notification when the state of sensor privacy
      * changes.
      *
      * @param sensor the sensor to listen to changes to
      * @param executor the executor to dispatch the callback on
      * @param listener the OnSensorPrivacyChangedListener to be notified when the state of sensor
-     *                 privacy changes.
+     *                       privacy changes.
      *
      * @hide
      */
@@ -283,43 +453,76 @@ public final class SensorPrivacyManager {
     @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
     public void addSensorPrivacyListener(@Sensors.Sensor int sensor, @NonNull Executor executor,
             @NonNull OnSensorPrivacyChangedListener listener) {
-        addSensorPrivacyListener(sensor, mContext.getUserId(), executor, listener);
+        Pair<Integer, OnSensorPrivacyChangedListener> pair = new Pair(sensor, listener);
+        OnSensorPrivacyChangedListener toggleListener = new OnSensorPrivacyChangedListener() {
+            @Override
+            public void onSensorPrivacyChanged(SensorPrivacyChangedParams params) {
+                if (params.getSensor() == sensor) {
+                    listener.onSensorPrivacyChanged(params.getSensor(), params.isEnabled());
+                }
+            }
+            @Override
+            public void onSensorPrivacyChanged(int sensor, boolean enabled) {
+            }
+        };
+
+        synchronized (mLock) {
+            mLegacyToggleListeners.put(pair, toggleListener);
+            addSensorPrivacyListenerLocked(executor, toggleListener);
+        }
     }
 
     /**
+     *
      * Registers a new listener to receive notification when the state of sensor privacy
      * changes.
      *
-     * @param sensor the sensor to listen to changes to
-     * @param executor the executor to dispatch the callback on
-     * @param userId the user's id
-     * @param listener the OnSensorPrivacyChangedListener to be notified when the state of sensor
-     *                 privacy changes.
+     * @param listener the OnSensorPrivacyChangedListener to be notified when the state of
+     *                 sensor privacy changes.
      *
      * @hide
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
-    public void addSensorPrivacyListener(@Sensors.Sensor int sensor, @UserIdInt int userId,
-            @NonNull Executor executor, @NonNull OnSensorPrivacyChangedListener listener) {
-        synchronized (mIndividualListeners) {
-            ISensorPrivacyListener iListener = mIndividualListeners.get(listener);
-            if (iListener == null) {
-                iListener = new ISensorPrivacyListener.Stub() {
-                    @Override
-                    public void onSensorPrivacyChanged(boolean enabled) {
-                        executor.execute(() -> listener.onSensorPrivacyChanged(sensor, enabled));
-                    }
-                };
-                mIndividualListeners.put(new Pair<>(listener, sensor), iListener);
-            }
+    public void addSensorPrivacyListener(@NonNull OnSensorPrivacyChangedListener listener) {
+        addSensorPrivacyListener(mContext.getMainExecutor(), listener);
+    }
 
+    /**
+     *
+     * Registers a new listener to receive notification when the state of sensor privacy
+     * changes.
+     *
+     * @param executor the executor to dispatch the callback on
+     * @param listener the OnSensorPrivacyChangedListener to be notified when the state of
+     *                 sensor privacy changes.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
+    public void addSensorPrivacyListener(@NonNull Executor executor,
+            @NonNull OnSensorPrivacyChangedListener listener) {
+        synchronized (mLock) {
+            addSensorPrivacyListenerLocked(executor, listener);
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void addSensorPrivacyListenerLocked(@NonNull Executor executor,
+            @NonNull OnSensorPrivacyChangedListener listener) {
+        if (!mToggleListenerRegistered) {
             try {
-                mService.addIndividualSensorPrivacyListener(userId, sensor,
-                        iListener);
+                mService.addToggleSensorPrivacyListener(mIToggleListener);
+                mToggleListenerRegistered = true;
             } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
+                e.rethrowFromSystemServer();
             }
         }
+        if (mToggleListeners.containsKey(listener)) {
+            throw new IllegalArgumentException("listener is already registered");
+        }
+        mToggleListeners.put(listener, executor);
     }
 
     /**
@@ -335,20 +538,63 @@ public final class SensorPrivacyManager {
     @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
     public void removeSensorPrivacyListener(@Sensors.Sensor int sensor,
             @NonNull OnSensorPrivacyChangedListener listener) {
-        synchronized (mListeners) {
-            for (int i = 0; i < mIndividualListeners.size(); i++) {
-                Pair<OnSensorPrivacyChangedListener, Integer> pair = mIndividualListeners.keyAt(i);
-                if (pair.second == sensor && pair.first.equals(listener)) {
-                    try {
-                        mService.removeIndividualSensorPrivacyListener(sensor,
-                                mIndividualListeners.valueAt(i));
-                    } catch (RemoteException e) {
-                        throw e.rethrowFromSystemServer();
-                    }
-                    mIndividualListeners.removeAt(i--);
-                }
+        Pair<Integer, OnSensorPrivacyChangedListener> pair = new Pair(sensor, listener);
+        synchronized (mLock) {
+            OnSensorPrivacyChangedListener onToggleSensorPrivacyChangedListener =
+                    mLegacyToggleListeners.remove(pair);
+            if (onToggleSensorPrivacyChangedListener != null) {
+                removeSensorPrivacyListenerLocked(onToggleSensorPrivacyChangedListener);
             }
         }
+    }
+
+    /**
+     * Unregisters the specified listener from receiving notifications when the state of any sensor
+     * privacy changes.
+     *
+     * @param listener the {@link OnSensorPrivacyChangedListener} to be unregistered from
+     *                 notifications when sensor privacy changes.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
+    public void removeSensorPrivacyListener(
+            @NonNull OnSensorPrivacyChangedListener listener) {
+        synchronized (mLock) {
+            removeSensorPrivacyListenerLocked(listener);
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void removeSensorPrivacyListenerLocked(
+            @NonNull OnSensorPrivacyChangedListener listener) {
+        mToggleListeners.remove(listener);
+        if (mToggleListeners.size() == 0) {
+            try {
+                mService.removeToggleSensorPrivacyListener(mIToggleListener);
+                mToggleListenerRegistered = false;
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Returns whether sensor privacy is currently enabled by software control for a specific
+     * sensor.
+     *
+     * @return true if sensor privacy is currently enabled, false otherwise.
+     *
+     * @deprecated Prefer to use {@link #isSensorPrivacyEnabled(int, int)}
+     *
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
+    public boolean isSensorPrivacyEnabled(@Sensors.Sensor int sensor) {
+        return isSensorPrivacyEnabled(TOGGLE_TYPE_SOFTWARE, sensor);
     }
 
     /**
@@ -360,24 +606,57 @@ public final class SensorPrivacyManager {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
-    public boolean isSensorPrivacyEnabled(@Sensors.Sensor int sensor) {
-        return isSensorPrivacyEnabled(sensor, mContext.getUserId());
+    public boolean isSensorPrivacyEnabled(@ToggleType int toggleType,
+            @Sensors.Sensor int sensor) {
+        try {
+            return mService.isToggleSensorPrivacyEnabled(toggleType, sensor);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
      * Returns whether sensor privacy is currently enabled for a specific sensor.
+     * Combines the state of the SW + HW toggles and returns true if either the
+     * SOFTWARE or the HARDWARE toggles are enabled.
      *
      * @return true if sensor privacy is currently enabled, false otherwise.
      *
      * @hide
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
-    public boolean isSensorPrivacyEnabled(@Sensors.Sensor int sensor, @UserIdInt int userId) {
+    public boolean areAnySensorPrivacyTogglesEnabled(@Sensors.Sensor int sensor) {
         try {
-            return mService.isIndividualSensorPrivacyEnabled(userId, sensor);
+            return mService.isCombinedToggleSensorPrivacyEnabled(sensor);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Sets sensor privacy to the specified state for an individual sensor.
+     *
+     * @param sensor the sensor which to change the state for
+     * @param enable the state to which sensor privacy should be set.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
+    public void setSensorPrivacy(@Sensors.Sensor int sensor,
+            boolean enable) {
+        setSensorPrivacy(resolveSourceFromCurrentContext(), sensor, enable,
+                UserHandle.USER_CURRENT);
+    }
+
+    private @Sources.Source int resolveSourceFromCurrentContext() {
+        String packageName = mContext.getOpPackageName();
+        if (Objects.equals(packageName,
+                mContext.getPackageManager().getPermissionControllerPackageName())) {
+            return Sources.SAFETY_CENTER;
+        }
+        return Sources.OTHER;
     }
 
     /**
@@ -392,7 +671,7 @@ public final class SensorPrivacyManager {
     @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
     public void setSensorPrivacy(@Sources.Source int source, @Sensors.Sensor int sensor,
             boolean enable) {
-        setSensorPrivacy(source, sensor, enable, mContext.getUserId());
+        setSensorPrivacy(source, sensor, enable, UserHandle.USER_CURRENT);
     }
 
     /**
@@ -408,7 +687,7 @@ public final class SensorPrivacyManager {
     public void setSensorPrivacy(@Sources.Source int source, @Sensors.Sensor int sensor,
             boolean enable, @UserIdInt int userId) {
         try {
-            mService.setIndividualSensorPrivacy(userId, source, sensor, enable);
+            mService.setToggleSensorPrivacy(userId, source, sensor, enable);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -424,11 +703,10 @@ public final class SensorPrivacyManager {
      *
      * @hide
      */
-    @TestApi
     @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
     public void setSensorPrivacyForProfileGroup(@Sources.Source int source,
             @Sensors.Sensor int sensor, boolean enable) {
-        setSensorPrivacyForProfileGroup(source , sensor, enable, mContext.getUserId());
+        setSensorPrivacyForProfileGroup(source , sensor, enable, UserHandle.USER_CURRENT);
     }
 
     /**
@@ -446,7 +724,7 @@ public final class SensorPrivacyManager {
     public void setSensorPrivacyForProfileGroup(@Sources.Source int source,
             @Sensors.Sensor int sensor, boolean enable, @UserIdInt int userId) {
         try {
-            mService.setIndividualSensorPrivacyForProfileGroup(userId, source, sensor, enable);
+            mService.setToggleSensorPrivacyForProfileGroup(userId, source, sensor, enable);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -455,7 +733,6 @@ public final class SensorPrivacyManager {
     /**
      * Don't show dialogs to turn off sensor privacy for this package.
      *
-     * @param packageName Package name not to show dialogs for
      * @param suppress Whether to suppress or re-enable.
      *
      * @hide
@@ -463,13 +740,12 @@ public final class SensorPrivacyManager {
     @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
     public void suppressSensorPrivacyReminders(int sensor,
             boolean suppress) {
-        suppressSensorPrivacyReminders(sensor, suppress, mContext.getUserId());
+        suppressSensorPrivacyReminders(sensor, suppress, UserHandle.USER_CURRENT);
     }
 
     /**
      * Don't show dialogs to turn off sensor privacy for this package.
      *
-     * @param packageName Package name not to show dialogs for
      * @param suppress Whether to suppress or re-enable.
      * @param userId the user's id
      *
@@ -479,10 +755,46 @@ public final class SensorPrivacyManager {
     public void suppressSensorPrivacyReminders(int sensor,
             boolean suppress, @UserIdInt int userId) {
         try {
-            mService.suppressIndividualSensorPrivacyReminders(userId, sensor,
+            mService.suppressToggleSensorPrivacyReminders(userId, sensor,
                     token, suppress);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @return whether the device is required to be unlocked to change software state.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
+    public boolean requiresAuthentication() {
+        if (mRequiresAuthentication == null) {
+            try {
+                mRequiresAuthentication = mService.requiresAuthentication();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return mRequiresAuthentication;
+    }
+
+    /**
+     * If sensor privacy for the provided sensor is enabled then this call will show the user the
+     * dialog which is shown when an application attempts to use that sensor. If privacy isn't
+     * enabled then this does nothing.
+     *
+     * This call can only be made by the system uid.
+     *
+     * @throws SecurityException when called by someone other than system uid.
+     *
+     * @hide
+     */
+    public void showSensorUseDialog(int sensor) {
+        try {
+            mService.showSensorUseDialog(sensor);
+        } catch (RemoteException e) {
+            Log.e(LOG_TAG, "Received exception while trying to show sensor use dialog", e);
         }
     }
 
@@ -535,7 +847,8 @@ public final class SensorPrivacyManager {
             if (iListener == null) {
                 iListener = new ISensorPrivacyListener.Stub() {
                     @Override
-                    public void onSensorPrivacyChanged(boolean enabled) {
+                    public void onSensorPrivacyChanged(int toggleType, int sensor,
+                            boolean enabled) {
                         listener.onAllSensorPrivacyChanged(enabled);
                     }
                 };
@@ -590,4 +903,5 @@ public final class SensorPrivacyManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
 }

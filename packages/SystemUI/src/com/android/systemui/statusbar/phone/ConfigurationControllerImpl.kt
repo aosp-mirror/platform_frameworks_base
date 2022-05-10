@@ -17,22 +17,29 @@ package com.android.systemui.statusbar.phone
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
+import android.graphics.Rect
 import android.os.LocaleList
+import android.view.View.LAYOUT_DIRECTION_RTL
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.policy.ConfigurationController
 
 import java.util.ArrayList
+import javax.inject.Inject
 
-class ConfigurationControllerImpl(context: Context) : ConfigurationController {
+@SysUISingleton
+class ConfigurationControllerImpl @Inject constructor(context: Context) : ConfigurationController {
 
     private val listeners: MutableList<ConfigurationController.ConfigurationListener> = ArrayList()
     private val lastConfig = Configuration()
     private var density: Int = 0
     private var smallestScreenWidth: Int = 0
+    private var maxBounds: Rect? = null
     private var fontScale: Float = 0.toFloat()
     private val inCarMode: Boolean
     private var uiMode: Int = 0
     private var localeList: LocaleList? = null
     private val context: Context
+    private var layoutDirection: Int
 
     init {
         val currentConfig = context.resources.configuration
@@ -44,6 +51,7 @@ class ConfigurationControllerImpl(context: Context) : ConfigurationController {
                 Configuration.UI_MODE_TYPE_CAR
         uiMode = currentConfig.uiMode and Configuration.UI_MODE_NIGHT_MASK
         localeList = currentConfig.locales
+        layoutDirection = currentConfig.layoutDirection
     }
 
     override fun notifyThemeChanged() {
@@ -82,6 +90,14 @@ class ConfigurationControllerImpl(context: Context) : ConfigurationController {
             }
         }
 
+        val maxBounds = newConfig.windowConfiguration.maxBounds
+        if (maxBounds != this.maxBounds) {
+            this.maxBounds = maxBounds
+            listeners.filterForEach({ this.listeners.contains(it) }) {
+                it.onMaxBoundsChanged()
+            }
+        }
+
         val localeList = newConfig.locales
         if (localeList != this.localeList) {
             this.localeList = localeList
@@ -101,9 +117,16 @@ class ConfigurationControllerImpl(context: Context) : ConfigurationController {
             }
         }
 
+        if (layoutDirection != newConfig.layoutDirection) {
+            layoutDirection = newConfig.layoutDirection
+            listeners.filterForEach({ this.listeners.contains(it) }) {
+                it.onLayoutDirectionChanged(layoutDirection == LAYOUT_DIRECTION_RTL)
+            }
+        }
+
         if (lastConfig.updateFrom(newConfig) and ActivityInfo.CONFIG_ASSETS_PATHS != 0) {
             listeners.filterForEach({ this.listeners.contains(it) }) {
-                it.onOverlayChanged()
+                it.onThemeChanged()
             }
         }
     }
@@ -115,6 +138,10 @@ class ConfigurationControllerImpl(context: Context) : ConfigurationController {
 
     override fun removeCallback(listener: ConfigurationController.ConfigurationListener) {
         listeners.remove(listener)
+    }
+
+    override fun isLayoutRtl(): Boolean {
+        return layoutDirection == LAYOUT_DIRECTION_RTL
     }
 }
 

@@ -18,6 +18,8 @@ package com.android.settingslib.widget;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -53,6 +55,7 @@ public class IllustrationPreferenceTest {
     @Mock
     private ViewGroup mRootView;
     private Uri mImageUri;
+    private ImageView mBackgroundView;
     private LottieAnimationView mAnimationView;
     private IllustrationPreference mPreference;
     private PreferenceViewHolder mViewHolder;
@@ -64,6 +67,7 @@ public class IllustrationPreferenceTest {
         MockitoAnnotations.initMocks(this);
 
         mImageUri = new Uri.Builder().build();
+        mBackgroundView = new ImageView(mContext);
         mAnimationView = spy(new LottieAnimationView(mContext));
         mMiddleGroundLayout = new FrameLayout(mContext);
         final FrameLayout illustrationFrame = new FrameLayout(mContext);
@@ -71,6 +75,7 @@ public class IllustrationPreferenceTest {
                 new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT));
         doReturn(mMiddleGroundLayout).when(mRootView).findViewById(R.id.middleground_layout);
+        doReturn(mBackgroundView).when(mRootView).findViewById(R.id.background_view);
         doReturn(mAnimationView).when(mRootView).findViewById(R.id.lottie_view);
         doReturn(illustrationFrame).when(mRootView).findViewById(R.id.illustration_frame);
         mViewHolder = spy(PreferenceViewHolder.createInstanceForTests(mRootView));
@@ -129,5 +134,56 @@ public class IllustrationPreferenceTest {
         mPreference.onBindViewHolder(mViewHolder);
 
         verify(drawable).start();
+    }
+
+    @Test
+    public void playLottieAnimationWithUri_verifyFailureListener() {
+        doReturn(null).when(mAnimationView).getDrawable();
+
+        mPreference.setImageUri(mImageUri);
+        mPreference.onBindViewHolder(mViewHolder);
+
+        verify(mAnimationView).setFailureListener(any());
+    }
+
+    @Test
+    public void playLottieAnimationWithResource_verifyFailureListener() {
+        // fake the valid lottie image
+        final int fakeValidResId = 111;
+        doNothing().when(mAnimationView).setImageResource(fakeValidResId);
+        doReturn(null).when(mAnimationView).getDrawable();
+
+        mPreference.setLottieAnimationResId(fakeValidResId);
+        mPreference.onBindViewHolder(mViewHolder);
+
+        verify(mAnimationView).setFailureListener(any());
+    }
+
+    @Test
+    public void setMaxHeight_smallerThanRestrictedHeight_matchResult() {
+        final int restrictedHeight =
+                mContext.getResources().getDimensionPixelSize(
+                        R.dimen.settingslib_illustration_height);
+        final int maxHeight = restrictedHeight - 200;
+
+        mPreference.setMaxHeight(maxHeight);
+        mPreference.onBindViewHolder(mViewHolder);
+
+        assertThat(mBackgroundView.getMaxHeight()).isEqualTo(maxHeight);
+        assertThat(mAnimationView.getMaxHeight()).isEqualTo(maxHeight);
+    }
+
+    @Test
+    public void setMaxHeight_largerThanRestrictedHeight_specificHeight() {
+        final int restrictedHeight =
+                mContext.getResources().getDimensionPixelSize(
+                        R.dimen.settingslib_illustration_height);
+        final int maxHeight = restrictedHeight + 200;
+
+        mPreference.setMaxHeight(maxHeight);
+        mPreference.onBindViewHolder(mViewHolder);
+
+        assertThat(mBackgroundView.getMaxHeight()).isEqualTo(restrictedHeight);
+        assertThat(mAnimationView.getMaxHeight()).isEqualTo(restrictedHeight);
     }
 }

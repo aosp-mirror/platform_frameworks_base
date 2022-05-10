@@ -24,6 +24,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.server.policy.WindowManagerPolicy.TRANSIT_EXIT;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -44,6 +45,7 @@ import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 import java.util.function.BiFunction;
 
@@ -92,6 +94,20 @@ public class WindowTokenTests extends WindowTestsBase {
     }
 
     @Test
+    public void testAddWindow_assignsLayers() {
+        final TestWindowToken token1 = createTestWindowToken(0, mDisplayContent);
+        final TestWindowToken token2 = createTestWindowToken(0, mDisplayContent);
+        final WindowState window1 = createWindow(null, TYPE_STATUS_BAR, token1, "window1");
+        final WindowState window2 = createWindow(null, TYPE_STATUS_BAR, token2, "window2");
+
+        token1.addWindow(window1);
+        token2.addWindow(window2);
+
+        assertEquals(token1.getLastLayer(), 0);
+        assertEquals(token2.getLastLayer(), 1);
+    }
+
+    @Test
     public void testChildRemoval() {
         final DisplayContent dc = mDisplayContent;
         final TestWindowToken token = createTestWindowToken(0, dc);
@@ -126,7 +142,7 @@ public class WindowTokenTests extends WindowTestsBase {
         final WindowState window1 = createWindow(null, TYPE_TOAST, token, "window1");
         final WindowState window2 = createWindow(null, TYPE_TOAST, token, "window2");
 
-        mDisplayContent.removeWindowToken(token.token);
+        mDisplayContent.removeWindowToken(token.token, true /* animateExit */);
         // Verify that the token is no longer mapped on the display
         assertNull(mDisplayContent.getWindowToken(token.token));
         // Verify that the token is still attached to its parent
@@ -246,7 +262,7 @@ public class WindowTokenTests extends WindowTestsBase {
     @Test
     public void testSetInsetsFrozen_notAffectImeWindowState() {
         // Pre-condition: make the IME window be controlled by IME insets provider.
-        mDisplayContent.getInsetsStateController().getSourceProvider(ITYPE_IME).setWindow(
+        mDisplayContent.getInsetsStateController().getSourceProvider(ITYPE_IME).setWindowContainer(
                 mDisplayContent.mInputMethodWindow, null, null);
 
         // Simulate an app window to be the IME layering target, assume the app window has no
@@ -260,5 +276,30 @@ public class WindowTokenTests extends WindowTestsBase {
         app.mToken.setInsetsFrozen(true);
         assertNotNull(app.getFrozenInsetsState());
         assertNull(mDisplayContent.mInputMethodWindow.getFrozenInsetsState());
+    }
+
+    @Test
+    public void testRemoveWindowToken_noAnimateExitWhenSet() {
+        final TestWindowToken token = createTestWindowToken(0, mDisplayContent);
+        final WindowState win = createWindow(null, TYPE_APPLICATION, token, "win");
+        makeWindowVisible(win);
+        assertTrue(win.isOnScreen());
+        spyOn(win);
+        spyOn(win.mWinAnimator);
+        spyOn(win.mToken);
+
+        // Invoking removeWindowToken with setting no window exit animation and not remove window
+        // immediately. verify the window will hide without applying exit animation.
+        mWm.removeWindowToken(win.mToken.token, false /* removeWindows */, false /* animateExit */,
+                mDisplayContent.mDisplayId);
+        verify(win).onSetAppExiting(Mockito.eq(false) /* animateExit */);
+        verify(win).hide(false /* doAnimation */, false /* requestAnim */);
+        assertFalse(win.isOnScreen());
+        verify(win.mWinAnimator, Mockito.never()).applyAnimationLocked(TRANSIT_EXIT, false);
+        assertTrue(win.mToken.hasChild());
+
+        // Even though the window is being removed afterwards, it won't apply exit animation.
+        win.removeIfPossible();
+        verify(win.mWinAnimator, Mockito.never()).applyAnimationLocked(TRANSIT_EXIT, false);
     }
 }

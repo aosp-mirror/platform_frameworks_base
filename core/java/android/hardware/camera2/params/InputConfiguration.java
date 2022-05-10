@@ -42,7 +42,7 @@ public final class InputConfiguration {
     private final boolean mIsMultiResolution;
 
     /**
-     * Create an input configration with the width, height, and user-defined format.
+     * Create an input configuration with the width, height, and user-defined format.
      *
      * <p>Images of a user-defined format are accessible by applications. Use
      * {@link android.hardware.camera2.CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP}
@@ -64,7 +64,7 @@ public final class InputConfiguration {
     }
 
     /**
-     * Create an input configration with the format and a list of multi-resolution input stream
+     * Create an input configuration with the format and a list of multi-resolution input stream
      * info.
      *
      * <p>Use {@link
@@ -108,7 +108,7 @@ public final class InputConfiguration {
     }
 
     /**
-     * Get the width of this input configration.
+     * Get the width of this input configuration.
      *
      * @return width of this input configuration.
      */
@@ -117,7 +117,7 @@ public final class InputConfiguration {
     }
 
     /**
-     * Get the height of this input configration.
+     * Get the height of this input configuration.
      *
      * @return height of this input configuration.
      */
@@ -126,7 +126,7 @@ public final class InputConfiguration {
     }
 
     /**
-     * Get the format of this input configration.
+     * Get the format of this input configuration.
      *
      * @return format of this input configuration.
      */

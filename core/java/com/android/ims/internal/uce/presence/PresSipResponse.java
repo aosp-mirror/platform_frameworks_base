@@ -29,6 +29,7 @@ public class PresSipResponse implements Parcelable {
     private int mSipResponseCode = 0;
     private int mRetryAfter = 0;
     private String mReasonPhrase = "";
+    private String mReasonHeader = "";
 
     /**
      * Gets the Presence command ID.
@@ -123,6 +124,23 @@ public class PresSipResponse implements Parcelable {
     }
 
     /**
+     * Gets the reason header associated with the SIP response
+     * code.
+     * @hide
+     */
+    public String getReasonHeader() {
+        return mReasonHeader;
+    }
+
+    /**
+     * Sets the SIP response code reason header.
+     * @hide
+     */
+    public void setReasonHeader(String reasonHeader) {
+        this.mReasonHeader = reasonHeader;
+    }
+
+    /**
      * Constructor for the PresSipResponse class.
      * @hide
      */
@@ -141,6 +159,7 @@ public class PresSipResponse implements Parcelable {
         dest.writeString(mReasonPhrase);
         dest.writeParcelable(mCmdId, flags);
         dest.writeInt(mRetryAfter);
+        dest.writeString(mReasonHeader);
     }
 
     /** @hide */
@@ -166,7 +185,8 @@ public class PresSipResponse implements Parcelable {
         mRequestId = source.readInt();
         mSipResponseCode = source.readInt();
         mReasonPhrase = source.readString();
-        mCmdId = source.readParcelable(PresCmdId.class.getClassLoader());
+        mCmdId = source.readParcelable(PresCmdId.class.getClassLoader(), com.android.ims.internal.uce.presence.PresCmdId.class);
         mRetryAfter = source.readInt();
+        mReasonHeader = source.readString();
     }
 }

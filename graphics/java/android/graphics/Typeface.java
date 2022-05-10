@@ -329,7 +329,7 @@ public class Typeface {
             FontFamily.Builder familyBuilder = null;
             for (final FontFileResourceEntry fontFile : filesEntry.getEntries()) {
                 final Font.Builder fontBuilder = new Font.Builder(mgr, fontFile.getFileName(),
-                        false /* isAsset */, 0 /* cookie */)
+                        false /* isAsset */, AssetManager.COOKIE_UNKNOWN)
                         .setTtcIndex(fontFile.getTtcIndex())
                         .setFontVariationSettings(fontFile.getVariationSettings());
                 if (fontFile.getWeight() != Typeface.RESOLVE_BY_FONT_TABLE) {

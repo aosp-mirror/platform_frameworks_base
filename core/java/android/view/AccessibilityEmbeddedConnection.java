@@ -33,7 +33,7 @@ import java.lang.ref.WeakReference;
  */
 final class AccessibilityEmbeddedConnection extends IAccessibilityEmbeddedConnection.Stub {
     private final WeakReference<ViewRootImpl> mViewRootImpl;
-    private final Matrix mTmpScreenMatrix = new Matrix();
+    private final Matrix mTmpWindowMatrix = new Matrix();
 
     AccessibilityEmbeddedConnection(ViewRootImpl viewRootImpl) {
         mViewRootImpl = new WeakReference<>(viewRootImpl);
@@ -63,7 +63,6 @@ final class AccessibilityEmbeddedConnection extends IAccessibilityEmbeddedConnec
                     viewRootImpl.mContext);
             viewRootImpl.mAttachInfo.mLeashedParentToken = null;
             viewRootImpl.mAttachInfo.mLeashedParentAccessibilityViewId = View.NO_ID;
-            viewRootImpl.mAttachInfo.mLocationInParentDisplay.set(0, 0);
             if (accessibilityManager.isEnabled()) {
                 accessibilityManager.disassociateEmbeddedHierarchy(viewRootImpl.mLeashToken);
             }
@@ -71,14 +70,14 @@ final class AccessibilityEmbeddedConnection extends IAccessibilityEmbeddedConnec
     }
 
     @Override
-    public void setScreenMatrix(float[] matrixValues) {
+    public void setWindowMatrix(float[] matrixValues) {
         final ViewRootImpl viewRootImpl = mViewRootImpl.get();
         if (viewRootImpl != null) {
-            mTmpScreenMatrix.setValues(matrixValues);
-            if (viewRootImpl.mAttachInfo.mScreenMatrixInEmbeddedHierarchy == null) {
-                viewRootImpl.mAttachInfo.mScreenMatrixInEmbeddedHierarchy = new Matrix();
+            mTmpWindowMatrix.setValues(matrixValues);
+            if (viewRootImpl.mAttachInfo.mWindowMatrixInEmbeddedHierarchy == null) {
+                viewRootImpl.mAttachInfo.mWindowMatrixInEmbeddedHierarchy = new Matrix();
             }
-            viewRootImpl.mAttachInfo.mScreenMatrixInEmbeddedHierarchy.set(mTmpScreenMatrix);
+            viewRootImpl.mAttachInfo.mWindowMatrixInEmbeddedHierarchy.set(mTmpWindowMatrix);
         }
     }
 }

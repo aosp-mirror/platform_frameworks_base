@@ -22,6 +22,8 @@ import android.hardware.hdmi.HdmiDeviceInfo;
  * Callback interface definition for HDMI client to get informed of
  * the CEC logical device status change event.
  *
+ * Only to be used on TV panel and Audio System devices (b/226317598).
+ *
  * @hide
  */
 oneway interface IHdmiDeviceEventListener {

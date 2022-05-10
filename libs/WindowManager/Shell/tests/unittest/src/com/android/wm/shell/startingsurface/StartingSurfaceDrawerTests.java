@@ -15,43 +15,64 @@
  */
 package com.android.wm.shell.startingsurface;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SPLASH_SCREEN;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.wm.shell.startingsurface.StartingSurfaceDrawer.MAX_ANIMATION_DURATION;
+import static com.android.wm.shell.startingsurface.StartingSurfaceDrawer.MINIMAL_ANIMATION_DURATION;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.graphics.ColorSpace;
+import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.HardwareBuffer;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.testing.TestableContext;
-import android.view.SurfaceControl;
+import android.view.Display;
+import android.view.IWindowSession;
+import android.view.InsetsState;
+import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 import android.view.WindowMetrics;
 import android.window.StartingWindowInfo;
+import android.window.StartingWindowRemovalInfo;
+import android.window.TaskSnapshot;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.common.HandlerExecutor;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
@@ -61,6 +82,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.MockitoSession;
 
 import java.util.function.IntSupplier;
 
@@ -75,39 +97,42 @@ public class StartingSurfaceDrawerTests {
     @Mock
     private WindowManager mMockWindowManager;
     @Mock
+    private IconProvider mIconProvider;
+    @Mock
     private TransactionPool mTransactionPool;
 
     private final Handler mTestHandler = new Handler(Looper.getMainLooper());
+    private ShellExecutor mTestExecutor;
     private final TestableContext mTestContext = new TestContext(
             InstrumentationRegistry.getInstrumentation().getTargetContext());
     TestStartingSurfaceDrawer mStartingSurfaceDrawer;
 
     static final class TestStartingSurfaceDrawer extends StartingSurfaceDrawer{
         int mAddWindowForTask = 0;
-        int mViewThemeResId;
 
         TestStartingSurfaceDrawer(Context context, ShellExecutor splashScreenExecutor,
-                TransactionPool pool) {
-            super(context, splashScreenExecutor, pool);
+                IconProvider iconProvider, TransactionPool pool) {
+            super(context, splashScreenExecutor, iconProvider, pool);
         }
 
         @Override
-        protected boolean addWindow(int taskId, IBinder appToken,
-                View view, WindowManager wm, WindowManager.LayoutParams params, int suggestType) {
+        protected boolean addWindow(int taskId, IBinder appToken, View view, Display display,
+                WindowManager.LayoutParams params, int suggestType) {
             // listen for addView
             mAddWindowForTask = taskId;
-            mViewThemeResId = view.getContext().getThemeResId();
+            saveSplashScreenRecord(appToken, taskId, view, suggestType);
             // Do not wait for background color
             return false;
         }
 
         @Override
-        protected void removeWindowSynced(int taskId, SurfaceControl leash, Rect frame,
-                boolean playRevealAnimation) {
+        protected void removeWindowSynced(StartingWindowRemovalInfo removalInfo,
+                boolean immediately) {
             // listen for removeView
-            if (mAddWindowForTask == taskId) {
+            if (mAddWindowForTask == removalInfo.taskId) {
                 mAddWindowForTask = 0;
             }
+            mStartingWindowRecords.remove(removalInfo.taskId);
         }
     }
 
@@ -138,9 +163,10 @@ public class StartingSurfaceDrawerTests {
 
         doReturn(metrics).when(mMockWindowManager).getMaximumWindowMetrics();
         doNothing().when(mMockWindowManager).addView(any(), any());
-
-        mStartingSurfaceDrawer = spy(new TestStartingSurfaceDrawer(mTestContext,
-                new HandlerExecutor(mTestHandler), mTransactionPool));
+        mTestExecutor = new HandlerExecutor(mTestHandler);
+        mStartingSurfaceDrawer = spy(
+                new TestStartingSurfaceDrawer(mTestContext, mTestExecutor, mIconProvider,
+                        mTransactionPool));
     }
 
     @Test
@@ -155,9 +181,11 @@ public class StartingSurfaceDrawerTests {
                 eq(STARTING_WINDOW_TYPE_SPLASH_SCREEN));
         assertEquals(mStartingSurfaceDrawer.mAddWindowForTask, taskId);
 
-        mStartingSurfaceDrawer.removeStartingWindow(windowInfo.taskInfo.taskId, null, null, false);
+        StartingWindowRemovalInfo removalInfo = new StartingWindowRemovalInfo();
+        removalInfo.taskId = windowInfo.taskInfo.taskId;
+        mStartingSurfaceDrawer.removeStartingWindow(removalInfo);
         waitHandlerIdle(mTestHandler);
-        verify(mStartingSurfaceDrawer).removeWindowSynced(eq(taskId), any(), any(), eq(false));
+        verify(mStartingSurfaceDrawer).removeWindowSynced(any(), eq(false));
         assertEquals(mStartingSurfaceDrawer.mAddWindowForTask, 0);
     }
 
@@ -166,12 +194,15 @@ public class StartingSurfaceDrawerTests {
         final int taskId = 1;
         final StartingWindowInfo windowInfo =
                 createWindowInfo(taskId, 0);
+        final int[] theme = new int[1];
+        doAnswer(invocation -> theme[0] = (Integer) invocation.callRealMethod())
+                .when(mStartingSurfaceDrawer).getSplashScreenTheme(eq(0), any());
+
         mStartingSurfaceDrawer.addSplashScreenStartingWindow(windowInfo, mBinder,
                 STARTING_WINDOW_TYPE_SPLASH_SCREEN);
         waitHandlerIdle(mTestHandler);
-        verify(mStartingSurfaceDrawer).addWindow(eq(taskId), eq(mBinder), any(), any(), any(),
-                eq(STARTING_WINDOW_TYPE_SPLASH_SCREEN));
-        assertNotEquals(mStartingSurfaceDrawer.mViewThemeResId, 0);
+        verify(mStartingSurfaceDrawer).getSplashScreenTheme(eq(0), any());
+        assertNotEquals(theme[0], 0);
     }
 
     @Test
@@ -205,6 +236,119 @@ public class StartingSurfaceDrawerTests {
         assertEquals(0, windowColor3.mReuseCount);
     }
 
+    @Test
+    public void testRemoveTaskSnapshotWithImeSurfaceWhenOnImeDrawn() throws Exception {
+        final int taskId = 1;
+        final StartingWindowInfo windowInfo =
+                createWindowInfo(taskId, android.R.style.Theme);
+        TaskSnapshot snapshot = createTaskSnapshot(100, 100, new Point(100, 100),
+                new Rect(0, 0, 0, 50), true /* hasImeSurface */);
+        final IWindowSession session = WindowManagerGlobal.getWindowSession();
+        spyOn(session);
+        doReturn(WindowManagerGlobal.ADD_OKAY).when(session).addToDisplay(
+                any() /* window */, any() /* attrs */,
+                anyInt() /* viewVisibility */, anyInt() /* displayId */,
+                any() /* requestedVisibility */, any() /* outInputChannel */,
+                any() /* outInsetsState */, any() /* outActiveControls */);
+        TaskSnapshotWindow mockSnapshotWindow = TaskSnapshotWindow.create(windowInfo,
+                mBinder,
+                snapshot, mTestExecutor, () -> {
+                });
+        spyOn(mockSnapshotWindow);
+        try (AutoCloseable mockTaskSnapshotSession = new AutoCloseable() {
+            MockitoSession mockSession = mockitoSession()
+                    .initMocks(this)
+                    .mockStatic(TaskSnapshotWindow.class)
+                    .startMocking();
+            @Override
+            public void close() {
+                mockSession.finishMocking();
+            }
+        }) {
+            when(TaskSnapshotWindow.create(eq(windowInfo), eq(mBinder), eq(snapshot), any(),
+                    any())).thenReturn(mockSnapshotWindow);
+            // Simulate a task snapshot window created with IME snapshot shown.
+            mStartingSurfaceDrawer.makeTaskSnapshotWindow(windowInfo, mBinder, snapshot);
+            waitHandlerIdle(mTestHandler);
+
+            // Verify the task snapshot with IME snapshot will be removed when received the real IME
+            // drawn callback.
+            // makeTaskSnapshotWindow shall call removeWindowSynced before there add a new
+            // StartingWindowRecord for the task.
+            mStartingSurfaceDrawer.onImeDrawnOnTask(1);
+            verify(mStartingSurfaceDrawer, times(2))
+                    .removeWindowSynced(any(), eq(true));
+        }
+    }
+
+    @Test
+    public void testClearAllWindows() {
+        final int taskId = 1;
+        final StartingWindowInfo windowInfo =
+                createWindowInfo(taskId, android.R.style.Theme);
+        mStartingSurfaceDrawer.addSplashScreenStartingWindow(windowInfo, mBinder,
+                STARTING_WINDOW_TYPE_SPLASH_SCREEN);
+        waitHandlerIdle(mTestHandler);
+        verify(mStartingSurfaceDrawer).addWindow(eq(taskId), eq(mBinder), any(), any(), any(),
+                eq(STARTING_WINDOW_TYPE_SPLASH_SCREEN));
+        assertEquals(mStartingSurfaceDrawer.mAddWindowForTask, taskId);
+
+        mStartingSurfaceDrawer.clearAllWindows();
+        waitHandlerIdle(mTestHandler);
+        verify(mStartingSurfaceDrawer).removeWindowSynced(any(), eq(true));
+        assertEquals(mStartingSurfaceDrawer.mStartingWindowRecords.size(), 0);
+    }
+
+    @Test
+    public void testMinimumAnimationDuration() {
+        final long maxDuration = MAX_ANIMATION_DURATION;
+        final long minDuration = MINIMAL_ANIMATION_DURATION;
+
+        final long shortDuration = minDuration - 1;
+        final long medianShortDuration = minDuration + 1;
+        final long medianLongDuration = maxDuration - 1;
+        final long longAppDuration = maxDuration + 1;
+
+        // static icon
+        assertEquals(shortDuration, SplashscreenContentDrawer.getShowingDuration(
+                0, shortDuration));
+        // median launch + static icon
+        assertEquals(medianShortDuration, SplashscreenContentDrawer.getShowingDuration(
+                0, medianShortDuration));
+        // long launch + static icon
+        assertEquals(longAppDuration, SplashscreenContentDrawer.getShowingDuration(
+                0, longAppDuration));
+
+        // fast launch + animatable icon
+        assertEquals(shortDuration, SplashscreenContentDrawer.getShowingDuration(
+                shortDuration, shortDuration));
+        assertEquals(minDuration, SplashscreenContentDrawer.getShowingDuration(
+                medianShortDuration, shortDuration));
+        assertEquals(minDuration, SplashscreenContentDrawer.getShowingDuration(
+                longAppDuration, shortDuration));
+
+        // median launch + animatable icon
+        assertEquals(medianShortDuration, SplashscreenContentDrawer.getShowingDuration(
+                shortDuration, medianShortDuration));
+        assertEquals(medianShortDuration, SplashscreenContentDrawer.getShowingDuration(
+                medianShortDuration, medianShortDuration));
+        assertEquals(minDuration, SplashscreenContentDrawer.getShowingDuration(
+                longAppDuration, medianShortDuration));
+        // between min < max launch + animatable icon
+        assertEquals(medianLongDuration, SplashscreenContentDrawer.getShowingDuration(
+                medianShortDuration, medianLongDuration));
+        assertEquals(maxDuration, SplashscreenContentDrawer.getShowingDuration(
+                medianLongDuration, medianShortDuration));
+
+        // long launch + animatable icon
+        assertEquals(longAppDuration, SplashscreenContentDrawer.getShowingDuration(
+                shortDuration, longAppDuration));
+        assertEquals(longAppDuration, SplashscreenContentDrawer.getShowingDuration(
+                medianShortDuration, longAppDuration));
+        assertEquals(longAppDuration, SplashscreenContentDrawer.getShowingDuration(
+                longAppDuration, longAppDuration));
+    }
+
     private StartingWindowInfo createWindowInfo(int taskId, int themeResId) {
         StartingWindowInfo windowInfo = new StartingWindowInfo();
         final ActivityInfo info = new ActivityInfo();
@@ -214,11 +358,29 @@ public class StartingSurfaceDrawerTests {
         final ActivityManager.RunningTaskInfo taskInfo = new ActivityManager.RunningTaskInfo();
         taskInfo.topActivityInfo = info;
         taskInfo.taskId = taskId;
+        windowInfo.targetActivityInfo = info;
         windowInfo.taskInfo = taskInfo;
+        windowInfo.topOpaqueWindowInsetsState = new InsetsState();
+        windowInfo.mainWindowLayoutParams = new WindowManager.LayoutParams();
+        windowInfo.topOpaqueWindowLayoutParams = new WindowManager.LayoutParams();
         return windowInfo;
     }
 
     private static void waitHandlerIdle(Handler handler) {
         handler.runWithScissors(() -> { }, 0 /* timeout */);
+    }
+
+    private TaskSnapshot createTaskSnapshot(int width, int height, Point taskSize,
+            Rect contentInsets, boolean hasImeSurface) {
+        final HardwareBuffer buffer = HardwareBuffer.create(width, height, HardwareBuffer.RGBA_8888,
+                1, HardwareBuffer.USAGE_CPU_READ_RARELY);
+        return new TaskSnapshot(
+                System.currentTimeMillis(),
+                new ComponentName("", ""), buffer,
+                ColorSpace.get(ColorSpace.Named.SRGB), ORIENTATION_PORTRAIT,
+                Surface.ROTATION_0, taskSize, contentInsets, new Rect() /* letterboxInsets */,
+                false, true /* isRealSnapshot */, WINDOWING_MODE_FULLSCREEN,
+                0 /* systemUiVisibility */, false /* isTranslucent */,
+                hasImeSurface /* hasImeSurface */);
     }
 }

@@ -40,15 +40,18 @@ import java.util.function.Consumer;
 public final class TranslationCapability implements Parcelable {
 
     /**
-     * TODO: fill in javadoc
+     * The translation service supports translation between the source and target specs, and it is
+     * ready to be downloaded onto the device.
      */
     public static final @ModelState int STATE_AVAILABLE_TO_DOWNLOAD = 1;
     /**
-     * TODO: fill in javadoc
+     * The translation service supports translation between the source and target specs, and it is
+     * being downloaded onto the device currently.
      */
     public static final @ModelState int STATE_DOWNLOADING = 2;
     /**
-     * TODO: fill in javadoc
+     * The translation service supports translation between the source and target specs, and it is
+     * downloaded and ready to use on device.
      */
     public static final @ModelState int STATE_ON_DEVICE = 3;
     /**
@@ -305,7 +308,7 @@ public final class TranslationCapability implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1624307114468L,
+            time = 1629158466039L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/view/translation/TranslationCapability.java",
             inputSignatures = "public static final @android.view.translation.TranslationCapability.ModelState int STATE_AVAILABLE_TO_DOWNLOAD\npublic static final @android.view.translation.TranslationCapability.ModelState int STATE_DOWNLOADING\npublic static final @android.view.translation.TranslationCapability.ModelState int STATE_ON_DEVICE\npublic static final @android.view.translation.TranslationCapability.ModelState int STATE_NOT_AVAILABLE\npublic static final @android.view.translation.TranslationCapability.ModelState int STATE_REMOVED_AND_AVAILABLE\nprivate final @android.view.translation.TranslationCapability.ModelState int mState\nprivate final @android.annotation.NonNull android.view.translation.TranslationSpec mSourceSpec\nprivate final @android.annotation.NonNull android.view.translation.TranslationSpec mTargetSpec\nprivate final  boolean mUiTranslationEnabled\nprivate final @android.view.translation.TranslationContext.TranslationFlag int mSupportedTranslationFlags\nclass TranslationCapability extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genHiddenConstDefs=true, genToString=true, genConstructor=false)")

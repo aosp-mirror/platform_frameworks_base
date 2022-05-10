@@ -28,7 +28,7 @@
     <string name="label_orientation" msgid="2853142581990496477">"দিশ"</string>
     <string name="label_pages" msgid="7768589729282182230">"পৃষ্ঠাসমূহ"</string>
     <string name="destination_default_text" msgid="5422708056807065710">"প্ৰিণ্টাৰ বাছনি কৰক"</string>
-    <string name="template_all_pages" msgid="3322235982020148762">"সকলো <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
+    <string name="template_all_pages" msgid="3322235982020148762">"আটাইবোৰ <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
     <string name="template_page_range" msgid="428638530038286328">"<xliff:g id="PAGE_COUNT">%1$s</xliff:g>ৰ পৰিসৰ"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"যেনে: ১—৫, ৮, ১১—১৩"</string>
     <string name="print_preview" msgid="8010217796057763343">"প্ৰিণ্টৰ পূৰ্বদৰ্শন"</string>
@@ -36,7 +36,7 @@
     <string name="printing_app_crashed" msgid="854477616686566398">"প্ৰিণ্টিং এপ্ ক্ৰেশ্ব হৈছে"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"প্ৰিণ্টিং প্ৰস্তুত কৰি আছে"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"PDF ৰূপে ছেভ কৰক"</string>
-    <string name="all_printers" msgid="5018829726861876202">"সকলো প্ৰিণ্টাৰ…"</string>
+    <string name="all_printers" msgid="5018829726861876202">"আটাইবোৰ প্ৰিণ্টাৰ…"</string>
     <string name="print_dialog" msgid="32628687461331979">"প্ৰিণ্ট সংবাদ"</string>
     <string name="current_page_template" msgid="5145005201131935302">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g> /<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="page_description_template" msgid="6831239682256197161">"পৃষ্ঠা <xliff:g id="PAGE_COUNT">%2$d</xliff:g>ৰ <xliff:g id="CURRENT_PAGE">%1$d</xliff:g>"</string>
@@ -47,8 +47,8 @@
     <string name="savetopdf_button" msgid="2976186791686924743">"PDFৰ জৰিয়তে ছেভ কৰক"</string>
     <string name="print_options_expanded" msgid="6944679157471691859">"প্ৰিণ্ট বিকল্পসমূহ বিস্তাৰ কৰা হ’ল"</string>
     <string name="print_options_collapsed" msgid="7455930445670414332">"প্ৰিণ্ট বিকল্পসমূহ সংকুচিত কৰা হ’ল"</string>
-    <string name="search" msgid="5421724265322228497">"Search"</string>
-    <string name="all_printers_label" msgid="3178848870161526399">"সকলো প্ৰিণ্টাৰ"</string>
+    <string name="search" msgid="5421724265322228497">"সন্ধান কৰক"</string>
+    <string name="all_printers_label" msgid="3178848870161526399">"আটাইবোৰ প্ৰিণ্টাৰ"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"সেৱা যোগ কৰক"</string>
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"সন্ধান বাকচটো দেখুওৱা হ’ল"</string>
     <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"সন্ধান বাকচটো ঢাক খাই আছে"</string>
@@ -74,7 +74,7 @@
     <string name="enabled_services_title" msgid="7036986099096582296">"সক্ষম কৰা সেৱাসমূহ"</string>
     <string name="recommended_services_title" msgid="3799434882937956924">"অনুমোদিত সেৱাসমূহ"</string>
     <string name="disabled_services_title" msgid="7313253167968363211">"অক্ষম কৰা সেৱাসমূহ"</string>
-    <string name="all_services_title" msgid="5578662754874906455">"সকলো সেৱা"</string>
+    <string name="all_services_title" msgid="5578662754874906455">"আটাইবোৰ সেৱা"</string>
     <plurals name="print_services_recommendation_subtitle" formatted="false" msgid="5678487708807185138">
       <item quantity="one"><xliff:g id="COUNT_1">%1$s</xliff:g>টা প্ৰিণ্টাৰ বিচাৰিবলৈ ইনষ্টল কৰক</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$s</xliff:g>টা প্ৰিণ্টাৰ বিচাৰিবলৈ ইনষ্টল কৰক</item>

@@ -22,6 +22,7 @@ import static com.android.internal.util.FrameworkStatsLog.ALARM_SCHEDULED__EXACT
 import static com.android.internal.util.FrameworkStatsLog.ALARM_SCHEDULED__EXACT_ALARM_ALLOWED_REASON__PERMISSION;
 import static com.android.server.alarm.AlarmManagerService.INDEFINITE_DELAY;
 
+import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.StatsManager;
 import android.content.Context;
@@ -93,7 +94,7 @@ class MetricsHelper {
         }
     }
 
-    static void pushAlarmScheduled(Alarm a) {
+    static void pushAlarmScheduled(Alarm a, int callerProcState) {
         FrameworkStatsLog.write(
                 FrameworkStatsLog.ALARM_SCHEDULED,
                 a.uid,
@@ -103,7 +104,8 @@ class MetricsHelper {
                 a.alarmClock != null,
                 a.repeatInterval != 0,
                 reasonToStatsReason(a.mExactAllowReason),
-                AlarmManagerService.isRtc(a.type));
+                AlarmManagerService.isRtc(a.type),
+                ActivityManager.processStateAmToProto(callerProcState));
     }
 
     static void pushAlarmBatchDelivered(int numAlarms, int wakeups) {

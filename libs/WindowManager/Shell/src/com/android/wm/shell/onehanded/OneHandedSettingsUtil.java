@@ -20,12 +20,15 @@ import static com.android.internal.accessibility.AccessibilityShortcutController
 
 import android.annotation.IntDef;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.provider.Settings;
 import android.text.TextUtils;
 
 import androidx.annotation.Nullable;
+
+import com.android.wm.shell.R;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -36,7 +39,6 @@ import java.lang.annotation.RetentionPolicy;
  */
 public final class OneHandedSettingsUtil {
     private static final String TAG = "OneHandedSettingsUtil";
-
     private static final String ONE_HANDED_MODE_TARGET_NAME =
             ONE_HANDED_COMPONENT_NAME.getShortClassName();
 
@@ -128,7 +130,7 @@ public final class OneHandedSettingsUtil {
      */
     public boolean getSettingsTapsAppToExit(ContentResolver resolver, int userId) {
         return Settings.Secure.getIntForUser(resolver,
-                Settings.Secure.TAPS_APP_TO_EXIT, 0, userId) == 1;
+                Settings.Secure.TAPS_APP_TO_EXIT, 1, userId) == 1;
     }
 
     /**
@@ -169,9 +171,22 @@ public final class OneHandedSettingsUtil {
      * @return true if user enabled one-handed shortcut in settings, false otherwise.
      */
     public boolean getShortcutEnabled(ContentResolver resolver, int userId) {
-        final String targets = Settings.Secure.getStringForUser(resolver,
+        // Checks SOFTWARE_SHORTCUT_KEY
+        final String targetsSwKey = Settings.Secure.getStringForUser(resolver,
                 Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, userId);
-        return TextUtils.isEmpty(targets) ? false : targets.contains(ONE_HANDED_MODE_TARGET_NAME);
+        if (!TextUtils.isEmpty(targetsSwKey) && targetsSwKey.contains(
+                ONE_HANDED_MODE_TARGET_NAME)) {
+            return true;
+        }
+
+        // Checks HARDWARE_SHORTCUT_KEY
+        final String targetsHwKey = Settings.Secure.getStringForUser(resolver,
+                Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, userId);
+        if (!TextUtils.isEmpty(targetsHwKey) && targetsHwKey.contains(
+                ONE_HANDED_MODE_TARGET_NAME)) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -204,12 +219,33 @@ public final class OneHandedSettingsUtil {
                 Settings.Secure.ONE_HANDED_MODE_ACTIVATED, state, userId);
     }
 
+    /**
+     * Obtains one-handed mode transition duration from resource config.
+     *
+     * @return durationMs The duration in milli-seconds
+     */
+    public int getTransitionDuration(Context context) {
+        return context.getResources().getInteger(
+                R.integer.config_one_handed_translate_animation_duration);
+    }
+
+    /**
+     * Obtains one-handed mode offset fraction from resource config.
+     *
+     * @return fraction The fraction of offset of the whole screen.
+     */
+    public float getTranslationFraction(Context context) {
+        return context.getResources().getFraction(R.fraction.config_one_handed_offset, 1, 1);
+    }
+
     void dump(PrintWriter pw, String prefix, ContentResolver resolver,
             int userId) {
         final String innerPrefix = "  ";
         pw.println(TAG);
         pw.print(innerPrefix + "isOneHandedModeEnable=");
         pw.println(getSettingsOneHandedModeEnabled(resolver, userId));
+        pw.print(innerPrefix + "isSwipeToNotificationEnabled=");
+        pw.println(getSettingsSwipeToNotificationEnabled(resolver, userId));
         pw.print(innerPrefix + "oneHandedTimeOut=");
         pw.println(getSettingsOneHandedModeTimeout(resolver, userId));
         pw.print(innerPrefix + "tapsAppToExit=");

@@ -45,6 +45,9 @@ import static android.app.AppOpsManager.OP_NONE;
 import static android.app.AppOpsManager.OP_PLAY_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO_HOTWORD;
+import static android.app.AppOpsManager.OnOpStartedListener.START_TYPE_FAILED;
+import static android.app.AppOpsManager.OnOpStartedListener.START_TYPE_RESUMED;
+import static android.app.AppOpsManager.OnOpStartedListener.START_TYPE_STARTED;
 import static android.app.AppOpsManager.OpEventProxyInfo;
 import static android.app.AppOpsManager.RestrictionBypass;
 import static android.app.AppOpsManager.SAMPLING_STRATEGY_BOOT_TIME_SAMPLING;
@@ -66,6 +69,7 @@ import static android.app.AppOpsManager.extractUidStateFromKey;
 import static android.app.AppOpsManager.makeKey;
 import static android.app.AppOpsManager.modeToName;
 import static android.app.AppOpsManager.opAllowSystemBypassRestriction;
+import static android.app.AppOpsManager.opRestrictsRead;
 import static android.app.AppOpsManager.opToName;
 import static android.app.AppOpsManager.opToPublicName;
 import static android.app.AppOpsManager.resolveFirstUnrestrictedUidState;
@@ -110,7 +114,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PermissionInfo;
 import android.content.pm.UserInfo;
-import android.content.pm.parsing.component.ParsedAttribution;
 import android.database.ContentObserver;
 import android.hardware.camera2.CameraDevice.CAMERA_AUDIO_RESTRICTION;
 import android.net.Uri;
@@ -175,6 +178,10 @@ import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemServiceManager;
 import com.android.server.pm.PackageList;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.component.ParsedAttribution;
+import com.android.server.policy.AppOpsPolicy;
+
+import dalvik.annotation.optimization.NeverCompile;
 
 import libcore.util.EmptyArray;
 
@@ -202,6 +209,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Scanner;
 import java.util.Set;
@@ -775,7 +783,11 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         /** Clean up event */
         public void finish() {
-            mClientId.unlinkToDeath(this, 0);
+            try {
+                mClientId.unlinkToDeath(this, 0);
+            } catch (NoSuchElementException e) {
+                // Either not linked, or already unlinked. Either way, nothing to do.
+            }
         }
 
         @Override
@@ -1233,6 +1245,11 @@ public class AppOpsService extends IAppOpsService.Stub {
                     scheduleOpActiveChangedIfNeededLocked(parent.op, parent.uid, parent.packageName,
                             tag, true, event.getAttributionFlags(), event.getAttributionChainId());
                 }
+                // Note: this always sends MODE_ALLOWED, even if the mode is FOREGROUND
+                // TODO ntmyren: figure out how to get the real mode.
+                scheduleOpStartedIfNeededLocked(parent.op, parent.uid, parent.packageName,
+                        tag, event.getFlags(), MODE_ALLOWED, START_TYPE_RESUMED,
+                        event.getAttributionFlags(), event.getAttributionChainId());
             }
             mPausedInProgressEvents = null;
         }
@@ -1301,6 +1318,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                                     event.getAttributionFlags(), event.getAttributionChainId());
                         }
 
+                        events = isRunning ? mInProgressEvents : mPausedInProgressEvents;
                         InProgressStartOpEvent newEvent = events.get(binders.get(i));
                         if (newEvent != null) {
                             newEvent.numUnfinishedStarts += numPreviousUnfinishedStarts - 1;
@@ -1816,13 +1834,13 @@ public class AppOpsService extends IAppOpsService.Stub {
                     for (int attributionNum = 0; attributionNum < numAttributions;
                             attributionNum++) {
                         ParsedAttribution attribution = pkg.getAttributions().get(attributionNum);
-                        attributionTags.add(attribution.tag);
+                        attributionTags.add(attribution.getTag());
 
-                        int numInheritFrom = attribution.inheritFrom.size();
+                        int numInheritFrom = attribution.getInheritFrom().size();
                         for (int inheritFromNum = 0; inheritFromNum < numInheritFrom;
                                 inheritFromNum++) {
-                            dstAttributionTags.put(attribution.inheritFrom.get(inheritFromNum),
-                                    attribution.tag);
+                            dstAttributionTags.put(attribution.getInheritFrom().get(inheritFromNum),
+                                    attribution.getTag());
                         }
                     }
                 }
@@ -2362,7 +2380,13 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return;
             }
 
-            if (!isCallerSystem && !isCallerInstrumented && !isCallerPermissionController) {
+            boolean doesCallerHavePermission = mContext.checkPermission(
+                    android.Manifest.permission.GET_HISTORICAL_APP_OPS_STATS,
+                    Binder.getCallingPid(), Binder.getCallingUid())
+                    == PackageManager.PERMISSION_GRANTED;
+
+            if (!isCallerSystem && !isCallerInstrumented && !isCallerPermissionController
+                    && !doesCallerHavePermission) {
                 mHandler.post(() -> callback.sendResult(new Bundle()));
                 return;
             }
@@ -2852,6 +2876,10 @@ public class AppOpsService extends IAppOpsService.Stub {
             // features may require permissions our remote caller does not have.
             final long identity = Binder.clearCallingIdentity();
             try {
+                if (shouldIgnoreCallback(switchedCode, callback.mCallingPid,
+                        callback.mCallingUid)) {
+                    continue;
+                }
                 callback.mCallback.opChanged(switchedCode, uid, packageName);
             } catch (RemoteException e) {
                 /* ignore */
@@ -3294,13 +3322,21 @@ public class AppOpsService extends IAppOpsService.Stub {
         Objects.requireNonNull(packageName);
         try {
             verifyAndGetBypass(uid, packageName, null);
-            if (filterAppAccessUnlocked(packageName)) {
-                return AppOpsManager.MODE_ERRORED;
+            // When the caller is the system, it's possible that the packageName is the special
+            // one (e.g., "root") which isn't actually existed.
+            if (resolveUid(packageName) == uid
+                    || (isPackageExisted(packageName) && !filterAppAccessUnlocked(packageName))) {
+                return AppOpsManager.MODE_ALLOWED;
             }
-            return AppOpsManager.MODE_ALLOWED;
+            return AppOpsManager.MODE_ERRORED;
         } catch (SecurityException ignored) {
             return AppOpsManager.MODE_ERRORED;
         }
+    }
+
+    private boolean isPackageExisted(String packageName) {
+        return LocalServices.getService(PackageManagerInternal.class)
+                .getPackageStateInternal(packageName) != null;
     }
 
     /**
@@ -3433,7 +3469,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                         + " package " + packageName + "flags: " +
                         AppOpsManager.flagsToString(flags));
                 return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
-                        packageName + " flags: " + AppOpsManager.flagsToString(flags));
+                        packageName);
             }
             final Op op = getOpLocked(ops, code, uid, true);
             final AttributedOp attributedOp = op.getOrCreateAttribution(op, attributionTag);
@@ -3940,13 +3976,15 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         boolean isRestricted = false;
+        int startType = START_TYPE_FAILED;
         synchronized (this) {
             final Ops ops = getOpsLocked(uid, packageName, attributionTag,
                     pvr.isAttributionTagValid, pvr.bypass, /* edit */ true);
             if (ops == null) {
                 if (!dryRun) {
                     scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag,
-                            flags, AppOpsManager.MODE_IGNORED);
+                            flags, AppOpsManager.MODE_IGNORED, startType, attributionFlags,
+                            attributionChainId);
                 }
                 if (DEBUG) Slog.d(TAG, "startOperation: no op for code " + code + " uid " + uid
                         + " package " + packageName + " flags: "
@@ -3972,7 +4010,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     if (!dryRun) {
                         attributedOp.rejected(uidState.state, flags);
                         scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag,
-                                flags, uidMode);
+                                flags, uidMode, startType, attributionFlags, attributionChainId);
                     }
                     return new SyncNotedAppOp(uidMode, code, attributionTag, packageName);
                 }
@@ -3988,7 +4026,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     if (!dryRun) {
                         attributedOp.rejected(uidState.state, flags);
                         scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag,
-                                flags, mode);
+                                flags, mode, startType, attributionFlags, attributionChainId);
                     }
                     return new SyncNotedAppOp(mode, code, attributionTag, packageName);
                 }
@@ -4006,12 +4044,14 @@ public class AppOpsService extends IAppOpsService.Stub {
                         attributedOp.started(clientId, proxyUid, proxyPackageName,
                                 proxyAttributionTag, uidState.state, flags, attributionFlags,
                                 attributionChainId);
+                        startType = START_TYPE_STARTED;
                     }
                 } catch (RemoteException e) {
                     throw new RuntimeException(e);
                 }
                 scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag, flags,
-                        isRestricted ? MODE_IGNORED : MODE_ALLOWED);
+                        isRestricted ? MODE_IGNORED : MODE_ALLOWED, startType, attributionFlags,
+                        attributionChainId);
             }
         }
 
@@ -4170,6 +4210,9 @@ public class AppOpsService extends IAppOpsService.Stub {
             for (int i = 0; i < callbackCount; i++) {
                 final ActiveCallback callback = callbacks.valueAt(i);
                 try {
+                    if (shouldIgnoreCallback(code, callback.mCallingPid, callback.mCallingUid)) {
+                        continue;
+                    }
                     callback.mCallback.opActiveChanged(code, uid, packageName, attributionTag,
                             active, attributionFlags, attributionChainId);
                 } catch (RemoteException e) {
@@ -4182,7 +4225,9 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private void scheduleOpStartedIfNeededLocked(int code, int uid, String pkgName,
-            String attributionTag, @OpFlags int flags, @Mode int result) {
+            String attributionTag, @OpFlags int flags, @Mode int result,
+            @AppOpsManager.OnOpStartedListener.StartedType int startedType,
+            @AttributionFlags int attributionFlags, int attributionChainId) {
         ArraySet<StartedCallback> dispatchedCallbacks = null;
         final int callbackListCount = mStartedWatchers.size();
         for (int i = 0; i < callbackListCount; i++) {
@@ -4208,20 +4253,24 @@ public class AppOpsService extends IAppOpsService.Stub {
         mHandler.sendMessage(PooledLambda.obtainMessage(
                 AppOpsService::notifyOpStarted,
                 this, dispatchedCallbacks, code, uid, pkgName, attributionTag, flags,
-                result));
+                result, startedType, attributionFlags, attributionChainId));
     }
 
     private void notifyOpStarted(ArraySet<StartedCallback> callbacks,
             int code, int uid, String packageName, String attributionTag, @OpFlags int flags,
-            @Mode int result) {
+            @Mode int result, @AppOpsManager.OnOpStartedListener.StartedType int startedType,
+            @AttributionFlags int attributionFlags, int attributionChainId) {
         final long identity = Binder.clearCallingIdentity();
         try {
             final int callbackCount = callbacks.size();
             for (int i = 0; i < callbackCount; i++) {
                 final StartedCallback callback = callbacks.valueAt(i);
                 try {
+                    if (shouldIgnoreCallback(code, callback.mCallingPid, callback.mCallingUid)) {
+                        continue;
+                    }
                     callback.mCallback.opStarted(code, uid, packageName, attributionTag, flags,
-                            result);
+                            result, startedType, attributionFlags, attributionChainId);
                 } catch (RemoteException e) {
                     /* do nothing */
                 }
@@ -4268,6 +4317,9 @@ public class AppOpsService extends IAppOpsService.Stub {
             for (int i = 0; i < callbackCount; i++) {
                 final NotedCallback callback = callbacks.valueAt(i);
                 try {
+                    if (shouldIgnoreCallback(code, callback.mCallingPid, callback.mCallingUid)) {
+                        continue;
+                    }
                     callback.mCallback.opNoted(code, uid, packageName, attributionTag, flags,
                             result);
                 } catch (RemoteException e) {
@@ -4332,8 +4384,20 @@ public class AppOpsService extends IAppOpsService.Stub {
                 Binder.getCallingPid(), Binder.getCallingUid(), null);
     }
 
+    private boolean shouldIgnoreCallback(int op, int watcherPid, int watcherUid) {
+        // If it's a restricted read op, ignore it if watcher doesn't have manage ops permission,
+        // as watcher should not use this to signal if the value is changed.
+        return opRestrictsRead(op) && mContext.checkPermission(Manifest.permission.MANAGE_APPOPS,
+                watcherPid, watcherUid) != PackageManager.PERMISSION_GRANTED;
+    }
+
     private void verifyIncomingOp(int op) {
         if (op >= 0 && op < AppOpsManager._NUM_OP) {
+            // Enforce manage appops permission if it's a restricted read op.
+            if (opRestrictsRead(op)) {
+                mContext.enforcePermission(Manifest.permission.MANAGE_APPOPS,
+                        Binder.getCallingPid(), Binder.getCallingUid(), "verifyIncomingOp");
+            }
             return;
         }
         throw new IllegalArgumentException("Bad operation #" + op);
@@ -4481,8 +4545,9 @@ public class AppOpsService extends IAppOpsService.Stub {
      * @return The restriction matching the package
      */
     private RestrictionBypass getBypassforPackage(@NonNull AndroidPackage pkg) {
-        return new RestrictionBypass(pkg.isPrivileged(), mContext.checkPermission(
-                android.Manifest.permission.EXEMPT_FROM_AUDIO_RECORD_RESTRICTIONS, -1, pkg.getUid())
+        return new RestrictionBypass(pkg.getUid() == Process.SYSTEM_UID, pkg.isPrivileged(),
+                mContext.checkPermission(android.Manifest.permission
+                        .EXEMPT_FROM_AUDIO_RECORD_RESTRICTIONS, -1, pkg.getUid())
                 == PackageManager.PERMISSION_GRANTED);
     }
 
@@ -4514,6 +4579,27 @@ public class AppOpsService extends IAppOpsService.Stub {
             return new PackageVerificationResult(null,
                     /* isAttributionTagValid */ true);
         }
+        if (Process.isSdkSandboxUid(uid)) {
+            // SDK sandbox processes run in their own UID range, but their associated
+            // UID for checks should always be the UID of the package implementing SDK sandbox
+            // service.
+            // TODO: We will need to modify the callers of this function instead, so
+            // modifications and checks against the app ops state are done with the
+            // correct UID.
+            try {
+                final PackageManager pm = mContext.getPackageManager();
+                final String supplementalPackageName = pm.getSdkSandboxPackageName();
+                if (Objects.equals(packageName, supplementalPackageName)) {
+                    int supplementalAppId = pm.getPackageUid(supplementalPackageName,
+                            PackageManager.PackageInfoFlags.of(0));
+                    uid = UserHandle.getUid(UserHandle.getUserId(uid), supplementalAppId);
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+                // Shouldn't happen for the supplemental package
+                e.printStackTrace();
+            }
+        }
+
 
         // Do not check if uid/packageName/attributionTag is already known.
         synchronized (this) {
@@ -4542,8 +4628,10 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
         if (pkgUid != Process.INVALID_UID) {
             if (pkgUid != UserHandle.getAppId(uid)) {
+                Slog.e(TAG, "Bad call made by uid " + callingUid + ". "
+                        + "Package \"" + packageName + "\" does not belong to uid " + uid + ".");
                 String otherUidMessage = DEBUG ? " but it is really " + pkgUid : " but it is not";
-                throw new SecurityException("Specified package " + packageName + " under uid "
+                throw new SecurityException("Specified package \"" + packageName + "\" under uid "
                         +  UserHandle.getAppId(uid) + otherUidMessage);
             }
             return new PackageVerificationResult(RestrictionBypass.UNRESTRICTED,
@@ -4598,8 +4686,10 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         if (pkgUid != uid) {
+            Slog.e(TAG, "Bad call made by uid " + callingUid + ". "
+                    + "Package \"" + packageName + "\" does not belong to uid " + uid + ".");
             String otherUidMessage = DEBUG ? " but it is really " + pkgUid : " but it is not";
-            throw new SecurityException("Specified package " + packageName + " under uid " + uid
+            throw new SecurityException("Specified package \"" + packageName + "\" under uid " + uid
                     + otherUidMessage);
         }
 
@@ -4616,7 +4706,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         if (pkg.getAttributions() != null) {
             int numAttributions = pkg.getAttributions().size();
             for (int i = 0; i < numAttributions; i++) {
-                if (pkg.getAttributions().get(i).tag.equals(attributionTag)) {
+                if (pkg.getAttributions().get(i).getTag().equals(attributionTag)) {
                     return true;
                 }
             }
@@ -4764,6 +4854,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                 if (opBypass != null) {
                     // If we are the system, bypass user restrictions for certain codes
                     synchronized (this) {
+                        if (opBypass.isSystemUid && appBypass != null && appBypass.isSystemUid) {
+                            return false;
+                        }
                         if (opBypass.isPrivileged && appBypass != null && appBypass.isPrivileged) {
                             return false;
                         }
@@ -5099,13 +5192,15 @@ public class AppOpsService extends IAppOpsService.Stub {
                     String lastPkg = null;
                     for (int i=0; i<allOps.size(); i++) {
                         AppOpsManager.PackageOps pkg = allOps.get(i);
-                        if (!pkg.getPackageName().equals(lastPkg)) {
+                        if (!Objects.equals(pkg.getPackageName(), lastPkg)) {
                             if (lastPkg != null) {
                                 out.endTag(null, "pkg");
                             }
                             lastPkg = pkg.getPackageName();
-                            out.startTag(null, "pkg");
-                            out.attribute(null, "n", lastPkg);
+                            if (lastPkg != null) {
+                                out.startTag(null, "pkg");
+                                out.attribute(null, "n", lastPkg);
+                            }
                         }
                         out.startTag(null, "uid");
                         out.attributeInt(null, "n", pkg.getUid());
@@ -5841,6 +5936,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
+    @NeverCompile // Avoid size overhead of debugging code.
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, TAG, pw)) return;
@@ -6166,8 +6262,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
             }
             if (mAudioRestrictionManager.hasActiveRestrictions() && dumpOp < 0
-                    && dumpPackage != null && dumpMode < 0 && !dumpWatchers && !dumpWatchers) {
-                needSep = mAudioRestrictionManager.dump(pw) | needSep ;
+                    && dumpPackage != null && dumpMode < 0 && !dumpWatchers) {
+                needSep = mAudioRestrictionManager.dump(pw) || needSep;
             }
             if (needSep) {
                 pw.println();
@@ -6441,6 +6537,17 @@ public class AppOpsService extends IAppOpsService.Stub {
                         ipw.decreaseIndent();
                     }
                     ipw.decreaseIndent();
+                }
+            }
+
+            if (!dumpHistory && !dumpWatchers) {
+                pw.println();
+                if (mCheckOpsDelegateDispatcher.mPolicy != null
+                        && mCheckOpsDelegateDispatcher.mPolicy instanceof AppOpsPolicy) {
+                    AppOpsPolicy policy = (AppOpsPolicy) mCheckOpsDelegateDispatcher.mPolicy;
+                    policy.dumpTags(pw);
+                } else {
+                    pw.println("  AppOps policy not set.");
                 }
             }
         }
@@ -7289,6 +7396,30 @@ public class AppOpsService extends IAppOpsService.Stub {
                     restrictionState.destroy();
                 }
             }
+        }
+
+        @Override
+        public int getOpRestrictionCount(int code, UserHandle user, String pkg,
+                String attributionTag) {
+            int number = 0;
+            synchronized (AppOpsService.this) {
+                int numRestrictions = mOpUserRestrictions.size();
+                for (int i = 0; i < numRestrictions; i++) {
+                    if (mOpUserRestrictions.valueAt(i)
+                            .hasRestriction(code, pkg, attributionTag, user.getIdentifier())) {
+                        number++;
+                    }
+                }
+
+                numRestrictions = mOpGlobalRestrictions.size();
+                for (int i = 0; i < numRestrictions; i++) {
+                    if (mOpGlobalRestrictions.valueAt(i).hasRestriction(code)) {
+                        number++;
+                    }
+                }
+            }
+
+            return number;
         }
     }
 

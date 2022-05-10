@@ -45,26 +45,21 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.text.TextUtils;
 import android.util.ArraySet;
-import android.util.FeatureFlagUtils;
 import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
 
-import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.internal.logging.InstanceId;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -74,8 +69,6 @@ import org.mockito.Captor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.MockitoSession;
-import org.mockito.quality.Strictness;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -87,12 +80,12 @@ import java.util.concurrent.Executor;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class TileQueryHelperTest extends SysuiTestCase {
-    private static final String CURRENT_TILES = "wifi,dnd,nfc";
-    private static final String ONLY_STOCK_TILES = "wifi,dnd";
-    private static final String WITH_OTHER_TILES = "wifi,dnd,other";
+    private static final String CURRENT_TILES = "internet,dnd,nfc";
+    private static final String ONLY_STOCK_TILES = "internet,dnd";
+    private static final String WITH_OTHER_TILES = "internet,dnd,other";
     // Note no nfc in stock tiles
-    private static final String STOCK_TILES = "wifi,dnd,cell,battery";
-    private static final String ALL_TILES = "wifi,dnd,nfc,cell,battery";
+    private static final String STOCK_TILES = "internet,dnd,battery";
+    private static final String ALL_TILES = "internet,dnd,nfc,battery";
     private static final Set<String> FACTORY_TILES = new ArraySet<>();
     private static final String TEST_PKG = "test_pkg";
     private static final String TEST_CLS = "test_cls";
@@ -100,7 +93,7 @@ public class TileQueryHelperTest extends SysuiTestCase {
 
     static {
         FACTORY_TILES.addAll(Arrays.asList(
-                new String[]{"wifi", "bt", "cell", "dnd", "inversion", "airplane", "work",
+                new String[]{"internet", "bt", "dnd", "inversion", "airplane", "work",
                         "rotation", "flashlight", "location", "cast", "hotspot", "user", "battery",
                         "saver", "night", "nfc"}));
         FACTORY_TILES.add(CUSTOM_TILE);
@@ -114,7 +107,6 @@ public class TileQueryHelperTest extends SysuiTestCase {
     private PackageManager mPackageManager;
     @Mock
     private UserTracker mUserTracker;
-    @Mock private FeatureFlags mFeatureFlags;
     @Captor
     private ArgumentCaptor<List<TileQueryHelper.TileInfo>> mCaptor;
 
@@ -122,18 +114,10 @@ public class TileQueryHelperTest extends SysuiTestCase {
     private TileQueryHelper mTileQueryHelper;
     private FakeExecutor mMainExecutor;
     private FakeExecutor mBgExecutor;
-    MockitoSession mMockingSession = null;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        // TODO(b/174753536): Remove the mMockingSession when
-        // FeatureFlagUtils.SETTINGS_PROVIDER_MODEL is removed.
-        mMockingSession = ExtendedMockito.mockitoSession().strictness(Strictness.LENIENT)
-                .mockStatic(FeatureFlagUtils.class).startMocking();
-        ExtendedMockito.doReturn(false).when(() -> FeatureFlagUtils.isEnabled(mContext,
-                FeatureFlagUtils.SETTINGS_PROVIDER_MODEL));
-
         mContext.setMockPackageManager(mPackageManager);
 
         mState = new QSTile.State();
@@ -148,20 +132,12 @@ public class TileQueryHelperTest extends SysuiTestCase {
                     }
                 }
         ).when(mQSTileHost).createTile(anyString());
-
         FakeSystemClock clock = new FakeSystemClock();
         mMainExecutor = new FakeExecutor(clock);
         mBgExecutor = new FakeExecutor(clock);
         mTileQueryHelper = new TileQueryHelper(
-                mContext, mUserTracker, mMainExecutor, mBgExecutor, mFeatureFlags);
+                mContext, mUserTracker, mMainExecutor, mBgExecutor);
         mTileQueryHelper.setListener(mListener);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        if (mMockingSession != null) {
-            mMockingSession.finishMocking();
-        }
     }
 
     @Test
@@ -397,6 +373,11 @@ public class TileQueryHelperTest extends SysuiTestCase {
         }
 
         @Override
+        public boolean isListening() {
+            return mListening;
+        }
+
+        @Override
         public CharSequence getTileLabel() {
             return mSpec;
         }
@@ -443,11 +424,5 @@ public class TileQueryHelperTest extends SysuiTestCase {
 
         @Override
         public void destroy() {}
-
-
-        @Override
-        public DetailAdapter getDetailAdapter() {
-            return null;
-        }
     }
 }

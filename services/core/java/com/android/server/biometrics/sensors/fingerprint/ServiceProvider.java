@@ -30,7 +30,7 @@ import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.server.biometrics.sensors.BaseClientMonitor;
+import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutTracker;
 
@@ -85,27 +85,32 @@ public interface ServiceProvider {
     void scheduleRevokeChallenge(int sensorId, int userId, @NonNull IBinder token,
             @NonNull String opPackageName, long challenge);
 
-    void scheduleEnroll(int sensorId, @NonNull IBinder token, byte[] hardwareAuthToken, int userId,
-            @NonNull IFingerprintServiceReceiver receiver, @NonNull String opPackageName,
-            @FingerprintManager.EnrollReason int enrollReason,
-            @NonNull FingerprintStateCallback fingerprintStateCallback);
+    /**
+     * Schedules fingerprint enrollment.
+     */
+    long scheduleEnroll(int sensorId, @NonNull IBinder token, @NonNull byte[] hardwareAuthToken,
+            int userId, @NonNull IFingerprintServiceReceiver receiver,
+            @NonNull String opPackageName, @FingerprintManager.EnrollReason int enrollReason);
 
-    void cancelEnrollment(int sensorId, @NonNull IBinder token);
+    void cancelEnrollment(int sensorId, @NonNull IBinder token, long requestId);
 
-    void scheduleFingerDetect(int sensorId, @NonNull IBinder token, int userId,
+    long scheduleFingerDetect(int sensorId, @NonNull IBinder token, int userId,
             @NonNull ClientMonitorCallbackConverter callback, @NonNull String opPackageName,
-            int statsClient,
-            @NonNull FingerprintStateCallback fingerprintStateCallback);
+            int statsClient);
 
     void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId, int userId,
             int cookie, @NonNull ClientMonitorCallbackConverter callback,
+            @NonNull String opPackageName, long requestId, boolean restricted, int statsClient,
+            boolean allowBackgroundAuthentication);
+
+    long scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId, int userId,
+            int cookie, @NonNull ClientMonitorCallbackConverter callback,
             @NonNull String opPackageName, boolean restricted, int statsClient,
-            boolean allowBackgroundAuthentication,
-            @NonNull FingerprintStateCallback fingerprintStateCallback);
+            boolean allowBackgroundAuthentication);
 
     void startPreparedClient(int sensorId, int cookie);
 
-    void cancelAuthentication(int sensorId, @NonNull IBinder token);
+    void cancelAuthentication(int sensorId, @NonNull IBinder token, long requestId);
 
     void scheduleRemove(int sensorId, @NonNull IBinder token,
             @NonNull IFingerprintServiceReceiver receiver, int fingerId, int userId,
@@ -116,7 +121,7 @@ public interface ServiceProvider {
             @NonNull String opPackageName);
 
     void scheduleInternalCleanup(int sensorId, int userId,
-            @Nullable BaseClientMonitor.Callback callback);
+            @Nullable ClientMonitorCallback callback);
 
     boolean isHardwareDetected(int sensorId);
 
@@ -137,11 +142,11 @@ public interface ServiceProvider {
 
     long getAuthenticatorId(int sensorId, int userId);
 
-    void onPointerDown(int sensorId, int x, int y, float minor, float major);
+    void onPointerDown(long requestId, int sensorId, int x, int y, float minor, float major);
 
-    void onPointerUp(int sensorId);
+    void onPointerUp(long requestId, int sensorId);
 
-    void onUiReady(int sensorId);
+    void onUiReady(long requestId, int sensorId);
 
     void setUdfpsOverlayController(@NonNull IUdfpsOverlayController controller);
 
@@ -160,6 +165,5 @@ public interface ServiceProvider {
 
     @NonNull
     ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,
-            @NonNull FingerprintStateCallback fingerprintStateCallback,
             @NonNull String opPackageName);
 }

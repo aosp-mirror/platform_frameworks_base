@@ -25,6 +25,7 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.UserHandle;
 import android.service.quickaccesswallet.GetWalletCardsError;
 import android.service.quickaccesswallet.GetWalletCardsResponse;
 import android.service.quickaccesswallet.QuickAccessWalletClient;
@@ -53,7 +54,6 @@ import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.wallet.controller.QuickAccessWalletController;
-import com.android.systemui.wallet.ui.WalletActivity;
 
 import java.util.List;
 
@@ -72,8 +72,10 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
     private final SecureSettings mSecureSettings;
     private final QuickAccessWalletController mController;
 
+    @Nullable
     private WalletCard mSelectedCard;
     private boolean mIsWalletUpdating = true;
+    @Nullable
     @VisibleForTesting Drawable mCardViewDrawable;
 
     @Inject
@@ -126,52 +128,14 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
                 view == null ? null : ActivityLaunchAnimator.Controller.fromView(view,
                         InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE);
 
-        mUiHandler.post(() -> {
-            if (mSelectedCard != null) {
-                Intent intent = new Intent(mContext, WalletActivity.class)
-                        .setAction(Intent.ACTION_VIEW)
-                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                if (mKeyguardStateController.isUnlocked()) {
-                    mActivityStarter.startActivity(intent, true /* dismissShade */,
-                            animationController);
-                } else {
-                    mHost.collapsePanels();
-                    // Do not use ActivityStarter here because the WalletActivity is required to be
-                    // started without prompting keyguard when the device is locked.
-                    mContext.startActivity(intent);
-                }
-            } else {
-                if (mController.getWalletClient().createWalletIntent() == null) {
-                    Log.w(TAG, "Could not get intent of the wallet app.");
-                    return;
-                }
-                mActivityStarter.postStartActivityDismissingKeyguard(
-                        mController.getWalletClient().createWalletIntent(),
-                        /* delay= */ 0,
-                        animationController);
-            }
-        });
-    }
-
-    @Nullable
-    private CharSequence getServiceLabelSafe() {
-        try {
-            return mController.getWalletClient().getServiceLabel();
-        } catch (RuntimeException e) {
-            Log.e(TAG, "Failed to get the service label safely, recreating wallet client", e);
-            mController.reCreateWalletClient();
-            try {
-                return mController.getWalletClient().getServiceLabel();
-            } catch (RuntimeException e2) {
-                Log.e(TAG, "The QAW service label is broken.", e2);
-                return null;
-            }
-        }
+        mUiHandler.post(
+                () -> mController.startQuickAccessUiIntent(
+                        mActivityStarter, animationController, mSelectedCard != null));
     }
 
     @Override
     protected void handleUpdateState(State state, Object arg) {
-        CharSequence label = getServiceLabelSafe();
+        CharSequence label = mController.getWalletClient().getServiceLabel();
         state.label = label == null ? mLabel : label;
         state.contentDescription = state.label;
         Drawable tileIcon = mController.getWalletClient().getTileIcon();
@@ -183,16 +147,9 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
         if (mController.getWalletClient().isWalletServiceAvailable()
                 && mController.getWalletClient().isWalletFeatureAvailable()) {
             if (mSelectedCard != null) {
-                if (isDeviceLocked) {
-                    state.state = Tile.STATE_INACTIVE;
-                    state.secondaryLabel =
-                            mContext.getString(R.string.wallet_secondary_label_device_locked);
-                    state.sideViewCustomDrawable = null;
-                } else {
-                    state.state = Tile.STATE_ACTIVE;
-                    state.secondaryLabel = mSelectedCard.getContentDescription();
-                    state.sideViewCustomDrawable = mCardViewDrawable;
-                }
+                state.state = isDeviceLocked ? Tile.STATE_INACTIVE : Tile.STATE_ACTIVE;
+                state.secondaryLabel = mSelectedCard.getContentDescription();
+                state.sideViewCustomDrawable = mCardViewDrawable;
             } else {
                 state.state = Tile.STATE_INACTIVE;
                 state.secondaryLabel =
@@ -219,9 +176,11 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
     public boolean isAvailable() {
         return mPackageManager.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION)
                 && !mPackageManager.hasSystemFeature(FEATURE_CHROME_OS)
-                && mSecureSettings.getString(NFC_PAYMENT_DEFAULT_COMPONENT) != null;
+                && mSecureSettings.getStringForUser(NFC_PAYMENT_DEFAULT_COMPONENT,
+                    UserHandle.USER_CURRENT) != null;
     }
 
+    @Nullable
     @Override
     public Intent getLongClickIntent() {
         return null;

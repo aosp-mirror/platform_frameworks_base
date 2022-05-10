@@ -24,13 +24,17 @@ import android.animation.ObjectAnimator;
 import android.annotation.IntDef;
 import android.annotation.UiThread;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.IWindowManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,8 +45,8 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 
+import com.android.systemui.CoreStartable;
 import com.android.systemui.R;
-import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.privacy.PrivacyChipBuilder;
 import com.android.systemui.privacy.PrivacyItem;
@@ -53,6 +57,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -62,7 +67,7 @@ import javax.inject.Inject;
  * recording audio, accessing the camera or accessing the location.
  */
 @SysUISingleton
-public class TvOngoingPrivacyChip extends SystemUI implements PrivacyItemController.Callback,
+public class TvOngoingPrivacyChip extends CoreStartable implements PrivacyItemController.Callback,
         PrivacyChipDrawable.PrivacyChipDrawableListener {
     private static final String TAG = "TvOngoingPrivacyChip";
     private static final boolean DEBUG = false;
@@ -88,11 +93,18 @@ public class TvOngoingPrivacyChip extends SystemUI implements PrivacyItemControl
     private static final int STATE_COLLAPSED = 3;
     private static final int STATE_DISAPPEARING = 4;
 
+    // Avoid multiple messages after rapid changes such as starting/stopping both camera and mic.
+    private static final int ACCESSIBILITY_ANNOUNCEMENT_DELAY_MS = 500;
+
     private static final int EXPANDED_DURATION_MS = 4000;
     public final int mAnimationDurationMs;
 
     private final Context mContext;
     private final PrivacyItemController mPrivacyItemController;
+
+    private final IWindowManager mIWindowManager;
+    private final Rect[] mBounds = new Rect[4];
+    private boolean mIsRtl;
 
     private ViewGroup mIndicatorView;
     private boolean mViewAndWindowAdded;
@@ -113,20 +125,29 @@ public class TvOngoingPrivacyChip extends SystemUI implements PrivacyItemControl
     private final Handler mUiThreadHandler = new Handler(Looper.getMainLooper());
     private final Runnable mCollapseRunnable = this::collapseChip;
 
+    private final Runnable mAccessibilityRunnable = this::makeAccessibilityAnnouncement;
+    private final List<PrivacyItem> mItemsBeforeLastAnnouncement = new LinkedList<>();
+
     @State
     private int mState = STATE_NOT_SHOWN;
 
     @Inject
-    public TvOngoingPrivacyChip(Context context, PrivacyItemController privacyItemController) {
+    public TvOngoingPrivacyChip(Context context, PrivacyItemController privacyItemController,
+            IWindowManager iWindowManager) {
         super(context);
         if (DEBUG) Log.d(TAG, "Privacy chip running");
         mContext = context;
         mPrivacyItemController = privacyItemController;
+        mIWindowManager = iWindowManager;
 
         Resources res = mContext.getResources();
         mIconMarginStart = Math.round(
                 res.getDimension(R.dimen.privacy_chip_icon_margin_in_between));
         mIconSize = res.getDimensionPixelSize(R.dimen.privacy_chip_icon_size);
+
+        mIsRtl = mContext.getResources().getConfiguration().getLayoutDirection()
+                == View.LAYOUT_DIRECTION_RTL;
+        updateStaticPrivacyIndicatorBounds();
 
         mAnimationDurationMs = res.getInteger(R.integer.privacy_chip_animation_millis);
 
@@ -137,6 +158,24 @@ public class TvOngoingPrivacyChip extends SystemUI implements PrivacyItemControl
             Log.d(TAG, "micCameraIndicators: " + mMicCameraIndicatorFlagEnabled);
             Log.d(TAG, "allIndicators: " + mAllIndicatorsEnabled);
         }
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration config) {
+        boolean updatedRtl = config.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
+        if (mIsRtl == updatedRtl) {
+            return;
+        }
+        mIsRtl = updatedRtl;
+
+        updateStaticPrivacyIndicatorBounds();
+
+        // Update privacy chip location.
+        if (mState == STATE_NOT_SHOWN || mIndicatorView == null) {
+            return;
+        }
+        fadeOutIndicator();
+        createAndShowIndicator();
     }
 
     @Override
@@ -169,7 +208,35 @@ public class TvOngoingPrivacyChip extends SystemUI implements PrivacyItemControl
         }
 
         mPrivacyItems = updatedPrivacyItems;
+
+        postAccessibilityAnnouncement();
         updateChip();
+    }
+
+    private void updateStaticPrivacyIndicatorBounds() {
+        Resources res = mContext.getResources();
+        int mMaxExpandedWidth = res.getDimensionPixelSize(R.dimen.privacy_chip_max_width);
+        int mMaxExpandedHeight = res.getDimensionPixelSize(R.dimen.privacy_chip_height);
+        int mChipMarginTotal = 2 * res.getDimensionPixelSize(R.dimen.privacy_chip_margin);
+
+        final WindowManager windowManager = mContext.getSystemService(WindowManager.class);
+        Rect screenBounds = windowManager.getCurrentWindowMetrics().getBounds();
+        mBounds[0] = new Rect(
+                mIsRtl ? screenBounds.left
+                        : screenBounds.right - mChipMarginTotal - mMaxExpandedWidth,
+                screenBounds.top,
+                mIsRtl ? screenBounds.left + mChipMarginTotal + mMaxExpandedWidth
+                        : screenBounds.right,
+                screenBounds.top + mChipMarginTotal + mMaxExpandedHeight
+        );
+
+        if (DEBUG) Log.v(TAG, "privacy indicator bounds: " + mBounds[0].toShortString());
+
+        try {
+            mIWindowManager.updateStaticPrivacyIndicatorBounds(mContext.getDisplayId(), mBounds);
+        } catch (RemoteException e) {
+            Log.w(TAG, "could not update privacy indicator bounds");
+        }
     }
 
     private void updateChip() {
@@ -301,18 +368,15 @@ public class TvOngoingPrivacyChip extends SystemUI implements PrivacyItemControl
                                 mIndicatorView.getViewTreeObserver().removeOnGlobalLayoutListener(
                                         this);
 
+                                postAccessibilityAnnouncement();
                                 animateIconAppearance();
                                 mChipDrawable.startInitialFadeIn();
                             }
                         });
 
-        final boolean isRtl = mContext.getResources().getConfiguration().getLayoutDirection()
-                == View.LAYOUT_DIRECTION_RTL;
-        if (DEBUG) Log.d(TAG, "is RTL: " + isRtl);
-
         mChipDrawable = new PrivacyChipDrawable(mContext);
         mChipDrawable.setListener(this);
-        mChipDrawable.setRtl(isRtl);
+        mChipDrawable.setRtl(mIsRtl);
         ImageView chipBackground = mIndicatorView.findViewById(R.id.chip_drawable);
         if (chipBackground != null) {
             chipBackground.setImageDrawable(mChipDrawable);
@@ -322,17 +386,21 @@ public class TvOngoingPrivacyChip extends SystemUI implements PrivacyItemControl
         mIconsContainer.setAlpha(0f);
         updateIcons();
 
+        final WindowManager windowManager = mContext.getSystemService(WindowManager.class);
+        windowManager.addView(mIndicatorView, getWindowLayoutParams());
+    }
+
+    private WindowManager.LayoutParams getWindowLayoutParams() {
         final WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
                 WRAP_CONTENT,
                 WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT);
-        layoutParams.gravity = Gravity.TOP | (isRtl ? Gravity.LEFT : Gravity.RIGHT);
+        layoutParams.gravity = Gravity.TOP | (mIsRtl ? Gravity.LEFT : Gravity.RIGHT);
         layoutParams.setTitle(LAYOUT_PARAMS_TITLE);
         layoutParams.packageName = mContext.getPackageName();
-        final WindowManager windowManager = mContext.getSystemService(WindowManager.class);
-        windowManager.addView(mIndicatorView, layoutParams);
+        return layoutParams;
     }
 
     private void updateIcons() {
@@ -457,6 +525,83 @@ public class TvOngoingPrivacyChip extends SystemUI implements PrivacyItemControl
         }
 
         mViewAndWindowAdded = false;
+    }
+
+    /**
+     * Schedules the accessibility announcement to be made after {@code
+     * ACCESSIBILITY_ANNOUNCEMENT_DELAY_MS} (if possible). This is so that only one announcement is
+     * made instead of two separate ones if both the camera and the mic are started/stopped.
+     */
+    private void postAccessibilityAnnouncement() {
+        mUiThreadHandler.removeCallbacks(mAccessibilityRunnable);
+
+        if (mPrivacyItems.size() == 0) {
+            // Announce immediately since announcement cannot be made once the chip is gone.
+            makeAccessibilityAnnouncement();
+        } else {
+            mUiThreadHandler.postDelayed(mAccessibilityRunnable,
+                    ACCESSIBILITY_ANNOUNCEMENT_DELAY_MS);
+        }
+    }
+
+    private void makeAccessibilityAnnouncement() {
+        if (mIndicatorView == null) {
+            return;
+        }
+
+        boolean cameraWasRecording = listContainsPrivacyType(mItemsBeforeLastAnnouncement,
+                PrivacyType.TYPE_CAMERA);
+        boolean cameraIsRecording = listContainsPrivacyType(mPrivacyItems,
+                PrivacyType.TYPE_CAMERA);
+        boolean micWasRecording = listContainsPrivacyType(mItemsBeforeLastAnnouncement,
+                PrivacyType.TYPE_MICROPHONE);
+        boolean micIsRecording = listContainsPrivacyType(mPrivacyItems,
+                PrivacyType.TYPE_MICROPHONE);
+
+        int announcement = 0;
+        if (!cameraWasRecording && cameraIsRecording && !micWasRecording && micIsRecording) {
+            // Both started
+            announcement = R.string.mic_and_camera_recording_announcement;
+        } else if (cameraWasRecording && !cameraIsRecording && micWasRecording && !micIsRecording) {
+            // Both stopped
+            announcement = R.string.mic_camera_stopped_recording_announcement;
+        } else {
+            // Did the camera start or stop?
+            if (cameraWasRecording && !cameraIsRecording) {
+                announcement = R.string.camera_stopped_recording_announcement;
+            } else if (!cameraWasRecording && cameraIsRecording) {
+                announcement = R.string.camera_recording_announcement;
+            }
+
+            // Announce camera changes now since we might need a second announcement about the mic.
+            if (announcement != 0) {
+                mIndicatorView.announceForAccessibility(mContext.getString(announcement));
+                announcement = 0;
+            }
+
+            // Did the mic start or stop?
+            if (micWasRecording && !micIsRecording) {
+                announcement = R.string.mic_stopped_recording_announcement;
+            } else if (!micWasRecording && micIsRecording) {
+                announcement = R.string.mic_recording_announcement;
+            }
+        }
+
+        if (announcement != 0) {
+            mIndicatorView.announceForAccessibility(mContext.getString(announcement));
+        }
+
+        mItemsBeforeLastAnnouncement.clear();
+        mItemsBeforeLastAnnouncement.addAll(mPrivacyItems);
+    }
+
+    private boolean listContainsPrivacyType(List<PrivacyItem> list, PrivacyType privacyType) {
+        for (PrivacyItem item : list) {
+            if (item.getPrivacyType() == privacyType) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

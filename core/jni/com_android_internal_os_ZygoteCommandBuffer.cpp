@@ -34,6 +34,7 @@
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/system_properties.h>
 #include <vector>
 
 namespace android {
@@ -43,10 +44,10 @@ using android::base::StringPrintf;
 using android::zygote::ZygoteFailure;
 
 // WARNING: Knows a little about the wire protocol used to communicate with Zygote.
-// TODO: Fix error handling.
 
-constexpr size_t MAX_COMMAND_BYTES = 12200;
-constexpr size_t NICE_NAME_BYTES = 50;
+// Commands and nice names have large arbitrary size limits to avoid dynamic memory allocation.
+constexpr size_t MAX_COMMAND_BYTES = 32768;
+constexpr size_t NICE_NAME_BYTES = 128;
 
 // A buffer optionally bundled with a file descriptor from which we can fill it.
 // Does not own the file descriptor; destroying a NativeCommandBuffer does not
@@ -190,6 +191,9 @@ class NativeCommandBuffer {
         size_t copy_len = std::min(name_len, NICE_NAME_BYTES - 1);
         memcpy(mNiceName, arg_start + NN_LENGTH, copy_len);
         mNiceName[copy_len] = '\0';
+        if (haveWrapProperty()) {
+          return false;
+        }
         continue;
       }
       if (arg_end - arg_start == IW_LENGTH
@@ -222,6 +226,8 @@ class NativeCommandBuffer {
         }
         saw_setgid = true;
       }
+      // ro.debuggable can be handled entirely in the child unless --invoke-with is also specified.
+      // Thus we do not need to check it here.
     }
     return saw_runtime_args && saw_setuid && saw_setgid;
   }
@@ -249,6 +255,14 @@ class NativeCommandBuffer {
   }
 
  private:
+  bool haveWrapProperty() {
+    static const char* WRAP = "wrap.";
+    static const size_t WRAP_LENGTH = strlen(WRAP);
+    char propNameBuf[WRAP_LENGTH + NICE_NAME_BYTES];
+    strcpy(propNameBuf, WRAP);
+    strlcpy(propNameBuf + WRAP_LENGTH, mNiceName, NICE_NAME_BYTES);
+    return __system_property_find(propNameBuf) != nullptr;
+  }
   // Picky version of atoi(). No sign or unexpected characters allowed. Return -1 on failure.
   static int digitsVal(char* start, char* end) {
     int result = 0;
@@ -269,11 +283,9 @@ class NativeCommandBuffer {
   uint32_t mNext;  // Index of first character past last line returned by readLine.
   int32_t mLinesLeft;  // Lines in current command that haven't yet been read.
   int mFd;  // Open file descriptor from which we can read more. -1 if none.
-  char mNiceName[NICE_NAME_BYTES];
+  char mNiceName[NICE_NAME_BYTES];  // Always null terminated.
   char mBuffer[MAX_COMMAND_BYTES];
 };
-
-static_assert(sizeof(NativeCommandBuffer) < 3 * 4096);
 
 static int buffersAllocd(0);
 
@@ -284,7 +296,7 @@ jlong com_android_internal_os_ZygoteCommandBuffer_getNativeBuffer(JNIEnv* env, j
   ++buffersAllocd;
   // MMap explicitly to get it page aligned.
   void *bufferMem = mmap(NULL, sizeof(NativeCommandBuffer), PROT_READ | PROT_WRITE,
-                         MAP_ANONYMOUS | MAP_PRIVATE | MAP_POPULATE, -1, 0);
+                         MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
   // Currently we mmap and unmap one for every request handled by the Java code.
   // That could be improved, but unclear it matters.
   if (bufferMem == MAP_FAILED) {
@@ -374,6 +386,7 @@ jboolean com_android_internal_os_ZygoteCommandBuffer_nativeForkRepeatedly(
             jint minUid,
             jstring managed_nice_name) {
 
+  ALOGI("Entering forkRepeatedly native zygote loop");
   NativeCommandBuffer* n_buffer = reinterpret_cast<NativeCommandBuffer*>(j_buffer);
   int session_socket = n_buffer->getFd();
   std::vector<int> session_socket_fds {session_socket};
@@ -402,7 +415,8 @@ jboolean com_android_internal_os_ZygoteCommandBuffer_nativeForkRepeatedly(
   socklen_t cred_size = sizeof credentials;
   if (getsockopt(n_buffer->getFd(), SOL_SOCKET, SO_PEERCRED, &credentials, &cred_size) == -1
       || cred_size != sizeof credentials) {
-    fail_fn_1(CREATE_ERROR("ForkMany failed to get initial credentials, %s", strerror(errno)));
+    fail_fn_1(CREATE_ERROR("ForkRepeatedly failed to get initial credentials, %s",
+                           strerror(errno)));
   }
 
   bool first_time = true;
@@ -426,7 +440,7 @@ jboolean com_android_internal_os_ZygoteCommandBuffer_nativeForkRepeatedly(
       tmp_pid >>= 8;
     }
     pid_buf[4] = 0;  // Process is not wrapped.
-    int res = write(session_socket, pid_buf, 5);
+    int res = TEMP_FAILURE_RETRY(write(session_socket, pid_buf, 5));
     if (res != 5) {
       if (res == -1) {
         (first_time ? fail_fn_1 : fail_fn_n)
@@ -451,18 +465,18 @@ jboolean com_android_internal_os_ZygoteCommandBuffer_nativeForkRepeatedly(
       }
       // We've now seen either a disconnect or connect request.
       close(session_socket);
-      int new_fd = accept(zygote_socket_fd, nullptr, nullptr);
+      int new_fd = TEMP_FAILURE_RETRY(accept(zygote_socket_fd, nullptr, nullptr));
       if (new_fd == -1) {
         fail_fn_z(CREATE_ERROR("Accept(%d) failed: %s", zygote_socket_fd, strerror(errno)));
       }
       if (new_fd != session_socket) {
           // Move new_fd back to the old value, so that we don't have to change Java-level data
           // structures to reflect a change. This implicitly closes the old one.
-          if (dup2(new_fd, session_socket) != session_socket) {
+          if (TEMP_FAILURE_RETRY(dup2(new_fd, session_socket)) != session_socket) {
             fail_fn_z(CREATE_ERROR("Failed to move fd %d to %d: %s",
                                    new_fd, session_socket, strerror(errno)));
           }
-          close(new_fd);
+          close(new_fd);  //  On Linux, fd is closed even if EINTR is returned.
       }
       // If we ever return, we effectively reuse the old Java ZygoteConnection.
       // None of its state needs to change.

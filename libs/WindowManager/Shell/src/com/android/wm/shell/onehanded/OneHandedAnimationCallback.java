@@ -46,7 +46,7 @@ public interface OneHandedAnimationCallback {
     /**
      * Called when OneHanded animator is updating position
      */
-    default void onAnimationUpdate(float xPos, float yPos) {
+    default void onAnimationUpdate(SurfaceControl.Transaction tx, float xPos, float yPos) {
     }
 
 }

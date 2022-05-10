@@ -174,7 +174,7 @@ public class SyncRequest implements Parcelable {
         mIsAuthority = (in.readInt() != 0);
         mIsExpedited = (in.readInt() != 0);
         mIsScheduledAsExpeditedJob = (in.readInt() != 0);
-        mAccountToSync = in.readParcelable(null);
+        mAccountToSync = in.readParcelable(null, android.accounts.Account.class);
         mAuthority = in.readString();
     }
 

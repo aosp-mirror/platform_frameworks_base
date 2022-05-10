@@ -1,2 +1,0 @@
-rule com.android.modules.** android.media.internal.@1
-rule com.google.android.exoplayer2.** android.media.internal.exo.@1

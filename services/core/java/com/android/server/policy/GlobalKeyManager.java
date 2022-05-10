@@ -56,11 +56,10 @@ final class GlobalKeyManager {
 
     private static final int GLOBAL_KEY_FILE_VERSION = 1;
 
-    private SparseArray<GlobalKeyAction> mKeyMapping;
+    private final SparseArray<GlobalKeyAction> mKeyMapping = new SparseArray<>();
     private boolean mBeganFromNonInteractive = false;
 
     public GlobalKeyManager(Context context) {
-        mKeyMapping = new SparseArray<>();
         loadGlobalKeys(context);
     }
 
@@ -69,7 +68,7 @@ final class GlobalKeyManager {
      *
      * @param context context used to broadcast the event
      * @param keyCode keyCode which triggered this function
-     * @param event keyEvent which trigged this function
+     * @param event keyEvent which triggered this function
      * @return {@code true} if this was handled
      */
     boolean handleGlobalKey(Context context, int keyCode, KeyEvent event) {
@@ -113,18 +112,17 @@ final class GlobalKeyManager {
     }
 
     class GlobalKeyAction {
-        private ComponentName mComponentName;
-        private boolean mDispatchWhenNonInteractive;
+        private final ComponentName mComponentName;
+        private final boolean mDispatchWhenNonInteractive;
         GlobalKeyAction(String componentName, String dispatchWhenNonInteractive) {
             mComponentName = ComponentName.unflattenFromString(componentName);
-            mDispatchWhenNonInteractive = Boolean.valueOf(dispatchWhenNonInteractive);
+            mDispatchWhenNonInteractive = Boolean.parseBoolean(dispatchWhenNonInteractive);
         }
     }
 
     private void loadGlobalKeys(Context context) {
-        XmlResourceParser parser = null;
-        try {
-            parser = context.getResources().getXml(com.android.internal.R.xml.global_keys);
+        try (XmlResourceParser parser = context.getResources().getXml(
+                com.android.internal.R.xml.global_keys)) {
             XmlUtils.beginDocument(parser, TAG_GLOBAL_KEYS);
             int version = parser.getAttributeIntValue(null, ATTR_VERSION, 0);
             if (GLOBAL_KEY_FILE_VERSION == version) {
@@ -153,10 +151,6 @@ final class GlobalKeyManager {
             Log.w(TAG, "XML parser exception reading global keys file", e);
         } catch (IOException e) {
             Log.w(TAG, "I/O exception reading global keys file", e);
-        } finally {
-            if (parser != null) {
-                parser.close();
-            }
         }
     }
 

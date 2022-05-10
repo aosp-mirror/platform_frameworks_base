@@ -63,11 +63,6 @@ public final class Prefs {
             Key.QS_WORK_ADDED,
             Key.QS_NIGHTDISPLAY_ADDED,
             Key.QS_LONG_PRESS_TOOLTIP_SHOWN_COUNT,
-            Key.SEEN_MULTI_USER,
-            Key.HAS_SEEN_RECENTS_SWIPE_UP_ONBOARDING,
-            Key.HAS_SEEN_RECENTS_QUICK_SCRUB_ONBOARDING,
-            Key.OVERVIEW_OPENED_COUNT,
-            Key.OVERVIEW_OPENED_FROM_HOME_COUNT,
             Key.SEEN_RINGER_GUIDANCE_COUNT,
             Key.QS_HAS_TURNED_OFF_MOBILE_DATA,
             Key.TOUCHED_RINGER_TOGGLE,
@@ -75,7 +70,9 @@ public final class Prefs {
             Key.HAS_SEEN_REVERSE_BOTTOM_SHEET,
             Key.CONTROLS_STRUCTURE_SWIPE_TOOLTIP_COUNT,
             Key.HAS_SEEN_ACCESSIBILITY_FLOATING_MENU_DOCK_TOOLTIP,
-            Key.ACCESSIBILITY_FLOATING_MENU_POSITION
+            Key.ACCESSIBILITY_FLOATING_MENU_POSITION,
+            Key.HAS_CLICKED_NUDGE_TO_SETUP_DREAM,
+            Key.HAS_DISMISSED_NUDGE_TO_SETUP_DREAM
     })
     // TODO: annotate these with their types so {@link PrefsCommandLine} can know how to set them
     public @interface Key {
@@ -108,15 +105,6 @@ public final class Prefs {
          * Settings panel.
          */
         String QS_LONG_PRESS_TOOLTIP_SHOWN_COUNT = "QsLongPressTooltipShownCount";
-        String SEEN_MULTI_USER = "HasSeenMultiUser";
-        String OVERVIEW_OPENED_COUNT = "OverviewOpenedCount";
-        String OVERVIEW_OPENED_FROM_HOME_COUNT = "OverviewOpenedFromHomeCount";
-        String HAS_SEEN_RECENTS_SWIPE_UP_ONBOARDING = "HasSeenRecentsSwipeUpOnboarding";
-        String HAS_SEEN_RECENTS_QUICK_SCRUB_ONBOARDING = "HasSeenRecentsQuickScrubOnboarding";
-        String DISMISSED_RECENTS_SWIPE_UP_ONBOARDING_COUNT =
-                "DismissedRecentsSwipeUpOnboardingCount";
-        String HAS_DISMISSED_RECENTS_QUICK_SCRUB_ONBOARDING_ONCE =
-                "HasDismissedRecentsQuickScrubOnboardingOnce";
         String SEEN_RINGER_GUIDANCE_COUNT = "RingerGuidanceCount";
         String QS_TILE_SPECS_REVEALED = "QsTileSpecsRevealed";
         String QS_HAS_TURNED_OFF_MOBILE_DATA = "QsHasTurnedOffMobileData";
@@ -127,6 +115,8 @@ public final class Prefs {
         String HAS_SEEN_ACCESSIBILITY_FLOATING_MENU_DOCK_TOOLTIP =
                 "HasSeenAccessibilityFloatingMenuDockTooltip";
         String ACCESSIBILITY_FLOATING_MENU_POSITION = "AccessibilityFloatingMenuPosition";
+        String HAS_CLICKED_NUDGE_TO_SETUP_DREAM = "HasClickedNudgeToSetupDream";
+        String HAS_DISMISSED_NUDGE_TO_SETUP_DREAM = "HasDismissedNudgeToSetupDream";
     }
 
     public static boolean getBoolean(Context context, @Key String key, boolean defaultValue) {

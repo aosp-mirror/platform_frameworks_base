@@ -21,7 +21,10 @@ import android.content.Context;
 import android.service.quickaccesswallet.QuickAccessWalletClient;
 
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.wallet.ui.WalletActivity;
+
+import java.util.concurrent.Executor;
 
 import dagger.Binds;
 import dagger.Module;
@@ -45,7 +48,8 @@ public abstract class WalletModule {
     /** */
     @SysUISingleton
     @Provides
-    public static QuickAccessWalletClient provideQuickAccessWalletClient(Context context) {
-        return QuickAccessWalletClient.create(context);
+    public static QuickAccessWalletClient provideQuickAccessWalletClient(Context context,
+            @Background Executor bgExecutor) {
+        return QuickAccessWalletClient.create(context, bgExecutor);
     }
 }

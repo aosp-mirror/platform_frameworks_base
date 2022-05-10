@@ -23,12 +23,12 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.telephony.TelephonyManager;
 import android.telephony.euicc.DownloadableSubscription;
 import android.telephony.euicc.EuiccInfo;
 import android.telephony.euicc.EuiccManager;
@@ -254,6 +254,27 @@ public abstract class EuiccService extends Service {
      */
     public static final String EXTRA_RESOLUTION_CARD_ID =
             "android.service.euicc.extra.RESOLUTION_CARD_ID";
+
+    /**
+     * Intent extra set for resolution requests containing an int indicating the subscription id
+     * to be enabled.
+     */
+    public static final String EXTRA_RESOLUTION_SUBSCRIPTION_ID =
+            "android.service.euicc.extra.RESOLUTION_SUBSCRIPTION_ID";
+
+    /**
+     * Intent extra set for resolution requests containing an int indicating the current port index.
+     */
+    public static final String EXTRA_RESOLUTION_PORT_INDEX =
+            "android.service.euicc.extra.RESOLUTION_PORT_INDEX";
+
+    /**
+     * Intent extra set for resolution requests containing a bool indicating whether to use the
+     * given port index. For example, if {@link #switchToSubscription(int, PendingIntent)} is
+     * called, then no portIndex has been provided by the caller, and this extra will be false.
+     */
+    public static final String EXTRA_RESOLUTION_USE_PORT_INDEX =
+            "android.service.euicc.extra.RESOLUTION_USE_PORT_INDEX";
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -502,11 +523,45 @@ public abstract class EuiccService extends Service {
      *     defined in {@code RESOLVABLE_ERROR_}. A subclass should override this method. Otherwise,
      *     this method does nothing and returns null by default.
      * @see android.telephony.euicc.EuiccManager#downloadSubscription
+     * @deprecated prefer {@link #onDownloadSubscription(int, int,
+     *     DownloadableSubscription, boolean, boolean, Bundle)}
      */
+    @Deprecated
     public DownloadSubscriptionResult onDownloadSubscription(int slotId,
             @NonNull DownloadableSubscription subscription, boolean switchAfterDownload,
             boolean forceDeactivateSim, @Nullable Bundle resolvedBundle) {
         return null;
+    }
+
+    /**
+     * Download the given subscription.
+     *
+     * @param slotIndex Index of the SIM slot to use for the operation.
+     * @param portIndex Index of the port from the slot. portIndex is used when
+     *     switchAfterDownload is set to {@code true}, otherwise download is port agnostic.
+     * @param subscription The subscription to download.
+     * @param switchAfterDownload If true, the subscription should be enabled upon successful
+     *     download.
+     * @param forceDeactivateSim If true, and if an active SIM must be deactivated to access the
+     *     eUICC, perform this action automatically. Otherwise, {@link #RESULT_MUST_DEACTIVATE_SIM}
+     *     should be returned to allow the user to consent to this operation first.
+     * @param resolvedBundle The bundle containing information on resolved errors. It can contain
+     *     a string of confirmation code for the key {@link #EXTRA_RESOLUTION_CONFIRMATION_CODE},
+     *     and a boolean for key {@link #EXTRA_RESOLUTION_ALLOW_POLICY_RULES} indicating whether
+     *     the user allows profile policy rules or not.
+     * @return a DownloadSubscriptionResult instance including a result code, a resolvable errors
+     *     bit map, and original the card Id. The result code may be one of the predefined
+     *     {@code RESULT_} constants or any implementation-specific code starting with
+     *     {@link #RESULT_FIRST_USER}. The resolvable error bit map can be either 0 or values
+     *     defined in {@code RESOLVABLE_ERROR_}.
+     * @see android.telephony.euicc.EuiccManager#downloadSubscription
+     */
+    @NonNull
+    public DownloadSubscriptionResult onDownloadSubscription(int slotIndex, int portIndex,
+            @NonNull DownloadableSubscription subscription, boolean switchAfterDownload,
+            boolean forceDeactivateSim, @NonNull Bundle resolvedBundle) {
+        // stub implementation, LPA needs to implement this
+        throw new UnsupportedOperationException("LPA must override onDownloadSubscription");
     }
 
     /**
@@ -579,9 +634,32 @@ public abstract class EuiccService extends Service {
      * @return the result of the switch operation. May be one of the predefined {@code RESULT_}
      *     constants or any implementation-specific code starting with {@link #RESULT_FIRST_USER}.
      * @see android.telephony.euicc.EuiccManager#switchToSubscription
+     *
+     * @deprecated prefer {@link #onSwitchToSubscriptionWithPort(int, int, String, boolean)}
      */
-    public abstract @Result int onSwitchToSubscription(int slotId, @Nullable String iccid,
-            boolean forceDeactivateSim);
+    @Deprecated public abstract @Result int onSwitchToSubscription(int slotId,
+            @Nullable String iccid, boolean forceDeactivateSim);
+
+    /**
+     * Switch to the given subscription.
+     *
+     * @param slotId ID of the SIM slot to use for the operation.
+     * @param portIndex which port on the eUICC to use
+     * @param iccid the ICCID of the subscription to enable. May be null, in which case the current
+     *     profile should be deactivated and no profile should be activated to replace it - this is
+     *     equivalent to a physical SIM being ejected.
+     * @param forceDeactivateSim If true, and if an active SIM must be deactivated to access the
+     *     eUICC, perform this action automatically. Otherwise, {@link #RESULT_MUST_DEACTIVATE_SIM}
+     *     should be returned to allow the user to consent to this operation first.
+     * @return the result of the switch operation. May be one of the predefined {@code RESULT_}
+     *     constants or any implementation-specific code starting with {@link #RESULT_FIRST_USER}.
+     * @see android.telephony.euicc.EuiccManager#switchToSubscription
+     */
+    public @Result int onSwitchToSubscriptionWithPort(int slotId, int portIndex,
+            @Nullable String iccid, boolean forceDeactivateSim) {
+        // stub implementation, LPA needs to implement this
+        throw new UnsupportedOperationException("LPA must override onSwitchToSubscriptionWithPort");
+    }
 
     /**
      * Update the nickname of the given subscription.
@@ -656,7 +734,8 @@ public abstract class EuiccService extends Service {
      */
     private class IEuiccServiceWrapper extends IEuiccService.Stub {
         @Override
-        public void downloadSubscription(int slotId, DownloadableSubscription subscription,
+        public void downloadSubscription(int slotId, int portIndex,
+                DownloadableSubscription subscription,
                 boolean switchAfterDownload, boolean forceDeactivateSim, Bundle resolvedBundle,
                 IDownloadSubscriptionCallback callback) {
             mExecutor.execute(new Runnable() {
@@ -664,18 +743,16 @@ public abstract class EuiccService extends Service {
                 public void run() {
                     DownloadSubscriptionResult result;
                     try {
-                        result =
-                            EuiccService.this.onDownloadSubscription(
-                                slotId, subscription, switchAfterDownload, forceDeactivateSim,
-                                resolvedBundle);
-                    } catch (AbstractMethodError e) {
-                        Log.w(TAG, "The new onDownloadSubscription(int, "
+                        result = EuiccService.this.onDownloadSubscription(
+                                slotId, portIndex, subscription, switchAfterDownload,
+                                forceDeactivateSim, resolvedBundle);
+                    } catch (UnsupportedOperationException | AbstractMethodError e) {
+                        Log.w(TAG, "The new onDownloadSubscription(int, int, "
                                 + "DownloadableSubscription, boolean, boolean, Bundle) is not "
                                 + "implemented. Fall back to the old one.", e);
-                        int resultCode = EuiccService.this.onDownloadSubscription(
-                                slotId, subscription, switchAfterDownload, forceDeactivateSim);
-                        result = new DownloadSubscriptionResult(resultCode,
-                            0 /* resolvableErrors */, TelephonyManager.UNSUPPORTED_CARD_ID);
+                        result = EuiccService.this.onDownloadSubscription(
+                                slotId, subscription, switchAfterDownload,
+                                forceDeactivateSim, resolvedBundle);
                     }
                     try {
                         callback.onComplete(result);
@@ -821,16 +898,21 @@ public abstract class EuiccService extends Service {
                 }
             });
         }
-
         @Override
-        public void switchToSubscription(int slotId, String iccid, boolean forceDeactivateSim,
-                ISwitchToSubscriptionCallback callback) {
+        public void switchToSubscription(int slotId, int portIndex, String iccid,
+                boolean forceDeactivateSim, ISwitchToSubscriptionCallback callback,
+                boolean usePortIndex) {
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
-                    int result =
-                            EuiccService.this.onSwitchToSubscription(
-                                    slotId, iccid, forceDeactivateSim);
+                    int result = 0;
+                    if (usePortIndex) {
+                        result = EuiccService.this.onSwitchToSubscriptionWithPort(
+                                slotId, portIndex, iccid, forceDeactivateSim);
+                    } else {
+                        result = EuiccService.this.onSwitchToSubscription(
+                                slotId, iccid, forceDeactivateSim);
+                    }
                     try {
                         callback.onComplete(result);
                     } catch (RemoteException e) {

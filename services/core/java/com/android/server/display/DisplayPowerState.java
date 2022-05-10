@@ -48,7 +48,7 @@ import java.io.PrintWriter;
 final class DisplayPowerState {
     private static final String TAG = "DisplayPowerState";
 
-    private static boolean DEBUG = false;
+    private static final boolean DEBUG = false;
     private static String COUNTER_COLOR_FADE = "ColorFadeLevel";
 
     private final Handler mHandler;
@@ -411,7 +411,7 @@ final class DisplayPowerState {
      * Updates the state of the screen and backlight asynchronously on a separate thread.
      */
     private final class PhotonicModulator extends Thread {
-        private static final int INITIAL_SCREEN_STATE = Display.STATE_OFF; // unknown, assume off
+        private static final int INITIAL_SCREEN_STATE = Display.STATE_UNKNOWN;
         private static final float INITIAL_BACKLIGHT_FLOAT = PowerManager.BRIGHTNESS_INVALID_FLOAT;
 
         private final Object mLock = new Object();
@@ -494,7 +494,9 @@ final class DisplayPowerState {
                     if (!backlightChanged) {
                         mBacklightChangeInProgress = false;
                     }
-                    if (!stateChanged && !backlightChanged) {
+                    boolean valid = state != Display.STATE_UNKNOWN && !Float.isNaN(brightnessState);
+                    boolean changed = stateChanged || backlightChanged;
+                    if (!valid || !changed) {
                         try {
                             mLock.wait();
                         } catch (InterruptedException ex) {

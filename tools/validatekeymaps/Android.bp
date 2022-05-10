@@ -32,7 +32,7 @@ cc_binary_host {
         "libui-types",
     ],
     target: {
-        linux_glibc: {
+        host_linux: {
             static_libs: [
                 // libbinder is only available for linux
                 "libbinder",

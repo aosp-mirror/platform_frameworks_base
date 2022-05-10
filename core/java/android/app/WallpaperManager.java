@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -70,6 +71,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.MathUtils;
 import android.util.Pair;
 import android.view.Display;
 import android.view.WindowManagerGlobal;
@@ -107,7 +109,7 @@ import java.util.concurrent.TimeUnit;
 @SystemService(Context.WALLPAPER_SERVICE)
 public class WallpaperManager {
     private static String TAG = "WallpaperManager";
-    private static boolean DEBUG = false;
+    private static final boolean DEBUG = false;
     private float mWallpaperXStep = -1;
     private float mWallpaperYStep = -1;
     private static final @NonNull RectF LOCAL_COLOR_BOUNDS =
@@ -221,10 +223,32 @@ public class WallpaperManager {
     public static final String COMMAND_REAPPLY = "android.wallpaper.reapply";
 
     /**
+     * Command for {@link #sendWallpaperCommand}: reported when the live wallpaper needs to be
+     * frozen.
+     * @hide
+     */
+    public static final String COMMAND_FREEZE = "android.wallpaper.freeze";
+
+    /**
+     * Command for {@link #sendWallpaperCommand}: reported when the live wallapper doesn't need
+     * to be frozen anymore.
+     * @hide
+     */
+    public static final String COMMAND_UNFREEZE = "android.wallpaper.unfreeze";
+
+    /**
      * Extra passed back from setWallpaper() giving the new wallpaper's assigned ID.
      * @hide
      */
     public static final String EXTRA_NEW_WALLPAPER_ID = "android.service.wallpaper.extra.ID";
+
+    /**
+     * Extra passed on {@link Intent.ACTION_WALLPAPER_CHANGED} indicating if wallpaper was set from
+     * a foreground app.
+     * @hide
+     */
+    public static final String EXTRA_FROM_FOREGROUND_APP =
+            "android.service.wallpaper.extra.FROM_FOREGROUND_APP";
 
     // flags for which kind of wallpaper to act on
 
@@ -343,17 +367,18 @@ public class WallpaperManager {
         private int mCachedWallpaperUserId;
         private Bitmap mDefaultWallpaper;
         private Handler mMainLooperHandler;
-        private ArrayMap<RectF, ArraySet<LocalWallpaperColorConsumer>> mLocalColorAreas =
-                new ArrayMap<>();
+        private ArrayMap<LocalWallpaperColorConsumer, ArraySet<RectF>> mLocalColorCallbackAreas =
+                        new ArrayMap<>();
         private ILocalWallpaperColorConsumer mLocalColorCallback =
                 new ILocalWallpaperColorConsumer.Stub() {
                     @Override
                     public void onColorsChanged(RectF area, WallpaperColors colors) {
-                        ArraySet<LocalWallpaperColorConsumer> callbacks =
-                                mLocalColorAreas.get(area);
-                        if (callbacks == null) return;
-                        for (LocalWallpaperColorConsumer callback: callbacks) {
-                            callback.onColorsChanged(area, colors);
+                        for (LocalWallpaperColorConsumer callback :
+                                mLocalColorCallbackAreas.keySet()) {
+                            ArraySet<RectF> areas = mLocalColorCallbackAreas.get(callback);
+                            if (areas != null && areas.contains(area)) {
+                                callback.onColorsChanged(area, colors);
+                            }
                         }
                     }
                 };
@@ -398,46 +423,52 @@ public class WallpaperManager {
             }
         }
 
-        public void addOnColorsChangedListener(@NonNull LocalWallpaperColorConsumer callback,
+        public void addOnColorsChangedListener(
+                @NonNull LocalWallpaperColorConsumer callback,
                 @NonNull List<RectF> regions, int which, int userId, int displayId) {
-            for (RectF area: regions) {
-                ArraySet<LocalWallpaperColorConsumer> callbacks = mLocalColorAreas.get(area);
-                if (callbacks == null) {
-                    callbacks = new ArraySet<>();
-                    mLocalColorAreas.put(area, callbacks);
+            synchronized (this) {
+                for (RectF area : regions) {
+                    ArraySet<RectF> areas = mLocalColorCallbackAreas.get(callback);
+                    if (areas == null) {
+                        areas = new ArraySet<>();
+                        mLocalColorCallbackAreas.put(callback, areas);
+                    }
+                    areas.add(area);
                 }
-                callbacks.add(callback);
-            }
-            try {
-                mService.addOnLocalColorsChangedListener(mLocalColorCallback , regions, which,
-                                                         userId, displayId);
-            } catch (RemoteException e) {
-                // Can't get colors, connection lost.
-                Log.e(TAG, "Can't register for local color updates", e);
+                try {
+                    // one way returns immediately
+                    mService.addOnLocalColorsChangedListener(mLocalColorCallback, regions, which,
+                            userId, displayId);
+                } catch (RemoteException e) {
+                    // Can't get colors, connection lost.
+                    Log.e(TAG, "Can't register for local color updates", e);
+                }
             }
         }
 
         public void removeOnColorsChangedListener(
                 @NonNull LocalWallpaperColorConsumer callback, int which, int userId,
                 int displayId) {
-            final ArrayList<RectF> removeAreas = new ArrayList<>();
-            for (RectF area : mLocalColorAreas.keySet()) {
-                ArraySet<LocalWallpaperColorConsumer> callbacks = mLocalColorAreas.get(area);
-                if (callbacks == null) continue;
-                callbacks.remove(callback);
-                if (callbacks.size() == 0) {
-                    mLocalColorAreas.remove(area);
-                    removeAreas.add(area);
+            synchronized (this) {
+                final ArraySet<RectF> removeAreas = mLocalColorCallbackAreas.remove(callback);
+                if (removeAreas == null || removeAreas.size() == 0) {
+                    return;
                 }
-            }
-            try {
-                if (removeAreas.size() > 0) {
-                    mService.removeOnLocalColorsChangedListener(
-                            mLocalColorCallback, removeAreas, which, userId, displayId);
+                for (LocalWallpaperColorConsumer cb : mLocalColorCallbackAreas.keySet()) {
+                    ArraySet<RectF> areas = mLocalColorCallbackAreas.get(cb);
+                    if (areas != null && cb != callback) removeAreas.removeAll(areas);
                 }
-            } catch (RemoteException e) {
-                // Can't get colors, connection lost.
-                Log.e(TAG, "Can't unregister for local color updates", e);
+                try {
+                    if (removeAreas.size() > 0) {
+                        // one way returns immediately
+                        mService.removeOnLocalColorsChangedListener(
+                                mLocalColorCallback, new ArrayList(removeAreas), which, userId,
+                                displayId);
+                    }
+                } catch (RemoteException e) {
+                    // Can't get colors, connection lost.
+                    Log.e(TAG, "Can't unregister for local color updates", e);
+                }
             }
         }
 
@@ -527,28 +558,31 @@ public class WallpaperManager {
                 }
                 mCachedWallpaper = null;
                 mCachedWallpaperUserId = 0;
-                try {
-                    mCachedWallpaper = getCurrentWallpaperLocked(
-                            context, userId, hardware, cmProxy);
-                    mCachedWallpaperUserId = userId;
-                } catch (OutOfMemoryError e) {
-                    Log.w(TAG, "Out of memory loading the current wallpaper: " + e);
-                } catch (SecurityException e) {
-                    if (context.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.O_MR1) {
-                        Log.w(TAG, "No permission to access wallpaper, suppressing"
-                                + " exception to avoid crashing legacy app.");
-                    } else {
-                        // Post-O apps really most sincerely need the permission.
-                        throw e;
+            }
+            try {
+                Bitmap currentWallpaper = getCurrentWallpaperLocked(
+                        context, userId, hardware, cmProxy);
+                if (currentWallpaper != null) {
+                    synchronized (this) {
+                        mCachedWallpaper = currentWallpaper;
+                        mCachedWallpaperUserId = userId;
+                        return mCachedWallpaper;
                     }
                 }
-                if (mCachedWallpaper != null) {
-                    return mCachedWallpaper;
+            } catch (OutOfMemoryError e) {
+                Log.w(TAG, "Out of memory loading the current wallpaper: " + e);
+            } catch (SecurityException e) {
+                if (context.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.O_MR1) {
+                    Log.w(TAG, "No permission to access wallpaper, suppressing"
+                            + " exception to avoid crashing legacy app.");
+                } else {
+                    // Post-O apps really most sincerely need the permission.
+                    throw e;
                 }
             }
             if (returnDefault) {
                 Bitmap defaultWallpaper = mDefaultWallpaper;
-                if (defaultWallpaper == null) {
+                if (defaultWallpaper == null || defaultWallpaper.isRecycled()) {
                     defaultWallpaper = getDefaultWallpaper(context, which);
                     synchronized (this) {
                         mDefaultWallpaper = defaultWallpaper;
@@ -557,6 +591,60 @@ public class WallpaperManager {
                 return defaultWallpaper;
             }
             return null;
+        }
+
+        public Rect peekWallpaperDimensions(Context context, boolean returnDefault, int userId) {
+            if (mService != null) {
+                try {
+                    if (!mService.isWallpaperSupported(context.getOpPackageName())) {
+                        return new Rect();
+                    }
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
+
+            Rect dimensions = null;
+            synchronized (this) {
+                ParcelFileDescriptor pfd = null;
+                try {
+                    Bundle params = new Bundle();
+                    pfd = mService.getWallpaperWithFeature(context.getOpPackageName(),
+                            context.getAttributionTag(), this, FLAG_SYSTEM, params, userId);
+                    // Let's peek user wallpaper first.
+                    if (pfd != null) {
+                        BitmapFactory.Options options = new BitmapFactory.Options();
+                        options.inJustDecodeBounds = true;
+                        BitmapFactory.decodeFileDescriptor(pfd.getFileDescriptor(), null, options);
+                        dimensions = new Rect(0, 0, options.outWidth, options.outHeight);
+                    }
+                } catch (RemoteException ex) {
+                    Log.w(TAG, "peek wallpaper dimensions failed", ex);
+                } finally {
+                    if (pfd != null) {
+                        try {
+                            pfd.close();
+                        } catch (IOException ignored) {
+                        }
+                    }
+                }
+            }
+            // If user wallpaper is unavailable, may be the default one instead.
+            if ((dimensions == null || dimensions.width() == 0 || dimensions.height() == 0)
+                    && returnDefault) {
+                InputStream is = openDefaultWallpaper(context, FLAG_SYSTEM);
+                if (is != null) {
+                    try {
+                        BitmapFactory.Options options = new BitmapFactory.Options();
+                        options.inJustDecodeBounds = true;
+                        BitmapFactory.decodeStream(is, null, options);
+                        dimensions = new Rect(0, 0, options.outWidth, options.outHeight);
+                    } finally {
+                        IoUtils.closeQuietly(is);
+                    }
+                }
+            }
+            return dimensions;
         }
 
         void forgetLoadedWallpaper() {
@@ -1036,6 +1124,17 @@ public class WallpaperManager {
     public Bitmap getBitmapAsUser(int userId, boolean hardware) {
         final ColorManagementProxy cmProxy = getColorManagementProxy();
         return sGlobals.peekWallpaperBitmap(mContext, true, FLAG_SYSTEM, userId, hardware, cmProxy);
+    }
+
+    /**
+     * Peek the dimensions of system wallpaper of the user without decoding it.
+     *
+     * @return the dimensions of system wallpaper
+     * @hide
+     */
+    public Rect peekBitmapDimensions() {
+        return sGlobals.peekWallpaperDimensions(
+                mContext, true /* returnDefault */, mContext.getUserId());
     }
 
     /**
@@ -1899,6 +1998,63 @@ public class WallpaperManager {
     }
 
     /**
+     * Sets the wallpaper dim amount between [0f, 1f] which would be blended with the system default
+     * dimming. 0f doesn't add any additional dimming and 1f makes the wallpaper fully black.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.SET_WALLPAPER_DIM_AMOUNT)
+    public void setWallpaperDimAmount(@FloatRange (from = 0f, to = 1f) float dimAmount) {
+        if (sGlobals.mService == null) {
+            Log.w(TAG, "WallpaperService not running");
+            throw new RuntimeException(new DeadSystemException());
+        }
+        try {
+            sGlobals.mService.setWallpaperDimAmount(MathUtils.saturate(dimAmount));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the current additional dim amount set on the wallpaper. 0f means no application has
+     * added any dimming on top of the system default dim amount.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.SET_WALLPAPER_DIM_AMOUNT)
+    public float getWallpaperDimAmount() {
+        if (sGlobals.mService == null) {
+            Log.w(TAG, "WallpaperService not running");
+            throw new RuntimeException(new DeadSystemException());
+        }
+        try {
+            return sGlobals.mService.getWallpaperDimAmount();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Whether the lock screen wallpaper is different from the system wallpaper.
+     *
+     * @hide
+     */
+    public boolean lockScreenWallpaperExists() {
+        if (sGlobals.mService == null) {
+            Log.w(TAG, "WallpaperService not running");
+            throw new RuntimeException(new DeadSystemException());
+        }
+        try {
+            return sGlobals.mService.lockScreenWallpaperExists();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Set the live wallpaper.
      *
      * This can only be called by packages with android.permission.SET_WALLPAPER_COMPONENT
@@ -2316,22 +2472,24 @@ public class WallpaperManager {
          * A {@link android.app.WallpaperColors} object containing a simplified
          * color histogram will be given.
          *
-         * @param colors Wallpaper color info
+         * @param colors Wallpaper color info, {@code null} when not available.
          * @param which A combination of {@link #FLAG_LOCK} and {@link #FLAG_SYSTEM}
+         * @see android.service.wallpaper.WallpaperService.Engine#onComputeColors()
          */
-        void onColorsChanged(WallpaperColors colors, int which);
+        void onColorsChanged(@Nullable WallpaperColors colors, int which);
 
         /**
          * Called when colors change.
          * A {@link android.app.WallpaperColors} object containing a simplified
          * color histogram will be given.
          *
-         * @param colors Wallpaper color info
+         * @param colors Wallpaper color info, {@code null} when not available.
          * @param which A combination of {@link #FLAG_LOCK} and {@link #FLAG_SYSTEM}
          * @param userId Owner of the wallpaper
+         * @see android.service.wallpaper.WallpaperService.Engine#onComputeColors()
          * @hide
          */
-        default void onColorsChanged(WallpaperColors colors, int which, int userId) {
+        default void onColorsChanged(@Nullable WallpaperColors colors, int which, int userId) {
             onColorsChanged(colors, which);
         }
     }

@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.BadParcelableException;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -109,17 +110,22 @@ public abstract class AbstractResolverComparator implements Comparator<ResolvedC
 
     // get annotations of content from intent.
     private void getContentAnnotations(Intent intent) {
-        ArrayList<String> annotations = intent.getStringArrayListExtra(
-                Intent.EXTRA_CONTENT_ANNOTATIONS);
-        if (annotations != null) {
-            int size = annotations.size();
-            if (size > NUM_OF_TOP_ANNOTATIONS_TO_USE) {
-                size = NUM_OF_TOP_ANNOTATIONS_TO_USE;
+        try {
+            ArrayList<String> annotations = intent.getStringArrayListExtra(
+                    Intent.EXTRA_CONTENT_ANNOTATIONS);
+            if (annotations != null) {
+                int size = annotations.size();
+                if (size > NUM_OF_TOP_ANNOTATIONS_TO_USE) {
+                    size = NUM_OF_TOP_ANNOTATIONS_TO_USE;
+                }
+                mAnnotations = new String[size];
+                for (int i = 0; i < size; i++) {
+                    mAnnotations[i] = annotations.get(i);
+                }
             }
-            mAnnotations = new String[size];
-            for (int i = 0; i < size; i++) {
-                mAnnotations[i] = annotations.get(i);
-            }
+        } catch (BadParcelableException e) {
+            Log.i(TAG, "Couldn't unparcel intent annotations. Ignoring.");
+            mAnnotations = new String[0];
         }
     }
 
@@ -154,6 +160,11 @@ public abstract class AbstractResolverComparator implements Comparator<ResolvedC
     public final int compare(ResolvedComponentInfo lhsp, ResolvedComponentInfo rhsp) {
         final ResolveInfo lhs = lhsp.getResolveInfoAt(0);
         final ResolveInfo rhs = rhsp.getResolveInfoAt(0);
+
+        final boolean lFixedAtTop = lhsp.isFixedAtTop();
+        final boolean rFixedAtTop = rhsp.isFixedAtTop();
+        if (lFixedAtTop && !rFixedAtTop) return -1;
+        if (!lFixedAtTop && rFixedAtTop) return 1;
 
         // We want to put the one targeted to another user at the end of the dialog.
         if (lhs.targetUserId != UserHandle.USER_CURRENT) {
@@ -216,12 +227,6 @@ public abstract class AbstractResolverComparator implements Comparator<ResolvedC
      * when {@link #compute(List)} was called before this.
      */
     abstract float getScore(ComponentName name);
-
-    /**
-     * Returns the list of top K component names which have highest
-     * {@link #getScore(ComponentName)}
-     */
-    abstract List<ComponentName> getTopComponentNames(int topK);
 
     /** Handles result message sent to mHandler. */
     abstract void handleResultMessage(Message message);

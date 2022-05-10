@@ -26,6 +26,7 @@ import static org.mockito.internal.verification.VerificationModeFactory.times;
 import android.content.Intent;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
@@ -37,6 +38,7 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -94,4 +96,11 @@ public class StatusBarRemoteInputCallbackTest extends SysuiTestCase {
         verify(mRemoteInputCallback, times(1)).onWorkChallengeChanged();
     }
 
+    @Test
+    public void testShowGenericBouncer_onLockedRemoteInput() {
+        mRemoteInputCallback.onLockedRemoteInput(
+                mock(ExpandableNotificationRow.class), mock(View.class));
+
+        verify(mStatusBarKeyguardViewManager).showGenericBouncer(true);
+    }
 }

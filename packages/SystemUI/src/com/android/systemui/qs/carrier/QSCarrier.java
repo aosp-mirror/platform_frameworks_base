@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.carrier;
 
+import android.annotation.StyleRes;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.text.TextUtils;
@@ -25,8 +26,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+
 import com.android.settingslib.Utils;
 import com.android.settingslib.graph.SignalDrawable;
+import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 
 import java.util.Objects;
@@ -37,8 +42,11 @@ public class QSCarrier extends LinearLayout {
     private TextView mCarrierText;
     private ImageView mMobileSignal;
     private ImageView mMobileRoaming;
+    private View mSpacer;
+    @Nullable
     private CellSignalState mLastSignalState;
     private boolean mProviderModelInitialized = false;
+    private boolean mIsSingleCarrier;
 
     public QSCarrier(Context context) {
         super(context);
@@ -63,18 +71,25 @@ public class QSCarrier extends LinearLayout {
         mMobileRoaming = findViewById(R.id.mobile_roaming);
         mMobileSignal = findViewById(R.id.mobile_signal);
         mCarrierText = findViewById(R.id.qs_carrier_text);
+        mSpacer = findViewById(R.id.spacer);
     }
 
     /**
      * Update the state of this view
      * @param state the current state of the signal for this view
+     * @param isSingleCarrier whether there is a single carrier being shown in the container
      * @return true if the state was actually changed
      */
-    public boolean updateState(CellSignalState state) {
-        if (Objects.equals(state, mLastSignalState)) return false;
+    public boolean updateState(CellSignalState state, boolean isSingleCarrier) {
+        if (Objects.equals(state, mLastSignalState) && isSingleCarrier == mIsSingleCarrier) {
+            return false;
+        }
         mLastSignalState = state;
-        mMobileGroup.setVisibility(state.visible ? View.VISIBLE : View.GONE);
-        if (state.visible) {
+        mIsSingleCarrier = isSingleCarrier;
+        final boolean visible = state.visible && !isSingleCarrier;
+        mMobileGroup.setVisibility(visible ? View.VISIBLE : View.GONE);
+        mSpacer.setVisibility(isSingleCarrier ? View.VISIBLE : View.GONE);
+        if (visible) {
             mMobileRoaming.setVisibility(state.roaming ? View.VISIBLE : View.GONE);
             ColorStateList colorStateList = Utils.getColorAttr(mContext,
                     android.R.attr.textColorPrimary);
@@ -114,7 +129,7 @@ public class QSCarrier extends LinearLayout {
         return true;
     }
 
-    private boolean hasValidTypeContentDescription(String typeContentDescription) {
+    private boolean hasValidTypeContentDescription(@Nullable String typeContentDescription) {
         return TextUtils.equals(typeContentDescription,
                 mContext.getString(R.string.data_connection_no_internet))
                 || TextUtils.equals(typeContentDescription,
@@ -125,7 +140,16 @@ public class QSCarrier extends LinearLayout {
                         com.android.settingslib.R.string.not_default_data_content_description));
     }
 
+    @VisibleForTesting
+    View getRSSIView() {
+        return mMobileGroup;
+    }
+
     public void setCarrierText(CharSequence text) {
         mCarrierText.setText(text);
+    }
+
+    public void updateTextAppearance(@StyleRes int resId) {
+        FontSizeUtils.updateFontSizeFromStyle(mCarrierText, resId);
     }
 }

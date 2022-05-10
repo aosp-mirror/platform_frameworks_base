@@ -44,8 +44,8 @@ class DisplayFoldDurationLogger {
     @Retention(RetentionPolicy.SOURCE)
     public @interface ScreenState {}
 
-    private @ScreenState int mScreenState = SCREEN_STATE_UNKNOWN;
-    private Long mLastChanged = null;
+    private volatile @ScreenState int mScreenState = SCREEN_STATE_UNKNOWN;
+    private volatile Long mLastChanged = null;
 
     private static final int LOG_SUBTYPE_UNFOLDED = 0;
     private static final int LOG_SUBTYPE_FOLDED = 1;

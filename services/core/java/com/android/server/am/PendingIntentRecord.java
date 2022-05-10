@@ -24,6 +24,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NA
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
+import android.app.BroadcastOptions;
 import android.app.PendingIntent;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
@@ -309,6 +310,22 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
                 requiredPermission, null, null, 0, 0, 0, options);
     }
 
+    public static boolean isPendingIntentBalAllowedByCaller(
+            @Nullable ActivityOptions activityOptions) {
+        if (activityOptions == null) {
+            return ActivityOptions.PENDING_INTENT_BAL_ALLOWED_DEFAULT;
+        }
+        return isPendingIntentBalAllowedByCaller(activityOptions.toBundle());
+    }
+
+    private static boolean isPendingIntentBalAllowedByCaller(@Nullable Bundle options) {
+        if (options == null) {
+            return ActivityOptions.PENDING_INTENT_BAL_ALLOWED_DEFAULT;
+        }
+        return options.getBoolean(ActivityOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED,
+                ActivityOptions.PENDING_INTENT_BAL_ALLOWED_DEFAULT);
+    }
+
     public int sendInner(int code, Intent intent, String resolvedType, IBinder allowlistToken,
             IIntentReceiver finishedReceiver, String requiredPermission, IBinder resultTo,
             String resultWho, int requestCode, int flagsMask, int flagsValues, Bundle options) {
@@ -408,6 +425,18 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
                 }
                 controller.mAmInternal.tempAllowlistForPendingIntent(callingPid, callingUid,
                         uid, duration.duration, duration.type, duration.reasonCode, tag.toString());
+            } else if (key.type == ActivityManager.INTENT_SENDER_FOREGROUND_SERVICE
+                    && options != null) {
+                // If this is a getForegroundService() type pending intent, use its BroadcastOptions
+                // temp allowlist duration as its pending intent temp allowlist duration.
+                BroadcastOptions brOptions = new BroadcastOptions(options);
+                if (brOptions.getTemporaryAppAllowlistDuration() > 0) {
+                    controller.mAmInternal.tempAllowlistForPendingIntent(callingPid, callingUid,
+                            uid, brOptions.getTemporaryAppAllowlistDuration(),
+                            brOptions.getTemporaryAppAllowlistType(),
+                            brOptions.getTemporaryAppAllowlistReasonCode(),
+                            brOptions.getTemporaryAppAllowlistReason());
+                }
             }
 
             boolean sendFinish = finishedReceiver != null;
@@ -418,7 +447,8 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
             // temporarily allow receivers and services to open activities from background if the
             // PendingIntent.send() caller was foreground at the time of sendInner() call
             final boolean allowTrampoline = uid != callingUid
-                    && controller.mAtmInternal.isUidForeground(callingUid);
+                    && controller.mAtmInternal.isUidForeground(callingUid)
+                    && isPendingIntentBalAllowedByCaller(options);
 
             // note: we on purpose don't pass in the information about the PendingIntent's creator,
             // like pid or ProcessRecord, to the ActivityTaskManagerInternal calls below, because
@@ -468,7 +498,8 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
                                 key.featureId, uid, callingUid, callingPid, finalIntent,
                                 resolvedType, finishedReceiver, code, null, null,
                                 requiredPermission, options, (finishedReceiver != null), false,
-                                userId, allowedByToken || allowTrampoline, bgStartsToken);
+                                userId, allowedByToken || allowTrampoline, bgStartsToken,
+                                null /* broadcastAllowList */);
                         if (sent == ActivityManager.BROADCAST_SUCCESS) {
                             sendFinish = false;
                         }

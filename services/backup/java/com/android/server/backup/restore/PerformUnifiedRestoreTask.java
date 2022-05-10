@@ -20,7 +20,6 @@ import static com.android.server.backup.BackupManagerService.DEBUG;
 import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
 import static com.android.server.backup.UserBackupManagerService.KEY_WIDGET_STATE;
-import static com.android.server.backup.UserBackupManagerService.OP_TYPE_RESTORE_WAIT;
 import static com.android.server.backup.UserBackupManagerService.PACKAGE_MANAGER_SENTINEL;
 import static com.android.server.backup.UserBackupManagerService.SETTINGS_PACKAGE;
 import static com.android.server.backup.internal.BackupHandler.MSG_BACKUP_RESTORE_STEP;
@@ -54,19 +53,21 @@ import android.util.EventLog;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.backup.IBackupTransport;
 import com.android.server.AppWidgetBackupBridge;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.BackupUtils;
+import com.android.server.backup.OperationStorage;
+import com.android.server.backup.OperationStorage.OpType;
 import com.android.server.backup.PackageManagerBackupAgent;
 import com.android.server.backup.PackageManagerBackupAgent.Metadata;
 import com.android.server.backup.TransportManager;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.internal.OnTaskFinishedListener;
-import com.android.server.backup.transport.TransportClient;
+import com.android.server.backup.transport.BackupTransportClient;
+import com.android.server.backup.transport.TransportConnection;
 import com.android.server.backup.utils.BackupEligibilityRules;
 import com.android.server.backup.utils.BackupManagerMonitorUtils;
 
@@ -84,10 +85,11 @@ import java.util.Set;
 public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
     private UserBackupManagerService backupManagerService;
+    private final OperationStorage mOperationStorage;
     private final int mUserId;
     private final TransportManager mTransportManager;
     // Transport client we're working with to do the restore
-    private final TransportClient mTransportClient;
+    private final TransportConnection mTransportConnection;
 
     // Where per-transport saved state goes
     private File mStateDir;
@@ -169,7 +171,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
     PerformUnifiedRestoreTask(UserBackupManagerService backupManagerService) {
         mListener = null;
         mAgentTimeoutParameters = null;
-        mTransportClient = null;
+        mOperationStorage = null;
+        mTransportConnection = null;
         mTransportManager = null;
         mEphemeralOpToken = 0;
         mUserId = 0;
@@ -181,7 +184,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
     // about releasing it.
     public PerformUnifiedRestoreTask(
             UserBackupManagerService backupManagerService,
-            TransportClient transportClient,
+            OperationStorage operationStorage,
+            TransportConnection transportConnection,
             IRestoreObserver observer,
             IBackupManagerMonitor monitor,
             long restoreSetToken,
@@ -192,13 +196,14 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             OnTaskFinishedListener listener,
             BackupEligibilityRules backupEligibilityRules) {
         this.backupManagerService = backupManagerService;
+        mOperationStorage = operationStorage;
         mUserId = backupManagerService.getUserId();
         mTransportManager = backupManagerService.getTransportManager();
         mEphemeralOpToken = backupManagerService.generateRandomIntegerToken();
         mState = UnifiedRestoreState.INITIAL;
         mStartRealtime = SystemClock.elapsedRealtime();
 
-        mTransportClient = transportClient;
+        mTransportConnection = transportConnection;
         mObserver = observer;
         mMonitor = monitor;
         mToken = restoreSetToken;
@@ -386,7 +391,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
         try {
             String transportDirName =
-                    mTransportManager.getTransportDirName(mTransportClient.getTransportComponent());
+                    mTransportManager.getTransportDirName(
+                            mTransportConnection.getTransportComponent());
             mStateDir = new File(backupManagerService.getBaseStateDir(), transportDirName);
 
             // Fetch the current metadata from the dataset first
@@ -396,8 +402,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
             PackageInfo[] packages = mAcceptSet.toArray(new PackageInfo[0]);
 
-            IBackupTransport transport =
-                    mTransportClient.connectOrThrow("PerformUnifiedRestoreTask.startRestore()");
+            BackupTransportClient transport =
+                    mTransportConnection.connectOrThrow("PerformUnifiedRestoreTask.startRestore()");
 
             mStatus = transport.startRestore(mToken, packages);
             if (mStatus != BackupTransport.TRANSPORT_OK) {
@@ -494,8 +500,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
     private void dispatchNextRestore() {
         UnifiedRestoreState nextState = UnifiedRestoreState.FINAL;
         try {
-            IBackupTransport transport =
-                    mTransportClient.connectOrThrow(
+            BackupTransportClient transport =
+                    mTransportConnection.connectOrThrow(
                             "PerformUnifiedRestoreTask.dispatchNextRestore()");
             mRestoreDescription = transport.nextRestorePackage();
             final String pkgName = (mRestoreDescription != null)
@@ -708,8 +714,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         boolean startedAgentRestore = false;
 
         try {
-            IBackupTransport transport =
-                    mTransportClient.connectOrThrow(
+            BackupTransportClient transport =
+                    mTransportConnection.connectOrThrow(
                             "PerformUnifiedRestoreTask.initiateOneRestore()");
 
             // Run the transport's restore pass
@@ -766,7 +772,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             long restoreAgentTimeoutMillis = mAgentTimeoutParameters.getRestoreAgentTimeoutMillis(
                     app.applicationInfo.uid);
             backupManagerService.prepareOperationTimeout(
-                    mEphemeralOpToken, restoreAgentTimeoutMillis, this, OP_TYPE_RESTORE_WAIT);
+                    mEphemeralOpToken, restoreAgentTimeoutMillis, this, OpType.RESTORE_WAIT);
             startedAgentRestore = true;
             mAgent.doRestoreWithExcludedKeys(mBackupData, appVersionCode, mNewState,
                     mEphemeralOpToken, backupManagerService.getBackupManagerBinder(),
@@ -876,7 +882,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             backupManagerService
                     .prepareOperationTimeout(mEphemeralOpToken,
                             restoreAgentFinishedTimeoutMillis, this,
-                            OP_TYPE_RESTORE_WAIT);
+                            OpType.RESTORE_WAIT);
             mAgent.doRestoreFinished(mEphemeralOpToken,
                     backupManagerService.getBackupManagerBinder());
             // If we get this far, the callback or timeout will schedule the
@@ -920,7 +926,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             EventLog.writeEvent(EventLogTags.FULL_RESTORE_PACKAGE,
                     mCurrentPackage.packageName);
 
-            mEngine = new FullRestoreEngine(backupManagerService, this, null,
+            mEngine = new FullRestoreEngine(backupManagerService, mOperationStorage, this, null,
                     mMonitor, mCurrentPackage, false, mEphemeralOpToken, false,
                     mBackupEligibilityRules);
             mEngineThread = new FullRestoreEngineThread(mEngine, mEnginePipes[0]);
@@ -939,7 +945,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
             String callerLogString = "PerformUnifiedRestoreTask$StreamFeederThread.run()";
             try {
-                IBackupTransport transport = mTransportClient.connectOrThrow(callerLogString);
+                BackupTransportClient transport = mTransportConnection.connectOrThrow(
+                        callerLogString);
                 while (status == BackupTransport.TRANSPORT_OK) {
                     // have the transport write some of the restoring data to us
                     int result = transport.getNextFullRestoreDataChunk(tWriteEnd);
@@ -1031,8 +1038,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                     // Something went wrong somewhere.  Whether it was at the transport
                     // level is immaterial; we need to tell the transport to bail
                     try {
-                        IBackupTransport transport =
-                                mTransportClient.connectOrThrow(callerLogString);
+                        BackupTransportClient transport =
+                                mTransportConnection.connectOrThrow(callerLogString);
                         transport.abortFullRestore();
                     } catch (Exception e) {
                         // transport itself is dead; make sure we handle this as a
@@ -1069,7 +1076,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         // The app has timed out handling a restoring file
         @Override
         public void handleCancel(boolean cancelAll) {
-            backupManagerService.removeOperation(mEphemeralOpToken);
+            mOperationStorage.removeOperation(mEphemeralOpToken);
             if (DEBUG) {
                 Slog.w(TAG, "Full-data restore target timed out; shutting down");
             }
@@ -1094,8 +1101,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
         String callerLogString = "PerformUnifiedRestoreTask.finalizeRestore()";
         try {
-            IBackupTransport transport =
-                    mTransportClient.connectOrThrow(callerLogString);
+            BackupTransportClient transport =
+                    mTransportConnection.connectOrThrow(callerLogString);
             transport.finishRestore();
         } catch (Exception e) {
             Slog.e(TAG, "Error finishing restore", e);
@@ -1266,7 +1273,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
     @Override
     public void operationComplete(long unusedResult) {
-        backupManagerService.removeOperation(mEphemeralOpToken);
+        mOperationStorage.removeOperation(mEphemeralOpToken);
         if (MORE_DEBUG) {
             Slog.i(TAG, "operationComplete() during restore: target="
                     + mCurrentPackage.packageName
@@ -1329,7 +1336,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
     // A call to agent.doRestore() or agent.doRestoreFinished() has timed out
     @Override
     public void handleCancel(boolean cancelAll) {
-        backupManagerService.removeOperation(mEphemeralOpToken);
+        mOperationStorage.removeOperation(mEphemeralOpToken);
         Slog.e(TAG, "Timeout restoring application " + mCurrentPackage.packageName);
         mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
                 BackupManagerMonitor.LOG_EVENT_ID_KEY_VALUE_RESTORE_TIMEOUT,

@@ -24,6 +24,7 @@
 #include <idmap2/ResourceContainer.h>
 #include <idmap2/Result.h>
 
+#include <filesystem>
 #include <memory>
 #include <string>
 #include <vector>
@@ -59,7 +60,11 @@ class Idmap2Service : public BinderService<Idmap2Service>, public BnIdmap2 {
   binder::Status deleteFabricatedOverlay(const std::string& overlay_path,
                                          bool* _aidl_return) override;
 
-  binder::Status getFabricatedOverlayInfos(
+  binder::Status acquireFabricatedOverlayIterator() override;
+
+  binder::Status releaseFabricatedOverlayIterator() override;
+
+  binder::Status nextFabricatedOverlayInfos(
       std::vector<os::FabricatedOverlayInfo>* _aidl_return) override;
 
   binder::Status dumpIdmap(const std::string& overlay_path, std::string* _aidl_return) override;
@@ -69,7 +74,7 @@ class Idmap2Service : public BinderService<Idmap2Service>, public BnIdmap2 {
   // be able to be recalculated if idmap2 dies and restarts.
   std::unique_ptr<idmap2::TargetResourceContainer> framework_apk_cache_;
 
-  std::vector<os::FabricatedOverlayInfo> fabricated_overlays_;
+  std::optional<std::filesystem::directory_iterator> frro_iter_;
 
   template <typename T>
   using MaybeUniquePtr = std::variant<std::unique_ptr<T>, T*>;

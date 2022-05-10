@@ -38,7 +38,7 @@ import com.android.systemui.doze.DozeHost;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.EnhancedEstimates;
-import com.android.systemui.power.EnhancedEstimatesImpl;
+import com.android.systemui.power.dagger.PowerModule;
 import com.android.systemui.qs.dagger.QSModule;
 import com.android.systemui.qs.tileimpl.QSFactoryImpl;
 import com.android.systemui.recents.Recents;
@@ -49,7 +49,8 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManagerImpl;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
+import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
+import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.phone.DozeServiceHost;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -64,11 +65,13 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedControllerImpl;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController;
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyControllerImpl;
 import com.android.systemui.statusbar.policy.SensorPrivacyController;
 import com.android.systemui.statusbar.policy.SensorPrivacyControllerImpl;
 import com.android.systemui.statusbar.tv.notifications.TvNotificationHandler;
+import com.android.systemui.volume.dagger.VolumeModule;
 
 import javax.inject.Named;
 
@@ -81,7 +84,9 @@ import dagger.Provides;
  * overridden by the System UI implementation.
  */
 @Module(includes = {
-            QSModule.class
+            PowerModule.class,
+            QSModule.class,
+            VolumeModule.class,
         },
         subcomponents = {
         })
@@ -94,9 +99,6 @@ public abstract class TvSystemUIModule {
     static String provideLeakReportEmail() {
         return null;
     }
-
-    @Binds
-    abstract EnhancedEstimates bindEnhancedEstimates(EnhancedEstimatesImpl enhancedEstimates);
 
     @Binds
     abstract NotificationLockscreenUserManager bindNotificationLockscreenUserManager(
@@ -158,12 +160,21 @@ public abstract class TvSystemUIModule {
     @Provides
     static HeadsUpManagerPhone provideHeadsUpManagerPhone(
             Context context,
+            HeadsUpManagerLogger headsUpManagerLogger,
             StatusBarStateController statusBarStateController,
             KeyguardBypassController bypassController,
-            NotificationGroupManagerLegacy groupManager,
+            GroupMembershipManager groupManager,
+            VisualStabilityProvider visualStabilityProvider,
             ConfigurationController configurationController) {
-        return new HeadsUpManagerPhone(context, statusBarStateController, bypassController,
-                groupManager, configurationController);
+        return new HeadsUpManagerPhone(
+                context,
+                headsUpManagerLogger,
+                statusBarStateController,
+                bypassController,
+                groupManager,
+                visualStabilityProvider,
+                configurationController
+        );
     }
 
     @Binds
@@ -176,9 +187,13 @@ public abstract class TvSystemUIModule {
         return new Recents(context, recentsImplementation, commandQueue);
     }
 
-    @Binds
-    abstract DeviceProvisionedController bindDeviceProvisionedController(
-            DeviceProvisionedControllerImpl deviceProvisionedController);
+    @SysUISingleton
+    @Provides
+    static DeviceProvisionedController providesDeviceProvisionedController(
+            DeviceProvisionedControllerImpl deviceProvisionedController) {
+        deviceProvisionedController.init();
+        return deviceProvisionedController;
+    }
 
     @Binds
     abstract KeyguardViewController bindKeyguardViewController(

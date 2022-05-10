@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
+#include "idmap2/CommandUtils.h"
+
 #include <fstream>
 #include <memory>
 #include <string>
 #include <vector>
 
-#include "idmap2/CommandUtils.h"
 #include "idmap2/Idmap.h"
 #include "idmap2/Result.h"
 #include "idmap2/SysTrace.h"

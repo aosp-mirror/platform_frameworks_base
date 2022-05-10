@@ -60,14 +60,10 @@ public class RoSystemProperties {
     public static final CryptoProperties.type_values CRYPTO_TYPE =
             CryptoProperties.type().orElse(CryptoProperties.type_values.NONE);
     // These are pseudo-properties
-    public static final boolean CRYPTO_ENCRYPTABLE =
-            CRYPTO_STATE != CryptoProperties.state_values.UNSUPPORTED;
     public static final boolean CRYPTO_ENCRYPTED =
             CRYPTO_STATE == CryptoProperties.state_values.ENCRYPTED;
     public static final boolean CRYPTO_FILE_ENCRYPTED =
             CRYPTO_TYPE == CryptoProperties.type_values.FILE;
-    public static final boolean CRYPTO_BLOCK_ENCRYPTED =
-            CRYPTO_TYPE == CryptoProperties.type_values.BLOCK;
 
     public static final boolean CONTROL_PRIVAPP_PERMISSIONS_LOG =
             "log".equalsIgnoreCase(CONTROL_PRIVAPP_PERMISSIONS);

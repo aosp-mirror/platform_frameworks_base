@@ -24,7 +24,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
-import com.android.systemui.statusbar.phone.KeyguardBypassController;
 
 import java.util.HashSet;
 
@@ -40,12 +39,13 @@ public class NotificationRoundnessManager {
     private final ExpandableView[] mLastInSectionViews;
     private final ExpandableView[] mTmpFirstInSectionViews;
     private final ExpandableView[] mTmpLastInSectionViews;
-    private final KeyguardBypassController mBypassController;
     private boolean mExpanded;
     private HashSet<ExpandableView> mAnimatedChildren;
     private Runnable mRoundingChangedCallback;
     private ExpandableNotificationRow mTrackedHeadsUp;
     private float mAppearFraction;
+    private boolean mRoundForPulsingViews;
+    private boolean mIsClearAllInProgress;
 
     private ExpandableView mSwipedView = null;
     private ExpandableView mViewBeforeSwipedView = null;
@@ -53,14 +53,12 @@ public class NotificationRoundnessManager {
 
     @Inject
     NotificationRoundnessManager(
-            KeyguardBypassController keyguardBypassController,
             NotificationSectionsFeatureManager sectionsFeatureManager) {
         int numberOfSections = sectionsFeatureManager.getNumberOfBuckets();
         mFirstInSectionViews = new ExpandableView[numberOfSections];
         mLastInSectionViews = new ExpandableView[numberOfSections];
         mTmpFirstInSectionViews = new ExpandableView[numberOfSections];
         mTmpLastInSectionViews = new ExpandableView[numberOfSections];
-        mBypassController = keyguardBypassController;
     }
 
     public void updateView(ExpandableView view, boolean animate) {
@@ -85,8 +83,8 @@ public class NotificationRoundnessManager {
             return false;
         }
 
-        final float topRoundness = getRoundness(view, true /* top */);
-        final float bottomRoundness = getRoundness(view, false /* top */);
+        final float topRoundness = getRoundnessFraction(view, true /* top */);
+        final float bottomRoundness = getRoundnessFraction(view, false /* top */);
 
         final boolean topChanged = view.setTopRoundness(topRoundness, animate);
         final boolean bottomChanged = view.setBottomRoundness(bottomRoundness, animate);
@@ -121,17 +119,13 @@ public class NotificationRoundnessManager {
     void setViewsAffectedBySwipe(
             ExpandableView viewBefore,
             ExpandableView viewSwiped,
-            ExpandableView viewAfter,
-            boolean cornerAnimationsEnabled) {
-        if (!cornerAnimationsEnabled) {
-            return;
-        }
+            ExpandableView viewAfter) {
         final boolean animate = true;
 
         ExpandableView oldViewBefore = mViewBeforeSwipedView;
         mViewBeforeSwipedView = viewBefore;
         if (oldViewBefore != null) {
-            final float bottomRoundness = getRoundness(oldViewBefore, false /* top */);
+            final float bottomRoundness = getRoundnessFraction(oldViewBefore, false /* top */);
             oldViewBefore.setBottomRoundness(bottomRoundness,  animate);
         }
         if (viewBefore != null) {
@@ -141,8 +135,8 @@ public class NotificationRoundnessManager {
         ExpandableView oldSwipedview = mSwipedView;
         mSwipedView = viewSwiped;
         if (oldSwipedview != null) {
-            final float bottomRoundness = getRoundness(oldSwipedview, false /* top */);
-            final float topRoundness = getRoundness(oldSwipedview, true /* top */);
+            final float bottomRoundness = getRoundnessFraction(oldSwipedview, false /* top */);
+            final float topRoundness = getRoundnessFraction(oldSwipedview, true /* top */);
             oldSwipedview.setTopRoundness(topRoundness, animate);
             oldSwipedview.setBottomRoundness(bottomRoundness, animate);
         }
@@ -154,7 +148,7 @@ public class NotificationRoundnessManager {
         ExpandableView oldViewAfter = mViewAfterSwipedView;
         mViewAfterSwipedView = viewAfter;
         if (oldViewAfter != null) {
-            final float topRoundness = getRoundness(oldViewAfter, true /* top */);
+            final float topRoundness = getRoundnessFraction(oldViewAfter, true /* top */);
             oldViewAfter.setTopRoundness(topRoundness, animate);
         }
         if (viewAfter != null) {
@@ -162,7 +156,11 @@ public class NotificationRoundnessManager {
         }
     }
 
-    private float getRoundness(ExpandableView view, boolean top) {
+    void setClearAllInProgress(boolean isClearingAll) {
+        mIsClearAllInProgress = isClearingAll;
+    }
+
+    private float getRoundnessFraction(ExpandableView view, boolean top) {
         if (view == null) {
             return 0f;
         }
@@ -170,6 +168,11 @@ public class NotificationRoundnessManager {
                 || view == mSwipedView
                 || view == mViewAfterSwipedView) {
             return 1f;
+        }
+        if (view instanceof ExpandableNotificationRow
+                && ((ExpandableNotificationRow) view).canViewBeCleared()
+                && mIsClearAllInProgress) {
+            return 1.0f;
         }
         if ((view.isPinned()
                 || (view.isHeadsUpAnimatingAway()) && !mExpanded)) {
@@ -186,7 +189,7 @@ public class NotificationRoundnessManager {
             // rounded.
             return MathUtils.saturate(1.0f - mAppearFraction);
         }
-        if (view.showingPulsing() && !mBypassController.getBypassEnabled()) {
+        if (view.showingPulsing() && mRoundForPulsingViews) {
             return 1.0f;
         }
         final Resources resources = view.getResources();
@@ -288,5 +291,9 @@ public class NotificationRoundnessManager {
         if (previous != null) {
             updateView(previous, true /* animate */);
         }
+    }
+
+    public void setShouldRoundPulsingViews(boolean shouldRoundPulsingViews) {
+        mRoundForPulsingViews = shouldRoundPulsingViews;
     }
 }

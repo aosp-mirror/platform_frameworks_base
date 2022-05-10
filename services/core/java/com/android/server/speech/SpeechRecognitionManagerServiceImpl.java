@@ -33,6 +33,7 @@ import android.permission.PermissionManager;
 import android.speech.IRecognitionListener;
 import android.speech.IRecognitionService;
 import android.speech.IRecognitionServiceManagerCallback;
+import android.speech.IRecognitionSupportCallback;
 import android.speech.RecognitionService;
 import android.speech.SpeechRecognizer;
 import android.util.Slog;
@@ -141,7 +142,8 @@ final class SpeechRecognitionManagerServiceImpl extends
                                         throws RemoteException {
                             attributionSource.enforceCallingUid();
                             if (!attributionSource.isTrusted(mMaster.getContext())) {
-                                mMaster.getContext().getSystemService(PermissionManager.class)
+                                attributionSource = mMaster.getContext()
+                                        .getSystemService(PermissionManager.class)
                                         .registerAttributionSource(attributionSource);
                             }
                             service.startListening(recognizerIntent, listener, attributionSource);
@@ -167,6 +169,18 @@ final class SpeechRecognitionManagerServiceImpl extends
                                         false /* invoke #cancel */);
                                 clientToken.unlinkToDeath(deathRecipient, 0);
                             }
+                        }
+
+                        @Override
+                        public void checkRecognitionSupport(
+                                Intent recognizerIntent,
+                                IRecognitionSupportCallback callback) {
+                            service.checkRecognitionSupport(recognizerIntent, callback);
+                        }
+
+                        @Override
+                        public void triggerModelDownload(Intent recognizerIntent) {
+                            service.triggerModelDownload(recognizerIntent);
                         }
                     });
                 } catch (RemoteException e) {
@@ -254,9 +268,17 @@ final class SpeechRecognitionManagerServiceImpl extends
     }
 
     private boolean componentMapsToRecognitionService(@NonNull ComponentName serviceComponent) {
-        List<ResolveInfo> resolveInfos =
-                getContext().getPackageManager().queryIntentServices(
-                        new Intent(RecognitionService.SERVICE_INTERFACE), 0);
+        List<ResolveInfo> resolveInfos;
+
+        final long identityToken = Binder.clearCallingIdentity();
+        try {
+            resolveInfos =
+                    getContext().getPackageManager().queryIntentServicesAsUser(
+                            new Intent(RecognitionService.SERVICE_INTERFACE), 0, getUserId());
+        } finally {
+            Binder.restoreCallingIdentity(identityToken);
+        }
+
         if (resolveInfos == null) {
             return false;
         }

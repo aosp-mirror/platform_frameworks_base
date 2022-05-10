@@ -16,6 +16,8 @@
 
 package com.android.server.job;
 
+import static android.app.job.JobInfo.getPriorityString;
+
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_NONE;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
@@ -42,7 +44,6 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.os.WorkSource;
 import android.util.EventLog;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
@@ -55,6 +56,9 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.job.controllers.JobStatus;
+import com.android.server.tare.EconomicPolicy;
+import com.android.server.tare.EconomyManagerInternal;
+import com.android.server.tare.JobSchedulerEconomicPolicy;
 
 /**
  * Handles client binding and lifecycle of a job. Jobs execute one at a time on an instance of this
@@ -108,7 +112,9 @@ public final class JobServiceContext implements ServiceConnection {
     private final Context mContext;
     private final Object mLock;
     private final IBatteryStats mBatteryStats;
+    private final EconomyManagerInternal mEconomyManagerInternal;
     private final JobPackageTracker mJobPackageTracker;
+    private final PowerManager mPowerManager;
     private PowerManager.WakeLock mWakeLock;
 
     // Execution state.
@@ -116,6 +122,16 @@ public final class JobServiceContext implements ServiceConnection {
     @VisibleForTesting
     int mVerb;
     private boolean mCancelled;
+    /**
+     * True if the previous job on this context successfully finished (ie. called jobFinished or
+     * dequeueWork with no work left).
+     */
+    private boolean mPreviousJobHadSuccessfulFinish;
+    /**
+     * The last time a job on this context didn't finish successfully, in the elapsed realtime
+     * timebase.
+     */
+    private long mLastUnsuccessfulFinishElapsed;
 
     /**
      * All the information maintained about the job currently being executed.
@@ -201,10 +217,12 @@ public final class JobServiceContext implements ServiceConnection {
         mLock = service.getLock();
         mService = service;
         mBatteryStats = batteryStats;
+        mEconomyManagerInternal = LocalServices.getService(EconomyManagerInternal.class);
         mJobPackageTracker = tracker;
         mCallbackHandler = new JobServiceHandler(looper);
         mJobConcurrencyManager = concurrencyManager;
         mCompletedListener = service;
+        mPowerManager = mContext.getSystemService(PowerManager.class);
         mAvailable = true;
         mVerb = VERB_FINISHED;
         mPreferredUid = NO_PREFERRED_UID;
@@ -271,6 +289,17 @@ public final class JobServiceContext implements ServiceConnection {
             // it was inflated from disk with not-yet-coherent delay/deadline bounds.
             job.clearPersistedUtcTimes();
 
+            mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, job.getTag());
+            mWakeLock.setWorkSource(
+                    mService.deriveWorkSource(job.getSourceUid(), job.getSourcePackageName()));
+            mWakeLock.setReferenceCounted(false);
+            mWakeLock.acquire();
+
+            // Note the start when we try to bind so that the app is charged for some processing
+            // even if binding fails.
+            mEconomyManagerInternal.noteInstantaneousEvent(
+                    job.getSourceUserId(), job.getSourcePackageName(),
+                    getStartActionId(job), String.valueOf(job.getJobId()));
             mVerb = VERB_BINDING;
             scheduleOpTimeOutLocked();
             final Intent intent = new Intent().setComponent(job.getServiceComponent());
@@ -306,6 +335,7 @@ public final class JobServiceContext implements ServiceConnection {
                 mRunningCallback = null;
                 mParams = null;
                 mExecutionStartTimeElapsed = 0L;
+                mWakeLock.release();
                 mVerb = VERB_FINISHED;
                 removeOpTimeOutLocked();
                 return false;
@@ -326,7 +356,11 @@ public final class JobServiceContext implements ServiceConnection {
                     job.hasContentTriggerConstraint(),
                     job.isRequestedExpeditedJob(),
                     job.shouldTreatAsExpeditedJob(),
-                    JobProtoEnums.STOP_REASON_UNDEFINED);
+                    JobProtoEnums.STOP_REASON_UNDEFINED,
+                    job.getJob().isPrefetch(),
+                    job.getJob().getPriority(),
+                    job.getEffectivePriority(),
+                    job.getNumFailures());
             try {
                 mBatteryStats.noteJobStart(job.getBatteryName(), job.getSourceUid());
             } catch (RemoteException e) {
@@ -342,6 +376,25 @@ public final class JobServiceContext implements ServiceConnection {
             mStoppedTime = 0;
             job.startedAsExpeditedJob = job.shouldTreatAsExpeditedJob();
             return true;
+        }
+    }
+
+    @EconomicPolicy.AppAction
+    private static int getStartActionId(@NonNull JobStatus job) {
+        switch (job.getEffectivePriority()) {
+            case JobInfo.PRIORITY_MAX:
+                return JobSchedulerEconomicPolicy.ACTION_JOB_MAX_START;
+            case JobInfo.PRIORITY_HIGH:
+                return JobSchedulerEconomicPolicy.ACTION_JOB_HIGH_START;
+            case JobInfo.PRIORITY_LOW:
+                return JobSchedulerEconomicPolicy.ACTION_JOB_LOW_START;
+            case JobInfo.PRIORITY_MIN:
+                return JobSchedulerEconomicPolicy.ACTION_JOB_MIN_START;
+            default:
+                Slog.wtf(TAG, "Unknown priority: " + getPriorityString(job.getEffectivePriority()));
+                // Intentional fallthrough
+            case JobInfo.PRIORITY_DEFAULT:
+                return JobSchedulerEconomicPolicy.ACTION_JOB_DEFAULT_START;
         }
     }
 
@@ -378,6 +431,10 @@ public final class JobServiceContext implements ServiceConnection {
 
     void clearPreferredUid() {
         mPreferredUid = NO_PREFERRED_UID;
+    }
+
+    int getId() {
+        return hashCode();
     }
 
     long getExecutionStartTimeElapsed() {
@@ -439,7 +496,9 @@ public final class JobServiceContext implements ServiceConnection {
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
-                assertCallerLocked(cb);
+                if (!assertCallerLocked(cb)) {
+                    return null;
+                }
                 if (mVerb == VERB_STOPPING || mVerb == VERB_FINISHED) {
                     // This job is either all done, or on its way out.  Either way, it
                     // should not dispatch any more work.  We will pick up any remaining
@@ -465,7 +524,11 @@ public final class JobServiceContext implements ServiceConnection {
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
-                assertCallerLocked(cb);
+                if (!assertCallerLocked(cb)) {
+                    // Return true instead of false here so we don't just kick the
+                    // Exception-throwing-can down the road to JobParameters.completeWork >:(
+                    return true;
+                }
                 return mRunningJob.completeWorkLocked(workId);
             }
         } finally {
@@ -495,39 +558,7 @@ public final class JobServiceContext implements ServiceConnection {
                 return;
             }
             this.service = IJobService.Stub.asInterface(service);
-            final PowerManager pm =
-                    (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-            PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                    runningJob.getTag());
-            wl.setWorkSource(deriveWorkSource(runningJob));
-            wl.setReferenceCounted(false);
-            wl.acquire();
-
-            // We use a new wakelock instance per job.  In rare cases there is a race between
-            // teardown following job completion/cancellation and new job service spin-up
-            // such that if we simply assign mWakeLock to be the new instance, we orphan
-            // the currently-live lock instead of cleanly replacing it.  Watch for this and
-            // explicitly fast-forward the release if we're in that situation.
-            if (mWakeLock != null) {
-                Slog.w(TAG, "Bound new job " + runningJob + " but live wakelock " + mWakeLock
-                        + " tag=" + mWakeLock.getTag());
-                mWakeLock.release();
-            }
-            mWakeLock = wl;
             doServiceBoundLocked();
-        }
-    }
-
-    private WorkSource deriveWorkSource(JobStatus runningJob) {
-        final int jobUid = runningJob.getSourceUid();
-        if (WorkSource.isChainedBatteryAttributionEnabled(mContext)) {
-            WorkSource workSource = new WorkSource();
-            workSource.createWorkChain()
-                    .addNode(jobUid, null)
-                    .addNode(android.os.Process.SYSTEM_UID, "JobScheduler");
-            return workSource;
-        } else {
-            return new WorkSource(jobUid);
         }
     }
 
@@ -536,6 +567,42 @@ public final class JobServiceContext implements ServiceConnection {
     public void onServiceDisconnected(ComponentName name) {
         synchronized (mLock) {
             closeAndCleanupJobLocked(true /* needsReschedule */, "unexpectedly disconnected");
+        }
+    }
+
+    @Override
+    public void onBindingDied(ComponentName name) {
+        synchronized (mLock) {
+            if (mRunningJob == null) {
+                Slog.e(TAG, "Binding died for " + name.getPackageName()
+                        + " but no running job on this context");
+            } else if (mRunningJob.getServiceComponent().equals(name)) {
+                Slog.e(TAG, "Binding died for "
+                        + mRunningJob.getSourceUserId() + ":" + name.getPackageName());
+            } else {
+                Slog.e(TAG, "Binding died for " + name.getPackageName()
+                        + " but context is running a different job");
+            }
+            closeAndCleanupJobLocked(true /* needsReschedule */, "binding died");
+        }
+    }
+
+    @Override
+    public void onNullBinding(ComponentName name) {
+        synchronized (mLock) {
+            if (mRunningJob == null) {
+                Slog.wtf(TAG, "Got null binding for " + name.getPackageName()
+                        + " but no running job on this context");
+            } else if (mRunningJob.getServiceComponent().equals(name)) {
+                Slog.wtf(TAG, "Got null binding for "
+                        + mRunningJob.getSourceUserId() + ":" + name.getPackageName());
+            } else {
+                Slog.wtf(TAG, "Got null binding for " + name.getPackageName()
+                        + " but context is running a different job");
+            }
+            // Don't reschedule the job since returning a null binding is an explicit choice by the
+            // app which breaks things.
+            closeAndCleanupJobLocked(false /* needsReschedule */, "null binding");
         }
     }
 
@@ -554,18 +621,34 @@ public final class JobServiceContext implements ServiceConnection {
         return true;
     }
 
-    private void assertCallerLocked(JobCallback cb) {
+    /**
+     * Will throw a {@link SecurityException} if the callback is not for the currently running job,
+     * but may decide not to throw an exception if the call from the previous job appears to be an
+     * accident.
+     *
+     * @return true if the callback is for the current job, false otherwise
+     */
+    private boolean assertCallerLocked(JobCallback cb) {
         if (!verifyCallerLocked(cb)) {
+            final long nowElapsed = sElapsedRealtimeClock.millis();
+            if (!mPreviousJobHadSuccessfulFinish
+                    && (nowElapsed - mLastUnsuccessfulFinishElapsed) < 15_000L) {
+                // Don't punish apps for race conditions
+                return false;
+            }
+            // It's been long enough that the app should really not be calling into JS for the
+            // stopped job.
             StringBuilder sb = new StringBuilder(128);
             sb.append("Caller no longer running");
             if (cb.mStoppedReason != null) {
                 sb.append(", last stopped ");
-                TimeUtils.formatDuration(sElapsedRealtimeClock.millis() - cb.mStoppedTime, sb);
+                TimeUtils.formatDuration(nowElapsed - cb.mStoppedTime, sb);
                 sb.append(" because: ");
                 sb.append(cb.mStoppedReason);
             }
             throw new SecurityException(sb.toString());
         }
+        return true;
     }
 
     /**
@@ -668,7 +751,8 @@ public final class JobServiceContext implements ServiceConnection {
             }
         }
         mParams.setStopReason(stopReasonCode, internalStopReasonCode, debugReason);
-        if (internalStopReasonCode == JobParameters.INTERNAL_STOP_REASON_PREEMPT) {
+        if (stopReasonCode == JobParameters.STOP_REASON_PREEMPT) {
+            // Only preserve the UID when we're preempting the job for another one of the same UID.
             mPreferredUid = mRunningJob != null ? mRunningJob.getUid() : NO_PREFERRED_UID;
         }
         handleCancelLocked(debugReason);
@@ -908,9 +992,18 @@ public final class JobServiceContext implements ServiceConnection {
         if (mVerb == VERB_FINISHED) {
             return;
         }
+        if (DEBUG) {
+            Slog.d(TAG, "Cleaning up " + mRunningJob.toShortString()
+                    + " reschedule=" + reschedule + " reason=" + reason);
+        }
         applyStoppedReasonLocked(reason);
         completedJob = mRunningJob;
         final int internalStopReason = mParams.getInternalStopReasonCode();
+        mPreviousJobHadSuccessfulFinish =
+                (internalStopReason == JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH);
+        if (!mPreviousJobHadSuccessfulFinish) {
+            mLastUnsuccessfulFinishElapsed = sElapsedRealtimeClock.millis();
+        }
         mJobPackageTracker.noteInactive(completedJob, internalStopReason, reason);
         FrameworkStatsLog.write_non_chained(FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED,
                 completedJob.getSourceUid(), null, completedJob.getBatteryName(),
@@ -926,12 +1019,22 @@ public final class JobServiceContext implements ServiceConnection {
                 completedJob.hasContentTriggerConstraint(),
                 completedJob.isRequestedExpeditedJob(),
                 completedJob.startedAsExpeditedJob,
-                mParams.getStopReason());
+                mParams.getStopReason(),
+                completedJob.getJob().isPrefetch(),
+                completedJob.getJob().getPriority(),
+                completedJob.getEffectivePriority(),
+                completedJob.getNumFailures());
         try {
             mBatteryStats.noteJobFinish(mRunningJob.getBatteryName(), mRunningJob.getSourceUid(),
                     internalStopReason);
         } catch (RemoteException e) {
             // Whatever.
+        }
+        if (mParams.getStopReason() == JobParameters.STOP_REASON_TIMEOUT) {
+            mEconomyManagerInternal.noteInstantaneousEvent(
+                    mRunningJob.getSourceUserId(), mRunningJob.getSourcePackageName(),
+                    JobSchedulerEconomicPolicy.ACTION_JOB_TIMEOUT,
+                    String.valueOf(mRunningJob.getJobId()));
         }
         if (mWakeLock != null) {
             mWakeLock.release();

@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.hardware.SensorPrivacyManager.Sensors.Sensor;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.view.View;
 import android.widget.Switch;
@@ -35,7 +36,6 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
-import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
@@ -63,6 +63,11 @@ public abstract class SensorPrivacyToggleTile extends QSTileImpl<QSTile.BooleanS
      */
     public abstract @DrawableRes int getIconRes(boolean isBlocked);
 
+    /**
+     * @return the user restriction name
+     */
+    public abstract String getRestriction();
+
     protected SensorPrivacyToggleTile(QSHost host,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
@@ -87,21 +92,23 @@ public abstract class SensorPrivacyToggleTile extends QSTileImpl<QSTile.BooleanS
 
     @Override
     protected void handleClick(@Nullable View view) {
-        if (mKeyguard.isMethodSecure() && mKeyguard.isShowing()) {
-            mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
-                mSensorPrivacyController.setSensorBlocked(QS_TILE, getSensorId(),
-                        !mSensorPrivacyController.isSensorBlocked(getSensorId()));
-            });
+        boolean blocked = mSensorPrivacyController.isSensorBlocked(getSensorId());
+        if (mSensorPrivacyController.requiresAuthentication()
+                && mKeyguard.isMethodSecure()
+                && mKeyguard.isShowing()) {
+            mActivityStarter.postQSRunnableDismissingKeyguard(() ->
+                    mSensorPrivacyController.setSensorBlocked(QS_TILE, getSensorId(), !blocked));
             return;
         }
-        mSensorPrivacyController.setSensorBlocked(QS_TILE, getSensorId(),
-                !mSensorPrivacyController.isSensorBlocked(getSensorId()));
+        mSensorPrivacyController.setSensorBlocked(QS_TILE, getSensorId(), !blocked);
     }
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
         boolean isBlocked = arg == null ? mSensorPrivacyController.isSensorBlocked(getSensorId())
                 : (boolean) arg;
+
+        checkIfRestrictionEnforcedByAdminOnly(state, getRestriction());
 
         state.icon = ResourceIcon.get(getIconRes(isBlocked));
         state.state = isBlocked ? Tile.STATE_INACTIVE : Tile.STATE_ACTIVE;
@@ -112,7 +119,6 @@ public abstract class SensorPrivacyToggleTile extends QSTileImpl<QSTile.BooleanS
         } else {
             state.secondaryLabel = mContext.getString(R.string.quick_settings_camera_mic_available);
         }
-        state.handlesLongClick = false;
         state.contentDescription = state.label;
         state.expandedAccessibilityClassName = Switch.class.getName();
     }
@@ -124,12 +130,7 @@ public abstract class SensorPrivacyToggleTile extends QSTileImpl<QSTile.BooleanS
 
     @Override
     public Intent getLongClickIntent() {
-        return null;
-    }
-
-    @Override
-    public DetailAdapter getDetailAdapter() {
-        return super.getDetailAdapter();
+        return new Intent(Settings.ACTION_PRIVACY_SETTINGS);
     }
 
     @Override

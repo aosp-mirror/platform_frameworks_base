@@ -40,4 +40,11 @@ public abstract class ServiceStartNotAllowedException extends IllegalStateExcept
             return new BackgroundServiceStartNotAllowedException(message);
         }
     }
+
+    @Override
+    public synchronized Throwable getCause() {
+        // "Cause" is often used for clustering exceptions, and developers don't want to have it
+        // for this exception. b/210890426
+        return null;
+    }
 }

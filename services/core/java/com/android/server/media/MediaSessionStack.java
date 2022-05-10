@@ -325,7 +325,7 @@ class MediaSessionStack {
         int size = records.size();
         for (int i = 0; i < size; i++) {
             MediaSessionRecord record = records.get(i);
-            if (record.checkPlaybackActiveState(true)) {
+            if (record.checkPlaybackActiveState(true) && record.canHandleVolumeKey()) {
                 mCachedVolumeDefault = record;
                 return record;
             }
