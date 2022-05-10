@@ -3532,7 +3532,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final ActivityRecord next = getDisplayArea().topRunningActivity(
                 true /* considerKeyguardState */);
 
-        // If the finishing activity is the last activity of a organized TaskFragment and has an
+        // If the finishing activity is the last activity of an organized TaskFragment and has an
         // adjacent TaskFragment, check if the activity removal should be delayed.
         boolean delayRemoval = false;
         final TaskFragment taskFragment = getTaskFragment();
@@ -3540,7 +3540,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             final TaskFragment organized = taskFragment.getOrganizedTaskFragment();
             final TaskFragment adjacent =
                     organized != null ? organized.getAdjacentTaskFragment() : null;
-            if (adjacent != null && organized.topRunningActivity() == null) {
+            if (adjacent != null && next.isDescendantOf(adjacent)
+                    && organized.topRunningActivity() == null) {
                 delayRemoval = organized.isDelayLastActivityRemoval();
             }
         }
