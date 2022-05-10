@@ -188,6 +188,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private static final int MSG_KEYGUARD_GOING_AWAY = 342;
     private static final int MSG_TIME_FORMAT_UPDATE = 344;
     private static final int MSG_REQUIRE_NFC_UNLOCK = 345;
+    private static final int MSG_KEYGUARD_DISMISS_ANIMATION_FINISHED = 346;
 
     /** Biometric authentication state: Not listening. */
     private static final int BIOMETRIC_STATE_STOPPED = 0;
@@ -2005,6 +2006,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     case MSG_REQUIRE_NFC_UNLOCK:
                         handleRequireUnlockForNfc();
                         break;
+                    case MSG_KEYGUARD_DISMISS_ANIMATION_FINISHED:
+                        handleKeyguardDismissAnimationFinished();
+                        break;
                     default:
                         super.handleMessage(msg);
                         break;
@@ -3277,6 +3281,19 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     /**
+     * Handle {@link #MSG_KEYGUARD_DISMISS_ANIMATION_FINISHED}
+     */
+    private void handleKeyguardDismissAnimationFinished() {
+        Assert.isMainThread();
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onKeyguardDismissAnimationFinished();
+            }
+        }
+    }
+
+    /**
      * Handle {@link #MSG_REPORT_EMERGENCY_CALL_ACTION}
      */
     private void handleReportEmergencyCallAction() {
@@ -3612,6 +3629,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      */
     public void dispatchKeyguardGoingAway(boolean goingAway) {
         mHandler.sendMessage(mHandler.obtainMessage(MSG_KEYGUARD_GOING_AWAY, goingAway));
+    }
+
+    /**
+     * Sends a message to notify the keyguard dismiss animation is finished.
+     */
+    public void dispatchKeyguardDismissAnimationFinished() {
+        mHandler.sendEmptyMessage(MSG_KEYGUARD_DISMISS_ANIMATION_FINISHED);
     }
 
     public boolean isDeviceInteractive() {
