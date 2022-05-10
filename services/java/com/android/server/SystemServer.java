@@ -651,19 +651,14 @@ public final class SystemServer implements Dumpable {
         mFactoryTestMode = FactoryTest.getMode();
 
         // Record process start information.
-        // Note SYSPROP_START_COUNT will increment by *2* on a FDE device when it fully boots;
-        // one for the password screen, second for the actual boot.
         mStartCount = SystemProperties.getInt(SYSPROP_START_COUNT, 0) + 1;
         mRuntimeStartElapsedTime = SystemClock.elapsedRealtime();
         mRuntimeStartUptime = SystemClock.uptimeMillis();
         Process.setStartTimes(mRuntimeStartElapsedTime, mRuntimeStartUptime,
                 mRuntimeStartElapsedTime, mRuntimeStartUptime);
 
-        // Remember if it's runtime restart(when sys.boot_completed is already set) or reboot
-        // We don't use "mStartCount > 1" here because it'll be wrong on a FDE device.
-        // TODO: mRuntimeRestart will *not* be set to true if the proccess crashes before
-        // sys.boot_completed is set. Fix it.
-        mRuntimeRestart = "1".equals(SystemProperties.get("sys.boot_completed"));
+        // Remember if it's runtime restart or reboot.
+        mRuntimeRestart = mStartCount > 1;
     }
 
     @Override
