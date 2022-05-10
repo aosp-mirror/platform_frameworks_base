@@ -27,17 +27,20 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 
+import androidx.annotation.Nullable;
+
 import java.util.List;
+
 
 /**
  * Utility class for find out when to show WorkPolicyInfo
  */
 public class WorkPolicyUtils {
 
-    Context mContext;
-    PackageManager mPackageManager;
-    UserManager mUserManager;
-    DevicePolicyManager mDevicePolicyManager;
+    private final Context mContext;
+    private final PackageManager mPackageManager;
+    private final UserManager mUserManager;
+    private final DevicePolicyManager mDevicePolicyManager;
 
     private static final int USER_NULL = -10000;
 
@@ -81,7 +84,12 @@ public class WorkPolicyUtils {
         return false;
     }
 
-    private Intent getWorkPolicyInfoIntentDO() {
+    /**
+     * Returns the work policy info intent if the device owner component exists,
+     * and returns {@code null} otherwise
+     */
+    @Nullable
+    public Intent getWorkPolicyInfoIntentDO() {
         final ComponentName ownerComponent = getDeviceOwnerComponent();
         if (ownerComponent == null) {
             return null;
@@ -99,43 +107,55 @@ public class WorkPolicyUtils {
         return null;
     }
 
-    private Intent getWorkPolicyInfoIntentPO() {
+    @Nullable
+    private ComponentName getManagedProfileOwnerComponent(int managedUserId) {
+        if (managedUserId == USER_NULL) {
+            return null;
+        }
+        Context managedProfileContext;
         try {
-            final int managedUserId = getManagedProfileUserId();
-            if (managedUserId == USER_NULL) {
-                return null;
-            }
-
-            Context managedProfileContext =
+            managedProfileContext =
                     mContext.createPackageContextAsUser(
                             mContext.getPackageName(), 0, UserHandle.of(managedUserId)
                     );
-
-            DevicePolicyManager managedProfileDevicePolicyManager =
-                    (DevicePolicyManager)
-                            managedProfileContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
-            ComponentName ownerComponent = managedProfileDevicePolicyManager.getProfileOwner();
-            if (ownerComponent == null) {
-                return null;
-            }
-
-            // Only search for the required action in the Profile Owner's package
-            final Intent intent =
-                    new Intent(Settings.ACTION_SHOW_WORK_POLICY_INFO)
-                            .setPackage(ownerComponent.getPackageName());
-            final List<ResolveInfo> activities =
-                    mPackageManager.queryIntentActivitiesAsUser(
-                            intent, 0, UserHandle.of(managedUserId));
-            if (activities.size() != 0) {
-                return intent;
-            }
-
-            return null;
         } catch (PackageManager.NameNotFoundException e) {
             return null;
         }
+
+        DevicePolicyManager managedProfileDevicePolicyManager =
+                (DevicePolicyManager)
+                        managedProfileContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+        ComponentName ownerComponent = managedProfileDevicePolicyManager.getProfileOwner();
+        return ownerComponent;
     }
 
+    /**
+     * Returns the work policy info intent if the profile owner component exists,
+     * and returns {@code null} otherwise
+     */
+    @Nullable
+    public Intent getWorkPolicyInfoIntentPO() {
+        final int managedUserId = getManagedProfileUserId();
+        ComponentName ownerComponent = getManagedProfileOwnerComponent(managedUserId);
+        if (ownerComponent == null) {
+            return null;
+        }
+
+        // Only search for the required action in the Profile Owner's package
+        final Intent intent =
+                new Intent(Settings.ACTION_SHOW_WORK_POLICY_INFO)
+                        .setPackage(ownerComponent.getPackageName());
+        final List<ResolveInfo> activities =
+                mPackageManager.queryIntentActivitiesAsUser(
+                        intent, 0, UserHandle.of(managedUserId));
+        if (activities.size() != 0) {
+            return intent;
+        }
+
+        return null;
+    }
+
+    @Nullable
     private ComponentName getDeviceOwnerComponent() {
         if (!mPackageManager.hasSystemFeature(PackageManager.FEATURE_DEVICE_ADMIN)) {
             return null;
@@ -143,7 +163,10 @@ public class WorkPolicyUtils {
         return mDevicePolicyManager.getDeviceOwnerComponentOnAnyUser();
     }
 
-    private int getManagedProfileUserId() {
+    /**
+     * Returns the user id of the managed profile, and returns {@code USER_NULL} otherwise
+     */
+    public int getManagedProfileUserId() {
         List<UserHandle> allProfiles = mUserManager.getAllProfiles();
         for (UserHandle uh : allProfiles) {
             int id = uh.getIdentifier();
