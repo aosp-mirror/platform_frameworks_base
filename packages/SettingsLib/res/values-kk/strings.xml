@@ -316,7 +316,7 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"Жергілікті терминал"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Жергілікті шелл-код қол жетімділігін ұсынатын терминалды қолданбаны қосу"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP тексерісі"</string>
-    <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP (кең жолақты сандық мазмұн қорғау) тексеру мүмкіндігін орнату"</string>
+    <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP (кең жолақты цифрлық мазмұн қорғау) тексеру мүмкіндігін орнату"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Түзету"</string>
     <string name="debug_app" msgid="8903350241392391766">"Түзету қолданбасын таңдау"</string>
     <string name="debug_app_not_set" msgid="1934083001283807188">"Түзету қолданбалары орнатылмаған."</string>
