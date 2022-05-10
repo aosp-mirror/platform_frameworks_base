@@ -137,9 +137,8 @@ public class TaskContainerTest {
 
         assertTrue(taskContainer.isEmpty());
 
-        final TaskFragmentContainer tf = new TaskFragmentContainer(null /* activity */, TASK_ID,
-                mController);
-        taskContainer.mContainers.add(tf);
+        final TaskFragmentContainer tf = new TaskFragmentContainer(null /* activity */,
+                taskContainer, mController);
 
         assertFalse(taskContainer.isEmpty());
 
