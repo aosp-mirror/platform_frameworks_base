@@ -52,6 +52,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaFeatureFlag;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -151,7 +152,8 @@ public class NotificationTestHelper {
         mIconManager = new IconManager(
                 mock(CommonNotifCollection.class),
                 mock(LauncherApps.class),
-                new IconBuilder(mContext));
+                new IconBuilder(mContext),
+                mock(NotificationLockscreenUserManager.class));
 
         NotificationContentInflater contentBinder = new NotificationContentInflater(
                 mock(NotifRemoteViewCache.class),
