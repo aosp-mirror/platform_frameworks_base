@@ -83,8 +83,6 @@ public final class SystemServiceManager implements Dumpable {
     private static final String USER_STOPPED = "Cleanup"; // Logged as onCleanupUser
     private static final String USER_COMPLETED_EVENT = "CompletedEvent"; // onCompletedEventUser
 
-    // Whether to use multiple threads to run user lifecycle phases in parallel.
-    private static boolean sUseLifecycleThreadPool = true;
     // The default number of threads to use if lifecycle thread pool is enabled.
     private static final int DEFAULT_MAX_USER_POOL_THREADS = 3;
     // The number of threads to use if lifecycle thread pool is enabled, dependent on the number of
@@ -129,9 +127,6 @@ public final class SystemServiceManager implements Dumpable {
         mContext = context;
         mServices = new ArrayList<>();
         mServiceClassnames = new ArraySet<>();
-        // Disable using the thread pool for low ram devices
-        sUseLifecycleThreadPool = sUseLifecycleThreadPool
-                && !ActivityManager.isLowRamDeviceStatic();
         mNumUserPoolThreads = Math.min(Runtime.getRuntime().availableProcessors(),
                 DEFAULT_MAX_USER_POOL_THREADS);
     }
@@ -551,16 +546,10 @@ public final class SystemServiceManager implements Dumpable {
                 terminated = threadPool.awaitTermination(
                         USER_POOL_SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
-                Slog.wtf(TAG, "User lifecycle thread pool was interrupted while awaiting completion"
-                        + " of " + onWhat + " of user " + curUser, e);
-                if (!onWhat.equals(USER_COMPLETED_EVENT)) {
-                    Slog.e(TAG, "Couldn't terminate, disabling thread pool. "
-                            + "Please capture a bug report.");
-                    sUseLifecycleThreadPool = false;
-                }
+                logFailure(onWhat, curUser, "(user lifecycle threadpool was interrupted)", e);
             }
             if (!terminated) {
-                Slog.wtf(TAG, "User lifecycle thread pool was not terminated.");
+                logFailure(onWhat, curUser, "(user lifecycle threadpool was not terminated)", null);
             }
         }
         t.traceEnd(); // main entry
@@ -575,9 +564,9 @@ public final class SystemServiceManager implements Dumpable {
     private boolean useThreadPool(int userId, @NonNull String onWhat) {
         switch (onWhat) {
             case USER_STARTING:
-                // Limit the lifecycle parallelization to all users other than the system user
-                // and only for the user start lifecycle phase for now.
-                return sUseLifecycleThreadPool && userId != UserHandle.USER_SYSTEM;
+                // Don't allow lifecycle parallelization for user start on low ram devices and
+                // the system user.
+                return !ActivityManager.isLowRamDeviceStatic() && userId != UserHandle.USER_SYSTEM;
             case USER_COMPLETED_EVENT:
                 return true;
             default:
@@ -611,8 +600,6 @@ public final class SystemServiceManager implements Dumpable {
                         "on" + USER_STARTING + "User-" + curUserId);
             } catch (Exception e) {
                 logFailure(USER_STARTING, curUser, serviceName, e);
-                Slog.e(TAG, "Disabling thread pool - please capture a bug report.");
-                sUseLifecycleThreadPool = false;
             } finally {
                 t.traceEnd();
             }
