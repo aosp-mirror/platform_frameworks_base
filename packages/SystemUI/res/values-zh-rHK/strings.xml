@@ -129,21 +129,21 @@
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"輕按 [確定] 以完成"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"驗證咗"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"使用 PIN"</string>
-    <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"使用圖形"</string>
+    <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"使用圖案"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"使用密碼"</string>
     <string name="biometric_dialog_wrong_pin" msgid="1878539073972762803">"PIN 錯誤"</string>
-    <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"圖形錯誤"</string>
+    <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"圖案錯誤"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"密碼錯誤"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"輸入錯誤的次數太多，\n請於 <xliff:g id="NUMBER">%d</xliff:g> 秒後再試。"</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"請再試一次。您已嘗試 <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> 次，最多可試 <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g> 次。"</string>
     <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"您的資料將會刪除"</string>
-    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"如果您下次畫出錯誤的上鎖圖形，系統將會刪除此裝置上的資料。"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"如果您下次畫出錯誤的上鎖圖案，系統將會刪除此裝置上的資料。"</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"如果您下次輸入錯誤的 PIN，系統將會刪除此裝置上的資料。"</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_device" msgid="2363778585575998317">"如果您下次輸入錯誤的密碼，系統將會刪除此裝置上的資料。"</string>
-    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"如果您下次畫出錯誤的上鎖圖形，系統將會刪除此使用者。"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user" msgid="8400180746043407270">"如果您下次畫出錯誤的上鎖圖案，系統將會刪除此使用者。"</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_user" msgid="4159878829962411168">"如果您下次輸入錯誤的 PIN，系統將會刪除此使用者。"</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_user" msgid="4695682515465063885">"如果您下次輸入錯誤的密碼，系統將會刪除此使用者。"</string>
-    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"如果您下次畫出錯誤的上鎖圖形，系統將會刪除工作設定檔和相關資料。"</string>
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"如果您下次畫出錯誤的上鎖圖案，系統將會刪除工作設定檔和相關資料。"</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"如果您下次輸入錯誤的 PIN，系統將會刪除工作設定檔和相關資料。"</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"如果您下次輸入錯誤的密碼，系統將會刪除工作設定檔和相關資料。"</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"錯誤次數太多，系統將會刪除此裝置上的資料。"</string>

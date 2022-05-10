@@ -345,7 +345,7 @@
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Chcete v relácii pokračovať?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Začať odznova"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Áno, pokračovať"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Pridať nového používateľa?"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"Chcete pridať nového používateľa?"</string>
     <string name="user_add_user_message_short" msgid="2599370307878014791">"Keď pridáte nového používateľa, musí si nastaviť vlastný priestor.\n\nKtorýkoľvek používateľ môže aktualizovať aplikácie všetkých ostatných používateľov."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Dosiahnutý limit počtu používateľov"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">

@@ -342,7 +342,7 @@
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Torna a començar"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Sí, continua"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"Vols afegir un usuari nou?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Quan s\'afegeix un usuari nou, aquest usuari ha de configurar-se l\'espai.\n\nQualsevol usuari pot actualitzar les aplicacions de la resta d\'usuaris."</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Quan s\'afegeix un usuari nou, aquesta persona ha de configurar el seu espai.\n\nQualsevol usuari pot actualitzar les aplicacions dels altres usuaris."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"S\'ha assolit el límit d\'usuaris"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Pots afegir fins a <xliff:g id="COUNT">%d</xliff:g> usuaris.</item>

@@ -53,7 +53,7 @@
     <string name="wifi_debugging_title" msgid="7300007687492186076">"اشکال‌زدایی بی‌سیم در این شبکه مجاز شود؟"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"‏نام شبکه (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nنشانی Wi‑Fi (BSSID)‎\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"همیشه در این شبکه مجاز شود"</string>
-    <string name="wifi_debugging_allow" msgid="4573224609684957886">"مجاز است"</string>
+    <string name="wifi_debugging_allow" msgid="4573224609684957886">"اجازه دادن"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"اشکال‌زدایی بی‌سیم مجاز نیست"</string>
     <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"کاربری که درحال‌حاضر در این دستگاه به سیستم وارد شده است نمی‌تواند اشکال‌زدایی بی‌سیم را روشن کند. برای استفاده از این ویژگی، به کاربر اصلی بروید."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"‏درگاه USB غیرفعال شده است"</string>
@@ -716,7 +716,7 @@
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- می‌تواند اطلاعات <xliff:g id="APP">%1$s</xliff:g> را بخواند"</string>
     <string name="slice_permission_text_2" msgid="6758906940360746983">"- می‌تواند در <xliff:g id="APP">%1$s</xliff:g> اقدام انجام دهد"</string>
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"به <xliff:g id="APP">%1$s</xliff:g> اجازه داده شود تکه‌هایی از برنامه‌ها نشان دهد"</string>
-    <string name="slice_permission_allow" msgid="6340449521277951123">"مجاز"</string>
+    <string name="slice_permission_allow" msgid="6340449521277951123">"اجازه دادن"</string>
     <string name="slice_permission_deny" msgid="6870256451658176895">"مجاز نبودن"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"برای زمان‌بندی «بهینه‌سازی باتری» ضربه بزنید"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"وقتی باتری روبه‌اتمام است، بهینه‌سازی باتری را روشن کنید"</string>
