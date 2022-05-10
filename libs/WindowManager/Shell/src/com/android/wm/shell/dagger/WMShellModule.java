@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.dagger;
 
-import android.animation.AnimationHandler;
 import android.content.Context;
 import android.content.pm.LauncherApps;
 import android.os.Handler;
@@ -42,12 +41,10 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.TransactionPool;
-import com.android.wm.shell.common.annotations.ChoreographerSfVsync;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.freeform.FreeformTaskListener;
 import com.android.wm.shell.fullscreen.FullscreenUnfoldController;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
@@ -177,20 +174,6 @@ public class WMShellModule {
                 rootTaskDisplayAreaOrganizer, mainExecutor, displayController, displayImeController,
                 displayInsetsController, transitions, transactionPool, iconProvider,
                 recentTasks, stageTaskUnfoldControllerProvider);
-    }
-
-    @WMSingleton
-    @Provides
-    static LegacySplitScreenController provideLegacySplitScreen(Context context,
-            DisplayController displayController, SystemWindows systemWindows,
-            DisplayImeController displayImeController, TransactionPool transactionPool,
-            ShellTaskOrganizer shellTaskOrganizer, SyncTransactionQueue syncQueue,
-            TaskStackListenerImpl taskStackListener, Transitions transitions,
-            @ShellMainThread ShellExecutor mainExecutor,
-            @ChoreographerSfVsync AnimationHandler sfVsyncAnimationHandler) {
-        return new LegacySplitScreenController(context, displayController, systemWindows,
-                displayImeController, transactionPool, shellTaskOrganizer, syncQueue,
-                taskStackListener, transitions, mainExecutor, sfVsyncAnimationHandler);
     }
 
     @WMSingleton
