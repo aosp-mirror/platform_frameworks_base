@@ -740,7 +740,8 @@ public final class ColorDisplayService extends SystemService {
         mDisplayWhiteBalanceTintController.setActivated(isDisplayWhiteBalanceSettingEnabled()
                 && !mNightDisplayTintController.isActivated()
                 && !isAccessibilityEnabled()
-                && dtm.needsLinearColorMatrix());
+                && dtm.needsLinearColorMatrix()
+                && mDisplayWhiteBalanceTintController.isAllowed());
         boolean activated = mDisplayWhiteBalanceTintController.isActivated();
 
         if (mDisplayWhiteBalanceListener != null && oldActivated != activated) {
@@ -1452,6 +1453,12 @@ public final class ColorDisplayService extends SystemService {
      * Local service that allows color transforms to be enabled from other system services.
      */
     public class ColorDisplayServiceInternal {
+
+        /** Sets whether DWB should be allowed in the current state. */
+        public void setDisplayWhiteBalanceAllowed(boolean allowed)  {
+            mDisplayWhiteBalanceTintController.setAllowed(allowed);
+            updateDisplayWhiteBalanceStatus();
+        }
 
         /**
          * Set the current CCT value for the display white balance transform, and if the transform

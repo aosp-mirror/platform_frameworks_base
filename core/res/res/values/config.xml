@@ -932,6 +932,8 @@
         <!-- Nominal White Z --> <item>1.089058</item>
     </string-array>
 
+    <!-- Boolean indicating whether light mode is allowed when DWB is turned on. -->
+    <bool name="config_displayWhiteBalanceLightModeAllowed">true</bool>
 
     <!-- Indicate available ColorDisplayManager.COLOR_MODE_xxx. -->
     <integer-array name="config_availableColorModes">
