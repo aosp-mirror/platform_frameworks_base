@@ -89,7 +89,7 @@ final class LetterboxUiController {
 
     // Taskbar expanded height. Used to determine whether to crop an app window to display rounded
     // corners above the taskbar.
-    private float mExpandedTaskBarHeight;
+    private final float mExpandedTaskBarHeight;
 
     private boolean mShowWallpaperForLetterboxBackground;
 
@@ -120,7 +120,7 @@ final class LetterboxUiController {
         }
     }
 
-    boolean hasWallpaperBackgroudForLetterbox() {
+    boolean hasWallpaperBackgroundForLetterbox() {
         return mShowWallpaperForLetterboxBackground;
     }
 
@@ -137,6 +137,11 @@ final class LetterboxUiController {
     void getLetterboxInnerBounds(Rect outBounds) {
         if (mLetterbox != null) {
             outBounds.set(mLetterbox.getInnerFrame());
+            final WindowState w = mActivityRecord.findMainWindow();
+            if (w == null) {
+                return;
+            }
+            adjustBoundsForTaskbar(w, outBounds);
         } else {
             outBounds.setEmpty();
         }
@@ -160,13 +165,17 @@ final class LetterboxUiController {
     }
 
     void updateLetterboxSurface(WindowState winHint) {
+        updateLetterboxSurface(winHint, mActivityRecord.getSyncTransaction());
+    }
+
+    void updateLetterboxSurface(WindowState winHint, Transaction t) {
         final WindowState w = mActivityRecord.findMainWindow();
         if (w != winHint && winHint != null && w != null) {
             return;
         }
         layoutLetterbox(winHint);
         if (mLetterbox != null && mLetterbox.needsApplySurfaceChanges()) {
-            mLetterbox.applySurfaceChanges(mActivityRecord.getSyncTransaction());
+            mLetterbox.applySurfaceChanges(t);
         }
     }
 
@@ -191,14 +200,22 @@ final class LetterboxUiController {
                         mActivityRecord.mWmService.mTransactionFactory,
                         this::shouldLetterboxHaveRoundedCorners,
                         this::getLetterboxBackgroundColor,
-                        this::hasWallpaperBackgroudForLetterbox,
+                        this::hasWallpaperBackgroundForLetterbox,
                         this::getLetterboxWallpaperBlurRadius,
                         this::getLetterboxWallpaperDarkScrimAlpha,
                         this::handleHorizontalDoubleTap,
-                        this::handleVerticalDoubleTap);
+                        this::handleVerticalDoubleTap,
+                        this::getLetterboxParentSurface);
                 mLetterbox.attachInput(w);
             }
-            mActivityRecord.getPosition(mTmpPoint);
+
+            if (mActivityRecord.isInLetterboxAnimation()) {
+                // In this case we attach the letterbox to the task instead of the activity.
+                mActivityRecord.getTask().getPosition(mTmpPoint);
+            } else {
+                mActivityRecord.getPosition(mTmpPoint);
+            }
+
             // Get the bounds of the "space-to-fill". The transformed bounds have the highest
             // priority because the activity is launched in a rotated environment. In multi-window
             // mode, the task-level represents this. In fullscreen-mode, the task container does
@@ -213,6 +230,13 @@ final class LetterboxUiController {
         } else if (mLetterbox != null) {
             mLetterbox.hide();
         }
+    }
+
+    SurfaceControl getLetterboxParentSurface() {
+        if (mActivityRecord.isInLetterboxAnimation()) {
+            return mActivityRecord.getTask().getSurfaceControl();
+        }
+        return mActivityRecord.getSurfaceControl();
     }
 
     private boolean shouldLetterboxHaveRoundedCorners() {
@@ -432,7 +456,7 @@ final class LetterboxUiController {
                 }
                 break;
             case LETTERBOX_BACKGROUND_WALLPAPER:
-                if (hasWallpaperBackgroudForLetterbox()) {
+                if (hasWallpaperBackgroundForLetterbox()) {
                     // Color is used for translucent scrim that dims wallpaper.
                     return Color.valueOf(Color.BLACK);
                 }
@@ -455,15 +479,14 @@ final class LetterboxUiController {
     private void updateRoundedCorners(WindowState mainWindow) {
         final SurfaceControl windowSurface = mainWindow.getClientViewRootSurface();
         if (windowSurface != null && windowSurface.isValid()) {
-            Transaction transaction = mActivityRecord.getSyncTransaction();
+            final Transaction transaction = mActivityRecord.getSyncTransaction();
 
-            final InsetsState insetsState = mainWindow.getInsetsState();
-            final InsetsSource taskbarInsetsSource =
-                    insetsState.peekSource(InsetsState.ITYPE_EXTRA_NAVIGATION_BAR);
-
-            if (!isLetterboxedNotForDisplayCutout(mainWindow)
-                    || !mLetterboxConfiguration.isLetterboxActivityCornersRounded()
-                    || taskbarInsetsSource == null) {
+            if (!requiresRoundedCorners(mainWindow) || mActivityRecord.isInLetterboxAnimation()) {
+                // We don't want corner radius on the window.
+                // In the case the ActivityRecord requires a letterboxed animation we never want
+                // rounded corners on the window because rounded corners are applied at the
+                // animation-bounds surface level and rounded corners on the window would interfere
+                // with that leading to unexpected rounded corner positioning during the animation.
                 transaction
                         .setWindowCrop(windowSurface, null)
                         .setCornerRadius(windowSurface, 0);
@@ -472,46 +495,87 @@ final class LetterboxUiController {
 
             Rect cropBounds = null;
 
-            // Rounded corners should be displayed above the taskbar. When taskbar is hidden,
-            // an insets frame is equal to a navigation bar which shouldn't affect position of
-            // rounded corners since apps are expected to handle navigation bar inset.
-            // This condition checks whether the taskbar is visible.
-            // Do not crop the taskbar inset if the window is in immersive mode - the user can
-            // swipe to show/hide the taskbar as an overlay.
-            if (taskbarInsetsSource.getFrame().height() >= mExpandedTaskBarHeight
-                    && taskbarInsetsSource.isVisible()) {
+            if (hasVisibleTaskbar(mainWindow)) {
                 cropBounds = new Rect(mActivityRecord.getBounds());
                 // Activity bounds are in screen coordinates while (0,0) for activity's surface
                 // control is at the top left corner of an app window so offsetting bounds
                 // accordingly.
                 cropBounds.offsetTo(0, 0);
-                // Rounded cornerners should be displayed above the taskbar.
-                cropBounds.bottom =
-                        Math.min(cropBounds.bottom, taskbarInsetsSource.getFrame().top);
-                if (mActivityRecord.inSizeCompatMode()
-                        && mActivityRecord.getSizeCompatScale() < 1.0f) {
-                    cropBounds.scale(1.0f / mActivityRecord.getSizeCompatScale());
-                }
+                // Rounded corners should be displayed above the taskbar.
+                adjustBoundsForTaskbarUnchecked(mainWindow, cropBounds);
             }
 
             transaction
                     .setWindowCrop(windowSurface, cropBounds)
-                    .setCornerRadius(windowSurface, getRoundedCorners(insetsState));
+                    .setCornerRadius(windowSurface, getRoundedCornersRadius(mainWindow));
         }
     }
 
-    // Returns rounded corners radius based on override in
+    private boolean requiresRoundedCorners(WindowState mainWindow) {
+        final InsetsSource taskbarInsetsSource = getTaskbarInsetsSource(mainWindow);
+
+        return isLetterboxedNotForDisplayCutout(mainWindow)
+                && mLetterboxConfiguration.isLetterboxActivityCornersRounded()
+                && taskbarInsetsSource != null;
+    }
+
+    // Returns rounded corners radius the letterboxed activity should have based on override in
     // R.integer.config_letterboxActivityCornersRadius or min device bottom corner radii.
     // Device corners can be different on the right and left sides but we use the same radius
     // for all corners for consistency and pick a minimal bottom one for consistency with a
     // taskbar rounded corners.
-    private int getRoundedCorners(InsetsState insetsState) {
+    int getRoundedCornersRadius(WindowState mainWindow) {
+        if (!requiresRoundedCorners(mainWindow)) {
+            return 0;
+        }
+
         if (mLetterboxConfiguration.getLetterboxActivityCornersRadius() >= 0) {
             return mLetterboxConfiguration.getLetterboxActivityCornersRadius();
         }
+
+        final InsetsState insetsState = mainWindow.getInsetsState();
         return Math.min(
                 getInsetsStateCornerRadius(insetsState, RoundedCorner.POSITION_BOTTOM_LEFT),
                 getInsetsStateCornerRadius(insetsState, RoundedCorner.POSITION_BOTTOM_RIGHT));
+    }
+
+    /**
+     * Returns whether the taskbar is visible. Returns false if the window is in immersive mode,
+     * since the user can swipe to show/hide the taskbar as an overlay.
+     */
+    private boolean hasVisibleTaskbar(WindowState mainWindow) {
+        final InsetsSource taskbarInsetsSource = getTaskbarInsetsSource(mainWindow);
+
+        return taskbarInsetsSource != null
+                && taskbarInsetsSource.getFrame().height() >= mExpandedTaskBarHeight
+                && taskbarInsetsSource.isVisible();
+    }
+
+    private InsetsSource getTaskbarInsetsSource(WindowState mainWindow) {
+        final InsetsState insetsState = mainWindow.getInsetsState();
+        return insetsState.peekSource(InsetsState.ITYPE_EXTRA_NAVIGATION_BAR);
+    }
+
+    private void adjustBoundsForTaskbar(WindowState mainWindow, Rect bounds) {
+        // Rounded corners should be displayed above the taskbar. When taskbar is hidden,
+        // an insets frame is equal to a navigation bar which shouldn't affect position of
+        // rounded corners since apps are expected to handle navigation bar inset.
+        // This condition checks whether the taskbar is visible.
+        // Do not crop the taskbar inset if the window is in immersive mode - the user can
+        // swipe to show/hide the taskbar as an overlay.
+        if (hasVisibleTaskbar(mainWindow)) {
+            adjustBoundsForTaskbarUnchecked(mainWindow, bounds);
+        }
+    }
+
+    private void adjustBoundsForTaskbarUnchecked(WindowState mainWindow, Rect bounds) {
+        // Rounded corners should be displayed above the taskbar.
+        bounds.bottom =
+                Math.min(bounds.bottom, getTaskbarInsetsSource(mainWindow).getFrame().top);
+        if (mActivityRecord.inSizeCompatMode()
+                && mActivityRecord.getSizeCompatScale() < 1.0f) {
+            bounds.scale(1.0f / mActivityRecord.getSizeCompatScale());
+        }
     }
 
     private int getInsetsStateCornerRadius(
@@ -588,7 +652,7 @@ final class LetterboxUiController {
                 + letterboxBackgroundTypeToString(
                         mLetterboxConfiguration.getLetterboxBackgroundType()));
         pw.println(prefix + "  letterboxCornerRadius="
-                + getRoundedCorners(mainWin.getInsetsState()));
+                + getRoundedCornersRadius(mainWin));
         if (mLetterboxConfiguration.getLetterboxBackgroundType()
                 == LETTERBOX_BACKGROUND_WALLPAPER) {
             pw.println(prefix + "  isLetterboxWallpaperBlurSupported="
