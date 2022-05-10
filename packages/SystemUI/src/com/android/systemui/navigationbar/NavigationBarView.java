@@ -301,7 +301,7 @@ public class NavigationBarView extends FrameLayout {
                 R.drawable.ic_sysbar_rotate_button_ccw_start_90,
                 R.drawable.ic_sysbar_rotate_button_cw_start_0,
                 R.drawable.ic_sysbar_rotate_button_cw_start_90,
-                () -> getDisplay().getRotation());
+                () -> mCurrentRotation);
 
         mConfiguration = new Configuration();
         mTmpLastConfiguration = new Configuration();
@@ -473,6 +473,7 @@ public class NavigationBarView extends FrameLayout {
             mRotationButtonController.setRotationButton(mRotationContextButton,
                     mRotationButtonListener);
         }
+        mNavigationInflaterView.setButtonDispatchers(mButtonDispatchers);
     }
 
     public KeyButtonDrawable getBackDrawable() {
@@ -876,15 +877,27 @@ public class NavigationBarView extends FrameLayout {
         return mCurrentRotation != rotation;
     }
 
+    private void updateCurrentRotation() {
+        final int rotation = mConfiguration.windowConfiguration.getDisplayRotation();
+        if (mCurrentRotation == rotation) {
+            return;
+        }
+        mCurrentRotation = rotation;
+        mNavigationInflaterView.setAlternativeOrder(mCurrentRotation == Surface.ROTATION_90);
+        mDeadZone.onConfigurationChanged(mCurrentRotation);
+        if (DEBUG) {
+            Log.d(TAG, "updateCurrentRotation(): rot=" + mCurrentRotation);
+        }
+    }
+
     private void updateCurrentView() {
         resetViews();
         mCurrentView = mIsVertical ? mVertical : mHorizontal;
         mCurrentView.setVisibility(View.VISIBLE);
         mNavigationInflaterView.setVertical(mIsVertical);
-        mCurrentRotation = getContextDisplay().getRotation();
-        mNavigationInflaterView.setAlternativeOrder(mCurrentRotation == Surface.ROTATION_90);
         mNavigationInflaterView.updateButtonDispatchersCurrentView();
         updateLayoutTransitionsEnabled();
+        updateCurrentRotation();
     }
 
     private void resetViews() {
@@ -917,16 +930,10 @@ public class NavigationBarView extends FrameLayout {
 
     public void reorient() {
         updateCurrentView();
-
         ((NavigationBarFrame) getRootView()).setDeadZone(mDeadZone);
-        mDeadZone.onConfigurationChanged(mCurrentRotation);
 
         // force the low profile & disabled states into compliance
         mBarTransitions.init();
-
-        if (DEBUG) {
-            Log.d(TAG, "reorient(): rot=" + mCurrentRotation);
-        }
 
         // Resolve layout direction if not resolved since components changing layout direction such
         // as changing languages will recreate this view and the direction will be resolved later
@@ -998,6 +1005,7 @@ public class NavigationBarView extends FrameLayout {
         boolean uiCarModeChanged = updateCarMode();
         updateIcons(mTmpLastConfiguration);
         updateRecentsIcon();
+        updateCurrentRotation();
         mEdgeBackGestureHandler.onConfigurationChanged(mConfiguration);
         if (uiCarModeChanged || mTmpLastConfiguration.densityDpi != mConfiguration.densityDpi
                 || mTmpLastConfiguration.getLayoutDirection() != mConfiguration.getLayoutDirection()) {
