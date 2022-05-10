@@ -583,7 +583,7 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"Profilni podaci"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Prije izrade ograničenog profila trebate postaviti zaključavanje zaslona radi zaštite svojih aplikacija i osobnih podataka."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Postavi zaključavanje"</string>
-    <string name="user_switch_to_user" msgid="6975428297154968543">"Prelazak na korisnika <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"Prijeđi na korisnika <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Izrada novog korisnika…"</string>
     <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Izrada novog gosta…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"Izrada novog korisnika nije uspjela"</string>
@@ -591,7 +591,7 @@
     <string name="user_nickname" msgid="262624187455825083">"Nadimak"</string>
     <string name="user_add_user" msgid="7876449291500212468">"Dodavanje korisnika"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Dodavanje gosta"</string>
-    <string name="guest_exit_guest" msgid="5908239569510734136">"Uklanjanje gosta"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Ukloni gosta"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Poništi gostujuću sesiju"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Poništiti gostujuću sesiju?"</string>
     <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Želite li ukloniti gosta?"</string>
@@ -611,8 +611,8 @@
     <string name="guest_reset_button" msgid="2515069346223503479">"Poništi gostujuću sesiju"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Izlaz iz gostujuće sesije"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Sve će se aktivnosti izbrisati na izlasku"</string>
-    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Možete spremiti ili izbrisati svoje aktivnosti na izlasku"</string>
-    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Poništite da biste odmah izbrisali aktivnost sesije, a možete i spremiti ili izbrisati aktivnost na izlasku."</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Svoje aktivnosti možete spremiti ili izbrisati na izlasku."</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Poništite da odmah izbrišete aktivnost sesije. Inače je možete spremiti ili izbrisati na izlasku."</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Fotografiraj"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Odaberi sliku"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Odabir slike"</string>

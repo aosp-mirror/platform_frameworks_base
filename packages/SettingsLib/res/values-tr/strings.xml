@@ -612,7 +612,7 @@
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Misafir modundan çık"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Çıkış yapıldığında tüm etkinlikler silinir"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Etkinliklerinizi çıkarken kaydedebilir veya silebilirsiniz"</string>
-    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Oturum etkinliklerini hemen silmek için sıfırlayın. Etkinlikleri çıkarken kaydetmeyi veya silmeyi de tercih edebilirsiniz"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Oturum etkinliklerini silmek için sıfırlayabilir ya da çıkarken kaydedebilir veya silebilirsiniz"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Fotoğraf çek"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Resim seç"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Fotoğraf seç"</string>

@@ -612,7 +612,7 @@
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Loka gestastillingu"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Öllum aðgerðum verður eytt þegar lotu er lokað"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Þú getur vistað eða eytt aðgerðum þegar þú lokar"</string>
-    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Endurstilltu til að eyða aðgerðum lotu núna, eða þú getur vistað eða eytt aðgerðum þegar þú lokar"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Endurstilltu til að eyða aðgerðum lotu núna, eða vistaðu eða eyddu aðgerðum þegar þú lokar"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Taka mynd"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Velja mynd"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Velja mynd"</string>

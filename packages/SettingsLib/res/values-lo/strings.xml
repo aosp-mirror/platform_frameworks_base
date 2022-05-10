@@ -598,7 +598,7 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"ຣີເຊັດ"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"ລຶບອອກ"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"ກຳລັງຣີເຊັດແຂກ…"</string>
-    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"ຣີເຊັດໄລຍະເວລາຂອງແຂກບໍ?"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"ຣີເຊັດເຊດຊັນຂອງແຂກບໍ?"</string>
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"ນີ້ຈະເລີ່ມໄລຍະເວລາຂອງແຂກໃໝ່ ແລະ ລຶບແອັບ ແລະ ຂໍ້ມູນທັງໝົດອອກຈາກເຊດຊັນປັດຈຸບັນ"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"ອອກຈາກໂໝດແຂກບໍ?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"ນີ້ຈະລຶບແອັບ ແລະ ຂໍ້ມູນອອກຈາກໄລຍະເວລາຂອງແຂກປັດຈຸບັນ"</string>
@@ -608,7 +608,7 @@
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"ລຶບ"</string>
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"ບັນທຶກ"</string>
     <string name="guest_exit_button" msgid="5774985819191803960">"ອອກຈາກໂໝດແຂກ"</string>
-    <string name="guest_reset_button" msgid="2515069346223503479">"ຣີເຊັດໄລຍະເວລາຂອງແຂກ"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"ຣີເຊັດເຊດຊັນຂອງແຂກ"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"ອອກຈາກແຂກ"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"ການເຄື່ອນໄຫວທັງໝົດຈະຖືກລຶບໃນຕອນອອກ"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"ທ່ານສາມາດບັນທຶກ ຫຼື ລຶບການເຄື່ອນໄຫວຂອງທ່ານໃນຕອນອອກໄດ້"</string>
