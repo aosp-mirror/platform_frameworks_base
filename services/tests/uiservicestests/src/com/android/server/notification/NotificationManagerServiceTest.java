@@ -9348,8 +9348,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
 
-        mBinderService.setNotificationsEnabledForPackage(
-                r.getSbn().getPackageName(), r.getUid(), false);
+        when(mPermissionHelper.hasPermission(mUid)).thenReturn(false);
 
         // normal blocked notifications - blocked
         mService.addEnqueuedNotification(r);
