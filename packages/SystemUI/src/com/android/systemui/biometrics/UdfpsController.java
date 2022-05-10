@@ -54,6 +54,7 @@ import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.ActiveUnlockConfig;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeReceiver;
@@ -125,6 +126,7 @@ public class UdfpsController implements DozeReceiver {
     @NonNull private final UnlockedScreenOffAnimationController
             mUnlockedScreenOffAnimationController;
     @NonNull private final LatencyTracker mLatencyTracker;
+    @NonNull private final BroadcastSender mBroadcastSender;
     @VisibleForTesting @NonNull final BiometricDisplayListener mOrientationListener;
     @NonNull private final ActivityLaunchAnimator mActivityLaunchAnimator;
 
@@ -205,7 +207,7 @@ public class UdfpsController implements DozeReceiver {
                             mUnlockedScreenOffAnimationController, mHalControlsIllumination,
                             mHbmProvider, requestId, reason, callback,
                             (view, event, fromUdfpsView) -> onTouch(requestId, event,
-                                    fromUdfpsView), mActivityLaunchAnimator)));
+                                    fromUdfpsView), mActivityLaunchAnimator, mBroadcastSender)));
         }
 
         @Override
@@ -574,7 +576,8 @@ public class UdfpsController implements DozeReceiver {
             @NonNull SystemUIDialogManager dialogManager,
             @NonNull LatencyTracker latencyTracker,
             @NonNull ActivityLaunchAnimator activityLaunchAnimator,
-            @NonNull Optional<AlternateUdfpsTouchProvider> aternateTouchProvider) {
+            @NonNull Optional<AlternateUdfpsTouchProvider> aternateTouchProvider,
+            @NonNull BroadcastSender broadcastSender) {
         mContext = context;
         mExecution = execution;
         mVibrator = vibrator;
@@ -604,6 +607,7 @@ public class UdfpsController implements DozeReceiver {
         mLatencyTracker = latencyTracker;
         mActivityLaunchAnimator = activityLaunchAnimator;
         mAlternateTouchProvider = aternateTouchProvider.orElse(null);
+        mBroadcastSender = broadcastSender;
 
         mOrientationListener = new BiometricDisplayListener(
                 context,
