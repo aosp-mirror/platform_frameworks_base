@@ -292,14 +292,13 @@ public class CompanionDeviceManagerService extends SystemService {
 
     private boolean onCompanionApplicationBindingDiedInternal(
             @UserIdInt int userId, @NonNull String packageName) {
-        // Update the current connected devices sets when binderDied, so that application is able
-        // to call notifyDeviceAppeared after re-launch the application.
         for (AssociationInfo ai :
                 mAssociationStore.getAssociationsForPackage(userId, packageName)) {
-            int id = ai.getId();
-            Slog.i(TAG, "Removing association id: " + id + " for package: "
-                    + packageName + " due to binderDied.");
-            mDevicePresenceMonitor.removeDeviceFromMonitoring(id);
+            final int associationId = ai.getId();
+            if (ai.isSelfManaged()
+                    && mDevicePresenceMonitor.isDevicePresent(associationId)) {
+                mDevicePresenceMonitor.onSelfManagedDeviceReporterBinderDied(associationId);
+            }
         }
         // TODO(b/218613015): implement.
         return false;
