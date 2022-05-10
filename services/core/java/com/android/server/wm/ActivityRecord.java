@@ -9342,6 +9342,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         sb.append(mUserId);
         sb.append(' ');
         sb.append(intent.getComponent().flattenToShortString());
+        sb.append("}");
         stringName = sb.toString();
         return stringName;
     }
