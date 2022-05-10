@@ -538,6 +538,7 @@ public class NavigationBarView extends FrameLayout {
             mRotationButtonController.setRotationButton(mRotationContextButton,
                     mRotationButtonListener);
         }
+        mNavigationInflaterView.setButtonDispatchers(mButtonDispatchers);
     }
 
     public KeyButtonDrawable getBackDrawable() {
