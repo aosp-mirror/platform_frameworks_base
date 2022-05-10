@@ -22,7 +22,6 @@ import com.android.wm.shell.apppairs.AppPairsController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutoutController;
 import com.android.wm.shell.kidsmode.KidsModeTaskOrganizer;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.recents.RecentTasksController;
@@ -39,7 +38,6 @@ import java.util.Optional;
 public final class ShellCommandHandlerImpl {
     private static final String TAG = ShellCommandHandlerImpl.class.getSimpleName();
 
-    private final Optional<LegacySplitScreenController> mLegacySplitScreenOptional;
     private final Optional<SplitScreenController> mSplitScreenOptional;
     private final Optional<Pip> mPipOptional;
     private final Optional<OneHandedController> mOneHandedOptional;
@@ -54,7 +52,6 @@ public final class ShellCommandHandlerImpl {
     public ShellCommandHandlerImpl(
             ShellTaskOrganizer shellTaskOrganizer,
             KidsModeTaskOrganizer kidsModeTaskOrganizer,
-            Optional<LegacySplitScreenController> legacySplitScreenOptional,
             Optional<SplitScreenController> splitScreenOptional,
             Optional<Pip> pipOptional,
             Optional<OneHandedController> oneHandedOptional,
@@ -65,7 +62,6 @@ public final class ShellCommandHandlerImpl {
         mShellTaskOrganizer = shellTaskOrganizer;
         mKidsModeTaskOrganizer = kidsModeTaskOrganizer;
         mRecentTasks = recentTasks;
-        mLegacySplitScreenOptional = legacySplitScreenOptional;
         mSplitScreenOptional = splitScreenOptional;
         mPipOptional = pipOptional;
         mOneHandedOptional = oneHandedOptional;
@@ -84,7 +80,6 @@ public final class ShellCommandHandlerImpl {
         pw.println();
         pw.println();
         mPipOptional.ifPresent(pip -> pip.dump(pw));
-        mLegacySplitScreenOptional.ifPresent(splitScreen -> splitScreen.dump(pw));
         mOneHandedOptional.ifPresent(oneHanded -> oneHanded.dump(pw));
         mHideDisplayCutout.ifPresent(hideDisplayCutout -> hideDisplayCutout.dump(pw));
         pw.println();
