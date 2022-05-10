@@ -376,44 +376,24 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * calls.
      */
     private static Boolean isSystemNotification(Context context, StatusBarNotification sbn) {
-        // TODO (b/194833441): clean up before launch
-        if (Settings.Secure.getIntForUser(context.getContentResolver(),
-                Settings.Secure.NOTIFICATION_PERMISSION_ENABLED, 0, USER_SYSTEM) == 1) {
-            INotificationManager iNm = INotificationManager.Stub.asInterface(
-                    ServiceManager.getService(Context.NOTIFICATION_SERVICE));
+        INotificationManager iNm = INotificationManager.Stub.asInterface(
+                ServiceManager.getService(Context.NOTIFICATION_SERVICE));
 
-            boolean isSystem = false;
-            try {
-                isSystem = iNm.isPermissionFixed(sbn.getPackageName(), sbn.getUserId());
-            } catch (RemoteException e) {
-                Log.e(TAG, "cannot reach NMS");
-            }
-            RoleManager rm = context.getSystemService(RoleManager.class);
-            List<String> fixedRoleHolders = new ArrayList<>();
-            fixedRoleHolders.addAll(rm.getRoleHolders(RoleManager.ROLE_DIALER));
-            fixedRoleHolders.addAll(rm.getRoleHolders(RoleManager.ROLE_EMERGENCY));
-            if (fixedRoleHolders.contains(sbn.getPackageName())) {
-                isSystem = true;
-            }
-
-            return isSystem;
-        } else {
-            PackageManager packageManager = CentralSurfaces.getPackageManagerForUser(
-                    context, sbn.getUser().getIdentifier());
-            Boolean isSystemNotification = null;
-
-            try {
-                PackageInfo packageInfo = packageManager.getPackageInfo(
-                        sbn.getPackageName(), PackageManager.GET_SIGNATURES);
-
-                isSystemNotification =
-                        com.android.settingslib.Utils.isSystemPackage(
-                                context.getResources(), packageManager, packageInfo);
-            } catch (PackageManager.NameNotFoundException e) {
-                Log.e(TAG, "cacheIsSystemNotification: Could not find package info");
-            }
-            return isSystemNotification;
+        boolean isSystem = false;
+        try {
+            isSystem = iNm.isPermissionFixed(sbn.getPackageName(), sbn.getUserId());
+        } catch (RemoteException e) {
+            Log.e(TAG, "cannot reach NMS");
         }
+        RoleManager rm = context.getSystemService(RoleManager.class);
+        List<String> fixedRoleHolders = new ArrayList<>();
+        fixedRoleHolders.addAll(rm.getRoleHolders(RoleManager.ROLE_DIALER));
+        fixedRoleHolders.addAll(rm.getRoleHolders(RoleManager.ROLE_EMERGENCY));
+        if (fixedRoleHolders.contains(sbn.getPackageName())) {
+            isSystem = true;
+        }
+
+        return isSystem;
     }
 
     public NotificationContentView[] getLayouts() {
@@ -567,9 +547,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mEntry.mIsSystemNotification = isSystemNotification(mContext, mEntry.getSbn());
         }
 
-        // TODO (b/194833441): remove when we've migrated to permission
-        boolean isNonblockable = mEntry.getChannel().isImportanceLockedByOEM()
-                || mEntry.getChannel().isImportanceLockedByCriticalDeviceFunction();
+        boolean isNonblockable = mEntry.getChannel().isImportanceLockedByCriticalDeviceFunction();
 
         if (!isNonblockable && mEntry != null && mEntry.mIsSystemNotification != null) {
             if (mEntry.mIsSystemNotification) {

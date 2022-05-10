@@ -166,6 +166,27 @@ interface ITunerResourceManager {
     boolean requestFrontend(in TunerFrontendRequest request, out int[] frontendHandle);
 
     /*
+     * Sets the maximum usable frontends number of a given frontend type. It is used to enable or
+     * disable frontends when cable connection status is changed by user.
+     *
+     * @param frontendType the frontendType which the maximum usable number will be set for.
+     * @param maxNumber the new maximum usable number.
+     *
+     * @return true if  successful and false otherwise.
+     */
+    boolean setMaxNumberOfFrontends(in int frontendType, in int maxNum);
+
+    /*
+     * Get the maximum usable frontends number of a given frontend type.
+     *
+     * @param frontendType the frontendType which the maximum usable number will be queried for.
+     *
+     * @return the maximum usable number of the queried frontend type. Returns -1 when the
+     *         frontendType is invalid
+     */
+    int getMaxNumberOfFrontends(in int frontendType);
+
+    /*
      * Requests to share frontend with an existing client.
      *
      * <p><strong>Note:</strong> {@link #setFrontendInfoList(TunerFrontendInfo[])} must be called
