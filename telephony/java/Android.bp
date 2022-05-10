@@ -13,6 +13,15 @@ filegroup {
     srcs: [
         "**/*.java",
         "**/*.aidl",
+        ":statslog-telephony-java-gen",
     ],
     visibility: ["//frameworks/base"],
+}
+
+genrule {
+    name: "statslog-telephony-java-gen",
+    tools: ["stats-log-api-gen"],
+    cmd: "$(location stats-log-api-gen) --java $(out) --module telephony" +
+        " --javaPackage com.android.internal.telephony --javaClass TelephonyStatsLog",
+    out: ["com/android/internal/telephony/TelephonyStatsLog.java"],
 }

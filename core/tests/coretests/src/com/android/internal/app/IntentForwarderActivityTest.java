@@ -44,7 +44,6 @@ import android.content.pm.UserInfo;
 import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -297,7 +296,7 @@ public class IntentForwarderActivityTest {
         mActivityRule.launchActivity(intent);
 
         verify(mIPm).canForwardTo(any(), any(), anyInt(), anyInt());
-        verify(sInjector).showToast(anyInt(), anyInt());
+        verify(sInjector).showToast(anyString(), anyInt());
     }
 
     @Test
@@ -312,7 +311,7 @@ public class IntentForwarderActivityTest {
         mActivityRule.launchActivity(intent);
 
         verify(mIPm).canForwardTo(any(), any(), anyInt(), anyInt());
-        verify(sInjector, never()).showToast(anyInt(), anyInt());
+        verify(sInjector, never()).showToast(anyString(), anyInt());
     }
 
     @Test
@@ -324,7 +323,7 @@ public class IntentForwarderActivityTest {
         mActivityRule.launchActivity(intent);
 
         verify(mIPm).canForwardTo(any(), any(), anyInt(), anyInt());
-        verify(sInjector, never()).showToast(anyInt(), anyInt());
+        verify(sInjector, never()).showToast(anyString(), anyInt());
     }
 
     @Test
@@ -336,7 +335,7 @@ public class IntentForwarderActivityTest {
         mActivityRule.launchActivity(intent);
 
         verify(mIPm).canForwardTo(any(), any(), anyInt(), anyInt());
-        verify(sInjector, never()).showToast(anyInt(), anyInt());
+        verify(sInjector, never()).showToast(anyString(), anyInt());
     }
 
     @Test
@@ -348,7 +347,7 @@ public class IntentForwarderActivityTest {
         mActivityRule.launchActivity(intent);
 
         verify(mIPm).canForwardTo(any(), any(), anyInt(), anyInt());
-        verify(sInjector, never()).showToast(anyInt(), anyInt());
+        verify(sInjector, never()).showToast(anyString(), anyInt());
     }
 
     @Test
@@ -360,7 +359,7 @@ public class IntentForwarderActivityTest {
         mActivityRule.launchActivity(intent);
 
         verify(mIPm).canForwardTo(any(), any(), anyInt(), anyInt());
-        verify(sInjector, never()).showToast(anyInt(), anyInt());
+        verify(sInjector, never()).showToast(anyString(), anyInt());
     }
 
     @Test
@@ -372,7 +371,7 @@ public class IntentForwarderActivityTest {
         mActivityRule.launchActivity(intent);
 
         verify(mIPm).canForwardTo(any(), any(), anyInt(), anyInt());
-        verify(sInjector).showToast(anyInt(), anyInt());
+        verify(sInjector).showToast(anyString(), anyInt());
     }
 
     @Test
@@ -386,7 +385,7 @@ public class IntentForwarderActivityTest {
         mActivityRule.launchActivity(intent);
 
         verify(mIPm).canForwardTo(any(), any(), anyInt(), anyInt());
-        verify(sInjector, never()).showToast(anyInt(), anyInt());
+        verify(sInjector, never()).showToast(anyString(), anyInt());
     }
 
     @Test
@@ -399,7 +398,7 @@ public class IntentForwarderActivityTest {
         mActivityRule.launchActivity(intent);
 
         verify(mIPm).canForwardTo(any(), any(), anyInt(), anyInt());
-        verify(sInjector, never()).showToast(anyInt(), anyInt());
+        verify(sInjector, never()).showToast(anyString(), anyInt());
     }
 
     @Test
@@ -412,7 +411,7 @@ public class IntentForwarderActivityTest {
         mActivityRule.launchActivity(intent);
 
         verify(mIPm).canForwardTo(any(), any(), anyInt(), anyInt());
-        verify(sInjector, never()).showToast(anyInt(), anyInt());
+        verify(sInjector, never()).showToast(anyString(), anyInt());
     }
 
     @Test
@@ -425,7 +424,7 @@ public class IntentForwarderActivityTest {
         mActivityRule.launchActivity(intent);
 
         verify(mIPm).canForwardTo(any(), any(), anyInt(), anyInt());
-        verify(sInjector, never()).showToast(anyInt(), anyInt());
+        verify(sInjector, never()).showToast(anyString(), anyInt());
     }
 
     @Test
@@ -438,7 +437,7 @@ public class IntentForwarderActivityTest {
         mActivityRule.launchActivity(intent);
 
         verify(mIPm).canForwardTo(any(), any(), anyInt(), anyInt());
-        verify(sInjector, never()).showToast(anyInt(), anyInt());
+        verify(sInjector, never()).showToast(anyString(), anyInt());
     }
 
     @Test
@@ -452,7 +451,7 @@ public class IntentForwarderActivityTest {
         mActivityRule.launchActivity(intent);
 
         verify(mIPm).canForwardTo(any(), any(), anyInt(), anyInt());
-        verify(sInjector, never()).showToast(anyInt(), anyInt());
+        verify(sInjector, never()).showToast(anyString(), anyInt());
     }
 
     @Test
@@ -466,7 +465,7 @@ public class IntentForwarderActivityTest {
         mActivityRule.launchActivity(intent);
 
         verify(mIPm).canForwardTo(any(), any(), anyInt(), anyInt());
-        verify(sInjector, never()).showToast(anyInt(), anyInt());
+        verify(sInjector, never()).showToast(anyString(), anyInt());
     }
 
     @Test
@@ -480,7 +479,7 @@ public class IntentForwarderActivityTest {
         mActivityRule.launchActivity(intent);
 
         verify(mIPm).canForwardTo(any(), any(), anyInt(), anyInt());
-        verify(sInjector, never()).showToast(anyInt(), anyInt());
+        verify(sInjector, never()).showToast(anyString(), anyInt());
     }
 
     @Test
@@ -494,7 +493,7 @@ public class IntentForwarderActivityTest {
         mActivityRule.launchActivity(intent);
 
         verify(mIPm).canForwardTo(any(), any(), anyInt(), anyInt());
-        verify(sInjector, never()).showToast(anyInt(), anyInt());
+        verify(sInjector, never()).showToast(anyString(), anyInt());
     }
 
     @Test
@@ -507,7 +506,7 @@ public class IntentForwarderActivityTest {
         mActivityRule.launchActivity(intent);
 
         verify(mIPm).canForwardTo(any(), any(), anyInt(), anyInt());
-        verify(sInjector).showToast(anyInt(), anyInt());
+        verify(sInjector).showToast(anyString(), anyInt());
     }
 
     @Test
@@ -521,7 +520,7 @@ public class IntentForwarderActivityTest {
         mActivityRule.launchActivity(intent);
 
         verify(mIPm).canForwardTo(any(), any(), anyInt(), anyInt());
-        verify(sInjector).showToast(anyInt(), anyInt());
+        verify(sInjector).showToast(anyString(), anyInt());
     }
 
     @Test
@@ -535,7 +534,7 @@ public class IntentForwarderActivityTest {
         mActivityRule.launchActivity(intent);
 
         verify(mIPm).canForwardTo(any(), any(), anyInt(), anyInt());
-        verify(sInjector).showToast(anyInt(), anyInt());
+        verify(sInjector).showToast(anyString(), anyInt());
     }
 
     @Test
@@ -551,7 +550,7 @@ public class IntentForwarderActivityTest {
         mActivityRule.launchActivity(intent);
 
         verify(mIPm).canForwardTo(any(), any(), anyInt(), anyInt());
-        verify(sInjector, never()).showToast(anyInt(), anyInt());
+        verify(sInjector, never()).showToast(anyString(), anyInt());
     }
 
     @Test
@@ -649,7 +648,7 @@ public class IntentForwarderActivityTest {
 
         @Override
         public void startActivityAsCaller(Intent intent, @Nullable Bundle options,
-                IBinder permissionToken, boolean ignoreTargetSecurity, int userId) {
+                boolean ignoreTargetSecurity, int userId) {
             mStartActivityIntent = intent;
             mUserIdActivityLaunchedIn = userId;
         }
@@ -692,6 +691,6 @@ public class IntentForwarderActivityTest {
         }
 
         @Override
-        public void showToast(int messageId, int duration) {}
+        public void showToast(String message, int duration) {}
     }
 }

@@ -104,9 +104,17 @@ public class CameraDeviceImpl extends CameraDevice
     private SparseArray<CaptureCallbackHolder> mCaptureCallbackMap =
             new SparseArray<CaptureCallbackHolder>();
 
+    /** map request IDs which have batchedOutputs to requestCount*/
+    private HashMap<Integer, Integer> mBatchOutputMap = new HashMap<>();
+
     private int mRepeatingRequestId = REQUEST_ID_NONE;
     // Latest repeating request list's types
     private int[] mRepeatingRequestTypes;
+
+    // Cache failed requests to process later in case of a repeating error callback
+    private int mFailedRepeatingRequestId = REQUEST_ID_NONE;
+    private int[] mFailedRepeatingRequestTypes;
+
     // Map stream IDs to input/output configurations
     private SimpleEntry<Integer, InputConfiguration> mConfiguredInput =
             new SimpleEntry<>(REQUEST_ID_NONE, null);
@@ -973,6 +981,7 @@ public class CameraDeviceImpl extends CameraDevice
             mConfiguredInput = new SimpleEntry<Integer, InputConfiguration>(REQUEST_ID_NONE, null);
             mIdle = true;
             mCaptureCallbackMap = new SparseArray<CaptureCallbackHolder>();
+            mBatchOutputMap = new HashMap<>();
             mFrameNumberTracker = new FrameNumberTracker();
 
             mCurrentSession.closeWithoutDraining();
@@ -1179,6 +1188,41 @@ public class CameraDeviceImpl extends CameraDevice
         return requestTypes;
     }
 
+    private boolean hasBatchedOutputs(List<CaptureRequest> requestList) {
+        boolean hasBatchedOutputs = true;
+        for (int i = 0; i < requestList.size(); i++) {
+            CaptureRequest request = requestList.get(i);
+            if (!request.isPartOfCRequestList()) {
+                hasBatchedOutputs = false;
+                break;
+            }
+            if (i == 0) {
+                Collection<Surface> targets = request.getTargets();
+                if (targets.size() != 2) {
+                    hasBatchedOutputs = false;
+                    break;
+                }
+            }
+        }
+        return hasBatchedOutputs;
+    }
+
+    private void updateTracker(int requestId, long frameNumber,
+            int requestType, CaptureResult result, boolean isPartialResult) {
+        int requestCount = 1;
+        // If the request has batchedOutputs update each frame within the batch.
+        if (mBatchOutputMap.containsKey(requestId)) {
+            requestCount = mBatchOutputMap.get(requestId);
+            for (int i = 0; i < requestCount; i++) {
+                mFrameNumberTracker.updateTracker(frameNumber - (requestCount - 1 - i),
+                        result, isPartialResult, requestType);
+            }
+        } else {
+            mFrameNumberTracker.updateTracker(frameNumber, result,
+                    isPartialResult, requestType);
+        }
+    }
+
     private int submitCaptureRequest(List<CaptureRequest> requestList, CaptureCallback callback,
             Executor executor, boolean repeating) throws CameraAccessException {
 
@@ -1222,6 +1266,14 @@ public class CameraDeviceImpl extends CameraDevice
 
             for (CaptureRequest request : requestArray) {
                 request.recoverStreamIdToSurface();
+            }
+
+            // If the request has batched outputs, then store the
+            // requestCount and requestId in the map.
+            boolean hasBatchedOutputs = hasBatchedOutputs(requestList);
+            if (hasBatchedOutputs) {
+                int requestCount = requestList.size();
+                mBatchOutputMap.put(requestInfo.getRequestId(), requestCount);
             }
 
             if (callback != null) {
@@ -1279,16 +1331,25 @@ public class CameraDeviceImpl extends CameraDevice
 
                 int requestId = mRepeatingRequestId;
                 mRepeatingRequestId = REQUEST_ID_NONE;
+                mFailedRepeatingRequestId = REQUEST_ID_NONE;
                 int[] requestTypes = mRepeatingRequestTypes;
                 mRepeatingRequestTypes = null;
+                mFailedRepeatingRequestTypes = null;
 
                 long lastFrameNumber;
                 try {
                     lastFrameNumber = mRemoteDevice.cancelRequest(requestId);
                 } catch (IllegalArgumentException e) {
                     if (DEBUG) {
-                        Log.v(TAG, "Repeating request was already stopped for request " + requestId);
+                        Log.v(TAG, "Repeating request was already stopped for request " +
+                                requestId);
                     }
+                    // Cache request id and request types in case of a race with
+                    // "onRepeatingRequestError" which may no yet be scheduled on another thread
+                    // or blocked by us.
+                    mFailedRepeatingRequestId = requestId;
+                    mFailedRepeatingRequestTypes = requestTypes;
+
                     // Repeating request was already stopped. Nothing more to do.
                     return;
                 }
@@ -1820,7 +1881,7 @@ public class CameraDeviceImpl extends CameraDevice
             final CaptureFailure failure = new CaptureFailure(
                 request,
                 reason,
-                /*dropped*/ mayHaveBuffers,
+                mayHaveBuffers,
                 requestId,
                 frameNumber,
                 errorPhysicalCameraId);
@@ -1839,8 +1900,18 @@ public class CameraDeviceImpl extends CameraDevice
             if (DEBUG) {
                 Log.v(TAG, String.format("got error frame %d", frameNumber));
             }
-            mFrameNumberTracker.updateTracker(frameNumber,
-                    /*error*/true, request.getRequestType());
+
+            // Update FrameNumberTracker for every frame during HFR mode.
+            if (mBatchOutputMap.containsKey(requestId)) {
+                for (int i = 0; i < mBatchOutputMap.get(requestId); i++) {
+                    mFrameNumberTracker.updateTracker(frameNumber - (subsequenceId - i),
+                            /*error*/true, request.getRequestType());
+                }
+            } else {
+                mFrameNumberTracker.updateTracker(frameNumber,
+                        /*error*/true, request.getRequestType());
+            }
+
             checkAndFireSequenceComplete();
 
             // Dispatch the failure callback
@@ -1908,7 +1979,17 @@ public class CameraDeviceImpl extends CameraDevice
             synchronized(mInterfaceLock) {
                 // Camera is already closed or no repeating request is present.
                 if (mRemoteDevice == null || mRepeatingRequestId == REQUEST_ID_NONE) {
-                    return; // Camera already closed
+                    if ((mFailedRepeatingRequestId == repeatingRequestId) &&
+                            (mFailedRepeatingRequestTypes != null) && (mRemoteDevice != null)) {
+                        Log.v(TAG, "Resuming stop of failed repeating request with id: " +
+                                mFailedRepeatingRequestId);
+
+                        checkEarlyTriggerSequenceCompleteLocked(mFailedRepeatingRequestId,
+                                lastFrameNumber, mFailedRepeatingRequestTypes);
+                        mFailedRepeatingRequestId = REQUEST_ID_NONE;
+                        mFailedRepeatingRequestTypes = null;
+                    }
+                    return;
                 }
 
                 // Redirect device callback to the offline session in case we are in the middle
@@ -2023,7 +2104,6 @@ public class CameraDeviceImpl extends CameraDevice
         public void onResultReceived(CameraMetadataNative result,
                 CaptureResultExtras resultExtras, PhysicalCaptureResultInfo physicalResults[])
                 throws RemoteException {
-
             int requestId = resultExtras.getRequestId();
             long frameNumber = resultExtras.getFrameNumber();
 
@@ -2064,8 +2144,8 @@ public class CameraDeviceImpl extends CameraDevice
                                         + frameNumber);
                     }
 
-                    mFrameNumberTracker.updateTracker(frameNumber, /*result*/null, isPartialResult,
-                            requestType);
+                    updateTracker(requestId, frameNumber, requestType, /*result*/null,
+                            isPartialResult);
 
                     return;
                 }
@@ -2077,8 +2157,9 @@ public class CameraDeviceImpl extends CameraDevice
                                         + frameNumber);
                     }
 
-                    mFrameNumberTracker.updateTracker(frameNumber, /*result*/null, isPartialResult,
-                            requestType);
+                    updateTracker(requestId, frameNumber, requestType, /*result*/null,
+                            isPartialResult);
+
                     return;
                 }
 
@@ -2184,9 +2265,7 @@ public class CameraDeviceImpl extends CameraDevice
                     Binder.restoreCallingIdentity(ident);
                 }
 
-                // Collect the partials for a total result; or mark the frame as totally completed
-                mFrameNumberTracker.updateTracker(frameNumber, finalResult, isPartialResult,
-                        requestType);
+                updateTracker(requestId, frameNumber, requestType, finalResult, isPartialResult);
 
                 // Fire onCaptureSequenceCompleted
                 if (!isPartialResult) {
@@ -2416,10 +2495,10 @@ public class CameraDeviceImpl extends CameraDevice
             if (CameraExtensionCharacteristics.areAdvancedExtensionsSupported()) {
                 mCurrentAdvancedExtensionSession =
                         CameraAdvancedExtensionSessionImpl.createCameraAdvancedExtensionSession(
-                                this, mContext, extensionConfiguration);
+                                this, mContext, extensionConfiguration, mNextSessionId++);
             } else {
                 mCurrentExtensionSession = CameraExtensionSessionImpl.createCameraExtensionSession(
-                        this, mContext, extensionConfiguration);
+                        this, mContext, extensionConfiguration, mNextSessionId++);
             }
         } catch (RemoteException e) {
             throw new CameraAccessException(CameraAccessException.CAMERA_ERROR);

@@ -60,7 +60,6 @@ import android.util.Xml;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.Immutable;
 import com.android.internal.content.PackageMonitor;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.dump.DualDumpOutputStream;
 
@@ -75,7 +74,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.ProtocolException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -85,6 +83,8 @@ import java.util.Map;
 class UsbProfileGroupSettingsManager {
     private static final String TAG = UsbProfileGroupSettingsManager.class.getSimpleName();
     private static final boolean DEBUG = false;
+
+    private static final int DUMPSYS_LOG_BUFFER = 200;
 
     /** Legacy settings file, before multi-user */
     private static final File sSingleUserSettingsFile = new File(
@@ -129,6 +129,8 @@ class UsbProfileGroupSettingsManager {
      */
     @GuardedBy("mLock")
     private boolean mIsWriteSettingsScheduled;
+
+    private static UsbDeviceLogger sEventLogger;
 
     /**
      * A package of a user.
@@ -260,6 +262,9 @@ class UsbProfileGroupSettingsManager {
                         device, false /* showMtpNotification */));
 
         mUsbHandlerManager = usbResolveActivityManager;
+
+        sEventLogger = new UsbDeviceLogger(DUMPSYS_LOG_BUFFER,
+                "UsbProfileGroupSettingsManager activity");
     }
 
     /**
@@ -965,6 +970,7 @@ class UsbProfileGroupSettingsManager {
                     matches, mAccessoryPreferenceMap.get(new AccessoryFilter(accessory)));
         }
 
+        sEventLogger.log(new UsbDeviceLogger.StringEvent("accessoryAttached: " + intent));
         resolveActivity(intent, matches, defaultActivity, null, accessory);
     }
 
@@ -1518,6 +1524,7 @@ class UsbProfileGroupSettingsManager {
             }
         }
 
+        sEventLogger.dump(dump, UsbProfileGroupSettingsManagerProto.INTENT);
         dump.end(token);
     }
 

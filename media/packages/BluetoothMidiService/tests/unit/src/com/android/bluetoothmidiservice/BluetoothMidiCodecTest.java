@@ -114,7 +114,7 @@ public class BluetoothMidiCodecTest {
         // TODO Should this block?
         // Store the packets and then write them from a periodic task.
         @Override
-        public void writePacket(byte[] buffer, int count) {
+        public boolean writePacket(byte[] buffer, int count) {
             Log.d(TAG, "writePacket() passed " + MidiFramer.formatMidiData(buffer, 0, count));
             byte[] packet = new byte[count];
             System.arraycopy(buffer, 0, packet, 0, count);
@@ -124,6 +124,7 @@ public class BluetoothMidiCodecTest {
                 assertEquals(null, e);
             }
             Log.d(TAG, "writePacket() returns");
+            return true;
         }
 
         void test(final byte[][] midi)

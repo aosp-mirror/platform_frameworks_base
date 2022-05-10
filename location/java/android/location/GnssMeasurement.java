@@ -1381,7 +1381,10 @@ public final class GnssMeasurement implements Parcelable {
     /**
      * Returns {@code true} if {@link #getAutomaticGainControlLevelDb()} is available,
      * {@code false} otherwise.
+     *
+     * @deprecated Use {@link GnssMeasurementsEvent#getGnssAutomaticGainControls()} instead.
      */
+    @Deprecated
     public boolean hasAutomaticGainControlLevelDb() {
         return isFlagSet(HAS_AUTOMATIC_GAIN_CONTROL);
     }
@@ -1401,7 +1404,10 @@ public final class GnssMeasurement implements Parcelable {
      * indicative of changes on input signal power in the frequency band for this measurement.
      *
      * <p> The value is only available if {@link #hasAutomaticGainControlLevelDb()} is {@code true}
+     *
+     * @deprecated Use {@link GnssMeasurementsEvent#getGnssAutomaticGainControls()} instead.
      */
+    @Deprecated
     public double getAutomaticGainControlLevelDb() {
         return mAutomaticGainControlLevelInDb;
     }
@@ -1409,7 +1415,9 @@ public final class GnssMeasurement implements Parcelable {
     /**
      * Sets the Automatic Gain Control level in dB.
      * @hide
+     * @deprecated Use {@link GnssMeasurementsEvent.Builder#setGnssAutomaticGainControls()} instead.
      */
+    @Deprecated
     @TestApi
     public void setAutomaticGainControlLevelInDb(double agcLevelDb) {
         setFlag(HAS_AUTOMATIC_GAIN_CONTROL);
@@ -1860,7 +1868,7 @@ public final class GnssMeasurement implements Parcelable {
             gnssMeasurement.mSatelliteInterSignalBiasUncertaintyNanos = parcel.readDouble();
             if (gnssMeasurement.hasSatellitePvt()) {
                 ClassLoader classLoader = getClass().getClassLoader();
-                gnssMeasurement.mSatellitePvt = parcel.readParcelable(classLoader);
+                gnssMeasurement.mSatellitePvt = parcel.readParcelable(classLoader, android.location.SatellitePvt.class);
             }
             if (gnssMeasurement.hasCorrelationVectors()) {
                 CorrelationVector[] correlationVectorsArray =

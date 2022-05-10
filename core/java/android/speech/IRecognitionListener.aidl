@@ -78,6 +78,24 @@ oneway interface IRecognitionListener {
     void onPartialResults(in Bundle results);
 
     /**
+     * Called for each ready segment of a recognition request. To request segmented speech results
+     * use {@link RecognizerIntent#EXTRA_SEGMENTED_SESSION}. The callback might be called
+     * any number of times between {@link #onBeginningOfSpeech()} and
+     * {@link #onEndOfSegmentedSession()}.
+     *
+     * @param segmentResults the returned results. To retrieve the results in
+     *        ArrayList&lt;String&gt; format use {@link Bundle#getStringArrayList(String)} with
+     *        {@link SpeechRecognizer#RESULTS_RECOGNITION} as a parameter
+    */
+    void onSegmentResults(in Bundle results);
+
+    /**
+     * Called at the end of a segmented recognition request. To request segmented speech results
+     * use {@link RecognizerIntent#EXTRA_SEGMENTED_SESSION}.
+     */
+    void onEndOfSegmentedSession();
+
+    /**
      * Reserved for adding future events.
      *
      * @param eventType the type of the occurred event

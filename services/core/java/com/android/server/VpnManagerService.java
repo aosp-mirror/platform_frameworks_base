@@ -37,6 +37,7 @@ import android.net.NetworkStack;
 import android.net.UnderlyingNetworkInfo;
 import android.net.Uri;
 import android.net.VpnManager;
+import android.net.VpnProfileState;
 import android.net.VpnService;
 import android.net.util.NetdService;
 import android.os.Binder;
@@ -340,17 +341,18 @@ public class VpnManagerService extends IVpnManager.Stub {
      * <p>This is designed to serve the VpnManager only; settings-based VPN profiles are managed
      * exclusively by the Settings app, and passed into the platform at startup time.
      *
+     * @return A unique key corresponding to this session.
      * @throws IllegalArgumentException if no profile was found for the given package name.
      * @hide
      */
     @Override
-    public void startVpnProfile(@NonNull String packageName) {
+    public String startVpnProfile(@NonNull String packageName) {
         final int callingUid = Binder.getCallingUid();
         verifyCallingUidAndPackage(packageName, callingUid);
         final int user = UserHandle.getUserId(callingUid);
         synchronized (mVpns) {
             throwIfLockdownEnabled();
-            mVpns.get(user).startVpnProfile(packageName);
+            return mVpns.get(user).startVpnProfile(packageName);
         }
     }
 
@@ -369,6 +371,24 @@ public class VpnManagerService extends IVpnManager.Stub {
         final int user = UserHandle.getUserId(callingUid);
         synchronized (mVpns) {
             mVpns.get(user).stopVpnProfile(packageName);
+        }
+    }
+
+    /**
+     * Retrieve the VpnProfileState for the profile provisioned by the given package.
+     *
+     * @return the VpnProfileState with current information, or null if there was no profile
+     *         provisioned by the given package.
+     * @hide
+     */
+    @Override
+    @Nullable
+    public VpnProfileState getProvisionedVpnProfileState(@NonNull String packageName) {
+        final int callingUid = Binder.getCallingUid();
+        verifyCallingUidAndPackage(packageName, callingUid);
+        final int user = UserHandle.getUserId(callingUid);
+        synchronized (mVpns) {
+            return mVpns.get(user).getProvisionedVpnProfileState(packageName);
         }
     }
 
@@ -681,7 +701,7 @@ public class VpnManagerService extends IVpnManager.Stub {
         intentFilter = new IntentFilter();
         intentFilter.addAction(LockdownVpnTracker.ACTION_LOCKDOWN_RESET);
         mUserAllContext.registerReceiver(
-                mIntentReceiver, intentFilter, NETWORK_STACK, mHandler);
+                mIntentReceiver, intentFilter, NETWORK_STACK, mHandler, Context.RECEIVER_EXPORTED);
     }
 
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {

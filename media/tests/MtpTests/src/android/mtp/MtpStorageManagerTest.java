@@ -132,9 +132,10 @@ public class MtpStorageManagerTest {
         secondaryStorageDir = createNewDir(TEMP_DIR_FILE);
 
         StorageVolume mainStorage = new StorageVolume("1", mainStorageDir, mainStorageDir,
-                "", true, false, true, false, -1, UserHandle.CURRENT, null /* uuid */, "", "");
+                "", true, false, true, false, false, -1, UserHandle.CURRENT, null /* uuid */, "",
+                "");
         StorageVolume secondaryStorage = new StorageVolume("2", secondaryStorageDir,
-                secondaryStorageDir, "", false, false, true, false, -1, UserHandle.CURRENT,
+                secondaryStorageDir, "", false, false, true, false, false, -1, UserHandle.CURRENT,
                 null /* uuid */, "", "");
 
         objectsAdded = new ArrayList<>();
@@ -159,10 +160,11 @@ public class MtpStorageManagerTest {
                 Log.d(TAG, "sendObjectInfoChanged: " + id);
                 objectsInfoChanged.add(id);
             }
-        }, null);
+        }, /* subdirectories= */ null);
 
-        mainMtpStorage = manager.addMtpStorage(mainStorage);
-        secondaryMtpStorage = manager.addMtpStorage(secondaryStorage);
+        mainMtpStorage = manager.addMtpStorage(mainStorage, /* isHostWindows= */ () -> false);
+        secondaryMtpStorage = manager.addMtpStorage(secondaryStorage,
+                                                    /* isHostWindows= */ () -> false);
     }
 
     @After

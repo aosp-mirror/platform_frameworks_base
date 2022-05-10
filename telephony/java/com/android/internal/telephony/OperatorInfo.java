@@ -189,7 +189,7 @@ public class OperatorInfo implements Parcelable {
                             in.readString(), /*operatorAlphaLong*/
                             in.readString(), /*operatorAlphaShort*/
                             in.readString(), /*operatorNumeric*/
-                            (State) in.readSerializable(), /*state*/
+                            (State) in.readSerializable(com.android.internal.telephony.OperatorInfo.State.class.getClassLoader(), com.android.internal.telephony.OperatorInfo.State.class), /*state*/
                             in.readInt()); /*ran*/
                     return opInfo;
                 }

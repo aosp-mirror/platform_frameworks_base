@@ -17,6 +17,7 @@
 package com.android.internal.accessibility.util;
 
 import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
+import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_GESTURE;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
@@ -30,6 +31,7 @@ import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT
 import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_BUTTON;
 import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_BUTTON_LONG_PRESS;
 import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_FLOATING_MENU;
+import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_GESTURE;
 import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__TRIPLE_TAP;
 import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__UNKNOWN_TYPE;
 import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__VOLUME_KEY;
@@ -37,6 +39,9 @@ import static com.android.internal.util.FrameworkStatsLog.MAGNIFICATION_USAGE_RE
 import static com.android.internal.util.FrameworkStatsLog.MAGNIFICATION_USAGE_REPORTED__ACTIVATED_MODE__MAGNIFICATION_FULL_SCREEN;
 import static com.android.internal.util.FrameworkStatsLog.MAGNIFICATION_USAGE_REPORTED__ACTIVATED_MODE__MAGNIFICATION_UNKNOWN_MODE;
 import static com.android.internal.util.FrameworkStatsLog.MAGNIFICATION_USAGE_REPORTED__ACTIVATED_MODE__MAGNIFICATION_WINDOW;
+import static com.android.internal.util.FrameworkStatsLog.NON_A11Y_TOOL_SERVICE_WARNING_REPORTED__STATUS__WARNING_CLICKED;
+import static com.android.internal.util.FrameworkStatsLog.NON_A11Y_TOOL_SERVICE_WARNING_REPORTED__STATUS__WARNING_SERVICE_DISABLED;
+import static com.android.internal.util.FrameworkStatsLog.NON_A11Y_TOOL_SERVICE_WARNING_REPORTED__STATUS__WARNING_SHOWN;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -48,6 +53,16 @@ import com.android.internal.util.FrameworkStatsLog;
 
 /** Methods for logging accessibility states. */
 public final class AccessibilityStatsLogUtils {
+    /** The status represents an accessibility privacy warning has been shown. */
+    public static int ACCESSIBILITY_PRIVACY_WARNING_STATUS_SHOWN =
+            NON_A11Y_TOOL_SERVICE_WARNING_REPORTED__STATUS__WARNING_SHOWN;
+    /** The status represents an accessibility privacy warning has been clicked to review. */
+    public static int ACCESSIBILITY_PRIVACY_WARNING_STATUS_CLICKED =
+            NON_A11Y_TOOL_SERVICE_WARNING_REPORTED__STATUS__WARNING_CLICKED;
+    /** The status represents an accessibility privacy warning service has been disabled. */
+    public static int ACCESSIBILITY_PRIVACY_WARNING_STATUS_SERVICE_DISABLED =
+            NON_A11Y_TOOL_SERVICE_WARNING_REPORTED__STATUS__WARNING_SERVICE_DISABLED;
+
     private static final int UNKNOWN_STATUS =
             ACCESSIBILITY_SHORTCUT_REPORTED__SERVICE_STATUS__UNKNOWN;
 
@@ -152,19 +167,46 @@ public final class AccessibilityStatsLogUtils {
                 convertToLoggingMagnificationMode(mode));
     }
 
-    private static boolean isFloatingMenuEnabled(Context context) {
+    /**
+     * Logs the warning status of the non-a11yTool service. Calls this when the warning status is
+     * changed.
+     *
+     * @param packageName    The package name of the non-a11yTool service
+     * @param status         The warning status of the non-a11yTool service, it should be one of
+     *                       {@code ACCESSIBILITY_PRIVACY_WARNING_STATUS_SHOWN},{@code
+     *                       ACCESSIBILITY_PRIVACY_WARNING_STATUS_CLICKED} and {@code
+     *                       ACCESSIBILITY_PRIVACY_WARNING_STATUS_SERVICE_DISABLED}
+     * @param durationMillis The duration in milliseconds between current and previous status
+     */
+    public static void logNonA11yToolServiceWarningReported(String packageName, int status,
+            long durationMillis) {
+        FrameworkStatsLog.write(FrameworkStatsLog.NON_A11Y_TOOL_SERVICE_WARNING_REPORT,
+                packageName, status, durationMillis);
+    }
+
+    private static boolean isAccessibilityFloatingMenuEnabled(Context context) {
         return Settings.Secure.getInt(context.getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_BUTTON_MODE, /* def= */ -1)
                 == ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
+    }
+
+    private static boolean isAccessibilityGestureEnabled(Context context) {
+        return Settings.Secure.getInt(context.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_BUTTON_MODE, /* def= */ -1)
+                == ACCESSIBILITY_BUTTON_MODE_GESTURE;
     }
 
     private static int convertToLoggingShortcutType(Context context,
             @ShortcutType int shortcutType) {
         switch (shortcutType) {
             case ACCESSIBILITY_BUTTON:
-                return isFloatingMenuEnabled(context)
-                        ? ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_FLOATING_MENU
-                        : ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_BUTTON;
+                if (isAccessibilityFloatingMenuEnabled(context)) {
+                    return ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_FLOATING_MENU;
+                } else if (isAccessibilityGestureEnabled(context)) {
+                    return ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_GESTURE;
+                } else {
+                    return ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_BUTTON;
+                }
             case ACCESSIBILITY_SHORTCUT_KEY:
                 return ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__VOLUME_KEY;
         }

@@ -156,11 +156,11 @@ class ChannelEditorDialogController @Inject constructor(
         groupList: Sequence<NotificationChannelGroup>
     ): Sequence<NotificationChannel> {
 
+        // TODO (b/194833441): remove channel level settings when we move to a permission
         val channels = groupList
                 .flatMap { group ->
                     group.channels.asSequence().filterNot { channel ->
-                        channel.isImportanceLockedByOEM ||
-                                channel.importance == IMPORTANCE_NONE ||
+                        channel.importance == IMPORTANCE_NONE ||
                                 channel.isImportanceLockedByCriticalDeviceFunction
                     }
                 }
@@ -280,7 +280,8 @@ class ChannelEditorDialogController @Inject constructor(
 
     @VisibleForTesting
     fun launchSettings(sender: View) {
-        onSettingsClickListener?.onClick(sender, null, appUid!!)
+        val channel = if (providedChannels.size == 1) providedChannels[0] else null
+        onSettingsClickListener?.onClick(sender, channel, appUid!!)
     }
 
     private fun initDialog() {

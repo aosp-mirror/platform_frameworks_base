@@ -18,11 +18,12 @@ package android.location;
 
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
+import android.annotation.FloatRange;
+import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -30,48 +31,51 @@ import android.os.SystemClock;
 import android.util.Printer;
 import android.util.TimeUtils;
 
+import com.android.internal.util.Preconditions;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.text.DecimalFormat;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.StringTokenizer;
 
 /**
- * A data class representing a geographic location.
- *
- * <p>A location may consist of a latitude, longitude, timestamp, and other information such as
- * bearing, altitude and velocity.
+ * A data class representing a geographic location. A location consists of a latitude, longitude,
+ * timestamp, accuracy, and other information such as bearing, altitude and velocity.
  *
  * <p>All locations generated through {@link LocationManager} are guaranteed to have a valid
- * latitude, longitude, and timestamp (both UTC time and elapsed real-time since boot). All other
- * parameters are optional.
+ * latitude, longitude, timestamp (both Unix epoch time and elapsed realtime since boot), and
+ * accuracy. All other parameters are optional.
  */
 public class Location implements Parcelable {
 
     /**
-     * Constant used to specify formatting of a latitude or longitude
-     * in the form "[+-]DDD.DDDDD where D indicates degrees.
+     * Constant used to specify formatting of a latitude or longitude in the form "[+-]DDD.DDDDD
+     * where D indicates degrees.
      */
     public static final int FORMAT_DEGREES = 0;
 
     /**
-     * Constant used to specify formatting of a latitude or longitude
-     * in the form "[+-]DDD:MM.MMMMM" where D indicates degrees and
-     * M indicates minutes of arc (1 minute = 1/60th of a degree).
+     * Constant used to specify formatting of a latitude or longitude in the form "[+-]DDD:MM.MMMMM"
+     * where D indicates degrees and M indicates minutes of arc (1 minute = 1/60th of a degree).
      */
     public static final int FORMAT_MINUTES = 1;
 
     /**
-     * Constant used to specify formatting of a latitude or longitude
-     * in the form "DDD:MM:SS.SSSSS" where D indicates degrees, M
-     * indicates minutes of arc, and S indicates seconds of arc (1
+     * Constant used to specify formatting of a latitude or longitude in the form "DDD:MM:SS.SSSSS"
+     * where D indicates degrees, M indicates minutes of arc, and S indicates seconds of arc (1
      * minute = 1/60th of a degree, 1 second = 1/3600th of a degree).
      */
     public static final int FORMAT_SECONDS = 2;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({FORMAT_DEGREES, FORMAT_MINUTES, FORMAT_SECONDS})
+    public @interface Format {}
+
     /**
      * Bundle key for a version of the location containing no GPS data.
-     * Allows location providers to flag locations as being safe to
-     * feed to LocationFudger.
      *
      * @hide
      * @deprecated As of Android R, this extra is longer in use, since it is not necessary to keep
@@ -87,7 +91,7 @@ public class Location implements Parcelable {
     private static final int HAS_BEARING_MASK = 1 << 2;
     private static final int HAS_HORIZONTAL_ACCURACY_MASK = 1 << 3;
     private static final int HAS_MOCK_PROVIDER_MASK = 1 << 4;
-    private static final int HAS_VERTICAL_ACCURACY_MASK = 1 << 5;
+    private static final int HAS_ALTITUDE_ACCURACY_MASK = 1 << 5;
     private static final int HAS_SPEED_ACCURACY_MASK = 1 << 6;
     private static final int HAS_BEARING_ACCURACY_MASK = 1 << 7;
     private static final int HAS_ELAPSED_REALTIME_UNCERTAINTY_MASK = 1 << 8;
@@ -98,119 +102,916 @@ public class Location implements Parcelable {
     private static final ThreadLocal<BearingDistanceCache> sBearingDistanceCache =
             ThreadLocal.withInitial(BearingDistanceCache::new);
 
-    private String mProvider;
-    private long mTime = 0;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R,
-            publicAlternatives = "{@link #getElapsedRealtimeNanos()}")
-    private long mElapsedRealtimeNanos = 0;
-    // Estimate of the relative precision of the alignment of this SystemClock
-    // timestamp, with the reported measurements in nanoseconds (68% confidence).
-    private double mElapsedRealtimeUncertaintyNanos = 0.0f;
-    private double mLatitude = 0.0;
-    private double mLongitude = 0.0;
-    private double mAltitude = 0.0f;
-    private float mSpeed = 0.0f;
-    private float mBearing = 0.0f;
-    private float mHorizontalAccuracyMeters = 0.0f;
-    private float mVerticalAccuracyMeters = 0.0f;
-    private float mSpeedAccuracyMetersPerSecond = 0.0f;
-    private float mBearingAccuracyDegrees = 0.0f;
-
-    private Bundle mExtras = null;
-
     // A bitmask of fields present in this object (see HAS_* constants defined above).
     private int mFieldsMask = 0;
 
+    private @Nullable String mProvider;
+    private long mTimeMs;
+    private long mElapsedRealtimeNs;
+    private double mElapsedRealtimeUncertaintyNs;
+    private double mLatitudeDegrees;
+    private double mLongitudeDegrees;
+    private float mHorizontalAccuracyMeters;
+    private double mAltitudeMeters;
+    private float mAltitudeAccuracyMeters;
+    private float mSpeedMetersPerSecond;
+    private float mSpeedAccuracyMetersPerSecond;
+    private float mBearingDegrees;
+    private float mBearingAccuracyDegrees;
+
+    private Bundle mExtras = null;
+
     /**
-     * Construct a new Location with a named provider.
+     * Constructs a new location with a named provider. By default all values are zero, and no
+     * optional values are present.
      *
-     * <p>By default time, latitude and longitude are 0, and the location
-     * has no bearing, altitude, speed, accuracy or extras.
-     *
-     * @param provider the source that provides the location. It can be of type
-     * {@link LocationManager#GPS_PROVIDER}, {@link LocationManager#NETWORK_PROVIDER},
-     * or {@link LocationManager#PASSIVE_PROVIDER}. You can also define your own
-     * provider string, in which case an empty string is a valid provider.
+     * @param provider the location provider name associated with this location
      */
-    public Location(String provider) {
+    public Location(@Nullable String provider) {
         mProvider = provider;
     }
 
     /**
-     * Construct a new Location object that is copied from an existing one.
+     * Constructs a new location copied from the given location.
      */
-    public Location(Location l) {
-        set(l);
+    public Location(@NonNull Location location) {
+        set(location);
     }
 
     /**
-     * Sets the contents of the location to the values from the given location.
+     * Turns this location into a copy of the given location.
      */
-    public void set(Location l) {
-        mProvider = l.mProvider;
-        mTime = l.mTime;
-        mElapsedRealtimeNanos = l.mElapsedRealtimeNanos;
-        mElapsedRealtimeUncertaintyNanos = l.mElapsedRealtimeUncertaintyNanos;
-        mFieldsMask = l.mFieldsMask;
-        mLatitude = l.mLatitude;
-        mLongitude = l.mLongitude;
-        mAltitude = l.mAltitude;
-        mSpeed = l.mSpeed;
-        mBearing = l.mBearing;
-        mHorizontalAccuracyMeters = l.mHorizontalAccuracyMeters;
-        mVerticalAccuracyMeters = l.mVerticalAccuracyMeters;
-        mSpeedAccuracyMetersPerSecond = l.mSpeedAccuracyMetersPerSecond;
-        mBearingAccuracyDegrees = l.mBearingAccuracyDegrees;
-        mExtras = (l.mExtras == null) ? null : new Bundle(l.mExtras);
+    public void set(@NonNull Location location) {
+        mFieldsMask = location.mFieldsMask;
+        mProvider = location.mProvider;
+        mTimeMs = location.mTimeMs;
+        mElapsedRealtimeNs = location.mElapsedRealtimeNs;
+        mElapsedRealtimeUncertaintyNs = location.mElapsedRealtimeUncertaintyNs;
+        mLatitudeDegrees = location.mLatitudeDegrees;
+        mLongitudeDegrees = location.mLongitudeDegrees;
+        mHorizontalAccuracyMeters = location.mHorizontalAccuracyMeters;
+        mAltitudeMeters = location.mAltitudeMeters;
+        mAltitudeAccuracyMeters = location.mAltitudeAccuracyMeters;
+        mSpeedMetersPerSecond = location.mSpeedMetersPerSecond;
+        mSpeedAccuracyMetersPerSecond = location.mSpeedAccuracyMetersPerSecond;
+        mBearingDegrees = location.mBearingDegrees;
+        mBearingAccuracyDegrees = location.mBearingAccuracyDegrees;
+        mExtras = (location.mExtras == null) ? null : new Bundle(location.mExtras);
     }
 
     /**
-     * Clears the contents of the location.
+     * Sets the provider to null, removes all optional fields, and sets the values of all other
+     * fields to zero.
      */
     public void reset() {
         mProvider = null;
-        mTime = 0;
-        mElapsedRealtimeNanos = 0;
-        mElapsedRealtimeUncertaintyNanos = 0.0;
+        mTimeMs = 0;
+        mElapsedRealtimeNs = 0;
+        mElapsedRealtimeUncertaintyNs = 0.0;
         mFieldsMask = 0;
-        mLatitude = 0;
-        mLongitude = 0;
-        mAltitude = 0;
-        mSpeed = 0;
-        mBearing = 0;
+        mLatitudeDegrees = 0;
+        mLongitudeDegrees = 0;
+        mAltitudeMeters = 0;
+        mSpeedMetersPerSecond = 0;
+        mBearingDegrees = 0;
         mHorizontalAccuracyMeters = 0;
-        mVerticalAccuracyMeters = 0;
+        mAltitudeAccuracyMeters = 0;
         mSpeedAccuracyMetersPerSecond = 0;
         mBearingAccuracyDegrees = 0;
         mExtras = null;
     }
 
     /**
-     * Converts a coordinate to a String representation. The outputType
-     * may be one of FORMAT_DEGREES, FORMAT_MINUTES, or FORMAT_SECONDS.
-     * The coordinate must be a valid double between -180.0 and 180.0.
-     * This conversion is performed in a method that is dependent on the
-     * default locale, and so is not guaranteed to round-trip with
-     * {@link #convert(String)}.
+     * Returns the approximate distance in meters between this location and the given location.
+     * Distance is defined using the WGS84 ellipsoid.
      *
-     * @throws IllegalArgumentException if coordinate is less than
-     * -180.0, greater than 180.0, or is not a number.
-     * @throws IllegalArgumentException if outputType is not one of
-     * FORMAT_DEGREES, FORMAT_MINUTES, or FORMAT_SECONDS.
+     * @param dest the destination location
+     * @return the approximate distance in meters
      */
-    public static String convert(double coordinate, int outputType) {
-        if (coordinate < -180.0 || coordinate > 180.0 || Double.isNaN(coordinate)) {
-            throw new IllegalArgumentException("coordinate=" + coordinate);
+    public @FloatRange(from = 0.0) float distanceTo(@NonNull Location dest) {
+        BearingDistanceCache cache = sBearingDistanceCache.get();
+        // See if we already have the result
+        if (mLatitudeDegrees != cache.mLat1 || mLongitudeDegrees != cache.mLon1
+                || dest.mLatitudeDegrees != cache.mLat2 || dest.mLongitudeDegrees != cache.mLon2) {
+            computeDistanceAndBearing(mLatitudeDegrees, mLongitudeDegrees,
+                    dest.mLatitudeDegrees, dest.mLongitudeDegrees, cache);
         }
-        if ((outputType != FORMAT_DEGREES) &&
-            (outputType != FORMAT_MINUTES) &&
-            (outputType != FORMAT_SECONDS)) {
-            throw new IllegalArgumentException("outputType=" + outputType);
+        return cache.mDistance;
+    }
+
+    /**
+     * Returns the approximate initial bearing in degrees east of true north when traveling along
+     * the shortest path between this location and the given location. The shortest path is defined
+     * using the WGS84 ellipsoid. Locations that are (nearly) antipodal may produce meaningless
+     * results.
+     *
+     * @param dest the destination location
+     * @return the initial bearing in degrees
+     */
+    public float bearingTo(@NonNull Location dest) {
+        BearingDistanceCache cache = sBearingDistanceCache.get();
+        // See if we already have the result
+        if (mLatitudeDegrees != cache.mLat1 || mLongitudeDegrees != cache.mLon1
+                || dest.mLatitudeDegrees != cache.mLat2 || dest.mLongitudeDegrees != cache.mLon2) {
+            computeDistanceAndBearing(mLatitudeDegrees, mLongitudeDegrees,
+                    dest.mLatitudeDegrees, dest.mLongitudeDegrees, cache);
         }
+        return cache.mInitialBearing;
+    }
+
+    /**
+     * Returns the name of the provider associated with this location.
+     *
+     * @return the name of the provider
+     */
+    public @Nullable String getProvider() {
+        return mProvider;
+    }
+
+    /**
+     * Sets the name of the provider associated with this location
+     *
+     * @param provider the name of the provider
+     */
+    public void setProvider(@Nullable String provider) {
+        mProvider = provider;
+    }
+
+    /**
+     * Returns the Unix epoch time of this location fix, in milliseconds since the start of the Unix
+     * epoch (00:00:00 January 1, 1970 UTC).
+     *
+     * <p>There is no guarantee that different locations have times set from the same clock.
+     * Locations derived from the {@link LocationManager#GPS_PROVIDER} are guaranteed to have their
+     * time originate from the clock in use by the satellite constellation that provided the fix.
+     * Locations derived from other providers may use any clock to set their time, though it is most
+     * common to use the device's Unix epoch time system clock (which may be incorrect).
+     *
+     * <p>Note that the device's Unix epoch time system clock is not monotonic; it can jump forwards
+     * or backwards unpredictably and may be changed at any time by the user, so this time should
+     * not be used to order or compare locations. Prefer {@link #getElapsedRealtimeNanos} for that
+     * purpose, as the elapsed realtime clock is guaranteed to be monotonic.
+     *
+     * <p>On the other hand, this method may be useful for presenting a human-readable time to the
+     * user, or as a heuristic for comparing location fixes across reboot or across devices.
+     *
+     * <p>All locations generated by the {@link LocationManager} are guaranteed to have this time
+     * set, however remember that the device's system clock may have changed since the location was
+     * generated.
+     *
+     * @return the Unix epoch time of this location
+     */
+    public @IntRange(from = 0) long getTime() {
+        return mTimeMs;
+    }
+
+    /**
+     * Sets the Unix epoch time of this location fix, in milliseconds since the start of the Unix
+     * epoch (00:00:00 January 1 1970 UTC).
+     *
+     * @param timeMs the Unix epoch time of this location
+     */
+    public void setTime(@IntRange(from = 0) long timeMs) {
+        mTimeMs = timeMs;
+    }
+
+    /**
+     * Return the time of this fix in nanoseconds of elapsed realtime since system boot.
+     *
+     * <p>This value can be compared with {@link android.os.SystemClock#elapsedRealtimeNanos} to
+     * reliably order or compare locations. This is reliable because elapsed realtime is guaranteed
+     * to be monotonic and continues to increment even when the system is in deep sleep (unlike
+     * {@link #getTime}). However, since elapsed realtime is with reference to system boot, it does
+     * not make sense to use this value to order or compare locations across boot cycles or devices.
+     *
+     * <p>All locations generated by the {@link LocationManager} are guaranteed to have a valid
+     * elapsed realtime set.
+     *
+     * @return elapsed realtime of this location in nanoseconds
+     */
+    public @IntRange(from = 0) long getElapsedRealtimeNanos() {
+        return mElapsedRealtimeNs;
+    }
+
+    /**
+     * Return the time of this fix in milliseconds of elapsed realtime since system boot.
+     *
+     * @return elapsed realtime of this location in milliseconds
+     * @see #getElapsedRealtimeNanos()
+     */
+    public @IntRange(from = 0) long getElapsedRealtimeMillis() {
+        return NANOSECONDS.toMillis(mElapsedRealtimeNs);
+    }
+
+    /**
+     * A convenience methods that returns the age of this location in milliseconds with respect to
+     * the current elapsed realtime.
+     *
+     * @return age of this location in milliseconds
+     */
+    public @IntRange(from = 0) long getElapsedRealtimeAgeMillis() {
+        return getElapsedRealtimeAgeMillis(SystemClock.elapsedRealtime());
+    }
+
+    /**
+     * A convenience method that returns the age of this location with respect to the given
+     * reference elapsed realtime.
+     *
+     * @param referenceRealtimeMs reference realtime in milliseconds
+     * @return age of this location in milliseconds
+     */
+    public long getElapsedRealtimeAgeMillis(
+            @IntRange(from = 0) long referenceRealtimeMs) {
+        return referenceRealtimeMs - getElapsedRealtimeMillis();
+    }
+
+    /**
+     * Set the time of this location in nanoseconds of elapsed realtime since system boot.
+     *
+     * @param elapsedRealtimeNs elapsed realtime in nanoseconds
+     */
+    public void setElapsedRealtimeNanos(@IntRange(from = 0) long elapsedRealtimeNs) {
+        mElapsedRealtimeNs = elapsedRealtimeNs;
+    }
+
+    /**
+     * Get the uncertainty in nanoseconds of the precision of {@link #getElapsedRealtimeNanos()} at
+     * the 68th percentile confidence level. This means that there is 68% chance that the true
+     * elapsed realtime of this location is within {@link #getElapsedRealtimeNanos()} +/- this
+     * uncertainty.
+     *
+     * <p>This is only valid if {@link #hasElapsedRealtimeUncertaintyNanos()} is true.
+     *
+     * @return uncertainty in nanoseconds of the elapsed realtime of this location
+     */
+    public @FloatRange(from = 0.0) double getElapsedRealtimeUncertaintyNanos() {
+        return mElapsedRealtimeUncertaintyNs;
+    }
+
+    /**
+     * Sets the uncertainty in nanoseconds of the precision of the elapsed realtime timestamp at a
+     * 68% confidence level.
+     *
+     * @param elapsedRealtimeUncertaintyNs uncertainty in nanoseconds of the elapsed realtime of
+     *                                     this location
+     */
+    public void setElapsedRealtimeUncertaintyNanos(
+            @FloatRange(from = 0.0) double elapsedRealtimeUncertaintyNs) {
+        mElapsedRealtimeUncertaintyNs = elapsedRealtimeUncertaintyNs;
+        mFieldsMask |= HAS_ELAPSED_REALTIME_UNCERTAINTY_MASK;
+    }
+
+    /**
+     * True if this location has an elapsed realtime uncertainty, false otherwise.
+     */
+    public boolean hasElapsedRealtimeUncertaintyNanos() {
+        return (mFieldsMask & HAS_ELAPSED_REALTIME_UNCERTAINTY_MASK) != 0;
+    }
+
+    /**
+     * Removes the elapsed realtime uncertainty from this location.
+     */
+    public void removeElapsedRealtimeUncertaintyNanos() {
+        mFieldsMask &= ~HAS_ELAPSED_REALTIME_UNCERTAINTY_MASK;
+    }
+
+    /**
+     * Get the latitude in degrees. All locations generated by the {@link LocationManager} will have
+     * a valid latitude.
+     *
+     * @return latitude of this location
+     */
+    public @FloatRange(from = -90.0, to = 90.0) double getLatitude() {
+        return mLatitudeDegrees;
+    }
+
+    /**
+     * Set the latitude of this location.
+     *
+     * @param latitudeDegrees latitude in degrees
+     */
+    public void setLatitude(@FloatRange(from = -90.0, to = 90.0) double latitudeDegrees) {
+        mLatitudeDegrees = latitudeDegrees;
+    }
+
+    /**
+     * Get the longitude in degrees. All locations generated by the {@link LocationManager} will
+     * have a valid longitude.
+     *
+     * @return longitude of this location
+     */
+    public @FloatRange(from = -180.0, to = 180.0) double getLongitude() {
+        return mLongitudeDegrees;
+    }
+
+    /**
+     * Set the longitude of this location.
+     *
+     * @param longitudeDegrees longitude in degrees
+     */
+    public void setLongitude(@FloatRange(from = -180.0, to = 180.0) double longitudeDegrees) {
+        mLongitudeDegrees = longitudeDegrees;
+    }
+
+    /**
+     * Returns the estimated horizontal accuracy radius in meters of this location at the 68th
+     * percentile confidence level. This means that there is a 68% chance that the true location of
+     * the device is within a distance of this uncertainty of the reported location. Another way of
+     * putting this is that if a circle with a radius equal to this accuracy is drawn around the
+     * reported location, there is a 68% chance that the true location falls within this circle.
+     * This accuracy value is only valid for horizontal positioning, and not vertical positioning.
+     *
+     * <p>This is only valid if {@link #hasAccuracy()} is true. All locations generated by the
+     * {@link LocationManager} include horizontal accuracy.
+     *
+     * @return horizontal accuracy of this location
+     */
+    public @FloatRange(from = 0.0) float getAccuracy() {
+        return mHorizontalAccuracyMeters;
+    }
+
+    /**
+     * Set the horizontal accuracy in meters of this location.
+     *
+     * @param horizontalAccuracyMeters horizontal altitude in meters
+     */
+    public void setAccuracy(@FloatRange(from = 0.0) float horizontalAccuracyMeters) {
+        mHorizontalAccuracyMeters = horizontalAccuracyMeters;
+        mFieldsMask |= HAS_HORIZONTAL_ACCURACY_MASK;
+    }
+
+    /**
+     * Returns true if this location has a horizontal accuracy, false otherwise.
+     */
+    public boolean hasAccuracy() {
+        return (mFieldsMask & HAS_HORIZONTAL_ACCURACY_MASK) != 0;
+    }
+
+    /**
+     * Remove the horizontal accuracy from this location.
+     */
+    public void removeAccuracy() {
+        mFieldsMask &= ~HAS_HORIZONTAL_ACCURACY_MASK;
+    }
+
+    /**
+     * The altitude of this location in meters above the WGS84 reference ellipsoid.
+     *
+     * <p>This is only valid if {@link #hasAltitude()} is true.
+     *
+     * @return altitude of this location
+     */
+    public @FloatRange double getAltitude() {
+        return mAltitudeMeters;
+    }
+
+    /**
+     * Set the altitude of this location in meters above the WGS84 reference ellipsoid.
+     *
+     * @param altitudeMeters altitude in meters
+     */
+    public void setAltitude(@FloatRange double altitudeMeters) {
+        mAltitudeMeters = altitudeMeters;
+        mFieldsMask |= HAS_ALTITUDE_MASK;
+    }
+
+    /**
+     * Returns true if this location has an altitude, false otherwise.
+     */
+    public boolean hasAltitude() {
+        return (mFieldsMask & HAS_ALTITUDE_MASK) != 0;
+    }
+
+    /**
+     * Removes the altitude from this location.
+     */
+    public void removeAltitude() {
+        mFieldsMask &= ~HAS_ALTITUDE_MASK;
+    }
+
+    /**
+     * Returns the estimated altitude accuracy in meters of this location at the 68th percentile
+     * confidence level. This means that there is 68% chance that the true altitude of this location
+     * falls within {@link #getAltitude()} ()} +/- this uncertainty.
+     *
+     * <p>This is only valid if {@link #hasVerticalAccuracy()} is true.
+     *
+     * @return vertical accuracy of this location
+     */
+    public @FloatRange(from = 0.0) float getVerticalAccuracyMeters() {
+        return mAltitudeAccuracyMeters;
+    }
+
+    /**
+     * Set the altitude accuracy of this location in meters.
+     *
+     * @param altitudeAccuracyMeters altitude accuracy in meters
+     */
+    public void setVerticalAccuracyMeters(@FloatRange(from = 0.0) float altitudeAccuracyMeters) {
+        mAltitudeAccuracyMeters = altitudeAccuracyMeters;
+        mFieldsMask |= HAS_ALTITUDE_ACCURACY_MASK;
+    }
+
+    /**
+     * Returns true if this location has a vertical accuracy, false otherwise.
+     */
+    public boolean hasVerticalAccuracy() {
+        return (mFieldsMask & HAS_ALTITUDE_ACCURACY_MASK) != 0;
+    }
+
+    /**
+     * Remove the vertical accuracy from this location.
+     */
+    public void removeVerticalAccuracy() {
+        mFieldsMask &= ~HAS_ALTITUDE_ACCURACY_MASK;
+    }
+
+    /**
+     * Returns the speed at the time of this location in meters per second. Note that the speed
+     * returned here may be more accurate than would be obtained simply by calculating
+     * {@code distance / time} for sequential positions, such as if the Doppler measurements from
+     * GNSS satellites are taken into account.
+     *
+     * <p>This is only valid if {@link #hasSpeed()} is true.
+     *
+     * @return speed at the time of this location
+     */
+    public @FloatRange(from = 0.0) float getSpeed() {
+        return mSpeedMetersPerSecond;
+    }
+
+    /**
+     * Set the speed at the time of this location, in meters per second.
+     *
+     * @param speedMetersPerSecond speed in meters per second
+     */
+    public void setSpeed(@FloatRange(from = 0.0) float speedMetersPerSecond) {
+        mSpeedMetersPerSecond = speedMetersPerSecond;
+        mFieldsMask |= HAS_SPEED_MASK;
+    }
+
+    /**
+     * True if this location has a speed, false otherwise.
+     */
+    public boolean hasSpeed() {
+        return (mFieldsMask & HAS_SPEED_MASK) != 0;
+    }
+
+    /**
+     * Remove the speed from this location.
+     */
+    public void removeSpeed() {
+        mFieldsMask &= ~HAS_SPEED_MASK;
+    }
+
+    /**
+     * Returns the estimated speed accuracy in meters per second of this location at the 68th
+     * percentile confidence level. This means that there is 68% chance that the true speed at the
+     * time of this location falls within {@link #getSpeed()} ()} +/- this uncertainty.
+     *
+     * <p>This is only valid if {@link #hasSpeedAccuracy()} is true.
+     *
+     * @return vertical accuracy of this location
+     */
+    public @FloatRange(from = 0.0) float getSpeedAccuracyMetersPerSecond() {
+        return mSpeedAccuracyMetersPerSecond;
+    }
+
+    /**
+     * Set the speed accuracy of this location in meters per second.
+     *
+     * @param speedAccuracyMeterPerSecond speed accuracy in meters per second
+     */
+    public void setSpeedAccuracyMetersPerSecond(
+            @FloatRange(from = 0.0) float speedAccuracyMeterPerSecond) {
+        mSpeedAccuracyMetersPerSecond = speedAccuracyMeterPerSecond;
+        mFieldsMask |= HAS_SPEED_ACCURACY_MASK;
+    }
+
+    /**
+     * Returns true if this location has a speed accuracy, false otherwise.
+     */
+    public boolean hasSpeedAccuracy() {
+        return (mFieldsMask & HAS_SPEED_ACCURACY_MASK) != 0;
+    }
+
+    /**
+     * Remove the speed accuracy from this location.
+     */
+    public void removeSpeedAccuracy() {
+        mFieldsMask &= ~HAS_SPEED_ACCURACY_MASK;
+    }
+
+    /**
+     * Returns the bearing at the time of this location in degrees. Bearing is the horizontal
+     * direction of travel of this device and is unrelated to the device orientation. The bearing
+     * is guaranteed to be in the range [0, 360).
+     *
+     * <p>This is only valid if {@link #hasBearing()} is true.
+     *
+     * @return bearing at the time of this location
+     */
+    public @FloatRange(from = 0.0, to = 360.0, toInclusive = false) float getBearing() {
+        return mBearingDegrees;
+    }
+
+    /**
+     * Set the bearing at the time of this location, in degrees. The given bearing will be converted
+     * into the range [0, 360).
+     *
+     * <p class="note">Note: passing in extremely high or low floating point values to this function
+     * may produce strange results due to the intricacies of floating point math.
+     *
+     * @param bearingDegrees bearing in degrees
+     */
+    public void setBearing(
+            @FloatRange(fromInclusive = false, toInclusive = false) float bearingDegrees) {
+        Preconditions.checkArgument(Float.isFinite(bearingDegrees));
+
+        // final addition of zero is to remove -0 results. while these are technically within the
+        // range [0, 360) according to IEEE semantics, this eliminates possible user confusion.
+        float modBearing = bearingDegrees % 360f + 0f;
+        if (modBearing < 0) {
+            modBearing += 360f;
+        }
+        mBearingDegrees = modBearing;
+        mFieldsMask |= HAS_BEARING_MASK;
+    }
+
+    /**
+     * True if this location has a bearing, false otherwise.
+     */
+    public boolean hasBearing() {
+        return (mFieldsMask & HAS_BEARING_MASK) != 0;
+    }
+
+    /**
+     * Remove the bearing from this location.
+     */
+    public void removeBearing() {
+        mFieldsMask &= ~HAS_BEARING_MASK;
+    }
+
+    /**
+     * Returns the estimated bearing accuracy in degrees of this location at the 68th percentile
+     * confidence level. This means that there is 68% chance that the true bearing at the
+     * time of this location falls within {@link #getBearing()} ()} +/- this uncertainty.
+     *
+     * <p>This is only valid if {@link #hasBearingAccuracy()} ()} is true.
+     *
+     * @return bearing accuracy in degrees of this location
+     */
+    public @FloatRange(from = 0.0) float getBearingAccuracyDegrees() {
+        return mBearingAccuracyDegrees;
+    }
+
+    /**
+     * Set the bearing accuracy in degrees of this location.
+     *
+     * @param bearingAccuracyDegrees bearing accuracy in degrees
+     */
+    public void setBearingAccuracyDegrees(@FloatRange(from = 0.0) float bearingAccuracyDegrees) {
+        mBearingAccuracyDegrees = bearingAccuracyDegrees;
+        mFieldsMask |= HAS_BEARING_ACCURACY_MASK;
+    }
+
+    /**
+     * Returns true if this location has a bearing accuracy, false otherwise.
+     */
+    public boolean hasBearingAccuracy() {
+        return (mFieldsMask & HAS_BEARING_ACCURACY_MASK) != 0;
+    }
+
+    /**
+     * Remove the bearing accuracy from this location.
+     */
+    public void removeBearingAccuracy() {
+        mFieldsMask &= ~HAS_BEARING_ACCURACY_MASK;
+    }
+
+    /**
+     * Returns true if this is a mock location. If this location comes from the Android framework,
+     * this indicates that the location was provided by a test location provider, and thus may not
+     * be related to the actual location of the device.
+     *
+     * @return true if this location came from a mock provider, false otherwise
+     * @deprecated Prefer {@link #isMock()} instead.
+     */
+    @Deprecated
+    public boolean isFromMockProvider() {
+        return isMock();
+    }
+
+    /**
+     * Flag this location as having come from a mock provider or not.
+     *
+     * @param isFromMockProvider true if this location came from a mock provider, false otherwise
+     * @deprecated Prefer {@link #setMock(boolean)} instead.
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    public void setIsFromMockProvider(boolean isFromMockProvider) {
+        setMock(isFromMockProvider);
+    }
+
+    /**
+     * Returns true if this location is marked as a mock location. If this location comes from the
+     * Android framework, this indicates that the location was provided by a test location provider,
+     * and thus may not be related to the actual location of the device.
+     *
+     * @see LocationManager#addTestProvider
+     */
+    public boolean isMock() {
+        return (mFieldsMask & HAS_MOCK_PROVIDER_MASK) != 0;
+    }
+
+    /**
+     * Sets whether this location is marked as a mock location.
+     */
+    public void setMock(boolean mock) {
+        if (mock) {
+            mFieldsMask |= HAS_MOCK_PROVIDER_MASK;
+        } else {
+            mFieldsMask &= ~HAS_MOCK_PROVIDER_MASK;
+        }
+    }
+
+    /**
+     * Returns an optional bundle of additional information associated with this location. The keys
+     * and values within the bundle are determined by the location provider.
+     *
+     * <p> Common key/value pairs are listed below. There is no guarantee that these key/value pairs
+     * will be present for any location.
+     *
+     * <ul>
+     * <li> satellites - the number of satellites used to derive a GNSS fix
+     * </ul>
+     */
+    public @Nullable Bundle getExtras() {
+        return mExtras;
+    }
+
+    /**
+     * Sets the extra information associated with this fix to the given Bundle.
+     *
+     * <p>Note this stores a copy of the given extras, so any changes to extras after calling this
+     * method won't be reflected in the location bundle.
+     */
+    public void setExtras(@Nullable Bundle extras) {
+        mExtras = (extras == null) ? null : new Bundle(extras);
+    }
+
+    /**
+     * Return true if this location is considered complete. A location is considered complete if it
+     * has a non-null provider, accuracy, and non-zero time and elapsed realtime. The exact
+     * definition of completeness may change over time.
+     *
+     * <p>All locations supplied by the {@link LocationManager} are guaranteed to be complete.
+     */
+    public boolean isComplete() {
+        return mProvider != null && hasAccuracy() && mTimeMs != 0 && mElapsedRealtimeNs != 0;
+    }
+
+    /**
+     * Helper to fill incomplete fields with valid (but likely nonsensical) values.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void makeComplete() {
+        if (mProvider == null) {
+            mProvider = "";
+        }
+        if (!hasAccuracy()) {
+            mFieldsMask |= HAS_HORIZONTAL_ACCURACY_MASK;
+            mHorizontalAccuracyMeters = 100.0f;
+        }
+        if (mTimeMs == 0) {
+            mTimeMs = System.currentTimeMillis();
+        }
+        if (mElapsedRealtimeNs == 0) {
+            mElapsedRealtimeNs = SystemClock.elapsedRealtimeNanos();
+        }
+    }
+
+    /**
+     * Location equality is provided primarily for test purposes. Comparing locations for equality
+     * in production may indicate incorrect assumptions, and should be avoided whenever possible.
+     *
+     * <p>{@inheritDoc}
+     */
+    @Override
+    public boolean equals(@Nullable Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Location)) {
+            return false;
+        }
+
+        Location location = (Location) o;
+        return mTimeMs == location.mTimeMs
+                && mElapsedRealtimeNs == location.mElapsedRealtimeNs
+                && hasElapsedRealtimeUncertaintyNanos()
+                == location.hasElapsedRealtimeUncertaintyNanos()
+                && (!hasElapsedRealtimeUncertaintyNanos() || Double.compare(
+                location.mElapsedRealtimeUncertaintyNs, mElapsedRealtimeUncertaintyNs) == 0)
+                && Double.compare(location.mLatitudeDegrees, mLatitudeDegrees) == 0
+                && Double.compare(location.mLongitudeDegrees, mLongitudeDegrees) == 0
+                && hasAltitude() == location.hasAltitude()
+                && (!hasAltitude() || Double.compare(location.mAltitudeMeters, mAltitudeMeters)
+                == 0)
+                && hasSpeed() == location.hasSpeed()
+                && (!hasSpeed() || Float.compare(location.mSpeedMetersPerSecond,
+                mSpeedMetersPerSecond) == 0)
+                && hasBearing() == location.hasBearing()
+                && (!hasBearing() || Float.compare(location.mBearingDegrees, mBearingDegrees) == 0)
+                && hasAccuracy() == location.hasAccuracy()
+                && (!hasAccuracy() || Float.compare(location.mHorizontalAccuracyMeters,
+                mHorizontalAccuracyMeters) == 0)
+                && hasVerticalAccuracy() == location.hasVerticalAccuracy()
+                && (!hasVerticalAccuracy() || Float.compare(location.mAltitudeAccuracyMeters,
+                mAltitudeAccuracyMeters) == 0)
+                && hasSpeedAccuracy() == location.hasSpeedAccuracy()
+                && (!hasSpeedAccuracy() || Float.compare(location.mSpeedAccuracyMetersPerSecond,
+                mSpeedAccuracyMetersPerSecond) == 0)
+                && hasBearingAccuracy() == location.hasBearingAccuracy()
+                && (!hasBearingAccuracy() || Float.compare(location.mBearingAccuracyDegrees,
+                mBearingAccuracyDegrees) == 0)
+                && Objects.equals(mProvider, location.mProvider)
+                && areExtrasEqual(mExtras, location.mExtras);
+    }
+
+    private static boolean areExtrasEqual(@Nullable Bundle extras1, @Nullable Bundle extras2) {
+        if ((extras1 == null || extras1.isEmpty()) && (extras2 == null || extras2.isEmpty())) {
+            return true;
+        } else if (extras1 == null || extras2 == null) {
+            return false;
+        } else {
+            return extras1.kindofEquals(extras2);
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mProvider, mElapsedRealtimeNs, mLatitudeDegrees, mLongitudeDegrees);
+    }
+
+    @Override
+    public @NonNull String toString() {
+        StringBuilder s = new StringBuilder();
+        s.append("Location[");
+        s.append(mProvider);
+        s.append(" ").append(String.format(Locale.ROOT, "%.6f,%.6f", mLatitudeDegrees,
+                mLongitudeDegrees));
+        if (hasAccuracy()) {
+            s.append(" hAcc=").append(mHorizontalAccuracyMeters);
+        }
+        s.append(" et=");
+        TimeUtils.formatDuration(getElapsedRealtimeMillis(), s);
+        if (hasAltitude()) {
+            s.append(" alt=").append(mAltitudeMeters);
+            if (hasVerticalAccuracy()) {
+                s.append(" vAcc=").append(mAltitudeAccuracyMeters);
+            }
+        }
+        if (hasSpeed()) {
+            s.append(" vel=").append(mSpeedMetersPerSecond);
+            if (hasSpeedAccuracy()) {
+                s.append(" sAcc=").append(mSpeedAccuracyMetersPerSecond);
+            }
+        }
+        if (hasBearing()) {
+            s.append(" bear=").append(mBearingDegrees);
+            if (hasBearingAccuracy()) {
+                s.append(" bAcc=").append(mBearingAccuracyDegrees);
+            }
+        }
+        if (isMock()) {
+            s.append(" mock");
+        }
+
+        if (mExtras != null && !mExtras.isEmpty()) {
+            s.append(" {").append(mExtras).append('}');
+        }
+        s.append(']');
+        return s.toString();
+    }
+
+    /**
+     * Dumps location information to the given Printer.
+     *
+     * @deprecated Prefer to use {@link #toString()} along with whatever custom formatting is
+     * required instead of this method. It is not this class's job to manage print representations.
+     */
+    @Deprecated
+    public void dump(@NonNull Printer pw, @Nullable String prefix) {
+        pw.println(prefix + this);
+    }
+
+    public static final @NonNull Parcelable.Creator<Location> CREATOR =
+        new Parcelable.Creator<Location>() {
+        @Override
+        public Location createFromParcel(Parcel in) {
+            Location l = new Location(in.readString8());
+            l.mFieldsMask = in.readInt();
+            l.mTimeMs = in.readLong();
+            l.mElapsedRealtimeNs = in.readLong();
+            if (l.hasElapsedRealtimeUncertaintyNanos()) {
+                l.mElapsedRealtimeUncertaintyNs = in.readDouble();
+            }
+            l.mLatitudeDegrees = in.readDouble();
+            l.mLongitudeDegrees = in.readDouble();
+            if (l.hasAltitude()) {
+                l.mAltitudeMeters = in.readDouble();
+            }
+            if (l.hasSpeed()) {
+                l.mSpeedMetersPerSecond = in.readFloat();
+            }
+            if (l.hasBearing()) {
+                l.mBearingDegrees = in.readFloat();
+            }
+            if (l.hasAccuracy()) {
+                l.mHorizontalAccuracyMeters = in.readFloat();
+            }
+            if (l.hasVerticalAccuracy()) {
+                l.mAltitudeAccuracyMeters = in.readFloat();
+            }
+            if (l.hasSpeedAccuracy()) {
+                l.mSpeedAccuracyMetersPerSecond = in.readFloat();
+            }
+            if (l.hasBearingAccuracy()) {
+                l.mBearingAccuracyDegrees = in.readFloat();
+            }
+            l.mExtras = Bundle.setDefusable(in.readBundle(), true);
+            return l;
+        }
+
+        @Override
+        public Location[] newArray(int size) {
+            return new Location[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel parcel, int flags) {
+        parcel.writeString8(mProvider);
+        parcel.writeInt(mFieldsMask);
+        parcel.writeLong(mTimeMs);
+        parcel.writeLong(mElapsedRealtimeNs);
+        if (hasElapsedRealtimeUncertaintyNanos()) {
+            parcel.writeDouble(mElapsedRealtimeUncertaintyNs);
+        }
+        parcel.writeDouble(mLatitudeDegrees);
+        parcel.writeDouble(mLongitudeDegrees);
+        if (hasAltitude()) {
+            parcel.writeDouble(mAltitudeMeters);
+        }
+        if (hasSpeed()) {
+            parcel.writeFloat(mSpeedMetersPerSecond);
+        }
+        if (hasBearing()) {
+            parcel.writeFloat(mBearingDegrees);
+        }
+        if (hasAccuracy()) {
+            parcel.writeFloat(mHorizontalAccuracyMeters);
+        }
+        if (hasVerticalAccuracy()) {
+            parcel.writeFloat(mAltitudeAccuracyMeters);
+        }
+        if (hasSpeedAccuracy()) {
+            parcel.writeFloat(mSpeedAccuracyMetersPerSecond);
+        }
+        if (hasBearingAccuracy()) {
+            parcel.writeFloat(mBearingAccuracyDegrees);
+        }
+        parcel.writeBundle(mExtras);
+    }
+
+    /**
+     * Converts a latitude/longitude coordinate to a String representation. The outputType must be
+     * one of {@link #FORMAT_DEGREES}, {@link #FORMAT_MINUTES}, or {@link #FORMAT_SECONDS}. The
+     * coordinate must be a number between -180.0 and 180.0, inclusive. This conversion is performed
+     * in a method that is dependent on the default locale, and so is not guaranteed to round-trip
+     * with {@link #convert(String)}.
+     *
+     * @throws IllegalArgumentException if coordinate is less than -180.0, greater than 180.0, or is
+     *                                  not a number.
+     * @throws IllegalArgumentException if outputType is not a recognized value.
+     */
+    public static @NonNull String convert(@FloatRange double coordinate, @Format int outputType) {
+        Preconditions.checkArgumentInRange(coordinate, -180D, 180D, "coordinate");
+        Preconditions.checkArgument(outputType == FORMAT_DEGREES || outputType == FORMAT_MINUTES
+                || outputType == FORMAT_SECONDS, "%d is an unrecognized format", outputType);
 
         StringBuilder sb = new StringBuilder();
 
-        // Handle negative values
         if (coordinate < 0) {
             sb.append('-');
             coordinate = -coordinate;
@@ -236,21 +1037,17 @@ public class Location implements Parcelable {
     }
 
     /**
-     * Converts a String in one of the formats described by
-     * FORMAT_DEGREES, FORMAT_MINUTES, or FORMAT_SECONDS into a
-     * double. This conversion is performed in a locale agnostic
-     * method, and so is not guaranteed to round-trip with
+     * Converts a String in one of the formats described by {@link #FORMAT_DEGREES},
+     * {@link #FORMAT_MINUTES}, or {@link #FORMAT_SECONDS} into a double. This conversion is
+     * performed in a locale agnostic method, and so is not guaranteed to round-trip with
      * {@link #convert(double, int)}.
      *
      * @throws NullPointerException if coordinate is null
      * @throws IllegalArgumentException if the coordinate is not
      * in one of the valid formats.
      */
-    public static double convert(String coordinate) {
-        // IllegalArgumentException if bad syntax
-        if (coordinate == null) {
-            throw new NullPointerException("coordinate");
-        }
+    public static @FloatRange double convert(@NonNull String coordinate) {
+        Objects.requireNonNull(coordinate);
 
         boolean negative = false;
         if (coordinate.charAt(0) == '-') {
@@ -286,40 +1083,36 @@ public class Location implements Parcelable {
                 min = Double.parseDouble(minutes);
             }
 
-            boolean isNegative180 = negative && (deg == 180) &&
-                (min == 0) && (sec == 0);
+            boolean isNegative180 = negative && deg == 180 && min == 0 && sec == 0;
 
             // deg must be in [0, 179] except for the case of -180 degrees
-            if ((deg < 0.0) || (deg > 179 && !isNegative180)) {
+            if (deg < 0.0 || (deg > 179 && !isNegative180)) {
                 throw new IllegalArgumentException("coordinate=" + coordinate);
             }
 
             // min must be in [0, 59] if seconds are present, otherwise [0.0, 60.0)
-            if (min < 0 || min >= 60 || (secPresent && (min > 59))) {
-                throw new IllegalArgumentException("coordinate=" +
-                        coordinate);
+            if (min < 0 || min >= 60 || (secPresent && min > 59)) {
+                throw new IllegalArgumentException("coordinate=" + coordinate);
             }
 
             // sec must be in [0.0, 60.0)
             if (sec < 0 || sec >= 60) {
-                throw new IllegalArgumentException("coordinate=" +
-                        coordinate);
+                throw new IllegalArgumentException("coordinate=" + coordinate);
             }
 
-            val = deg*3600.0 + min*60.0 + sec;
+            val = deg * 3600.0 + min * 60.0 + sec;
             val /= 3600.0;
             return negative ? -val : val;
-        } catch (NumberFormatException nfe) {
-            throw new IllegalArgumentException("coordinate=" + coordinate);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("coordinate=" + coordinate, e);
         }
     }
 
     private static void computeDistanceAndBearing(double lat1, double lon1,
-        double lat2, double lon2, BearingDistanceCache results) {
+            double lat2, double lon2, BearingDistanceCache results) {
         // Based on http://www.ngs.noaa.gov/PUBS_LIB/inverse.pdf
         // using the "Inverse Formula" (section 4)
 
-        int MAXITERS = 20;
         // Convert lat/long to radians
         lat1 *= Math.PI / 180.0;
         lat2 *= Math.PI / 180.0;
@@ -331,15 +1124,15 @@ public class Location implements Parcelable {
         double f = (a - b) / a;
         double aSqMinusBSqOverBSq = (a * a - b * b) / (b * b);
 
-        double L = lon2 - lon1;
-        double A = 0.0;
-        double U1 = Math.atan((1.0 - f) * Math.tan(lat1));
-        double U2 = Math.atan((1.0 - f) * Math.tan(lat2));
+        double l = lon2 - lon1;
+        double aA = 0.0;
+        double u1 = Math.atan((1.0 - f) * Math.tan(lat1));
+        double u2 = Math.atan((1.0 - f) * Math.tan(lat2));
 
-        double cosU1 = Math.cos(U1);
-        double cosU2 = Math.cos(U2);
-        double sinU1 = Math.sin(U1);
-        double sinU2 = Math.sin(U2);
+        double cosU1 = Math.cos(u1);
+        double cosU2 = Math.cos(u2);
+        double sinU1 = Math.sin(u1);
+        double sinU2 = Math.sin(u2);
         double cosU1cosU2 = cosU1 * cosU2;
         double sinU1sinU2 = sinU1 * sinU2;
 
@@ -352,46 +1145,35 @@ public class Location implements Parcelable {
         double cosLambda = 0.0;
         double sinLambda = 0.0;
 
-        double lambda = L; // initial guess
-        for (int iter = 0; iter < MAXITERS; iter++) {
+        double lambda = l; // initial guess
+        for (int iter = 0; iter < 20; iter++) {
             double lambdaOrig = lambda;
             cosLambda = Math.cos(lambda);
             sinLambda = Math.sin(lambda);
             double t1 = cosU2 * sinLambda;
             double t2 = cosU1 * sinU2 - sinU1 * cosU2 * cosLambda;
-            double sinSqSigma = t1 * t1 + t2 * t2; // (14)
+            double sinSqSigma = t1 * t1 + t2 * t2;
             sinSigma = Math.sqrt(sinSqSigma);
-            cosSigma = sinU1sinU2 + cosU1cosU2 * cosLambda; // (15)
-            sigma = Math.atan2(sinSigma, cosSigma); // (16)
+            cosSigma = sinU1sinU2 + cosU1cosU2 * cosLambda;
+            sigma = Math.atan2(sinSigma, cosSigma);
             double sinAlpha = (sinSigma == 0) ? 0.0 :
-                cosU1cosU2 * sinLambda / sinSigma; // (17)
+                    cosU1cosU2 * sinLambda / sinSigma;
             cosSqAlpha = 1.0 - sinAlpha * sinAlpha;
-            cos2SM = (cosSqAlpha == 0) ? 0.0 :
-                cosSigma - 2.0 * sinU1sinU2 / cosSqAlpha; // (18)
+            cos2SM = (cosSqAlpha == 0) ? 0.0 : cosSigma - 2.0 * sinU1sinU2 / cosSqAlpha;
 
-            double uSquared = cosSqAlpha * aSqMinusBSqOverBSq; // defn
-            A = 1 + (uSquared / 16384.0) * // (3)
-                (4096.0 + uSquared *
-                 (-768 + uSquared * (320.0 - 175.0 * uSquared)));
-            double B = (uSquared / 1024.0) * // (4)
-                (256.0 + uSquared *
-                 (-128.0 + uSquared * (74.0 - 47.0 * uSquared)));
-            double C = (f / 16.0) *
-                cosSqAlpha *
-                (4.0 + f * (4.0 - 3.0 * cosSqAlpha)); // (10)
+            double uSquared = cosSqAlpha * aSqMinusBSqOverBSq;
+            aA = 1 + (uSquared / 16384.0) * (4096.0 + uSquared * (-768 + uSquared * (320.0
+                    - 175.0 * uSquared)));
+            double bB = (uSquared / 1024.0) * (256.0 + uSquared * (-128.0 + uSquared * (74.0
+                    - 47.0 * uSquared)));
+            double cC = (f / 16.0) * cosSqAlpha * (4.0 + f * (4.0 - 3.0 * cosSqAlpha));
             double cos2SMSq = cos2SM * cos2SM;
-            deltaSigma = B * sinSigma * // (6)
-                (cos2SM + (B / 4.0) *
-                 (cosSigma * (-1.0 + 2.0 * cos2SMSq) -
-                  (B / 6.0) * cos2SM *
-                  (-3.0 + 4.0 * sinSigma * sinSigma) *
-                  (-3.0 + 4.0 * cos2SMSq)));
+            deltaSigma = bB * sinSigma * (cos2SM + (bB / 4.0) * (cosSigma * (-1.0 + 2.0 * cos2SMSq)
+                    - (bB / 6.0) * cos2SM * (-3.0 + 4.0 * sinSigma * sinSigma) * (-3.0
+                    + 4.0 * cos2SMSq)));
 
-            lambda = L +
-                (1.0 - C) * f * sinAlpha *
-                (sigma + C * sinSigma *
-                 (cos2SM + C * cosSigma *
-                  (-1.0 + 2.0 * cos2SM * cos2SM))); // (11)
+            lambda = l + (1.0 - cC) * f * sinAlpha * (sigma + cC * sinSigma * (cos2SM
+                    + cC * cosSigma * (-1.0 + 2.0 * cos2SM * cos2SM)));
 
             double delta = (lambda - lambdaOrig) / lambda;
             if (Math.abs(delta) < 1.0e-12) {
@@ -399,14 +1181,14 @@ public class Location implements Parcelable {
             }
         }
 
-        results.mDistance = (float) (b * A * (sigma - deltaSigma));
+        results.mDistance = (float) (b * aA * (sigma - deltaSigma));
         float initialBearing = (float) Math.atan2(cosU2 * sinLambda,
-            cosU1 * sinU2 - sinU1 * cosU2 * cosLambda);
-        initialBearing *= 180.0 / Math.PI;
+                cosU1 * sinU2 - sinU1 * cosU2 * cosLambda);
+        initialBearing = (float) (initialBearing * (180.0 / Math.PI));
         results.mInitialBearing = initialBearing;
         float finalBearing = (float) Math.atan2(cosU1 * sinLambda,
                 -sinU1 * cosU2 + cosU1 * sinU2 * cosLambda);
-        finalBearing *= 180.0 / Math.PI;
+        finalBearing = (float) (finalBearing * (180.0 / Math.PI));
         results.mFinalBearing = finalBearing;
         results.mLat1 = lat1;
         results.mLat2 = lat2;
@@ -432,8 +1214,12 @@ public class Location implements Parcelable {
      *
      * @throws IllegalArgumentException if results is null or has length < 1
      */
-    public static void distanceBetween(double startLatitude, double startLongitude,
-        double endLatitude, double endLongitude, float[] results) {
+    public static void distanceBetween(
+            @FloatRange(from = -90.0, to = 90.0) double startLatitude,
+            @FloatRange(from = -180.0, to = 180.0) double startLongitude,
+            @FloatRange(from = -90.0, to = 90.0) double endLatitude,
+            @FloatRange(from = -180.0, to = 180.0)  double endLongitude,
+            float[] results) {
         if (results == null || results.length < 1) {
             throw new IllegalArgumentException("results is null or has length < 1");
         }
@@ -449,880 +1235,6 @@ public class Location implements Parcelable {
         }
     }
 
-    /**
-     * Returns the approximate distance in meters between this
-     * location and the given location.  Distance is defined using
-     * the WGS84 ellipsoid.
-     *
-     * @param dest the destination location
-     * @return the approximate distance in meters
-     */
-    public float distanceTo(Location dest) {
-        BearingDistanceCache cache = sBearingDistanceCache.get();
-        // See if we already have the result
-        if (mLatitude != cache.mLat1 || mLongitude != cache.mLon1 ||
-            dest.mLatitude != cache.mLat2 || dest.mLongitude != cache.mLon2) {
-            computeDistanceAndBearing(mLatitude, mLongitude,
-                dest.mLatitude, dest.mLongitude, cache);
-        }
-        return cache.mDistance;
-    }
-
-    /**
-     * Returns the approximate initial bearing in degrees East of true
-     * North when traveling along the shortest path between this
-     * location and the given location.  The shortest path is defined
-     * using the WGS84 ellipsoid.  Locations that are (nearly)
-     * antipodal may produce meaningless results.
-     *
-     * @param dest the destination location
-     * @return the initial bearing in degrees
-     */
-    public float bearingTo(Location dest) {
-        BearingDistanceCache cache = sBearingDistanceCache.get();
-        // See if we already have the result
-        if (mLatitude != cache.mLat1 || mLongitude != cache.mLon1 ||
-                        dest.mLatitude != cache.mLat2 || dest.mLongitude != cache.mLon2) {
-            computeDistanceAndBearing(mLatitude, mLongitude,
-                dest.mLatitude, dest.mLongitude, cache);
-        }
-        return cache.mInitialBearing;
-    }
-
-    /**
-     * Returns the name of the provider that generated this fix.
-     *
-     * @return the provider, or null if it has not been set
-     */
-    public String getProvider() {
-        return mProvider;
-    }
-
-    /**
-     * Sets the name of the provider that generated this fix.
-     */
-    public void setProvider(String provider) {
-        mProvider = provider;
-    }
-
-    /**
-     * Return the UTC time of this location fix, in milliseconds since epoch (January 1, 1970).
-     *
-     * <p>There is no guarantee that different locations have times set from the same clock.
-     * Locations derived from the {@link LocationManager#GPS_PROVIDER} are guaranteed to have their
-     * time set from the clock in use by the satellite constellation that provided the fix.
-     * Locations derived from other providers may use any clock to set their time, though it is most
-     * common to use the device clock (which may be incorrect).
-     *
-     * <p>Note that the device clock UTC time is not monotonic; it can jump forwards or backwards
-     * unpredictably and may be changed at any time by the user, so this time should not be used to
-     * order or compare locations. Prefer {@link #getElapsedRealtimeNanos} for that purpose, as this
-     * clock is guaranteed to be monotonic.
-     *
-     * <p>On the other hand, this method may be useful for presenting a human readable time to the
-     * user, or as a heuristic for comparing location fixes across reboot or across devices.
-     *
-     * <p>All locations generated by the {@link LocationManager} are guaranteed to have a UTC time
-     * set, however remember that the device clock may have changed since the location was
-     * generated.
-     *
-     * @return UTC time of fix, in milliseconds since January 1, 1970.
-     */
-    public long getTime() {
-        return mTime;
-    }
-
-    /**
-     * Set the UTC time of this fix, in milliseconds since epoch (January 1, 1970).
-     *
-     * @param time UTC time of this fix, in milliseconds since January 1, 1970
-     */
-    public void setTime(long time) {
-        mTime = time;
-    }
-
-    /**
-     * Return the time of this fix in nanoseconds of elapsed realtime since system boot.
-     *
-     * <p>This value can be compared with {@link android.os.SystemClock#elapsedRealtimeNanos}, to
-     * reliably order or compare locations. This is reliable because elapsed realtime is guaranteed
-     * to be monotonic and continues to increment even when the system is in deep sleep (unlike
-     * {@link #getTime}). However, since elapsed realtime is with reference to system boot, it does
-     * not make sense to use this value to order or compare locations across boot cycles.
-     *
-     * <p>All locations generated by the {@link LocationManager} are guaranteed to have a valid
-     * elapsed realtime set.
-     *
-     * @return elapsed realtime of fix, in nanoseconds since system boot.
-     */
-    public long getElapsedRealtimeNanos() {
-        return mElapsedRealtimeNanos;
-    }
-
-    /**
-     * Return the time of this fix in milliseconds of elapsed realtime since system boot.
-     *
-     * @see #getElapsedRealtimeNanos()
-     *
-     * @hide
-     */
-    public long getElapsedRealtimeMillis() {
-        return NANOSECONDS.toMillis(getElapsedRealtimeNanos());
-    }
-
-    /**
-     * Returns the age of this fix with respect to the current elapsed realtime.
-     *
-     * @see #getElapsedRealtimeNanos()
-     *
-     * @hide
-     */
-    public long getElapsedRealtimeAgeMillis() {
-        return getElapsedRealtimeAgeMillis(SystemClock.elapsedRealtime());
-    }
-
-    /**
-     * Returns the age of this fix with respect to the given elapsed realtime.
-     *
-     * @see #getElapsedRealtimeNanos()
-     *
-     * @hide
-     */
-    public long getElapsedRealtimeAgeMillis(long referenceRealtimeMs) {
-        return referenceRealtimeMs - NANOSECONDS.toMillis(mElapsedRealtimeNanos);
-    }
-
-    /**
-     * Set the time of this fix, in elapsed realtime since system boot.
-     *
-     * @param time elapsed realtime of fix, in nanoseconds since system boot.
-     */
-    public void setElapsedRealtimeNanos(long time) {
-        mElapsedRealtimeNanos = time;
-    }
-
-    /**
-     * Get estimate of the relative precision of the alignment of the
-     * ElapsedRealtimeNanos timestamp, with the reported measurements in
-     * nanoseconds (68% confidence).
-     *
-     * This means that we have 68% confidence that the true timestamp of the
-     * event is within ElapsedReatimeNanos +/- uncertainty.
-     *
-     * Example :
-     *   - getElapsedRealtimeNanos() returns 10000000
-     *   - getElapsedRealtimeUncertaintyNanos() returns 1000000 (equivalent to 1millisecond)
-     *   This means that the event most likely happened between 9000000 and 11000000.
-     *
-     * @return uncertainty of elapsed real-time of fix, in nanoseconds.
-     */
-    public double getElapsedRealtimeUncertaintyNanos() {
-        return mElapsedRealtimeUncertaintyNanos;
-    }
-
-    /**
-     * Set estimate of the relative precision of the alignment of the
-     * ElapsedRealtimeNanos timestamp, with the reported measurements in
-     * nanoseconds (68% confidence).
-     *
-     * @param time uncertainty of the elapsed real-time of fix, in nanoseconds.
-     */
-    public void setElapsedRealtimeUncertaintyNanos(double time) {
-        mElapsedRealtimeUncertaintyNanos = time;
-        mFieldsMask |= HAS_ELAPSED_REALTIME_UNCERTAINTY_MASK;
-    }
-
-    /**
-     * True if this location has a elapsed realtime accuracy.
-     */
-    public boolean hasElapsedRealtimeUncertaintyNanos() {
-        return (mFieldsMask & HAS_ELAPSED_REALTIME_UNCERTAINTY_MASK) != 0;
-    }
-
-
-    /**
-     * Get the latitude, in degrees.
-     *
-     * <p>All locations generated by the {@link LocationManager}
-     * will have a valid latitude.
-     */
-    public double getLatitude() {
-        return mLatitude;
-    }
-
-    /**
-     * Set the latitude, in degrees.
-     */
-    public void setLatitude(double latitude) {
-        mLatitude = latitude;
-    }
-
-    /**
-     * Get the longitude, in degrees.
-     *
-     * <p>All locations generated by the {@link LocationManager}
-     * will have a valid longitude.
-     */
-    public double getLongitude() {
-        return mLongitude;
-    }
-
-    /**
-     * Set the longitude, in degrees.
-     */
-    public void setLongitude(double longitude) {
-        mLongitude = longitude;
-    }
-
-    /**
-     * True if this location has an altitude.
-     */
-    public boolean hasAltitude() {
-        return (mFieldsMask & HAS_ALTITUDE_MASK) != 0;
-    }
-
-    /**
-     * Get the altitude if available, in meters above the WGS 84 reference
-     * ellipsoid.
-     *
-     * <p>If this location does not have an altitude then 0.0 is returned.
-     */
-    public double getAltitude() {
-        return mAltitude;
-    }
-
-    /**
-     * Set the altitude, in meters above the WGS 84 reference ellipsoid.
-     *
-     * <p>Following this call {@link #hasAltitude} will return true.
-     */
-    public void setAltitude(double altitude) {
-        mAltitude = altitude;
-        mFieldsMask |= HAS_ALTITUDE_MASK;
-    }
-
-    /**
-     * Remove the altitude from this location.
-     *
-     * <p>Following this call {@link #hasAltitude} will return false,
-     * and {@link #getAltitude} will return 0.0.
-     *
-     * @deprecated use a new Location object for location updates.
-     */
-    @Deprecated
-    public void removeAltitude() {
-        mAltitude = 0.0f;
-        mFieldsMask &= ~HAS_ALTITUDE_MASK;
-    }
-
-    /**
-     * True if this location has a speed.
-     */
-    public boolean hasSpeed() {
-        return (mFieldsMask & HAS_SPEED_MASK) != 0;
-    }
-
-    /**
-     * Get the speed if it is available, in meters/second over ground.
-     *
-     * <p>If this location does not have a speed then 0.0 is returned.
-     */
-    public float getSpeed() {
-        return mSpeed;
-    }
-
-    /**
-     * Set the speed, in meters/second over ground.
-     *
-     * <p>Following this call {@link #hasSpeed} will return true.
-     */
-    public void setSpeed(float speed) {
-        mSpeed = speed;
-        mFieldsMask |= HAS_SPEED_MASK;
-    }
-
-    /**
-     * Remove the speed from this location.
-     *
-     * <p>Following this call {@link #hasSpeed} will return false,
-     * and {@link #getSpeed} will return 0.0.
-     *
-     * @deprecated use a new Location object for location updates.
-     */
-    @Deprecated
-    public void removeSpeed() {
-        mSpeed = 0.0f;
-        mFieldsMask &= ~HAS_SPEED_MASK;
-    }
-
-    /**
-     * True if this location has a bearing.
-     */
-    public boolean hasBearing() {
-        return (mFieldsMask & HAS_BEARING_MASK) != 0;
-    }
-
-    /**
-     * Get the bearing, in degrees.
-     *
-     * <p>Bearing is the horizontal direction of travel of this device,
-     * and is not related to the device orientation. It is guaranteed to
-     * be in the range (0.0, 360.0] if the device has a bearing.
-     *
-     * <p>If this location does not have a bearing then 0.0 is returned.
-     */
-    public float getBearing() {
-        return mBearing;
-    }
-
-    /**
-     * Set the bearing, in degrees.
-     *
-     * <p>Bearing is the horizontal direction of travel of this device,
-     * and is not related to the device orientation.
-     *
-     * <p>The input will be wrapped into the range (0.0, 360.0].
-     */
-    public void setBearing(float bearing) {
-        while (bearing < 0.0f) {
-            bearing += 360.0f;
-        }
-        while (bearing >= 360.0f) {
-            bearing -= 360.0f;
-        }
-        mBearing = bearing;
-        mFieldsMask |= HAS_BEARING_MASK;
-    }
-
-    /**
-     * Remove the bearing from this location.
-     *
-     * <p>Following this call {@link #hasBearing} will return false,
-     * and {@link #getBearing} will return 0.0.
-     *
-     * @deprecated use a new Location object for location updates.
-     */
-    @Deprecated
-    public void removeBearing() {
-        mBearing = 0.0f;
-        mFieldsMask &= ~HAS_BEARING_MASK;
-    }
-
-    /**
-     * True if this location has a horizontal accuracy.
-     *
-     * <p>All locations generated by the {@link LocationManager} have an horizontal accuracy.
-     */
-    public boolean hasAccuracy() {
-        return (mFieldsMask & HAS_HORIZONTAL_ACCURACY_MASK) != 0;
-    }
-
-    /**
-     * Get the estimated horizontal accuracy of this location, radial, in meters.
-     *
-     * <p>We define horizontal accuracy as the radius of 68% confidence. In other
-     * words, if you draw a circle centered at this location's
-     * latitude and longitude, and with a radius equal to the accuracy,
-     * then there is a 68% probability that the true location is inside
-     * the circle.
-     *
-     * <p>This accuracy estimation is only concerned with horizontal
-     * accuracy, and does not indicate the accuracy of bearing,
-     * velocity or altitude if those are included in this Location.
-     *
-     * <p>If this location does not have a horizontal accuracy, then 0.0 is returned.
-     * All locations generated by the {@link LocationManager} include horizontal accuracy.
-     */
-    public float getAccuracy() {
-        return mHorizontalAccuracyMeters;
-    }
-
-    /**
-     * Set the estimated horizontal accuracy of this location, meters.
-     *
-     * <p>See {@link #getAccuracy} for the definition of horizontal accuracy.
-     *
-     * <p>Following this call {@link #hasAccuracy} will return true.
-     */
-    public void setAccuracy(float horizontalAccuracy) {
-        mHorizontalAccuracyMeters = horizontalAccuracy;
-        mFieldsMask |= HAS_HORIZONTAL_ACCURACY_MASK;
-    }
-
-    /**
-     * Remove the horizontal accuracy from this location.
-     *
-     * <p>Following this call {@link #hasAccuracy} will return false, and
-     * {@link #getAccuracy} will return 0.0.
-     *
-     * @deprecated use a new Location object for location updates.
-     */
-    @Deprecated
-    public void removeAccuracy() {
-        mHorizontalAccuracyMeters = 0.0f;
-        mFieldsMask &= ~HAS_HORIZONTAL_ACCURACY_MASK;
-    }
-
-    /**
-     * True if this location has a vertical accuracy.
-     */
-    public boolean hasVerticalAccuracy() {
-        return (mFieldsMask & HAS_VERTICAL_ACCURACY_MASK) != 0;
-    }
-
-    /**
-     * Get the estimated vertical accuracy of this location, in meters.
-     *
-     * <p>We define vertical accuracy at 68% confidence. Specifically, as 1-side of the 2-sided
-     * range above and below the estimated altitude reported by {@link #getAltitude()}, within which
-     * there is a 68% probability of finding the true altitude.
-     *
-     * <p>In the case where the underlying distribution is assumed Gaussian normal, this would be
-     * considered 1 standard deviation.
-     *
-     * <p>For example, if {@link #getAltitude()} returns 150m, and this method returns 20m then
-     * there is a 68% probability of the true altitude being between 130m and 170m.
-     */
-    public float getVerticalAccuracyMeters() {
-        return mVerticalAccuracyMeters;
-    }
-
-    /**
-     * Set the estimated vertical accuracy of this location, meters.
-     *
-     * <p>See {@link #getVerticalAccuracyMeters} for the definition of vertical accuracy.
-     *
-     * <p>Following this call {@link #hasVerticalAccuracy} will return true.
-     */
-    public void setVerticalAccuracyMeters(float verticalAccuracyMeters) {
-        mVerticalAccuracyMeters = verticalAccuracyMeters;
-        mFieldsMask |= HAS_VERTICAL_ACCURACY_MASK;
-    }
-
-    /**
-     * Remove the vertical accuracy from this location.
-     *
-     * <p>Following this call {@link #hasVerticalAccuracy} will return false, and
-     * {@link #getVerticalAccuracyMeters} will return 0.0.
-     *
-     * @deprecated use a new Location object for location updates.
-     * @removed
-     */
-    @Deprecated
-    public void removeVerticalAccuracy() {
-        mVerticalAccuracyMeters = 0.0f;
-        mFieldsMask &= ~HAS_VERTICAL_ACCURACY_MASK;
-    }
-
-    /**
-     * True if this location has a speed accuracy.
-     */
-    public boolean hasSpeedAccuracy() {
-        return (mFieldsMask & HAS_SPEED_ACCURACY_MASK) != 0;
-    }
-
-    /**
-     * Get the estimated speed accuracy of this location, in meters per second.
-     *
-     * <p>We define speed accuracy at 68% confidence. Specifically, as 1-side of the 2-sided range
-     * above and below the estimated speed reported by {@link #getSpeed()}, within which there is a
-     * 68% probability of finding the true speed.
-     *
-     * <p>In the case where the underlying distribution is assumed Gaussian normal, this would be
-     * considered 1 standard deviation.
-     *
-     * <p>For example, if {@link #getSpeed()} returns 5m/s, and this method returns 1m/s, then there
-     * is a 68% probability of the true speed being between 4m/s and 6m/s.
-     *
-     * <p>Note that the speed and speed accuracy may be more accurate than would be obtained simply
-     * from differencing sequential positions, such as when the Doppler measurements from GNSS
-     * satellites are taken into account.
-     */
-    public float getSpeedAccuracyMetersPerSecond() {
-        return mSpeedAccuracyMetersPerSecond;
-    }
-
-    /**
-     * Set the estimated speed accuracy of this location, meters per second.
-     *
-     * <p>See {@link #getSpeedAccuracyMetersPerSecond} for the definition of speed accuracy.
-     *
-     * <p>Following this call {@link #hasSpeedAccuracy} will return true.
-     */
-    public void setSpeedAccuracyMetersPerSecond(float speedAccuracyMeterPerSecond) {
-        mSpeedAccuracyMetersPerSecond = speedAccuracyMeterPerSecond;
-        mFieldsMask |= HAS_SPEED_ACCURACY_MASK;
-    }
-
-    /**
-     * Remove the speed accuracy from this location.
-     *
-     * <p>Following this call {@link #hasSpeedAccuracy} will return false, and
-     * {@link #getSpeedAccuracyMetersPerSecond} will return 0.0.
-     *
-     * @deprecated use a new Location object for location updates.
-     * @removed
-     */
-    @Deprecated
-    public void removeSpeedAccuracy() {
-        mSpeedAccuracyMetersPerSecond = 0.0f;
-        mFieldsMask &= ~HAS_SPEED_ACCURACY_MASK;
-    }
-
-    /**
-     * True if this location has a bearing accuracy.
-     */
-    public boolean hasBearingAccuracy() {
-        return (mFieldsMask & HAS_BEARING_ACCURACY_MASK) != 0;
-    }
-
-    /**
-     * Get the estimated bearing accuracy of this location, in degrees.
-     *
-     * <p>We define bearing accuracy at 68% confidence. Specifically, as 1-side of the 2-sided range
-     * on each side of the estimated bearing reported by {@link #getBearing()}, within which there
-     * is a 68% probability of finding the true bearing.
-     *
-     * <p>In the case where the underlying distribution is assumed Gaussian normal, this would be
-     * considered 1 standard deviation.
-     *
-     * <p>For example, if {@link #getBearing()} returns 60°, and this method returns 10°, then there
-     * is a 68% probability of the true bearing being between 50° and 70°.
-     */
-    public float getBearingAccuracyDegrees() {
-        return mBearingAccuracyDegrees;
-    }
-
-    /**
-     * Set the estimated bearing accuracy of this location, degrees.
-     *
-     * <p>See {@link #getBearingAccuracyDegrees} for the definition of bearing accuracy.
-     *
-     * <p>Following this call {@link #hasBearingAccuracy} will return true.
-     */
-    public void setBearingAccuracyDegrees(float bearingAccuracyDegrees) {
-        mBearingAccuracyDegrees = bearingAccuracyDegrees;
-        mFieldsMask |= HAS_BEARING_ACCURACY_MASK;
-    }
-
-    /**
-     * Remove the bearing accuracy from this location.
-     *
-     * <p>Following this call {@link #hasBearingAccuracy} will return false, and
-     * {@link #getBearingAccuracyDegrees} will return 0.0.
-     *
-     * @deprecated use a new Location object for location updates.
-     * @removed
-     */
-    @Deprecated
-    public void removeBearingAccuracy() {
-        mBearingAccuracyDegrees = 0.0f;
-        mFieldsMask &= ~HAS_BEARING_ACCURACY_MASK;
-    }
-
-    /**
-     * Return true if this Location object is complete.
-     *
-     * <p>A location object is currently considered complete if it has
-     * a valid provider, accuracy, wall-clock time and elapsed real-time.
-     *
-     * <p>All locations supplied by the {@link LocationManager} to
-     * applications must be complete.
-     *
-     * @see #makeComplete
-     * @hide
-     */
-    @SystemApi
-    public boolean isComplete() {
-        return mProvider != null && hasAccuracy() && mTime != 0 && mElapsedRealtimeNanos != 0;
-    }
-
-    /**
-     * Helper to fill incomplete fields.
-     *
-     * <p>Used to assist in backwards compatibility with
-     * Location objects received from applications.
-     *
-     * @see #isComplete
-     * @hide
-     */
-    @SystemApi
-    public void makeComplete() {
-        if (mProvider == null) mProvider = "?";
-        if (!hasAccuracy()) {
-            mFieldsMask |= HAS_HORIZONTAL_ACCURACY_MASK;
-            mHorizontalAccuracyMeters = 100.0f;
-        }
-        if (mTime == 0) mTime = System.currentTimeMillis();
-        if (mElapsedRealtimeNanos == 0) mElapsedRealtimeNanos = SystemClock.elapsedRealtimeNanos();
-    }
-
-    /**
-     * Returns additional provider-specific information about the location fix as a Bundle. The keys
-     * and values are determined by the provider.  If no additional information is available, null
-     * is returned.
-     *
-     * <p> A number of common key/value pairs are listed
-     * below. Providers that use any of the keys on this list must
-     * provide the corresponding value as described below.
-     *
-     * <ul>
-     * <li> satellites - the number of satellites used to derive the fix
-     * </ul>
-     */
-    public Bundle getExtras() {
-        return mExtras;
-    }
-
-    /**
-     * Sets the extra information associated with this fix to the given Bundle.
-     *
-     * <p>Note this stores a copy of the given extras, so any changes to extras after calling this
-     * method won't be reflected in the location bundle.
-     */
-    public void setExtras(@Nullable Bundle extras) {
-        mExtras = (extras == null) ? null : new Bundle(extras);
-    }
-
-    /**
-     * Location equality is provided primarily for test purposes. Comparing locations for equality
-     * in production may indicate incorrect assumptions, and should be avoided whenever possible.
-     *
-     * <p>{@inheritDoc}
-     */
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        Location location = (Location) o;
-        return mTime == location.mTime
-                && mElapsedRealtimeNanos == location.mElapsedRealtimeNanos
-                && hasElapsedRealtimeUncertaintyNanos()
-                == location.hasElapsedRealtimeUncertaintyNanos()
-                && (!hasElapsedRealtimeUncertaintyNanos() || Double.compare(
-                location.mElapsedRealtimeUncertaintyNanos, mElapsedRealtimeUncertaintyNanos) == 0)
-                && Double.compare(location.mLatitude, mLatitude) == 0
-                && Double.compare(location.mLongitude, mLongitude) == 0
-                && hasAltitude() == location.hasAltitude()
-                && (!hasAltitude() || Double.compare(location.mAltitude, mAltitude) == 0)
-                && hasSpeed() == location.hasSpeed()
-                && (!hasSpeed() || Float.compare(location.mSpeed, mSpeed) == 0)
-                && hasBearing() == location.hasBearing()
-                && (!hasBearing() || Float.compare(location.mBearing, mBearing) == 0)
-                && hasAccuracy() == location.hasAccuracy()
-                && (!hasAccuracy() || Float.compare(location.mHorizontalAccuracyMeters,
-                mHorizontalAccuracyMeters) == 0)
-                && hasVerticalAccuracy() == location.hasVerticalAccuracy()
-                && (!hasVerticalAccuracy() || Float.compare(location.mVerticalAccuracyMeters,
-                mVerticalAccuracyMeters) == 0)
-                && hasSpeedAccuracy() == location.hasSpeedAccuracy()
-                && (!hasSpeedAccuracy() || Float.compare(location.mSpeedAccuracyMetersPerSecond,
-                mSpeedAccuracyMetersPerSecond) == 0)
-                && hasBearingAccuracy() == location.hasBearingAccuracy()
-                && (!hasBearingAccuracy() || Float.compare(location.mBearingAccuracyDegrees,
-                mBearingAccuracyDegrees) == 0)
-                && Objects.equals(mProvider, location.mProvider)
-                && areExtrasEqual(mExtras, location.mExtras);
-    }
-
-    private static boolean areExtrasEqual(@Nullable Bundle extras1, @Nullable Bundle extras2) {
-        if ((extras1 == null || extras1.isEmpty()) && (extras2 == null || extras2.isEmpty())) {
-            return true;
-        } else if (extras1 == null || extras2 == null) {
-            return false;
-        } else {
-            return extras1.kindofEquals(extras2);
-        }
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(mProvider, mElapsedRealtimeNanos, mLatitude, mLongitude);
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder s = new StringBuilder();
-        s.append("Location[");
-        s.append(mProvider);
-        s.append(" ").append(String.format(Locale.ROOT, "%.6f,%.6f", mLatitude, mLongitude));
-        if (hasAccuracy()) {
-            s.append(" hAcc=").append(mHorizontalAccuracyMeters);
-        }
-        s.append(" et=");
-        TimeUtils.formatDuration(getElapsedRealtimeMillis(), s);
-        if (hasAltitude()) {
-            s.append(" alt=").append(mAltitude);
-            if (hasVerticalAccuracy()) {
-                s.append(" vAcc=").append(mVerticalAccuracyMeters);
-            }
-        }
-        if (hasSpeed()) {
-            s.append(" vel=").append(mSpeed);
-            if (hasSpeedAccuracy()) {
-                s.append(" sAcc=").append(mSpeedAccuracyMetersPerSecond);
-            }
-        }
-        if (hasBearing()) {
-            s.append(" bear=").append(mBearing);
-            if (hasBearingAccuracy()) {
-                s.append(" bAcc=").append(mBearingAccuracyDegrees);
-            }
-        }
-        if (isMock()) {
-            s.append(" mock");
-        }
-
-        if (mExtras != null) {
-            s.append(" {").append(mExtras).append('}');
-        }
-        s.append(']');
-        return s.toString();
-    }
-
-    public void dump(Printer pw, String prefix) {
-        pw.println(prefix + toString());
-    }
-
-    public static final @NonNull Parcelable.Creator<Location> CREATOR =
-        new Parcelable.Creator<Location>() {
-        @Override
-        public Location createFromParcel(Parcel in) {
-            Location l = new Location(in.readString());
-            l.mFieldsMask = in.readInt();
-            l.mTime = in.readLong();
-            l.mElapsedRealtimeNanos = in.readLong();
-            if (l.hasElapsedRealtimeUncertaintyNanos()) {
-                l.mElapsedRealtimeUncertaintyNanos = in.readDouble();
-            }
-            l.mLatitude = in.readDouble();
-            l.mLongitude = in.readDouble();
-            if (l.hasAltitude()) {
-                l.mAltitude = in.readDouble();
-            }
-            if (l.hasSpeed()) {
-                l.mSpeed = in.readFloat();
-            }
-            if (l.hasBearing()) {
-                l.mBearing = in.readFloat();
-            }
-            if (l.hasAccuracy()) {
-                l.mHorizontalAccuracyMeters = in.readFloat();
-            }
-            if (l.hasVerticalAccuracy()) {
-                l.mVerticalAccuracyMeters = in.readFloat();
-            }
-            if (l.hasSpeedAccuracy()) {
-                l.mSpeedAccuracyMetersPerSecond = in.readFloat();
-            }
-            if (l.hasBearingAccuracy()) {
-                l.mBearingAccuracyDegrees = in.readFloat();
-            }
-            l.mExtras = Bundle.setDefusable(in.readBundle(), true);
-            return l;
-        }
-
-        @Override
-        public Location[] newArray(int size) {
-            return new Location[size];
-        }
-    };
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeString(mProvider);
-        parcel.writeInt(mFieldsMask);
-        parcel.writeLong(mTime);
-        parcel.writeLong(mElapsedRealtimeNanos);
-        if (hasElapsedRealtimeUncertaintyNanos()) {
-            parcel.writeDouble(mElapsedRealtimeUncertaintyNanos);
-        }
-        parcel.writeDouble(mLatitude);
-        parcel.writeDouble(mLongitude);
-        if (hasAltitude()) {
-            parcel.writeDouble(mAltitude);
-        }
-        if (hasSpeed()) {
-            parcel.writeFloat(mSpeed);
-        }
-        if (hasBearing()) {
-            parcel.writeFloat(mBearing);
-        }
-        if (hasAccuracy()) {
-            parcel.writeFloat(mHorizontalAccuracyMeters);
-        }
-        if (hasVerticalAccuracy()) {
-            parcel.writeFloat(mVerticalAccuracyMeters);
-        }
-        if (hasSpeedAccuracy()) {
-            parcel.writeFloat(mSpeedAccuracyMetersPerSecond);
-        }
-        if (hasBearingAccuracy()) {
-            parcel.writeFloat(mBearingAccuracyDegrees);
-        }
-        parcel.writeBundle(mExtras);
-    }
-
-    /**
-     * Returns true if the Location came from a mock provider.
-     *
-     * @return true if this Location came from a mock provider, false otherwise
-     * @deprecated Prefer {@link #isMock()} instead.
-     */
-    @Deprecated
-    public boolean isFromMockProvider() {
-        return isMock();
-    }
-
-    /**
-     * Flag this Location as having come from a mock provider or not.
-     *
-     * @param isFromMockProvider true if this Location came from a mock provider, false otherwise
-     * @deprecated Prefer {@link #setMock(boolean)} instead.
-     * @hide
-     */
-    @Deprecated
-    @SystemApi
-    public void setIsFromMockProvider(boolean isFromMockProvider) {
-        setMock(isFromMockProvider);
-    }
-
-    /**
-     * Returns true if this location is marked as a mock location. If this location comes from the
-     * Android framework, this indicates that the location was provided by a test location provider,
-     * and thus may not be related to the actual location of the device.
-     *
-     * @see LocationManager#addTestProvider
-     */
-    public boolean isMock() {
-        return (mFieldsMask & HAS_MOCK_PROVIDER_MASK) != 0;
-    }
-
-    /**
-     * Sets whether this location is marked as a mock location.
-     */
-    public void setMock(boolean mock) {
-        if (mock) {
-            mFieldsMask |= HAS_MOCK_PROVIDER_MASK;
-        } else {
-            mFieldsMask &= ~HAS_MOCK_PROVIDER_MASK;
-        }
-    }
-
-    /**
-     * Caches data used to compute distance and bearing (so successive calls to {@link #distanceTo}
-     * and {@link #bearingTo} don't duplicate work.
-     */
     private static class BearingDistanceCache {
         double mLat1 = 0.0;
         double mLon1 = 0.0;

@@ -34,6 +34,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManager.KeyguardEnvironment;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.provider.DebugModeFilterProvider;
 
 import javax.inject.Inject;
 
@@ -44,6 +45,7 @@ import javax.inject.Inject;
 @SysUISingleton
 public class NotificationFilter {
 
+    private final DebugModeFilterProvider mDebugNotificationFilter;
     private final StatusBarStateController mStatusBarStateController;
     private final KeyguardEnvironment mKeyguardEnvironment;
     private final ForegroundServiceController mForegroundServiceController;
@@ -52,11 +54,13 @@ public class NotificationFilter {
 
     @Inject
     public NotificationFilter(
+            DebugModeFilterProvider debugNotificationFilter,
             StatusBarStateController statusBarStateController,
             KeyguardEnvironment keyguardEnvironment,
             ForegroundServiceController foregroundServiceController,
             NotificationLockscreenUserManager userManager,
             MediaFeatureFlag mediaFeatureFlag) {
+        mDebugNotificationFilter = debugNotificationFilter;
         mStatusBarStateController = statusBarStateController;
         mKeyguardEnvironment = keyguardEnvironment;
         mForegroundServiceController = foregroundServiceController;
@@ -69,6 +73,10 @@ public class NotificationFilter {
      */
     public boolean shouldFilterOut(NotificationEntry entry) {
         final StatusBarNotification sbn = entry.getSbn();
+        if (mDebugNotificationFilter.shouldFilterOut(entry)) {
+            return true;
+        }
+
         if (!(mKeyguardEnvironment.isDeviceProvisioned()
                 || showNotificationEvenIfUnprovisioned(sbn))) {
             return true;
