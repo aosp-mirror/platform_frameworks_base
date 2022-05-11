@@ -980,6 +980,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 updateUnfoldBounds();
                 return;
             }
+            // Clear the divider remote animating flag as the divider will be re-rendered to apply
+            // the new rotation config.
+            mIsDividerRemoteAnimating = false;
             mSplitLayout.update(null /* t */);
             onLayoutSizeChanged(mSplitLayout);
         }
