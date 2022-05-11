@@ -344,7 +344,7 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"Жергілікті терминал"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Жергілікті шелл-код қол жетімділігін ұсынатын терминалды қолданбаны қосу"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP тексерісі"</string>
-    <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP (кең жолақты сандық мазмұн қорғау) тексеру мүмкіндігін орнату"</string>
+    <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP (кең жолақты цифрлық мазмұн қорғау) тексеру мүмкіндігін орнату"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Түзету"</string>
     <string name="debug_app" msgid="8903350241392391766">"Түзету қолданбасын таңдау"</string>
     <string name="debug_app_not_set" msgid="1934083001283807188">"Түзету қолданбалары орнатылмаған."</string>
@@ -612,7 +612,7 @@
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Қонақ режимінен шығу"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Шыққанда барлық әрекет жойылады."</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Шыққанда барлық әрекетті сақтай немесе жоя аласыз."</string>
-    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Сеанс әрекетін қазір жою үшін оны бастапқы күйге қайтарыңыз. Әрекетті сақтау немесе жою шешімін шыққан кезде қабылдай аласыз."</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Сеанс дерегін жою үшін оны бастапқы күйге қайтарыңыз. Деректі шығар кезде де сақтауға не жоюға болады."</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Фотосуретке түсіру"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Сурет таңдау"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Фотосурет таңдау"</string>

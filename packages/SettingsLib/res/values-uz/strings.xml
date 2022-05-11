@@ -604,7 +604,7 @@
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Bunda joriy mehmon seansidagi ilova va ularning maʼlumotlari tozalanadi"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Chiqish"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Mehmon faoliyati saqlansinmi?"</string>
-    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Joriy seansdagi faoliyatni saqlash yoki barcha ilova va maʼlumotlarni tozalash mumkin"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Joriy seansdagi faoliyatni saqlash yoki barcha ilova va maʼlumotlarni oʻchirib tashlashingiz mumkin"</string>
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Oʻchirish"</string>
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Saqlash"</string>
     <string name="guest_exit_button" msgid="5774985819191803960">"Mehmon rejimidan chiqish"</string>

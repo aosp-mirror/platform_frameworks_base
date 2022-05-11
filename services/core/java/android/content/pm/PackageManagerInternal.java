@@ -371,10 +371,10 @@ public abstract class PackageManagerInternal {
             int deviceOwnerUserId, String deviceOwner, SparseArray<String> profileOwners);
 
     /**
-     * Called by Owners to set the package names protected by the device owner.
+     * Marks packages as protected for a given user or all users in case of USER_ALL.
      */
-    public abstract void setDeviceOwnerProtectedPackages(
-            String deviceOwnerPackageName, List<String> packageNames);
+    public abstract void setOwnerProtectedPackages(
+            @UserIdInt int userId, @NonNull List<String> packageNames);
 
     /**
      * Returns {@code true} if a given package can't be wiped. Otherwise, returns {@code false}.

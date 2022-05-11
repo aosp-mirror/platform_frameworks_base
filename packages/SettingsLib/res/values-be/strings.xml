@@ -612,7 +612,7 @@
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Выйсці з гасцявога рэжыму"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Падчас выхаду будуць выдалены ўсе звесткі пра дзеянні"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Падчас выхаду можна захаваць ці выдаліць звесткі пра дзеянні"</string>
-    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Скіньце налады, каб выдаліць звесткі пра дзеянні падчас сеанса. Таксама можна захаваць ці выдаліць гэтыя звесткі ў час выхаду"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Скіньце звесткі пра дзеянні падчас сеанса зараз. Вы таксама можаце захаваць ці выдаліць іх у час выхаду."</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Зрабіць фота"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Выбраць відарыс"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Выбраць фота"</string>

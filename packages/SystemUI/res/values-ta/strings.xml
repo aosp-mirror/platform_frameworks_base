@@ -78,6 +78,7 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"ஸ்கிரீன் ஷாட்டை மீண்டும் எடுக்க முயலவும்"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"ஸ்கிரீன்ஷாட்டைச் சேமிக்க முடியவில்லை"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ஸ்கிரீன் ஷாட்டுகளை எடுப்பதை, ஆப்ஸ் அல்லது உங்கள் நிறுவனம் அனுமதிக்கவில்லை"</string>
+    <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"ஸ்கிரீன்ஷாட்கள் எடுப்பதை உங்கள் IT நிர்வாகி தடைசெய்துள்ளார்"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"திருத்து"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"ஸ்கிரீன்ஷாட்டைத் திருத்தும்"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"ஸ்கிரீன்ஷாட்டைப் பகிர்"</string>
@@ -225,6 +226,8 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"தானாகச் சுழற்று"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"திரையைத் தானாகச் சுழற்று"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"இருப்பிடம்"</string>
+    <!-- no translation found for quick_settings_screensaver_label (1495003469366524120) -->
+    <skip />
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"கேமரா அணுகல்"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"மைக் அணுகல்"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"கிடைக்கிறது"</string>
@@ -467,7 +470,8 @@
     <string name="wallet_title" msgid="5369767670735827105">"வாலட்"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"மொபைல் மூலம் விரைவாகவும் பாதுகாப்பாகவும் பர்ச்சேஸ்கள் செய்ய பேமெண்ட் முறையை அமைக்கவும்"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"அனைத்தையும் காட்டு"</string>
-    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"கார்டைச் சேர்"</string>
+    <!-- no translation found for wallet_secondary_label_no_card (8488069304491125713) -->
+    <skip />
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"புதுப்பிக்கிறது"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"பயன்படுத்துவதற்கு அன்லாக் செய்க"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"உங்கள் கார்டுகளின் விவரங்களைப் பெறுவதில் சிக்கல் ஏற்பட்டது, பிறகு முயலவும்"</string>
@@ -727,6 +731,7 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"பேட்டரி தீர்ந்துபோகும் நிலையில் இருக்கும் போது ஆன் செய்யப்படும்"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"வேண்டாம்"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
+    <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"உபயோகத்தில் உள்ளது"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"உங்கள் <xliff:g id="TYPES_LIST">%s</xliff:g> ஆகியவற்றை ஆப்ஸ் பயன்படுத்துகின்றன."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" மற்றும் "</string>
@@ -824,7 +829,6 @@
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g> சாதனத்தில் இயக்க உங்கள் சாதனத்தை அருகில் எடுத்துச் செல்லுங்கள்"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"இங்கு பிளே செய்ய உங்கள் சாதனத்தை <xliff:g id="DEVICENAME">%1$s</xliff:g> சாதனத்திற்கு அருகில் நகர்த்துங்கள்"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g> சாதனத்தில் பிளே ஆகிறது"</string>
-    <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"இந்த மொபைலில் பிளே ஆகிறது"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"ஏதோ தவறாகிவிட்டது. மீண்டும் முயலவும்."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"செயலில் இல்லை , சரிபார்க்கவும்"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"இல்லை"</string>
@@ -853,6 +857,8 @@
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"சேமி"</string>
     <string name="media_output_broadcast_starting" msgid="8130153654166235557">"தொடங்குகிறது…"</string>
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"ஒளிபரப்ப முடியவில்லை"</string>
+    <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"சேமிக்க முடியவில்லை. மீண்டும் முயலவும்."</string>
+    <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"சேமிக்க முடியவில்லை."</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"பதிப்பு எண்"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"பதிப்பு எண் கிளிப்போர்டுக்கு நகலெடுக்கப்பட்டது."</string>
     <string name="basic_status" msgid="2315371112182658176">"திறந்தநிலை உரையாடல்"</string>
@@ -937,6 +943,8 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"நகலெடுத்த வார்த்தைகளைத் திருத்து"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"நகலெடுத்த படத்தைத் திருத்து"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"அருகிலுள்ள சாதனத்திற்கு அனுப்பு"</string>
+    <!-- no translation found for clipboard_text_hidden (7926899867471812305) -->
+    <skip />
     <string name="add" msgid="81036585205287996">"சேர்"</string>
     <string name="manage_users" msgid="1823875311934643849">"பயனர்களை நிர்வகித்தல்"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"பிரிக்கப்பட்ட திரைக்குள் இந்த அறிவிப்பை இழுத்துவிட முடியாது."</string>

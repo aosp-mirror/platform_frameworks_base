@@ -599,7 +599,7 @@
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"移除"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"正在重設訪客…"</string>
     <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"要重設訪客工作階段嗎？"</string>
-    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"此操作會開始新的訪客工作階段，並刪除目前工作階段中的所有應用程式和活動"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"此操作會開始新的訪客工作階段，並刪除目前工作階段的所有應用程式和資料"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"要結束訪客模式嗎？"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"此操作會刪除目前訪客工作階段中的所有應用程式和資料"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"結束"</string>
@@ -612,7 +612,7 @@
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"結束訪客模式"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"結束時將會刪除所有活動"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"您可以在結束時儲存或刪除活動"</string>
-    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"重設即可立即刪除工作階段活動，或在結束時儲存或刪除工作階段"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"重設可立即刪除工作階段活動，或者您可以在結束時儲存或刪除活動"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"拍照"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"選擇圖片"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"揀相"</string>

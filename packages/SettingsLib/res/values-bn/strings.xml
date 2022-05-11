@@ -603,7 +603,7 @@
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"\'অতিথি মোড\' ছেড়ে বেরিয়ে আসবেন?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"এটি বর্তমান অতিথি সেশন থেকে অ্যাপ ও ডেটা মুছে দেবে"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"বেরিয়ে আসুন"</string>
-    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"অতিথি অ্যাক্টিভিটি সেভ করবেন?"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"অতিথি মোডের অ্যাক্টিভিটি সেভ করবেন?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"আপনি বর্তমান সেশন থেকে অ্যাক্টিভিটি সেভ করতে বা সব অ্যাপ ও ডেটা মুছতে পারবেন"</string>
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"মুছুন"</string>
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"সেভ করুন"</string>

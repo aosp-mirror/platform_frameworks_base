@@ -604,7 +604,7 @@
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Verranno eliminati i dati e le app della sessione Ospite corrente"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Esci"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Vuoi salvare l\'attività Ospite?"</string>
-    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Puoi salvare l\'attività della sessione corrente o eliminare tutti i dati e app"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Puoi salvare l\'attività della sessione corrente o eliminare tutti i dati e le app"</string>
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Elimina"</string>
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Salva"</string>
     <string name="guest_exit_button" msgid="5774985819191803960">"Esci dalla modalità Ospite"</string>
@@ -612,7 +612,7 @@
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Esci dalla modalità Ospite"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Quando esci verrà eliminata tutta l\'attività"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Quando esci puoi salvare o eliminare la tua attività"</string>
-    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Reimposta per eliminare subito l\'attività della sessione oppure puoi salvare o eliminare l\'attività quando esci"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Reimposta la sessione per eliminare subito l\'attività, oppure salvala o eliminala quando esci"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Scatta una foto"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Scegli un\'immagine"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Seleziona la foto"</string>

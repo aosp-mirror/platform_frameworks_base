@@ -569,7 +569,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Колдонуучу"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Чектелген профайл"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Жаңы колдонуучу кошосузбу?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Эгер түзмөгүңүздү дагы бир адам колдонуп жаткан болсо, кошумча профилдерди түзүп коюңуз. Профилдин ээси аны өзү каалагандай жөндөп, тушкагаздарды коюп, керектүү колдонмолорду орнотуп алат. Мындан тышкары, колдонуучулар түзмөктүн Wi‑Fi´ды өчүрүү/күйгүзүү сыяктуу жалпы жөндөөлөрүн өзгөртө алат.\n\nПрофиль түзүлгөндөн кийин, аны жөндөп алуу керек.\n\nЖалпы колдонмолорду баары жаңырта алат, бирок атайын мүмкүнчүлүктөр өз-өзүнчө жөндөлөт."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Эгер түзмөгүңүздү дагы бир адам колдонуп жаткан болсо, кошумча профилдерди түзүп коюңуз. Профилдин ээси аны өзү каалагандай тууралап, тушкагаздарды коюп, керектүү колдонмолорду орнотуп алат. Мындан тышкары, колдонуучулар түзмөктүн Wi‑Fi´ды өчүрүү/күйгүзүү сыяктуу жалпы параметрлерин өзгөртө алышат.\n\nПрофиль түзүлгөндөн кийин, аны тууралап алуу керек.\n\nЖалпы колдонмолорду баары жаңырта алат, бирок атайын мүмкүнчүлүктөр өз-өзүнчө жөндөлөт."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Жаңы колдонуучу кошулганда, ал өз мейкиндигин түзүп алышы керек.\n\nКолдонмолорду бир колдонуучу жаңыртканда, ал калган бардык колдонуучулар үчүн да жаңырат."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Профилди жөндөйсүзбү?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Өз мейкиндигин жөндөп алышы үчүн, түзмөктү колдонуучуга беришиңиз керек."</string>
@@ -598,12 +598,12 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Баштапкы абалга келтирүү"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Өчүрүү"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Конок сеансы баштапкы абалга келтирилүүдө…"</string>
-    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Конок сеансы баштапкы абалга келтирилсинби?"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Конок сеансын баштапкы абалга келтиресизби?"</string>
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Бул аракет жаңы конок сеансын баштап, учурдагы сеанстагы бардык колдонмолорду жана алардагы нерселерди жок кылат"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Конок режиминен чыгасызбы?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Бул учурдагы конок сеансындагы колдонмолорду жана алардагы нерселерди жок кылат"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Чыгуу"</string>
-    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Коноктун аракеттери сакталсынбы?"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Коноктун аракеттерин сактайсызбы?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Учурдагы сеанстагы аракеттерди сактап же бардык колдонмолорду жана алардагы нерселерди жок кылсаңыз болот"</string>
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Өчүрүү"</string>
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Сактоо"</string>
@@ -612,7 +612,7 @@
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Конок режиминен чыгуу"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Чыксаңыз, бардык аракеттер өчүрүлөт"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Чыгуудан мурун аракеттериңизди сактап же жок кылсаңыз болот"</string>
-    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Сеанстагы аракеттерди азыр жок кылуу үчүн баштапкы абалга келтириңиз, же болбосо чыгуу учурунда аракеттерди сактап же жок кылсаңыз болот"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Сеанстагы аракеттерди азыр өчүрсөңүз болот же чыгып баратып өчүрүп же сактап коюңуз"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Сүрөткө тартуу"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Сүрөт тандаңыз"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Сүрөт тандаңыз"</string>
