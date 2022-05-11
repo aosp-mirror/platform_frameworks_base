@@ -1204,7 +1204,6 @@ public class RecentTasksTest extends WindowTestsBase {
         RecentTaskInfo info = mRecentTasks.createRecentTaskInfo(task, true);
 
         assertTrue(info.supportsMultiWindow);
-        assertTrue(info.supportsSplitScreenMultiWindow);
 
         // The task can be put in split screen even if it is not attached now.
         task.removeImmediately();
@@ -1212,7 +1211,6 @@ public class RecentTasksTest extends WindowTestsBase {
         info = mRecentTasks.createRecentTaskInfo(task, true);
 
         assertTrue(info.supportsMultiWindow);
-        assertTrue(info.supportsSplitScreenMultiWindow);
 
         // Test non-resizable.
         // The non-resizable task cannot be put in split screen because of the config.
@@ -1222,7 +1220,6 @@ public class RecentTasksTest extends WindowTestsBase {
         info = mRecentTasks.createRecentTaskInfo(task, true);
 
         assertFalse(info.supportsMultiWindow);
-        assertFalse(info.supportsSplitScreenMultiWindow);
 
         // Even if it is not attached, the non-resizable task can be put in split screen as long as
         // the device supports it.
@@ -1231,8 +1228,6 @@ public class RecentTasksTest extends WindowTestsBase {
         info = mRecentTasks.createRecentTaskInfo(task, true);
 
         assertTrue(info.supportsMultiWindow);
-        assertTrue(info.supportsSplitScreenMultiWindow);
-
     }
 
     private TaskSnapshot createSnapshot(Point taskSize, Point bufferSize) {
