@@ -1100,16 +1100,19 @@ public class PermissionManagerService {
                         // case of OS update
                         if (mPackageManagerInt.getInstalledSdkVersion(pkg)
                                 < Build.VERSION_CODES.Q) {
-                            int numSplitPerms = PermissionManager.SPLIT_PERMISSIONS.size();
+                            final List<PermissionManager.SplitPermissionInfo> permissionList =
+                                    getSplitPermissions();
+                            int numSplitPerms = permissionList.size();
                             for (int splitPermNum = 0; splitPermNum < numSplitPerms;
                                     splitPermNum++) {
                                 PermissionManager.SplitPermissionInfo sp =
-                                        PermissionManager.SPLIT_PERMISSIONS.get(splitPermNum);
+                                        permissionList.get(splitPermNum);
                                 String splitPermName = sp.getSplitPermission();
                                 if (sp.getNewPermissions().contains(permName)
                                         && origPermissions.hasInstallPermission(splitPermName)) {
                                     upgradedActivityRecognitionPermission = splitPermName;
                                     newImplicitPermissions.add(permName);
+
                                     if (DEBUG_PERMISSIONS) {
                                         Slog.i(TAG, permName + " is newly added for "
                                                 + pkg.packageName);
