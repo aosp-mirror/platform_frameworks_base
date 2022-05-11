@@ -184,6 +184,12 @@ public final class DevicePolicyResources {
                     PREFIX + "WORK_PROFILE_IT_ADMIN_CANT_RESET_SCREEN_LOCK";
 
             /**
+             * Text shown on the CTA link shown to user to set a separate lock for work apps
+             */
+            public static final String WORK_PROFILE_IT_ADMIN_CANT_RESET_SCREEN_LOCK_ACTION =
+                    PREFIX + "WORK_PROFILE_IT_ADMIN_CANT_RESET_SCREEN_LOCK_ACTION";
+
+            /**
              * Message shown in screen lock picker for setting up a work profile screen lock
              */
             public static final String WORK_PROFILE_SCREEN_LOCK_SETUP_MESSAGE =
