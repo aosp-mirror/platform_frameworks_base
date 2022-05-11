@@ -283,7 +283,7 @@ public final class SmartspaceTarget implements Parcelable {
         this.mAssociatedSmartspaceTargetId = in.readString();
         this.mSliceUri = in.readTypedObject(Uri.CREATOR);
         this.mWidget = in.readTypedObject(AppWidgetProviderInfo.CREATOR);
-        this.mTemplateData = in.readTypedObject(BaseTemplateData.CREATOR);
+        this.mTemplateData = in.readParcelable(/* loader= */null, BaseTemplateData.class);
     }
 
     private SmartspaceTarget(String smartspaceTargetId,
@@ -491,7 +491,7 @@ public final class SmartspaceTarget implements Parcelable {
         dest.writeString(this.mAssociatedSmartspaceTargetId);
         dest.writeTypedObject(this.mSliceUri, flags);
         dest.writeTypedObject(this.mWidget, flags);
-        dest.writeTypedObject(this.mTemplateData, flags);
+        dest.writeParcelable(this.mTemplateData, flags);
     }
 
     @Override

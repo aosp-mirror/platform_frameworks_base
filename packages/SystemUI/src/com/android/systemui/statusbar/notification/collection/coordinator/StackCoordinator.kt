@@ -50,6 +50,8 @@ class StackCoordinator @Inject internal constructor(
         var hasClearableAlertingNotifs = false
         var hasNonClearableSilentNotifs = false
         var hasClearableSilentNotifs = false
+        val clearableAlertingSensitiveNotifUsers = mutableSetOf<Int>()
+        val clearableSilentSensitiveNotifUsers = mutableSetOf<Int>()
         entries.forEach {
             val section = checkNotNull(it.section) { "Null section for ${it.key}" }
             val entry = checkNotNull(it.representativeEntry) { "Null notif entry for ${it.key}" }
@@ -63,13 +65,22 @@ class StackCoordinator @Inject internal constructor(
                 !isSilent && isClearable -> hasClearableAlertingNotifs = true
                 !isSilent && !isClearable -> hasNonClearableAlertingNotifs = true
             }
+            if (isClearable && entry.hasSensitiveContents()) {
+                if (isSilent) {
+                    clearableSilentSensitiveNotifUsers.add(entry.sbn.userId)
+                } else {
+                    clearableAlertingSensitiveNotifUsers.add(entry.sbn.userId)
+                }
+            }
         }
         return NotifStats(
             numActiveNotifs = entries.size,
             hasNonClearableAlertingNotifs = hasNonClearableAlertingNotifs,
             hasClearableAlertingNotifs = hasClearableAlertingNotifs,
             hasNonClearableSilentNotifs = hasNonClearableSilentNotifs,
-            hasClearableSilentNotifs = hasClearableSilentNotifs
+            hasClearableSilentNotifs = hasClearableSilentNotifs,
+            clearableAlertingSensitiveNotifUsers = clearableAlertingSensitiveNotifUsers,
+            clearableSilentSensitiveNotifUsers = clearableSilentSensitiveNotifUsers
         )
     }
 }
