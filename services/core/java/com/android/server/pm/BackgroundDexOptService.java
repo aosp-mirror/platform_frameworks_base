@@ -91,17 +91,21 @@ public final class BackgroundDexOptService {
 
     // Possible return codes of individual optimization steps.
     /** Ok status: Optimizations finished, All packages were processed, can continue */
-    private static final int STATUS_OK = 0;
+    /* package */ static final int STATUS_OK = 0;
     /** Optimizations should be aborted. Job scheduler requested it. */
-    private static final int STATUS_ABORT_BY_CANCELLATION = 1;
+    /* package */ static final int STATUS_ABORT_BY_CANCELLATION = 1;
     /** Optimizations should be aborted. No space left on device. */
-    private static final int STATUS_ABORT_NO_SPACE_LEFT = 2;
+    /* package */ static final int STATUS_ABORT_NO_SPACE_LEFT = 2;
     /** Optimizations should be aborted. Thermal throttling level too high. */
-    private static final int STATUS_ABORT_THERMAL = 3;
+    /* package */ static final int STATUS_ABORT_THERMAL = 3;
     /** Battery level too low */
-    private static final int STATUS_ABORT_BATTERY = 4;
-    /** {@link PackageDexOptimizer#DEX_OPT_FAILED} case */
-    private static final int STATUS_DEX_OPT_FAILED = 5;
+    /* package */ static final int STATUS_ABORT_BATTERY = 4;
+    /**
+     * {@link PackageDexOptimizer#DEX_OPT_FAILED} case. This state means some packages have failed
+     * compilation during the job. Note that the failure will not be permanent as the next dexopt
+     * job will exclude those failed packages.
+     */
+    /* package */ static final int STATUS_DEX_OPT_FAILED = 5;
 
     @IntDef(prefix = {"STATUS_"}, value = {
             STATUS_OK,
@@ -525,7 +529,10 @@ public final class BackgroundDexOptService {
         }
     }
 
-    /** Returns true if completed */
+    /**
+     * Returns whether we've successfully run the job. Note that it will return true even if some
+     * packages may have failed compiling.
+     */
     private boolean runIdleOptimization(PackageManagerService pm, List<String> pkgs,
             boolean isPostBootUpdate) {
         synchronized (mLock) {
@@ -541,7 +548,7 @@ public final class BackgroundDexOptService {
             mLastExecutionDurationMs = SystemClock.elapsedRealtime() - mLastExecutionStartTimeMs;
         }
 
-        return status == STATUS_OK;
+        return status == STATUS_OK || status == STATUS_DEX_OPT_FAILED;
     }
 
     /** Gets the size of the directory. It uses recursion to go over all files. */
@@ -661,6 +668,11 @@ public final class BackgroundDexOptService {
             ArraySet<String> updatedPackages, boolean isPostBootUpdate) {
         boolean supportSecondaryDex = mInjector.supportSecondaryDex();
 
+        // Keep the error if there is any error from any package.
+        @Status int status = STATUS_OK;
+
+        // Other than cancellation, all packages will be processed even if an error happens
+        // in a package.
         for (String pkg : pkgs) {
             int abortCode = abortIdleOptimizations(lowStorageThreshold);
             if (abortCode != STATUS_OK) {
@@ -670,10 +682,13 @@ public final class BackgroundDexOptService {
 
             @DexOptResult int primaryResult =
                     optimizePackage(pkg, true /* isForPrimaryDex */, isPostBootUpdate);
+            if (primaryResult == PackageDexOptimizer.DEX_OPT_CANCELLED) {
+                return STATUS_ABORT_BY_CANCELLATION;
+            }
             if (primaryResult == PackageDexOptimizer.DEX_OPT_PERFORMED) {
                 updatedPackages.add(pkg);
-            } else if (primaryResult != PackageDexOptimizer.DEX_OPT_SKIPPED) {
-                return convertPackageDexOptimizerStatusToInternal(primaryResult);
+            } else if (primaryResult == PackageDexOptimizer.DEX_OPT_FAILED) {
+                status = convertPackageDexOptimizerStatusToInternal(primaryResult);
             }
 
             if (!supportSecondaryDex) {
@@ -682,12 +697,14 @@ public final class BackgroundDexOptService {
 
             @DexOptResult int secondaryResult =
                     optimizePackage(pkg, false /* isForPrimaryDex */, isPostBootUpdate);
-            if (secondaryResult != PackageDexOptimizer.DEX_OPT_PERFORMED
-                    && secondaryResult != PackageDexOptimizer.DEX_OPT_SKIPPED) {
-                return convertPackageDexOptimizerStatusToInternal(secondaryResult);
+            if (secondaryResult == PackageDexOptimizer.DEX_OPT_CANCELLED) {
+                return STATUS_ABORT_BY_CANCELLATION;
+            }
+            if (secondaryResult == PackageDexOptimizer.DEX_OPT_FAILED) {
+                status = convertPackageDexOptimizerStatusToInternal(secondaryResult);
             }
         }
-        return STATUS_OK;
+        return status;
     }
 
     /**
@@ -779,9 +796,9 @@ public final class BackgroundDexOptService {
     @DexOptResult
     private int performDexOptPrimary(String pkg, int reason,
             int dexoptFlags) {
+        DexoptOptions dexoptOptions = new DexoptOptions(pkg, reason, dexoptFlags);
         return trackPerformDexOpt(pkg, /*isForPrimaryDex=*/ true,
-                () -> mDexOptHelper.performDexOptWithStatus(
-                        new DexoptOptions(pkg, reason, dexoptFlags)));
+                () -> mDexOptHelper.performDexOptWithStatus(dexoptOptions));
     }
 
     @DexOptResult
@@ -791,7 +808,7 @@ public final class BackgroundDexOptService {
                 dexoptFlags | DexoptOptions.DEXOPT_ONLY_SECONDARY_DEX);
         return trackPerformDexOpt(pkg, /*isForPrimaryDex=*/ false,
                 () -> mDexOptHelper.performDexOpt(dexoptOptions)
-                    ? PackageDexOptimizer.DEX_OPT_PERFORMED : PackageDexOptimizer.DEX_OPT_FAILED
+                        ? PackageDexOptimizer.DEX_OPT_PERFORMED : PackageDexOptimizer.DEX_OPT_FAILED
         );
     }
 
