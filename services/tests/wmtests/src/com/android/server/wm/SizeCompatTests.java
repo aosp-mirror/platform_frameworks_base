@@ -1928,7 +1928,7 @@ public class SizeCompatTests extends WindowTestsBase {
         prepareUnresizable(mActivity, /* maxAspect */ 1.1f, SCREEN_ORIENTATION_UNSPECIFIED);
 
         // Bounds are letterboxed to respect the provided max aspect ratio.
-        assertEquals(mActivity.getBounds(), new Rect(0, 0, 1000, 1100));
+        assertEquals(mActivity.getBounds(), new Rect(0, 850, 1000, 1950));
 
         // Move activity to split screen which has landscape size.
         mTask.reparent(organizer.mPrimary, POSITION_TOP, /* moveParents */ false, "test");
@@ -2045,19 +2045,14 @@ public class SizeCompatTests extends WindowTestsBase {
         mActivity.mWmService.mLetterboxConfiguration.setLetterboxHorizontalPositionMultiplier(
                 letterboxHorizontalPositionMultiplier);
         prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
-
         assertEquals(fixedOrientationLetterbox, mActivity.getBounds());
-
         // Rotate to put activity in size compat mode.
         rotateDisplay(mActivity.mDisplayContent, ROTATION_90);
-
         assertTrue(mActivity.inSizeCompatMode());
         // Activity is in size compat mode but not scaled.
         assertEquals(sizeCompatUnscaled, mActivity.getBounds());
-
         // Force activity to scaled down for size compat mode.
         resizeDisplay(mTask.mDisplayContent, 700, 1400);
-
         assertTrue(mActivity.inSizeCompatMode());
         assertScaled();
         assertEquals(sizeCompatScaled, mActivity.getBounds());
@@ -2072,6 +2067,109 @@ public class SizeCompatTests extends WindowTestsBase {
                 /* letterboxHorizontalPositionMultiplier */ 0.5f);
         assertHorizontalPositionForDifferentDisplayConfigsForLandscapeActivity(
                 /* letterboxHorizontalPositionMultiplier */ 1.0f);
+    }
+
+    @Test
+    public void testUpdateResolvedBoundsVerticalPosition_top() {
+        // Display configured as (1400, 2800).
+        assertVerticalPositionForDifferentDisplayConfigsForLandscapeActivity(
+                /* letterboxVerticalPositionMultiplier */ 0.0f,
+                // At launch.
+                /* fixedOrientationLetterbox */ new Rect(0, 0, 1400, 700),
+                // After 90 degree rotation.
+                /* sizeCompatUnscaled */ new Rect(700, 0, 2100, 700),
+                // After the display is resized to (1400, 700).
+                /* sizeCompatScaled */ new Rect(0, 0, 700, 350));
+    }
+
+    @Test
+    public void testUpdateResolvedBoundsVerticalPosition_center() {
+        // Display configured as (1400, 2800).
+        assertVerticalPositionForDifferentDisplayConfigsForLandscapeActivity(
+                /* letterboxVerticalPositionMultiplier */ 0.5f,
+                // At launch.
+                /* fixedOrientationLetterbox */ new Rect(0, 1050, 1400, 1750),
+                // After 90 degree rotation.
+                /* sizeCompatUnscaled */ new Rect(700, 350, 2100, 1050),
+                // After the display is resized to (1400, 700).
+                /* sizeCompatScaled */ new Rect(0, 525, 700, 875));
+    }
+
+    @Test
+    public void testUpdateResolvedBoundsVerticalPosition_invalidMultiplier_defaultToCenter() {
+        // Display configured as (1400, 2800).
+
+        // Below 0.0.
+        assertVerticalPositionForDifferentDisplayConfigsForLandscapeActivity(
+                /* letterboxVerticalPositionMultiplier */ -1.0f,
+                // At launch.
+                /* fixedOrientationLetterbox */ new Rect(0, 1050, 1400, 1750),
+                // After 90 degree rotation.
+                /* sizeCompatUnscaled */ new Rect(700, 350, 2100, 1050),
+                // After the display is resized to (1400, 700).
+                /* sizeCompatScaled */ new Rect(0, 525, 700, 875));
+
+        // Above 1.0
+        assertVerticalPositionForDifferentDisplayConfigsForLandscapeActivity(
+                /* letterboxVerticalPositionMultiplier */ 2.0f,
+                // At launch.
+                /* fixedOrientationLetterbox */ new Rect(0, 1050, 1400, 1750),
+                // After 90 degree rotation.
+                /* sizeCompatUnscaled */ new Rect(700, 350, 2100, 1050),
+                // After the display is resized to (1400, 700).
+                /* sizeCompatScaled */ new Rect(0, 525, 700, 875));
+    }
+
+    @Test
+    public void testUpdateResolvedBoundsVerticalPosition_bottom() {
+        // Display configured as (1400, 2800).
+        assertVerticalPositionForDifferentDisplayConfigsForLandscapeActivity(
+                /* letterboxVerticalPositionMultiplier */ 1.0f,
+                // At launch.
+                /* fixedOrientationLetterbox */ new Rect(0, 2100, 1400, 2800),
+                // After 90 degree rotation.
+                /* sizeCompatUnscaled */ new Rect(700, 700, 2100, 1400),
+                // After the display is resized to (1400, 700).
+                /* sizeCompatScaled */ new Rect(0, 1050, 700, 1400));
+    }
+
+    private void assertVerticalPositionForDifferentDisplayConfigsForLandscapeActivity(
+            float letterboxVerticalPositionMultiplier, Rect fixedOrientationLetterbox,
+            Rect sizeCompatUnscaled, Rect sizeCompatScaled) {
+        // Set up a display in portrait and ignoring orientation request.
+        setUpDisplaySizeWithApp(1400, 2800);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+
+        mActivity.mWmService.mLetterboxConfiguration.setLetterboxVerticalPositionMultiplier(
+                letterboxVerticalPositionMultiplier);
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_LANDSCAPE);
+
+        assertEquals(fixedOrientationLetterbox, mActivity.getBounds());
+
+        // Rotate to put activity in size compat mode.
+        rotateDisplay(mActivity.mDisplayContent, ROTATION_90);
+
+        assertTrue(mActivity.inSizeCompatMode());
+        // Activity is in size compat mode but not scaled.
+        assertEquals(sizeCompatUnscaled, mActivity.getBounds());
+
+        // Force activity to scaled down for size compat mode.
+        resizeDisplay(mTask.mDisplayContent, 1400, 700);
+
+        assertTrue(mActivity.inSizeCompatMode());
+        assertScaled();
+        assertEquals(sizeCompatScaled, mActivity.getBounds());
+    }
+
+    @Test
+    public void testUpdateResolvedBoundsVerticalPosition_activityFillParentHeight() {
+        // When activity height equals parent height, multiplier shouldn't have any effect.
+        assertVerticalPositionForDifferentDisplayConfigsForPortraitActivity(
+                /* letterboxVerticalPositionMultiplier */ 0.0f);
+        assertVerticalPositionForDifferentDisplayConfigsForPortraitActivity(
+                /* letterboxVerticalPositionMultiplier */ 0.5f);
+        assertVerticalPositionForDifferentDisplayConfigsForPortraitActivity(
+                /* letterboxVerticalPositionMultiplier */ 1.0f);
     }
 
     @Test
@@ -2367,6 +2465,23 @@ public class SizeCompatTests extends WindowTestsBase {
         mActivity.mWmService.mLetterboxConfiguration.setLetterboxHorizontalPositionMultiplier(
                 letterboxHorizontalPositionMultiplier);
         prepareUnresizable(mActivity, SCREEN_ORIENTATION_LANDSCAPE);
+        assertFitted();
+        // Rotate to put activity in size compat mode.
+        rotateDisplay(mActivity.mDisplayContent, ROTATION_90);
+        assertTrue(mActivity.inSizeCompatMode());
+        // Activity is in size compat mode but not scaled.
+        assertEquals(new Rect(0, 1050, 1400, 1750), mActivity.getBounds());
+    }
+
+    private void assertVerticalPositionForDifferentDisplayConfigsForPortraitActivity(
+            float letterboxVerticalPositionMultiplier) {
+        // Set up a display in portrait and ignoring orientation request.
+        setUpDisplaySizeWithApp(1400, 2800);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+
+        mActivity.mWmService.mLetterboxConfiguration.setLetterboxVerticalPositionMultiplier(
+                letterboxVerticalPositionMultiplier);
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
 
         assertFitted();
 
@@ -2375,7 +2490,7 @@ public class SizeCompatTests extends WindowTestsBase {
 
         assertTrue(mActivity.inSizeCompatMode());
         // Activity is in size compat mode but not scaled.
-        assertEquals(new Rect(0, 1050, 1400, 1750), mActivity.getBounds());
+        assertEquals(new Rect(1050, 0, 1750, 1400), mActivity.getBounds());
     }
 
     private static WindowState addWindowToActivity(ActivityRecord activity) {
