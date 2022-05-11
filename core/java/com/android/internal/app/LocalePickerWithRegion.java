@@ -36,7 +36,6 @@ import android.widget.SearchView;
 
 import com.android.internal.R;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Locale;
@@ -204,13 +203,20 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
     }
 
     private Set<LocaleStore.LocaleInfo> filterTheLanguagesNotSupportedInApp(
-            boolean shouldShowList, ArrayList<Locale> supportedLocales) {
+            boolean shouldShowList, HashSet<Locale> supportedLocales) {
         Set<LocaleStore.LocaleInfo> filteredList = new HashSet<>();
-        if (shouldShowList) {
-            for(LocaleStore.LocaleInfo li: mLocaleList) {
+        if (!shouldShowList) {
+            return filteredList;
+        }
+
+        for(LocaleStore.LocaleInfo li: mLocaleList) {
+            if (supportedLocales.contains(li.getLocale())) {
+                filteredList.add(li);
+            } else {
                 for(Locale l: supportedLocales) {
                     if(LocaleList.matchesLanguageAndScript(li.getLocale(), l)) {
                         filteredList.add(li);
+                        break;
                     }
                 }
             }
