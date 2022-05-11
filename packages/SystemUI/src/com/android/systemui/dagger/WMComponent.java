@@ -37,7 +37,6 @@ import com.android.wm.shell.dagger.WMSingleton;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelper;
 import com.android.wm.shell.draganddrop.DragAndDrop;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.recents.RecentTasks;
@@ -94,9 +93,6 @@ public interface WMComponent {
 
     @WMSingleton
     Optional<Pip> getPip();
-
-    @WMSingleton
-    Optional<LegacySplitScreen> getLegacySplitScreen();
 
     @WMSingleton
     Optional<SplitScreen> getSplitScreen();
