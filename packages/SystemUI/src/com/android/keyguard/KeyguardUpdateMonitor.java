@@ -2799,7 +2799,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      * Note: checking fingerprint enrollment directly with the AuthController requires an IPC.
      */
     public boolean getCachedIsUnlockWithFingerprintPossible(int userId) {
-        return mIsUnlockWithFingerprintPossible.get(userId);
+        return mIsUnlockWithFingerprintPossible.getOrDefault(userId, false);
     }
 
     private boolean isUnlockWithFacePossible(int userId) {

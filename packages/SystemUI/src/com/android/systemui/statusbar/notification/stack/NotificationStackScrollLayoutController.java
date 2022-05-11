@@ -216,6 +216,9 @@ public class NotificationStackScrollLayoutController {
                     mBarState = mStatusBarStateController.getState();
                     mStatusBarStateController.addCallback(
                             mStateListener, SysuiStatusBarStateController.RANK_STACK_SCROLLER);
+                    mLockscreenUserManager.addOnNeedsRedactionInPublicChangedListener(
+                            mOnNeedsRedactionInPublicChangedListener);
+                    updateClearButtonVisibility();
                 }
 
                 @Override
@@ -223,6 +226,8 @@ public class NotificationStackScrollLayoutController {
                     mConfigurationController.removeCallback(mConfigurationListener);
                     mZenModeController.removeCallback(mZenModeControllerCallback);
                     mStatusBarStateController.removeCallback(mStateListener);
+                    mLockscreenUserManager.removeOnNeedsRedactionInPublicChangedListener(
+                            mOnNeedsRedactionInPublicChangedListener);
                 }
             };
 
@@ -326,6 +331,7 @@ public class NotificationStackScrollLayoutController {
                             mLockscreenUserManager.isAnyProfilePublicMode());
                     mView.onStatePostChange(mStatusBarStateController.fromShadeLocked());
                     mNotificationEntryManager.updateNotifications("CentralSurfaces state changed");
+                    updateClearButtonVisibility();
                 }
             };
 
@@ -335,6 +341,17 @@ public class NotificationStackScrollLayoutController {
             mView.updateSensitiveness(false, mLockscreenUserManager.isAnyProfilePublicMode());
             mHistoryEnabled = null;
             updateFooter();
+        }
+    };
+
+    private final Runnable mOnNeedsRedactionInPublicChangedListener = new Runnable() {
+        @Override
+        public void run() {
+            // Whether or not the notification needs redaction when in public has changed, but if
+            // we're not actually in public, then we don't need to update anything.
+            if (mLockscreenUserManager.isAnyProfilePublicMode()) {
+                updateClearButtonVisibility();
+            }
         }
     };
 
@@ -1274,12 +1291,44 @@ public class NotificationStackScrollLayoutController {
         return hasNotifications(selection, true /* clearable */);
     }
 
+    private boolean hasRedactedClearableSilentNotifs() {
+        if (!mLockscreenUserManager.isAnyProfilePublicMode()) {
+            return false;
+        }
+        for (int userId : mNotifStats.getClearableSilentSensitiveNotifUsers()) {
+            if (mLockscreenUserManager.sensitiveNotifsNeedRedactionInPublic(userId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean hasClearableSilentNotifs() {
+        return mNotifStats.getHasClearableSilentNotifs() && !hasRedactedClearableSilentNotifs();
+    }
+
+    private boolean hasRedactedClearableAlertingNotifs() {
+        if (!mLockscreenUserManager.isAnyProfilePublicMode()) {
+            return false;
+        }
+        for (int userId : mNotifStats.getClearableAlertingSensitiveNotifUsers()) {
+            if (mLockscreenUserManager.sensitiveNotifsNeedRedactionInPublic(userId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean hasClearableAlertingNotifs() {
+        return mNotifStats.getHasClearableAlertingNotifs() && !hasRedactedClearableAlertingNotifs();
+    }
+
     public boolean hasNotifications(@SelectedRows int selection, boolean isClearable) {
         boolean hasAlertingMatchingClearable = isClearable
-                ? mNotifStats.getHasClearableAlertingNotifs()
+                ? hasClearableAlertingNotifs()
                 : mNotifStats.getHasNonClearableAlertingNotifs();
         boolean hasSilentMatchingClearable = isClearable
-                ? mNotifStats.getHasClearableSilentNotifs()
+                ? hasClearableSilentNotifs()
                 : mNotifStats.getHasNonClearableSilentNotifs();
         switch (selection) {
             case ROWS_GENTLE:
@@ -1577,6 +1626,15 @@ public class NotificationStackScrollLayoutController {
 
     public void setNotificationActivityStarter(NotificationActivityStarter activityStarter) {
         mNotificationActivityStarter = activityStarter;
+    }
+
+    private void updateClearButtonVisibility() {
+        updateClearSilentButton();
+        updateFooter();
+    }
+
+    private void updateClearSilentButton() {
+        mSilentHeaderController.setClearSectionEnabled(hasClearableSilentNotifs());
     }
 
     /**
@@ -1904,6 +1962,7 @@ public class NotificationStackScrollLayoutController {
         @Override
         public void setNotifStats(@NonNull NotifStats notifStats) {
             mNotifStats = notifStats;
+            updateClearSilentButton();
             updateFooter();
             updateShowEmptyShadeView();
         }
