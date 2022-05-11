@@ -74,6 +74,7 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__TAKE_SCREENSHOT;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__UNFOLD_ANIM;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__USER_SWITCH;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__VOLUME_CONTROL;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__WALLPAPER_TRANSITION;
 
 import android.annotation.IntDef;
@@ -196,6 +197,7 @@ public class InteractionJankMonitor {
     public static final int CUJ_SPLIT_SCREEN_RESIZE = 52;
     public static final int CUJ_SETTINGS_SLIDER = 53;
     public static final int CUJ_TAKE_SCREENSHOT = 54;
+    public static final int CUJ_VOLUME_CONTROL = 55;
 
     private static final int NO_STATSD_LOGGING = -1;
 
@@ -259,6 +261,7 @@ public class InteractionJankMonitor {
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SPLIT_SCREEN_RESIZE,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SETTINGS_SLIDER,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__TAKE_SCREENSHOT,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__VOLUME_CONTROL,
     };
 
     private static volatile InteractionJankMonitor sInstance;
@@ -334,6 +337,7 @@ public class InteractionJankMonitor {
             CUJ_SPLIT_SCREEN_RESIZE,
             CUJ_SETTINGS_SLIDER,
             CUJ_TAKE_SCREENSHOT,
+            CUJ_VOLUME_CONTROL,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {
@@ -762,6 +766,8 @@ public class InteractionJankMonitor {
                 return "SETTINGS_SLIDER";
             case CUJ_TAKE_SCREENSHOT:
                 return "TAKE_SCREENSHOT";
+            case CUJ_VOLUME_CONTROL:
+                return "VOLUME_CONTROL";
         }
         return "UNKNOWN";
     }
