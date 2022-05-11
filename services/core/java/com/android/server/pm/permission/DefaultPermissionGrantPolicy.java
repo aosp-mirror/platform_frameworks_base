@@ -1018,8 +1018,6 @@ final class DefaultPermissionGrantPolicy {
         for (String packageName : packageNames) {
             grantPermissionsToSystemPackage(NO_PM_CACHE, packageName, userId,
                     PHONE_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS, SMS_PERMISSIONS);
-            grantPermissionsToPackage(NO_PM_CACHE, packageName, userId, false, false,
-                    NOTIFICATION_PERMISSIONS);
         }
     }
 

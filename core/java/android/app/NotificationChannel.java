@@ -867,14 +867,6 @@ public final class NotificationChannel implements Parcelable {
      * @hide
      */
     @TestApi
-    public boolean isImportanceLockedByOEM() {
-        return mImportanceLockedByOEM;
-    }
-
-    /**
-     * @hide
-     */
-    @TestApi
     public boolean isImportanceLockedByCriticalDeviceFunction() {
         return mImportanceLockedDefaultApp;
     }
