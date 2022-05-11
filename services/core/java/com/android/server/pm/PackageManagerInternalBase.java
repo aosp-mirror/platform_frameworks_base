@@ -352,10 +352,9 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
 
     @Override
     @Deprecated
-    public final void setDeviceOwnerProtectedPackages(
-            String deviceOwnerPackageName, List<String> packageNames) {
-        getProtectedPackages().setDeviceOwnerProtectedPackages(
-                deviceOwnerPackageName, packageNames);
+    public final void setOwnerProtectedPackages(
+            @UserIdInt int userId, @NonNull List<String> packageNames) {
+        getProtectedPackages().setOwnerProtectedPackages(userId, packageNames);
     }
 
     @Override
