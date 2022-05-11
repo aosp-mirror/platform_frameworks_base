@@ -82,7 +82,7 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
                 mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
         adjacentRootTask.mCreatedByOrganizer = true;
         final TaskDisplayArea taskDisplayArea = rootTask.getDisplayArea();
-        adjacentRootTask.setAdjacentTaskFragment(rootTask, false /* moveTogether */);
+        adjacentRootTask.setAdjacentTaskFragment(rootTask);
 
         taskDisplayArea.setLaunchAdjacentFlagRootTask(adjacentRootTask);
         Task actualRootTask = taskDisplayArea.getLaunchRootTask(
@@ -108,7 +108,7 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
         final Task adjacentRootTask = createTask(
                 mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
         adjacentRootTask.mCreatedByOrganizer = true;
-        adjacentRootTask.setAdjacentTaskFragment(rootTask, false /* moveTogether */);
+        adjacentRootTask.setAdjacentTaskFragment(rootTask);
 
         taskDisplayArea.setLaunchRootTask(rootTask,
                 new int[]{WINDOWING_MODE_MULTI_WINDOW}, new int[]{ACTIVITY_TYPE_STANDARD});
@@ -129,7 +129,7 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
                 mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
         adjacentRootTask.mCreatedByOrganizer = true;
         final TaskDisplayArea taskDisplayArea = rootTask.getDisplayArea();
-        adjacentRootTask.setAdjacentTaskFragment(rootTask, false /* moveTogether */);
+        adjacentRootTask.setAdjacentTaskFragment(rootTask);
 
         taskDisplayArea.setLaunchAdjacentFlagRootTask(adjacentRootTask);
         final Task actualRootTask = taskDisplayArea.getLaunchRootTask(
@@ -758,7 +758,7 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
         adjacentRootTask.mCreatedByOrganizer = true;
         final Task candidateTask = createTaskInRootTask(rootTask, 0 /* userId*/);
         final TaskDisplayArea taskDisplayArea = rootTask.getDisplayArea();
-        adjacentRootTask.setAdjacentTaskFragment(rootTask, false /* moveTogether */);
+        adjacentRootTask.setAdjacentTaskFragment(rootTask);
 
         // Verify the launch root with candidate task
         Task actualRootTask = taskDisplayArea.getLaunchRootTask(WINDOWING_MODE_UNDEFINED,
