@@ -8244,6 +8244,30 @@ public class TelephonyManager {
     public static final int AUTHTYPE_EAP_SIM = PhoneConstants.AUTH_CONTEXT_EAP_SIM;
     /** Authentication type for UICC challenge is EAP AKA. See RFC 4187 for details. */
     public static final int AUTHTYPE_EAP_AKA = PhoneConstants.AUTH_CONTEXT_EAP_AKA;
+    /**
+     * Authentication type for GBA Bootstrap Challenge is GBA_BOOTSTRAP.
+     * See 3GPP 33.220 Section 5.3.2.
+     * @hide
+     */
+    public static final int AUTHTYPE_GBA_BOOTSTRAP = PhoneConstants.AUTH_CONTEXT_GBA_BOOTSTRAP;
+    /**
+     * Authentication type for GBA Network Application Functions (NAF) key
+     * External Challenge is AUTHTYPE_GBA_NAF_KEY_EXTERNAL.
+     * See 3GPP 33.220 Section 5.3.2.
+     * @hide
+     */
+    public static final int AUTHTYPE_GBA_NAF_KEY_EXTERNAL =
+            PhoneConstants.AUTHTYPE_GBA_NAF_KEY_EXTERNAL;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+            AUTHTYPE_EAP_SIM,
+            AUTHTYPE_EAP_AKA,
+            AUTHTYPE_GBA_BOOTSTRAP,
+            AUTHTYPE_GBA_NAF_KEY_EXTERNAL
+    })
+    public @interface AuthType {}
 
     /**
      * Returns the response of authentication for the default subscription.
@@ -8258,7 +8282,7 @@ public class TelephonyManager {
      * </ul>
      *
      * @param appType the icc application type, like {@link #APPTYPE_USIM}
-     * @param authType the authentication type, {@link #AUTHTYPE_EAP_AKA} or
+     * @param authType the authentication type, any one of {@link #AUTHTYPE_EAP_AKA} or
      * {@link #AUTHTYPE_EAP_SIM}
      * @param data authentication challenge data, base64 encoded.
      * See 3GPP TS 31.102 7.1.2 for more details.
@@ -8273,7 +8297,7 @@ public class TelephonyManager {
     // READ_PRIVILEGED_PHONE_STATE. It certainly shouldn't reference the permission in Javadoc since
     // it's not public API.
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
-    public String getIccAuthentication(int appType, int authType, String data) {
+    public String getIccAuthentication(int appType,@AuthType int authType, String data) {
         return getIccAuthentication(getSubId(), appType, authType, data);
     }
 
@@ -8286,7 +8310,7 @@ public class TelephonyManager {
      *
      * @param subId subscription ID used for authentication
      * @param appType the icc application type, like {@link #APPTYPE_USIM}
-     * @param authType the authentication type, {@link #AUTHTYPE_EAP_AKA} or
+     * @param authType the authentication type, any one of {@link #AUTHTYPE_EAP_AKA} or
      * {@link #AUTHTYPE_EAP_SIM}
      * @param data authentication challenge data, base64 encoded.
      * See 3GPP TS 31.102 7.1.2 for more details.
@@ -8300,7 +8324,7 @@ public class TelephonyManager {
      * @hide
      */
     @UnsupportedAppUsage
-    public String getIccAuthentication(int subId, int appType, int authType, String data) {
+    public String getIccAuthentication(int subId, int appType,@AuthType int authType, String data) {
         try {
             IPhoneSubInfo info = getSubscriberInfoService();
             if (info == null)
