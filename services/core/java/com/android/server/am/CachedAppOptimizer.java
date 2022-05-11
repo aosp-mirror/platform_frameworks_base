@@ -1223,14 +1223,16 @@ public final class CachedAppOptimizer {
                 break;
         }
 
-        // Downgrade compaction if facing swap memory pressure
+        // Downgrade compaction under swap memory pressure
         if (resolvedAction == COMPACT_ACTION_FULL) {
-            double swapUsagePercent = getFreeSwapPercent();
-            if (swapUsagePercent < COMPACT_DOWNGRADE_FREE_SWAP_THRESHOLD) {
-                Slog.d(TAG_AM,
-                        "Downgraded compaction to file only due to low swap."
-                                + " Swap Free% " + swapUsagePercent);
+            double swapFreePercent = getFreeSwapPercent();
+            if (swapFreePercent < COMPACT_DOWNGRADE_FREE_SWAP_THRESHOLD) {
                 resolvedAction = COMPACT_ACTION_FILE;
+                if (DEBUG_COMPACTION) {
+                    Slog.d(TAG_AM,
+                            "Downgraded compaction to file only due to low swap."
+                                    + " Swap Free% " + swapFreePercent);
+                }
             }
         }
 
@@ -1445,7 +1447,6 @@ public final class CachedAppOptimizer {
                         lastCompactTime = opt.getLastCompactTime();
                     }
 
-                    int resolvedAction = resolveCompactionAction(requestedAction);
                     long[] rssBefore;
                     if (pid == 0) {
                         // not a real process, either one being launched or one being killed
@@ -1456,17 +1457,17 @@ public final class CachedAppOptimizer {
                     }
 
                     if (!forceCompaction) {
-                        if (shouldOomAdjThrottleCompaction(proc, resolvedAction)) {
+                        if (shouldOomAdjThrottleCompaction(proc, requestedAction)) {
                             return;
                         }
                         if (shouldTimeThrottleCompaction(proc, start, requestedAction)) {
                             return;
                         }
-                        if (shouldThrottleMiscCompaction(proc, procState, resolvedAction)) {
+                        if (shouldThrottleMiscCompaction(proc, procState, requestedAction)) {
                             return;
                         }
                         rssBefore = mProcessDependencies.getRss(pid);
-                        if (shouldRssThrottleCompaction(resolvedAction, pid, name, rssBefore)) {
+                        if (shouldRssThrottleCompaction(requestedAction, pid, name, rssBefore)) {
                             return;
                         }
                     } else {
@@ -1494,6 +1495,8 @@ public final class CachedAppOptimizer {
                         default:
                             break;
                     }
+
+                    int resolvedAction = resolveCompactionAction(requestedAction);
                     action = compactActionIntToString(resolvedAction);
 
                     try {
