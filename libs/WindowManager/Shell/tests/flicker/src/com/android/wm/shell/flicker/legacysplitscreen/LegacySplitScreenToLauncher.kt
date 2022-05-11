@@ -17,7 +17,6 @@
 package com.android.wm.shell.flicker.legacysplitscreen
 
 import android.platform.test.annotations.Presubmit
-import android.support.test.launcherhelper.LauncherStrategyFactory
 import android.view.Surface
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
@@ -26,22 +25,19 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group2
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.endRotation
-import com.android.server.wm.flicker.focusDoesNotChange
+import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.exitSplitScreen
 import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.helpers.openQuickStepAndClearRecentAppsFromOverview
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
-import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
-import com.android.server.wm.flicker.layerBecomesInvisible
-import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
-import com.android.server.wm.flicker.noUncoveredRegions
-import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.navBarWindowIsVisible
+import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
-import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
+import com.android.server.wm.flicker.statusBarWindowIsVisible
+import com.android.server.wm.traces.common.FlickerComponentName
 import com.android.wm.shell.flicker.dockedStackDividerBecomesInvisible
 import com.android.wm.shell.flicker.helpers.SimpleAppHelper
 import org.junit.FixMethodOrder
@@ -62,12 +58,10 @@ import org.junit.runners.Parameterized
 class LegacySplitScreenToLauncher(
     testSpec: FlickerTestParameter
 ) : LegacySplitScreenTransition(testSpec) {
-    private val launcherPackageName = LauncherStrategyFactory.getInstance(instrumentation)
-        .launcherStrategy.supportedLauncherPackage
     private val testApp = SimpleAppHelper(instrumentation)
 
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
-        get() = { configuration ->
+    override val transition: FlickerBuilder.() -> Unit
+        get() = {
             setup {
                 test {
                     device.wakeUpAndGoToHomeScreen()
@@ -75,7 +69,7 @@ class LegacySplitScreenToLauncher(
                 }
                 eachRun {
                     testApp.launchViaIntent(wmHelper)
-                    this.setRotation(configuration.endRotation)
+                    this.setRotation(testSpec.endRotation)
                     device.launchSplitScreen(wmHelper)
                     device.waitForIdle()
                 }
@@ -90,51 +84,69 @@ class LegacySplitScreenToLauncher(
             }
         }
 
-    override val ignoredWindows: List<String>
-        get() = listOf(launcherPackageName, WindowManagerStateHelper.SPLASH_SCREEN_NAME,
-            WindowManagerStateHelper.SNAPSHOT_WINDOW_NAME)
+    override val ignoredWindows: List<FlickerComponentName>
+        get() = listOf(LAUNCHER_COMPONENT, FlickerComponentName.SPLASH_SCREEN,
+            FlickerComponentName.SNAPSHOT)
 
     @Presubmit
     @Test
-    fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
+    fun navBarWindowIsVisible() = testSpec.navBarWindowIsVisible()
 
     @Presubmit
     @Test
-    fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
+    fun statusBarWindowIsVisible() = testSpec.statusBarWindowIsVisible()
 
     @Presubmit
     @Test
-    fun navBarLayerIsAlwaysVisible() = testSpec.navBarLayerIsAlwaysVisible()
+    fun navBarLayerIsVisible() = testSpec.navBarLayerIsVisible()
 
     @Presubmit
     @Test
-    fun noUncoveredRegions() = testSpec.noUncoveredRegions(testSpec.config.endRotation)
+    fun entireScreenCovered() = testSpec.entireScreenCovered()
 
     @Presubmit
     @Test
-    fun navBarLayerRotatesAndScales() =
-        testSpec.navBarLayerRotatesAndScales(testSpec.config.endRotation)
+    fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales()
+
+    @FlakyTest(bugId = 206753786)
+    @Test
+    fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
 
     @Presubmit
     @Test
-    fun statusBarLayerRotatesScales() =
-        testSpec.statusBarLayerRotatesScales(testSpec.config.endRotation)
+    fun statusBarLayerIsVisible() = testSpec.statusBarLayerIsVisible()
 
-    @Presubmit
-    @Test
-    fun statusBarLayerIsAlwaysVisible() = testSpec.statusBarLayerIsAlwaysVisible()
-
-    @Presubmit
+    @FlakyTest
     @Test
     fun dockedStackDividerBecomesInvisible() = testSpec.dockedStackDividerBecomesInvisible()
 
+    @FlakyTest
+    @Test
+    fun layerBecomesInvisible() {
+        testSpec.assertLayers {
+            this.isVisible(testApp.component)
+                    .then()
+                    .isInvisible(testApp.component)
+        }
+    }
+
+    @FlakyTest
+    @Test
+    fun focusDoesNotChange() {
+        testSpec.assertEventLog {
+            this.focusDoesNotChange()
+        }
+    }
+
     @Presubmit
     @Test
-    fun layerBecomesInvisible() = testSpec.layerBecomesInvisible(testApp.getPackage())
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+            super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
-    @FlakyTest(bugId = 151179149)
+    @Presubmit
     @Test
-    fun focusDoesNotChange() = testSpec.focusDoesNotChange()
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+            super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

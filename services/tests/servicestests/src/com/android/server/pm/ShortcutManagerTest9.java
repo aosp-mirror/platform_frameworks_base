@@ -32,7 +32,9 @@ import android.content.IntentSender;
 import android.content.pm.LauncherApps;
 import android.content.pm.LauncherApps.PinItemRequest;
 import android.os.UserHandle;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.platform.test.annotations.Presubmit;
+
+import androidx.test.filters.SmallTest;
 
 import org.mockito.ArgumentCaptor;
 
@@ -46,6 +48,7 @@ import org.mockito.ArgumentCaptor;
  adb shell am instrument -e class com.android.server.pm.ShortcutManagerTest9 \
  -w com.android.frameworks.servicestests/androidx.test.runner.AndroidJUnitRunner
  */
+@Presubmit
 @SmallTest
 public class ShortcutManagerTest9 extends BaseShortcutManagerTest {
 

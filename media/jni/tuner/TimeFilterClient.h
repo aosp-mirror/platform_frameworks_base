@@ -17,18 +17,14 @@
 #ifndef _ANDROID_MEDIA_TV_TIME_FILTER_CLIENT_H_
 #define _ANDROID_MEDIA_TV_TIME_FILTER_CLIENT_H_
 
+#include <aidl/android/hardware/tv/tuner/Result.h>
 #include <aidl/android/media/tv/tuner/ITunerTimeFilter.h>
-#include <android/hardware/tv/tuner/1.0/ITimeFilter.h>
-#include <android/hardware/tv/tuner/1.1/types.h>
-
-using ::aidl::android::media::tv::tuner::ITunerTimeFilter;
+#include <utils/RefBase.h>
 
 using Status = ::ndk::ScopedAStatus;
-using ::android::hardware::Return;
-using ::android::hardware::Void;
-using ::android::hardware::hidl_vec;
-using ::android::hardware::tv::tuner::V1_0::ITimeFilter;
-using ::android::hardware::tv::tuner::V1_0::Result;
+
+using ::aidl::android::hardware::tv::tuner::Result;
+using ::aidl::android::media::tv::tuner::ITunerTimeFilter;
 
 using namespace std;
 
@@ -40,13 +36,10 @@ public:
     TimeFilterClient(shared_ptr<ITunerTimeFilter> tunerTimeFilter);
     ~TimeFilterClient();
 
-    // TODO: remove after migration to Tuner Service is done.
-    void setHidlTimeFilter(sp<ITimeFilter> timeFilter);
-
     /**
      * Set time stamp for time based filter.
      */
-    Result setTimeStamp(long timeStamp);
+    Result setTimeStamp(int64_t timeStamp);
 
     /**
      * Clear the time stamp in the time filter.
@@ -56,12 +49,12 @@ public:
     /**
      * Get the current time in the time filter.
      */
-    long getTimeStamp();
+    int64_t getTimeStamp();
 
     /**
      * Get the time from the beginning of current data source.
      */
-    long getSourceTime();
+    int64_t getSourceTime();
 
     /**
      * Releases the Time Filter instance.
@@ -74,13 +67,6 @@ private:
      * opens an TimeFilter. Default null when time filter is not opened.
      */
     shared_ptr<ITunerTimeFilter> mTunerTimeFilter;
-
-    /**
-     * A TimeFilter HAL interface that is ready before migrating to the TunerTimeFilter.
-     * This is a temprary interface before Tuner Framework migrates to use TunerService.
-     * Default null when the HAL service does not exist.
-     */
-    sp<ITimeFilter> mTimeFilter;
 };
 }  // namespace android
 

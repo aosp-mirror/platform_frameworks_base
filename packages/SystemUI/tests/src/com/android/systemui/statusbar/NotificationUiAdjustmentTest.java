@@ -80,8 +80,8 @@ public class NotificationUiAdjustmentTest extends SysuiTestCase {
         Notification.Action firstAction =
                 createActionBuilder("same", R.drawable.ic_corp_icon, pendingIntent).build();
         Notification.Action secondAction =
-                createActionBuilder("same", R.drawable.ic_account_circle, pendingIntent)
-                        .build();
+                createActionBuilder("same", com.android.settingslib.R.drawable.ic_account_circle,
+                        pendingIntent).build();
 
         assertThat(NotificationUiAdjustment.needReinflate(
                 createUiAdjustmentFromSmartActions("first", Collections.singletonList(firstAction)),

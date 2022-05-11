@@ -51,8 +51,8 @@ public final class SnapshotData implements Parcelable {
 
     SnapshotData(@NonNull Parcel parcel) {
         mAssistData = parcel.readBundle();
-        mAssistStructure = parcel.readParcelable(null);
-        mAssistContent = parcel.readParcelable(null);
+        mAssistStructure = parcel.readParcelable(null, android.app.assist.AssistStructure.class);
+        mAssistContent = parcel.readParcelable(null, android.app.assist.AssistContent.class);
     }
 
     /**

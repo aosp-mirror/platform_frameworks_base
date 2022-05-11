@@ -18,10 +18,10 @@ package com.android.server.pm.parsing;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.pm.parsing.component.ParsedComponent;
 import android.util.Pair;
 
-import com.android.server.pm.PackageSetting;
+import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.component.ParsedComponent;
 
 /**
  * For exposing internal fields to the rest of the server, enforcing that any overridden state from
@@ -37,12 +37,12 @@ public class ParsedComponentStateUtils {
 
     @NonNull
     public static Pair<CharSequence, Integer> getNonLocalizedLabelAndIcon(ParsedComponent component,
-            @Nullable PackageSetting pkgSetting, int userId) {
+            @Nullable PackageStateInternal pkgSetting, int userId) {
         CharSequence label = component.getNonLocalizedLabel();
         int icon = component.getIcon();
 
         Pair<String, Integer> overrideLabelIcon = pkgSetting == null ? null :
-                pkgSetting.readUserState(userId)
+                pkgSetting.getUserStateOrDefault(userId)
                         .getOverrideLabelIconForComponent(component.getComponentName());
         if (overrideLabelIcon != null) {
             if (overrideLabelIcon.first != null) {

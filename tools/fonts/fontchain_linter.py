@@ -13,41 +13,56 @@ from fontTools import ttLib
 EMOJI_VS = 0xFE0F
 
 LANG_TO_SCRIPT = {
+    'af': 'Latn',
     'as': 'Beng',
+    'am': 'Latn',
     'be': 'Cyrl',
     'bg': 'Cyrl',
     'bn': 'Beng',
+    'cs': 'Latn',
     'cu': 'Cyrl',
     'cy': 'Latn',
     'da': 'Latn',
     'de': 'Latn',
+    'el': 'Latn',
     'en': 'Latn',
     'es': 'Latn',
     'et': 'Latn',
     'eu': 'Latn',
     'fr': 'Latn',
     'ga': 'Latn',
+    'gl': 'Latn',
     'gu': 'Gujr',
     'hi': 'Deva',
     'hr': 'Latn',
     'hu': 'Latn',
     'hy': 'Armn',
+    'it': 'Latn',
     'ja': 'Jpan',
+    'ka': 'Latn',
     'kn': 'Knda',
     'ko': 'Kore',
     'la': 'Latn',
+    'lt': 'Latn',
+    'lv': 'Latn',
     'ml': 'Mlym',
     'mn': 'Cyrl',
     'mr': 'Deva',
     'nb': 'Latn',
+    'nl': 'Latn',
     'nn': 'Latn',
     'or': 'Orya',
     'pa': 'Guru',
     'pt': 'Latn',
+    'ru': 'Latn',
+    'sk': 'Latn',
     'sl': 'Latn',
+    'sq': 'Latn',
+    'sv': 'Latn',
     'ta': 'Taml',
     'te': 'Telu',
     'tk': 'Latn',
+    'uk': 'Latn',
 }
 
 def lang_to_script(lang_code):
@@ -228,6 +243,8 @@ def parse_fonts_xml(fonts_xml_path):
         name = family.get('name')
         variant = family.get('variant')
         langs = family.get('lang')
+        ignoreAttr = family.get('ignore')
+
         if name:
             assert variant is None, (
                 'No variant expected for LGC font %s.' % name)
@@ -244,6 +261,11 @@ def parse_fonts_xml(fonts_xml_path):
         name = family.get('name')
         variant = family.get('variant')
         langs = family.get('lang')
+        ignoreAttr = family.get('ignore')
+        ignore = ignoreAttr == 'true' or ignoreAttr == '1'
+
+        if ignore:
+            continue
 
         if langs:
             langs = langs.split()
@@ -318,29 +340,104 @@ def check_emoji_coverage(all_emoji, equivalent_emoji):
 def get_emoji_fonts():
     return [ record.font for record in _all_fonts if 'Zsye' in record.scripts ]
 
+def seq_any(sequence, pred):
+  if type(sequence) is tuple:
+    return any([pred(x) for x in sequence])
+  else:
+    return pred(sequence)
+
+def seq_all(sequence, pred):
+  if type(sequence) is tuple:
+    return all([pred(x) for x in sequence])
+  else:
+    return pred(sequence)
+
+def is_regional_indicator(x):
+    # regional indicator A..Z
+    return 0x1F1E6 <= x <= 0x1F1FF
+
+def is_tag(x):
+    # tag block
+    return 0xE0000 <= x <= 0xE007F
+
 def is_pua(x):
     return 0xE000 <= x <= 0xF8FF or 0xF0000 <= x <= 0xFFFFD or 0x100000 <= x <= 0x10FFFD
 
 def contains_pua(sequence):
-  if type(sequence) is tuple:
-    return any([is_pua(x) for x in sequence])
-  else:
-    return is_pua(sequence)
+    return seq_any(sequence, is_pua)
+
+def contains_regional_indicator(sequence):
+    return seq_any(sequence, is_regional_indicator)
+
+def only_tags(sequence):
+    return seq_all(sequence, is_tag)
 
 def get_psname(ttf):
     return str(next(x for x in ttf['name'].names
         if x.platformID == 3 and x.platEncID == 1 and x.nameID == 6))
 
-def check_emoji_compat():
+def hex_strs(sequence):
+    if type(sequence) is tuple:
+        return tuple(f"{s:X}" for s in sequence)
+    return hex(sequence)
+
+def check_plausible_compat_pua(coverage, all_emoji, equivalent_emoji):
+    # A PUA should point to every RGI emoji and that PUA should be unique to the
+    # set of equivalent sequences for the emoji.
+    problems = []
+    for seq in all_emoji:
+        # We're looking to match not-PUA with PUA so filter out existing PUA
+        if contains_pua(seq):
+            continue
+
+        # Filter out non-RGI things that end up in all_emoji
+        if only_tags(seq) or seq in {ZWJ, COMBINING_KEYCAP, EMPTY_FLAG_SEQUENCE}:
+            continue
+
+        equivalents = [seq]
+        if seq in equivalent_emoji:
+            equivalents.append(equivalent_emoji[seq])
+
+        # If there are problems the hex code is much more useful
+        log_equivalents = [hex_strs(s) for s in equivalents]
+
+        # The system compat font should NOT include regional indicators as these have been split out
+        if contains_regional_indicator(seq):
+            assert not any(s in coverage for s in equivalents), f"Regional indicators not expected in compat font, found {log_equivalents}"
+            continue
+
+        glyph = {coverage[e] for e in equivalents}
+        if len(glyph) != 1:
+            problems.append(f"{log_equivalents} should all point to the same glyph")
+            continue
+        glyph = next(iter(glyph))
+
+        pua = {s for s, g in coverage.items() if contains_pua(s) and g == glyph}
+        if not pua:
+            problems.append(f"Expected PUA for {log_equivalents} but none exist")
+            continue
+
+    assert not problems, "\n".join(sorted(problems)) + f"\n{len(problems)} PUA problems"
+
+def check_emoji_compat(all_emoji, equivalent_emoji):
+    compat_psnames = set()
     for emoji_font in get_emoji_fonts():
         ttf = open_font(emoji_font)
         psname = get_psname(ttf)
 
-        # If the font file is NotoColorEmoji, it must be Compat font.
-        if psname == 'NotoColorEmoji':
-            meta = ttf['meta']
-            assert meta, 'Compat font must have meta table'
-            assert 'Emji' in meta.data, 'meta table should have \'Emji\' data.'
+        is_compat_font = "meta" in ttf and 'Emji' in ttf["meta"].data
+        if not is_compat_font:
+            continue
+        compat_psnames.add(psname)
+
+        # If the font has compat metadata it should have PUAs for emoji sequences
+        coverage = get_emoji_map(emoji_font)
+        check_plausible_compat_pua(coverage, all_emoji, equivalent_emoji)
+
+
+    # NotoColorEmoji must be a Compat font.
+    assert 'NotoColorEmoji' in compat_psnames, 'NotoColorEmoji MUST be a compat font'
+
 
 def check_emoji_font_coverage(emoji_fonts, all_emoji, equivalent_emoji):
     coverages = []
@@ -589,6 +686,8 @@ SAME_FLAG_MAPPINGS = [
 
 ZWJ = 0x200D
 
+EMPTY_FLAG_SEQUENCE = (0x1F3F4, 0xE007F)
+
 def is_fitzpatrick_modifier(cp):
     return 0x1F3FB <= cp <= 0x1F3FF
 
@@ -614,29 +713,17 @@ def compute_expected_emoji():
     adjusted_emoji_zwj_sequences.update(_emoji_zwj_sequences)
 
     # Add empty flag tag sequence that is supported as fallback
-    _emoji_sequences[(0x1F3F4, 0xE007F)] = 'Emoji_Tag_Sequence'
+    _emoji_sequences[EMPTY_FLAG_SEQUENCE] = 'Emoji_Tag_Sequence'
 
     for sequence in _emoji_sequences.keys():
         sequence = tuple(ch for ch in sequence if ch != EMOJI_VS)
         all_sequences.add(sequence)
         sequence_pieces.update(sequence)
-        if _emoji_sequences.get(sequence, None) == 'Emoji_Tag_Sequence':
-            # Add reverse of all emoji ZWJ sequences, which are added to the
-            # fonts as a workaround to get the sequences work in RTL text.
-            # TODO: test if these are actually needed by Minikin/HarfBuzz.
-            reversed_seq = reverse_emoji(sequence)
-            all_sequences.add(reversed_seq)
-            equivalent_emoji[reversed_seq] = sequence
 
     for sequence in adjusted_emoji_zwj_sequences.keys():
         sequence = tuple(ch for ch in sequence if ch != EMOJI_VS)
         all_sequences.add(sequence)
         sequence_pieces.update(sequence)
-        # Add reverse of all emoji ZWJ sequences, which are added to the fonts
-        # as a workaround to get the sequences work in RTL text.
-        reversed_seq = reverse_emoji(sequence)
-        all_sequences.add(reversed_seq)
-        equivalent_emoji[reversed_seq] = sequence
 
     for first, second in SAME_FLAG_MAPPINGS:
         equivalent_emoji[first] = second
@@ -741,6 +828,7 @@ def main():
     _fonts_dir = path.join(target_out, 'fonts')
 
     fonts_xml_path = path.join(target_out, 'etc', 'fonts.xml')
+
     parse_fonts_xml(fonts_xml_path)
 
     check_compact_only_fallback()
@@ -759,7 +847,7 @@ def main():
         ucd_path = sys.argv[3]
         parse_ucd(ucd_path)
         all_emoji, default_emoji, equivalent_emoji = compute_expected_emoji()
-        check_emoji_compat()
+        check_emoji_compat(all_emoji, equivalent_emoji)
         check_emoji_coverage(all_emoji, equivalent_emoji)
         check_emoji_defaults(default_emoji)
 

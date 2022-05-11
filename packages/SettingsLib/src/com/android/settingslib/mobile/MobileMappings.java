@@ -113,6 +113,8 @@ public class MobileMappings {
                     TelephonyIcons.UNKNOWN);
             networkToIconLookup.put(toIconKey(TelephonyManager.NETWORK_TYPE_EDGE),
                     TelephonyIcons.E);
+            networkToIconLookup.put(toIconKey(TelephonyManager.NETWORK_TYPE_GPRS),
+                    TelephonyIcons.G);
             networkToIconLookup.put(toIconKey(TelephonyManager.NETWORK_TYPE_CDMA),
                     TelephonyIcons.ONE_X);
             networkToIconLookup.put(toIconKey(TelephonyManager.NETWORK_TYPE_1xRTT),
@@ -121,6 +123,8 @@ public class MobileMappings {
             networkToIconLookup.put(toIconKey(TelephonyManager.NETWORK_TYPE_UNKNOWN),
                     TelephonyIcons.THREE_G);
             networkToIconLookup.put(toIconKey(TelephonyManager.NETWORK_TYPE_EDGE),
+                    TelephonyIcons.THREE_G);
+            networkToIconLookup.put(toIconKey(TelephonyManager.NETWORK_TYPE_GPRS),
                     TelephonyIcons.THREE_G);
             networkToIconLookup.put(toIconKey(TelephonyManager.NETWORK_TYPE_CDMA),
                     TelephonyIcons.THREE_G);
@@ -155,6 +159,19 @@ public class MobileMappings {
                 networkToIconLookup.put(toDisplayIconKey(
                         TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_CA),
                         TelephonyIcons.FOUR_G_PLUS);
+            }
+        } else if (config.show4glteForLte) {
+            networkToIconLookup.put(toIconKey(
+                    TelephonyManager.NETWORK_TYPE_LTE),
+                    TelephonyIcons.FOUR_G_LTE);
+            if (config.hideLtePlus) {
+                networkToIconLookup.put(toDisplayIconKey(
+                        TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_CA),
+                        TelephonyIcons.FOUR_G_LTE);
+            } else {
+                networkToIconLookup.put(toDisplayIconKey(
+                        TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_CA),
+                        TelephonyIcons.FOUR_G_LTE_PLUS);
             }
         } else {
             networkToIconLookup.put(toIconKey(
@@ -196,6 +213,7 @@ public class MobileMappings {
         public boolean show4gFor3g = false;
         public boolean alwaysShowCdmaRssi = false;
         public boolean show4gForLte = false;
+        public boolean show4glteForLte = false;
         public boolean hideLtePlus = false;
         public boolean hspaDataDistinguishable;
         public boolean alwaysShowDataRatIcon = false;
@@ -224,6 +242,8 @@ public class MobileMappings {
                         CarrierConfigManager.KEY_ALWAYS_SHOW_DATA_RAT_ICON_BOOL);
                 config.show4gForLte = b.getBoolean(
                         CarrierConfigManager.KEY_SHOW_4G_FOR_LTE_DATA_ICON_BOOL);
+                config.show4glteForLte = b.getBoolean(
+                        CarrierConfigManager.KEY_SHOW_4GLTE_FOR_LTE_DATA_ICON_BOOL);
                 config.show4gFor3g = b.getBoolean(
                         CarrierConfigManager.KEY_SHOW_4G_FOR_3G_DATA_ICON_BOOL);
                 config.hideLtePlus = b.getBoolean(

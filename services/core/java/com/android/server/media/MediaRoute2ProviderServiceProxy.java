@@ -301,8 +301,8 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
         if (DEBUG) {
             Slog.d(TAG, this + ": Service binding died");
         }
+        unbind();
         if (shouldBind()) {
-            unbind();
             bind();
         }
     }

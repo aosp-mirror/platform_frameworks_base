@@ -51,8 +51,6 @@ int register_android_server_Watchdog(JNIEnv* env);
 int register_android_server_HardwarePropertiesManagerService(JNIEnv* env);
 int register_android_server_SyntheticPasswordManager(JNIEnv* env);
 int register_android_hardware_display_DisplayViewport(JNIEnv* env);
-int register_android_server_net_NetworkStatsFactory(JNIEnv* env);
-int register_android_server_net_NetworkStatsService(JNIEnv* env);
 int register_android_server_am_CachedAppOptimizer(JNIEnv* env);
 int register_android_server_am_LowMemDetector(JNIEnv* env);
 int register_com_android_server_soundtrigger_middleware_AudioSessionProviderImpl(JNIEnv* env);
@@ -63,6 +61,9 @@ int register_android_server_FaceService(JNIEnv* env);
 int register_android_server_GpuService(JNIEnv* env);
 int register_android_server_stats_pull_StatsPullAtomService(JNIEnv* env);
 int register_android_server_sensor_SensorService(JavaVM* vm, JNIEnv* env);
+int register_android_server_companion_virtual_InputController(JNIEnv* env);
+int register_android_server_app_GameManagerService(JNIEnv* env);
+int register_com_android_server_wm_TaskFpsCallbackController(JNIEnv* env);
 };
 
 using namespace android;
@@ -105,10 +106,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     register_android_server_HardwarePropertiesManagerService(env);
     register_android_server_storage_AppFuse(env);
     register_android_server_SyntheticPasswordManager(env);
-    register_android_graphics_GraphicsStatsService(env);
     register_android_hardware_display_DisplayViewport(env);
-    register_android_server_net_NetworkStatsFactory(env);
-    register_android_server_net_NetworkStatsService(env);
     register_android_server_am_CachedAppOptimizer(env);
     register_android_server_am_LowMemDetector(env);
     register_com_android_server_soundtrigger_middleware_AudioSessionProviderImpl(env);
@@ -119,5 +117,8 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     register_android_server_GpuService(env);
     register_android_server_stats_pull_StatsPullAtomService(env);
     register_android_server_sensor_SensorService(vm, env);
+    register_android_server_companion_virtual_InputController(env);
+    register_android_server_app_GameManagerService(env);
+    register_com_android_server_wm_TaskFpsCallbackController(env);
     return JNI_VERSION_1_4;
 }

@@ -61,5 +61,6 @@ public final class RecordingSession implements AutoCloseable {
     @Override
     public void close() {
         mClosed = true;
+        mManager.releaseSessionId(mLogSessionId.getStringId());
     }
 }

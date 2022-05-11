@@ -109,7 +109,7 @@ public class BluetoothEventManagerTest {
                         /* handler= */ null, /* userHandle= */ null);
 
         verify(mockContext).registerReceiver(any(BroadcastReceiver.class), any(IntentFilter.class),
-                eq(null), eq(null));
+                eq(null), eq(null), eq(Context.RECEIVER_EXPORTED));
     }
 
     @Test
@@ -120,7 +120,7 @@ public class BluetoothEventManagerTest {
                         /* handler= */ null, UserHandle.ALL);
 
         verify(mockContext).registerReceiverAsUser(any(BroadcastReceiver.class), eq(UserHandle.ALL),
-                any(IntentFilter.class), eq(null), eq(null));
+                any(IntentFilter.class), eq(null), eq(null), eq(Context.RECEIVER_EXPORTED));
     }
 
     /**
@@ -357,7 +357,8 @@ public class BluetoothEventManagerTest {
         mIntent = new Intent(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mBluetoothDevice);
         mIntent.putExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.BOND_NONE);
-        mIntent.putExtra(BluetoothDevice.EXTRA_REASON, BluetoothDevice.UNBOND_REASON_AUTH_TIMEOUT);
+        mIntent.putExtra(BluetoothDevice.EXTRA_UNBOND_REASON,
+                BluetoothDevice.UNBOND_REASON_AUTH_TIMEOUT);
         when(mCachedDeviceManager.findDevice(mBluetoothDevice)).thenReturn(mCachedDevice1);
         when(mCachedDevice1.getName()).thenReturn(DEVICE_NAME);
 
@@ -372,7 +373,7 @@ public class BluetoothEventManagerTest {
         mIntent = new Intent(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mBluetoothDevice);
         mIntent.putExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.BOND_NONE);
-        mIntent.putExtra(BluetoothDevice.EXTRA_REASON,
+        mIntent.putExtra(BluetoothDevice.EXTRA_UNBOND_REASON,
                 BluetoothDevice.UNBOND_REASON_REMOTE_DEVICE_DOWN);
         when(mCachedDeviceManager.findDevice(mBluetoothDevice)).thenReturn(mCachedDevice1);
         when(mCachedDevice1.getName()).thenReturn(DEVICE_NAME);
@@ -388,7 +389,8 @@ public class BluetoothEventManagerTest {
         mIntent = new Intent(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mBluetoothDevice);
         mIntent.putExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.BOND_NONE);
-        mIntent.putExtra(BluetoothDevice.EXTRA_REASON, BluetoothDevice.UNBOND_REASON_AUTH_REJECTED);
+        mIntent.putExtra(BluetoothDevice.EXTRA_UNBOND_REASON,
+                BluetoothDevice.UNBOND_REASON_AUTH_REJECTED);
         when(mCachedDeviceManager.findDevice(mBluetoothDevice)).thenReturn(mCachedDevice1);
         when(mCachedDevice1.getName()).thenReturn(DEVICE_NAME);
 
@@ -403,7 +405,8 @@ public class BluetoothEventManagerTest {
         mIntent = new Intent(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mBluetoothDevice);
         mIntent.putExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.BOND_NONE);
-        mIntent.putExtra(BluetoothDevice.EXTRA_REASON, BluetoothDevice.UNBOND_REASON_AUTH_FAILED);
+        mIntent.putExtra(BluetoothDevice.EXTRA_UNBOND_REASON,
+                BluetoothDevice.UNBOND_REASON_AUTH_FAILED);
         when(mCachedDeviceManager.findDevice(mBluetoothDevice)).thenReturn(mCachedDevice1);
         when(mCachedDevice1.getName()).thenReturn(DEVICE_NAME);
 

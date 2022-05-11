@@ -22,6 +22,8 @@ import static android.view.MotionEvent.ACTION_POINTER_DOWN;
 import static android.view.MotionEvent.ACTION_POINTER_UP;
 import static android.view.MotionEvent.ACTION_UP;
 
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
+
 import static com.android.server.testutils.TestUtils.strictMock;
 
 import static org.junit.Assert.assertFalse;
@@ -38,20 +40,19 @@ import static org.mockito.Mockito.when;
 
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
-import android.content.Context;
 import android.graphics.PointF;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.Settings;
+import android.testing.TestableContext;
 import android.util.DebugUtils;
 import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.accessibility.AccessibilityManagerService;
+import com.android.server.accessibility.AccessibilityTraceManager;
 import com.android.server.accessibility.EventStreamTransformation;
 import com.android.server.accessibility.magnification.FullScreenMagnificationController.MagnificationInfoChangedCallback;
 import com.android.server.testutils.OffsettableClock;
@@ -60,6 +61,7 @@ import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -121,7 +123,6 @@ public class FullScreenMagnificationGestureHandlerTest {
 
     private static final int DISPLAY_0 = 0;
 
-    private Context mContext;
     FullScreenMagnificationController mFullScreenMagnificationController;
     @Mock
     MagnificationGestureHandler.Callback mMockCallback;
@@ -129,6 +130,13 @@ public class FullScreenMagnificationGestureHandlerTest {
     MagnificationInfoChangedCallback mMagnificationInfoChangedCallback;
     @Mock
     WindowMagnificationPromptController mWindowMagnificationPromptController;
+    @Mock
+    AccessibilityManagerService mMockAccessibilityManagerService;
+    @Mock
+    AccessibilityTraceManager mMockTraceManager;
+
+    @Rule
+    public final TestableContext mContext = new TestableContext(getInstrumentation().getContext());
 
     private OffsettableClock mClock;
     private FullScreenMagnificationGestureHandler mMgh;
@@ -139,26 +147,27 @@ public class FullScreenMagnificationGestureHandlerTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mContext = InstrumentationRegistry.getContext();
         final FullScreenMagnificationController.ControllerContext mockController =
                 mock(FullScreenMagnificationController.ControllerContext.class);
         final WindowManagerInternal mockWindowManager = mock(WindowManagerInternal.class);
         when(mockController.getContext()).thenReturn(mContext);
-        when(mockController.getAms()).thenReturn(mock(AccessibilityManagerService.class));
+        when(mockController.getTraceManager()).thenReturn(mMockTraceManager);
         when(mockController.getWindowManager()).thenReturn(mockWindowManager);
         when(mockController.getHandler()).thenReturn(new Handler(mContext.getMainLooper()));
         when(mockController.newValueAnimator()).thenReturn(new ValueAnimator());
         when(mockController.getAnimationDuration()).thenReturn(1000L);
         when(mockWindowManager.setMagnificationCallbacks(eq(DISPLAY_0), any())).thenReturn(true);
         mFullScreenMagnificationController = new FullScreenMagnificationController(mockController,
-                new Object(), mMagnificationInfoChangedCallback) {
+                new Object(), mMagnificationInfoChangedCallback,
+                new MagnificationScaleProvider(mContext)) {
             @Override
             public boolean magnificationRegionContains(int displayId, float x, float y) {
                 return true;
             }
 
             @Override
-            void setForceShowMagnifiableBounds(int displayId, boolean show) {}
+            void setForceShowMagnifiableBounds(int displayId, boolean show) {
+            }
         };
         mFullScreenMagnificationController.register(DISPLAY_0);
         mClock = new OffsettableClock.Stopped();
@@ -179,7 +188,7 @@ public class FullScreenMagnificationGestureHandlerTest {
     private FullScreenMagnificationGestureHandler newInstance(boolean detectTripleTap,
             boolean detectShortcutTrigger) {
         FullScreenMagnificationGestureHandler h = new FullScreenMagnificationGestureHandler(
-                mContext, mFullScreenMagnificationController, mMockCallback,
+                mContext, mFullScreenMagnificationController, mMockTraceManager, mMockCallback,
                 detectTripleTap, detectShortcutTrigger,
                 mWindowMagnificationPromptController, DISPLAY_0);
         mHandler = new TestHandler(h.mDetectingState, mClock) {
@@ -449,14 +458,6 @@ public class FullScreenMagnificationGestureHandlerTest {
         goFromStateIdleTo(STATE_SHORTCUT_TRIGGERED);
 
         verify(mWindowMagnificationPromptController).showNotificationIfNeeded();
-    }
-
-    @Test
-    public void testZoomedWithTripleTap_callsOnTripleTapped() {
-        goFromStateIdleTo(STATE_ZOOMED_2TAPS);
-
-        verify(mMockCallback).onTripleTapped(DISPLAY_0,
-                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
     }
 
     private void assertActionsInOrder(List<MotionEvent> actualEvents,

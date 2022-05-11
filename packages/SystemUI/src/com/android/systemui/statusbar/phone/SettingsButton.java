@@ -24,13 +24,15 @@ import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Button;
 
-import com.android.keyguard.AlphaOptimizedImageButton;
 import com.android.systemui.animation.Interpolators;
+import com.android.systemui.statusbar.AlphaOptimizedImageView;
 
-public class SettingsButton extends AlphaOptimizedImageButton {
+public class SettingsButton extends AlphaOptimizedImageView {
 
     private static final boolean TUNER_ENABLE_AVAILABLE = false;
 
@@ -120,6 +122,9 @@ public class SettingsButton extends AlphaOptimizedImageButton {
                         setAlpha(1f);
                         setTranslationX(0);
                         cancelLongClick();
+                        // Unset the listener, otherwise this may persist for
+                        // another view property animation
+                        animate().setListener(null);
                     }
 
                     @Override
@@ -165,6 +170,12 @@ public class SettingsButton extends AlphaOptimizedImageButton {
         mAnimator.setDuration(FULL_SPEED_LENGTH);
         mAnimator.setRepeatCount(Animation.INFINITE);
         mAnimator.start();
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfoInternal(info);
+        info.setClassName(Button.class.getName());
     }
 
     private final Runnable mLongPressCallback = new Runnable() {

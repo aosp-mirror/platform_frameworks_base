@@ -147,8 +147,8 @@ public class OptionsCmdStatus implements Parcelable {
     /** @hide */
     public void readFromParcel(Parcel source) {
         mUserData = source.readInt();
-        mCmdId = source.readParcelable(OptionsCmdId.class.getClassLoader());
-        mStatus = source.readParcelable(StatusCode.class.getClassLoader());
-        mCapInfo = source.readParcelable(CapInfo.class.getClassLoader());
+        mCmdId = source.readParcelable(OptionsCmdId.class.getClassLoader(), com.android.ims.internal.uce.options.OptionsCmdId.class);
+        mStatus = source.readParcelable(StatusCode.class.getClassLoader(), com.android.ims.internal.uce.common.StatusCode.class);
+        mCapInfo = source.readParcelable(CapInfo.class.getClassLoader(), com.android.ims.internal.uce.common.CapInfo.class);
     }
 }

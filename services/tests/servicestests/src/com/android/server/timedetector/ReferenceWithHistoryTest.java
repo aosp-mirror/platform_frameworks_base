@@ -17,17 +17,19 @@
 package com.android.server.timedetector;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import android.util.IndentingPrintWriter;
 
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.timezonedetector.ReferenceWithHistory;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.StringWriter;
+import java.util.Arrays;
 
 @RunWith(AndroidJUnit4.class)
 public class ReferenceWithHistoryTest {
@@ -41,31 +43,34 @@ public class ReferenceWithHistoryTest {
 
         // Check unset behavior.
         compareGet(referenceWithHistory, reference, null);
-        assertNotNull(dumpReferenceWithHistory(referenceWithHistory));
+        assertDumpContent(referenceWithHistory);
         compareToString(referenceWithHistory, reference, "null");
 
         // Try setting null.
         setAndCompareReturnValue(referenceWithHistory, reference, null);
         compareGet(referenceWithHistory, reference, null);
-        assertNotNull(dumpReferenceWithHistory(referenceWithHistory));
+        assertDumpContent(referenceWithHistory, new DumpLine(0, "null"));
         compareToString(referenceWithHistory, reference, "null");
 
         // Try setting a non-null value.
         setAndCompareReturnValue(referenceWithHistory, reference, "Foo");
         compareGet(referenceWithHistory, reference, "Foo");
-        assertNotNull(dumpReferenceWithHistory(referenceWithHistory));
+        assertDumpContent(referenceWithHistory,
+                new DumpLine(0, "null"), new DumpLine(1, "Foo"));
         compareToString(referenceWithHistory, reference, "Foo");
 
         // Try setting null again.
-        setAndCompareReturnValue(referenceWithHistory, reference, "Foo");
-        compareGet(referenceWithHistory, reference, "Foo");
-        assertNotNull(dumpReferenceWithHistory(referenceWithHistory));
-        compareToString(referenceWithHistory, reference, "Foo");
+        setAndCompareReturnValue(referenceWithHistory, reference, null);
+        compareGet(referenceWithHistory, reference, null);
+        assertDumpContent(referenceWithHistory,
+                new DumpLine(1, "Foo"), new DumpLine(2, "null"));
+        compareToString(referenceWithHistory, reference, "null");
 
         // Try a non-null value again.
         setAndCompareReturnValue(referenceWithHistory, reference, "Bar");
         compareGet(referenceWithHistory, reference, "Bar");
-        assertNotNull(dumpReferenceWithHistory(referenceWithHistory));
+        assertDumpContent(referenceWithHistory,
+                new DumpLine(2, "null"), new DumpLine(3, "Bar"));
         compareToString(referenceWithHistory, reference, "Bar");
     }
 
@@ -132,11 +137,54 @@ public class ReferenceWithHistoryTest {
         assertEquals(expected, referenceWithHistory.toString());
     }
 
-    private static String dumpReferenceWithHistory(ReferenceWithHistory<?> referenceWithHistory) {
+    private static void assertDumpContent(
+            ReferenceWithHistory<?> referenceWithHistory, DumpLine... expectedLines) {
+        String[] actualLines = dumpReferenceWithHistory(referenceWithHistory);
+
+        if (expectedLines.length == 0) {
+            String expectedEmptyOutput = "{Empty}";
+            assertEquals(expectedEmptyOutput, 1, actualLines.length);
+            assertEquals(expectedEmptyOutput, actualLines[0]);
+        } else {
+            assertEquals("Expected=" + Arrays.toString(expectedLines)
+                            + ", actual=" + Arrays.toString(actualLines),
+                    expectedLines.length, actualLines.length);
+            for (int i = 0; i < expectedLines.length; i++) {
+                DumpLine expectedLine = expectedLines[i];
+                String actualLine = actualLines[i];
+                assertTrue("i=" + i + ", expected=" + expectedLine + ", actual=" + actualLine,
+                        actualLine.startsWith(Integer.toString(expectedLine.mIndex)));
+                assertTrue("i=" + i + ", expected=" + expectedLine + ", actual=" + actualLine,
+                        actualLine.endsWith(expectedLine.mLine));
+            }
+        }
+    }
+
+    private static String[] dumpReferenceWithHistory(ReferenceWithHistory<?> referenceWithHistory) {
         StringWriter stringWriter = new StringWriter();
         try (IndentingPrintWriter ipw = new IndentingPrintWriter(stringWriter, " ")) {
             referenceWithHistory.dump(ipw);
-            return stringWriter.toString();
+            return stringWriter.toString().split("\n");
+        }
+    }
+
+    /** An expected line of {@link ReferenceWithHistory#dump} output. */
+    private static class DumpLine {
+
+        final int mIndex;
+        final String mLine;
+
+        DumpLine(int index, String line) {
+            mIndex = index;
+            mLine = line;
+        }
+
+        @Override
+        public String toString() {
+            return "DumpLine{"
+                    + "mIndex=" + mIndex
+                    + ", mLine='" + mLine + '\''
+                    + '}';
         }
     }
 }

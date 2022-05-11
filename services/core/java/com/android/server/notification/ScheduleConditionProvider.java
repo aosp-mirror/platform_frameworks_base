@@ -40,6 +40,7 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.notification.NotificationManagerService.DumpFilter;
+import com.android.server.pm.PackageManagerService;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -218,12 +219,7 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
 
     private void updateAlarm(long now, long time) {
         final AlarmManager alarms = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-        final PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext,
-                REQUEST_CODE_EVALUATE,
-                new Intent(ACTION_EVALUATE)
-                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
-                        .putExtra(EXTRA_TIME, time),
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        final PendingIntent pendingIntent = getPendingIntent(time);
         alarms.cancel(pendingIntent);
         if (time > now) {
             if (DEBUG) Slog.d(TAG, String.format("Scheduling evaluate for %s, in %s, now=%s",
@@ -232,6 +228,17 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
         } else {
             if (DEBUG) Slog.d(TAG, "Not scheduling evaluate");
         }
+    }
+
+    @VisibleForTesting
+    PendingIntent getPendingIntent(long time) {
+        return PendingIntent.getBroadcast(mContext,
+                REQUEST_CODE_EVALUATE,
+                new Intent(ACTION_EVALUATE)
+                        .setPackage(PackageManagerService.PLATFORM_PACKAGE_NAME)
+                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+                        .putExtra(EXTRA_TIME, time),
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
     public long getNextAlarm() {
@@ -254,7 +261,8 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
             filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
             filter.addAction(ACTION_EVALUATE);
             filter.addAction(AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED);
-            registerReceiver(mReceiver, filter);
+            registerReceiver(mReceiver, filter,
+                    Context.RECEIVER_EXPORTED_UNAUDITED);
         } else {
             unregisterReceiver(mReceiver);
         }

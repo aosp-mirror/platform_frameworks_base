@@ -20,8 +20,6 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.os.Handler;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -34,51 +32,12 @@ public final class TimeZoneDetectorInternalImpl implements TimeZoneDetectorInter
     @NonNull private final Context mContext;
     @NonNull private final Handler mHandler;
     @NonNull private final TimeZoneDetectorStrategy mTimeZoneDetectorStrategy;
-    @NonNull private final List<ConfigurationChangeListener> mConfigurationListeners =
-            new ArrayList<>();
 
     public TimeZoneDetectorInternalImpl(@NonNull Context context, @NonNull Handler handler,
             @NonNull TimeZoneDetectorStrategy timeZoneDetectorStrategy) {
         mContext = Objects.requireNonNull(context);
         mHandler = Objects.requireNonNull(handler);
         mTimeZoneDetectorStrategy = Objects.requireNonNull(timeZoneDetectorStrategy);
-
-        // Wire up a change listener so that any downstream listeners can be notified when
-        // the configuration changes for any reason.
-        mTimeZoneDetectorStrategy.addConfigChangeListener(this::handleConfigurationChanged);
-    }
-
-    private void handleConfigurationChanged() {
-        synchronized (mConfigurationListeners) {
-            for (ConfigurationChangeListener listener : mConfigurationListeners) {
-                listener.onChange();
-            }
-        }
-    }
-
-    @Override
-    public void addDumpable(@NonNull Dumpable dumpable) {
-        mTimeZoneDetectorStrategy.addDumpable(dumpable);
-    }
-
-    @Override
-    public void addConfigurationListener(ConfigurationChangeListener listener) {
-        synchronized (mConfigurationListeners) {
-            mConfigurationListeners.add(Objects.requireNonNull(listener));
-        }
-    }
-
-    @Override
-    public void removeConfigurationListener(ConfigurationChangeListener listener) {
-        synchronized (mConfigurationListeners) {
-            mConfigurationListeners.remove(Objects.requireNonNull(listener));
-        }
-    }
-
-    @Override
-    @NonNull
-    public ConfigurationInternal getCurrentUserConfigurationInternal() {
-        return mTimeZoneDetectorStrategy.getCurrentUserConfigurationInternal();
     }
 
     @Override
