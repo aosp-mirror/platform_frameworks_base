@@ -57,11 +57,11 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.WindowManagerGlobal;
 import android.view.WindowMetrics;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.accessibility.IRemoteMagnificationAnimationCallback;
+import android.widget.FrameLayout;
 
 import androidx.core.math.MathUtils;
 
@@ -75,6 +75,7 @@ import java.io.PrintWriter;
 import java.text.NumberFormat;
 import java.util.Collections;
 import java.util.Locale;
+import java.util.function.Supplier;
 
 /**
  * Class to handle adding and removing a window magnification.
@@ -92,6 +93,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     private static final Range<Float> A11Y_ACTION_SCALE_RANGE = new Range<>(2.0f, 8.0f);
     private static final float A11Y_CHANGE_SCALE_DIFFERENCE = 1.0f;
     private static final float ANIMATION_BOUNCE_EFFECT_SCALE = 1.05f;
+
     private final Context mContext;
     private final Resources mResources;
     private final Handler mHandler;
@@ -163,8 +165,13 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     private SurfaceView mMirrorSurfaceView;
     private int mMirrorSurfaceMargin;
     private int mBorderDragSize;
-    private int mDragViewSize;
     private int mOuterBorderSize;
+
+    /**
+     * How far from the right edge of the screen you need to drag the window before the button
+     * repositions to the other side.
+     */
+    private int mButtonRepositionThresholdFromEdge;
     // The boundary of magnification frame.
     private final Rect mMagnificationFrameBoundary = new Rect();
     // The top Y of the system gesture rect at the bottom. Set to -1 if it is invalid.
@@ -172,6 +179,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     private int mMinWindowSize;
 
     private final WindowMagnificationAnimationController mAnimationController;
+    private final Supplier<IWindowSession> mGlobalWindowSessionSupplier;
     private final SfVsyncFrameCallbackProvider mSfVsyncFrameProvider;
     private final MagnificationGestureDetector mGestureDetector;
     private final int mBounceEffectDuration;
@@ -182,18 +190,25 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     private SysUiState mSysUiState;
     // Set it to true when the view is overlapped with the gesture insets at the bottom.
     private boolean mOverlapWithGestureInsets;
+    private boolean mIsDragging;
 
     @Nullable
     private MirrorWindowControl mMirrorWindowControl;
 
-    WindowMagnificationController(@UiContext Context context, @NonNull Handler handler,
+    WindowMagnificationController(
+            @UiContext Context context,
+            @NonNull Handler handler,
             @NonNull WindowMagnificationAnimationController animationController,
             SfVsyncFrameCallbackProvider sfVsyncFrameProvider,
-            MirrorWindowControl mirrorWindowControl, SurfaceControl.Transaction transaction,
-            @NonNull WindowMagnifierCallback callback, SysUiState sysUiState) {
+            MirrorWindowControl mirrorWindowControl,
+            SurfaceControl.Transaction transaction,
+            @NonNull WindowMagnifierCallback callback,
+            SysUiState sysUiState,
+            @NonNull Supplier<IWindowSession> globalWindowSessionSupplier) {
         mContext = context;
         mHandler = handler;
         mAnimationController = animationController;
+        mGlobalWindowSessionSupplier = globalWindowSessionSupplier;
         mAnimationController.setWindowMagnificationController(this);
         mSfVsyncFrameProvider = sfVsyncFrameProvider;
         mWindowMagnifierCallback = callback;
@@ -249,8 +264,8 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
                 };
 
         mMirrorSurfaceViewLayoutChangeListener =
-                (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom)
-                        -> applyTapExcludeRegion();
+                (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) ->
+                        mMirrorView.post(this::applyTapExcludeRegion);
 
         mMirrorViewGeometryVsyncCallback =
                 l -> {
@@ -283,10 +298,11 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
                 R.dimen.magnification_mirror_surface_margin);
         mBorderDragSize = mResources.getDimensionPixelSize(
                 R.dimen.magnification_border_drag_size);
-        mDragViewSize = mResources.getDimensionPixelSize(
-                R.dimen.magnification_drag_view_size);
         mOuterBorderSize = mResources.getDimensionPixelSize(
                 R.dimen.magnification_outer_border_margin);
+        mButtonRepositionThresholdFromEdge =
+                mResources.getDimensionPixelSize(
+                        R.dimen.magnification_button_reposition_threshold_from_edge);
         mMinWindowSize = mResources.getDimensionPixelSize(
                 com.android.internal.R.dimen.accessibility_window_magnifier_min_size);
     }
@@ -551,10 +567,13 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     }
 
     private void applyTapExcludeRegion() {
+        // Sometimes this can get posted and run after deleteWindowMagnification() is called.
+        if (mMirrorView == null) return;
+
         final Region tapExcludeRegion = calculateTapExclude();
         final IWindow window = IWindow.Stub.asInterface(mMirrorView.getWindowToken());
         try {
-            IWindowSession session = WindowManagerGlobal.getWindowSession();
+            IWindowSession session = mGlobalWindowSessionSupplier.get();
             session.updateTapExcludeRegion(window, tapExcludeRegion);
         } catch (RemoteException e) {
         }
@@ -564,9 +583,9 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         Region regionInsideDragBorder = new Region(mBorderDragSize, mBorderDragSize,
                 mMirrorView.getWidth() - mBorderDragSize,
                 mMirrorView.getHeight() - mBorderDragSize);
-        Rect dragArea = new Rect(mMirrorView.getWidth() - mDragViewSize - mBorderDragSize,
-                mMirrorView.getHeight() - mDragViewSize - mBorderDragSize,
-                mMirrorView.getWidth(), mMirrorView.getHeight());
+        Rect dragArea = new Rect();
+        mDragView.getHitRect(dragArea);
+
         regionInsideDragBorder.op(dragArea, Region.Op.DIFFERENCE);
         return regionInsideDragBorder;
     }
@@ -713,6 +732,12 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         mMirrorView.setTranslationX(translationX);
         mMirrorView.setTranslationY(translationY);
         mWm.updateViewLayout(mMirrorView, params);
+
+        // If they are not dragging the handle, we can move the drag handle immediately without
+        // disruption. But if they are dragging it, we avoid moving until the end of the drag.
+        if (!mIsDragging) {
+            mMirrorView.post(this::maybeRepositionButton);
+        }
     }
 
     @Override
@@ -1060,12 +1085,38 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
 
     @Override
     public boolean onStart(float x, float y) {
+        mIsDragging = true;
         return true;
     }
 
     @Override
     public boolean onFinish(float x, float y) {
+        maybeRepositionButton();
+        mIsDragging = false;
         return false;
+    }
+
+    /** Moves the button to the opposite edge if the frame is against the edge of the screen. */
+    private void maybeRepositionButton() {
+        if (mMirrorView == null) return;
+
+        final float screenEdgeX = mWindowBounds.right - mButtonRepositionThresholdFromEdge;
+        final FrameLayout.LayoutParams layoutParams =
+                (FrameLayout.LayoutParams) mDragView.getLayoutParams();
+
+        mMirrorView.getBoundsOnScreen(mTmpRect);
+
+        final int newGravity;
+        if (mTmpRect.right >= screenEdgeX) {
+            newGravity = Gravity.BOTTOM | Gravity.LEFT;
+        } else {
+            newGravity = Gravity.BOTTOM | Gravity.RIGHT;
+        }
+        if (newGravity != layoutParams.gravity) {
+            layoutParams.gravity = newGravity;
+            mDragView.setLayoutParams(layoutParams);
+            mDragView.post(this::applyTapExcludeRegion);
+        }
     }
 
     private void animateBounceEffect() {

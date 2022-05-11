@@ -1036,6 +1036,9 @@
     <!-- The extra padding to show the whole outer border -->
     <dimen name="magnifier_drag_handle_padding">3dp</dimen>
     <dimen name="magnification_max_frame_size">300dp</dimen>
+    <!-- How far from the right edge of the screen you need to drag the window before the button
+         repositions to the other side. -->
+    <dimen name="magnification_button_reposition_threshold_from_edge">32dp</dimen>
 
     <!-- Home Controls -->
     <dimen name="controls_header_menu_size">48dp</dimen>
