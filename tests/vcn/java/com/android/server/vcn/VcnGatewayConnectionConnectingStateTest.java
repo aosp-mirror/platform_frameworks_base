@@ -64,7 +64,7 @@ public class VcnGatewayConnectionConnectingStateTest extends VcnGatewayConnectio
     @Test
     public void testNullNetworkTriggersDisconnect() throws Exception {
         mGatewayConnection
-                .getUnderlyingNetworkTrackerCallback()
+                .getUnderlyingNetworkControllerCallback()
                 .onSelectedUnderlyingNetworkChanged(null);
         mTestLooper.dispatchAll();
 
@@ -76,7 +76,7 @@ public class VcnGatewayConnectionConnectingStateTest extends VcnGatewayConnectio
     @Test
     public void testNewNetworkTriggersReconnect() throws Exception {
         mGatewayConnection
-                .getUnderlyingNetworkTrackerCallback()
+                .getUnderlyingNetworkControllerCallback()
                 .onSelectedUnderlyingNetworkChanged(TEST_UNDERLYING_NETWORK_RECORD_2);
         mTestLooper.dispatchAll();
 
@@ -89,7 +89,7 @@ public class VcnGatewayConnectionConnectingStateTest extends VcnGatewayConnectio
     @Test
     public void testSameNetworkDoesNotTriggerReconnect() throws Exception {
         mGatewayConnection
-                .getUnderlyingNetworkTrackerCallback()
+                .getUnderlyingNetworkControllerCallback()
                 .onSelectedUnderlyingNetworkChanged(TEST_UNDERLYING_NETWORK_RECORD_1);
         mTestLooper.dispatchAll();
 
@@ -125,6 +125,10 @@ public class VcnGatewayConnectionConnectingStateTest extends VcnGatewayConnectio
     @Test
     public void testTeardown() throws Exception {
         mGatewayConnection.teardownAsynchronously();
+        mTestLooper.dispatchAll();
+
+        // Verify that sending a non-quitting disconnect request does not unset the isQuitting flag
+        mGatewayConnection.sendDisconnectRequestedAndAcquireWakelock("TEST", false);
         mTestLooper.dispatchAll();
 
         assertEquals(mGatewayConnection.mDisconnectingState, mGatewayConnection.getCurrentState());

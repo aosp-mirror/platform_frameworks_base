@@ -122,6 +122,29 @@ public class HapticFeedbackConstants {
     public static final int REJECT = 17;
 
     /**
+     * A haptic effect to provide texture while a rotary input device is being scrolled.
+     *
+     * @hide
+     */
+    public static final int ROTARY_SCROLL_TICK = 18;
+
+    /**
+     * A haptic effect to signal that a list element has been focused while scrolling using a rotary
+     * input device.
+     *
+     * @hide
+     */
+    public static final int ROTARY_SCROLL_ITEM_FOCUS = 19;
+
+    /**
+     * A haptic effect to signal reaching the scrolling limits of a list while scrolling using a
+     * rotary input device.
+     *
+     * @hide
+     */
+    public static final int ROTARY_SCROLL_LIMIT = 20;
+
+    /**
      * The phone has booted with safe mode enabled.
      * This is a private constant.  Feel free to renumber as desired.
      * @hide
@@ -130,9 +153,18 @@ public class HapticFeedbackConstants {
 
     /**
      * Invocation of the voice assistant via hardware button.
+     * This is a private constant.  Feel free to renumber as desired.
      * @hide
      */
     public static final int ASSISTANT_BUTTON = 10002;
+
+    /**
+     * The user has performed a long press on the power button hardware that is resulting
+     * in an action being performed.
+     * This is a private constant.  Feel free to renumber as desired.
+     * @hide
+     */
+    public static final int LONG_PRESS_POWER_BUTTON = 10003;
 
     /**
      * Flag for {@link View#performHapticFeedback(int, int)
@@ -145,6 +177,10 @@ public class HapticFeedbackConstants {
      * Flag for {@link View#performHapticFeedback(int, int)
      * View.performHapticFeedback(int, int)}: Ignore the global setting
      * for whether to perform haptic feedback, do it always.
+     *
+     * @deprecated Starting from {@link android.os.Build.VERSION_CODES#TIRAMISU} only privileged
+     * apps can ignore user settings for touch feedback.
      */
+    @Deprecated
     public static final int FLAG_IGNORE_GLOBAL_SETTING = 0x0002;
 }

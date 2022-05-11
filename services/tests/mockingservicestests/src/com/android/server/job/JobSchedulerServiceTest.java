@@ -32,6 +32,7 @@ import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
@@ -77,6 +78,8 @@ import java.time.Duration;
 import java.time.ZoneOffset;
 
 public class JobSchedulerServiceTest {
+    private static final String TAG = JobSchedulerServiceTest.class.getSimpleName();
+
     private JobSchedulerService mService;
 
     private MockitoSession mMockingSession;
@@ -89,11 +92,6 @@ public class JobSchedulerServiceTest {
         TestJobSchedulerService(Context context) {
             super(context);
             mAppStateTracker = mock(AppStateTrackerImpl.class);
-        }
-
-        @Override
-        public boolean isChainedAttributionEnabled() {
-            return false;
         }
     }
 
@@ -112,15 +110,14 @@ public class JobSchedulerServiceTest {
                 .when(() -> LocalServices.getService(ActivityManagerInternal.class));
         doReturn(mock(AppStandbyInternal.class))
                 .when(() -> LocalServices.getService(AppStandbyInternal.class));
+        doReturn(mock(BatteryManagerInternal.class))
+                .when(() -> LocalServices.getService(BatteryManagerInternal.class));
         doReturn(mock(UsageStatsManagerInternal.class))
                 .when(() -> LocalServices.getService(UsageStatsManagerInternal.class));
         when(mContext.getString(anyInt())).thenReturn("some_test_string");
         // Called in BackgroundJobsController constructor.
         doReturn(mock(AppStateTrackerImpl.class))
                 .when(() -> LocalServices.getService(AppStateTracker.class));
-        // Called in BatteryController constructor.
-        doReturn(mock(BatteryManagerInternal.class))
-                .when(() -> LocalServices.getService(BatteryManagerInternal.class));
         // Called in ConnectivityController constructor.
         when(mContext.getSystemService(ConnectivityManager.class))
                 .thenReturn(mock(ConnectivityManager.class));
@@ -178,12 +175,64 @@ public class JobSchedulerServiceTest {
     }
 
     private static JobInfo.Builder createJobInfo() {
-        return new JobInfo.Builder(351, new ComponentName("foo", "bar"));
+        return createJobInfo(351);
+    }
+
+    private static JobInfo.Builder createJobInfo(int jobId) {
+        return new JobInfo.Builder(jobId, new ComponentName("foo", "bar"));
     }
 
     private JobStatus createJobStatus(String testTag, JobInfo.Builder jobInfoBuilder) {
+        return createJobStatus(testTag, jobInfoBuilder, 1234);
+    }
+
+    private JobStatus createJobStatus(String testTag, JobInfo.Builder jobInfoBuilder,
+            int callingUid) {
         return JobStatus.createFromJobInfo(
-                jobInfoBuilder.build(), 1234, "com.android.test", 0, testTag);
+                jobInfoBuilder.build(), callingUid, "com.android.test", 0, testTag);
+    }
+
+    @Test
+    public void testGetMinJobExecutionGuaranteeMs() {
+        JobStatus ejMax = createJobStatus("testGetMinJobExecutionGuaranteeMs",
+                createJobInfo(1).setExpedited(true));
+        JobStatus ejHigh = createJobStatus("testGetMinJobExecutionGuaranteeMs",
+                createJobInfo(2).setExpedited(true).setPriority(JobInfo.PRIORITY_HIGH));
+        JobStatus ejMaxDowngraded = createJobStatus("testGetMinJobExecutionGuaranteeMs",
+                createJobInfo(3).setExpedited(true));
+        JobStatus ejHighDowngraded = createJobStatus("testGetMinJobExecutionGuaranteeMs",
+                createJobInfo(4).setExpedited(true).setPriority(JobInfo.PRIORITY_HIGH));
+        JobStatus jobHigh = createJobStatus("testGetMinJobExecutionGuaranteeMs",
+                createJobInfo(5).setPriority(JobInfo.PRIORITY_HIGH));
+        JobStatus jobDef = createJobStatus("testGetMinJobExecutionGuaranteeMs",
+                createJobInfo(6));
+
+        spyOn(ejMax);
+        spyOn(ejHigh);
+        spyOn(ejMaxDowngraded);
+        spyOn(ejHighDowngraded);
+        spyOn(jobHigh);
+        spyOn(jobDef);
+
+        when(ejMax.shouldTreatAsExpeditedJob()).thenReturn(true);
+        when(ejHigh.shouldTreatAsExpeditedJob()).thenReturn(true);
+        when(ejMaxDowngraded.shouldTreatAsExpeditedJob()).thenReturn(false);
+        when(ejHighDowngraded.shouldTreatAsExpeditedJob()).thenReturn(false);
+        when(jobHigh.shouldTreatAsExpeditedJob()).thenReturn(false);
+        when(jobDef.shouldTreatAsExpeditedJob()).thenReturn(false);
+
+        assertEquals(mService.mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(ejMax));
+        assertEquals(mService.mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(ejHigh));
+        assertEquals(mService.mConstants.RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(ejMaxDowngraded));
+        assertEquals(mService.mConstants.RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(ejHighDowngraded));
+        assertEquals(mService.mConstants.RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobHigh));
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobDef));
     }
 
     /**
@@ -688,13 +737,108 @@ public class JobSchedulerServiceTest {
         assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
     }
 
+    @Test
+    public void testGetRescheduleJobForPeriodic_outsideWindow_flex_failedJob_longPeriod() {
+        JobStatus job = createJobStatus(
+                "testGetRescheduleJobForPeriodic_outsideWindow_flex_failedJob_longPeriod",
+                createJobInfo().setPeriodic(7 * DAY_IN_MILLIS, 9 * HOUR_IN_MILLIS));
+        JobStatus failedJob = mService.getRescheduleJobForFailureLocked(job);
+        // First window starts 6.625 days from now.
+        advanceElapsedClock(6 * DAY_IN_MILLIS + 15 * HOUR_IN_MILLIS);
+        long now = sElapsedRealtimeClock.millis();
+        long nextWindowStartTime = now + 7 * DAY_IN_MILLIS;
+        long nextWindowEndTime = nextWindowStartTime + 9 * HOUR_IN_MILLIS;
+
+        advanceElapsedClock(6 * HOUR_IN_MILLIS + MINUTE_IN_MILLIS);
+        // Say the job ran at the very end of its previous window. The intended JSS behavior is to
+        // have consistent windows, so the new window should start as soon as the previous window
+        // ended and end PERIOD time after the previous window ended.
+        JobStatus rescheduledJob = mService.getRescheduleJobForPeriodic(failedJob);
+        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
+        advanceElapsedClock(DAY_IN_MILLIS);
+        // Say the job ran a day late. Since the period is massive compared to the flex, JSS should
+        // put the rescheduled job in the original window.
+        rescheduledJob = mService.getRescheduleJobForPeriodic(failedJob);
+        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
+        // 1 day before the start of the next window. Given the large period, respect the original
+        // next window.
+        advanceElapsedClock(nextWindowStartTime - sElapsedRealtimeClock.millis() - DAY_IN_MILLIS);
+        rescheduledJob = mService.getRescheduleJobForPeriodic(job);
+        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
+        // 1 hour before the start of the next window. It's too close to the next window, so the
+        // returned job should be for the window after.
+        long oneHourBeforeNextWindow =
+                nextWindowStartTime - sElapsedRealtimeClock.millis() - HOUR_IN_MILLIS;
+        long fiveMinsBeforeNextWindow =
+                nextWindowStartTime - sElapsedRealtimeClock.millis() - 5 * MINUTE_IN_MILLIS;
+        advanceElapsedClock(oneHourBeforeNextWindow);
+        nextWindowStartTime += 7 * DAY_IN_MILLIS;
+        nextWindowEndTime += 7 * DAY_IN_MILLIS;
+        rescheduledJob = mService.getRescheduleJobForPeriodic(job);
+        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
+        // 5 minutes before the start of the next window. It's too close to the next window, so the
+        // returned job should be for the window after.
+        advanceElapsedClock(fiveMinsBeforeNextWindow);
+        rescheduledJob = mService.getRescheduleJobForPeriodic(job);
+        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
+        advanceElapsedClock(14 * DAY_IN_MILLIS);
+        // Say that the job ran at this point, probably because the phone was off the entire time.
+        // The next window should be consistent (start and end at the time it would have had the job
+        // run normally in previous windows).
+        nextWindowStartTime += 14 * DAY_IN_MILLIS;
+        nextWindowEndTime += 14 * DAY_IN_MILLIS;
+
+        rescheduledJob = mService.getRescheduleJobForPeriodic(failedJob);
+        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
+        // Test original job again but with a huge delay from the original execution window
+
+        // 1 day before the start of the next window. Given the large period, respect the original
+        // next window.
+        advanceElapsedClock(nextWindowStartTime - sElapsedRealtimeClock.millis() - DAY_IN_MILLIS);
+        rescheduledJob = mService.getRescheduleJobForPeriodic(job);
+        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
+        // 1 hour before the start of the next window. It's too close to the next window, so the
+        // returned job should be for the window after.
+        oneHourBeforeNextWindow =
+                nextWindowStartTime - sElapsedRealtimeClock.millis() - HOUR_IN_MILLIS;
+        fiveMinsBeforeNextWindow =
+                nextWindowStartTime - sElapsedRealtimeClock.millis() - 5 * MINUTE_IN_MILLIS;
+        advanceElapsedClock(oneHourBeforeNextWindow);
+        nextWindowStartTime += 7 * DAY_IN_MILLIS;
+        nextWindowEndTime += 7 * DAY_IN_MILLIS;
+        rescheduledJob = mService.getRescheduleJobForPeriodic(job);
+        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
+        // 5 minutes before the start of the next window. It's too close to the next window, so the
+        // returned job should be for the window after.
+        advanceElapsedClock(fiveMinsBeforeNextWindow);
+        rescheduledJob = mService.getRescheduleJobForPeriodic(job);
+        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+    }
+
     /** Tests that rare job batching works as expected. */
     @Test
     public void testRareJobBatching() {
         spyOn(mService);
         doNothing().when(mService).evaluateControllerStatesLocked(any());
         doNothing().when(mService).noteJobsPending(any());
-        doReturn(true).when(mService).isReadyToBeExecutedLocked(any());
+        doReturn(true).when(mService).isReadyToBeExecutedLocked(any(), anyBoolean());
         advanceElapsedClock(24 * HOUR_IN_MILLIS);
 
         JobSchedulerService.MaybeReadyJobQueueFunctor maybeQueueFunctor =
@@ -708,7 +852,7 @@ public class JobSchedulerServiceTest {
         job.setStandbyBucket(RARE_INDEX);
 
         // Not enough RARE jobs to run.
-        mService.mPendingJobs.clear();
+        mService.getPendingJobQueue().clear();
         maybeQueueFunctor.reset();
         for (int i = 0; i < mService.mConstants.MIN_READY_NON_ACTIVE_JOBS_COUNT / 2; ++i) {
             maybeQueueFunctor.accept(job);
@@ -716,11 +860,11 @@ public class JobSchedulerServiceTest {
             assertEquals(i + 1, maybeQueueFunctor.runnableJobs.size());
             assertEquals(sElapsedRealtimeClock.millis(), job.getFirstForceBatchedTimeElapsed());
         }
-        maybeQueueFunctor.postProcess();
-        assertEquals(0, mService.mPendingJobs.size());
+        maybeQueueFunctor.postProcessLocked();
+        assertEquals(0, mService.getPendingJobQueue().size());
 
         // Enough RARE jobs to run.
-        mService.mPendingJobs.clear();
+        mService.getPendingJobQueue().clear();
         maybeQueueFunctor.reset();
         for (int i = 0; i < mService.mConstants.MIN_READY_NON_ACTIVE_JOBS_COUNT; ++i) {
             maybeQueueFunctor.accept(job);
@@ -728,11 +872,11 @@ public class JobSchedulerServiceTest {
             assertEquals(i + 1, maybeQueueFunctor.runnableJobs.size());
             assertEquals(sElapsedRealtimeClock.millis(), job.getFirstForceBatchedTimeElapsed());
         }
-        maybeQueueFunctor.postProcess();
-        assertEquals(5, mService.mPendingJobs.size());
+        maybeQueueFunctor.postProcessLocked();
+        assertEquals(5, mService.getPendingJobQueue().size());
 
         // Not enough RARE jobs to run, but a non-batched job saves the day.
-        mService.mPendingJobs.clear();
+        mService.getPendingJobQueue().clear();
         maybeQueueFunctor.reset();
         JobStatus activeJob = createJobStatus(
                 "testRareJobBatching",
@@ -745,11 +889,11 @@ public class JobSchedulerServiceTest {
             assertEquals(sElapsedRealtimeClock.millis(), job.getFirstForceBatchedTimeElapsed());
         }
         maybeQueueFunctor.accept(activeJob);
-        maybeQueueFunctor.postProcess();
-        assertEquals(3, mService.mPendingJobs.size());
+        maybeQueueFunctor.postProcessLocked();
+        assertEquals(3, mService.getPendingJobQueue().size());
 
         // Not enough RARE jobs to run, but an old RARE job saves the day.
-        mService.mPendingJobs.clear();
+        mService.getPendingJobQueue().clear();
         maybeQueueFunctor.reset();
         JobStatus oldRareJob = createJobStatus("testRareJobBatching", createJobInfo());
         oldRareJob.setStandbyBucket(RARE_INDEX);
@@ -764,8 +908,8 @@ public class JobSchedulerServiceTest {
         }
         maybeQueueFunctor.accept(oldRareJob);
         assertEquals(oldBatchTime, oldRareJob.getFirstForceBatchedTimeElapsed());
-        maybeQueueFunctor.postProcess();
-        assertEquals(3, mService.mPendingJobs.size());
+        maybeQueueFunctor.postProcessLocked();
+        assertEquals(3, mService.getPendingJobQueue().size());
     }
 
     /** Tests that jobs scheduled by the app itself are counted towards scheduling limits. */

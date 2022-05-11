@@ -28,7 +28,7 @@ import android.accounts.AccountManagerInternal;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -115,6 +115,8 @@ import com.android.server.content.SyncStorageEngine.AuthorityInfo;
 import com.android.server.content.SyncStorageEngine.EndPoint;
 import com.android.server.content.SyncStorageEngine.OnSyncRequestListener;
 import com.android.server.job.JobSchedulerInternal;
+
+import dalvik.annotation.optimization.NeverCompile;
 
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
@@ -322,6 +324,8 @@ public class SyncManager {
     private final AccountManagerInternal mAccountManagerInternal;
 
     private final PackageManagerInternal mPackageManagerInternal;
+
+    private final ActivityManagerInternal mAmi;
 
     private List<UserInfo> getAllUsers() {
         return mUserManager.getUsers();
@@ -643,6 +647,7 @@ public class SyncManager {
         mAccountManager = (AccountManager) mContext.getSystemService(Context.ACCOUNT_SERVICE);
         mAccountManagerInternal = LocalServices.getService(AccountManagerInternal.class);
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
+        mAmi = LocalServices.getService(ActivityManagerInternal.class);
 
         mAccountManagerInternal.addOnAppPermissionChangeListener((Account account, int uid) -> {
             // If the UID gained access to the account kick-off syncs lacking account access
@@ -1115,15 +1120,11 @@ public class SyncManager {
         }
         final int owningUid = syncAdapterInfo.uid;
         final String owningPackage = syncAdapterInfo.componentName.getPackageName();
-        try {
-            if (ActivityManager.getService().isAppStartModeDisabled(owningUid, owningPackage)) {
-                Slog.w(TAG, "Not scheduling job " + syncAdapterInfo.uid + ":"
-                        + syncAdapterInfo.componentName
-                        + " -- package not allowed to start");
-                return AuthorityInfo.NOT_SYNCABLE;
-            }
-        } catch (RemoteException e) {
-            /* ignore - local call */
+        if (mAmi.isAppStartModeDisabled(owningUid, owningPackage)) {
+            Slog.w(TAG, "Not scheduling job " + syncAdapterInfo.uid + ":"
+                    + syncAdapterInfo.componentName
+                    + " -- package not allowed to start");
+            return AuthorityInfo.NOT_SYNCABLE;
         }
         if (checkAccountAccess && !canAccessAccount(account, owningPackage, owningUid)) {
             Log.w(TAG, "Access to " + logSafe(account) + " denied for package "
@@ -1244,6 +1245,26 @@ public class SyncManager {
             filteredResult.add(packageName);
         }
         return filteredResult.toArray(new String[] {});
+    }
+
+    public String getSyncAdapterPackageAsUser(String accountType, String authority,
+            int callingUid, int userId) {
+        if (accountType == null || authority == null) {
+            return null;
+        }
+        final RegisteredServicesCache.ServiceInfo<SyncAdapterType> syncAdapterInfo =
+                mSyncAdapters.getServiceInfo(
+                        SyncAdapterType.newKey(authority, accountType),
+                        userId);
+        if (syncAdapterInfo == null) {
+            return null;
+        }
+        final String packageName = syncAdapterInfo.type.getPackageName();
+        if (TextUtils.isEmpty(packageName) || mPackageManagerInternal.filterAppAccess(
+                packageName, callingUid, userId)) {
+            return null;
+        }
+        return packageName;
     }
 
     private void sendSyncFinishedOrCanceledMessage(ActiveSyncContext syncContext,
@@ -1606,7 +1627,7 @@ public class SyncManager {
             Slog.v(TAG, "scheduling sync operation " + syncOperation.toString());
         }
 
-        int priority = syncOperation.findPriority();
+        int bias = syncOperation.getJobBias();
 
         final int networkType = syncOperation.isNotAllowedOnMetered() ?
                 JobInfo.NETWORK_TYPE_UNMETERED : JobInfo.NETWORK_TYPE_ANY;
@@ -1622,7 +1643,7 @@ public class SyncManager {
                 .setRequiredNetworkType(networkType)
                 .setRequiresStorageNotLow(true)
                 .setPersisted(true)
-                .setPriority(priority)
+                .setBias(bias)
                 .setFlags(jobFlags);
 
         if (syncOperation.isPeriodic) {
@@ -2150,6 +2171,7 @@ public class SyncManager {
         return true;
     }
 
+    @NeverCompile // Avoid size overhead of debugging code.
     protected void dumpSyncState(PrintWriter pw, SyncAdapterStateFetcher buckets) {
         final StringBuilder sb = new StringBuilder();
 
@@ -3209,7 +3231,7 @@ public class SyncManager {
                 if (asc.mSyncOperation.isConflict(op)) {
                     // If the provided SyncOperation conflicts with a running one, the lower
                     // priority sync is pre-empted.
-                    if (asc.mSyncOperation.findPriority() >= op.findPriority()) {
+                    if (asc.mSyncOperation.getJobBias() >= op.getJobBias()) {
                         if (isLoggable) {
                             Slog.v(TAG, "Rescheduling sync due to conflict " + op.toString());
                         }
@@ -3403,7 +3425,7 @@ public class SyncManager {
 
             scheduleSyncOperationH(op);
             mSyncStorageEngine.reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS,
-                    target.userId);
+                    op.owningPackage, target.userId);
         }
 
         /**
@@ -3922,7 +3944,7 @@ public class SyncManager {
                     syncOperation.toEventLog(SyncStorageEngine.EVENT_STOP));
             mSyncStorageEngine.stopSyncEvent(rowId, elapsedTime,
                     resultMessage, downstreamActivity, upstreamActivity,
-                    syncOperation.target.userId);
+                    syncOperation.owningPackage, syncOperation.target.userId);
         }
     }
 

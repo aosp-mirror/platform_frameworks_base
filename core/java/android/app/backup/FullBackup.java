@@ -116,7 +116,7 @@ public class FullBackup {
         ConfigSection.CLOUD_BACKUP,
         ConfigSection.DEVICE_TRANSFER
     })
-    private @interface ConfigSection {
+    @interface ConfigSection {
         String CLOUD_BACKUP = "cloud-backup";
         String DEVICE_TRANSFER = "device-transfer";
     }
@@ -528,7 +528,8 @@ public class FullBackup {
             return mExcludes;
         }
 
-        private synchronized int getRequiredTransportFlags()
+        @VisibleForTesting
+        public synchronized int getRequiredTransportFlags()
                 throws IOException, XmlPullParserException {
             if (mRequiredTransportFlags == null) {
                 maybeParseBackupSchemeLocked();
@@ -587,11 +588,13 @@ public class FullBackup {
             if (mDataExtractionRules != 0) {
                 // New config is present. Use it if it has configuration for this operation
                 // type.
+                boolean isSectionPresent;
                 try (XmlResourceParser parser = getParserForResource(mDataExtractionRules)) {
-                    parseNewBackupSchemeFromXmlLocked(parser, configSection, mExcludes, mIncludes);
+                    isSectionPresent = parseNewBackupSchemeFromXmlLocked(parser, configSection,
+                            mExcludes, mIncludes);
                 }
-                if (!mExcludes.isEmpty() || !mIncludes.isEmpty()) {
-                    // Found configuration in the new config, we will use it.
+                if (isSectionPresent) {
+                    // Found the relevant section in the new config, we will use it.
                     mIsUsingNewScheme = true;
                     return;
                 }
@@ -630,12 +633,15 @@ public class FullBackup {
                     .getXml(resourceId);
         }
 
-        private void parseNewBackupSchemeFromXmlLocked(XmlPullParser parser,
+        @VisibleForTesting
+        public boolean parseNewBackupSchemeFromXmlLocked(XmlPullParser parser,
                 @ConfigSection  String configSection,
                 Set<PathWithRequiredFlags> excludes,
                 Map<String, Set<PathWithRequiredFlags>> includes)
                 throws IOException, XmlPullParserException {
             verifyTopLevelTag(parser, "data-extraction-rules");
+
+            boolean isSectionPresent = false;
 
             int event;
             while ((event = parser.next()) != XmlPullParser.END_DOCUMENT) {
@@ -643,11 +649,15 @@ public class FullBackup {
                     continue;
                 }
 
+                isSectionPresent = true;
+
                 parseRequiredTransportFlags(parser, configSection);
                 parseRules(parser, excludes, includes, Optional.of(0), configSection);
             }
 
             logParsingResults(excludes, includes);
+
+            return isSectionPresent;
         }
 
         private void parseRequiredTransportFlags(XmlPullParser parser,

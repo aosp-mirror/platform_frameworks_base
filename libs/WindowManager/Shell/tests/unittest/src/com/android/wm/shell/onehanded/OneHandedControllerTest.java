@@ -26,6 +26,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -41,9 +42,11 @@ import android.util.ArrayMap;
 import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceControl;
+import android.window.WindowContainerTransaction;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
@@ -53,6 +56,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
@@ -61,16 +65,15 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     private int mCurrentUser = UserHandle.myUserId();
 
     Display mDisplay;
-    DisplayLayout mDisplayLayout;
     OneHandedAccessibilityUtil mOneHandedAccessibilityUtil;
     OneHandedController mSpiedOneHandedController;
     OneHandedTimeoutHandler mSpiedTimeoutHandler;
     OneHandedState mSpiedTransitionState;
 
     @Mock
-    DisplayController mMockDisplayController;
+    DisplayLayout mDisplayLayout;
     @Mock
-    OneHandedBackgroundPanelOrganizer mMockBackgroundOrganizer;
+    DisplayController mMockDisplayController;
     @Mock
     OneHandedDisplayAreaOrganizer mMockDisplayAreaOrganizer;
     @Mock
@@ -83,6 +86,8 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     OneHandedSettingsUtil mMockSettingsUitl;
     @Mock
     OneHandedUiEventLogger mMockUiEventLogger;
+    @Mock
+    InteractionJankMonitor mMockJankMonitor;
     @Mock
     IOverlayManager mMockOverlayManager;
     @Mock
@@ -102,14 +107,14 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mDisplay = mContext.getDisplay();
-        mDisplayLayout = new DisplayLayout(mContext, mDisplay);
+        mDisplayLayout = Mockito.mock(DisplayLayout.class);
         mSpiedTimeoutHandler = spy(new OneHandedTimeoutHandler(mMockShellMainExecutor));
         mSpiedTransitionState = spy(new OneHandedState());
 
         when(mMockDisplayController.getDisplay(anyInt())).thenReturn(mDisplay);
+        when(mMockDisplayController.getDisplayLayout(anyInt())).thenReturn(null);
         when(mMockDisplayAreaOrganizer.getDisplayAreaTokenMap()).thenReturn(new ArrayMap<>());
         when(mMockDisplayAreaOrganizer.isReady()).thenReturn(true);
-        when(mMockBackgroundOrganizer.getBackgroundSurface()).thenReturn(mMockLeash);
         when(mMockSettingsUitl.getSettingsOneHandedModeEnabled(any(), anyInt())).thenReturn(
                 mDefaultEnabled);
         when(mMockSettingsUitl.getSettingsOneHandedModeTimeout(any(), anyInt())).thenReturn(
@@ -118,16 +123,16 @@ public class OneHandedControllerTest extends OneHandedTestCase {
                 mDefaultTapAppToExitEnabled);
         when(mMockSettingsUitl.getSettingsSwipeToNotificationEnabled(any(), anyInt())).thenReturn(
                 mDefaultSwipeToNotificationEnabled);
+        when(mMockSettingsUitl.getShortcutEnabled(any(), anyInt())).thenReturn(false);
 
         when(mMockDisplayAreaOrganizer.getLastDisplayBounds()).thenReturn(
-                new Rect(0, 0, mDisplayLayout.width(), mDisplayLayout.height()));
+                new Rect(0, 0, 1080, 2400));
         when(mMockDisplayAreaOrganizer.getDisplayLayout()).thenReturn(mDisplayLayout);
 
         mOneHandedAccessibilityUtil = new OneHandedAccessibilityUtil(mContext);
         mSpiedOneHandedController = spy(new OneHandedController(
                 mContext,
                 mMockDisplayController,
-                mMockBackgroundOrganizer,
                 mMockDisplayAreaOrganizer,
                 mMockTouchHandler,
                 mMockTutorialHandler,
@@ -135,6 +140,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
                 mOneHandedAccessibilityUtil,
                 mSpiedTimeoutHandler,
                 mSpiedTransitionState,
+                mMockJankMonitor,
                 mMockUiEventLogger,
                 mMockOverlayManager,
                 mMockTaskStackListener,
@@ -147,6 +153,13 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     public void testDefaultShouldNotInOneHanded() {
         // Assert default transition state is STATE_NONE
         assertThat(mSpiedTransitionState.getState()).isEqualTo(STATE_NONE);
+    }
+
+    @Test
+    public void testNullDisplayLayout() {
+        mSpiedOneHandedController.updateDisplayLayout(0);
+
+        verify(mMockDisplayAreaOrganizer, never()).setDisplayLayout(any());
     }
 
     @Test
@@ -236,13 +249,6 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     }
 
     @Test
-    public void testSettingsObserverUpdateTimeout() {
-        mSpiedOneHandedController.onTimeoutSettingChanged();
-
-        verify(mSpiedTimeoutHandler, atLeastOnce()).setTimeout(anyInt());
-    }
-
-    @Test
     public void testSettingsObserverUpdateSwipeToNotification() {
         mSpiedOneHandedController.onSwipeToNotificationEnabledChanged();
 
@@ -298,10 +304,9 @@ public class OneHandedControllerTest extends OneHandedTestCase {
 
     @Test
     public void testRotation90CanNotStartOneHanded() {
-        final DisplayLayout landscapeDisplayLayout = new DisplayLayout(mDisplayLayout);
-        landscapeDisplayLayout.rotateTo(mContext.getResources(), Surface.ROTATION_90);
+        mDisplayLayout.rotateTo(mContext.getResources(), Surface.ROTATION_90);
         mSpiedTransitionState.setState(STATE_NONE);
-        when(mMockDisplayAreaOrganizer.getDisplayLayout()).thenReturn(landscapeDisplayLayout);
+        when(mDisplayLayout.isLandscape()).thenReturn(true);
         mSpiedOneHandedController.setOneHandedEnabled(true);
         mSpiedOneHandedController.setLockedDisabled(false /* locked */, false /* enabled */);
         mSpiedOneHandedController.startOneHanded();
@@ -311,11 +316,10 @@ public class OneHandedControllerTest extends OneHandedTestCase {
 
     @Test
     public void testRotation180CanStartOneHanded() {
-        final DisplayLayout testDisplayLayout = new DisplayLayout(mDisplayLayout);
-        testDisplayLayout.rotateTo(mContext.getResources(), Surface.ROTATION_180);
+        mDisplayLayout.rotateTo(mContext.getResources(), Surface.ROTATION_180);
         mSpiedTransitionState.setState(STATE_NONE);
         when(mMockDisplayAreaOrganizer.isReady()).thenReturn(true);
-        when(mMockDisplayAreaOrganizer.getDisplayLayout()).thenReturn(testDisplayLayout);
+        when(mDisplayLayout.isLandscape()).thenReturn(false);
         mSpiedOneHandedController.setOneHandedEnabled(true);
         mSpiedOneHandedController.setLockedDisabled(false /* locked */, false /* enabled */);
         mSpiedOneHandedController.startOneHanded();
@@ -325,10 +329,9 @@ public class OneHandedControllerTest extends OneHandedTestCase {
 
     @Test
     public void testRotation270CanNotStartOneHanded() {
-        final DisplayLayout testDisplayLayout = new DisplayLayout(mDisplayLayout);
-        testDisplayLayout.rotateTo(mContext.getResources(), Surface.ROTATION_270);
+        mDisplayLayout.rotateTo(mContext.getResources(), Surface.ROTATION_270);
         mSpiedTransitionState.setState(STATE_NONE);
-        when(mMockDisplayAreaOrganizer.getDisplayLayout()).thenReturn(testDisplayLayout);
+        when(mDisplayLayout.isLandscape()).thenReturn(true);
         mSpiedOneHandedController.setOneHandedEnabled(true);
         mSpiedOneHandedController.setLockedDisabled(false /* locked */, false /* enabled */);
         mSpiedOneHandedController.startOneHanded();
@@ -337,10 +340,63 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     }
 
     @Test
+    public void testOneHandedEnabledRotation90ShouldHandleRotate() {
+        when(mMockSettingsUitl.getSettingsOneHandedModeEnabled(any(), anyInt())).thenReturn(true);
+        when(mMockSettingsUitl.getSettingsSwipeToNotificationEnabled(any(), anyInt())).thenReturn(
+                false);
+        final WindowContainerTransaction handlerWCT = new WindowContainerTransaction();
+        mSpiedOneHandedController.onRotateDisplay(mDisplay.getDisplayId(), Surface.ROTATION_0,
+                Surface.ROTATION_90, handlerWCT);
+
+        verify(mMockDisplayAreaOrganizer, atLeastOnce()).onRotateDisplay(eq(mContext),
+                eq(Surface.ROTATION_90), any(WindowContainerTransaction.class));
+    }
+
+    @Test
+    public void testOneHandedDisabledRotation90ShouldNotHandleRotate() {
+        when(mMockSettingsUitl.getSettingsOneHandedModeEnabled(any(), anyInt())).thenReturn(false);
+        when(mMockSettingsUitl.getSettingsSwipeToNotificationEnabled(any(), anyInt())).thenReturn(
+                false);
+        final WindowContainerTransaction handlerWCT = new WindowContainerTransaction();
+        mSpiedOneHandedController.onRotateDisplay(mDisplay.getDisplayId(), Surface.ROTATION_0,
+                Surface.ROTATION_90, handlerWCT);
+
+        verify(mMockDisplayAreaOrganizer, never()).onRotateDisplay(eq(mContext),
+                eq(Surface.ROTATION_90), any(WindowContainerTransaction.class));
+    }
+
+    @Test
+    public void testSwipeToNotificationEnabledRotation90ShouldNotHandleRotate() {
+        when(mMockSettingsUitl.getSettingsOneHandedModeEnabled(any(), anyInt())).thenReturn(true);
+        when(mMockSettingsUitl.getSettingsSwipeToNotificationEnabled(any(), anyInt())).thenReturn(
+                true);
+        final WindowContainerTransaction handlerWCT = new WindowContainerTransaction();
+        mSpiedOneHandedController.onRotateDisplay(mDisplay.getDisplayId(), Surface.ROTATION_0,
+                Surface.ROTATION_90, handlerWCT);
+
+        verify(mMockDisplayAreaOrganizer, never()).onRotateDisplay(eq(mContext),
+                eq(Surface.ROTATION_90), any(WindowContainerTransaction.class));
+    }
+
+    @Test
+    public void testSwipeToNotificationDisabledRotation90ShouldHandleRotate() {
+        when(mMockSettingsUitl.getSettingsOneHandedModeEnabled(any(), anyInt())).thenReturn(true);
+        when(mMockSettingsUitl.getSettingsSwipeToNotificationEnabled(any(), anyInt())).thenReturn(
+                false);
+        final WindowContainerTransaction handlerWCT = new WindowContainerTransaction();
+        mSpiedOneHandedController.onRotateDisplay(mDisplay.getDisplayId(), Surface.ROTATION_0,
+                Surface.ROTATION_90, handlerWCT);
+
+        verify(mMockDisplayAreaOrganizer, atLeastOnce()).onRotateDisplay(eq(mContext),
+                eq(Surface.ROTATION_90), any(WindowContainerTransaction.class));
+    }
+
+    @Test
     public void testStateActive_shortcutRequestActivate_skipActions() {
         when(mSpiedTransitionState.getState()).thenReturn(STATE_ACTIVE);
         when(mSpiedTransitionState.isTransitioning()).thenReturn(false);
         when(mMockSettingsUitl.getOneHandedModeActivated(any(), anyInt())).thenReturn(true);
+        when(mSpiedOneHandedController.isShortcutEnabled()).thenReturn(true);
         mSpiedOneHandedController.onActivatedActionChanged();
 
         verify(mSpiedOneHandedController, never()).startOneHanded();
@@ -352,6 +408,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
         when(mSpiedTransitionState.getState()).thenReturn(STATE_NONE);
         when(mSpiedTransitionState.isTransitioning()).thenReturn(false);
         when(mMockSettingsUitl.getOneHandedModeActivated(any(), anyInt())).thenReturn(false);
+        when(mSpiedOneHandedController.isShortcutEnabled()).thenReturn(true);
         mSpiedOneHandedController.onActivatedActionChanged();
 
         verify(mSpiedOneHandedController, never()).startOneHanded();
@@ -363,6 +420,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
         when(mSpiedTransitionState.getState()).thenReturn(STATE_NONE);
         when(mSpiedTransitionState.isTransitioning()).thenReturn(false);
         when(mMockSettingsUitl.getOneHandedModeActivated(any(), anyInt())).thenReturn(true);
+        when(mSpiedOneHandedController.isShortcutEnabled()).thenReturn(true);
         mSpiedOneHandedController.onActivatedActionChanged();
 
         verify(mSpiedOneHandedController).startOneHanded();
@@ -374,6 +432,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
         when(mSpiedTransitionState.getState()).thenReturn(STATE_ENTERING);
         when(mSpiedTransitionState.isTransitioning()).thenReturn(true);
         when(mMockSettingsUitl.getOneHandedModeActivated(any(), anyInt())).thenReturn(true);
+        when(mSpiedOneHandedController.isShortcutEnabled()).thenReturn(true);
         mSpiedOneHandedController.onActivatedActionChanged();
 
         verify(mSpiedTransitionState, never()).setState(STATE_EXITING);
@@ -384,6 +443,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
         when(mSpiedTransitionState.getState()).thenReturn(STATE_EXITING);
         when(mSpiedTransitionState.isTransitioning()).thenReturn(true);
         when(mMockSettingsUitl.getOneHandedModeActivated(any(), anyInt())).thenReturn(true);
+        when(mSpiedOneHandedController.isShortcutEnabled()).thenReturn(true);
         mSpiedOneHandedController.onActivatedActionChanged();
 
         verify(mSpiedTransitionState, never()).setState(STATE_ENTERING);
@@ -392,6 +452,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     @Test
     public void testOneHandedDisabled_shortcutTrigger_thenAutoEnabled() {
         when(mSpiedOneHandedController.isOneHandedEnabled()).thenReturn(false);
+        when(mSpiedOneHandedController.isShortcutEnabled()).thenReturn(true);
         when(mSpiedTransitionState.getState()).thenReturn(STATE_NONE);
         when(mSpiedTransitionState.isTransitioning()).thenReturn(false);
         when(mMockSettingsUitl.getOneHandedModeActivated(any(), anyInt())).thenReturn(false);
@@ -399,7 +460,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
                 false);
         mSpiedOneHandedController.onActivatedActionChanged();
 
-        verify(mSpiedOneHandedController).notifyUserConfigChanged(anyBoolean());
+        verify(mMockSettingsUitl).setOneHandedModeEnabled(any(), eq(1), anyInt());
     }
 
     @Test
@@ -417,6 +478,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
         when(mSpiedOneHandedController.isOneHandedEnabled()).thenReturn(true);
         when(mSpiedTransitionState.getState()).thenReturn(STATE_NONE);
         when(mSpiedTransitionState.isTransitioning()).thenReturn(false);
+        when(mSpiedOneHandedController.isShortcutEnabled()).thenReturn(true);
         when(mSpiedOneHandedController.isSwipeToNotificationEnabled()).thenReturn(true);
         mSpiedOneHandedController.registerEventCallback(mMockEventCallback);
         mSpiedOneHandedController.onActivatedActionChanged();
@@ -425,15 +487,15 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     }
 
     @Test
-    public void testNotifyShortcutState_whenUpdateOneHandedEnabled() {
-        when(mSpiedOneHandedController.isOneHandedEnabled()).thenReturn(false);
+    public void testNotifyShortcutState_whenSetOneHandedEnabled() {
+        when(mSpiedOneHandedController.isOneHandedEnabled()).thenReturn(true);
         when(mSpiedTransitionState.getState()).thenReturn(STATE_NONE);
         when(mSpiedTransitionState.isTransitioning()).thenReturn(false);
-        when(mSpiedOneHandedController.isSwipeToNotificationEnabled()).thenReturn(true);
+        when(mSpiedOneHandedController.isSwipeToNotificationEnabled()).thenReturn(false);
         mSpiedOneHandedController.registerEventCallback(mMockEventCallback);
         mSpiedOneHandedController.setOneHandedEnabled(true);
 
-        verify(mSpiedOneHandedController).notifyShortcutState(anyInt());
+        verify(mSpiedOneHandedController).notifyShortcutStateChanged(anyInt());
     }
 
     @Test
@@ -447,5 +509,31 @@ public class OneHandedControllerTest extends OneHandedTestCase {
 
         // Verify no NPE crash and mMockShellMainExecutor never be execute.
         verify(mMockShellMainExecutor, never()).execute(any());
+    }
+
+    @Test
+    public void testShortcutEnable_ableToAutoEnableOneHandedMode() {
+        when(mSpiedOneHandedController.isOneHandedEnabled()).thenReturn(false);
+        when(mSpiedTransitionState.getState()).thenReturn(STATE_NONE);
+        when(mSpiedTransitionState.isTransitioning()).thenReturn(false);
+        when(mSpiedOneHandedController.isShortcutEnabled()).thenReturn(true);
+        when(mSpiedOneHandedController.isSwipeToNotificationEnabled()).thenReturn(false);
+        when(mMockSettingsUitl.setOneHandedModeEnabled(any(), anyInt(), anyInt())).thenReturn(
+                false /* To avoid test runner create Toast */);
+        mSpiedOneHandedController.onActivatedActionChanged();
+
+        verify(mMockSettingsUitl).setOneHandedModeEnabled(any(), eq(1), anyInt());
+    }
+
+    @Test
+    public void testShortcutDisable_shouldNotAutoEnableOneHandedMode() {
+        when(mSpiedOneHandedController.isOneHandedEnabled()).thenReturn(false);
+        when(mSpiedTransitionState.getState()).thenReturn(STATE_NONE);
+        when(mSpiedTransitionState.isTransitioning()).thenReturn(false);
+        when(mSpiedOneHandedController.isSwipeToNotificationEnabled()).thenReturn(false);
+        when(mMockSettingsUitl.setOneHandedModeEnabled(any(), anyInt(), anyInt())).thenReturn(true);
+        mSpiedOneHandedController.onActivatedActionChanged();
+
+        verify(mMockSettingsUitl, never()).setOneHandedModeEnabled(any(), anyInt(), anyInt());
     }
 }

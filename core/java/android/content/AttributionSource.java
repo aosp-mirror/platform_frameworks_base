@@ -22,6 +22,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.ActivityThread;
+import android.app.AppGlobals;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
@@ -86,6 +87,10 @@ import java.util.Set;
  */
 @Immutable
 public final class AttributionSource implements Parcelable {
+    private static final String DESCRIPTOR = "android.content.AttributionSource";
+
+    private static final Binder sDefaultToken = new Binder(DESCRIPTOR);
+
     private final @NonNull AttributionSourceState mAttributionSourceState;
 
     private @Nullable AttributionSource mNextCached;
@@ -95,7 +100,7 @@ public final class AttributionSource implements Parcelable {
     @TestApi
     public AttributionSource(int uid, @Nullable String packageName,
             @Nullable String attributionTag) {
-        this(uid, packageName, attributionTag, new Binder());
+        this(uid, packageName, attributionTag, sDefaultToken);
     }
 
     /** @hide */
@@ -130,7 +135,7 @@ public final class AttributionSource implements Parcelable {
 
     AttributionSource(int uid, @Nullable String packageName, @Nullable String attributionTag,
             @Nullable String[] renouncedPermissions, @Nullable AttributionSource next) {
-        this(uid, packageName, attributionTag, new Binder(), renouncedPermissions, next);
+        this(uid, packageName, attributionTag, sDefaultToken, renouncedPermissions, next);
     }
 
     AttributionSource(int uid, @Nullable String packageName, @Nullable String attributionTag,
@@ -148,6 +153,10 @@ public final class AttributionSource implements Parcelable {
 
     AttributionSource(@NonNull Parcel in) {
         this(AttributionSourceState.CREATOR.createFromParcel(in));
+
+        // Since we just unpacked this object as part of it transiting a Binder
+        // call, this is the perfect time to enforce that its UID and PID can be trusted
+        enforceCallingUidAndPid();
     }
 
     /** @hide */
@@ -168,6 +177,12 @@ public final class AttributionSource implements Parcelable {
     }
 
     /** @hide */
+    public AttributionSource withToken(@NonNull Binder token) {
+        return new AttributionSource(getUid(), getPackageName(), getAttributionTag(),
+                token, mAttributionSourceState.renouncedPermissions, getNext());
+    }
+
+    /** @hide */
     public @NonNull AttributionSourceState asState() {
         return mAttributionSourceState;
     }
@@ -177,10 +192,42 @@ public final class AttributionSource implements Parcelable {
         return new ScopedParcelState(this);
     }
 
-    /** @hide */
-    public static AttributionSource myAttributionSource() {
-        return new AttributionSource(Process.myUid(), ActivityThread.currentOpPackageName(),
-                /*attributionTag*/ null, (String[]) /*renouncedPermissions*/ null, /*next*/ null);
+    /**
+     * Returns a generic {@link AttributionSource} that represents the entire
+     * calling process.
+     *
+     * <p>Callers are <em>strongly</em> encouraged to use a more specific
+     * attribution source whenever possible, such as from
+     * {@link Context#getAttributionSource()}, since that enables developers to
+     * have more detailed and scoped control over attribution within
+     * sub-components of their app.
+     *
+     * @see Context#createAttributionContext(String)
+     * @see Context#getAttributionTag()
+     * @return a generic {@link AttributionSource} representing the entire
+     *         calling process
+     * @throws IllegalStateException when no accurate {@link AttributionSource}
+     *         can be determined
+     */
+    public static @NonNull AttributionSource myAttributionSource() {
+
+        final AttributionSource globalSource = ActivityThread.currentAttributionSource();
+        if (globalSource != null) {
+            return globalSource;
+        }
+
+        int uid = Process.myUid();
+        if (uid == Process.ROOT_UID) {
+            uid = Process.SYSTEM_UID;
+        }
+        try {
+            return new AttributionSource.Builder(uid)
+                .setPackageName(AppGlobals.getPackageManager().getPackagesForUid(uid)[0])
+                .build();
+        } catch (Exception ignored) {
+        }
+
+        throw new IllegalStateException("Failed to resolve AttributionSource");
     }
 
     /**
@@ -212,13 +259,24 @@ public final class AttributionSource implements Parcelable {
     }
 
     /**
+     * If you are handling an IPC and you don't trust the caller you need to validate whether the
+     * attribution source is one for the calling app to prevent the caller to pass you a source from
+     * another app without including themselves in the attribution chain.
+     *
+     * @throws SecurityException if the attribution source cannot be trusted to be from the caller.
+     */
+    private void enforceCallingUidAndPid() {
+        enforceCallingUid();
+        enforceCallingPid();
+    }
+
+    /**
      * If you are handling an IPC and you don't trust the caller you need to validate
      * whether the attribution source is one for the calling app to prevent the caller
      * to pass you a source from another app without including themselves in the
      * attribution chain.
      *
-     * @throws SecurityException if the attribution source cannot be trusted to be
-     * from the caller.
+     * @throws SecurityException if the attribution source cannot be trusted to be from the caller.
      */
     public void enforceCallingUid() {
         if (!checkCallingUid()) {
@@ -233,16 +291,44 @@ public final class AttributionSource implements Parcelable {
      * whether the attribution source is one for the calling app to prevent the caller
      * to pass you a source from another app without including themselves in the
      * attribution chain.
-     *f
+     *
      * @return if the attribution source cannot be trusted to be from the caller.
      */
     public boolean checkCallingUid() {
         final int callingUid = Binder.getCallingUid();
-        if (callingUid != Process.SYSTEM_UID
+        if (callingUid != Process.ROOT_UID
+                && callingUid != Process.SYSTEM_UID
                 && callingUid != mAttributionSourceState.uid) {
             return false;
         }
         // No need to check package as app ops manager does it already.
+        return true;
+    }
+
+    /**
+     * Validate that the pid being claimed for the calling app is not spoofed
+     *
+     * @throws SecurityException if the attribution source cannot be trusted to be from the caller.
+     * @hide
+     */
+    @TestApi
+    public void enforceCallingPid() {
+        if (!checkCallingPid()) {
+            throw new SecurityException("Calling pid: " + Binder.getCallingPid()
+                    + " doesn't match source pid: " + mAttributionSourceState.pid);
+        }
+    }
+
+    /**
+     * Validate that the pid being claimed for the calling app is not spoofed
+     *
+     * @return if the attribution source cannot be trusted to be from the caller.
+     */
+    private boolean checkCallingPid() {
+        final int callingPid = Binder.getCallingPid();
+        if (mAttributionSourceState.pid != -1 && callingPid != mAttributionSourceState.pid) {
+            return false;
+        }
         return true;
     }
 
@@ -459,6 +545,18 @@ public final class AttributionSource implements Parcelable {
             mAttributionSourceState.uid = uid;
         }
 
+        public Builder(@NonNull AttributionSource current) {
+            if (current == null) {
+                throw new IllegalArgumentException("current AttributionSource can not be null");
+            }
+            mAttributionSourceState.uid = current.getUid();
+            mAttributionSourceState.packageName = current.getPackageName();
+            mAttributionSourceState.attributionTag = current.getAttributionTag();
+            mAttributionSourceState.token = current.getToken();
+            mAttributionSourceState.renouncedPermissions =
+                current.mAttributionSourceState.renouncedPermissions;
+        }
+
         /**
          * The package that is accessing the permission protected data.
          */
@@ -541,7 +639,9 @@ public final class AttributionSource implements Parcelable {
             if ((mBuilderFieldsSet & 0x10) == 0) {
                 mAttributionSourceState.next = null;
             }
-            mAttributionSourceState.token = new Binder();
+
+            mAttributionSourceState.token = sDefaultToken;
+
             if (mAttributionSourceState.next == null) {
                 // The NDK aidl backend doesn't support null parcelable arrays.
                 mAttributionSourceState.next = new AttributionSourceState[0];

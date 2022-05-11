@@ -68,7 +68,7 @@ public class VcnGatewayConnectionDisconnectedStateTest extends VcnGatewayConnect
                         true /* isMobileDataEnabled */,
                         mDeps);
 
-        vgc.setIsQuitting(true);
+        vgc.setQuitting();
         vgc.transitionTo(vgc.mDisconnectedState);
         mTestLooper.dispatchAll();
 
@@ -78,7 +78,7 @@ public class VcnGatewayConnectionDisconnectedStateTest extends VcnGatewayConnect
     @Test
     public void testNetworkChangesTriggerStateTransitions() throws Exception {
         mGatewayConnection
-                .getUnderlyingNetworkTrackerCallback()
+                .getUnderlyingNetworkControllerCallback()
                 .onSelectedUnderlyingNetworkChanged(TEST_UNDERLYING_NETWORK_RECORD_1);
         mTestLooper.dispatchAll();
 
@@ -89,7 +89,7 @@ public class VcnGatewayConnectionDisconnectedStateTest extends VcnGatewayConnect
     @Test
     public void testNullNetworkDoesNotTriggerStateTransition() throws Exception {
         mGatewayConnection
-                .getUnderlyingNetworkTrackerCallback()
+                .getUnderlyingNetworkControllerCallback()
                 .onSelectedUnderlyingNetworkChanged(null);
         mTestLooper.dispatchAll();
 
@@ -100,6 +100,10 @@ public class VcnGatewayConnectionDisconnectedStateTest extends VcnGatewayConnect
     @Test
     public void testTeardown() throws Exception {
         mGatewayConnection.teardownAsynchronously();
+        mTestLooper.dispatchAll();
+
+        // Verify that sending a non-quitting disconnect request does not unset the isQuitting flag
+        mGatewayConnection.sendDisconnectRequestedAndAcquireWakelock("TEST", false);
         mTestLooper.dispatchAll();
 
         assertNull(mGatewayConnection.getCurrentState());

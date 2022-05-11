@@ -292,9 +292,10 @@ public class TaskStackChangeListeners {
                     }
                     case ON_TASK_SNAPSHOT_CHANGED: {
                         Trace.beginSection("onTaskSnapshotChanged");
+                        final TaskSnapshot snapshot = (TaskSnapshot) msg.obj;
+                        final ThumbnailData thumbnail = new ThumbnailData(snapshot);
                         for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                            mTaskStackListeners.get(i).onTaskSnapshotChanged(msg.arg1,
-                                    new ThumbnailData((TaskSnapshot) msg.obj));
+                            mTaskStackListeners.get(i).onTaskSnapshotChanged(msg.arg1, thumbnail);
                         }
                         Trace.endSection();
                         break;

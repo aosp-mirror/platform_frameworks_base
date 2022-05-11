@@ -31,16 +31,20 @@ import java.lang.annotation.RetentionPolicy;
  */
 public interface AuthDialog {
 
-    String KEY_CONTAINER_STATE = "container_state";
+    String KEY_CONTAINER_GOING_AWAY = "container_going_away";
     String KEY_BIOMETRIC_SHOWING = "biometric_showing";
     String KEY_CREDENTIAL_SHOWING = "credential_showing";
 
+    String KEY_BIOMETRIC_CONFIRM_VISIBILITY = "confirm_visibility";
     String KEY_BIOMETRIC_TRY_AGAIN_VISIBILITY = "try_agian_visibility";
     String KEY_BIOMETRIC_STATE = "state";
     String KEY_BIOMETRIC_INDICATOR_STRING = "indicator_string"; // error / help / hint
     String KEY_BIOMETRIC_INDICATOR_ERROR_SHOWING = "error_is_temporary";
     String KEY_BIOMETRIC_INDICATOR_HELP_SHOWING = "hint_is_temporary";
     String KEY_BIOMETRIC_DIALOG_SIZE = "size";
+
+    String KEY_BIOMETRIC_SENSOR_TYPE = "sensor_type";
+    String KEY_BIOMETRIC_SENSOR_PROPS = "sensor_props";
 
     int SIZE_UNKNOWN = 0;
     /**
@@ -60,7 +64,7 @@ public interface AuthDialog {
     @interface DialogSize {}
 
     /**
-     * Parameters used when laying out {@link AuthBiometricView}, its sublclasses, and
+     * Parameters used when laying out {@link AuthBiometricView}, its subclasses, and
      * {@link AuthPanelController}.
      */
     class LayoutParams {
@@ -109,7 +113,7 @@ public interface AuthDialog {
     /**
      * Biometric authenticated. May be pending user confirmation, or completed.
      */
-    void onAuthenticationSucceeded();
+    void onAuthenticationSucceeded(@Modality int modality);
 
     /**
      * Authentication failed (reject, timeout). Dialog stays showing.
@@ -132,6 +136,9 @@ public interface AuthDialog {
      */
     void onError(@Modality int modality, String error);
 
+    /** UDFPS pointer down event. */
+    void onPointerDown();
+
     /**
      * Save the current state.
      * @param outState
@@ -143,6 +150,9 @@ public interface AuthDialog {
      */
     String getOpPackageName();
 
+    /** The requestId of the underlying operation within the framework. */
+    long getRequestId();
+
     /**
      * Animate to credential UI. Typically called after biometric is locked out.
      */
@@ -152,4 +162,12 @@ public interface AuthDialog {
      * @return true if device credential is allowed.
      */
     boolean isAllowDeviceCredentials();
+
+    /**
+     * Called when the device's orientation changed and the dialog may need to do another
+     * layout. This is most relevant to UDFPS since configuration changes are not sent by
+     * the framework in equivalent cases (landscape to reverse landscape) but the dialog
+     * must remain fixed on the physical sensor location.
+     */
+    void onOrientationChanged();
 }

@@ -27,27 +27,33 @@
     <FrameLayout
         android:id="@+id/illustration_frame"
         android:layout_width="wrap_content"
-        android:layout_height="@dimen/settingslib_illustration_height"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:gravity="center_vertical"
-        android:padding="@dimen/settingslib_illustration_padding"
+        android:paddingHorizontal="@dimen/settingslib_illustration_padding"
         android:orientation="vertical">
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/protection_background"/>
+        <ImageView
+            android:id="@+id/background_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:adjustViewBounds="true"
+            android:src="@drawable/protection_background"/>
 
         <com.airbnb.lottie.LottieAnimationView
             android:id="@+id/lottie_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:maxWidth="@dimen/settingslib_illustration_width"
+            android:maxHeight="@dimen/settingslib_illustration_height"
+            android:adjustViewBounds="true"/>
 
         <FrameLayout
             android:id="@+id/middleground_layout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:background="@android:color/transparent"
             android:layout_gravity="center"
             android:visibility="gone"/>

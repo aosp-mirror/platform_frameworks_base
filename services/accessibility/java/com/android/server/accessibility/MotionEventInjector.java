@@ -16,6 +16,7 @@
 
 package com.android.server.accessibility;
 
+import android.accessibilityservice.AccessibilityTrace;
 import android.accessibilityservice.GestureDescription;
 import android.accessibilityservice.GestureDescription.GestureStep;
 import android.accessibilityservice.GestureDescription.TouchPoint;
@@ -30,6 +31,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.InputDevice;
+import android.view.KeyCharacterMap;
 import android.view.MotionEvent;
 import android.view.WindowManagerPolicyConstants;
 
@@ -55,7 +57,6 @@ public class MotionEventInjector extends BaseEventStreamTransformation implement
      */
     private static final int EVENT_META_STATE = 0;
     private static final int EVENT_BUTTON_STATE = 0;
-    private static final int EVENT_DEVICE_ID = 0;
     private static final int EVENT_EDGE_FLAGS = 0;
     private static final int EVENT_SOURCE = InputDevice.SOURCE_TOUCHSCREEN;
     private static final int EVENT_FLAGS = 0;
@@ -68,6 +69,7 @@ public class MotionEventInjector extends BaseEventStreamTransformation implement
     private final Handler mHandler;
     private final SparseArray<Boolean> mOpenGesturesInProgress = new SparseArray<>();
 
+    private final AccessibilityTraceManager mTrace;
     private IAccessibilityServiceClient mServiceInterfaceForCurrentGesture;
     private IntArray mSequencesInProgress = new IntArray(5);
     private boolean mIsDestroyed = false;
@@ -80,15 +82,17 @@ public class MotionEventInjector extends BaseEventStreamTransformation implement
     /**
      * @param looper A looper on the main thread to use for dispatching new events
      */
-    public MotionEventInjector(Looper looper) {
+    public MotionEventInjector(Looper looper, AccessibilityTraceManager trace) {
         mHandler = new Handler(looper, this);
+        mTrace = trace;
     }
 
     /**
      * @param handler A handler to post messages. Exposes internal state for testing only.
      */
-    public MotionEventInjector(Handler handler) {
+    public MotionEventInjector(Handler handler, AccessibilityTraceManager trace) {
         mHandler = handler;
+        mTrace = trace;
     }
 
     /**
@@ -112,6 +116,12 @@ public class MotionEventInjector extends BaseEventStreamTransformation implement
 
     @Override
     public void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+        if (mTrace.isA11yTracingEnabledForTypes(
+                AccessibilityTrace.FLAGS_INPUT_FILTER | AccessibilityTrace.FLAGS_GESTURE)) {
+            mTrace.logTrace(LOG_TAG + ".onMotionEvent",
+                    AccessibilityTrace.FLAGS_INPUT_FILTER | AccessibilityTrace.FLAGS_GESTURE,
+                    "event=" + event + ";rawEvent=" + rawEvent + ";policyFlags=" + policyFlags);
+        }
         // MotionEventInjector would cancel any injected gesture when any MotionEvent arrives.
         // For user using an external device to control the pointer movement, it's almost
         // impossible to perform the gestures. Any slightly unintended movement results in the
@@ -122,9 +132,6 @@ public class MotionEventInjector extends BaseEventStreamTransformation implement
             return;
         }
         cancelAnyPendingInjectedEvents();
-        // The events injected from outside of system_server are not trusted. Remove the flag to
-        // prevent accessibility service from impersonating a real input device.
-        policyFlags &= ~WindowManagerPolicyConstants.FLAG_INPUTFILTER_TRUSTED;
         // Indicate that the input event is injected from accessibility, to let applications
         // distinguish it from events injected by other means.
         policyFlags |= WindowManagerPolicyConstants.FLAG_INJECTED_FROM_ACCESSIBILITY;
@@ -483,8 +490,8 @@ public class MotionEventInjector extends BaseEventStreamTransformation implement
         }
         return MotionEvent.obtain(downTime, eventTime, action, touchPointsSize,
                 sPointerProps, sPointerCoords, EVENT_META_STATE, EVENT_BUTTON_STATE,
-                EVENT_X_PRECISION, EVENT_Y_PRECISION, EVENT_DEVICE_ID, EVENT_EDGE_FLAGS,
-                EVENT_SOURCE, EVENT_FLAGS);
+                EVENT_X_PRECISION, EVENT_Y_PRECISION, KeyCharacterMap.VIRTUAL_KEYBOARD,
+                EVENT_EDGE_FLAGS, EVENT_SOURCE, EVENT_FLAGS);
     }
 
     private static int findPointByStrokeId(TouchPoint[] touchPoints, int touchPointsSize,

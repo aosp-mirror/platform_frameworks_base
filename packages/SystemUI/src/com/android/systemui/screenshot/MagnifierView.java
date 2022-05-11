@@ -33,6 +33,7 @@ import android.view.ViewPropertyAnimator;
 
 import androidx.annotation.Nullable;
 
+import com.android.internal.graphics.ColorUtils;
 import com.android.systemui.R;
 
 /**
@@ -83,7 +84,9 @@ public class MagnifierView extends View implements CropView.CropInteractionListe
         TypedArray t = context.getTheme().obtainStyledAttributes(
                 attrs, R.styleable.MagnifierView, 0, 0);
         mShadePaint = new Paint();
-        mShadePaint.setColor(t.getColor(R.styleable.MagnifierView_scrimColor, Color.TRANSPARENT));
+        int alpha = t.getInteger(R.styleable.MagnifierView_scrimAlpha, 255);
+        int scrimColor = t.getColor(R.styleable.MagnifierView_scrimColor, Color.TRANSPARENT);
+        mShadePaint.setColor(ColorUtils.setAlphaComponent(scrimColor, alpha));
         mHandlePaint = new Paint();
         mHandlePaint.setColor(t.getColor(R.styleable.MagnifierView_handleColor, Color.BLACK));
         mHandlePaint.setStrokeWidth(

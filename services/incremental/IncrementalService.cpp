@@ -91,7 +91,7 @@ struct Constants {
     static constexpr auto readLogsMaxInterval = 2h;
 
     // How long should we wait till dataLoader reports destroyed.
-    static constexpr auto destroyTimeout = 60s;
+    static constexpr auto destroyTimeout = 10s;
 
     static constexpr auto anyStatus = INT_MIN;
 };
@@ -109,6 +109,11 @@ static bool getAlwaysEnableReadTimeoutsForSystemDataLoaders() {
     return android::base::
             GetBoolProperty("debug.incremental.always_enable_read_timeouts_for_system_dataloaders",
                             true);
+}
+
+static bool getEnableReadTimeoutsAfterInstall() {
+    return android::base::GetBoolProperty("debug.incremental.enable_read_timeouts_after_install",
+                                          true);
 }
 
 static bool getEnforceReadLogsMaxIntervalForSystemDataLoaders() {
@@ -853,7 +858,7 @@ void IncrementalService::onInstallationComplete(StorageId storage) {
 
     // Always enable long read timeouts after installation is complete.
     std::unique_lock l(ifs->lock);
-    ifs->setReadTimeoutsRequested(true);
+    ifs->setReadTimeoutsRequested(getEnableReadTimeoutsAfterInstall());
     applyStorageParamsLocked(*ifs);
 }
 

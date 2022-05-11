@@ -18,6 +18,7 @@
 
 #include "DamageAccumulator.h"
 #include "Debug.h"
+#include "Properties.h"
 #include "TreeInfo.h"
 #include "VectorDrawable.h"
 #include "private/hwui/WebViewFunctor.h"
@@ -340,6 +341,7 @@ std::optional<RenderNode::SnapshotResult> RenderNode::updateSnapshotIfRequired(
     sk_sp<SkImage> snapshot = layerSurface->makeImageSnapshot();
     const auto subset = SkIRect::MakeWH(properties().getWidth(),
                                         properties().getHeight());
+    uint32_t layerSurfaceGenerationId = layerSurface->generationID();
     // If we don't have an ImageFilter just return the snapshot
     if (imageFilter == nullptr) {
         mSnapshotResult.snapshot = snapshot;
@@ -347,9 +349,10 @@ std::optional<RenderNode::SnapshotResult> RenderNode::updateSnapshotIfRequired(
         mSnapshotResult.outOffset = SkIPoint::Make(0.0f, 0.0f);
         mImageFilterClipBounds = clipBounds;
         mTargetImageFilter = nullptr;
-    } else if (mSnapshotResult.snapshot == nullptr ||
-        imageFilter != mTargetImageFilter.get() ||
-        mImageFilterClipBounds != clipBounds) {
+        mTargetImageFilterLayerSurfaceGenerationId = 0;
+    } else if (mSnapshotResult.snapshot == nullptr || imageFilter != mTargetImageFilter.get() ||
+               mImageFilterClipBounds != clipBounds ||
+               mTargetImageFilterLayerSurfaceGenerationId != layerSurfaceGenerationId) {
         // Otherwise create a new snapshot with the given filter and snapshot
         mSnapshotResult.snapshot =
                 snapshot->makeWithFilter(context,
@@ -360,6 +363,7 @@ std::optional<RenderNode::SnapshotResult> RenderNode::updateSnapshotIfRequired(
                                          &mSnapshotResult.outOffset);
         mTargetImageFilter = sk_ref_sp(imageFilter);
         mImageFilterClipBounds = clipBounds;
+        mTargetImageFilterLayerSurfaceGenerationId = layerSurfaceGenerationId;
     }
 
     return mSnapshotResult;
@@ -473,6 +477,9 @@ void RenderNode::decParentRefCount(TreeObserver& observer, TreeInfo* info) {
 }
 
 void RenderNode::onRemovedFromTree(TreeInfo* info) {
+    if (Properties::enableWebViewOverlays && mDisplayList) {
+        mDisplayList.onRemovedFromTree();
+    }
     destroyHardwareResources(info);
 }
 

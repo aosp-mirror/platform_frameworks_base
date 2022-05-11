@@ -97,7 +97,11 @@ class ControlsProviderLifecycleManager(
                     }
                     bindTryCount++
                     try {
-                        context.bindServiceAsUser(intent, serviceConnection, BIND_FLAGS, user)
+                        val bound = context
+                            .bindServiceAsUser(intent, serviceConnection, BIND_FLAGS, user)
+                        if (!bound) {
+                            context.unbindService(serviceConnection)
+                        }
                     } catch (e: SecurityException) {
                         Log.e(TAG, "Failed to bind to service", e)
                     }
@@ -130,6 +134,12 @@ class ControlsProviderLifecycleManager(
             if (DEBUG) Log.d(TAG, "onServiceDisconnected $name")
             wrapper = null
             bindService(false)
+        }
+
+        override fun onNullBinding(name: ComponentName?) {
+            if (DEBUG) Log.d(TAG, "onNullBinding $name")
+            wrapper = null
+            context.unbindService(this)
         }
     }
 

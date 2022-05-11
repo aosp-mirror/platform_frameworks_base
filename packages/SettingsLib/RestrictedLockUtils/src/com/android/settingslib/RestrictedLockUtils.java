@@ -21,11 +21,13 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
 import java.util.Objects;
 
@@ -34,10 +36,18 @@ import java.util.Objects;
  * support message dialog.
  */
 public class RestrictedLockUtils {
+    /**
+     * Get EnforcedAdmin from DevicePolicyManager
+     */
+    @RequiresApi(Build.VERSION_CODES.M)
     public static EnforcedAdmin getProfileOrDeviceOwner(Context context, UserHandle user) {
         return getProfileOrDeviceOwner(context, null, user);
     }
 
+    /**
+     * Get EnforcedAdmin from DevicePolicyManager
+     */
+    @RequiresApi(Build.VERSION_CODES.M)
     public static EnforcedAdmin getProfileOrDeviceOwner(
             Context context, String enforcedRestriction, UserHandle user) {
         if (user == null) {
@@ -73,6 +83,7 @@ public class RestrictedLockUtils {
     /**
      * Send the intent to trigger the {@code android.settings.ShowAdminSupportDetailsDialog}.
      */
+    @RequiresApi(Build.VERSION_CODES.M)
     public static void sendShowAdminSupportDetailsIntent(Context context, EnforcedAdmin admin) {
         final Intent intent = getShowAdminSupportDetailsIntent(context, admin);
         int targetUserId = UserHandle.myUserId();
@@ -97,6 +108,10 @@ public class RestrictedLockUtils {
         return intent;
     }
 
+    /**
+     * Check if current user is profile or not
+     */
+    @RequiresApi(Build.VERSION_CODES.M)
     public static boolean isCurrentUserOrProfile(Context context, int userId) {
         UserManager um = context.getSystemService(UserManager.class);
         return um.getUserProfiles().contains(UserHandle.of(userId));

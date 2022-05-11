@@ -21,7 +21,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.graphics.Point;
 import android.graphics.Region;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -134,6 +133,18 @@ public class SystemWindows {
     }
 
     /**
+     * Sets the accessibility window for the given {@param shellRootLayer}.
+     */
+    public void setShellRootAccessibilityWindow(int displayId,
+            @WindowManager.ShellRootLayer int shellRootLayer, View view) {
+        PerDisplay pd = mPerDisplay.get(displayId);
+        if (pd == null) {
+            return;
+        }
+        pd.setShellRootAccessibilityWindow(shellRootLayer, view);
+    }
+
+    /**
      * Sets the touchable region of a view's window. This will be cropped to the window size.
      * @param view
      * @param region
@@ -180,6 +191,19 @@ public class SystemWindows {
         return null;
     }
 
+    /**
+     * Gets a token associated with the view that can be used to grant the view focus.
+     */
+    public IBinder getFocusGrantToken(View view) {
+        SurfaceControlViewHost root = mViewRoots.get(view);
+        if (root == null) {
+            Slog.e(TAG, "Couldn't get focus grant token since view does not exist in "
+                    + "SystemWindow:" + view);
+            return null;
+        }
+        return root.getFocusGrantToken();
+    }
+
     private class PerDisplay {
         final int mDisplayId;
         private final SparseArray<SysUiWindowManager> mWwms = new SparseArray<>();
@@ -202,15 +226,9 @@ public class SystemWindows {
             attrs.flags |= FLAG_HARDWARE_ACCELERATED;
             viewRoot.setView(view, attrs);
             mViewRoots.put(view, viewRoot);
-
-            try {
-                mWmService.setShellRootAccessibilityWindow(mDisplayId, shellRootLayer,
-                        viewRoot.getWindowToken());
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Error setting accessibility window for " + mDisplayId + ":"
-                        + shellRootLayer, e);
-            }
+            setShellRootAccessibilityWindow(shellRootLayer, view);
         }
+
         SysUiWindowManager addRoot(@WindowManager.ShellRootLayer int shellRootLayer) {
             SysUiWindowManager wwm = mWwms.get(shellRootLayer);
             if (wwm != null) {
@@ -238,6 +256,21 @@ public class SystemWindows {
                 return null;
             }
             return wwm.mContainerWindow;
+        }
+
+        void setShellRootAccessibilityWindow(@WindowManager.ShellRootLayer int shellRootLayer,
+                View view) {
+            SysUiWindowManager wwm = mWwms.get(shellRootLayer);
+            if (wwm == null) {
+                return;
+            }
+            try {
+                mWmService.setShellRootAccessibilityWindow(mDisplayId, shellRootLayer,
+                        view != null ? mViewRoots.get(view).getWindowToken() : null);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Error setting accessibility window for " + mDisplayId + ":"
+                        + shellRootLayer, e);
+            }
         }
 
         void updateConfiguration(Configuration configuration) {
@@ -310,18 +343,13 @@ public class SystemWindows {
 
         @Override
         public void resized(ClientWindowFrames frames, boolean reportDraw,
-                MergedConfiguration newMergedConfiguration, boolean forceLayout,
-                boolean alwaysConsumeSystemBars, int displayId) {}
-
-        @Override
-        public void locationInParentDisplayChanged(Point offset) {}
-
-        @Override
-        public void insetsChanged(InsetsState insetsState, boolean willMove, boolean willResize) {}
+                MergedConfiguration newMergedConfiguration, InsetsState insetsState,
+                boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId, int syncSeqId,
+                int resizeMode) {}
 
         @Override
         public void insetsControlChanged(InsetsState insetsState,
-                InsetsSourceControl[] activeControls, boolean willMove, boolean willResize) {}
+                InsetsSourceControl[] activeControls) {}
 
         @Override
         public void showInsets(int types, boolean fromIme) {}
@@ -337,9 +365,6 @@ public class SystemWindows {
 
         @Override
         public void dispatchGetNewSurface() {}
-
-        @Override
-        public void windowFocusChanged(boolean hasFocus, boolean inTouchMode) {}
 
         @Override
         public void executeCommand(String command, String parameters, ParcelFileDescriptor out) {}

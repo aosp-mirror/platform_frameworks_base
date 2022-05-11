@@ -16,17 +16,18 @@
 #ifndef DRAWFRAMETASK_H
 #define DRAWFRAMETASK_H
 
-#include <vector>
-
+#include <android/performance_hint.h>
 #include <utils/Condition.h>
 #include <utils/Mutex.h>
 #include <utils/StrongPointer.h>
 
-#include "RenderTask.h"
+#include <optional>
+#include <vector>
 
 #include "../FrameInfo.h"
 #include "../Rect.h"
 #include "../TreeInfo.h"
+#include "RenderTask.h"
 
 namespace android {
 namespace uirenderer {
@@ -60,9 +61,8 @@ public:
     DrawFrameTask();
     virtual ~DrawFrameTask();
 
-    void setContext(RenderThread* thread, CanvasContext* context, RenderNode* targetNode);
-    void setHintSessionCallbacks(std::function<void(int64_t)> updateTargetWorkDuration,
-                                 std::function<void(int64_t)> reportActualWorkDuration);
+    void setContext(RenderThread* thread, CanvasContext* context, RenderNode* targetNode,
+                    int32_t uiThreadId, int32_t renderThreadId);
     void setContentDrawBounds(int left, int top, int right, int bottom) {
         mContentDrawBounds.set(left, top, right, bottom);
     }
@@ -76,15 +76,33 @@ public:
 
     void run();
 
-    void setFrameCallback(std::function<void(int64_t)>&& callback) {
+    void setFrameCallback(std::function<std::function<void(bool)>(int32_t, int64_t)>&& callback) {
         mFrameCallback = std::move(callback);
     }
 
-    void setFrameCompleteCallback(std::function<void(int64_t)>&& callback) {
+    void setFrameCommitCallback(std::function<void(bool)>&& callback) {
+        mFrameCommitCallback = std::move(callback);
+    }
+
+    void setFrameCompleteCallback(std::function<void()>&& callback) {
         mFrameCompleteCallback = std::move(callback);
     }
 
+    void forceDrawNextFrame() { mForceDrawFrame = true; }
+
 private:
+    class HintSessionWrapper {
+    public:
+        HintSessionWrapper(int32_t uiThreadId, int32_t renderThreadId);
+        ~HintSessionWrapper();
+
+        void updateTargetWorkDuration(long targetDurationNanos);
+        void reportActualWorkDuration(long actualDurationNanos);
+
+    private:
+        APerformanceHintSession* mHintSession = nullptr;
+    };
+
     void postAndWait();
     bool syncFrameState(TreeInfo& info);
     void unblockUiThread();
@@ -95,6 +113,8 @@ private:
     RenderThread* mRenderThread;
     CanvasContext* mContext;
     RenderNode* mTargetNode = nullptr;
+    int32_t mUiThreadId = -1;
+    int32_t mRenderThreadId = -1;
     Rect mContentDrawBounds;
 
     /*********************************************
@@ -107,13 +127,15 @@ private:
 
     int64_t mFrameInfo[UI_THREAD_FRAME_INFO_SIZE];
 
-    std::function<void(int64_t)> mFrameCallback;
-    std::function<void(int64_t)> mFrameCompleteCallback;
+    std::function<std::function<void(bool)>(int32_t, int64_t)> mFrameCallback;
+    std::function<void(bool)> mFrameCommitCallback;
+    std::function<void()> mFrameCompleteCallback;
 
     nsecs_t mLastDequeueBufferDuration = 0;
     nsecs_t mLastTargetWorkDuration = 0;
-    std::function<void(int64_t)> mUpdateTargetWorkDuration;
-    std::function<void(int64_t)> mReportActualWorkDuration;
+    std::optional<HintSessionWrapper> mHintSessionWrapper;
+
+    bool mForceDrawFrame = false;
 };
 
 } /* namespace renderthread */

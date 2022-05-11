@@ -83,8 +83,9 @@ typedef ASurfaceControl* (*ASC_create)(ASurfaceControl* parent, const char* debu
 typedef void (*ASC_acquire)(ASurfaceControl* control);
 typedef void (*ASC_release)(ASurfaceControl* control);
 
-typedef void (*ASC_registerSurfaceStatsListener)(ASurfaceControl* control, void* context,
-        ASurfaceControl_SurfaceStatsListener func);
+typedef void (*ASC_registerSurfaceStatsListener)(ASurfaceControl* control, int32_t id,
+                                                 void* context,
+                                                 ASurfaceControl_SurfaceStatsListener func);
 typedef void (*ASC_unregisterSurfaceStatsListener)(void* context,
                                                    ASurfaceControl_SurfaceStatsListener func);
 
@@ -94,6 +95,9 @@ typedef uint64_t (*ASCStats_getFrameNumber)(ASurfaceControlStats* stats);
 typedef ASurfaceTransaction* (*AST_create)();
 typedef void (*AST_delete)(ASurfaceTransaction* transaction);
 typedef void (*AST_apply)(ASurfaceTransaction* transaction);
+typedef void (*AST_reparent)(ASurfaceTransaction* aSurfaceTransaction,
+                             ASurfaceControl* aSurfaceControl,
+                             ASurfaceControl* newParentASurfaceControl);
 typedef void (*AST_setVisibility)(ASurfaceTransaction* transaction,
                                   ASurfaceControl* surface_control, int8_t visibility);
 typedef void (*AST_setZOrder)(ASurfaceTransaction* transaction, ASurfaceControl* surface_control,
@@ -113,6 +117,7 @@ struct ASurfaceControlFunctions {
     AST_create transactionCreateFunc;
     AST_delete transactionDeleteFunc;
     AST_apply transactionApplyFunc;
+    AST_reparent transactionReparentFunc;
     AST_setVisibility transactionSetVisibilityFunc;
     AST_setZOrder transactionSetZOrderFunc;
 };
@@ -206,7 +211,9 @@ private:
     // corresponding callbacks for each display event type
     static int choreographerCallback(int fd, int events, void* data);
     // Callback that will be run on vsync ticks.
-    static void frameCallback(int64_t frameTimeNanos, void* data);
+    static void extendedFrameCallback(const AChoreographerFrameCallbackData* cbData, void* data);
+    void frameCallback(int64_t vsyncId, int64_t frameDeadline, int64_t frameTimeNanos,
+                       int64_t frameInterval);
     // Callback that will be run whenver there is a refresh rate change.
     static void refreshRateCallback(int64_t vsyncPeriod, void* data);
     void drainDisplayEventQueue();

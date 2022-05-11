@@ -16,20 +16,24 @@
 
 package com.android.systemui.toast;
 
+import static android.content.pm.ApplicationInfo.FLAG_SYSTEM;
+import static android.content.pm.ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
+
 import android.animation.Animator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.Application;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.UserHandle;
+import android.util.IconDrawableFactory;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,9 +41,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.internal.R;
-import com.android.launcher3.icons.IconFactory;
-import com.android.settingslib.applications.ApplicationsState;
-import com.android.settingslib.applications.ApplicationsState.AppEntry;
 import com.android.systemui.plugins.ToastPlugin;
 
 /**
@@ -53,7 +54,7 @@ public class SystemUIToast implements ToastPlugin.Toast {
     final ToastPlugin.Toast mPluginToast;
 
     private final String mPackageName;
-    private final int mUserId;
+    @UserIdInt private final int mUserId;
     private final LayoutInflater mLayoutInflater;
 
     final int mDefaultX = 0;
@@ -74,7 +75,7 @@ public class SystemUIToast implements ToastPlugin.Toast {
     }
 
     SystemUIToast(LayoutInflater layoutInflater, Context context, CharSequence text,
-            ToastPlugin.Toast pluginToast, String packageName, int userId,
+            ToastPlugin.Toast pluginToast, String packageName, @UserIdInt int userId,
             int orientation) {
         mLayoutInflater = layoutInflater;
         mContext = context;
@@ -195,7 +196,9 @@ public class SystemUIToast implements ToastPlugin.Toast {
                 iconView.setVisibility(View.GONE);
             } else {
                 iconView.setImageDrawable(icon);
-                if (appInfo.labelRes != 0) {
+                if (appInfo == null) {
+                    Log.d(TAG, "No appInfo for pkg=" + mPackageName + " usr=" + mUserId);
+                } else if (appInfo.labelRes != 0) {
                     try {
                         Resources res = mContext.getPackageManager().getResourcesForApplication(
                                 appInfo,
@@ -248,24 +251,34 @@ public class SystemUIToast implements ToastPlugin.Toast {
             return null;
         }
 
-        final ApplicationsState appState =
-                ApplicationsState.getInstance((Application) context.getApplicationContext());
-        if (!appState.isUserAdded(userId)) {
-            Log.d(TAG, "user hasn't been fully initialized, not showing an app icon for "
-                    + "packageName=" + packageName);
-            return null;
-        }
-        final AppEntry appEntry = appState.getEntry(packageName, userId);
-        if (appEntry == null || appEntry.info == null
-                || !ApplicationsState.FILTER_DOWNLOADED_AND_LAUNCHER.filterApp(appEntry)) {
-            return null;
-        }
+        try {
+            final PackageManager packageManager = context.getPackageManager();
+            final ApplicationInfo appInfo = packageManager.getApplicationInfoAsUser(
+                    packageName,
+                    PackageManager.ApplicationInfoFlags.of(PackageManager.GET_META_DATA),
+                    userId);
+            if (appInfo == null || !showApplicationIcon(appInfo, packageManager)) {
+                return null;
+            }
 
-        final ApplicationInfo appInfo = appEntry.info;
-        UserHandle user = UserHandle.getUserHandleForUid(appInfo.uid);
-        IconFactory iconFactory = IconFactory.obtain(context);
-        Bitmap iconBmp = iconFactory.createBadgedIconBitmap(
-                appInfo.loadUnbadgedIcon(context.getPackageManager()), user, true).icon;
-        return new BitmapDrawable(context.getResources(), iconBmp);
+            IconDrawableFactory iconFactory = IconDrawableFactory.newInstance(context);
+            return iconFactory.getBadgedIcon(appInfo, UserHandle.getUserId(appInfo.uid));
+        } catch (NameNotFoundException e) {
+            Log.e(TAG, "Couldn't find application info for packageName=" + packageName
+                    + " userId=" + userId);
+            return null;
+        }
+    }
+
+    private static boolean showApplicationIcon(ApplicationInfo appInfo,
+            PackageManager packageManager) {
+        if (hasFlag(appInfo.flags, FLAG_UPDATED_SYSTEM_APP)) {
+            return packageManager.getLaunchIntentForPackage(appInfo.packageName) != null;
+        }
+        return !hasFlag(appInfo.flags, FLAG_SYSTEM);
+    }
+
+    private static boolean hasFlag(int flags, int flag) {
+        return (flags & flag) != 0;
     }
 }

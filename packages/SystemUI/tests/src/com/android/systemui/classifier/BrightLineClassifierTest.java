@@ -31,6 +31,7 @@ import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
 import android.view.MotionEvent;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.filters.SmallTest;
 
@@ -38,7 +39,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.testing.FakeMetricsLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingDataProvider.GestureFinalizedListener;
-import com.android.systemui.dock.DockManagerFake;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -61,7 +61,6 @@ public class BrightLineClassifierTest extends SysuiTestCase {
     private BrightLineFalsingManager mBrightLineFalsingManager;
     @Mock
     private FalsingDataProvider mFalsingDataProvider;
-    private final DockManagerFake mDockManager = new DockManagerFake();
     private final MetricsLogger mMetricsLogger = new FakeMetricsLogger();
     private final Set<FalsingClassifier> mClassifiers = new HashSet<>();
     @Mock
@@ -77,6 +76,8 @@ public class BrightLineClassifierTest extends SysuiTestCase {
     private HistoryTracker mHistoryTracker;
     @Mock
     private KeyguardStateController mKeyguardStateController;
+    @Mock
+    private AccessibilityManager mAccessibilityManager;
 
     private final FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
 
@@ -99,9 +100,10 @@ public class BrightLineClassifierTest extends SysuiTestCase {
         mClassifiers.add(mClassifierB);
         when(mFalsingDataProvider.getRecentMotionEvents()).thenReturn(mMotionEventList);
         when(mKeyguardStateController.isShowing()).thenReturn(true);
-        mBrightLineFalsingManager = new BrightLineFalsingManager(mFalsingDataProvider, mDockManager,
+        mBrightLineFalsingManager = new BrightLineFalsingManager(mFalsingDataProvider,
                 mMetricsLogger, mClassifiers, mSingleTapClassfier, mDoubleTapClassifier,
-                mHistoryTracker, mKeyguardStateController, false);
+                mHistoryTracker, mKeyguardStateController, mAccessibilityManager,
+                false);
 
 
         ArgumentCaptor<GestureFinalizedListener> gestureCompleteListenerCaptor =
@@ -164,7 +166,7 @@ public class BrightLineClassifierTest extends SysuiTestCase {
         // Even when the classifiers report a false, we should allow.
         when(mClassifierA.classifyGesture(anyInt(), anyDouble(), anyDouble()))
                 .thenReturn(mPassedResult);
-        mDockManager.setIsDocked(true);
+        when(mFalsingDataProvider.isDocked()).thenReturn(true);
 
         assertThat(mBrightLineFalsingManager.isFalseTouch(0)).isFalse();
     }

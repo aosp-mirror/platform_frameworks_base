@@ -71,8 +71,6 @@ public:
     void setSwapBehavior(SwapBehavior swapBehavior);
     bool loadSystemProperties();
     void setName(const char* name);
-    void setHintSessionCallbacks(std::function<void(int64_t)> updateTargetWorkDuration,
-                                 std::function<void(int64_t)> reportActualWorkDuration);
 
     void setSurface(ANativeWindow* window, bool enableTimeout = true);
     void setSurfaceControl(ASurfaceControl* surfaceControl);
@@ -84,6 +82,7 @@ public:
     void setOpaque(bool opaque);
     void setColorMode(ColorMode mode);
     int64_t* frameInfo();
+    void forceDrawNextFrame();
     int syncAndDrawFrame();
     void destroy();
 
@@ -110,7 +109,8 @@ public:
     // Not exported, only used for testing
     void resetProfileInfo();
     uint32_t frameTimePercentile(int p);
-    static void dumpGraphicsMemory(int fd, bool includeProfileData = true);
+    static void dumpGraphicsMemory(int fd, bool includeProfileData = true,
+                                   bool resetProfile = false);
     static void getMemoryUsage(size_t* cpuUsage, size_t* gpuUsage);
 
     static void rotateProcessStatsBuffer();
@@ -123,10 +123,11 @@ public:
     void setContentDrawBounds(int left, int top, int right, int bottom);
     void setPictureCapturedCallback(const std::function<void(sk_sp<SkPicture>&&)>& callback);
     void setASurfaceTransactionCallback(
-            const std::function<void(int64_t, int64_t, int64_t)>& callback);
+            const std::function<bool(int64_t, int64_t, int64_t)>& callback);
     void setPrepareSurfaceControlForWebviewCallback(const std::function<void()>& callback);
-    void setFrameCallback(std::function<void(int64_t)>&& callback);
-    void setFrameCompleteCallback(std::function<void(int64_t)>&& callback);
+    void setFrameCallback(std::function<std::function<void(bool)>(int32_t, int64_t)>&& callback);
+    void setFrameCommitCallback(std::function<void(bool)>&& callback);
+    void setFrameCompleteCallback(std::function<void()>&& callback);
 
     void addFrameMetricsObserver(FrameMetricsObserver* observer);
     void removeFrameMetricsObserver(FrameMetricsObserver* observer);
@@ -142,6 +143,8 @@ public:
     static void disableVsync();
 
     static void preload();
+
+    static void setRtAnimationsEnabled(bool enabled);
 
 private:
     RenderThread& mRenderThread;

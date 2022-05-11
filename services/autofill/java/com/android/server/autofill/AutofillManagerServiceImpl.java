@@ -16,6 +16,8 @@
 
 package com.android.server.autofill;
 
+import static android.service.autofill.FillEventHistory.Event.NO_SAVE_UI_REASON_NONE;
+import static android.service.autofill.FillEventHistory.Event.UI_TYPE_INLINE;
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.view.autofill.AutofillManager.ACTION_START_SESSION;
 import static android.view.autofill.AutofillManager.FLAG_ADD_CLIENT_ENABLED;
@@ -76,6 +78,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.os.IResultReceiver;
 import com.android.server.LocalServices;
 import com.android.server.autofill.AutofillManagerService.AutofillCompatState;
 import com.android.server.autofill.AutofillManagerService.DisabledInfoCache;
@@ -283,7 +286,9 @@ final class AutofillManagerServiceImpl
         }
         final Session session = mSessions.get(sessionId);
         if (session != null && uid == session.uid) {
-            session.setAuthenticationResultLocked(data, authenticationId);
+            synchronized (session.mLock) {
+                session.setAuthenticationResultLocked(data, authenticationId);
+            }
         }
     }
 
@@ -373,7 +378,9 @@ final class AutofillManagerServiceImpl
                 + " hc=" + hasCallback + " f=" + flags + " aa=" + forAugmentedAutofillOnly;
         mMaster.logRequestLocked(historyItem);
 
-        newSession.updateLocked(autofillId, virtualBounds, value, ACTION_START_SESSION, flags);
+        synchronized (newSession.mLock) {
+            newSession.updateLocked(autofillId, virtualBounds, value, ACTION_START_SESSION, flags);
+        }
 
         if (forAugmentedAutofillOnly) {
             // Must embed the flag in the response, at the high-end side of the long.
@@ -798,12 +805,13 @@ final class AutofillManagerServiceImpl
      * Updates the last fill response when a dataset was selected.
      */
     void logDatasetSelected(@Nullable String selectedDataset, int sessionId,
-            @Nullable Bundle clientState) {
+            @Nullable Bundle clientState,  int presentationType) {
         synchronized (mLock) {
             if (isValidEventLocked("logDatasetSelected()", sessionId)) {
                 mEventHistory.addEvent(
                         new Event(Event.TYPE_DATASET_SELECTED, selectedDataset, clientState, null,
-                                null, null, null, null, null, null, null));
+                                null, null, null, null, null, null, null, NO_SAVE_UI_REASON_NONE,
+                                presentationType));
             }
         }
     }
@@ -811,12 +819,13 @@ final class AutofillManagerServiceImpl
     /**
      * Updates the last fill response when a dataset is shown.
      */
-    void logDatasetShown(int sessionId, @Nullable Bundle clientState) {
+    void logDatasetShown(int sessionId, @Nullable Bundle clientState, int presentationType) {
         synchronized (mLock) {
             if (isValidEventLocked("logDatasetShown", sessionId)) {
                 mEventHistory.addEvent(
                         new Event(Event.TYPE_DATASETS_SHOWN, null, clientState, null, null, null,
-                                null, null, null, null, null));
+                                null, null, null, null, null, NO_SAVE_UI_REASON_NONE,
+                                presentationType));
             }
         }
     }
@@ -853,9 +862,12 @@ final class AutofillManagerServiceImpl
                     || mAugmentedAutofillEventHistory.getSessionId() != sessionId) {
                 return;
             }
+            // Augmented Autofill only logs for inline now, so set UI_TYPE_INLINE here.
+            // Ideally should not hardcode here and should also log for menu presentation.
             mAugmentedAutofillEventHistory.addEvent(
                     new Event(Event.TYPE_DATASETS_SHOWN, null, clientState, null, null, null,
-                            null, null, null, null, null));
+                            null, null, null, null, null, NO_SAVE_UI_REASON_NONE,
+                            UI_TYPE_INLINE));
 
         }
     }
@@ -1178,6 +1190,15 @@ final class AutofillManagerServiceImpl
             return mInfo.isInlineSuggestionsEnabled();
         }
         return false;
+    }
+
+    @GuardedBy("mLock")
+    void requestSavedPasswordCount(IResultReceiver receiver) {
+        RemoteFillService remoteService =
+                new RemoteFillService(
+                        getContext(), mInfo.getServiceInfo().getComponentName(), mUserId,
+                        /* callbacks= */ null, mMaster.isInstantServiceAllowed());
+        remoteService.onSavedPasswordCountRequest(receiver);
     }
 
     @GuardedBy("mLock")
@@ -1505,16 +1526,10 @@ final class AutofillManagerServiceImpl
             final int intDuration = duration > Integer.MAX_VALUE
                     ? Integer.MAX_VALUE
                     : (int) duration;
-            // NOTE: not using Helper.newLogMaker() because we're setting the componentName instead
-            // of package name
-            final LogMaker log = new LogMaker(MetricsEvent.AUTOFILL_SERVICE_DISABLED_ACTIVITY)
-                    .setComponentName(componentName)
-                    .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SERVICE, getServicePackageName())
-                    .addTaggedData(MetricsEvent.FIELD_AUTOFILL_DURATION, intDuration)
-                    .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SESSION_ID, sessionId);
-            if (compatMode) {
-                log.addTaggedData(MetricsEvent.FIELD_AUTOFILL_COMPAT_MODE, 1);
-            }
+
+            final LogMaker log = Helper.newLogMaker(MetricsEvent.AUTOFILL_SERVICE_DISABLED_ACTIVITY,
+                    componentName, getServicePackageName(), sessionId, compatMode)
+                    .addTaggedData(MetricsEvent.FIELD_AUTOFILL_DURATION, intDuration);
             mMetricsLogger.write(log);
         }
     }

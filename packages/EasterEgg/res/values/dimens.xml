@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
 Copyright (C) 2016 The Android Open Source Project
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,4 +15,10 @@ Copyright (C) 2016 The Android Open Source Project
 -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
     <dimen name="neko_display_size">64dp</dimen>
+
+    <!--
+Refer to App Widget Documentation for margin information
+http://developer.android.com/guide/topics/appwidgets/index.html#CreatingLayout
+    -->
+    <dimen name="widget_margin">0dp</dimen>
 </resources>

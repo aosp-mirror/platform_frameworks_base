@@ -63,7 +63,7 @@ import javax.inject.Inject;
  * and bottom before saving/sharing/editing.
  */
 public class LongScreenshotActivity extends Activity {
-    private static final String TAG = "LongScreenshotActivity";
+    private static final String TAG = LogConfig.logTag(LongScreenshotActivity.class);
 
     public static final String EXTRA_CAPTURE_RESPONSE = "capture-response";
     private static final String KEY_SAVED_IMAGE_PATH = "saved-image-path";
@@ -78,6 +78,7 @@ public class LongScreenshotActivity extends Activity {
     private ImageView mTransitionView;
     private ImageView mEnterTransitionView;
     private View mSave;
+    private View mCancel;
     private View mEdit;
     private View mShare;
     private CropView mCropView;
@@ -112,7 +113,6 @@ public class LongScreenshotActivity extends Activity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG, "onCreate(savedInstanceState = " + savedInstanceState + ")");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.long_screenshot);
 
@@ -120,6 +120,7 @@ public class LongScreenshotActivity extends Activity {
         mSave = requireViewById(R.id.save);
         mEdit = requireViewById(R.id.edit);
         mShare = requireViewById(R.id.share);
+        mCancel = requireViewById(R.id.cancel);
         mCropView = requireViewById(R.id.crop_view);
         mMagnifierView = requireViewById(R.id.magnifier);
         mCropView.setCropInteractionListener(mMagnifierView);
@@ -127,6 +128,7 @@ public class LongScreenshotActivity extends Activity {
         mEnterTransitionView = requireViewById(R.id.enter_transition);
 
         mSave.setOnClickListener(this::onClicked);
+        mCancel.setOnClickListener(this::onClicked);
         mEdit.setOnClickListener(this::onClicked);
         mShare.setOnClickListener(this::onClicked);
 
@@ -152,8 +154,13 @@ public class LongScreenshotActivity extends Activity {
 
     @Override
     public void onStart() {
-        Log.d(TAG, "onStart");
         super.onStart();
+        mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_ACTIVITY_STARTED);
+
+        if (mPreview.getDrawable() != null) {
+            // We already have an image, so no need to try to load again.
+            return;
+        }
 
         if (mCacheLoadFuture != null) {
             Log.d(TAG, "mCacheLoadFuture != null");
@@ -185,7 +192,7 @@ public class LongScreenshotActivity extends Activity {
     }
 
     private void onLongScreenshotReceived(LongScreenshot longScreenshot) {
-        Log.d(TAG, "onLongScreenshotReceived(longScreenshot=" + longScreenshot + ")");
+        Log.i(TAG, "Completed: " + longScreenshot);
         mLongScreenshot = longScreenshot;
         Drawable drawable = mLongScreenshot.getDrawable();
         mPreview.setImageDrawable(drawable);
@@ -200,7 +207,6 @@ public class LongScreenshotActivity extends Activity {
                         / (float) mLongScreenshot.getHeight());
 
         mEnterTransitionView.setImageDrawable(drawable);
-
         mEnterTransitionView.getViewTreeObserver().addOnPreDrawListener(
                 new ViewTreeObserver.OnPreDrawListener() {
                     @Override
@@ -220,7 +226,6 @@ public class LongScreenshotActivity extends Activity {
                                         mCropView.animateEntrance();
                                         mCropView.setVisibility(View.VISIBLE);
                                         setButtonsEnabled(true);
-                                        mEnterTransitionView.setVisibility(View.GONE);
                                     });
                         });
                         return true;
@@ -228,8 +233,8 @@ public class LongScreenshotActivity extends Activity {
                 });
 
         // Immediately export to temp image file for saved state
-        mCacheSaveFuture = mImageExporter.exportAsTempFile(mBackgroundExecutor,
-                mLongScreenshot.toBitmap());
+        mCacheSaveFuture = mImageExporter.exportToRawFile(mBackgroundExecutor,
+                mLongScreenshot.toBitmap(), new File(getCacheDir(), "long_screenshot_cache.png"));
         mCacheSaveFuture.addListener(() -> {
             try {
                 // Get the temp file path to persist, used in onSavedInstanceState
@@ -242,7 +247,8 @@ public class LongScreenshotActivity extends Activity {
     }
 
     private void onCachedImageLoaded(ImageLoader.Result imageResult) {
-        Log.d(TAG, "onCachedImageLoaded(imageResult=" + imageResult + ")");
+        mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_ACTIVITY_CACHED_IMAGE_LOADED);
+
         BitmapDrawable drawable = new BitmapDrawable(getResources(), imageResult.bitmap);
         mPreview.setImageDrawable(drawable);
         mPreview.setAlpha(1f);
@@ -267,7 +273,6 @@ public class LongScreenshotActivity extends Activity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        Log.d(TAG, "onSaveInstanceState");
         super.onSaveInstanceState(outState);
         if (mSavedImagePath != null) {
             outState.putString(KEY_SAVED_IMAGE_PATH, mSavedImagePath.getPath());
@@ -275,19 +280,14 @@ public class LongScreenshotActivity extends Activity {
     }
 
     @Override
-    protected void onPause() {
-        Log.d(TAG, "onPause");
-        super.onPause();
-    }
-
-    @Override
     protected void onStop() {
-        Log.d(TAG, "onStop finishing=" + isFinishing());
         super.onStop();
         if (mTransitionStarted) {
             finish();
         }
         if (isFinishing()) {
+            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_ACTIVITY_FINISHED);
+
             if (mScrollCaptureResponse != null) {
                 mScrollCaptureResponse.close();
             }
@@ -304,17 +304,10 @@ public class LongScreenshotActivity extends Activity {
             mCacheSaveFuture.cancel(true);
         }
         if (mSavedImagePath != null) {
-            Log.d(TAG, "Deleting " + mSavedImagePath);
             //noinspection ResultOfMethodCallIgnored
             mSavedImagePath.delete();
             mSavedImagePath = null;
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        Log.d(TAG, "onDestroy");
-        super.onDestroy();
     }
 
     private void setButtonsEnabled(boolean enabled) {
@@ -361,6 +354,7 @@ public class LongScreenshotActivity extends Activity {
         v.setPressed(true);
         setButtonsEnabled(false);
         if (id == R.id.save) {
+            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_SAVED);
             startExport(PendingAction.SAVE);
         } else if (id == R.id.edit) {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_EDIT);
@@ -368,11 +362,13 @@ public class LongScreenshotActivity extends Activity {
         } else if (id == R.id.share) {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_SHARE);
             startExport(PendingAction.SHARE);
+        } else if (id == R.id.cancel) {
+            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_EXIT);
+            finishAndRemoveTask();
         }
     }
 
     private void startExport(PendingAction action) {
-        Log.d(TAG, "startExport(action = " + action + ")");
         Drawable drawable = mPreview.getDrawable();
         if (drawable == null) {
             Log.e(TAG, "No drawable, skipping export!");

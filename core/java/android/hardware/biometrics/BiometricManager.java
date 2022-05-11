@@ -104,16 +104,16 @@ public class BiometricManager {
     public static final int BIOMETRIC_MULTI_SENSOR_DEFAULT = 0;
 
     /**
-     * Prefer the face sensor and fall back to fingerprint when needed.
+     * Use face and fingerprint sensors together.
      * @hide
      */
-    public static final int BIOMETRIC_MULTI_SENSOR_FACE_THEN_FINGERPRINT = 1;
+    public static final int BIOMETRIC_MULTI_SENSOR_FINGERPRINT_AND_FACE = 1;
 
     /**
      * @hide
      */
     @IntDef({BIOMETRIC_MULTI_SENSOR_DEFAULT,
-            BIOMETRIC_MULTI_SENSOR_FACE_THEN_FINGERPRINT})
+            BIOMETRIC_MULTI_SENSOR_FINGERPRINT_AND_FACE})
     @Retention(RetentionPolicy.SOURCE)
     public @interface BiometricMultiSensorMode {}
 
@@ -223,10 +223,6 @@ public class BiometricManager {
         @NonNull private final IAuthService mService;
         @Authenticators.Types int mAuthenticators;
 
-        @Nullable CharSequence mButtonLabel;
-        @Nullable CharSequence mPromptMessage;
-        @Nullable CharSequence mSettingName;
-
         private Strings(@NonNull Context context, @NonNull IAuthService service,
                 @Authenticators.Types int authenticators) {
             mContext = context;
@@ -259,16 +255,13 @@ public class BiometricManager {
         @RequiresPermission(USE_BIOMETRIC)
         @Nullable
         public CharSequence getButtonLabel() {
-            if (mButtonLabel == null) {
-                final int userId = mContext.getUserId();
-                final String opPackageName = mContext.getOpPackageName();
-                try {
-                    mButtonLabel = mService.getButtonLabel(userId, opPackageName, mAuthenticators);
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                }
+            final int userId = mContext.getUserId();
+            final String opPackageName = mContext.getOpPackageName();
+            try {
+                return mService.getButtonLabel(userId, opPackageName, mAuthenticators);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
             }
-            return mButtonLabel;
         }
 
         /**
@@ -296,16 +289,13 @@ public class BiometricManager {
         @RequiresPermission(USE_BIOMETRIC)
         @Nullable
         public CharSequence getPromptMessage() {
-            if (mPromptMessage == null) {
-                final int userId = mContext.getUserId();
-                final String opPackageName = mContext.getOpPackageName();
-                try {
-                    return mService.getPromptMessage(userId, opPackageName, mAuthenticators);
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                }
+            final int userId = mContext.getUserId();
+            final String opPackageName = mContext.getOpPackageName();
+            try {
+                return mService.getPromptMessage(userId, opPackageName, mAuthenticators);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
             }
-            return mPromptMessage;
         }
 
         /**
@@ -335,16 +325,13 @@ public class BiometricManager {
         @RequiresPermission(USE_BIOMETRIC)
         @Nullable
         public CharSequence getSettingName() {
-            if (mSettingName == null) {
-                final int userId = mContext.getUserId();
-                final String opPackageName = mContext.getOpPackageName();
-                try {
-                    return mService.getSettingName(userId, opPackageName, mAuthenticators);
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                }
+            final int userId = mContext.getUserId();
+            final String opPackageName = mContext.getOpPackageName();
+            try {
+                return mService.getSettingName(userId, opPackageName, mAuthenticators);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
             }
-            return mSettingName;
         }
     }
 

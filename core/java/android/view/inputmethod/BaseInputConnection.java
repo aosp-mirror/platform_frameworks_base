@@ -163,6 +163,17 @@ public class BaseInputConnection implements InputConnection {
     }
 
     /**
+     * Called after only the composing region is modified (so it isn't called if the text also
+     * changes).
+     * <p>
+     * Default implementation does nothing.
+     *
+     * @hide
+     */
+    public void endComposingRegionEditInternal() {
+    }
+
+    /**
      * Default implementation calls {@link #finishComposingText()} and
      * {@code setImeConsumesInput(false)}.
      */
@@ -468,6 +479,7 @@ public class BaseInputConnection implements InputConnection {
             // Note: sendCurrentText does nothing unless mFallbackMode is set
             sendCurrentText();
             endBatchEdit();
+            endComposingRegionEditInternal();
         }
         return true;
     }
@@ -734,6 +746,7 @@ public class BaseInputConnection implements InputConnection {
             // Note: sendCurrentText does nothing unless mFallbackMode is set
             sendCurrentText();
             endBatchEdit();
+            endComposingRegionEditInternal();
         }
         return true;
     }
@@ -965,5 +978,39 @@ public class BaseInputConnection implements InputConnection {
                 .setInputContentInfo(inputContentInfo)
                 .build();
         return mTargetView.performReceiveContent(payload) == null;
+    }
+
+    /**
+     * Default implementation that constructs {@link TextSnapshot} with information extracted from
+     * {@link BaseInputConnection}.
+     *
+     * @return {@code null} when {@link TextSnapshot} cannot be fully taken.
+     */
+    @Nullable
+    @Override
+    public TextSnapshot takeSnapshot() {
+        final Editable content = getEditable();
+        if (content == null) {
+            return null;
+        }
+        int composingStart = getComposingSpanStart(content);
+        int composingEnd = getComposingSpanEnd(content);
+        if (composingEnd < composingStart) {
+            final int tmp = composingStart;
+            composingStart = composingEnd;
+            composingEnd = tmp;
+        }
+
+        final SurroundingText surroundingText = getSurroundingText(
+                EditorInfo.MEMORY_EFFICIENT_TEXT_LENGTH / 2,
+                EditorInfo.MEMORY_EFFICIENT_TEXT_LENGTH / 2, GET_TEXT_WITH_STYLES);
+        if (surroundingText == null) {
+            return null;
+        }
+
+        final int cursorCapsMode = getCursorCapsMode(TextUtils.CAP_MODE_CHARACTERS
+                | TextUtils.CAP_MODE_WORDS | TextUtils.CAP_MODE_SENTENCES);
+
+        return new TextSnapshot(surroundingText, composingStart, composingEnd, cursorCapsMode);
     }
 }

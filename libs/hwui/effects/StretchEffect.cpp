@@ -181,11 +181,12 @@ static const SkString stretchShader = SkString(R"(
         );
         coord.x = outU;
         coord.y = outV;
-        return sample(uContentTexture, coord);
+        return uContentTexture.eval(coord);
     })");
 
 static const float ZERO = 0.f;
 static const float INTERPOLATION_STRENGTH_VALUE = 0.7f;
+static const char CONTENT_TEXTURE[] = "uContentTexture";
 
 sk_sp<SkShader> StretchEffect::getShader(float width, float height,
                                          const sk_sp<SkImage>& snapshotImage,
@@ -207,7 +208,7 @@ sk_sp<SkShader> StretchEffect::getShader(float width, float height,
         mBuilder = std::make_unique<SkRuntimeShaderBuilder>(getStretchEffect());
     }
 
-    mBuilder->child("uContentTexture") =
+    mBuilder->child(CONTENT_TEXTURE) =
             snapshotImage->makeShader(SkTileMode::kClamp, SkTileMode::kClamp,
                                       SkSamplingOptions(SkFilterMode::kLinear), matrix);
     mBuilder->uniform("uInterpolationStrength").set(&INTERPOLATION_STRENGTH_VALUE, 1);
@@ -226,7 +227,9 @@ sk_sp<SkShader> StretchEffect::getShader(float width, float height,
     mBuilder->uniform("viewportWidth").set(&width, 1);
     mBuilder->uniform("viewportHeight").set(&height, 1);
 
-    return mBuilder->makeShader(nullptr, false);
+    auto result = mBuilder->makeShader();
+    mBuilder->child(CONTENT_TEXTURE) = nullptr;
+    return result;
 }
 
 sk_sp<SkRuntimeEffect> StretchEffect::getStretchEffect() {

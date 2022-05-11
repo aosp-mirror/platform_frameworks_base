@@ -29,6 +29,7 @@ import android.os.UserHandle
 import android.util.Log
 import com.android.systemui.controls.controller.AuxiliaryPersistenceWrapper
 import com.android.systemui.controls.controller.ControlsFavoritePersistenceWrapper
+import com.android.systemui.people.widget.PeopleBackupHelper
 
 /**
  * Helper for backing up elements in SystemUI
@@ -39,24 +40,35 @@ import com.android.systemui.controls.controller.ControlsFavoritePersistenceWrapp
  * After restoring is done, a [ACTION_RESTORE_FINISHED] intent will be send to SystemUI user 0,
  * indicating that restoring is finished for a given user.
  */
-class BackupHelper : BackupAgentHelper() {
+open class BackupHelper : BackupAgentHelper() {
 
     companion object {
-        private const val TAG = "BackupHelper"
+        const val TAG = "BackupHelper"
         internal const val CONTROLS = ControlsFavoritePersistenceWrapper.FILE_NAME
         private const val NO_OVERWRITE_FILES_BACKUP_KEY = "systemui.files_no_overwrite"
+        private const val PEOPLE_TILES_BACKUP_KEY = "systemui.people.shared_preferences"
         val controlsDataLock = Any()
         const val ACTION_RESTORE_FINISHED = "com.android.systemui.backup.RESTORE_FINISHED"
         private const val PERMISSION_SELF = "com.android.systemui.permission.SELF"
     }
 
-    override fun onCreate() {
+    override fun onCreate(userHandle: UserHandle, operationType: Int) {
         super.onCreate()
         // The map in mapOf is guaranteed to be order preserving
         val controlsMap = mapOf(CONTROLS to getPPControlsFile(this))
         NoOverwriteFileBackupHelper(controlsDataLock, this, controlsMap).also {
             addHelper(NO_OVERWRITE_FILES_BACKUP_KEY, it)
         }
+
+        // Conversations widgets backup only works for system user, because widgets' information is
+        // stored in system user's SharedPreferences files and we can't open those from other users.
+        if (!userHandle.isSystem) {
+            return
+        }
+
+        val keys = PeopleBackupHelper.getFilesToBackup()
+        addHelper(PEOPLE_TILES_BACKUP_KEY, PeopleBackupHelper(
+                this, userHandle, keys.toTypedArray()))
     }
 
     override fun onRestoreFinished() {

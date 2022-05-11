@@ -19,6 +19,7 @@ package com.android.systemui.accessibility.floatingmenu;
 import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
 
 import android.content.Context;
+import android.os.UserHandle;
 import android.text.TextUtils;
 
 import androidx.annotation.MainThread;
@@ -40,36 +41,29 @@ public class AccessibilityFloatingMenuController implements
         AccessibilityButtonModeObserver.ModeChangedListener,
         AccessibilityButtonTargetsObserver.TargetsChangedListener {
 
-    private final Context mContext;
     private final AccessibilityButtonModeObserver mAccessibilityButtonModeObserver;
     private final AccessibilityButtonTargetsObserver mAccessibilityButtonTargetsObserver;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
+    private Context mContext;
     @VisibleForTesting
     IAccessibilityFloatingMenu mFloatingMenu;
     private int mBtnMode;
     private String mBtnTargets;
     private boolean mIsKeyguardVisible;
-    private boolean mIsAccessibilityManagerServiceReady;
 
     @VisibleForTesting
     final KeyguardUpdateMonitorCallback mKeyguardCallback = new KeyguardUpdateMonitorCallback() {
-        // Accessibility floating menu needs to retrieve information from
-        // AccessibilityManagerService, and it would be ready before onUserUnlocked().
+
         @Override
         public void onUserUnlocked() {
-            mIsAccessibilityManagerServiceReady = true;
             handleFloatingMenuVisibility(mIsKeyguardVisible, mBtnMode, mBtnTargets);
         }
 
-        // Keyguard state would be changed before AccessibilityManagerService is ready to retrieve,
-        // need to wait until receive onUserUnlocked().
         @Override
         public void onKeyguardVisibilityChanged(boolean showing) {
             mIsKeyguardVisible = showing;
-            if (mIsAccessibilityManagerServiceReady) {
-                handleFloatingMenuVisibility(mIsKeyguardVisible, mBtnMode, mBtnTargets);
-            }
+            handleFloatingMenuVisibility(mIsKeyguardVisible, mBtnMode, mBtnTargets);
         }
 
         @Override
@@ -79,6 +73,7 @@ public class AccessibilityFloatingMenuController implements
 
         @Override
         public void onUserSwitchComplete(int userId) {
+            mContext = mContext.createContextAsUser(UserHandle.of(userId), /* flags= */ 0);
             mBtnMode = mAccessibilityButtonModeObserver.getCurrentAccessibilityButtonMode();
             mBtnTargets =
                     mAccessibilityButtonTargetsObserver.getCurrentAccessibilityButtonTargets();
@@ -96,7 +91,7 @@ public class AccessibilityFloatingMenuController implements
         mAccessibilityButtonModeObserver = accessibilityButtonModeObserver;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
 
-        init();
+        mIsKeyguardVisible = false;
     }
 
     /**
@@ -122,9 +117,8 @@ public class AccessibilityFloatingMenuController implements
         handleFloatingMenuVisibility(mIsKeyguardVisible, mBtnMode, mBtnTargets);
     }
 
-    private void init() {
-        mIsKeyguardVisible = false;
-        mIsAccessibilityManagerServiceReady = false;
+    /** Initializes the AccessibilityFloatingMenuController configurations. */
+    public void init() {
         mBtnMode = mAccessibilityButtonModeObserver.getCurrentAccessibilityButtonMode();
         mBtnTargets = mAccessibilityButtonTargetsObserver.getCurrentAccessibilityButtonTargets();
         registerContentObservers();

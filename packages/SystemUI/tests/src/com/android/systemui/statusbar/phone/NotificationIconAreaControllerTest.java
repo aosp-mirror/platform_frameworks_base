@@ -33,6 +33,7 @@ import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
+import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.wm.shell.bubbles.Bubbles;
 
 import org.junit.Before;
@@ -66,6 +67,8 @@ public class NotificationIconAreaControllerTest extends SysuiTestCase {
     DarkIconDispatcher mDarkIconDispatcher;
     @Mock
     StatusBarWindowController mStatusBarWindowController;
+    @Mock
+    ScreenOffAnimationController mScreenOffAnimationController;
     private NotificationIconAreaController mController;
     @Mock
     private Bubbles mBubbles;
@@ -87,7 +90,8 @@ public class NotificationIconAreaControllerTest extends SysuiTestCase {
                 Optional.of(mBubbles),
                 mDemoModeController,
                 mDarkIconDispatcher,
-                mStatusBarWindowController);
+                mStatusBarWindowController,
+                mScreenOffAnimationController);
     }
 
     @Test

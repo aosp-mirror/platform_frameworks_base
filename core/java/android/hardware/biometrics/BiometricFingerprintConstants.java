@@ -61,7 +61,7 @@ public interface BiometricFingerprintConstants {
             BIOMETRIC_ERROR_RE_ENROLL,
             BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED,
             FINGERPRINT_ERROR_UNKNOWN,
-            FINGERPRINT_ERROR_BAD_CALIBARTION})
+            FINGERPRINT_ERROR_BAD_CALIBRATION})
     @Retention(RetentionPolicy.SOURCE)
     @interface FingerprintError {}
 
@@ -185,7 +185,7 @@ public interface BiometricFingerprintConstants {
      * Error indicating that the fingerprint sensor has bad calibration.
      * @hide
      */
-    int FINGERPRINT_ERROR_BAD_CALIBARTION = 18;
+    int FINGERPRINT_ERROR_BAD_CALIBRATION = 18;
 
     /**
      * @hide
@@ -209,7 +209,8 @@ public interface BiometricFingerprintConstants {
             FINGERPRINT_ACQUIRED_VENDOR,
             FINGERPRINT_ACQUIRED_START,
             FINGERPRINT_ACQUIRED_UNKNOWN,
-            FINGERPRINT_ACQUIRED_IMMOBILE})
+            FINGERPRINT_ACQUIRED_IMMOBILE,
+            FINGERPRINT_ACQUIRED_TOO_BRIGHT})
     @Retention(RetentionPolicy.SOURCE)
     @interface FingerprintAcquired {}
 
@@ -287,7 +288,43 @@ public interface BiometricFingerprintConstants {
     int FINGERPRINT_ACQUIRED_IMMOBILE = 9;
 
     /**
+     * For sensors that require illumination, such as optical under-display fingerprint sensors,
+     * the image was too bright to be used for matching.
+     * @hide
+     */
+    int FINGERPRINT_ACQUIRED_TOO_BRIGHT = 10;
+
+    /**
      * @hide
      */
     int FINGERPRINT_ACQUIRED_VENDOR_BASE = 1000;
+
+    /**
+     * Whether the FingerprintAcquired message is a signal to turn off HBM
+     */
+    static boolean shouldTurnOffHbm(@FingerprintAcquired int acquiredInfo) {
+        switch (acquiredInfo) {
+            case FINGERPRINT_ACQUIRED_START:
+                // Authentication just began
+                return false;
+            case FINGERPRINT_ACQUIRED_GOOD:
+                // Good image captured. Turn off HBM. Success/Reject comes after, which is when
+                // hideUdfpsOverlay will be called.
+                return true;
+            case FINGERPRINT_ACQUIRED_PARTIAL:
+            case FINGERPRINT_ACQUIRED_INSUFFICIENT:
+            case FINGERPRINT_ACQUIRED_IMAGER_DIRTY:
+            case FINGERPRINT_ACQUIRED_TOO_SLOW:
+            case FINGERPRINT_ACQUIRED_TOO_FAST:
+            case FINGERPRINT_ACQUIRED_IMMOBILE:
+            case FINGERPRINT_ACQUIRED_TOO_BRIGHT:
+            case FINGERPRINT_ACQUIRED_VENDOR:
+                // Bad image captured. Turn off HBM. Matcher will not run, so there's no need to
+                // keep HBM on.
+                return true;
+            case FINGERPRINT_ACQUIRED_UNKNOWN:
+            default:
+                return false;
+        }
+    }
 }

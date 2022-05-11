@@ -16,6 +16,7 @@
 
 package android.view.translation;
 
+import static android.view.translation.Helper.ANIMATION_DURATION_MILLIS;
 import static android.view.translation.UiTranslationManager.STATE_UI_TRANSLATION_FINISHED;
 import static android.view.translation.UiTranslationManager.STATE_UI_TRANSLATION_PAUSED;
 import static android.view.translation.UiTranslationManager.STATE_UI_TRANSLATION_RESUMED;
@@ -24,13 +25,15 @@ import static android.view.translation.UiTranslationManager.STATE_UI_TRANSLATION
 import android.annotation.NonNull;
 import android.annotation.WorkerThread;
 import android.app.Activity;
+import android.app.assist.ActivityId;
 import android.content.Context;
-import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Dumpable;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.LongSparseArray;
@@ -60,14 +63,15 @@ import java.util.function.BiConsumer;
  *
  * @hide
  */
-public class UiTranslationController {
+public class UiTranslationController implements Dumpable {
 
-    // TODO(b/182433547): remove Build.IS_DEBUGGABLE before ship. Enable the logging in debug build
-    //  to help the debug during the development phase
-    public static final boolean DEBUG = Log.isLoggable(UiTranslationManager.LOG_TAG, Log.DEBUG)
-            || Build.IS_DEBUGGABLE;
+    public static final boolean DEBUG = Log.isLoggable(UiTranslationManager.LOG_TAG, Log.DEBUG);
+
+    /** @hide */
+    public static final String DUMPABLE_NAME = "UiTranslationController";
 
     private static final String TAG = "UiTranslationController";
+
     @NonNull
     private final Activity mActivity;
     @NonNull
@@ -105,6 +109,7 @@ public class UiTranslationController {
                         Process.THREAD_PRIORITY_FOREGROUND);
         mWorkerThread.start();
         mWorkerHandler = mWorkerThread.getThreadHandler();
+        activity.addDumpable(this);
     }
 
     /**
@@ -113,11 +118,10 @@ public class UiTranslationController {
     public void updateUiTranslationState(@UiTranslationState int state, TranslationSpec sourceSpec,
             TranslationSpec targetSpec, List<AutofillId> views,
             UiTranslationSpec uiTranslationSpec) {
-        if (!mActivity.isResumed() && (state == STATE_UI_TRANSLATION_STARTED
-                || state == STATE_UI_TRANSLATION_RESUMED)) {
+        if (mActivity.isDestroyed()) {
+            Log.i(TAG, "Cannot update " + stateToString(state) + " for destroyed " + mActivity);
             return;
         }
-
         Log.i(TAG, "updateUiTranslationState state: " + stateToString(state)
                 + (DEBUG ? (", views: " + views + ", spec: " + uiTranslationSpec) : ""));
         synchronized (mLock) {
@@ -154,13 +158,9 @@ public class UiTranslationController {
             case STATE_UI_TRANSLATION_FINISHED:
                 destroyTranslators();
                 runForEachView((view, callback) -> {
-                    callback.onClearTranslation(view);
-                    view.clearViewTranslationResponse();
-                    if (view.hasTranslationTransientState()) {
-                        view.setHasTransientState(false);
-                        view.setHasTranslationTransientState(false);
-                    }
+                    view.clearTranslationState();
                 });
+                notifyTranslationFinished(/* activityDestroyed= */ false);
                 synchronized (mLock) {
                     mViews.clear();
                 }
@@ -175,9 +175,25 @@ public class UiTranslationController {
      */
     public void onActivityDestroyed() {
         synchronized (mLock) {
+            if (DEBUG) {
+                Log.i(TAG,
+                        "onActivityDestroyed(): mCurrentState is " + stateToString(mCurrentState));
+            }
+            if (mCurrentState != STATE_UI_TRANSLATION_FINISHED) {
+                notifyTranslationFinished(/* activityDestroyed= */ true);
+            }
             mViews.clear();
             destroyTranslators();
             mWorkerThread.quitSafely();
+        }
+    }
+
+    private void notifyTranslationFinished(boolean activityDestroyed) {
+        UiTranslationManager manager = mContext.getSystemService(UiTranslationManager.class);
+        if (manager != null) {
+            manager.onTranslationFinished(activityDestroyed,
+                    new ActivityId(mActivity.getTaskId(), mActivity.getShareableActivityToken()),
+                    mActivity.getComponentName());
         }
     }
 
@@ -191,10 +207,14 @@ public class UiTranslationController {
         mLastRequestAutofillIds.addAll(views);
     }
 
-    /**
-     * Called to dump the translation information for Activity.
-     */
-    public void dump(String outerPrefix, PrintWriter pw) {
+    @Override
+    public String getDumpableName() {
+        return DUMPABLE_NAME;
+    }
+
+    @Override
+    public void dump(PrintWriter pw, String[] args) {
+        String outerPrefix = "";
         pw.print(outerPrefix); pw.println("UiTranslationController:");
         final String pfx = outerPrefix + "  ";
         pw.print(pfx); pw.print("activity: "); pw.print(mActivity);
@@ -220,9 +240,7 @@ public class UiTranslationController {
             }
             pw.print(outerPrefix); pw.print("padded views: "); pw.println(mViewsToPadContent);
         }
-        // TODO(b/182433547): we will remove debug rom condition before S release then we change
-        //  change this back to "DEBUG"
-        if (Log.isLoggable(UiTranslationManager.LOG_TAG, Log.DEBUG)) {
+        if (DEBUG) {
             dumpViewByTraversal(outerPrefix, pw);
         }
     }
@@ -330,10 +348,8 @@ public class UiTranslationController {
      */
     private void onVirtualViewTranslationCompleted(
             SparseArray<LongSparseArray<ViewTranslationResponse>> translatedResult) {
-        if (!mActivity.isResumed()) {
-            if (DEBUG) {
-                Log.v(TAG, "onTranslationCompleted: Activity is not resumed.");
-            }
+        if (mActivity.isDestroyed()) {
+            Log.v(TAG, "onTranslationCompleted:" + mActivity + "is destroyed.");
             return;
         }
         synchronized (mLock) {
@@ -344,7 +360,11 @@ public class UiTranslationController {
             }
             for (int i = 0; i < translatedResult.size(); i++) {
                 final AutofillId autofillId = new AutofillId(translatedResult.keyAt(i));
-                final View view = mViews.get(autofillId).get();
+                final WeakReference<View> viewRef = mViews.get(autofillId);
+                if (viewRef == null) {
+                    continue;
+                }
+                final View view = viewRef.get();
                 if (view == null) {
                     Log.w(TAG, "onTranslationCompleted: the view for autofill id " + autofillId
                             + " may be gone.");
@@ -356,6 +376,10 @@ public class UiTranslationController {
                     Log.v(TAG, "onVirtualViewTranslationCompleted: received response for "
                             + "AutofillId " + autofillId);
                 }
+                view.onVirtualViewTranslationResponses(virtualChildResponse);
+                if (mCurrentState == STATE_UI_TRANSLATION_PAUSED) {
+                    return;
+                }
                 mActivity.runOnUiThread(() -> {
                     if (view.getViewTranslationCallback() == null) {
                         if (DEBUG) {
@@ -364,7 +388,6 @@ public class UiTranslationController {
                         }
                         return;
                     }
-                    view.onVirtualViewTranslationResponses(virtualChildResponse);
                     if (view.getViewTranslationCallback() != null) {
                         view.getViewTranslationCallback().onShowTranslation(view);
                     }
@@ -377,10 +400,8 @@ public class UiTranslationController {
      * The method is used to handle the translation result for non-vertual views.
      */
     private void onTranslationCompleted(SparseArray<ViewTranslationResponse> translatedResult) {
-        if (!mActivity.isResumed()) {
-            if (DEBUG) {
-                Log.v(TAG, "onTranslationCompleted: Activity is not resumed.");
-            }
+        if (mActivity.isDestroyed()) {
+            Log.v(TAG, "onTranslationCompleted:" + mActivity + "is destroyed.");
             return;
         }
         final int resultCount = translatedResult.size();
@@ -396,7 +417,6 @@ public class UiTranslationController {
             for (int i = 0; i < resultCount; i++) {
                 final ViewTranslationResponse response = translatedResult.valueAt(i);
                 if (DEBUG) {
-                    // TODO(b/182433547): remove before S release
                     Log.v(TAG, "onTranslationCompleted: "
                             + sanitizedViewTranslationResponse(response));
                 }
@@ -405,26 +425,39 @@ public class UiTranslationController {
                     Log.w(TAG, "No AutofillId is set in ViewTranslationResponse");
                     continue;
                 }
-                final View view = mViews.get(autofillId).get();
+                final WeakReference<View> viewRef = mViews.get(autofillId);
+                if (viewRef == null) {
+                    continue;
+                }
+                final View view = viewRef.get();
                 if (view == null) {
                     Log.w(TAG, "onTranslationCompleted: the view for autofill id " + autofillId
                             + " may be gone.");
                     continue;
                 }
+                int currentState;
+                currentState = mCurrentState;
                 mActivity.runOnUiThread(() -> {
+                    ViewTranslationCallback callback = view.getViewTranslationCallback();
                     if (view.getViewTranslationResponse() != null
                             && view.getViewTranslationResponse().equals(response)) {
-                        if (DEBUG) {
-                            Log.d(TAG, "Duplicate ViewTranslationResponse for " + autofillId
-                                    + ". Ignoring.");
+                        if (callback instanceof TextViewTranslationCallback) {
+                            TextViewTranslationCallback textViewCallback =
+                                    (TextViewTranslationCallback) callback;
+                            if (textViewCallback.isShowingTranslation()
+                                    || textViewCallback.isAnimationRunning()) {
+                                if (DEBUG) {
+                                    Log.d(TAG, "Duplicate ViewTranslationResponse for " + autofillId
+                                            + ". Ignoring.");
+                                }
+                                return;
+                            }
                         }
-                        return;
                     }
-                    ViewTranslationCallback callback = view.getViewTranslationCallback();
                     if (callback == null) {
                         if (view instanceof TextView) {
                             // developer doesn't provide their override, we set the default TextView
-                            // implememtation.
+                            // implementation.
                             callback = new TextViewTranslationCallback();
                             view.setViewTranslationCallback(callback);
                         } else {
@@ -440,14 +473,14 @@ public class UiTranslationController {
                         callback.enableContentPadding();
                     }
                     view.onViewTranslationResponse(response);
+                    if (currentState == STATE_UI_TRANSLATION_PAUSED) {
+                        return;
+                    }
                     callback.onShowTranslation(view);
                 });
             }
         }
     }
-
-    // TODO: Use a device config value.
-    private static final int ANIMATION_DURATION_MILLIS = 250;
 
     /**
      * Creates a Translator for the given source and target translation specs and start the ui
@@ -579,9 +612,8 @@ public class UiTranslationController {
             final View rootView = roots.get(rootNum).getView();
             if (rootView instanceof ViewGroup) {
                 findViewsTraversalByAutofillIds((ViewGroup) rootView, sourceViewIds);
-            } else {
-                addViewIfNeeded(sourceViewIds, rootView);
             }
+            addViewIfNeeded(sourceViewIds, rootView);
         }
     }
 
@@ -592,15 +624,14 @@ public class UiTranslationController {
             final View child = viewGroup.getChildAt(i);
             if (child instanceof ViewGroup) {
                 findViewsTraversalByAutofillIds((ViewGroup) child, sourceViewIds);
-            } else {
-                addViewIfNeeded(sourceViewIds, child);
             }
+            addViewIfNeeded(sourceViewIds, child);
         }
     }
 
     private void addViewIfNeeded(IntArray sourceViewIds, View view) {
         final AutofillId autofillId = view.getAutofillId();
-        if ((sourceViewIds.indexOf(autofillId.getViewId()) >= 0)
+        if (autofillId != null && (sourceViewIds.indexOf(autofillId.getViewId()) >= 0)
                 && !mViews.containsKey(autofillId)) {
             mViews.put(autofillId, new WeakReference<>(view));
         }
@@ -617,8 +648,8 @@ public class UiTranslationController {
                 for (int i = 0; i < viewCounts; i++) {
                     final View view = views.valueAt(i).get();
                     if (DEBUG) {
-                        // TODO(b/182433547): remove before S release
-                        Log.d(TAG, "runForEachView: view= " + view);
+                        Log.d(TAG, "runForEachView for autofillId = " + (view != null
+                                ? view.getAutofillId() : " null"));
                     }
                     if (view == null || view.getViewTranslationCallback() == null) {
                         if (DEBUG) {
@@ -640,8 +671,13 @@ public class UiTranslationController {
             Log.e(TAG, "Can not find TranslationManager when trying to create translator.");
             return null;
         }
-        final TranslationContext translationContext = new TranslationContext(sourceSpec,
-                targetSpec, /* translationFlags= */ 0);
+        final TranslationContext translationContext =
+                new TranslationContext.Builder(sourceSpec, targetSpec)
+                        .setActivityId(
+                                new ActivityId(
+                                        mActivity.getTaskId(),
+                                        mActivity.getShareableActivityToken()))
+                        .build();
         final Translator translator = tm.createTranslator(translationContext);
         if (translator != null) {
             final Pair<TranslationSpec, TranslationSpec> specs = new Pair<>(sourceSpec, targetSpec);
@@ -679,8 +715,6 @@ public class UiTranslationController {
         }
     }
 
-    // TODO(b/182433547): maybe remove below before S release
-
     /**
      * Returns a sanitized string representation of {@link ViewTranslationRequest};
      */
@@ -707,7 +741,21 @@ public class UiTranslationController {
             msg.append("text=").append(value.getText() == null
                     ? "null"
                     : "string[" + value.getText().length() + "], ");
-            //TODO: append dictionary results.
+            final Bundle definitions =
+                    (Bundle) value.getExtras().get(TranslationResponseValue.EXTRA_DEFINITIONS);
+            if (definitions != null) {
+                msg.append("definitions={");
+                for (String partOfSpeech : definitions.keySet()) {
+                    msg.append(partOfSpeech).append(":[");
+                    for (CharSequence definition : definitions.getCharSequenceArray(partOfSpeech)) {
+                        msg.append(definition == null
+                                ? "null, "
+                                : "string[" + definition.length() + "], ");
+                    }
+                    msg.append("], ");
+                }
+                msg.append("}");
+            }
             msg.append("transliteration=").append(value.getTransliteration() == null
                     ? "null"
                     : "string[" + value.getTransliteration().length() + "]}, ");

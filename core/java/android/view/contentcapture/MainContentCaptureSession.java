@@ -26,6 +26,7 @@ import static android.view.contentcapture.ContentCaptureEvent.TYPE_VIEW_INSETS_C
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_VIEW_TEXT_CHANGED;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_VIEW_TREE_APPEARED;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_VIEW_TREE_APPEARING;
+import static android.view.contentcapture.ContentCaptureEvent.TYPE_WINDOW_BOUNDS_CHANGED;
 import static android.view.contentcapture.ContentCaptureHelper.getSanitizedString;
 import static android.view.contentcapture.ContentCaptureHelper.sDebug;
 import static android.view.contentcapture.ContentCaptureHelper.sVerbose;
@@ -38,6 +39,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Insets;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -323,9 +325,11 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         if (!hasStarted() && eventType != ContentCaptureEvent.TYPE_SESSION_STARTED
                 && eventType != ContentCaptureEvent.TYPE_CONTEXT_UPDATED) {
             // TODO(b/120494182): comment when this could happen (dialogs?)
-            Log.v(TAG, "handleSendEvent(" + getDebugState() + ", "
-                    + ContentCaptureEvent.getTypeAsString(eventType)
-                    + "): dropping because session not started yet");
+            if (sVerbose) {
+                Log.v(TAG, "handleSendEvent(" + getDebugState() + ", "
+                        + ContentCaptureEvent.getTypeAsString(eventType)
+                        + "): dropping because session not started yet");
+            }
             return;
         }
         if (mDisabled.get()) {
@@ -368,7 +372,10 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
                     final CharSequence lastText = lastEvent.getText();
                     final boolean bothNonEmpty = !TextUtils.isEmpty(lastText)
                             && !TextUtils.isEmpty(text);
-                    boolean equalContent = TextUtils.equals(lastText, text);
+                    boolean equalContent =
+                            TextUtils.equals(lastText, text)
+                            && lastEvent.hasSameComposingSpan(event)
+                            && lastEvent.hasSameSelectionSpan(event);
                     if (equalContent) {
                         addEvent = false;
                     } else if (bothNonEmpty) {
@@ -768,7 +775,15 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
 
     void notifyContextUpdated(int sessionId, @Nullable ContentCaptureContext context) {
         mHandler.post(() -> sendEvent(new ContentCaptureEvent(sessionId, TYPE_CONTEXT_UPDATED)
-                .setClientContext(context)));
+                .setClientContext(context), FORCE_FLUSH));
+    }
+
+    /** public because is also used by ViewRootImpl */
+    public void notifyWindowBoundsChanged(int sessionId, @NonNull Rect bounds) {
+        mHandler.post(() -> sendEvent(
+                new ContentCaptureEvent(sessionId, TYPE_WINDOW_BOUNDS_CHANGED)
+                .setBounds(bounds)
+        ));
     }
 
     @Override

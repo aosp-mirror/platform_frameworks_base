@@ -33,17 +33,15 @@ import android.view.IWindowManager;
 import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
+import android.view.InsetsVisibilities;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.WindowInsets;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
-import androidx.annotation.BinderThread;
 import androidx.annotation.VisibleForTesting;
 
-import com.android.internal.inputmethod.Completable;
-import com.android.internal.inputmethod.ResultCallbacks;
 import com.android.internal.view.IInputMethodManager;
 
 import java.util.ArrayList;
@@ -70,14 +68,17 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
     protected final Executor mMainExecutor;
     private final TransactionPool mTransactionPool;
     private final DisplayController mDisplayController;
+    private final DisplayInsetsController mDisplayInsetsController;
     private final SparseArray<PerDisplay> mImePerDisplay = new SparseArray<>();
     private final ArrayList<ImePositionProcessor> mPositionProcessors = new ArrayList<>();
 
 
     public DisplayImeController(IWindowManager wmService, DisplayController displayController,
+            DisplayInsetsController displayInsetsController,
             Executor mainExecutor, TransactionPool transactionPool) {
         mWmService = wmService;
         mDisplayController = displayController;
+        mDisplayInsetsController = displayInsetsController;
         mMainExecutor = mainExecutor;
         mTransactionPool = transactionPool;
     }
@@ -111,11 +112,11 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
 
     @Override
     public void onDisplayRemoved(int displayId) {
-        try {
-            mWmService.setDisplayWindowInsetsController(displayId, null);
-        } catch (RemoteException e) {
-            Slog.w(TAG, "Unable to remove insets controller on display " + displayId);
+        PerDisplay pd = mImePerDisplay.get(displayId);
+        if (pd == null) {
+            return;
         }
+        pd.unregister();
         mImePerDisplay.remove(displayId);
     }
 
@@ -159,6 +160,14 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         }
     }
 
+    private void dispatchImeControlTargetChanged(int displayId, boolean controlling) {
+        synchronized (mPositionProcessors) {
+            for (ImePositionProcessor pp : mPositionProcessors) {
+                pp.onImeControlTargetChanged(displayId, controlling);
+            }
+        }
+    }
+
     private void dispatchVisibilityChanged(int displayId, boolean isShowing) {
         synchronized (mPositionProcessors) {
             for (ImePositionProcessor pp : mPositionProcessors) {
@@ -189,11 +198,10 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
     }
 
     /** An implementation of {@link IDisplayWindowInsetsController} for a given display id. */
-    public class PerDisplay {
+    public class PerDisplay implements DisplayInsetsController.OnInsetsChangedListener {
         final int mDisplayId;
         final InsetsState mInsetsState = new InsetsState();
-        protected final DisplayWindowInsetsControllerImpl mInsetsControllerImpl =
-                new DisplayWindowInsetsControllerImpl();
+        final InsetsVisibilities mRequestedVisibilities = new InsetsVisibilities();
         InsetsSourceControl mImeSourceControl = null;
         int mAnimationDirection = DIRECTION_NONE;
         ValueAnimator mAnimation = null;
@@ -208,14 +216,15 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         }
 
         public void register() {
-            try {
-                mWmService.setDisplayWindowInsetsController(mDisplayId, mInsetsControllerImpl);
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Unable to set insets controller on display " + mDisplayId);
-            }
+            mDisplayInsetsController.addInsetsChangedListener(mDisplayId, this);
         }
 
-        protected void insetsChanged(InsetsState insetsState) {
+        public void unregister() {
+            mDisplayInsetsController.removeInsetsChangedListener(mDisplayId, this);
+        }
+
+        @Override
+        public void insetsChanged(InsetsState insetsState) {
             if (mInsetsState.equals(insetsState)) {
                 return;
             }
@@ -233,42 +242,57 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             }
         }
 
+        @Override
         @VisibleForTesting
-        protected void insetsControlChanged(InsetsState insetsState,
+        public void insetsControlChanged(InsetsState insetsState,
                 InsetsSourceControl[] activeControls) {
             insetsChanged(insetsState);
+            InsetsSourceControl imeSourceControl = null;
             if (activeControls != null) {
                 for (InsetsSourceControl activeControl : activeControls) {
                     if (activeControl == null) {
                         continue;
                     }
                     if (activeControl.getType() == InsetsState.ITYPE_IME) {
-                        final Point lastSurfacePosition = mImeSourceControl != null
-                                ? mImeSourceControl.getSurfacePosition() : null;
-                        final boolean positionChanged =
-                                !activeControl.getSurfacePosition().equals(lastSurfacePosition);
-                        final boolean leashChanged =
-                                !haveSameLeash(mImeSourceControl, activeControl);
-                        mImeSourceControl = activeControl;
-                        if (mAnimation != null) {
-                            if (positionChanged) {
-                                startAnimation(mImeShowing, true /* forceRestart */);
-                            }
-                        } else {
-                            if (leashChanged) {
-                                applyVisibilityToLeash();
-                            }
-                            if (!mImeShowing) {
-                                removeImeSurface();
-                            }
-                        }
+                        imeSourceControl = activeControl;
                     }
                 }
             }
+
+            final boolean hadImeSourceControl = mImeSourceControl != null;
+            final boolean hasImeSourceControl = imeSourceControl != null;
+            if (hadImeSourceControl != hasImeSourceControl) {
+                dispatchImeControlTargetChanged(mDisplayId, hasImeSourceControl);
+            }
+
+            if (hasImeSourceControl) {
+                final Point lastSurfacePosition = mImeSourceControl != null
+                        ? mImeSourceControl.getSurfacePosition() : null;
+                final boolean positionChanged =
+                        !imeSourceControl.getSurfacePosition().equals(lastSurfacePosition);
+                final boolean leashChanged =
+                        !haveSameLeash(mImeSourceControl, imeSourceControl);
+                if (mAnimation != null) {
+                    if (positionChanged) {
+                        startAnimation(mImeShowing, true /* forceRestart */);
+                    }
+                } else {
+                    if (leashChanged) {
+                        applyVisibilityToLeash(imeSourceControl);
+                    }
+                    if (!mImeShowing) {
+                        removeImeSurface();
+                    }
+                    if (mImeSourceControl != null) {
+                        mImeSourceControl.release(SurfaceControl::release);
+                    }
+                }
+                mImeSourceControl = imeSourceControl;
+            }
         }
 
-        private void applyVisibilityToLeash() {
-            SurfaceControl leash = mImeSourceControl.getLeash();
+        private void applyVisibilityToLeash(InsetsSourceControl imeSourceControl) {
+            SurfaceControl leash = imeSourceControl.getLeash();
             if (leash != null) {
                 SurfaceControl.Transaction t = mTransactionPool.acquire();
                 if (mImeShowing) {
@@ -281,7 +305,8 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             }
         }
 
-        protected void showInsets(int types, boolean fromIme) {
+        @Override
+        public void showInsets(int types, boolean fromIme) {
             if ((types & WindowInsets.Type.ime()) == 0) {
                 return;
             }
@@ -289,8 +314,8 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             startAnimation(true /* show */, false /* forceRestart */);
         }
 
-
-        protected void hideInsets(int types, boolean fromIme) {
+        @Override
+        public void hideInsets(int types, boolean fromIme) {
             if ((types & WindowInsets.Type.ime()) == 0) {
                 return;
             }
@@ -298,7 +323,9 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             startAnimation(false /* show */, false /* forceRestart */);
         }
 
-        public void topFocusedWindowChanged(String packageName) {
+        @Override
+        public void topFocusedWindowChanged(String packageName,
+                InsetsVisibilities requestedVisibilities) {
             // Do nothing
         }
 
@@ -307,8 +334,10 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
          */
         private void setVisibleDirectly(boolean visible) {
             mInsetsState.getSource(InsetsState.ITYPE_IME).setVisible(visible);
+            mRequestedVisibilities.setVisibility(InsetsState.ITYPE_IME, visible);
             try {
-                mWmService.modifyDisplayWindowInsets(mDisplayId, mInsetsState);
+                mWmService.updateDisplayWindowRequestedVisibilities(mDisplayId,
+                        mRequestedVisibilities);
             } catch (RemoteException e) {
             }
         }
@@ -469,47 +498,6 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 dispatchVisibilityChanged(mDisplayId, isShowing);
             }
         }
-
-        @VisibleForTesting
-        @BinderThread
-        public class DisplayWindowInsetsControllerImpl
-                extends IDisplayWindowInsetsController.Stub {
-            @Override
-            public void topFocusedWindowChanged(String packageName) throws RemoteException {
-                mMainExecutor.execute(() -> {
-                    PerDisplay.this.topFocusedWindowChanged(packageName);
-                });
-            }
-
-            @Override
-            public void insetsChanged(InsetsState insetsState) throws RemoteException {
-                mMainExecutor.execute(() -> {
-                    PerDisplay.this.insetsChanged(insetsState);
-                });
-            }
-
-            @Override
-            public void insetsControlChanged(InsetsState insetsState,
-                    InsetsSourceControl[] activeControls) throws RemoteException {
-                mMainExecutor.execute(() -> {
-                    PerDisplay.this.insetsControlChanged(insetsState, activeControls);
-                });
-            }
-
-            @Override
-            public void showInsets(int types, boolean fromIme) throws RemoteException {
-                mMainExecutor.execute(() -> {
-                    PerDisplay.this.showInsets(types, fromIme);
-                });
-            }
-
-            @Override
-            public void hideInsets(int types, boolean fromIme) throws RemoteException {
-                mMainExecutor.execute(() -> {
-                    PerDisplay.this.hideInsets(types, fromIme);
-                });
-            }
-        }
     }
 
     void removeImeSurface() {
@@ -518,9 +506,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             try {
                 // Remove the IME surface to make the insets invisible for
                 // non-client controlled insets.
-                final Completable.Void value = Completable.createVoid();
-                imms.removeImeSurface(ResultCallbacks.of(value));
-                Completable.getResult(value);
+                imms.removeImeSurface();
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to remove IME surface.", e);
             }
@@ -577,6 +563,15 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
          */
         default void onImeEndPositioning(int displayId, boolean cancel,
                 SurfaceControl.Transaction t) {
+        }
+
+        /**
+         * Called when the IME control target changed. So that the processor can restore its
+         * adjusted layout when the IME insets is not controlling by the current controller anymore.
+         *
+         * @param controlling indicates whether the current controller is controlling IME insets.
+         */
+        default void onImeControlTargetChanged(int displayId, boolean controlling) {
         }
 
         /**

@@ -39,9 +39,15 @@ class ChargingRippleView(context: Context?, attrs: AttributeSet?) : View(context
 
     var rippleInProgress: Boolean = false
     var radius: Float = 0.0f
-        set(value) { rippleShader.radius = value }
+        set(value) {
+            rippleShader.radius = value
+            field = value
+        }
     var origin: PointF = PointF()
-        set(value) { rippleShader.origin = value }
+        set(value) {
+            rippleShader.origin = value
+            field = value
+        }
     var duration: Long = 1750
 
     init {
@@ -49,7 +55,6 @@ class ChargingRippleView(context: Context?, attrs: AttributeSet?) : View(context
         rippleShader.progress = 0f
         rippleShader.sparkleStrength = RIPPLE_SPARKLE_STRENGTH
         ripplePaint.shader = rippleShader
-        visibility = View.GONE
     }
 
     override fun onConfigurationChanged(newConfig: Configuration?) {
@@ -80,12 +85,10 @@ class ChargingRippleView(context: Context?, attrs: AttributeSet?) : View(context
         animator.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator?) {
                 rippleInProgress = false
-                visibility = View.GONE
                 onAnimationEnd?.run()
             }
         })
         animator.start()
-        visibility = View.VISIBLE
         rippleInProgress = true
     }
 
@@ -94,6 +97,16 @@ class ChargingRippleView(context: Context?, attrs: AttributeSet?) : View(context
     }
 
     override fun onDraw(canvas: Canvas?) {
-        canvas?.drawRect(0f, 0f, width.toFloat(), height.toFloat(), ripplePaint)
+        if (canvas == null || !canvas.isHardwareAccelerated) {
+            // Drawing with the ripple shader requires hardware acceleration, so skip
+            // if it's unsupported.
+            return
+        }
+        // To reduce overdraw, we mask the effect to a circle whose radius is big enough to cover
+        // the active effect area. Values here should be kept in sync with the
+        // animation implementation in the ripple shader.
+        val maskRadius = (1 - (1 - rippleShader.progress) * (1 - rippleShader.progress) *
+                (1 - rippleShader.progress)) * radius * 2
+        canvas?.drawCircle(origin.x, origin.y, maskRadius, ripplePaint)
     }
 }

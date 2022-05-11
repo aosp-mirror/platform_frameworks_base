@@ -30,7 +30,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.android.internal.R;
-import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.Utils;
 import com.android.systemui.plugins.GlobalActions;
 import com.android.systemui.scrim.ScrimDrawable;
@@ -42,52 +41,41 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import javax.inject.Inject;
 
-import dagger.Lazy;
-
 public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks {
 
     private final Context mContext;
-    private final Lazy<GlobalActionsDialogLite> mGlobalActionsDialogLazy;
     private final KeyguardStateController mKeyguardStateController;
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final BlurUtils mBlurUtils;
-    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final CommandQueue mCommandQueue;
-    private GlobalActionsDialogLite mGlobalActionsDialog;
+    private final GlobalActionsDialogLite mGlobalActionsDialog;
     private boolean mDisabled;
 
     @Inject
     public GlobalActionsImpl(Context context, CommandQueue commandQueue,
-            Lazy<GlobalActionsDialogLite> globalActionsDialogLazy, BlurUtils blurUtils,
+            GlobalActionsDialogLite globalActionsDialog, BlurUtils blurUtils,
             KeyguardStateController keyguardStateController,
-            DeviceProvisionedController deviceProvisionedController,
-            KeyguardUpdateMonitor keyguardUpdateMonitor) {
+            DeviceProvisionedController deviceProvisionedController) {
         mContext = context;
-        mGlobalActionsDialogLazy = globalActionsDialogLazy;
+        mGlobalActionsDialog = globalActionsDialog;
         mKeyguardStateController = keyguardStateController;
         mDeviceProvisionedController = deviceProvisionedController;
         mCommandQueue = commandQueue;
         mBlurUtils = blurUtils;
-        mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mCommandQueue.addCallback(this);
     }
 
     @Override
     public void destroy() {
         mCommandQueue.removeCallback(this);
-        if (mGlobalActionsDialog != null) {
-            mGlobalActionsDialog.destroy();
-            mGlobalActionsDialog = null;
-        }
+        mGlobalActionsDialog.destroy();
     }
 
     @Override
     public void showGlobalActions(GlobalActionsManager manager) {
         if (mDisabled) return;
-        mGlobalActionsDialog = mGlobalActionsDialogLazy.get();
         mGlobalActionsDialog.showOrHideDialog(mKeyguardStateController.isShowing(),
-                mDeviceProvisionedController.isDeviceProvisioned());
-        mKeyguardUpdateMonitor.requestFaceAuth();
+                mDeviceProvisionedController.isDeviceProvisioned(), null /* view */);
     }
 
     @Override
@@ -102,7 +90,7 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
                 int backgroundAlpha = (int) (ScrimController.BUSY_SCRIM_ALPHA * 255);
                 background.setAlpha(backgroundAlpha);
                 mBlurUtils.applyBlur(d.getWindow().getDecorView().getViewRootImpl(),
-                        mBlurUtils.blurRadiusOfRatio(1), backgroundAlpha == 255);
+                        (int) mBlurUtils.blurRadiusOfRatio(1), backgroundAlpha == 255);
             } else {
                 float backgroundAlpha = mContext.getResources().getFloat(
                         com.android.systemui.R.dimen.shutdown_scrim_behind_alpha);
@@ -194,7 +182,7 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
         final boolean disabled = (state2 & DISABLE2_GLOBAL_ACTIONS) != 0;
         if (displayId != mContext.getDisplayId() || disabled == mDisabled) return;
         mDisabled = disabled;
-        if (disabled && mGlobalActionsDialog != null) {
+        if (disabled) {
             mGlobalActionsDialog.dismissDialog();
         }
     }

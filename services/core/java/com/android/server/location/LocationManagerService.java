@@ -17,6 +17,7 @@
 package com.android.server.location;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 import static android.app.compat.CompatChanges.isChangeEnabled;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
@@ -39,12 +40,14 @@ import android.Manifest;
 import android.Manifest.permission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
 import android.app.compat.CompatChanges;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.GeocoderParams;
 import android.location.Geofence;
@@ -109,7 +112,6 @@ import com.android.server.location.injector.DeviceIdleHelper;
 import com.android.server.location.injector.DeviceStationaryHelper;
 import com.android.server.location.injector.EmergencyHelper;
 import com.android.server.location.injector.Injector;
-import com.android.server.location.injector.LocationAttributionHelper;
 import com.android.server.location.injector.LocationPermissionsHelper;
 import com.android.server.location.injector.LocationPowerSaveModeHelper;
 import com.android.server.location.injector.LocationUsageLogger;
@@ -134,6 +136,8 @@ import com.android.server.location.provider.PassiveLocationProvider;
 import com.android.server.location.provider.PassiveLocationProviderManager;
 import com.android.server.location.provider.StationaryThrottlingLocationProvider;
 import com.android.server.location.provider.proxy.ProxyLocationProvider;
+import com.android.server.location.settings.LocationSettings;
+import com.android.server.location.settings.LocationUserSettings;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal;
 
 import java.io.FileDescriptor;
@@ -270,8 +274,13 @@ public class LocationManagerService extends ILocationManager.Stub implements
 
         mGeofenceManager = new GeofenceManager(mContext, injector);
 
+        mInjector.getLocationSettings().registerLocationUserSettingsListener(
+                this::onLocationUserSettingsChanged);
         mInjector.getSettingsHelper().addOnLocationEnabledChangedListener(
                 this::onLocationModeChanged);
+        mInjector.getSettingsHelper().addAdasAllowlistChangedListener(
+                () -> refreshAppOpsRestrictions(UserHandle.USER_ALL)
+        );
         mInjector.getSettingsHelper().addIgnoreSettingsAllowlistChangedListener(
                 () -> refreshAppOpsRestrictions(UserHandle.USER_ALL));
         mInjector.getUserInfoHelper().addListener((userId, change) -> {
@@ -476,6 +485,25 @@ public class LocationManagerService extends ILocationManager.Stub implements
         }
     }
 
+    private void onLocationUserSettingsChanged(int userId, LocationUserSettings oldSettings,
+            LocationUserSettings newSettings) {
+        if (oldSettings.isAdasGnssLocationEnabled() != newSettings.isAdasGnssLocationEnabled()) {
+            boolean enabled = newSettings.isAdasGnssLocationEnabled();
+
+            if (D) {
+                Log.d(TAG, "[u" + userId + "] adas gnss location enabled = " + enabled);
+            }
+
+            EVENT_LOG.logAdasLocationEnabled(userId, enabled);
+
+            Intent intent = new Intent(LocationManager.ACTION_ADAS_GNSS_ENABLED_CHANGED)
+                    .putExtra(LocationManager.EXTRA_ADAS_GNSS_ENABLED, enabled)
+                    .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY)
+                    .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+            mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
+        }
+    }
+
     private void onLocationModeChanged(int userId) {
         boolean enabled = mInjector.getSettingsHelper().isLocationEnabled(userId);
         LocationManager.invalidateLocalLocationEnabledCaches();
@@ -661,7 +689,7 @@ public class LocationManagerService extends ILocationManager.Stub implements
         // clients in the system process must have an attribution tag set
         Preconditions.checkState(identity.getPid() != Process.myPid() || attributionTag != null);
 
-        request = validateLocationRequest(request, identity);
+        request = validateLocationRequest(provider, request, identity);
 
         LocationProviderManager manager = getLocationProviderManager(provider);
         Preconditions.checkArgument(manager != null,
@@ -687,7 +715,7 @@ public class LocationManagerService extends ILocationManager.Stub implements
                     new IllegalArgumentException());
         }
 
-        request = validateLocationRequest(request, identity);
+        request = validateLocationRequest(provider, request, identity);
 
         LocationProviderManager manager = getLocationProviderManager(provider);
         Preconditions.checkArgument(manager != null,
@@ -725,7 +753,7 @@ public class LocationManagerService extends ILocationManager.Stub implements
             }
         }
 
-        request = validateLocationRequest(request, identity);
+        request = validateLocationRequest(provider, request, identity);
 
         LocationProviderManager manager = getLocationProviderManager(provider);
         Preconditions.checkArgument(manager != null,
@@ -734,33 +762,19 @@ public class LocationManagerService extends ILocationManager.Stub implements
         manager.registerLocationRequest(request, identity, permissionLevel, pendingIntent);
     }
 
-    private LocationRequest validateLocationRequest(LocationRequest request,
+    private LocationRequest validateLocationRequest(String provider, LocationRequest request,
             CallerIdentity identity) {
+        // validate unsanitized request
         if (!request.getWorkSource().isEmpty()) {
             mContext.enforceCallingOrSelfPermission(
                     permission.UPDATE_DEVICE_STATS,
                     "setting a work source requires " + permission.UPDATE_DEVICE_STATS);
         }
-        if (request.isHiddenFromAppOps()) {
-            mContext.enforceCallingOrSelfPermission(
-                    permission.UPDATE_APP_OPS_STATS,
-                    "hiding from app ops requires " + permission.UPDATE_APP_OPS_STATS);
-        }
-        if (request.isLocationSettingsIgnored()) {
-            mContext.enforceCallingOrSelfPermission(
-                    permission.WRITE_SECURE_SETTINGS,
-                    "ignoring location settings requires " + permission.WRITE_SECURE_SETTINGS);
-        }
 
+        // sanitize request
         LocationRequest.Builder sanitized = new LocationRequest.Builder(request);
 
-        if (CompatChanges.isChangeEnabled(LOW_POWER_EXCEPTIONS, Binder.getCallingUid())) {
-            if (request.isLowPower()) {
-                mContext.enforceCallingOrSelfPermission(
-                        permission.LOCATION_HARDWARE,
-                        "low power request requires " + permission.LOCATION_HARDWARE);
-            }
-        } else {
+        if (!CompatChanges.isChangeEnabled(LOW_POWER_EXCEPTIONS, Binder.getCallingUid())) {
             if (mContext.checkCallingPermission(permission.LOCATION_HARDWARE)
                     != PERMISSION_GRANTED) {
                 sanitized.setLowPower(false);
@@ -786,7 +800,42 @@ public class LocationManagerService extends ILocationManager.Stub implements
         }
         sanitized.setWorkSource(workSource);
 
-        return sanitized.build();
+        request = sanitized.build();
+
+        // validate sanitized request
+        boolean isLocationProvider = mLocalService.isProvider(null, identity);
+
+        if (request.isLowPower() && CompatChanges.isChangeEnabled(LOW_POWER_EXCEPTIONS,
+                identity.getUid())) {
+            mContext.enforceCallingOrSelfPermission(
+                    permission.LOCATION_HARDWARE,
+                    "low power request requires " + permission.LOCATION_HARDWARE);
+        }
+        if (request.isHiddenFromAppOps()) {
+            mContext.enforceCallingOrSelfPermission(
+                    permission.UPDATE_APP_OPS_STATS,
+                    "hiding from app ops requires " + permission.UPDATE_APP_OPS_STATS);
+        }
+        if (request.isAdasGnssBypass()) {
+            if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
+                throw new IllegalArgumentException(
+                        "adas gnss bypass requests are only allowed on automotive devices");
+            }
+            if (!GPS_PROVIDER.equals(provider)) {
+                throw new IllegalArgumentException(
+                        "adas gnss bypass requests are only allowed on the \"gps\" provider");
+            }
+            if (!isLocationProvider) {
+                LocationPermissions.enforceCallingOrSelfBypassPermission(mContext);
+            }
+        }
+        if (request.isLocationSettingsIgnored()) {
+            if (!isLocationProvider) {
+                LocationPermissions.enforceCallingOrSelfBypassPermission(mContext);
+            }
+        }
+
+        return request;
     }
 
     @Override
@@ -834,7 +883,7 @@ public class LocationManagerService extends ILocationManager.Stub implements
         // clients in the system process must have an attribution tag set
         Preconditions.checkArgument(identity.getPid() != Process.myPid() || attributionTag != null);
 
-        request = validateLastLocationRequest(request);
+        request = validateLastLocationRequest(provider, request, identity);
 
         LocationProviderManager manager = getLocationProviderManager(provider);
         if (manager == null) {
@@ -844,16 +893,40 @@ public class LocationManagerService extends ILocationManager.Stub implements
         return manager.getLastLocation(request, identity, permissionLevel);
     }
 
-    private LastLocationRequest validateLastLocationRequest(LastLocationRequest request) {
+    private LastLocationRequest validateLastLocationRequest(String provider,
+            LastLocationRequest request,
+            CallerIdentity identity) {
+        // sanitize request
+        LastLocationRequest.Builder sanitized = new LastLocationRequest.Builder(request);
+
+        request = sanitized.build();
+
+        // validate request
+        boolean isLocationProvider = mLocalService.isProvider(null, identity);
+
         if (request.isHiddenFromAppOps()) {
             mContext.enforceCallingOrSelfPermission(
                     permission.UPDATE_APP_OPS_STATS,
                     "hiding from app ops requires " + permission.UPDATE_APP_OPS_STATS);
         }
+
+        if (request.isAdasGnssBypass()) {
+            if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
+                throw new IllegalArgumentException(
+                        "adas gnss bypass requests are only allowed on automotive devices");
+            }
+            if (!GPS_PROVIDER.equals(provider)) {
+                throw new IllegalArgumentException(
+                        "adas gnss bypass requests are only allowed on the \"gps\" provider");
+            }
+            if (!isLocationProvider) {
+                LocationPermissions.enforceCallingOrSelfBypassPermission(mContext);
+            }
+        }
         if (request.isLocationSettingsIgnored()) {
-            mContext.enforceCallingOrSelfPermission(
-                    permission.WRITE_SECURE_SETTINGS,
-                    "ignoring location settings requires " + permission.WRITE_SECURE_SETTINGS);
+            if (!isLocationProvider) {
+                LocationPermissions.enforceCallingOrSelfBypassPermission(mContext);
+            }
         }
 
         return request;
@@ -1044,7 +1117,7 @@ public class LocationManagerService extends ILocationManager.Stub implements
             if (provider != null && !provider.equals(manager.getName())) {
                 continue;
             }
-            CallerIdentity identity = manager.getIdentity();
+            CallerIdentity identity = manager.getProviderIdentity();
             if (identity == null) {
                 continue;
             }
@@ -1066,7 +1139,7 @@ public class LocationManagerService extends ILocationManager.Stub implements
             return Collections.emptyList();
         }
 
-        CallerIdentity identity = manager.getIdentity();
+        CallerIdentity identity = manager.getProviderIdentity();
         if (identity == null) {
             return Collections.emptyList();
         }
@@ -1112,7 +1185,7 @@ public class LocationManagerService extends ILocationManager.Stub implements
         userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, false, false, "setLocationEnabledForUser", null);
 
-        mContext.enforceCallingOrSelfPermission(permission.WRITE_SECURE_SETTINGS, null);
+        mContext.enforceCallingOrSelfPermission(WRITE_SECURE_SETTINGS, null);
 
         LocationManager.invalidateLocalLocationEnabledCaches();
         mInjector.getSettingsHelper().setLocationEnabled(enabled, userId);
@@ -1126,8 +1199,52 @@ public class LocationManagerService extends ILocationManager.Stub implements
     }
 
     @Override
+    public void setAdasGnssLocationEnabledForUser(boolean enabled, int userId) {
+        userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
+                userId, false, false, "setAdasGnssLocationEnabledForUser", null);
+
+        LocationPermissions.enforceCallingOrSelfBypassPermission(mContext);
+
+        mInjector.getLocationSettings().updateUserSettings(userId,
+                settings -> settings.withAdasGnssLocationEnabled(enabled));
+    }
+
+    @Override
+    public boolean isAdasGnssLocationEnabledForUser(int userId) {
+        userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
+                userId, false, false, "isAdasGnssLocationEnabledForUser", null);
+        return mInjector.getLocationSettings().getUserSettings(userId).isAdasGnssLocationEnabled();
+    }
+
+    @Override
     public boolean isProviderEnabledForUser(String provider, int userId) {
         return mLocalService.isProviderEnabledForUser(provider, userId);
+    }
+
+    @Override
+    @RequiresPermission(android.Manifest.permission.CONTROL_AUTOMOTIVE_GNSS)
+    public void setAutomotiveGnssSuspended(boolean suspended) {
+        mContext.enforceCallingPermission(permission.CONTROL_AUTOMOTIVE_GNSS, null);
+
+        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
+            throw new IllegalStateException(
+                    "setAutomotiveGnssSuspended only allowed on automotive devices");
+        }
+
+        mGnssManagerService.setAutomotiveGnssSuspended(suspended);
+    }
+
+    @Override
+    @RequiresPermission(android.Manifest.permission.CONTROL_AUTOMOTIVE_GNSS)
+    public boolean isAutomotiveGnssSuspended() {
+        mContext.enforceCallingPermission(permission.CONTROL_AUTOMOTIVE_GNSS, null);
+
+        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
+            throw new IllegalStateException(
+                    "isAutomotiveGnssSuspended only allowed on automotive devices");
+        }
+
+        return mGnssManagerService.isAutomotiveGnssSuspended();
     }
 
     @Override
@@ -1277,7 +1394,7 @@ public class LocationManagerService extends ILocationManager.Stub implements
 
                 ipw.println("Event Log:");
                 ipw.increaseIndent();
-                EVENT_LOG.iterate(manager.getName(), ipw::println);
+                EVENT_LOG.iterate(ipw::println, manager.getName());
                 ipw.decreaseIndent();
                 return;
             }
@@ -1301,6 +1418,7 @@ public class LocationManagerService extends ILocationManager.Stub implements
         ipw.println("Location Settings:");
         ipw.increaseIndent();
         mInjector.getSettingsHelper().dump(fd, ipw, args);
+        mInjector.getLocationSettings().dump(fd, ipw, args);
         ipw.decreaseIndent();
 
         synchronized (mLock) {
@@ -1408,12 +1526,13 @@ public class LocationManagerService extends ILocationManager.Stub implements
         if (!enabled) {
             PackageTagsList.Builder builder = new PackageTagsList.Builder();
             for (LocationProviderManager manager : mProviderManagers) {
-                CallerIdentity identity = manager.getIdentity();
+                CallerIdentity identity = manager.getProviderIdentity();
                 if (identity != null) {
                     builder.add(identity.getPackageName(), identity.getAttributionTag());
                 }
             }
             builder.add(mInjector.getSettingsHelper().getIgnoreSettingsAllowlist());
+            builder.add(mInjector.getSettingsHelper().getAdasAllowlist());
             allowedPackages = builder.build();
         }
 
@@ -1496,7 +1615,7 @@ public class LocationManagerService extends ILocationManager.Stub implements
                 if (provider != null && !provider.equals(manager.getName())) {
                     continue;
                 }
-                if (identity.equals(manager.getIdentity())) {
+                if (identity.equals(manager.getProviderIdentity())) {
                     return true;
                 }
             }
@@ -1537,7 +1656,7 @@ public class LocationManagerService extends ILocationManager.Stub implements
                 if (listener != null) {
                     ArraySet<Integer> uids = new ArraySet<>(mProviderManagers.size());
                     for (LocationProviderManager manager : mProviderManagers) {
-                        CallerIdentity identity = manager.getIdentity();
+                        CallerIdentity identity = manager.getProviderIdentity();
                         if (identity != null) {
                             uids.add(identity.getUid());
                         }
@@ -1555,11 +1674,12 @@ public class LocationManagerService extends ILocationManager.Stub implements
         }
     }
 
-    private static class SystemInjector implements Injector {
+    private static final class SystemInjector implements Injector {
 
         private final Context mContext;
 
         private final UserInfoHelper mUserInfoHelper;
+        private final LocationSettings mLocationSettings;
         private final AlarmHelper mAlarmHelper;
         private final SystemAppOpsHelper mAppOpsHelper;
         private final SystemLocationPermissionsHelper mLocationPermissionsHelper;
@@ -1569,7 +1689,6 @@ public class LocationManagerService extends ILocationManager.Stub implements
         private final SystemScreenInteractiveHelper mScreenInteractiveHelper;
         private final SystemDeviceStationaryHelper mDeviceStationaryHelper;
         private final SystemDeviceIdleHelper mDeviceIdleHelper;
-        private final LocationAttributionHelper mLocationAttributionHelper;
         private final LocationUsageLogger mLocationUsageLogger;
 
         // lazily instantiated since they may not always be used
@@ -1584,6 +1703,7 @@ public class LocationManagerService extends ILocationManager.Stub implements
             mContext = context;
 
             mUserInfoHelper = userInfoHelper;
+            mLocationSettings = new LocationSettings(context);
             mAlarmHelper = new SystemAlarmHelper(context);
             mAppOpsHelper = new SystemAppOpsHelper(context);
             mLocationPermissionsHelper = new SystemLocationPermissionsHelper(context,
@@ -1594,7 +1714,6 @@ public class LocationManagerService extends ILocationManager.Stub implements
             mScreenInteractiveHelper = new SystemScreenInteractiveHelper(context);
             mDeviceStationaryHelper = new SystemDeviceStationaryHelper();
             mDeviceIdleHelper = new SystemDeviceIdleHelper(context);
-            mLocationAttributionHelper = new LocationAttributionHelper(mAppOpsHelper);
             mLocationUsageLogger = new LocationUsageLogger();
         }
 
@@ -1618,6 +1737,11 @@ public class LocationManagerService extends ILocationManager.Stub implements
         @Override
         public UserInfoHelper getUserInfoHelper() {
             return mUserInfoHelper;
+        }
+
+        @Override
+        public LocationSettings getLocationSettings() {
+            return mLocationSettings;
         }
 
         @Override
@@ -1663,11 +1787,6 @@ public class LocationManagerService extends ILocationManager.Stub implements
         @Override
         public DeviceIdleHelper getDeviceIdleHelper() {
             return mDeviceIdleHelper;
-        }
-
-        @Override
-        public LocationAttributionHelper getLocationAttributionHelper() {
-            return mLocationAttributionHelper;
         }
 
         @Override

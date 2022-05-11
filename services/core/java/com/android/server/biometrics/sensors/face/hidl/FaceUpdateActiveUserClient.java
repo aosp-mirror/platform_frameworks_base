@@ -18,54 +18,42 @@ package com.android.server.biometrics.sensors.face.hidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
-import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.os.Environment;
 import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.server.biometrics.BiometricsProto;
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
+import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.HalClientMonitor;
 
 import java.io.File;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class FaceUpdateActiveUserClient extends HalClientMonitor<IBiometricsFace> {
     private static final String TAG = "FaceUpdateActiveUserClient";
     private static final String FACE_DATA_DIR = "facedata";
 
-    private final int mCurrentUserId;
     private final boolean mHasEnrolledBiometrics;
     @NonNull private final Map<Integer, Long> mAuthenticatorIds;
 
     FaceUpdateActiveUserClient(@NonNull Context context,
-            @NonNull LazyDaemon<IBiometricsFace> lazyDaemon,  int userId, @NonNull String owner,
-            int sensorId, int currentUserId, boolean hasEnrolledBIometrics,
+            @NonNull Supplier<IBiometricsFace> lazyDaemon, int userId, @NonNull String owner,
+            int sensorId, @NonNull BiometricLogger logger,
+            @NonNull BiometricContext biometricContext, boolean hasEnrolledBiometrics,
             @NonNull Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, null /* token */, null /* listener */, userId, owner,
-                0 /* cookie */, sensorId, BiometricsProtoEnums.MODALITY_UNKNOWN,
-                BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN);
-        mCurrentUserId = currentUserId;
-        mHasEnrolledBiometrics = hasEnrolledBIometrics;
+                0 /* cookie */, sensorId, logger, biometricContext);
+        mHasEnrolledBiometrics = hasEnrolledBiometrics;
         mAuthenticatorIds = authenticatorIds;
     }
 
     @Override
-    public void start(@NonNull Callback callback) {
+    public void start(@NonNull ClientMonitorCallback callback) {
         super.start(callback);
-
-        if (mCurrentUserId == getTargetUserId()) {
-            Slog.d(TAG, "Already user: " + mCurrentUserId + ", refreshing authenticatorId");
-            try {
-                mAuthenticatorIds.put(getTargetUserId(), mHasEnrolledBiometrics
-                        ? getFreshDaemon().getAuthenticatorId().value : 0L);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Unable to refresh authenticatorId", e);
-            }
-            callback.onClientFinished(this, true /* success */);
-            return;
-        }
-
         startHalOperation();
     }
 
@@ -85,7 +73,10 @@ public class FaceUpdateActiveUserClient extends HalClientMonitor<IBiometricsFace
         }
 
         try {
-            getFreshDaemon().setActiveUser(getTargetUserId(), storePath.getAbsolutePath());
+            final IBiometricsFace daemon = getFreshDaemon();
+            daemon.setActiveUser(getTargetUserId(), storePath.getAbsolutePath());
+            mAuthenticatorIds.put(getTargetUserId(),
+                    mHasEnrolledBiometrics ? daemon.getAuthenticatorId().value : 0L);
             mCallback.onClientFinished(this, true /* success */);
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to setActiveUser: " + e);

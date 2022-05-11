@@ -251,6 +251,18 @@ final class DisplayWhiteBalanceTintController extends TintController {
         }
     }
 
+    public float getLuminance() {
+        synchronized (mLock) {
+            if (mChromaticAdaptationMatrix != null && mChromaticAdaptationMatrix.length == 9) {
+                // Compute only the luminance (y) value of the xyz * [1 1 1] transform.
+                return 1 / (mChromaticAdaptationMatrix[1] + mChromaticAdaptationMatrix[4]
+                        + mChromaticAdaptationMatrix[7]);
+            } else {
+                return -1;
+            }
+        }
+    }
+
     private ColorSpace.Rgb makeRgbColorSpaceFromXYZ(float[] redGreenBlueXYZ, float[] whiteXYZ) {
         return new ColorSpace.Rgb(
                 "Display Color Space",

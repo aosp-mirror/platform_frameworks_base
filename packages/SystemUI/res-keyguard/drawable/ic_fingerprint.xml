@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2021 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:height="65dp"
+        android:width="46dp"
+        android:viewportHeight="65"
+        android:viewportWidth="46">
+    <group android:name="_R_G_L_0_G" android:translateX="3.75" android:translateY="8.25">
+        <path
+            android:strokeColor="#FF000000"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:strokeWidth="2.5"
+            android:pathData="M27.52 38.98 C26.49,39.95 25.29,40.73 23.98,41.29 C23.17,41.65 22.31,41.91 21.41,42.07 C20.74,42.19 20.05,42.25 19.34,42.25 C18.44,42.25 17.56,42.15 16.72,41.96 C15.93,41.77 15.16,41.51 14.43,41.18 C13.23,40.63 12.13,39.88 11.16,38.98 " />
+        <path
+            android:strokeColor="#FF000000"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:strokeWidth="2.5"
+            android:pathData="M8.64 34.07 C7.89,31.97 7.89,29.85 7.89,29.85 C7.89,24.05 12.81,19.34 19.34,19.34 C25.87,19.34 30.8,24.05 30.8,29.85 C30.8,29.85 30.8,30.16 30.8,30.16 C30.8,32.32 29.04,34.07 26.89,34.07 C25.28,34.07 23.86,33.1 23.27,31.61 C23.27,31.61 21.96,28.34 21.96,28.34 C21.37,26.85 19.93,25.89 18.34,25.89 C16.18,25.89 14.43,27.64 14.43,29.8 C14.43,31.42 14.87,32.99 15.68,34.36 C16.22,35.26 16.93,36.08 17.77,36.75 C17.77,36.75 18.52,37.34 18.52,37.34 " />
+        <path
+            android:strokeColor="#FF000000"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:strokeWidth="2.5"
+            android:pathData="M6.25 19.34 C7.48,17.3 9.46,15.58 11.9,14.42 C12.93,13.94 14.03,13.55 15.2,13.27 C16.51,12.96 17.9,12.8 19.34,12.8 C20.77,12.8 22.14,12.96 23.45,13.26 C24.9,13.6 26.26,14.12 27.48,14.78 C29.6,15.92 31.32,17.5 32.43,19.34 " />
+        <path
+            android:strokeColor="#FF000000"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:strokeWidth="2.5"
+            android:pathData="M9.52 8.7 C10.98,7.91 12.58,7.28 14.28,6.86 C15.89,6.46 17.58,6.25 19.34,6.25 C21.06,6.25 22.72,6.45 24.3,6.83 C26.04,7.25 27.67,7.89 29.16,8.7 " />
+    </group>
+</vector>

@@ -35,6 +35,7 @@ import java.util.List;
 /**
  * Adapter for media output dynamic group dialog.
  */
+//TODO: clear this class after new UI updated
 public class MediaOutputGroupAdapter extends MediaOutputBaseAdapter {
 
     private static final String TAG = "MediaOutputGroupAdapter";
@@ -68,7 +69,7 @@ public class MediaOutputGroupAdapter extends MediaOutputBaseAdapter {
         final int size = mGroupMediaDevices.size();
         if (newPosition < size) {
             viewHolder.onBind(mGroupMediaDevices.get(newPosition), false /* topMargin */,
-                    newPosition == (size - 1) /* bottomMargin */);
+                    newPosition == (size - 1) /* bottomMargin */, position);
             return;
         }
         if (DEBUG) {
@@ -94,18 +95,16 @@ public class MediaOutputGroupAdapter extends MediaOutputBaseAdapter {
         }
 
         @Override
-        void onBind(MediaDevice device, boolean topMargin, boolean bottomMargin) {
-            super.onBind(device, topMargin, bottomMargin);
-            mDivider.setVisibility(View.GONE);
-            mAddIcon.setVisibility(View.GONE);
-            mBottomDivider.setVisibility(View.GONE);
+        void onBind(MediaDevice device, boolean topMargin, boolean bottomMargin, int position) {
+            super.onBind(device, topMargin, bottomMargin, position);
             mCheckBox.setVisibility(View.VISIBLE);
             mCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 onCheckBoxClicked(isChecked, device);
             });
+            boolean isCurrentSeekbarInvisible = mSeekBar.getVisibility() == View.GONE;
             setTwoLineLayout(device, false /* bFocused */, true /* showSeekBar */,
                     false /* showProgressBar */, false /* showSubtitle*/);
-            initSeekbar(device);
+            initSeekbar(device, isCurrentSeekbarInvisible);
             final List<MediaDevice> selectedDevices = mController.getSelectedMediaDevice();
             if (isDeviceIncluded(mController.getSelectableMediaDevice(), device)) {
                 mCheckBox.setButtonDrawable(R.drawable.ic_check_box);
@@ -127,16 +126,12 @@ public class MediaOutputGroupAdapter extends MediaOutputBaseAdapter {
 
         @Override
         void onBind(int customizedItem, boolean topMargin, boolean bottomMargin) {
-            super.onBind(customizedItem, topMargin, bottomMargin);
             if (customizedItem == CUSTOMIZED_ITEM_GROUP) {
                 setTwoLineLayout(mContext.getText(R.string.media_output_dialog_group),
                         true /* bFocused */, true /* showSeekBar */, false /* showProgressBar */,
                         false /* showSubtitle*/);
                 mTitleIcon.setImageDrawable(getSpeakerDrawable());
-                mBottomDivider.setVisibility(View.VISIBLE);
                 mCheckBox.setVisibility(View.GONE);
-                mDivider.setVisibility(View.GONE);
-                mAddIcon.setVisibility(View.GONE);
                 initSessionSeekbar();
             }
         }

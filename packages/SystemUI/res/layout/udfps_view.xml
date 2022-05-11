@@ -20,18 +20,12 @@
     android:id="@+id/udfps_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    systemui:sensorTouchAreaCoefficient="0.75"
+    systemui:sensorTouchAreaCoefficient="1.0"
     android:contentDescription="@string/accessibility_fingerprint_label">
 
     <ViewStub
         android:id="@+id/animation_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
-
-    <com.android.systemui.biometrics.UdfpsSurfaceView
-        android:id="@+id/hbm_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="invisible"/>
 
 </com.android.systemui.biometrics.UdfpsView>

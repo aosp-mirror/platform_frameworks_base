@@ -19,6 +19,8 @@ package com.android.server.location.provider;
 import static android.app.AppOpsManager.OP_FINE_LOCATION;
 import static android.app.AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION;
 import static android.app.AppOpsManager.OP_MONITOR_LOCATION;
+import static android.content.pm.PackageManager.FEATURE_AUTOMOTIVE;
+import static android.location.LocationManager.GPS_PROVIDER;
 import static android.location.LocationRequest.PASSIVE_INTERVAL;
 import static android.location.provider.ProviderProperties.POWER_USAGE_HIGH;
 import static android.os.PowerManager.LOCATION_MODE_THROTTLE_REQUESTS_WHEN_SCREEN_OFF;
@@ -56,6 +58,8 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertThrows;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.location.ILocationCallback;
 import android.location.ILocationListener;
 import android.location.LastLocationRequest;
@@ -82,6 +86,7 @@ import android.util.Log;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.R;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.location.injector.FakeUserInfoHelper;
@@ -139,6 +144,10 @@ public class LocationProviderManagerTest {
     @Mock
     private Context mContext;
     @Mock
+    private Resources mResources;
+    @Mock
+    private PackageManager mPackageManager;
+    @Mock
     private PowerManager mPowerManager;
     @Mock
     private PowerManager.WakeLock mWakeLock;
@@ -161,20 +170,28 @@ public class LocationProviderManagerTest {
         LocalServices.addService(LocationManagerInternal.class, mInternal);
 
         doReturn("android").when(mContext).getPackageName();
+        doReturn(mResources).when(mContext).getResources();
+        doReturn(mPackageManager).when(mContext).getPackageManager();
         doReturn(mPowerManager).when(mContext).getSystemService(PowerManager.class);
         doReturn(mWakeLock).when(mPowerManager).newWakeLock(anyInt(), anyString());
 
-        mInjector = new TestInjector();
+        mInjector = new TestInjector(mContext);
         mInjector.getUserInfoHelper().startUser(OTHER_USER);
 
         mPassive = new PassiveLocationProviderManager(mContext, mInjector);
         mPassive.startManager(null);
         mPassive.setRealProvider(new PassiveLocationProvider(mContext));
 
+        createManager(NAME);
+    }
+
+    private void createManager(String name) {
+        mStateChangedListener = mock(LocationProviderManager.StateChangedListener.class);
+
         mProvider = new TestProvider(PROPERTIES, PROVIDER_IDENTITY);
         mProvider.setProviderAllowed(true);
 
-        mManager = new LocationProviderManager(mContext, mInjector, NAME, mPassive);
+        mManager = new LocationProviderManager(mContext, mInjector, name, mPassive);
         mManager.startManager(mStateChangedListener);
         mManager.setRealProvider(mProvider);
     }
@@ -196,7 +213,7 @@ public class LocationProviderManagerTest {
     public void testProperties() {
         assertThat(mManager.getName()).isEqualTo(NAME);
         assertThat(mManager.getProperties()).isEqualTo(PROPERTIES);
-        assertThat(mManager.getIdentity()).isEqualTo(IDENTITY);
+        assertThat(mManager.getProviderIdentity()).isEqualTo(IDENTITY);
         assertThat(mManager.hasProvider()).isTrue();
 
         ProviderProperties newProperties = new ProviderProperties.Builder()
@@ -213,7 +230,7 @@ public class LocationProviderManagerTest {
         CallerIdentity newIdentity = CallerIdentity.forTest(OTHER_USER, 1, "otherpackage",
                 "otherattribution");
         mProvider.setIdentity(newIdentity);
-        assertThat(mManager.getIdentity()).isEqualTo(newIdentity);
+        assertThat(mManager.getProviderIdentity()).isEqualTo(newIdentity);
 
         mManager.setRealProvider(null);
         assertThat(mManager.hasProvider()).isFalse();
@@ -316,6 +333,10 @@ public class LocationProviderManagerTest {
 
     @Test
     public void testGetLastLocation_Bypass() {
+        mInjector.getSettingsHelper().setIgnoreSettingsAllowlist(
+                new PackageTagsList.Builder().add(
+                        IDENTITY.getPackageName()).build());
+
         assertThat(mManager.getLastLocation(new LastLocationRequest.Builder().build(), IDENTITY,
                 PERMISSION_FINE)).isNull();
         assertThat(mManager.getLastLocation(
@@ -364,6 +385,14 @@ public class LocationProviderManagerTest {
                 new LastLocationRequest.Builder().setLocationSettingsIgnored(true).build(),
                 IDENTITY, PERMISSION_FINE)).isEqualTo(
                 loc);
+
+        mInjector.getSettingsHelper().setIgnoreSettingsAllowlist(
+                new PackageTagsList.Builder().build());
+        mProvider.setProviderAllowed(false);
+
+        assertThat(mManager.getLastLocation(
+                new LastLocationRequest.Builder().setLocationSettingsIgnored(true).build(),
+                IDENTITY, PERMISSION_FINE)).isNull();
     }
 
     @Test
@@ -828,6 +857,48 @@ public class LocationProviderManagerTest {
     }
 
     @Test
+    public void testLocationMonitoring_multipleIdentities() {
+        CallerIdentity identity1 = CallerIdentity.forTest(CURRENT_USER, 1,
+                "mypackage", "attribution", "listener1");
+        CallerIdentity identity2 = CallerIdentity.forTest(CURRENT_USER, 1,
+                "mypackage", "attribution", "listener2");
+
+        assertThat(mInjector.getAppOpsHelper().isAppOpStarted(OP_MONITOR_LOCATION,
+                IDENTITY.getPackageName())).isFalse();
+        assertThat(mInjector.getAppOpsHelper().isAppOpStarted(OP_MONITOR_HIGH_POWER_LOCATION,
+                IDENTITY.getPackageName())).isFalse();
+
+        ILocationListener listener1 = createMockLocationListener();
+        LocationRequest request1 = new LocationRequest.Builder(0).setWorkSource(
+                WORK_SOURCE).build();
+        mManager.registerLocationRequest(request1, identity1, PERMISSION_FINE, listener1);
+
+        ILocationListener listener2 = createMockLocationListener();
+        LocationRequest request2 = new LocationRequest.Builder(0).setWorkSource(
+                WORK_SOURCE).build();
+        mManager.registerLocationRequest(request2, identity2, PERMISSION_FINE, listener2);
+
+        assertThat(mInjector.getAppOpsHelper().isAppOpStarted(OP_MONITOR_LOCATION,
+                "mypackage")).isTrue();
+        assertThat(mInjector.getAppOpsHelper().isAppOpStarted(OP_MONITOR_HIGH_POWER_LOCATION,
+                "mypackage")).isTrue();
+
+        mManager.unregisterLocationRequest(listener2);
+
+        assertThat(mInjector.getAppOpsHelper().isAppOpStarted(OP_MONITOR_LOCATION,
+                "mypackage")).isTrue();
+        assertThat(mInjector.getAppOpsHelper().isAppOpStarted(OP_MONITOR_HIGH_POWER_LOCATION,
+                "mypackage")).isTrue();
+
+        mManager.unregisterLocationRequest(listener1);
+
+        assertThat(mInjector.getAppOpsHelper().isAppOpStarted(OP_MONITOR_LOCATION,
+                "mypackage")).isFalse();
+        assertThat(mInjector.getAppOpsHelper().isAppOpStarted(OP_MONITOR_HIGH_POWER_LOCATION,
+                "mypackage")).isFalse();
+    }
+
+    @Test
     public void testProviderRequest() {
         assertThat(mProvider.getRequest().isActive()).isFalse();
 
@@ -886,6 +957,21 @@ public class LocationProviderManagerTest {
         mInjector.getAlarmHelper().incrementAlarmTime(60000);
         assertThat(mProvider.getRequest().isActive()).isTrue();
         assertThat(mProvider.getRequest().getIntervalMillis()).isEqualTo(60000);
+    }
+
+    @Test
+    public void testProviderRequest_DelayedRequest_Remove() {
+        mProvider.setProviderLocation(createLocation(NAME, mRandom));
+
+        ILocationListener listener1 = createMockLocationListener();
+        LocationRequest request1 = new LocationRequest.Builder(60000)
+                .setWorkSource(WORK_SOURCE)
+                .build();
+        mManager.registerLocationRequest(request1, IDENTITY, PERMISSION_FINE, listener1);
+        mManager.unregisterLocationRequest(listener1);
+
+        mInjector.getAlarmHelper().incrementAlarmTime(60000);
+        assertThat(mProvider.getRequest().isActive()).isFalse();
     }
 
     @Test
@@ -1014,6 +1100,108 @@ public class LocationProviderManagerTest {
 
         mInjector.getAppForegroundHelper().setAppForeground(IDENTITY.getUid(), false);
         assertThat(mProvider.getRequest().getIntervalMillis()).isEqualTo(5);
+    }
+
+    @Test
+    public void testProviderRequest_AdasGnssBypass() {
+        doReturn(true).when(mPackageManager).hasSystemFeature(FEATURE_AUTOMOTIVE);
+        doReturn(true).when(mResources).getBoolean(R.bool.config_defaultAdasGnssLocationEnabled);
+
+        mInjector.getSettingsHelper().setAdasSettingsAllowlist(
+                new PackageTagsList.Builder().add(
+                        IDENTITY.getPackageName()).build());
+
+        createManager(GPS_PROVIDER);
+
+        ILocationListener listener1 = createMockLocationListener();
+        LocationRequest request1 = new LocationRequest.Builder(5)
+                .setWorkSource(WORK_SOURCE)
+                .build();
+        mManager.registerLocationRequest(request1, IDENTITY, PERMISSION_FINE, listener1);
+
+        assertThat(mProvider.getRequest().isActive()).isTrue();
+        assertThat(mProvider.getRequest().getIntervalMillis()).isEqualTo(5);
+        assertThat(mProvider.getRequest().isAdasGnssBypass()).isFalse();
+
+        ILocationListener listener2 = createMockLocationListener();
+        LocationRequest request2 = new LocationRequest.Builder(1)
+                .setAdasGnssBypass(true)
+                .setWorkSource(WORK_SOURCE)
+                .build();
+        mManager.registerLocationRequest(request2, IDENTITY, PERMISSION_FINE, listener2);
+
+        assertThat(mProvider.getRequest().isActive()).isTrue();
+        assertThat(mProvider.getRequest().getIntervalMillis()).isEqualTo(1);
+        assertThat(mProvider.getRequest().isAdasGnssBypass()).isTrue();
+    }
+
+    @Test
+    public void testProviderRequest_AdasGnssBypass_ProviderDisabled() {
+        doReturn(true).when(mPackageManager).hasSystemFeature(FEATURE_AUTOMOTIVE);
+        doReturn(true).when(mResources).getBoolean(R.bool.config_defaultAdasGnssLocationEnabled);
+
+        mInjector.getSettingsHelper().setAdasSettingsAllowlist(
+                new PackageTagsList.Builder().add(
+                        IDENTITY.getPackageName()).build());
+
+        createManager(GPS_PROVIDER);
+
+        ILocationListener listener1 = createMockLocationListener();
+        LocationRequest request1 = new LocationRequest.Builder(1)
+                .setWorkSource(WORK_SOURCE)
+                .build();
+        mManager.registerLocationRequest(request1, IDENTITY, PERMISSION_FINE, listener1);
+
+        ILocationListener listener2 = createMockLocationListener();
+        LocationRequest request2 = new LocationRequest.Builder(5)
+                .setAdasGnssBypass(true)
+                .setWorkSource(WORK_SOURCE)
+                .build();
+        mManager.registerLocationRequest(request2, IDENTITY, PERMISSION_FINE, listener2);
+
+        mInjector.getSettingsHelper().setLocationEnabled(false, IDENTITY.getUserId());
+
+        assertThat(mProvider.getRequest().isActive()).isTrue();
+        assertThat(mProvider.getRequest().getIntervalMillis()).isEqualTo(5);
+        assertThat(mProvider.getRequest().isAdasGnssBypass()).isTrue();
+    }
+
+    @Test
+    public void testProviderRequest_AdasGnssBypass_ProviderDisabled_AdasDisabled() {
+        doReturn(true).when(mPackageManager).hasSystemFeature(FEATURE_AUTOMOTIVE);
+        doReturn(true).when(mResources).getBoolean(R.bool.config_defaultAdasGnssLocationEnabled);
+
+        mInjector.getSettingsHelper().setIgnoreSettingsAllowlist(
+                new PackageTagsList.Builder().add(
+                        IDENTITY.getPackageName()).build());
+
+        mInjector.getSettingsHelper().setAdasSettingsAllowlist(
+                new PackageTagsList.Builder().add(
+                        IDENTITY.getPackageName()).build());
+
+        createManager(GPS_PROVIDER);
+
+        ILocationListener listener1 = createMockLocationListener();
+        LocationRequest request1 = new LocationRequest.Builder(5)
+                .setLocationSettingsIgnored(true)
+                .setWorkSource(WORK_SOURCE)
+                .build();
+        mManager.registerLocationRequest(request1, IDENTITY, PERMISSION_FINE, listener1);
+
+        ILocationListener listener2 = createMockLocationListener();
+        LocationRequest request2 = new LocationRequest.Builder(1)
+                .setAdasGnssBypass(true)
+                .setWorkSource(WORK_SOURCE)
+                .build();
+        mManager.registerLocationRequest(request2, IDENTITY, PERMISSION_FINE, listener2);
+
+        mInjector.getLocationSettings().updateUserSettings(IDENTITY.getUserId(),
+                settings -> settings.withAdasGnssLocationEnabled(false));
+        mInjector.getSettingsHelper().setLocationEnabled(false, IDENTITY.getUserId());
+
+        assertThat(mProvider.getRequest().isActive()).isTrue();
+        assertThat(mProvider.getRequest().getIntervalMillis()).isEqualTo(5);
+        assertThat(mProvider.getRequest().isAdasGnssBypass()).isFalse();
     }
 
     @Test

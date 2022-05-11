@@ -34,6 +34,7 @@ import android.util.Log;
 
 import com.android.internal.os.IDropBoxManagerService;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.Closeable;
 import java.io.File;
@@ -72,7 +73,7 @@ public class DropBoxManager {
     /** Flag value: Content is human-readable UTF-8 text (can be combined with IS_GZIPPED). */
     public static final int IS_TEXT = 2;
 
-    /** Flag value: Content can be decompressed with {@link java.util.zip.GZIPOutputStream}. */
+    /** Flag value: Content can be decompressed with java.util.zip.GZIPOutputStream. */
     public static final int IS_GZIPPED = 4;
 
     /** Flag value for serialization only: Value is a byte array, not a file descriptor */
@@ -257,7 +258,8 @@ public class DropBoxManager {
             } else {
                 return null;
             }
-            return (mFlags & IS_GZIPPED) != 0 ? new GZIPInputStream(is) : is;
+            return (mFlags & IS_GZIPPED) != 0
+                ? new GZIPInputStream(new BufferedInputStream(is)) : is;
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<Entry> CREATOR = new Parcelable.Creator() {

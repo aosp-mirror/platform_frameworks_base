@@ -29,6 +29,8 @@
 #include "utils/Macros.h"
 #include "utils/TimeUtils.h"
 
+#include <pthread.h>
+
 namespace android {
 namespace uirenderer {
 namespace renderthread {
@@ -39,7 +41,8 @@ RenderProxy::RenderProxy(bool translucent, RenderNode* rootRenderNode,
     mContext = mRenderThread.queue().runSync([&]() -> CanvasContext* {
         return CanvasContext::create(mRenderThread, translucent, rootRenderNode, contextFactory);
     });
-    mDrawFrameTask.setContext(&mRenderThread, mContext, rootRenderNode);
+    mDrawFrameTask.setContext(&mRenderThread, mContext, rootRenderNode,
+                              pthread_gettid_np(pthread_self()), getRenderThreadTid());
 }
 
 RenderProxy::~RenderProxy() {
@@ -48,7 +51,7 @@ RenderProxy::~RenderProxy() {
 
 void RenderProxy::destroyContext() {
     if (mContext) {
-        mDrawFrameTask.setContext(nullptr, nullptr, nullptr);
+        mDrawFrameTask.setContext(nullptr, nullptr, nullptr, -1, -1);
         // This is also a fence as we need to be certain that there are no
         // outstanding mDrawFrame tasks posted before it is destroyed
         mRenderThread.queue().runSync([this]() { delete mContext; });
@@ -74,12 +77,6 @@ void RenderProxy::setName(const char* name) {
     // block since name/value pointers owned by caller
     // TODO: Support move arguments
     mRenderThread.queue().runSync([this, name]() { mContext->setName(std::string(name)); });
-}
-
-void RenderProxy::setHintSessionCallbacks(std::function<void(int64_t)> updateTargetWorkDuration,
-                                          std::function<void(int64_t)> reportActualWorkDuration) {
-    mDrawFrameTask.setHintSessionCallbacks(std::move(updateTargetWorkDuration),
-                                           std::move(reportActualWorkDuration));
 }
 
 void RenderProxy::setSurface(ANativeWindow* window, bool enableTimeout) {
@@ -134,6 +131,10 @@ void RenderProxy::setColorMode(ColorMode mode) {
 
 int64_t* RenderProxy::frameInfo() {
     return mDrawFrameTask.frameInfo();
+}
+
+void RenderProxy::forceDrawNextFrame() {
+    mDrawFrameTask.forceDrawNextFrame();
 }
 
 int RenderProxy::syncAndDrawFrame() {
@@ -260,10 +261,15 @@ uint32_t RenderProxy::frameTimePercentile(int percentile) {
     });
 }
 
-void RenderProxy::dumpGraphicsMemory(int fd, bool includeProfileData) {
+void RenderProxy::dumpGraphicsMemory(int fd, bool includeProfileData, bool resetProfile) {
     if (RenderThread::hasInstance()) {
         auto& thread = RenderThread::getInstance();
-        thread.queue().runSync([&]() { thread.dumpGraphicsMemory(fd, includeProfileData); });
+        thread.queue().runSync([&]() {
+            thread.dumpGraphicsMemory(fd, includeProfileData);
+            if (resetProfile) {
+                thread.globalProfileData()->reset();
+            }
+        });
     }
 }
 
@@ -314,7 +320,7 @@ void RenderProxy::setPictureCapturedCallback(
 }
 
 void RenderProxy::setASurfaceTransactionCallback(
-        const std::function<void(int64_t, int64_t, int64_t)>& callback) {
+        const std::function<bool(int64_t, int64_t, int64_t)>& callback) {
     mRenderThread.queue().post(
             [this, cb = callback]() { mContext->setASurfaceTransactionCallback(cb); });
 }
@@ -325,11 +331,16 @@ void RenderProxy::setPrepareSurfaceControlForWebviewCallback(
             [this, cb = callback]() { mContext->setPrepareSurfaceControlForWebviewCallback(cb); });
 }
 
-void RenderProxy::setFrameCallback(std::function<void(int64_t)>&& callback) {
+void RenderProxy::setFrameCallback(
+        std::function<std::function<void(bool)>(int32_t, int64_t)>&& callback) {
     mDrawFrameTask.setFrameCallback(std::move(callback));
 }
 
-void RenderProxy::setFrameCompleteCallback(std::function<void(int64_t)>&& callback) {
+void RenderProxy::setFrameCommitCallback(std::function<void(bool)>&& callback) {
+    mDrawFrameTask.setFrameCommitCallback(std::move(callback));
+}
+
+void RenderProxy::setFrameCompleteCallback(std::function<void()>&& callback) {
     mDrawFrameTask.setFrameCompleteCallback(std::move(callback));
 }
 
@@ -415,6 +426,15 @@ void RenderProxy::preload() {
     // Create RenderThread object and start the thread. Then preload Vulkan/EGL driver.
     auto& thread = RenderThread::getInstance();
     thread.queue().post([&thread]() { thread.preload(); });
+}
+
+void RenderProxy::setRtAnimationsEnabled(bool enabled) {
+    if (RenderThread::hasInstance()) {
+        RenderThread::getInstance().queue().post(
+                [enabled]() { Properties::enableRTAnimations = enabled; });
+    } else {
+        Properties::enableRTAnimations = enabled;
+    }
 }
 
 } /* namespace renderthread */

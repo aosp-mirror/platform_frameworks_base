@@ -16,10 +16,16 @@
 
 package com.android.server.vcn;
 
+import static com.android.server.vcn.VcnGatewayConnection.VcnNetworkAgent;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -33,49 +39,66 @@ import org.junit.runner.RunWith;
 @SmallTest
 public class VcnGatewayConnectionRetryTimeoutStateTest extends VcnGatewayConnectionTestBase {
     private long mFirstRetryInterval;
+    private VcnNetworkAgent mNetworkAgent;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
 
         mFirstRetryInterval = mConfig.getRetryIntervalsMillis()[0];
+        mNetworkAgent = mock(VcnNetworkAgent.class);
 
         mGatewayConnection.setUnderlyingNetwork(TEST_UNDERLYING_NETWORK_RECORD_1);
         mGatewayConnection.transitionTo(mGatewayConnection.mRetryTimeoutState);
         mTestLooper.dispatchAll();
+
+        mGatewayConnection.setNetworkAgent(mNetworkAgent);
     }
 
     @Test
     public void testNewNetworkTriggerRetry() throws Exception {
         mGatewayConnection
-                .getUnderlyingNetworkTrackerCallback()
+                .getUnderlyingNetworkControllerCallback()
                 .onSelectedUnderlyingNetworkChanged(TEST_UNDERLYING_NETWORK_RECORD_2);
         mTestLooper.dispatchAll();
 
         assertEquals(mGatewayConnection.mConnectingState, mGatewayConnection.getCurrentState());
         verifyRetryTimeoutAlarmAndGetCallback(mFirstRetryInterval, true /* expectCanceled */);
+
+        assertNotNull(mGatewayConnection.getNetworkAgent());
+        verify(mNetworkAgent, never()).unregister();
     }
 
     @Test
     public void testSameNetworkDoesNotTriggerRetry() throws Exception {
         mGatewayConnection
-                .getUnderlyingNetworkTrackerCallback()
+                .getUnderlyingNetworkControllerCallback()
                 .onSelectedUnderlyingNetworkChanged(TEST_UNDERLYING_NETWORK_RECORD_1);
         mTestLooper.dispatchAll();
 
         assertEquals(mGatewayConnection.mRetryTimeoutState, mGatewayConnection.getCurrentState());
         verifyRetryTimeoutAlarmAndGetCallback(mFirstRetryInterval, false /* expectCanceled */);
+
+        assertNotNull(mGatewayConnection.getNetworkAgent());
+        verify(mNetworkAgent, never()).unregister();
     }
 
     @Test
     public void testNullNetworkTriggersDisconnect() throws Exception {
         mGatewayConnection
-                .getUnderlyingNetworkTrackerCallback()
+                .getUnderlyingNetworkControllerCallback()
                 .onSelectedUnderlyingNetworkChanged(null);
+        mTestLooper.dispatchAll();
+
+        // Verify that sending a non-quitting disconnect request does not unset the isQuitting flag
+        mGatewayConnection.sendDisconnectRequestedAndAcquireWakelock("TEST", false);
         mTestLooper.dispatchAll();
 
         assertEquals(mGatewayConnection.mDisconnectedState, mGatewayConnection.getCurrentState());
         verifyRetryTimeoutAlarmAndGetCallback(mFirstRetryInterval, true /* expectCanceled */);
+
+        assertNull(mGatewayConnection.getNetworkAgent());
+        verify(mNetworkAgent).unregister();
     }
 
     @Test
@@ -93,6 +116,9 @@ public class VcnGatewayConnectionRetryTimeoutStateTest extends VcnGatewayConnect
 
         assertEquals(mGatewayConnection.mConnectingState, mGatewayConnection.getCurrentState());
         verifyRetryTimeoutAlarmAndGetCallback(mFirstRetryInterval, true /* expectCanceled */);
+
+        assertNotNull(mGatewayConnection.getNetworkAgent());
+        verify(mNetworkAgent, never()).unregister();
     }
 
     @Test
@@ -108,6 +134,9 @@ public class VcnGatewayConnectionRetryTimeoutStateTest extends VcnGatewayConnect
 
         assertNull(mGatewayConnection.getCurrentState());
         assertTrue(mGatewayConnection.isQuitting());
+
+        assertNull(mGatewayConnection.getNetworkAgent());
+        verify(mNetworkAgent).unregister();
     }
 
     @Test
@@ -117,5 +146,8 @@ public class VcnGatewayConnectionRetryTimeoutStateTest extends VcnGatewayConnect
 
         assertEquals(mGatewayConnection.mDisconnectedState, mGatewayConnection.getCurrentState());
         assertFalse(mGatewayConnection.isQuitting());
+
+        assertNull(mGatewayConnection.getNetworkAgent());
+        verify(mNetworkAgent).unregister();
     }
 }

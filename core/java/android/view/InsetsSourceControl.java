@@ -39,6 +39,8 @@ import java.util.function.Consumer;
  */
 public class InsetsSourceControl implements Parcelable {
 
+    public static final Insets INVALID_HINTS = Insets.of(-1, -1, -1, -1);
+
     private final @InternalInsetsType int mType;
     private final @Nullable SurfaceControl mLeash;
     private final Point mSurfacePosition;
@@ -48,6 +50,7 @@ public class InsetsSourceControl implements Parcelable {
     private Insets mInsetsHint;
 
     private boolean mSkipAnimationOnce;
+    private int mParcelableFlags;
 
     public InsetsSourceControl(@InternalInsetsType int type, @Nullable SurfaceControl leash,
             Point surfacePosition, Insets insetsHint) {
@@ -132,6 +135,10 @@ public class InsetsSourceControl implements Parcelable {
         return result;
     }
 
+    public void setParcelableFlags(int parcelableFlags) {
+        mParcelableFlags = parcelableFlags;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -140,9 +147,9 @@ public class InsetsSourceControl implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mType);
-        dest.writeTypedObject(mLeash, 0 /* parcelableFlags */);
-        dest.writeTypedObject(mSurfacePosition, 0 /* parcelableFlags */);
-        dest.writeTypedObject(mInsetsHint, 0 /* parcelableFlags */);
+        dest.writeTypedObject(mLeash, mParcelableFlags);
+        dest.writeTypedObject(mSurfacePosition, mParcelableFlags);
+        dest.writeTypedObject(mInsetsHint, mParcelableFlags);
         dest.writeBoolean(mSkipAnimationOnce);
     }
 
@@ -178,6 +185,15 @@ public class InsetsSourceControl implements Parcelable {
         result = 31 * result + mInsetsHint.hashCode();
         result = 31 * result + (mSkipAnimationOnce ? 1 : 0);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "InsetsSourceControl: {"
+                + "type=" + InsetsState.typeToString(mType)
+                + ", mSurfacePosition=" + mSurfacePosition
+                + ", mInsetsHint=" + mInsetsHint
+                + "}";
     }
 
     public void dump(String prefix, PrintWriter pw) {

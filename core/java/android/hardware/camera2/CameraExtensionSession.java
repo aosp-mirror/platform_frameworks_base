@@ -172,6 +172,32 @@ public abstract class CameraExtensionSession implements AutoCloseable {
                 int sequenceId) {
             // default empty implementation
         }
+
+        /**
+         * This method is called when an image capture has fully completed and all the
+         * result metadata is available.
+         *
+         * <p>This callback will only be called in case
+         * {@link CameraExtensionCharacteristics#getAvailableCaptureResultKeys} returns a valid
+         * non-empty list.</p>
+         *
+         * <p>The default implementation of this method does nothing.</p>
+         *
+         * @param session The session received during
+         *                {@link StateCallback#onConfigured(CameraExtensionSession)}
+         * @param request The request that was given to the CameraDevice
+         * @param result The total output metadata from the capture, which only includes the
+         * capture result keys advertised as supported in
+         * {@link CameraExtensionCharacteristics#getAvailableCaptureResultKeys}.
+         *
+         * @see #capture
+         * @see #setRepeatingRequest
+         * @see CameraExtensionCharacteristics#getAvailableCaptureResultKeys
+         */
+        public void onCaptureResultAvailable(@NonNull CameraExtensionSession session,
+                @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
+            // default empty implementation
+        }
     }
 
     /**
@@ -195,8 +221,9 @@ public abstract class CameraExtensionSession implements AutoCloseable {
          * This method is called if the session cannot be configured as requested.
          *
          * <p>This can happen if the set of requested outputs contains unsupported sizes,
-         * too many outputs are requested at once or the camera device encounters an
-         * unrecoverable error during configuration.</p>
+         * too many outputs are requested at once or when trying to initialize multiple
+         * concurrent extension sessions from two (or more) separate camera devices
+         * or the camera device encounters an unrecoverable error during configuration.</p>
          *
          * <p>The session is considered to be closed, and all methods called on it after this
          * callback is invoked will throw an IllegalStateException.</p>
@@ -238,8 +265,8 @@ public abstract class CameraExtensionSession implements AutoCloseable {
      * from the camera device, to produce a single high-quality output result.
      *
      * <p>Note that single capture requests currently do not support
-     * client parameters except for {@link CaptureRequest#JPEG_ORIENTATION orientation} and
-     * {@link CaptureRequest#JPEG_QUALITY quality} in case of ImageFormat.JPEG output target.
+     * client parameters except for controls advertised in
+     * {@link CameraExtensionCharacteristics#getAvailableCaptureRequestKeys}.
      * The rest of the settings included in the request will be entirely overridden by
      * the device-specific extension. </p>
      *
@@ -247,6 +274,11 @@ public abstract class CameraExtensionSession implements AutoCloseable {
      * ImageFormat.YUV_420_888 or ImageFormat.JPEG target surface. {@link CaptureRequest}
      * arguments that include further targets will cause
      * IllegalArgumentException to be thrown. </p>
+     *
+     * <p>Starting with Android {@link android.os.Build.VERSION_CODES#TIRAMISU} single capture
+     * requests will also support the preview {@link android.graphics.ImageFormat#PRIVATE} target
+     * surface. These can typically be used for enabling AF/AE triggers. Do note, that single
+     * capture requests referencing both output surfaces remain unsupported.</p>
      *
      * <p>Each request will produce one new frame for one target Surface, set
      * with the CaptureRequest builder's
@@ -292,8 +324,10 @@ public abstract class CameraExtensionSession implements AutoCloseable {
      * rate possible.</p>
      *
      * <p>Note that repeating capture requests currently do not support
-     * client parameters. Settings included in the request will
-     * be completely overridden by the device-specific extension.</p>
+     * client parameters except for controls advertised in
+     * {@link CameraExtensionCharacteristics#getAvailableCaptureRequestKeys}.
+     * The rest of the settings included in the request will be entirely overridden by
+     * the device-specific extension. </p>
      *
      * <p>The {@link CaptureRequest.Builder#addTarget} supports only one
      * target surface. {@link CaptureRequest} arguments that include further

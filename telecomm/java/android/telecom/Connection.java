@@ -45,6 +45,7 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.telephony.CallQuality;
+import android.telephony.CellIdentity;
 import android.telephony.ims.ImsStreamMediaProfile;
 import android.util.ArraySet;
 import android.view.Surface;
@@ -422,8 +423,14 @@ public abstract class Connection extends Conferenceable {
      */
     public static final int CAPABILITY_TRANSFER_CONSULTATIVE = 0x10000000;
 
+    /**
+     * Indicates whether the remote party supports RTT or not to the UI.
+     */
+
+    public static final int CAPABILITY_REMOTE_PARTY_SUPPORTS_RTT = 0x20000000;
+
     //**********************************************************************************************
-    // Next CAPABILITY value: 0x20000000
+    // Next CAPABILITY value: 0x40000000
     //**********************************************************************************************
 
     /**
@@ -671,6 +678,14 @@ public abstract class Connection extends Conferenceable {
     public @interface AudioCodec {}
 
     /**
+     * Contains the same value as {@link #getCallerNumberVerificationStatus()}, except will be
+     * present in the {@link #getExtras()} using this key.
+     * @hide
+     */
+    public static final String EXTRA_CALLER_NUMBER_VERIFICATION_STATUS =
+            "android.telecom.extra.CALLER_NUMBER_VERIFICATION_STATUS";
+
+    /**
      * Connection extra key used to store the last forwarded number associated with the current
      * connection.  Used to communicate to the user interface that the connection was forwarded via
      * the specified number.
@@ -767,6 +782,21 @@ public abstract class Connection extends Conferenceable {
             "android.telecom.extra.REMOTE_PHONE_ACCOUNT_HANDLE";
 
     /**
+     * The Telecom call ID of the conference an existing connection should be added to.  This is
+     * required when {@link com.android.services.telephony.TelephonyConnectionService} adds a
+     * {@link Conference} to Telecom using the
+     * {@link ConnectionService#addExistingConnection(PhoneAccountHandle, Connection, Conference)}
+     * API.  That API specifies a parent conference associated with the new existing connection
+     * being added, and there is no equivalent as part of the {@link RemoteConnectionService} API.
+     * This extra key is used to stack the ID of the conference to which the existing connection
+     * will be added so that Telecom can link it up correctly when the {@link RemoteConference}
+     * is added to Telecom by the connection manager.
+     * @hide
+     */
+    public static final String EXTRA_ADD_TO_CONFERENCE_ID =
+            "android.telecom.extra.ADD_TO_CONFERENCE_ID";
+
+    /**
      * Extra key set from a {@link ConnectionService} when using the remote connection APIs
      * (e.g. {@link RemoteConnectionService#createRemoteConnection(PhoneAccountHandle,
      * ConnectionRequest, boolean)}) to create a remote connection.  Provides the receiving
@@ -806,6 +836,17 @@ public abstract class Connection extends Conferenceable {
      */
     public static final String EXTRA_AUDIO_CODEC_BANDWIDTH_KHZ =
             "android.telecom.extra.AUDIO_CODEC_BANDWIDTH_KHZ";
+
+    /**
+     * Last known cell identity key {@link CellIdentity} to be used to fill geo location header
+     * in case of an emergency  call. This entry will not be filled if call is not identified as
+     * an emergency call. Only provided to the {@link ConnectionService}  for the purpose of
+     * placing an emergency call; will not be present in the  {@link InCallService} layer.
+     * The {@link ConnectionService}'s implementation will be logged for fine location access
+     * when an outgoing call is placed in this case.
+     */
+    public static final String EXTRA_LAST_KNOWN_CELL_IDENTITY =
+            "android.telecom.extra.LAST_KNOWN_CELL_IDENTITY";
 
     /**
      * Boolean connection extra key used to indicate whether device to device communication is
@@ -1115,6 +1156,10 @@ public abstract class Connection extends Conferenceable {
                 == CAPABILITY_TRANSFER_CONSULTATIVE) {
             builder.append(isLong ? " CAPABILITY_TRANSFER_CONSULTATIVE" : " sup_cTrans");
         }
+        if ((capabilities & CAPABILITY_REMOTE_PARTY_SUPPORTS_RTT)
+                == CAPABILITY_REMOTE_PARTY_SUPPORTS_RTT) {
+            builder.append(isLong ? " CAPABILITY_REMOTE_PARTY_SUPPORTS_RTT" : " sup_rtt");
+        }
         builder.append("]");
         return builder.toString();
     }
@@ -1355,6 +1400,18 @@ public abstract class Connection extends Conferenceable {
          * Session modify request rejected by remote user.
          */
         public static final int SESSION_MODIFY_REQUEST_REJECTED_BY_REMOTE = 5;
+
+
+        /**@hide*/
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(prefix = "SESSION_MODIFY_REQUEST_", value = {
+                SESSION_MODIFY_REQUEST_SUCCESS,
+                SESSION_MODIFY_REQUEST_FAIL,
+                SESSION_MODIFY_REQUEST_INVALID,
+                SESSION_MODIFY_REQUEST_TIMED_OUT,
+                SESSION_MODIFY_REQUEST_REJECTED_BY_REMOTE
+        })
+        public @interface RttSessionModifyStatus {}
     }
 
     /**
@@ -1757,11 +1814,13 @@ public abstract class Connection extends Conferenceable {
         public abstract void onSetDeviceOrientation(int rotation);
 
         /**
-         * Sets camera zoom ratio.
+         * Sets the camera zoom ratio.
          * <p>
          * Sent from the {@link InCallService} via {@link InCallService.VideoCall#setZoom(float)}.
          *
-         * @param value The camera zoom ratio.
+         * @param value The camera zoom ratio; for the current camera, should be a value in the
+         * range defined by
+         * {@link android.hardware.camera2.CameraCharacteristics#CONTROL_ZOOM_RATIO_RANGE}.
          */
         public abstract void onSetZoom(float value);
 
@@ -3491,9 +3550,9 @@ public abstract class Connection extends Conferenceable {
             mIsBlocked = in.readByte() != 0;
             mIsInContacts = in.readByte() != 0;
             CallScreeningService.ParcelableCallResponse response
-                    = in.readParcelable(CallScreeningService.class.getClassLoader());
+                    = in.readParcelable(CallScreeningService.class.getClassLoader(), android.telecom.CallScreeningService.ParcelableCallResponse.class);
             mCallResponse = response == null ? null : response.toCallResponse();
-            mCallScreeningComponent = in.readParcelable(ComponentName.class.getClassLoader());
+            mCallScreeningComponent = in.readParcelable(ComponentName.class.getClassLoader(), android.content.ComponentName.class);
         }
 
         @NonNull

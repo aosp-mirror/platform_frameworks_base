@@ -27,6 +27,7 @@ import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.widget.WidgetFlags;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
@@ -93,8 +94,6 @@ final class CoreSettingsObserver extends ContentObserver {
         sGlobalSettingToTypeMap.put(
                 Settings.Global.ANGLE_GL_DRIVER_SELECTION_VALUES, String.class);
         sGlobalSettingToTypeMap.put(
-                Settings.Global.ANGLE_ALLOWLIST, String.class);
-        sGlobalSettingToTypeMap.put(
                 Settings.Global.ANGLE_EGL_FEATURES, String.class);
         sGlobalSettingToTypeMap.put(
                 Settings.Global.SHOW_ANGLE_IN_USE_DIALOG_BOX, String.class);
@@ -159,12 +158,9 @@ final class CoreSettingsObserver extends ContentObserver {
                 DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.MAGNIFIER_ASPECT_RATIO,
                 WidgetFlags.KEY_MAGNIFIER_ASPECT_RATIO, float.class,
                 WidgetFlags.MAGNIFIER_ASPECT_RATIO_DEFAULT));
-        sDeviceConfigEntries.add(new DeviceConfigEntry<>(
-                DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.ANALOG_CLOCK_SECONDS_HAND_FPS,
-                WidgetFlags.KEY_ANALOG_CLOCK_SECONDS_HAND_FPS, int.class,
-                WidgetFlags.ANALOG_CLOCK_SECONDS_HAND_FPS_DEFAULT));
         // add other device configs here...
     }
+    private static volatile boolean sDeviceConfigContextEntriesLoaded = false;
 
     private final Bundle mCoreSettings = new Bundle();
 
@@ -172,9 +168,27 @@ final class CoreSettingsObserver extends ContentObserver {
 
     public CoreSettingsObserver(ActivityManagerService activityManagerService) {
         super(activityManagerService.mHandler);
+
+        if (!sDeviceConfigContextEntriesLoaded) {
+            synchronized (sDeviceConfigEntries) {
+                if (!sDeviceConfigContextEntriesLoaded) {
+                    loadDeviceConfigContextEntries(activityManagerService.mContext);
+                    sDeviceConfigContextEntriesLoaded = true;
+                }
+            }
+        }
+
         mActivityManagerService = activityManagerService;
         beginObserveCoreSettings();
         sendCoreSettings();
+    }
+
+    private static void loadDeviceConfigContextEntries(Context context) {
+        sDeviceConfigEntries.add(new DeviceConfigEntry<>(
+                DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.ANALOG_CLOCK_SECONDS_HAND_FPS,
+                WidgetFlags.KEY_ANALOG_CLOCK_SECONDS_HAND_FPS, int.class,
+                context.getResources()
+                        .getInteger(R.integer.config_defaultAnalogClockSecondsHandFps)));
     }
 
     public Bundle getCoreSettingsLocked() {

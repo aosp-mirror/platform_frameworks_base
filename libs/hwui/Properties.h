@@ -182,6 +182,17 @@ enum DebugLevel {
  */
 #define PROPERTY_REDUCE_OPS_TASK_SPLITTING "renderthread.skia.reduceopstasksplitting"
 
+/**
+ * Enable WebView Overlays feature.
+ */
+#define PROPERTY_WEBVIEW_OVERLAYS_ENABLED "debug.hwui.webview_overlays_enabled"
+
+/**
+ * Property for globally GL drawing state. Can be overridden per process with
+ * setDrawingEnabled.
+ */
+#define PROPERTY_DRAWING_ENABLED "debug.hwui.drawing_enabled"
+
 ///////////////////////////////////////////////////////////////////////////////
 // Misc
 ///////////////////////////////////////////////////////////////////////////////
@@ -203,6 +214,8 @@ enum class StretchEffectBehavior {
     UniformScale  // Uniform scale stretch everywhere
 };
 
+enum class DrawingEnabled { NotInitialized, On, Off };
+
 /**
  * Renderthread-only singleton which manages several static rendering properties. Most of these
  * are driven by system properties which are queried once at initialization, and again if init()
@@ -219,6 +232,7 @@ public:
     static bool skipEmptyFrames;
     static bool useBufferAge;
     static bool enablePartialUpdates;
+    static bool enableRenderEffectCache;
 
     // TODO: Move somewhere else?
     static constexpr float textGamma = 1.45f;
@@ -276,6 +290,8 @@ public:
     static bool useHintManager;
     static int targetCpuTimePercentage;
 
+    static bool enableWebViewOverlays;
+
     static StretchEffectBehavior getStretchEffectBehavior() {
         return stretchEffectBehavior;
     }
@@ -293,6 +309,11 @@ public:
     static void setStretchEffectBehavior(StretchEffectBehavior behavior) {
         stretchEffectBehavior = behavior;
     }
+
+    // Represents if drawing is enabled. Should only be Off in headless testing environments
+    static DrawingEnabled drawingEnabled;
+    static bool isDrawingEnabled();
+    static void setDrawingEnabled(bool enable);
 
 private:
     static StretchEffectBehavior stretchEffectBehavior;

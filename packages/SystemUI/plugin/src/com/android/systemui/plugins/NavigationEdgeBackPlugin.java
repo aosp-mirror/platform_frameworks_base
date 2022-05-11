@@ -22,6 +22,8 @@ import android.view.WindowManager;
 
 import com.android.systemui.plugins.annotations.ProvidesInterface;
 
+import java.io.PrintWriter;
+
 /** Plugin to handle navigation edge gestures for Back. */
 @ProvidesInterface(
         action = NavigationEdgeBackPlugin.ACTION,
@@ -48,6 +50,9 @@ public interface NavigationEdgeBackPlugin extends Plugin {
 
     /** Updates the UI based on the motion events passed in device coordinates. */
     void onMotionEvent(MotionEvent motionEvent);
+
+    /** Dumps info about the back gesture plugin. */
+    void dump(PrintWriter pw);
 
     /** Callback to let the system react to the detected back gestures. */
     interface BackCallback {

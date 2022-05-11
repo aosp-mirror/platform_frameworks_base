@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread;
 import android.content.Context;
+import android.hardware.security.keymint.EcCurve;
 import android.hardware.security.keymint.KeyParameter;
 import android.hardware.security.keymint.KeyPurpose;
 import android.hardware.security.keymint.SecurityLevel;
@@ -27,7 +28,7 @@ import android.hardware.security.keymint.Tag;
 import android.os.Build;
 import android.os.RemoteException;
 import android.security.GenerateRkpKey;
-import android.security.GenerateRkpKeyException;
+import android.security.IGenerateRkpKeyService;
 import android.security.KeyPairGeneratorSpec;
 import android.security.KeyStore2;
 import android.security.KeyStoreException;
@@ -65,6 +66,7 @@ import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.ECGenParameterSpec;
+import java.security.spec.NamedParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -106,6 +108,16 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
         }
     }
 
+    /**
+     * XDH represents Curve 25519 providers.
+     */
+    public static class XDH extends AndroidKeyStoreKeyPairGeneratorSpi {
+        // XDH is treated as EC.
+        public XDH() {
+            super(KeymasterDefs.KM_ALGORITHM_EC);
+        }
+    }
+
     /*
      * These must be kept in sync with system/security/keystore/defaults.h
      */
@@ -118,35 +130,42 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
     private static final int RSA_MIN_KEY_SIZE = 512;
     private static final int RSA_MAX_KEY_SIZE = 8192;
 
-    private static final Map<String, Integer> SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE =
+    private static final Map<String, Integer> SUPPORTED_EC_CURVE_NAME_TO_SIZE =
             new HashMap<String, Integer>();
-    private static final List<String> SUPPORTED_EC_NIST_CURVE_NAMES = new ArrayList<String>();
-    private static final List<Integer> SUPPORTED_EC_NIST_CURVE_SIZES = new ArrayList<Integer>();
+    private static final List<String> SUPPORTED_EC_CURVE_NAMES = new ArrayList<String>();
+    private static final List<Integer> SUPPORTED_EC_CURVE_SIZES = new ArrayList<Integer>();
+    private static final String CURVE_X_25519 = NamedParameterSpec.X25519.getName();
+    private static final String CURVE_ED_25519 = NamedParameterSpec.ED25519.getName();
+
+
     static {
         // Aliases for NIST P-224
-        SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE.put("p-224", 224);
-        SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE.put("secp224r1", 224);
+        SUPPORTED_EC_CURVE_NAME_TO_SIZE.put("p-224", 224);
+        SUPPORTED_EC_CURVE_NAME_TO_SIZE.put("secp224r1", 224);
 
 
         // Aliases for NIST P-256
-        SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE.put("p-256", 256);
-        SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE.put("secp256r1", 256);
-        SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE.put("prime256v1", 256);
+        SUPPORTED_EC_CURVE_NAME_TO_SIZE.put("p-256", 256);
+        SUPPORTED_EC_CURVE_NAME_TO_SIZE.put("secp256r1", 256);
+        SUPPORTED_EC_CURVE_NAME_TO_SIZE.put("prime256v1", 256);
+        // Aliases for Curve 25519
+        SUPPORTED_EC_CURVE_NAME_TO_SIZE.put(CURVE_X_25519.toLowerCase(Locale.US), 256);
+        SUPPORTED_EC_CURVE_NAME_TO_SIZE.put(CURVE_ED_25519.toLowerCase(Locale.US), 256);
 
         // Aliases for NIST P-384
-        SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE.put("p-384", 384);
-        SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE.put("secp384r1", 384);
+        SUPPORTED_EC_CURVE_NAME_TO_SIZE.put("p-384", 384);
+        SUPPORTED_EC_CURVE_NAME_TO_SIZE.put("secp384r1", 384);
 
         // Aliases for NIST P-521
-        SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE.put("p-521", 521);
-        SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE.put("secp521r1", 521);
+        SUPPORTED_EC_CURVE_NAME_TO_SIZE.put("p-521", 521);
+        SUPPORTED_EC_CURVE_NAME_TO_SIZE.put("secp521r1", 521);
 
-        SUPPORTED_EC_NIST_CURVE_NAMES.addAll(SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE.keySet());
-        Collections.sort(SUPPORTED_EC_NIST_CURVE_NAMES);
+        SUPPORTED_EC_CURVE_NAMES.addAll(SUPPORTED_EC_CURVE_NAME_TO_SIZE.keySet());
+        Collections.sort(SUPPORTED_EC_CURVE_NAMES);
 
-        SUPPORTED_EC_NIST_CURVE_SIZES.addAll(
-                new HashSet<Integer>(SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE.values()));
-        Collections.sort(SUPPORTED_EC_NIST_CURVE_SIZES);
+        SUPPORTED_EC_CURVE_SIZES.addAll(
+                new HashSet<Integer>(SUPPORTED_EC_CURVE_NAME_TO_SIZE.values()));
+        Collections.sort(SUPPORTED_EC_CURVE_SIZES);
     }
 
     private final int mOriginalKeymasterAlgorithm;
@@ -162,6 +181,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
     private int mKeySizeBits;
     private SecureRandom mRng;
     private KeyDescriptor mAttestKeyDescriptor;
+    private String mEcCurveName;
 
     private int[] mKeymasterPurposes;
     private int[] mKeymasterBlockModes;
@@ -175,12 +195,32 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
         mOriginalKeymasterAlgorithm = keymasterAlgorithm;
     }
 
+    private static @EcCurve int keySizeAndNameToEcCurve(int keySizeBits, String ecCurveName)
+            throws InvalidAlgorithmParameterException {
+        switch (keySizeBits) {
+            case 224:
+                return EcCurve.P_224;
+            case 256:
+                if (isCurve25519(ecCurveName)) {
+                    return EcCurve.CURVE_25519;
+                }
+                return EcCurve.P_256;
+            case 384:
+                return EcCurve.P_384;
+            case 521:
+                return EcCurve.P_521;
+            default:
+                throw new InvalidAlgorithmParameterException(
+                        "Unsupported EC curve keysize: " + keySizeBits);
+        }
+    }
+
     @SuppressWarnings("deprecation")
     @Override
     public void initialize(int keysize, SecureRandom random) {
         throw new IllegalArgumentException(
                 KeyGenParameterSpec.class.getName() + " or " + KeyPairGeneratorSpec.class.getName()
-                + " required to initialize this KeyPairGenerator");
+                        + " required to initialize this KeyPairGenerator");
     }
 
     @SuppressWarnings("deprecation")
@@ -194,7 +234,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
             if (params == null) {
                 throw new InvalidAlgorithmParameterException(
                         "Must supply params of type " + KeyGenParameterSpec.class.getName()
-                        + " or " + KeyPairGeneratorSpec.class.getName());
+                                + " or " + KeyPairGeneratorSpec.class.getName());
             }
 
             KeyGenParameterSpec spec;
@@ -212,11 +252,28 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                 } catch (NullPointerException | IllegalArgumentException e) {
                     throw new InvalidAlgorithmParameterException(e);
                 }
+            } else if (params instanceof NamedParameterSpec) {
+                NamedParameterSpec namedSpec = (NamedParameterSpec) params;
+                // Android Keystore cannot support initialization from a NamedParameterSpec
+                // because an alias for the key is needed (a KeyGenParameterSpec cannot be
+                // constructed).
+                if (namedSpec.getName().equalsIgnoreCase(NamedParameterSpec.X25519.getName())
+                        || namedSpec.getName().equalsIgnoreCase(
+                        NamedParameterSpec.ED25519.getName())) {
+                    throw new IllegalArgumentException(
+                            "This KeyPairGenerator cannot be initialized using NamedParameterSpec."
+                                    + " use " + KeyGenParameterSpec.class.getName() + " or "
+                                    + KeyPairGeneratorSpec.class.getName());
+                } else {
+                    throw new InvalidAlgorithmParameterException(
+                            "Unsupported algorithm specified via NamedParameterSpec: "
+                            + namedSpec.getName());
+                }
             } else {
                 throw new InvalidAlgorithmParameterException(
                         "Unsupported params class: " + params.getClass().getName()
-                        + ". Supported: " + KeyGenParameterSpec.class.getName()
-                        + ", " + KeyPairGeneratorSpec.class.getName());
+                                + ". Supported: " + KeyGenParameterSpec.class.getName()
+                                + ", " + KeyPairGeneratorSpec.class.getName());
             }
 
             mEntryAlias = spec.getKeystoreAlias();
@@ -228,7 +285,8 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
             if (mKeySizeBits == -1) {
                 mKeySizeBits = getDefaultKeySize(keymasterAlgorithm);
             }
-            checkValidKeySize(keymasterAlgorithm, mKeySizeBits, mSpec.isStrongBoxBacked());
+            checkValidKeySize(keymasterAlgorithm, mKeySizeBits, mSpec.isStrongBoxBacked(),
+                    mEcCurveName);
 
             if (spec.getKeystoreAlias() == null) {
                 throw new InvalidAlgorithmParameterException("KeyStore entry alias not provided");
@@ -250,11 +308,11 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                                         keymasterPadding)) {
                             throw new InvalidAlgorithmParameterException(
                                     "Randomized encryption (IND-CPA) required but may be violated"
-                                    + " by padding scheme: "
-                                    + KeyProperties.EncryptionPadding.fromKeymaster(
+                                            + " by padding scheme: "
+                                            + KeyProperties.EncryptionPadding.fromKeymaster(
                                             keymasterPadding)
-                                    + ". See " + KeyGenParameterSpec.class.getName()
-                                    + " documentation.");
+                                            + ". See " + KeyGenParameterSpec.class.getName()
+                                            + " documentation.");
                         }
                     }
                 }
@@ -280,6 +338,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
 
             mAttestKeyDescriptor = buildAndCheckAttestKeyDescriptor(spec);
             checkAttestKeyPurpose(spec);
+            checkCorrectKeyPurposeForCurve(spec);
 
             success = true;
         } finally {
@@ -296,6 +355,42 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
             throw new InvalidAlgorithmParameterException(
                     "PURPOSE_ATTEST_KEY may not be specified with any other purposes");
         }
+    }
+
+    private void checkCorrectKeyPurposeForCurve(KeyGenParameterSpec spec)
+            throws InvalidAlgorithmParameterException {
+        // Validate the key usage purposes against the curve. x25519 should be
+        // key exchange only, ed25519 signing and attesting.
+
+        if (!isCurve25519(mEcCurveName)) {
+            return;
+        }
+
+        if (mEcCurveName.equalsIgnoreCase(CURVE_X_25519)
+                && spec.getPurposes() != KeyProperties.PURPOSE_AGREE_KEY) {
+            throw new InvalidAlgorithmParameterException(
+                    "x25519 may only be used for key agreement.");
+        } else if (mEcCurveName.equalsIgnoreCase(CURVE_ED_25519)
+                && !hasOnlyAllowedPurposeForEd25519(spec.getPurposes())) {
+            throw new InvalidAlgorithmParameterException(
+                    "ed25519 may not be used for key agreement.");
+        }
+    }
+
+    private static boolean isCurve25519(String ecCurveName) {
+        if (ecCurveName == null) {
+            return false;
+        }
+        return ecCurveName.equalsIgnoreCase(CURVE_X_25519)
+                || ecCurveName.equalsIgnoreCase(CURVE_ED_25519);
+    }
+
+    private static boolean hasOnlyAllowedPurposeForEd25519(@KeyProperties.PurposeEnum int purpose) {
+        final int allowedPurposes = KeyProperties.PURPOSE_SIGN | KeyProperties.PURPOSE_VERIFY
+                | KeyProperties.PURPOSE_ATTEST_KEY;
+        boolean hasAllowedPurpose = (purpose & allowedPurposes) != 0;
+        boolean hasDisallowedPurpose = (purpose & ~allowedPurposes) != 0;
+        return hasAllowedPurpose && !hasDisallowedPurpose;
     }
 
     private KeyDescriptor buildAndCheckAttestKeyDescriptor(KeyGenParameterSpec spec)
@@ -378,7 +473,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                 specBuilder = new KeyGenParameterSpec.Builder(
                         legacySpec.getKeystoreAlias(),
                         KeyProperties.PURPOSE_SIGN
-                        | KeyProperties.PURPOSE_VERIFY);
+                                | KeyProperties.PURPOSE_VERIFY);
                 // Authorized to be used with any digest (including no digest).
                 // MD5 was never offered for Android Keystore for ECDSA.
                 specBuilder.setDigests(
@@ -393,9 +488,9 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                 specBuilder = new KeyGenParameterSpec.Builder(
                         legacySpec.getKeystoreAlias(),
                         KeyProperties.PURPOSE_ENCRYPT
-                        | KeyProperties.PURPOSE_DECRYPT
-                        | KeyProperties.PURPOSE_SIGN
-                        | KeyProperties.PURPOSE_VERIFY);
+                                | KeyProperties.PURPOSE_DECRYPT
+                                | KeyProperties.PURPOSE_SIGN
+                                | KeyProperties.PURPOSE_VERIFY);
                 // Authorized to be used with any digest (including no digest).
                 specBuilder.setDigests(
                         KeyProperties.DIGEST_NONE,
@@ -454,13 +549,13 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
         mRSAPublicExponent = null;
         mRng = null;
         mKeyStore = null;
+        mEcCurveName = null;
     }
 
     private void initAlgorithmSpecificParameters() throws InvalidAlgorithmParameterException {
         AlgorithmParameterSpec algSpecificSpec = mSpec.getAlgorithmParameterSpec();
         switch (mKeymasterAlgorithm) {
-            case KeymasterDefs.KM_ALGORITHM_RSA:
-            {
+            case KeymasterDefs.KM_ALGORITHM_RSA: {
                 BigInteger publicExponent = null;
                 if (algSpecificSpec instanceof RSAKeyGenParameterSpec) {
                     RSAKeyGenParameterSpec rsaSpec = (RSAKeyGenParameterSpec) algSpecificSpec;
@@ -474,7 +569,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                     publicExponent = rsaSpec.getPublicExponent();
                 } else if (algSpecificSpec != null) {
                     throw new InvalidAlgorithmParameterException(
-                        "RSA may only use RSAKeyGenParameterSpec");
+                            "RSA may only use RSAKeyGenParameterSpec");
                 }
                 if (publicExponent == null) {
                     publicExponent = RSAKeyGenParameterSpec.F4;
@@ -487,7 +582,8 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                         || (publicExponent.compareTo(KeymasterArguments.UINT64_MAX_VALUE) > 0)) {
                     throw new InvalidAlgorithmParameterException(
                             "Unsupported RSA public exponent: " + publicExponent
-                            + ". Maximum supported value: " + KeymasterArguments.UINT64_MAX_VALUE);
+                                    + ". Maximum supported value: "
+                                    + KeymasterArguments.UINT64_MAX_VALUE);
                 }
                 mRSAPublicExponent = publicExponent.longValue();
                 break;
@@ -495,13 +591,13 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
             case KeymasterDefs.KM_ALGORITHM_EC:
                 if (algSpecificSpec instanceof ECGenParameterSpec) {
                     ECGenParameterSpec ecSpec = (ECGenParameterSpec) algSpecificSpec;
-                    String curveName = ecSpec.getName();
-                    Integer ecSpecKeySizeBits = SUPPORTED_EC_NIST_CURVE_NAME_TO_SIZE.get(
-                            curveName.toLowerCase(Locale.US));
+                    mEcCurveName = ecSpec.getName();
+                    final Integer ecSpecKeySizeBits = SUPPORTED_EC_CURVE_NAME_TO_SIZE.get(
+                            mEcCurveName.toLowerCase(Locale.US));
                     if (ecSpecKeySizeBits == null) {
                         throw new InvalidAlgorithmParameterException(
-                                "Unsupported EC curve name: " + curveName
-                                + ". Supported: " + SUPPORTED_EC_NIST_CURVE_NAMES);
+                                "Unsupported EC curve name: " + mEcCurveName
+                                        + ". Supported: " + SUPPORTED_EC_CURVE_NAMES);
                     }
                     if (mKeySizeBits == -1) {
                         mKeySizeBits = ecSpecKeySizeBits;
@@ -512,7 +608,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                     }
                 } else if (algSpecificSpec != null) {
                     throw new InvalidAlgorithmParameterException(
-                        "EC may only use ECGenParameterSpec");
+                            "EC may only use ECGenParameterSpec");
                 }
                 break;
             default:
@@ -522,18 +618,44 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
 
     @Override
     public KeyPair generateKeyPair() {
-        try {
-            return generateKeyPairHelper();
-        } catch (GenerateRkpKeyException e) {
-            try {
-                return generateKeyPairHelper();
-            } catch (GenerateRkpKeyException f) {
-                throw new ProviderException("Failed to provision new attestation keys.");
+        GenerateKeyPairHelperResult result = new GenerateKeyPairHelperResult(0, null);
+        for (int i = 0; i < 2; i++) {
+            /**
+             * NOTE: There is no need to delay between re-tries because the call to
+             * GenerateRkpKey.notifyEmpty() will delay for a while before returning.
+             */
+            result = generateKeyPairHelper();
+            if (result.rkpStatus == KeyStoreException.RKP_SUCCESS && result.keyPair != null) {
+                return result.keyPair;
             }
+        }
+
+        // RKP failure
+        if (result.rkpStatus != KeyStoreException.RKP_SUCCESS) {
+            KeyStoreException ksException = new KeyStoreException(ResponseCode.OUT_OF_KEYS,
+                    "Could not get RKP keys", result.rkpStatus);
+            throw new ProviderException("Failed to provision new attestation keys.", ksException);
+        }
+
+        return result.keyPair;
+    }
+
+    private static class GenerateKeyPairHelperResult {
+        // Zero indicates success, non-zero indicates failure. Values should be
+        // {@link android.security.KeyStoreException#RKP_TEMPORARILY_UNAVAILABLE},
+        // {@link android.security.KeyStoreException#RKP_SERVER_REFUSED_ISSUANCE},
+        // {@link android.security.KeyStoreException#RKP_FETCHING_PENDING_CONNECTIVITY}
+        public final int rkpStatus;
+        @Nullable
+        public final KeyPair keyPair;
+
+        private GenerateKeyPairHelperResult(int rkpStatus, KeyPair keyPair) {
+            this.rkpStatus = rkpStatus;
+            this.keyPair = keyPair;
         }
     }
 
-    private KeyPair generateKeyPairHelper() throws GenerateRkpKeyException {
+    private GenerateKeyPairHelperResult generateKeyPairHelper() {
         if (mKeyStore == null || mSpec == null) {
             throw new IllegalStateException("Not initialized");
         }
@@ -546,7 +668,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
         final int flags =
                 mSpec.isCriticalToDeviceEncryption()
                         ? IKeystoreSecurityLevel
-                                .KEY_FLAG_AUTH_BOUND_WITHOUT_CRYPTOGRAPHIC_LSKF_BINDING
+                        .KEY_FLAG_AUTH_BOUND_WITHOUT_CRYPTOGRAPHIC_LSKF_BINDING
                         : 0;
 
         byte[] additionalEntropy =
@@ -580,23 +702,17 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
             } catch (RemoteException e) {
                 // This is not really an error state, and necessarily does not apply to non RKP
                 // systems or hybrid systems where RKP is not currently turned on.
-                Log.d(TAG, "Couldn't connect to the RemoteProvisioner backend.");
+                Log.d(TAG, "Couldn't connect to the RemoteProvisioner backend.", e);
             }
             success = true;
-            return new KeyPair(publicKey, publicKey.getPrivateKey());
-        } catch (android.security.KeyStoreException e) {
-            switch(e.getErrorCode()) {
+            KeyPair kp = new KeyPair(publicKey, publicKey.getPrivateKey());
+            return new GenerateKeyPairHelperResult(0, kp);
+        } catch (KeyStoreException e) {
+            switch (e.getErrorCode()) {
                 case KeymasterDefs.KM_ERROR_HARDWARE_TYPE_UNAVAILABLE:
                     throw new StrongBoxUnavailableException("Failed to generated key pair.", e);
                 case ResponseCode.OUT_OF_KEYS:
-                    GenerateRkpKey keyGen = new GenerateRkpKey(ActivityThread
-                            .currentApplication());
-                    try {
-                        keyGen.notifyEmpty(securityLevel);
-                    } catch (RemoteException f) {
-                        throw new ProviderException("Failed to talk to RemoteProvisioner", f);
-                    }
-                    throw new GenerateRkpKeyException();
+                    throw makeOutOfKeysException(e, securityLevel);
                 default:
                     ProviderException p = new ProviderException("Failed to generate key pair.", e);
                     if ((mSpec.getPurposes() & KeyProperties.PURPOSE_WRAP_KEY) != 0) {
@@ -605,7 +721,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                     throw p;
             }
         } catch (UnrecoverableKeyException | IllegalArgumentException
-                    | DeviceIdAttestationException e) {
+                | DeviceIdAttestationException | InvalidAlgorithmParameterException e) {
             throw new ProviderException(
                     "Failed to construct key object from newly generated key pair.", e);
         } finally {
@@ -620,6 +736,52 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                 }
             }
         }
+    }
+
+    // In case keystore reports OUT_OF_KEYS, call this handler in an attempt to remotely provision
+    // some keys.
+    private ProviderException makeOutOfKeysException(KeyStoreException e, int securityLevel) {
+        GenerateRkpKey keyGen = new GenerateRkpKey(ActivityThread
+                .currentApplication());
+        KeyStoreException ksException;
+        try {
+            final int keyGenStatus = keyGen.notifyEmpty(securityLevel);
+            // Default stance: temporary error. This is a hint to the caller to try again with
+            // exponential back-off.
+            int rkpStatus;
+            switch (keyGenStatus) {
+                case IGenerateRkpKeyService.Status.NO_NETWORK_CONNECTIVITY:
+                    rkpStatus = KeyStoreException.RKP_FETCHING_PENDING_CONNECTIVITY;
+                    break;
+                case IGenerateRkpKeyService.Status.DEVICE_NOT_REGISTERED:
+                    rkpStatus = KeyStoreException.RKP_SERVER_REFUSED_ISSUANCE;
+                    break;
+                case IGenerateRkpKeyService.Status.OK:
+                    // This will actually retry once immediately, so on "OK" go ahead and return
+                    // "temporarily unavailable". @see generateKeyPair
+                case IGenerateRkpKeyService.Status.NETWORK_COMMUNICATION_ERROR:
+                case IGenerateRkpKeyService.Status.HTTP_CLIENT_ERROR:
+                case IGenerateRkpKeyService.Status.HTTP_SERVER_ERROR:
+                case IGenerateRkpKeyService.Status.HTTP_UNKNOWN_ERROR:
+                case IGenerateRkpKeyService.Status.INTERNAL_ERROR:
+                default:
+                    // These errors really should never happen. The best we can do is assume they
+                    // are transient and hint to the caller to retry with back-off.
+                    rkpStatus = KeyStoreException.RKP_TEMPORARILY_UNAVAILABLE;
+                    break;
+            }
+            ksException = new KeyStoreException(
+                    ResponseCode.OUT_OF_KEYS,
+                    "Out of RKP keys due to IGenerateRkpKeyService status: " + keyGenStatus,
+                    rkpStatus);
+        } catch (RemoteException f) {
+            ksException = new KeyStoreException(
+                    ResponseCode.OUT_OF_KEYS,
+                    "Remote exception: " + f.getMessage(),
+                    KeyStoreException.RKP_TEMPORARILY_UNAVAILABLE);
+        }
+        ksException.initCause(e);
+        return new ProviderException("Failed to talk to RemoteProvisioner", ksException);
     }
 
     private void addAttestationParameters(@NonNull List<KeyParameter> params)
@@ -666,8 +828,8 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
             if (idTypesSet.contains(AttestationUtils.ID_TYPE_IMEI)
                     || idTypesSet.contains(AttestationUtils.ID_TYPE_MEID)) {
                 telephonyService =
-                    (TelephonyManager) android.app.AppGlobals.getInitialApplication()
-                            .getSystemService(Context.TELEPHONY_SERVICE);
+                        (TelephonyManager) android.app.AppGlobals.getInitialApplication()
+                                .getSystemService(Context.TELEPHONY_SERVICE);
                 if (telephonyService == null) {
                     throw new DeviceIdAttestationException("Unable to access telephony service");
                 }
@@ -715,12 +877,20 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
     }
 
     private Collection<KeyParameter> constructKeyGenerationArguments()
-            throws DeviceIdAttestationException, IllegalArgumentException {
+            throws DeviceIdAttestationException, IllegalArgumentException,
+            InvalidAlgorithmParameterException {
         List<KeyParameter> params = new ArrayList<>();
         params.add(KeyStore2ParameterUtils.makeInt(KeymasterDefs.KM_TAG_KEY_SIZE, mKeySizeBits));
         params.add(KeyStore2ParameterUtils.makeEnum(
                 KeymasterDefs.KM_TAG_ALGORITHM, mKeymasterAlgorithm
         ));
+
+        if (mKeymasterAlgorithm == KeymasterDefs.KM_ALGORITHM_EC) {
+            params.add(KeyStore2ParameterUtils.makeEnum(
+                    Tag.EC_CURVE, keySizeAndNameToEcCurve(mKeySizeBits, mEcCurveName)
+            ));
+        }
+
         ArrayUtils.forEach(mKeymasterPurposes, (purpose) -> {
             params.add(KeyStore2ParameterUtils.makeEnum(
                     KeymasterDefs.KM_TAG_PURPOSE, purpose
@@ -837,18 +1007,23 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
     private static void checkValidKeySize(
             int keymasterAlgorithm,
             int keySize,
-            boolean isStrongBoxBacked)
+            boolean isStrongBoxBacked,
+            String mEcCurveName)
             throws InvalidAlgorithmParameterException {
         switch (keymasterAlgorithm) {
             case KeymasterDefs.KM_ALGORITHM_EC:
                 if (isStrongBoxBacked && keySize != 256) {
                     throw new InvalidAlgorithmParameterException(
                             "Unsupported StrongBox EC key size: "
-                            + keySize + " bits. Supported: 256");
+                                    + keySize + " bits. Supported: 256");
                 }
-                if (!SUPPORTED_EC_NIST_CURVE_SIZES.contains(keySize)) {
+                if (isStrongBoxBacked && isCurve25519(mEcCurveName)) {
+                    throw new InvalidAlgorithmParameterException(
+                            "Unsupported StrongBox EC: " + mEcCurveName);
+                }
+                if (!SUPPORTED_EC_CURVE_SIZES.contains(keySize)) {
                     throw new InvalidAlgorithmParameterException("Unsupported EC key size: "
-                            + keySize + " bits. Supported: " + SUPPORTED_EC_NIST_CURVE_SIZES);
+                            + keySize + " bits. Supported: " + SUPPORTED_EC_CURVE_SIZES);
                 }
                 break;
             case KeymasterDefs.KM_ALGORITHM_RSA:
@@ -892,8 +1067,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
             return null;
         }
         switch (keymasterAlgorithm) {
-            case KeymasterDefs.KM_ALGORITHM_EC:
-            {
+            case KeymasterDefs.KM_ALGORITHM_EC: {
                 Set<Integer> availableKeymasterDigests = getAvailableKeymasterSignatureDigests(
                         spec.getDigests(),
                         AndroidKeyStoreBCWorkaroundProvider.getSupportedEcdsaSignatureDigests());
@@ -940,8 +1114,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                 return KeyProperties.Digest.fromKeymasterToSignatureAlgorithmDigest(
                         bestKeymasterDigest) + "WithECDSA";
             }
-            case KeymasterDefs.KM_ALGORITHM_RSA:
-            {
+            case KeymasterDefs.KM_ALGORITHM_RSA: {
                 // Check whether this key is authorized for PKCS#1 signature padding.
                 // We use Bouncy Castle to generate self-signed RSA certificates. Bouncy Castle
                 // only supports RSA certificates signed using PKCS#1 padding scheme. The key needs

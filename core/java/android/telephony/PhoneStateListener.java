@@ -191,20 +191,6 @@ public class PhoneStateListener {
     public static final int LISTEN_SIGNAL_STRENGTHS                         = 0x00000100;
 
     /**
-     * Listen for changes of the network signal strengths (cellular) always reported from modem,
-     * even in some situations such as the screen of the device is off.
-     *
-     * @see #onSignalStrengthsChanged
-     *
-     * @hide
-     * @deprecated Use TelephonyManager#setSignalStrengthUpdateRequest
-     * instead.
-     */
-    @Deprecated
-    @RequiresPermission(android.Manifest.permission.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH)
-    public static final int LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH          = 0x00000200;
-
-    /**
      * Listen for changes to observed cell info.
      *
      * Listening to this event requires the {@link Manifest.permission#READ_PHONE_STATE} and
@@ -621,7 +607,11 @@ public class PhoneStateListener {
      * The instance of {@link ServiceState} passed as an argument here will have various levels of
      * location information stripped from it depending on the location permissions that your app
      * holds. Only apps holding the {@link Manifest.permission#ACCESS_FINE_LOCATION} permission will
-     * receive all the information in {@link ServiceState}.
+     * receive all the information in {@link ServiceState}, otherwise the cellIdentity will be null
+     * if apps only holding the {@link Manifest.permission#ACCESS_COARSE_LOCATION} permission.
+     * Network operator name in long/short alphanumeric format and numeric id will be null if apps
+     * holding neither {@link android.Manifest.permission#ACCESS_FINE_LOCATION} nor
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
      *
      * @see ServiceState#STATE_EMERGENCY_ONLY
      * @see ServiceState#STATE_IN_SERVICE
@@ -753,6 +743,7 @@ public class PhoneStateListener {
      * @see TelephonyManager#DATA_CONNECTING
      * @see TelephonyManager#DATA_CONNECTED
      * @see TelephonyManager#DATA_SUSPENDED
+     * @see TelephonyManager#DATA_HANDOVER_IN_PROGRESS
      * @deprecated Use {@link TelephonyCallback.DataConnectionStateListener} instead.
      */
     @Deprecated

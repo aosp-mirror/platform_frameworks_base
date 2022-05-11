@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.os.Handler;
 import android.telephony.SubscriptionInfo;
@@ -25,11 +26,13 @@ import android.util.Log;
 import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.statusbar.policy.NetworkController;
-import com.android.systemui.statusbar.policy.NetworkController.IconState;
-import com.android.systemui.statusbar.policy.NetworkController.MobileDataIndicators;
-import com.android.systemui.statusbar.policy.NetworkController.WifiIndicators;
-import com.android.systemui.statusbar.policy.NetworkControllerImpl;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
+import com.android.systemui.statusbar.connectivity.IconState;
+import com.android.systemui.statusbar.connectivity.MobileDataIndicators;
+import com.android.systemui.statusbar.connectivity.NetworkController;
+import com.android.systemui.statusbar.connectivity.SignalCallback;
+import com.android.systemui.statusbar.connectivity.WifiIndicators;
 import com.android.systemui.statusbar.policy.SecurityController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
@@ -41,9 +44,9 @@ import java.util.Objects;
 
 import javax.inject.Inject;
 
-/** Controls the signal policies for icons shown in the StatusBar. **/
+/** Controls the signal policies for icons shown in the statusbar. **/
 @SysUISingleton
-public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallback,
+public class StatusBarSignalPolicy implements SignalCallback,
         SecurityController.SecurityControllerCallback, Tunable {
     private static final String TAG = "StatusBarSignalPolicy";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -63,28 +66,33 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
     private final Handler mHandler = Handler.getMain();
     private final CarrierConfigTracker mCarrierConfigTracker;
     private final TunerService mTunerService;
+    private final FeatureFlags mFeatureFlags;
 
     private boolean mHideAirplane;
     private boolean mHideMobile;
     private boolean mHideWifi;
     private boolean mHideEthernet;
     private boolean mActivityEnabled;
-    private boolean mForceHideWifi;
 
     // Track as little state as possible, and only for padding purposes
     private boolean mIsAirplaneMode = false;
     private boolean mIsWifiEnabled = false;
-    private boolean mWifiVisible = false;
 
-    private ArrayList<MobileIconState> mMobileStates = new ArrayList<MobileIconState>();
-    private ArrayList<CallIndicatorIconState> mCallIndicatorStates =
-            new ArrayList<CallIndicatorIconState>();
+    private ArrayList<MobileIconState> mMobileStates = new ArrayList<>();
+    private ArrayList<CallIndicatorIconState> mCallIndicatorStates = new ArrayList<>();
     private WifiIconState mWifiIconState = new WifiIconState();
+    private boolean mInitialized;
 
     @Inject
-    public StatusBarSignalPolicy(Context context, StatusBarIconController iconController,
-            CarrierConfigTracker carrierConfigTracker, NetworkController networkController,
-            SecurityController securityController, TunerService tunerService) {
+    public StatusBarSignalPolicy(
+            Context context,
+            StatusBarIconController iconController,
+            CarrierConfigTracker carrierConfigTracker,
+            NetworkController networkController,
+            SecurityController securityController,
+            TunerService tunerService,
+            FeatureFlags featureFlags
+    ) {
         mContext = context;
 
         mIconController = iconController;
@@ -92,6 +100,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
         mNetworkController = networkController;
         mSecurityController = securityController;
         mTunerService = tunerService;
+        mFeatureFlags = featureFlags;
 
         mSlotAirplane = mContext.getString(com.android.internal.R.string.status_bar_airplane);
         mSlotMobile   = mContext.getString(com.android.internal.R.string.status_bar_mobile);
@@ -102,9 +111,15 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
         mSlotCallStrength =
                 mContext.getString(com.android.internal.R.string.status_bar_call_strength);
         mActivityEnabled = mContext.getResources().getBoolean(R.bool.config_showActivity);
+    }
 
-
-        tunerService.addTunable(this, StatusBarIconController.ICON_HIDE_LIST);
+    /** Call to initilaize and register this classw with the system. */
+    public void init() {
+        if (mInitialized) {
+            return;
+        }
+        mInitialized = true;
+        mTunerService.addTunable(this, StatusBarIconController.ICON_HIDE_LIST);
         mNetworkController.addCallback(this);
         mSecurityController.addCallback(this);
     }
@@ -152,7 +167,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
             mHideAirplane = hideAirplane;
             mHideMobile = hideMobile;
             mHideEthernet = hideEthernet;
-            mHideWifi = hideWifi || mForceHideWifi;
+            mHideWifi = hideWifi;
             // Re-register to get new callbacks.
             mNetworkController.removeCallback(this);
             mNetworkController.addCallback(this);
@@ -160,7 +175,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
     }
 
     @Override
-    public void setWifiIndicators(WifiIndicators indicators) {
+    public void setWifiIndicators(@NonNull WifiIndicators indicators) {
         if (DEBUG) {
             Log.d(TAG, "setWifiIndicators: " + indicators);
         }
@@ -210,7 +225,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
     }
 
     @Override
-    public void setCallIndicator(IconState statusIcon, int subId) {
+    public void setCallIndicator(@NonNull IconState statusIcon, int subId) {
         if (DEBUG) {
             Log.d(TAG, "setCallIndicator: "
                     + "statusIcon = " + statusIcon + ","
@@ -238,7 +253,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
     }
 
     @Override
-    public void setMobileDataIndicators(MobileDataIndicators indicators) {
+    public void setMobileDataIndicators(@NonNull MobileDataIndicators indicators) {
         if (DEBUG) {
             Log.d(TAG, "setMobileDataIndicators: " + indicators);
         }
@@ -365,6 +380,9 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
     @Override
     public void setConnectivityStatus(boolean noDefaultNetwork, boolean noValidatedNetwork,
             boolean noNetworksAvailable) {
+        if (!mFeatureFlags.isEnabled(Flags.COMBINED_STATUS_BAR_SIGNAL_ICONS)) {
+            return;
+        }
         if (DEBUG) {
             Log.d(TAG, "setConnectivityStatus: "
                     + "noDefaultNetwork = " + noDefaultNetwork + ","
@@ -431,7 +449,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
     }
 
     /**
-     * Stores the StatusBar state for no Calling & SMS.
+     * Stores the statusbar state for no Calling & SMS.
      */
     public static class CallIndicatorIconState {
         public boolean isNoCalling;

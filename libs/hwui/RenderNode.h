@@ -331,6 +331,8 @@ public:
             mSkiaLayer.reset();
         }
 
+        mProperties.mutateLayerProperties().mutableStretchEffect().clear();
+        mStretchMask.clear();
         // Clear out the previous snapshot and the image filter the previous
         // snapshot was created with whenever the layer changes.
         mSnapshotResult.snapshot = nullptr;
@@ -394,6 +396,7 @@ private:
      * SkImageFilter used to create the mSnapshotResult
      */
     sk_sp<SkImageFilter> mTargetImageFilter;
+    uint32_t mTargetImageFilterLayerSurfaceGenerationId = 0;
 
     /**
      * Clip bounds used to create the mSnapshotResult

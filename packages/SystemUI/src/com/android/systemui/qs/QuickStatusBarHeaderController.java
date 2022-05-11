@@ -17,32 +17,24 @@
 package com.android.systemui.qs;
 
 import android.os.Bundle;
-import android.view.View;
-import android.view.View.OnClickListener;
-
-import androidx.annotation.NonNull;
 
 import com.android.internal.colorextraction.ColorExtractor;
-import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
+import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
-import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.privacy.OngoingPrivacyChip;
-import com.android.systemui.privacy.PrivacyChipEvent;
-import com.android.systemui.privacy.PrivacyDialogController;
-import com.android.systemui.privacy.PrivacyItem;
-import com.android.systemui.privacy.PrivacyItemController;
-import com.android.systemui.privacy.logging.PrivacyLogger;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.qs.carrier.QSCarrierGroupController;
 import com.android.systemui.qs.dagger.QSScope;
+import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusIconContainer;
 import com.android.systemui.statusbar.policy.Clock;
+import com.android.systemui.statusbar.policy.VariableDateViewController;
 import com.android.systemui.util.ViewController;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -51,106 +43,67 @@ import javax.inject.Inject;
  * Controller for {@link QuickStatusBarHeader}.
  */
 @QSScope
-class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader> {
-    private static final String TAG = "QuickStatusBarHeader";
+class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader> implements
+        ChipVisibilityListener {
 
-    private final PrivacyItemController mPrivacyItemController;
-    private final ActivityStarter mActivityStarter;
-    private final UiEventLogger mUiEventLogger;
     private final QSCarrierGroupController mQSCarrierGroupController;
-    private final QuickQSPanelController mHeaderQsPanelController;
-    private final OngoingPrivacyChip mPrivacyChip;
+    private final QuickQSPanelController mQuickQSPanelController;
     private final Clock mClockView;
     private final StatusBarIconController mStatusBarIconController;
     private final DemoModeController mDemoModeController;
     private final StatusIconContainer mIconContainer;
     private final StatusBarIconController.TintedIconManager mIconManager;
     private final DemoMode mDemoModeReceiver;
-    private final PrivacyLogger mPrivacyLogger;
-    private final PrivacyDialogController mPrivacyDialogController;
     private final QSExpansionPathInterpolator mQSExpansionPathInterpolator;
+    private final FeatureFlags mFeatureFlags;
+    private final BatteryMeterViewController mBatteryMeterViewController;
+    private final StatusBarContentInsetsProvider mInsetsProvider;
+
+    private final VariableDateViewController mVariableDateViewControllerDateView;
+    private final VariableDateViewController mVariableDateViewControllerClockDateView;
+    private final HeaderPrivacyIconsController mPrivacyIconsController;
 
     private boolean mListening;
-    private boolean mMicCameraIndicatorsEnabled;
-    private boolean mLocationIndicatorsEnabled;
-    private boolean mPrivacyChipLogged;
 
     private SysuiColorExtractor mColorExtractor;
     private ColorExtractor.OnColorsChangedListener mOnColorsChangedListener;
 
-    private PrivacyItemController.Callback mPICCallback = new PrivacyItemController.Callback() {
-        @Override
-        public void onPrivacyItemsChanged(@NonNull List<PrivacyItem> privacyItems) {
-            mPrivacyChip.setPrivacyList(privacyItems);
-            setChipVisibility(!privacyItems.isEmpty());
-        }
-
-        @Override
-        public void onFlagMicCameraChanged(boolean flag) {
-            if (mMicCameraIndicatorsEnabled != flag) {
-                mMicCameraIndicatorsEnabled = flag;
-                update();
-            }
-        }
-
-        @Override
-        public void onFlagLocationChanged(boolean flag) {
-            if (mLocationIndicatorsEnabled != flag) {
-                mLocationIndicatorsEnabled = flag;
-                update();
-            }
-        }
-
-        private void update() {
-            StatusIconContainer iconContainer = mView.requireViewById(R.id.statusIcons);
-            iconContainer.setIgnoredSlots(getIgnoredIconSlots());
-            setChipVisibility(!mPrivacyChip.getPrivacyList().isEmpty());
-        }
-    };
-
-    private View.OnClickListener mOnClickListener = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (v == mPrivacyChip) {
-                // If the privacy chip is visible, it means there were some indicators
-                mUiEventLogger.log(PrivacyChipEvent.ONGOING_INDICATORS_CHIP_CLICK);
-                mPrivacyDialogController.showDialog(getContext());
-            }
-        }
-    };
-
     @Inject
     QuickStatusBarHeaderController(QuickStatusBarHeader view,
-            PrivacyItemController privacyItemController,
-            ActivityStarter activityStarter, UiEventLogger uiEventLogger,
+            HeaderPrivacyIconsController headerPrivacyIconsController,
             StatusBarIconController statusBarIconController,
             DemoModeController demoModeController,
             QuickQSPanelController quickQSPanelController,
             QSCarrierGroupController.Builder qsCarrierGroupControllerBuilder,
-            PrivacyLogger privacyLogger,
             SysuiColorExtractor colorExtractor,
-            PrivacyDialogController privacyDialogController,
-            QSExpansionPathInterpolator qsExpansionPathInterpolator) {
+            QSExpansionPathInterpolator qsExpansionPathInterpolator,
+            FeatureFlags featureFlags,
+            VariableDateViewController.Factory variableDateViewControllerFactory,
+            BatteryMeterViewController batteryMeterViewController,
+            StatusBarContentInsetsProvider statusBarContentInsetsProvider) {
         super(view);
-        mPrivacyItemController = privacyItemController;
-        mActivityStarter = activityStarter;
-        mUiEventLogger = uiEventLogger;
+        mPrivacyIconsController = headerPrivacyIconsController;
         mStatusBarIconController = statusBarIconController;
         mDemoModeController = demoModeController;
-        mHeaderQsPanelController = quickQSPanelController;
-        mPrivacyLogger = privacyLogger;
-        mPrivacyDialogController = privacyDialogController;
+        mQuickQSPanelController = quickQSPanelController;
         mQSExpansionPathInterpolator = qsExpansionPathInterpolator;
+        mFeatureFlags = featureFlags;
+        mBatteryMeterViewController = batteryMeterViewController;
+        mInsetsProvider = statusBarContentInsetsProvider;
 
         mQSCarrierGroupController = qsCarrierGroupControllerBuilder
                 .setQSCarrierGroup(mView.findViewById(R.id.carrier_group))
                 .build();
-
-        mPrivacyChip = mView.findViewById(R.id.privacy_chip);
         mClockView = mView.findViewById(R.id.clock);
         mIconContainer = mView.findViewById(R.id.statusIcons);
+        mVariableDateViewControllerDateView = variableDateViewControllerFactory.create(
+                mView.requireViewById(R.id.date)
+        );
+        mVariableDateViewControllerClockDateView = variableDateViewControllerFactory.create(
+                mView.requireViewById(R.id.date_clock)
+        );
 
-        mIconManager = new StatusBarIconController.TintedIconManager(mIconContainer);
+        mIconManager = new StatusBarIconController.TintedIconManager(mIconContainer, featureFlags);
         mDemoModeReceiver = new ClockDemoModeReceiver(mClockView);
         mColorExtractor = colorExtractor;
         mOnColorsChangedListener = (extractor, which) -> {
@@ -158,33 +111,57 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
             mClockView.onColorsChanged(lightTheme);
         };
         mColorExtractor.addOnColorsChangedListener(mOnColorsChangedListener);
+
+        // Don't need to worry about tuner settings for this icon
+        mBatteryMeterViewController.ignoreTunerUpdates();
+    }
+
+    @Override
+    protected void onInit() {
+        mBatteryMeterViewController.init();
     }
 
     @Override
     protected void onViewAttached() {
-        mPrivacyChip.setOnClickListener(mOnClickListener);
-
-        mMicCameraIndicatorsEnabled = mPrivacyItemController.getMicCameraAvailable();
-        mLocationIndicatorsEnabled = mPrivacyItemController.getLocationAvailable();
-
-        // Ignore privacy icons because they show in the space above QQS
-        mIconContainer.setIgnoredSlots(getIgnoredIconSlots());
+        mPrivacyIconsController.onParentVisible();
+        mPrivacyIconsController.setChipVisibilityListener(this);
+        mIconContainer.addIgnoredSlot(
+                getResources().getString(com.android.internal.R.string.status_bar_managed_profile));
         mIconContainer.setShouldRestrictIcons(false);
         mStatusBarIconController.addIconGroup(mIconManager);
 
-        setChipVisibility(mPrivacyChip.getVisibility() == View.VISIBLE);
+        mView.setIsSingleCarrier(mQSCarrierGroupController.isSingleCarrier());
+        mQSCarrierGroupController
+                .setOnSingleCarrierChangedListener(mView::setIsSingleCarrier);
 
-        mView.onAttach(mIconManager, mQSExpansionPathInterpolator);
+        List<String> rssiIgnoredSlots;
+
+        if (mFeatureFlags.isEnabled(Flags.COMBINED_STATUS_BAR_SIGNAL_ICONS)) {
+            rssiIgnoredSlots = List.of(
+                    getResources().getString(com.android.internal.R.string.status_bar_no_calling),
+                    getResources().getString(com.android.internal.R.string.status_bar_call_strength)
+            );
+        } else {
+            rssiIgnoredSlots = List.of(
+                    getResources().getString(com.android.internal.R.string.status_bar_mobile)
+            );
+        }
+
+        mView.onAttach(mIconManager, mQSExpansionPathInterpolator, rssiIgnoredSlots,
+                mInsetsProvider, mFeatureFlags.isEnabled(Flags.COMBINED_QS_HEADERS));
 
         mDemoModeController.addCallback(mDemoModeReceiver);
-        mHeaderQsPanelController.setContentMargins(0, 0);
+
+        mVariableDateViewControllerDateView.init();
+        mVariableDateViewControllerClockDateView.init();
     }
 
     @Override
     protected void onViewDetached() {
         mColorExtractor.removeOnColorsChangedListener(mOnColorsChangedListener);
-        mPrivacyChip.setOnClickListener(null);
+        mPrivacyIconsController.onParentInvisible();
         mStatusBarIconController.removeIconGroup(mIconManager);
+        mQSCarrierGroupController.setOnSingleCarrierChangedListener(null);
         mDemoModeController.removeCallback(mDemoModeReceiver);
         setListening(false);
     }
@@ -197,60 +174,29 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         }
         mListening = listening;
 
-        mHeaderQsPanelController.setListening(listening);
-        if (mHeaderQsPanelController.isListening()) {
-            mHeaderQsPanelController.refreshAllTiles();
+        mQuickQSPanelController.setListening(listening);
+        if (mQuickQSPanelController.isListening()) {
+            mQuickQSPanelController.refreshAllTiles();
         }
 
-        if (mHeaderQsPanelController.switchTileLayout(false)) {
+        if (mQuickQSPanelController.switchTileLayout(false)) {
             mView.updateResources();
         }
 
         if (listening) {
-            // Get the most up to date info
-            mMicCameraIndicatorsEnabled = mPrivacyItemController.getMicCameraAvailable();
-            mLocationIndicatorsEnabled = mPrivacyItemController.getLocationAvailable();
-            mPrivacyItemController.addCallback(mPICCallback);
+            mPrivacyIconsController.startListening();
         } else {
-            mPrivacyItemController.removeCallback(mPICCallback);
-            mPrivacyChipLogged = false;
+            mPrivacyIconsController.stopListening();
         }
     }
 
-    private void setChipVisibility(boolean chipVisible) {
-        if (chipVisible && getChipEnabled()) {
-            mPrivacyLogger.logChipVisible(true);
-            // Makes sure that the chip is logged as viewed at most once each time QS is opened
-            // mListening makes sure that the callback didn't return after the user closed QS
-            if (!mPrivacyChipLogged && mListening) {
-                mPrivacyChipLogged = true;
-                mUiEventLogger.log(PrivacyChipEvent.ONGOING_INDICATORS_CHIP_VIEW);
-            }
-        } else {
-            mPrivacyLogger.logChipVisible(false);
-        }
-        mView.setChipVisibility(chipVisible);
+    @Override
+    public void onChipVisibilityRefreshed(boolean visible) {
+        mView.setChipVisibility(visible);
     }
 
-    private List<String> getIgnoredIconSlots() {
-        ArrayList<String> ignored = new ArrayList<>();
-        if (getChipEnabled()) {
-            if (mMicCameraIndicatorsEnabled) {
-                ignored.add(mView.getResources().getString(
-                        com.android.internal.R.string.status_bar_camera));
-                ignored.add(mView.getResources().getString(
-                        com.android.internal.R.string.status_bar_microphone));
-            }
-            if (mLocationIndicatorsEnabled) {
-                ignored.add(mView.getResources().getString(
-                        com.android.internal.R.string.status_bar_location));
-            }
-        }
-        return ignored;
-    }
-
-    private boolean getChipEnabled() {
-        return mMicCameraIndicatorsEnabled || mLocationIndicatorsEnabled;
+    public void setContentMargins(int marginStart, int marginEnd) {
+        mQuickQSPanelController.setContentMargins(marginStart, marginEnd);
     }
 
     private static class ClockDemoModeReceiver implements DemoMode {

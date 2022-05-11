@@ -40,7 +40,6 @@ import android.os.incremental.IncrementalManager;
 import android.os.incremental.IncrementalStorage;
 import android.system.ErrnoException;
 import android.system.Os;
-import android.util.ArraySet;
 import android.util.Slog;
 
 import dalvik.system.CloseGuard;
@@ -65,8 +64,7 @@ public class NativeLibraryHelper {
     public static final String LIB_DIR_NAME = "lib";
     public static final String LIB64_DIR_NAME = "lib64";
 
-    // Special value for {@code PackageParser.Package#cpuAbiOverride} to indicate
-    // that the cpuAbiOverride must be clear.
+    // Special value for indicating that the cpuAbiOverride must be clear.
     public static final String CLEAR_ABI_OVERRIDE = "-";
 
     /**
@@ -551,18 +549,4 @@ public class NativeLibraryHelper {
         }
         return false;
     }
-
-    /**
-     * Wait for all native library extraction to complete for the passed storages.
-     *
-     * @param incrementalStorages A list of the storages to wait for.
-     */
-    public static void waitForNativeBinariesExtraction(
-            ArraySet<IncrementalStorage> incrementalStorages) {
-        for (int i = 0; i < incrementalStorages.size(); ++i) {
-            IncrementalStorage storage = incrementalStorages.valueAtUnchecked(i);
-            storage.waitForNativeBinariesExtraction();
-        }
-    }
-
 }

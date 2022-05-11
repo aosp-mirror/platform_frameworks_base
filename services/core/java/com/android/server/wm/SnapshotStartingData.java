@@ -18,7 +18,7 @@ package com.android.server.wm;
 
 import android.window.TaskSnapshot;
 
-import com.android.server.policy.WindowManagerPolicy.StartingSurface;
+import com.android.server.wm.StartingSurfaceController.StartingSurface;
 
 /**
  * Represents starting data for snapshot starting windows.
@@ -38,6 +38,11 @@ class SnapshotStartingData extends StartingData {
     StartingSurface createStartingSurface(ActivityRecord activity) {
         return mService.mStartingSurfaceController.createTaskSnapshotSurface(activity,
                 mSnapshot);
+    }
+
+    @Override
+    boolean needRevealAnimation() {
+        return false;
     }
 
     @Override

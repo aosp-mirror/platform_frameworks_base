@@ -17,6 +17,7 @@
 package android.view;
 
 import static android.view.KeyEvent.FLAG_CANCELED;
+import static android.view.KeyEvent.FLAG_IS_ACCESSIBILITY_EVENT;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -72,6 +73,7 @@ public final class VerifiedKeyEvent extends VerifiedInputEvent implements Parcel
      *
      * @see KeyEvent#getFlags()
      * @see KeyEvent#FLAG_CANCELED
+     * @see KeyEvent#FLAG_IS_ACCESSIBILITY_EVENT
      *
      * @hide
      */
@@ -125,6 +127,7 @@ public final class VerifiedKeyEvent extends VerifiedInputEvent implements Parcel
             // InputDispatcher only verifies a subset of the KeyEvent flags.
             // These values must be kept in sync with Input.cpp
             case FLAG_CANCELED:
+            case FLAG_IS_ACCESSIBILITY_EVENT:
                 return (mFlags & flag) != 0;
         }
         return null;

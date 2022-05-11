@@ -57,12 +57,13 @@ public:
     }
 
     FrameInfo* startFrame() { return &mFrames.next(); }
-    void finishFrame(FrameInfo& frame, std::unique_ptr<FrameMetricsReporter>& reporter);
+    void finishFrame(FrameInfo& frame, std::unique_ptr<FrameMetricsReporter>& reporter,
+                     int64_t frameNumber, int32_t surfaceId);
 
     // Calculates the 'legacy' jank information, i.e. with outdated refresh rate information and
     // without GPU completion or deadlined information.
     void calculateLegacyJank(FrameInfo& frame);
-    void dumpStats(int fd) { dumpData(fd, &mDescription, mData.get()); }
+    void dumpStats(int fd) NO_THREAD_SAFETY_ANALYSIS { dumpData(fd, &mDescription, mData.get()); }
     void dumpFrames(int fd);
     void reset();
 

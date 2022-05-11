@@ -17,6 +17,7 @@
 package com.android.keyguard;
 
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
@@ -28,7 +29,7 @@ import javax.inject.Inject;
 public class KeyguardMessageAreaController extends ViewController<KeyguardMessageArea> {
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final ConfigurationController mConfigurationController;
-
+    private boolean mAltBouncerShowing;
 
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
         public void onFinishedGoingToSleep(int why) {
@@ -38,15 +39,14 @@ public class KeyguardMessageAreaController extends ViewController<KeyguardMessag
         public void onStartedWakingUp() {
             mView.setSelected(true);
         }
-
-        @Override
-        public void onKeyguardBouncerChanged(boolean bouncer) {
-            mView.setBouncerVisible(bouncer);
-            mView.update();
-        }
     };
 
     private ConfigurationListener mConfigurationListener = new ConfigurationListener() {
+        @Override
+        public void onConfigChanged(Configuration newConfig) {
+            mView.onConfigChanged();
+        }
+
         @Override
         public void onThemeChanged() {
             mView.onThemeChanged();
@@ -79,6 +79,20 @@ public class KeyguardMessageAreaController extends ViewController<KeyguardMessag
     protected void onViewDetached() {
         mConfigurationController.removeCallback(mConfigurationListener);
         mKeyguardUpdateMonitor.removeCallback(mInfoCallback);
+    }
+
+    /**
+     * Set whether alt bouncer is showing
+     */
+    public void setAltBouncerShowing(boolean showing) {
+        mView.setAltBouncerShowing(showing);
+    }
+
+    /**
+     * Set bouncer is fully showing
+     */
+    public void setBouncerShowing(boolean showing) {
+        mView.setBouncerShowing(showing);
     }
 
     public void setMessage(CharSequence s) {

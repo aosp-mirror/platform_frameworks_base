@@ -55,12 +55,13 @@ public class FakeSensorManager extends SensorManager {
 
     private final FakeProximitySensor mFakeProximitySensor;
     private final FakeGenericSensor mFakeLightSensor;
+    private final FakeGenericSensor mFakeLightSensor2;
     private final FakeGenericSensor mFakeTapSensor;
     private final FakeGenericSensor[] mSensors;
 
     public FakeSensorManager(Context context) throws Exception {
         Sensor proxSensor = context.getSystemService(SensorManager.class)
-                .getDefaultSensor(Sensor.TYPE_PROXIMITY);
+                .getDefaultSensor(Sensor.TYPE_PROXIMITY, true);
         if (proxSensor == null) {
             // No prox? Let's create a fake one!
             proxSensor =
@@ -70,7 +71,8 @@ public class FakeSensorManager extends SensorManager {
         mSensors = new FakeGenericSensor[]{
                 mFakeProximitySensor = new FakeProximitySensor(proxSensor),
                 mFakeLightSensor = new FakeGenericSensor(createSensor(Sensor.TYPE_LIGHT, null)),
-                mFakeTapSensor = new FakeGenericSensor(createSensor(99, TAP_SENSOR_TYPE))
+                mFakeTapSensor = new FakeGenericSensor(createSensor(99, TAP_SENSOR_TYPE)),
+                mFakeLightSensor2 = new FakeGenericSensor(createSensor(Sensor.TYPE_LIGHT, null))
         };
     }
 
@@ -80,6 +82,10 @@ public class FakeSensorManager extends SensorManager {
 
     public FakeGenericSensor getFakeLightSensor() {
         return mFakeLightSensor;
+    }
+
+    public FakeGenericSensor getFakeLightSensor2() {
+        return mFakeLightSensor2;
     }
 
     public FakeGenericSensor getFakeTapSensor() {

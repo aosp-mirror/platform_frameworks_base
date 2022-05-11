@@ -29,8 +29,8 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * Version of AppOpsHelper for testing. Settings are initialized to reasonable defaults (location is
- * enabled by default).
+ * Version of SettingsHelper for testing. Settings are initialized to reasonable defaults (location
+ * is enabled by default).
  */
 public class FakeSettingsHelper extends SettingsHelper {
 
@@ -84,6 +84,8 @@ public class FakeSettingsHelper extends SettingsHelper {
     private final Setting mBackgroundThrottlePackageWhitelistSetting = new Setting(
             Collections.emptySet());
     private final Setting mGnssMeasurementsFullTrackingSetting = new Setting(Boolean.FALSE);
+    private final Setting mAdasPackageAllowlist = new Setting(
+            new PackageTagsList.Builder().build());
     private final Setting mIgnoreSettingsAllowlist = new Setting(
             new PackageTagsList.Builder().build());
     private final Setting mBackgroundThrottleProximityAlertIntervalSetting = new Setting(
@@ -194,8 +196,27 @@ public class FakeSettingsHelper extends SettingsHelper {
     }
 
     @Override
+    public PackageTagsList getAdasAllowlist() {
+        return mAdasPackageAllowlist.getValue(PackageTagsList.class);
+    }
+
+    @Override
+    public void addAdasAllowlistChangedListener(GlobalSettingChangedListener listener) {
+        mAdasPackageAllowlist.addListener(listener);
+    }
+
+    @Override
+    public void removeAdasAllowlistChangedListener(GlobalSettingChangedListener listener) {
+        mAdasPackageAllowlist.removeListener(listener);
+    }
+
+    @Override
     public PackageTagsList getIgnoreSettingsAllowlist() {
         return mIgnoreSettingsAllowlist.getValue(PackageTagsList.class);
+    }
+
+    public void setAdasSettingsAllowlist(PackageTagsList newValue) {
+        mAdasPackageAllowlist.setValue(newValue);
     }
 
     public void setIgnoreSettingsAllowlist(PackageTagsList newValue) {

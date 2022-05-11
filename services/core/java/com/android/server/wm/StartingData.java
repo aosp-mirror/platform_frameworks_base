@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import com.android.server.policy.WindowManagerPolicy.StartingSurface;
+import com.android.server.wm.StartingSurfaceController.StartingSurface;
 
 /**
  * Represents the model about how a starting window should be constructed.
@@ -32,6 +32,12 @@ public abstract class StartingData {
      */
     boolean mIsTransitionForward;
 
+    /**
+     * Non-null if the starting window should cover the bounds of associated task. It is assigned
+     * when the parent activity of starting window may be put in a partial area of the task.
+     */
+    Task mAssociatedTask;
+
     protected StartingData(WindowManagerService service, int typeParams) {
         mService = service;
         mTypeParams = typeParams;
@@ -46,6 +52,11 @@ public abstract class StartingData {
      *         {@link StartingSurface#remove}
      */
     abstract StartingSurface createStartingSurface(ActivityRecord activity);
+
+    /**
+     * @return Whether to apply reveal animation when exiting the starting window.
+     */
+    abstract boolean needRevealAnimation();
 
     /** @see android.window.TaskSnapshot#hasImeSurface() */
     boolean hasImeSurface() {

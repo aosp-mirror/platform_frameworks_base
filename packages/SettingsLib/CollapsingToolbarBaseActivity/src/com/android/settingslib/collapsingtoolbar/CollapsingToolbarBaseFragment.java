@@ -16,6 +16,8 @@
 
 package com.android.settingslib.collapsingtoolbar;
 
+import android.app.ActionBar;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,8 +27,10 @@ import android.widget.Toolbar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 
 /**
@@ -34,30 +38,49 @@ import com.google.android.material.appbar.CollapsingToolbarLayout;
  */
 public abstract class CollapsingToolbarBaseFragment extends Fragment {
 
-    @Nullable
-    private CollapsingToolbarLayout mCollapsingToolbarLayout;
-    @NonNull
-    private Toolbar mToolbar;
-    @NonNull
-    private FrameLayout mContentFrameLayout;
+    private class DelegateCallback implements CollapsingToolbarDelegate.HostCallback {
+        @Nullable
+        @Override
+        public ActionBar setActionBar(Toolbar toolbar) {
+            requireActivity().setActionBar(toolbar);
+            return null;
+        }
+
+        @Override
+        public void setOuterTitle(CharSequence title) {
+            // ignore
+        }
+    }
+
+    private CollapsingToolbarDelegate mToolbardelegate;
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mToolbardelegate = new CollapsingToolbarDelegate(new DelegateCallback());
+    }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
             @Nullable Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.collapsing_toolbar_base_layout, container,
-                false);
-        mCollapsingToolbarLayout = view.findViewById(R.id.collapsing_toolbar);
-        mToolbar = view.findViewById(R.id.action_bar);
-        mContentFrameLayout = view.findViewById(R.id.content_frame);
-        return view;
+        return mToolbardelegate.onCreateView(inflater, container);
     }
 
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    /**
+     * Return an instance of CoordinatorLayout.
+     */
+    @Nullable
+    public CoordinatorLayout getCoordinatorLayout() {
+        return mToolbardelegate.getCoordinatorLayout();
+    }
 
-        requireActivity().setActionBar(mToolbar);
+    /**
+     * Return an instance of app bar.
+     */
+    @Nullable
+    public AppBarLayout getAppBarLayout() {
+        return mToolbardelegate.getAppBarLayout();
     }
 
     /**
@@ -65,7 +88,7 @@ public abstract class CollapsingToolbarBaseFragment extends Fragment {
      */
     @Nullable
     public CollapsingToolbarLayout getCollapsingToolbarLayout() {
-        return mCollapsingToolbarLayout;
+        return mToolbardelegate.getCollapsingToolbarLayout();
     }
 
     /**
@@ -73,6 +96,6 @@ public abstract class CollapsingToolbarBaseFragment extends Fragment {
      */
     @NonNull
     public FrameLayout getContentFrameLayout() {
-        return mContentFrameLayout;
+        return mToolbardelegate.getContentFrameLayout();
     }
 }

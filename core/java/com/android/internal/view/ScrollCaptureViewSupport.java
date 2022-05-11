@@ -21,12 +21,12 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.HardwareRenderer;
-import android.graphics.Matrix;
+import android.graphics.HardwareRenderer.SyncAndDrawResult;
 import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.RenderNode;
 import android.os.CancellationSignal;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -35,6 +35,7 @@ import android.view.ScrollCaptureCallback;
 import android.view.ScrollCaptureSession;
 import android.view.Surface;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.android.internal.view.ScrollCaptureViewHelper.ScrollResult;
 
@@ -53,7 +54,7 @@ import java.util.function.Consumer;
 @UiThread
 public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCallback {
 
-    private static final String TAG = "ScrollCaptureViewSupport";
+    private static final String TAG = "SCViewSupport";
 
     private static final String SETTING_CAPTURE_DELAY = "screenshot.scroll_capture_delay";
     private static final long SETTING_CAPTURE_DELAY_DEFAULT = 60L; // millis
@@ -75,6 +76,7 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
         ContentResolver contentResolver = context.getContentResolver();
         mPostScrollDelayMillis = Settings.Global.getLong(contentResolver,
                 SETTING_CAPTURE_DELAY, SETTING_CAPTURE_DELAY_DEFAULT);
+        Log.d(TAG, "screenshot.scroll_capture_delay = " + mPostScrollDelayMillis);
     }
 
     /** Based on ViewRootImpl#updateColorModeIfNeeded */
@@ -86,6 +88,113 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
             colorMode = ActivityInfo.COLOR_MODE_DEFAULT;
         }
         return colorMode;
+    }
+
+    /**
+     * Maps a rect in request bounds relative space  (relative to requestBounds) to container-local
+     * space, accounting for the provided value of scrollY.
+     *
+     * @param scrollY the current scroll offset to apply to rect
+     * @param requestBounds defines the local coordinate space of rect, within the container
+     * @param requestRect the rectangle to transform to container-local coordinates
+     * @return the same rectangle mapped to container bounds
+     */
+    public static Rect transformFromRequestToContainer(int scrollY, Rect requestBounds,
+            Rect requestRect) {
+        Rect requestedContainerBounds = new Rect(requestRect);
+        requestedContainerBounds.offset(0, -scrollY);
+        requestedContainerBounds.offset(requestBounds.left, requestBounds.top);
+        return requestedContainerBounds;
+    }
+
+    /**
+     * Maps a rect in container-local coordinate space to request space (relative to
+     * requestBounds), accounting for the provided value of scrollY.
+     *
+     * @param scrollY the current scroll offset of the container
+     * @param requestBounds defines the local coordinate space of rect, within the container
+     * @param containerRect the rectangle within the container local coordinate space
+     * @return the same rectangle mapped to within request bounds
+     */
+    public static Rect transformFromContainerToRequest(int scrollY, Rect requestBounds,
+            Rect containerRect) {
+        Rect requestRect = new Rect(containerRect);
+        requestRect.offset(-requestBounds.left, -requestBounds.top);
+        requestRect.offset(0, scrollY);
+        return requestRect;
+    }
+
+    /**
+     * Implements the core contract of requestRectangleOnScreen. Given a bounding rect and
+     * another rectangle, return the minimum scroll distance that will maximize the visible area
+     * of the requested rectangle.
+     *
+     * @param parentVisibleBounds the visible area
+     * @param requested the requested area
+     */
+    public static int computeScrollAmount(Rect parentVisibleBounds, Rect requested) {
+        final int height = parentVisibleBounds.height();
+        final int top = parentVisibleBounds.top;
+        final int bottom = parentVisibleBounds.bottom;
+        int scrollYDelta = 0;
+
+        if (requested.bottom > bottom && requested.top > top) {
+            // need to scroll DOWN (move views up) to get it in view:
+            // move just enough so that the entire rectangle is in view
+            // (or at least the first screen size chunk).
+
+            if (requested.height() > height) {
+                // just enough to get screen size chunk on
+                scrollYDelta += (requested.top - top);
+            } else {
+                // entire rect at bottom
+                scrollYDelta += (requested.bottom - bottom);
+            }
+        } else if (requested.top < top && requested.bottom < bottom) {
+            // need to scroll UP (move views down) to get it in view:
+            // move just enough so that entire rectangle is in view
+            // (or at least the first screen size chunk of it).
+
+            if (requested.height() > height) {
+                // screen size chunk
+                scrollYDelta -= (bottom - requested.bottom);
+            } else {
+                // entire rect at top
+                scrollYDelta -= (top - requested.top);
+            }
+        }
+        return scrollYDelta;
+    }
+
+    /**
+     * Locate a view to use as a reference, given an anticipated scrolling movement.
+     * <p>
+     * This view will be used to measure the actual movement of child views after scrolling.
+     * When scrolling down, the last (max(y)) view is used, otherwise the first (min(y)
+     * view. This helps to avoid recycling the reference view as a side effect of scrolling.
+     *
+     * @param parent the scrolling container
+     * @param expectedScrollDistance the amount of scrolling to perform
+     */
+    public static View findScrollingReferenceView(ViewGroup parent, int expectedScrollDistance) {
+        View selected = null;
+        Rect parentLocalVisible = new Rect();
+        parent.getLocalVisibleRect(parentLocalVisible);
+
+        final int childCount = parent.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View child = parent.getChildAt(i);
+            if (selected == null) {
+                selected = child;
+            } else if (expectedScrollDistance < 0) {
+                if (child.getTop() < selected.getTop()) {
+                    selected = child;
+                }
+            } else if (child.getBottom() > selected.getBottom()) {
+                selected = child;
+            }
+        }
+        return selected;
     }
 
     @Override
@@ -141,29 +250,45 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
         }
 
         // Ask the view to scroll as needed to bring this area into view.
-        ScrollResult scrollResult = mViewHelper.onScrollRequested(view, session.getScrollBounds(),
-                requestRect);
+        mViewHelper.onScrollRequested(view, session.getScrollBounds(), requestRect, signal,
+                (result) -> onScrollResult(result, view, signal, onComplete));
+    }
+
+    private void onScrollResult(ScrollResult scrollResult, V view, CancellationSignal signal,
+            Consumer<Rect> onComplete) {
+
+        if (signal.isCanceled()) {
+            Log.w(TAG, "onScrollCaptureImageRequest: cancelled! skipping render.");
+            return;
+        }
 
         if (scrollResult.availableArea.isEmpty()) {
             onComplete.accept(scrollResult.availableArea);
             return;
         }
 
-        // For image capture, shift back by scrollDelta to arrive at the location within the view
-        // where the requested content will be drawn
+        // For image capture, shift back by scrollDelta to arrive at the location
+        // within the view where the requested content will be drawn
         Rect viewCaptureArea = new Rect(scrollResult.availableArea);
         viewCaptureArea.offset(0, -scrollResult.scrollDelta);
 
-        Runnable captureAction = () -> {
-            if (signal.isCanceled()) {
-                Log.w(TAG, "onScrollCaptureImageRequest: cancelled! skipping render.");
-            } else {
-                mRenderer.renderView(view, viewCaptureArea);
-                onComplete.accept(new Rect(scrollResult.availableArea));
-            }
-        };
+        view.postOnAnimationDelayed(
+                () -> doCapture(scrollResult, view, viewCaptureArea, onComplete),
+                mPostScrollDelayMillis);
+    }
 
-        view.postOnAnimationDelayed(captureAction, mPostScrollDelayMillis);
+    private void doCapture(ScrollResult scrollResult, V view, Rect viewCaptureArea,
+            Consumer<Rect> onComplete) {
+        int result = mRenderer.renderView(view, viewCaptureArea);
+        if (result == HardwareRenderer.SYNC_OK
+                || result == HardwareRenderer.SYNC_REDRAW_REQUESTED) {
+            /* Frame synced, buffer will be produced... notify client. */
+            onComplete.accept(new Rect(scrollResult.availableArea));
+        } else {
+            // No buffer will be produced.
+            Log.e(TAG, "syncAndDraw(): SyncAndDrawResult = " + result);
+            onComplete.accept(new Rect(/* empty */));
+        }
     }
 
     @Override
@@ -267,37 +392,16 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
             mCaptureRenderNode.endRecording();
         }
 
-        public void renderView(View view, Rect sourceRect) {
+        @SyncAndDrawResult
+        public int renderView(View view, Rect sourceRect) {
+            HardwareRenderer.FrameRenderRequest request = mRenderer.createRenderRequest();
+            request.setVsyncTime(SystemClock.elapsedRealtimeNanos());
             if (updateForView(view)) {
                 setupLighting(view);
             }
             view.invalidate();
             updateRootNode(view, sourceRect);
-            HardwareRenderer.FrameRenderRequest request = mRenderer.createRenderRequest();
-            long timestamp = System.nanoTime();
-            request.setVsyncTime(timestamp);
-
-            // Would be nice to access nextFrameNumber from HwR without having to hold on to Surface
-            final long frameNumber = mSurface.getNextFrameNumber();
-
-            // Block until a frame is presented to the Surface
-            request.setWaitForPresent(true);
-
-            switch (request.syncAndDraw()) {
-                case HardwareRenderer.SYNC_OK:
-                case HardwareRenderer.SYNC_REDRAW_REQUESTED:
-                    return;
-
-                case HardwareRenderer.SYNC_FRAME_DROPPED:
-                    Log.e(TAG, "syncAndDraw(): SYNC_FRAME_DROPPED !");
-                    break;
-                case HardwareRenderer.SYNC_LOST_SURFACE_REWARD_IF_FOUND:
-                    Log.e(TAG, "syncAndDraw(): SYNC_LOST_SURFACE !");
-                    break;
-                case HardwareRenderer.SYNC_CONTEXT_IS_STOPPED:
-                    Log.e(TAG, "syncAndDraw(): SYNC_CONTEXT_IS_STOPPED !");
-                    break;
-            }
+            return request.syncAndDraw();
         }
 
         public void trimMemory() {

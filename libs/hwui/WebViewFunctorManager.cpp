@@ -100,12 +100,40 @@ WebViewFunctor::~WebViewFunctor() {
     destroyContext();
 
     ATRACE_NAME("WebViewFunctor::onDestroy");
+    if (mSurfaceControl) {
+        removeOverlays();
+    }
     mCallbacks.onDestroyed(mFunctor, mData);
 }
 
 void WebViewFunctor::sync(const WebViewSyncData& syncData) const {
     ATRACE_NAME("WebViewFunctor::sync");
     mCallbacks.onSync(mFunctor, mData, syncData);
+}
+
+void WebViewFunctor::onRemovedFromTree() {
+    ATRACE_NAME("WebViewFunctor::onRemovedFromTree");
+    if (mSurfaceControl) {
+        removeOverlays();
+    }
+}
+
+bool WebViewFunctor::prepareRootSurfaceControl() {
+    if (!Properties::enableWebViewOverlays) return false;
+
+    renderthread::CanvasContext* activeContext = renderthread::CanvasContext::getActiveContext();
+    if (!activeContext) return false;
+
+    ASurfaceControl* rootSurfaceControl = activeContext->getSurfaceControl();
+    if (!rootSurfaceControl) return false;
+
+    int32_t rgid = activeContext->getSurfaceControlGenerationId();
+    if (mParentSurfaceControlGenerationId != rgid) {
+        reparentSurfaceControl(rootSurfaceControl);
+        mParentSurfaceControlGenerationId = rgid;
+    }
+
+    return true;
 }
 
 void WebViewFunctor::drawGl(const DrawGlInfo& drawInfo) {
@@ -121,13 +149,8 @@ void WebViewFunctor::drawGl(const DrawGlInfo& drawInfo) {
             .mergeTransaction = currentFunctor.mergeTransaction,
     };
 
-    if (!drawInfo.isLayer) {
-        renderthread::CanvasContext* activeContext =
-                renderthread::CanvasContext::getActiveContext();
-        if (activeContext != nullptr) {
-            ASurfaceControl* rootSurfaceControl = activeContext->getSurfaceControl();
-            if (rootSurfaceControl) overlayParams.overlaysMode = OverlaysMode::Enabled;
-        }
+    if (!drawInfo.isLayer && prepareRootSurfaceControl()) {
+        overlayParams.overlaysMode = OverlaysMode::Enabled;
     }
 
     mCallbacks.gles.draw(mFunctor, mData, drawInfo, overlayParams);
@@ -153,7 +176,10 @@ void WebViewFunctor::drawVk(const VkFunctorDrawParams& params) {
             .mergeTransaction = currentFunctor.mergeTransaction,
     };
 
-    // TODO, enable surface control once offscreen mode figured out
+    if (!params.is_layer && prepareRootSurfaceControl()) {
+        overlayParams.overlaysMode = OverlaysMode::Enabled;
+    }
+
     mCallbacks.vk.draw(mFunctor, mData, params, overlayParams);
 }
 
@@ -178,6 +204,7 @@ void WebViewFunctor::removeOverlays() {
     ScopedCurrentFunctor currentFunctor(this);
     mCallbacks.removeOverlays(mFunctor, mData, currentFunctor.mergeTransaction);
     if (mSurfaceControl) {
+        reparentSurfaceControl(nullptr);
         auto funcs = renderthread::RenderThread::getInstance().getASurfaceControlFunctions();
         funcs.releaseFunc(mSurfaceControl);
         mSurfaceControl = nullptr;
@@ -195,6 +222,7 @@ ASurfaceControl* WebViewFunctor::getSurfaceControl() {
     LOG_ALWAYS_FATAL_IF(rootSurfaceControl == nullptr, "Null root surface control!");
 
     auto funcs = renderthread::RenderThread::getInstance().getASurfaceControlFunctions();
+    mParentSurfaceControlGenerationId = activeContext->getSurfaceControlGenerationId();
     mSurfaceControl = funcs.createFunc(rootSurfaceControl, "Webview Overlay SurfaceControl");
     ASurfaceTransaction* transaction = funcs.transactionCreateFunc();
     activeContext->prepareSurfaceControlForWebview();
@@ -209,13 +237,27 @@ ASurfaceControl* WebViewFunctor::getSurfaceControl() {
 void WebViewFunctor::mergeTransaction(ASurfaceTransaction* transaction) {
     ATRACE_NAME("WebViewFunctor::mergeTransaction");
     if (transaction == nullptr) return;
+    bool done = false;
     renderthread::CanvasContext* activeContext = renderthread::CanvasContext::getActiveContext();
-    LOG_ALWAYS_FATAL_IF(activeContext == nullptr, "Null active canvas context!");
-    bool done = activeContext->mergeTransaction(transaction, mSurfaceControl);
+    // activeContext might be null when called from mCallbacks.removeOverlays()
+    if (activeContext != nullptr) {
+        done = activeContext->mergeTransaction(transaction, mSurfaceControl);
+    }
     if (!done) {
         auto funcs = renderthread::RenderThread::getInstance().getASurfaceControlFunctions();
         funcs.transactionApplyFunc(transaction);
     }
+}
+
+void WebViewFunctor::reparentSurfaceControl(ASurfaceControl* parent) {
+    ATRACE_NAME("WebViewFunctor::reparentSurfaceControl");
+    if (mSurfaceControl == nullptr) return;
+
+    auto funcs = renderthread::RenderThread::getInstance().getASurfaceControlFunctions();
+    ASurfaceTransaction* transaction = funcs.transactionCreateFunc();
+    funcs.transactionReparentFunc(transaction, mSurfaceControl, parent);
+    mergeTransaction(transaction);
+    funcs.transactionDeleteFunc(transaction);
 }
 
 WebViewFunctorManager& WebViewFunctorManager::instance() {

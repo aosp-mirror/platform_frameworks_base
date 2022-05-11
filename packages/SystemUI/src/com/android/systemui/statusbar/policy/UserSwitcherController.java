@@ -19,12 +19,13 @@ package com.android.systemui.statusbar.policy;
 import static android.os.UserManager.SWITCHABILITY_STATUS_OK;
 
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
-import static com.android.systemui.DejankUtils.whitelistIpcs;
 
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.IActivityTaskManager;
+import android.app.IActivityManager;
+import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -37,53 +38,63 @@ import android.graphics.ColorFilter;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.telephony.TelephonyCallback;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManagerGlobal;
 import android.widget.BaseAdapter;
+import android.widget.Toast;
+
+import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEventLogger;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.util.LatencyTracker;
 import com.android.settingslib.RestrictedLockUtilsInternal;
+import com.android.settingslib.users.UserCreatingDialog;
+import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.GuestResumeSessionReceiver;
-import com.android.systemui.Prefs;
-import com.android.systemui.Prefs.Key;
 import com.android.systemui.R;
 import com.android.systemui.SystemUISecondaryUserService;
+import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.LongRunning;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.dagger.qualifiers.UiBackground;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.plugins.qs.DetailAdapter;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.qs.QSUserSwitcherEvent;
-import com.android.systemui.qs.tiles.UserDetailView;
+import com.android.systemui.qs.user.UserSwitchDialogController.DialogShower;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.user.CreateUserActivity;
+import com.android.systemui.util.settings.GlobalSettings;
+import com.android.systemui.util.settings.SecureSettings;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 
 /**
  * Keeps a list of all users on the device for user switching.
@@ -101,66 +112,114 @@ public class UserSwitcherController implements Dumpable {
     private static final int PAUSE_REFRESH_USERS_TIMEOUT_MS = 3000;
 
     private static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
+    private static final long MULTI_USER_JOURNEY_TIMEOUT = 20000l;
 
     protected final Context mContext;
+    protected final UserTracker mUserTracker;
     protected final UserManager mUserManager;
+    private final ContentObserver mSettingsObserver;
     private final ArrayList<WeakReference<BaseUserAdapter>> mAdapters = new ArrayList<>();
-    private final GuestResumeSessionReceiver mGuestResumeSessionReceiver;
+    @VisibleForTesting
+    final GuestResumeSessionReceiver mGuestResumeSessionReceiver;
     private final KeyguardStateController mKeyguardStateController;
+    private final DeviceProvisionedController mDeviceProvisionedController;
+    private final DevicePolicyManager mDevicePolicyManager;
     protected final Handler mHandler;
     private final ActivityStarter mActivityStarter;
     private final BroadcastDispatcher mBroadcastDispatcher;
+    private final BroadcastSender mBroadcastSender;
     private final TelephonyListenerManager mTelephonyListenerManager;
-    private final IActivityTaskManager mActivityTaskManager;
+    private final InteractionJankMonitor mInteractionJankMonitor;
+    private final LatencyTracker mLatencyTracker;
+    private final DialogLaunchAnimator mDialogLaunchAnimator;
 
     private ArrayList<UserRecord> mUsers = new ArrayList<>();
-    private Dialog mExitGuestDialog;
-    private Dialog mAddUserDialog;
+    @VisibleForTesting
+    AlertDialog mExitGuestDialog;
+    @VisibleForTesting
+    Dialog mAddUserDialog;
     private int mLastNonGuestUser = UserHandle.USER_SYSTEM;
     private boolean mResumeUserOnGuestLogout = true;
     private boolean mSimpleUserSwitcher;
     // When false, there won't be any visual affordance to add a new user from the keyguard even if
     // the user is unlocked
     private boolean mAddUsersFromLockScreen;
-    private boolean mPauseRefreshUsers;
+    private boolean mUserSwitcherEnabled;
+    @VisibleForTesting
+    boolean mPauseRefreshUsers;
     private int mSecondaryUser = UserHandle.USER_NULL;
     private Intent mSecondaryUserServiceIntent;
     private SparseBooleanArray mForcePictureLoadForUserId = new SparseBooleanArray(2);
     private final UiEventLogger mUiEventLogger;
-    public final DetailAdapter mUserDetailAdapter;
-    private final Executor mUiBgExecutor;
+    private final IActivityManager mActivityManager;
+    private final Executor mBgExecutor;
+    private final Executor mUiExecutor;
+    private final Executor mLongRunningExecutor;
     private final boolean mGuestUserAutoCreated;
+    private final AtomicBoolean mGuestIsResetting;
     private final AtomicBoolean mGuestCreationScheduled;
+    private FalsingManager mFalsingManager;
+    private View mView;
+    private String mCreateSupervisedUserPackage;
+    private GlobalSettings mGlobalSettings;
+    private List<UserSwitchCallback> mUserSwitchCallbacks =
+            Collections.synchronizedList(new ArrayList<>());
 
     @Inject
     public UserSwitcherController(Context context,
+            IActivityManager activityManager,
+            UserManager userManager,
+            UserTracker userTracker,
             KeyguardStateController keyguardStateController,
+            DeviceProvisionedController deviceProvisionedController,
+            DevicePolicyManager devicePolicyManager,
             @Main Handler handler,
             ActivityStarter activityStarter,
             BroadcastDispatcher broadcastDispatcher,
+            BroadcastSender broadcastSender,
             UiEventLogger uiEventLogger,
+            FalsingManager falsingManager,
             TelephonyListenerManager telephonyListenerManager,
-            IActivityTaskManager activityTaskManager,
-            UserDetailAdapter userDetailAdapter,
-            @UiBackground Executor uiBgExecutor) {
+            SecureSettings secureSettings,
+            GlobalSettings globalSettings,
+            @Background Executor bgExecutor,
+            @LongRunning Executor longRunningExecutor,
+            @Main Executor uiExecutor,
+            InteractionJankMonitor interactionJankMonitor,
+            LatencyTracker latencyTracker,
+            DumpManager dumpManager,
+            DialogLaunchAnimator dialogLaunchAnimator) {
         mContext = context;
+        mActivityManager = activityManager;
+        mUserTracker = userTracker;
         mBroadcastDispatcher = broadcastDispatcher;
+        mBroadcastSender = broadcastSender;
         mTelephonyListenerManager = telephonyListenerManager;
-        mActivityTaskManager = activityTaskManager;
         mUiEventLogger = uiEventLogger;
-        mGuestResumeSessionReceiver = new GuestResumeSessionReceiver(this, mUiEventLogger);
-        mUserDetailAdapter = userDetailAdapter;
-        mUiBgExecutor = uiBgExecutor;
+        mFalsingManager = falsingManager;
+        mInteractionJankMonitor = interactionJankMonitor;
+        mLatencyTracker = latencyTracker;
+        mGlobalSettings = globalSettings;
+        mGuestResumeSessionReceiver = new GuestResumeSessionReceiver(
+                this, mUserTracker, mUiEventLogger, secureSettings);
+        mBgExecutor = bgExecutor;
+        mLongRunningExecutor = longRunningExecutor;
+        mUiExecutor = uiExecutor;
         if (!UserManager.isGuestUserEphemeral()) {
             mGuestResumeSessionReceiver.register(mBroadcastDispatcher);
         }
         mGuestUserAutoCreated = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_guestUserAutoCreated);
+        mGuestIsResetting = new AtomicBoolean();
         mGuestCreationScheduled = new AtomicBoolean();
         mKeyguardStateController = keyguardStateController;
+        mDeviceProvisionedController = deviceProvisionedController;
+        mDevicePolicyManager = devicePolicyManager;
         mHandler = handler;
         mActivityStarter = activityStarter;
-        mUserManager = UserManager.get(context);
+        mUserManager = userManager;
+        mDialogLaunchAnimator = dialogLaunchAnimator;
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_ADDED);
         filter.addAction(Intent.ACTION_USER_REMOVED);
@@ -169,7 +228,8 @@ public class UserSwitcherController implements Dumpable {
         filter.addAction(Intent.ACTION_USER_STOPPED);
         filter.addAction(Intent.ACTION_USER_UNLOCKED);
         mBroadcastDispatcher.registerReceiver(
-                mReceiver, filter, null /* handler */, UserHandle.SYSTEM);
+                mReceiver, filter, null /* executor */,
+                UserHandle.SYSTEM, Context.RECEIVER_EXPORTED, null /* permission */);
 
         mSimpleUserSwitcher = shouldUseSimpleUserSwitcher();
 
@@ -177,10 +237,25 @@ public class UserSwitcherController implements Dumpable {
 
         filter = new IntentFilter();
         mContext.registerReceiverAsUser(mReceiver, UserHandle.SYSTEM, filter,
-                PERMISSION_SELF, null /* scheduler */);
+                PERMISSION_SELF, null /* scheduler */,
+                Context.RECEIVER_EXPORTED_UNAUDITED);
 
+        mSettingsObserver = new ContentObserver(mHandler) {
+            @Override
+            public void onChange(boolean selfChange) {
+                mSimpleUserSwitcher = shouldUseSimpleUserSwitcher();
+                mAddUsersFromLockScreen = mGlobalSettings.getIntForUser(
+                        Settings.Global.ADD_USERS_WHEN_LOCKED, 0, UserHandle.USER_SYSTEM) != 0;
+                mUserSwitcherEnabled = mGlobalSettings.getIntForUser(
+                        Settings.Global.USER_SWITCHER_ENABLED, 0, UserHandle.USER_SYSTEM) != 0;
+                refreshUsers(UserHandle.USER_NULL);
+            };
+        };
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(SIMPLE_USER_SWITCHER_GLOBAL_SETTING), true,
+                mSettingsObserver);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.USER_SWITCHER_ENABLED), true,
                 mSettingsObserver);
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.ADD_USERS_WHEN_LOCKED), true,
@@ -194,6 +269,11 @@ public class UserSwitcherController implements Dumpable {
 
         keyguardStateController.addCallback(mCallback);
         listenForCallState();
+
+        mCreateSupervisedUserPackage = mContext.getString(
+                com.android.internal.R.string.config_supervisedUserCreationPackage);
+
+        dumpManager.registerDumpable(getClass().getSimpleName(), this);
 
         refreshUsers(UserHandle.USER_NULL);
     }
@@ -230,103 +310,137 @@ public class UserSwitcherController implements Dumpable {
         mForcePictureLoadForUserId.clear();
 
         final boolean addUsersWhenLocked = mAddUsersFromLockScreen;
-        new AsyncTask<SparseArray<Bitmap>, Void, ArrayList<UserRecord>>() {
-            @SuppressWarnings("unchecked")
-            @Override
-            protected ArrayList<UserRecord> doInBackground(SparseArray<Bitmap>... params) {
-                final SparseArray<Bitmap> bitmaps = params[0];
-                List<UserInfo> infos = mUserManager.getAliveUsers();
-                if (infos == null) {
-                    return null;
+        mBgExecutor.execute(() ->  {
+            List<UserInfo> infos = mUserManager.getAliveUsers();
+            if (infos == null) {
+                return;
+            }
+            ArrayList<UserRecord> records = new ArrayList<>(infos.size());
+            int currentId = mUserTracker.getUserId();
+            // Check user switchability of the foreground user since SystemUI is running in
+            // User 0
+            boolean canSwitchUsers = mUserManager.getUserSwitchability(
+                    UserHandle.of(mUserTracker.getUserId())) == SWITCHABILITY_STATUS_OK;
+            UserRecord guestRecord = null;
+
+            for (UserInfo info : infos) {
+                boolean isCurrent = currentId == info.id;
+                boolean switchToEnabled = canSwitchUsers || isCurrent;
+                if (!mUserSwitcherEnabled && !info.isPrimary()) {
+                    continue;
                 }
-                ArrayList<UserRecord> records = new ArrayList<>(infos.size());
-                int currentId = ActivityManager.getCurrentUser();
-                // Check user switchability of the foreground user since SystemUI is running in
-                // User 0
-                boolean canSwitchUsers = mUserManager.getUserSwitchability(
-                        UserHandle.of(ActivityManager.getCurrentUser())) == SWITCHABILITY_STATUS_OK;
-                UserInfo currentUserInfo = null;
-                UserRecord guestRecord = null;
 
-                for (UserInfo info : infos) {
-                    boolean isCurrent = currentId == info.id;
-                    if (isCurrent) {
-                        currentUserInfo = info;
-                    }
-                    boolean switchToEnabled = canSwitchUsers || isCurrent;
-                    if (info.isEnabled()) {
-                        if (info.isGuest()) {
-                            // Tapping guest icon triggers remove and a user switch therefore
-                            // the icon shouldn't be enabled even if the user is current
-                            guestRecord = new UserRecord(info, null /* picture */,
-                                    true /* isGuest */, isCurrent, false /* isAddUser */,
-                                    false /* isRestricted */, canSwitchUsers);
-                        } else if (info.supportsSwitchToByUser()) {
-                            Bitmap picture = bitmaps.get(info.id);
-                            if (picture == null) {
-                                picture = mUserManager.getUserIcon(info.id);
+                if (info.isEnabled()) {
+                    if (info.isGuest()) {
+                        // Tapping guest icon triggers remove and a user switch therefore
+                        // the icon shouldn't be enabled even if the user is current
+                        guestRecord = new UserRecord(info, null /* picture */,
+                                true /* isGuest */, isCurrent, false /* isAddUser */,
+                                false /* isRestricted */, canSwitchUsers,
+                                false /* isAddSupervisedUser */);
+                    } else if (info.supportsSwitchToByUser()) {
+                        Bitmap picture = bitmaps.get(info.id);
+                        if (picture == null) {
+                            picture = mUserManager.getUserIcon(info.id);
 
-                                if (picture != null) {
-                                    int avatarSize = mContext.getResources()
-                                            .getDimensionPixelSize(R.dimen.max_avatar_size);
-                                    picture = Bitmap.createScaledBitmap(
-                                            picture, avatarSize, avatarSize, true);
-                                }
+                            if (picture != null) {
+                                int avatarSize = mContext.getResources()
+                                        .getDimensionPixelSize(R.dimen.max_avatar_size);
+                                picture = Bitmap.createScaledBitmap(
+                                        picture, avatarSize, avatarSize, true);
                             }
-                            records.add(new UserRecord(info, picture, false /* isGuest */,
-                                    isCurrent, false /* isAddUser */, false /* isRestricted */,
-                                    switchToEnabled));
                         }
+                        records.add(new UserRecord(info, picture, false /* isGuest */,
+                                isCurrent, false /* isAddUser */, false /* isRestricted */,
+                                switchToEnabled, false /* isAddSupervisedUser */));
                     }
                 }
-                if (records.size() > 1 || guestRecord != null) {
-                    Prefs.putBoolean(mContext, Key.SEEN_MULTI_USER, true);
-                }
+            }
 
-                boolean systemCanCreateUsers = !mUserManager.hasBaseUserRestriction(
-                                UserManager.DISALLOW_ADD_USER, UserHandle.SYSTEM);
-                boolean currentUserCanCreateUsers = currentUserInfo != null
-                        && (currentUserInfo.isAdmin()
-                                || currentUserInfo.id == UserHandle.USER_SYSTEM)
-                        && systemCanCreateUsers;
-                boolean anyoneCanCreateUsers = systemCanCreateUsers && addUsersWhenLocked;
-                boolean canCreateGuest = (currentUserCanCreateUsers || anyoneCanCreateUsers)
-                        && guestRecord == null;
-                boolean canCreateUser = (currentUserCanCreateUsers || anyoneCanCreateUsers)
-                        && mUserManager.canAddMoreUsers();
-                boolean createIsRestricted = !addUsersWhenLocked;
-
-                if (guestRecord == null) {
-                    if (canCreateGuest) {
-                        guestRecord = new UserRecord(null /* info */, null /* picture */,
-                                true /* isGuest */, false /* isCurrent */,
-                                false /* isAddUser */, createIsRestricted, canSwitchUsers);
-                        checkIfAddUserDisallowedByAdminOnly(guestRecord);
-                        records.add(guestRecord);
-                    }
-                } else {
+            if (guestRecord == null) {
+                if (mGuestUserAutoCreated) {
+                    // If mGuestIsResetting=true, the switch should be disabled since
+                    // we will just use it as an indicator for "Resetting guest...".
+                    // Otherwise, default to canSwitchUsers.
+                    boolean isSwitchToGuestEnabled = !mGuestIsResetting.get() && canSwitchUsers;
+                    guestRecord = new UserRecord(null /* info */, null /* picture */,
+                            true /* isGuest */, false /* isCurrent */,
+                            false /* isAddUser */, false /* isRestricted */,
+                            isSwitchToGuestEnabled, false /* isAddSupervisedUser */);
+                    checkIfAddUserDisallowedByAdminOnly(guestRecord);
+                    records.add(guestRecord);
+                } else if (canCreateGuest(guestRecord != null)) {
+                    guestRecord = new UserRecord(null /* info */, null /* picture */,
+                            true /* isGuest */, false /* isCurrent */,
+                            false /* isAddUser */, createIsRestricted(), canSwitchUsers,
+                            false /* isAddSupervisedUser */);
+                    checkIfAddUserDisallowedByAdminOnly(guestRecord);
                     records.add(guestRecord);
                 }
-
-                if (canCreateUser) {
-                    UserRecord addUserRecord = new UserRecord(null /* info */, null /* picture */,
-                            false /* isGuest */, false /* isCurrent */, true /* isAddUser */,
-                            createIsRestricted, canSwitchUsers);
-                    checkIfAddUserDisallowedByAdminOnly(addUserRecord);
-                    records.add(addUserRecord);
-                }
-
-                return records;
+            } else {
+                records.add(guestRecord);
             }
 
-            @Override
-            protected void onPostExecute(ArrayList<UserRecord> userRecords) {
-                if (userRecords != null) {
-                    mUsers = userRecords;
+            if (canCreateUser()) {
+                UserRecord addUserRecord = new UserRecord(null /* info */, null /* picture */,
+                        false /* isGuest */, false /* isCurrent */, true /* isAddUser */,
+                        createIsRestricted(), canSwitchUsers,
+                        false /* isAddSupervisedUser */);
+                checkIfAddUserDisallowedByAdminOnly(addUserRecord);
+                records.add(addUserRecord);
+            }
+
+            if (canCreateSupervisedUser()) {
+                UserRecord addUserRecord = new UserRecord(null /* info */, null /* picture */,
+                        false /* isGuest */, false /* isCurrent */, false /* isAddUser */,
+                        createIsRestricted(), canSwitchUsers, true /* isAddSupervisedUser */);
+                checkIfAddUserDisallowedByAdminOnly(addUserRecord);
+                records.add(addUserRecord);
+            }
+
+            mUiExecutor.execute(() -> {
+                if (records != null) {
+                    mUsers = records;
                     notifyAdapters();
                 }
-            }
-        }.execute((SparseArray) bitmaps);
+            });
+        });
+    }
+
+    boolean systemCanCreateUsers() {
+        return !mUserManager.hasBaseUserRestriction(
+                UserManager.DISALLOW_ADD_USER, UserHandle.SYSTEM);
+    }
+
+    boolean currentUserCanCreateUsers() {
+        UserInfo currentUser = mUserTracker.getUserInfo();
+        return currentUser != null
+                && (currentUser.isAdmin() || mUserTracker.getUserId() == UserHandle.USER_SYSTEM)
+                && systemCanCreateUsers();
+    }
+
+    boolean anyoneCanCreateUsers() {
+        return systemCanCreateUsers() && mAddUsersFromLockScreen;
+    }
+
+    boolean canCreateGuest(boolean hasExistingGuest) {
+        return mUserSwitcherEnabled
+                && (currentUserCanCreateUsers() || anyoneCanCreateUsers())
+                && !hasExistingGuest;
+    }
+
+    boolean canCreateUser() {
+        return mUserSwitcherEnabled
+                && (currentUserCanCreateUsers() || anyoneCanCreateUsers())
+                && mUserManager.canAddMoreUsers(UserManager.USER_TYPE_FULL_SECONDARY);
+    }
+
+    boolean createIsRestricted() {
+        return !mAddUsersFromLockScreen;
+    }
+
+    boolean canCreateSupervisedUser() {
+        return !TextUtils.isEmpty(mCreateSupervisedUserPackage) && canCreateUser();
     }
 
     private void pauseRefreshUsers() {
@@ -351,32 +465,15 @@ public class UserSwitcherController implements Dumpable {
         return mSimpleUserSwitcher;
     }
 
-    public boolean useFullscreenUserSwitcher() {
-        // Use adb to override:
-        // adb shell settings put system enable_fullscreen_user_switcher 0  # Turn it off.
-        // adb shell settings put system enable_fullscreen_user_switcher 1  # Turn it on.
-        // Restart SystemUI or adb reboot.
-        final int DEFAULT = -1;
-        final int overrideUseFullscreenUserSwitcher =
-                whitelistIpcs(() -> Settings.System.getInt(mContext.getContentResolver(),
-                        "enable_fullscreen_user_switcher", DEFAULT));
-        if (overrideUseFullscreenUserSwitcher != DEFAULT) {
-            return overrideUseFullscreenUserSwitcher != 0;
-        }
-        // Otherwise default to the build setting.
-        return mContext.getResources().getBoolean(R.bool.config_enableFullscreenUserSwitcher);
-    }
-
     public void setResumeUserOnGuestLogout(boolean resume) {
         mResumeUserOnGuestLogout = resume;
     }
 
-    public void logoutCurrentUser() {
-        int currentUser = ActivityManager.getCurrentUser();
-        if (currentUser != UserHandle.USER_SYSTEM) {
-            pauseRefreshUsers();
-            ActivityManager.logoutCurrentUser();
-        }
+    /**
+     * Returns whether the current user is a system user.
+     */
+    public boolean isSystemUser() {
+        return mUserTracker.getUserId() == UserHandle.USER_SYSTEM;
     }
 
     public void removeUserId(int userId) {
@@ -384,7 +481,7 @@ public class UserSwitcherController implements Dumpable {
             Log.w(TAG, "User " + userId + " could not removed.");
             return;
         }
-        if (ActivityManager.getCurrentUser() == userId) {
+        if (mUserTracker.getUserId() == userId) {
             switchToUserId(UserHandle.USER_SYSTEM);
         }
         if (mUserManager.removeUser(userId)) {
@@ -392,54 +489,77 @@ public class UserSwitcherController implements Dumpable {
         }
     }
 
-    private void onUserListItemClicked(UserRecord record) {
-        int id;
+    /**
+     * @return UserRecord for the current user
+     */
+    public @Nullable UserRecord getCurrentUserRecord() {
+        for (int i = 0; i < mUsers.size(); ++i) {
+            UserRecord userRecord = mUsers.get(i);
+            if (userRecord.isCurrent) {
+                return userRecord;
+            }
+        }
+        return null;
+    }
+
+    @VisibleForTesting
+    void onUserListItemClicked(UserRecord record, DialogShower dialogShower) {
         if (record.isGuest && record.info == null) {
             // No guest user. Create one.
-            int guestId = createGuest();
-            if (guestId == UserHandle.USER_NULL) {
-                // This may happen if we haven't reloaded the user list yet.
-                return;
-            }
-            mUiEventLogger.log(QSUserSwitcherEvent.QS_USER_GUEST_ADD);
-            id = guestId;
+            createGuestAsync(guestId -> {
+                // guestId may be USER_NULL if we haven't reloaded the user list yet.
+                if (guestId != UserHandle.USER_NULL) {
+                    mUiEventLogger.log(QSUserSwitcherEvent.QS_USER_GUEST_ADD);
+                    onUserListItemClicked(guestId, record, dialogShower);
+                }
+            });
         } else if (record.isAddUser) {
-            showAddUserDialog();
-            return;
+            showAddUserDialog(dialogShower);
+        } else if (record.isAddSupervisedUser) {
+            startSupervisedUserActivity();
         } else {
-            id = record.info.id;
+            onUserListItemClicked(record.info.id, record, dialogShower);
         }
+    }
 
-        int currUserId = ActivityManager.getCurrentUser();
+    private void onUserListItemClicked(int id, UserRecord record, DialogShower dialogShower) {
+        int currUserId = mUserTracker.getUserId();
         if (currUserId == id) {
             if (record.isGuest) {
-                showExitGuestDialog(id);
+                showExitGuestDialog(id, dialogShower);
             }
             return;
         }
-
         if (UserManager.isGuestUserEphemeral()) {
             // If switching from guest, we want to bring up the guest exit dialog instead of switching
             UserInfo currUserInfo = mUserManager.getUserInfo(currUserId);
             if (currUserInfo != null && currUserInfo.isGuest()) {
-                showExitGuestDialog(currUserId, record.resolveId());
+                showExitGuestDialog(currUserId, record.resolveId(), dialogShower);
                 return;
             }
         }
-
+        if (dialogShower != null) {
+            // If we haven't morphed into another dialog, it means we have just switched users.
+            // Then, dismiss the dialog.
+            dialogShower.dismiss();
+        }
         switchToUserId(id);
     }
 
     protected void switchToUserId(int id) {
         try {
+            mInteractionJankMonitor.begin(InteractionJankMonitor.Configuration.Builder
+                    .withView(InteractionJankMonitor.CUJ_USER_SWITCH, mView)
+                    .setTimeout(MULTI_USER_JOURNEY_TIMEOUT));
+            mLatencyTracker.onActionStart(LatencyTracker.ACTION_USER_SWITCH);
             pauseRefreshUsers();
-            ActivityManager.getService().switchUser(id);
+            mActivityManager.switchUser(id);
         } catch (RemoteException e) {
             Log.e(TAG, "Couldn't switch user.", e);
         }
     }
 
-    protected void showExitGuestDialog(int id) {
+    private void showExitGuestDialog(int id, DialogShower dialogShower) {
         int newId = UserHandle.USER_SYSTEM;
         if (mResumeUserOnGuestLogout && mLastNonGuestUser != UserHandle.USER_SYSTEM) {
             UserInfo info = mUserManager.getUserInfo(mLastNonGuestUser);
@@ -447,23 +567,40 @@ public class UserSwitcherController implements Dumpable {
                 newId = info.id;
             }
         }
-        showExitGuestDialog(id, newId);
+        showExitGuestDialog(id, newId, dialogShower);
     }
 
-    protected void showExitGuestDialog(int id, int targetId) {
+    private void showExitGuestDialog(int id, int targetId, DialogShower dialogShower) {
         if (mExitGuestDialog != null && mExitGuestDialog.isShowing()) {
             mExitGuestDialog.cancel();
         }
         mExitGuestDialog = new ExitGuestDialog(mContext, id, targetId);
-        mExitGuestDialog.show();
+        if (dialogShower != null) {
+            dialogShower.showDialog(mExitGuestDialog);
+        } else {
+            mExitGuestDialog.show();
+        }
     }
 
-    public void showAddUserDialog() {
+    private void showAddUserDialog(DialogShower dialogShower) {
         if (mAddUserDialog != null && mAddUserDialog.isShowing()) {
             mAddUserDialog.cancel();
         }
         mAddUserDialog = new AddUserDialog(mContext);
-        mAddUserDialog.show();
+        if (dialogShower != null) {
+            dialogShower.showDialog(mAddUserDialog);
+        } else {
+            mAddUserDialog.show();
+        }
+    }
+
+    private void startSupervisedUserActivity() {
+        final Intent intent = new Intent()
+                .setAction(UserManager.ACTION_CREATE_SUPERVISED_USER)
+                .setPackage(mCreateSupervisedUserPackage)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        mContext.startActivity(intent);
     }
 
     private void listenForCallState() {
@@ -519,6 +656,7 @@ public class UserSwitcherController implements Dumpable {
                         i--;
                     }
                 }
+                notifyUserSwitchCallbacks();
                 notifyAdapters();
 
                 // Disconnect from the old secondary user's service
@@ -535,6 +673,13 @@ public class UserSwitcherController implements Dumpable {
                     mSecondaryUser = userInfo.id;
                 }
                 unpauseRefreshUsers = true;
+                if (mGuestUserAutoCreated) {
+                    // Guest user must be scheduled for creation AFTER switching to the target user.
+                    // This avoids lock contention which will produce UX bugs on the keyguard
+                    // (b/193933686).
+                    // TODO(b/191067027): Move guest user recreation to system_server
+                    guaranteeGuestPresent();
+                }
             } else if (Intent.ACTION_USER_INFO_CHANGED.equals(intent.getAction())) {
                 forcePictureLoadForId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
                         UserHandle.USER_NULL);
@@ -561,17 +706,8 @@ public class UserSwitcherController implements Dumpable {
         }
     };
 
-    private final ContentObserver mSettingsObserver = new ContentObserver(new Handler()) {
-        public void onChange(boolean selfChange) {
-            mSimpleUserSwitcher = shouldUseSimpleUserSwitcher();
-            mAddUsersFromLockScreen = Settings.Global.getInt(mContext.getContentResolver(),
-                    Settings.Global.ADD_USERS_WHEN_LOCKED, 0) != 0;
-            refreshUsers(UserHandle.USER_NULL);
-        };
-    };
-
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("UserSwitcherController state:");
         pw.println("  mLastNonGuestUser=" + mLastNonGuestUser);
         pw.print("  mUsers.size="); pw.println(mUsers.size());
@@ -586,10 +722,9 @@ public class UserSwitcherController implements Dumpable {
     /** Returns the name of the current user of the phone. */
     public String getCurrentUserName() {
         if (mUsers.isEmpty()) return null;
-        UserRecord item = mUsers.get(0);
+        UserRecord item = mUsers.stream().filter(x -> x.isCurrent).findFirst().orElse(null);
         if (item == null || item.info == null) return null;
-        if (item.isGuest) return mContext.getString(
-                com.android.settingslib.R.string.guest_nickname);
+        if (item.isGuest) return mContext.getString(com.android.internal.R.string.guest_name);
         return item.info.name;
     }
 
@@ -628,13 +763,7 @@ public class UserSwitcherController implements Dumpable {
      * UserHandle.USER_NULL}, then switch immediately to the newly created guest user.
      */
     public void removeGuestUser(@UserIdInt int guestUserId, @UserIdInt int targetUserId) {
-        UserInfo currentUser;
-        try {
-            currentUser = ActivityManager.getService().getCurrentUser();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Couldn't remove guest because ActivityManager is dead");
-            return;
-        }
+        UserInfo currentUser = mUserTracker.getUserInfo();
         if (currentUser.id != guestUserId) {
             Log.w(TAG, "User requesting to start a new session (" + guestUserId + ")"
                     + " is not current user (" + currentUser.id + ")");
@@ -652,29 +781,30 @@ public class UserSwitcherController implements Dumpable {
             return;
         }
 
-        try {
-            if (targetUserId == UserHandle.USER_NULL) {
-                // Create a new guest in the foreground, and then immediately switch to it
-                int newGuestId = createGuest();
+        if (targetUserId == UserHandle.USER_NULL) {
+            // Create a new guest in the foreground, and then immediately switch to it
+            createGuestAsync(newGuestId -> {
                 if (newGuestId == UserHandle.USER_NULL) {
                     Log.e(TAG, "Could not create new guest, switching back to system user");
                     switchToUserId(UserHandle.USER_SYSTEM);
                     mUserManager.removeUser(currentUser.id);
-                    WindowManagerGlobal.getWindowManagerService().lockNow(/* options= */ null);
+                    try {
+                        WindowManagerGlobal.getWindowManagerService().lockNow(/* options= */ null);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Couldn't remove guest because ActivityManager "
+                                + "or WindowManager is dead");
+                    }
                     return;
                 }
                 switchToUserId(newGuestId);
                 mUserManager.removeUser(currentUser.id);
-            } else {
-                if (mGuestUserAutoCreated) {
-                    // TODO(b/191067027): Move guest recreation to system_server
-                    scheduleGuestCreation();
-                }
-                switchToUserId(targetUserId);
+            });
+        } else {
+            if (mGuestUserAutoCreated) {
+                mGuestIsResetting.set(true);
             }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Couldn't remove guest because ActivityManager or WindowManager is dead");
-            return;
+            switchToUserId(targetUserId);
+            mUserManager.removeUser(currentUser.id);
         }
     }
 
@@ -683,23 +813,62 @@ public class UserSwitcherController implements Dumpable {
             return;
         }
 
-        mUiBgExecutor.execute(() -> {
+        mLongRunningExecutor.execute(() -> {
             int newGuestId = createGuest();
+            mGuestCreationScheduled.set(false);
+            mGuestIsResetting.set(false);
             if (newGuestId == UserHandle.USER_NULL) {
                 Log.w(TAG, "Could not create new guest while exiting existing guest");
+                // Refresh users so that we still display "Guest" if
+                // config_guestUserAutoCreated=true
+                refreshUsers(UserHandle.USER_NULL);
             }
-            mGuestCreationScheduled.set(false);
         });
 
     }
 
     /**
+     * Guarantee guest is present only if the device is provisioned. Otherwise, create a content
+     * observer to wait until the device is provisioned, then schedule the guest creation.
+     */
+    public void schedulePostBootGuestCreation() {
+        if (isDeviceAllowedToAddGuest()) {
+            guaranteeGuestPresent();
+        } else {
+            mDeviceProvisionedController.addCallback(mGuaranteeGuestPresentAfterProvisioned);
+        }
+    }
+
+    private boolean isDeviceAllowedToAddGuest() {
+        return mDeviceProvisionedController.isDeviceProvisioned()
+                && !mDevicePolicyManager.isDeviceManaged();
+    }
+
+    /**
      * If there is no guest on the device, schedule creation of a new guest user in the background.
      */
-    public void guaranteeGuestPresent() {
-        if (mUserManager.findCurrentGuestUser() == null) {
+    private void guaranteeGuestPresent() {
+        if (isDeviceAllowedToAddGuest() && mUserManager.findCurrentGuestUser() == null) {
             scheduleGuestCreation();
         }
+    }
+
+    private void createGuestAsync(Consumer<Integer> callback) {
+        final Dialog guestCreationProgressDialog =
+                new UserCreatingDialog(mContext, /* isGuest= */true);
+        guestCreationProgressDialog.show();
+
+        // userManager.createGuest will block the thread so post is needed for the dialog to show
+        ThreadUtils.postOnMainThread(() -> {
+            final int guestId = createGuest();
+            guestCreationProgressDialog.dismiss();
+            if (guestId == UserHandle.USER_NULL) {
+                Toast.makeText(mContext,
+                        com.android.settingslib.R.string.add_guest_failed,
+                        Toast.LENGTH_SHORT).show();
+            }
+            callback.accept(guestId);
+        });
     }
 
     /**
@@ -714,8 +883,7 @@ public class UserSwitcherController implements Dumpable {
     public @UserIdInt int createGuest() {
         UserInfo guest;
         try {
-            guest = mUserManager.createGuest(mContext,
-                    mContext.getString(com.android.settingslib.R.string.guest_nickname));
+            guest = mUserManager.createGuest(mContext);
         } catch (UserManager.UserOperationException e) {
             Log.e(TAG, "Couldn't create guest user", e);
             return UserHandle.USER_NULL;
@@ -727,6 +895,18 @@ public class UserSwitcherController implements Dumpable {
         return guest.id;
     }
 
+    /**
+     * Require a view for jank detection
+     */
+    public void init(View view) {
+        mView = view;
+    }
+
+    @VisibleForTesting
+    public KeyguardStateController getKeyguardStateController() {
+        return mKeyguardStateController;
+    }
+
     public static abstract class BaseUserAdapter extends BaseAdapter {
 
         final UserSwitcherController mController;
@@ -734,7 +914,7 @@ public class UserSwitcherController implements Dumpable {
 
         protected BaseUserAdapter(UserSwitcherController controller) {
             mController = controller;
-            mKeyguardStateController = controller.mKeyguardStateController;
+            mKeyguardStateController = controller.getKeyguardStateController();
             controller.addAdapter(new WeakReference<>(this));
         }
 
@@ -779,9 +959,17 @@ public class UserSwitcherController implements Dumpable {
 
         /**
          * It handles click events on user list items.
+         *
+         * If the user switcher is hosted in a dialog, passing a non-null {@link DialogShower}
+         * will allow animation to and from the parent dialog.
+         *
          */
+        public void onUserListItemClicked(UserRecord record, @Nullable DialogShower dialogShower) {
+            mController.onUserListItemClicked(record, dialogShower);
+        }
+
         public void onUserListItemClicked(UserRecord record) {
-            mController.onUserListItemClicked(record);
+            onUserListItemClicked(record, null);
         }
 
         public String getName(Context context, UserRecord item) {
@@ -791,15 +979,30 @@ public class UserSwitcherController implements Dumpable {
                             ? com.android.settingslib.R.string.guest_reset_guest
                             : com.android.settingslib.R.string.guest_exit_guest);
                 } else {
-                    // If config_guestUserAutoCreated, always show guest nickname instead of "Add
-                    // guest" to make it seem as though the device always has a guest ready for use
-                    return context.getString(
-                            item.info == null && !mController.mGuestUserAutoCreated
-                                    ? com.android.settingslib.R.string.guest_new_guest
-                                    : com.android.settingslib.R.string.guest_nickname);
+                    if (item.info != null) {
+                        return context.getString(com.android.internal.R.string.guest_name);
+                    } else {
+                        if (mController.mGuestUserAutoCreated) {
+                            // If mGuestIsResetting=true, we expect the guest user to be created
+                            // shortly, so display a "Resetting guest..." as an indicator that we
+                            // are busy. Otherwise, if mGuestIsResetting=false, we probably failed
+                            // to create a guest at some point. In this case, always show guest
+                            // nickname instead of "Add guest" to make it seem as though the device
+                            // always has a guest ready for use.
+                            return context.getString(
+                                    mController.mGuestIsResetting.get()
+                                            ? com.android.settingslib.R.string.guest_resetting
+                                            : com.android.internal.R.string.guest_name);
+                        } else {
+                            return context.getString(
+                                    com.android.settingslib.R.string.guest_new_guest);
+                        }
+                    }
                 }
             } else if (item.isAddUser) {
-                return context.getString(R.string.user_add_user);
+                return context.getString(com.android.settingslib.R.string.user_add_user);
+            } else if (item.isAddSupervisedUser) {
+                return context.getString(R.string.add_user_supervised);
             } else {
                 return item.info.name;
             }
@@ -814,9 +1017,11 @@ public class UserSwitcherController implements Dumpable {
         protected static Drawable getIconDrawable(Context context, UserRecord item) {
             int iconRes;
             if (item.isAddUser) {
-                iconRes = R.drawable.ic_add_circle;
+                iconRes = R.drawable.ic_account_circle_filled;
             } else if (item.isGuest) {
-                iconRes = R.drawable.ic_avatar_guest_user;
+                iconRes = R.drawable.ic_account_circle;
+            } else if (item.isAddSupervisedUser) {
+                iconRes = R.drawable.ic_add_supervised_user;
             } else {
                 iconRes = R.drawable.ic_avatar_user;
             }
@@ -831,9 +1036,9 @@ public class UserSwitcherController implements Dumpable {
 
     private void checkIfAddUserDisallowedByAdminOnly(UserRecord record) {
         EnforcedAdmin admin = RestrictedLockUtilsInternal.checkIfRestrictionEnforced(mContext,
-                UserManager.DISALLOW_ADD_USER, ActivityManager.getCurrentUser());
+                UserManager.DISALLOW_ADD_USER, mUserTracker.getUserId());
         if (admin != null && !RestrictedLockUtilsInternal.hasBaseUserRestriction(mContext,
-                UserManager.DISALLOW_ADD_USER, ActivityManager.getCurrentUser())) {
+                UserManager.DISALLOW_ADD_USER, mUserTracker.getUserId())) {
             record.isDisabledByAdmin = true;
             record.enforcedAdmin = admin;
         } else {
@@ -845,12 +1050,39 @@ public class UserSwitcherController implements Dumpable {
     private boolean shouldUseSimpleUserSwitcher() {
         int defaultSimpleUserSwitcher = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_expandLockScreenUserSwitcher) ? 1 : 0;
-        return Settings.Global.getInt(mContext.getContentResolver(),
-                SIMPLE_USER_SWITCHER_GLOBAL_SETTING, defaultSimpleUserSwitcher) != 0;
+        return mGlobalSettings.getIntForUser(SIMPLE_USER_SWITCHER_GLOBAL_SETTING,
+                defaultSimpleUserSwitcher, UserHandle.USER_SYSTEM) != 0;
     }
 
     public void startActivity(Intent intent) {
         mActivityStarter.startActivity(intent, true);
+    }
+
+    /**
+     *  Add a subscriber to when user switches.
+     */
+    public void addUserSwitchCallback(UserSwitchCallback callback) {
+        mUserSwitchCallbacks.add(callback);
+    }
+
+    /**
+     *  Remove a subscriber to when user switches.
+     */
+    public void removeUserSwitchCallback(UserSwitchCallback callback) {
+        mUserSwitchCallbacks.remove(callback);
+    }
+
+    /**
+     *  Notify user switch callbacks that user has switched.
+     */
+    private void notifyUserSwitchCallbacks() {
+        List<UserSwitchCallback> temp;
+        synchronized (mUserSwitchCallbacks) {
+            temp = new ArrayList<>(mUserSwitchCallbacks);
+        }
+        for (UserSwitchCallback callback : temp) {
+            callback.onUserSwitched();
+        }
     }
 
     public static final class UserRecord {
@@ -859,6 +1091,7 @@ public class UserSwitcherController implements Dumpable {
         public final boolean isGuest;
         public final boolean isCurrent;
         public final boolean isAddUser;
+        public final boolean isAddSupervisedUser;
         /** If true, the record is only visible to the owner and only when unlocked. */
         public final boolean isRestricted;
         public boolean isDisabledByAdmin;
@@ -866,7 +1099,8 @@ public class UserSwitcherController implements Dumpable {
         public boolean isSwitchToEnabled;
 
         public UserRecord(UserInfo info, Bitmap picture, boolean isGuest, boolean isCurrent,
-                boolean isAddUser, boolean isRestricted, boolean isSwitchToEnabled) {
+                boolean isAddUser, boolean isRestricted, boolean isSwitchToEnabled,
+                boolean isAddSupervisedUser) {
             this.info = info;
             this.picture = picture;
             this.isGuest = isGuest;
@@ -874,11 +1108,12 @@ public class UserSwitcherController implements Dumpable {
             this.isAddUser = isAddUser;
             this.isRestricted = isRestricted;
             this.isSwitchToEnabled = isSwitchToEnabled;
+            this.isAddSupervisedUser = isAddSupervisedUser;
         }
 
         public UserRecord copyWithIsCurrent(boolean _isCurrent) {
             return new UserRecord(info, picture, isGuest, _isCurrent, isAddUser, isRestricted,
-                    isSwitchToEnabled);
+                    isSwitchToEnabled, isAddSupervisedUser);
         }
 
         public int resolveId() {
@@ -902,6 +1137,7 @@ public class UserSwitcherController implements Dumpable {
             }
             if (isGuest) sb.append(" <isGuest>");
             if (isAddUser) sb.append(" <isAddUser>");
+            if (isAddSupervisedUser) sb.append(" <isAddSupervisedUser>");
             if (isCurrent) sb.append(" <isCurrent>");
             if (picture != null) sb.append(" <hasPicture>");
             if (isRestricted) sb.append(" <isRestricted>");
@@ -916,77 +1152,6 @@ public class UserSwitcherController implements Dumpable {
             return sb.toString();
         }
     }
-
-    public static class UserDetailAdapter implements DetailAdapter {
-        private final Intent USER_SETTINGS_INTENT = new Intent(Settings.ACTION_USER_SETTINGS);
-
-        private final Context mContext;
-        private final Provider<UserDetailView.Adapter> mUserDetailViewAdapterProvider;
-
-        @Inject
-        UserDetailAdapter(Context context,
-                Provider<UserDetailView.Adapter> userDetailViewAdapterProvider) {
-            mContext = context;
-            mUserDetailViewAdapterProvider = userDetailViewAdapterProvider;
-        }
-
-        @Override
-        public CharSequence getTitle() {
-            return mContext.getString(R.string.quick_settings_user_title);
-        }
-
-        @Override
-        public View createDetailView(Context context, View convertView, ViewGroup parent) {
-            UserDetailView v;
-            if (!(convertView instanceof UserDetailView)) {
-                v = UserDetailView.inflate(context, parent, false);
-                v.setAdapter(mUserDetailViewAdapterProvider.get());
-            } else {
-                v = (UserDetailView) convertView;
-            }
-            v.refreshAdapter();
-            return v;
-        }
-
-        @Override
-        public Intent getSettingsIntent() {
-            return USER_SETTINGS_INTENT;
-        }
-
-        @Override
-        public int getSettingsText() {
-            return R.string.quick_settings_more_user_settings;
-        }
-
-        @Override
-        public Boolean getToggleState() {
-            return null;
-        }
-
-        @Override
-        public void setToggleState(boolean state) {
-        }
-
-        @Override
-        public int getMetricsCategory() {
-            return MetricsEvent.QS_USERDETAIL;
-        }
-
-        @Override
-        public UiEventLogger.UiEventEnum openDetailEvent() {
-            return QSUserSwitcherEvent.QS_USER_DETAIL_OPEN;
-        }
-
-        @Override
-        public UiEventLogger.UiEventEnum closeDetailEvent() {
-            return QSUserSwitcherEvent.QS_USER_DETAIL_CLOSE;
-        }
-
-        @Override
-        public UiEventLogger.UiEventEnum moreSettingsEvent() {
-            return QSUserSwitcherEvent.QS_USER_MORE_SETTINGS;
-        }
-    };
 
     private final KeyguardStateController.Callback mCallback =
             new KeyguardStateController.Callback() {
@@ -1004,6 +1169,21 @@ public class UserSwitcherController implements Dumpable {
                 }
             };
 
+    private final DeviceProvisionedController.DeviceProvisionedListener
+            mGuaranteeGuestPresentAfterProvisioned =
+            new DeviceProvisionedController.DeviceProvisionedListener() {
+                @Override
+                public void onDeviceProvisionedChanged() {
+                    if (isDeviceAllowedToAddGuest()) {
+                        mBgExecutor.execute(
+                                () -> mDeviceProvisionedController.removeCallback(
+                                        mGuaranteeGuestPresentAfterProvisioned));
+                        guaranteeGuestPresent();
+                    }
+                }
+            };
+
+
     private final class ExitGuestDialog extends SystemUIDialog implements
             DialogInterface.OnClickListener {
 
@@ -1012,16 +1192,18 @@ public class UserSwitcherController implements Dumpable {
 
         public ExitGuestDialog(Context context, int guestId, int targetId) {
             super(context);
-            setTitle(mGuestUserAutoCreated ? R.string.guest_reset_guest_dialog_title
-                    : R.string.guest_exit_guest_dialog_title);
+            setTitle(mGuestUserAutoCreated
+                    ? com.android.settingslib.R.string.guest_reset_guest_dialog_title
+                    : com.android.settingslib.R.string.guest_remove_guest_dialog_title);
             setMessage(context.getString(R.string.guest_exit_guest_dialog_message));
-            setButton(DialogInterface.BUTTON_NEGATIVE,
+            setButton(DialogInterface.BUTTON_NEUTRAL,
                     context.getString(android.R.string.cancel), this);
             setButton(DialogInterface.BUTTON_POSITIVE,
-                    context.getString(
-                            mGuestUserAutoCreated ? R.string.guest_reset_guest_dialog_remove
-                                    : R.string.guest_exit_guest_dialog_remove), this);
-            SystemUIDialog.setWindowOnTop(this);
+                    context.getString(mGuestUserAutoCreated
+                            ? com.android.settingslib.R.string.guest_reset_guest_confirm_button
+                            : com.android.settingslib.R.string.guest_remove_guest_confirm_button),
+                    this);
+            SystemUIDialog.setWindowOnTop(this, mKeyguardStateController.isShowing());
             setCanceledOnTouchOutside(false);
             mGuestId = guestId;
             mTargetId = targetId;
@@ -1029,67 +1211,68 @@ public class UserSwitcherController implements Dumpable {
 
         @Override
         public void onClick(DialogInterface dialog, int which) {
-            if (which == BUTTON_NEGATIVE) {
+            int penalty = which == BUTTON_NEGATIVE ? FalsingManager.NO_PENALTY
+                    : FalsingManager.HIGH_PENALTY;
+            if (mFalsingManager.isFalseTap(penalty)) {
+                return;
+            }
+            if (which == BUTTON_NEUTRAL) {
                 cancel();
             } else {
                 mUiEventLogger.log(QSUserSwitcherEvent.QS_USER_GUEST_REMOVE);
-                dismiss();
+                mDialogLaunchAnimator.dismissStack(this);
                 removeGuestUser(mGuestId, mTargetId);
             }
         }
     }
 
-    private final class AddUserDialog extends SystemUIDialog implements
+    @VisibleForTesting
+    final class AddUserDialog extends SystemUIDialog implements
             DialogInterface.OnClickListener {
 
         public AddUserDialog(Context context) {
             super(context);
-            setTitle(R.string.user_add_user_title);
-            setMessage(context.getString(R.string.user_add_user_message_short));
-            setButton(DialogInterface.BUTTON_NEGATIVE,
+            setTitle(com.android.settingslib.R.string.user_add_user_title);
+            setMessage(com.android.settingslib.R.string.user_add_user_message_short);
+            setButton(DialogInterface.BUTTON_NEUTRAL,
                     context.getString(android.R.string.cancel), this);
             setButton(DialogInterface.BUTTON_POSITIVE,
                     context.getString(android.R.string.ok), this);
-            SystemUIDialog.setWindowOnTop(this);
+            SystemUIDialog.setWindowOnTop(this, mKeyguardStateController.isShowing());
         }
 
         @Override
         public void onClick(DialogInterface dialog, int which) {
-            if (which == BUTTON_NEGATIVE) {
+            int penalty = which == BUTTON_NEGATIVE ? FalsingManager.NO_PENALTY
+                    : FalsingManager.MODERATE_PENALTY;
+            if (mFalsingManager.isFalseTap(penalty)) {
+                return;
+            }
+            if (which == BUTTON_NEUTRAL) {
                 cancel();
             } else {
-                dismiss();
+                mDialogLaunchAnimator.dismissStack(this);
                 if (ActivityManager.isUserAMonkey()) {
                     return;
                 }
-                Intent intent = CreateUserActivity.createIntentForStart(getContext());
-
-                // There are some differences between ActivityStarter and ActivityTaskManager in
-                // terms of how they start an activity. ActivityStarter hides the notification bar
-                // before starting the activity to make sure nothing is in front of the new
-                // activity. ActivityStarter also tries to unlock the device if it's locked.
-                // When locked with PIN/pattern/password then it shows the prompt, if there are no
-                // security steps then it dismisses the keyguard and then starts the activity.
-                // ActivityTaskManager doesn't hide the notification bar or unlocks the device, but
-                // it can start an activity on top of the locked screen.
-                if (!mKeyguardStateController.isUnlocked()
-                        && !mKeyguardStateController.canDismissLockScreen()) {
-                    // Device is locked and can't be unlocked without a PIN/pattern/password so we
-                    // need to use ActivityTaskManager to start the activity on top of the locked
-                    // screen.
-                    try {
-                        mActivityTaskManager.startActivity(null,
-                                mContext.getBasePackageName(), mContext.getAttributionTag(), intent,
-                                intent.resolveTypeIfNeeded(mContext.getContentResolver()), null,
-                                null, 0, 0, null, null);
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                        Log.e(TAG, "Couldn't start create user activity", e);
-                    }
-                } else {
-                    mActivityStarter.startActivity(intent, true);
-                }
+                // Use broadcast instead of ShadeController, as this dialog may have started in
+                // another process and normal dagger bindings are not available
+                mBroadcastSender.sendBroadcastAsUser(
+                        new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS), UserHandle.CURRENT);
+                getContext().startActivityAsUser(
+                        CreateUserActivity.createIntentForStart(getContext()),
+                        mUserTracker.getUserHandle());
             }
         }
+    }
+
+    /**
+     * Callback to for when this controller receives the intent to switch users.
+     */
+    public interface UserSwitchCallback {
+        /**
+         * Called when user has switched.
+         */
+        void onUserSwitched();
     }
 }

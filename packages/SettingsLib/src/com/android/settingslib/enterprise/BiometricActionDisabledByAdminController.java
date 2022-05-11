@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.provider.Settings;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -29,11 +30,6 @@ import com.android.settingslib.RestrictedLockUtils;
 public class BiometricActionDisabledByAdminController extends BaseActionDisabledByAdminController {
 
     private static final String TAG = "BiometricActionDisabledByAdminController";
-
-    // These MUST not change, as they are the stable API between here and device admin specified
-    // by the component below.
-    private static final String ACTION_LEARN_MORE = "android.settings.LEARN_MORE";
-    private static final String EXTRA_FROM_BIOMETRIC_SETUP = "from_biometric_setup";
 
     BiometricActionDisabledByAdminController(
             DeviceAdminStringProvider stringProvider) {
@@ -61,10 +57,10 @@ public class BiometricActionDisabledByAdminController extends BaseActionDisabled
             @NonNull RestrictedLockUtils.EnforcedAdmin enforcedAdmin) {
         return (dialog, which) -> {
             Log.d(TAG, "Positive button clicked, component: " + enforcedAdmin.component);
-            final Intent intent = new Intent(ACTION_LEARN_MORE)
-                    .setComponent(enforcedAdmin.component)
-                    .putExtra(EXTRA_FROM_BIOMETRIC_SETUP, true)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            final Intent intent = new Intent(Settings.ACTION_MANAGE_SUPERVISOR_RESTRICTED_SETTING)
+                    .putExtra(Settings.EXTRA_SUPERVISOR_RESTRICTED_SETTING_KEY,
+                            Settings.SUPERVISOR_VERIFICATION_SETTING_BIOMETRICS)
+                    .setPackage(enforcedAdmin.component.getPackageName());
             context.startActivity(intent);
         };
     }

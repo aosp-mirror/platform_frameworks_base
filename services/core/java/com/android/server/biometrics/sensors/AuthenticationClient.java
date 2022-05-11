@@ -16,32 +16,34 @@
 
 package com.android.server.biometrics.sensors;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.TaskStackListener;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
-import android.hardware.biometrics.BiometricsProtoEnums;
+import android.hardware.biometrics.BiometricOverlayConstants;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.VibrationEffect;
-import android.provider.Settings;
+import android.os.SystemClock;
 import android.security.KeyStore;
 import android.util.EventLog;
 import android.util.Slog;
 
 import com.android.server.biometrics.BiometricsProto;
 import com.android.server.biometrics.Utils;
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * A class to keep track of the authentication state for a given client.
@@ -51,6 +53,24 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
 
     private static final String TAG = "Biometrics/AuthenticationClient";
 
+    // New, has not started yet
+    public static final int STATE_NEW = 0;
+    // Framework/HAL have started this operation
+    public static final int STATE_STARTED = 1;
+    // Operation is started, but requires some user action to start (such as finger lift & re-touch)
+    public static final int STATE_STARTED_PAUSED = 2;
+    // Same as above, except auth was attempted (rejected, timed out, etc).
+    public static final int STATE_STARTED_PAUSED_ATTEMPTED = 3;
+    // Done, errored, canceled, etc. HAL/framework are not running this sensor anymore.
+    public static final int STATE_STOPPED = 4;
+
+    @IntDef({STATE_NEW,
+            STATE_STARTED,
+            STATE_STARTED_PAUSED,
+            STATE_STARTED_PAUSED_ATTEMPTED,
+            STATE_STOPPED})
+    @interface State {}
+
     private final boolean mIsStrongBiometric;
     private final boolean mRequireConfirmation;
     private final ActivityTaskManager mActivityTaskManager;
@@ -59,36 +79,39 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
     private final LockoutTracker mLockoutTracker;
     private final boolean mIsRestricted;
     private final boolean mAllowBackgroundAuthentication;
-    @NonNull private final ContentResolver mContentResolver;
+    private final boolean mIsKeyguardBypassEnabled;
 
     protected final long mOperationId;
 
     private long mStartTimeMs;
 
-    protected boolean mAuthAttempted;
-    private final boolean mCustomHaptics;
+    private boolean mAuthAttempted;
+    private boolean mAuthSuccess = false;
 
-    public AuthenticationClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
+    // TODO: This is currently hard to maintain, as each AuthenticationClient subclass must update
+    //  the state. We should think of a way to improve this in the future.
+    protected @State int mState = STATE_NEW;
+
+    public AuthenticationClient(@NonNull Context context, @NonNull Supplier<T> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
             int targetUserId, long operationId, boolean restricted, @NonNull String owner,
-            int cookie, boolean requireConfirmation, int sensorId, boolean isStrongBiometric,
-            int statsModality, int statsClient, @Nullable TaskStackListener taskStackListener,
-            @NonNull LockoutTracker lockoutTracker, boolean allowBackgroundAuthentication) {
+            int cookie, boolean requireConfirmation, int sensorId,
+            @NonNull BiometricLogger biometricLogger, @NonNull BiometricContext biometricContext,
+            boolean isStrongBiometric, @Nullable TaskStackListener taskStackListener,
+            @NonNull LockoutTracker lockoutTracker, boolean allowBackgroundAuthentication,
+            boolean shouldVibrate, boolean isKeyguardBypassEnabled) {
         super(context, lazyDaemon, token, listener, targetUserId, owner, cookie, sensorId,
-                statsModality, BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient);
+                shouldVibrate, biometricLogger, biometricContext);
         mIsStrongBiometric = isStrongBiometric;
         mOperationId = operationId;
         mRequireConfirmation = requireConfirmation;
-        mActivityTaskManager = ActivityTaskManager.getInstance();
+        mActivityTaskManager = getActivityTaskManager();
         mBiometricManager = context.getSystemService(BiometricManager.class);
         mTaskStackListener = taskStackListener;
         mLockoutTracker = lockoutTracker;
         mIsRestricted = restricted;
         mAllowBackgroundAuthentication = allowBackgroundAuthentication;
-
-        mContentResolver = context.getContentResolver();
-        mCustomHaptics = Settings.Global.getInt(mContentResolver,
-                "fp_custom_success_error", 0) == 1;
+        mIsKeyguardBypassEnabled = isKeyguardBypassEnabled;
     }
 
     public @LockoutTracker.LockoutMode int handleFailedAttempt(int userId) {
@@ -108,6 +131,10 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
 
     protected long getStartTimeMs() {
         return mStartTimeMs;
+    }
+
+    protected ActivityTaskManager getActivityTaskManager() {
+        return ActivityTaskManager.getInstance();
     }
 
     @Override
@@ -132,6 +159,10 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
         return Utils.isKeyguard(getContext(), getOwnerString());
     }
 
+    private boolean isSettings() {
+        return Utils.isSettings(getContext(), getOwnerString());
+    }
+
     @Override
     protected boolean isCryptoOperation() {
         return mOperationId != 0;
@@ -140,146 +171,245 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
     @Override
     public void onAuthenticated(BiometricAuthenticator.Identifier identifier,
             boolean authenticated, ArrayList<Byte> hardwareAuthToken) {
-        super.logOnAuthenticated(getContext(), authenticated, mRequireConfirmation,
-                getTargetUserId(), isBiometricPrompt());
+        getLogger().logOnAuthenticated(getContext(), getOperationContext(),
+                authenticated, mRequireConfirmation, getTargetUserId(), isBiometricPrompt());
 
         final ClientMonitorCallbackConverter listener = getListener();
 
-        try {
-            if (DEBUG) Slog.v(TAG, "onAuthenticated(" + authenticated + ")"
-                    + ", ID:" + identifier.getBiometricId()
-                    + ", Owner: " + getOwnerString()
-                    + ", isBP: " + isBiometricPrompt()
-                    + ", listener: " + listener
-                    + ", requireConfirmation: " + mRequireConfirmation
-                    + ", user: " + getTargetUserId());
+        if (DEBUG) Slog.v(TAG, "onAuthenticated(" + authenticated + ")"
+                + ", ID:" + identifier.getBiometricId()
+                + ", Owner: " + getOwnerString()
+                + ", isBP: " + isBiometricPrompt()
+                + ", listener: " + listener
+                + ", requireConfirmation: " + mRequireConfirmation
+                + ", user: " + getTargetUserId()
+                + ", clientMonitor: " + toString());
 
-            final PerformanceTracker pm = PerformanceTracker.getInstanceForSensorId(getSensorId());
-            if (isCryptoOperation()) {
-                pm.incrementCryptoAuthForUser(getTargetUserId(), authenticated);
+        final PerformanceTracker pm = PerformanceTracker.getInstanceForSensorId(getSensorId());
+        if (isCryptoOperation()) {
+            pm.incrementCryptoAuthForUser(getTargetUserId(), authenticated);
+        } else {
+            pm.incrementAuthForUser(getTargetUserId(), authenticated);
+        }
+
+        if (mAllowBackgroundAuthentication) {
+            Slog.w(TAG, "Allowing background authentication,"
+                    + " this is allowed only for platform or test invocations");
+        }
+
+        // Ensure authentication only succeeds if the client activity is on top.
+        boolean isBackgroundAuth = false;
+        if (!mAllowBackgroundAuthentication && authenticated
+                && !Utils.isKeyguard(getContext(), getOwnerString())
+                && !Utils.isSystem(getContext(), getOwnerString())) {
+            final List<ActivityManager.RunningTaskInfo> tasks =
+                    mActivityTaskManager.getTasks(1);
+            if (tasks == null || tasks.isEmpty()) {
+                Slog.e(TAG, "No running tasks reported");
+                isBackgroundAuth = true;
             } else {
-                pm.incrementAuthForUser(getTargetUserId(), authenticated);
-            }
-
-            if (mAllowBackgroundAuthentication) {
-                Slog.w(TAG, "Allowing background authentication,"
-                        + " this is allowed only for platform or test invocations");
-            }
-
-            // Ensure authentication only succeeds if the client activity is on top.
-            boolean isBackgroundAuth = false;
-            if (!mAllowBackgroundAuthentication && authenticated
-                    && !Utils.isKeyguard(getContext(), getOwnerString())
-                    && !Utils.isSystem(getContext(), getOwnerString())) {
-                final List<ActivityManager.RunningTaskInfo> tasks =
-                        mActivityTaskManager.getTasks(1);
-                if (tasks == null || tasks.isEmpty()) {
-                    Slog.e(TAG, "No running tasks reported");
+                final ComponentName topActivity = tasks.get(0).topActivity;
+                if (topActivity == null) {
+                    Slog.e(TAG, "Unable to get top activity");
                     isBackgroundAuth = true;
                 } else {
-                    final ComponentName topActivity = tasks.get(0).topActivity;
-                    if (topActivity == null) {
-                        Slog.e(TAG, "Unable to get top activity");
+                    final String topPackage = topActivity.getPackageName();
+                    if (!topPackage.contentEquals(getOwnerString())) {
+                        Slog.e(TAG, "Background authentication detected, top: " + topPackage
+                                + ", client: " + getOwnerString());
                         isBackgroundAuth = true;
-                    } else {
-                        final String topPackage = topActivity.getPackageName();
-                        if (!topPackage.contentEquals(getOwnerString())) {
-                            Slog.e(TAG, "Background authentication detected, top: " + topPackage
-                                    + ", client: " + getOwnerString());
-                            isBackgroundAuth = true;
-                        }
                     }
                 }
             }
+        }
 
-            // Fail authentication if we can't confirm the client activity is on top.
+        // Fail authentication if we can't confirm the client activity is on top.
+        if (isBackgroundAuth) {
+            Slog.e(TAG, "Failing possible background authentication");
+            authenticated = false;
+
+            // SafetyNet logging for exploitation attempts of b/159249069.
+            final ApplicationInfo appInfo = getContext().getApplicationInfo();
+            EventLog.writeEvent(0x534e4554, "159249069", appInfo != null ? appInfo.uid : -1,
+                    "Attempted background authentication");
+        }
+
+        if (authenticated) {
+            // SafetyNet logging for b/159249069 if constraint is violated.
             if (isBackgroundAuth) {
-                Slog.e(TAG, "Failing possible background authentication");
-                authenticated = false;
-
-                // SafetyNet logging for exploitation attempts of b/159249069.
                 final ApplicationInfo appInfo = getContext().getApplicationInfo();
                 EventLog.writeEvent(0x534e4554, "159249069", appInfo != null ? appInfo.uid : -1,
-                        "Attempted background authentication");
+                        "Successful background authentication!");
             }
 
-            if (authenticated) {
-                // SafetyNet logging for b/159249069 if constraint is violated.
-                if (isBackgroundAuth) {
-                    final ApplicationInfo appInfo = getContext().getApplicationInfo();
-                    EventLog.writeEvent(0x534e4554, "159249069", appInfo != null ? appInfo.uid : -1,
-                            "Successful background authentication!");
-                }
+            mAuthSuccess = true;
+            markAlreadyDone();
 
-                mAlreadyDone = true;
+            if (mTaskStackListener != null) {
+                mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
+            }
 
-                if (listener != null) {
-                    vibrateSuccess();
-                }
+            final byte[] byteToken = new byte[hardwareAuthToken.size()];
+            for (int i = 0; i < hardwareAuthToken.size(); i++) {
+                byteToken[i] = hardwareAuthToken.get(i);
+            }
 
-                if (mTaskStackListener != null) {
-                    mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
-                }
+            if (mIsStrongBiometric) {
+                mBiometricManager.resetLockoutTimeBound(getToken(),
+                        getContext().getOpPackageName(),
+                        getSensorId(), getTargetUserId(), byteToken);
+            }
 
-                final byte[] byteToken = new byte[hardwareAuthToken.size()];
-                for (int i = 0; i < hardwareAuthToken.size(); i++) {
-                    byteToken[i] = hardwareAuthToken.get(i);
-                }
-
-                if (mIsStrongBiometric) {
-                    mBiometricManager.resetLockoutTimeBound(getToken(),
-                            getContext().getOpPackageName(),
-                            getSensorId(), getTargetUserId(), byteToken);
-                }
-
-                if (isBiometricPrompt() && listener != null) {
-                    // BiometricService will add the token to keystore
-                    listener.onAuthenticationSucceeded(getSensorId(), identifier, byteToken,
-                            getTargetUserId(), mIsStrongBiometric);
-                } else if (!isBiometricPrompt() && listener != null) {
-                    if (mIsStrongBiometric) {
+            final CoexCoordinator coordinator = CoexCoordinator.getInstance();
+            coordinator.onAuthenticationSucceeded(SystemClock.uptimeMillis(), this,
+                    new CoexCoordinator.Callback() {
+                @Override
+                public void sendAuthenticationResult(boolean addAuthTokenIfStrong) {
+                    if (addAuthTokenIfStrong && mIsStrongBiometric) {
                         final int result = KeyStore.getInstance().addAuthToken(byteToken);
                         Slog.d(TAG, "addAuthToken: " + result);
                     } else {
                         Slog.d(TAG, "Skipping addAuthToken");
                     }
 
-                    // Explicitly have if/else here to make it super obvious in case the code is
-                    // touched in the future.
-                    if (!mIsRestricted) {
-                        listener.onAuthenticationSucceeded(getSensorId(), identifier, byteToken,
-                                getTargetUserId(), mIsStrongBiometric);
+                    if (listener != null) {
+                        try {
+                            // Explicitly have if/else here to make it super obvious in case the
+                            // code is touched in the future.
+                            if (!mIsRestricted) {
+                                listener.onAuthenticationSucceeded(getSensorId(),
+                                        identifier,
+                                        byteToken,
+                                        getTargetUserId(),
+                                        mIsStrongBiometric);
+                            } else {
+                                listener.onAuthenticationSucceeded(getSensorId(),
+                                        null /* identifier */,
+                                        byteToken,
+                                        getTargetUserId(),
+                                        mIsStrongBiometric);
+                            }
+                        } catch (RemoteException e) {
+                            Slog.e(TAG, "Unable to notify listener", e);
+                        }
                     } else {
-                        listener.onAuthenticationSucceeded(getSensorId(), null /* identifier */,
-                                byteToken, getTargetUserId(), mIsStrongBiometric);
+                        Slog.w(TAG, "Client not listening");
                     }
-
-                } else {
-                    // Client not listening
-                    Slog.w(TAG, "Client not listening");
                 }
+
+                @Override
+                public void sendHapticFeedback() {
+                    if (listener != null && mShouldVibrate) {
+                        vibrateSuccess();
+                    }
+                }
+
+                @Override
+                public void handleLifecycleAfterAuth() {
+                    AuthenticationClient.this.handleLifecycleAfterAuth(true /* authenticated */);
+                }
+
+                @Override
+                public void sendAuthenticationCanceled() {
+                    sendCancelOnly(listener);
+                }
+            });
+        } else { // not authenticated
+            if (isBackgroundAuth) {
+                Slog.e(TAG, "cancelling due to background auth");
+                cancel();
             } else {
-                if (listener != null) {
-                    vibrateError();
-                }
-
                 // Allow system-defined limit of number of attempts before giving up
                 final @LockoutTracker.LockoutMode int lockoutMode =
                         handleFailedAttempt(getTargetUserId());
-                if (lockoutMode == LockoutTracker.LOCKOUT_NONE) {
-                    // Don't send onAuthenticationFailed if we're in lockout, it causes a
-                    // janky UI on Keyguard/BiometricPrompt since "authentication failed"
-                    // will show briefly and be replaced by "device locked out" message.
-                    if (listener != null) {
-                        listener.onAuthenticationFailed(getSensorId());
-                    }
-                } else {
-                    mAlreadyDone = true;
+                if (lockoutMode != LockoutTracker.LOCKOUT_NONE) {
+                    markAlreadyDone();
+                }
+
+                final CoexCoordinator coordinator = CoexCoordinator.getInstance();
+                coordinator.onAuthenticationRejected(SystemClock.uptimeMillis(), this, lockoutMode,
+                        new CoexCoordinator.Callback() {
+                            @Override
+                            public void sendAuthenticationResult(boolean addAuthTokenIfStrong) {
+                                if (listener != null) {
+                                    try {
+                                        listener.onAuthenticationFailed(getSensorId());
+                                    } catch (RemoteException e) {
+                                        Slog.e(TAG, "Unable to notify listener", e);
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void sendHapticFeedback() {
+                                if (listener != null && mShouldVibrate) {
+                                    vibrateError();
+                                }
+                            }
+
+                            @Override
+                            public void handleLifecycleAfterAuth() {
+                                AuthenticationClient.this.handleLifecycleAfterAuth(false /* authenticated */);
+                            }
+
+                            @Override
+                            public void sendAuthenticationCanceled() {
+                                sendCancelOnly(listener);
+                            }
+                        });
+            }
+        }
+    }
+
+    /**
+     * Only call this method on interfaces where lockout does not come from onError, I.E. the
+     * old HIDL implementation.
+     */
+    protected void onLockoutTimed(long durationMillis) {
+        final ClientMonitorCallbackConverter listener = getListener();
+        final CoexCoordinator coordinator = CoexCoordinator.getInstance();
+        coordinator.onAuthenticationError(this, BiometricConstants.BIOMETRIC_ERROR_LOCKOUT,
+                new CoexCoordinator.ErrorCallback() {
+            @Override
+            public void sendHapticFeedback() {
+                if (listener != null && mShouldVibrate) {
+                    vibrateError();
                 }
             }
+        });
+    }
+
+    /**
+     * Only call this method on interfaces where lockout does not come from onError, I.E. the
+     * old HIDL implementation.
+     */
+    protected void onLockoutPermanent() {
+        final ClientMonitorCallbackConverter listener = getListener();
+        final CoexCoordinator coordinator = CoexCoordinator.getInstance();
+        coordinator.onAuthenticationError(this,
+                BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT,
+                new CoexCoordinator.ErrorCallback() {
+            @Override
+            public void sendHapticFeedback() {
+                if (listener != null && mShouldVibrate) {
+                    vibrateError();
+                }
+            }
+        });
+    }
+
+    private void sendCancelOnly(@Nullable ClientMonitorCallbackConverter listener) {
+        if (listener == null) {
+            Slog.e(TAG, "Unable to sendAuthenticationCanceled, listener null");
+            return;
+        }
+        try {
+            listener.onError(getSensorId(),
+                    getCookie(),
+                    BiometricConstants.BIOMETRIC_ERROR_CANCELED,
+                    0 /* vendorCode */);
         } catch (RemoteException e) {
-            Slog.e(TAG, "Unable to notify listener, finishing", e);
-            mCallback.onClientFinished(this, false /* success */);
+            Slog.e(TAG, "Remote exception", e);
         }
     }
 
@@ -295,11 +425,19 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
         }
     }
 
+    @Override
+    public void onError(@BiometricConstants.Errors int errorCode, int vendorCode) {
+        super.onError(errorCode, vendorCode);
+        mState = STATE_STOPPED;
+
+        CoexCoordinator.getInstance().onAuthenticationError(this, errorCode, this::vibrateError);
+    }
+
     /**
      * Start authentication
      */
     @Override
-    public void start(@NonNull Callback callback) {
+    public void start(@NonNull ClientMonitorCallback callback) {
         super.start(callback);
 
         final @LockoutTracker.LockoutMode int lockoutMode =
@@ -317,7 +455,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
             mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
         }
 
-        if (DEBUG) Slog.w(TAG, "Requesting auth for " + getOwnerString());
+        Slog.d(TAG, "Requesting auth for " + getOwnerString());
 
         mStartTimeMs = System.currentTimeMillis();
         mAuthAttempted = true;
@@ -333,6 +471,34 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
         }
     }
 
+    /**
+     * Handles lifecycle, e.g. {@link BiometricScheduler},
+     * {@link com.android.server.biometrics.sensors.BaseClientMonitor.Callback} after authentication
+     * results are known. Note that this happens asynchronously from (but shortly after)
+     * {@link #onAuthenticated(BiometricAuthenticator.Identifier, boolean, ArrayList)} and allows
+     * {@link CoexCoordinator} a chance to invoke/delay this event.
+     * @param authenticated
+     */
+    protected abstract void handleLifecycleAfterAuth(boolean authenticated);
+
+    /**
+     * @return true if a user was detected (i.e. face was found, fingerprint sensor was touched.
+     *         etc)
+     */
+    public abstract boolean wasUserDetected();
+
+    public @State int getState() {
+        return mState;
+    }
+
+    /**
+     * @return true if the client supports bypass (e.g. passive auth such as face), and if it's
+     * enabled by the user.
+     */
+    public boolean isKeyguardBypassEnabled() {
+        return mIsKeyguardBypassEnabled;
+    }
+
     @Override
     public int getProtoEnum() {
         return BiometricsProto.CM_AUTHENTICATE;
@@ -343,24 +509,28 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
         return true;
     }
 
-    @Override
-    protected @NonNull VibrationEffect getSuccessVibrationEffect() {
-        if (!mCustomHaptics) {
-            return super.getSuccessVibrationEffect();
-        }
-
-        return getVibration(Settings.Global.getString(mContentResolver,
-                "fp_success_type"), super.getSuccessVibrationEffect());
+    public boolean wasAuthAttempted() {
+        return mAuthAttempted;
     }
 
-    @Override
-    protected @NonNull VibrationEffect getErrorVibrationEffect() {
-        if (!mCustomHaptics) {
-            return super.getErrorVibrationEffect();
+    /** If an auth attempt completed successfully. */
+    public boolean wasAuthSuccessful() {
+        return mAuthSuccess;
+    }
+
+    protected int getShowOverlayReason() {
+        if (isKeyguard()) {
+            return BiometricOverlayConstants.REASON_AUTH_KEYGUARD;
+        } else if (isBiometricPrompt()) {
+            // BP reason always takes precedent over settings, since callers from within
+            // settings can always invoke BP.
+            return BiometricOverlayConstants.REASON_AUTH_BP;
+        } else if (isSettings()) {
+            // This is pretty much only for FingerprintManager#authenticate usage from
+            // FingerprintSettings.
+            return BiometricOverlayConstants.REASON_AUTH_SETTINGS;
+        } else {
+            return BiometricOverlayConstants.REASON_AUTH_OTHER;
         }
-
-        return getVibration(Settings.Global.getString(mContentResolver,
-                "fp_error_type"), super.getErrorVibrationEffect());
-
     }
 }

@@ -132,6 +132,26 @@ class OngoingCallChronometerTest : SysuiTestCase() {
         assertThat(textView.measuredWidth).isGreaterThan(0)
     }
 
+    @Test
+    fun setShouldHideText_true_textHidden() {
+        textView.setShouldHideText(true)
+        measureTextView()
+
+        assertThat(textView.measuredWidth).isEqualTo(0)
+    }
+
+    @Test
+    fun setShouldHideText_false_textShown() {
+        // First, set to true so that setting it to false will definitely have an effect.
+        textView.setShouldHideText(true)
+        measureTextView()
+
+        textView.setShouldHideText(false)
+        measureTextView()
+
+        assertThat(textView.measuredWidth).isGreaterThan(0)
+    }
+
     private fun setTextAndMeasure(text: String) {
         textView.text = text
         measureTextView()

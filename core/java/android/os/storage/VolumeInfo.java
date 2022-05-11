@@ -56,11 +56,12 @@ import java.util.UUID;
  * <ul>
  * <li>{@link #MOUNT_FLAG_PRIMARY} means the volume provides primary external
  * storage, historically found at {@code /sdcard}.
- * <li>{@link #MOUNT_FLAG_VISIBLE} means the volume is visible to third-party
- * apps for direct filesystem access. The system should send out relevant
- * storage broadcasts and index any media on visible volumes. Visible volumes
- * are considered a more stable part of the device, which is why we take the
- * time to index them. In particular, transient volumes like USB OTG devices
+ * <li>{@link #MOUNT_FLAG_VISIBLE_FOR_READ} and
+ * {@link #MOUNT_FLAG_VISIBLE_FOR_WRITE} mean the volume is visible to
+ * third-party apps for direct filesystem access. The system should send out
+ * relevant storage broadcasts and index any media on visible volumes. Visible
+ * volumes are considered a more stable part of the device, which is why we take
+ * the time to index them. In particular, transient volumes like USB OTG devices
  * <em>should not</em> be marked as visible; their contents should be surfaced
  * to apps through the Storage Access Framework.
  * </ul>
@@ -100,7 +101,8 @@ public class VolumeInfo implements Parcelable {
     public static final int STATE_BAD_REMOVAL = IVold.VOLUME_STATE_BAD_REMOVAL;
 
     public static final int MOUNT_FLAG_PRIMARY = IVold.MOUNT_FLAG_PRIMARY;
-    public static final int MOUNT_FLAG_VISIBLE = IVold.MOUNT_FLAG_VISIBLE;
+    public static final int MOUNT_FLAG_VISIBLE_FOR_READ = IVold.MOUNT_FLAG_VISIBLE_FOR_READ;
+    public static final int MOUNT_FLAG_VISIBLE_FOR_WRITE = IVold.MOUNT_FLAG_VISIBLE_FOR_WRITE;
 
     private static SparseArray<String> sStateToEnvironment = new SparseArray<>();
     private static ArrayMap<String, String> sEnvironmentToBroadcast = new ArrayMap<>();
@@ -312,17 +314,31 @@ public class VolumeInfo implements Parcelable {
         return isPrimary() && (getType() == TYPE_PUBLIC);
     }
 
-    @UnsupportedAppUsage
-    public boolean isVisible() {
-        return (mountFlags & MOUNT_FLAG_VISIBLE) != 0;
+    private boolean isVisibleForRead() {
+        return (mountFlags & MOUNT_FLAG_VISIBLE_FOR_READ) != 0;
     }
 
-    public boolean isVisibleForUser(int userId) {
-        if ((type == TYPE_PUBLIC || type == TYPE_STUB || type == TYPE_EMULATED)
-                && mountUserId == userId) {
-            return isVisible();
+    private boolean isVisibleForWrite() {
+        return (mountFlags & MOUNT_FLAG_VISIBLE_FOR_WRITE) != 0;
+    }
+
+    @UnsupportedAppUsage
+    public boolean isVisible() {
+        return isVisibleForRead() || isVisibleForWrite();
+    }
+
+    private boolean isVolumeSupportedForUser(int userId) {
+        if (mountUserId != userId) {
+            return false;
         }
-        return false;
+        return type == TYPE_PUBLIC || type == TYPE_STUB || type == TYPE_EMULATED;
+    }
+
+    /**
+     * Returns {@code true} if this volume is visible for {@code userId}, {@code false} otherwise.
+     */
+    public boolean isVisibleForUser(int userId) {
+        return isVolumeSupportedForUser(userId) && isVisible();
     }
 
     /**
@@ -335,12 +351,12 @@ public class VolumeInfo implements Parcelable {
     }
 
     public boolean isVisibleForRead(int userId) {
-        return isVisibleForUser(userId);
+        return isVolumeSupportedForUser(userId) && isVisibleForRead();
     }
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean isVisibleForWrite(int userId) {
-        return isVisibleForUser(userId);
+        return isVolumeSupportedForUser(userId) && isVisibleForWrite();
     }
 
     @UnsupportedAppUsage
@@ -388,6 +404,7 @@ public class VolumeInfo implements Parcelable {
 
         final boolean removable;
         final boolean emulated;
+        final boolean externallyManaged = type == TYPE_STUB;
         final boolean allowMassStorage = false;
         final String envState = reportUnmounted
                 ? Environment.MEDIA_UNMOUNTED : getEnvironmentForState(state);
@@ -443,7 +460,7 @@ public class VolumeInfo implements Parcelable {
         }
 
         return new StorageVolume(id, userPath, internalPath, description, isPrimary(), removable,
-                emulated, allowMassStorage, maxFileSize, new UserHandle(userId),
+                emulated, externallyManaged, allowMassStorage, maxFileSize, new UserHandle(userId),
                 uuid, derivedFsUuid, envState);
     }
 

@@ -16,11 +16,21 @@
 
 package android.net;
 
+import static android.net.NetworkStats.METERED_ALL;
+import static android.net.NetworkStats.METERED_YES;
+import static android.net.NetworkTemplate.MATCH_BLUETOOTH;
+import static android.net.NetworkTemplate.MATCH_CARRIER;
+import static android.net.NetworkTemplate.MATCH_ETHERNET;
+import static android.net.NetworkTemplate.MATCH_MOBILE;
+import static android.net.NetworkTemplate.MATCH_WIFI;
+
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.BackupUtils;
+import android.util.Log;
 import android.util.Range;
 import android.util.RecurrenceRule;
 
@@ -34,6 +44,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Iterator;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Policy for networks matching a {@link NetworkTemplate}, including usage cycle
@@ -42,9 +53,25 @@ import java.util.Objects;
  * @hide
  */
 public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
+    private static final String TAG = NetworkPolicy.class.getSimpleName();
     private static final int VERSION_INIT = 1;
     private static final int VERSION_RULE = 2;
     private static final int VERSION_RAPID = 3;
+
+    /**
+     * Initial Version of the NetworkTemplate backup serializer.
+     */
+    private static final int TEMPLATE_BACKUP_VERSION_1_INIT = 1;
+    private static final int TEMPLATE_BACKUP_VERSION_2_UNSUPPORTED = 2;
+    /**
+     * Version of the NetworkTemplate backup serializer that added carrier template support.
+     */
+    private static final int TEMPLATE_BACKUP_VERSION_3_SUPPORT_CARRIER_TEMPLATE = 3;
+    /**
+     * Latest Version of the NetworkTemplate Backup Serializer.
+     */
+    private static final int TEMPLATE_BACKUP_VERSION_LATEST =
+            TEMPLATE_BACKUP_VERSION_3_SUPPORT_CARRIER_TEMPLATE;
 
     public static final int CYCLE_NONE = -1;
     public static final long WARNING_DISABLED = -1;
@@ -115,8 +142,8 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
     }
 
     private NetworkPolicy(Parcel source) {
-        template = source.readParcelable(null);
-        cycleRule = source.readParcelable(null);
+        template = source.readParcelable(null, android.net.NetworkTemplate.class);
+        cycleRule = source.readParcelable(null, android.util.RecurrenceRule.class);
         warningBytes = source.readLong();
         limitBytes = source.readLong();
         lastWarningSnooze = source.readLong();
@@ -255,7 +282,7 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
         DataOutputStream out = new DataOutputStream(baos);
 
         out.writeInt(VERSION_RAPID);
-        out.write(template.getBytesForBackup());
+        out.write(getNetworkTemplateBytesForBackup());
         cycleRule.writeToStream(out);
         out.writeLong(warningBytes);
         out.writeLong(limitBytes);
@@ -274,7 +301,7 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
             throw new BackupUtils.BadVersionException("Unknown backup version: " + version);
         }
 
-        final NetworkTemplate template = NetworkTemplate.getNetworkTemplateFromBackup(in);
+        final NetworkTemplate template = getNetworkTemplateFromBackup(in);
         final RecurrenceRule cycleRule;
         if (version >= VERSION_RULE) {
             cycleRule = new RecurrenceRule(in);
@@ -297,5 +324,90 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
         final boolean inferred = in.readInt() == 1;
         return new NetworkPolicy(template, cycleRule, warningBytes, limitBytes, lastWarningSnooze,
                 lastLimitSnooze, lastRapidSnooze, metered, inferred);
+    }
+
+    @NonNull
+    private byte[] getNetworkTemplateBytesForBackup() throws IOException {
+        if (!isTemplatePersistable(this.template)) {
+            Log.wtf(TAG, "Trying to backup non-persistable template: " + this);
+        }
+
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        final DataOutputStream out = new DataOutputStream(baos);
+
+        out.writeInt(TEMPLATE_BACKUP_VERSION_LATEST);
+
+        out.writeInt(template.getMatchRule());
+        final Set<String> subscriberIds = template.getSubscriberIds();
+        BackupUtils.writeString(out, subscriberIds.isEmpty()
+                ? null : subscriberIds.iterator().next());
+        BackupUtils.writeString(out, template.getWifiNetworkKeys().isEmpty()
+                ? null : template.getWifiNetworkKeys().iterator().next());
+        out.writeInt(template.getMeteredness());
+
+        return baos.toByteArray();
+    }
+
+    @NonNull
+    private static NetworkTemplate getNetworkTemplateFromBackup(DataInputStream in)
+            throws IOException, BackupUtils.BadVersionException {
+        int version = in.readInt();
+        if (version < TEMPLATE_BACKUP_VERSION_1_INIT || version > TEMPLATE_BACKUP_VERSION_LATEST
+                || version == TEMPLATE_BACKUP_VERSION_2_UNSUPPORTED) {
+            throw new BackupUtils.BadVersionException("Unknown Backup Serialization Version");
+        }
+
+        int matchRule = in.readInt();
+        final String subscriberId = BackupUtils.readString(in);
+        final String wifiNetworkKey = BackupUtils.readString(in);
+
+        final int metered;
+        if (version >= TEMPLATE_BACKUP_VERSION_3_SUPPORT_CARRIER_TEMPLATE) {
+            metered = in.readInt();
+        } else {
+            // For backward compatibility, fill the missing filters from match rules.
+            metered = (matchRule == MATCH_MOBILE || matchRule == MATCH_CARRIER)
+                    ? METERED_YES : METERED_ALL;
+        }
+
+        try {
+            final NetworkTemplate.Builder builder = new NetworkTemplate.Builder(matchRule)
+                    .setMeteredness(metered);
+            if (subscriberId != null) {
+                builder.setSubscriberIds(Set.of(subscriberId));
+            }
+            if (wifiNetworkKey != null) {
+                builder.setWifiNetworkKeys(Set.of(wifiNetworkKey));
+            }
+            return builder.build();
+        } catch (IllegalArgumentException e) {
+            throw new BackupUtils.BadVersionException(
+                    "Restored network template contains unknown match rule " + matchRule, e);
+        }
+    }
+
+    /**
+     * Check if the template can be persisted into disk.
+     */
+    public static boolean isTemplatePersistable(@NonNull NetworkTemplate template) {
+        switch (template.getMatchRule()) {
+            case MATCH_BLUETOOTH:
+            case MATCH_ETHERNET:
+                return true;
+            case MATCH_CARRIER:
+            case MATCH_MOBILE:
+                return !template.getSubscriberIds().isEmpty()
+                        && template.getMeteredness() == METERED_YES;
+            case MATCH_WIFI:
+                if (template.getWifiNetworkKeys().isEmpty()
+                        && template.getSubscriberIds().isEmpty()) {
+                    return false;
+                }
+                return true;
+            default:
+                // Don't allow persistable for unknown types or legacy types such as
+                // MATCH_MOBILE_WILDCARD, MATCH_PROXY, etc.
+                return false;
+        }
     }
 }

@@ -46,7 +46,6 @@
             android:id="@+id/volume_row_slider_frame"
             android:layout_width="match_parent"
             android:layout_height="@dimen/volume_row_slider_height">
-            <include layout="@layout/volume_dnd_icon"/>
             <SeekBar
                 android:id="@+id/volume_row_slider"
                 android:paddingLeft="0dp"
@@ -63,6 +62,7 @@
                 android:background="@null"
                 android:layoutDirection="ltr"
                 android:rotation="270" />
+            <include layout="@layout/volume_dnd_icon"/>
         </FrameLayout>
 
         <com.android.keyguard.AlphaOptimizedImageButton

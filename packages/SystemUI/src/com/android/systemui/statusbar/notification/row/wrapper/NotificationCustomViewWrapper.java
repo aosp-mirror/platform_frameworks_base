@@ -22,6 +22,7 @@ import android.view.View;
 
 import com.android.internal.graphics.ColorUtils;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.notification.NotificationFadeAware;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
 /**
@@ -46,10 +47,6 @@ public class NotificationCustomViewWrapper extends NotificationViewWrapper {
     @Override
     public void onContentUpdated(ExpandableNotificationRow row) {
         super.onContentUpdated(row);
-
-        // Custom views will most likely use just white or black as their text color.
-        // We need to scan through and replace these colors by Material NEXT colors.
-        ensureThemeOnChildren(mView);
 
         // Let's invert the notification colors when we're in night mode and
         // the notification background isn't colorized.
@@ -89,5 +86,15 @@ public class NotificationCustomViewWrapper extends NotificationViewWrapper {
     @Override
     public boolean shouldClipToRounding(boolean topRounded, boolean bottomRounded) {
         return true;
+    }
+
+    /**
+     * Apply the faded state as a layer type change to the custom view which needs to have
+     * overlapping contents render precisely.
+     */
+    @Override
+    public void setNotificationFaded(boolean faded) {
+        super.setNotificationFaded(faded);
+        NotificationFadeAware.setLayerTypeForFaded(mView, faded);
     }
 }

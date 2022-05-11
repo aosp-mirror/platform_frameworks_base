@@ -19,18 +19,19 @@
     android:layout_width="250dp"
     android:layout_height="48dp"
     android:orientation="vertical"
-    android:padding="13dp">
+    android:padding="12dp">
     <TextView
         android:id="@+id/screen_recording_dialog_source_text"
-        android:layout_width="250dp"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center_vertical"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="?android:attr/textColorPrimary"/>
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textSize="14sp"
+        android:textColor="@color/material_dynamic_neutral10"/>
     <TextView
         android:id="@+id/screen_recording_dialog_source_description"
-        android:layout_width="250dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="?android:attr/textColorSecondary"/>
+        android:textColor="@color/material_dynamic_neutral_variant30"/>
 </LinearLayout>

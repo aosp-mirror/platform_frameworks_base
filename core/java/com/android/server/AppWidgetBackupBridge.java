@@ -47,9 +47,9 @@ public class AppWidgetBackupBridge {
                 : null;
     }
 
-    public static void restoreStarting(int userId) {
+    public static void systemRestoreStarting(int userId) {
         if (sAppWidgetService != null) {
-            sAppWidgetService.restoreStarting(userId);
+            sAppWidgetService.systemRestoreStarting(userId);
         }
     }
 
@@ -59,9 +59,9 @@ public class AppWidgetBackupBridge {
         }
     }
 
-    public static void restoreFinished(int userId) {
+    public static void systemRestoreFinished(int userId) {
         if (sAppWidgetService != null) {
-            sAppWidgetService.restoreFinished(userId);
+            sAppWidgetService.systemRestoreFinished(userId);
         }
     }
 }

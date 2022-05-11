@@ -22,7 +22,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.os.Build;
 import android.text.TextUtils;
 import android.text.method.TransformationMethod;
 import android.text.method.TranslationTransformationMethod;
@@ -43,38 +42,16 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
 
     private static final String TAG = "TextViewTranslationCb";
 
-    // TODO(b/182433547): remove Build.IS_DEBUGGABLE before ship. Enable the logging in debug build
-    //  to help the debug during the development phase
-    private static final boolean DEBUG = Log.isLoggable(UiTranslationManager.LOG_TAG, Log.DEBUG)
-            || Build.IS_DEBUGGABLE;
+    private static final boolean DEBUG = Log.isLoggable(UiTranslationManager.LOG_TAG, Log.DEBUG);
 
     private TranslationTransformationMethod mTranslationTransformation;
     private boolean mIsShowingTranslation = false;
+    private boolean mAnimationRunning = false;
     private boolean mIsTextPaddingEnabled = false;
     private CharSequence mPaddedText;
     private int mAnimationDurationMillis = 250; // default value
 
     private CharSequence mContentDescription;
-
-    /**
-     * Invoked by the platform when receiving the successful {@link ViewTranslationResponse} for the
-     * view that provides the translatable information by {@link View#createTranslationRequest} and
-     * sent by the platform.
-     */
-    void setTranslationTransformation(TranslationTransformationMethod method) {
-        if (method == null) {
-            if (DEBUG) {
-                Log.w(TAG, "setTranslationTransformation: should not set null "
-                        + "TranslationTransformationMethod");
-            }
-            return;
-        }
-        mTranslationTransformation = method;
-    }
-
-    TranslationTransformationMethod getTranslationTransformation() {
-        return mTranslationTransformation;
-    }
 
     private void clearTranslationTransformation() {
         if (DEBUG) {
@@ -88,34 +65,45 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
      */
     @Override
     public boolean onShowTranslation(@NonNull View view) {
-        if (view.getViewTranslationResponse() == null) {
-            Log.wtf(TAG, "onShowTranslation() shouldn't be called before "
+        if (mIsShowingTranslation) {
+            if (DEBUG) {
+                Log.d(TAG, view + " is already showing translated text.");
+            }
+            return false;
+        }
+        ViewTranslationResponse response = view.getViewTranslationResponse();
+        if (response == null) {
+            Log.e(TAG, "onShowTranslation() shouldn't be called before "
                     + "onViewTranslationResponse().");
             return false;
         }
-        if (mTranslationTransformation != null) {
-            final TransformationMethod transformation = mTranslationTransformation;
-            runWithAnimation(
-                    (TextView) view,
-                    () -> {
-                        mIsShowingTranslation = true;
-                        ((TextView) view).setTransformationMethod(transformation);
-                    });
-            ViewTranslationResponse response = view.getViewTranslationResponse();
-            if (response.getKeys().contains(ViewTranslationRequest.ID_CONTENT_DESCRIPTION)) {
-                CharSequence translatedContentDescription =
-                        response.getValue(ViewTranslationRequest.ID_CONTENT_DESCRIPTION).getText();
-                if (!TextUtils.isEmpty(translatedContentDescription)) {
-                    mContentDescription = view.getContentDescription();
-                    view.setContentDescription(translatedContentDescription);
-                }
+        // It is possible user changes text and new translation response returns, system should
+        // update the translation response to keep the result up to date.
+        // Because TextView.setTransformationMethod() will skip the same TransformationMethod
+        // instance, we should create a new one to let new translation can work.
+        if (mTranslationTransformation == null
+                || !response.equals(mTranslationTransformation.getViewTranslationResponse())) {
+            TransformationMethod originalTranslationMethod =
+                    ((TextView) view).getTransformationMethod();
+            mTranslationTransformation = new TranslationTransformationMethod(response,
+                    originalTranslationMethod);
+        }
+        final TransformationMethod transformation = mTranslationTransformation;
+        runChangeTextWithAnimationIfNeeded(
+                (TextView) view,
+                () -> {
+                    mIsShowingTranslation = true;
+                    mAnimationRunning = false;
+                    // TODO(b/178353965): well-handle setTransformationMethod.
+                    ((TextView) view).setTransformationMethod(transformation);
+                });
+        if (response.getKeys().contains(ViewTranslationRequest.ID_CONTENT_DESCRIPTION)) {
+            CharSequence translatedContentDescription =
+                    response.getValue(ViewTranslationRequest.ID_CONTENT_DESCRIPTION).getText();
+            if (!TextUtils.isEmpty(translatedContentDescription)) {
+                mContentDescription = view.getContentDescription();
+                view.setContentDescription(translatedContentDescription);
             }
-        } else {
-            if (DEBUG) {
-                // TODO(b/182433547): remove before S release
-                Log.w(TAG, "onShowTranslation(): no translated text.");
-            }
-            return false;
         }
         return true;
     }
@@ -126,7 +114,7 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
     @Override
     public boolean onHideTranslation(@NonNull View view) {
         if (view.getViewTranslationResponse() == null) {
-            Log.wtf(TAG, "onHideTranslation() shouldn't be called before "
+            Log.e(TAG, "onHideTranslation() shouldn't be called before "
                     + "onViewTranslationResponse().");
             return false;
         }
@@ -134,10 +122,11 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
         if (mTranslationTransformation != null) {
             final TransformationMethod transformation =
                     mTranslationTransformation.getOriginalTransformationMethod();
-            runWithAnimation(
+            runChangeTextWithAnimationIfNeeded(
                     (TextView) view,
                     () -> {
                         mIsShowingTranslation = false;
+                        mAnimationRunning = false;
                         ((TextView) view).setTransformationMethod(transformation);
                     });
             if (!TextUtils.isEmpty(mContentDescription)) {
@@ -145,7 +134,6 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
             }
         } else {
             if (DEBUG) {
-                // TODO(b/182433547): remove before S release
                 Log.w(TAG, "onHideTranslation(): no translated text.");
             }
             return false;
@@ -166,7 +154,6 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
             mContentDescription = null;
         } else {
             if (DEBUG) {
-                // TODO(b/182433547): remove before S release
                 Log.w(TAG, "onClearTranslation(): no translated text.");
             }
             return false;
@@ -174,8 +161,15 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
         return true;
     }
 
-    boolean isShowingTranslation() {
+    public boolean isShowingTranslation() {
         return mIsShowingTranslation;
+    }
+
+    /**
+     * Returns whether the view is running animation to show or hide the translation.
+     */
+    public boolean isAnimationRunning() {
+        return mAnimationRunning;
     }
 
     @Override
@@ -238,14 +232,21 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
      * Applies a simple text alpha animation when toggling between original and translated text. The
      * text is fully faded out, then swapped to the new text, then the fading is reversed.
      *
-     * @param runnable the operation to run on the view after the text is faded out, to change to
-     * displaying the original or translated text.
+     * @param changeTextRunnable the operation to run on the view after the text is faded out, to
+     * change to displaying the original or translated text.
      */
-    private void runWithAnimation(TextView view, Runnable runnable) {
+    private void runChangeTextWithAnimationIfNeeded(TextView view, Runnable changeTextRunnable) {
+        boolean areAnimatorsEnabled = ValueAnimator.areAnimatorsEnabled();
+        if (!areAnimatorsEnabled) {
+            // The animation is disabled, just change display text
+            changeTextRunnable.run();
+            return;
+        }
         if (mAnimator != null) {
             mAnimator.end();
             // Note: mAnimator is now null; do not use again here.
         }
+        mAnimationRunning = true;
         int fadedOutColor = colorWithAlpha(view.getCurrentTextColor(), 0);
         mAnimator = ValueAnimator.ofArgb(view.getCurrentTextColor(), fadedOutColor);
         mAnimator.addUpdateListener(
@@ -274,7 +275,7 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
 
             @Override
             public void onAnimationRepeat(Animator animation) {
-                runnable.run();
+                changeTextRunnable.run();
             }
         });
         mAnimator.start();

@@ -55,6 +55,7 @@ import android.content.ClipData;
 import android.content.Intent;
 import android.content.pm.ProviderInfo;
 import android.net.Uri;
+import android.os.Process;
 import android.os.UserHandle;
 import android.util.ArraySet;
 
@@ -72,8 +73,8 @@ public class UriGrantsManagerServiceTest {
 
     // we expect the following only during grant if a grant is expected
     private void verifyNoVisibilityGrant() {
-        verify(mContext.mPmInternal, never())
-                .grantImplicitAccess(anyInt(), any(), anyInt(), anyInt(), anyBoolean());
+        verify(mContext.mPmInternal, never()).grantImplicitAccess(
+                anyInt(), any(), anyInt(), anyInt(), anyBoolean(), anyBoolean());
     }
 
     @Before
@@ -292,23 +293,29 @@ public class UriGrantsManagerServiceTest {
         intent.setClipData(clip);
 
         {
-            // When granting towards primary, persistable can't be honored so
-            // the entire grant fails
-            try {
-                mService.checkGrantUriPermissionFromIntent(
-                        intent, UID_PRIMARY_CAMERA, PKG_SOCIAL, USER_PRIMARY);
-                fail();
-            } catch (SecurityException expected) {
+            // The camera package shouldn't be able to see other packages or their providers,
+            // so make sure the grant only succeeds for the camera's URIs.
+            final NeededUriGrants nug = mService.checkGrantUriPermissionFromIntent(
+                    intent, UID_PRIMARY_CAMERA, PKG_SOCIAL, USER_PRIMARY);
+            if (nug != null && nug.uris != null) {
+                for (GrantUri gu : nug.uris) {
+                    if (!gu.uri.getAuthority().equals(PKG_CAMERA)) {
+                        fail();
+                    }
+                }
             }
         }
         {
-            // When granting towards secondary, persistable can't be honored so
-            // the entire grant fails
-            try {
-                mService.checkGrantUriPermissionFromIntent(
-                        intent, UID_PRIMARY_CAMERA, PKG_SOCIAL, USER_SECONDARY);
-                fail();
-            } catch (SecurityException expected) {
+            // The camera package shouldn't be able to see other packages or their providers,
+            // so make sure the grant only succeeds for the camera's URIs.
+            final NeededUriGrants nug = mService.checkGrantUriPermissionFromIntent(
+                    intent, UID_PRIMARY_CAMERA, PKG_SOCIAL, USER_SECONDARY);
+            if (nug != null && nug.uris != null) {
+                for (GrantUri gu : nug.uris) {
+                    if (!gu.uri.getAuthority().equals(PKG_CAMERA)) {
+                        fail();
+                    }
+                }
             }
         }
     }
@@ -350,7 +357,7 @@ public class UriGrantsManagerServiceTest {
         final UriPermissionOwner owner = new UriPermissionOwner(mService, "primary");
 
         final ProviderInfo cameraInfo = mContext.mPmInternal.resolveContentProvider(
-                PKG_CAMERA, 0, USER_PRIMARY);
+                PKG_CAMERA, 0, USER_PRIMARY, Process.SYSTEM_UID);
 
         // By default no social can see any camera
         assertFalse(mService.checkAuthorityGrants(UID_PRIMARY_SOCIAL,

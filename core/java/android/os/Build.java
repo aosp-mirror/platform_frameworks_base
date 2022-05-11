@@ -31,6 +31,7 @@ import android.sysprop.DeviceProperties;
 import android.sysprop.SocProperties;
 import android.sysprop.TelephonyProperties;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.Slog;
 import android.view.View;
 
@@ -39,6 +40,7 @@ import dalvik.system.VMRuntime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -283,11 +285,18 @@ public class Build {
         public static final String RELEASE = getString("ro.build.version.release");
 
         /**
-         * The version string we show to the user; may be {@link #RELEASE} or
-         * {@link #CODENAME} if not a final release build.
+         * The version string.  May be {@link #RELEASE} or {@link #CODENAME} if
+         * not a final release build.
          */
         @NonNull public static final String RELEASE_OR_CODENAME = getString(
                 "ro.build.version.release_or_codename");
+
+        /**
+         * The version string we show to the user; may be {@link #RELEASE} or
+         * a descriptive string if not a final release build.
+         */
+        @NonNull public static final String RELEASE_OR_PREVIEW_DISPLAY = getString(
+                "ro.build.version.release_or_preview_display");
 
         /**
          * The base OS build the product is based on.
@@ -396,6 +405,22 @@ public class Build {
          */
         public static final String CODENAME = getString("ro.build.version.codename");
 
+        /**
+         * All known codenames that are present in {@link VERSION_CODES}.
+         *
+         * <p>This includes in development codenames as well, i.e. if {@link #CODENAME} is not "REL"
+         * then the value of that is present in this set.
+         *
+         * <p>If a particular string is not present in this set, then it is either not a codename
+         * or a codename for a future release. For example, during Android R development, "Tiramisu"
+         * was not a known codename.
+         *
+         * @hide
+         */
+        @SystemApi
+        @NonNull public static final Set<String> KNOWN_CODENAMES =
+                new ArraySet<>(getStringList("ro.build.version.known_codenames", ","));
+
         private static final String[] ALL_CODENAMES
                 = getStringList("ro.build.version.all_codenames", ",");
 
@@ -441,23 +466,30 @@ public class Build {
         public static final int CUR_DEVELOPMENT = 10000;
 
         /**
-         * October 2008: The original, first, version of Android.  Yay!
+         * The original, first, version of Android.  Yay!
+         *
+         * <p>Released publicly as Android 1.0 in September 2008.
          */
         public static final int BASE = 1;
 
         /**
-         * February 2009: First Android update, officially called 1.1.
+         * First Android update.
+         *
+         * <p>Released publicly as Android 1.1 in February 2009.
          */
         public static final int BASE_1_1 = 2;
 
         /**
-         * May 2009: Android 1.5.
+         * C.
+         *
+         * <p>Released publicly as Android 1.5 in April 2009.
          */
         public static final int CUPCAKE = 3;
 
         /**
-         * September 2009: Android 1.6.
+         * D.
          *
+         * <p>Released publicly as Android 1.6 in September 2009.
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior:</p>
          * <ul>
@@ -481,8 +513,9 @@ public class Build {
         public static final int DONUT = 4;
 
         /**
-         * November 2009: Android 2.0
+         * E.
          *
+         * <p>Released publicly as Android 2.0 in October 2009.
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior:</p>
          * <ul>
@@ -501,23 +534,30 @@ public class Build {
         public static final int ECLAIR = 5;
 
         /**
-         * December 2009: Android 2.0.1
+         * E incremental update.
+         *
+         * <p>Released publicly as Android 2.0.1 in December 2009.
          */
         public static final int ECLAIR_0_1 = 6;
 
         /**
-         * January 2010: Android 2.1
+         * E MR1.
+         *
+         * <p>Released publicly as Android 2.1 in January 2010.
          */
         public static final int ECLAIR_MR1 = 7;
 
         /**
-         * June 2010: Android 2.2
+         * F.
+         *
+         * <p>Released publicly as Android 2.2 in May 2010.
          */
         public static final int FROYO = 8;
 
         /**
-         * November 2010: Android 2.3
+         * G.
          *
+         * <p>Released publicly as Android 2.3 in December 2010.
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior:</p>
          * <ul>
@@ -528,13 +568,16 @@ public class Build {
         public static final int GINGERBREAD = 9;
 
         /**
-         * February 2011: Android 2.3.3.
+         * G MR1.
+         *
+         * <p>Released publicly as Android 2.3.3 in February 2011.
          */
         public static final int GINGERBREAD_MR1 = 10;
 
         /**
-         * February 2011: Android 3.0.
+         * H.
          *
+         * <p>Released publicly as Android 3.0 in February 2011.
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior:</p>
          * <ul>
@@ -573,13 +616,16 @@ public class Build {
         public static final int HONEYCOMB = 11;
 
         /**
-         * May 2011: Android 3.1.
+         * H MR1.
+         *
+         * <p>Released publicly as Android 3.1 in May 2011.
          */
         public static final int HONEYCOMB_MR1 = 12;
 
         /**
-         * June 2011: Android 3.2.
+         * H MR2.
          *
+         * <p>Released publicly as Android 3.2 in July 2011.
          * <p>Update to Honeycomb MR1 to support 7 inch tablets, improve
          * screen compatibility mode, etc.</p>
          *
@@ -626,8 +672,9 @@ public class Build {
         public static final int HONEYCOMB_MR2 = 13;
 
         /**
-         * October 2011: Android 4.0.
+         * I.
          *
+         * <p>Released publicly as Android 4.0 in October 2011.
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior:</p>
          * <ul>
@@ -672,13 +719,16 @@ public class Build {
         public static final int ICE_CREAM_SANDWICH = 14;
 
         /**
-         * December 2011: Android 4.0.3.
+         * I MR1.
+         *
+         * <p>Released publicly as Android 4.03 in December 2011.
          */
         public static final int ICE_CREAM_SANDWICH_MR1 = 15;
 
         /**
-         * June 2012: Android 4.1.
+         * J.
          *
+         * <p>Released publicly as Android 4.1 in July 2012.
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior:</p>
          * <ul>
@@ -720,8 +770,9 @@ public class Build {
         public static final int JELLY_BEAN = 16;
 
         /**
-         * November 2012: Android 4.2, Moar jelly beans!
+         * J MR1.
          *
+         * <p>Released publicly as Android 4.2 in November 2012.
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior:</p>
          * <ul>
@@ -740,13 +791,16 @@ public class Build {
         public static final int JELLY_BEAN_MR1 = 17;
 
         /**
-         * July 2013: Android 4.3, the revenge of the beans.
+         * J MR2.
+         *
+         * <p>Released publicly as Android 4.3 in July 2013.
          */
         public static final int JELLY_BEAN_MR2 = 18;
 
         /**
-         * October 2013: Android 4.4, KitKat, another tasty treat.
+         * K.
          *
+         * <p>Released publicly as Android 4.4 in October 2013.
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior. For more information about this release, see the
          * <a href="/about/versions/kitkat/">Android KitKat overview</a>.</p>
@@ -778,8 +832,9 @@ public class Build {
         public static final int KITKAT = 19;
 
         /**
-         * June 2014: Android 4.4W. KitKat for watches, snacks on the run.
+         * K for watches.
          *
+         * <p>Released publicly as Android 4.4W in June 2014.
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior:</p>
          * <ul>
@@ -796,8 +851,9 @@ public class Build {
         public static final int L = 21;
 
         /**
-         * November 2014: Lollipop.  A flat one with beautiful shadows.  But still tasty.
+         * L.
          *
+         * <p>Released publicly as Android 5.0 in November 2014.
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior.  For more information about this release, see the
          * <a href="/about/versions/lollipop/">Android Lollipop overview</a>.</p>
@@ -828,15 +884,18 @@ public class Build {
         public static final int LOLLIPOP = 21;
 
         /**
-         * March 2015: Lollipop with an extra sugar coating on the outside!
-         * For more information about this release, see the
+         * L MR1.
+         *
+         * <p>Released publicly as Android 5.1 in March 2015.
+         * <p>For more information about this release, see the
          * <a href="/about/versions/android-5.1">Android 5.1 APIs</a>.
          */
         public static final int LOLLIPOP_MR1 = 22;
 
         /**
-         * M is for Marshmallow!
+         * M.
          *
+         * <p>Released publicly as Android 6.0 in October 2015.
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior. For more information about this release, see the
          * <a href="/about/versions/marshmallow/">Android 6.0 Marshmallow overview</a>.</p>
@@ -867,8 +926,9 @@ public class Build {
         public static final int M = 23;
 
         /**
-         * N is for Nougat.
+         * N.
          *
+         * <p>Released publicly as Android 7.0 in August 2016.
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior. For more information about this release, see
          * the <a href="/about/versions/nougat/">Android Nougat overview</a>.</p>
@@ -921,7 +981,10 @@ public class Build {
         public static final int N = 24;
 
         /**
-         * N MR1: Nougat++. For more information about this release, see
+         * N MR1.
+         *
+         * <p>Released publicly as Android 7.1 in October 2016.
+         * <p>For more information about this release, see
          * <a href="/about/versions/nougat/android-7.1">Android 7.1 for
          * Developers</a>.
          */
@@ -930,6 +993,7 @@ public class Build {
         /**
          * O.
          *
+         * <p>Released publicly as Android 8.0 in August 2017.
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior. For more information about this release, see
          * the <a href="/about/versions/oreo/">Android Oreo overview</a>.</p>
@@ -985,7 +1049,7 @@ public class Build {
          * will also enable {@link StrictMode.ThreadPolicy.Builder#detectUnbufferedIo}.</li>
          * <li>{@link android.provider.DocumentsContract}'s various methods will throw failure
          * exceptions back to the caller instead of returning null.
-         * <li>{@link View#hasFocusable View.hasFocusable} now includes auto-focusable views.</li>
+         * <li>{@link View#hasFocusable() View.hasFocusable} now includes auto-focusable views.</li>
          * <li>{@link android.view.SurfaceView} will no longer always change the underlying
          * Surface object when something about it changes; apps need to look at the current
          * state of the object to determine which things they are interested in have changed.</li>
@@ -1020,6 +1084,7 @@ public class Build {
         /**
          * O MR1.
          *
+         * <p>Released publicly as Android 8.1 in December 2017.
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior. For more information about this release, see
          * <a href="/about/versions/oreo/android-8.1">Android 8.1 features and
@@ -1037,6 +1102,7 @@ public class Build {
         /**
          * P.
          *
+         * <p>Released publicly as Android 9 in August 2018.
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior. For more information about this release, see the
          * <a href="/about/versions/pie/">Android 9 Pie overview</a>.</p>
@@ -1054,6 +1120,7 @@ public class Build {
         /**
          * Q.
          *
+         * <p>Released publicly as Android 10 in September 2019.
          * <p>Applications targeting this or a later release will get these new changes in behavior.
          * For more information about this release, see the
          * <a href="/about/versions/10">Android 10 overview</a>.</p>
@@ -1069,6 +1136,7 @@ public class Build {
         /**
          * R.
          *
+         * <p>Released publicly as Android 11 in September 2020.
          * <p>Applications targeting this or a later release will get these new changes in behavior.
          * For more information about this release, see the
          * <a href="/about/versions/11">Android 11 overview</a>.</p>
@@ -1087,6 +1155,18 @@ public class Build {
          * S.
          */
         public static final int S = 31;
+
+        /**
+         * S V2.
+         *
+         * Once more unto the breach, dear friends, once more.
+         */
+        public static final int S_V2 = 32;
+
+        /**
+         * Tiramisu.
+         */
+        public static final int TIRAMISU = 33;
     }
 
     /** The type of build, like "user" or "eng". */
@@ -1239,6 +1319,18 @@ public class Build {
     public static class Partition {
         /** The name identifying the system partition. */
         public static final String PARTITION_NAME_SYSTEM = "system";
+        /** @hide */
+        public static final String PARTITION_NAME_BOOTIMAGE = "bootimage";
+        /** @hide */
+        public static final String PARTITION_NAME_ODM = "odm";
+        /** @hide */
+        public static final String PARTITION_NAME_OEM = "oem";
+        /** @hide */
+        public static final String PARTITION_NAME_PRODUCT = "product";
+        /** @hide */
+        public static final String PARTITION_NAME_SYSTEM_EXT = "system_ext";
+        /** @hide */
+        public static final String PARTITION_NAME_VENDOR = "vendor";
 
         private final String mName;
         private final String mFingerprint;
@@ -1295,8 +1387,12 @@ public class Build {
         ArrayList<Partition> partitions = new ArrayList();
 
         String[] names = new String[] {
-            "bootimage", "odm", "product", "system_ext", Partition.PARTITION_NAME_SYSTEM,
-            "vendor"
+                Partition.PARTITION_NAME_BOOTIMAGE,
+                Partition.PARTITION_NAME_ODM,
+                Partition.PARTITION_NAME_PRODUCT,
+                Partition.PARTITION_NAME_SYSTEM_EXT,
+                Partition.PARTITION_NAME_SYSTEM,
+                Partition.PARTITION_NAME_VENDOR
         };
         for (String name : names) {
             String fingerprint = SystemProperties.get("ro." + name + ".build.fingerprint");
@@ -1351,7 +1447,11 @@ public class Build {
     public static final boolean IS_USER = "user".equals(TYPE);
 
     /**
-     * Whether this build is running inside a container.
+     * Whether this build is running on ARC, the Android Runtime for Chrome
+     * (https://chromium.googlesource.com/chromiumos/docs/+/master/containers_and_vms.md).
+     * Prior to R this was implemented as a container but from R this will be
+     * a VM. The name of the property remains ro.boot.conntainer as it is
+     * referenced in other projects.
      *
      * We should try to avoid checking this flag if possible to minimize
      * unnecessarily diverging from non-container Android behavior.
@@ -1362,7 +1462,7 @@ public class Build {
      * For higher-level behavior differences, other checks should be preferred.
      * @hide
      */
-    public static final boolean IS_CONTAINER =
+    public static final boolean IS_ARC =
             SystemProperties.getBoolean("ro.boot.container", false);
 
     /**

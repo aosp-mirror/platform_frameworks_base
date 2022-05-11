@@ -19,20 +19,23 @@ package com.android.systemui.statusbar
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ObjectAnimator
-import android.animation.ValueAnimator
 import android.content.Context
+import android.content.res.Configuration
 import android.os.PowerManager
 import android.os.PowerManager.WAKE_REASON_GESTURE
 import android.os.SystemClock
+import android.util.IndentingPrintWriter
 import android.view.MotionEvent
 import android.view.VelocityTracker
 import android.view.ViewConfiguration
+import com.android.systemui.Dumpable
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.R
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.classifier.Classifier.NOTIFICATION_DRAG_DOWN
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
@@ -42,6 +45,8 @@ import com.android.systemui.statusbar.notification.stack.NotificationRoundnessMa
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
 import com.android.systemui.statusbar.phone.KeyguardBypassController
+import com.android.systemui.statusbar.policy.ConfigurationController
+import java.io.PrintWriter
 import javax.inject.Inject
 import kotlin.math.max
 
@@ -56,18 +61,18 @@ constructor(
     private val bypassController: KeyguardBypassController,
     private val headsUpManager: HeadsUpManagerPhone,
     private val roundnessManager: NotificationRoundnessManager,
+    private val configurationController: ConfigurationController,
     private val statusBarStateController: StatusBarStateController,
     private val falsingManager: FalsingManager,
     private val lockscreenShadeTransitionController: LockscreenShadeTransitionController,
-    private val falsingCollector: FalsingCollector
-) : Gefingerpoken {
+    private val falsingCollector: FalsingCollector,
+    dumpManager: DumpManager
+) : Gefingerpoken, Dumpable {
     companion object {
-        private val RUBBERBAND_FACTOR_STATIC = 0.25f
         private val SPRING_BACK_ANIMATION_LENGTH_MS = 375
     }
     private val mPowerManager: PowerManager?
 
-    private val mMinDragDistance: Int
     private var mInitialTouchX: Float = 0.0f
     private var mInitialTouchY: Float = 0.0f
     var isExpanding: Boolean = false
@@ -81,6 +86,7 @@ constructor(
                     topEntry?.let {
                         roundnessManager.setTrackingHeadsUp(it.row)
                     }
+                    lockscreenShadeTransitionController.onPulseExpansionStarted()
                 } else {
                     roundnessManager.setTrackingHeadsUp(null)
                     if (!leavingLockscreen) {
@@ -93,18 +99,14 @@ constructor(
         }
     var leavingLockscreen: Boolean = false
         private set
-    private val mTouchSlop: Float
-    private lateinit var overStretchHandler: OverStretchHandler
+    private var touchSlop = 0f
+    private var minDragDistance = 0
     private lateinit var stackScrollerController: NotificationStackScrollLayoutController
     private val mTemp2 = IntArray(2)
     private var mDraggedFarEnough: Boolean = false
     private var mStartingChild: ExpandableView? = null
     private var mPulsing: Boolean = false
-    var isWakingToShadeLocked: Boolean = false
-        private set
-    private var overStretchAmount: Float = 0.0f
-    private var mWakeUpHeight: Float = 0.0f
-    private var mReachedWakeUpHeight: Boolean = false
+
     private var velocityTracker: VelocityTracker? = null
 
     private val isFalseTouch: Boolean
@@ -114,10 +116,20 @@ constructor(
     var bouncerShowing: Boolean = false
 
     init {
-        mMinDragDistance = context.resources.getDimensionPixelSize(
-                R.dimen.keyguard_drag_down_min_distance)
-        mTouchSlop = ViewConfiguration.get(context).scaledTouchSlop.toFloat()
+        initResources(context)
+        configurationController.addCallback(object : ConfigurationController.ConfigurationListener {
+            override fun onConfigChanged(newConfig: Configuration?) {
+                initResources(context)
+            }
+        })
         mPowerManager = context.getSystemService(PowerManager::class.java)
+        dumpManager.registerDumpable(this)
+    }
+
+    private fun initResources(context: Context) {
+        minDragDistance = context.resources.getDimensionPixelSize(
+            R.dimen.keyguard_drag_down_min_distance)
+        touchSlop = ViewConfiguration.get(context).scaledTouchSlop.toFloat()
     }
 
     override fun onInterceptTouchEvent(event: MotionEvent): Boolean {
@@ -148,14 +160,12 @@ constructor(
 
             MotionEvent.ACTION_MOVE -> {
                 val h = y - mInitialTouchY
-                if (h > mTouchSlop && h > Math.abs(x - mInitialTouchX)) {
+                if (h > touchSlop && h > Math.abs(x - mInitialTouchX)) {
                     falsingCollector.onStartExpandingFromPulse()
                     isExpanding = true
                     captureStartingChild(mInitialTouchX, mInitialTouchY)
                     mInitialTouchY = y
                     mInitialTouchX = x
-                    mWakeUpHeight = wakeUpCoordinator.getWakeUpHeight()
-                    mReachedWakeUpHeight = false
                     return true
                 }
             }
@@ -179,7 +189,13 @@ constructor(
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        if (!canHandleMotionEvent()) {
+        val finishExpanding = (event.action == MotionEvent.ACTION_CANCEL ||
+            event.action == MotionEvent.ACTION_UP) && isExpanding
+
+        val isDraggingNotificationOrCanBypass = mStartingChild?.showingPulsing() == true ||
+                bypassController.canBypass()
+        if ((!canHandleMotionEvent() || !isDraggingNotificationOrCanBypass) && !finishExpanding) {
+            // We allow cancellations/finishing to still go through here to clean up the state
             return false
         }
 
@@ -213,20 +229,19 @@ constructor(
     }
 
     private fun finishExpansion() {
-        resetClock()
         val startingChild = mStartingChild
         if (mStartingChild != null) {
             setUserLocked(mStartingChild!!, false)
             mStartingChild = null
         }
         if (statusBarStateController.isDozing) {
-            isWakingToShadeLocked = true
             wakeUpCoordinator.willWakeUp = true
             mPowerManager!!.wakeUp(SystemClock.uptimeMillis(), WAKE_REASON_GESTURE,
                     "com.android.systemui:PULSEDRAG")
         }
         lockscreenShadeTransitionController.goToLockedShade(startingChild,
                 needsQSAnimation = false)
+        lockscreenShadeTransitionController.finishPulseAnimation(cancelled = false)
         leavingLockscreen = true
         isExpanding = false
         if (mStartingChild is ExpandableNotificationRow) {
@@ -237,24 +252,19 @@ constructor(
 
     private fun updateExpansionHeight(height: Float) {
         var expansionHeight = max(height, 0.0f)
-        if (!mReachedWakeUpHeight && height > mWakeUpHeight) {
-            mReachedWakeUpHeight = true
-        }
         if (mStartingChild != null) {
             val child = mStartingChild!!
             val newHeight = Math.min((child.collapsedHeight + expansionHeight).toInt(),
                     child.maxContentHeight)
             child.actualHeight = newHeight
-            expansionHeight = max(newHeight.toFloat(), expansionHeight)
         } else {
-            val target = if (mReachedWakeUpHeight) mWakeUpHeight else 0.0f
-            wakeUpCoordinator.setNotificationsVisibleForExpansion(height > target,
-                    true /* animate */,
-                    true /* increaseSpeed */)
-            expansionHeight = max(mWakeUpHeight, expansionHeight)
+            wakeUpCoordinator.setNotificationsVisibleForExpansion(
+                height
+                    > lockscreenShadeTransitionController.distanceUntilShowingPulsingNotifications,
+                true /* animate */,
+                true /* increaseSpeed */)
         }
-        val dragDownAmount = wakeUpCoordinator.setPulseHeight(expansionHeight)
-        setOverStretchAmount(dragDownAmount)
+        lockscreenShadeTransitionController.setPulseHeight(expansionHeight, animate = false)
     }
 
     private fun captureStartingChild(x: Float, y: Float) {
@@ -264,11 +274,6 @@ constructor(
                 setUserLocked(mStartingChild!!, true)
             }
         }
-    }
-
-    private fun setOverStretchAmount(amount: Float) {
-        overStretchAmount = amount
-        overStretchHandler.setOverStretchAmount(amount)
     }
 
     private fun reset(child: ExpandableView) {
@@ -294,25 +299,14 @@ constructor(
         }
     }
 
-    private fun resetClock() {
-        val anim = ValueAnimator.ofFloat(overStretchAmount, 0f)
-        anim.interpolator = Interpolators.FAST_OUT_SLOW_IN
-        anim.duration = SPRING_BACK_ANIMATION_LENGTH_MS.toLong()
-        anim.addUpdateListener {
-            animation -> setOverStretchAmount(animation.animatedValue as Float)
-        }
-        anim.start()
-    }
-
     private fun cancelExpansion() {
         isExpanding = false
         falsingCollector.onExpansionFromPulseStopped()
         if (mStartingChild != null) {
             reset(mStartingChild!!)
             mStartingChild = null
-        } else {
-            resetClock()
         }
+        lockscreenShadeTransitionController.finishPulseAnimation(cancelled = true)
         wakeUpCoordinator.setNotificationsVisibleForExpansion(false /* visible */,
                 true /* animate */,
                 false /* increaseSpeed */)
@@ -330,11 +324,7 @@ constructor(
         } else null
     }
 
-    fun setUp(
-        stackScrollerController: NotificationStackScrollLayoutController,
-        overStrechHandler: OverStretchHandler
-    ) {
-        this.overStretchHandler = overStrechHandler
+    fun setUp(stackScrollerController: NotificationStackScrollLayoutController) {
         this.stackScrollerController = stackScrollerController
     }
 
@@ -342,15 +332,15 @@ constructor(
         mPulsing = pulsing
     }
 
-    fun onStartedWakingUp() {
-        isWakingToShadeLocked = false
-    }
-
-    interface OverStretchHandler {
-
-        /**
-         * Set the overstretch amount in pixels This will be rubberbanded later
-         */
-        fun setOverStretchAmount(amount: Float)
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
+        IndentingPrintWriter(pw, "  ").let {
+            it.println("PulseExpansionHandler:")
+            it.increaseIndent()
+            it.println("isExpanding: $isExpanding")
+            it.println("leavingLockscreen: $leavingLockscreen")
+            it.println("mPulsing: $mPulsing")
+            it.println("qsExpanded: $qsExpanded")
+            it.println("bouncerShowing: $bouncerShowing")
+        }
     }
 }

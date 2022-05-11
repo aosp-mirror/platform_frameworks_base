@@ -70,12 +70,12 @@ import android.transition.TransitionInflater;
 import android.transition.TransitionManager;
 import android.transition.TransitionSet;
 import android.util.AndroidRuntimeException;
-import android.view.AttachedSurfaceControl;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
 import android.util.TypedValue;
+import android.view.AttachedSurfaceControl;
 import android.view.ContextThemeWrapper;
 import android.view.CrossWindowBlurListeners;
 import android.view.Gravity;
@@ -110,6 +110,8 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.window.OnBackInvokedDispatcher;
+import android.window.ProxyOnBackInvokedDispatcher;
 
 import com.android.internal.R;
 import com.android.internal.view.menu.ContextMenuBuilder;
@@ -339,6 +341,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private ActivityConfigCallback mActivityConfigCallback;
 
     boolean mDecorFitsSystemWindows = true;
+
+    private ProxyOnBackInvokedDispatcher mProxyOnBackInvokedDispatcher =
+            new ProxyOnBackInvokedDispatcher();
 
     static class WindowManagerHolder {
         static final IWindowManager sWindowManager = IWindowManager.Stub.asInterface(
@@ -1841,8 +1846,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public void setLocalFocus(boolean hasFocus, boolean inTouchMode) {
-        getViewRootImpl().windowFocusChanged(hasFocus, inTouchMode);
-
+        ViewRootImpl viewRoot = getViewRootImpl();
+        viewRoot.windowFocusChanged(hasFocus);
+        viewRoot.touchModeChanged(inTouchMode);
     }
 
     @Override
@@ -2145,6 +2151,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     /** Notify when decor view is attached to window and {@link ViewRootImpl} is available. */
     void onViewRootImplSet(ViewRootImpl viewRoot) {
         viewRoot.setActivityConfigCallback(mActivityConfigCallback);
+        mProxyOnBackInvokedDispatcher.setActualDispatcher(viewRoot.getOnBackInvokedDispatcher());
         applyDecorFitsSystemWindows();
     }
 
@@ -2512,14 +2519,15 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
             params.privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION;
         }
-        if (a.getBoolean(R.styleable.Window_windowLightStatusBar, false)) {
-            decor.setSystemUiVisibility(
-                    decor.getSystemUiVisibility() | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-        }
-        if (a.getBoolean(R.styleable.Window_windowLightNavigationBar, false)) {
-            decor.setSystemUiVisibility(
-                    decor.getSystemUiVisibility() | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
-        }
+        final int sysUiVis = decor.getSystemUiVisibility();
+        final int statusLightFlag = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+        final int statusFlag = a.getBoolean(R.styleable.Window_windowLightStatusBar, false)
+                ? statusLightFlag : 0;
+        final int navLightFlag = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+        final int navFlag = a.getBoolean(R.styleable.Window_windowLightNavigationBar, false)
+                ? navLightFlag : 0;
+        decor.setSystemUiVisibility(
+                (sysUiVis & ~(statusLightFlag | navLightFlag)) | (statusFlag | navFlag));
         if (a.hasValue(R.styleable.Window_windowLayoutInDisplayCutoutMode)) {
             int mode = a.getInt(R.styleable.Window_windowLayoutInDisplayCutoutMode, -1);
             if (mode < LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
@@ -3148,7 +3156,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (cb == null || isDestroyed()) {
             result = false;
         } else {
-            sendCloseSystemWindows("search");
             int deviceId = event.getDeviceId();
             SearchEvent searchEvent = null;
             if (deviceId != 0) {
@@ -3991,5 +3998,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     @Override
     public AttachedSurfaceControl getRootSurfaceControl() {
         return getViewRootImplOrNull();
+    }
+
+    @NonNull
+    @Override
+    public OnBackInvokedDispatcher getOnBackInvokedDispatcher() {
+        return mProxyOnBackInvokedDispatcher;
     }
 }

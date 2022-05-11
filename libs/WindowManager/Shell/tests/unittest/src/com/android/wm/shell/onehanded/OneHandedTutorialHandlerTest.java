@@ -19,8 +19,6 @@ package com.android.wm.shell.onehanded;
 import static com.android.wm.shell.onehanded.OneHandedState.STATE_ENTERING;
 import static com.android.wm.shell.onehanded.OneHandedState.STATE_NONE;
 
-import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.never;
@@ -58,6 +56,8 @@ public class OneHandedTutorialHandlerTest extends OneHandedTestCase {
     OneHandedSettingsUtil mMockSettingsUtil;
     @Mock
     WindowManager mMockWindowManager;
+    @Mock
+    BackgroundWindowManager mMockBackgroundWindowManager;
 
     @Before
     public void setUp() {
@@ -65,18 +65,12 @@ public class OneHandedTutorialHandlerTest extends OneHandedTestCase {
         when(mMockSettingsUtil.getTutorialShownCounts(any(), anyInt())).thenReturn(0);
 
         mDisplay = mContext.getDisplay();
-        mDisplayLayout = new DisplayLayout(mContext, mDisplay);
+        mDisplayLayout = new DisplayLayout(getTestContext().getApplicationContext(), mDisplay);
         mSpiedTransitionState = spy(new OneHandedState());
         mSpiedTutorialHandler = spy(
-                new OneHandedTutorialHandler(mContext, mDisplayLayout, mMockWindowManager,
-                        mMockSettingsUtil, mMockShellMainExecutor));
+                new OneHandedTutorialHandler(mContext, mMockSettingsUtil, mMockWindowManager,
+                        mMockBackgroundWindowManager));
         mTimeoutHandler = new OneHandedTimeoutHandler(mMockShellMainExecutor);
-    }
-
-    @Test
-    public void testDefaultZeroShownCounts_canShowTutorial() {
-        assertThat(mSpiedTutorialHandler.canShowTutorial()).isTrue();
-        verify(mMockShellMainExecutor, never()).execute(any());
     }
 
     @Test
@@ -86,7 +80,7 @@ public class OneHandedTutorialHandlerTest extends OneHandedTestCase {
 
     @Test
     public void testOnStateChangedEntering_createViewAndAttachToWindow() {
-        when(mSpiedTutorialHandler.canShowTutorial()).thenReturn(true);
+        when(mSpiedTutorialHandler.isAttached()).thenReturn(true);
         try {
             mSpiedTutorialHandler.onStateChanged(STATE_ENTERING);
         } catch (ClassCastException e) {
@@ -98,31 +92,35 @@ public class OneHandedTutorialHandlerTest extends OneHandedTestCase {
 
     @Test
     public void testOnStateChangedNone_removeViewAndAttachToWindow() {
-        when(mSpiedTutorialHandler.canShowTutorial()).thenReturn(true);
+        when(mSpiedTutorialHandler.isAttached()).thenReturn(true);
         try {
             mSpiedTutorialHandler.onStateChanged(STATE_NONE);
         } catch (ClassCastException e) {
             // no-op, just assert removeTutorialFromWindowManager() to be called
+        } catch (NullPointerException e) {
+            // no-op, just assert removeTutorialFromWindowManager() to be called
         }
 
-        verify(mSpiedTutorialHandler).removeTutorialFromWindowManager(true);
+        verify(mSpiedTutorialHandler).removeTutorialFromWindowManager();
     }
 
     @Test
     public void testOnStateChangedNone_shouldNotAttachWindow() {
-        when(mSpiedTutorialHandler.canShowTutorial()).thenReturn(true);
+        when(mSpiedTutorialHandler.isAttached()).thenReturn(true);
         try {
             mSpiedTutorialHandler.onStateChanged(STATE_NONE);
         } catch (ClassCastException e) {
             // no-op, just assert setTutorialShownCountIncrement() never be called
+        } catch (NullPointerException e) {
+            // no-op, just assert setTutorialShownCountIncrement() never be called
         }
 
-        verify(mSpiedTutorialHandler, never()).setTutorialShownCountIncrement();
+        verify(mSpiedTutorialHandler, never()).createViewAndAttachToWindow(any());
     }
 
     @Test
     public void testOnConfigurationChanged_shouldUpdateViewContent() {
-        when(mSpiedTutorialHandler.canShowTutorial()).thenReturn(true);
+        when(mSpiedTutorialHandler.isAttached()).thenReturn(true);
         try {
             mSpiedTutorialHandler.onStateChanged(STATE_ENTERING);
         } catch (ClassCastException e) {
@@ -131,9 +129,12 @@ public class OneHandedTutorialHandlerTest extends OneHandedTestCase {
         try {
             mSpiedTutorialHandler.onConfigurationChanged();
         } catch (ClassCastException e) {
-            // no-op, just assert removeTutorialFromWindowManager() be called
+        } catch (NullPointerException e) {
+            // no-op, just assert removeTutorialFromWindowManager() be called,
+            // and createViewAndAttachToWindow() be called twice
         }
 
-        verify(mSpiedTutorialHandler).removeTutorialFromWindowManager(false);
+        verify(mSpiedTutorialHandler).createViewAndAttachToWindow(any());
+        verify(mSpiedTutorialHandler).removeTutorialFromWindowManager();
     }
 }

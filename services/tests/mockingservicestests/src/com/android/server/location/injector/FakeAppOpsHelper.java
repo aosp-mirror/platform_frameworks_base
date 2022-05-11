@@ -29,9 +29,10 @@ import java.util.HashMap;
 public class FakeAppOpsHelper extends AppOpsHelper {
 
     private static class AppOp {
-        private boolean mAllowed = true;
-        private boolean mStarted = false;
-        private int mNoteCount = 0;
+        AppOp() {}
+        boolean mAllowed = true;
+        int mStarted = 0;
+        int mNoteCount = 0;
     }
 
     private final HashMap<String, SparseArray<AppOp>> mAppOps;
@@ -48,7 +49,7 @@ public class FakeAppOpsHelper extends AppOpsHelper {
 
     public boolean isAppOpStarted(int appOp, String packageName) {
         AppOp myAppOp = getOp(packageName, appOp);
-        return myAppOp.mStarted;
+        return myAppOp.mStarted > 0;
     }
 
     public int getAppOpNoteCount(int appOp, String packageName) {
@@ -62,16 +63,15 @@ public class FakeAppOpsHelper extends AppOpsHelper {
         if (!myAppOp.mAllowed) {
             return false;
         }
-        Preconditions.checkState(!myAppOp.mStarted);
-        myAppOp.mStarted = true;
+        myAppOp.mStarted++;
         return true;
     }
 
     @Override
     public void finishOp(int appOp, CallerIdentity callerIdentity) {
         AppOp myAppOp = getOp(callerIdentity.getPackageName(), appOp);
-        Preconditions.checkState(myAppOp.mStarted);
-        myAppOp.mStarted = false;
+        Preconditions.checkState(myAppOp.mStarted > 0);
+        myAppOp.mStarted--;
     }
 
     @Override

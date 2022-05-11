@@ -41,6 +41,7 @@ import android.util.Slog;
 
 import com.android.internal.infra.AbstractRemoteService;
 import com.android.internal.infra.ServiceConnector;
+import com.android.internal.os.IResultReceiver;
 
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
@@ -223,6 +224,10 @@ final class RemoteFillService extends ServiceConnector.Impl<IAutoFillService> {
                                 mComponentName.getPackageName(), err.getMessage());
                     }
                 }));
+    }
+
+    void onSavedPasswordCountRequest(IResultReceiver receiver) {
+        run(service -> service.onSavedPasswordCountRequest(receiver));
     }
 
     public void destroy() {

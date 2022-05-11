@@ -17,7 +17,6 @@
 
 <com.android.systemui.statusbar.phone.KeyguardBottomAreaView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:id="@+id/keyguard_bottom_area"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
@@ -52,6 +51,8 @@
             android:paddingStart="@dimen/keyguard_indication_text_padding"
             android:paddingEnd="@dimen/keyguard_indication_text_padding"
             android:textAppearance="@style/TextAppearance.Keyguard.BottomArea"
+            android:maxLines="2"
+            android:ellipsize="end"
             android:alpha=".8"
             android:accessibilityLiveRegion="polite"
             android:visibility="gone"/>
@@ -80,16 +81,44 @@
 
     <ImageView
         android:id="@+id/wallet_button"
-        android:layout_height="@dimen/keyguard_affordance_wallet_height"
-        android:layout_width="@dimen/keyguard_affordance_wallet_width"
+        android:layout_height="@dimen/keyguard_affordance_fixed_height"
+        android:layout_width="@dimen/keyguard_affordance_fixed_width"
         android:layout_gravity="bottom|end"
         android:scaleType="center"
         android:tint="?android:attr/textColorPrimary"
         android:src="@drawable/ic_wallet_lockscreen"
-        android:background="@drawable/wallet_lockscreen_bg"
+        android:background="@drawable/keyguard_bottom_affordance_bg"
         android:layout_marginEnd="@dimen/keyguard_affordance_horizontal_offset"
         android:layout_marginBottom="@dimen/keyguard_affordance_vertical_offset"
         android:contentDescription="@string/accessibility_wallet_button"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/qr_code_scanner_button"
+        android:layout_height="@dimen/keyguard_affordance_fixed_height"
+        android:layout_width="@dimen/keyguard_affordance_fixed_width"
+        android:layout_gravity="bottom|end"
+        android:scaleType="center"
+        android:tint="?android:attr/textColorPrimary"
+        android:src="@drawable/ic_qr_code_scanner"
+        android:background="@drawable/keyguard_bottom_affordance_bg"
+        android:layout_marginEnd="@dimen/keyguard_affordance_horizontal_offset"
+        android:layout_marginBottom="@dimen/keyguard_affordance_vertical_offset"
+        android:contentDescription="@string/accessibility_qr_code_scanner_button"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/controls_button"
+        android:layout_height="@dimen/keyguard_affordance_fixed_height"
+        android:layout_width="@dimen/keyguard_affordance_fixed_width"
+        android:layout_gravity="bottom|start"
+        android:scaleType="center"
+        android:tint="?android:attr/textColorPrimary"
+        android:src="@drawable/controls_icon"
+        android:background="@drawable/keyguard_bottom_affordance_bg"
+        android:layout_marginStart="@dimen/keyguard_affordance_horizontal_offset"
+        android:layout_marginBottom="@dimen/keyguard_affordance_vertical_offset"
+        android:contentDescription="@string/quick_controls_title"
         android:visibility="gone" />
 
     <FrameLayout
@@ -98,7 +127,8 @@
         android:layout_height="match_parent">
 
         <include layout="@layout/keyguard_bottom_area_overlay" />
-
     </FrameLayout>
 
+    <include layout="@layout/ambient_indication"
+             android:id="@+id/ambient_indication_container" />
 </com.android.systemui.statusbar.phone.KeyguardBottomAreaView>

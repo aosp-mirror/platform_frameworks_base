@@ -22,7 +22,6 @@ import android.content.res.Resources;
 import android.util.LayoutDirection;
 import android.view.View;
 import android.view.View.MeasureSpec;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.ListPopupWindow;
@@ -41,6 +40,7 @@ public class GlobalActionsPopupMenu extends ListPopupWindow {
     private boolean mIsDropDownMode;
     private int mMenuVerticalPadding = 0;
     private int mGlobalActionsSidePadding = 0;
+    private int mMaximumWidthThresholdDp = 800;
     private ListAdapter mAdapter;
     private AdapterView.OnItemLongClickListener mOnItemLongClickListener;
 
@@ -49,11 +49,9 @@ public class GlobalActionsPopupMenu extends ListPopupWindow {
         mContext = context;
         Resources res = mContext.getResources();
         setBackgroundDrawable(
-                res.getDrawable(R.drawable.rounded_bg_full, context.getTheme()));
+                res.getDrawable(R.drawable.global_actions_popup_bg, context.getTheme()));
         mIsDropDownMode = isDropDownMode;
 
-        // required to show above the global actions dialog
-        setWindowLayoutType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY);
         setInputMethodMode(INPUT_METHOD_NOT_NEEDED);
         setModal(true);
 
@@ -95,6 +93,8 @@ public class GlobalActionsPopupMenu extends ListPopupWindow {
 
             // width should be between [.5, .9] of screen
             int parentWidth = res.getSystem().getDisplayMetrics().widthPixels;
+            float parentDensity = res.getSystem().getDisplayMetrics().density;
+            float parentWidthDp = parentWidth / parentDensity;
             int widthSpec = MeasureSpec.makeMeasureSpec(
                     (int) (parentWidth * 0.9), MeasureSpec.AT_MOST);
             int maxWidth = 0;
@@ -104,9 +104,12 @@ public class GlobalActionsPopupMenu extends ListPopupWindow {
                 int w = child.getMeasuredWidth();
                 maxWidth = Math.max(w, maxWidth);
             }
-            int width = Math.max(maxWidth, (int) (parentWidth * 0.5));
-            listView.setPadding(0, mMenuVerticalPadding, 0, mMenuVerticalPadding);
 
+            int width = maxWidth;
+            if (parentWidthDp < mMaximumWidthThresholdDp) {
+                width = Math.max(maxWidth, (int) (parentWidth * 0.5));
+            }
+            listView.setPadding(0, mMenuVerticalPadding, 0, mMenuVerticalPadding);
             setWidth(width);
             if (getAnchorView().getLayoutDirection() == LayoutDirection.LTR) {
                 setHorizontalOffset(getAnchorView().getWidth() - mGlobalActionsSidePadding - width);

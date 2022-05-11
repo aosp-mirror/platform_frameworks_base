@@ -146,10 +146,8 @@ public class LegacySplitScreenController implements DisplayController.OnDisplays
                             new LegacySplitDisplayLayout(mContext, displayLayout, mSplits);
                     sdl.rotateTo(toRotation);
                     mRotateSplitLayout = sdl;
-                    final int position = isDividerVisible()
-                            ? (mMinimized ? mView.mSnapTargetBeforeMinimized.position
-                            : mView.getCurrentPosition())
-                            // snap resets to middle target when not in split-mode
+                    // snap resets to middle target when not minimized and rotation changed.
+                    final int position = mMinimized ? mView.mSnapTargetBeforeMinimized.position
                             : sdl.getSnapAlgorithm().getMiddleTarget().position;
                     DividerSnapAlgorithm snap = sdl.getSnapAlgorithm();
                     final DividerSnapAlgorithm.SnapTarget target =
@@ -174,6 +172,14 @@ public class LegacySplitScreenController implements DisplayController.OnDisplays
                 };
 
         mWindowManager = new DividerWindowManager(mSystemWindows);
+
+        // No need to listen to display window container or create root tasks if the device is not
+        // using legacy split screen.
+        if (!context.getResources().getBoolean(com.android.internal.R.bool.config_useLegacySplit)) {
+            return;
+        }
+
+
         mDisplayController.addDisplayWindowListener(this);
         // Don't initialize the divider or anything until we get the default display.
 
@@ -229,9 +235,6 @@ public class LegacySplitScreenController implements DisplayController.OnDisplays
             return;
         }
         mView.setHidden(showing);
-        if (!showing) {
-            mImePositionProcessor.updateAdjustForIme();
-        }
         mIsKeyguardShowing = showing;
     }
 

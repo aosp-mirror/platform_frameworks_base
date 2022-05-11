@@ -17,18 +17,15 @@
 #include <android/hardware/configstore/1.0/ISurfaceFlingerConfigs.h>
 #include <android/native_window.h>
 #include <android/surface_control.h>
-#include <surface_control_private.h>
-
 #include <configstore/Utils.h>
-
 #include <gui/HdrMetadata.h>
 #include <gui/ISurfaceComposer.h>
 #include <gui/Surface.h>
 #include <gui/SurfaceComposerClient.h>
 #include <gui/SurfaceControl.h>
-
+#include <private/android/choreographer.h>
+#include <surface_control_private.h>
 #include <ui/DynamicDisplayInfo.h>
-
 #include <utils/Timers.h>
 
 using namespace android::hardware::configstore;
@@ -44,70 +41,14 @@ using Transaction = SurfaceComposerClient::Transaction;
     LOG_ALWAYS_FATAL_IF(!static_cast<const Rect&>(name).isValid(), \
                         "invalid arg passed as " #name " argument");
 
-static bool getWideColorSupport(const sp<SurfaceControl>& surfaceControl) {
-    sp<SurfaceComposerClient> client = surfaceControl->getClient();
-
-    const sp<IBinder> display = client->getInternalDisplayToken();
-    if (display == nullptr) {
-        ALOGE("unable to get wide color support for disconnected internal display");
-        return false;
-    }
-
-    bool isWideColorDisplay = false;
-    status_t err = client->isWideColorDisplay(display, &isWideColorDisplay);
-    if (err) {
-        ALOGE("unable to get wide color support");
-        return false;
-    }
-    return isWideColorDisplay;
-}
-
-static bool getHdrSupport(const sp<SurfaceControl>& surfaceControl) {
-    sp<SurfaceComposerClient> client = surfaceControl->getClient();
-
-    const sp<IBinder> display = client->getInternalDisplayToken();
-    if (display == nullptr) {
-        ALOGE("unable to get hdr capabilities for disconnected internal display");
-        return false;
-    }
-
-    ui::DynamicDisplayInfo info;
-    if (status_t err = client->getDynamicDisplayInfo(display, &info); err != NO_ERROR) {
-        ALOGE("unable to get hdr capabilities");
-        return err;
-    }
-
-    return !info.hdrCapabilities.getSupportedHdrTypes().empty();
-}
-
-static bool isDataSpaceValid(const sp<SurfaceControl>& surfaceControl, ADataSpace dataSpace) {
-    static_assert(static_cast<int>(ADATASPACE_UNKNOWN) == static_cast<int>(HAL_DATASPACE_UNKNOWN));
-    static_assert(static_cast<int>(ADATASPACE_SCRGB_LINEAR) == static_cast<int>(HAL_DATASPACE_V0_SCRGB_LINEAR));
-    static_assert(static_cast<int>(ADATASPACE_SRGB) == static_cast<int>(HAL_DATASPACE_V0_SRGB));
-    static_assert(static_cast<int>(ADATASPACE_SCRGB) == static_cast<int>(HAL_DATASPACE_V0_SCRGB));
-    static_assert(static_cast<int>(ADATASPACE_DISPLAY_P3) == static_cast<int>(HAL_DATASPACE_DISPLAY_P3));
-    static_assert(static_cast<int>(ADATASPACE_BT2020_PQ) == static_cast<int>(HAL_DATASPACE_BT2020_PQ));
-
-    switch (static_cast<android_dataspace_t>(dataSpace)) {
-        case HAL_DATASPACE_UNKNOWN:
-        case HAL_DATASPACE_V0_SRGB:
-            return true;
-        // These data space need wide gamut support.
-        case HAL_DATASPACE_V0_SCRGB_LINEAR:
-        case HAL_DATASPACE_V0_SCRGB:
-        case HAL_DATASPACE_DISPLAY_P3:
-            return getWideColorSupport(surfaceControl);
-        // These data space need HDR support.
-        case HAL_DATASPACE_BT2020_PQ:
-            if (!getHdrSupport(surfaceControl)) {
-                ALOGE("Invalid dataspace - device does not support hdr");
-                return false;
-            }
-            return true;
-        default:
-            return false;
-    }
-}
+static_assert(static_cast<int>(ADATASPACE_UNKNOWN) == static_cast<int>(HAL_DATASPACE_UNKNOWN));
+static_assert(static_cast<int>(ADATASPACE_SCRGB_LINEAR) ==
+              static_cast<int>(HAL_DATASPACE_V0_SCRGB_LINEAR));
+static_assert(static_cast<int>(ADATASPACE_SRGB) == static_cast<int>(HAL_DATASPACE_V0_SRGB));
+static_assert(static_cast<int>(ADATASPACE_SCRGB) == static_cast<int>(HAL_DATASPACE_V0_SCRGB));
+static_assert(static_cast<int>(ADATASPACE_DISPLAY_P3) ==
+              static_cast<int>(HAL_DATASPACE_DISPLAY_P3));
+static_assert(static_cast<int>(ADATASPACE_BT2020_PQ) == static_cast<int>(HAL_DATASPACE_BT2020_PQ));
 
 Transaction* ASurfaceTransaction_to_Transaction(ASurfaceTransaction* aSurfaceTransaction) {
     return reinterpret_cast<Transaction*>(aSurfaceTransaction);
@@ -197,32 +138,28 @@ void ASurfaceControl_release(ASurfaceControl* aSurfaceControl) {
 }
 
 struct ASurfaceControlStats {
-    int64_t acquireTime;
+    std::variant<int64_t, sp<Fence>> acquireTimeOrFence;
     sp<Fence> previousReleaseFence;
     uint64_t frameNumber;
 };
 
-void ASurfaceControl_registerSurfaceStatsListener(ASurfaceControl* control, void* context,
-        ASurfaceControl_SurfaceStatsListener func) {
-    SurfaceStatsCallback callback = [func](void* callback_context,
-                                                               nsecs_t,
-                                                               const sp<Fence>&,
-                                                               const SurfaceStats& surfaceStats) {
-
+void ASurfaceControl_registerSurfaceStatsListener(ASurfaceControl* control, int32_t id,
+                                                  void* context,
+                                                  ASurfaceControl_SurfaceStatsListener func) {
+    SurfaceStatsCallback callback = [func, id](void* callback_context, nsecs_t, const sp<Fence>&,
+                                               const SurfaceStats& surfaceStats) {
         ASurfaceControlStats aSurfaceControlStats;
 
-        ASurfaceControl* aSurfaceControl =
-                reinterpret_cast<ASurfaceControl*>(surfaceStats.surfaceControl.get());
-        aSurfaceControlStats.acquireTime = surfaceStats.acquireTime;
+        aSurfaceControlStats.acquireTimeOrFence = surfaceStats.acquireTimeOrFence;
         aSurfaceControlStats.previousReleaseFence = surfaceStats.previousReleaseFence;
         aSurfaceControlStats.frameNumber = surfaceStats.eventStats.frameNumber;
 
-        (*func)(callback_context, aSurfaceControl, &aSurfaceControlStats);
+        (*func)(callback_context, id, &aSurfaceControlStats);
     };
+
     TransactionCompletedListener::getInstance()->addSurfaceStatsListener(context,
             reinterpret_cast<void*>(func), ASurfaceControl_to_SurfaceControl(control), callback);
 }
-
 
 void ASurfaceControl_unregisterSurfaceStatsListener(void* context,
         ASurfaceControl_SurfaceStatsListener func) {
@@ -231,7 +168,15 @@ void ASurfaceControl_unregisterSurfaceStatsListener(void* context,
 }
 
 int64_t ASurfaceControlStats_getAcquireTime(ASurfaceControlStats* stats) {
-    return stats->acquireTime;
+    if (const auto* fence = std::get_if<sp<Fence>>(&stats->acquireTimeOrFence)) {
+        // We got a fence instead of the acquire time due to latch unsignaled.
+        // Ideally the client could just get the acquire time dericly from
+        // the fence instead of calling this function which needs to block.
+        (*fence)->waitForever("ASurfaceControlStats_getAcquireTime");
+        return (*fence)->getSignalTime();
+    }
+
+    return std::get<int64_t>(stats->acquireTimeOrFence);
 }
 
 uint64_t ASurfaceControlStats_getFrameNumber(ASurfaceControlStats* stats) {
@@ -310,7 +255,7 @@ int64_t ASurfaceTransactionStats_getAcquireTime(ASurfaceTransactionStats* aSurfa
             aSurfaceControlStats == aSurfaceTransactionStats->aSurfaceControlStats.end(),
             "ASurfaceControl not found");
 
-    return aSurfaceControlStats->second.acquireTime;
+    return ASurfaceControlStats_getAcquireTime(&aSurfaceControlStats->second);
 }
 
 int ASurfaceTransactionStats_getPreviousReleaseFenceFd(
@@ -354,9 +299,10 @@ void ASurfaceTransaction_setOnComplete(ASurfaceTransaction* aSurfaceTransaction,
 
         auto& aSurfaceControlStats = aSurfaceTransactionStats.aSurfaceControlStats;
 
-        for (const auto& [surfaceControl, latchTime, acquireTime, presentFence, previousReleaseFence, transformHint, frameEvents] : surfaceControlStats) {
+        for (const auto& [surfaceControl, latchTime, acquireTimeOrFence, presentFence,
+                          previousReleaseFence, transformHint, frameEvents] : surfaceControlStats) {
             ASurfaceControl* aSurfaceControl = reinterpret_cast<ASurfaceControl*>(surfaceControl.get());
-            aSurfaceControlStats[aSurfaceControl].acquireTime = acquireTime;
+            aSurfaceControlStats[aSurfaceControl].acquireTimeOrFence = acquireTimeOrFence;
             aSurfaceControlStats[aSurfaceControl].previousReleaseFence = previousReleaseFence;
         }
 
@@ -424,13 +370,13 @@ void ASurfaceTransaction_setBuffer(ASurfaceTransaction* aSurfaceTransaction,
     sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
     Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
 
-    sp<GraphicBuffer> graphic_buffer(reinterpret_cast<GraphicBuffer*>(buffer));
+    sp<GraphicBuffer> graphic_buffer(GraphicBuffer::fromAHardwareBuffer(buffer));
 
-    transaction->setBuffer(surfaceControl, graphic_buffer);
+    std::optional<sp<Fence>> fence = std::nullopt;
     if (acquire_fence_fd != -1) {
-        sp<Fence> fence = new Fence(acquire_fence_fd);
-        transaction->setAcquireFence(surfaceControl, fence);
+        fence = new Fence(acquire_fence_fd);
     }
+    transaction->setBuffer(surfaceControl, graphic_buffer, fence);
 }
 
 void ASurfaceTransaction_setGeometry(ASurfaceTransaction* aSurfaceTransaction,
@@ -580,10 +526,6 @@ void ASurfaceTransaction_setBufferDataSpace(ASurfaceTransaction* aSurfaceTransac
     CHECK_NOT_NULL(aSurfaceControl);
 
     sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
-    if (!isDataSpaceValid(surfaceControl, aDataSpace)) {
-        ALOGE("Failed to set buffer dataspace - invalid dataspace");
-        return;
-    }
     Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
     transaction->setDataspace(surfaceControl, static_cast<ui::Dataspace>(aDataSpace));
 }
@@ -650,10 +592,6 @@ void ASurfaceTransaction_setColor(ASurfaceTransaction* aSurfaceTransaction,
     CHECK_NOT_NULL(aSurfaceControl);
 
     sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
-    if (!isDataSpaceValid(surfaceControl, dataspace)) {
-        ALOGE("Failed to set buffer dataspace - invalid dataspace");
-        return;
-    }
     Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
 
     half3 color;
@@ -711,13 +649,12 @@ void ASurfaceTransaction_setOnCommit(ASurfaceTransaction* aSurfaceTransaction, v
                 aSurfaceTransactionStats.transactionCompleted = false;
 
                 auto& aSurfaceControlStats = aSurfaceTransactionStats.aSurfaceControlStats;
-                for (const auto&
-                             [surfaceControl, latchTime, acquireTime, presentFence,
-                              previousReleaseFence, transformHint,
-                              frameEvents] : surfaceControlStats) {
+                for (const auto& [surfaceControl, latchTime, acquireTimeOrFence, presentFence,
+                                  previousReleaseFence, transformHint, frameEvents] :
+                     surfaceControlStats) {
                     ASurfaceControl* aSurfaceControl =
                             reinterpret_cast<ASurfaceControl*>(surfaceControl.get());
-                    aSurfaceControlStats[aSurfaceControl].acquireTime = acquireTime;
+                    aSurfaceControlStats[aSurfaceControl].acquireTimeOrFence = acquireTimeOrFence;
                 }
 
                 (*func)(callback_context, &aSurfaceTransactionStats);
@@ -726,4 +663,12 @@ void ASurfaceTransaction_setOnCommit(ASurfaceTransaction* aSurfaceTransaction, v
     Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
 
     transaction->addTransactionCommittedCallback(callback, context);
+}
+
+void ASurfaceTransaction_setFrameTimeline(ASurfaceTransaction* aSurfaceTransaction,
+                                          AVsyncId vsyncId) {
+    CHECK_NOT_NULL(aSurfaceTransaction);
+    const auto startTime = AChoreographer_getStartTimeNanosForVsyncId(vsyncId);
+    ASurfaceTransaction_to_Transaction(aSurfaceTransaction)
+            ->setFrameTimelineInfo({.vsyncId = vsyncId, .startTimeNanos = startTime});
 }

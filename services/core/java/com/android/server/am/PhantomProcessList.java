@@ -18,6 +18,7 @@ package com.android.server.am;
 
 import static android.os.MessageQueue.OnFileDescriptorEventListener.EVENT_ERROR;
 import static android.os.MessageQueue.OnFileDescriptorEventListener.EVENT_INPUT;
+import static android.util.FeatureFlagUtils.SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROCESSES;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
@@ -28,6 +29,7 @@ import android.app.ApplicationExitInfo.SubReason;
 import android.os.Handler;
 import android.os.Process;
 import android.os.StrictMode;
+import android.util.FeatureFlagUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -305,7 +307,7 @@ public final class PhantomProcessList {
             }
             // Somehow our record doesn't match, remove it anyway
             Slog.w(TAG, "Stale " + proc + ", removing");
-            mPhantomProcesses.removeAt(index);
+            onPhantomProcessKilledLocked(proc);
         } else {
             // Is this one of the zombie processes we've known?
             final int idx = mZombiePhantomProcesses.indexOfKey(pid);
@@ -365,6 +367,9 @@ public final class PhantomProcessList {
     private int onPhantomProcessFdEvent(FileDescriptor fd, int events) {
         synchronized (mLock) {
             final PhantomProcessRecord proc = mPhantomProcessesPidFds.get(fd.getInt$());
+            if (proc == null) {
+                return 0;
+            }
             if ((events & EVENT_INPUT) != 0) {
                 proc.onProcDied(true);
             } else {
@@ -416,6 +421,10 @@ public final class PhantomProcessList {
      * order of the oom adjs of their parent process.
      */
     void trimPhantomProcessesIfNecessary() {
+        if (!mService.mSystemReady || !FeatureFlagUtils.isEnabled(mService.mContext,
+                SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS)) {
+            return;
+        }
         synchronized (mService.mProcLock) {
             synchronized (mLock) {
                 mTrimPhantomProcessScheduled = false;

@@ -742,6 +742,13 @@ public class AppOpsManager {
     public static final int ATTRIBUTION_FLAG_RECEIVER = 0x4;
 
     /**
+     * Attribution chain flag: Specifies that all attribution sources in the chain were trusted.
+     * Must only be set by system server.
+     * @hide
+     */
+    public static final int ATTRIBUTION_FLAG_TRUSTED = 0x8;
+
+    /**
      * No attribution flags.
      * @hide
      */
@@ -760,7 +767,8 @@ public class AppOpsManager {
     @IntDef(flag = true, prefix = { "FLAG_" }, value = {
             ATTRIBUTION_FLAG_ACCESSOR,
             ATTRIBUTION_FLAG_INTERMEDIARY,
-            ATTRIBUTION_FLAG_RECEIVER
+            ATTRIBUTION_FLAG_RECEIVER,
+            ATTRIBUTION_FLAG_TRUSTED
     })
     public @interface AttributionFlags {}
 
@@ -1284,6 +1292,9 @@ public class AppOpsManager {
     /** @hide */
     public static final int OP_UWB_RANGING = AppProtoEnums.APP_OP_UWB_RANGING;
 
+    /** @hide */
+    public static final int OP_NEARBY_WIFI_DEVICES = AppProtoEnums.APP_OP_NEARBY_WIFI_DEVICES;
+
     /**
      * Activity recognition being accessed by an activity recognition source, which
      * is a component that already has access since it is the one that detects
@@ -1302,9 +1313,31 @@ public class AppOpsManager {
     public static final int OP_RECORD_INCOMING_PHONE_AUDIO =
             AppProtoEnums.APP_OP_RECORD_INCOMING_PHONE_AUDIO;
 
+    /**
+     * VPN app establishes a connection through the VpnService API.
+     *
+     * @hide
+     */
+    public static final int OP_ESTABLISH_VPN_SERVICE = AppProtoEnums.APP_OP_ESTABLISH_VPN_SERVICE;
+
+    /**
+     * VPN app establishes a connection through the VpnManager API.
+     *
+     * @hide
+     */
+    public static final int OP_ESTABLISH_VPN_MANAGER = AppProtoEnums.APP_OP_ESTABLISH_VPN_MANAGER;
+
+    /**
+     * Access restricted settings.
+     *
+     * @hide
+     */
+    public static final int OP_ACCESS_RESTRICTED_SETTINGS =
+            AppProtoEnums.APP_OP_ACCESS_RESTRICTED_SETTINGS;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 116;
+    public static final int _NUM_OP = 120;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1660,6 +1693,7 @@ public class AppOpsManager {
      *
      * @hide
      */
+    @TestApi
     public static final String OPSTR_RECORD_AUDIO_HOTWORD = "android:record_audio_hotword";
 
     /**
@@ -1722,6 +1756,8 @@ public class AppOpsManager {
     public static final String OPSTR_MANAGE_MEDIA = "android:manage_media";
     /** @hide */
     public static final String OPSTR_UWB_RANGING = "android:uwb_ranging";
+    /** @hide */
+    public static final String OPSTR_NEARBY_WIFI_DEVICES = "android:nearby_wifi_devices";
 
     /**
      * Activity recognition being accessed by an activity recognition source, which
@@ -1739,6 +1775,30 @@ public class AppOpsManager {
      */
     public static final String OPSTR_RECORD_INCOMING_PHONE_AUDIO =
             "android:record_incoming_phone_audio";
+
+    /**
+     * VPN app establishes a connection through the VpnService API.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String OPSTR_ESTABLISH_VPN_SERVICE = "android:establish_vpn_service";
+
+    /**
+     * VPN app establishes a connection through the VpnManager API.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String OPSTR_ESTABLISH_VPN_MANAGER = "android:establish_vpn_manager";
+
+    /**
+     * Limit user accessing restricted settings.
+     *
+     * @hide
+     */
+    public static final String OPSTR_ACCESS_RESTRICTED_SETTINGS =
+            "android:access_restricted_settings";
 
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
@@ -1810,6 +1870,9 @@ public class AppOpsManager {
             OP_BLUETOOTH_CONNECT,
             OP_BLUETOOTH_ADVERTISE,
             OP_UWB_RANGING,
+            OP_NEARBY_WIFI_DEVICES,
+            // Notifications
+            OP_POST_NOTIFICATION,
 
             // APPOP PERMISSIONS
             OP_ACCESS_NOTIFICATIONS,
@@ -1954,6 +2017,10 @@ public class AppOpsManager {
             OP_ACTIVITY_RECOGNITION,            // OP_ACTIVITY_RECOGNITION_SOURCE
             OP_BLUETOOTH_ADVERTISE,             // OP_BLUETOOTH_ADVERTISE
             OP_RECORD_INCOMING_PHONE_AUDIO,     // OP_RECORD_INCOMING_PHONE_AUDIO
+            OP_NEARBY_WIFI_DEVICES,             // OP_NEARBY_WIFI_DEVICES
+            OP_ESTABLISH_VPN_SERVICE,           // OP_ESTABLISH_VPN_SERVICE
+            OP_ESTABLISH_VPN_MANAGER,           // OP_ESTABLISH_VPN_MANAGER
+            OP_ACCESS_RESTRICTED_SETTINGS,      // OP_ACCESS_RESTRICTED_SETTINGS
     };
 
     /**
@@ -2076,6 +2143,10 @@ public class AppOpsManager {
             OPSTR_ACTIVITY_RECOGNITION_SOURCE,
             OPSTR_BLUETOOTH_ADVERTISE,
             OPSTR_RECORD_INCOMING_PHONE_AUDIO,
+            OPSTR_NEARBY_WIFI_DEVICES,
+            OPSTR_ESTABLISH_VPN_SERVICE,
+            OPSTR_ESTABLISH_VPN_MANAGER,
+            OPSTR_ACCESS_RESTRICTED_SETTINGS,
     };
 
     /**
@@ -2199,6 +2270,10 @@ public class AppOpsManager {
             "ACTIVITY_RECOGNITION_SOURCE",
             "BLUETOOTH_ADVERTISE",
             "RECORD_INCOMING_PHONE_AUDIO",
+            "NEARBY_WIFI_DEVICES",
+            "ESTABLISH_VPN_SERVICE",
+            "ESTABLISH_VPN_MANAGER",
+            "ACCESS_RESTRICTED_SETTINGS",
     };
 
     /**
@@ -2218,7 +2293,7 @@ public class AppOpsManager {
             android.Manifest.permission.READ_CALENDAR,
             android.Manifest.permission.WRITE_CALENDAR,
             android.Manifest.permission.ACCESS_WIFI_STATE,
-            null, // no permission required for notifications
+            android.Manifest.permission.POST_NOTIFICATIONS,
             null, // neighboring cells shares the coarse location perm
             android.Manifest.permission.CALL_PHONE,
             android.Manifest.permission.READ_SMS,
@@ -2288,11 +2363,11 @@ public class AppOpsManager {
             Manifest.permission.USE_BIOMETRIC,
             Manifest.permission.ACTIVITY_RECOGNITION,
             Manifest.permission.SMS_FINANCIAL_TRANSACTIONS,
-            null,
+            Manifest.permission.READ_MEDIA_AUDIO,
             null, // no permission for OP_WRITE_MEDIA_AUDIO
-            null,
+            Manifest.permission.READ_MEDIA_VIDEO,
             null, // no permission for OP_WRITE_MEDIA_VIDEO
-            null,
+            Manifest.permission.READ_MEDIA_IMAGES,
             null, // no permission for OP_WRITE_MEDIA_IMAGES
             null, // no permission for OP_LEGACY_STORAGE
             null, // no permission for OP_ACCESS_ACCESSIBILITY
@@ -2323,6 +2398,10 @@ public class AppOpsManager {
             null, // no permission for OP_ACTIVITY_RECOGNITION_SOURCE,
             Manifest.permission.BLUETOOTH_ADVERTISE,
             null, // no permission for OP_RECORD_INCOMING_PHONE_AUDIO,
+            Manifest.permission.NEARBY_WIFI_DEVICES,
+            null, // no permission for OP_ESTABLISH_VPN_SERVICE
+            null, // no permission for OP_ESTABLISH_VPN_MANAGER
+            null, // no permission for OP_ACCESS_RESTRICTED_SETTINGS,
     };
 
     /**
@@ -2447,6 +2526,10 @@ public class AppOpsManager {
             null, // ACTIVITY_RECOGNITION_SOURCE
             null, // BLUETOOTH_ADVERTISE
             null, // RECORD_INCOMING_PHONE_AUDIO
+            null, // NEARBY_WIFI_DEVICES
+            null, // ESTABLISH_VPN_SERVICE
+            null, // ESTABLISH_VPN_MANAGER
+            null, // ACCESS_RESTRICTED_SETTINGS,
     };
 
     /**
@@ -2454,8 +2537,8 @@ public class AppOpsManager {
      * restriction} for a certain app-op.
      */
     private static RestrictionBypass[] sOpAllowSystemRestrictionBypass = new RestrictionBypass[] {
-            new RestrictionBypass(true, false), //COARSE_LOCATION
-            new RestrictionBypass(true, false), //FINE_LOCATION
+            new RestrictionBypass(true, false, false), //COARSE_LOCATION
+            new RestrictionBypass(true, false, false), //FINE_LOCATION
             null, //GPS
             null, //VIBRATE
             null, //READ_CONTACTS
@@ -2464,7 +2547,7 @@ public class AppOpsManager {
             null, //WRITE_CALL_LOG
             null, //READ_CALENDAR
             null, //WRITE_CALENDAR
-            new RestrictionBypass(true, false), //WIFI_SCAN
+            new RestrictionBypass(false, true, false), //WIFI_SCAN
             null, //POST_NOTIFICATION
             null, //NEIGHBORING_CELLS
             null, //CALL_PHONE
@@ -2478,10 +2561,10 @@ public class AppOpsManager {
             null, //READ_ICC_SMS
             null, //WRITE_ICC_SMS
             null, //WRITE_SETTINGS
-            new RestrictionBypass(true, false), //SYSTEM_ALERT_WINDOW
+            new RestrictionBypass(false, true, false), //SYSTEM_ALERT_WINDOW
             null, //ACCESS_NOTIFICATIONS
             null, //CAMERA
-            new RestrictionBypass(false, true), //RECORD_AUDIO
+            new RestrictionBypass(false, false, true), //RECORD_AUDIO
             null, //PLAY_AUDIO
             null, //READ_CLIPBOARD
             null, //WRITE_CLIPBOARD
@@ -2499,7 +2582,7 @@ public class AppOpsManager {
             null, //MONITOR_HIGH_POWER_LOCATION
             null, //GET_USAGE_STATS
             null, //MUTE_MICROPHONE
-            new RestrictionBypass(true, false), //TOAST_WINDOW
+            new RestrictionBypass(false, true, false), //TOAST_WINDOW
             null, //PROJECT_MEDIA
             null, //ACTIVATE_VPN
             null, //WALLPAPER
@@ -2531,7 +2614,7 @@ public class AppOpsManager {
             null, // ACCEPT_HANDOVER
             null, // MANAGE_IPSEC_HANDOVERS
             null, // START_FOREGROUND
-            new RestrictionBypass(true, false), // BLUETOOTH_SCAN
+            new RestrictionBypass(false, true, false), // BLUETOOTH_SCAN
             null, // USE_BIOMETRIC
             null, // ACTIVITY_RECOGNITION
             null, // SMS_FINANCIAL_TRANSACTIONS
@@ -2570,6 +2653,10 @@ public class AppOpsManager {
             null, // ACTIVITY_RECOGNITION_SOURCE
             null, // BLUETOOTH_ADVERTISE
             null, // RECORD_INCOMING_PHONE_AUDIO
+            null, // NEARBY_WIFI_DEVICES
+            null, // ESTABLISH_VPN_SERVICE
+            null, // ESTABLISH_VPN_MANAGER
+            null, // ACCESS_RESTRICTED_SETTINGS,
     };
 
     /**
@@ -2600,7 +2687,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED, // READ_ICC_SMS
             AppOpsManager.MODE_ALLOWED, // WRITE_ICC_SMS
             AppOpsManager.MODE_DEFAULT, // WRITE_SETTINGS
-            getSystemAlertWindowDefault(), // SYSTEM_ALERT_WINDOW
+            AppOpsManager.MODE_DEFAULT, // SYSTEM_ALERT_WINDOW /*Overridden in opToDefaultMode()*/
             AppOpsManager.MODE_ALLOWED, // ACCESS_NOTIFICATIONS
             AppOpsManager.MODE_ALLOWED, // CAMERA
             AppOpsManager.MODE_ALLOWED, // RECORD_AUDIO
@@ -2692,6 +2779,10 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED, // ACTIVITY_RECOGNITION_SOURCE
             AppOpsManager.MODE_ALLOWED, // BLUETOOTH_ADVERTISE
             AppOpsManager.MODE_ALLOWED, // RECORD_INCOMING_PHONE_AUDIO
+            AppOpsManager.MODE_ALLOWED, // NEARBY_WIFI_DEVICES
+            AppOpsManager.MODE_ALLOWED, // ESTABLISH_VPN_SERVICE
+            AppOpsManager.MODE_ALLOWED, // ESTABLISH_VPN_MANAGER
+            AppOpsManager.MODE_ALLOWED, // ACCESS_RESTRICTED_SETTINGS,
     };
 
     /**
@@ -2818,6 +2909,137 @@ public class AppOpsManager {
             false, // ACTIVITY_RECOGNITION_SOURCE
             false, // BLUETOOTH_ADVERTISE
             false, // RECORD_INCOMING_PHONE_AUDIO
+            false, // NEARBY_WIFI_DEVICES
+            false, // OP_ESTABLISH_VPN_SERVICE
+            false, // OP_ESTABLISH_VPN_MANAGER
+            true, // ACCESS_RESTRICTED_SETTINGS
+    };
+
+    /**
+     * This specifies whether each option is only allowed to be read
+     * by apps with manage appops permission.
+     */
+    private static boolean[] sOpRestrictRead = new boolean[] {
+            false, // COARSE_LOCATION
+            false, // FINE_LOCATION
+            false, // GPS
+            false, // VIBRATE
+            false, // READ_CONTACTS
+            false, // WRITE_CONTACTS
+            false, // READ_CALL_LOG
+            false, // WRITE_CALL_LOG
+            false, // READ_CALENDAR
+            false, // WRITE_CALENDAR
+            false, // WIFI_SCAN
+            false, // POST_NOTIFICATION
+            false, // NEIGHBORING_CELLS
+            false, // CALL_PHONE
+            false, // READ_SMS
+            false, // WRITE_SMS
+            false, // RECEIVE_SMS
+            false, // RECEIVE_EMERGENCY_BROADCAST
+            false, // RECEIVE_MMS
+            false, // RECEIVE_WAP_PUSH
+            false, // SEND_SMS
+            false, // READ_ICC_SMS
+            false, // WRITE_ICC_SMS
+            false, // WRITE_SETTINGS
+            false, // SYSTEM_ALERT_WINDOW
+            false, // ACCESS_NOTIFICATIONS
+            false, // CAMERA
+            false, // RECORD_AUDIO
+            false, // PLAY_AUDIO
+            false, // READ_CLIPBOARD
+            false, // WRITE_CLIPBOARD
+            false, // TAKE_MEDIA_BUTTONS
+            false, // TAKE_AUDIO_FOCUS
+            false, // AUDIO_MASTER_VOLUME
+            false, // AUDIO_VOICE_VOLUME
+            false, // AUDIO_RING_VOLUME
+            false, // AUDIO_MEDIA_VOLUME
+            false, // AUDIO_ALARM_VOLUME
+            false, // AUDIO_NOTIFICATION_VOLUME
+            false, // AUDIO_BLUETOOTH_VOLUME
+            false, // WAKE_LOCK
+            false, // MONITOR_LOCATION
+            false, // MONITOR_HIGH_POWER_LOCATION
+            false, // GET_USAGE_STATS
+            false, // MUTE_MICROPHONE
+            false, // TOAST_WINDOW
+            false, // PROJECT_MEDIA
+            false, // ACTIVATE_VPN
+            false, // WRITE_WALLPAPER
+            false, // ASSIST_STRUCTURE
+            false, // ASSIST_SCREENSHOT
+            false, // READ_PHONE_STATE
+            false, // ADD_VOICEMAIL
+            false, // USE_SIP
+            false, // PROCESS_OUTGOING_CALLS
+            false, // USE_FINGERPRINT
+            false, // BODY_SENSORS
+            false, // READ_CELL_BROADCASTS
+            false, // MOCK_LOCATION
+            false, // READ_EXTERNAL_STORAGE
+            false, // WRITE_EXTERNAL_STORAGE
+            false, // TURN_SCREEN_ON
+            false, // GET_ACCOUNTS
+            false, // RUN_IN_BACKGROUND
+            false, // AUDIO_ACCESSIBILITY_VOLUME
+            false, // READ_PHONE_NUMBERS
+            false, // REQUEST_INSTALL_PACKAGES
+            false, // PICTURE_IN_PICTURE
+            false, // INSTANT_APP_START_FOREGROUND
+            false, // ANSWER_PHONE_CALLS
+            false, // RUN_ANY_IN_BACKGROUND
+            false, // CHANGE_WIFI_STATE
+            false, // REQUEST_DELETE_PACKAGES
+            false, // BIND_ACCESSIBILITY_SERVICE
+            false, // ACCEPT_HANDOVER
+            false, // MANAGE_IPSEC_TUNNELS
+            false, // START_FOREGROUND
+            false, // BLUETOOTH_SCAN
+            false, // USE_BIOMETRIC
+            false, // ACTIVITY_RECOGNITION
+            false, // SMS_FINANCIAL_TRANSACTIONS
+            false, // READ_MEDIA_AUDIO
+            false, // WRITE_MEDIA_AUDIO
+            false, // READ_MEDIA_VIDEO
+            false,  // WRITE_MEDIA_VIDEO
+            false, // READ_MEDIA_IMAGES
+            false,  // WRITE_MEDIA_IMAGES
+            false,  // LEGACY_STORAGE
+            false, // ACCESS_ACCESSIBILITY
+            false, // READ_DEVICE_IDENTIFIERS
+            false, // ACCESS_MEDIA_LOCATION
+            false, // QUERY_ALL_PACKAGES
+            false, // MANAGE_EXTERNAL_STORAGE
+            false, // INTERACT_ACROSS_PROFILES
+            false, // ACTIVATE_PLATFORM_VPN
+            false, // LOADER_USAGE_STATS
+            false, // deprecated operation
+            false, // AUTO_REVOKE_PERMISSIONS_IF_UNUSED
+            false, // AUTO_REVOKE_MANAGED_BY_INSTALLER
+            false, // NO_ISOLATED_STORAGE
+            false, // PHONE_CALL_MICROPHONE
+            false, // PHONE_CALL_CAMERA
+            false, // RECORD_AUDIO_HOTWORD
+            false, // MANAGE_ONGOING_CALLS
+            false, // MANAGE_CREDENTIALS
+            false, // USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER
+            false, // RECORD_AUDIO_OUTPUT
+            false, // SCHEDULE_EXACT_ALARM
+            false, // ACCESS_FINE_LOCATION_SOURCE
+            false, // ACCESS_COARSE_LOCATION_SOURCE
+            false, // MANAGE_MEDIA
+            false, // BLUETOOTH_CONNECT
+            false, // UWB_RANGING
+            false, // ACTIVITY_RECOGNITION_SOURCE
+            false, // BLUETOOTH_ADVERTISE
+            false, // RECORD_INCOMING_PHONE_AUDIO
+            false, // NEARBY_WIFI_DEVICES
+            false, // OP_ESTABLISH_VPN_SERVICE
+            false, // OP_ESTABLISH_VPN_MANAGER
+            true, // ACCESS_RESTRICTED_SETTINGS
     };
 
     /**
@@ -2840,14 +3062,14 @@ public class AppOpsManager {
     private static final ThreadLocal<Integer> sBinderThreadCallingUid = new ThreadLocal<>();
 
     /**
-     * If a thread is currently executing a two-way binder transaction, this stores the
-     * ops that were noted blaming any app (the caller, the caller of the caller, etc).
+     * If a thread is currently executing a two-way binder transaction, this stores the op-codes of
+     * the app-ops that were noted during this transaction.
      *
      * @see #getNotedOpCollectionMode
      * @see #collectNotedOpSync
      */
-    private static final ThreadLocal<ArrayMap<String, ArrayMap<String, long[]>>>
-            sAppOpsNotedInThisBinderTransaction = new ThreadLocal<>();
+    private static final ThreadLocal<ArrayMap<String, long[]>> sAppOpsNotedInThisBinderTransaction =
+            new ThreadLocal<>();
 
     /** Whether noting for an appop should be collected */
     private static final @ShouldCollectNoteOp byte[] sAppOpsToNote = new byte[_NUM_OP];
@@ -2915,6 +3137,8 @@ public class AppOpsManager {
     private static final String DEBUG_LOGGING_PACKAGES_PROP = "appops.logging_packages";
     private static final String DEBUG_LOGGING_OPS_PROP = "appops.logging_ops";
     private static final String DEBUG_LOGGING_TAG = "AppOpsManager";
+
+    private static volatile Integer sOpSystemAlertWindowDefaultMode;
 
     /**
      * Retrieve the op switch that controls the given operation.
@@ -3014,6 +3238,9 @@ public class AppOpsManager {
      * @hide
      */
     public static @Mode int opToDefaultMode(int op) {
+        if (op == OP_SYSTEM_ALERT_WINDOW) {
+            return getSystemAlertWindowDefault();
+        }
         return sOpDefaultMode[op];
     }
 
@@ -3040,6 +3267,14 @@ public class AppOpsManager {
             return MODE_NAMES[mode];
         }
         return "mode=" + mode;
+    }
+
+    /**
+     * Retrieve whether the op can be read by apps with manage appops permission.
+     * @hide
+     */
+    public static boolean opRestrictsRead(int op) {
+        return sOpRestrictRead[op];
     }
 
     /**
@@ -3096,6 +3331,9 @@ public class AppOpsManager {
      * @hide
      */
     public static class RestrictionBypass {
+        /** Does the app need to be system uid to bypass the restriction */
+        public boolean isSystemUid;
+
         /** Does the app need to be privileged to bypass the restriction */
         public boolean isPrivileged;
 
@@ -3105,12 +3343,14 @@ public class AppOpsManager {
          */
         public boolean isRecordAudioRestrictionExcept;
 
-        public RestrictionBypass(boolean isPrivileged, boolean isRecordAudioRestrictionExcept) {
+        public RestrictionBypass(boolean isSystemUid, boolean isPrivileged,
+                boolean isRecordAudioRestrictionExcept) {
+            this.isSystemUid = isSystemUid;
             this.isPrivileged = isPrivileged;
             this.isRecordAudioRestrictionExcept = isRecordAudioRestrictionExcept;
         }
 
-        public static RestrictionBypass UNRESTRICTED = new RestrictionBypass(true, true);
+        public static RestrictionBypass UNRESTRICTED = new RestrictionBypass(false, true, true);
     }
 
     /**
@@ -3987,7 +4227,7 @@ public class AppOpsManager {
                 LongSparseArray<NoteOpEvent> array = new LongSparseArray<>(numEntries);
 
                 for (int i = 0; i < numEntries; i++) {
-                    array.put(source.readLong(), source.readParcelable(null));
+                    array.put(source.readLong(), source.readParcelable(null, android.app.AppOpsManager.NoteOpEvent.class));
                 }
 
                 return array;
@@ -4804,6 +5044,16 @@ public class AppOpsManager {
     public static final int HISTORY_FLAG_DISCRETE = 1 << 1;
 
     /**
+     * Flag for querying app op history: assemble attribution chains, and attach the last visible
+     * node in the chain to the start as a proxy info. This only applies to discrete accesses.
+     *
+     * TODO 191512294: Add to @SystemApi
+     *
+     * @hide
+     */
+    public static final int HISTORY_FLAG_GET_ATTRIBUTION_CHAINS = 1 << 2;
+
+    /**
      * Flag for querying app op history: get all types of historical access information.
      *
      * @see #getHistoricalOps(HistoricalOpsRequest, Executor, Consumer)
@@ -4819,7 +5069,8 @@ public class AppOpsManager {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, prefix = { "HISTORY_FLAG_" }, value = {
             HISTORY_FLAG_AGGREGATE,
-            HISTORY_FLAG_DISCRETE
+            HISTORY_FLAG_DISCRETE,
+            HISTORY_FLAG_GET_ATTRIBUTION_CHAINS
     })
     public @interface OpHistoryFlags {}
 
@@ -5037,7 +5288,8 @@ public class AppOpsManager {
              * @return This builder.
              */
             public @NonNull Builder setHistoryFlags(@OpHistoryFlags int flags) {
-                Preconditions.checkFlagsArgument(flags, HISTORY_FLAGS_ALL);
+                Preconditions.checkFlagsArgument(flags,
+                        HISTORY_FLAGS_ALL | HISTORY_FLAG_GET_ATTRIBUTION_CHAINS);
                 mHistoryFlags = flags;
                 return this;
             }
@@ -5095,7 +5347,7 @@ public class AppOpsManager {
             final int[] uids = parcel.createIntArray();
             if (!ArrayUtils.isEmpty(uids)) {
                 final ParceledListSlice<HistoricalUidOps> listSlice = parcel.readParcelable(
-                        HistoricalOps.class.getClassLoader());
+                        HistoricalOps.class.getClassLoader(), android.content.pm.ParceledListSlice.class);
                 final List<HistoricalUidOps> uidOps = (listSlice != null)
                         ? listSlice.getList() : null;
                 if (uidOps == null) {
@@ -5290,8 +5542,17 @@ public class AppOpsManager {
                 @Nullable String attributionTag, @UidState int uidState, @OpFlags int opFlag,
                 long discreteAccessTime, long discreteAccessDuration) {
             getOrCreateHistoricalUidOps(uid).addDiscreteAccess(opCode, packageName, attributionTag,
-                    uidState, opFlag, discreteAccessTime, discreteAccessDuration);
-        };
+                    uidState, opFlag, discreteAccessTime, discreteAccessDuration, null);
+        }
+
+        /** @hide */
+        public void addDiscreteAccess(int opCode, int uid, @NonNull String packageName,
+                @Nullable String attributionTag, @UidState int uidState, @OpFlags int opFlag,
+                long discreteAccessTime, long discreteAccessDuration,
+                @Nullable OpEventProxyInfo proxy) {
+            getOrCreateHistoricalUidOps(uid).addDiscreteAccess(opCode, packageName, attributionTag,
+                    uidState, opFlag, discreteAccessTime, discreteAccessDuration, proxy);
+        }
 
 
         /** @hide */
@@ -5623,9 +5884,10 @@ public class AppOpsManager {
 
         private void addDiscreteAccess(int opCode, @NonNull String packageName,
                 @Nullable String attributionTag, @UidState int uidState,
-                @OpFlags int flag, long discreteAccessTime, long discreteAccessDuration) {
+                @OpFlags int flag, long discreteAccessTime, long discreteAccessDuration,
+                @Nullable OpEventProxyInfo proxy) {
             getOrCreateHistoricalPackageOps(packageName).addDiscreteAccess(opCode, attributionTag,
-                    uidState, flag, discreteAccessTime, discreteAccessDuration);
+                    uidState, flag, discreteAccessTime, discreteAccessDuration, proxy);
         };
 
         /**
@@ -5889,9 +6151,9 @@ public class AppOpsManager {
 
         private void addDiscreteAccess(int opCode, @Nullable String attributionTag,
                 @UidState int uidState, @OpFlags int flag, long discreteAccessTime,
-                long discreteAccessDuration) {
+                long discreteAccessDuration, @Nullable OpEventProxyInfo proxy) {
             getOrCreateAttributedHistoricalOps(attributionTag).addDiscreteAccess(opCode, uidState,
-                    flag, discreteAccessTime, discreteAccessDuration);
+                    flag, discreteAccessTime, discreteAccessDuration, proxy);
         }
 
         /**
@@ -6212,9 +6474,10 @@ public class AppOpsManager {
         }
 
         private void addDiscreteAccess(int opCode, @UidState int uidState, @OpFlags int flag,
-                long discreteAccessTime, long discreteAccessDuration) {
+                long discreteAccessTime, long discreteAccessDuration,
+                @Nullable OpEventProxyInfo proxy) {
             getOrCreateHistoricalOp(opCode).addDiscreteAccess(uidState,flag, discreteAccessTime,
-                    discreteAccessDuration);
+                    discreteAccessDuration, proxy);
         }
 
         /**
@@ -6583,11 +6846,12 @@ public class AppOpsManager {
         }
 
         private void addDiscreteAccess(@UidState int uidState, @OpFlags int flag,
-                long discreteAccessTime, long discreteAccessDuration) {
+                long discreteAccessTime, long discreteAccessDuration,
+                @Nullable OpEventProxyInfo proxy) {
             List<AttributedOpEntry> discreteAccesses = getOrCreateDiscreteAccesses();
             LongSparseArray<NoteOpEvent> accessEvents = new LongSparseArray<>();
             long key = makeKey(uidState, flag);
-            NoteOpEvent note = new NoteOpEvent(discreteAccessTime, discreteAccessDuration, null);
+            NoteOpEvent note = new NoteOpEvent(discreteAccessTime, discreteAccessDuration, proxy);
             accessEvents.append(key, note);
             AttributedOpEntry access = new AttributedOpEntry(mOp, false, accessEvents, null);
             int insertionPoint = discreteAccesses.size() - 1;
@@ -7172,6 +7436,34 @@ public class AppOpsManager {
      * @hide
      */
     public interface OnOpStartedListener {
+
+        /**
+         * Represents a start operation that was unsuccessful
+         * @hide
+         */
+        public int START_TYPE_FAILED = 0;
+
+        /**
+         * Represents a successful start operation
+         * @hide
+         */
+        public int START_TYPE_STARTED = 1;
+
+        /**
+         * Represents an operation where a restricted operation became unrestricted, and resumed.
+         * @hide
+         */
+        public int START_TYPE_RESUMED = 2;
+
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(flag = true, prefix = { "TYPE_" }, value = {
+            START_TYPE_FAILED,
+            START_TYPE_STARTED,
+            START_TYPE_RESUMED
+        })
+        public @interface StartedType {}
+
         /**
          * Called when an op was started.
          *
@@ -7180,11 +7472,35 @@ public class AppOpsManager {
          * @param uid The UID performing the operation.
          * @param packageName The package performing the operation.
          * @param attributionTag The attribution tag performing the operation.
-         * @param flags The flags of this op
+         * @param flags The flags of this op.
          * @param result The result of the start.
          */
         void onOpStarted(int op, int uid, String packageName, String attributionTag,
                 @OpFlags int flags, @Mode int result);
+
+        /**
+         * Called when an op was started.
+         *
+         * Note: This is only for op starts. It is not called when an op is noted or stopped.
+         * By default, unless this method is overridden, no code will be executed for resume
+         * events.
+         * @param op The op code.
+         * @param uid The UID performing the operation.
+         * @param packageName The package performing the operation.
+         * @param attributionTag The attribution tag performing the operation.
+         * @param flags The flags of this op.
+         * @param result The result of the start.
+         * @param startType The start type of this start event. Either failed, resumed, or started.
+         * @param attributionFlags The location of this started op in an attribution chain.
+         * @param attributionChainId The ID of the attribution chain of this op, if it is in one.
+         */
+        default void onOpStarted(int op, int uid, String packageName, String attributionTag,
+                @OpFlags int flags, @Mode int result, @StartedType int startType,
+                @AttributionFlags int attributionFlags, int attributionChainId) {
+            if (startType != START_TYPE_RESUMED) {
+                onOpStarted(op, uid, packageName, attributionTag, flags, result);
+            }
+        }
     }
 
     AppOpsManager(Context context, IAppOpsService service) {
@@ -7825,8 +8141,10 @@ public class AppOpsManager {
              cb = new IAppOpsStartedCallback.Stub() {
                  @Override
                  public void opStarted(int op, int uid, String packageName, String attributionTag,
-                         int flags, int mode) {
-                     callback.onOpStarted(op, uid, packageName, attributionTag, flags, mode);
+                         int flags, int mode, int startType, int attributionFlags,
+                         int attributionChainId) {
+                     callback.onOpStarted(op, uid, packageName, attributionTag, flags, mode,
+                             startType, attributionFlags, attributionChainId);
                  }
              };
              mStartedWatchers.put(callback, cb);
@@ -9019,6 +9337,66 @@ public class AppOpsManager {
     }
 
     /**
+     * State of a temporarily paused noted app-ops collection.
+     *
+     * @see #pauseNotedAppOpsCollection()
+     *
+     * @hide
+     */
+    public static class PausedNotedAppOpsCollection {
+        final int mUid;
+        final @Nullable ArrayMap<String, long[]> mCollectedNotedAppOps;
+
+        PausedNotedAppOpsCollection(int uid, @Nullable ArrayMap<String,
+                long[]> collectedNotedAppOps) {
+            mUid = uid;
+            mCollectedNotedAppOps = collectedNotedAppOps;
+        }
+    }
+
+    /**
+     * Temporarily suspend collection of noted app-ops when binder-thread calls into the other
+     * process. During such a call there might be call-backs coming back on the same thread which
+     * should not be accounted to the current collection.
+     *
+     * @return a state needed to resume the collection
+     *
+     * @hide
+     */
+    public static @Nullable PausedNotedAppOpsCollection pauseNotedAppOpsCollection() {
+        Integer previousUid = sBinderThreadCallingUid.get();
+        if (previousUid != null) {
+            ArrayMap<String, long[]> previousCollectedNotedAppOps =
+                    sAppOpsNotedInThisBinderTransaction.get();
+
+            sBinderThreadCallingUid.remove();
+            sAppOpsNotedInThisBinderTransaction.remove();
+
+            return new PausedNotedAppOpsCollection(previousUid, previousCollectedNotedAppOps);
+        }
+
+        return null;
+    }
+
+    /**
+     * Resume a collection paused via {@link #pauseNotedAppOpsCollection}.
+     *
+     * @param prevCollection The state of the previous collection
+     *
+     * @hide
+     */
+    public static void resumeNotedAppOpsCollection(
+            @Nullable PausedNotedAppOpsCollection prevCollection) {
+        if (prevCollection != null) {
+            sBinderThreadCallingUid.set(prevCollection.mUid);
+
+            if (prevCollection.mCollectedNotedAppOps != null) {
+                sAppOpsNotedInThisBinderTransaction.set(prevCollection.mCollectedNotedAppOps);
+            }
+        }
+    }
+
+    /**
      * Finish collection of noted appops on this thread.
      *
      * <p>Called at the end of a two way binder transaction.
@@ -9058,47 +9436,26 @@ public class AppOpsManager {
      */
     @TestApi
     public static void collectNotedOpSync(@NonNull SyncNotedAppOp syncOp) {
-        collectNotedOpSync(sOpStrToOp.get(syncOp.getOp()), syncOp.getAttributionTag(),
-                syncOp.getPackageName());
-    }
-
-    /**
-     * Collect a noted op when inside of a two-way binder call.
-     *
-     * <p> Delivered to caller via {@link #prefixParcelWithAppOpsIfNeeded}
-     *
-     * @param code the op code to note for
-     * @param attributionTag the attribution tag to note for
-     * @param packageName the package to note for
-     */
-    private static void collectNotedOpSync(int code, @Nullable String attributionTag,
-            @NonNull String packageName) {
         // If this is inside of a two-way binder call:
         // We are inside of a two-way binder call. Delivered to caller via
         // {@link #prefixParcelWithAppOpsIfNeeded}
-        ArrayMap<String, ArrayMap<String, long[]>> appOpsNoted =
-                sAppOpsNotedInThisBinderTransaction.get();
+        int op = sOpStrToOp.get(syncOp.getOp());
+        ArrayMap<String, long[]> appOpsNoted = sAppOpsNotedInThisBinderTransaction.get();
         if (appOpsNoted == null) {
             appOpsNoted = new ArrayMap<>(1);
             sAppOpsNotedInThisBinderTransaction.set(appOpsNoted);
         }
 
-        ArrayMap<String, long[]> packageAppOpsNotedForAttribution = appOpsNoted.get(packageName);
-        if (packageAppOpsNotedForAttribution == null) {
-            packageAppOpsNotedForAttribution = new ArrayMap<>(1);
-            appOpsNoted.put(packageName, packageAppOpsNotedForAttribution);
-        }
-
-        long[] appOpsNotedForAttribution = packageAppOpsNotedForAttribution.get(attributionTag);
+        long[] appOpsNotedForAttribution = appOpsNoted.get(syncOp.getAttributionTag());
         if (appOpsNotedForAttribution == null) {
             appOpsNotedForAttribution = new long[2];
-            packageAppOpsNotedForAttribution.put(attributionTag, appOpsNotedForAttribution);
+            appOpsNoted.put(syncOp.getAttributionTag(), appOpsNotedForAttribution);
         }
 
-        if (code < 64) {
-            appOpsNotedForAttribution[0] |= 1L << code;
+        if (op < 64) {
+            appOpsNotedForAttribution[0] |= 1L << op;
         } else {
-            appOpsNotedForAttribution[1] |= 1L << (code - 64);
+            appOpsNotedForAttribution[1] |= 1L << (op - 64);
         }
     }
 
@@ -9152,7 +9509,9 @@ public class AppOpsManager {
             }
         }
 
-        if (isListeningForOpNotedInBinderTransaction()) {
+        Integer binderUid = sBinderThreadCallingUid.get();
+
+        if (binderUid != null && binderUid == uid) {
             return COLLECT_SYNC;
         } else {
             return COLLECT_ASYNC;
@@ -9171,32 +9530,20 @@ public class AppOpsManager {
      */
     // TODO (b/186872903) Refactor how sync noted ops are propagated.
     public static void prefixParcelWithAppOpsIfNeeded(@NonNull Parcel p) {
-        if (!isListeningForOpNotedInBinderTransaction()) {
-            return;
-        }
-        final ArrayMap<String, ArrayMap<String, long[]>> notedAppOps =
-                sAppOpsNotedInThisBinderTransaction.get();
+        ArrayMap<String, long[]> notedAppOps = sAppOpsNotedInThisBinderTransaction.get();
         if (notedAppOps == null) {
             return;
         }
 
         p.writeInt(Parcel.EX_HAS_NOTED_APPOPS_REPLY_HEADER);
 
-        final int packageCount = notedAppOps.size();
-        p.writeInt(packageCount);
+        int numAttributionWithNotesAppOps = notedAppOps.size();
+        p.writeInt(numAttributionWithNotesAppOps);
 
-        for (int i = 0; i < packageCount; i++) {
+        for (int i = 0; i < numAttributionWithNotesAppOps; i++) {
             p.writeString(notedAppOps.keyAt(i));
-
-            final ArrayMap<String, long[]> notedTagAppOps = notedAppOps.valueAt(i);
-            final int tagCount = notedTagAppOps.size();
-            p.writeInt(tagCount);
-
-            for (int j = 0; j < tagCount; j++) {
-                p.writeString(notedTagAppOps.keyAt(j));
-                p.writeLong(notedTagAppOps.valueAt(j)[0]);
-                p.writeLong(notedTagAppOps.valueAt(j)[1]);
-            }
+            p.writeLong(notedAppOps.valueAt(i)[0]);
+            p.writeLong(notedAppOps.valueAt(i)[1]);
         }
     }
 
@@ -9211,54 +9558,36 @@ public class AppOpsManager {
      * @hide
      */
     public static void readAndLogNotedAppops(@NonNull Parcel p) {
-        final int packageCount = p.readInt();
-        if (packageCount <= 0) {
-            return;
-        }
+        int numAttributionsWithNotedAppOps = p.readInt();
 
-        final String myPackageName = ActivityThread.currentPackageName();
+        for (int i = 0; i < numAttributionsWithNotedAppOps; i++) {
+            String attributionTag = p.readString();
+            long[] rawNotedAppOps = new long[2];
+            rawNotedAppOps[0] = p.readLong();
+            rawNotedAppOps[1] = p.readLong();
 
-        synchronized (sLock) {
-            for (int i = 0; i < packageCount; i++) {
-                final String packageName = p.readString();
+            if (rawNotedAppOps[0] != 0 || rawNotedAppOps[1] != 0) {
+                BitSet notedAppOps = BitSet.valueOf(rawNotedAppOps);
 
-                final int tagCount = p.readInt();
-                for (int j = 0; j < tagCount; j++) {
-                    final String attributionTag = p.readString();
-                    final long[] rawNotedAppOps = new long[2];
-                    rawNotedAppOps[0] = p.readLong();
-                    rawNotedAppOps[1] = p.readLong();
-
-                    if (rawNotedAppOps[0] == 0 && rawNotedAppOps[1] == 0) {
-                        continue;
-                    }
-
-                    final BitSet notedAppOps = BitSet.valueOf(rawNotedAppOps);
+                synchronized (sLock) {
                     for (int code = notedAppOps.nextSetBit(0); code != -1;
                             code = notedAppOps.nextSetBit(code + 1)) {
-                        if (Objects.equals(myPackageName, packageName)) {
-                            if (sOnOpNotedCallback != null) {
-                                sOnOpNotedCallback.onNoted(new SyncNotedAppOp(code,
-                                        attributionTag, packageName));
-                            } else {
-                                String message = getFormattedStackTrace();
-                                sUnforwardedOps.add(new AsyncNotedAppOp(code, Process.myUid(),
-                                        attributionTag, message, System.currentTimeMillis()));
-                                if (sUnforwardedOps.size() > MAX_UNFORWARDED_OPS) {
-                                    sUnforwardedOps.remove(0);
-                                }
+                        if (sOnOpNotedCallback != null) {
+                            sOnOpNotedCallback.onNoted(new SyncNotedAppOp(code, attributionTag));
+                        } else {
+                            String message = getFormattedStackTrace();
+                            sUnforwardedOps.add(
+                                    new AsyncNotedAppOp(code, Process.myUid(), attributionTag,
+                                            message, System.currentTimeMillis()));
+                            if (sUnforwardedOps.size() > MAX_UNFORWARDED_OPS) {
+                                sUnforwardedOps.remove(0);
                             }
-                        } else if (isListeningForOpNotedInBinderTransaction()) {
-                            collectNotedOpSync(code, attributionTag, packageName);
                         }
                     }
-                    for (int code = notedAppOps.nextSetBit(0); code != -1;
-                            code = notedAppOps.nextSetBit(code + 1)) {
-                        if (Objects.equals(myPackageName, packageName)) {
-                            sMessageCollector.onNoted(new SyncNotedAppOp(code,
-                                    attributionTag, packageName));
-                        }
-                    }
+                }
+                for (int code = notedAppOps.nextSetBit(0); code != -1;
+                        code = notedAppOps.nextSetBit(code + 1)) {
+                    sMessageCollector.onNoted(new SyncNotedAppOp(code, attributionTag));
                 }
             }
         }
@@ -9309,23 +9638,23 @@ public class AppOpsManager {
                     e.rethrowFromSystemServer();
                 }
 
-                if (missedAsyncOps != null) {
+                // Copy pointer so callback can be dispatched out of lock
+                OnOpNotedCallback onOpNotedCallback = sOnOpNotedCallback;
+                if (onOpNotedCallback != null && missedAsyncOps != null) {
                     int numMissedAsyncOps = missedAsyncOps.size();
                     for (int i = 0; i < numMissedAsyncOps; i++) {
                         final AsyncNotedAppOp asyncNotedAppOp = missedAsyncOps.get(i);
-                        if (sOnOpNotedCallback != null) {
-                            sOnOpNotedCallback.getAsyncNotedExecutor().execute(
-                                    () -> sOnOpNotedCallback.onAsyncNoted(asyncNotedAppOp));
-                        }
+                        onOpNotedCallback.getAsyncNotedExecutor().execute(
+                                () -> onOpNotedCallback.onAsyncNoted(asyncNotedAppOp));
                     }
                 }
                 synchronized (this) {
                     int numMissedSyncOps = sUnforwardedOps.size();
-                    for (int i = 0; i < numMissedSyncOps; i++) {
-                        final AsyncNotedAppOp syncNotedAppOp = sUnforwardedOps.get(i);
-                        if (sOnOpNotedCallback != null) {
-                            sOnOpNotedCallback.getAsyncNotedExecutor().execute(
-                                    () -> sOnOpNotedCallback.onAsyncNoted(syncNotedAppOp));
+                    if (onOpNotedCallback != null) {
+                        for (int i = 0; i < numMissedSyncOps; i++) {
+                            final AsyncNotedAppOp syncNotedAppOp = sUnforwardedOps.get(i);
+                            onOpNotedCallback.getAsyncNotedExecutor().execute(
+                                    () -> onOpNotedCallback.onAsyncNoted(syncNotedAppOp));
                         }
                     }
                     sUnforwardedOps.clear();
@@ -9365,15 +9694,7 @@ public class AppOpsManager {
      * @hide
      */
     public static boolean isListeningForOpNoted() {
-        return sOnOpNotedCallback != null || isListeningForOpNotedInBinderTransaction()
-                || isCollectingStackTraces();
-    }
-
-    /**
-     * @return whether we are in a binder transaction and collecting appops.
-     */
-    private static boolean isListeningForOpNotedInBinderTransaction() {
-        return sBinderThreadCallingUid.get() != null;
+        return sOnOpNotedCallback != null || isCollectingStackTraces();
     }
 
     /**
@@ -9848,7 +10169,7 @@ public class AppOpsManager {
 
     private static @Nullable List<AttributedOpEntry> readDiscreteAccessArrayFromParcel(
             @NonNull Parcel parcel) {
-        final ParceledListSlice<AttributedOpEntry> listSlice = parcel.readParcelable(null);
+        final ParceledListSlice<AttributedOpEntry> listSlice = parcel.readParcelable(null, android.content.pm.ParceledListSlice.class);
         return listSlice == null ? null : listSlice.getList();
     }
 
@@ -9937,6 +10258,11 @@ public class AppOpsManager {
     }
 
     private static int getSystemAlertWindowDefault() {
+        // This is indeed racy but we aren't expecting the result to change so it's not worth
+        // the synchronization.
+        if (sOpSystemAlertWindowDefaultMode != null) {
+            return sOpSystemAlertWindowDefaultMode;
+        }
         final Context context = ActivityThread.currentApplication();
         if (context == null) {
             return AppOpsManager.MODE_DEFAULT;
@@ -9947,10 +10273,11 @@ public class AppOpsManager {
         // TVs are constantly plugged in and has less concern for memory/power
         if (ActivityManager.isLowRamDeviceStatic()
                 && !pm.hasSystemFeature(PackageManager.FEATURE_LEANBACK, 0)) {
-            return AppOpsManager.MODE_IGNORED;
+            sOpSystemAlertWindowDefaultMode = AppOpsManager.MODE_IGNORED;
+        } else {
+            sOpSystemAlertWindowDefaultMode = AppOpsManager.MODE_DEFAULT;
         }
-
-        return AppOpsManager.MODE_DEFAULT;
+        return sOpSystemAlertWindowDefaultMode;
     }
 
     /**
@@ -10022,6 +10349,8 @@ public class AppOpsManager {
                     NoteOpEvent existingAccess = accessEvents.get(key);
                     if (existingAccess == null || existingAccess.getDuration() == -1) {
                         accessEvents.append(key, access);
+                    } else if (existingAccess.mProxy == null && access.mProxy != null ) {
+                        existingAccess.mProxy = access.mProxy;
                     }
                 }
                 if (reject != null) {

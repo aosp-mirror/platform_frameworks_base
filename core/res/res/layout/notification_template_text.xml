@@ -21,7 +21,7 @@
     android:layout_height="@dimen/notification_text_height"
     android:layout_gravity="top"
     android:layout_marginTop="@dimen/notification_text_margin_top"
-    android:ellipsize="marquee"
+    android:ellipsize="end"
     android:fadingEdge="horizontal"
     android:gravity="top"
     android:singleLine="true"

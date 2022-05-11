@@ -55,11 +55,11 @@ import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.settings.CurrentUserTracker;
 
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -109,7 +109,8 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
             Context context,
             @Background Handler bgHandler,
             BroadcastDispatcher broadcastDispatcher,
-            @Background Executor bgExecutor
+            @Background Executor bgExecutor,
+            DumpManager dumpManager
     ) {
         super(broadcastDispatcher);
         mContext = context;
@@ -121,6 +122,8 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
         mPackageManager = context.getPackageManager();
         mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
         mBgExecutor = bgExecutor;
+
+        dumpManager.registerDumpable(getClass().getSimpleName(), this);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(KeyChain.ACTION_TRUST_STORE_CHANGED);
@@ -134,7 +137,7 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
         startTracking();
     }
 
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("SecurityController state:");
         pw.print("  mCurrentVpns={");
         for (int i = 0 ; i < mCurrentVpns.size(); i++) {
@@ -208,6 +211,12 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
     @Override
     public boolean hasWorkProfile() {
         return getWorkProfileUserId(mCurrentUserId) != UserHandle.USER_NULL;
+    }
+
+    @Override
+    public boolean isWorkProfileOn() {
+        final UserHandle userHandle = UserHandle.of(getWorkProfileUserId(mCurrentUserId));
+        return userHandle != null && !mUserManager.isQuietModeEnabled(userHandle);
     }
 
     @Override

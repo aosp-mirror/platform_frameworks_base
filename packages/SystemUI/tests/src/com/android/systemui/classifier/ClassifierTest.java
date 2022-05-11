@@ -19,30 +19,35 @@ package com.android.systemui.classifier;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 
-import com.android.systemui.utils.leaks.FakeBatteryController;
-import com.android.systemui.utils.leaks.LeakCheckedTest;
+import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dock.DockManagerFake;
+import com.android.systemui.statusbar.policy.BatteryController;
 
 import org.junit.After;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClassifierTest extends LeakCheckedTest {
+public class ClassifierTest extends SysuiTestCase {
 
     private FalsingDataProvider mDataProvider;
-    private List<MotionEvent> mMotionEvents = new ArrayList<>();
+    private final List<MotionEvent> mMotionEvents = new ArrayList<>();
     private float mOffsetX = 0;
     private float mOffsetY = 0;
-    private FakeBatteryController mFakeBatteryController;
+    @Mock
+    private BatteryController mBatteryController;
+    private final DockManagerFake mDockManager = new DockManagerFake();
 
     public void setup() {
+        MockitoAnnotations.initMocks(this);
         DisplayMetrics displayMetrics = new DisplayMetrics();
         displayMetrics.xdpi = 100;
         displayMetrics.ydpi = 100;
         displayMetrics.widthPixels = 1000;
         displayMetrics.heightPixels = 1000;
-        mFakeBatteryController = new FakeBatteryController(getLeakCheck());
-        mDataProvider = new FalsingDataProvider(displayMetrics, mFakeBatteryController);
+        mDataProvider = new FalsingDataProvider(displayMetrics, mBatteryController, mDockManager);
     }
 
     @After
@@ -52,10 +57,6 @@ public class ClassifierTest extends LeakCheckedTest {
 
     protected FalsingDataProvider getDataProvider() {
         return mDataProvider;
-    }
-
-    FakeBatteryController getFakeBatteryController() {
-        return mFakeBatteryController;
     }
 
     protected void setOffsetX(float offsetX) {

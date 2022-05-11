@@ -18,6 +18,7 @@ package android.location;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.Manifest.permission.LOCATION_BYPASS;
 import static android.Manifest.permission.LOCATION_HARDWARE;
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 import static android.location.LocationRequest.createFromDeprecatedCriteria;
@@ -180,6 +181,11 @@ public class LocationManager {
      * <p>If present, this provider determines location using GNSS satellites. The responsiveness
      * and accuracy of location fixes may depend on GNSS signal conditions.
      *
+     * <p>Locations returned from this provider are with respect to the primary GNSS antenna
+     * position within the device. {@link #getGnssAntennaInfos()} may be used to determine the GNSS
+     * antenna position with respect to the Android Coordinate System, and convert between them if
+     * necessary. This is generally only necessary for high accuracy applications.
+     *
      * <p>The extras Bundle for locations derived by this location provider may contain the
      * following key/value pairs:
      * <ul>
@@ -313,6 +319,33 @@ public class LocationManager {
      * @see #MODE_CHANGED_ACTION
      */
     public static final String EXTRA_LOCATION_ENABLED = "android.location.extra.LOCATION_ENABLED";
+
+    /**
+     * Broadcast intent action when the ADAS (Advanced Driving Assistance Systems) GNSS location
+     * enabled state changes. Includes a boolean intent extra, {@link #EXTRA_ADAS_GNSS_ENABLED},
+     * with the enabled state of ADAS GNSS location. This broadcast only has meaning on automotive
+     * devices.
+     *
+     * @see #EXTRA_ADAS_GNSS_ENABLED
+     * @see #isAdasGnssLocationEnabled()
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_ADAS_GNSS_ENABLED_CHANGED =
+            "android.location.action.ADAS_GNSS_ENABLED_CHANGED";
+
+    /**
+     * Intent extra included with {@link #ACTION_ADAS_GNSS_ENABLED_CHANGED} broadcasts, containing
+     * the boolean enabled state of ADAS GNSS location.
+     *
+     * @see #ACTION_ADAS_GNSS_ENABLED_CHANGED
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_ADAS_GNSS_ENABLED = "android.location.extra.ADAS_GNSS_ENABLED";
 
     /**
      * Broadcast intent action indicating that a high power location requests
@@ -621,6 +654,43 @@ public class LocationManager {
     }
 
     /**
+     * Returns the current enabled/disabled state of ADAS (Advanced Driving Assistance Systems)
+     * GNSS location access for the given user. This controls safety critical automotive access to
+     * GNSS location. This only has meaning on automotive devices.
+     *
+     * @return true if ADAS location is enabled and false if ADAS location is disabled.
+     *
+     * @hide
+     */
+    @SystemApi
+    public boolean isAdasGnssLocationEnabled() {
+        try {
+            return mService.isAdasGnssLocationEnabledForUser(mContext.getUser().getIdentifier());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Enables or disables ADAS (Advanced Driving Assistance Systems) GNSS location access for the
+     * given user. This only has meaning on automotive devices.
+     *
+     * @param enabled true to enable ADAS location and false to disable ADAS location.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(LOCATION_BYPASS)
+    @RequiresFeature(PackageManager.FEATURE_AUTOMOTIVE)
+    public void setAdasGnssLocationEnabled(boolean enabled) {
+        try {
+            mService.setAdasGnssLocationEnabledForUser(enabled, mContext.getUser().getIdentifier());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns the current enabled/disabled status of the given provider. To listen for changes, see
      * {@link #PROVIDERS_CHANGED_ACTION}.
      *
@@ -687,6 +757,47 @@ public class LocationManager {
             @NonNull String provider, boolean enabled, @NonNull UserHandle userHandle) {
         Preconditions.checkArgument(provider != null, "invalid null provider");
         return false;
+    }
+
+    /**
+     * Set whether GNSS requests are suspended on the automotive device.
+     *
+     * For devices where GNSS prevents the system from going into a low power state, GNSS should
+     * be suspended right before going into the lower power state and resumed right after the device
+     * wakes up.
+     *
+     * This method disables GNSS and should only be used for power management use cases such as
+     * suspend-to-RAM or suspend-to-disk.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @RequiresFeature(PackageManager.FEATURE_AUTOMOTIVE)
+    @RequiresPermission(android.Manifest.permission.CONTROL_AUTOMOTIVE_GNSS)
+    public void setAutomotiveGnssSuspended(boolean suspended) {
+        try {
+            mService.setAutomotiveGnssSuspended(suspended);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Return whether GNSS requests are suspended on the automotive device.
+     *
+     * @return true if GNSS requests are suspended and false if they aren't.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @RequiresFeature(PackageManager.FEATURE_AUTOMOTIVE)
+    @RequiresPermission(android.Manifest.permission.CONTROL_AUTOMOTIVE_GNSS)
+    public boolean isAutomotiveGnssSuspended() {
+        try {
+            return mService.isAutomotiveGnssSuspended();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -1388,6 +1499,11 @@ public class LocationManager {
      * provider availability update will be sent. As soon as the provider is enabled again, another
      * provider availability update will be sent and location updates will resume.
      *
+     * <p>Locations returned from {@link #GPS_PROVIDER} are with respect to the primary GNSS antenna
+     * position within the device. {@link #getGnssAntennaInfos()} may be used to determine the GNSS
+     * antenna position with respect to the Android Coordinate System, and convert between them if
+     * necessary. This is generally only necessary for high accuracy applications.
+     *
      * <p>When location callbacks are invoked, the system will hold a wakelock on your
      * application's behalf for some period of time, but not indefinitely. If your application
      * requires a long running wakelock within the location callback, you should acquire it
@@ -1506,6 +1622,7 @@ public class LocationManager {
      *
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @RequiresPermission(allOf = {LOCATION_HARDWARE, ACCESS_FINE_LOCATION})
     public boolean injectLocation(@NonNull Location location) {
         Preconditions.checkArgument(location != null, "invalid null location");
@@ -3521,7 +3638,7 @@ public class LocationManager {
         }
 
         @Override
-        protected Boolean recompute(Integer userId) {
+        public Boolean recompute(Integer userId) {
             Preconditions.checkArgument(userId >= 0);
 
             if (mManager == null) {

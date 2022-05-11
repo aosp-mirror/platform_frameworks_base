@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.keyguard;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.RippleDrawable;
+import android.graphics.drawable.GradientDrawable;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.AttributeSet;
@@ -52,6 +52,7 @@ public class NumPadKey extends ViewGroup {
 
     @Nullable
     private NumPadAnimator mAnimator;
+    private int mOrientation;
 
     private View.OnClickListener mListener = new View.OnClickListener() {
         @Override
@@ -131,12 +132,17 @@ public class NumPadKey extends ViewGroup {
         setContentDescription(mDigitText.getText().toString());
 
         Drawable background = getBackground();
-        if (background instanceof RippleDrawable) {
-            mAnimator = new NumPadAnimator(context, (RippleDrawable) background,
-                    R.style.NumPadKey);
+        if (background instanceof GradientDrawable) {
+            mAnimator = new NumPadAnimator(context, background.mutate(),
+                    R.style.NumPadKey, mDigitText, null);
         } else {
             mAnimator = null;
         }
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        mOrientation = newConfig.orientation;
     }
 
     /**
@@ -155,11 +161,16 @@ public class NumPadKey extends ViewGroup {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-            doHapticKeyClick();
-            if (mAnimator != null) mAnimator.start();
+        switch(event.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                doHapticKeyClick();
+                if (mAnimator != null) mAnimator.expand();
+                break;
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                if (mAnimator != null) mAnimator.contract();
+                break;
         }
-
         return super.onTouchEvent(event);
     }
 
@@ -169,9 +180,14 @@ public class NumPadKey extends ViewGroup {
         measureChildren(widthMeasureSpec, heightMeasureSpec);
 
         // Set width/height to the same value to ensure a smooth circle for the bg, but shrink
-        // the height to match the old pin bouncer
+        // the height to match the old pin bouncer.
+        // This is only used for PIN/PUK; the main PIN pad now uses ConstraintLayout, which will
+        // force our width/height to conform to the ratio in the layout.
         int width = getMeasuredWidth();
-        int height = mAnimator == null ? (int) (width * .75f) : width;
+
+        boolean shortenHeight = mAnimator == null
+                || mOrientation == Configuration.ORIENTATION_LANDSCAPE;
+        int height = shortenHeight ? (int) (width * .66f) : width;
 
         setMeasuredDimension(getMeasuredWidth(), height);
     }
@@ -202,10 +218,7 @@ public class NumPadKey extends ViewGroup {
 
     // Cause a VIRTUAL_KEY vibration
     public void doHapticKeyClick() {
-        if (mLockPatternUtils.isTactileFeedbackEnabled()) {
-            performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY,
-                    HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
-                    | HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
-        }
+        performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY,
+                HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
     }
 }

@@ -33,7 +33,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.Trace;
-import android.os.UserHandle;
 import android.util.AndroidRuntimeException;
 import android.util.ArraySet;
 import android.util.Log;
@@ -52,7 +51,7 @@ public final class WebViewFactory {
     // visible for WebViewZygoteInit to look up the class by reflection and call preloadInZygote.
     /** @hide */
     private static final String CHROMIUM_WEBVIEW_FACTORY =
-            "com.android.webview.chromium.WebViewChromiumFactoryProviderForS";
+            "com.android.webview.chromium.WebViewChromiumFactoryProviderForT";
 
     private static final String CHROMIUM_WEBVIEW_FACTORY_METHOD = "create";
 
@@ -468,12 +467,9 @@ public final class WebViewFactory {
             sTimestamps.mCreateContextStart = SystemClock.uptimeMillis();
             try {
                 // Construct an app context to load the Java code into the current app.
-                Context webViewContext = initialApplication.createPackageContextAsUser(
-                        ai.packageName,
-                        Context.CONTEXT_INCLUDE_CODE | Context.CONTEXT_IGNORE_SECURITY,
-                        UserHandle.getUserHandleForUid(ai.uid),
-                        PackageManager.MATCH_UNINSTALLED_PACKAGES
-                                | PackageManager.MATCH_DEBUG_TRIAGED_MISSING);
+                Context webViewContext = initialApplication.createApplicationContext(
+                        ai,
+                        Context.CONTEXT_INCLUDE_CODE | Context.CONTEXT_IGNORE_SECURITY);
                 sPackageInfo = newPackageInfo;
                 return webViewContext;
             } finally {

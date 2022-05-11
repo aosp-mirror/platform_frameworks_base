@@ -1,0 +1,154 @@
+# Copyright (C) 2021 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# proto-message: TraceConfig
+
+# Enable periodic flushing of the trace buffer into the output file.
+write_into_file: true
+
+# Writes the userspace buffer into the file every 1s.
+file_write_period_ms: 1000
+
+# See b/126487238 - we need to guarantee ordering of events.
+flush_period_ms: 10000
+
+# The trace buffers needs to be big enough to hold |file_write_period_ms| of
+# trace data. The trace buffer sizing depends on the number of trace categories
+# enabled and the device activity.
+
+# RSS events
+buffers {
+  size_kb: 32768
+  fill_policy: RING_BUFFER
+}
+
+# procfs polling
+buffers {
+  size_kb: 8192
+  fill_policy: RING_BUFFER
+}
+
+data_sources {
+  config {
+    name: "linux.ftrace"
+    target_buffer: 0
+    ftrace_config {
+      # These parameters affect only the kernel trace buffer size and how
+      # frequently it gets moved into the userspace buffer defined above.
+      buffer_size_kb: 16384
+      drain_period_ms: 250
+
+      # Store certain high-volume "sched" ftrace events in a denser format
+      # (falling back to the default format if not supported by the tracer).
+      compact_sched {
+        enabled: true
+      }
+
+      # Enables symbol name resolution against /proc/kallsyms
+      symbolize_ksyms: true
+
+      # We need to do process tracking to ensure kernel ftrace events targeted at short-lived
+      # threads are associated correctly
+      ftrace_events: "task/task_newtask"
+      ftrace_events: "task/task_rename"
+      ftrace_events: "sched/sched_process_exit"
+      ftrace_events: "sched/sched_process_free"
+
+      # Memory events
+      ftrace_events: "rss_stat"
+      ftrace_events: "ion_heap_shrink"
+      ftrace_events: "ion_heap_grow"
+      ftrace_events: "ion/ion_stat"
+      ftrace_events: "dmabuf_heap/dma_heap_stat"
+      ftrace_events: "oom_score_adj_update"
+      ftrace_events: "gpu_mem/gpu_mem_total"
+
+      # Old (kernel) LMK
+      ftrace_events: "lowmemorykiller/lowmemory_kill"
+
+      atrace_apps: "*"
+
+      atrace_categories: "am"
+      atrace_categories: "binder_driver"
+      atrace_categories: "bionic"
+      atrace_categories: "dalvik"
+      atrace_categories: "input"
+      atrace_categories: "pm"
+      atrace_categories: "res"
+      atrace_categories: "rro"
+      atrace_categories: "ss"
+      atrace_categories: "view"
+      atrace_categories: "wm"
+
+      atrace_categories: "freq"
+      atrace_categories: "sched"
+      atrace_categories: "sync"
+      atrace_categories: "workq"
+
+    }
+  }
+}
+
+data_sources: {
+  config {
+    name: "android.gpu.memory"
+    target_buffer: 0
+  }
+}
+
+data_sources {
+  config {
+    name: "linux.process_stats"
+    target_buffer: 1
+    process_stats_config {
+      proc_stats_poll_ms: 10000
+    }
+  }
+}
+
+data_sources {
+  config {
+    name: "linux.sys_stats"
+    target_buffer: 1
+    sys_stats_config {
+      meminfo_period_ms: 1000
+      meminfo_counters: MEMINFO_MEM_TOTAL
+      meminfo_counters: MEMINFO_MEM_FREE
+      meminfo_counters: MEMINFO_MEM_AVAILABLE
+      meminfo_counters: MEMINFO_BUFFERS
+      meminfo_counters: MEMINFO_CACHED
+      meminfo_counters: MEMINFO_SWAP_CACHED
+      meminfo_counters: MEMINFO_ACTIVE
+      meminfo_counters: MEMINFO_INACTIVE
+      meminfo_counters: MEMINFO_ACTIVE_ANON
+      meminfo_counters: MEMINFO_INACTIVE_ANON
+      meminfo_counters: MEMINFO_ACTIVE_FILE
+      meminfo_counters: MEMINFO_INACTIVE_FILE
+      meminfo_counters: MEMINFO_UNEVICTABLE
+      meminfo_counters: MEMINFO_SWAP_TOTAL
+      meminfo_counters: MEMINFO_SWAP_FREE
+      meminfo_counters: MEMINFO_DIRTY
+      meminfo_counters: MEMINFO_WRITEBACK
+      meminfo_counters: MEMINFO_ANON_PAGES
+      meminfo_counters: MEMINFO_MAPPED
+      meminfo_counters: MEMINFO_SHMEM
+    }
+  }
+}
+
+data_sources: {
+  config: {
+    name: "android.surfaceflinger.frametimeline"
+  }
+}

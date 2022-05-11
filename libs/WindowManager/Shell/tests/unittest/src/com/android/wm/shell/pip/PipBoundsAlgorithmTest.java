@@ -29,6 +29,7 @@ import android.view.Gravity;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayLayout;
 
@@ -72,16 +73,16 @@ public class PipBoundsAlgorithmTest extends ShellTestCase {
     private void initializeMockResources() {
         final TestableResources res = mContext.getOrCreateTestableResources();
         res.addOverride(
-                com.android.internal.R.dimen.config_pictureInPictureDefaultAspectRatio,
+                R.dimen.config_pictureInPictureDefaultAspectRatio,
                 DEFAULT_ASPECT_RATIO);
         res.addOverride(
-                com.android.internal.R.integer.config_defaultPictureInPictureGravity,
+                R.integer.config_defaultPictureInPictureGravity,
                 Gravity.END | Gravity.BOTTOM);
         res.addOverride(
-                com.android.internal.R.dimen.default_minimal_size_pip_resizable_task,
+                R.dimen.default_minimal_size_pip_resizable_task,
                 DEFAULT_MIN_EDGE_SIZE);
         res.addOverride(
-                com.android.internal.R.string.config_defaultPictureInPictureScreenEdgeInsets,
+                R.string.config_defaultPictureInPictureScreenEdgeInsets,
                 "16x16");
         res.addOverride(
                 com.android.internal.R.dimen.config_pictureInPictureMinAspectRatio,
@@ -107,7 +108,7 @@ public class PipBoundsAlgorithmTest extends ShellTestCase {
     public void onConfigurationChanged_reloadResources() {
         final float newDefaultAspectRatio = (DEFAULT_ASPECT_RATIO + MAX_ASPECT_RATIO) / 2;
         final TestableResources res = mContext.getOrCreateTestableResources();
-        res.addOverride(com.android.internal.R.dimen.config_pictureInPictureDefaultAspectRatio,
+        res.addOverride(R.dimen.config_pictureInPictureDefaultAspectRatio,
                 newDefaultAspectRatio);
 
         mPipBoundsAlgorithm.onConfigurationChanged(mContext);
@@ -402,10 +403,68 @@ public class PipBoundsAlgorithmTest extends ShellTestCase {
         assertBoundsInclusionWithMargin("useDefaultBounds", defaultBounds, actualBounds);
     }
 
+    @Test
+    public void adjustNormalBoundsToFitMenu_alreadyFits() {
+        final Rect normalBounds = new Rect(0, 0, 400, 711);
+        final Size minMenuSize = new Size(396, 292);
+        mPipBoundsState.setAspectRatio(
+                ((float) normalBounds.width()) / ((float) normalBounds.height()));
+
+        final Rect bounds =
+                mPipBoundsAlgorithm.adjustNormalBoundsToFitMenu(normalBounds, minMenuSize);
+
+        assertEquals(normalBounds, bounds);
+    }
+
+    @Test
+    public void adjustNormalBoundsToFitMenu_widthTooSmall() {
+        final Rect normalBounds = new Rect(0, 0, 297, 528);
+        final Size minMenuSize = new Size(396, 292);
+        mPipBoundsState.setAspectRatio(
+                ((float) normalBounds.width()) / ((float) normalBounds.height()));
+
+        final Rect bounds =
+                mPipBoundsAlgorithm.adjustNormalBoundsToFitMenu(normalBounds, minMenuSize);
+
+        assertEquals(minMenuSize.getWidth(), bounds.width());
+        assertEquals(minMenuSize.getWidth() / mPipBoundsState.getAspectRatio(),
+                bounds.height(), 0.3f);
+    }
+
+    @Test
+    public void adjustNormalBoundsToFitMenu_heightTooSmall() {
+        final Rect normalBounds = new Rect(0, 0, 400, 280);
+        final Size minMenuSize = new Size(396, 292);
+        mPipBoundsState.setAspectRatio(
+                ((float) normalBounds.width()) / ((float) normalBounds.height()));
+
+        final Rect bounds =
+                mPipBoundsAlgorithm.adjustNormalBoundsToFitMenu(normalBounds, minMenuSize);
+
+        assertEquals(minMenuSize.getHeight(), bounds.height());
+        assertEquals(minMenuSize.getHeight() * mPipBoundsState.getAspectRatio(),
+                bounds.width(), 0.3f);
+    }
+
+    @Test
+    public void adjustNormalBoundsToFitMenu_widthAndHeightTooSmall() {
+        final Rect normalBounds = new Rect(0, 0, 350, 280);
+        final Size minMenuSize = new Size(396, 292);
+        mPipBoundsState.setAspectRatio(
+                ((float) normalBounds.width()) / ((float) normalBounds.height()));
+
+        final Rect bounds =
+                mPipBoundsAlgorithm.adjustNormalBoundsToFitMenu(normalBounds, minMenuSize);
+
+        assertEquals(minMenuSize.getWidth(), bounds.width());
+        assertEquals(minMenuSize.getWidth() / mPipBoundsState.getAspectRatio(),
+                bounds.height(), 0.3f);
+    }
+
     private void overrideDefaultAspectRatio(float aspectRatio) {
         final TestableResources res = mContext.getOrCreateTestableResources();
         res.addOverride(
-                com.android.internal.R.dimen.config_pictureInPictureDefaultAspectRatio,
+                R.dimen.config_pictureInPictureDefaultAspectRatio,
                 aspectRatio);
         mPipBoundsAlgorithm.onConfigurationChanged(mContext);
     }
@@ -413,7 +472,7 @@ public class PipBoundsAlgorithmTest extends ShellTestCase {
     private void overrideDefaultStackGravity(int stackGravity) {
         final TestableResources res = mContext.getOrCreateTestableResources();
         res.addOverride(
-                com.android.internal.R.integer.config_defaultPictureInPictureGravity,
+                R.integer.config_defaultPictureInPictureGravity,
                 stackGravity);
         mPipBoundsAlgorithm.onConfigurationChanged(mContext);
     }

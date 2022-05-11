@@ -16,21 +16,11 @@
   -->
 <com.android.systemui.biometrics.UdfpsKeyguardView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/udfps_animation_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Background protection -->
-    <ImageView
-        android:id="@+id/udfps_keyguard_fp_bg"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/fingerprint_bg"
-        android:visibility="gone"/>
+    <!-- Add fingerprint views here. See udfps_keyguard_view_internal.xml. -->
 
-    <!-- Fingerprint -->
-    <ImageView
-        android:id="@+id/udfps_keyguard_animation_fp_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
 </com.android.systemui.biometrics.UdfpsKeyguardView>

@@ -579,7 +579,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         //
         // Note: mNamespace == KeyProperties.NAMESPACE_APPLICATION implies that the target domain
         // is Domain.APP and Domain.SELINUX is the target domain otherwise.
-        if (alias != descriptor.alias
+        if (!alias.equals(descriptor.alias)
                 || descriptor.domain != targetDomain
                 || (descriptor.domain == Domain.SELINUX && descriptor.nspace != targetNamespace)) {
             throw new KeyStoreException("Can only replace keys with same alias: " + alias
@@ -601,8 +601,6 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         }
         KeyProtection params = (KeyProtection) param;
 
-        @SecurityLevel int securityLevel = params.isStrongBoxBacked() ? SecurityLevel.STRONGBOX :
-                SecurityLevel.TRUSTED_ENVIRONMENT;
         @Domain int targetDomain = (getTargetDomain());
 
         if (key instanceof AndroidKeyStoreSecretKey) {
@@ -793,6 +791,9 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         if (params.isCriticalToDeviceEncryption()) {
             flags |= IKeystoreSecurityLevel.KEY_FLAG_AUTH_BOUND_WITHOUT_CRYPTOGRAPHIC_LSKF_BINDING;
         }
+
+        @SecurityLevel int securityLevel = params.isStrongBoxBacked() ? SecurityLevel.STRONGBOX :
+                SecurityLevel.TRUSTED_ENVIRONMENT;
 
         try {
             KeyStoreSecurityLevel securityLevelInterface = mKeyStore.getSecurityLevel(

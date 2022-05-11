@@ -35,13 +35,13 @@
             android:id="@+id/animatable_clock_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:gravity="center_horizontal"
+            android:layout_gravity="start"
+            android:gravity="start"
             android:textSize="@dimen/clock_text_size"
             android:fontFamily="@font/clock"
-            android:typeface="monospace"
             android:elegantTextHeight="false"
             android:singleLine="true"
+            android:fontFeatureSettings="pnum"
             chargeAnimationDelay="350"
             dozeWeight="200"
             lockScreenWeight="400"
@@ -51,13 +51,13 @@
         android:id="@+id/lockscreen_clock_view_large"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/keyguard_status_area"
+        android:layout_below="@id/keyguard_slice_view"
         android:visibility="gone">
         <com.android.keyguard.AnimatableClockView
             android:id="@+id/animatable_clock_view_large"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
+            android:layout_gravity="center"
             android:gravity="center_horizontal"
             android:textSize="@dimen/large_clock_text_size"
             android:fontFamily="@font/clock"
@@ -68,19 +68,28 @@
             lockScreenWeight="400"
         />
     </FrameLayout>
-    <include layout="@layout/keyguard_status_area"
+
+    <!-- Not quite optimal but needed to translate these items as a group. The
+         NotificationIconContainer has its own logic for translation. -->
+    <LinearLayout
         android:id="@+id/keyguard_status_area"
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
-        android:layout_below="@id/lockscreen_clock_view" />
+        android:layout_below="@id/lockscreen_clock_view">
 
-    <com.android.systemui.statusbar.phone.NotificationIconContainer
-        android:id="@+id/left_aligned_notification_icon_container"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/notification_shelf_height"
-        android:layout_below="@id/keyguard_status_area"
-        android:paddingStart="@dimen/below_clock_padding_start_icons"
-        android:visibility="invisible"
-    />
+      <include layout="@layout/keyguard_slice_view"
+               android:id="@+id/keyguard_slice_view"
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content" />
+
+      <com.android.systemui.statusbar.phone.NotificationIconContainer
+          android:id="@+id/left_aligned_notification_icon_container"
+          android:layout_width="match_parent"
+          android:layout_height="@dimen/notification_shelf_height"
+          android:paddingStart="@dimen/below_clock_padding_start_icons"
+          android:visibility="invisible"
+          />
+    </LinearLayout>
 </com.android.keyguard.KeyguardClockSwitch>
