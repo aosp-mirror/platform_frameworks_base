@@ -92,9 +92,18 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
         }
     };
 
+    /**
+     * @deprecated Pass a main executor.
+     */
     public RegionSamplingHelper(View sampledView, SamplingCallback samplingCallback,
             Executor backgroundExecutor) {
         this(sampledView, samplingCallback, sampledView.getContext().getMainExecutor(),
+                backgroundExecutor);
+    }
+
+    public RegionSamplingHelper(View sampledView, SamplingCallback samplingCallback,
+            Executor mainExecutor, Executor backgroundExecutor) {
+        this(sampledView, samplingCallback, mainExecutor,
                 backgroundExecutor, new SysuiCompositionSamplingListener());
     }
 

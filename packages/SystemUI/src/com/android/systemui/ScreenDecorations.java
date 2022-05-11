@@ -957,11 +957,19 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         } else {
             pw.println("  mScreenDecorHwcLayer: null");
         }
-        pw.println("  mOverlays(left,top,right,bottom)=("
-                + (mOverlays != null && mOverlays[BOUNDS_POSITION_LEFT] != null) + ","
-                + (mOverlays != null && mOverlays[BOUNDS_POSITION_TOP] != null) + ","
-                + (mOverlays != null && mOverlays[BOUNDS_POSITION_RIGHT] != null) + ","
-                + (mOverlays != null && mOverlays[BOUNDS_POSITION_BOTTOM] != null) + ")");
+        if (mOverlays != null) {
+            pw.println("  mOverlays(left,top,right,bottom)=("
+                    + (mOverlays[BOUNDS_POSITION_LEFT] != null) + ","
+                    + (mOverlays[BOUNDS_POSITION_TOP] != null) + ","
+                    + (mOverlays[BOUNDS_POSITION_RIGHT] != null) + ","
+                    + (mOverlays[BOUNDS_POSITION_BOTTOM] != null) + ")");
+
+            for (int i = BOUNDS_POSITION_LEFT; i < BOUNDS_POSITION_LENGTH; i++) {
+                if (mOverlays[i] != null) {
+                    mOverlays[i].dump(pw, getWindowTitleByPos(i));
+                }
+            }
+        }
         mRoundedCornerResDelegate.dump(pw, args);
     }
 

@@ -62,7 +62,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
@@ -81,7 +80,6 @@ import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.text.BidiFormatter;
 import android.util.ArraySet;
 import android.util.ExceptionUtils;
 import android.util.Log;
@@ -294,14 +292,13 @@ public class CompanionDeviceManagerService extends SystemService {
 
     private boolean onCompanionApplicationBindingDiedInternal(
             @UserIdInt int userId, @NonNull String packageName) {
-        // Update the current connected devices sets when binderDied, so that application is able
-        // to call notifyDeviceAppeared after re-launch the application.
         for (AssociationInfo ai :
                 mAssociationStore.getAssociationsForPackage(userId, packageName)) {
-            int id = ai.getId();
-            Slog.i(TAG, "Removing association id: " + id + " for package: "
-                    + packageName + " due to binderDied.");
-            mDevicePresenceMonitor.removeDeviceFromMonitoring(id);
+            final int associationId = ai.getId();
+            if (ai.isSelfManaged()
+                    && mDevicePresenceMonitor.isDevicePresent(associationId)) {
+                mDevicePresenceMonitor.onSelfManagedDeviceReporterBinderDied(associationId);
+            }
         }
         // TODO(b/218613015): implement.
         return false;
@@ -538,20 +535,12 @@ public class CompanionDeviceManagerService extends SystemService {
             String callingPackage = component.getPackageName();
             checkCanCallNotificationApi(callingPackage);
             // TODO: check userId.
-            String packageTitle = BidiFormatter.getInstance().unicodeWrap(
-                    getPackageInfo(getContext(), userId, callingPackage)
-                            .applicationInfo
-                            .loadSafeLabel(getContext().getPackageManager(),
-                                    PackageItemInfo.DEFAULT_MAX_LABEL_SIZE_PX,
-                                    PackageItemInfo.SAFE_LABEL_FLAG_TRIM
-                                            | PackageItemInfo.SAFE_LABEL_FLAG_FIRST_LINE)
-                            .toString());
             final long identity = Binder.clearCallingIdentity();
             try {
                 return PendingIntent.getActivityAsUser(getContext(),
                         0 /* request code */,
                         NotificationAccessConfirmationActivityContract.launcherIntent(
-                                getContext(), userId, component, packageTitle),
+                                getContext(), userId, component),
                         PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_ONE_SHOT
                                 | PendingIntent.FLAG_CANCEL_CURRENT,
                         null /* options */,
@@ -732,9 +721,12 @@ public class CompanionDeviceManagerService extends SystemService {
                 String[] args, ShellCallback callback, ResultReceiver resultReceiver)
                 throws RemoteException {
             enforceCallerCanManageCompanionDevice(getContext(), "onShellCommand");
-            new CompanionDeviceShellCommand(
-                    CompanionDeviceManagerService.this, mAssociationStore)
-                    .exec(this, in, out, err, args, callback, resultReceiver);
+
+            final CompanionDeviceShellCommand cmd = new CompanionDeviceShellCommand(
+                    CompanionDeviceManagerService.this,
+                    mAssociationStore,
+                    mDevicePresenceMonitor);
+            cmd.exec(this, in, out, err, args, callback, resultReceiver);
         }
 
         @Override
