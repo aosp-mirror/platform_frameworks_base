@@ -6648,6 +6648,11 @@ public class AudioService extends IAudioService.Stub
         // verify arguments
         Objects.requireNonNull(device);
         AudioManager.enforceValidVolumeBehavior(deviceVolumeBehavior);
+        sVolumeLogger.log(new AudioEventLogger.StringEvent("setDeviceVolumeBehavior: dev:"
+                + AudioSystem.getOutputDeviceName(device.getInternalType()) + " addr:"
+                + device.getAddress() + " behavior:"
+                + AudioDeviceVolumeManager.volumeBehaviorName(deviceVolumeBehavior)
+                + " pack:" + pkgName).printLog(TAG));
         if (pkgName == null) {
             pkgName = "";
         }
@@ -8363,7 +8368,7 @@ public class AudioService extends IAudioService.Stub
     private void avrcpSupportsAbsoluteVolume(String address, boolean support) {
         // address is not used for now, but may be used when multiple a2dp devices are supported
         sVolumeLogger.log(new AudioEventLogger.StringEvent("avrcpSupportsAbsoluteVolume addr="
-                + address + " support=" + support));
+                + address + " support=" + support).printLog(TAG));
         mDeviceBroker.setAvrcpAbsoluteVolumeSupported(support);
         setAvrcpAbsoluteVolumeSupported(support);
     }

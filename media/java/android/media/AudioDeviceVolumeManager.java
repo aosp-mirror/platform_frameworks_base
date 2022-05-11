@@ -304,6 +304,28 @@ public class AudioDeviceVolumeManager {
                 "removeOnDeviceVolumeBehaviorChangedListener");
     }
 
+    /**
+     * Return human-readable name for volume behavior
+     * @param behavior one of the volume behaviors defined in AudioManager
+     * @return a string for the given behavior
+     */
+    public static String volumeBehaviorName(@AudioManager.DeviceVolumeBehavior int behavior) {
+        switch (behavior) {
+            case AudioManager.DEVICE_VOLUME_BEHAVIOR_VARIABLE:
+                return "DEVICE_VOLUME_BEHAVIOR_VARIABLE";
+            case AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL:
+                return "DEVICE_VOLUME_BEHAVIOR_FULL";
+            case AudioManager.DEVICE_VOLUME_BEHAVIOR_FIXED:
+                return "DEVICE_VOLUME_BEHAVIOR_FIXED";
+            case AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE:
+                return "DEVICE_VOLUME_BEHAVIOR_ABSOLUTE";
+            case AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_MULTI_MODE:
+                return "DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_MULTI_MODE";
+            default:
+                return "invalid volume behavior " + behavior;
+        }
+    }
+
     private final class DeviceVolumeBehaviorDispatcherStub
             extends IDeviceVolumeBehaviorDispatcher.Stub implements CallbackUtil.DispatcherStub {
         public void register(boolean register) {
