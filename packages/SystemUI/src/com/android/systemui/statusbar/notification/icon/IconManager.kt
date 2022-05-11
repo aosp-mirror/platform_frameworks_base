@@ -28,6 +28,7 @@ import android.widget.ImageView
 import com.android.internal.statusbar.StatusBarIcon
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.notification.InflationException
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
@@ -49,31 +50,29 @@ import javax.inject.Inject
 class IconManager @Inject constructor(
     private val notifCollection: CommonNotifCollection,
     private val launcherApps: LauncherApps,
-    private val iconBuilder: IconBuilder
+    private val iconBuilder: IconBuilder,
+    private val notifLockscreenUserManager: NotificationLockscreenUserManager
 ) : ConversationIconManager {
     private var unimportantConversationKeys: Set<String> = emptySet()
 
     fun attach() {
         notifCollection.addCollectionListener(entryListener)
+        notifLockscreenUserManager.addOnNeedsRedactionInPublicChangedListener(sensitivityListener)
     }
 
     private val entryListener = object : NotifCollectionListener {
-        override fun onEntryInit(entry: NotificationEntry) {
-            entry.addOnSensitivityChangedListener(sensitivityListener)
-        }
-
-        override fun onEntryCleanUp(entry: NotificationEntry) {
-            entry.removeOnSensitivityChangedListener(sensitivityListener)
-        }
-
         override fun onRankingApplied() {
             // rankings affect whether a conversation is important, which can change the icons
             recalculateForImportantConversationChange()
         }
     }
 
-    private val sensitivityListener = NotificationEntry.OnSensitivityChangedListener {
-        entry -> updateIconsSafe(entry)
+    private val sensitivityListener = Runnable {
+        for (entry in notifCollection.allNotifs) {
+            if (entry.hasSensitiveContents()) {
+                updateIconsSafe(entry)
+            }
+        }
     }
 
     private fun recalculateForImportantConversationChange() {
@@ -182,12 +181,16 @@ class IconManager @Inject constructor(
         }
     }
 
+    private inline val NotificationEntry.needsRedactionInPublic: Boolean get() =
+        hasSensitiveContents() &&
+                notifLockscreenUserManager.sensitiveNotifsNeedRedactionInPublic(sbn.userId)
+
     @Throws(InflationException::class)
     private fun getIconDescriptors(
         entry: NotificationEntry
     ): Pair<StatusBarIcon, StatusBarIcon> {
         val iconDescriptor = getIconDescriptor(entry, false /* redact */)
-        val sensitiveDescriptor = if (entry.isSensitive) {
+        val sensitiveDescriptor = if (entry.needsRedactionInPublic) {
             getIconDescriptor(entry, true /* redact */)
         } else {
             iconDescriptor
@@ -310,7 +313,7 @@ class IconManager @Inject constructor(
                 iconView === entry.icons.shelfIcon || iconView === entry.icons.aodIcon
         val isSmallIcon = iconDescriptor.icon.equals(entry.sbn.notification.smallIcon)
         return isImportantConversation(entry) && !isSmallIcon &&
-                (!usedInSensitiveContext || !entry.isSensitive)
+                (!usedInSensitiveContext || !entry.needsRedactionInPublic)
     }
 
     private fun isImportantConversation(entry: NotificationEntry): Boolean {
