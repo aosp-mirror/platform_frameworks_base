@@ -37,6 +37,11 @@ public class CameraPowerCalculator extends PowerCalculator {
     }
 
     @Override
+    public boolean isPowerComponentSupported(@BatteryConsumer.PowerComponent int powerComponent) {
+        return powerComponent == BatteryConsumer.POWER_COMPONENT_CAMERA;
+    }
+
+    @Override
     public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
             long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
         super.calculate(builder, batteryStats, rawRealtimeUs, rawUptimeUs, query);
@@ -63,15 +68,5 @@ public class CameraPowerCalculator extends PowerCalculator {
         final double powerMah = mPowerEstimator.calculatePower(durationMs);
         app.setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_CAMERA, durationMs)
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_CAMERA, powerMah);
-    }
-
-    @Override
-    protected void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
-            long rawUptimeUs, int statsType) {
-        final long durationMs = mPowerEstimator.calculateDuration(u.getCameraTurnedOnTimer(),
-                rawRealtimeUs, statsType);
-        final double powerMah = mPowerEstimator.calculatePower(durationMs);
-        app.cameraTimeMs = durationMs;
-        app.cameraPowerMah = powerMah;
     }
 }

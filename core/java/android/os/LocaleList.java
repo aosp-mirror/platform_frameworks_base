@@ -20,6 +20,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
+import android.annotation.SuppressLint;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.icu.util.ULocale;
 
@@ -312,18 +313,30 @@ public final class LocaleList implements Parcelable {
         return isPseudoLocale(locale != null ? locale.toLocale() : null);
     }
 
-    @IntRange(from=0, to=1)
-    private static int matchScore(Locale supported, Locale desired) {
+    /**
+     * Determine whether two locales are considered a match, even if they are not exactly equal.
+     * They are considered as a match when both of their languages and scripts
+     * (explicit or inferred) are identical. This means that a user would be able to understand
+     * the content written in the supported locale even if they say they prefer the desired locale.
+     *
+     * E.g. [zh-HK] matches [zh-Hant]; [en-US] matches [en-CA]
+     *
+     * @param supported The supported {@link Locale} to be compared.
+     * @param desired   The desired {@link Locale} to be compared.
+     * @return True if they match, false otherwise.
+     */
+    public static boolean matchesLanguageAndScript(@SuppressLint("UseIcu") @NonNull
+            Locale supported, @SuppressLint("UseIcu") @NonNull Locale desired) {
         if (supported.equals(desired)) {
-            return 1;  // return early so we don't do unnecessary computation
+            return true;  // return early so we don't do unnecessary computation
         }
         if (!supported.getLanguage().equals(desired.getLanguage())) {
-            return 0;
+            return false;
         }
         if (isPseudoLocale(supported) || isPseudoLocale(desired)) {
             // The locales are not the same, but the languages are the same, and one of the locales
             // is a pseudo-locale. So this is not a match.
-            return 0;
+            return false;
         }
         final String supportedScr = getLikelyScript(supported);
         if (supportedScr.isEmpty()) {
@@ -331,20 +344,17 @@ public final class LocaleList implements Parcelable {
             // if the locales match. So we fall back to old behavior of matching, which considered
             // locales with different regions different.
             final String supportedRegion = supported.getCountry();
-            return (supportedRegion.isEmpty() ||
-                    supportedRegion.equals(desired.getCountry()))
-                    ? 1 : 0;
+            return supportedRegion.isEmpty() || supportedRegion.equals(desired.getCountry());
         }
         final String desiredScr = getLikelyScript(desired);
         // There is no match if the two locales use different scripts. This will most imporantly
         // take care of traditional vs simplified Chinese.
-        return supportedScr.equals(desiredScr) ? 1 : 0;
+        return supportedScr.equals(desiredScr);
     }
 
     private int findFirstMatchIndex(Locale supportedLocale) {
         for (int idx = 0; idx < mList.length; idx++) {
-            final int score = matchScore(supportedLocale, mList[idx]);
-            if (score > 0) {
+            if (matchesLanguageAndScript(supportedLocale, mList[idx])) {
                 return idx;
             }
         }

@@ -32,7 +32,6 @@ import androidx.test.filters.MediumTest
 import androidx.test.rule.ActivityTestRule
 import androidx.test.runner.intercepting.SingleActivityFactory
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.controller.ControlInfo
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.util.mockito.capture
@@ -70,8 +69,6 @@ class ControlsRequestDialogTest : SysuiTestCase() {
     @Mock
     private lateinit var listingController: ControlsListingController
     @Mock
-    private lateinit var broadcastDispatcher: BroadcastDispatcher
-    @Mock
     private lateinit var iIntentSender: IIntentSender
     @Captor
     private lateinit var captor: ArgumentCaptor<ControlInfo>
@@ -85,7 +82,7 @@ class ControlsRequestDialogTest : SysuiTestCase() {
                     override fun create(intent: Intent?): TestControlsRequestDialog {
                         return TestControlsRequestDialog(
                                 controller,
-                                broadcastDispatcher,
+                                fakeBroadcastDispatcher,
                                 listingController
                         )
                     }

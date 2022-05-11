@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The Android Open Source Project
+ * Copyright 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,295 +16,156 @@
 
 #define LOG_TAG "DemuxClient"
 
+#include "DemuxClient.h"
+
+#include <aidl/android/hardware/tv/tuner/Constant.h>
+#include <aidl/android/hardware/tv/tuner/Constant64Bit.h>
 #include <android-base/logging.h>
 #include <utils/Log.h>
 
-#include "DemuxClient.h"
-
-using ::aidl::android::media::tv::tuner::TunerFrontendSettings;
-
-using ::android::hardware::tv::tuner::V1_0::DemuxFilterMainType;
-using ::android::hardware::tv::tuner::V1_0::Result;
+using ::aidl::android::hardware::tv::tuner::Constant;
+using ::aidl::android::hardware::tv::tuner::Constant64Bit;
 
 namespace android {
-
 /////////////// DemuxClient ///////////////////////
-
 DemuxClient::DemuxClient(shared_ptr<ITunerDemux> tunerDemux) {
     mTunerDemux = tunerDemux;
-    mId = -1;
 }
 
 DemuxClient::~DemuxClient() {
-    mTunerDemux = NULL;
-    mDemux = NULL;
-    mId = -1;
-}
-
-// TODO: remove after migration to Tuner Service is done.
-void DemuxClient::setHidlDemux(sp<IDemux> demux) {
-    mDemux = demux;
+    mTunerDemux = nullptr;
 }
 
 Result DemuxClient::setFrontendDataSource(sp<FrontendClient> frontendClient) {
-    if (mTunerDemux != NULL) {
-        Status s = mTunerDemux->setFrontendDataSource(frontendClient->getAidlFrontend());
-        return ClientHelper::getServiceSpecificErrorCode(s);
+    if (frontendClient == nullptr) {
+        return Result::INVALID_ARGUMENT;
     }
 
-    if (mDemux != NULL) {
-        Result res = mDemux->setFrontendDataSource(frontendClient->getId());
-        return res;
+    if (mTunerDemux != nullptr) {
+        Status s = mTunerDemux->setFrontendDataSource(frontendClient->getAidlFrontend());
+        return ClientHelper::getServiceSpecificErrorCode(s);
     }
 
     return Result::INVALID_STATE;
 }
 
-sp<FilterClient> DemuxClient::openFilter(DemuxFilterType type, int bufferSize,
-        sp<FilterClientCallback> cb) {
-    if (mTunerDemux != NULL) {
+Result DemuxClient::setFrontendDataSourceById(int frontendId) {
+    if (mTunerDemux != nullptr) {
+        Status s = mTunerDemux->setFrontendDataSourceById(frontendId);
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
+
+    return Result::INVALID_STATE;
+}
+
+sp<FilterClient> DemuxClient::openFilter(const DemuxFilterType& type, int32_t bufferSize,
+                                         sp<FilterClientCallback> cb) {
+    if (cb == nullptr) {
+        return nullptr;
+    }
+
+    if (mTunerDemux != nullptr) {
         shared_ptr<ITunerFilter> tunerFilter;
         shared_ptr<TunerFilterCallback> callback =
                 ::ndk::SharedRefBase::make<TunerFilterCallback>(cb);
-        Status s = mTunerDemux->openFilter((int)type.mainType, getSubType(type),
-                    bufferSize, callback, &tunerFilter);
-        if (ClientHelper::getServiceSpecificErrorCode(s) != Result::SUCCESS) {
-            return NULL;
+        Status s = mTunerDemux->openFilter(type, bufferSize, callback, &tunerFilter);
+        if (!s.isOk()) {
+            return nullptr;
         }
         return new FilterClient(type, tunerFilter);
     }
 
-    if (mDemux != NULL) {
-        sp<HidlFilterCallback> callback = new HidlFilterCallback(cb);
-        sp<IFilter> hidlFilter = openHidlFilter(type, bufferSize, callback);
-        if (hidlFilter != NULL) {
-            sp<FilterClient> filterClient = new FilterClient(type, NULL);
-            filterClient->setHidlFilter(hidlFilter);
-            return filterClient;
-        }
-    }
-
-    return NULL;
+    return nullptr;
 }
 
 sp<TimeFilterClient> DemuxClient::openTimeFilter() {
-    if (mTunerDemux != NULL) {
+    if (mTunerDemux != nullptr) {
         shared_ptr<ITunerTimeFilter> tunerTimeFilter;
         Status s = mTunerDemux->openTimeFilter(&tunerTimeFilter);
-        if (ClientHelper::getServiceSpecificErrorCode(s) != Result::SUCCESS) {
-            return NULL;
+        if (!s.isOk()) {
+            return nullptr;
         }
         return new TimeFilterClient(tunerTimeFilter);
     }
 
-    if (mDemux != NULL) {
-        sp<ITimeFilter> hidlTimeFilter = openHidlTimeFilter();
-        if (hidlTimeFilter != NULL) {
-            sp<TimeFilterClient> timeFilterClient = new TimeFilterClient(NULL);
-            timeFilterClient->setHidlTimeFilter(hidlTimeFilter);
-            return timeFilterClient;
-        }
-    }
-
-    return NULL;
+    return nullptr;
 }
 
-int DemuxClient::getAvSyncHwId(sp<FilterClient> filterClient) {
-    if (mTunerDemux != NULL) {
-        int hwId;
+int32_t DemuxClient::getAvSyncHwId(sp<FilterClient> filterClient) {
+    if (filterClient == nullptr) {
+        return static_cast<int32_t>(Constant::INVALID_AV_SYNC_ID);
+    }
+
+    if (mTunerDemux != nullptr) {
+        int32_t hwId;
         Status s = mTunerDemux->getAvSyncHwId(filterClient->getAidlFilter(), &hwId);
-        if (ClientHelper::getServiceSpecificErrorCode(s) != Result::SUCCESS) {
-            return INVALID_AV_SYNC_HW_ID;
+        if (!s.isOk()) {
+            return static_cast<int32_t>(Constant::INVALID_AV_SYNC_ID);
         }
         return hwId;
     }
 
-    if (mDemux != NULL) {
-        uint32_t avSyncHwId;
-        Result res;
-        sp<IFilter> halFilter = filterClient->getHalFilter();
-        mDemux->getAvSyncHwId(halFilter,
-                [&](Result r, uint32_t id) {
-                    res = r;
-                    avSyncHwId = id;
-                });
-        if (res == Result::SUCCESS) {
-            return (int) avSyncHwId;
-        }
-    }
-
-    return INVALID_AV_SYNC_HW_ID;
+    return static_cast<int32_t>(Constant::INVALID_AV_SYNC_ID);
 }
 
-long DemuxClient::getAvSyncTime(int avSyncHwId) {
-    if (mTunerDemux != NULL) {
+int64_t DemuxClient::getAvSyncTime(int32_t avSyncHwId) {
+    if (mTunerDemux != nullptr) {
         int64_t time;
         Status s = mTunerDemux->getAvSyncTime(avSyncHwId, &time);
-        if (ClientHelper::getServiceSpecificErrorCode(s) != Result::SUCCESS) {
-            return INVALID_AV_SYNC_TIME;
+        if (!s.isOk()) {
+            return static_cast<int64_t>(Constant64Bit::INVALID_PRESENTATION_TIME_STAMP);
         }
         return time;
     }
 
-    if (mDemux != NULL) {
-        uint64_t time;
-        Result res;
-        mDemux->getAvSyncTime(static_cast<uint32_t>(avSyncHwId),
-                [&](Result r, uint64_t ts) {
-                    res = r;
-                    time = ts;
-                });
-        if (res == Result::SUCCESS) {
-            return (long) time;
-        }
-    }
-
-    return INVALID_AV_SYNC_TIME;
+    return static_cast<int64_t>(Constant64Bit::INVALID_PRESENTATION_TIME_STAMP);
 }
 
-sp<DvrClient> DemuxClient::openDvr(DvrType dvbType, int bufferSize, sp<DvrClientCallback> cb) {
-    if (mTunerDemux != NULL) {
+sp<DvrClient> DemuxClient::openDvr(DvrType dvbType, int32_t bufferSize, sp<DvrClientCallback> cb) {
+    if (cb == nullptr) {
+        return nullptr;
+    }
+
+    if (mTunerDemux != nullptr) {
         shared_ptr<ITunerDvr> tunerDvr;
         shared_ptr<TunerDvrCallback> callback =
                 ::ndk::SharedRefBase::make<TunerDvrCallback>(cb);
-        Status s = mTunerDemux->openDvr((int)dvbType, bufferSize, callback, &tunerDvr);
-        if (ClientHelper::getServiceSpecificErrorCode(s) != Result::SUCCESS) {
-            return NULL;
+        Status s = mTunerDemux->openDvr(dvbType, bufferSize, callback, &tunerDvr);
+        if (!s.isOk()) {
+            return nullptr;
         }
         return new DvrClient(tunerDvr);
     }
 
-    if (mDemux != NULL) {
-        sp<HidlDvrCallback> callback = new HidlDvrCallback(cb);
-        sp<IDvr> hidlDvr = openHidlDvr(dvbType, bufferSize, callback);
-        if (hidlDvr != NULL) {
-            sp<DvrClient> dvrClient = new DvrClient(NULL);
-            dvrClient->setHidlDvr(hidlDvr);
-            return dvrClient;
-        }
-    }
-
-    return NULL;
+    return nullptr;
 }
 
-Result DemuxClient::connectCiCam(int ciCamId) {
-    if (mTunerDemux != NULL) {
+Result DemuxClient::connectCiCam(int32_t ciCamId) {
+    if (mTunerDemux != nullptr) {
         Status s = mTunerDemux->connectCiCam(ciCamId);
         return ClientHelper::getServiceSpecificErrorCode(s);
-    }
-
-    if (mDemux != NULL) {
-        return mDemux->connectCiCam(static_cast<uint32_t>(ciCamId));
     }
 
     return Result::INVALID_STATE;
 }
 
 Result DemuxClient::disconnectCiCam() {
-    if (mTunerDemux != NULL) {
+    if (mTunerDemux != nullptr) {
         Status s = mTunerDemux->disconnectCiCam();
         return ClientHelper::getServiceSpecificErrorCode(s);
-    }
-
-    if (mDemux != NULL) {
-        return mDemux->disconnectCiCam();
     }
 
     return Result::INVALID_STATE;
 }
 
 Result DemuxClient::close() {
-    if (mTunerDemux != NULL) {
+    if (mTunerDemux != nullptr) {
         Status s = mTunerDemux->close();
-        mTunerDemux = NULL;
+        mTunerDemux = nullptr;
         return ClientHelper::getServiceSpecificErrorCode(s);
-    }
-
-    if (mDemux != NULL) {
-        Result res = mDemux->close();
-        mDemux = NULL;
-        return res;
     }
 
     return Result::INVALID_STATE;
 }
 
-/////////////// DemuxClient Helper Methods ///////////////////////
-
-sp<IFilter> DemuxClient::openHidlFilter(DemuxFilterType type, int bufferSize,
-        sp<HidlFilterCallback> callback) {
-    if (mDemux == NULL) {
-        return NULL;
-    }
-
-    sp<IFilter> hidlFilter;
-    Result res;
-    mDemux->openFilter(type, bufferSize, callback,
-            [&](Result r, const sp<IFilter>& filter) {
-                hidlFilter = filter;
-                res = r;
-            });
-    if (res != Result::SUCCESS || hidlFilter == NULL) {
-        return NULL;
-    }
-
-    return hidlFilter;
-}
-
-sp<ITimeFilter> DemuxClient::openHidlTimeFilter() {
-    if (mDemux == NULL) {
-        return NULL;
-    }
-
-    sp<ITimeFilter> timeFilter;
-    Result res;
-    mDemux->openTimeFilter(
-            [&](Result r, const sp<ITimeFilter>& timeFilterSp) {
-                timeFilter = timeFilterSp;
-                res = r;
-            });
-
-    if (res != Result::SUCCESS || timeFilter == NULL) {
-        return NULL;
-    }
-
-    return timeFilter;
-}
-
-sp<IDvr> DemuxClient::openHidlDvr(DvrType dvrType, int bufferSize,
-        sp<HidlDvrCallback> callback) {
-    if (mDemux == NULL) {
-        return NULL;
-    }
-
-    sp<IDvr> hidlDvr;
-    Result res;
-    mDemux->openDvr(dvrType, bufferSize, callback,
-            [&](Result r, const sp<IDvr>& dvr) {
-                hidlDvr = dvr;
-                res = r;
-            });
-    if (res != Result::SUCCESS || hidlDvr == NULL) {
-        return NULL;
-    }
-
-    return hidlDvr;
-}
-
-int DemuxClient::getSubType(DemuxFilterType filterType) {
-    switch (filterType.mainType) {
-        case DemuxFilterMainType::TS:
-            return (int)filterType.subType.tsFilterType();
-        case DemuxFilterMainType::MMTP:
-            return (int)filterType.subType.mmtpFilterType();
-        case DemuxFilterMainType::IP:
-            return (int)filterType.subType.ipFilterType();
-        case DemuxFilterMainType::TLV:
-            return (int)filterType.subType.tlvFilterType();
-        case DemuxFilterMainType::ALP:
-            return (int)filterType.subType.alpFilterType();
-        default:
-            return -1;
-    }
-}
 }  // namespace android

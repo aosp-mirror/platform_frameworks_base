@@ -21,18 +21,16 @@ import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationEffectSegment;
 import android.util.MathUtils;
+import android.util.Range;
 
 import java.util.List;
 
 /**
- * Adapter that clips frequency values to {@link VibratorInfo#getFrequencyRange()} and
- * amplitude values to respective {@link VibratorInfo#getMaxAmplitude}.
+ * Adapter that clips frequency values to the ones specified by the
+ * {@link VibratorInfo.FrequencyProfile}.
  *
- * <p>Devices with no frequency control will collapse all frequencies to zero and leave
- * amplitudes unchanged.
- *
- * <p>The frequency value returned in segments will be absolute, converted with
- * {@link VibratorInfo#getAbsoluteFrequency(float)}.
+ * <p>Devices with no frequency control will collapse all frequencies to the resonant frequency and
+ * leave amplitudes unchanged.
  */
 final class ClippingAmplitudeAndFrequencyAdapter
         implements VibrationEffectAdapters.SegmentsAdapter<VibratorInfo> {
@@ -52,29 +50,39 @@ final class ClippingAmplitudeAndFrequencyAdapter
     }
 
     private StepSegment apply(StepSegment segment, VibratorInfo info) {
-        float clampedFrequency = clampFrequency(info, segment.getFrequency());
+        float clampedFrequency = clampFrequency(info, segment.getFrequencyHz());
         return new StepSegment(
                 clampAmplitude(info, clampedFrequency, segment.getAmplitude()),
-                info.getAbsoluteFrequency(clampedFrequency),
+                clampedFrequency,
                 (int) segment.getDuration());
     }
 
     private RampSegment apply(RampSegment segment, VibratorInfo info) {
-        float clampedStartFrequency = clampFrequency(info, segment.getStartFrequency());
-        float clampedEndFrequency = clampFrequency(info, segment.getEndFrequency());
+        float clampedStartFrequency = clampFrequency(info, segment.getStartFrequencyHz());
+        float clampedEndFrequency = clampFrequency(info, segment.getEndFrequencyHz());
         return new RampSegment(
                 clampAmplitude(info, clampedStartFrequency, segment.getStartAmplitude()),
                 clampAmplitude(info, clampedEndFrequency, segment.getEndAmplitude()),
-                info.getAbsoluteFrequency(clampedStartFrequency),
-                info.getAbsoluteFrequency(clampedEndFrequency),
+                clampedStartFrequency,
+                clampedEndFrequency,
                 (int) segment.getDuration());
     }
 
-    private float clampFrequency(VibratorInfo info, float frequency) {
-        return info.getFrequencyRange().clamp(frequency);
+    private float clampFrequency(VibratorInfo info, float frequencyHz) {
+        Range<Float> frequencyRangeHz = info.getFrequencyProfile().getFrequencyRangeHz();
+        if (frequencyHz == 0 || frequencyRangeHz == null)  {
+            return info.getResonantFrequencyHz();
+        }
+        return frequencyRangeHz.clamp(frequencyHz);
     }
 
-    private float clampAmplitude(VibratorInfo info, float frequency, float amplitude) {
-        return MathUtils.min(amplitude, info.getMaxAmplitude(frequency));
+    private float clampAmplitude(VibratorInfo info, float frequencyHz, float amplitude) {
+        VibratorInfo.FrequencyProfile mapping = info.getFrequencyProfile();
+        if (mapping.isEmpty()) {
+            // No frequency mapping was specified so leave amplitude unchanged.
+            // The frequency will be clamped to the device's resonant frequency.
+            return amplitude;
+        }
+        return MathUtils.min(amplitude, mapping.getMaxAmplitude(frequencyHz));
     }
 }

@@ -94,6 +94,20 @@ public class WindowTokenTests extends WindowTestsBase {
     }
 
     @Test
+    public void testAddWindow_assignsLayers() {
+        final TestWindowToken token1 = createTestWindowToken(0, mDisplayContent);
+        final TestWindowToken token2 = createTestWindowToken(0, mDisplayContent);
+        final WindowState window1 = createWindow(null, TYPE_STATUS_BAR, token1, "window1");
+        final WindowState window2 = createWindow(null, TYPE_STATUS_BAR, token2, "window2");
+
+        token1.addWindow(window1);
+        token2.addWindow(window2);
+
+        assertEquals(token1.getLastLayer(), 0);
+        assertEquals(token2.getLastLayer(), 1);
+    }
+
+    @Test
     public void testChildRemoval() {
         final DisplayContent dc = mDisplayContent;
         final TestWindowToken token = createTestWindowToken(0, dc);
@@ -248,7 +262,7 @@ public class WindowTokenTests extends WindowTestsBase {
     @Test
     public void testSetInsetsFrozen_notAffectImeWindowState() {
         // Pre-condition: make the IME window be controlled by IME insets provider.
-        mDisplayContent.getInsetsStateController().getSourceProvider(ITYPE_IME).setWindow(
+        mDisplayContent.getInsetsStateController().getSourceProvider(ITYPE_IME).setWindowContainer(
                 mDisplayContent.mInputMethodWindow, null, null);
 
         // Simulate an app window to be the IME layering target, assume the app window has no

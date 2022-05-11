@@ -108,7 +108,7 @@ public abstract class CellSignalStrength {
 
     // Range for RSSI in ASU (0-31, 99) as defined in TS 27.007 8.69
     /** @hide */
-    protected static final int getRssiDbmFromAsu(int asu) {
+    public static final int getRssiDbmFromAsu(int asu) {
         if (asu > 31 || asu < 0) return CellInfo.UNAVAILABLE;
         return -113 + (2 * asu);
     }
@@ -122,7 +122,7 @@ public abstract class CellSignalStrength {
 
     // Range for RSCP in ASU (0-96, 255) as defined in TS 27.007 8.69
     /** @hide */
-    protected static final int getRscpDbmFromAsu(int asu) {
+    public static final int getRscpDbmFromAsu(int asu) {
         if (asu > 96 || asu < 0) return CellInfo.UNAVAILABLE;
         return asu - 120;
     }
@@ -136,7 +136,7 @@ public abstract class CellSignalStrength {
 
     // Range for SNR in ASU (0-49, 255) as defined in TS 27.007 8.69
     /** @hide */
-    protected static final int getEcNoDbFromAsu(int asu) {
+    public static final int getEcNoDbFromAsu(int asu) {
         if (asu > 49 || asu < 0) return CellInfo.UNAVAILABLE;
         return -24 + (asu / 2);
     }

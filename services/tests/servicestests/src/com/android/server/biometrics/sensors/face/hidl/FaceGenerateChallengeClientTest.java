@@ -34,7 +34,9 @@ import android.platform.test.annotations.Presubmit;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.filters.SmallTest;
 
-import com.android.server.biometrics.sensors.BaseClientMonitor;
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
+import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 
 import org.junit.Before;
@@ -61,7 +63,11 @@ public class FaceGenerateChallengeClientTest {
     @Mock
     private IFaceServiceReceiver mOtherReceiver;
     @Mock
-    private BaseClientMonitor.Callback mMonitorCallback;
+    private ClientMonitorCallback mMonitorCallback;
+    @Mock
+    private BiometricLogger mBiometricLogger;
+    @Mock
+    private BiometricContext mBiometricContext;
 
     private FaceGenerateChallengeClient mClient;
 
@@ -75,7 +81,7 @@ public class FaceGenerateChallengeClientTest {
 
         mClient = new FaceGenerateChallengeClient(mContext, () -> mIBiometricsFace, new Binder(),
                 new ClientMonitorCallbackConverter(mClientReceiver), USER_ID,
-                TAG, SENSOR_ID, START_TIME);
+                TAG, SENSOR_ID, mBiometricLogger, mBiometricContext , START_TIME);
     }
 
     @Test

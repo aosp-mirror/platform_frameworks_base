@@ -39,6 +39,11 @@ public class SensorPowerCalculator extends PowerCalculator {
     }
 
     @Override
+    public boolean isPowerComponentSupported(@BatteryConsumer.PowerComponent int powerComponent) {
+        return powerComponent == BatteryConsumer.POWER_COMPONENT_SENSORS;
+    }
+
+    @Override
     public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
             long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
         double appsPowerMah = 0;
@@ -46,7 +51,9 @@ public class SensorPowerCalculator extends PowerCalculator {
                 builder.getUidBatteryConsumerBuilders();
         for (int i = uidBatteryConsumerBuilders.size() - 1; i >= 0; i--) {
             final UidBatteryConsumer.Builder app = uidBatteryConsumerBuilders.valueAt(i);
-            appsPowerMah += calculateApp(app, app.getBatteryStatsUid(), rawRealtimeUs);
+            if (!app.isVirtualUid()) {
+                appsPowerMah += calculateApp(app, app.getBatteryStatsUid(), rawRealtimeUs);
+            }
         }
 
         builder.getAggregateBatteryConsumerBuilder(
@@ -65,12 +72,6 @@ public class SensorPowerCalculator extends PowerCalculator {
                         calculateDuration(u, rawRealtimeUs, BatteryStats.STATS_SINCE_CHARGED))
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SENSORS, powerMah);
         return powerMah;
-    }
-
-    @Override
-    protected void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
-            long rawUptimeUs, int statsType) {
-        app.sensorPowerMah = calculatePowerMah(u, rawRealtimeUs, statsType);
     }
 
     private long calculateDuration(BatteryStats.Uid u, long rawRealtimeUs, int statsType) {

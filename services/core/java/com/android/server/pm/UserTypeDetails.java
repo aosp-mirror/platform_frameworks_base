@@ -50,7 +50,7 @@ public final class UserTypeDetails {
     /** Name of the user type, such as {@link UserManager#USER_TYPE_PROFILE_MANAGED}. */
     private final @NonNull String mName;
 
-    // TODO(b/142482943): Currently unused. Hook this up.
+    /** Whether users of this type can be created. */
     private final boolean mEnabled;
 
     // TODO(b/142482943): Currently unused and not set. Hook this up.
@@ -156,6 +156,13 @@ public final class UserTypeDetails {
      */
     private final boolean mIsMediaSharedWithParent;
 
+    /**
+     * Denotes if the user shares encryption credentials with its parent user.
+     *
+     * <p> Default value is false
+     */
+    private final boolean mIsCredentialSharableWithParent;
+
     private UserTypeDetails(@NonNull String name, boolean enabled, int maxAllowed,
             @UserInfoFlag int baseType, @UserInfoFlag int defaultUserInfoPropertyFlags, int label,
             int maxAllowedPerParent,
@@ -166,7 +173,8 @@ public final class UserTypeDetails {
             @Nullable Bundle defaultSystemSettings,
             @Nullable Bundle defaultSecureSettings,
             @Nullable List<DefaultCrossProfileIntentFilter> defaultCrossProfileIntentFilters,
-            boolean isMediaSharedWithParent) {
+            boolean isMediaSharedWithParent,
+            boolean isCredentialSharableWithParent) {
         this.mName = name;
         this.mEnabled = enabled;
         this.mMaxAllowed = maxAllowed;
@@ -186,6 +194,7 @@ public final class UserTypeDetails {
         this.mBadgeColors = badgeColors;
         this.mDarkThemeBadgeColors = darkThemeBadgeColors;
         this.mIsMediaSharedWithParent = isMediaSharedWithParent;
+        this.mIsCredentialSharableWithParent = isCredentialSharableWithParent;
     }
 
     /**
@@ -195,7 +204,10 @@ public final class UserTypeDetails {
         return mName;
     }
 
-    // TODO(b/142482943) Hook this up or delete it.
+    /**
+     * Returns whether this user type is enabled.
+     * If it is not enabled, all future attempts to create users of this type will be rejected.
+     */
     public boolean isEnabled() {
         return mEnabled;
     }
@@ -307,6 +319,14 @@ public final class UserTypeDetails {
         return mIsMediaSharedWithParent;
     }
 
+    /**
+     * Returns true if the user has shared encryption credential with parent user or
+     * false otherwise.
+     */
+    public boolean isCredentialSharableWithParent() {
+        return mIsCredentialSharableWithParent;
+    }
+
     /** Returns a {@link Bundle} representing the default user restrictions. */
     @NonNull Bundle getDefaultRestrictions() {
         return BundleUtils.clone(mDefaultRestrictions);
@@ -390,7 +410,7 @@ public final class UserTypeDetails {
         private @Nullable Bundle mDefaultSecureSettings = null;
         private @Nullable List<DefaultCrossProfileIntentFilter> mDefaultCrossProfileIntentFilters =
                 null;
-        private boolean mEnabled = true;
+        private int mEnabled = 1;
         private int mLabel = Resources.ID_NULL;
         private @Nullable int[] mBadgeLabels = null;
         private @Nullable int[] mBadgeColors = null;
@@ -399,13 +419,14 @@ public final class UserTypeDetails {
         private @DrawableRes int mBadgePlain = Resources.ID_NULL;
         private @DrawableRes int mBadgeNoBackground = Resources.ID_NULL;
         private boolean mIsMediaSharedWithParent = false;
+        private boolean mIsCredentialSharableWithParent = false;
 
         public Builder setName(String name) {
             mName = name;
             return this;
         }
 
-        public Builder setEnabled(boolean enabled) {
+        public Builder setEnabled(int enabled) {
             mEnabled = enabled;
             return this;
         }
@@ -498,6 +519,15 @@ public final class UserTypeDetails {
             return this;
         }
 
+        /**
+         * Sets shared media property for the user.
+         * @param isCredentialSharableWithParent  the value to be set, true or false
+         */
+        public Builder setIsCredentialSharableWithParent(boolean isCredentialSharableWithParent) {
+            mIsCredentialSharableWithParent = isCredentialSharableWithParent;
+            return this;
+        }
+
         @UserInfoFlag int getBaseType() {
             return mBaseType;
         }
@@ -522,12 +552,26 @@ public final class UserTypeDetails {
                         "UserTypeDetails %s has a non empty "
                                 + "defaultCrossProfileIntentFilters", mName);
             }
-            return new UserTypeDetails(mName, mEnabled, mMaxAllowed, mBaseType,
-                    mDefaultUserInfoPropertyFlags, mLabel, mMaxAllowedPerParent,
-                    mIconBadge, mBadgePlain, mBadgeNoBackground, mBadgeLabels, mBadgeColors,
+            return new UserTypeDetails(
+                    mName,
+                    mEnabled != 0,
+                    mMaxAllowed,
+                    mBaseType,
+                    mDefaultUserInfoPropertyFlags,
+                    mLabel,
+                    mMaxAllowedPerParent,
+                    mIconBadge,
+                    mBadgePlain,
+                    mBadgeNoBackground,
+                    mBadgeLabels,
+                    mBadgeColors,
                     mDarkThemeBadgeColors == null ? mBadgeColors : mDarkThemeBadgeColors,
-                    mDefaultRestrictions, mDefaultSystemSettings, mDefaultSecureSettings,
-                    mDefaultCrossProfileIntentFilters, mIsMediaSharedWithParent);
+                    mDefaultRestrictions,
+                    mDefaultSystemSettings,
+                    mDefaultSecureSettings,
+                    mDefaultCrossProfileIntentFilters,
+                    mIsMediaSharedWithParent,
+                    mIsCredentialSharableWithParent);
         }
 
         private boolean hasBadge() {

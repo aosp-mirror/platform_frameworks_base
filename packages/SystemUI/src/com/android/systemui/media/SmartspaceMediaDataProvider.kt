@@ -1,9 +1,12 @@
 package com.android.systemui.media
 
 import android.app.smartspace.SmartspaceTarget
+import android.util.Log
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceTargetListener
 import javax.inject.Inject
+
+private const val TAG = "SsMediaDataProvider"
 
 /** Provides SmartspaceTargets of media types for SystemUI media control. */
 class SmartspaceMediaDataProvider @Inject constructor() : BcSmartspaceDataPlugin {
@@ -29,6 +32,10 @@ class SmartspaceMediaDataProvider @Inject constructor() : BcSmartspaceDataPlugin
             if (smartspaceTarget.featureType == SmartspaceTarget.FEATURE_MEDIA) {
                 mediaTargets.add(smartspaceTarget)
             }
+        }
+
+        if (!mediaTargets.isEmpty()) {
+            Log.d(TAG, "Forwarding Smartspace media updates $mediaTargets")
         }
 
         smartspaceMediaTargets = mediaTargets

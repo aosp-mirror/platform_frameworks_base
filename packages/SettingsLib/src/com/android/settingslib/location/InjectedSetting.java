@@ -46,12 +46,12 @@ public class InjectedSetting {
     public final String className;
 
     /**
-     * The {@link android.support.v7.preference.Preference#getTitle()} value.
+     * The {@link androidx.preference.Preference#getTitle()} value.
      */
     public final String title;
 
     /**
-     * The {@link android.support.v7.preference.Preference#getIcon()} value.
+     * The {@link androidx.preference.Preference#getIcon()} value.
      */
     public final int iconId;
 

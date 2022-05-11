@@ -92,21 +92,6 @@ public abstract class UserManagerInternal {
     public abstract void setDevicePolicyUserRestrictions(int originatingUserId,
             @Nullable Bundle global, @Nullable RestrictionsSet local, boolean isDeviceOwner);
 
-    /**
-     * Returns the "base" user restrictions.
-     *
-     * Used by {@link com.android.server.devicepolicy.DevicePolicyManagerService} for upgrading
-     * from MNC.
-     */
-    public abstract Bundle getBaseUserRestrictions(int userId);
-
-    /**
-     * Called by {@link com.android.server.devicepolicy.DevicePolicyManagerService} for upgrading
-     * from MNC.
-     */
-    public abstract void setBaseUserRestrictionsByDpmsForMigration(int userId,
-            Bundle baseRestrictions);
-
     /** Return a user restriction. */
     public abstract boolean getUserRestriction(int userId, String key);
 
@@ -312,4 +297,12 @@ public abstract class UserManagerInternal {
      */
     public abstract void setDefaultCrossProfileIntentFilters(
             @UserIdInt int parentUserId, @UserIdInt int profileUserId);
+
+    /**
+     * Returns {@code true} if the system should ignore errors when preparing
+     * the storage directories for the user with ID {@code userId}. This will
+     * return {@code false} for all new users; it will only return {@code true}
+     * for users that already existed on-disk from an older version of Android.
+     */
+    public abstract boolean shouldIgnorePrepareStorageErrors(int userId);
 }
