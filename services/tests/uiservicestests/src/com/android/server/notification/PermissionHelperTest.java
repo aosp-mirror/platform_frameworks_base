@@ -88,49 +88,11 @@ public class PermissionHelperTest extends UiServiceTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mPermissionHelper = new PermissionHelper(mPmi, mPackageManager, mPermManager, true, false);
+        mPermissionHelper = new PermissionHelper(mPmi, mPackageManager, mPermManager, false);
         PackageInfo testPkgInfo = new PackageInfo();
         testPkgInfo.requestedPermissions = new String[]{ Manifest.permission.POST_NOTIFICATIONS };
         when(mPackageManager.getPackageInfo(anyString(), anyLong(), anyInt()))
                 .thenReturn(testPkgInfo);
-    }
-
-    // TODO (b/194833441): Remove when the migration is enabled
-    @Test
-    public void testMethodsThrowIfMigrationDisabled() throws IllegalAccessException,
-            InvocationTargetException {
-        PermissionHelper permHelper =
-                new PermissionHelper(mPmi, mPackageManager, mPermManager, false, false);
-
-        Method[] allMethods = PermissionHelper.class.getDeclaredMethods();
-        for (Method method : allMethods) {
-            if (Modifier.isPublic(method.getModifiers()) &&
-                    !Objects.equals("isMigrationEnabled", method.getName())) {
-                Parameter[] params = method.getParameters();
-                List<Object> args = Lists.newArrayListWithCapacity(params.length);
-                for (int i = 0; i < params.length; i++) {
-                    Type type = params[i].getParameterizedType();
-                    if (type.getTypeName().equals("java.lang.String")) {
-                        args.add("");
-                    } else if (type.getTypeName().equals("boolean")){
-                        args.add(false);
-                    } else if (type.getTypeName().equals("int")) {
-                        args.add(1);
-                    } else if (type.getTypeName().equals(
-                            "com.android.server.notification.PermissionHelper$PackagePermission")) {
-                        args.add(null);
-                    }
-                }
-                try {
-                    method.invoke(permHelper, args.toArray());
-                    fail("Method should have thrown because migration flag is disabled");
-                } catch (InvocationTargetException e) {
-                    if (!(e.getTargetException() instanceof IllegalStateException)) {
-                        throw e;
-                    }
-                }
-            }
-        }
     }
 
     @Test
@@ -304,7 +266,7 @@ public class PermissionHelperTest extends UiServiceTestCase {
     @Test
     public void testSetNotificationPermission_pkgPerm_grantedByDefaultPermSet_allUserSet()
             throws Exception {
-        mPermissionHelper = new PermissionHelper(mPmi, mPackageManager, mPermManager, true, true);
+        mPermissionHelper = new PermissionHelper(mPmi, mPackageManager, mPermManager, true);
         when(mPmi.checkPermission(anyString(), anyString(), anyInt()))
                 .thenReturn(PERMISSION_DENIED);
         when(mPermManager.getPermissionFlags(anyString(),
