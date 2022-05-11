@@ -29,11 +29,6 @@ import java.util.function.Function;
  */
 public interface PolicyUpgraderDataProvider {
     /**
-     * Returns true if the storage manager indicates file-based encryption is enabled.
-     */
-    boolean storageManagerIsFileBasedEncryptionEnabled();
-
-    /**
      * Returns the journaled policies file for a given user.
      */
     JournaledFile makeDevicePoliciesJournaledFile(int userId);
