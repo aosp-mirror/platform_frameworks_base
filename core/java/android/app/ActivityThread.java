@@ -177,7 +177,6 @@ import android.view.DisplayAdjustments;
 import android.view.SurfaceControl;
 import android.view.ThreadedRenderer;
 import android.view.View;
-import android.view.ViewDebug;
 import android.view.ViewManager;
 import android.view.ViewRootImpl;
 import android.view.ViewTreeObserver;
@@ -1402,16 +1401,18 @@ public final class ActivityThread extends ClientTransactionHandler
                     ContextImpl.class,
                     Activity.class,
                     WebView.class,
-                    OpenSSLSocketImpl.class
+                    OpenSSLSocketImpl.class,
+                    View.class,
+                    ViewRootImpl.class
             };
             long[] instanceCounts = VMDebug.countInstancesOfClasses(classesToCount, true);
             long appContextInstanceCount = instanceCounts[0];
             long activityInstanceCount = instanceCounts[1];
             long webviewInstanceCount = instanceCounts[2];
             long openSslSocketCount = instanceCounts[3];
+            long viewInstanceCount = instanceCounts[4];
+            long viewRootInstanceCount = instanceCounts[5];
 
-            long viewInstanceCount = ViewDebug.getViewInstanceCount();
-            long viewRootInstanceCount = ViewDebug.getViewRootImplCount();
             int globalAssetCount = AssetManager.getGlobalAssetCount();
             int globalAssetManagerCount = AssetManager.getGlobalAssetManagerCount();
             int binderLocalObjectCount = Debug.getBinderLocalObjectCount();
@@ -1554,16 +1555,18 @@ public final class ActivityThread extends ClientTransactionHandler
                     ContextImpl.class,
                     Activity.class,
                     WebView.class,
-                    OpenSSLSocketImpl.class
+                    OpenSSLSocketImpl.class,
+                    View.class,
+                    ViewRootImpl.class
             };
             long[] instanceCounts = VMDebug.countInstancesOfClasses(classesToCount, true);
             long appContextInstanceCount = instanceCounts[0];
             long activityInstanceCount = instanceCounts[1];
             long webviewInstanceCount = instanceCounts[2];
             long openSslSocketCount = instanceCounts[3];
+            long viewInstanceCount = instanceCounts[4];
+            long viewRootInstanceCount = instanceCounts[5];
 
-            long viewInstanceCount = ViewDebug.getViewInstanceCount();
-            long viewRootInstanceCount = ViewDebug.getViewRootImplCount();
             int globalAssetCount = AssetManager.getGlobalAssetCount();
             int globalAssetManagerCount = AssetManager.getGlobalAssetManagerCount();
             int binderLocalObjectCount = Debug.getBinderLocalObjectCount();
