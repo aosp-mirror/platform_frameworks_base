@@ -119,6 +119,11 @@ public class ResolverActivity extends Activity implements
 
     @UnsupportedAppUsage
     public ResolverActivity() {
+        mIsIntentPicker = getClass().equals(ResolverActivity.class);
+    }
+
+    protected ResolverActivity(boolean isIntentPicker) {
+        mIsIntentPicker = isIntentPicker;
     }
 
     private boolean mSafeForwardingMode;
@@ -135,6 +140,8 @@ public class ResolverActivity extends Activity implements
     private String mReferrerPackage;
     private CharSequence mTitle;
     private int mDefaultTitleResId;
+    // Expected to be true if this object is ResolverActivity or is ResolverWrapperActivity.
+    private final boolean mIsIntentPicker;
 
     // Whether or not this activity supports choosing a default handler for the intent.
     @VisibleForTesting
@@ -445,10 +452,6 @@ public class ResolverActivity extends Activity implements
                         + (categories != null ? Arrays.toString(categories.toArray()) : ""));
     }
 
-    private boolean isIntentPicker() {
-        return getClass().equals(ResolverActivity.class);
-    }
-
     protected AbstractMultiProfilePagerAdapter createMultiProfilePagerAdapter(
             Intent[] initialIntents,
             List<ResolveInfo> rList,
@@ -637,6 +640,11 @@ public class ResolverActivity extends Activity implements
 
         resetButtonBar();
 
+        if (shouldUseMiniResolver()) {
+            View buttonContainer = findViewById(R.id.button_bar_container);
+            buttonContainer.setPadding(0, 0, 0, mSystemWindowInsets.bottom);
+        }
+
         // Need extra padding so the list can fully scroll up
         if (shouldAddFooterView()) {
             applyFooterView(mSystemWindowInsets.bottom);
@@ -649,7 +657,8 @@ public class ResolverActivity extends Activity implements
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         mMultiProfilePagerAdapter.getActiveListAdapter().handlePackagesChanged();
-        if (isIntentPicker() && shouldShowTabs() && !useLayoutWithDefault()) {
+        if (mIsIntentPicker && shouldShowTabs() && !useLayoutWithDefault()
+                && !shouldUseMiniResolver()) {
             updateIntentPickerPaddings();
         }
 
@@ -1084,7 +1093,7 @@ public class ResolverActivity extends Activity implements
         if (isAutolaunching()) {
             return;
         }
-        if (isIntentPicker()) {
+        if (mIsIntentPicker) {
             ((ResolverMultiProfilePagerAdapter) mMultiProfilePagerAdapter)
                     .setUseLayoutWithDefault(useLayoutWithDefault());
         }
@@ -1108,7 +1117,7 @@ public class ResolverActivity extends Activity implements
     protected void onListRebuilt(ResolverListAdapter listAdapter, boolean rebuildCompleted) {
         final ItemClickListener listener = new ItemClickListener();
         setupAdapterListView((ListView) mMultiProfilePagerAdapter.getActiveAdapterView(), listener);
-        if (shouldShowTabs() && isIntentPicker()) {
+        if (shouldShowTabs() && mIsIntentPicker) {
             final ResolverDrawerLayout rdl = findViewById(R.id.contentPanel);
             if (rdl != null) {
                 rdl.setMaxCollapsedHeight(getResources()
@@ -1448,6 +1457,12 @@ public class ResolverActivity extends Activity implements
         return postRebuildList(rebuildCompleted);
     }
 
+    /**
+     * Mini resolver is shown when the user is choosing between browser[s] in this profile and a
+     * single app in the other profile (see shouldUseMiniResolver()). It shows the single app icon
+     * and asks the user if they'd like to open that cross-profile app or use the in-profile
+     * browser.
+     */
     private void configureMiniResolverContent() {
         mLayoutId = R.layout.miniresolver;
         setContentView(mLayoutId);
@@ -1484,7 +1499,16 @@ public class ResolverActivity extends Activity implements
         });
     }
 
+    /**
+     * Mini resolver should be used when all of the following are true:
+     * 1. This is the intent picker (ResolverActivity).
+     * 2. This profile only has web browser matches.
+     * 3. The other profile has a single non-browser match.
+     */
     private boolean shouldUseMiniResolver() {
+        if (!mIsIntentPicker) {
+            return false;
+        }
         if (mMultiProfilePagerAdapter.getActiveListAdapter() == null
                 || mMultiProfilePagerAdapter.getInactiveListAdapter() == null) {
             return false;
@@ -1790,7 +1814,7 @@ public class ResolverActivity extends Activity implements
     void onHorizontalSwipeStateChanged(int state) {}
 
     private void maybeHideDivider() {
-        if (!isIntentPicker()) {
+        if (!mIsIntentPicker) {
             return;
         }
         final View divider = findViewById(R.id.divider);
@@ -1807,7 +1831,7 @@ public class ResolverActivity extends Activity implements
     protected void onProfileTabSelected() { }
 
     private void resetCheckedItem() {
-        if (!isIntentPicker()) {
+        if (!mIsIntentPicker) {
             return;
         }
         mLastSelected = ListView.INVALID_POSITION;
