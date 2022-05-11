@@ -103,7 +103,6 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.EventLog;
-import android.util.IntArray;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
@@ -1661,30 +1660,16 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     /**
      * Reverts user permission state changes (permissions and flags).
      *
-     * @param pkg The package for which to reset.
+     * @param filterPkg The package for which to reset, or {@code null} for all packages.
      * @param userId The device user for which to do a reset.
      */
-    private void resetRuntimePermissionsInternal(@NonNull AndroidPackage pkg,
+    private void resetRuntimePermissionsInternal(@Nullable AndroidPackage filterPkg,
             @UserIdInt int userId) {
-        final String packageName = pkg.getPackageName();
-
-        // These are flags that can change base on user actions.
-        final int userSettableMask = FLAG_PERMISSION_USER_SET
-                | FLAG_PERMISSION_USER_FIXED
-                | FLAG_PERMISSION_REVOKED_COMPAT
-                | FLAG_PERMISSION_REVIEW_REQUIRED
-                | FLAG_PERMISSION_ONE_TIME
-                | FLAG_PERMISSION_SELECTED_LOCATION_ACCURACY;
-
-        final int policyOrSystemFlags = FLAG_PERMISSION_SYSTEM_FIXED
-                | FLAG_PERMISSION_POLICY_FIXED;
-
         // Delay and combine non-async permission callbacks
-        final int permissionCount = ArrayUtils.size(pkg.getRequestedPermissions());
         final boolean[] permissionRemoved = new boolean[1];
         final ArraySet<Long> revokedPermissions = new ArraySet<>();
-        final IntArray syncUpdatedUsers = new IntArray(permissionCount);
-        final IntArray asyncUpdatedUsers = new IntArray(permissionCount);
+        final ArraySet<Integer> syncUpdatedUsers = new ArraySet<>();
+        final ArraySet<Integer> asyncUpdatedUsers = new ArraySet<>();
 
         PermissionCallback delayingPermCallback = new PermissionCallback() {
             public void onGidsChanged(int appId, int userId) {
@@ -1746,6 +1731,55 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             }
         };
 
+        if (filterPkg != null) {
+            resetRuntimePermissionsInternal(filterPkg, userId, delayingPermCallback);
+        } else {
+            mPackageManagerInt.forEachPackage(pkg ->
+                    resetRuntimePermissionsInternal(pkg, userId, delayingPermCallback));
+        }
+
+        // Execute delayed callbacks
+        if (permissionRemoved[0]) {
+            mDefaultPermissionCallback.onPermissionRemoved();
+        }
+
+        // Slight variation on the code in mPermissionCallback.onPermissionRevoked() as we cannot
+        // kill uid while holding mPackages-lock
+        if (!revokedPermissions.isEmpty()) {
+            int numRevokedPermissions = revokedPermissions.size();
+            for (int i = 0; i < numRevokedPermissions; i++) {
+                int revocationUID = IntPair.first(revokedPermissions.valueAt(i));
+                int revocationUserId = IntPair.second(revokedPermissions.valueAt(i));
+
+                mOnPermissionChangeListeners.onPermissionsChanged(revocationUID);
+
+                // Kill app later as we are holding mPackages
+                mHandler.post(() -> killUid(UserHandle.getAppId(revocationUID), revocationUserId,
+                        KILL_APP_REASON_PERMISSIONS_REVOKED));
+            }
+        }
+
+        mPackageManagerInt.writePermissionSettings(ArrayUtils.convertToIntArray(syncUpdatedUsers),
+                false);
+        mPackageManagerInt.writePermissionSettings(ArrayUtils.convertToIntArray(asyncUpdatedUsers),
+                true);
+    }
+
+    private void resetRuntimePermissionsInternal(@NonNull AndroidPackage pkg,
+            @UserIdInt int userId, @NonNull PermissionCallback delayingPermCallback) {
+        // These are flags that can change base on user actions.
+        final int userSettableMask = FLAG_PERMISSION_USER_SET
+                | FLAG_PERMISSION_USER_FIXED
+                | FLAG_PERMISSION_REVOKED_COMPAT
+                | FLAG_PERMISSION_REVIEW_REQUIRED
+                | FLAG_PERMISSION_ONE_TIME
+                | FLAG_PERMISSION_SELECTED_LOCATION_ACCURACY;
+
+        final int policyOrSystemFlags = FLAG_PERMISSION_SYSTEM_FIXED
+                | FLAG_PERMISSION_POLICY_FIXED;
+
+        final String packageName = pkg.getPackageName();
+        final int permissionCount = ArrayUtils.size(pkg.getRequestedPermissions());
         for (int i = 0; i < permissionCount; i++) {
             final String permName = pkg.getRequestedPermissions().get(i);
 
@@ -1824,30 +1858,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                         userId, null, delayingPermCallback);
             }
         }
-
-        // Execute delayed callbacks
-        if (permissionRemoved[0]) {
-            mDefaultPermissionCallback.onPermissionRemoved();
-        }
-
-        // Slight variation on the code in mPermissionCallback.onPermissionRevoked() as we cannot
-        // kill uid while holding mPackages-lock
-        if (!revokedPermissions.isEmpty()) {
-            int numRevokedPermissions = revokedPermissions.size();
-            for (int i = 0; i < numRevokedPermissions; i++) {
-                int revocationUID = IntPair.first(revokedPermissions.valueAt(i));
-                int revocationUserId = IntPair.second(revokedPermissions.valueAt(i));
-
-                mOnPermissionChangeListeners.onPermissionsChanged(revocationUID);
-
-                // Kill app later as we are holding mPackages
-                mHandler.post(() -> killUid(UserHandle.getAppId(revocationUID), revocationUserId,
-                        KILL_APP_REASON_PERMISSIONS_REVOKED));
-            }
-        }
-
-        mPackageManagerInt.writePermissionSettings(syncUpdatedUsers.toArray(), false);
-        mPackageManagerInt.writePermissionSettings(asyncUpdatedUsers.toArray(), true);
     }
 
     /**
@@ -5175,6 +5185,12 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         Objects.requireNonNull(pkg, "pkg");
         Preconditions.checkArgumentNonNegative(userId, "userId");
         resetRuntimePermissionsInternal(pkg, userId);
+    }
+
+    @Override
+    public void resetRuntimePermissionsForUser(@UserIdInt int userId) {
+        Preconditions.checkArgumentNonNegative(userId, "userId");
+        resetRuntimePermissionsInternal(null, userId);
     }
 
     @Override

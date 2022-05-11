@@ -48,7 +48,6 @@ import android.util.Xml;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.server.net.NetworkPolicyManagerInternal;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -595,11 +594,7 @@ final class PreferredActivityHelper {
             synchronized (mPm.mLock) {
                 mPm.mSettings.applyDefaultPreferredAppsLPw(userId);
                 mPm.mDomainVerificationManager.clearUser(userId);
-                final int numPackages = mPm.mPackages.size();
-                for (int i = 0; i < numPackages; i++) {
-                    final AndroidPackage pkg = mPm.mPackages.valueAt(i);
-                    mPm.mPermissionManager.resetRuntimePermissions(pkg, userId);
-                }
+                mPm.mPermissionManager.resetRuntimePermissionsForUser(userId);
             }
             updateDefaultHomeNotLocked(mPm.snapshotComputer(), userId);
             resetNetworkPolicies(userId);

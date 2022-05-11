@@ -428,6 +428,13 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
             @UserIdInt int userId);
 
     /**
+     * Reset the runtime permission state changes for all packages in a user.
+     *
+     * @param userId the user ID
+     */
+    void resetRuntimePermissionsForUser(@UserIdInt int userId);
+
+    /**
      * Read legacy permission state from package settings.
      *
      * TODO(zhanghai): This is a temporary method because we should not expose
