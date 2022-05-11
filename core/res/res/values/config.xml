@@ -5662,6 +5662,9 @@
     <!-- Whether or not to enable the lock screen entry point for the QR code scanner. -->
     <bool name="config_enableQrCodeScannerOnLockScreen">false</bool>
 
+    <!-- Default component for QR code scanner -->
+    <string name="config_defaultQrCodeComponent"></string>
+
     <!-- Whether Low Power Standby is supported and can be enabled. -->
     <bool name="config_lowPowerStandbySupported">false</bool>
 
