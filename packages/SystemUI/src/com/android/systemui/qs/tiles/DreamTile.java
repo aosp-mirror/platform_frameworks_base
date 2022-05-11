@@ -61,6 +61,7 @@ import javax.inject.Named;
 public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
 
     private static final String LOG_TAG = "QSDream";
+    private final Icon mIcon = ResourceIcon.get(R.drawable.ic_qs_screen_saver);
     private final IDreamManager mDreamManager;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final SettingObserver mEnabledSettingObserver;
@@ -167,6 +168,7 @@ public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
         state.label = getTileLabel();
         state.secondaryLabel = getActiveDreamName();
         state.contentDescription = getContentDescription(state.secondaryLabel);
+        state.icon = mIcon;
 
         if (getActiveDream() == null || !isScreensaverEnabled()) {
             state.state = Tile.STATE_UNAVAILABLE;
