@@ -235,13 +235,7 @@ public class AudioDeviceVolumeManager {
                     mDeviceVolumeDispatcherStub = new DeviceVolumeDispatcherStub();
                 }
             } else {
-                for (ListenerInfo info : mDeviceVolumeListeners) {
-                    if (info.mListener == vclistener) {
-                        throw new IllegalArgumentException(
-                                "attempt to call setDeviceAbsoluteMultiVolumeBehavior() "
-                                        + "on a previously registered listener");
-                    }
-                }
+                mDeviceVolumeListeners.removeIf(info -> info.mDevice.equalTypeAddress(device));
             }
             mDeviceVolumeListeners.add(listenerInfo);
             mDeviceVolumeDispatcherStub.register(true, device, volumes, handlesVolumeAdjustment);

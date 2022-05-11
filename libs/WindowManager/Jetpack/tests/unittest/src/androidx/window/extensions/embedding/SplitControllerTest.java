@@ -22,8 +22,10 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -35,6 +37,7 @@ import android.app.Activity;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.os.Binder;
 import android.os.Handler;
 import android.platform.test.annotations.Presubmit;
 import android.window.TaskFragmentInfo;
@@ -96,20 +99,18 @@ public class SplitControllerTest {
 
     @Test
     public void testGetTopActiveContainer() {
-        TaskContainer taskContainer = new TaskContainer(TASK_ID);
+        final TaskContainer taskContainer = new TaskContainer(TASK_ID);
+        // tf1 has no running activity so is not active.
+        final TaskFragmentContainer tf1 = new TaskFragmentContainer(null /* activity */,
+                taskContainer, mSplitController);
+        // tf2 has running activity so is active.
+        final TaskFragmentContainer tf2 = mock(TaskFragmentContainer.class);
+        doReturn(1).when(tf2).getRunningActivityCount();
+        taskContainer.mContainers.add(tf2);
         // tf3 is finished so is not active.
-        TaskFragmentContainer tf3 = mock(TaskFragmentContainer.class);
+        final TaskFragmentContainer tf3 = mock(TaskFragmentContainer.class);
         doReturn(true).when(tf3).isFinished();
         doReturn(false).when(tf3).isWaitingActivityAppear();
-        // tf2 has running activity so is active.
-        TaskFragmentContainer tf2 = mock(TaskFragmentContainer.class);
-        doReturn(1).when(tf2).getRunningActivityCount();
-        // tf1 has no running activity so is not active.
-        TaskFragmentContainer tf1 = new TaskFragmentContainer(null /* activity */, TASK_ID,
-                mSplitController);
-
-        taskContainer.mContainers.add(tf1);
-        taskContainer.mContainers.add(tf2);
         taskContainer.mContainers.add(tf3);
         mSplitController.mTaskContainers.put(TASK_ID, taskContainer);
 
@@ -161,6 +162,18 @@ public class SplitControllerTest {
         mSplitController.onTaskFragmentAppearEmptyTimeout(tf);
 
         verify(mSplitPresenter).cleanupContainer(tf, false /* shouldFinishDependent */);
+    }
+
+    @Test
+    public void testOnActivityDestroyed() {
+        doReturn(new Binder()).when(mActivity).getActivityToken();
+        final TaskFragmentContainer tf = mSplitController.newContainer(mActivity, TASK_ID);
+
+        assertTrue(tf.hasActivity(mActivity.getActivityToken()));
+
+        mSplitController.onActivityDestroyed(mActivity);
+
+        assertFalse(tf.hasActivity(mActivity.getActivityToken()));
     }
 
     @Test

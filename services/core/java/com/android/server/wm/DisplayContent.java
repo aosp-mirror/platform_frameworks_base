@@ -5265,7 +5265,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     void prepareAppTransition(@WindowManager.TransitionType int transit,
             @WindowManager.TransitionFlags int flags) {
         final boolean prepared = mAppTransition.prepareAppTransition(transit, flags);
-        if (prepared && okToAnimate()) {
+        if (prepared && okToAnimate() && transit != TRANSIT_NONE) {
             mSkipAppTransitionAnimation = false;
         }
     }

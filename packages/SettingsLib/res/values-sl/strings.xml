@@ -568,7 +568,7 @@
     <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Dostop do aplikacij in vsebine iz vašega računa lahko omejite"</string>
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Uporabnik"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Omejen profil"</string>
-    <string name="user_add_user_title" msgid="5457079143694924885">"Dodajanje novega uporabnika?"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"Želite dodati uporabnika?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"To napravo lahko delite z drugimi tako, da ustvarite dodatne uporabnike. Vsak ima svoj prostor, ki ga lahko prilagodi z aplikacijami, ozadji in drugim. Uporabniki lahko tudi prilagodijo nastavitve naprave, ki vplivajo na vse, na primer nastavitve omrežja Wi-Fi.\n\nKo dodate novega uporabnika, mora ta nastaviti svoj prostor.\n\nVsak uporabnik lahko posodobi aplikacije za vse druge uporabnike. Nastavitve in storitve funkcij za ljudi s posebnimi potrebami morda ne bodo prenesene v prostor novega uporabnika."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Ko dodate novega uporabnika, mora ta nastaviti svoj prostor.\n\nVsak uporabnik lahko posodobi aplikacije za vse druge uporabnike."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Želite uporabnika nastaviti zdaj?"</string>
@@ -659,4 +659,7 @@
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Če oddajate aplikacijo <xliff:g id="SWITCHAPP">%1$s</xliff:g> ali spremenite izhod, bo trenutno oddajanje ustavljeno."</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Oddajaj aplikacijo <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Sprememba izhoda"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"Animacije poteze za nazaj s predvidevanjem"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Omogoči sistemske animacije za potezo za nazaj s predvidevanjem."</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Ta nastavitev omogoča sistemske animacije za animacijo poteze s predvidevanjem. V datoteki manifesta mora biti parameter »enableOnBackInvokedCallback« za posamezno aplikacijo nastavljen na »true«."</string>
 </resources>
