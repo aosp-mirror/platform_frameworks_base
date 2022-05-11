@@ -35,6 +35,9 @@
 #include "pipeline/skia/ShaderCache.h"
 #include "renderstate/RenderState.h"
 
+#undef LOG_TAG
+#define LOG_TAG "VulkanManager"
+
 namespace android {
 namespace uirenderer {
 namespace renderthread {

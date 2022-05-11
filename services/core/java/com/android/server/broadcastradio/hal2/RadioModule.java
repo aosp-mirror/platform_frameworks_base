@@ -58,7 +58,7 @@ class RadioModule {
     @NonNull private final IBroadcastRadio mService;
     @NonNull public final RadioManager.ModuleProperties mProperties;
 
-    private final Object mLock = new Object();
+    private final Object mLock;
     @NonNull private final Handler mHandler;
 
     @GuardedBy("mLock")
@@ -132,13 +132,15 @@ class RadioModule {
 
     @VisibleForTesting
     RadioModule(@NonNull IBroadcastRadio service,
-            @NonNull RadioManager.ModuleProperties properties) {
+            @NonNull RadioManager.ModuleProperties properties, @NonNull Object lock) {
         mProperties = Objects.requireNonNull(properties);
         mService = Objects.requireNonNull(service);
+        mLock = Objects.requireNonNull(lock);
         mHandler = new Handler(Looper.getMainLooper());
     }
 
-    public static @Nullable RadioModule tryLoadingModule(int idx, @NonNull String fqName) {
+    public static @Nullable RadioModule tryLoadingModule(int idx, @NonNull String fqName,
+            Object lock) {
         try {
             IBroadcastRadio service = IBroadcastRadio.getService(fqName);
             if (service == null) return null;
@@ -156,7 +158,7 @@ class RadioModule {
             RadioManager.ModuleProperties prop = Convert.propertiesFromHal(idx, fqName,
                     service.getProperties(), amfmConfig.value, dabConfig.value);
 
-            return new RadioModule(service, prop);
+            return new RadioModule(service, prop, lock);
         } catch (RemoteException ex) {
             Slog.e(TAG, "failed to load module " + fqName, ex);
             return null;
@@ -178,7 +180,8 @@ class RadioModule {
                 });
                 mHalTunerSession = Objects.requireNonNull(hwSession.value);
             }
-            TunerSession tunerSession = new TunerSession(this, mHalTunerSession, userCb);
+            TunerSession tunerSession = new TunerSession(this, mHalTunerSession, userCb,
+                    mLock);
             mAidlTunerSessions.add(tunerSession);
 
             // Propagate state to new client. Note: These callbacks are invoked while holding mLock
@@ -377,7 +380,7 @@ class RadioModule {
             }
         };
 
-        synchronized (mService) {
+        synchronized (mLock) {
             mService.registerAnnouncementListener(enabledList, hwListener, (result, closeHnd) -> {
                 halResult.value = result;
                 hwCloseHandle.value = closeHnd;
@@ -401,7 +404,7 @@ class RadioModule {
         if (id == 0) throw new IllegalArgumentException("Image ID is missing");
 
         byte[] rawImage;
-        synchronized (mService) {
+        synchronized (mLock) {
             List<Byte> rawList = Utils.maybeRethrow(() -> mService.getImage(id));
             rawImage = new byte[rawList.size()];
             for (int i = 0; i < rawList.size(); i++) {

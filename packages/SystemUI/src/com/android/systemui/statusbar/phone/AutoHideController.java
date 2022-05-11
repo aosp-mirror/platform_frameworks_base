@@ -23,12 +23,14 @@ import android.util.Log;
 import android.view.IWindowManager;
 import android.view.MotionEvent;
 
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.AutoHideUiElement;
 
 import javax.inject.Inject;
 
 /** A controller to control all auto-hide things. Also see {@link AutoHideUiElement}. */
+@SysUISingleton
 public class AutoHideController {
     private static final String TAG = "AutoHideController";
     private static final long AUTO_HIDE_TIMEOUT_MS = 2250;
@@ -37,6 +39,7 @@ public class AutoHideController {
     private final Handler mHandler;
 
     private AutoHideUiElement mStatusBar;
+    /** For tablets, this will represent the Taskbar */
     private AutoHideUiElement mNavigationBar;
     private int mDisplayId;
 
@@ -89,7 +92,7 @@ public class AutoHideController {
         }
     }
 
-    void resumeSuspendedAutoHide() {
+    public void resumeSuspendedAutoHide() {
         if (mAutoHideSuspended) {
             scheduleAutoHide();
             Runnable checkBarModesRunnable = getCheckBarModesRunnable();
@@ -99,7 +102,7 @@ public class AutoHideController {
         }
     }
 
-    void suspendAutoHide() {
+    public void suspendAutoHide() {
         mHandler.removeCallbacks(mAutoHide);
         Runnable checkBarModesRunnable = getCheckBarModesRunnable();
         if (checkBarModesRunnable != null) {
@@ -170,5 +173,24 @@ public class AutoHideController {
         }
 
         return false;
+    }
+
+    /**
+     * Injectable factory for creating a {@link AutoHideController}.
+     */
+    public static class Factory {
+        private final Handler mHandler;
+        private final IWindowManager mIWindowManager;
+
+        @Inject
+        public Factory(@Main Handler handler, IWindowManager iWindowManager) {
+            mHandler = handler;
+            mIWindowManager = iWindowManager;
+        }
+
+        /** Create an {@link AutoHideController} */
+        public AutoHideController create(Context context) {
+            return new AutoHideController(context, mHandler, mIWindowManager);
+        }
     }
 }

@@ -136,31 +136,6 @@ public final class CellIdentityLte extends CellIdentity {
         updateGlobalCellId();
     }
 
-    /** @hide */
-    public CellIdentityLte(@NonNull android.hardware.radio.V1_0.CellIdentityLte cid) {
-        this(cid.ci, cid.pci, cid.tac, cid.earfcn, new int[] {},
-                CellInfo.UNAVAILABLE, cid.mcc, cid.mnc, "", "", new ArraySet<>(), null);
-    }
-
-    /** @hide */
-    public CellIdentityLte(@NonNull android.hardware.radio.V1_2.CellIdentityLte cid) {
-        this(cid.base.ci, cid.base.pci, cid.base.tac, cid.base.earfcn, new int[] {},
-                cid.bandwidth, cid.base.mcc, cid.base.mnc, cid.operatorNames.alphaLong,
-                cid.operatorNames.alphaShort, new ArraySet<>(), null);
-    }
-
-    /** @hide */
-    public CellIdentityLte(@NonNull android.hardware.radio.V1_5.CellIdentityLte cid) {
-        this(cid.base.base.ci, cid.base.base.pci, cid.base.base.tac, cid.base.base.earfcn,
-                cid.bands.stream().mapToInt(Integer::intValue).toArray(), cid.base.bandwidth,
-                cid.base.base.mcc, cid.base.base.mnc, cid.base.operatorNames.alphaLong,
-                cid.base.operatorNames.alphaShort, cid.additionalPlmns,
-                cid.optionalCsgInfo.getDiscriminator()
-                        == android.hardware.radio.V1_5.OptionalCsgInfo.hidl_discriminator.csgInfo
-                                ? new ClosedSubscriberGroupInfo(cid.optionalCsgInfo.csgInfo())
-                                        : null);
-    }
-
     private CellIdentityLte(@NonNull CellIdentityLte cid) {
         this(cid.mCi, cid.mPci, cid.mTac, cid.mEarfcn, cid.mBands, cid.mBandwidth, cid.mMccStr,
                 cid.mMncStr, cid.mAlphaLong, cid.mAlphaShort, cid.mAdditionalPlmns, cid.mCsgInfo);
@@ -404,7 +379,7 @@ public final class CellIdentityLte extends CellIdentity {
         mBands = in.createIntArray();
         mBandwidth = in.readInt();
         mAdditionalPlmns = (ArraySet<String>) in.readArraySet(null);
-        mCsgInfo = in.readParcelable(null);
+        mCsgInfo = in.readParcelable(null, android.telephony.ClosedSubscriberGroupInfo.class);
 
         updateGlobalCellId();
         if (DBG) log(toString());

@@ -21,18 +21,17 @@ import android.content.res.Configuration;
 import android.os.Handler;
 import android.util.Log;
 
+import com.android.systemui.CoreStartable;
 import com.android.systemui.R;
-import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.qs.tiles.DndTile;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
 
 @SysUISingleton
-public class VolumeUI extends SystemUI {
+public class VolumeUI extends CoreStartable {
     private static final String TAG = "VolumeUI";
     private static boolean LOGD = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -67,10 +66,10 @@ public class VolumeUI extends SystemUI {
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.print("mEnabled="); pw.println(mEnabled);
         if (!mEnabled) return;
-        mVolumeComponent.dump(fd, pw, args);
+        mVolumeComponent.dump(pw, args);
     }
 
     private void setDefaultVolumeController() {

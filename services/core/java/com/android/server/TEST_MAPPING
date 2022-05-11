@@ -1,9 +1,6 @@
 {
     "presubmit": [
         {
-            "name": "CtsLocationFineTestCases"
-        },
-        {
             "name": "CtsLocationCoarseTestCases"
         },
         {
@@ -30,6 +27,10 @@
                 }
             ],
             "file_patterns": ["SensorPrivacyService\\.java"]
+        },
+        {
+            "name": "BinaryTransparencyServiceTest",
+            "file_patterns": ["BinaryTransparencyService\\.java"]
         }
     ],
     "presubmit-large": [
@@ -59,6 +60,11 @@
                 }
             ],
             "file_patterns": ["ClipboardService\\.java"]
+        }
+    ],
+    "postsubmit": [
+        {
+            "name": "CtsLocationFineTestCases"
         }
     ]
 }

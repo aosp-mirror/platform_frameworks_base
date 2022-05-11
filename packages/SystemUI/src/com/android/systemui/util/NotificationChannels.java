@@ -23,15 +23,17 @@ import android.net.Uri;
 import android.provider.Settings;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.R;
-import com.android.systemui.SystemUI;
 import com.android.wm.shell.pip.tv.TvPipNotificationController;
 
 import java.util.Arrays;
 
-public class NotificationChannels extends SystemUI {
+import javax.inject.Inject;
+
+// NOT Singleton. Started per-user.
+public class NotificationChannels extends CoreStartable {
     public static String ALERTS      = "ALR";
-    public static String SCREENSHOTS_LEGACY = "SCN";
     public static String SCREENSHOTS_HEADSUP = "SCN_HEADSUP";
     public static String GENERAL     = "GEN";
     public static String STORAGE     = "DSK";
@@ -39,6 +41,7 @@ public class NotificationChannels extends SystemUI {
     public static String TVPIP       = TvPipNotificationController.NOTIFICATION_CHANNEL; // "TVPIP"
     public static String HINTS       = "HNT";
 
+    @Inject
     public NotificationChannels(Context context) {
         super(context);
     }
@@ -84,17 +87,10 @@ public class NotificationChannels extends SystemUI {
                 general,
                 storage,
                 createScreenshotChannel(
-                        context.getString(R.string.notification_channel_screenshot),
-                        nm.getNotificationChannel(SCREENSHOTS_LEGACY)),
+                        context.getString(R.string.notification_channel_screenshot)),
                 batteryChannel,
                 hint
         ));
-
-        // Delete older SS channel if present.
-        // Screenshots promoted to heads-up in P, this cleans up the lower priority channel from O.
-        // This line can be deleted in Q.
-        nm.deleteNotificationChannel(SCREENSHOTS_LEGACY);
-
 
         if (isTv(context)) {
             // TV specific notification channel for TV PIP controls.
@@ -113,31 +109,13 @@ public class NotificationChannels extends SystemUI {
      * @return
      */
     @VisibleForTesting static NotificationChannel createScreenshotChannel(
-            String name, NotificationChannel legacySS) {
+            String name) {
         NotificationChannel screenshotChannel = new NotificationChannel(SCREENSHOTS_HEADSUP,
                 name, NotificationManager.IMPORTANCE_HIGH); // pop on screen
 
         screenshotChannel.setSound(null, // silent
                 new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_NOTIFICATION).build());
         screenshotChannel.setBlockable(true);
-
-        if (legacySS != null) {
-            // Respect any user modified fields from the old channel.
-            int userlock = legacySS.getUserLockedFields();
-            if ((userlock & NotificationChannel.USER_LOCKED_IMPORTANCE) != 0) {
-                screenshotChannel.setImportance(legacySS.getImportance());
-            }
-            if ((userlock & NotificationChannel.USER_LOCKED_SOUND) != 0)  {
-                screenshotChannel.setSound(legacySS.getSound(), legacySS.getAudioAttributes());
-            }
-            if ((userlock & NotificationChannel.USER_LOCKED_VIBRATION) != 0)  {
-                screenshotChannel.setVibrationPattern(legacySS.getVibrationPattern());
-            }
-            if ((userlock & NotificationChannel.USER_LOCKED_LIGHTS) != 0)  {
-                screenshotChannel.setLightColor(legacySS.getLightColor());
-            }
-            // skip show_badge, irrelevant for system channel
-        }
 
         return screenshotChannel;
     }

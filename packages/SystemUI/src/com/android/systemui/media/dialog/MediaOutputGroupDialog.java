@@ -17,6 +17,7 @@
 package com.android.systemui.media.dialog;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
@@ -24,21 +25,22 @@ import android.view.WindowManager;
 import androidx.core.graphics.drawable.IconCompat;
 
 import com.android.systemui.R;
+import com.android.systemui.broadcast.BroadcastSender;
 
 /**
  * Dialog for media output group.
  */
+// TODO(b/203073091): Remove this class once group logic been implemented.
 public class MediaOutputGroupDialog extends MediaOutputBaseDialog {
 
-    MediaOutputGroupDialog(Context context, boolean aboveStatusbar, MediaOutputController
-            mediaOutputController) {
-        super(context, mediaOutputController);
+    MediaOutputGroupDialog(Context context, boolean aboveStatusbar, BroadcastSender broadcastSender,
+            MediaOutputController mediaOutputController) {
+        super(context, broadcastSender, mediaOutputController);
         mMediaOutputController.resetGroupMediaDevices();
         mAdapter = new MediaOutputGroupAdapter(mMediaOutputController);
         if (!aboveStatusbar) {
             getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
         }
-        show();
     }
 
     @Override
@@ -77,12 +79,19 @@ public class MediaOutputGroupDialog extends MediaOutputBaseDialog {
     }
 
     @Override
+    Drawable getAppSourceIcon() {
+        return null;
+    }
+
+    @Override
     int getStopButtonVisibility() {
         return View.VISIBLE;
     }
 
     @Override
     void onHeaderIconClick() {
-        mMediaOutputController.launchMediaOutputDialog();
+        // Given that we launched the media output group dialog from the media output dialog,
+        // dismissing this dialog will show the media output dialog again.
+        dismiss();
     }
 }

@@ -16,42 +16,108 @@
 
 package com.android.server.wm.flicker.close
 
+import android.platform.test.annotations.Presubmit
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.annotation.Group1
+import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import org.junit.FixMethodOrder
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test app closes by pressing home button.
+ * Test app closes by pressing home button
+ *
  * To run this test: `atest FlickerTests:CloseAppHomeButtonTest`
+ *
+ * Actions:
+ *     Make sure no apps are running on the device
+ *     Launch an app [testApp] and wait animation to complete
+ *     Press home button
+ *
+ * To run only the presubmit assertions add: `--
+ *      --module-arg FlickerTests:exclude-annotation:androidx.test.filters.FlakyTest
+ *      --module-arg FlickerTests:include-annotation:android.platform.test.annotations.Presubmit`
+ *
+ * To run only the postsubmit assertions add: `--
+ *      --module-arg FlickerTests:exclude-annotation:androidx.test.filters.FlakyTest
+ *      --module-arg FlickerTests:include-annotation:android.platform.test.annotations.Postsubmit`
+ *
+ * To run only the flaky assertions add: `--
+ *      --module-arg FlickerTests:include-annotation:androidx.test.filters.FlakyTest`
+ *
+ * Notes:
+ *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
+ *        are inherited [CloseAppTransition]
+ *     2. Part of the test setup occurs automatically via
+ *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
+ *        including configuring navigation mode, initial orientation and ensuring no
+ *        apps are running before setup
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Group1
+@Group4
 class CloseAppHomeButtonTest(testSpec: FlickerTestParameter) : CloseAppTransition(testSpec) {
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
+    override val transition: FlickerBuilder.() -> Unit
         get() = {
-            super.transition(this, it)
+            super.transition(this)
             transitions {
                 device.pressHome()
                 wmHelper.waitForHomeActivityVisible()
             }
         }
 
+    /** {@inheritDoc} */
+    @FlakyTest
+    @Test
+    override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
+
+    /** {@inheritDoc} */
+    @FlakyTest(bugId = 227430489)
+    @Test
+    override fun statusBarLayerRotatesScales() {
+        super.statusBarLayerRotatesScales()
+    }
+
+    /** {@inheritDoc} */
+    @Presubmit
+    @Test
+    override fun launcherLayerReplacesApp() {
+        super.launcherLayerReplacesApp()
+    }
+
+    /** {@inheritDoc} */
+    @Presubmit
+    @Test
+    override fun entireScreenCovered() {
+        super.entireScreenCovered()
+    }
+
+    /** {@inheritDoc} */
+    @FlakyTest(bugId = 229762973)
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+
     companion object {
+        /**
+         * Creates the test configurations.
+         *
+         * See [FlickerTestParameterFactory.getConfigNonRotationTests] for configuring
+         * repetitions, screen orientation and navigation modes.
+         */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(repetitions = 5)
+                .getConfigNonRotationTests(repetitions = 3)
         }
     }
 }

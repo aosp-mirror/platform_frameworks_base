@@ -16,7 +16,6 @@
 
 syntax = "proto2";
 
-import "frameworks/base/core/proto/android/view/inputmethod/editorinfo.proto";
 import "frameworks/base/core/proto/android/view/insetssourceconsumer.proto";
 
 package android.view;
@@ -30,4 +29,6 @@ message ImeInsetsSourceConsumerProto {
     optional InsetsSourceConsumerProto insets_source_consumer = 1;
     reserved 2; // focused_editor = 2
     optional bool is_requested_visible_awaiting_control = 3;
+    optional bool is_hide_animation_running = 4;
+    optional bool is_show_requested_during_hide_animation = 5;
 }

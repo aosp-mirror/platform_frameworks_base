@@ -15,36 +15,26 @@
     limitations under the License.
 -->
 <!-- Layout for TvPipMenuActionButton -->
-<merge xmlns:android="http://schemas.android.com/apk/res/android">
+<FrameLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/button"
+        android:layout_width="@dimen/pip_menu_button_size"
+        android:layout_height="@dimen/pip_menu_button_size"
+        android:padding="@dimen/pip_menu_button_margin"
+        android:stateListAnimator="@animator/tv_pip_menu_action_button_animator"
+        android:focusable="true">
 
-    <ImageView android:id="@+id/button"
-        android:layout_width="34dp"
-        android:layout_height="34dp"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:focusable="true"
-        android:src="@drawable/tv_pip_button_focused"
-        android:importantForAccessibility="yes" />
+        <View android:id="@+id/background"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:layout_gravity="center"
+              android:duplicateParentState="true"
+              android:background="@drawable/tv_pip_button_bg"/>
 
-    <ImageView android:id="@+id/icon"
-        android:layout_width="34dp"
-        android:layout_height="34dp"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:padding="5dp"
-        android:importantForAccessibility="no" />
-
-    <TextView android:id="@+id/desc"
-        android:layout_width="100dp"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/icon"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="3dp"
-        android:gravity="center"
-        android:text="@string/pip_fullscreen"
-        android:alpha="0"
-        android:fontFamily="sans-serif"
-        android:textSize="12sp"
-        android:textColor="#EEEEEE"
-        android:importantForAccessibility="no" />
-</merge>
+        <ImageView android:id="@+id/icon"
+                   android:layout_width="@dimen/pip_menu_icon_size"
+                   android:layout_height="@dimen/pip_menu_icon_size"
+                   android:layout_gravity="center"
+                   android:duplicateParentState="true"
+                   android:tint="@color/tv_pip_menu_icon" />
+</FrameLayout>

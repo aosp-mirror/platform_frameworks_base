@@ -30,11 +30,8 @@ static bool writeAllBytes(const int fd, void* buffer, const size_t byteCount) {
     char* writeBuffer = static_cast<char*>(buffer);
     size_t remainingBytes = byteCount;
     while (remainingBytes > 0) {
-        ssize_t writtenByteCount = write(fd, writeBuffer, remainingBytes);
+        ssize_t writtenByteCount = TEMP_FAILURE_RETRY(write(fd, writeBuffer, remainingBytes));
         if (writtenByteCount == -1) {
-            if (errno == EINTR) {
-                continue;
-            }
             __android_log_print(ANDROID_LOG_ERROR, LOG_TAG,
                     "Error writing to buffer: %d", errno);
             return false;
@@ -49,19 +46,17 @@ static bool readAllBytes(const int fd, void* buffer, const size_t byteCount) {
     char* readBuffer = static_cast<char*>(buffer);
     size_t remainingBytes = byteCount;
     while (remainingBytes > 0) {
-        ssize_t readByteCount = read(fd, readBuffer, remainingBytes);
+        ssize_t readByteCount = TEMP_FAILURE_RETRY(read(fd, readBuffer, remainingBytes));
+        if (readByteCount == -1) {
+            __android_log_print(ANDROID_LOG_ERROR, LOG_TAG,
+                    "Error reading from buffer: %d", errno);
+            return false;
+        }
 
         remainingBytes -= readByteCount;
         readBuffer += readByteCount;
 
-        if (readByteCount == -1) {
-            if (errno == EINTR) {
-                continue;
-            }
-            __android_log_print(ANDROID_LOG_ERROR, LOG_TAG,
-                    "Error reading from buffer: %d", errno);
-            return false;
-        } else if (readByteCount == 0 && remainingBytes > 0) {
+        if (readByteCount == 0 && remainingBytes > 0) {
             __android_log_print(ANDROID_LOG_ERROR, LOG_TAG,
                     "File closed before all bytes were read. %zu/%zu remaining", remainingBytes,
                     byteCount);

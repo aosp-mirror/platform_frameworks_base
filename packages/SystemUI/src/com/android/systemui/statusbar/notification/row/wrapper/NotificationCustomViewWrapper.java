@@ -22,6 +22,7 @@ import android.view.View;
 
 import com.android.internal.graphics.ColorUtils;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.notification.NotificationFadeAware;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
 /**
@@ -85,5 +86,15 @@ public class NotificationCustomViewWrapper extends NotificationViewWrapper {
     @Override
     public boolean shouldClipToRounding(boolean topRounded, boolean bottomRounded) {
         return true;
+    }
+
+    /**
+     * Apply the faded state as a layer type change to the custom view which needs to have
+     * overlapping contents render precisely.
+     */
+    @Override
+    public void setNotificationFaded(boolean faded) {
+        super.setNotificationFaded(faded);
+        NotificationFadeAware.setLayerTypeForFaded(mView, faded);
     }
 }

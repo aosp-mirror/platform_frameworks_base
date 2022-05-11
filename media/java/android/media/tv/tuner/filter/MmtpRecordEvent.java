@@ -55,7 +55,7 @@ public class MmtpRecordEvent extends FilterEvent {
     }
 
     /**
-     * Gets data size in bytes of filtered data.
+     * Gets the record data offset from the beginning of the record buffer.
      */
     @BytesLong
     public long getDataLength() {
