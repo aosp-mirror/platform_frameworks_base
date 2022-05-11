@@ -16,6 +16,8 @@
 
 package com.android.server.companion.datatransfer;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.util.Slog;
 import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
@@ -39,6 +41,12 @@ public class CompanionMessageProcessor {
 
     private static final String LOG_TAG = CompanionMessageProcessor.class.getSimpleName();
 
+    /** Listener for incoming complete messages. */
+    interface Listener {
+        /** When a complete message is received from the companion app. */
+        void onCompleteMessageReceived(@NonNull CompanionMessageInfo message);
+    }
+
     // Rough size for each CompanionMessage, each message can exceed 50K for a little, but not
     // too much. Hard limit is 100K, WCS data processing limit. Closer to 100K, less stable at
     // the WCS data processing layer. Refer to
@@ -48,6 +56,9 @@ public class CompanionMessageProcessor {
 
     private final CompanionSecureCommunicationsManager mSecureCommsManager;
 
+    @Nullable
+    private Listener mListener;
+
     // Association id -> (parent id -> received messages)
     private final Map<Integer, Map<Integer, List<CompanionMessageInfo>>> mAssociationsMessagesMap =
             new HashMap<>();
@@ -56,6 +67,11 @@ public class CompanionMessageProcessor {
 
     public CompanionMessageProcessor(CompanionSecureCommunicationsManager secureCommsManager) {
         mSecureCommsManager = secureCommsManager;
+        mSecureCommsManager.setListener(this::onDecryptedMessageReceived);
+    }
+
+    public void setListener(@NonNull Listener listener) {
+        mListener = listener;
     }
 
     /**
@@ -72,7 +88,8 @@ public class CompanionMessageProcessor {
 
         for (int i = 0; i < totalMessageCount; i++) {
             ProtoOutputStream proto = new ProtoOutputStream();
-            proto.write(CompanionMessage.ID, parentMessageId + i + 1);
+            int messageId = parentMessageId + i + 1;
+            proto.write(CompanionMessage.ID, messageId);
 
             long paginationInfoToken = proto.start(CompanionMessage.PAGINATION_INFO);
             proto.write(CompanionMessage.PaginationInfo.PARENT_ID, parentMessageId);
@@ -87,29 +104,68 @@ public class CompanionMessageProcessor {
 
             Slog.i(LOG_TAG, "Sending " + currentData.length + " bytes to " + packageName);
 
-            mSecureCommsManager.sendSecureMessage(associationId, proto.getBytes());
+            mSecureCommsManager.sendSecureMessage(associationId, messageId, proto.getBytes());
         }
     }
 
     /**
-     * Process message and store it. If all the messages with the same parent id have been received,
-     * return the message with combined message data. Otherwise, return null if there's still data
-     * parts missing.
+     * Process the message and store it. If all the messages with the same parent id have been
+     * received, return the message with combined message data. Otherwise, return null if there's
+     * still data parts missing.
      */
-    public CompanionMessageInfo processMessage(int messageId, int associationId, byte[] message) {
+    public CompanionMessageInfo onDecryptedMessageReceived(int messageId, int associationId,
+            byte[] message) {
         ProtoInputStream proto = new ProtoInputStream(message);
         try {
-            int id = proto.readInt(CompanionMessage.ID);
-            if (id == messageId) {
-                // Read proto data
-                long paginationToken = proto.start(CompanionMessage.PAGINATION_INFO);
-                int parentId = proto.readInt(CompanionMessage.PaginationInfo.PARENT_ID);
-                int page = proto.readInt(CompanionMessage.PaginationInfo.PAGE);
-                int total = proto.readInt(CompanionMessage.PaginationInfo.TOTAL);
-                proto.end(paginationToken);
-                int type = proto.readInt(CompanionMessage.TYPE);
-                byte[] data = proto.readBytes(CompanionMessage.DATA);
+            int id = 0;
+            int parentId = 0;
+            int page = 0;
+            int total = 0;
+            int type = CompanionMessage.UNKNOWN;
+            byte[] data = null;
 
+            // Read proto data
+            while (proto.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+                switch (proto.getFieldNumber()) {
+                    case (int) CompanionMessage.ID:
+                        id = proto.readInt(CompanionMessage.ID);
+                        break;
+                    case (int) CompanionMessage.PAGINATION_INFO:
+                        long paginationToken = proto.start(CompanionMessage.PAGINATION_INFO);
+                        while (proto.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+                            switch (proto.getFieldNumber()) {
+                                case (int) CompanionMessage.PaginationInfo.PARENT_ID:
+                                    parentId = proto.readInt(
+                                            CompanionMessage.PaginationInfo.PARENT_ID);
+                                    break;
+                                case (int) CompanionMessage.PaginationInfo.PAGE:
+                                    page = proto.readInt(CompanionMessage.PaginationInfo.PAGE);
+                                    break;
+                                case (int) CompanionMessage.PaginationInfo.TOTAL:
+                                    total = proto.readInt(CompanionMessage.PaginationInfo.TOTAL);
+                                    break;
+                                default:
+                                    Slog.e(LOG_TAG, "Unexpected field id "
+                                            + proto.getFieldNumber() + " for PaginationInfo.");
+                                    break;
+                            }
+                        }
+                        proto.end(paginationToken);
+                        break;
+                    case (int) CompanionMessage.TYPE:
+                        type = proto.readInt(CompanionMessage.TYPE);
+                        break;
+                    case (int) CompanionMessage.DATA:
+                        data = proto.readBytes(CompanionMessage.DATA);
+                        break;
+                    default:
+                        Slog.e(LOG_TAG, "Unexpected field id " + proto.getFieldNumber()
+                                + " for CompanionMessage.");
+                        break;
+                }
+            }
+
+            if (id == messageId) {
                 CompanionMessageInfo messageInfo = new CompanionMessageInfo(id, page, total, type,
                         data);
                 // Add the message into mAssociationsMessagesMap
@@ -122,28 +178,35 @@ public class CompanionMessageProcessor {
                 mAssociationsMessagesMap.put(associationId, associationMessages);
                 // Check if all the messages with the same parentId are received.
                 if (childMessages.size() == total) {
+                    Slog.i(LOG_TAG, "All [" + total + "] messages are received. Processing.");
+
                     childMessages.sort(Comparator.comparing(CompanionMessageInfo::getPage));
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
                     for (int i = 0; i < childMessages.size(); i++) {
                         stream.write(childMessages.get(i).getData());
                     }
                     mAssociationsMessagesMap.remove(parentId);
-                    return new CompanionMessageInfo(parentId, 0, total, type, stream.toByteArray());
+                    mListener.onCompleteMessageReceived(
+                            new CompanionMessageInfo(parentId, 0, total, type,
+                                    stream.toByteArray()));
+                } else {
+                    Slog.i(LOG_TAG, "[" + childMessages.size() + "/" + total
+                            + "] messages are received for parentId [" + parentId + "]");
                 }
             } else {
                 Slog.e(LOG_TAG, "Message id mismatch.");
                 return null;
             }
         } catch (IOException e) {
-            Slog.e(LOG_TAG, "Can't read proto message id: " + messageId + ", message: "
-                    + new String(message) + ".");
+            Slog.e(LOG_TAG, "Can't read proto from the message.");
             return null;
         }
         return null;
     }
 
     /**
-     * Find the next parent id. The parent and child ids are incremental.
+     * Find the next parent id from [1, Integer.MAX_VALUE].
+     * The parent and child ids are incremental.
      */
     private int findNextParentId(int associationId, int totalMessageCount) {
         int nextParentId = mNextParentId.getOrDefault(associationId, 1);

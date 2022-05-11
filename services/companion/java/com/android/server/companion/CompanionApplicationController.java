@@ -103,7 +103,10 @@ public class CompanionApplicationController {
         mCompanionServicesRegister.invalidate(userId);
     }
 
-    void bindCompanionApplication(@UserIdInt int userId, @NonNull String packageName,
+    /**
+     * CDM binds to the companion app.
+     */
+    public void bindCompanionApplication(@UserIdInt int userId, @NonNull String packageName,
             boolean bindImportant) {
         if (DEBUG) {
             Log.i(TAG, "bind() u" + userId + "/" + packageName
@@ -143,7 +146,10 @@ public class CompanionApplicationController {
         }
     }
 
-    void unbindCompanionApplication(@UserIdInt int userId, @NonNull String packageName) {
+    /**
+     * CDM unbinds the companion app.
+     */
+    public void unbindCompanionApplication(@UserIdInt int userId, @NonNull String packageName) {
         if (DEBUG) Log.i(TAG, "unbind() u" + userId + "/" + packageName);
 
         final List<CompanionDeviceServiceConnector> serviceConnectors;
@@ -237,9 +243,9 @@ public class CompanionApplicationController {
         primaryServiceConnector.postOnDeviceDisappeared(association);
     }
 
-    /** Pass an encryped secure message to the companion application for transporting. */
+    /** Pass an encrypted secure message to the companion application for transporting. */
     public void dispatchMessage(@UserIdInt int userId, @NonNull String packageName,
-            int associationId, @NonNull byte[] message) {
+            int associationId, int messageId, @NonNull byte[] message) {
         if (DEBUG) {
             Log.i(TAG, "dispatchMessage() u" + userId + "/" + packageName
                     + " associationId=" + associationId);
@@ -256,7 +262,8 @@ public class CompanionApplicationController {
             return;
         }
 
-        primaryServiceConnector.postOnMessageDispatchedFromSystem(associationId, message);
+        primaryServiceConnector.postOnMessageDispatchedFromSystem(associationId, messageId,
+                message);
     }
 
     private void onPrimaryServiceBindingDied(@UserIdInt int userId, @NonNull String packageName) {
