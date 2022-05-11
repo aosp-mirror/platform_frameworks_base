@@ -20,6 +20,7 @@ import static android.window.BackNavigationInfo.KEY_TRIGGER_BACK;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
@@ -129,7 +130,7 @@ public class BackAnimationControllerTest {
                 new RemoteCallback((bundle) -> {}),
                 onBackInvokedCallback);
         try {
-            doReturn(navigationInfo).when(mActivityTaskManager).startBackNavigation();
+            doReturn(navigationInfo).when(mActivityTaskManager).startBackNavigation(anyBoolean());
         } catch (RemoteException ex) {
             ex.rethrowFromSystemServer();
         }
@@ -137,7 +138,7 @@ public class BackAnimationControllerTest {
 
     private void createNavigationInfo(BackNavigationInfo.Builder builder) {
         try {
-            doReturn(builder.build()).when(mActivityTaskManager).startBackNavigation();
+            doReturn(builder.build()).when(mActivityTaskManager).startBackNavigation(anyBoolean());
         } catch (RemoteException ex) {
             ex.rethrowFromSystemServer();
         }
@@ -217,8 +218,11 @@ public class BackAnimationControllerTest {
         // Check that back start and progress is dispatched when first move.
         doMotionEvent(MotionEvent.ACTION_MOVE, 100);
         verify(mIOnBackInvokedCallback).onBackStarted();
+
+        // Check that back progress is dispatched.
+        doMotionEvent(MotionEvent.ACTION_MOVE, 100);
         ArgumentCaptor<BackEvent> backEventCaptor = ArgumentCaptor.forClass(BackEvent.class);
-        verify(mIOnBackInvokedCallback).onBackProgressed(backEventCaptor.capture());
+        verify(mIOnBackInvokedCallback, atLeastOnce()).onBackProgressed(backEventCaptor.capture());
         assertEquals(animationTarget, backEventCaptor.getValue().getDepartingAnimationTarget());
 
         // Check that back invocation is dispatched.

@@ -67,7 +67,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                     SETTING_VALUE_ON) != SETTING_VALUE_OFF;
     private static final int PROGRESS_THRESHOLD = SystemProperties
             .getInt(PREDICTIVE_BACK_PROGRESS_THRESHOLD_PROP, -1);
-
     /**
      * Max duration to wait for a transition to finish before accepting another gesture start
      * request.
@@ -290,7 +289,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         mBackGestureStarted = true;
 
         try {
-            mBackNavigationInfo = mActivityTaskManager.startBackNavigation();
+            boolean requestAnimation = mEnableAnimations.get();
+            mBackNavigationInfo = mActivityTaskManager.startBackNavigation(requestAnimation);
             onBackNavigationInfoReceived(mBackNavigationInfo);
         } catch (RemoteException remoteException) {
             Log.e(TAG, "Failed to initAnimation", remoteException);
