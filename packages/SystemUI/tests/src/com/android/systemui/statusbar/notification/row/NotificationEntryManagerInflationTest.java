@@ -78,7 +78,6 @@ import com.android.systemui.statusbar.notification.collection.legacy.Notificatio
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 import com.android.systemui.statusbar.notification.icon.IconBuilder;
 import com.android.systemui.statusbar.notification.icon.IconManager;
-import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.dagger.ExpandableNotificationRowComponent;
@@ -132,7 +131,6 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
     @Mock private NotificationEntryListener mEntryListener;
     @Mock private NotificationRowBinderImpl.BindRowCallback mBindCallback;
     @Mock private HeadsUpManager mHeadsUpManager;
-    @Mock private NotificationInterruptStateProvider mNotificationInterruptionStateProvider;
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
     @Mock private NotificationGutsManager mGutsManager;
     @Mock private NotificationRemoteInputManager mRemoteInputManager;
@@ -254,6 +252,7 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                 .thenAnswer((Answer<ExpandableNotificationRowController>) invocation ->
                         new ExpandableNotificationRowController(
                                 viewCaptor.getValue(),
+                                mLockscreenUserManager,
                                 mock(ActivatableNotificationViewController.class),
                                 mock(RemoteInputViewSubcomponent.Factory.class),
                                 mock(MetricsLogger.class),
@@ -300,7 +299,8 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                 new IconManager(
                         mEntryManager,
                         mock(LauncherApps.class),
-                        new IconBuilder(mContext)),
+                        new IconBuilder(mContext),
+                        mLockscreenUserManager),
                 mock(LowPriorityInflationHelper.class),
                 mNotifPipelineFlags);
 
