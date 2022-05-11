@@ -738,6 +738,14 @@ public final class DeviceConfig {
      */
     public static final String NAMESPACE_VENDOR_SYSTEM_NATIVE = "vendor_system_native";
 
+    /**
+     * Namespace for DevicePolicyManager related features.
+     *
+     * @hide
+     */
+    public static final String NAMESPACE_DEVICE_POLICY_MANAGER =
+            "device_policy_manager";
+
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
     private static ArrayMap<OnPropertiesChangedListener, Pair<String, Executor>> sListeners =

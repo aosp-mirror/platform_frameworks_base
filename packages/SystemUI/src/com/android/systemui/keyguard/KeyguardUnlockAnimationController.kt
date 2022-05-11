@@ -857,6 +857,13 @@ class KeyguardUnlockAnimationController @Inject constructor(
     }
 
     /**
+     * Whether the RemoteAnimation on the app/launcher surface behind the keyguard is 'running'.
+     */
+    fun isAnimatingBetweenKeyguardAndSurfaceBehind(): Boolean {
+        return keyguardViewMediator.get().isAnimatingBetweenKeyguardAndSurfaceBehind
+    }
+
+    /**
      * Whether we are playing a canned unlock animation, vs. unlocking from a touch gesture such as
      * a swipe.
      */
