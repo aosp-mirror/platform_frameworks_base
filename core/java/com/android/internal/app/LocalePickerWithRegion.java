@@ -29,6 +29,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MenuItem.OnActionExpandListener;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.SearchView;
@@ -64,6 +65,7 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
     private int mTopDistance = 0;
     private String mAppPackageName;
     private CharSequence mTitle = null;
+    private OnActionExpandListener mOnActionExpandListener;
 
     /**
      * Other classes can register to be notified when a locale was selected.
@@ -80,8 +82,10 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
 
     private static LocalePickerWithRegion createCountryPicker(Context context,
             LocaleSelectedListener listener, LocaleStore.LocaleInfo parent,
-            boolean translatedOnly, String appPackageName) {
+            boolean translatedOnly, String appPackageName,
+            OnActionExpandListener onActionExpandListener) {
         LocalePickerWithRegion localePicker = new LocalePickerWithRegion();
+        localePicker.setOnActionExpandListener(onActionExpandListener);
         boolean shouldShowTheList = localePicker.setListener(context, listener, parent,
                 translatedOnly, appPackageName);
         return shouldShowTheList ? localePicker : null;
@@ -95,8 +99,10 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
     }
 
     public static LocalePickerWithRegion createLanguagePicker(Context context,
-            LocaleSelectedListener listener, boolean translatedOnly, String appPackageName) {
+            LocaleSelectedListener listener, boolean translatedOnly, String appPackageName,
+            OnActionExpandListener onActionExpandListener) {
         LocalePickerWithRegion localePicker = new LocalePickerWithRegion();
+        localePicker.setOnActionExpandListener(onActionExpandListener);
         localePicker.setListener(
                 context, listener, /* parent */ null, translatedOnly, appPackageName);
         return localePicker;
@@ -310,7 +316,7 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
         } else {
             LocalePickerWithRegion selector = LocalePickerWithRegion.createCountryPicker(
                     getContext(), mListener, locale, mTranslatedOnly /* translate only */,
-                    mAppPackageName);
+                    mAppPackageName, mOnActionExpandListener);
             if (selector != null) {
                 getFragmentManager().beginTransaction()
                         .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
@@ -328,8 +334,11 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
             inflater.inflate(R.menu.language_selection_list, menu);
 
             final MenuItem searchMenuItem = menu.findItem(R.id.locale_search_menu);
-            mSearchView = (SearchView) searchMenuItem.getActionView();
+            if (!mAppPackageName.isEmpty() && mOnActionExpandListener != null) {
+                searchMenuItem.setOnActionExpandListener(mOnActionExpandListener);
+            }
 
+            mSearchView = (SearchView) searchMenuItem.getActionView();
             mSearchView.setQueryHint(getText(R.string.search_language_hint));
             mSearchView.setOnQueryTextListener(this);
 
@@ -362,5 +371,12 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
             mAdapter.getFilter().filter(newText);
         }
         return false;
+    }
+
+    /**
+     * Sets OnActionExpandListener to LocalePickerWithRegion to dectect action of search bar.
+     */
+    public void setOnActionExpandListener(OnActionExpandListener onActionExpandListener) {
+        mOnActionExpandListener = onActionExpandListener;
     }
 }
