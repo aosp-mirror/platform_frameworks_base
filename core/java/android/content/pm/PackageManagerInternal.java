@@ -999,4 +999,10 @@ public abstract class PackageManagerInternal {
      * Migrates legacy obb data to its new location.
      */
     public abstract void migrateLegacyObbData();
+
+    /**
+     * Get installed SDK version of the package
+     * @param pkg package for which to retrieve the installed sdk version
+     */
+    public abstract int getInstalledSdkVersion(PackageParser.Package pkg);
 }
