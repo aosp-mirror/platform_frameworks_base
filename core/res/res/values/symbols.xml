@@ -4384,8 +4384,11 @@
   <java-symbol type="integer" name="config_letterboxBackgroundType" />
   <java-symbol type="color" name="config_letterboxBackgroundColor" />
   <java-symbol type="dimen" name="config_letterboxHorizontalPositionMultiplier" />
-  <java-symbol type="bool" name="config_letterboxIsReachabilityEnabled" />
-  <java-symbol type="integer" name="config_letterboxDefaultPositionForReachability" />
+  <java-symbol type="dimen" name="config_letterboxVerticalPositionMultiplier" />
+  <java-symbol type="bool" name="config_letterboxIsHorizontalReachabilityEnabled" />
+  <java-symbol type="bool" name="config_letterboxIsVerticalReachabilityEnabled" />
+  <java-symbol type="integer" name="config_letterboxDefaultPositionForHorizontalReachability" />
+  <java-symbol type="integer" name="config_letterboxDefaultPositionForVerticalReachability" />
   <java-symbol type="bool" name="config_letterboxIsEducationEnabled" />
   <java-symbol type="bool" name="config_isCameraCompatControlForStretchedIssuesEnabled" />
 
