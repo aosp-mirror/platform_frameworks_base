@@ -3116,6 +3116,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             deleteTransferOwnershipBundleLocked(metadata.userId);
         }
         updateSystemUpdateFreezePeriodsRecord(/* saveIfChanged */ true);
+        pushUserControlDisabledPackagesLocked(metadata.userId);
     }
 
     private void maybeLogStart() {
@@ -3178,18 +3179,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         startOwnerService(userId, "start-user");
     }
 
-    // TODO(b/218639412): Once PM stores these on a per-user basis, push even empty lists to handle
-    // DO/PO removal correctly.
     void pushUserControlDisabledPackagesLocked(int userId) {
-        if (userId != mOwners.getDeviceOwnerUserId()) {
-            return;
+        final int targetUserId;
+        final ActiveAdmin owner;
+        if (getDeviceOwnerUserIdUncheckedLocked() == userId) {
+            owner = getDeviceOwnerAdminLocked();
+            targetUserId = UserHandle.USER_ALL;
+        } else {
+            owner = getProfileOwnerAdminLocked(userId);
+            targetUserId = userId;
         }
-        ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
-        if (deviceOwner == null || deviceOwner.protectedPackages == null) {
-            return;
-        }
-        mInjector.getPackageManagerInternal().setDeviceOwnerProtectedPackages(
-                deviceOwner.info.getPackageName(), deviceOwner.protectedPackages);
+
+        List<String> protectedPackages = (owner == null || owner.protectedPackages == null)
+                ? Collections.emptyList() : owner.protectedPackages;
+        mInjector.binderWithCleanCallingIdentity(() ->
+                mInjector.getPackageManagerInternal().setOwnerProtectedPackages(
+                        targetUserId, protectedPackages));
     }
 
     @Override
@@ -16967,22 +16972,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Objects.requireNonNull(who, "ComponentName is null");
         Objects.requireNonNull(packages, "packages is null");
         final CallerIdentity caller = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(
-                isDefaultDeviceOwner(caller) || isFinancedDeviceOwner(caller));
+        Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller) || isProfileOwner(caller)
+                || isFinancedDeviceOwner(caller));
         checkCanExecuteOrThrowUnsafe(
                 DevicePolicyManager.OPERATION_SET_USER_CONTROL_DISABLED_PACKAGES);
 
         synchronized (getLockObject()) {
-            ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
-            if (!Objects.equals(deviceOwner.protectedPackages, packages)) {
-                deviceOwner.protectedPackages = packages.isEmpty() ? null : packages;
+            ActiveAdmin owner = getDeviceOrProfileOwnerAdminLocked(caller.getUserId());
+            if (!Objects.equals(owner.protectedPackages, packages)) {
+                owner.protectedPackages = packages.isEmpty() ? null : packages;
                 saveSettingsLocked(caller.getUserId());
+                pushUserControlDisabledPackagesLocked(caller.getUserId());
             }
         }
-
-        mInjector.binderWithCleanCallingIdentity(
-                () -> mInjector.getPackageManagerInternal().setDeviceOwnerProtectedPackages(
-                        who.getPackageName(), packages));
 
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_USER_CONTROL_DISABLED_PACKAGES)
@@ -16996,11 +16998,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Objects.requireNonNull(who, "ComponentName is null");
 
         final CallerIdentity caller = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(
-                isDefaultDeviceOwner(caller) || isFinancedDeviceOwner(caller));
+        Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller) || isProfileOwner(caller)
+                || isFinancedDeviceOwner(caller));
 
         synchronized (getLockObject()) {
-            ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
+            ActiveAdmin deviceOwner = getDeviceOrProfileOwnerAdminLocked(caller.getUserId());
             return deviceOwner.protectedPackages != null
                     ? deviceOwner.protectedPackages : Collections.emptyList();
         }
