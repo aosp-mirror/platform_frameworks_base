@@ -4468,8 +4468,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *         color mode set to avoid jank in the middle of the transition.
      */
     boolean canShowWindows() {
-        return allDrawn && !(isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION)
-                && hasNonDefaultColorWindow());
+        final boolean drawn = mTransitionController.isShellTransitionsEnabled()
+                ? mSyncState != SYNC_STATE_WAITING_FOR_DRAW : allDrawn;
+        final boolean animating = mTransitionController.isShellTransitionsEnabled()
+                ? mTransitionController.inTransition(this)
+                : isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION);
+        return drawn && !(animating && hasNonDefaultColorWindow());
     }
 
     /**
