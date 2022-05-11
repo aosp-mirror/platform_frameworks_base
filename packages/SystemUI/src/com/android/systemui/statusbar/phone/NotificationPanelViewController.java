@@ -1693,9 +1693,11 @@ public class NotificationPanelViewController extends PanelViewController {
         if (mShouldUseSplitNotificationShade && isOnKeyguard()) {
             // It's a special case as this method is likely to not be initiated by finger movement
             // but rather called from adb shell or accessibility service.
-            // In the future method below could be used for non-split shade as well but currently
-            // motion in that case looks worse than using flingSettings.
-            // TODO: make below function transitioning smoothly also in portrait with empty target
+            // We're using LockscreenShadeTransitionController because on lockscreen that's the
+            // source of truth for all shade motion. Not using it would make part of state to be
+            // outdated and will cause bugs. Ideally we'd use this controller also for non-split
+            // case but currently motion in portrait looks worse than when using flingSettings.
+            // TODO: make below function transitioning smoothly also in portrait with null target
             mLockscreenShadeTransitionController.goToLockedShade(
                     /* expandedView= */null, /* needsQSAnimation= */false);
         } else if (isFullyCollapsed()) {
