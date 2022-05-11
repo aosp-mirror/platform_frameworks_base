@@ -2629,11 +2629,10 @@ final class InstallPackageHelper {
                         Slog.i(TAG, "upgrading pkg " + res.mRemovedInfo.mRemovedPackage
                                 + " is ASEC-hosted -> UNAVAILABLE");
                     }
-                    final int[] uidArray = new int[]{res.mRemovedInfo.mUid};
-                    final ArrayList<String> pkgList = new ArrayList<>(1);
-                    pkgList.add(res.mRemovedInfo.mRemovedPackage);
-                    mBroadcastHelper.sendResourcesChangedBroadcast(
-                            false, true, pkgList, uidArray, null);
+                    final String[] pkgNames = new String[]{res.mRemovedInfo.mRemovedPackage};
+                    final int[] uids = new int[]{res.mRemovedInfo.mUid};
+                    mBroadcastHelper.sendResourcesChangedBroadcast(mPm.snapshotComputer(),
+                            false /* mediaStatus */, true /* replacing */, pkgNames, uids);
                 }
                 res.mRemovedInfo.sendPackageRemovedBroadcasts(killApp, false /*removedBySystem*/);
             }
@@ -2805,11 +2804,10 @@ final class InstallPackageHelper {
                     if (DEBUG_INSTALL) {
                         Slog.i(TAG, "upgrading pkg " + res.mPkg + " is external");
                     }
-                    final int[] uidArray = new int[]{res.mPkg.getUid()};
-                    ArrayList<String> pkgList = new ArrayList<>(1);
-                    pkgList.add(packageName);
-                    mBroadcastHelper.sendResourcesChangedBroadcast(
-                            true, true, pkgList, uidArray, null);
+                    final String[] pkgNames = new String[]{packageName};
+                    final int[] uids = new int[]{res.mPkg.getUid()};
+                    mBroadcastHelper.sendResourcesChangedBroadcast(mPm.snapshotComputer(),
+                            true /* mediaStatus */, true /* replacing */, pkgNames, uids);
                 }
             } else if (!ArrayUtils.isEmpty(res.mLibraryConsumers)) { // if static shared lib
                 // No need to kill consumers if it's installation of new version static shared lib.
