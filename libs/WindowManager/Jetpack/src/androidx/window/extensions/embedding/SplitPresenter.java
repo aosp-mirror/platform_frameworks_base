@@ -291,8 +291,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             // When placeholder is shown in split, we should keep the focus on the primary.
             wct.requestFocusOnTaskFragment(primaryContainer.getTaskFragmentToken());
         }
-        final TaskContainer taskContainer = mController.getTaskContainer(
-                updatedContainer.getTaskId());
+        final TaskContainer taskContainer = updatedContainer.getTaskContainer();
         final int windowingMode = taskContainer.getWindowingModeForSplitTaskFragment(
                 primaryRectBounds);
         updateTaskFragmentWindowingModeIfRegistered(wct, primaryContainer, windowingMode);
@@ -456,12 +455,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
 
     @NonNull
     Rect getParentContainerBounds(@NonNull TaskFragmentContainer container) {
-        final int taskId = container.getTaskId();
-        final TaskContainer taskContainer = mController.getTaskContainer(taskId);
-        if (taskContainer == null) {
-            throw new IllegalStateException("Can't find TaskContainer taskId=" + taskId);
-        }
-        return taskContainer.getTaskBounds();
+        return container.getTaskContainer().getTaskBounds();
     }
 
     @NonNull
