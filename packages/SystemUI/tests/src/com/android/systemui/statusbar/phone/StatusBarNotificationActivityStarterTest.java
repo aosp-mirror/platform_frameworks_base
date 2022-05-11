@@ -93,6 +93,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @SmallTest
@@ -141,6 +142,8 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     @Mock
     private OnUserInteractionCallback mOnUserInteractionCallback;
     @Mock
+    private Runnable mFutureDismissalRunnable;
+    @Mock
     private StatusBarNotificationActivityStarter mNotificationActivityStarter;
     @Mock
     private ActivityLaunchAnimator mActivityLaunchAnimator;
@@ -187,8 +190,8 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         when(mEntryManager.getVisibleNotifications()).thenReturn(mActiveNotifications);
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
         when(mNotifPipelineFlags.isNewPipelineEnabled()).thenReturn(false);
-        when(mOnUserInteractionCallback.getGroupSummaryToDismiss(mNotificationRow.getEntry()))
-                .thenReturn(null);
+        when(mOnUserInteractionCallback.registerFutureDismissal(eq(mNotificationRow.getEntry()),
+                anyInt())).thenReturn(mFutureDismissalRunnable);
         when(mVisibilityProvider.obtain(anyString(), anyBoolean()))
                 .thenAnswer(invocation -> NotificationVisibility.obtain(
                         invocation.getArgument(0), 0, 1, false));
@@ -264,6 +267,10 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     @Test
     public void testOnNotificationClicked_keyGuardShowing()
             throws PendingIntent.CanceledException, RemoteException {
+        // To get the order right, collect posted runnables and run them later
+        List<Runnable> runnables = new ArrayList<>();
+        doAnswer(answerVoid(r -> runnables.add((Runnable) r)))
+                .when(mHandler).post(any(Runnable.class));
         // Given
         NotificationEntry entry = mNotificationRow.getEntry();
         Notification notification = entry.getSbn().getNotification();
@@ -275,6 +282,8 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
 
         // When
         mNotificationActivityStarter.onNotificationClicked(entry, mNotificationRow);
+        // Run the collected runnables in fifo order, the way post() really does.
+        while (!runnables.isEmpty()) runnables.remove(0).run();
 
         // Then
         verify(mShadeController, atLeastOnce()).collapsePanel();
@@ -284,12 +293,14 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
 
         verify(mAssistManager).hideAssist();
 
-        InOrder orderVerifier = Mockito.inOrder(mClickNotifier, mOnUserInteractionCallback);
+        InOrder orderVerifier = Mockito.inOrder(mClickNotifier, mOnUserInteractionCallback,
+                mFutureDismissalRunnable);
+        // Notification calls dismiss callback to remove notification due to FLAG_AUTO_CANCEL
+        orderVerifier.verify(mOnUserInteractionCallback)
+                .registerFutureDismissal(eq(entry), eq(REASON_CLICK));
         orderVerifier.verify(mClickNotifier).onNotificationClick(
                 eq(entry.getKey()), any(NotificationVisibility.class));
-        // Notification calls dismiss callback to remove notification due to FLAG_AUTO_CANCEL
-        orderVerifier.verify(mOnUserInteractionCallback).onDismiss(entry,
-                REASON_CLICK, null);
+        orderVerifier.verify(mFutureDismissalRunnable).run();
     }
 
     @Test
@@ -319,8 +330,9 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         verifyZeroInteractions(mContentIntent);
 
         // Notification should not be cancelled.
-        verify(mOnUserInteractionCallback, never()).onDismiss(eq(mNotificationRow.getEntry()),
-                anyInt(), eq(null));
+        verify(mOnUserInteractionCallback, never())
+                .registerFutureDismissal(eq(mNotificationRow.getEntry()), anyInt());
+        verify(mFutureDismissalRunnable, never()).run();
     }
 
     @Test

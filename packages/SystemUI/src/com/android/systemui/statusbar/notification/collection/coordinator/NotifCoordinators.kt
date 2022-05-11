@@ -93,7 +93,7 @@ class NotifCoordinatorsImpl @Inject constructor(
         mCoordinators.add(shadeEventCoordinator)
         mCoordinators.add(viewConfigCoordinator)
         mCoordinators.add(visualStabilityCoordinator)
-        mCoordinators.add(activityLaunchAnimCoordinator)
+//        mCoordinators.add(activityLaunchAnimCoordinator) // NOTE: will delete in followup CL
         if (notifPipelineFlags.isSmartspaceDedupingEnabled()) {
             mCoordinators.add(smartspaceDedupingCoordinator)
         }
