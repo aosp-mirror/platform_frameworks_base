@@ -21,4 +21,11 @@
     <dimen name="app_icon_min_width">56dp</dimen>
     <dimen name="two_target_min_width">72dp</dimen>
     <dimen name="settingslib_dialogCornerRadius">8dp</dimen>
+
+    <!-- Left padding of the preference -->
+    <dimen name="settingslib_listPreferredItemPaddingStart">16dp</dimen>
+    <!-- Right padding of the preference -->
+    <dimen name="settingslib_listPreferredItemPaddingEnd">16dp</dimen>
+    <!-- Icon size of the preference -->
+    <dimen name="settingslib_preferenceIconSize">24dp</dimen>
 </resources>

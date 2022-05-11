@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 
+import android.annotation.NonNull;
 import android.view.SurfaceControl;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -36,7 +37,6 @@ public class NavBarFadeAnimationController extends FadeAnimationController{
     private static final Interpolator FADE_OUT_INTERPOLATOR =
             new PathInterpolator(0.2f, 0f, 1f, 1f);
 
-    private DisplayContent mDisplayContent;
     private final WindowState mNavigationBar;
     private Animation mFadeInAnimation;
     private Animation mFadeOutAnimation;
@@ -46,7 +46,6 @@ public class NavBarFadeAnimationController extends FadeAnimationController{
 
     public NavBarFadeAnimationController(DisplayContent displayContent) {
         super(displayContent);
-        mDisplayContent = displayContent;
         mNavigationBar = displayContent.getDisplayPolicy().getNavigationBar();
         mFadeInAnimation = new AlphaAnimation(0f, 1f);
         mFadeInAnimation.setDuration(FADE_IN_DURATION);
@@ -68,16 +67,10 @@ public class NavBarFadeAnimationController extends FadeAnimationController{
     }
 
     @Override
-    protected FadeAnimationAdapter createAdapter(boolean show, WindowToken windowToken) {
-        final Animation animation = show ? getFadeInAnimation() : getFadeOutAnimation();
-        if (animation == null) {
-            return null;
-        }
-
-        final LocalAnimationAdapter.AnimationSpec windowAnimationSpec =
-                createAnimationSpec(animation);
+    protected FadeAnimationAdapter createAdapter(LocalAnimationAdapter.AnimationSpec animationSpec,
+            boolean show, WindowToken windowToken) {
         return new NavFadeAnimationAdapter(
-                windowAnimationSpec, windowToken.getSurfaceAnimationRunner(), show, windowToken,
+                animationSpec, windowToken.getSurfaceAnimationRunner(), show, windowToken,
                 show ? mFadeInParent : mFadeOutParent);
     }
 
@@ -87,8 +80,8 @@ public class NavBarFadeAnimationController extends FadeAnimationController{
      * @param show true for fade-in, otherwise for fade-out.
      */
     public void fadeWindowToken(boolean show) {
-        final FadeRotationAnimationController controller =
-                mDisplayContent.getFadeRotationAnimationController();
+        final AsyncRotationController controller =
+                mDisplayContent.getAsyncRotationController();
         final Runnable fadeAnim = () -> fadeWindowToken(show, mNavigationBar.mToken,
                 ANIMATION_TYPE_APP_TRANSITION);
         if (controller == null) {
@@ -101,14 +94,6 @@ public class NavBarFadeAnimationController extends FadeAnimationController{
                 controller.setOnShowRunnable(fadeAnim);
             } else {
                 fadeAnim.run();
-            }
-        } else {
-            // If fade rotation animation is running and controlling the nav bar, make sure we empty
-            // the mDeferredFinishCallbacks and defer the runnable until fade rotation animation
-            // finishes.
-            final Runnable runnable = mDeferredFinishCallbacks.remove(mNavigationBar.mToken);
-            if (runnable != null) {
-                controller.setOnShowRunnable(runnable);
             }
         }
     }
@@ -144,7 +129,7 @@ public class NavBarFadeAnimationController extends FadeAnimationController{
 
         @Override
         public void startAnimation(SurfaceControl animationLeash, SurfaceControl.Transaction t,
-                int type, SurfaceAnimator.OnAnimationFinishedCallback finishCallback) {
+                int type, @NonNull SurfaceAnimator.OnAnimationFinishedCallback finishCallback) {
             super.startAnimation(animationLeash, t, type, finishCallback);
             if (mParent != null && mParent.isValid()) {
                 t.reparent(animationLeash, mParent);

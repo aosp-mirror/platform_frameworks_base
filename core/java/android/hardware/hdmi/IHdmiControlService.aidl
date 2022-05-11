@@ -76,7 +76,7 @@ interface IHdmiControlService {
     void askRemoteDeviceToBecomeActiveSource(int physicalAddress);
     void sendVendorCommand(int deviceType, int targetAddress, in byte[] params,
             boolean hasVendorId);
-    void addVendorCommandListener(IHdmiVendorCommandListener listener, int deviceType);
+    void addVendorCommandListener(IHdmiVendorCommandListener listener, int vendorId);
     void sendStandby(int deviceType, int deviceId);
     void setHdmiRecordListener(IHdmiRecordListener callback);
     void startOneTouchRecord(int recorderAddress, in byte[] recordSource);
@@ -88,6 +88,8 @@ interface IHdmiControlService {
     void setStandbyMode(boolean isStandbyModeOn);
     void reportAudioStatus(int deviceType, int volume, int maxVolume, boolean isMute);
     void setSystemAudioModeOnForAudioOnlySource();
+    boolean setMessageHistorySize(int newSize);
+    int getMessageHistorySize();
     void addCecSettingChangeListener(String name, IHdmiCecSettingChangeListener listener);
     void removeCecSettingChangeListener(String name, IHdmiCecSettingChangeListener listener);
     List<String> getUserCecSettings();

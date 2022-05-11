@@ -22,14 +22,19 @@ import static junit.framework.Assert.assertNotNull;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.AlertDialog;
+import android.app.admin.DevicePolicyManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.UserInfo;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.VectorDrawable;
@@ -42,6 +47,7 @@ import android.testing.LayoutInflaterBuilder;
 import android.testing.TestableImageView;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
+import android.testing.ViewUtils;
 import android.text.SpannableStringBuilder;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,16 +56,22 @@ import android.widget.TextView;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.SecurityController;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 /*
  * Compile and run the whole SystemUI test suite:
@@ -94,25 +106,40 @@ public class QSSecurityFooterTest extends SysuiTestCase {
     private UserTracker mUserTracker;
     @Mock
     private ActivityStarter mActivityStarter;
+    @Mock
+    private DialogLaunchAnimator mDialogLaunchAnimator;
+    @Mock
+    private BroadcastDispatcher mBroadcastDispatcher;
+
+    private TestableLooper mTestableLooper;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        Looper looper = TestableLooper.get(this).getLooper();
+        mTestableLooper = TestableLooper.get(this);
+        Looper looper = mTestableLooper.getLooper();
         when(mUserTracker.getUserInfo()).thenReturn(mock(UserInfo.class));
         mRootView = (ViewGroup) new LayoutInflaterBuilder(mContext)
                 .replace("ImageView", TestableImageView.class)
                 .build().inflate(R.layout.quick_settings_security_footer, null, false);
         mFooter = new QSSecurityFooter(mRootView, mUserTracker, new Handler(looper),
-                mActivityStarter, mSecurityController, looper);
+                mActivityStarter, mSecurityController, mDialogLaunchAnimator, looper,
+                mBroadcastDispatcher);
         mFooterText = mRootView.findViewById(R.id.footer_text);
         mPrimaryFooterIcon = mRootView.findViewById(R.id.primary_footer_icon);
-        mFooter.setHostEnvironment(null);
 
         when(mSecurityController.getDeviceOwnerComponentOnAnyUser())
                 .thenReturn(DEVICE_OWNER_COMPONENT);
         when(mSecurityController.getDeviceOwnerType(DEVICE_OWNER_COMPONENT))
                 .thenReturn(DEVICE_OWNER_TYPE_DEFAULT);
+        ViewUtils.attachView(mRootView);
+
+        mFooter.init();
+    }
+
+    @After
+    public void tearDown() {
+        ViewUtils.detachView(mRootView);
     }
 
     @Test
@@ -650,8 +677,6 @@ public class QSSecurityFooterTest extends SysuiTestCase {
 
     @Test
     public void testNoClickWhenGone() {
-        QSTileHost mockHost = mock(QSTileHost.class);
-        mFooter.setHostEnvironment(mockHost);
         mFooter.refreshState();
 
         TestableLooper.get(this).processAllMessages();
@@ -660,7 +685,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         mFooter.onClick(mFooter.getView());
 
         // Proxy for dialog being created
-        verify(mockHost, never()).collapsePanels();
+        verify(mDialogLaunchAnimator, never()).showFromView(any(), any());
     }
 
     @Test
@@ -700,6 +725,16 @@ public class QSSecurityFooterTest extends SysuiTestCase {
     }
 
     @Test
+    public void testDialogUsesDialogLauncher() {
+        when(mSecurityController.isDeviceManaged()).thenReturn(true);
+        mFooter.onClick(mRootView);
+
+        mTestableLooper.processAllMessages();
+
+        verify(mDialogLaunchAnimator).showFromView(any(), eq(mRootView));
+    }
+
+    @Test
     public void testCreateDialogViewForFinancedDevice() {
         when(mSecurityController.isDeviceManaged()).thenReturn(true);
         when(mSecurityController.getDeviceOwnerOrganizationName())
@@ -707,12 +742,6 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         when(mSecurityController.getDeviceOwnerType(DEVICE_OWNER_COMPONENT))
                 .thenReturn(DEVICE_OWNER_TYPE_FINANCED);
 
-        // Initialize AlertDialog which sets the text for the negative button, which is used when
-        // creating the dialog for a financed device.
-        mFooter.showDeviceMonitoringDialog();
-        // The above statement would display the Quick Settings dialog which requires user input,
-        // so simulate the press to continue with the unit test (otherwise, it is stuck).
-        mFooter.onClick(null, DialogInterface.BUTTON_NEGATIVE);
         View view = mFooter.createDialogView();
 
         TextView managementSubtitle = view.findViewById(R.id.device_management_subtitle);
@@ -725,6 +754,70 @@ public class QSSecurityFooterTest extends SysuiTestCase {
                 MANAGING_ORGANIZATION, MANAGING_ORGANIZATION), managementMessage.getText());
         assertEquals(mContext.getString(R.string.monitoring_button_view_policies),
                 mFooter.getSettingsButton());
+    }
+
+    @Test
+    public void testFinancedDeviceUsesSettingsButtonText() {
+        when(mSecurityController.isDeviceManaged()).thenReturn(true);
+        when(mSecurityController.getDeviceOwnerOrganizationName())
+                .thenReturn(MANAGING_ORGANIZATION);
+        when(mSecurityController.getDeviceOwnerType(DEVICE_OWNER_COMPONENT))
+                .thenReturn(DEVICE_OWNER_TYPE_FINANCED);
+
+        mFooter.showDeviceMonitoringDialog();
+        ArgumentCaptor<AlertDialog> dialogCaptor = ArgumentCaptor.forClass(AlertDialog.class);
+
+        mTestableLooper.processAllMessages();
+        verify(mDialogLaunchAnimator).showFromView(dialogCaptor.capture(), any());
+
+        AlertDialog dialog = dialogCaptor.getValue();
+        dialog.create();
+
+        assertEquals(mFooter.getSettingsButton(),
+                dialog.getButton(DialogInterface.BUTTON_NEGATIVE).getText());
+
+        dialog.dismiss();
+    }
+
+    @Test
+    public void testVisibilityListener() {
+        final AtomicInteger lastVisibility = new AtomicInteger(-1);
+        VisibilityChangedDispatcher.OnVisibilityChangedListener listener = lastVisibility::set;
+
+        mFooter.setOnVisibilityChangedListener(listener);
+
+        when(mSecurityController.isDeviceManaged()).thenReturn(true);
+        mFooter.refreshState();
+        mTestableLooper.processAllMessages();
+        assertEquals(View.VISIBLE, lastVisibility.get());
+
+        when(mSecurityController.isDeviceManaged()).thenReturn(false);
+        mFooter.refreshState();
+        mTestableLooper.processAllMessages();
+        assertEquals(View.GONE, lastVisibility.get());
+    }
+
+    @Test
+    public void testBroadcastShowsDialog() {
+        // Setup dialog content
+        when(mSecurityController.isDeviceManaged()).thenReturn(true);
+        when(mSecurityController.getDeviceOwnerOrganizationName())
+                .thenReturn(MANAGING_ORGANIZATION);
+        when(mSecurityController.getDeviceOwnerType(DEVICE_OWNER_COMPONENT))
+                .thenReturn(DEVICE_OWNER_TYPE_FINANCED);
+
+        ArgumentCaptor<BroadcastReceiver> captor = ArgumentCaptor.forClass(BroadcastReceiver.class);
+        verify(mBroadcastDispatcher).registerReceiverWithHandler(captor.capture(), any(), any(),
+                any());
+
+        // Pretend view is not visible temporarily
+        mRootView.onVisibilityAggregated(false);
+        captor.getValue().onReceive(mContext,
+                new Intent(DevicePolicyManager.ACTION_SHOW_DEVICE_MONITORING_DIALOG));
+        mTestableLooper.processAllMessages();
+
+        assertTrue(mFooter.getDialog().isShowing());
+        mFooter.getDialog().dismiss();
     }
 
     private CharSequence addLink(CharSequence description) {

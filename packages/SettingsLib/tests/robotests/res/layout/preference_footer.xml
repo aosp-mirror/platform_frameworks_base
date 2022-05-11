@@ -23,32 +23,46 @@
     android:paddingStart="?android:attr/listPreferredItemPaddingStart"
     android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
     android:background="?android:attr/selectableItemBackground"
+    android:orientation="vertical"
     android:clipToPadding="false">
 
     <LinearLayout
-        android:id="@+id/icon_container"
+        android:id="@+id/icon_frame"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:minWidth="60dp"
+        android:minWidth="56dp"
         android:gravity="start|top"
         android:orientation="horizontal"
         android:paddingEnd="12dp"
-        android:paddingTop="20dp"
+        android:paddingTop="16dp"
         android:paddingBottom="4dp">
         <ImageView
             android:id="@android:id/icon"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"/>
     </LinearLayout>
 
-    <com.android.settingslib.widget.LinkTextView
-        android:id="@android:id/title"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingBottom="16dp"
-        android:paddingTop="16dp"
-        android:maxLines="10"
-        android:textColor="?android:attr/textColorSecondary"
-        android:ellipsize="marquee" />
+        android:orientation="vertical">
+        <TextView
+            android:id="@android:id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="16dp"
+            android:paddingBottom="8dp"
+            android:textColor="?android:attr/textColorSecondary"
+            android:ellipsize="marquee" />
+
+        <com.android.settingslib.widget.LinkTextView
+            android:id="@+id/settingslib_learn_more"
+            android:text="@string/settingslib_learn_more_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:visibility="gone"
+            style="@style/TextAppearance.Footer.Title.SettingsLib"/>
+    </LinearLayout>
 
 </LinearLayout>

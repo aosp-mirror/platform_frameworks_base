@@ -35,6 +35,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.colorextraction.types.Tonal;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import org.junit.Before;
@@ -60,6 +61,8 @@ public class SysuiColorExtractorTests extends SysuiTestCase {
 
     @Mock
     private WallpaperManager mWallpaperManager;
+    @Mock
+    private DumpManager mDumpManager;
     private ColorExtractor.GradientColors mColors;
     private SysuiColorExtractor mColorExtractor;
 
@@ -69,13 +72,18 @@ public class SysuiColorExtractorTests extends SysuiTestCase {
         mColors = new ColorExtractor.GradientColors();
         mColors.setMainColor(Color.RED);
         mColors.setSecondaryColor(Color.RED);
-        mColorExtractor = new SysuiColorExtractor(getContext(),
+        mColorExtractor = new SysuiColorExtractor(
+                getContext(),
                 (inWallpaperColors, outGradientColorsNormal, outGradientColorsDark,
                         outGradientColorsExtraDark) -> {
                     outGradientColorsNormal.set(mColors);
                     outGradientColorsDark.set(mColors);
                     outGradientColorsExtraDark.set(mColors);
-                }, mock(ConfigurationController.class), mWallpaperManager, true /* immediately */);
+                },
+                mock(ConfigurationController.class),
+                mWallpaperManager,
+                mDumpManager,
+                true /* immediately */);
     }
 
     @Test
@@ -111,8 +119,13 @@ public class SysuiColorExtractorTests extends SysuiTestCase {
     public void onUiModeChanged_reloadsColors() {
         Tonal tonal = mock(Tonal.class);
         ConfigurationController configurationController = mock(ConfigurationController.class);
-        SysuiColorExtractor sysuiColorExtractor = new SysuiColorExtractor(getContext(),
-                tonal, configurationController, mWallpaperManager, true /* immediately */);
+        SysuiColorExtractor sysuiColorExtractor = new SysuiColorExtractor(
+                getContext(),
+                tonal,
+                configurationController,
+                mWallpaperManager,
+                mDumpManager,
+                true /* immediately */);
         verify(configurationController).addCallback(eq(sysuiColorExtractor));
 
         reset(tonal);

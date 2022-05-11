@@ -57,6 +57,8 @@ android_test {
         "ub-uiautomator",
         "hamcrest-library",
         "platform-compat-test-rules",
+        "CtsSurfaceValidatorLib",
+        "service-sdksandbox.impl",
     ],
 
     libs: [

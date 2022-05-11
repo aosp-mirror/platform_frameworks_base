@@ -22,9 +22,13 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.view.InsetsState.ITYPE_LOCAL_NAVIGATION_BAR_1;
+import static android.view.InsetsState.ITYPE_LOCAL_NAVIGATION_BAR_2;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_CHANGE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
@@ -42,6 +46,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.DisplayArea.Type.ANY;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_SCREEN_ROTATION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
@@ -52,6 +57,7 @@ import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -64,6 +70,7 @@ import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner;
+import android.view.InsetsSource;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
@@ -74,6 +81,7 @@ import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
@@ -268,6 +276,22 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testRemoveImmediatelyClearsLeash() {
+        final AnimationAdapter animAdapter = mock(AnimationAdapter.class);
+        final WindowToken token = createTestWindowToken(TYPE_APPLICATION_OVERLAY, mDisplayContent);
+        final SurfaceControl.Transaction t = token.getPendingTransaction();
+        token.startAnimation(t, animAdapter, false /* hidden */,
+                SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION);
+        final ArgumentCaptor<SurfaceControl> leashCaptor =
+                ArgumentCaptor.forClass(SurfaceControl.class);
+        verify(animAdapter).startAnimation(leashCaptor.capture(), eq(t), anyInt(), any());
+        assertTrue(token.mSurfaceAnimator.hasLeash());
+        token.removeImmediately();
+        assertFalse(token.mSurfaceAnimator.hasLeash());
+        verify(t).remove(eq(leashCaptor.getValue()));
+    }
+
+    @Test
     public void testAddChildByIndex() {
         final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
         final TestWindowContainer root = builder.setLayer(0).build();
@@ -440,7 +464,7 @@ public class WindowContainerTests extends WindowTestsBase {
         assertTrue(window.isAnimating());
         assertFalse(window.isAnimating(0, ANIMATION_TYPE_SCREEN_ROTATION));
         assertTrue(window.isAnimating(0, ANIMATION_TYPE_APP_TRANSITION));
-        assertFalse(window.isAnimatingExcluding(0, ANIMATION_TYPE_APP_TRANSITION));
+        assertFalse(window.isAnimating(0, ANIMATION_TYPE_ALL & ~ANIMATION_TYPE_APP_TRANSITION));
 
         final TestWindowContainer child = window.addChildWindow();
         assertFalse(child.isAnimating());
@@ -457,7 +481,7 @@ public class WindowContainerTests extends WindowTestsBase {
                 windowState.mSurfaceAnimator).getAnimationType();
         assertTrue(parent.isAnimating(CHILDREN));
 
-        windowState.setControllableInsetProvider(mock(InsetsSourceProvider.class));
+        windowState.setControllableInsetProvider(mock(WindowContainerInsetsSourceProvider.class));
         assertFalse(parent.isAnimating(CHILDREN));
     }
 
@@ -849,6 +873,24 @@ public class WindowContainerTests extends WindowTestsBase {
         final DisplayContent displayContent = createNewDisplay();
         // Do not reparent activity to default display when removing the display.
         doReturn(true).when(displayContent).shouldDestroyContentOnRemove();
+
+        // An animating window with mRemoveOnExit can be removed by handleCompleteDeferredRemoval
+        // once it no longer animates.
+        final WindowState exitingWindow = createWindow(null, TYPE_APPLICATION_OVERLAY,
+                displayContent, "exiting window");
+        exitingWindow.startAnimation(exitingWindow.getPendingTransaction(),
+                mock(AnimationAdapter.class), false /* hidden */,
+                SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION);
+        exitingWindow.mRemoveOnExit = true;
+        exitingWindow.handleCompleteDeferredRemoval();
+        // The animation has not finished so the window is not removed.
+        assertTrue(exitingWindow.isAnimating());
+        assertTrue(exitingWindow.isAttached());
+        exitingWindow.cancelAnimation();
+        // The window is removed because the animation is gone.
+        exitingWindow.handleCompleteDeferredRemoval();
+        assertFalse(exitingWindow.isAttached());
+
         final ActivityRecord r = new TaskBuilder(mSupervisor).setCreateActivity(true)
                 .setDisplay(displayContent).build().getTopMostActivity();
         // Add a window and make the activity animating so the removal of activity is deferred.
@@ -1069,6 +1111,332 @@ public class WindowContainerTests extends WindowTestsBase {
         // Trigger for the same relative layer call if forceUpdate=true
         container.assignRelativeLayer(t, relativeParent, 1 /* layer */, true /* forceUpdate */);
         verify(surfaceAnimator).setRelativeLayer(t, relativeParent, 1 /* layer */);
+    }
+
+    @Test
+    public void testAssignAnimationLayer() {
+        final WindowContainer container = new WindowContainer(mWm);
+        container.mSurfaceControl = mock(SurfaceControl.class);
+        final SurfaceAnimator surfaceAnimator = container.mSurfaceAnimator;
+        final SurfaceFreezer surfaceFreezer = container.mSurfaceFreezer;
+        final SurfaceControl relativeParent = mock(SurfaceControl.class);
+        final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
+        spyOn(container);
+        spyOn(surfaceAnimator);
+        spyOn(surfaceFreezer);
+
+        container.setLayer(t, 1);
+        container.setRelativeLayer(t, relativeParent, 2);
+
+        // Set through surfaceAnimator if surfaceFreezer doesn't have leash.
+        verify(surfaceAnimator).setLayer(t, 1);
+        verify(surfaceAnimator).setRelativeLayer(t, relativeParent, 2);
+        verify(surfaceFreezer, never()).setLayer(any(), anyInt());
+        verify(surfaceFreezer, never()).setRelativeLayer(any(), any(), anyInt());
+
+        clearInvocations(surfaceAnimator);
+        clearInvocations(surfaceFreezer);
+        doReturn(true).when(surfaceFreezer).hasLeash();
+
+        container.setLayer(t, 1);
+        container.setRelativeLayer(t, relativeParent, 2);
+
+        // Set through surfaceFreezer if surfaceFreezer has leash.
+        verify(surfaceFreezer).setLayer(t, 1);
+        verify(surfaceFreezer).setRelativeLayer(t, relativeParent, 2);
+        verify(surfaceAnimator, never()).setLayer(any(), anyInt());
+        verify(surfaceAnimator, never()).setRelativeLayer(any(), any(), anyInt());
+    }
+
+    @Test
+    public void testStartChangeTransitionWhenPreviousIsNotFinished() {
+        final WindowContainer container = createTaskFragmentWithParentTask(
+                createTask(mDisplayContent), false);
+        container.mSurfaceControl = mock(SurfaceControl.class);
+        final SurfaceAnimator surfaceAnimator = container.mSurfaceAnimator;
+        final SurfaceFreezer surfaceFreezer = container.mSurfaceFreezer;
+        final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
+        spyOn(container);
+        spyOn(surfaceAnimator);
+        mockSurfaceFreezerSnapshot(surfaceFreezer);
+        doReturn(t).when(container).getPendingTransaction();
+        doReturn(t).when(container).getSyncTransaction();
+
+        // Leash and snapshot created for change transition.
+        container.initializeChangeTransition(new Rect(0, 0, 1000, 2000));
+
+        assertNotNull(surfaceFreezer.mLeash);
+        assertNotNull(surfaceFreezer.mSnapshot);
+        assertEquals(surfaceFreezer.mLeash, container.getAnimationLeash());
+
+        // Start animation: surfaceAnimator take over the leash and snapshot from surfaceFreezer.
+        container.applyAnimationUnchecked(null /* lp */, true /* enter */,
+                TRANSIT_OLD_TASK_FRAGMENT_CHANGE, false /* isVoiceInteraction */,
+                null /* sources */);
+
+        assertNull(surfaceFreezer.mLeash);
+        assertNull(surfaceFreezer.mSnapshot);
+        assertNotNull(surfaceAnimator.mLeash);
+        assertNotNull(surfaceAnimator.mSnapshot);
+        final SurfaceControl prevLeash = surfaceAnimator.mLeash;
+        final SurfaceFreezer.Snapshot prevSnapshot = surfaceAnimator.mSnapshot;
+
+        // Prepare another change transition.
+        container.initializeChangeTransition(new Rect(0, 0, 1000, 2000));
+
+        assertNotNull(surfaceFreezer.mLeash);
+        assertNotNull(surfaceFreezer.mSnapshot);
+        assertEquals(surfaceFreezer.mLeash, container.getAnimationLeash());
+        assertNotEquals(prevLeash, container.getAnimationLeash());
+
+        // Start another animation before the previous one is finished, it should reset the previous
+        // one, but not change the current one.
+        container.applyAnimationUnchecked(null /* lp */, true /* enter */,
+                TRANSIT_OLD_TASK_FRAGMENT_CHANGE, false /* isVoiceInteraction */,
+                null /* sources */);
+
+        verify(container, never()).onAnimationLeashLost(any());
+        verify(surfaceFreezer, never()).unfreeze(any());
+        assertNotNull(surfaceAnimator.mLeash);
+        assertNotNull(surfaceAnimator.mSnapshot);
+        assertEquals(surfaceAnimator.mLeash, container.getAnimationLeash());
+        assertNotEquals(prevLeash, surfaceAnimator.mLeash);
+        assertNotEquals(prevSnapshot, surfaceAnimator.mSnapshot);
+
+        // Clean up after animation finished.
+        surfaceAnimator.mInnerAnimationFinishedCallback.onAnimationFinished(
+                ANIMATION_TYPE_APP_TRANSITION, surfaceAnimator.getAnimation());
+
+        verify(container).onAnimationLeashLost(any());
+        assertNull(surfaceAnimator.mLeash);
+        assertNull(surfaceAnimator.mSnapshot);
+    }
+
+    @Test
+    public void testUnfreezeWindow_removeWindowFromChanging() {
+        final WindowContainer container = createTaskFragmentWithParentTask(
+                createTask(mDisplayContent), false);
+        mockSurfaceFreezerSnapshot(container.mSurfaceFreezer);
+        final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
+
+        container.initializeChangeTransition(new Rect(0, 0, 1000, 2000));
+
+        assertTrue(mDisplayContent.mChangingContainers.contains(container));
+
+        container.mSurfaceFreezer.unfreeze(t);
+
+        assertFalse(mDisplayContent.mChangingContainers.contains(container));
+    }
+
+    @Test
+    public void testFailToTaskSnapshot_unfreezeWindow() {
+        final WindowContainer container = createTaskFragmentWithParentTask(
+                createTask(mDisplayContent), false);
+        final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
+        spyOn(container.mSurfaceFreezer);
+
+        container.initializeChangeTransition(new Rect(0, 0, 1000, 2000));
+
+        verify(container.mSurfaceFreezer).freeze(any(), any(), any(), any());
+        verify(container.mSurfaceFreezer).unfreeze(any());
+        assertTrue(mDisplayContent.mChangingContainers.isEmpty());
+    }
+
+    @Test
+    public void testRemoveUnstartedFreezeSurfaceWhenFreezeAgain() {
+        final WindowContainer container = createTaskFragmentWithParentTask(
+                createTask(mDisplayContent), false);
+        container.mSurfaceControl = mock(SurfaceControl.class);
+        final SurfaceFreezer surfaceFreezer = container.mSurfaceFreezer;
+        mockSurfaceFreezerSnapshot(surfaceFreezer);
+        final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
+        spyOn(container);
+        doReturn(t).when(container).getPendingTransaction();
+        doReturn(t).when(container).getSyncTransaction();
+
+        // Leash and snapshot created for change transition.
+        container.initializeChangeTransition(new Rect(0, 0, 1000, 2000));
+
+        assertNotNull(surfaceFreezer.mLeash);
+        assertNotNull(surfaceFreezer.mSnapshot);
+
+        final SurfaceControl prevLeash = surfaceFreezer.mLeash;
+        final SurfaceFreezer.Snapshot prevSnapshot = surfaceFreezer.mSnapshot;
+        spyOn(prevSnapshot);
+
+        container.initializeChangeTransition(new Rect(0, 0, 1500, 2500));
+
+        verify(t).remove(prevLeash);
+        verify(prevSnapshot).destroy(t);
+    }
+
+    @Test
+    public void testAddLocalInsetsSourceProvider() {
+         /*
+                ___ rootTask _______________________________________________
+               |        |                |                                  |
+          activity0    container     navigationBarInsetsProvider1    navigationBarInsetsProvider2
+                       /       \
+               activity1    activity2
+         */
+        final Task rootTask = createTask(mDisplayContent);
+
+        final ActivityRecord activity0 = createActivityRecord(mDisplayContent,
+                createTaskInRootTask(rootTask, 0 /* userId */));
+        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(
+                TYPE_BASE_APPLICATION);
+        attrs.setTitle("AppWindow0");
+        activity0.addWindow(createWindowState(attrs, activity0));
+
+        final Task container = createTaskInRootTask(rootTask, 0);
+        final ActivityRecord activity1 = createActivityRecord(mDisplayContent,
+                createTaskInRootTask(container, 0 /* userId */));
+        final WindowManager.LayoutParams attrs1 = new WindowManager.LayoutParams(
+                TYPE_BASE_APPLICATION);
+        attrs1.setTitle("AppWindow1");
+        activity1.addWindow(createWindowState(attrs1, activity1));
+
+        final ActivityRecord activity2 = createActivityRecord(mDisplayContent,
+                createTaskInRootTask(container, 0 /* userId */));
+        final WindowManager.LayoutParams attrs2 = new WindowManager.LayoutParams(
+                TYPE_BASE_APPLICATION);
+        attrs2.setTitle("AppWindow2");
+        activity2.addWindow(createWindowState(attrs2, activity2));
+        Rect navigationBarInsetsRect1 = new Rect(0, 200, 1080, 700);
+        Rect navigationBarInsetsRect2 = new Rect(0, 0, 1080, 200);
+
+        rootTask.addLocalRectInsetsSourceProvider(navigationBarInsetsRect1,
+                new int[]{ITYPE_LOCAL_NAVIGATION_BAR_1});
+        container.addLocalRectInsetsSourceProvider(navigationBarInsetsRect2,
+                new int[]{ITYPE_LOCAL_NAVIGATION_BAR_2});
+
+        InsetsSource navigationBarInsetsProvider1Source = new InsetsSource(
+                ITYPE_LOCAL_NAVIGATION_BAR_1);
+        navigationBarInsetsProvider1Source.setFrame(navigationBarInsetsRect1);
+        navigationBarInsetsProvider1Source.setVisible(true);
+        InsetsSource navigationBarInsetsProvider2Source = new InsetsSource(
+                ITYPE_LOCAL_NAVIGATION_BAR_2);
+        navigationBarInsetsProvider2Source.setFrame(navigationBarInsetsRect2);
+        navigationBarInsetsProvider2Source.setVisible(true);
+
+        activity0.forAllWindows(window -> {
+            assertEquals(navigationBarInsetsRect1,
+                    window.getInsetsState().peekSource(ITYPE_LOCAL_NAVIGATION_BAR_1).getFrame());
+            assertEquals(null,
+                    window.getInsetsState().peekSource(ITYPE_LOCAL_NAVIGATION_BAR_2));
+        }, true);
+        activity1.forAllWindows(window -> {
+            assertEquals(navigationBarInsetsRect1,
+                    window.getInsetsState().peekSource(ITYPE_LOCAL_NAVIGATION_BAR_1).getFrame());
+            assertEquals(navigationBarInsetsRect2,
+                    window.getInsetsState().peekSource(ITYPE_LOCAL_NAVIGATION_BAR_2).getFrame());
+        }, true);
+        activity2.forAllWindows(window -> {
+            assertEquals(navigationBarInsetsRect1,
+                    window.getInsetsState().peekSource(ITYPE_LOCAL_NAVIGATION_BAR_1).getFrame());
+            assertEquals(navigationBarInsetsRect2,
+                    window.getInsetsState().peekSource(ITYPE_LOCAL_NAVIGATION_BAR_2).getFrame());
+        }, true);
+    }
+
+    @Test
+    public void testAddLocalInsetsSourceProvider_sameType_replacesInsets() {
+         /*
+                ___ rootTask ________________________________________
+               |                  |                                  |
+          activity0      navigationBarInsetsProvider1    navigationBarInsetsProvider2
+         */
+        final Task rootTask = createTask(mDisplayContent);
+
+        final ActivityRecord activity0 = createActivityRecord(mDisplayContent,
+                createTaskInRootTask(rootTask, 0 /* userId */));
+        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(
+                TYPE_BASE_APPLICATION);
+        attrs.setTitle("AppWindow0");
+        activity0.addWindow(createWindowState(attrs, activity0));
+
+        Rect navigationBarInsetsRect1 = new Rect(0, 200, 1080, 700);
+        Rect navigationBarInsetsRect2 = new Rect(0, 0, 1080, 200);
+
+        rootTask.addLocalRectInsetsSourceProvider(navigationBarInsetsRect1,
+                new int[]{ITYPE_LOCAL_NAVIGATION_BAR_1});
+        activity0.forAllWindows(window -> {
+            assertEquals(navigationBarInsetsRect1,
+                    window.getInsetsState().peekSource(ITYPE_LOCAL_NAVIGATION_BAR_1).getFrame());
+        }, true);
+
+        rootTask.addLocalRectInsetsSourceProvider(navigationBarInsetsRect2,
+                new int[]{ITYPE_LOCAL_NAVIGATION_BAR_1});
+
+        activity0.forAllWindows(window -> {
+            assertEquals(navigationBarInsetsRect2,
+                    window.getInsetsState().peekSource(ITYPE_LOCAL_NAVIGATION_BAR_1).getFrame());
+        }, true);
+    }
+
+    @Test
+    public void testRemoveLocalInsetsSourceProvider() {
+         /*
+                ___ rootTask _______________________________________________
+               |        |                |                                  |
+          activity0    container    navigationBarInsetsProvider1     navigationBarInsetsProvider2
+                       /       \
+               activity1    activity2
+         */
+        final Task rootTask = createTask(mDisplayContent);
+
+        final ActivityRecord activity0 = createActivityRecord(mDisplayContent,
+                createTaskInRootTask(rootTask, 0 /* userId */));
+        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(
+                TYPE_BASE_APPLICATION);
+        attrs.setTitle("AppWindow0");
+        activity0.addWindow(createWindowState(attrs, activity0));
+
+        final Task container = createTaskInRootTask(rootTask, 0);
+        final ActivityRecord activity1 = createActivityRecord(mDisplayContent,
+                createTaskInRootTask(container, 0 /* userId */));
+        final WindowManager.LayoutParams attrs1 = new WindowManager.LayoutParams(
+                TYPE_BASE_APPLICATION);
+        attrs1.setTitle("AppWindow1");
+        activity1.addWindow(createWindowState(attrs1, activity1));
+
+        final ActivityRecord activity2 = createActivityRecord(mDisplayContent,
+                createTaskInRootTask(container, 0 /* userId */));
+        final WindowManager.LayoutParams attrs2 = new WindowManager.LayoutParams(
+                TYPE_BASE_APPLICATION);
+        attrs2.setTitle("AppWindow2");
+        activity2.addWindow(createWindowState(attrs2, activity2));
+
+        activity2.addWindow(createWindowState(attrs2, activity2));
+        Rect navigationBarInsetsRect1 = new Rect(0, 200, 1080, 700);
+        Rect navigationBarInsetsRect2 = new Rect(0, 0, 1080, 200);
+
+        rootTask.addLocalRectInsetsSourceProvider(navigationBarInsetsRect1,
+                new int[]{ITYPE_LOCAL_NAVIGATION_BAR_1});
+        container.addLocalRectInsetsSourceProvider(navigationBarInsetsRect2,
+                new int[]{ITYPE_LOCAL_NAVIGATION_BAR_2});
+        mDisplayContent.getInsetsStateController().onPostLayout();
+        rootTask.removeLocalInsetsSourceProvider(new int[]{ITYPE_LOCAL_NAVIGATION_BAR_1});
+        mDisplayContent.getInsetsStateController().onPostLayout();
+
+        activity0.forAllWindows(window -> {
+            assertEquals(null,
+                    window.getInsetsState().peekSource(ITYPE_LOCAL_NAVIGATION_BAR_1));
+            assertEquals(null,
+                    window.getInsetsState().peekSource(ITYPE_LOCAL_NAVIGATION_BAR_2));
+        }, true);
+        activity1.forAllWindows(window -> {
+            assertEquals(null,
+                    window.getInsetsState().peekSource(ITYPE_LOCAL_NAVIGATION_BAR_1));
+            assertEquals(navigationBarInsetsRect2,
+                    window.getInsetsState().peekSource(ITYPE_LOCAL_NAVIGATION_BAR_2).getFrame());
+        }, true);
+        activity2.forAllWindows(window -> {
+            assertEquals(null,
+                    window.getInsetsState().peekSource(ITYPE_LOCAL_NAVIGATION_BAR_1));
+            assertEquals(navigationBarInsetsRect2,
+                    window.getInsetsState().peekSource(ITYPE_LOCAL_NAVIGATION_BAR_2).getFrame());
+        }, true);
     }
 
     /* Used so we can gain access to some protected members of the {@link WindowContainer} class */
