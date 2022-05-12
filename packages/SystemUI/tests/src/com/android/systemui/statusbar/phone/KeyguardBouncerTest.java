@@ -475,4 +475,19 @@ public class KeyguardBouncerTest extends SysuiTestCase {
         mBouncer.setExpansion(bouncerHideAmount);
         verify(callback, never()).onExpansionChanged(bouncerHideAmount);
     }
+
+    @Test
+    public void testOnResumeCalledForFullscreenBouncerOnSecondShow() {
+        // GIVEN a security mode which requires fullscreen bouncer
+        when(mKeyguardSecurityModel.getSecurityMode(anyInt()))
+                .thenReturn(KeyguardSecurityModel.SecurityMode.SimPin);
+        mBouncer.show(true);
+
+        // WHEN a second call to show occurs, the bouncer will already by visible
+        reset(mKeyguardHostViewController);
+        mBouncer.show(true);
+
+        // THEN ensure the ViewController is told to resume
+        verify(mKeyguardHostViewController).onResume();
+    }
 }
