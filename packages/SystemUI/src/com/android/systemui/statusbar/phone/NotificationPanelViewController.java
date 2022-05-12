@@ -32,7 +32,6 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_N
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_QUICK_SETTINGS_EXPANDED;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
-import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
 import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_FOLD_TO_AOD;
 import static com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManagerKt.STATE_CLOSED;
 import static com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManagerKt.STATE_OPEN;
@@ -1693,9 +1692,11 @@ public class NotificationPanelViewController extends PanelViewController {
         if (mShouldUseSplitNotificationShade && isOnKeyguard()) {
             // It's a special case as this method is likely to not be initiated by finger movement
             // but rather called from adb shell or accessibility service.
-            // In the future method below could be used for non-split shade as well but currently
-            // motion in that case looks worse than using flingSettings.
-            // TODO: make below function transitioning smoothly also in portrait with empty target
+            // We're using LockscreenShadeTransitionController because on lockscreen that's the
+            // source of truth for all shade motion. Not using it would make part of state to be
+            // outdated and will cause bugs. Ideally we'd use this controller also for non-split
+            // case but currently motion in portrait looks worse than when using flingSettings.
+            // TODO: make below function transitioning smoothly also in portrait with null target
             mLockscreenShadeTransitionController.goToLockedShade(
                     /* expandedView= */null, /* needsQSAnimation= */false);
         } else if (isFullyCollapsed()) {
@@ -2363,9 +2364,12 @@ public class NotificationPanelViewController extends PanelViewController {
         mScrimController.setQsPosition(qsExpansionFraction, qsPanelBottomY);
         setQSClippingBounds();
 
-        // Only need to notify the notification stack when we're not in split screen mode. If we
-        // do, then the notification panel starts scrolling along with the QS.
-        if (!mShouldUseSplitNotificationShade) {
+        if (mShouldUseSplitNotificationShade) {
+            // In split shade we want to pretend that QS are always collapsed so their behaviour and
+            // interactions don't influence notifications as they do in portrait. But we want to set
+            // 0 explicitly in case we're rotating from non-split shade with QS expansion of 1.
+            mNotificationStackScrollLayoutController.setQsExpansionFraction(0);
+        } else {
             mNotificationStackScrollLayoutController.setQsExpansionFraction(qsExpansionFraction);
         }
 
@@ -3937,10 +3941,6 @@ public class NotificationPanelViewController extends PanelViewController {
         if (mKeyguardStatusBarViewController != null) {
             mKeyguardStatusBarViewController.dump(pw, args);
         }
-    }
-
-    public boolean hasActiveClearableNotifications() {
-        return mNotificationStackScrollLayoutController.hasActiveClearableNotifications(ROWS_ALL);
     }
 
     public RemoteInputController.Delegate createRemoteInputDelegate() {

@@ -130,8 +130,8 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         whenever(statusbarStateController.state).thenReturn(StatusBarState.KEYGUARD)
         whenever(nsslController.isInLockedDownShade).thenReturn(false)
         whenever(qS.isFullyCollapsed).thenReturn(true)
-        whenever(lockScreenUserManager.userAllowsPrivateNotificationsInPublic(anyInt())).thenReturn(
-                true)
+        whenever(lockScreenUserManager.sensitiveNotifsNeedRedactionInPublic(anyInt()))
+                .thenReturn(false)
         whenever(lockScreenUserManager.shouldShowLockscreenNotifications()).thenReturn(true)
         whenever(lockScreenUserManager.isLockscreenPublicMode(anyInt())).thenReturn(true)
         whenever(falsingCollector.shouldEnforceBouncer()).thenReturn(false)
@@ -207,8 +207,8 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
 
     @Test
     fun testTriggeringBouncerWhenPrivateNotificationsArentAllowed() {
-        whenever(lockScreenUserManager.userAllowsPrivateNotificationsInPublic(anyInt())).thenReturn(
-                false)
+        whenever(lockScreenUserManager.sensitiveNotifsNeedRedactionInPublic(anyInt()))
+                .thenReturn(true)
         transitionController.goToLockedShade(null)
         verify(statusbarStateController, never()).setState(anyInt())
         verify(statusbarStateController).setLeaveOpenOnKeyguardHide(true)
