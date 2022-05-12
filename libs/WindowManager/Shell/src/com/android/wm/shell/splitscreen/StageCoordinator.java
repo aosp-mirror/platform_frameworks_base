@@ -1115,7 +1115,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             final SurfaceControl.Transaction transaction = mTransactionPool.acquire();
             mDividerFadeInAnimator = ValueAnimator.ofFloat(0f, 1f);
             mDividerFadeInAnimator.addUpdateListener(animation -> {
-                if (dividerLeash == null) {
+                if (dividerLeash == null || !dividerLeash.isValid()) {
                     mDividerFadeInAnimator.cancel();
                     return;
                 }
@@ -1125,7 +1125,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mDividerFadeInAnimator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationStart(Animator animation) {
-                    if (dividerLeash == null) {
+                    if (dividerLeash == null || !dividerLeash.isValid()) {
                         mDividerFadeInAnimator.cancel();
                         return;
                     }
