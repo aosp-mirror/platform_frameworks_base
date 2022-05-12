@@ -2877,10 +2877,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private void saveSettingsLocked(int userHandle) {
-        if (DevicePolicyData.store(
-                getUserData(userHandle),
-                makeJournaledFile(userHandle),
-                !mInjector.storageManagerIsFileBasedEncryptionEnabled())) {
+        if (DevicePolicyData.store(getUserData(userHandle), makeJournaledFile(userHandle))) {
             sendChangedNotification(userHandle);
         }
         invalidateBinderCaches();
@@ -2895,7 +2892,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private void loadSettingsLocked(DevicePolicyData policy, int userHandle) {
         DevicePolicyData.load(policy,
-                !mInjector.storageManagerIsFileBasedEncryptionEnabled(),
                 makeJournaledFile(userHandle),
                 component -> findAdmin(
                         component, userHandle, /* throwForMissingPermission= */ false),
@@ -3060,11 +3056,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     // TODO(b/230841522) Make it static.
     private class DpmsUpgradeDataProvider implements PolicyUpgraderDataProvider {
-        @Override
-        public boolean storageManagerIsFileBasedEncryptionEnabled() {
-            return mInjector.storageManagerIsFileBasedEncryptionEnabled();
-        }
-
         @Override
         public JournaledFile makeDevicePoliciesJournaledFile(int userId) {
             return DevicePolicyManagerService.this.makeJournaledFile(userId, DEVICE_POLICIES_XML);

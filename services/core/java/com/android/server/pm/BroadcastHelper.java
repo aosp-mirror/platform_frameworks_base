@@ -152,30 +152,40 @@ public final class BroadcastHelper {
         }
     }
 
-    public void sendResourcesChangedBroadcast(boolean mediaStatus, boolean replacing,
-            ArrayList<String> pkgList, int[] uidArr, IIntentReceiver finishedReceiver) {
-        sendResourcesChangedBroadcast(mediaStatus, replacing,
-                pkgList.toArray(new String[pkgList.size()]), uidArr, finishedReceiver);
-    }
+    public void sendResourcesChangedBroadcast(@NonNull Computer snapshot, boolean mediaStatus,
+            boolean replacing, @NonNull String[] pkgNames, @NonNull int[] uids) {
+        if (ArrayUtils.isEmpty(pkgNames) || ArrayUtils.isEmpty(uids)) {
+            return;
+        }
 
-    public void sendResourcesChangedBroadcast(boolean mediaStatus, boolean replacing,
-            String[] pkgList, int[] uidArr, IIntentReceiver finishedReceiver) {
-        int size = pkgList.length;
-        if (size > 0) {
-            // Send broadcasts here
-            Bundle extras = new Bundle();
-            extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, pkgList);
-            if (uidArr != null) {
-                extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, uidArr);
+        try {
+            final IActivityManager am = ActivityManager.getService();
+            if (am == null) {
+                return;
             }
-            if (replacing) {
-                extras.putBoolean(Intent.EXTRA_REPLACING, replacing);
+
+            final int[] resolvedUserIds = am.getRunningUserIds();
+            for (int userId : resolvedUserIds) {
+                final var lists = getBroadcastParams(snapshot, pkgNames, uids, userId);
+                for (int i = 0; i < lists.size(); i++) {
+                    // Send broadcasts here
+                    final Bundle extras = new Bundle(3);
+                    final BroadcastParams list = lists.get(i);
+                    extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST,
+                            list.getPackageNames());
+                    extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, list.getUids());
+                    extras.putBoolean(Intent.EXTRA_REPLACING, replacing);
+                    final SparseArray<int[]> allowList = list.getAllowList().size() == 0
+                            ? null : list.getAllowList();
+                    final String action =
+                            mediaStatus ? Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE
+                                    : Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE;
+                    sendPackageBroadcast(action, null /* pkg */, extras, 0 /* flags */,
+                            null /* targetPkg */, null /* finishedReceiver */, new int[]{userId},
+                            null /* instantUserIds */, allowList, null /* bOptions */);
+                }
             }
-            String action = mediaStatus ? Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE
-                    : Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE;
-            // TODO: not sure how to handle this one.
-            sendPackageBroadcast(action, null, extras, 0, null, finishedReceiver,
-                    null, null, null, null);
+        } catch (RemoteException ex) {
         }
     }
 
@@ -202,7 +212,7 @@ public final class BroadcastHelper {
             final BroadcastOptions bOptions = getTemporaryAppAllowlistBroadcastOptions(
                     REASON_LOCKED_BOOT_COMPLETED);
             am.broadcastIntentWithFeature(null, null, lockedBcIntent, null, null, 0, null, null,
-                    requiredPermissions, null, android.app.AppOpsManager.OP_NONE,
+                    requiredPermissions, null, null, android.app.AppOpsManager.OP_NONE,
                     bOptions.toBundle(), false, false, userId);
 
             // Deliver BOOT_COMPLETED only if user is unlocked
@@ -212,7 +222,7 @@ public final class BroadcastHelper {
                     bcIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
                 }
                 am.broadcastIntentWithFeature(null, null, bcIntent, null, null, 0, null, null,
-                        requiredPermissions, null, android.app.AppOpsManager.OP_NONE,
+                        requiredPermissions, null, null, android.app.AppOpsManager.OP_NONE,
                         bOptions.toBundle(), false, false, userId);
             }
         } catch (RemoteException e) {
@@ -268,7 +278,7 @@ public final class BroadcastHelper {
         };
         try {
             am.broadcastIntentWithFeature(null, null, intent, null, null, 0, null, null,
-                    requiredPermissions, null, android.app.AppOpsManager.OP_NONE, null, false,
+                    requiredPermissions, null, null, android.app.AppOpsManager.OP_NONE, null, false,
                     false, UserHandle.USER_ALL);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -306,7 +316,7 @@ public final class BroadcastHelper {
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         try {
             am.broadcastIntentWithFeature(null, null, intent, null, null,
-                    0, null, null, null, null, android.app.AppOpsManager.OP_NONE,
+                    0, null, null, null, null, null, android.app.AppOpsManager.OP_NONE,
                     null, false, false, userId);
         } catch (RemoteException e) {
         }

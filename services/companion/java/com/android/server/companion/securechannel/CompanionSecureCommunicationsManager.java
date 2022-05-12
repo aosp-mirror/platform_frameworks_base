@@ -17,10 +17,12 @@
 package com.android.server.companion.securechannel;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.companion.AssociationInfo;
 import android.util.Base64;
 import android.util.Log;
+import android.util.Slog;
 
 import com.android.server.companion.AssociationStore;
 import com.android.server.companion.CompanionApplicationController;
@@ -31,8 +33,17 @@ public class CompanionSecureCommunicationsManager {
     static final String TAG = "CompanionDevice_SecureComms";
     static final boolean DEBUG = false;
 
+    /** Listener for incoming decrypted messages. */
+    public interface Listener {
+        /** When an incoming message is decrypted. */
+        void onDecryptedMessageReceived(int messageId, int associationId, byte[] message);
+    }
+
     private final AssociationStore mAssociationStore;
     private final CompanionApplicationController mCompanionAppController;
+
+    @Nullable
+    private Listener mListener;
 
     /** Constructor */
     public CompanionSecureCommunicationsManager(AssociationStore associationStore,
@@ -41,13 +52,18 @@ public class CompanionSecureCommunicationsManager {
         mCompanionAppController = companionApplicationController;
     }
 
+    public void setListener(@NonNull Listener listener) {
+        mListener = listener;
+    }
+
     /**
      * Send a data to the associated companion device via secure channel (establishing one if
      * needed).
      * @param associationId associationId of the "recipient" companion device.
+     * @param messageId id of the message
      * @param message data to be sent securely.
      */
-    public void sendSecureMessage(int associationId, @NonNull byte[] message) {
+    public void sendSecureMessage(int associationId, int messageId, @NonNull byte[] message) {
         if (DEBUG) {
             Log.d(TAG, "sendSecureMessage() associationId=" + associationId + "\n"
                     + "   message (Base64)=\"" + Base64.encodeToString(message, 0) + "\"");
@@ -62,13 +78,28 @@ public class CompanionSecureCommunicationsManager {
 
         final int userId = association.getUserId();
         final String packageName = association.getPackageName();
+
+        // Bind to the app if it hasn't been bound.
         if (!mCompanionAppController.isCompanionApplicationBound(userId, packageName)) {
-            throw new IllegalStateException("u" + userId + "\\" + packageName + " is NOT bound");
+            Slog.d(TAG, "userId [" + userId + "] packageName [" + packageName
+                    + "] is not bound. Binding it now to send a secure message.");
+            mCompanionAppController.bindCompanionApplication(userId, packageName,
+                    association.isSelfManaged());
+
+            // TODO(b/202926196): implement: encrypt and pass on the companion application for
+            //  transporting
+            mCompanionAppController.dispatchMessage(userId, packageName, associationId, messageId,
+                    message);
+
+            Slog.d(TAG, "Unbinding userId [" + userId + "] packageName [" + packageName
+                    + "]");
+            mCompanionAppController.unbindCompanionApplication(userId, packageName);
         }
 
         // TODO(b/202926196): implement: encrypt and pass on the companion application for
         //  transporting
-        mCompanionAppController.dispatchMessage(userId, packageName, associationId, message);
+        mCompanionAppController.dispatchMessage(userId, packageName, associationId, messageId,
+                message);
     }
 
     /**
@@ -76,12 +107,15 @@ public class CompanionSecureCommunicationsManager {
      * @param associationId associationId of the "sender" companion device.
      * @param encryptedMessage data.
      */
-    public void receiveSecureMessage(int associationId, @NonNull byte[] encryptedMessage) {
+    public void receiveSecureMessage(int messageId, int associationId,
+            @NonNull byte[] encryptedMessage) {
         if (DEBUG) {
             Log.d(TAG, "sendSecureMessage() associationId=" + associationId + "\n"
                     + "   message (Base64)=\"" + Base64.encodeToString(encryptedMessage, 0) + "\"");
         }
 
-        // TODO(b/202926196): implement: decrypt and dispatch.
+        // TODO(b/202926196): implement: decrypt and dispatch
+
+        mListener.onDecryptedMessageReceived(messageId, associationId, encryptedMessage);
     }
 }

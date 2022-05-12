@@ -69,14 +69,8 @@ public class PolicyVersionUpgraderTest extends DpmTestBase {
     private ComponentName mFakeAdmin;
 
     private class FakePolicyUpgraderDataProvider implements PolicyUpgraderDataProvider {
-        boolean mIsFileBasedEncryptionEnabled;
         Map<ComponentName, DeviceAdminInfo> mComponentToDeviceAdminInfo = new HashMap<>();
         int[] mUsers;
-
-        @Override
-        public boolean storageManagerIsFileBasedEncryptionEnabled() {
-            return mIsFileBasedEncryptionEnabled;
-        }
 
         private JournaledFile makeJournaledFile(int userId, String fileName) {
             File parentDir = getServices().environment.getUserSystemDirectory(userId);

@@ -67,9 +67,9 @@ class BroadcastHelperTest {
                 snapshot, packagesToChange, uidsToChange, TEST_USER_ID)
 
         assertThat(broadcastParams).hasSize(1)
-        assertThat(broadcastParams[0].packageNames).containsExactlyElementsIn(
+        assertThat(broadcastParams[0].packageNames).asList().containsExactlyElementsIn(
                 packagesToChange.toCollection(ArrayList()))
-        assertThat(broadcastParams[0].uids.toArray()).asList().containsExactlyElementsIn(
+        assertThat(broadcastParams[0].uids).asList().containsExactlyElementsIn(
                 uidsToChange.toCollection(ArrayList()))
     }
 

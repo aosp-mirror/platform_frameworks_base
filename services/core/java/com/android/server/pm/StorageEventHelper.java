@@ -28,7 +28,6 @@ import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
 
 import android.annotation.NonNull;
 import android.app.ResourcesManager;
-import android.content.IIntentReceiver;
 import android.content.pm.PackageManager;
 import android.content.pm.PackagePartitions;
 import android.content.pm.UserInfo;
@@ -223,7 +222,7 @@ public final class StorageEventHelper extends StorageEventListener {
         }
 
         if (DEBUG_INSTALL) Slog.d(TAG, "Loaded packages " + loaded);
-        sendResourcesChangedBroadcast(true, false, loaded, null);
+        sendResourcesChangedBroadcast(true /* mediaStatus */, false /* replacing */, loaded);
         synchronized (mLoadedVolumes) {
             mLoadedVolumes.add(vol.getId());
         }
@@ -274,7 +273,7 @@ public final class StorageEventHelper extends StorageEventListener {
         }
 
         if (DEBUG_INSTALL) Slog.d(TAG, "Unloaded packages " + unloaded);
-        sendResourcesChangedBroadcast(false, false, unloaded, null);
+        sendResourcesChangedBroadcast(false /* mediaStatus */, false /* replacing */, unloaded);
         synchronized (mLoadedVolumes) {
             mLoadedVolumes.remove(vol.getId());
         }
@@ -290,7 +289,7 @@ public final class StorageEventHelper extends StorageEventListener {
     }
 
     private void sendResourcesChangedBroadcast(boolean mediaStatus, boolean replacing,
-            ArrayList<AndroidPackage> packages, IIntentReceiver finishedReceiver) {
+            ArrayList<AndroidPackage> packages) {
         final int size = packages.size();
         final String[] packageNames = new String[size];
         final int[] packageUids = new int[size];
@@ -299,8 +298,8 @@ public final class StorageEventHelper extends StorageEventListener {
             packageNames[i] = pkg.getPackageName();
             packageUids[i] = pkg.getUid();
         }
-        mBroadcastHelper.sendResourcesChangedBroadcast(mediaStatus, replacing, packageNames,
-                packageUids, finishedReceiver);
+        mBroadcastHelper.sendResourcesChangedBroadcast(mPm.snapshotComputer(), mediaStatus,
+                replacing, packageNames, packageUids);
     }
 
     /**

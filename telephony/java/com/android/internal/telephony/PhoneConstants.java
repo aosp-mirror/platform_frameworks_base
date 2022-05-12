@@ -226,6 +226,8 @@ public class PhoneConstants {
     // per 3GPP TS 31.102 (Section 7.1.2)
     public static final int AUTH_CONTEXT_EAP_SIM = 128;
     public static final int AUTH_CONTEXT_EAP_AKA = 129;
+    public static final int AUTH_CONTEXT_GBA_BOOTSTRAP = 132;
+    public static final int AUTHTYPE_GBA_NAF_KEY_EXTERNAL = 133;
     public static final int AUTH_CONTEXT_UNDEFINED = -1;
 
     /**

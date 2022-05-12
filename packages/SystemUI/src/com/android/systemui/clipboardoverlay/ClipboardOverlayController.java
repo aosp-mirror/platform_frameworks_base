@@ -35,6 +35,7 @@ import android.animation.AnimatorSet;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.annotation.MainThread;
+import android.app.ICompatCameraControlCallback;
 import android.app.RemoteAction;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
@@ -44,7 +45,9 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Insets;
 import android.graphics.Rect;
@@ -68,6 +71,7 @@ import android.view.InputMonitor;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewRootImpl;
 import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -85,6 +89,7 @@ import android.widget.TextView;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.policy.PhoneWindow;
+import com.android.settingslib.applications.InterestingConfigChanges;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.broadcast.BroadcastSender;
@@ -149,6 +154,10 @@ public class ClipboardOverlayController {
 
     private boolean mBlockAttach = false;
     private Animator mExitAnimator;
+
+    /** Tracks config changes that require updating insets */
+    private final InterestingConfigChanges mConfigChanges = new InterestingConfigChanges(
+                    ActivityInfo.CONFIG_KEYBOARD_HIDDEN);
 
     public ClipboardOverlayController(Context context,
             BroadcastDispatcher broadcastDispatcher,
@@ -232,6 +241,24 @@ public class ClipboardOverlayController {
             mWindow.setContentView(mView);
             updateInsets(mWindowManager.getCurrentWindowMetrics().getWindowInsets());
             mView.requestLayout();
+            mWindow.peekDecorView().getViewRootImpl().setActivityConfigCallback(
+                    new ViewRootImpl.ActivityConfigCallback() {
+                        @Override
+                        public void onConfigurationChanged(Configuration overrideConfig,
+                                int newDisplayId) {
+                            if (mConfigChanges.applyNewConfig(mContext.getResources())) {
+                                updateInsets(
+                                        mWindowManager.getCurrentWindowMetrics().getWindowInsets());
+                            }
+                        }
+
+                        @Override
+                        public void requestCompatCameraControl(
+                                boolean showControl, boolean transformationApplied,
+                                ICompatCameraControlCallback callback) {
+                            Log.w(TAG, "unexpected requestCompatCameraControl call");
+                        }
+                    });
         });
 
         mTimeoutHandler.setOnTimeoutRunnable(() -> {

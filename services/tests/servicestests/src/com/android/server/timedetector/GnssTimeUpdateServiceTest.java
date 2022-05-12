@@ -85,6 +85,9 @@ public final class GnssTimeUpdateServiceTest {
         when(mMockContext.getSystemService(AlarmManager.class))
                 .thenReturn(mMockAlarmManager);
 
+        when(mMockLocationManager.hasProvider(LocationManager.GPS_PROVIDER))
+                .thenReturn(true);
+
         LocalServices.addService(LocationManagerInternal.class, mLocationManagerInternal);
 
         mGnssTimeUpdateService =

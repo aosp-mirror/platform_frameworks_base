@@ -46,7 +46,6 @@ import com.android.wm.shell.compatui.CompatUI;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelper;
 import com.android.wm.shell.draganddrop.DragAndDrop;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.recents.RecentTasks;
@@ -84,9 +83,6 @@ public interface SysUIComponent {
     interface Builder {
         @BindsInstance
         Builder setPip(Optional<Pip> p);
-
-        @BindsInstance
-        Builder setLegacySplitScreen(Optional<LegacySplitScreen> s);
 
         @BindsInstance
         Builder setSplitScreen(Optional<SplitScreen> s);

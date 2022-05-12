@@ -113,7 +113,8 @@ class CompanionDeviceShellCommand extends ShellCommand {
                         message = sb.toString().getBytes(UTF_8);
                     }
 
-                    mSecureCommsManager.sendSecureMessage(associationId, message);
+                    mSecureCommsManager.sendSecureMessage(associationId, /* messageId */ 0,
+                            message);
                     break;
 
                 case "simulate-device-appeared":

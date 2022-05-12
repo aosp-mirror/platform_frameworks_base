@@ -7987,20 +7987,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // orientation with insets applied.
             return;
         }
-        // Not using Task#isResizeable() or ActivityRecord#isResizeable() directly because app
-        // compatibility testing showed that android:supportsPictureInPicture="true" alone is not
-        // sufficient signal for not letterboxing an app.
-        // TODO(214602463): Remove multi-window check since orientation and aspect ratio
-        // restrictions should always be applied in multi-window.
-        final boolean isResizeable = task != null
-                // Activity should be resizable if the task is.
-                ? task.isResizeable(/* checkPictureInPictureSupport */ false)
-                        || isResizeable(/* checkPictureInPictureSupport */ false)
-                : isResizeable(/* checkPictureInPictureSupport */ false);
-        if (WindowConfiguration.inMultiWindowMode(windowingMode) && isResizeable) {
-            // Ignore orientation request for resizable apps in multi window.
-            return;
-        }
+
         if (windowingMode == WINDOWING_MODE_PINNED) {
             // PiP bounds have higher priority than the requested orientation. Otherwise the
             // activity may be squeezed into a small piece.
@@ -9342,6 +9329,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         sb.append(mUserId);
         sb.append(' ');
         sb.append(intent.getComponent().flattenToShortString());
+        sb.append("}");
         stringName = sb.toString();
         return stringName;
     }

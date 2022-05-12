@@ -620,6 +620,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
         onSurfaceShown(getSyncTransaction());
         updateSurfacePositionNonOrganized();
+        if (mLastMagnificationSpec != null) {
+            applyMagnificationSpec(getSyncTransaction(), mLastMagnificationSpec);
+        }
     }
 
     /**
@@ -1582,6 +1585,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     /** Returns whether the window should be shown for current user. */
     boolean showToCurrentUser() {
         return true;
+    }
+
+    void forAllWindowContainers(Consumer<WindowContainer> callback) {
+        callback.accept(this);
+        final int count = mChildren.size();
+        for (int i = 0; i < count; i++) {
+            mChildren.get(i).forAllWindowContainers(callback);
+        }
     }
 
     /**

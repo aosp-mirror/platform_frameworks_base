@@ -17,9 +17,13 @@
 package com.android.systemui.dreams.dagger;
 
 import android.content.Context;
+import android.content.res.Resources;
 
 import com.android.settingslib.dream.DreamBackend;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.complication.dagger.RegisteredComplicationsModule;
+
+import javax.inject.Named;
 
 import dagger.Module;
 import dagger.Provides;
@@ -34,11 +38,30 @@ import dagger.Provides;
             DreamOverlayComponent.class,
         })
 public interface DreamModule {
+    String DREAM_ONLY_ENABLED_FOR_SYSTEM_USER = "dream_only_enabled_for_system_user";
+
+    String DREAM_SUPPORTED = "dream_supported";
+
     /**
      * Provides an instance of the dream backend.
      */
     @Provides
     static DreamBackend providesDreamBackend(Context context) {
         return DreamBackend.getInstance(context);
+    }
+
+    /** */
+    @Provides
+    @Named(DREAM_ONLY_ENABLED_FOR_SYSTEM_USER)
+    static boolean providesDreamOnlyEnabledForSystemUser(@Main Resources resources) {
+        return resources.getBoolean(
+                com.android.internal.R.bool.config_dreamsOnlyEnabledForSystemUser);
+    }
+
+    /** */
+    @Provides
+    @Named(DREAM_SUPPORTED)
+    static boolean providesDreamSupported(@Main Resources resources) {
+        return resources.getBoolean(com.android.internal.R.bool.config_dreamsSupported);
     }
 }
