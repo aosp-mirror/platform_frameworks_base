@@ -4461,7 +4461,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             snapshot.enforceCrossUserPermission(callingUid, userId, true /* requireFullPermission */,
                     false /* checkShell */, "clear application data");
 
-            if (snapshot.getPackageStateFiltered(packageName, callingUid, userId) == null) {
+            if (snapshot.getPackageStateForInstalledAndFiltered(
+                    packageName, callingUid, userId) == null) {
                 if (observer != null) {
                     mHandler.post(() -> {
                         try {
@@ -4918,9 +4919,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         @Override
         public String getPermissionControllerPackageName() {
             final int callingUid = Binder.getCallingUid();
+            final int callingUserId = UserHandle.getUserId(callingUid);
             final Computer snapshot = snapshotComputer();
-            if (snapshot.getPackageStateFiltered(mRequiredPermissionControllerPackage,
-                    callingUid, UserHandle.getUserId(callingUid)) != null) {
+            if (snapshot.getPackageStateForInstalledAndFiltered(
+                    mRequiredPermissionControllerPackage, callingUid, callingUserId) != null) {
                 return mRequiredPermissionControllerPackage;
             }
 
@@ -4943,7 +4945,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             snapshot.enforceCrossUserPermission(
                     callingUid, userId, false /* requireFullPermission */,
                     false /* checkShell */, "getSplashScreenTheme");
-            PackageStateInternal packageState = filterPackageStateForInstalledAndFiltered(snapshot,
+            PackageStateInternal packageState = snapshot.getPackageStateForInstalledAndFiltered(
                     packageName, callingUid, userId);
             return packageState == null ? null
                     : packageState.getUserStateOrDefault(userId).getSplashScreenTheme();
@@ -5350,8 +5352,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 mInjector.getSystemService(AppOpsManager.class)
                         .checkPackage(Binder.getCallingUid(), callerPackageName);
 
-                PackageStateInternal packageState = computer.getPackageStateFiltered(packageName,
-                        Binder.getCallingUid(), UserHandle.getCallingUserId());
+                PackageStateInternal packageState = computer.getPackageStateForInstalledAndFiltered(
+                        packageName, Binder.getCallingUid(), UserHandle.getCallingUserId());
                 if (packageState == null) {
                     throw new IllegalArgumentException("Unknown target package " + packageName);
                 }
@@ -5420,7 +5422,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             final long callingId = Binder.clearCallingIdentity();
             try {
                 final PackageStateInternal packageState =
-                        snapshot.getPackageStateFiltered(packageName, callingUid, userId);
+                        snapshot.getPackageStateForInstalledAndFiltered(
+                                packageName, callingUid, userId);
                 if (packageState == null) {
                     return false;
                 }
@@ -5823,7 +5826,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     false /* checkShell */, "setSplashScreenTheme");
             enforceOwnerRights(snapshot, packageName, callingUid);
 
-            PackageStateInternal packageState = filterPackageStateForInstalledAndFiltered(snapshot,
+            PackageStateInternal packageState = snapshot.getPackageStateForInstalledAndFiltered(
                     packageName, callingUid, userId);
             if (packageState == null) {
                 return;
@@ -6395,7 +6398,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         public boolean registerInstalledLoadingProgressCallback(String packageName,
                 PackageManagerInternal.InstalledLoadingProgressCallback callback, int userId) {
             final Computer snapshot = snapshotComputer();
-            final PackageStateInternal ps = filterPackageStateForInstalledAndFiltered(snapshot,
+            final PackageStateInternal ps = snapshot.getPackageStateForInstalledAndFiltered(
                     packageName, Binder.getCallingUid(), userId);
             if (ps == null) {
                 return false;
@@ -6418,7 +6421,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         public IncrementalStatesInfo getIncrementalStatesInfo(
                 @NonNull String packageName, int filterCallingUid, int userId) {
             final Computer snapshot = snapshotComputer();
-            final PackageStateInternal ps = filterPackageStateForInstalledAndFiltered(snapshot,
+            final PackageStateInternal ps = snapshot.getPackageStateForInstalledAndFiltered(
                     packageName, filterCallingUid, userId);
             if (ps == null) {
                 return null;
@@ -6590,20 +6593,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     @GuardedBy("mLock")
     PackageSetting getDisabledPackageSettingForMutation(String packageName) {
         return mSettings.getDisabledSystemPkgLPr(packageName);
-    }
-
-    @Nullable
-    private PackageStateInternal filterPackageStateForInstalledAndFiltered(
-            @NonNull Computer computer, @NonNull String packageName, int callingUid,
-            @UserIdInt int userId) {
-        PackageStateInternal packageState =
-                computer.getPackageStateInternal(packageName, callingUid);
-        if (computer.shouldFilterApplicationIncludingUninstalled(
-                packageState, callingUid, userId)) {
-            return null;
-        } else {
-            return packageState;
-        }
     }
 
     @Deprecated

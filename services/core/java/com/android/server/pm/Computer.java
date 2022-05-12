@@ -387,12 +387,12 @@ public interface Computer extends PackageDataSnapshot {
     String[] getSystemSharedLibraryNames();
 
     /**
-     * @return the state if the given package has a state and isn't filtered by visibility.
+     * @return the state if the given package is installed and isn't filtered by visibility.
      * Provides no guarantee that the package is in any usable state.
      */
     @Nullable
-    PackageStateInternal getPackageStateFiltered(@NonNull String packageName, int callingUid,
-            @UserIdInt int userId);
+    PackageStateInternal getPackageStateForInstalledAndFiltered(@NonNull String packageName,
+            int callingUid, @UserIdInt int userId);
 
     int checkSignatures(@NonNull String pkg1, @NonNull String pkg2, int userId);
 

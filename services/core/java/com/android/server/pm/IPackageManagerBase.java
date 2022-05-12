@@ -715,8 +715,8 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
             String className) {
         Objects.requireNonNull(propertyName);
         Objects.requireNonNull(packageName);
-        PackageStateInternal packageState = snapshot().getPackageStateFiltered(packageName,
-                Binder.getCallingUid(), UserHandle.getCallingUserId());
+        PackageStateInternal packageState = snapshot().getPackageStateForInstalledAndFiltered(
+                packageName, Binder.getCallingUid(), UserHandle.getCallingUserId());
         if (packageState == null) {
             return null;
         }

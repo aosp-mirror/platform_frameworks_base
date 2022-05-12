@@ -4238,10 +4238,11 @@ public class ComputerEngine implements Computer {
     }
 
     @Override
-    public PackageStateInternal getPackageStateFiltered(@NonNull String packageName, int callingUid,
-            @UserIdInt int userId) {
+    public PackageStateInternal getPackageStateForInstalledAndFiltered(@NonNull String packageName,
+            int callingUid, @UserIdInt int userId) {
         final PackageStateInternal packageState = getPackageStateInternal(packageName);
-        if (packageState == null || shouldFilterApplication(packageState, callingUid, userId)) {
+        if (packageState == null
+                || shouldFilterApplicationIncludingUninstalled(packageState, callingUid, userId)) {
             return null;
         }
         return packageState;
