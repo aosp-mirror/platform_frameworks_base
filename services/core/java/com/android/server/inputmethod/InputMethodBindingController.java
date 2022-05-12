@@ -275,6 +275,7 @@ final class InputMethodBindingController {
     private final ServiceConnection mVisibleConnection = new ServiceConnection() {
         @Override public void onBindingDied(ComponentName name) {
             synchronized (ImfLock.class) {
+                mService.invalidateAutofillSessionLocked();
                 if (mVisibleBound) {
                     unbindVisibleConnection();
                 }
@@ -285,6 +286,9 @@ final class InputMethodBindingController {
         }
 
         @Override public void onServiceDisconnected(ComponentName name) {
+            synchronized (ImfLock.class) {
+                mService.invalidateAutofillSessionLocked();
+            }
         }
     };
 
