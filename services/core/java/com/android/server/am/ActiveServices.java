@@ -6593,12 +6593,11 @@ public final class ActiveServices {
         }
 
         final int uidState = mAm.getUidStateLocked(callingUid);
-        int callerTargetSdkVersion = INVALID_UID;
+        int callerTargetSdkVersion = -1;
         try {
-            ApplicationInfo ai = mAm.mContext.getPackageManager().getApplicationInfoAsUser(
-                    callingPackage, PackageManager.MATCH_KNOWN_PACKAGES, userId);
-            callerTargetSdkVersion = ai.targetSdkVersion;
-        } catch (PackageManager.NameNotFoundException e) {
+            callerTargetSdkVersion = mAm.mContext.getPackageManager()
+                    .getTargetSdkVersion(callingPackage);
+        } catch (PackageManager.NameNotFoundException ignored) {
         }
         final String debugInfo =
                 "[callingPackage: " + callingPackage
