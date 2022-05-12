@@ -20,6 +20,7 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,7 +28,7 @@ import static org.mockito.Mockito.when;
 import android.content.ComponentName;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.os.UserManager;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.dreams.IDreamManager;
 import android.service.quicksettings.Tile;
@@ -45,6 +46,7 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.SecureSettings;
 
@@ -74,7 +76,7 @@ public class DreamTileTest extends SysuiTestCase {
     @Mock
     private BroadcastDispatcher mBroadcastDispatcher;
     @Mock
-    private UserManager mUserManager;
+    private UserTracker mUserTracker;
 
     private TestableLooper mTestableLooper;
 
@@ -196,15 +198,21 @@ public class DreamTileTest extends SysuiTestCase {
 
         DreamTile supportedTileAllUsers = constructTileForTest(true, false);
 
-        when(mUserManager.isSystemUser()).thenReturn(true);
+        UserHandle systemUserHandle = mock(UserHandle.class);
+        when(systemUserHandle.isSystem()).thenReturn(true);
+
+        UserHandle nonSystemUserHandle = mock(UserHandle.class);
+        when(nonSystemUserHandle.isSystem()).thenReturn(false);
+
+        when(mUserTracker.getUserHandle()).thenReturn(systemUserHandle);
         assertTrue(supportedTileAllUsers.isAvailable());
-        when(mUserManager.isSystemUser()).thenReturn(false);
+        when(mUserTracker.getUserHandle()).thenReturn(nonSystemUserHandle);
         assertTrue(supportedTileAllUsers.isAvailable());
 
         DreamTile supportedTileOnlySystemUser = constructTileForTest(true, true);
-        when(mUserManager.isSystemUser()).thenReturn(true);
+        when(mUserTracker.getUserHandle()).thenReturn(systemUserHandle);
         assertTrue(supportedTileOnlySystemUser.isAvailable());
-        when(mUserManager.isSystemUser()).thenReturn(false);
+        when(mUserTracker.getUserHandle()).thenReturn(nonSystemUserHandle);
         assertFalse(supportedTileOnlySystemUser.isAvailable());
     }
 
@@ -227,7 +235,7 @@ public class DreamTileTest extends SysuiTestCase {
                 mDreamManager,
                 mSecureSettings,
                 mBroadcastDispatcher,
-                mUserManager,
+                mUserTracker,
                 dreamSupported, dreamOnlyEnabledForSystemUser);
     }
 }
