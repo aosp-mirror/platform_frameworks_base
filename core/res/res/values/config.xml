@@ -2998,12 +2998,6 @@
 
     </string-array>
 
-    <!-- When migrating notification settings into the permission framework, whether all existing
-         apps should be marked as 'user-set' (true) or whether only the apps that have explicitly
-         modified notification settings should be marked as 'user-set' (false). Users will not see
-         system generated permission prompts for 'user-set' apps. -->
-    <bool name="config_notificationForceUserSetOnUpgrade">true</bool>
-
     <!-- Default Gravity setting for the system Toast view. Equivalent to: Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM -->
     <integer name="config_toastDefaultGravity">0x00000051</integer>
 
