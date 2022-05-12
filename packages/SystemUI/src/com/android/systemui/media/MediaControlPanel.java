@@ -75,6 +75,7 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.monet.ColorScheme;
+import com.android.systemui.monet.Style;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.shared.system.SysUiStatsLog;
@@ -589,7 +590,7 @@ public class MediaControlPanel {
             if (artworkIcon != null) {
                 WallpaperColors wallpaperColors = WallpaperColors
                         .fromBitmap(artworkIcon.getBitmap());
-                mutableColorScheme = new ColorScheme(wallpaperColors, true);
+                mutableColorScheme = new ColorScheme(wallpaperColors, true, Style.CONTENT);
                 artwork = getScaledBackground(artworkIcon, width, height);
                 isArtworkBound = true;
             } else {
@@ -599,7 +600,8 @@ public class MediaControlPanel {
                 try {
                     Drawable icon = mContext.getPackageManager()
                             .getApplicationIcon(data.getPackageName());
-                    mutableColorScheme = new ColorScheme(WallpaperColors.fromDrawable(icon), true);
+                    mutableColorScheme = new ColorScheme(WallpaperColors.fromDrawable(icon), true,
+                            Style.CONTENT);
                 } catch (PackageManager.NameNotFoundException e) {
                     Log.w(TAG, "Cannot find icon for package " + data.getPackageName(), e);
                 }

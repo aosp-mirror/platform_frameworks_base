@@ -78,6 +78,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -639,6 +640,11 @@ public class ThemeOverlayController extends CoreStartable implements Dumpable {
     }
 
     private Style fetchThemeStyleFromSetting() {
+        // Allow-list of Style objects that can be created from a setting string, i.e. can be
+        // used as a system-wide theme.
+        // - Content intentionally excluded, intended for media player, not system-wide
+        List<Style> validStyles = Arrays.asList(Style.EXPRESSIVE, Style.SPRITZ, Style.TONAL_SPOT,
+                Style.FRUIT_SALAD, Style.RAINBOW, Style.VIBRANT);
         Style style = mThemeStyle;
         final String overlayPackageJson = mSecureSettings.getStringForUser(
                 Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
@@ -648,6 +654,9 @@ public class ThemeOverlayController extends CoreStartable implements Dumpable {
                 JSONObject object = new JSONObject(overlayPackageJson);
                 style = Style.valueOf(
                         object.getString(ThemeOverlayApplier.OVERLAY_CATEGORY_THEME_STYLE));
+                if (!validStyles.contains(style)) {
+                    style = Style.TONAL_SPOT;
+                }
             } catch (JSONException | IllegalArgumentException e) {
                 Log.i(TAG, "Failed to parse THEME_CUSTOMIZATION_OVERLAY_PACKAGES.", e);
                 style = Style.TONAL_SPOT;
