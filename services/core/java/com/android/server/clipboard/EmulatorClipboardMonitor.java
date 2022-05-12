@@ -71,7 +71,7 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
                 Os.connect(fd, new VmSocketAddress(HOST_PORT, OsConstants.VMADDR_CID_HOST));
 
                 final byte[] handshake = createOpenHandshake();
-                Os.write(fd, handshake, 0, handshake.length);
+                writeFully(fd, handshake, 0, handshake.length);
                 mPipe = fd;
                 return true;
             } catch (ErrnoException | SocketException | InterruptedIOException e) {
