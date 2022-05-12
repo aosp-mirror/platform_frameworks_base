@@ -3337,6 +3337,7 @@
   <java-symbol type="string" name="config_dozeTapSensorType" />
   <java-symbol type="array" name="config_dozeTapSensorPostureMapping" />
   <java-symbol type="bool" name="config_dozePulsePickup" />
+  <java-symbol type="bool" name="config_pulseOnNotificationsAvailable" />
 
   <!-- Used for MimeIconUtils. -->
   <java-symbol type="drawable" name="ic_doc_apk" />
