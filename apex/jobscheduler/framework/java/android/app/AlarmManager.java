@@ -27,7 +27,7 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledAfter;
+import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -282,15 +282,14 @@ public class AlarmManager {
     public static final long ENABLE_USE_EXACT_ALARM = 218533173L;
 
     /**
-     * For apps targeting {@link Build.VERSION_CODES#TIRAMISU} or above, the permission
-     * {@link Manifest.permission#SCHEDULE_EXACT_ALARM} will be denied, unless the user explicitly
-     * allows it from Settings.
+     * The permission {@link Manifest.permission#SCHEDULE_EXACT_ALARM} will be denied, unless the
+     * user explicitly allows it from Settings.
      *
-     * TODO (b/226439802): change to EnabledSince(T) after SDK finalization.
+     * TODO (b/226439802): Either enable it in the next SDK or replace it with a better alternative.
      * @hide
      */
     @ChangeId
-    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.S_V2)
+    @Disabled
     public static final long SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT = 226439802L;
 
     @UnsupportedAppUsage
