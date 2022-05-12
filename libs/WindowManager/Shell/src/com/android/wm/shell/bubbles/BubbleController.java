@@ -78,7 +78,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowManager;
-import android.window.WindowContainerTransaction;
 
 import androidx.annotation.MainThread;
 import androidx.annotation.Nullable;
@@ -89,7 +88,6 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.TaskViewTransitions;
 import com.android.wm.shell.WindowManagerShellWrapper;
-import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
@@ -423,17 +421,13 @@ public class BubbleController {
         });
 
         mDisplayController.addDisplayChangingController(
-                new DisplayChangeController.OnDisplayChangingListener() {
-                    @Override
-                    public void onRotateDisplay(int displayId, int fromRotation, int toRotation,
-                            WindowContainerTransaction t) {
-                        // This is triggered right before the rotation is applied
-                        if (fromRotation != toRotation) {
-                            if (mStackView != null) {
-                                // Layout listener set on stackView will update the positioner
-                                // once the rotation is applied
-                                mStackView.onOrientationChanged();
-                            }
+                (displayId, fromRotation, toRotation, newDisplayAreaInfo, t) -> {
+                    // This is triggered right before the rotation is applied
+                    if (fromRotation != toRotation) {
+                        if (mStackView != null) {
+                            // Layout listener set on stackView will update the positioner
+                            // once the rotation is applied
+                            mStackView.onOrientationChanged();
                         }
                     }
                 });

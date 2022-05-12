@@ -39,6 +39,7 @@ import android.provider.Settings;
 import android.util.Slog;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
+import android.window.DisplayAreaInfo;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
@@ -659,11 +660,11 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
     }
 
     /**
-     * Handles rotation based on OnDisplayChangingListener callback
+     * Handles display change based on OnDisplayChangingListener callback
      */
     @Override
-    public void onRotateDisplay(int displayId, int fromRotation, int toRotation,
-            WindowContainerTransaction wct) {
+    public void onDisplayChange(int displayId, int fromRotation, int toRotation,
+            DisplayAreaInfo newDisplayAreaInfo, WindowContainerTransaction wct) {
         if (!isInitialized()) {
             return;
         }
