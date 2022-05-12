@@ -484,7 +484,13 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
         if (mFaceProps == null || mFaceAuthSensorLocation == null) {
             return null;
         }
-        return new PointF(mFaceAuthSensorLocation.x, mFaceAuthSensorLocation.y);
+        DisplayInfo displayInfo = new DisplayInfo();
+        mContext.getDisplay().getDisplayInfo(displayInfo);
+        final float scaleFactor = android.util.DisplayUtils.getPhysicalPixelDisplaySizeRatio(
+                mStableDisplaySize.x, mStableDisplaySize.y, displayInfo.getNaturalWidth(),
+                displayInfo.getNaturalHeight());
+        return new PointF(mFaceAuthSensorLocation.x * scaleFactor,
+                mFaceAuthSensorLocation.y * scaleFactor);
     }
 
     /**
