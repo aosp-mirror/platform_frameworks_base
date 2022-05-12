@@ -3555,6 +3555,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
 
+        if (mInjector.getPackageManagerInternal().filterAppAccess(packageName, caller.getUid(),
+                userHandle)) {
+            return false;
+        }
+
         synchronized (getLockObject()) {
             DevicePolicyData policy = getUserData(userHandle);
             final int N = policy.mAdminList.size();
