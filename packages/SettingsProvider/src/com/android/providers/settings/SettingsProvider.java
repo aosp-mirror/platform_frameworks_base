@@ -5509,16 +5509,7 @@ public class SettingsProvider extends ContentProvider {
                     currentVersion = 209;
                 }
                 if (currentVersion == 209) {
-                    // Version 209: Enable enforcement of
-                    // android.Manifest.permission#POST_NOTIFICATIONS in order for applications
-                    // to post notifications.
-                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
-                    secureSettings.insertSettingLocked(
-                            Secure.NOTIFICATION_PERMISSION_ENABLED,
-                            /* enabled= */ "1",
-                            /* tag= */ null,
-                            /* makeDefault= */ false,
-                            SettingsState.SYSTEM_PACKAGE_NAME);
+                    // removed now that feature is enabled for everyone
                     currentVersion = 210;
                 }
 

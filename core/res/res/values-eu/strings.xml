@@ -1387,7 +1387,7 @@
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"Bistaratu beste aplikazioen gainean"</string>
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"<xliff:g id="NAME">%s</xliff:g> aplikazioen gainean agertzea"</string>
     <string name="alert_windows_notification_title" msgid="6331662751095228536">"Besteen gainean agertzen da <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="alert_windows_notification_message" msgid="6538171456970725333">"Ez baduzu nahi <xliff:g id="NAME">%s</xliff:g> zerbitzuak eginbide hori erabiltzea, sakatu hau ezarpenak ireki eta aukera desaktibatzeko."</string>
+    <string name="alert_windows_notification_message" msgid="6538171456970725333">"<xliff:g id="NAME">%s</xliff:g> zerbitzuak eginbide hori erabiltzea nahi ez baduzu, sakatu hau ezarpenak ireki eta aukera desaktibatzeko."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"Desaktibatu"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> egiaztatzen…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Edukia berrikusten"</string>

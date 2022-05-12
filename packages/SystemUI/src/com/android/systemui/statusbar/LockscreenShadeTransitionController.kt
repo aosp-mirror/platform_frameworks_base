@@ -386,7 +386,7 @@ class LockscreenShadeTransitionController @Inject constructor(
             }
             if (view is ExpandableNotificationRow) {
                 // Only drag down on sensitive views, otherwise the ExpandHelper will take this
-                return view.entry.isSensitive
+                return lockScreenUserManager.notifNeedsRedactionInPublic(view.entry)
             }
         }
         return false
@@ -552,7 +552,8 @@ class LockscreenShadeTransitionController @Inject constructor(
             logger.logShadeDisabledOnGoToLockedShade()
             return
         }
-        var userId: Int = lockScreenUserManager.getCurrentUserId()
+        val currentUser = lockScreenUserManager.currentUserId
+        var userId: Int = currentUser
         var entry: NotificationEntry? = null
         if (expandView is ExpandableNotificationRow) {
             entry = expandView.entry
@@ -562,12 +563,18 @@ class LockscreenShadeTransitionController @Inject constructor(
             entry.setGroupExpansionChanging(true)
             userId = entry.sbn.userId
         }
-        var fullShadeNeedsBouncer = (!lockScreenUserManager.userAllowsPrivateNotificationsInPublic(
-                lockScreenUserManager.getCurrentUserId()) ||
-                !lockScreenUserManager.shouldShowLockscreenNotifications() ||
-                falsingCollector.shouldEnforceBouncer())
-        if (keyguardBypassController.bypassEnabled) {
-            fullShadeNeedsBouncer = false
+        val fullShadeNeedsBouncer = when {
+            // No bouncer necessary if we're bypassing
+            keyguardBypassController.bypassEnabled -> false
+            // Redacted notificationss are present, bouncer should be shown before un-redacting in
+            // the full shade
+            lockScreenUserManager.sensitiveNotifsNeedRedactionInPublic(currentUser) -> true
+            // Notifications are hidden in public, bouncer should be shown before showing them in
+            // the full shade
+            !lockScreenUserManager.shouldShowLockscreenNotifications() -> true
+            // Bouncer is being enforced, so we need to show it
+            falsingCollector.shouldEnforceBouncer() -> true
+            else -> false
         }
         if (lockScreenUserManager.isLockscreenPublicMode(userId) && fullShadeNeedsBouncer) {
             statusBarStateController.setLeaveOpenOnKeyguardHide(true)

@@ -71,17 +71,22 @@ public interface NotificationLockscreenUserManager {
     boolean shouldHideNotifications(String key);
     boolean shouldShowOnKeyguard(NotificationEntry entry);
 
+    void addOnNeedsRedactionInPublicChangedListener(Runnable listener);
+
+    void removeOnNeedsRedactionInPublicChangedListener(Runnable listener);
+
     boolean isAnyProfilePublicMode();
 
     void updatePublicMode();
 
-    boolean needsRedaction(NotificationEntry entry);
+    /** Does this notification require redaction if it is displayed when the device is public? */
+    boolean notifNeedsRedactionInPublic(NotificationEntry entry);
 
     /**
-     * Has the given user chosen to allow their private (full) notifications to be shown even
-     * when the lockscreen is in "public" (secure & locked) mode?
+     * Do all sensitive notifications belonging to the given user require redaction when they are
+     * displayed in public?
      */
-    boolean userAllowsPrivateNotificationsInPublic(int currentUserId);
+    boolean sensitiveNotifsNeedRedactionInPublic(int userId);
 
     /**
      * Has the given user chosen to allow notifications to be shown even when the lockscreen is in

@@ -42,8 +42,10 @@ import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
+import android.content.pm.UserInfo;
 import android.metrics.LogMaker;
 import android.os.Binder;
 import android.os.Build;
@@ -146,7 +148,6 @@ public class PreferencesHelper implements RankingConfig {
     static final boolean DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS = false;
     private static final boolean DEFAULT_SHOW_BADGE = true;
 
-    private static final boolean DEFAULT_OEM_LOCKED_IMPORTANCE  = false;
     private static final boolean DEFAULT_APP_LOCKED_IMPORTANCE  = false;
 
     static final boolean DEFAULT_BUBBLES_ENABLED = true;
@@ -193,8 +194,6 @@ public class PreferencesHelper implements RankingConfig {
 
     private boolean mAllowInvalidShortcuts = false;
 
-    private Map<String, List<String>> mOemLockedApps = new HashMap();
-
     public PreferencesHelper(Context context, PackageManager pm, RankingHandler rankingHandler,
             ZenModeHelper zenHelper, PermissionHelper permHelper,
             NotificationChannelLogger notificationChannelLogger,
@@ -209,11 +208,7 @@ public class PreferencesHelper implements RankingConfig {
         mAppOps = appOpsManager;
         mStatsEventBuilderFactory = statsEventBuilderFactory;
 
-        if (mPermissionHelper.isMigrationEnabled()) {
-            XML_VERSION = 4;
-        } else {
-            XML_VERSION = 2;
-        }
+        XML_VERSION = 4;
 
         updateBadgingEnabled();
         updateBubblesEnabled();
@@ -230,8 +225,7 @@ public class PreferencesHelper implements RankingConfig {
 
         final int xmlVersion = parser.getAttributeInt(null, ATT_VERSION, -1);
         boolean upgradeForBubbles = xmlVersion == XML_VERSION_BUBBLES_UPGRADE;
-        boolean migrateToPermission = (xmlVersion < XML_VERSION_NOTIF_PERMISSION)
-                && mPermissionHelper.isMigrationEnabled();
+        boolean migrateToPermission = (xmlVersion < XML_VERSION_NOTIF_PERMISSION);
         if (xmlVersion < XML_VERSION_REVIEW_PERMISSIONS_NOTIFICATION) {
             // make a note that we should show the notification at some point.
             // it shouldn't be possible for the user to already have seen it, as the XML version
@@ -393,8 +387,6 @@ public class PreferencesHelper implements RankingConfig {
                             hasUserConfiguredSettings(r));
                     pkgPerms.add(pkgPerm);
                 }
-            } else if (!mPermissionHelper.isMigrationEnabled()) {
-                r.importance = appImportance;
             }
         } catch (Exception e) {
             Slog.w(TAG, "Failed to restore pkg", e);
@@ -417,16 +409,8 @@ public class PreferencesHelper implements RankingConfig {
                 } else {
                     channel.populateFromXml(parser);
                 }
-                if (!mPermissionHelper.isMigrationEnabled()) {
-                    channel.setImportanceLockedByCriticalDeviceFunction(
-                            r.defaultAppLockedImportance);
-                    channel.setImportanceLockedByOEM(r.oemLockedImportance);
-                    if (!channel.isImportanceLockedByOEM()) {
-                        if (r.oemLockedChannels.contains(channel.getId())) {
-                            channel.setImportanceLockedByOEM(true);
-                        }
-                    }
-                }
+                channel.setImportanceLockedByCriticalDeviceFunction(
+                        r.defaultAppLockedImportance || r.fixedImportance);
 
                 if (isShortcutOk(channel) && isDeletionOk(channel)) {
                     r.channels.put(id, channel);
@@ -499,14 +483,6 @@ public class PreferencesHelper implements RankingConfig {
             r.visibility = visibility;
             r.showBadge = showBadge;
             r.bubblePreference = bubblePreference;
-            if (mOemLockedApps.containsKey(r.pkg)) {
-                List<String> channels = mOemLockedApps.get(r.pkg);
-                if (channels == null || channels.isEmpty()) {
-                    r.oemLockedImportance = true;
-                } else {
-                    r.oemLockedChannels = channels;
-                }
-            }
 
             try {
                 createDefaultChannelIfNeededLocked(r);
@@ -604,7 +580,7 @@ public class PreferencesHelper implements RankingConfig {
             out.endTag(null, TAG_STATUS_ICONS);
         }
         ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> notifPermissions = new ArrayMap<>();
-        if (mPermissionHelper.isMigrationEnabled() && forBackup) {
+        if (forBackup) {
             notifPermissions = mPermissionHelper.getNotificationPermissionValues(userId);
         }
 
@@ -736,28 +712,6 @@ public class PreferencesHelper implements RankingConfig {
         }
     }
 
-    /**
-     * Gets importance.
-     */
-    @Override
-    public int getImportance(String packageName, int uid) {
-        synchronized (mPackagePreferences) {
-            return getOrCreatePackagePreferencesLocked(packageName, uid).importance;
-        }
-    }
-
-    /**
-     * Returns whether the importance of the corresponding notification is user-locked and shouldn't
-     * be adjusted by an assistant (via means of a blocking helper, for example). For the channel
-     * locking field, see {@link NotificationChannel#USER_LOCKED_IMPORTANCE}.
-     */
-    public boolean getIsAppImportanceLocked(String packageName, int uid) {
-        synchronized (mPackagePreferences) {
-            int userLockedFields = getOrCreatePackagePreferencesLocked(packageName, uid).lockedAppFields;
-            return (userLockedFields & LockableAppFields.USER_LOCKED_IMPORTANCE) != 0;
-        }
-    }
-
     @Override
     public boolean canShowBadge(String packageName, int uid) {
         synchronized (mPackagePreferences) {
@@ -852,6 +806,13 @@ public class PreferencesHelper implements RankingConfig {
         synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(packageName, uid);
             return r.hasSentValidBubble;
+        }
+    }
+
+    boolean isImportanceLocked(String pkg, int uid) {
+        synchronized (mPackagePreferences) {
+            PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);
+            return r.fixedImportance || r.defaultAppLockedImportance;
         }
     }
 
@@ -1043,16 +1004,10 @@ public class PreferencesHelper implements RankingConfig {
                             : NotificationChannel.DEFAULT_ALLOW_BUBBLE);
                 }
                 clearLockedFieldsLocked(channel);
-                if (!mPermissionHelper.isMigrationEnabled()) {
-                    channel.setImportanceLockedByOEM(r.oemLockedImportance);
-                    if (!channel.isImportanceLockedByOEM()) {
-                        if (r.oemLockedChannels.contains(channel.getId())) {
-                            channel.setImportanceLockedByOEM(true);
-                        }
-                    }
-                    channel.setImportanceLockedByCriticalDeviceFunction(
-                            r.defaultAppLockedImportance);
-                }
+
+                channel.setImportanceLockedByCriticalDeviceFunction(
+                        r.defaultAppLockedImportance || r.fixedImportance);
+
                 if (channel.getLockscreenVisibility() == Notification.VISIBILITY_PUBLIC) {
                     channel.setLockscreenVisibility(
                             NotificationListenerService.Ranking.VISIBILITY_NO_OVERRIDE);
@@ -1133,33 +1088,14 @@ public class PreferencesHelper implements RankingConfig {
                 updatedChannel.unlockFields(updatedChannel.getUserLockedFields());
             }
 
-            if (mPermissionHelper.isMigrationEnabled()) {
-                if (mPermissionHelper.isPermissionFixed(r.pkg, UserHandle.getUserId(r.uid))
-                        && !(channel.isBlockable() || channel.getImportance() == IMPORTANCE_NONE)) {
-                    updatedChannel.setImportance(channel.getImportance());
-                }
-            } else {
-                // no importance updates are allowed if OEM blocked it
-                updatedChannel.setImportanceLockedByOEM(channel.isImportanceLockedByOEM());
-                if (updatedChannel.isImportanceLockedByOEM()) {
-                    updatedChannel.setImportance(channel.getImportance());
-                }
-                updatedChannel.setImportanceLockedByCriticalDeviceFunction(
-                        r.defaultAppLockedImportance);
-                if (updatedChannel.isImportanceLockedByCriticalDeviceFunction()
-                        && updatedChannel.getImportance() == IMPORTANCE_NONE) {
-                    updatedChannel.setImportance(channel.getImportance());
-                }
+            if (channel.isImportanceLockedByCriticalDeviceFunction()
+                    && !(channel.isBlockable() || channel.getImportance() == IMPORTANCE_NONE)) {
+                updatedChannel.setImportance(channel.getImportance());
             }
 
             r.channels.put(updatedChannel.getId(), updatedChannel);
 
             if (onlyHasDefaultChannel(pkg, uid)) {
-                if (!mPermissionHelper.isMigrationEnabled()) {
-                    // copy settings to app level so they are inherited by new channels
-                    // when the app migrates
-                    r.importance = updatedChannel.getImportance();
-                }
                 r.priority = updatedChannel.canBypassDnd()
                         ? Notification.PRIORITY_MAX : Notification.PRIORITY_DEFAULT;
                 r.visibility = updatedChannel.getLockscreenVisibility();
@@ -1328,49 +1264,21 @@ public class PreferencesHelper implements RankingConfig {
         mHideSilentStatusBarIcons = hide;
     }
 
-    public void lockChannelsForOEM(String[] appOrChannelList) {
-        if (mPermissionHelper.isMigrationEnabled()) {
-            return;
-        }
-        if (appOrChannelList == null) {
-            return;
-        }
-        for (String appOrChannel : appOrChannelList) {
-            if (!TextUtils.isEmpty(appOrChannel)) {
-                String[] appSplit = appOrChannel.split(NON_BLOCKABLE_CHANNEL_DELIM);
-                if (appSplit != null && appSplit.length > 0) {
-                    String appName = appSplit[0];
-                    String channelId = appSplit.length == 2 ? appSplit[1] : null;
-
+    public void updateFixedImportance(List<UserInfo> users) {
+        for (UserInfo user : users) {
+            List<PackageInfo> packages = mPm.getInstalledPackagesAsUser(
+                    PackageManager.PackageInfoFlags.of(PackageManager.MATCH_SYSTEM_ONLY),
+                    user.getUserHandle().getIdentifier());
+            for (PackageInfo pi : packages) {
+                boolean fixed = mPermissionHelper.isPermissionFixed(
+                        pi.packageName, user.getUserHandle().getIdentifier());
+                if (fixed) {
                     synchronized (mPackagePreferences) {
-                        boolean foundApp = false;
-                        for (PackagePreferences r : mPackagePreferences.values()) {
-                            if (r.pkg.equals(appName)) {
-                                foundApp = true;
-                                if (channelId == null) {
-                                    // lock all channels for the app
-                                    r.oemLockedImportance = true;
-                                    for (NotificationChannel channel : r.channels.values()) {
-                                        channel.setImportanceLockedByOEM(true);
-                                    }
-                                } else {
-                                    NotificationChannel channel = r.channels.get(channelId);
-                                    if (channel != null) {
-                                        channel.setImportanceLockedByOEM(true);
-                                    }
-                                    // Also store the locked channels on the record, so they aren't
-                                    // temporarily lost when data is cleared on the package
-                                    r.oemLockedChannels.add(channelId);
-                                }
-                            }
-                        }
-                        if (!foundApp) {
-                            List<String> channels =
-                                    mOemLockedApps.getOrDefault(appName, new ArrayList<>());
-                            if (channelId != null) {
-                                channels.add(channelId);
-                            }
-                            mOemLockedApps.put(appName, channels);
+                        PackagePreferences p = getOrCreatePackagePreferencesLocked(
+                                pi.packageName, pi.applicationInfo.uid);
+                        p.fixedImportance = true;
+                        for (NotificationChannel channel : p.channels.values()) {
+                            channel.setImportanceLockedByCriticalDeviceFunction(true);
                         }
                     }
                 }
@@ -1380,16 +1288,15 @@ public class PreferencesHelper implements RankingConfig {
 
     public void updateDefaultApps(int userId, ArraySet<String> toRemove,
             ArraySet<Pair<String, Integer>> toAdd) {
-        if (mPermissionHelper.isMigrationEnabled()) {
-            return;
-        }
         synchronized (mPackagePreferences) {
             for (PackagePreferences p : mPackagePreferences.values()) {
                 if (userId == UserHandle.getUserId(p.uid)) {
                     if (toRemove != null && toRemove.contains(p.pkg)) {
                         p.defaultAppLockedImportance = false;
-                        for (NotificationChannel channel : p.channels.values()) {
-                            channel.setImportanceLockedByCriticalDeviceFunction(false);
+                        if (!p.fixedImportance) {
+                            for (NotificationChannel channel : p.channels.values()) {
+                                channel.setImportanceLockedByCriticalDeviceFunction(false);
+                            }
                         }
                     }
                 }
@@ -1802,20 +1709,8 @@ public class PreferencesHelper implements RankingConfig {
         }
         for (int i = candidatePkgs.size() - 1; i >= 0; i--) {
             Pair<String, Integer> app = candidatePkgs.valueAt(i);
-            if (mPermissionHelper.isMigrationEnabled()) {
-                if (!mPermissionHelper.hasPermission(app.second)) {
-                    candidatePkgs.removeAt(i);
-                }
-            } else {
-                synchronized (mPackagePreferences) {
-                    PackagePreferences r = getPackagePreferencesLocked(app.first, app.second);
-                    if (r == null) {
-                        continue;
-                    }
-                    if (r.importance == IMPORTANCE_NONE) {
-                        candidatePkgs.removeAt(i);
-                    }
-                }
+            if (!mPermissionHelper.hasPermission(app.second)) {
+                candidatePkgs.removeAt(i);
             }
         }
         boolean haveBypassingApps = candidatePkgs.size() > 0;
@@ -1858,27 +1753,6 @@ public class PreferencesHelper implements RankingConfig {
 
     public boolean areChannelsBypassingDnd() {
         return mAreChannelsBypassingDnd;
-    }
-
-    /**
-     * Sets importance.
-     */
-    @Override
-    public void setImportance(String pkgName, int uid, int importance) {
-        synchronized (mPackagePreferences) {
-            getOrCreatePackagePreferencesLocked(pkgName, uid).importance = importance;
-        }
-        updateConfig();
-    }
-
-    public void setEnabled(String packageName, int uid, boolean enabled) {
-        boolean wasEnabled = getImportance(packageName, uid) != IMPORTANCE_NONE;
-        if (wasEnabled == enabled) {
-            return;
-        }
-        setImportance(packageName, uid,
-                enabled ? DEFAULT_IMPORTANCE : IMPORTANCE_NONE);
-        mNotificationChannelLogger.logAppNotificationsAllowed(uid, packageName, enabled);
     }
 
     /**
@@ -2055,23 +1929,15 @@ public class PreferencesHelper implements RankingConfig {
                 pw.print(" (");
                 pw.print(r.uid == UNKNOWN_UID ? "UNKNOWN_UID" : Integer.toString(r.uid));
                 pw.print(')');
-                if (!mPermissionHelper.isMigrationEnabled()) {
-                    if (r.importance != DEFAULT_IMPORTANCE) {
-                        pw.print(" importance=");
-                        pw.print(NotificationListenerService.Ranking.importanceToString(
-                                r.importance));
-                    }
-                } else {
-                    Pair<Integer, String> key = new Pair<>(r.uid, r.pkg);
-                    if (packagePermissions != null && pkgsWithPermissionsToHandle.contains(key)) {
-                        pw.print(" importance=");
-                        pw.print(NotificationListenerService.Ranking.importanceToString(
-                                packagePermissions.get(key).first
-                                        ? IMPORTANCE_DEFAULT : IMPORTANCE_NONE));
-                        pw.print(" userSet=");
-                        pw.print(packagePermissions.get(key).second);
-                        pkgsWithPermissionsToHandle.remove(key);
-                    }
+                Pair<Integer, String> key = new Pair<>(r.uid, r.pkg);
+                if (packagePermissions != null && pkgsWithPermissionsToHandle.contains(key)) {
+                    pw.print(" importance=");
+                    pw.print(NotificationListenerService.Ranking.importanceToString(
+                            packagePermissions.get(key).first
+                                    ? IMPORTANCE_DEFAULT : IMPORTANCE_NONE));
+                    pw.print(" userSet=");
+                    pw.print(packagePermissions.get(key).second);
+                    pkgsWithPermissionsToHandle.remove(key);
                 }
                 if (r.priority != DEFAULT_PRIORITY) {
                     pw.print(" priority=");
@@ -2089,13 +1955,9 @@ public class PreferencesHelper implements RankingConfig {
                     pw.print(" defaultAppLocked=");
                     pw.print(r.defaultAppLockedImportance);
                 }
-                if (r.oemLockedImportance != DEFAULT_OEM_LOCKED_IMPORTANCE) {
-                    pw.print(" oemLocked=");
-                    pw.print(r.oemLockedImportance);
-                }
-                if (!r.oemLockedChannels.isEmpty()) {
-                    pw.print(" futureLockedChannels=");
-                    pw.print(r.oemLockedChannels);
+                if (r.fixedImportance != DEFAULT_APP_LOCKED_IMPORTANCE) {
+                    pw.print(" fixedImportance=");
+                    pw.print(r.fixedImportance);
                 }
                 pw.println();
                 for (NotificationChannel channel : r.channels.values()) {
@@ -2111,7 +1973,7 @@ public class PreferencesHelper implements RankingConfig {
             }
         }
         // Handle any remaining packages with permissions
-        if (mPermissionHelper.isMigrationEnabled() && pkgsWithPermissionsToHandle != null) {
+        if (pkgsWithPermissionsToHandle != null) {
             for (Pair<Integer, String> p : pkgsWithPermissionsToHandle) {
                 // p.first is the uid of this package; p.second is the package name
                 if (filter.matches(p.second)) {
@@ -2151,16 +2013,12 @@ public class PreferencesHelper implements RankingConfig {
 
                 proto.write(RankingHelperProto.RecordProto.PACKAGE, r.pkg);
                 proto.write(RankingHelperProto.RecordProto.UID, r.uid);
-                if (mPermissionHelper.isMigrationEnabled()) {
-                    Pair<Integer, String> key = new Pair<>(r.uid, r.pkg);
-                    if (packagePermissions != null && pkgsWithPermissionsToHandle.contains(key)) {
-                        proto.write(RankingHelperProto.RecordProto.IMPORTANCE,
-                                packagePermissions.get(key).first
-                                        ? IMPORTANCE_DEFAULT : IMPORTANCE_NONE);
-                        pkgsWithPermissionsToHandle.remove(key);
-                    }
-                } else {
-                    proto.write(RankingHelperProto.RecordProto.IMPORTANCE, r.importance);
+                Pair<Integer, String> key = new Pair<>(r.uid, r.pkg);
+                if (packagePermissions != null && pkgsWithPermissionsToHandle.contains(key)) {
+                    proto.write(RankingHelperProto.RecordProto.IMPORTANCE,
+                            packagePermissions.get(key).first
+                                    ? IMPORTANCE_DEFAULT : IMPORTANCE_NONE);
+                    pkgsWithPermissionsToHandle.remove(key);
                 }
                 proto.write(RankingHelperProto.RecordProto.PRIORITY, r.priority);
                 proto.write(RankingHelperProto.RecordProto.VISIBILITY, r.visibility);
@@ -2177,7 +2035,7 @@ public class PreferencesHelper implements RankingConfig {
             }
         }
 
-        if (mPermissionHelper.isMigrationEnabled() && pkgsWithPermissionsToHandle != null) {
+        if (pkgsWithPermissionsToHandle != null) {
             for (Pair<Integer, String> p : pkgsWithPermissionsToHandle) {
                 if (filter.matches(p.second)) {
                     fToken = proto.start(fieldId);
@@ -2217,25 +2075,22 @@ public class PreferencesHelper implements RankingConfig {
                 // collect whether this package's importance info was user-set for later, if needed
                 // before the migration is enabled, this will simply default to false in all cases.
                 boolean importanceIsUserSet = false;
-                if (mPermissionHelper.isMigrationEnabled()) {
-                    // Even if this package's data is not present, we need to write something;
-                    // so default to IMPORTANCE_NONE, since if PM doesn't know about the package
-                    // for some reason, notifications are not allowed.
-                    int importance = IMPORTANCE_NONE;
-                    Pair<Integer, String> key = new Pair<>(r.uid, r.pkg);
-                    if (pkgPermissions != null && pkgsWithPermissionsToHandle.contains(key)) {
-                        Pair<Boolean, Boolean> permissionPair = pkgPermissions.get(key);
-                        importance = permissionPair.first
-                                ? IMPORTANCE_DEFAULT : IMPORTANCE_NONE;
-                        // cache the second value for writing later
-                        importanceIsUserSet = permissionPair.second;
+                // Even if this package's data is not present, we need to write something;
+                // so default to IMPORTANCE_NONE, since if PM doesn't know about the package
+                // for some reason, notifications are not allowed.
+                int importance = IMPORTANCE_NONE;
+                Pair<Integer, String> key = new Pair<>(r.uid, r.pkg);
+                if (pkgPermissions != null && pkgsWithPermissionsToHandle.contains(key)) {
+                    Pair<Boolean, Boolean> permissionPair = pkgPermissions.get(key);
+                    importance = permissionPair.first
+                            ? IMPORTANCE_DEFAULT : IMPORTANCE_NONE;
+                    // cache the second value for writing later
+                    importanceIsUserSet = permissionPair.second;
 
-                        pkgsWithPermissionsToHandle.remove(key);
-                    }
-                    event.writeInt(importance);
-                } else {
-                    event.writeInt(r.importance);
+                    pkgsWithPermissionsToHandle.remove(key);
                 }
+                event.writeInt(importance);
+
                 event.writeInt(r.visibility);
                 event.writeInt(r.lockedAppFields);
                 event.writeBoolean(importanceIsUserSet);  // optional bool user_set_importance = 5;
@@ -2244,7 +2099,7 @@ public class PreferencesHelper implements RankingConfig {
         }
 
         // handle remaining packages with PackageManager permissions but not local settings
-        if (mPermissionHelper.isMigrationEnabled() && pkgPermissions != null) {
+        if (pkgPermissions != null) {
             for (Pair<Integer, String> p : pkgsWithPermissionsToHandle) {
                 if (pulledEvents > NOTIFICATION_PREFERENCES_PULL_LIMIT) {
                     break;
@@ -2357,22 +2212,14 @@ public class PreferencesHelper implements RankingConfig {
                     try {
                         PackagePreferences.put("userId", UserHandle.getUserId(r.uid));
                         PackagePreferences.put("packageName", r.pkg);
-                        if (mPermissionHelper.isMigrationEnabled()) {
-                            Pair<Integer, String> key = new Pair<>(r.uid, r.pkg);
-                            if (pkgPermissions != null
-                                    && pkgsWithPermissionsToHandle.contains(key)) {
-                                PackagePreferences.put("importance",
-                                        NotificationListenerService.Ranking.importanceToString(
-                                                pkgPermissions.get(key).first
-                                                        ? IMPORTANCE_DEFAULT : IMPORTANCE_NONE));
-                                pkgsWithPermissionsToHandle.remove(key);
-                            }
-                        } else {
-                            if (r.importance != DEFAULT_IMPORTANCE) {
-                                PackagePreferences.put("importance",
-                                        NotificationListenerService.Ranking.importanceToString(
-                                                r.importance));
-                            }
+                        Pair<Integer, String> key = new Pair<>(r.uid, r.pkg);
+                        if (pkgPermissions != null
+                                && pkgsWithPermissionsToHandle.contains(key)) {
+                            PackagePreferences.put("importance",
+                                    NotificationListenerService.Ranking.importanceToString(
+                                            pkgPermissions.get(key).first
+                                                    ? IMPORTANCE_DEFAULT : IMPORTANCE_NONE));
+                            pkgsWithPermissionsToHandle.remove(key);
                         }
                         if (r.priority != DEFAULT_PRIORITY) {
                             PackagePreferences.put("priority",
@@ -2404,7 +2251,7 @@ public class PreferencesHelper implements RankingConfig {
         }
 
         // handle packages for which there are permissions but no local settings
-        if (mPermissionHelper.isMigrationEnabled() && pkgsWithPermissionsToHandle != null) {
+        if (pkgsWithPermissionsToHandle != null) {
             for (Pair<Integer, String> p : pkgsWithPermissionsToHandle) {
                 if (filter == null || filter.matches(p.second)) {
                     JSONObject PackagePreferences = new JSONObject();
@@ -2443,8 +2290,7 @@ public class PreferencesHelper implements RankingConfig {
     public JSONArray dumpBansJson(NotificationManagerService.DumpFilter filter,
             ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> pkgPermissions) {
         JSONArray bans = new JSONArray();
-        Map<Integer, String> packageBans = mPermissionHelper.isMigrationEnabled()
-                ? getPermissionBasedPackageBans(pkgPermissions) : getPackageBans();
+        Map<Integer, String> packageBans = getPermissionBasedPackageBans(pkgPermissions);
         for (Map.Entry<Integer, String> ban : packageBans.entrySet()) {
             final int userId = UserHandle.getUserId(ban.getKey());
             final String packageName = ban.getValue();
@@ -2597,7 +2443,7 @@ public class PreferencesHelper implements RankingConfig {
                         synchronized (mPackagePreferences) {
                             mPackagePreferences.put(packagePreferencesKey(r.pkg, r.uid), r);
                         }
-                        if (mPermissionHelper.isMigrationEnabled() && r.migrateToPm) {
+                        if (r.migrateToPm) {
                             try {
                                 PackagePermission p = new PackagePermission(
                                         r.pkg, UserHandle.getUserId(r.uid),
@@ -2853,9 +2699,8 @@ public class PreferencesHelper implements RankingConfig {
         int lockedAppFields = DEFAULT_LOCKED_APP_FIELDS;
         // these fields are loaded on boot from a different source of truth and so are not
         // written to notification policy xml
-        boolean oemLockedImportance = DEFAULT_OEM_LOCKED_IMPORTANCE;
-        List<String> oemLockedChannels = new ArrayList<>();
         boolean defaultAppLockedImportance = DEFAULT_APP_LOCKED_IMPORTANCE;
+        boolean fixedImportance = DEFAULT_APP_LOCKED_IMPORTANCE;
 
         boolean hasSentInvalidMessage = false;
         boolean hasSentValidMessage = false;

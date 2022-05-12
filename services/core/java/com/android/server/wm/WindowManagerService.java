@@ -3060,10 +3060,10 @@ public class WindowManagerService extends IWindowManager.Stub
             mRecentsAnimationController = null;
             controller.cleanupAnimation(reorderMode);
             // TODO(multi-display): currently only default display support recents animation.
-            // Cancel any existing app transition animation running in the legacy transition
-            // framework.
             final DisplayContent dc = getDefaultDisplayContentLocked();
-            dc.mAppTransition.freeze();
+            if (dc.mAppTransition.isTransitionSet()) {
+                dc.mSkipAppTransitionAnimation = true;
+            }
             dc.forAllWindowContainers((wc) -> {
                 if (wc.isAnimating(TRANSITION, ANIMATION_TYPE_APP_TRANSITION)) {
                     wc.cancelAnimation();
@@ -5704,25 +5704,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void setSandboxDisplayApis(int displayId, boolean sandboxDisplayApis) {
-        if (mContext.checkCallingOrSelfPermission(WRITE_SECURE_SETTINGS)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Must hold permission " + WRITE_SECURE_SETTINGS);
-        }
-
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
-                if (displayContent != null) {
-                    displayContent.setSandboxDisplayApis(sandboxDisplayApis);
-                }
-            }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-    }
-
     /** The global settings only apply to default display. */
     private boolean applyForcedPropertiesForDefaultDisplay() {
         boolean changed = false;
@@ -8250,23 +8231,15 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public void replaceInputSurfaceTouchableRegionWithWindowCrop(
-                @NonNull SurfaceControl inputSurface,
-                @NonNull InputWindowHandle inputWindowHandle,
-                @NonNull IBinder windowToken) {
+        public boolean isPointInsideWindow(@NonNull IBinder windowToken, int displayId,
+                float displayX, float displayY) {
             synchronized (mGlobalLock) {
                 final WindowState w = mWindowMap.get(windowToken);
-                if (w == null) {
-                    return;
+                if (w == null || w.getDisplayId() != displayId) {
+                    return false;
                 }
-                // Make a copy of the InputWindowHandle to avoid leaking the window's
-                // SurfaceControl.
-                final InputWindowHandle localHandle = new InputWindowHandle(inputWindowHandle);
-                localHandle.replaceTouchableRegionWithCrop(w.getSurfaceControl());
-                final SurfaceControl.Transaction t = mTransactionFactory.get();
-                t.setInputWindowInfo(inputSurface, localHandle);
-                t.apply();
-                t.close();
+
+                return w.getBounds().contains((int) displayX, (int) displayY);
             }
         }
     }

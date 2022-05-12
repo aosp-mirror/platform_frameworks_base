@@ -93,6 +93,7 @@ public class ShadeListBuilder implements Dumpable {
     private final NotificationInteractionTracker mInteractionTracker;
     private final DumpManager mDumpManager;
     // used exclusivly by ShadeListBuilder#notifySectionEntriesUpdated
+    // TODO replace temp with collection pool for readability
     private final ArrayList<ListEntry> mTempSectionMembers = new ArrayList<>();
     private final boolean mAlwaysLogList;
 
@@ -230,13 +231,7 @@ public class ShadeListBuilder implements Dumpable {
         mPipelineState.requireState(STATE_IDLE);
 
         mNotifSections.clear();
-        NotifSectioner lastSection = null;
         for (NotifSectioner sectioner : sectioners) {
-            if (lastSection != null && lastSection.getBucket() > sectioner.getBucket()) {
-                throw new IllegalArgumentException("setSectioners with non contiguous sections "
-                        + lastSection.getName() + " - " + lastSection.getBucket() + " & "
-                        + sectioner.getName() + " - " + sectioner.getBucket());
-            }
             final NotifSection section = new NotifSection(sectioner, mNotifSections.size());
             final NotifComparator sectionComparator = section.getComparator();
             mNotifSections.add(section);
@@ -244,10 +239,23 @@ public class ShadeListBuilder implements Dumpable {
             if (sectionComparator != null) {
                 sectionComparator.setInvalidationListener(this::onNotifComparatorInvalidated);
             }
-            lastSection = sectioner;
         }
 
         mNotifSections.add(new NotifSection(DEFAULT_SECTIONER, mNotifSections.size()));
+
+        // validate sections
+        final ArraySet<Integer> seenBuckets = new ArraySet<>();
+        int lastBucket = mNotifSections.size() > 0
+                ? mNotifSections.get(0).getBucket()
+                : 0;
+        for (NotifSection section : mNotifSections) {
+            if (lastBucket != section.getBucket() && seenBuckets.contains(section.getBucket())) {
+                throw new IllegalStateException("setSectioners with non contiguous sections "
+                        + section.getLabel() + " has an already seen bucket");
+            }
+            lastBucket = section.getBucket();
+            seenBuckets.add(lastBucket);
+        }
     }
 
     void setNotifStabilityManager(@NonNull NotifStabilityManager notifStabilityManager) {
