@@ -6475,7 +6475,7 @@ public final class ActiveServices {
             }
         }
 
-        if (ret == REASON_DENIED) {
+        if (ret == REASON_DENIED && verifyPackage(callingPackage, callingUid)) {
             final boolean isAllowedPackage =
                     mAllowListWhileInUsePermissionInFgs.contains(callingPackage);
             if (isAllowedPackage) {
@@ -6881,5 +6881,20 @@ public final class ActiveServices {
                 /* targetService */ null,
                 /* allowBackgroundActivityStarts */ false)
                 != REASON_DENIED;
+    }
+
+    /**
+     * Checks if a given packageName belongs to a given uid.
+     * @param packageName the package of the caller
+     * @param uid the uid of the caller
+     * @return true or false
+     */
+    private boolean verifyPackage(String packageName, int uid) {
+        if (uid == ROOT_UID || uid == SYSTEM_UID) {
+            //System and Root are always allowed
+            return true;
+        }
+        return mAm.getPackageManagerInternal().isSameApp(packageName, uid,
+                UserHandle.getUserId(uid));
     }
 }
