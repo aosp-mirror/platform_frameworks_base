@@ -4176,7 +4176,11 @@ public class HdmiControlService extends SystemService {
         List<AudioDeviceAttributes> streamMusicDevices =
                 getAudioManager().getDevicesForAttributes(STREAM_MUSIC_ATTRIBUTES);
         if (streamMusicDevices.contains(getAvcAudioOutputDevice())) {
-            setStreamMusicVolume(volume, AudioManager.FLAG_ABSOLUTE_VOLUME);
+            int flags = AudioManager.FLAG_ABSOLUTE_VOLUME;
+            if (isTvDevice()) {
+                flags |= AudioManager.FLAG_SHOW_UI;
+            }
+            setStreamMusicVolume(volume, flags);
         }
     }
 
@@ -4190,8 +4194,11 @@ public class HdmiControlService extends SystemService {
                 getAudioManager().getDevicesForAttributes(STREAM_MUSIC_ATTRIBUTES);
         if (streamMusicDevices.contains(getAvcAudioOutputDevice())) {
             int direction = mute ? AudioManager.ADJUST_MUTE : AudioManager.ADJUST_UNMUTE;
-            getAudioManager().adjustStreamVolume(AudioManager.STREAM_MUSIC, direction,
-                    AudioManager.FLAG_ABSOLUTE_VOLUME);
+            int flags = AudioManager.FLAG_ABSOLUTE_VOLUME;
+            if (isTvDevice()) {
+                flags |= AudioManager.FLAG_SHOW_UI;
+            }
+            getAudioManager().adjustStreamVolume(AudioManager.STREAM_MUSIC, direction, flags);
         }
     }
 
