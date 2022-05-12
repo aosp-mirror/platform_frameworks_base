@@ -320,7 +320,6 @@ package android.app {
     method public void setDemoted(boolean);
     method public void setFgServiceShown(boolean);
     method public void setImportanceLockedByCriticalDeviceFunction(boolean);
-    method public void setImportanceLockedByOEM(boolean);
     method public void setImportantConversation(boolean);
     method public void setOriginalImportance(int);
   }
