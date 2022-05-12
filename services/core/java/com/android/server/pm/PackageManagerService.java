@@ -4450,8 +4450,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         @Override
         public void clearApplicationProfileData(String packageName) {
-            PackageManagerServiceUtils.enforceSystemOrRoot(
-                    "Only the system can clear all profile data");
+            PackageManagerServiceUtils.enforceSystemOrRootOrShell(
+                    "Only the system or shell can clear all profile data");
 
             final Computer snapshot = snapshotComputer();
             final AndroidPackage pkg = snapshot.getPackage(packageName);
