@@ -18,6 +18,7 @@ package com.android.server.clipboard;
 
 import android.annotation.Nullable;
 import android.content.ClipData;
+import android.os.PersistableBundle;
 import android.os.SystemProperties;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -25,6 +26,7 @@ import android.system.OsConstants;
 import android.system.VmSocketAddress;
 import android.util.Slog;
 
+import java.io.EOFException;
 import java.io.FileDescriptor;
 import java.io.InterruptedIOException;
 import java.net.SocketException;
@@ -58,11 +60,11 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
         return mPipe;
     }
 
-    private synchronized boolean openPipe() {
-        if (mPipe != null) {
-            return true;
-        }
+    private synchronized void setPipeFD(final FileDescriptor fd) {
+        mPipe = fd;
+    }
 
+    private static FileDescriptor openPipeImpl() {
         try {
             final FileDescriptor fd = Os.socket(OsConstants.AF_VSOCK, OsConstants.SOCK_STREAM, 0);
 
@@ -70,16 +72,33 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
                 Os.connect(fd, new VmSocketAddress(HOST_PORT, OsConstants.VMADDR_CID_HOST));
 
                 final byte[] handshake = createOpenHandshake();
-                Os.write(fd, handshake, 0, handshake.length);
-                mPipe = fd;
-                return true;
+                writeFully(fd, handshake, 0, handshake.length);
+                return fd;
             } catch (ErrnoException | SocketException | InterruptedIOException e) {
                 Os.close(fd);
             }
         } catch (ErrnoException e) {
         }
 
-        return false;
+        return null;
+    }
+
+    private void openPipe() throws InterruptedException {
+        FileDescriptor fd = getPipeFD();
+
+        if (fd == null) {
+            fd = openPipeImpl();
+
+            // There's no guarantee that QEMU pipes will be ready at the moment
+            // this method is invoked. We simply try to get the pipe open and
+            // retry on failure indefinitely.
+            while (fd == null) {
+                Thread.sleep(100);
+                fd = openPipeImpl();
+            }
+        }
+
+        setPipeFD(fd);
     }
 
     private synchronized void closePipe() {
@@ -93,16 +112,16 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
         }
     }
 
-    private byte[] receiveMessage() throws ErrnoException, InterruptedIOException {
+    private byte[] receiveMessage() throws ErrnoException, InterruptedIOException, EOFException {
         final byte[] lengthBits = new byte[4];
-        Os.read(mPipe, lengthBits, 0, lengthBits.length);
+        readFully(mPipe, lengthBits, 0, lengthBits.length);
 
         final ByteBuffer bb = ByteBuffer.wrap(lengthBits);
         bb.order(ByteOrder.LITTLE_ENDIAN);
         final int msgLen = bb.getInt();
 
         final byte[] msg = new byte[msgLen];
-        Os.read(mPipe, msg, 0, msg.length);
+        readFully(mPipe, msg, 0, msg.length);
 
         return msg;
     }
@@ -115,20 +134,15 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
         bb.order(ByteOrder.LITTLE_ENDIAN);
         bb.putInt(msg.length);
 
-        Os.write(fd, lengthBits, 0, lengthBits.length);
-        Os.write(fd, msg, 0, msg.length);
+        writeFully(fd, lengthBits, 0, lengthBits.length);
+        writeFully(fd, msg, 0, msg.length);
     }
 
     EmulatorClipboardMonitor(final Consumer<ClipData> setAndroidClipboard) {
         this.mHostMonitorThread = new Thread(() -> {
             while (!Thread.interrupted()) {
                 try {
-                    // There's no guarantee that QEMU pipes will be ready at the moment
-                    // this method is invoked. We simply try to get the pipe open and
-                    // retry on failure indefinitely.
-                    while (!openPipe()) {
-                        Thread.sleep(100);
-                    }
+                    openPipe();
 
                     final byte[] receivedData = receiveMessage();
 
@@ -136,12 +150,15 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
                     final ClipData clip = new ClipData("host clipboard",
                                                        new String[]{"text/plain"},
                                                        new ClipData.Item(str));
+                    final PersistableBundle bundle = new PersistableBundle();
+                    bundle.putBoolean("com.android.systemui.SUPPRESS_CLIPBOARD_OVERLAY", true);
+                    clip.getDescription().setExtras(bundle);
 
                     if (LOG_CLIBOARD_ACCESS) {
                         Slog.i(TAG, "Setting the guest clipboard to '" + str + "'");
                     }
                     setAndroidClipboard.accept(clip);
-                } catch (ErrnoException | InterruptedIOException e) {
+                } catch (ErrnoException | EOFException | InterruptedIOException e) {
                     closePipe();
                 } catch (InterruptedException | IllegalArgumentException e) {
                 }
@@ -180,6 +197,34 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
                 }
             });
             t.start();
+        }
+    }
+
+    private static void readFully(final FileDescriptor fd,
+                                  final byte[] buf, int offset, int size)
+                                  throws ErrnoException, InterruptedIOException, EOFException {
+        while (size > 0) {
+            final int r = Os.read(fd, buf, offset, size);
+            if (r > 0) {
+                offset += r;
+                size -= r;
+            } else {
+                throw new EOFException();
+            }
+        }
+    }
+
+    private static void writeFully(final FileDescriptor fd,
+                                   final byte[] buf, int offset, int size)
+                                   throws ErrnoException, InterruptedIOException {
+        while (size > 0) {
+            final int r = Os.write(fd, buf, offset, size);
+            if (r > 0) {
+                offset += r;
+                size -= r;
+            } else {
+                throw new ErrnoException("write", OsConstants.EIO);
+            }
         }
     }
 }
