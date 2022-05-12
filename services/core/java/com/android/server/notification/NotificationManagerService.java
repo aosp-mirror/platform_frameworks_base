@@ -4848,8 +4848,11 @@ public class NotificationManagerService extends SystemService {
         try {
             fixNotification(notification, pkg, userId);
 
-        } catch (NameNotFoundException e) {
-            Slog.e(TAG, "Cannot create a context for sending app", e);
+        } catch (Exception e) {
+            if (notification.isForegroundService()) {
+                throw new SecurityException("Invalid FGS notification", e);
+            }
+            Slog.e(TAG, "Cannot fix notification", e);
             return;
         }
 
