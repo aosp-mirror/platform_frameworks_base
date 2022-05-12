@@ -124,8 +124,8 @@ import android.view.ContentRecordingSession;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.Gravity;
-import android.view.IDisplayWindowRotationCallback;
-import android.view.IDisplayWindowRotationController;
+import android.view.IDisplayChangeWindowCallback;
+import android.view.IDisplayChangeWindowController;
 import android.view.ISystemGestureExclusionListener;
 import android.view.IWindowManager;
 import android.view.InsetsState;
@@ -136,6 +136,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.View;
 import android.view.WindowManager;
+import android.window.DisplayAreaInfo;
 import android.window.IDisplayAreaOrganizer;
 import android.window.WindowContainerToken;
 
@@ -1801,15 +1802,16 @@ public class DisplayContentTests extends WindowTestsBase {
                     return true;
                 }).when(dc).updateDisplayOverrideConfigurationLocked();
         final boolean[] called = new boolean[1];
-        mWm.mDisplayRotationController =
-                new IDisplayWindowRotationController.Stub() {
+        mWm.mDisplayChangeController =
+                new IDisplayChangeWindowController.Stub() {
                     @Override
-                    public void onRotateDisplay(int displayId, int fromRotation, int toRotation,
-                            IDisplayWindowRotationCallback callback) {
+                    public void onDisplayChange(int displayId, int fromRotation, int toRotation,
+                            DisplayAreaInfo newDisplayAreaInfo,
+                            IDisplayChangeWindowCallback callback) throws RemoteException {
                         called[0] = true;
 
                         try {
-                            callback.continueRotateDisplay(toRotation, null);
+                            callback.continueDisplayChange(null);
                         } catch (RemoteException e) {
                             assertTrue(false);
                         }
@@ -1843,13 +1845,14 @@ public class DisplayContentTests extends WindowTestsBase {
         // Rotate 180 degree so the display doesn't have configuration change. This condition is
         // used for the later verification of stop-freezing (without setting mWaitingForConfig).
         doReturn((dr.getRotation() + 2) % 4).when(dr).rotationForOrientation(anyInt(), anyInt());
-        mWm.mDisplayRotationController =
-                new IDisplayWindowRotationController.Stub() {
+        mWm.mDisplayChangeController =
+                new IDisplayChangeWindowController.Stub() {
                     @Override
-                    public void onRotateDisplay(int displayId, int fromRotation, int toRotation,
-                            IDisplayWindowRotationCallback callback) {
+                    public void onDisplayChange(int displayId, int fromRotation, int toRotation,
+                            DisplayAreaInfo newDisplayAreaInfo,
+                            IDisplayChangeWindowCallback callback) throws RemoteException {
                         try {
-                            callback.continueRotateDisplay(toRotation, null);
+                            callback.continueDisplayChange(null);
                         } catch (RemoteException e) {
                             assertTrue(false);
                         }

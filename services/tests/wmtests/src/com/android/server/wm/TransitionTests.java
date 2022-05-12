@@ -821,8 +821,11 @@ public class TransitionTests extends WindowTestsBase {
         player.onTransactionReady(mDisplayContent.getSyncTransaction());
 
         final DisplayRotation displayRotation = mDisplayContent.getDisplayRotation();
+        final RemoteDisplayChangeController displayChangeController = mDisplayContent
+                .mRemoteDisplayChangeController;
         spyOn(displayRotation);
-        doReturn(true).when(displayRotation).isWaitingForRemoteRotation();
+        spyOn(displayChangeController);
+        doReturn(true).when(displayChangeController).isWaitingForRemoteDisplayChange();
         doReturn(prevRotation + 1).when(displayRotation).rotationForOrientation(
                 anyInt() /* orientation */, anyInt() /* lastRotation */);
         // Rotation update is skipped while the recents animation is running.

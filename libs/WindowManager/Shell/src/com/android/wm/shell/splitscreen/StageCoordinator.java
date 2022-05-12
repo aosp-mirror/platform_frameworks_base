@@ -83,6 +83,7 @@ import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.WindowManager;
+import android.window.DisplayAreaInfo;
 import android.window.RemoteTransition;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
@@ -1318,7 +1319,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         if (displayId != DEFAULT_DISPLAY) {
             return;
         }
-        mDisplayController.addDisplayChangingController(this::onRotateDisplay);
+        mDisplayController.addDisplayChangingController(this::onDisplayChange);
     }
 
     @Override
@@ -1329,14 +1330,17 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mDisplayLayout.set(mDisplayController.getDisplayLayout(displayId));
     }
 
-    private void onRotateDisplay(int displayId, int fromRotation, int toRotation,
-            WindowContainerTransaction wct) {
+    private void onDisplayChange(int displayId, int fromRotation, int toRotation,
+            @Nullable DisplayAreaInfo newDisplayAreaInfo, WindowContainerTransaction wct) {
         if (!mMainStage.isActive()) return;
         // Only do this when shell transition
         if (!ENABLE_SHELL_TRANSITIONS) return;
 
         mDisplayLayout.rotateTo(mContext.getResources(), toRotation);
         mSplitLayout.rotateTo(toRotation, mDisplayLayout.stableInsets());
+        if (newDisplayAreaInfo != null) {
+            mSplitLayout.updateConfiguration(newDisplayAreaInfo.configuration);
+        }
         updateWindowBounds(mSplitLayout, wct);
         updateUnfoldBounds();
     }

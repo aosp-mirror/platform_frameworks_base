@@ -1786,13 +1786,16 @@ public class ActivityRecordTests extends WindowTestsBase {
     public void testActivityOnCancelFixedRotationTransform() {
         final ActivityRecord activity = createActivityWithTask();
         final DisplayRotation displayRotation = activity.mDisplayContent.getDisplayRotation();
+        final RemoteDisplayChangeController remoteDisplayChangeController = activity
+                .mDisplayContent.mRemoteDisplayChangeController;
         spyOn(displayRotation);
+        spyOn(remoteDisplayChangeController);
 
         final DisplayContent display = activity.mDisplayContent;
         final int originalRotation = display.getRotation();
 
         // Make {@link DisplayContent#sendNewConfiguration} not apply rotation immediately.
-        doReturn(true).when(displayRotation).isWaitingForRemoteRotation();
+        doReturn(true).when(remoteDisplayChangeController).isWaitingForRemoteDisplayChange();
         doReturn((originalRotation + 1) % 4).when(displayRotation).rotationForOrientation(
                 anyInt() /* orientation */, anyInt() /* lastRotation */);
         // Set to visible so the activity can freeze the screen.
@@ -1830,7 +1833,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // Simulate the remote rotation has completed and the configuration doesn't change, then
         // the rotated activity should also be restored by clearing the transform.
         displayRotation.updateRotationUnchecked(true /* forceUpdate */);
-        doReturn(false).when(displayRotation).isWaitingForRemoteRotation();
+        doReturn(false).when(remoteDisplayChangeController).isWaitingForRemoteDisplayChange();
         clearInvocations(activity);
         display.setFixedRotationLaunchingAppUnchecked(activity);
         display.sendNewConfiguration();
