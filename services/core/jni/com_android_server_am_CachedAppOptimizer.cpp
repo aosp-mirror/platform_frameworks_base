@@ -66,13 +66,13 @@ using android::base::unique_fd;
 // Defines the maximum amount of VMAs we can send per process_madvise syscall.
 // Currently this is set to UIO_MAXIOV which is the maximum segments allowed by
 // iovec implementation used by process_madvise syscall
-#define MAX_VMAS_PER_COMPACTION UIO_MAXIOV
+#define MAX_VMAS_PER_BATCH UIO_MAXIOV
 
 // Maximum bytes that we can send per process_madvise syscall once this limit
 // is reached we split the remaining VMAs into another syscall. The MAX_RW_COUNT
 // limit is imposed by iovec implementation. However, if you want to use a smaller
-// limit, it has to be a page aligned value, otherwise, compaction would fail.
-#define MAX_BYTES_PER_COMPACTION MAX_RW_COUNT
+// limit, it has to be a page aligned value.
+#define MAX_BYTES_PER_BATCH MAX_RW_COUNT
 
 // Selected a high enough number to avoid clashing with linux errno codes
 #define ERROR_COMPACTION_CANCELLED -1000
@@ -82,6 +82,180 @@ namespace android {
 // Signal happening in separate thread that would bail out compaction
 // before starting next VMA batch
 static std::atomic<bool> cancelRunningCompaction;
+
+// A VmaBatch represents a set of VMAs that can be processed
+// as VMAs are processed by client code it is expected that the
+// VMAs get consumed which means they are discarded as they are
+// processed so that the first element always is the next element
+// to be sent
+struct VmaBatch {
+    struct iovec* vmas;
+    // total amount of VMAs to reach the end of iovec
+    size_t totalVmas;
+    // total amount of bytes that are remaining within iovec
+    uint64_t totalBytes;
+};
+
+// Advances the iterator by the specified amount of bytes.
+// This is used to remove already processed or no longer
+// needed parts of the batch.
+// Returns total bytes consumed
+uint64_t consumeBytes(VmaBatch& batch, uint64_t bytesToConsume) {
+    if (CC_UNLIKELY(bytesToConsume) < 0) {
+        LOG(ERROR) << "Cannot consume negative bytes for VMA batch !";
+        return 0;
+    }
+
+    if (CC_UNLIKELY(bytesToConsume > batch.totalBytes)) {
+        // Avoid consuming more bytes than available
+        bytesToConsume = batch.totalBytes;
+    }
+
+    uint64_t bytesConsumed = 0;
+    while (bytesConsumed < bytesToConsume) {
+        if (CC_UNLIKELY(batch.totalVmas > 0)) {
+            // No more vmas to consume
+            break;
+        }
+        if (CC_UNLIKELY(bytesConsumed + batch.vmas[0].iov_len > bytesToConsume)) {
+            // This vma can't be fully consumed, do it partially.
+            uint64_t bytesLeftToConsume = bytesToConsume - bytesConsumed;
+            bytesConsumed += bytesLeftToConsume;
+            batch.vmas[0].iov_base = (void*)((uint64_t)batch.vmas[0].iov_base + bytesLeftToConsume);
+            batch.vmas[0].iov_len -= bytesLeftToConsume;
+            batch.totalBytes -= bytesLeftToConsume;
+            return bytesConsumed;
+        }
+        // This vma can be fully consumed
+        bytesConsumed += batch.vmas[0].iov_len;
+        batch.totalBytes -= batch.vmas[0].iov_len;
+        --batch.totalVmas;
+        ++batch.vmas;
+    }
+
+    return bytesConsumed;
+}
+
+// given a source of vmas this class will act as a factory
+// of VmaBatch objects and it will allow generating batches
+// until there are no more left in the source vector.
+// Note: the class does not actually modify the given
+// vmas vector, instead it iterates on it until the end.
+class VmaBatchCreator {
+    const std::vector<Vma>* sourceVmas;
+    // This is the destination array where batched VMAs will be stored
+    // it gets encapsulated into a VmaBatch which is the object
+    // meant to be used by client code.
+    struct iovec* destVmas;
+
+    // Parameters to keep track of the iterator on the source vmas
+    int currentIndex_;
+    uint64_t currentOffset_;
+
+public:
+    VmaBatchCreator(const std::vector<Vma>* vmasToBatch, struct iovec* destVmasVec)
+          : sourceVmas(vmasToBatch), destVmas(destVmasVec), currentIndex_(0), currentOffset_(0) {}
+
+    int currentIndex() { return currentIndex_; }
+    uint64_t currentOffset() { return currentOffset_; }
+
+    // Generates a batch and moves the iterator on the source vmas
+    // past the last VMA in the batch.
+    // Returns true on success, false on failure
+    bool createNextBatch(VmaBatch& batch) {
+        if (currentIndex_ >= MAX_VMAS_PER_BATCH && currentIndex_ >= sourceVmas->size()) {
+            return false;
+        }
+
+        const std::vector<Vma>& vmas = *sourceVmas;
+        batch.vmas = destVmas;
+        uint64_t totalBytesInBatch = 0;
+        int indexInBatch = 0;
+
+        // Add VMAs to the batch up until we consumed all the VMAs or
+        // reached any imposed limit of VMAs per batch.
+        while (indexInBatch < MAX_VMAS_PER_BATCH && currentIndex_ < vmas.size()) {
+            uint64_t vmaStart = vmas[currentIndex_].start + currentOffset_;
+            uint64_t vmaSize = vmas[currentIndex_].end - vmaStart;
+            uint64_t bytesAvailableInBatch = MAX_BYTES_PER_BATCH - totalBytesInBatch;
+
+            batch.vmas[indexInBatch].iov_base = (void*)vmaStart;
+
+            if (vmaSize > bytesAvailableInBatch) {
+                // VMA would exceed the max available bytes in batch
+                // clamp with available bytes and finish batch.
+                vmaSize = bytesAvailableInBatch;
+                currentOffset_ += bytesAvailableInBatch;
+            }
+
+            batch.vmas[indexInBatch].iov_len = vmaSize;
+            totalBytesInBatch += vmaSize;
+
+            ++indexInBatch;
+            if (totalBytesInBatch >= MAX_BYTES_PER_BATCH) {
+                // Reached max bytes quota so this marks
+                // the end of the batch
+                if (CC_UNLIKELY(vmaSize == (vmas[currentIndex_].end - vmaStart))) {
+                    // we reached max bytes exactly at the end of the vma
+                    // so advance to next one
+                    currentOffset_ = 0;
+                    ++currentIndex_;
+                }
+                break;
+            }
+            // Fully finished current VMA, move to next one
+            currentOffset_ = 0;
+            ++currentIndex_;
+        }
+        batch.totalVmas = indexInBatch;
+        batch.totalBytes = totalBytesInBatch;
+        if (batch.totalVmas == 0 || batch.totalBytes == 0) {
+            // This is an empty batch, mark as failed creating.
+            return false;
+        }
+        return true;
+    }
+};
+
+// Madvise a set of VMAs given in a batch for a specific process
+// The total number of bytes successfully madvised will be set on
+// outBytesProcessed.
+// Returns 0 on success and standard linux -errno code returned by
+// process_madvise on failure
+int madviseVmasFromBatch(unique_fd& pidfd, VmaBatch& batch, int madviseType,
+                         uint64_t* outBytesProcessed) {
+    if (batch.totalVmas == 0 || batch.totalBytes == 0) {
+        // No VMAs in Batch, skip.
+        *outBytesProcessed = 0;
+        return 0;
+    }
+
+    ATRACE_BEGIN(StringPrintf("Madvise %d: %zu VMAs.", madviseType, batch.totalVmas).c_str());
+    int64_t bytesProcessedInSend =
+            process_madvise(pidfd, batch.vmas, batch.totalVmas, madviseType, 0);
+    ATRACE_END();
+    if (CC_UNLIKELY(bytesProcessedInSend == -1)) {
+        bytesProcessedInSend = 0;
+        if (errno != EINVAL) {
+            // Forward irrecoverable errors and bail out compaction
+            *outBytesProcessed = 0;
+            return -errno;
+        }
+    }
+    if (bytesProcessedInSend == 0) {
+        // When we find a VMA with error, fully consume it as it
+        // is extremely expensive to iterate on its pages one by one
+        bytesProcessedInSend = batch.vmas[0].iov_len;
+    } else if (bytesProcessedInSend < batch.totalBytes) {
+        // Partially processed the bytes requested
+        // skip last page which is where it failed.
+        bytesProcessedInSend += PAGE_SIZE;
+    }
+    bytesProcessedInSend = consumeBytes(batch, bytesProcessedInSend);
+
+    *outBytesProcessed = bytesProcessedInSend;
+    return 0;
+}
 
 // Legacy method for compacting processes, any new code should
 // use compactProcess instead.
@@ -96,8 +270,6 @@ static inline void compactProcessProcfs(int pid, const std::string& compactionTy
 // If any VMA fails compaction due to -EINVAL it will be skipped and continue.
 // However, if it fails for any other reason, it will bail out and forward the error
 static int64_t compactMemory(const std::vector<Vma>& vmas, int pid, int madviseType) {
-    static struct iovec vmasToKernel[MAX_VMAS_PER_COMPACTION];
-
     if (vmas.empty()) {
         return 0;
     }
@@ -108,13 +280,16 @@ static int64_t compactMemory(const std::vector<Vma>& vmas, int pid, int madviseT
         return -errno;
     }
 
-    int64_t totalBytesProcessed = 0;
+    struct iovec destVmas[MAX_VMAS_PER_BATCH];
 
-    int64_t vmaOffset = 0;
-    for (int iVma = 0; iVma < vmas.size();) {
-        uint64_t bytesSentToCompact = 0;
-        int iVec = 0;
-        while (iVec < MAX_VMAS_PER_COMPACTION && iVma < vmas.size()) {
+    VmaBatch batch;
+    VmaBatchCreator batcher(&vmas, destVmas);
+
+    int64_t totalBytesProcessed = 0;
+    while (batcher.createNextBatch(batch)) {
+        uint64_t bytesProcessedInSend;
+        ScopedTrace batchTrace(ATRACE_TAG, "VMA Batch");
+        do {
             if (CC_UNLIKELY(cancelRunningCompaction.load())) {
                 // There could be a significant delay between when a compaction
                 // is requested and when it is handled during this time our
@@ -124,50 +299,18 @@ static int64_t compactMemory(const std::vector<Vma>& vmas, int pid, int madviseT
                                          StringPrintf("Cancelled compaction for %d", pid).c_str());
                 return ERROR_COMPACTION_CANCELLED;
             }
-
-            uint64_t vmaStart = vmas[iVma].start + vmaOffset;
-            uint64_t vmaSize = vmas[iVma].end - vmaStart;
-            if (vmaSize == 0) {
-                goto next_vma;
+            int error = madviseVmasFromBatch(pidfd, batch, madviseType, &bytesProcessedInSend);
+            if (error < 0) {
+                // Returns standard linux errno code
+                return error;
             }
-            vmasToKernel[iVec].iov_base = (void*)vmaStart;
-            if (vmaSize > MAX_BYTES_PER_COMPACTION - bytesSentToCompact) {
-                // Exceeded the max bytes that could be sent, so clamp
-                // the end to avoid exceeding limit and issue compaction
-                vmaSize = MAX_BYTES_PER_COMPACTION - bytesSentToCompact;
-            }
-
-            vmasToKernel[iVec].iov_len = vmaSize;
-            bytesSentToCompact += vmaSize;
-            ++iVec;
-            if (bytesSentToCompact >= MAX_BYTES_PER_COMPACTION) {
-                // Ran out of bytes within iovec, dispatch compaction.
-                vmaOffset += vmaSize;
+            if (CC_UNLIKELY(bytesProcessedInSend == 0)) {
+                // This means there was a problem consuming bytes,
+                // bail out since no forward progress can be made with this batch
                 break;
             }
-
-        next_vma:
-            // Finished current VMA, and have more bytes remaining
-            vmaOffset = 0;
-            ++iVma;
-        }
-
-        ATRACE_BEGIN(StringPrintf("Compact %d VMAs", iVec).c_str());
-        auto bytesProcessed = process_madvise(pidfd, vmasToKernel, iVec, madviseType, 0);
-        ATRACE_END();
-
-        if (CC_UNLIKELY(bytesProcessed == -1)) {
-            if (errno == EINVAL) {
-                // This error is somewhat common due to an unevictable VMA if this is
-                // the case silently skip the bad VMA and continue compacting the rest.
-                continue;
-            } else {
-                // Forward irrecoverable errors and bail out compaction
-                return -errno;
-            }
-        }
-
-        totalBytesProcessed += bytesProcessed;
+            totalBytesProcessed += bytesProcessedInSend;
+        } while (batch.totalBytes > 0 && batch.totalVmas > 0);
     }
 
     return totalBytesProcessed;
@@ -203,6 +346,7 @@ static int getAnyPageAdvice(const Vma& vma) {
 static int64_t compactProcess(int pid, VmaToAdviseFunc vmaToAdviseFunc) {
     cancelRunningCompaction.store(false);
 
+    ATRACE_BEGIN("CollectVmas");
     ProcMemInfo meminfo(pid);
     std::vector<Vma> pageoutVmas, coldVmas;
     auto vmaCollectorCb = [&coldVmas,&pageoutVmas,&vmaToAdviseFunc](const Vma& vma) {
@@ -217,6 +361,7 @@ static int64_t compactProcess(int pid, VmaToAdviseFunc vmaToAdviseFunc) {
         }
     };
     meminfo.ForEachVmaFromMaps(vmaCollectorCb);
+    ATRACE_END();
 
     int64_t pageoutBytes = compactMemory(pageoutVmas, pid, MADV_PAGEOUT);
     if (pageoutBytes < 0) {
