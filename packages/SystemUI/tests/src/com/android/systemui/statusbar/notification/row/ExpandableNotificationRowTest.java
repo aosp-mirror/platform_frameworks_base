@@ -322,8 +322,19 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         ExpandableNotificationRow row =
                 mNotificationTestHelper.createRow(mNotificationTestHelper.createNotification());
         row.getEntry().getChannel().setImportanceLockedByCriticalDeviceFunction(true);
+        row.getEntry().getChannel().setBlockable(false);
 
         assertTrue(row.getIsNonblockable());
+    }
+
+    @Test
+    public void testGetIsNonblockable_criticalDeviceFunction_butBlockable() throws Exception {
+        ExpandableNotificationRow row =
+                mNotificationTestHelper.createRow(mNotificationTestHelper.createNotification());
+        row.getEntry().getChannel().setImportanceLockedByCriticalDeviceFunction(true);
+        row.getEntry().getChannel().setBlockable(true);
+
+        assertFalse(row.getIsNonblockable());
     }
 
     @Test
