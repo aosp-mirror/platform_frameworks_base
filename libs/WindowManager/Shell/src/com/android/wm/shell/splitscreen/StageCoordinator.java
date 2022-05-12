@@ -30,6 +30,7 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.transitTypeToString;
 import static android.window.TransitionInfo.FLAG_FIRST_CUSTOM;
 import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER;
 
 import static com.android.wm.shell.common.split.SplitLayout.PARALLAX_ALIGN_CENTER;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
@@ -369,10 +370,15 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         sideOptions = sideOptions != null ? sideOptions : new Bundle();
         setSideStagePosition(sidePosition, wct);
 
+        if (mMainStage.isActive()) {
+            mMainStage.evictAllChildren(wct);
+            mSideStage.evictAllChildren(wct);
+        } else {
+            // Build a request WCT that will launch both apps such that task 0 is on the main stage
+            // while task 1 is on the side stage.
+            mMainStage.activate(wct, false /* reparent */);
+        }
         mSplitLayout.setDivideRatio(splitRatio);
-        // Build a request WCT that will launch both apps such that task 0 is on the main stage
-        // while task 1 is on the side stage.
-        mMainStage.activate(wct, false /* reparent */);
         updateWindowBounds(mSplitLayout, wct);
         wct.reorder(mRootTaskInfo.token, true);
 
@@ -1503,16 +1509,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     @Override
     public void onTransitionMerged(@NonNull IBinder transition) {
-        // Once the pending enter transition got merged, make sure to bring divider bar visible and
-        // clear the pending transition from cache to prevent mess-up the following state.
-        if (transition == mSplitTransitions.mPendingEnter) {
-            final SurfaceControl.Transaction t = mTransactionPool.acquire();
-            finishEnterSplitScreen(t);
-            mSplitTransitions.mPendingEnter = null;
-            mSplitTransitions.mPendingRemoteHandler = null;
-            t.apply();
-            mTransactionPool.release(t);
-        }
+        mSplitTransitions.onTransitionMerged(transition);
     }
 
     @Override
@@ -1713,8 +1710,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             logExitToStage(dismissReason, toStage == STAGE_TYPE_MAIN);
         }
 
-        addDividerBarToTransition(info, t, false /* show */);
-
         // Hide divider and dim layer on transition finished.
         setDividerVisibility(false, finishT);
         finishT.hide(mMainStage.mDimLayer);
@@ -1736,6 +1731,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             return false;
         }
 
+        addDividerBarToTransition(info, t, false /* show */);
         return true;
     }
 
@@ -1745,26 +1741,26 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         return true;
     }
 
-    void onRecentTransitionFinished(boolean returnToHome, WindowContainerTransaction wct,
+    void onRecentTransitionFinished(WindowContainerTransaction wct,
             SurfaceControl.Transaction finishT) {
-        // Exclude the case that the split screen has been dismissed already.
-        if (!mMainStage.isActive()) {
-            // The latest split dismissing transition might be a no-op transition and thus won't
-            // callback startAnimation, update split visibility here to cover this kind of no-op
-            // transition case.
-            setSplitsVisible(false);
-            return;
+        // Check if the recent transition is finished by returning to the current split so we can
+        // restore the divider bar.
+        for (int i = 0; i < wct.getHierarchyOps().size(); ++i) {
+            final WindowContainerTransaction.HierarchyOp op = wct.getHierarchyOps().get(i);
+            final IBinder container = op.getContainer();
+            if (op.getType() == HIERARCHY_OP_TYPE_REORDER && op.getToTop()
+                    && (mMainStage.containsContainer(container)
+                    || mSideStage.containsContainer(container))) {
+                setDividerVisibility(true, finishT);
+                return;
+            }
         }
 
-        if (returnToHome) {
-            // When returning to home from recent apps, the splitting tasks are already hidden, so
-            // append the reset of dismissing operations into the clean-up wct.
-            prepareExitSplitScreen(STAGE_TYPE_UNDEFINED, wct);
-            setSplitsVisible(false);
-            logExit(EXIT_REASON_RETURN_HOME);
-        } else {
-            setDividerVisibility(true, finishT);
-        }
+        // Dismiss the split screen is it's not returning to split.
+        prepareExitSplitScreen(STAGE_TYPE_UNDEFINED, wct);
+        setSplitsVisible(false);
+        setDividerVisibility(false, finishT);
+        logExit(EXIT_REASON_UNKNOWN);
     }
 
     private void addDividerBarToTransition(@NonNull TransitionInfo info,
