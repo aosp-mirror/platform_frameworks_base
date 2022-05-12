@@ -5384,10 +5384,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         @Override
         public void setApplicationCategoryHint(String packageName, int categoryHint,
                 String callerPackageName) {
-            final PackageStateMutator.InitialState initialState = recordInitialState();
-
-            final FunctionalUtils.ThrowingFunction<Computer, PackageStateMutator.Result>
-                    implementation = computer -> {
+            final FunctionalUtils.ThrowingBiFunction<PackageStateMutator.InitialState, Computer,
+                    PackageStateMutator.Result> implementation = (initialState, computer) -> {
                 if (computer.getInstantAppPackageName(Binder.getCallingUid()) != null) {
                     throw new SecurityException(
                             "Instant applications don't have access to this method");
@@ -5415,12 +5413,13 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 }
             };
 
-            PackageStateMutator.Result result = implementation.apply(snapshotComputer());
+            PackageStateMutator.Result result =
+                    implementation.apply(recordInitialState(), snapshotComputer());
             if (result != null && result.isStateChanged() && !result.isSpecificPackageNull()) {
                 // TODO: Specific return value of what state changed?
                 // The installer on record might have changed, retry with lock
                 synchronized (mPackageStateWriteLock) {
-                    result = implementation.apply(snapshotComputer());
+                    result = implementation.apply(recordInitialState(), snapshotComputer());
                 }
             }
 
@@ -7152,9 +7151,19 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     public PackageStateMutator.Result commitPackageStateMutation(
             @Nullable PackageStateMutator.InitialState initialState, @NonNull String packageName,
             @NonNull Consumer<PackageStateWrite> consumer) {
+        PackageStateMutator.Result result = null;
+        if (Thread.holdsLock(mPackageStateWriteLock)) {
+            // If the thread is already holding the lock, this is likely a retry based on a prior
+            // failure, and re-calculating whether a state change occurred can be skipped.
+            result = PackageStateMutator.Result.SUCCESS;
+        }
         synchronized (mPackageStateWriteLock) {
-            final PackageStateMutator.Result result = mPackageStateMutator.generateResult(
-                    initialState, mChangedPackagesTracker.getSequenceNumber());
+            if (result == null) {
+                // If the thread wasn't previously holding, this is a first-try commit and so a
+                // state change may have happened.
+                result = mPackageStateMutator.generateResult(
+                        initialState, mChangedPackagesTracker.getSequenceNumber());
+            }
             if (result != PackageStateMutator.Result.SUCCESS) {
                 return result;
             }
