@@ -8078,8 +8078,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             // do this when the system user is not setup since the setup wizard should be the one
             // to handle home activity in this case.
             if (UserManager.isSplitSystemUser() &&
-                    Settings.Secure.getInt(mContext.getContentResolver(),
-                         Settings.Secure.USER_SETUP_COMPLETE, 0) != 0
+                    Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                         Settings.Secure.USER_SETUP_COMPLETE, 0, currentUserId) != 0
                     || SystemProperties.getBoolean(SYSTEM_USER_HOME_NEEDED, false)) {
                 t.traceBegin("enableHomeActivity");
                 ComponentName cName = new ComponentName(mContext, SystemUserHomeActivity.class);

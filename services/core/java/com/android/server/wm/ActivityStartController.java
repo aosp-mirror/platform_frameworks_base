@@ -228,8 +228,8 @@ public class ActivityStartController {
                     vers = ri.activityInfo.applicationInfo.metaData.getString(
                             Intent.METADATA_SETUP_VERSION);
                 }
-                String lastVers = Settings.Secure.getString(
-                        resolver, Settings.Secure.LAST_SETUP_SHOWN);
+                String lastVers = Settings.Secure.getStringForUser(
+                        resolver, Settings.Secure.LAST_SETUP_SHOWN, resolver.getUserId());
                 if (vers != null && !vers.equals(lastVers)) {
                     intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
                     intent.setComponent(new ComponentName(
