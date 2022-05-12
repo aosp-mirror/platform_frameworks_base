@@ -82,6 +82,10 @@ class FingerprintResetLockoutClient extends HalClientMonitor<AidlSession> implem
         }
     }
 
+    public boolean interruptsPrecedingClients() {
+        return true;
+    }
+
     void onLockoutCleared() {
         resetLocalLockoutStateToNone(getSensorId(), getTargetUserId(), mLockoutCache,
                 mLockoutResetDispatcher);

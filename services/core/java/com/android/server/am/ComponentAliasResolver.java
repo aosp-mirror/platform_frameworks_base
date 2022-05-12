@@ -483,7 +483,7 @@ public class ComponentAliasResolver {
     @Nullable
     public Resolution<ResolveInfo> resolveReceiver(@NonNull Intent intent,
             @NonNull ResolveInfo receiver, @Nullable String resolvedType,
-            int packageFlags, int userId, int callingUid) {
+            int packageFlags, int userId, int callingUid, boolean forSend) {
         // Resolve this alias.
         final Resolution<ComponentName> resolution = resolveComponentAlias(() ->
                 receiver.activityInfo.getComponentName());
@@ -506,8 +506,8 @@ public class ComponentAliasResolver {
         i.setPackage(null);
         i.setComponent(resolution.getTarget());
 
-        List<ResolveInfo> resolved = pmi.queryIntentReceivers(i,
-                resolvedType, packageFlags, callingUid, userId);
+        List<ResolveInfo> resolved = pmi.queryIntentReceivers(
+                i, resolvedType, packageFlags, callingUid, userId, forSend);
         if (resolved == null || resolved.size() == 0) {
             // Target component not found.
             Slog.w(TAG, "Alias target " + target.flattenToShortString() + " not found");
