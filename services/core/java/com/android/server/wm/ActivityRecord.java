@@ -6343,8 +6343,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mSharedStartingData != null ? mSharedStartingData.mAssociatedTask : null;
         if (associatedTask == null) {
             removeStartingWindow();
-        } else if (associatedTask.getActivity(
-                r -> r.mVisibleRequested && !r.firstWindowDrawn) == null) {
+        } else if (associatedTask.getActivity(r -> r.mVisibleRequested && !r.firstWindowDrawn
+                // Don't block starting window removal if an Activity can't be a starting window
+                // target.
+                && r.mSharedStartingData != null) == null) {
             // The last drawn activity may not be the one that owns the starting window.
             final ActivityRecord r = associatedTask.topActivityContainsStartingWindow();
             if (r != null) {
