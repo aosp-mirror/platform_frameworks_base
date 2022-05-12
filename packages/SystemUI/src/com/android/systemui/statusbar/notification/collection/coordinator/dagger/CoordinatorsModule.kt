@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.notification.collection.coordinator.dagger
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.statusbar.notification.collection.coordinator.ActivityLaunchAnimCoordinatorModule
 import com.android.systemui.statusbar.notification.collection.coordinator.NotifCoordinators
 import com.android.systemui.statusbar.notification.collection.coordinator.NotifCoordinatorsImpl
 import dagger.Binds
@@ -48,7 +47,6 @@ interface CoordinatorsSubcomponent {
 }
 
 @Module(includes = [
-    ActivityLaunchAnimCoordinatorModule::class,
 ])
 private abstract class InternalCoordinatorsModule {
     @Binds
