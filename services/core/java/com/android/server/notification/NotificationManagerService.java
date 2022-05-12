@@ -2285,6 +2285,7 @@ public class NotificationManagerService extends SystemService {
                 mNotificationChannelLogger,
                 mAppOps,
                 new SysUiStatsEvent.BuilderFactory());
+        mPreferencesHelper.updateFixedImportance(mUm.getUsers());
         mRankingHelper = new RankingHelper(getContext(),
                 mRankingHandler,
                 mPreferencesHelper,
@@ -3630,6 +3631,12 @@ public class NotificationManagerService extends SystemService {
             } else {
                 return IMPORTANCE_NONE;
             }
+        }
+
+        @Override
+        public boolean isImportanceLocked(String pkg, int uid) {
+            checkCallerIsSystem();
+            return mPreferencesHelper.isImportanceLocked(pkg, uid);
         }
 
         @Override
