@@ -2484,6 +2484,12 @@
     <string name="clipboard_send_nearby_description">Send to nearby device</string>
     <!-- Text informing user that copied content is hidden [CHAR LIMIT=NONE] -->
     <string name="clipboard_text_hidden">Tap to view</string>
+    <!-- Accessibility announcement informing user that text has been copied [CHAR LIMIT=NONE] -->
+    <string name="clipboard_text_copied">Text copied</string>
+    <!-- Accessibility announcement informing user that text has been copied [CHAR LIMIT=NONE] -->
+    <string name="clipboard_image_copied">Image copied</string>
+    <!-- Accessibility announcement informing user that something has been copied [CHAR LIMIT=NONE] -->
+    <string name="clipboard_content_copied">Content copied</string>
 
     <!-- Generic "add" string [CHAR LIMIT=NONE] -->
     <string name="add">Add</string>
