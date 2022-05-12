@@ -659,4 +659,7 @@
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"ನೀವು <xliff:g id="SWITCHAPP">%1$s</xliff:g> ಅನ್ನು ಪ್ರಸಾರ ಮಾಡಿದರೆ ಅಥವಾ ಔಟ್‌ಪುಟ್ ಅನ್ನು ಬದಲಾಯಿಸಿದರೆ, ನಿಮ್ಮ ಪ್ರಸ್ತುತ ಪ್ರಸಾರವು ಸ್ಥಗಿತಗೊಳ್ಳುತ್ತದೆ"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> ಅನ್ನು ಪ್ರಸಾರ ಮಾಡಿ"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"ಔಟ್‌ಪುಟ್ ಅನ್ನು ಬದಲಾಯಿಸಿ"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"ಮುನ್ನೋಟದ ಬ್ಯಾಕ್ ಆ್ಯನಿಮೇಶನ್‌ಗಳು"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"ಮುನ್ನೋಟದ ಬ್ಯಾಕ್ ಗೆಸ್ಚರ್‌ಗಾಗಿ ಸಿಸ್ಟಂ ಆ್ಯನಿಮೇಶನ್‌ಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ."</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"ಮುನ್ನೋಟದ ಗೆಸ್ಚರ್ ಆ್ಯನಿಮೇಶನ್‌ಗಾಗಿ ಸಿಸ್ಟಂ ಆ್ಯನಿಮೇಶನ್‌ಗಳನ್ನು ಈ ಸೆಟ್ಟಿಂಗ್ ಸಕ್ರಿಯಗೊಳಿಸುತ್ತವೆ. ಇದನ್ನು ಮಾಡಲು, ಪ್ರತಿ ಆ್ಯಪ್‌ನ ಮ್ಯಾನಿಫೆಸ್ಟ್ ಫೈಲ್‌ನಲ್ಲಿರುವ enableOnBackInvokedCallback ಪ್ಯಾರಾಮೀಟರ್ ಅನ್ನು ಸರಿ ಎಂದು ಹೊಂದಿಸಬೇಕು."</string>
 </resources>

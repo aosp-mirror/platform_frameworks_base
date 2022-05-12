@@ -1681,9 +1681,9 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> کو آپ کے آلے کا مکمل کنٹرول حاصل کرنے کی اجازت دیں؟"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"مکمل کنٹرول ان ایپس کے لیے مناسب ہے جو ایکسیسبیلٹی کی ضروریات میں آپ کی مدد کرتی ہیں، لیکن زیادہ تر ایپس کیلئے مناسب نہیں۔"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"اسکرین کو دیکھیں اور کنٹرول کریں"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"یہ تمام مواد کو اسکرین پر پڑھ اور دیگر ایپس پر مواد کو ڈسپلے کر سکتا ہے۔"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"یہ اسکرین پر موجود تمام مواد کو پڑھ سکتا ہے اور دیگر ایپس پر مواد کو ڈسپلے کر سکتا ہے۔"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"کارروائیاں دیکھیں اور انجام دیں"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"یہ آپ کے تعاملات کو ایپ یا ہارڈویئر سینسر کے ذریعے ٹریک کر سکتا ہے، اور آپ کی طرف سے ایپ کے ساتھ تعمل کر سکتا ہے۔"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"یہ کسی ایپ یا ہارڈویئر سینسر کے ساتھ آپ کے تعاملات کو ٹریک کر سکتا ہے، اور آپ کی طرف سے ایپس کے ساتھ تعامل کر سکتا ہے۔"</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"اجازت دیں"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"مسترد کریں"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ایک خصوصیت کا استعمال شروع کرنے کیلئے اسے تھپتھپائیں:"</string>
@@ -1697,7 +1697,7 @@
     <string name="color_inversion_feature_name" msgid="326050048927789012">"رنگوں کی تقلیب"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"رنگ کی تصحیح"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"ایک ہاتھ کی وضع"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"اضافی دھندلا"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"اضافی مدھم"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"والیوم کی کلیدوں کو دبائے رکھا گیا۔ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> آن ہے۔"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"والیوم کی کلیدوں کو دبائے رکھا گیا۔ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> آف ہے۔"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> کا استعمال کرنے کے لیے 3 سیکنڈ تک والیوم کی دونوں کلیدوں کو چھوئیں اور دبائے رکھیں"</string>

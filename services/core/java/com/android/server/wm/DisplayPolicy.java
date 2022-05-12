@@ -651,15 +651,17 @@ public class DisplayPolicy {
 
         mForceShowNavBarSettingsObserver = new ForceShowNavBarSettingsObserver(
                 mHandler, mContext);
-        mForceShowNavBarSettingsObserver.setOnChangeRunnable(() -> {
-            synchronized (mLock) {
-                mForceShowNavigationBarEnabled =
-                        mForceShowNavBarSettingsObserver.isEnabled();
-                updateSystemBarAttributes();
-            }
-        });
+        mForceShowNavBarSettingsObserver.setOnChangeRunnable(this::updateForceShowNavBarSettings);
         mForceShowNavigationBarEnabled = mForceShowNavBarSettingsObserver.isEnabled();
         mHandler.post(mForceShowNavBarSettingsObserver::register);
+    }
+
+    private void updateForceShowNavBarSettings() {
+        synchronized (mLock) {
+            mForceShowNavigationBarEnabled =
+                    mForceShowNavBarSettingsObserver.isEnabled();
+            updateSystemBarAttributes();
+        }
     }
 
     /**
@@ -1801,6 +1803,7 @@ public class DisplayPolicy {
      */
     public void switchUser() {
         updateCurrentUserResources();
+        updateForceShowNavBarSettings();
     }
 
     /**

@@ -24,8 +24,12 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
+import android.app.Activity;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 
@@ -137,9 +141,8 @@ public class TaskContainerTest {
 
         assertTrue(taskContainer.isEmpty());
 
-        final TaskFragmentContainer tf = new TaskFragmentContainer(null /* activity */, TASK_ID,
-                mController);
-        taskContainer.mContainers.add(tf);
+        final TaskFragmentContainer tf = new TaskFragmentContainer(null /* activity */,
+                taskContainer, mController);
 
         assertFalse(taskContainer.isEmpty());
 
@@ -147,5 +150,39 @@ public class TaskContainerTest {
         taskContainer.mContainers.clear();
 
         assertFalse(taskContainer.isEmpty());
+    }
+
+    @Test
+    public void testGetTopTaskFragmentContainer() {
+        final TaskContainer taskContainer = new TaskContainer(TASK_ID);
+        assertNull(taskContainer.getTopTaskFragmentContainer());
+
+        final TaskFragmentContainer tf0 = new TaskFragmentContainer(null /* activity */,
+                taskContainer, mController);
+        assertEquals(tf0, taskContainer.getTopTaskFragmentContainer());
+
+        final TaskFragmentContainer tf1 = new TaskFragmentContainer(null /* activity */,
+                taskContainer, mController);
+        assertEquals(tf1, taskContainer.getTopTaskFragmentContainer());
+    }
+
+    @Test
+    public void testGetTopNonFinishingActivity() {
+        final TaskContainer taskContainer = new TaskContainer(TASK_ID);
+        assertNull(taskContainer.getTopNonFinishingActivity());
+
+        final TaskFragmentContainer tf0 = mock(TaskFragmentContainer.class);
+        taskContainer.mContainers.add(tf0);
+        final Activity activity0 = mock(Activity.class);
+        doReturn(activity0).when(tf0).getTopNonFinishingActivity();
+        assertEquals(activity0, taskContainer.getTopNonFinishingActivity());
+
+        final TaskFragmentContainer tf1 = mock(TaskFragmentContainer.class);
+        taskContainer.mContainers.add(tf1);
+        assertEquals(activity0, taskContainer.getTopNonFinishingActivity());
+
+        final Activity activity1 = mock(Activity.class);
+        doReturn(activity1).when(tf1).getTopNonFinishingActivity();
+        assertEquals(activity1, taskContainer.getTopNonFinishingActivity());
     }
 }

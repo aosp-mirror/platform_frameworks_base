@@ -611,10 +611,9 @@ public class ActivityRecordTests extends WindowTestsBase {
         activity.setRequestedOrientation(activityCurOrientation == ORIENTATION_LANDSCAPE
                 ? SCREEN_ORIENTATION_PORTRAIT : SCREEN_ORIENTATION_LANDSCAPE);
 
-        // Asserts fixed orientation request is ignored, and the orientation is not changed
-        // (fill Task).
-        assertEquals(activityCurOrientation, activity.getConfiguration().orientation);
-        assertFalse(activity.isLetterboxedForFixedOrientationAndAspectRatio());
+        // Asserts fixed orientation request is not ignored, and the orientation is changed.
+        assertNotEquals(activityCurOrientation, activity.getConfiguration().orientation);
+        assertTrue(activity.isLetterboxedForFixedOrientationAndAspectRatio());
     }
 
     @Test
@@ -2853,6 +2852,11 @@ public class ActivityRecordTests extends WindowTestsBase {
         taskFragment2.addChild(activity2);
         assertTrue(activity2.isResizeable());
         activity1.reparent(taskFragment1, POSITION_TOP);
+
+        // Adds an Activity which doesn't have shared starting data, and verify if it blocks
+        // starting window removal.
+        final ActivityRecord activity3 = new ActivityBuilder(mAtm).build();
+        taskFragment2.addChild(activity3, POSITION_TOP);
 
         verify(activity1.getSyncTransaction()).reparent(eq(startingWindow.mSurfaceControl),
                 eq(task.mSurfaceControl));

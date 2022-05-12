@@ -167,7 +167,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    static final int VERSION = 207;
+    static final int VERSION = 208;
 
     // The maximum number of names wakelocks we will keep track of
     // per uid; once the limit is reached, we batch the remaining wakelocks
@@ -3981,8 +3981,7 @@ public class BatteryStatsImpl extends BatteryStats {
         if (idxObj != null) {
             idx = idxObj;
             if ((idx & TAG_FIRST_OCCURRENCE_FLAG) != 0) {
-                idx &= ~TAG_FIRST_OCCURRENCE_FLAG;
-                mHistoryTagPool.put(tag, idx);
+                mHistoryTagPool.put(tag, idx & ~TAG_FIRST_OCCURRENCE_FLAG);
             }
             return idx;
         } else if (mNextHistoryTagIdx < HISTORY_TAG_INDEX_LIMIT) {

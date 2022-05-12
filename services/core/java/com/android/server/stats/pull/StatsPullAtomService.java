@@ -204,6 +204,7 @@ import com.android.server.SystemServiceManager;
 import com.android.server.am.MemoryStatUtil.MemoryStat;
 import com.android.server.health.HealthServiceWrapper;
 import com.android.server.notification.NotificationManagerService;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.stats.pull.IonMemoryUtil.IonAllocations;
 import com.android.server.stats.pull.ProcfsMemoryUtil.MemorySnapshot;
 import com.android.server.stats.pull.netstats.NetworkStatsExt;
@@ -4106,11 +4107,24 @@ public class StatsPullAtomService extends SystemService {
             // Incremental is not enabled on this device. The result list will be empty.
             return StatsManager.PULL_SUCCESS;
         }
-        List<PackageInfo> installedPackages = pm.getInstalledPackages(0);
-        for (PackageInfo pi : installedPackages) {
-            if (IncrementalManager.isIncrementalPath(pi.applicationInfo.getBaseCodePath())) {
-                pulledData.add(FrameworkStatsLog.buildStatsEvent(atomTag, pi.applicationInfo.uid));
+        final long token = Binder.clearCallingIdentity();
+        try {
+            int[] userIds = LocalServices.getService(UserManagerInternal.class).getUserIds();
+            for (int userId : userIds) {
+                List<PackageInfo> installedPackages = pm.getInstalledPackagesAsUser(0, userId);
+                for (PackageInfo pi : installedPackages) {
+                    if (IncrementalManager.isIncrementalPath(
+                            pi.applicationInfo.getBaseCodePath())) {
+                        pulledData.add(
+                                FrameworkStatsLog.buildStatsEvent(atomTag, pi.applicationInfo.uid));
+                    }
+                }
             }
+        } catch (Exception e) {
+            Slog.e(TAG, "failed to pullInstalledIncrementalPackagesLocked", e);
+            return StatsManager.PULL_SKIP;
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
         return StatsManager.PULL_SUCCESS;
     }
