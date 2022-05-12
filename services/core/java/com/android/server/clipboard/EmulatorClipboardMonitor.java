@@ -60,11 +60,11 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
         return mPipe;
     }
 
-    private synchronized boolean openPipe() {
-        if (mPipe != null) {
-            return true;
-        }
+    private synchronized void setPipeFD(final FileDescriptor fd) {
+        mPipe = fd;
+    }
 
+    private static FileDescriptor openPipeImpl() {
         try {
             final FileDescriptor fd = Os.socket(OsConstants.AF_VSOCK, OsConstants.SOCK_STREAM, 0);
 
@@ -72,16 +72,33 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
                 Os.connect(fd, new VmSocketAddress(HOST_PORT, OsConstants.VMADDR_CID_HOST));
 
                 final byte[] handshake = createOpenHandshake();
-                Os.write(fd, handshake, 0, handshake.length);
-                mPipe = fd;
-                return true;
+                writeFully(fd, handshake, 0, handshake.length);
+                return fd;
             } catch (ErrnoException | SocketException | InterruptedIOException e) {
                 Os.close(fd);
             }
         } catch (ErrnoException e) {
         }
 
-        return false;
+        return null;
+    }
+
+    private void openPipe() throws InterruptedException {
+        FileDescriptor fd = getPipeFD();
+
+        if (fd == null) {
+            fd = openPipeImpl();
+
+            // There's no guarantee that QEMU pipes will be ready at the moment
+            // this method is invoked. We simply try to get the pipe open and
+            // retry on failure indefinitely.
+            while (fd == null) {
+                Thread.sleep(100);
+                fd = openPipeImpl();
+            }
+        }
+
+        setPipeFD(fd);
     }
 
     private synchronized void closePipe() {
@@ -125,12 +142,7 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
         this.mHostMonitorThread = new Thread(() -> {
             while (!Thread.interrupted()) {
                 try {
-                    // There's no guarantee that QEMU pipes will be ready at the moment
-                    // this method is invoked. We simply try to get the pipe open and
-                    // retry on failure indefinitely.
-                    while (!openPipe()) {
-                        Thread.sleep(100);
-                    }
+                    openPipe();
 
                     final byte[] receivedData = receiveMessage();
 
