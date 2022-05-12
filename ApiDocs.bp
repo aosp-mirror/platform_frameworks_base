@@ -134,11 +134,7 @@ droidstubs {
     defaults: ["android-non-updatable-doc-stubs-defaults"],
     srcs: [":all-modules-public-stubs-source"],
     args: metalava_framework_docs_args,
-    api_levels_annotations_enabled: true,
-    api_levels_annotations_dirs: [
-        "sdk-dir",
-        "api-versions-jars-dir",
-    ],
+    api_levels_module: "api_versions_public",
     aidl: {
         include_dirs: [
             "packages/modules/Connectivity/framework/aidl-export",

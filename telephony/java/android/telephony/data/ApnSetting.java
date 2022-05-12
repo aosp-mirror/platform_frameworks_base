@@ -1290,8 +1290,8 @@ public class ApnSetting implements Parcelable {
                 && Objects.equals(this.mOperatorNumeric, other.mOperatorNumeric)
                 && Objects.equals(this.mProtocol, other.mProtocol)
                 && Objects.equals(this.mRoamingProtocol, other.mRoamingProtocol)
-                && xorEqualsInt(this.mMtuV4, other.mMtuV4)
-                && xorEqualsInt(this.mMtuV6, other.mMtuV6)
+                && mtuUnsetOrEquals(this.mMtuV4, other.mMtuV4)
+                && mtuUnsetOrEquals(this.mMtuV6, other.mMtuV6)
                 && Objects.equals(this.mCarrierEnabled, other.mCarrierEnabled)
                 && Objects.equals(this.mNetworkTypeBitmask, other.mNetworkTypeBitmask)
                 && Objects.equals(this.mLingeringNetworkTypeBitmask,
@@ -1319,7 +1319,12 @@ public class ApnSetting implements Parcelable {
     // Equal or one is not specified.
     private boolean xorEqualsInt(int first, int second) {
         return first == UNSPECIFIED_INT || second == UNSPECIFIED_INT
-            || Objects.equals(first, second);
+                || first == second;
+    }
+
+    // Equal or one is not specified. Specific to MTU where <= 0 indicates unset.
+    private boolean mtuUnsetOrEquals(int first, int second) {
+        return first <= 0 || second <= 0 || first == second;
     }
 
     private String nullToEmpty(String stringValue) {

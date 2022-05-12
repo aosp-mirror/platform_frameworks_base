@@ -22,6 +22,7 @@ import android.app.AlarmManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
+import android.os.Build;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.SystemClock;
@@ -164,6 +165,11 @@ final class EnvironmentImpl implements TimeDetectorStrategyImpl.Environment {
     public void releaseWakeLock() {
         checkWakeLockHeld();
         mWakeLock.release();
+    }
+
+    @Override
+    public boolean deviceHasY2038Issue() {
+        return Build.SUPPORTED_32_BIT_ABIS.length > 0;
     }
 
     private void checkWakeLockHeld() {
