@@ -648,10 +648,6 @@ final class InstallPackageHelper {
             Log.v(TAG, "restoreAndPostInstall userId=" + userId + " package=" + res.mPkg);
         }
 
-        if (res.mPkg != null) {
-            PackageManagerServiceUtils.verifySelinuxLabels(res.mPkg.getPath());
-        }
-
         // A restore should be requested at this point if (a) the install
         // succeeded, (b) the operation is not an update.
         final boolean update = res.mRemovedInfo != null
@@ -3570,7 +3566,6 @@ final class InstallPackageHelper {
             @ParsingPackageUtils.ParseFlags int parseFlags,
             @PackageManagerService.ScanFlags int scanFlags,
             @Nullable UserHandle user) throws PackageManagerException {
-        PackageManagerServiceUtils.verifySelinuxLabels(parsedPackage.getPath());
 
         final Pair<ScanResult, Boolean> scanResultPair = scanSystemPackageLI(
                 parsedPackage, parseFlags, scanFlags, user);
