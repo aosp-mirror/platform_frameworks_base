@@ -15,6 +15,8 @@
  */
 package com.android.keyguard;
 
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.KEYGUARD_DIALOG_FAILED_ATTEMPTS_ALMOST_ERASING_PROFILE;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.KEYGUARD_DIALOG_FAILED_ATTEMPTS_ERASING_PROFILE;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.systemBars;
 import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_STOP;
@@ -32,6 +34,7 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -676,7 +679,11 @@ public class KeyguardSecurityContainer extends FrameLayout {
                         attempts, remaining);
                 break;
             case USER_TYPE_WORK_PROFILE:
-                message = mContext.getString(R.string.kg_failed_attempts_almost_at_erase_profile,
+                message = mContext.getSystemService(DevicePolicyManager.class).getResources()
+                        .getString(KEYGUARD_DIALOG_FAILED_ATTEMPTS_ALMOST_ERASING_PROFILE,
+                                () -> mContext.getString(
+                                        R.string.kg_failed_attempts_almost_at_erase_profile,
+                                        attempts, remaining),
                         attempts, remaining);
                 break;
         }
@@ -695,7 +702,10 @@ public class KeyguardSecurityContainer extends FrameLayout {
                         attempts);
                 break;
             case USER_TYPE_WORK_PROFILE:
-                message = mContext.getString(R.string.kg_failed_attempts_now_erasing_profile,
+                message = mContext.getSystemService(DevicePolicyManager.class).getResources()
+                        .getString(KEYGUARD_DIALOG_FAILED_ATTEMPTS_ERASING_PROFILE,
+                                () -> mContext.getString(
+                                        R.string.kg_failed_attempts_now_erasing_profile, attempts),
                         attempts);
                 break;
         }
