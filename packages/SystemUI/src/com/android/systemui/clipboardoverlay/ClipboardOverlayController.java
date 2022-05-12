@@ -302,6 +302,7 @@ public class ClipboardOverlayController {
             mExitAnimator.cancel();
         }
         reset();
+        String accessibilityAnnouncement;
 
         boolean isSensitive = clipData != null && clipData.getDescription().getExtras() != null
                 && clipData.getDescription().getExtras()
@@ -310,6 +311,7 @@ public class ClipboardOverlayController {
             showTextPreview(
                     mContext.getResources().getString(R.string.clipboard_overlay_text_copied),
                     mTextPreview);
+            accessibilityAnnouncement = mContext.getString(R.string.clipboard_content_copied);
         } else if (!TextUtils.isEmpty(clipData.getItemAt(0).getText())) {
             ClipData.Item item = clipData.getItemAt(0);
             if (item.getTextLinks() != null) {
@@ -321,13 +323,18 @@ public class ClipboardOverlayController {
             } else {
                 showEditableText(item.getText(), false);
             }
+            accessibilityAnnouncement = mContext.getString(R.string.clipboard_text_copied);
         } else if (clipData.getItemAt(0).getUri() != null) {
-            // How to handle non-image URIs?
-            showEditableImage(clipData.getItemAt(0).getUri(), isSensitive);
+            if (tryShowEditableImage(clipData.getItemAt(0).getUri(), isSensitive)) {
+                accessibilityAnnouncement = mContext.getString(R.string.clipboard_image_copied);
+            } else {
+                accessibilityAnnouncement = mContext.getString(R.string.clipboard_content_copied);
+            }
         } else {
             showTextPreview(
                     mContext.getResources().getString(R.string.clipboard_overlay_text_copied),
                     mTextPreview);
+            accessibilityAnnouncement = mContext.getString(R.string.clipboard_content_copied);
         }
         Intent remoteCopyIntent = getRemoteCopyIntent(clipData);
         // Only show remote copy if it's available.
@@ -344,7 +351,12 @@ public class ClipboardOverlayController {
         } else {
             mRemoteCopyChip.setVisibility(View.GONE);
         }
-        withWindowAttached(() -> mView.post(this::animateIn));
+        withWindowAttached(() -> {
+            updateInsets(
+                    mWindowManager.getCurrentWindowMetrics().getWindowInsets());
+            mView.post(this::animateIn);
+            mView.announceForAccessibility(accessibilityAnnouncement);
+        });
         mTimeoutHandler.resetTimeout();
     }
 
@@ -476,33 +488,46 @@ public class ClipboardOverlayController {
         textView.setOnClickListener(listener);
     }
 
-    private void showEditableImage(Uri uri, boolean isSensitive) {
-        mEditChip.setAlpha(1f);
-        mActionContainerBackground.setVisibility(View.VISIBLE);
+    private boolean tryShowEditableImage(Uri uri, boolean isSensitive) {
         View.OnClickListener listener = v -> editImage(uri);
+        ContentResolver resolver = mContext.getContentResolver();
+        String mimeType = resolver.getType(uri);
+        boolean isEditableImage = mimeType != null && mimeType.startsWith("image");
         if (isSensitive) {
             showSinglePreview(mHiddenImagePreview);
-            mHiddenImagePreview.setOnClickListener(listener);
-        } else {
-            showSinglePreview(mImagePreview);
-            ContentResolver resolver = mContext.getContentResolver();
+            if (isEditableImage) {
+                mHiddenImagePreview.setOnClickListener(listener);
+            }
+        } else if (isEditableImage) { // if the MIMEtype is image, try to load
             try {
                 int size = mContext.getResources().getDimensionPixelSize(R.dimen.overlay_x_scale);
                 // The width of the view is capped, height maintains aspect ratio, so allow it to be
                 // taller if needed.
                 Bitmap thumbnail = resolver.loadThumbnail(uri, new Size(size, size * 4), null);
+                showSinglePreview(mImagePreview);
                 mImagePreview.setImageBitmap(thumbnail);
+                mImagePreview.setOnClickListener(listener);
             } catch (IOException e) {
                 Log.e(TAG, "Thumbnail loading failed", e);
                 showTextPreview(
                         mContext.getResources().getString(R.string.clipboard_overlay_text_copied),
                         mTextPreview);
+                isEditableImage = false;
             }
-            mImagePreview.setOnClickListener(listener);
+        } else {
+            showTextPreview(
+                    mContext.getResources().getString(R.string.clipboard_overlay_text_copied),
+                    mTextPreview);
         }
-        mEditChip.setOnClickListener(listener);
-        mEditChip.setContentDescription(
-                mContext.getString(R.string.clipboard_edit_image_description));
+        if (isEditableImage) {
+            mEditChip.setVisibility(View.VISIBLE);
+            mEditChip.setAlpha(1f);
+            mActionContainerBackground.setVisibility(View.VISIBLE);
+            mEditChip.setOnClickListener(listener);
+            mEditChip.setContentDescription(
+                    mContext.getString(R.string.clipboard_edit_image_description));
+        }
+        return isEditableImage;
     }
 
     private Intent getRemoteCopyIntent(ClipData clipData) {
