@@ -5095,13 +5095,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // still check DC#okToAnimate again if the transition animation is fine to apply.
         // TODO(new-app-transition): Rewrite this logic using WM Shell.
         final boolean recentsAnimating = isAnimating(PARENTS, ANIMATION_TYPE_RECENTS);
+        final boolean isEnteringPipWithoutVisibleChange = mWaitForEnteringPinnedMode
+                && mVisible == visible;
         if (okToAnimate(true /* ignoreFrozen */, canTurnScreenOn())
                 && (appTransition.isTransitionSet()
                 || (recentsAnimating && !isActivityTypeHome()))
-                // If the visibility change during enter PIP, we don't want to include it in app
-                // transition to affect the animation theme, because the Pip organizer will animate
-                // the entering PIP instead.
-                && !mWaitForEnteringPinnedMode) {
+                // If the visibility is not changed during enter PIP, we don't want to include it in
+                // app transition to affect the animation theme, because the Pip organizer will
+                // animate the entering PIP instead.
+                && !isEnteringPipWithoutVisibleChange) {
             if (visible) {
                 displayContent.mOpeningApps.add(this);
                 mEnteringAnimation = true;
