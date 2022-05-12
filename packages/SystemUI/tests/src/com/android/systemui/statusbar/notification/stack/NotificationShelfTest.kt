@@ -5,8 +5,9 @@ import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.NotificationShelf
-import junit.framework.Assert.assertFalse
-import junit.framework.Assert.assertTrue
+import com.android.systemui.statusbar.StatusBarIconView
+import com.android.systemui.statusbar.notification.row.ExpandableView
+import junit.framework.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -141,6 +142,113 @@ class NotificationShelfTest : SysuiTestCase() {
                 /* top */ 0f,
                 /* bottom */ 5f)
         assertFalse(isYBelowShelfInView)
+    }
+
+    @Test
+    fun getAmountInShelf_lastViewBelowShelf_completelyInShelf() {
+        val shelfClipStart = 0f
+        val viewStart = 1f
+
+        val expandableView = mock(ExpandableView::class.java)
+        whenever(expandableView.shelfIcon).thenReturn(mock(StatusBarIconView::class.java))
+        whenever(expandableView.translationY).thenReturn(viewStart)
+        whenever(expandableView.actualHeight).thenReturn(20)
+
+        whenever(expandableView.minHeight).thenReturn(20)
+        whenever(expandableView.shelfTransformationTarget).thenReturn(null)  // use translationY
+        whenever(expandableView.isInShelf).thenReturn(true)
+
+        whenever(ambientState.isOnKeyguard).thenReturn(true)
+        whenever(ambientState.isExpansionChanging).thenReturn(false)
+        whenever(ambientState.isShadeExpanded).thenReturn(true)
+
+        val amountInShelf = shelf.getAmountInShelf(/* i= */ 0,
+                /* view= */ expandableView,
+                /* scrollingFast= */ false,
+                /* expandingAnimated= */ false,
+                /* isLastChild= */ true,
+                shelfClipStart)
+        assertEquals(1f, amountInShelf)
+    }
+
+    @Test
+    fun getAmountInShelf_lastViewAlmostBelowShelf_completelyInShelf() {
+        val viewStart = 0f
+        val shelfClipStart = 0.001f
+
+        val expandableView = mock(ExpandableView::class.java)
+        whenever(expandableView.shelfIcon).thenReturn(mock(StatusBarIconView::class.java))
+        whenever(expandableView.translationY).thenReturn(viewStart)
+        whenever(expandableView.actualHeight).thenReturn(20)
+
+        whenever(expandableView.minHeight).thenReturn(20)
+        whenever(expandableView.shelfTransformationTarget).thenReturn(null)  // use translationY
+        whenever(expandableView.isInShelf).thenReturn(true)
+
+        whenever(ambientState.isOnKeyguard).thenReturn(true)
+        whenever(ambientState.isExpansionChanging).thenReturn(false)
+        whenever(ambientState.isShadeExpanded).thenReturn(true)
+
+        val amountInShelf = shelf.getAmountInShelf(/* i= */ 0,
+                /* view= */ expandableView,
+                /* scrollingFast= */ false,
+                /* expandingAnimated= */ false,
+                /* isLastChild= */ true,
+                shelfClipStart)
+        assertEquals(1f, amountInShelf)
+    }
+
+    @Test
+    fun getAmountInShelf_lastViewHalfClippedByShelf_halfInShelf() {
+        val viewStart = 0f
+        val shelfClipStart = 10f
+
+        val expandableView = mock(ExpandableView::class.java)
+        whenever(expandableView.shelfIcon).thenReturn(mock(StatusBarIconView::class.java))
+        whenever(expandableView.translationY).thenReturn(viewStart)
+        whenever(expandableView.actualHeight).thenReturn(25)
+
+        whenever(expandableView.minHeight).thenReturn(25)
+        whenever(expandableView.shelfTransformationTarget).thenReturn(null)  // use translationY
+        whenever(expandableView.isInShelf).thenReturn(true)
+
+        whenever(ambientState.isOnKeyguard).thenReturn(true)
+        whenever(ambientState.isExpansionChanging).thenReturn(false)
+        whenever(ambientState.isShadeExpanded).thenReturn(true)
+
+        val amountInShelf = shelf.getAmountInShelf(/* i= */ 0,
+                /* view= */ expandableView,
+                /* scrollingFast= */ false,
+                /* expandingAnimated= */ false,
+                /* isLastChild= */ true,
+                shelfClipStart)
+        assertEquals(0.5f, amountInShelf)
+    }
+
+    @Test
+    fun getAmountInShelf_lastViewAboveShelf_notInShelf() {
+        val viewStart = 0f
+        val shelfClipStart = 15f
+
+        val expandableView = mock(ExpandableView::class.java)
+        whenever(expandableView.shelfIcon).thenReturn(mock(StatusBarIconView::class.java))
+        whenever(expandableView.translationY).thenReturn(viewStart)
+        whenever(expandableView.actualHeight).thenReturn(10)
+
+        whenever(expandableView.minHeight).thenReturn(10)
+        whenever(expandableView.shelfTransformationTarget).thenReturn(null)  // use translationY
+        whenever(expandableView.isInShelf).thenReturn(false)
+
+        whenever(ambientState.isExpansionChanging).thenReturn(false)
+        whenever(ambientState.isOnKeyguard).thenReturn(true)
+
+        val amountInShelf = shelf.getAmountInShelf(/* i= */ 0,
+                /* view= */ expandableView,
+                /* scrollingFast= */ false,
+                /* expandingAnimated= */ false,
+                /* isLastChild= */ true,
+                shelfClipStart)
+        assertEquals(0f, amountInShelf)
     }
 
     private fun setFractionToShade(fraction: Float) {

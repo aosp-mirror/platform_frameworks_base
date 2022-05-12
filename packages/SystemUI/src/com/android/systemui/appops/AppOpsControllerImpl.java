@@ -102,6 +102,7 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
             AppOpsManager.OP_PHONE_CALL_CAMERA,
             AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
             AppOpsManager.OP_RECORD_AUDIO,
+            AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO,
             AppOpsManager.OP_PHONE_CALL_MICROPHONE,
             AppOpsManager.OP_COARSE_LOCATION,
             AppOpsManager.OP_FINE_LOCATION
@@ -535,7 +536,8 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
     }
 
     private boolean isOpMicrophone(int op) {
-        return op == AppOpsManager.OP_RECORD_AUDIO || op == AppOpsManager.OP_PHONE_CALL_MICROPHONE;
+        return op == AppOpsManager.OP_RECORD_AUDIO || op == AppOpsManager.OP_PHONE_CALL_MICROPHONE
+                || op == AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO;
     }
 
     protected class H extends Handler {

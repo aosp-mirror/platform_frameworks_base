@@ -14569,12 +14569,13 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by Device owner to disable user control over apps. User will not be able to clear
-     * app data or force-stop packages.
+     * Called by a device owner or a profile owner to disable user control over apps. User will not
+     * be able to clear app data or force-stop packages. When called by a device owner, applies to
+     * all users on the device.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
      * @param packages The package names for the apps.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException if {@code admin} is not a device owner or a profile owner.
      */
     public void setUserControlDisabledPackages(@NonNull ComponentName admin,
             @NonNull List<String> packages) {
@@ -14589,12 +14590,14 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns the list of packages over which user control is disabled by the device owner.
+     * Returns the list of packages over which user control is disabled by a device or profile
+     * owner.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
-    public @NonNull List<String> getUserControlDisabledPackages(@NonNull ComponentName admin) {
+    @NonNull
+    public List<String> getUserControlDisabledPackages(@NonNull ComponentName admin) {
         throwIfParentInstance("getUserControlDisabledPackages");
         if (mService != null) {
             try {
