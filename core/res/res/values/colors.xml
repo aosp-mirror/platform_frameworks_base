@@ -448,5 +448,6 @@
     <color name="accessibility_color_inversion_background">#546E7A</color>
 
     <!-- Color of camera light when camera is in use -->
-    <color name="camera_privacy_light">#FFFFFF</color>
+    <color name="camera_privacy_light_day">#FFFFFF</color>
+    <color name="camera_privacy_light_night">#FFFFFF</color>
 </resources>
