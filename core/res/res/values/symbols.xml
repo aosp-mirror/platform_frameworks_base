@@ -3426,6 +3426,9 @@
   <!-- Search Selector -->
   <java-symbol type="string" name="config_defaultSearchSelectorPackageName" />
 
+  <!-- Captive Portal Login -->
+  <java-symbol type="string" name="config_defaultCaptivePortalLoginPackageName" />
+
   <!-- Optional IPsec algorithms -->
   <java-symbol type="array" name="config_optionalIpSecAlgorithms" />
 
