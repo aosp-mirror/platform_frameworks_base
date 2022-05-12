@@ -413,7 +413,10 @@ public class AppSearchShortcutInfo extends GenericDocument {
         final int iconResId = (int) getPropertyLong(KEY_ICON_RES_ID);
         final String iconResName = getPropertyString(KEY_ICON_RES_NAME);
         final String iconUri = getPropertyString(KEY_ICON_URI);
-        final int disabledReason = Integer.parseInt(getPropertyString(KEY_DISABLED_REASON));
+        final String disabledReasonString = getPropertyString(KEY_DISABLED_REASON);
+        final int disabledReason = !TextUtils.isEmpty(disabledReasonString)
+                ? Integer.parseInt(getPropertyString(KEY_DISABLED_REASON))
+                : ShortcutInfo.DISABLED_REASON_NOT_DISABLED;
         final Map<String, Map<String, List<String>>> capabilityBindings =
                 parseCapabilityBindings(getPropertyStringArray(KEY_CAPABILITY_BINDINGS));
         return new ShortcutInfo(
