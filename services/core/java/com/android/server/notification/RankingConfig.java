@@ -24,8 +24,6 @@ import java.util.Collection;
 
 public interface RankingConfig {
 
-    void setImportance(String packageName, int uid, int importance);
-    int getImportance(String packageName, int uid);
     void setShowBadge(String packageName, int uid, boolean showBadge);
     boolean canShowBadge(String packageName, int uid);
     boolean badgingEnabled(UserHandle userHandle);

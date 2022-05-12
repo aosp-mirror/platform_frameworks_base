@@ -860,7 +860,7 @@ public final class PermissionControllerManager {
                     Binder.restoreCallingIdentity(token);
                 }
             }
-        });
+        }, executor);
     }
 
     /**

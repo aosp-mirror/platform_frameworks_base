@@ -71,6 +71,11 @@ class UserSwitcherActivity @Inject constructor(
     private var popupMenu: UserSwitcherPopupMenu? = null
     private lateinit var addButton: View
     private var addUserRecords = mutableListOf<UserRecord>()
+    private val userSwitchedCallback: UserTracker.Callback = object : UserTracker.Callback {
+        override fun onUserChanged(newUser: Int, userContext: Context) {
+            finish()
+        }
+    }
     // When the add users options become available, insert another option to manage users
     private val manageUserRecord = UserRecord(
         null /* info */,
@@ -215,11 +220,7 @@ class UserSwitcherActivity @Inject constructor(
         initBroadcastReceiver()
 
         parent.post { buildUserViews() }
-        userTracker.addCallback(object : UserTracker.Callback {
-            override fun onUserChanged(newUser: Int, userContext: Context) {
-                finish()
-            }
-        }, mainExecutor)
+        userTracker.addCallback(userSwitchedCallback, mainExecutor)
     }
 
     private fun showPopupMenu() {
@@ -340,6 +341,7 @@ class UserSwitcherActivity @Inject constructor(
         super.onDestroy()
 
         broadcastDispatcher.unregisterReceiver(broadcastReceiver)
+        userTracker.removeCallback(userSwitchedCallback)
     }
 
     private fun initBroadcastReceiver() {
