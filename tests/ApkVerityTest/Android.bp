@@ -37,8 +37,8 @@ java_test_host {
         "general-tests",
         "vts",
     ],
-    data_device_bins: [
-        "block_device_writer",
+    target_required: [
+        "block_device_writer_module",
     ],
     data: [
         ":ApkVerityTestCertDer",

@@ -31,7 +31,6 @@ import android.os.Binder;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Pair;
@@ -49,7 +48,6 @@ import com.android.server.wm.ActivityTaskManagerInternal;
 import java.io.File;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -108,12 +106,6 @@ class Owners {
 
             notifyChangeLocked();
             pushToActivityTaskManagerLocked();
-
-            for (ArrayMap.Entry<String, List<String>> entry :
-                    mData.mDeviceOwnerProtectedPackages.entrySet()) {
-                mPackageManagerInternal.setDeviceOwnerProtectedPackages(
-                        entry.getKey(), entry.getValue());
-            }
         }
     }
 
@@ -247,12 +239,6 @@ class Owners {
     void clearDeviceOwner() {
         synchronized (mData) {
             mData.mDeviceOwnerTypes.remove(mData.mDeviceOwner.packageName);
-            List<String> protectedPackages =
-                    mData.mDeviceOwnerProtectedPackages.remove(mData.mDeviceOwner.packageName);
-            if (protectedPackages != null) {
-                mPackageManagerInternal.setDeviceOwnerProtectedPackages(
-                        mData.mDeviceOwner.packageName, new ArrayList<>());
-            }
             mData.mDeviceOwner = null;
             mData.mDeviceOwnerUserId = UserHandle.USER_NULL;
 
@@ -296,12 +282,6 @@ class Owners {
         synchronized (mData) {
             Integer previousDeviceOwnerType = mData.mDeviceOwnerTypes.remove(
                     mData.mDeviceOwner.packageName);
-            List<String> previousProtectedPackages =
-                    mData.mDeviceOwnerProtectedPackages.remove(mData.mDeviceOwner.packageName);
-            if (previousProtectedPackages != null) {
-                mPackageManagerInternal.setDeviceOwnerProtectedPackages(
-                        mData.mDeviceOwner.packageName, new ArrayList<>());
-            }
             // We don't set a name because it's not used anyway.
             // See DevicePolicyManagerService#getDeviceOwnerName
             mData.mDeviceOwner = new OwnerInfo(null, target,
@@ -312,10 +292,6 @@ class Owners {
             if (previousDeviceOwnerType != null) {
                 mData.mDeviceOwnerTypes.put(
                         mData.mDeviceOwner.packageName, previousDeviceOwnerType);
-            }
-            if (previousProtectedPackages != null) {
-                mData.mDeviceOwnerProtectedPackages.put(
-                        mData.mDeviceOwner.packageName, previousProtectedPackages);
             }
             notifyChangeLocked();
             pushToActivityTaskManagerLocked();
@@ -501,34 +477,6 @@ class Owners {
         synchronized (mData) {
             return !mData.mDeviceOwnerTypes.isEmpty()
                     && mData.mDeviceOwnerTypes.containsKey(packageName);
-        }
-    }
-
-    void setDeviceOwnerProtectedPackages(String packageName, List<String> protectedPackages) {
-        synchronized (mData) {
-            if (!hasDeviceOwner()) {
-                Slog.e(TAG,
-                        "Attempting to set device owner protected packages when there is no "
-                                + "device owner");
-                return;
-            } else if (!mData.mDeviceOwner.packageName.equals(packageName)) {
-                Slog.e(TAG, "Attempting to set device owner protected packages when the provided "
-                        + "package name " + packageName
-                        + " does not match the device owner package name");
-                return;
-            }
-
-            mData.mDeviceOwnerProtectedPackages.put(packageName, protectedPackages);
-            mPackageManagerInternal.setDeviceOwnerProtectedPackages(packageName, protectedPackages);
-            writeDeviceOwner();
-        }
-    }
-
-    List<String> getDeviceOwnerProtectedPackages(String packageName) {
-        synchronized (mData) {
-            return mData.mDeviceOwnerProtectedPackages.containsKey(packageName)
-                    ? mData.mDeviceOwnerProtectedPackages.get(packageName)
-                    : Collections.emptyList();
         }
     }
 

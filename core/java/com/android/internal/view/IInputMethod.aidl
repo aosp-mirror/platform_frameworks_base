@@ -23,6 +23,7 @@ import android.view.MotionEvent;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputMethodSubtype;
+import android.window.ImeOnBackInvokedDispatcher;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
 import com.android.internal.view.IInputContext;
@@ -47,7 +48,8 @@ oneway interface IInputMethod {
     void unbindInput();
 
     void startInput(in IBinder startInputToken, in IInputContext inputContext,
-            in EditorInfo attribute, boolean restarting, int navigationBarFlags);
+            in EditorInfo attribute, boolean restarting, int navigationBarFlags,
+            in ImeOnBackInvokedDispatcher imeDispatcher);
 
     void onNavButtonFlagsChanged(int navButtonFlags);
 

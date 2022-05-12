@@ -9922,7 +9922,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <ol>
      *   <li>It should only be called when content capture is enabled for the view.
      *   <li>It must call viewAppeared() before viewDisappeared()
-     *   <li>viewAppearead() can only be called when the view is visible and laidout
+     *   <li>viewAppeared() can only be called when the view is visible and laid out
      *   <li>It should not call the same event twice.
      * </ol>
      */
@@ -9999,6 +9999,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     Log.v(CONTENT_CAPTURE_LOG_TAG, "no AttachInfo on disappeared for " + this);
                 }
             }
+
+            // We reset any translation state as views may be re-used (e.g., as in ListView and
+            // RecyclerView). We only need to do this for views important for content capture since
+            // views unimportant for content capture won't be translated anyway.
+            clearTranslationState();
         }
     }
 
@@ -11936,7 +11941,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @NonNull
     public final List<Rect> getUnrestrictedPreferKeepClearRects() {
         final ListenerInfo info = mListenerInfo;
-        if (info != null && info.mKeepClearRects != null) {
+        if (info != null && info.mUnrestrictedKeepClearRects != null) {
             return new ArrayList(info.mUnrestrictedKeepClearRects);
         }
 
@@ -12716,6 +12721,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public boolean hasTranslationTransientState() {
         return (mPrivateFlags4 & PFLAG4_HAS_TRANSLATION_TRANSIENT_STATE)
                 == PFLAG4_HAS_TRANSLATION_TRANSIENT_STATE;
+    }
+
+    /**
+     * @hide
+     */
+    public void clearTranslationState() {
+        if (mViewTranslationCallback != null) {
+            mViewTranslationCallback.onClearTranslation(this);
+        }
+        clearViewTranslationCallback();
+        clearViewTranslationResponse();
+        if (hasTranslationTransientState()) {
+            setHasTransientState(false);
+            setHasTranslationTransientState(false);
+        }
     }
 
     /**
@@ -21150,6 +21170,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         AccessibilityNodeIdManager.getInstance().unregisterViewWithId(getAccessibilityViewId());
+
+        if (mBackgroundRenderNode != null) {
+            mBackgroundRenderNode.forceEndAnimators();
+        }
+        mRenderNode.forceEndAnimators();
     }
 
     private void cleanupDraw() {

@@ -38,7 +38,6 @@ import com.android.systemui.media.dagger.MediaModule;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.EnhancedEstimates;
-import com.android.systemui.power.EnhancedEstimatesImpl;
 import com.android.systemui.power.dagger.PowerModule;
 import com.android.systemui.qs.dagger.QSModule;
 import com.android.systemui.qs.tileimpl.QSFactoryImpl;
@@ -80,8 +79,19 @@ import dagger.Module;
 import dagger.Provides;
 
 /**
- * A dagger module for injecting default implementations of components of System UI that may be
- * overridden by the System UI implementation.
+ * A dagger module for injecting default implementations of components of System UI.
+ *
+ * Variants of SystemUI should make a copy of this, include it in their component, and customize it
+ * as needed.
+ *
+ * This module might alternatively be named `AospSystemUIModule`, `PhoneSystemUIModule`,
+ * or `BasicSystemUIModule`.
+ *
+ * Nothing in the module should be strictly required. Each piece should either be swappable with
+ * a different implementation or entirely removable.
+ *
+ * This is different from {@link SystemUIModule} which should be used for pieces of required
+ * SystemUI code that variants of SystemUI _must_ include to function correctly.
  */
 @Module(includes = {
         MediaModule.class,
@@ -90,7 +100,7 @@ import dagger.Provides;
         StartCentralSurfacesModule.class,
         VolumeModule.class
 })
-public abstract class SystemUIDefaultModule {
+public abstract class ReferenceSystemUIModule {
 
     @SysUISingleton
     @Provides
@@ -99,9 +109,6 @@ public abstract class SystemUIDefaultModule {
     static String provideLeakReportEmail() {
         return null;
     }
-
-    @Binds
-    abstract EnhancedEstimates bindEnhancedEstimates(EnhancedEstimatesImpl enhancedEstimates);
 
     @Binds
     abstract NotificationLockscreenUserManager bindNotificationLockscreenUserManager(
@@ -148,6 +155,7 @@ public abstract class SystemUIDefaultModule {
         return spC;
     }
 
+    /** */
     @Binds
     @SysUISingleton
     public abstract QSFactory bindQSFactory(QSFactoryImpl qsFactoryImpl);

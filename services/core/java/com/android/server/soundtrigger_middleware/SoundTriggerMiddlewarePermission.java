@@ -41,6 +41,9 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 
+import com.android.server.LocalServices;
+import com.android.server.pm.permission.LegacyPermissionManagerInternal;
+
 import java.io.PrintWriter;
 import java.util.Objects;
 
@@ -120,8 +123,7 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
      * Throws a {@link SecurityException} iff the originator has permission to receive data.
      */
     void enforcePermissionsForDataDelivery(@NonNull Identity identity, @NonNull String reason) {
-        enforcePermissionForDataDelivery(mContext, identity, RECORD_AUDIO,
-                reason);
+        enforceSoundTriggerRecordAudioPermissionForDataDelivery(identity, reason);
         enforcePermissionForDataDelivery(mContext, identity, CAPTURE_AUDIO_HOTWORD,
                 reason);
     }
@@ -143,6 +145,19 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
         if (status != PermissionChecker.PERMISSION_GRANTED) {
             throw new SecurityException(
                     String.format("Failed to obtain permission %s for identity %s", permission,
+                            ObjectPrinter.print(identity, 16)));
+        }
+    }
+
+    private static void enforceSoundTriggerRecordAudioPermissionForDataDelivery(
+            @NonNull Identity identity, @NonNull String reason) {
+        LegacyPermissionManagerInternal lpmi =
+                LocalServices.getService(LegacyPermissionManagerInternal.class);
+        final int status = lpmi.checkSoundTriggerRecordAudioPermissionForDataDelivery(identity.uid,
+                identity.packageName, identity.attributionTag, reason);
+        if (status != PermissionChecker.PERMISSION_GRANTED) {
+            throw new SecurityException(
+                    String.format("Failed to obtain permission RECORD_AUDIO for identity %s",
                             ObjectPrinter.print(identity, 16)));
         }
     }

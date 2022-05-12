@@ -144,7 +144,9 @@ public class ChooserListAdapter extends ResolverListAdapter {
                     }
                 }
                 if (ai == null) {
-                    ri = packageManager.resolveActivity(ii, PackageManager.MATCH_DEFAULT_ONLY);
+                    // Because of AIDL bug, resolveActivity can't accept subclasses of Intent.
+                    final Intent rii = (ii.getClass() == Intent.class) ? ii : new Intent(ii);
+                    ri = packageManager.resolveActivity(rii, PackageManager.MATCH_DEFAULT_ONLY);
                     ai = ri != null ? ri.activityInfo : null;
                 }
                 if (ai == null) {

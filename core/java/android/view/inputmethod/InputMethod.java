@@ -29,6 +29,7 @@ import android.util.Log;
 import android.view.InputChannel;
 import android.view.MotionEvent;
 import android.view.View;
+import android.window.ImeOnBackInvokedDispatcher;
 
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.InputMethodNavButtonFlags;
@@ -232,6 +233,10 @@ public interface InputMethod {
      *                        long as your implementation of {@link InputMethod} relies on such
      *                        IPCs
      * @param navButtonFlags {@link InputMethodNavButtonFlags} in the initial state of this session.
+     * @param imeDispatcher The {@link ImeOnBackInvokedDispatcher }} to be set on the
+     *                      IME's {@link android.window.WindowOnBackInvokedDispatcher}, so that IME
+     *                      {@link android.window.OnBackInvokedCallback}s can be forwarded to
+     *                      the client requesting to start input.
      * @see #startInput(InputConnection, EditorInfo)
      * @see #restartInput(InputConnection, EditorInfo)
      * @see EditorInfo
@@ -240,7 +245,8 @@ public interface InputMethod {
     @MainThread
     default void dispatchStartInputWithToken(@Nullable InputConnection inputConnection,
             @NonNull EditorInfo editorInfo, boolean restarting,
-            @NonNull IBinder startInputToken, @InputMethodNavButtonFlags int navButtonFlags) {
+            @NonNull IBinder startInputToken, @InputMethodNavButtonFlags int navButtonFlags,
+            @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
         if (restarting) {
             restartInput(inputConnection, editorInfo);
         } else {

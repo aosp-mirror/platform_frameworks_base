@@ -18,6 +18,6 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
        android:shape="rectangle">
     <solid android:color="@android:color/system_accent1_100"/>
-    <corners android:topLeftRadius="16dp" android:topRightRadius="16dp"
-             android:bottomLeftRadius="16dp" android:bottomRightRadius="16dp"/>
+    <corners android:topLeftRadius="20dp" android:topRightRadius="20dp"
+             android:bottomLeftRadius="20dp" android:bottomRightRadius="20dp"/>
 </shape>

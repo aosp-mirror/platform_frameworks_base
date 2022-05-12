@@ -18,6 +18,7 @@ package android.provider.settings.validators;
 
 import static android.provider.settings.validators.SettingsValidators.ACCESSIBILITY_SHORTCUT_TARGET_LIST_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.ANY_INTEGER_VALIDATOR;
+import static android.provider.settings.validators.SettingsValidators.ANY_STRING_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.BOOLEAN_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.COLON_SEPARATED_COMPONENT_LIST_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.COLON_SEPARATED_PACKAGE_LIST_VALIDATOR;
@@ -176,6 +177,10 @@ public class SecureSettingsValidators {
         VALIDATORS.put(Secure.ACTIVE_UNLOCK_ON_WAKE, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.ACTIVE_UNLOCK_ON_UNLOCK_INTENT, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Secure.ACTIVE_UNLOCK_ON_FACE_ERRORS, ANY_STRING_VALIDATOR);
+        VALIDATORS.put(Secure.ACTIVE_UNLOCK_ON_FACE_ACQUIRE_INFO, ANY_STRING_VALIDATOR);
+        VALIDATORS.put(Secure.ACTIVE_UNLOCK_ON_UNLOCK_INTENT_WHEN_BIOMETRIC_ENROLLED,
+                ANY_STRING_VALIDATOR);
         VALIDATORS.put(Secure.ASSIST_GESTURE_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.ASSIST_GESTURE_SILENCE_ALERTS_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.ASSIST_GESTURE_WAKE_ENABLED, BOOLEAN_VALIDATOR);

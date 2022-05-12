@@ -1453,16 +1453,6 @@ public final class PermissionPolicyService extends SystemService {
                 }
             }
 
-            try {
-                if (Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                        Settings.Secure.NOTIFICATION_PERMISSION_ENABLED, UserHandle.USER_SYSTEM)
-                        == 0) {
-                    return false;
-                }
-            } catch (Settings.SettingNotFoundException e) {
-                return false;
-            }
-
             if (!pkg.getRequestedPermissions().contains(POST_NOTIFICATIONS)
                     || CompatChanges.isChangeEnabled(NOTIFICATION_PERM_CHANGE_ID, pkgName, user)
                     || mKeyguardManager.isKeyguardLocked()) {

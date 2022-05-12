@@ -17,16 +17,21 @@
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
     android:shareInterpolator="false">
-    <scale
-        android:fromXScale="1.1"
-        android:toXScale="1"
-        android:fromYScale="1.1"
-        android:toYScale="1"
-        android:pivotX="50%"
-        android:pivotY="50%"
+    <alpha
+        android:fromAlpha="1.0"
+        android:toAlpha="1.0"
+        android:fillEnabled="true"
+        android:fillBefore="true"
+        android:fillAfter="true"
+        android:interpolator="@interpolator/linear"
+        android:startOffset="0"
+        android:duration="200" />
+
+    <translate
         android:fillEnabled="true"
         android:fillBefore="true"
         android:fillAfter="true"
         android:interpolator="@interpolator/fast_out_extra_slow_in"
-        android:duration="400"/>
+        android:startOffset="0"
+        android:duration="200" />
 </set>
