@@ -44,6 +44,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class Installer extends SystemService {
     private static final String TAG = "Installer";
@@ -118,9 +121,13 @@ public class Installer extends SystemService {
     public static final int FLAG_CLEAR_APP_DATA_KEEP_ART_PROFILES =
             IInstalld.FLAG_CLEAR_APP_DATA_KEEP_ART_PROFILES;
 
+    private static final long CONNECT_RETRY_DELAY_MS = DateUtils.SECOND_IN_MILLIS;
+    private static final long CONNECT_WAIT_MS = 10 * DateUtils.SECOND_IN_MILLIS;
+
     private final boolean mIsolated;
     private volatile boolean mDeferSetFirstBoot;
-    private volatile IInstalld mInstalld;
+    private volatile IInstalld mInstalld = null;
+    private volatile CompletableFuture<IInstalld> mInstalldFuture = new CompletableFuture<>();
     private volatile Object mWarnIfHeld;
 
     public Installer(Context context) {
@@ -149,6 +156,7 @@ public class Installer extends SystemService {
     public void onStart() {
         if (mIsolated) {
             mInstalld = null;
+            mInstalldFuture = null;
         } else {
             connect();
         }
@@ -168,7 +176,9 @@ public class Installer extends SystemService {
         }
 
         if (binder != null) {
-            mInstalld = IInstalld.Stub.asInterface(binder);
+            IInstalld installd = IInstalld.Stub.asInterface(binder);
+            mInstalld = installd;
+            mInstalldFuture.complete(installd);
             try {
                 invalidateMounts();
                 executeDeferredActions();
@@ -202,9 +212,18 @@ public class Installer extends SystemService {
         if (mIsolated) {
             Slog.i(TAG, "Ignoring request because this installer is isolated");
             return false;
-        } else {
-            return true;
         }
+
+        if (mInstalld == null && mInstalldFuture != null) {
+            try {
+                Slog.i(TAG, "installd not ready, waiting for: " + CONNECT_WAIT_MS + "ms");
+                mInstalld = mInstalldFuture.get(CONNECT_WAIT_MS, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                Slog.e(TAG, "Ignoring request because this installer is not initialized", e);
+            }
+        }
+
+        return mInstalld != null;
     }
 
     // We explicitly do NOT set previousAppId because the default value should always be 0.
