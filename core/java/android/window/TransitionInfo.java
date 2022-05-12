@@ -107,8 +107,11 @@ public final class TransitionInfo implements Parcelable {
      */
     public static final int FLAG_DISPLAY_HAS_ALERT_WINDOWS = 1 << 7;
 
+    /** The container is an input-method window. */
+    public static final int FLAG_IS_INPUT_METHOD = 1 << 8;
+
     /** The first unused bit. This can be used by remotes to attach custom flags to this change. */
-    public static final int FLAG_FIRST_CUSTOM = 1 << 8;
+    public static final int FLAG_FIRST_CUSTOM = 1 << 9;
 
     /** @hide */
     @IntDef(prefix = { "FLAG_" }, value = {
@@ -121,6 +124,7 @@ public final class TransitionInfo implements Parcelable {
             FLAG_IS_DISPLAY,
             FLAG_OCCLUDES_KEYGUARD,
             FLAG_DISPLAY_HAS_ALERT_WINDOWS,
+            FLAG_IS_INPUT_METHOD,
             FLAG_FIRST_CUSTOM
     })
     public @interface ChangeFlags {}
@@ -299,6 +303,9 @@ public final class TransitionInfo implements Parcelable {
         }
         if ((flags & FLAG_IS_WALLPAPER) != 0) {
             sb.append("IS_WALLPAPER");
+        }
+        if ((flags & FLAG_IS_INPUT_METHOD) != 0) {
+            sb.append("IS_INPUT_METHOD");
         }
         if ((flags & FLAG_TRANSLUCENT) != 0) {
             sb.append((sb.length() == 0 ? "" : "|") + "TRANSLUCENT");
