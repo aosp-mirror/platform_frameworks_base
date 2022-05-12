@@ -5790,4 +5790,9 @@
 
     <!-- List of the labels of requestable device state config values -->
     <string-array name="config_deviceStatesAvailableForAppRequests"/>
+
+    <!-- Interval in milliseconds to average light sensor values for camera light brightness -->
+    <integer name="config_cameraPrivacyLightAlsAveragingIntervalMillis">3000</integer>
+    <!-- Light sensor's lux value to use as the threshold between using day or night brightness -->
+    <integer name="config_cameraPrivacyLightAlsNightThreshold">4</integer>
 </resources>
