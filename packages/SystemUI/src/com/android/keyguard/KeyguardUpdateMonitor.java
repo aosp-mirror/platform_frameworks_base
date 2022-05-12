@@ -2417,7 +2417,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         // Triggers:
         final boolean triggerActiveUnlockForAssistant = shouldTriggerActiveUnlockForAssistant();
         final boolean awakeKeyguard = mBouncerFullyShown || mUdfpsBouncerShowing
-                || (mKeyguardIsVisible && mDeviceInteractive && !mGoingToSleep
+                || (mKeyguardIsVisible && !mGoingToSleep
                 && mStatusBarState != StatusBarState.SHADE_LOCKED);
 
         // Gates:
