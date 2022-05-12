@@ -656,7 +656,8 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.COOLDOWN_MODE_ON,
                     Settings.Global.Wearable.CHARGING_SOUNDS_ENABLED,
                     Settings.Global.Wearable.SCREEN_UNLOCK_SOUND_ENABLED,
-                    Settings.Global.Wearable.BEDTIME_MODE);
+                    Settings.Global.Wearable.BEDTIME_MODE,
+                    Settings.Global.Wearable.WEAR_ACTIVITY_AUTO_RESUME_TIMEOUT_MAX_RESET_COUNT);
 
     private static final Set<String> BACKUP_DENY_LIST_SECURE_SETTINGS =
              newHashSet(
