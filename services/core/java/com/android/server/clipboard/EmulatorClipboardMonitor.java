@@ -165,34 +165,43 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
 
     @Override
     public void accept(final @Nullable ClipData clip) {
-        if (clip == null) {
-            setHostClipboardImpl("");
-        } else if (clip.getItemCount() > 0) {
-            final CharSequence text = clip.getItemAt(0).getText();
-            if (text != null) {
-                setHostClipboardImpl(text.toString());
-            }
+        final FileDescriptor fd = getPipeFD();
+        if (fd != null) {
+            setHostClipboard(fd, getClipString(clip));
         }
     }
 
-    private void setHostClipboardImpl(final String value) {
-        final FileDescriptor pipeFD = getPipeFD();
-
-        if (pipeFD != null) {
-            Thread t = new Thread(() -> {
-                if (LOG_CLIBOARD_ACCESS) {
-                    Slog.i(TAG, "Setting the host clipboard to '" + value + "'");
-                }
-
-                try {
-                    sendMessage(pipeFD, value.getBytes());
-                } catch (ErrnoException | InterruptedIOException e) {
-                    Slog.e(TAG, "Failed to set host clipboard " + e.getMessage());
-                } catch (IllegalArgumentException e) {
-                }
-            });
-            t.start();
+    private String getClipString(final @Nullable ClipData clip) {
+        if (clip == null) {
+            return "";
         }
+
+        if (clip.getItemCount() == 0) {
+            return "";
+        }
+
+        final CharSequence text = clip.getItemAt(0).getText();
+        if (text == null) {
+            return "";
+        }
+
+        return text.toString();
+    }
+
+    private static void setHostClipboard(final FileDescriptor fd, final String value) {
+        Thread t = new Thread(() -> {
+            if (LOG_CLIBOARD_ACCESS) {
+                Slog.i(TAG, "Setting the host clipboard to '" + value + "'");
+            }
+
+            try {
+                sendMessage(fd, value.getBytes());
+            } catch (ErrnoException | InterruptedIOException e) {
+                Slog.e(TAG, "Failed to set host clipboard " + e.getMessage());
+            } catch (IllegalArgumentException e) {
+            }
+        });
+        t.start();
     }
 
     private static void readFully(final FileDescriptor fd,
