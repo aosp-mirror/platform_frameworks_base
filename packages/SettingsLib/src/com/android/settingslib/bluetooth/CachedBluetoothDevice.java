@@ -1376,7 +1376,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     /**
      * Store the member devices that are in the same coordinated set.
      */
-    public void setMemberDevice(CachedBluetoothDevice memberDevice) {
+    public void addMemberDevice(CachedBluetoothDevice memberDevice) {
         mMemberDevices.add(memberDevice);
     }
 
@@ -1393,24 +1393,24 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
      * device and member devices.
      *
      * @param prevMainDevice the previous Main device, it will be added into the member device set.
-     * @param newMainDevie the new Main device, it will be removed from the member device set.
+     * @param newMainDevice the new Main device, it will be removed from the member device set.
      */
     public void switchMemberDeviceContent(CachedBluetoothDevice prevMainDevice,
-            CachedBluetoothDevice newMainDevie) {
+            CachedBluetoothDevice newMainDevice) {
         // Backup from main device
         final BluetoothDevice tmpDevice = mDevice;
         final short tmpRssi = mRssi;
         final boolean tmpJustDiscovered = mJustDiscovered;
         // Set main device from sub device
-        mDevice = newMainDevie.mDevice;
-        mRssi = newMainDevie.mRssi;
-        mJustDiscovered = newMainDevie.mJustDiscovered;
-        setMemberDevice(prevMainDevice);
-        mMemberDevices.remove(newMainDevie);
+        mDevice = newMainDevice.mDevice;
+        mRssi = newMainDevice.mRssi;
+        mJustDiscovered = newMainDevice.mJustDiscovered;
+        addMemberDevice(prevMainDevice);
+        mMemberDevices.remove(newMainDevice);
         // Set sub device from backup
-        newMainDevie.mDevice = tmpDevice;
-        newMainDevie.mRssi = tmpRssi;
-        newMainDevie.mJustDiscovered = tmpJustDiscovered;
+        newMainDevice.mDevice = tmpDevice;
+        newMainDevice.mRssi = tmpRssi;
+        newMainDevice.mJustDiscovered = tmpJustDiscovered;
         fetchActiveDevices();
     }
 

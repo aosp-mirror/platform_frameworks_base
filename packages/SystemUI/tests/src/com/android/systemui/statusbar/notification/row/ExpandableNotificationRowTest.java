@@ -91,7 +91,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
 
     @Test
     public void testGroupSummaryNotShowingIconWhenPublic() {
-        mGroupRow.setSensitive(true, true);
+        mGroupRow.setSensitive(true);
         mGroupRow.setHideSensitiveForIntrinsicHeight(true);
         assertTrue(mGroupRow.isSummaryWithChildren());
         assertFalse(mGroupRow.isShowingIcon());
@@ -99,7 +99,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
 
     @Test
     public void testNotificationHeaderVisibleWhenAnimating() {
-        mGroupRow.setSensitive(true, true);
+        mGroupRow.setSensitive(true);
         mGroupRow.setHideSensitive(true, false, 0, 0);
         mGroupRow.setHideSensitive(false, true, 0, 0);
         assertEquals(View.VISIBLE, mGroupRow.getChildrenContainer().getVisibleWrapper()
@@ -130,7 +130,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     public void testIconColorShouldBeUpdatedWhenSensitive() throws Exception {
         ExpandableNotificationRow row = spy(mNotificationTestHelper.createRow(
                 FLAG_CONTENT_VIEW_ALL));
-        row.setSensitive(true, true);
+        row.setSensitive(true);
         row.setHideSensitive(true, false, 0, 0);
         verify(row).updateShelfIconColor();
     }
@@ -214,7 +214,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     @Test
     public void testFeedback_noHeader() {
         // public notification is custom layout - no header
-        mGroupRow.setSensitive(true, true);
+        mGroupRow.setSensitive(true);
         mGroupRow.setOnFeedbackClickListener(null);
         mGroupRow.setFeedbackIcon(null);
     }
@@ -318,21 +318,23 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     }
 
     @Test
-    public void testGetIsNonblockable_oemLocked() throws Exception {
+    public void testGetIsNonblockable_criticalDeviceFunction() throws Exception {
         ExpandableNotificationRow row =
                 mNotificationTestHelper.createRow(mNotificationTestHelper.createNotification());
-        row.getEntry().getChannel().setImportanceLockedByOEM(true);
+        row.getEntry().getChannel().setImportanceLockedByCriticalDeviceFunction(true);
+        row.getEntry().getChannel().setBlockable(false);
 
         assertTrue(row.getIsNonblockable());
     }
 
     @Test
-    public void testGetIsNonblockable_criticalDeviceFunction() throws Exception {
+    public void testGetIsNonblockable_criticalDeviceFunction_butBlockable() throws Exception {
         ExpandableNotificationRow row =
                 mNotificationTestHelper.createRow(mNotificationTestHelper.createNotification());
         row.getEntry().getChannel().setImportanceLockedByCriticalDeviceFunction(true);
+        row.getEntry().getChannel().setBlockable(true);
 
-        assertTrue(row.getIsNonblockable());
+        assertFalse(row.getIsNonblockable());
     }
 
     @Test

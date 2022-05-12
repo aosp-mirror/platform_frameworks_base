@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<policies setup-complete="true" provisioning-state="3">
+    <admin name="com.android.frameworks.servicestests/com.android.server.devicepolicy.DummyDeviceAdmins$Admin1">
+        <policies flags="991" />
+        <strong-auth-unlock-timeout value="0" />
+        <test-only-admin value="true" />
+        <cross-profile-calendar-packages />
+        <cross-profile-packages />
+    </admin>
+    <lock-task-features value="16" />
+    <protected-packages name="com.some.app" />
+    <protected-packages name="foo.bar.baz" />
+</policies>

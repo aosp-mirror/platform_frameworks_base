@@ -392,6 +392,9 @@ public class ParsingPackageUtils {
         if ((flags & PARSE_FRAMEWORK_RES_SPLITS) != 0) {
             liteParseFlags = flags;
         }
+        if ((flags & PARSE_APK_IN_APEX) != 0) {
+            liteParseFlags |= PARSE_APK_IN_APEX;
+        }
         final ParseResult<PackageLite> liteResult =
                 ApkLiteParseUtils.parseClusterPackageLite(input, packageDir, frameworkSplits,
                         liteParseFlags);

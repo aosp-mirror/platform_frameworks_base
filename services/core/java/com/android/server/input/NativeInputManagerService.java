@@ -70,7 +70,18 @@ public interface NativeInputManagerService {
 
     void setBlockUntrustedTouchesMode(int mode);
 
-    int injectInputEvent(InputEvent event, int pid, int uid, int syncMode,
+    /**
+     * Inject an input event into the system.
+     *
+     * @param event         the input event to inject
+     * @param injectIntoUid true if the event should target windows owned by uid, false otherwise
+     * @param uid           the uid whose windows should be targeted, if any
+     * @param syncMode      {@link android.os.InputEventInjectionSync}
+     * @param timeoutMillis timeout to wait for input injection to complete, in milliseconds
+     * @param policyFlags   defined in {@link android.view.WindowManagerPolicyConstants}
+     * @return {@link android.os.InputEventInjectionResult}
+     */
+    int injectInputEvent(InputEvent event, boolean injectIntoUid, int uid, int syncMode,
             int timeoutMillis, int policyFlags);
 
     VerifiedInputEvent verifyInputEvent(InputEvent event);
@@ -240,7 +251,8 @@ public interface NativeInputManagerService {
         public native void setBlockUntrustedTouchesMode(int mode);
 
         @Override
-        public native int injectInputEvent(InputEvent event, int pid, int uid, int syncMode,
+        public native int injectInputEvent(InputEvent event, boolean injectIntoUid, int uid,
+                int syncMode,
                 int timeoutMillis, int policyFlags);
 
         @Override

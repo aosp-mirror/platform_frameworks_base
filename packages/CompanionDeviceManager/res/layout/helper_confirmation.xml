@@ -15,54 +15,67 @@
   ~ limitations under the License.
   -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:id="@+id/helper_confirmation"
-              android:theme="@style/ChooserActivity"
-              android:padding="12dp"
-              style="@style/ContainerLayout">
-
-    <ImageView
-        android:id="@+id/app_icon"
-        android:layout_width="match_parent"
-        android:layout_height="32dp"
-        android:gravity="center"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="12dp"/>
-
-    <TextView
-        android:id="@+id/helper_title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:paddingHorizontal="12dp"
-        android:textColor="?android:attr/textColorPrimary"
-        android:textSize="22sp" />
-
-    <TextView
-        android:id="@+id/helper_summary"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="24dp"
-        android:layout_marginRight="24dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="24dp"
-        android:gravity="center"
-        android:textColor="?android:attr/textColorSecondary"
-        android:textSize="14sp" />
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    style="@style/ScrollViewStyle">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginRight="12dp"
-        android:layout_marginBottom="12dp"
-        android:gravity="end">
+        android:layout_height="wrap_content">
 
-        <Button
-            android:id="@+id/btn_back"
-            style="@style/VendorHelperBackButton"
-            android:text="@string/consent_back" />
+        <LinearLayout
+            android:id="@+id/helper_confirmation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/ChooserActivity"
+            android:padding="12dp"
+            style="@style/ContainerLayout">
+
+            <ImageView
+                android:id="@+id/app_icon"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:gravity="center"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="12dp"/>
+
+            <TextView
+                android:id="@+id/helper_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="22sp" />
+
+            <TextView
+                android:id="@+id/helper_summary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="32dp"
+                android:gravity="center"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="14sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginEnd="12dp"
+                android:gravity="end">
+
+                <Button
+                    android:id="@+id/btn_back"
+                    style="@style/VendorHelperBackButton"
+                    android:text="@string/consent_back" />
+
+            </LinearLayout>
+
+        </LinearLayout>
 
     </LinearLayout>
 
-</LinearLayout>
+</ScrollView>

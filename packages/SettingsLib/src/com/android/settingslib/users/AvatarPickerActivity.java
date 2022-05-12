@@ -147,6 +147,7 @@ public class AvatarPickerActivity extends Activity {
             mWaitingForActivityResult = savedInstanceState.getBoolean(KEY_AWAITING_RESULT, false);
             mAdapter.mSelectedPosition =
                     savedInstanceState.getInt(KEY_SELECTED_POSITION, AvatarAdapter.NONE);
+            mDoneButton.setEnabled(mAdapter.mSelectedPosition != AvatarAdapter.NONE);
         }
     }
 

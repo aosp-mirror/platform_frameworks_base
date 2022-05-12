@@ -33,17 +33,14 @@ import kotlin.math.min
 import kotlin.math.roundToInt
 
 private const val DEFAULT_PIP_MARGINS = 48
-private const val DEFAULT_STASH_DURATION = 5000L
 private const val RELAX_DEPTH = 1
 private const val DEFAULT_MAX_RESTRICTED_DISTANCE_FRACTION = 0.15
 
 /**
  * This class calculates an appropriate position for a Picture-In-Picture (PiP) window, taking
  * into account app defined keep clear areas.
- *
- * @param clock A function returning a current timestamp (in milliseconds)
  */
-class TvPipKeepClearAlgorithm(private val clock: () -> Long) {
+class TvPipKeepClearAlgorithm() {
     /**
      * Result of the positioning algorithm.
      *
@@ -51,17 +48,17 @@ class TvPipKeepClearAlgorithm(private val clock: () -> Long) {
      * @param anchorBounds The bounds of the PiP anchor position
      *     (where the PiP would be placed if there were no keep clear areas)
      * @param stashType Where the PiP has been stashed, if at all
-     * @param unstashDestinationBounds If stashed, the PiP should move to this position after
-     *     [stashDuration] has passed.
-     * @param unstashTime If stashed, the time at which the PiP should move
-     *     to [unstashDestinationBounds]
+     * @param unstashDestinationBounds If stashed, the PiP should move to this position when
+     *     unstashing.
+     * @param triggerStash Whether this placement should trigger the PiP to stash, or extend
+     *     the unstash timeout if already stashed.
      */
     data class Placement(
         val bounds: Rect,
         val anchorBounds: Rect,
         @PipBoundsState.StashType val stashType: Int = STASH_TYPE_NONE,
         val unstashDestinationBounds: Rect? = null,
-        val unstashTime: Long = 0L
+        val triggerStash: Boolean = false
     ) {
         /** Bounds to use if the PiP should not be stashed. */
         fun getUnstashedBounds() = unstashDestinationBounds ?: bounds
@@ -79,12 +76,6 @@ class TvPipKeepClearAlgorithm(private val clock: () -> Long) {
     /** The distance the PiP peeks into the screen when stashed */
     var stashOffset = DEFAULT_PIP_MARGINS
 
-    /**
-     * How long (in milliseconds) the PiP should stay stashed for after the last time the
-     * keep clear areas causing the PiP to stash have changed.
-     */
-    var stashDuration = DEFAULT_STASH_DURATION
-
     /** The fraction of screen width/height restricted keep clear areas can move the PiP */
     var maxRestrictedDistanceFraction = DEFAULT_MAX_RESTRICTED_DISTANCE_FRACTION
 
@@ -93,14 +84,10 @@ class TvPipKeepClearAlgorithm(private val clock: () -> Long) {
     private var transformedMovementBounds = Rect()
 
     private var lastAreasOverlappingUnstashPosition: Set<Rect> = emptySet()
-    private var lastStashTime: Long = Long.MIN_VALUE
 
     /** Spaces around the PiP that we should leave space for when placing the PiP. Permanent PiP
      * decorations are relevant for calculating intersecting keep clear areas */
     private var pipPermanentDecorInsets = Insets.NONE
-    /** Spaces around the PiP that we should leave space for when placing the PiP. Temporary PiP
-     * decorations are not relevant for calculating intersecting keep clear areas */
-    private var pipTemporaryDecorInsets = Insets.NONE
 
     /**
      * Calculates the position the PiP should be placed at, taking into consideration the
@@ -113,8 +100,8 @@ class TvPipKeepClearAlgorithm(private val clock: () -> Long) {
      * always try to respect these areas.
      *
      * If no free space the PiP is allowed to move to can be found, a stashed position is returned
-     * as [Placement.bounds], along with a position to move to once [Placement.unstashTime] has
-     * passed as [Placement.unstashDestinationBounds].
+     * as [Placement.bounds], along with a position to move to when the PiP unstashes
+     * as [Placement.unstashDestinationBounds].
      *
      * @param pipSize The size of the PiP window
      * @param restrictedAreas The restricted keep clear areas
@@ -130,13 +117,11 @@ class TvPipKeepClearAlgorithm(private val clock: () -> Long) {
         val transformedUnrestrictedAreas = transformAndFilterAreas(unrestrictedAreas)
 
         val pipSizeWithAllDecors = addDecors(pipSize)
-        val pipAnchorBoundsWithAllDecors =
+        val pipAnchorBoundsWithDecors =
             getNormalPipAnchorBounds(pipSizeWithAllDecors, transformedMovementBounds)
 
-        val pipAnchorBoundsWithPermanentDecors =
-            removeTemporaryDecorsTransformed(pipAnchorBoundsWithAllDecors)
         val result = calculatePipPositionTransformed(
-            pipAnchorBoundsWithPermanentDecors,
+            pipAnchorBoundsWithDecors,
             transformedRestrictedAreas,
             transformedUnrestrictedAreas
         )
@@ -152,7 +137,7 @@ class TvPipKeepClearAlgorithm(private val clock: () -> Long) {
             anchorBounds,
             getStashType(pipBounds, unstashedDestBounds),
             unstashedDestBounds,
-            result.unstashTime
+            result.triggerStash
         )
     }
 
@@ -213,26 +198,13 @@ class TvPipKeepClearAlgorithm(private val clock: () -> Long) {
             !lastAreasOverlappingUnstashPosition.containsAll(areasOverlappingUnstashPosition)
         lastAreasOverlappingUnstashPosition = areasOverlappingUnstashPosition
 
-        val now = clock()
-        if (areasOverlappingUnstashPositionChanged) {
-            lastStashTime = now
-        }
-
-        // If overlapping areas haven't changed and the stash duration has passed, we can
-        // place the PiP at the unstash position
-        val unstashTime = lastStashTime + stashDuration
-        if (now >= unstashTime) {
-            return Placement(unstashBounds, pipAnchorBounds)
-        }
-
-        // Otherwise, we'll stash it close to the unstash position
         val stashedBounds = getNearbyStashedPosition(unstashBounds, keepClearAreas)
         return Placement(
             stashedBounds,
             pipAnchorBounds,
             getStashType(stashedBounds, unstashBounds),
             unstashBounds,
-            unstashTime
+            areasOverlappingUnstashPositionChanged
         )
     }
 
@@ -439,14 +411,6 @@ class TvPipKeepClearAlgorithm(private val clock: () -> Long) {
     }
 
     /**
-     * Prevents the PiP from being stashed for the current set of keep clear areas.
-     * The PiP may stash again if keep clear areas change.
-     */
-    fun keepUnstashedForCurrentKeepClearAreas() {
-        lastStashTime = Long.MIN_VALUE
-    }
-
-    /**
      * Updates the size of the screen.
      *
      * @param size The new size of the screen
@@ -490,10 +454,6 @@ class TvPipKeepClearAlgorithm(private val clock: () -> Long) {
 
     fun setPipPermanentDecorInsets(insets: Insets) {
         pipPermanentDecorInsets = insets
-    }
-
-    fun setPipTemporaryDecorInsets(insets: Insets) {
-        pipTemporaryDecorInsets = insets
     }
 
     /**
@@ -790,7 +750,6 @@ class TvPipKeepClearAlgorithm(private val clock: () -> Long) {
     private fun addDecors(size: Size): Size {
         val bounds = Rect(0, 0, size.width, size.height)
         bounds.inset(pipPermanentDecorInsets)
-        bounds.inset(pipTemporaryDecorInsets)
 
         return Size(bounds.width(), bounds.height())
     }
@@ -803,19 +762,6 @@ class TvPipKeepClearAlgorithm(private val clock: () -> Long) {
         val pipDecorReverseInsets = Insets.subtract(Insets.NONE, pipPermanentDecorInsets)
         bounds.inset(pipDecorReverseInsets)
         return bounds
-    }
-
-    /**
-     * Removes the space that was reserved for temporary decorations around the PiP
-     * @param bounds the bounds (in base case) to remove the insets from
-     */
-    private fun removeTemporaryDecorsTransformed(bounds: Rect): Rect {
-        if (pipTemporaryDecorInsets == Insets.NONE) return bounds
-
-        val reverseInsets = Insets.subtract(Insets.NONE, pipTemporaryDecorInsets)
-        val boundsInScreenSpace = fromTransformedSpace(bounds)
-        boundsInScreenSpace.inset(reverseInsets)
-        return toTransformedSpace(boundsInScreenSpace)
     }
 
     private fun Rect.offsetCopy(dx: Int, dy: Int) = Rect(this).apply { offset(dx, dy) }

@@ -582,6 +582,7 @@ public final class BackgroundRestrictionTest {
 
         DeviceConfigSession<Boolean> bgCurrentDrainMonitor = null;
         DeviceConfigSession<Long> bgCurrentDrainWindow = null;
+        DeviceConfigSession<Long> bgCurrentDrainInteractionGracePeriod = null;
         DeviceConfigSession<Float> bgCurrentDrainRestrictedBucketThreshold = null;
         DeviceConfigSession<Float> bgCurrentDrainBgRestrictedThreshold = null;
         DeviceConfigSession<Boolean> bgPromptFgsWithNotiToBgRestricted = null;
@@ -616,6 +617,14 @@ public final class BackgroundRestrictionTest {
                     (long) mContext.getResources().getInteger(
                             R.integer.config_bg_current_drain_window));
             bgCurrentDrainWindow.set(windowMs);
+
+            bgCurrentDrainInteractionGracePeriod = new DeviceConfigSession<>(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    AppBatteryPolicy.KEY_BG_CURRENT_DRAIN_INTERACTION_GRACE_PERIOD,
+                    DeviceConfig::getLong,
+                    (long) mContext.getResources().getInteger(
+                            R.integer.config_bg_current_drain_window));
+            bgCurrentDrainInteractionGracePeriod.set(windowMs);
 
             bgCurrentDrainRestrictedBucketThreshold = new DeviceConfigSession<>(
                     DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
@@ -768,6 +777,32 @@ public final class BackgroundRestrictionTest {
 
             clearInvocations(mInjector.getAppStandbyInternal());
 
+            // It won't be restricted since user just interacted with it.
+            runTestBgCurrentDrainMonitorOnce(listener, stats, uids,
+                    zeros, new double[]{0, restrictBucketThresholdMah - 1},
+                    zeros, new double[]{restrictBucketThresholdMah + 1, 0},
+                    () -> {
+                        doReturn(mCurrentTimeMillis).when(stats).getStatsStartTimestamp();
+                        doReturn(mCurrentTimeMillis + windowMs)
+                                .when(stats).getStatsEndTimestamp();
+                        mCurrentTimeMillis += windowMs + 1;
+                        try {
+                            listener.verify(timeout, testUid, testPkgName,
+                                    RESTRICTION_LEVEL_RESTRICTED_BUCKET);
+                            fail("There shouldn't be any level change events");
+                        } catch (Exception e) {
+                            // Expected.
+                        }
+                        verify(mInjector.getAppStandbyInternal(), never()).restrictApp(
+                                eq(testPkgName),
+                                eq(testUser),
+                                anyInt(), anyInt());
+                    });
+
+            // Sleep a while.
+            Thread.sleep(windowMs);
+            clearInvocations(mInjector.getAppStandbyInternal());
+            // Now it should have been restricted.
             runTestBgCurrentDrainMonitorOnce(listener, stats, uids,
                     zeros, new double[]{0, restrictBucketThresholdMah - 1},
                     zeros, new double[]{restrictBucketThresholdMah + 1, 0},
@@ -1061,6 +1096,7 @@ public final class BackgroundRestrictionTest {
         } finally {
             closeIfNotNull(bgCurrentDrainMonitor);
             closeIfNotNull(bgCurrentDrainWindow);
+            closeIfNotNull(bgCurrentDrainInteractionGracePeriod);
             closeIfNotNull(bgCurrentDrainRestrictedBucketThreshold);
             closeIfNotNull(bgCurrentDrainBgRestrictedThreshold);
             closeIfNotNull(bgPromptFgsWithNotiToBgRestricted);
@@ -1610,6 +1646,7 @@ public final class BackgroundRestrictionTest {
 
         DeviceConfigSession<Boolean> bgCurrentDrainMonitor = null;
         DeviceConfigSession<Long> bgCurrentDrainWindow = null;
+        DeviceConfigSession<Long> bgCurrentDrainInteractionGracePeriod = null;
         DeviceConfigSession<Float> bgCurrentDrainRestrictedBucketThreshold = null;
         DeviceConfigSession<Float> bgCurrentDrainBgRestrictedThreshold = null;
         DeviceConfigSession<Float> bgCurrentDrainRestrictedBucketHighThreshold = null;
@@ -1654,6 +1691,14 @@ public final class BackgroundRestrictionTest {
                     (long) mContext.getResources().getInteger(
                             R.integer.config_bg_current_drain_window));
             bgCurrentDrainWindow.set(windowMs);
+
+            bgCurrentDrainInteractionGracePeriod = new DeviceConfigSession<>(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    AppBatteryPolicy.KEY_BG_CURRENT_DRAIN_INTERACTION_GRACE_PERIOD,
+                    DeviceConfig::getLong,
+                    (long) mContext.getResources().getInteger(
+                            R.integer.config_bg_current_drain_window));
+            bgCurrentDrainInteractionGracePeriod.set(windowMs);
 
             bgCurrentDrainRestrictedBucketThreshold = new DeviceConfigSession<>(
                     DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
@@ -2176,6 +2221,7 @@ public final class BackgroundRestrictionTest {
         } finally {
             closeIfNotNull(bgCurrentDrainMonitor);
             closeIfNotNull(bgCurrentDrainWindow);
+            closeIfNotNull(bgCurrentDrainInteractionGracePeriod);
             closeIfNotNull(bgCurrentDrainRestrictedBucketThreshold);
             closeIfNotNull(bgCurrentDrainBgRestrictedThreshold);
             closeIfNotNull(bgCurrentDrainRestrictedBucketHighThreshold);

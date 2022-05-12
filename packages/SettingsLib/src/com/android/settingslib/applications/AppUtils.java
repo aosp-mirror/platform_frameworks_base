@@ -268,9 +268,9 @@ public class AppUtils {
     /**
      * Preload the top N icons of app entry list.
      *
-     * @param context caller's context
+     * @param context    caller's context
      * @param appEntries AppEntry list of ApplicationsState
-     * @param number the number of Top N icons of the appEntries
+     * @param number     the number of Top N icons of the appEntries
      */
     public static void preloadTopIcons(Context context,
             ArrayList<ApplicationsState.AppEntry> appEntries, int number) {
@@ -284,6 +284,19 @@ public class AppUtils {
                 getIcon(context, entry);
             });
         }
+    }
+
+    /**
+     * Returns a boolean indicating whether this app  is installed or not.
+     *
+     * @param appEntry AppEntry of ApplicationsState.
+     * @return true if the app is in installed state.
+     */
+    public static boolean isAppInstalled(ApplicationsState.AppEntry appEntry) {
+        if (appEntry == null || appEntry.info == null) {
+            return false;
+        }
+        return (appEntry.info.flags & ApplicationInfo.FLAG_INSTALLED) != 0;
     }
 
     private static void setAppEntryMounted(ApplicationsState.AppEntry appEntry, boolean mounted) {
