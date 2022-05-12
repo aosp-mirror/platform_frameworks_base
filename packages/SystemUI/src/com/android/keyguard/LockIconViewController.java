@@ -123,7 +123,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private float mHeightPixels;
     private float mWidthPixels;
     private int mBottomPaddingPx;
-    private int mScaledPaddingPx;
+    private int mDefaultPaddingPx;
 
     private boolean mShowUnlockIcon;
     private boolean mShowLockIcon;
@@ -340,6 +340,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mWidthPixels = bounds.right;
         mHeightPixels = bounds.bottom;
         mBottomPaddingPx = getResources().getDimensionPixelSize(R.dimen.lock_icon_margin_bottom);
+        mDefaultPaddingPx =
+                getResources().getDimensionPixelSize(R.dimen.lock_icon_padding);
 
         mUnlockedLabel = mView.getContext().getResources().getString(
                 R.string.accessibility_unlock_button);
@@ -348,17 +350,16 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     }
 
     private void updateLockIconLocation() {
+        final float scaleFactor = mAuthController.getScaleFactor();
+        final int scaledPadding = (int) (mDefaultPaddingPx * scaleFactor);
         if (mUdfpsSupported) {
-            final int defaultPaddingPx =
-                    getResources().getDimensionPixelSize(R.dimen.lock_icon_padding);
-            mScaledPaddingPx = (int) (defaultPaddingPx * mAuthController.getScaleFactor());
             mView.setCenterLocation(mAuthController.getUdfpsLocation(),
-                    mAuthController.getUdfpsRadius(), mScaledPaddingPx);
+                    mAuthController.getUdfpsRadius(), scaledPadding);
         } else {
             mView.setCenterLocation(
                     new PointF(mWidthPixels / 2,
-                        mHeightPixels - mBottomPaddingPx - sLockIconRadiusPx),
-                        sLockIconRadiusPx, mScaledPaddingPx);
+                        mHeightPixels - ((mBottomPaddingPx + sLockIconRadiusPx) * scaleFactor)),
+                        sLockIconRadiusPx * scaleFactor, scaledPadding);
         }
     }
 
