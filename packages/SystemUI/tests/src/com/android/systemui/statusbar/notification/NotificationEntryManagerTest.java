@@ -294,7 +294,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         verify(mPresenter).updateNotificationViews(any());
         verify(mEntryListener).onEntryRemoved(
-                eq(mEntry), any(), eq(false) /* removedByUser */, eq(UNDEFINED_DISMISS_REASON));
+                argThat(matchEntryOnKey()), any(),
+                eq(false) /* removedByUser */, eq(UNDEFINED_DISMISS_REASON));
         verify(mRow).setRemoved();
 
         assertNull(mEntryManager.getActiveNotificationUnfiltered(mSbn.getKey()));
@@ -319,8 +320,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         mEntryManager.removeNotification("not_a_real_key", mRankingMap, UNDEFINED_DISMISS_REASON);
 
-        verify(mEntryListener, never()).onEntryRemoved(
-                eq(mEntry), any(), eq(false) /* removedByUser */, eq(UNDEFINED_DISMISS_REASON));
+        verify(mEntryListener, never()).onEntryRemoved(argThat(matchEntryOnKey()), any(),
+                eq(false) /* removedByUser */, eq(UNDEFINED_DISMISS_REASON));
     }
 
     /** Regression test for b/201097913. */
@@ -333,10 +334,10 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         // Verify that only the listener for the NEW pipeline is notified.
         // Old pipeline:
         verify(mEntryListener, never()).onEntryRemoved(
-                argThat(matchEntryOnSbn()), any(), anyBoolean(), anyInt());
+                argThat(matchEntryOnKey()), any(), anyBoolean(), anyInt());
         // New pipeline:
         verify(mNotifCollectionListener).onEntryRemoved(
-                argThat(matchEntryOnSbn()), anyInt());
+                argThat(matchEntryOnKey()), anyInt());
     }
 
     @Test
@@ -457,7 +458,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         // THEN the notification is retained
         assertNotNull(mEntryManager.getActiveNotificationUnfiltered(mSbn.getKey()));
         verify(mEntryListener, never()).onEntryRemoved(
-                eq(mEntry), any(), eq(false), eq(UNDEFINED_DISMISS_REASON));
+                argThat(matchEntryOnKey()), any(), eq(false), eq(UNDEFINED_DISMISS_REASON));
     }
 
     @Test
@@ -476,7 +477,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         // THEN the notification is removed
         assertNull(mEntryManager.getActiveNotificationUnfiltered(mSbn.getKey()));
         verify(mEntryListener).onEntryRemoved(
-                eq(mEntry), any(), eq(false), eq(UNDEFINED_DISMISS_REASON));
+                argThat(matchEntryOnKey()), any(), eq(false), eq(UNDEFINED_DISMISS_REASON));
     }
 
     @Test
@@ -541,7 +542,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         // GIVEN interceptor that intercepts that entry
         when(mRemoveInterceptor.onNotificationRemoveRequested(
-                eq(mEntry.getKey()), eq(mEntry), anyInt()))
+                eq(mEntry.getKey()), argThat(matchEntryOnKey()), anyInt()))
                 .thenReturn(true);
 
         // WHEN the notification is removed
@@ -549,7 +550,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         // THEN the interceptor intercepts & the entry is not removed & no listeners are called
         assertNotNull(mEntryManager.getActiveNotificationUnfiltered(mSbn.getKey()));
-        verify(mEntryListener, never()).onEntryRemoved(eq(mEntry),
+        verify(mEntryListener, never()).onEntryRemoved(argThat(matchEntryOnKey()),
                 any(NotificationVisibility.class), anyBoolean(), eq(UNDEFINED_DISMISS_REASON));
     }
 
@@ -560,7 +561,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         // GIVEN interceptor that doesn't intercept
         when(mRemoveInterceptor.onNotificationRemoveRequested(
-                eq(mEntry.getKey()), eq(mEntry), anyInt()))
+                eq(mEntry.getKey()), argThat(matchEntryOnKey()), anyInt()))
                 .thenReturn(false);
 
         // WHEN the notification is removed
@@ -568,7 +569,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         // THEN the interceptor intercepts & the entry is not removed & no listeners are called
         assertNull(mEntryManager.getActiveNotificationUnfiltered(mSbn.getKey()));
-        verify(mEntryListener, atLeastOnce()).onEntryRemoved(eq(mEntry),
+        verify(mEntryListener, atLeastOnce()).onEntryRemoved(argThat(matchEntryOnKey()),
                 any(NotificationVisibility.class), anyBoolean(), eq(UNDEFINED_DISMISS_REASON));
     }
 
@@ -663,9 +664,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                     PendingIntent.FLAG_IMMUTABLE)).build();
     }
 
-    // TODO(b/201321631): Update more tests to use this function instead of eq(mEntry).
-    private ArgumentMatcher<NotificationEntry> matchEntryOnSbn() {
-        return e -> e.getSbn().equals(mSbn);
+    private ArgumentMatcher<NotificationEntry> matchEntryOnKey() {
+        return e -> e.getKey().equals(mEntry.getKey());
     }
 
     private static class FakeNotificationLifetimeExtender implements NotificationLifetimeExtender {

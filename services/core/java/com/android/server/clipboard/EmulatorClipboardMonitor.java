@@ -18,6 +18,7 @@ package com.android.server.clipboard;
 
 import android.annotation.Nullable;
 import android.content.ClipData;
+import android.os.PersistableBundle;
 import android.os.SystemProperties;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -137,6 +138,9 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
                     final ClipData clip = new ClipData("host clipboard",
                                                        new String[]{"text/plain"},
                                                        new ClipData.Item(str));
+                    final PersistableBundle bundle = new PersistableBundle();
+                    bundle.putBoolean("com.android.systemui.SUPPRESS_CLIPBOARD_OVERLAY", true);
+                    clip.getDescription().setExtras(bundle);
 
                     if (LOG_CLIBOARD_ACCESS) {
                         Slog.i(TAG, "Setting the guest clipboard to '" + str + "'");
