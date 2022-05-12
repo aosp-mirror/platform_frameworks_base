@@ -20,9 +20,11 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.hardware.display.DisplayViewport
 import android.hardware.input.InputManagerInternal
+import android.os.IInputConstants
 import android.os.test.TestLooper
 import android.platform.test.annotations.Presubmit
 import android.view.Display
+import android.view.PointerIcon
 import androidx.test.InstrumentationRegistry
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -31,6 +33,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.doAnswer
@@ -38,6 +41,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.junit.MockitoJUnit
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -218,5 +222,24 @@ class InputManagerServiceTests {
         assertTrue("Native callback unblocks second thread",
             secondRequestLatch.await(100, TimeUnit.MILLISECONDS))
         verify(native, times(2)).setPointerDisplayId(anyInt())
+    }
+
+    @Test
+    fun onDisplayRemoved_resetAllAdditionalInputProperties() {
+        localService.setVirtualMousePointerDisplayId(10)
+        localService.setPointerIconVisible(false, 10)
+        verify(native).setPointerIconType(eq(PointerIcon.TYPE_NULL))
+        localService.setPointerAcceleration(5f, 10)
+        verify(native).setPointerAcceleration(eq(5f))
+
+        service.onDisplayRemoved(10)
+        verify(native).displayRemoved(eq(10))
+        verify(native).setPointerIconType(eq(PointerIcon.TYPE_NOT_SPECIFIED))
+        verify(native).setPointerAcceleration(
+            eq(IInputConstants.DEFAULT_POINTER_ACCELERATION.toFloat()))
+
+        localService.setVirtualMousePointerDisplayId(10)
+        verify(native).setPointerDisplayId(eq(10))
+        verifyNoMoreInteractions(native)
     }
 }

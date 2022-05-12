@@ -173,6 +173,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -224,6 +225,7 @@ import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.MergedConfiguration;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.TimeUtils;
@@ -3058,10 +3060,10 @@ public class WindowManagerService extends IWindowManager.Stub
             mRecentsAnimationController = null;
             controller.cleanupAnimation(reorderMode);
             // TODO(multi-display): currently only default display support recents animation.
-            // Cancel any existing app transition animation running in the legacy transition
-            // framework.
             final DisplayContent dc = getDefaultDisplayContentLocked();
-            dc.mAppTransition.freeze();
+            if (dc.mAppTransition.isTransitionSet()) {
+                dc.mSkipAppTransitionAnimation = true;
+            }
             dc.forAllWindowContainers((wc) -> {
                 if (wc.isAnimating(TRANSITION, ANIMATION_TYPE_APP_TRANSITION)) {
                     wc.cancelAnimation();
@@ -7769,6 +7771,13 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
+        public Pair<Matrix, MagnificationSpec> getWindowTransformationMatrixAndMagnificationSpec(
+                IBinder token) {
+            return mAccessibilityController
+                    .getWindowTransformationMatrixAndMagnificationSpec(token);
+        }
+
+        @Override
         public void waitForAllWindowsDrawn(Runnable callback, long timeout, int displayId) {
             final WindowContainer container = displayId == INVALID_DISPLAY
                     ? mRoot : mRoot.getDisplayContent(displayId);
@@ -8241,23 +8250,15 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public void replaceInputSurfaceTouchableRegionWithWindowCrop(
-                @NonNull SurfaceControl inputSurface,
-                @NonNull InputWindowHandle inputWindowHandle,
-                @NonNull IBinder windowToken) {
+        public boolean isPointInsideWindow(@NonNull IBinder windowToken, int displayId,
+                float displayX, float displayY) {
             synchronized (mGlobalLock) {
                 final WindowState w = mWindowMap.get(windowToken);
-                if (w == null) {
-                    return;
+                if (w == null || w.getDisplayId() != displayId) {
+                    return false;
                 }
-                // Make a copy of the InputWindowHandle to avoid leaking the window's
-                // SurfaceControl.
-                final InputWindowHandle localHandle = new InputWindowHandle(inputWindowHandle);
-                localHandle.replaceTouchableRegionWithCrop(w.getSurfaceControl());
-                final SurfaceControl.Transaction t = mTransactionFactory.get();
-                t.setInputWindowInfo(inputSurface, localHandle);
-                t.apply();
-                t.close();
+
+                return w.getBounds().contains((int) displayX, (int) displayY);
             }
         }
     }
@@ -8877,16 +8878,18 @@ public class WindowManagerService extends IWindowManager.Stub
                 WindowState newFocusTarget =  displayContent == null
                         ? null : displayContent.findFocusedWindow();
                 if (newFocusTarget == null) {
-                    ProtoLog.v(WM_DEBUG_FOCUS, "grantEmbeddedWindowFocus remove request for "
-                                    + "win=%s dropped since no candidate was found",
+                    t.setFocusedWindow(null, null, displayId).apply();
+                    ProtoLog.v(WM_DEBUG_FOCUS, "grantEmbeddedWindowFocus win=%s"
+                                    + " dropped focus so setting focus to null since no candidate"
+                                    + " was found",
                             embeddedWindow);
                     return;
                 }
-                t.requestFocusTransfer(newFocusTarget.mInputChannelToken, newFocusTarget.getName(),
-                        inputToken, embeddedWindow.toString(),
+                t.setFocusedWindow(newFocusTarget.mInputChannelToken, newFocusTarget.getName(),
                         displayId).apply();
+
                 EventLog.writeEvent(LOGTAG_INPUT_FOCUS,
-                        "Transfer focus request " + newFocusTarget,
+                        "Focus request " + newFocusTarget,
                         "reason=grantEmbeddedWindowFocus(false)");
             }
             ProtoLog.v(WM_DEBUG_FOCUS, "grantEmbeddedWindowFocus win=%s grantFocus=%s",

@@ -13248,8 +13248,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     UserManager.DISALLOW_DEBUGGING_FEATURES, user)) {
                 continue;
             }
-            List<ResolveInfo> newReceivers = mPackageManagerInt
-                    .queryIntentReceivers(intent, resolvedType, pmFlags, callingUid, user);
+            List<ResolveInfo> newReceivers = mPackageManagerInt.queryIntentReceivers(
+                    intent, resolvedType, pmFlags, callingUid, user, true /* forSend */);
             if (user != UserHandle.USER_SYSTEM && newReceivers != null) {
                 // If this is not the system user, we need to check for
                 // any receivers that should be filtered out.
@@ -13265,8 +13265,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (newReceivers != null) {
                 for (int i = newReceivers.size() - 1; i >= 0; i--) {
                     final ResolveInfo ri = newReceivers.get(i);
-                    final Resolution<ResolveInfo> resolution = mComponentAliasResolver
-                            .resolveReceiver(intent, ri, resolvedType, pmFlags, user, callingUid);
+                    final Resolution<ResolveInfo> resolution =
+                            mComponentAliasResolver.resolveReceiver(intent, ri, resolvedType,
+                                    pmFlags, user, callingUid, true /* forSend */);
                     if (resolution == null) {
                         // It was an alias, but the target was not found.
                         newReceivers.remove(i);
@@ -17195,17 +17196,17 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public boolean isUidCurrentlyInstrumented(int uid) {
+        public int getInstrumentationSourceUid(int uid) {
             synchronized (mProcLock) {
                 for (int i = mActiveInstrumentation.size() - 1; i >= 0; i--) {
                     ActiveInstrumentation activeInst = mActiveInstrumentation.get(i);
                     if (!activeInst.mFinished && activeInst.mTargetInfo != null
                             && activeInst.mTargetInfo.uid == uid) {
-                        return true;
+                        return activeInst.mSourceUid;
                     }
                 }
             }
-            return false;
+            return INVALID_UID;
         }
 
         @Override
