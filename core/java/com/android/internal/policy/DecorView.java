@@ -1262,7 +1262,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             }
         }
 
-        if (forceConsumingNavBar && !mDrawLegacyNavigationBarBackgroundHandled) {
+        if (forceConsumingNavBar && !hideNavigation && !mDrawLegacyNavigationBarBackgroundHandled) {
             mBackgroundInsets = Insets.of(mLastLeftInset, 0, mLastRightInset, mLastBottomInset);
         } else {
             mBackgroundInsets = Insets.NONE;

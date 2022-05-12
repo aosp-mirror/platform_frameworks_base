@@ -659,4 +659,7 @@
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"तपाईंले <xliff:g id="SWITCHAPP">%1$s</xliff:g> ब्रोडकास्ट गर्नुभयो वा आउटपुट परिवर्तन गर्नुभयो भने तपाईंको हालको ब्रोडकास्ट रोकिने छ"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> ब्रोडकास्ट गर्नुहोस्"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"आउटपुट परिवर्तन गर्नुहोस्"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"पूर्वानुमानयुक्त ब्याक एनिमेसनहरू"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"पूर्वानुमानयुक्त ब्याक एनिमेसनका हकमा सिस्टम एनिमेसनहरू लागू गर्नुहोस्।"</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"यो सेटिङले पूर्वानुमानयुक्त जेस्चर एनिमेसनका हकमा सिस्टम एनिमेनसहरू लागू गर्छ। म्यानिफेस्ट फाइलमा हरेक एपका हकमा enableOnBackInvokedCallback सेट गरी TRUE बनाएपछि मात्र यो सेटिङ अन गर्न मिल्छ।"</string>
 </resources>

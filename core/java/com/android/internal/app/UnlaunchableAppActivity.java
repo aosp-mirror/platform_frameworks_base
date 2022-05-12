@@ -91,7 +91,12 @@ public class UnlaunchableAppActivity extends Activity
         } else {
             builder.setPositiveButton(R.string.ok, null);
         }
-        builder.show();
+        final AlertDialog dialog = builder.create();
+        dialog.create();
+        // Prevents screen overlay attack.
+        getWindow().setHideOverlayWindows(true);
+        dialog.getButton(DialogInterface.BUTTON_POSITIVE).setFilterTouchesWhenObscured(true);
+        dialog.show();
     }
 
     private String getDialogTitle() {

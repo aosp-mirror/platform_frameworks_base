@@ -25,19 +25,17 @@ import android.media.session.MediaSession
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
-
 import com.android.settingslib.media.LocalMediaManager
 import com.android.settingslib.media.MediaDevice
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionManager
 import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionManagerFactory
+import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
-
 import com.google.common.truth.Truth.assertThat
-
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -50,8 +48,8 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
+import org.mockito.Mockito.`when` as whenever
 
 private const val KEY = "TEST_KEY"
 private const val KEY_OLD = "TEST_KEY_OLD"
@@ -81,6 +79,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     @Mock private lateinit var route: RoutingSessionInfo
     @Mock private lateinit var controller: MediaController
     @Mock private lateinit var playbackInfo: PlaybackInfo
+    @Mock private lateinit var configurationController: ConfigurationController
     private lateinit var session: MediaSession
     private lateinit var mediaData: MediaData
     @JvmField @Rule val mockito = MockitoJUnit.rule()
@@ -94,6 +93,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
                 lmmFactory,
                 mr2,
                 muteAwaitFactory,
+                configurationController,
                 fakeFgExecutor,
                 fakeBgExecutor,
                 dumpster

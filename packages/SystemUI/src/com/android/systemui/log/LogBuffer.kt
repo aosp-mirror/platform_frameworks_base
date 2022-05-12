@@ -89,7 +89,7 @@ class LogBuffer @JvmOverloads constructor(
 
     init {
         if (logcatEchoTracker.logInBackgroundThread && echoMessageQueue != null) {
-            thread(start = true, priority = Thread.NORM_PRIORITY) {
+            thread(start = true, name = "LogBuffer-$name", priority = Thread.NORM_PRIORITY) {
                 try {
                     while (true) {
                         echoToDesiredEndpoints(echoMessageQueue.take())

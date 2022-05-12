@@ -16,6 +16,7 @@
 
 package com.android.server.devicepolicy;
 
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.os.UserHandle;
 import android.util.Slog;
@@ -28,6 +29,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class for dealing with Device Policy Manager Service version upgrades.
@@ -91,28 +94,80 @@ public class PolicyVersionUpgrader {
 
         if (currentVersion == 1) {
             Slog.i(LOG_TAG, String.format("Upgrading from version %d", currentVersion));
-            // This upgrade step is for Device Owner scenario only: For devices upgrading to S,
-            // if there is a device owner, it retains the ability to control sensors-related
-            // permission grants.
-            for (int userId : allUsers) {
-                DevicePolicyData userData = allUsersData.get(userId);
-                if (userData == null) {
-                    continue;
-                }
-                for (ActiveAdmin admin : userData.mAdminList) {
-                    if (ownersData.mDeviceOwnerUserId == userId
-                            && ownersData.mDeviceOwner != null
-                            && ownersData.mDeviceOwner.admin.equals(admin.info.getComponent())) {
-                        Slog.i(LOG_TAG, String.format(
-                                "Marking Device Owner in user %d for permission grant ", userId));
-                        admin.mAdminCanGrantSensorsPermissions = true;
-                    }
-                }
-            }
+            upgradeSensorPermissionsAccess(allUsers, ownersData, allUsersData);
             currentVersion = 2;
         }
 
+        if (currentVersion == 2) {
+            Slog.i(LOG_TAG, String.format("Upgrading from version %d", currentVersion));
+            upgradeProtectedPackages(ownersData, allUsersData);
+            currentVersion = 3;
+        }
+
         writePoliciesAndVersion(allUsers, allUsersData, ownersData, currentVersion);
+    }
+
+    /**
+     * This upgrade step is for Device Owner scenario only: For devices upgrading to S, if there is
+     * a device owner, it retains the ability to control sensors-related permission grants.
+     */
+    private void upgradeSensorPermissionsAccess(
+            int[] allUsers, OwnersData ownersData, SparseArray<DevicePolicyData> allUsersData) {
+        for (int userId : allUsers) {
+            DevicePolicyData userData = allUsersData.get(userId);
+            if (userData == null) {
+                continue;
+            }
+            for (ActiveAdmin admin : userData.mAdminList) {
+                if (ownersData.mDeviceOwnerUserId == userId
+                        && ownersData.mDeviceOwner != null
+                        && ownersData.mDeviceOwner.admin.equals(admin.info.getComponent())) {
+                    Slog.i(LOG_TAG, String.format(
+                            "Marking Device Owner in user %d for permission grant ", userId));
+                    admin.mAdminCanGrantSensorsPermissions = true;
+                }
+            }
+        }
+    }
+
+    /**
+     * This upgrade step moves device owner protected packages to ActiveAdmin.
+     * Initially these packages were stored in DevicePolicyData, then moved to Owners without
+     * employing PolicyVersionUpgrader. Here we check both places.
+     */
+    private void upgradeProtectedPackages(
+            OwnersData ownersData, SparseArray<DevicePolicyData> allUsersData) {
+        if (ownersData.mDeviceOwner == null) {
+            return;
+        }
+        List<String> protectedPackages = null;
+        DevicePolicyData doUserData = allUsersData.get(ownersData.mDeviceOwnerUserId);
+        if (doUserData == null) {
+            Slog.e(LOG_TAG, "No policy data for do user");
+            return;
+        }
+        if (ownersData.mDeviceOwnerProtectedPackages != null) {
+            protectedPackages = ownersData.mDeviceOwnerProtectedPackages
+                    .get(ownersData.mDeviceOwner.packageName);
+            if (protectedPackages != null) {
+                Slog.i(LOG_TAG, "Found protected packages in Owners");
+            }
+            ownersData.mDeviceOwnerProtectedPackages = null;
+        } else if (doUserData.mUserControlDisabledPackages != null) {
+            Slog.i(LOG_TAG, "Found protected packages in DevicePolicyData");
+            protectedPackages = doUserData.mUserControlDisabledPackages;
+            doUserData.mUserControlDisabledPackages = null;
+        }
+
+        ActiveAdmin doAdmin = doUserData.mAdminMap.get(ownersData.mDeviceOwner.admin);
+        if (doAdmin == null) {
+            Slog.e(LOG_TAG, "DO admin not found in DO user");
+            return;
+        }
+
+        if (protectedPackages != null) {
+            doAdmin.protectedPackages = new ArrayList<>(protectedPackages);
+        }
     }
 
     private OwnersData loadOwners(int[] allUsers) {
@@ -146,15 +201,21 @@ public class PolicyVersionUpgrader {
             OwnersData ownersData) {
         final SparseArray<DevicePolicyData> allUsersData = new SparseArray<>();
         for (int user: allUsers) {
-            ComponentName owner = null;
-            if (ownersData.mDeviceOwnerUserId == user && ownersData.mDeviceOwner != null) {
-                owner = ownersData.mDeviceOwner.admin;
-            } else if (ownersData.mProfileOwners.containsKey(user)) {
-                owner = ownersData.mProfileOwners.get(user).admin;
-            }
+            ComponentName owner = getOwnerForUser(ownersData, user);
             allUsersData.append(user, loadDataForUser(user, loadVersion, owner));
         }
         return allUsersData;
+    }
+
+    @Nullable
+    private ComponentName getOwnerForUser(OwnersData ownersData, int user) {
+        ComponentName owner = null;
+        if (ownersData.mDeviceOwnerUserId == user && ownersData.mDeviceOwner != null) {
+            owner = ownersData.mDeviceOwner.admin;
+        } else if (ownersData.mProfileOwners.containsKey(user)) {
+            owner = ownersData.mProfileOwners.get(user).admin;
+        }
+        return owner;
     }
 
     private DevicePolicyData loadDataForUser(

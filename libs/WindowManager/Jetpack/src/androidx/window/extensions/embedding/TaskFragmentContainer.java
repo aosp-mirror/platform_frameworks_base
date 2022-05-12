@@ -16,13 +16,11 @@
 
 package androidx.window.extensions.embedding;
 
-import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
-import android.app.ActivityThread;
 import android.app.WindowConfiguration.WindowingMode;
 import android.graphics.Rect;
 import android.os.Binder;
@@ -52,8 +50,9 @@ class TaskFragmentContainer {
     @NonNull
     private final IBinder mToken;
 
-    /** Parent leaf Task id. */
-    private final int mTaskId;
+    /** Parent leaf Task. */
+    @NonNull
+    private final TaskContainer mTaskContainer;
 
     /**
      * Server-provided task fragment information.
@@ -100,14 +99,12 @@ class TaskFragmentContainer {
      * Creates a container with an existing activity that will be re-parented to it in a window
      * container transaction.
      */
-    TaskFragmentContainer(@Nullable Activity activity, int taskId,
+    TaskFragmentContainer(@Nullable Activity activity, @NonNull TaskContainer taskContainer,
             @NonNull SplitController controller) {
         mController = controller;
         mToken = new Binder("TaskFragmentContainer");
-        if (taskId == INVALID_TASK_ID) {
-            throw new IllegalArgumentException("Invalid Task id");
-        }
-        mTaskId = taskId;
+        mTaskContainer = taskContainer;
+        taskContainer.mContainers.add(this);
         if (activity != null) {
             addPendingAppearedActivity(activity);
         }
@@ -135,9 +132,8 @@ class TaskFragmentContainer {
         if (mInfo == null) {
             return allActivities;
         }
-        ActivityThread activityThread = ActivityThread.currentActivityThread();
         for (IBinder token : mInfo.getActivities()) {
-            Activity activity = activityThread.getActivity(token);
+            Activity activity = mController.getActivity(token);
             if (activity != null && !activity.isFinishing() && !allActivities.contains(activity)) {
                 allActivities.add(activity);
             }
@@ -162,7 +158,16 @@ class TaskFragmentContainer {
     }
 
     void addPendingAppearedActivity(@NonNull Activity pendingAppearedActivity) {
+        if (hasActivity(pendingAppearedActivity.getActivityToken())) {
+            return;
+        }
+        // Remove the pending activity from other TaskFragments.
+        mTaskContainer.cleanupPendingAppearedActivity(pendingAppearedActivity);
         mPendingAppearedActivities.add(pendingAppearedActivity);
+    }
+
+    void removePendingAppearedActivity(@NonNull Activity pendingAppearedActivity) {
+        mPendingAppearedActivities.remove(pendingAppearedActivity);
     }
 
     boolean hasActivity(@NonNull IBinder token) {
@@ -376,7 +381,13 @@ class TaskFragmentContainer {
 
     /** Gets the parent leaf Task id. */
     int getTaskId() {
-        return mTaskId;
+        return mTaskContainer.getTaskId();
+    }
+
+    /** Gets the parent Task. */
+    @NonNull
+    TaskContainer getTaskContainer() {
+        return mTaskContainer;
     }
 
     @Override
@@ -392,6 +403,7 @@ class TaskFragmentContainer {
      */
     private String toString(boolean includeContainersToFinishOnExit) {
         return "TaskFragmentContainer{"
+                + " parentTaskId=" + getTaskId()
                 + " token=" + mToken
                 + " topNonFinishingActivity=" + getTopNonFinishingActivity()
                 + " runningActivityCount=" + getRunningActivityCount()

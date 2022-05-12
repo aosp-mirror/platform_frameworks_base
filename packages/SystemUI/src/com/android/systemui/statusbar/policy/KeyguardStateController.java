@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.policy;
 
 import android.app.IActivityTaskManager;
 
+import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.policy.KeyguardStateController.Callback;
 
@@ -92,6 +93,15 @@ public interface KeyguardStateController extends CallbackController<Callback> {
      * return {@code true} whenever {@link #isKeyguardFadingAway()} also returns {@code true}.
      */
     boolean isKeyguardGoingAway();
+
+    /**
+     * Whether we're currently animating between the keyguard and the app/launcher surface behind
+     * it, or will be shortly (which happens if we started a fling to dismiss the keyguard).
+     * @see {@link KeyguardViewMediator#isAnimatingBetweenKeyguardAndSurfaceBehind()}
+     */
+    default boolean isAnimatingBetweenKeyguardAndSurfaceBehind() {
+        return false;
+    };
 
     /**
      * @return a shortened fading away duration similar to
