@@ -47,6 +47,7 @@ import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.ModemActivityInfo;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
+import android.util.MutableInt;
 import android.util.SparseIntArray;
 import android.util.SparseLongArray;
 import android.view.Display;
@@ -1980,6 +1981,54 @@ public class BatteryStatsNoteTest extends TestCase {
         state.noteModemControllerActivity();
         checkPerStateActiveRadioDurations(expectedDurationsMs, expectedRxDurationsMs,
                 expectedTxDurationsMs, bi, state.currentTimeMs);
+    }
+
+    @SmallTest
+    @SuppressWarnings("GuardedBy")
+    public void testProcStateSyncScheduling_mobileRadioActiveState() {
+        final MockClock clock = new MockClock(); // holds realtime and uptime in ms
+        final MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clock);
+        final MutableInt lastProcStateChangeFlags = new MutableInt(0);
+
+        MockBatteryStatsImpl.DummyExternalStatsSync externalStatsSync =
+                new MockBatteryStatsImpl.DummyExternalStatsSync() {
+                    @Override
+                    public void scheduleSyncDueToProcessStateChange(int flags,
+                            long delayMillis) {
+                        lastProcStateChangeFlags.value = flags;
+                    }
+                };
+
+        bi.setDummyExternalStatsSync(externalStatsSync);
+
+        bi.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
+
+        // Note mobile radio is on.
+        long curr = 1000L * (clock.realtime = clock.uptime = 1001);
+        bi.noteMobileRadioPowerStateLocked(DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH, curr,
+                UID);
+
+        lastProcStateChangeFlags.value = 0;
+        clock.realtime = clock.uptime = 2002;
+        bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND);
+
+        final int allProcFlags = BatteryStatsImpl.ExternalStatsSync.UPDATE_ON_PROC_STATE_CHANGE;
+        assertEquals(allProcFlags, lastProcStateChangeFlags.value);
+
+        // Note mobile radio is off.
+        curr = 1000L * (clock.realtime = clock.uptime = 3003);
+        bi.noteMobileRadioPowerStateLocked(DataConnectionRealTimeInfo.DC_POWER_STATE_LOW, curr,
+                UID);
+
+        lastProcStateChangeFlags.value = 0;
+        clock.realtime = clock.uptime = 4004;
+        bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_CACHED_EMPTY);
+
+        final int noRadioProcFlags = BatteryStatsImpl.ExternalStatsSync.UPDATE_ON_PROC_STATE_CHANGE
+                & ~BatteryStatsImpl.ExternalStatsSync.UPDATE_RADIO;
+        assertEquals(
+                "An inactive radio should not be queried on proc state change",
+                noRadioProcFlags, lastProcStateChangeFlags.value);
     }
 
     private void setFgState(int uid, boolean fgOn, MockBatteryStatsImpl bi) {
