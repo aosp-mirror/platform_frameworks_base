@@ -56,7 +56,6 @@ class NotifCoordinatorsImpl @Inject constructor(
     smartspaceDedupingCoordinator: SmartspaceDedupingCoordinator,
     viewConfigCoordinator: ViewConfigCoordinator,
     visualStabilityCoordinator: VisualStabilityCoordinator,
-    sensitiveContentCoordinator: SensitiveContentCoordinator,
     activityLaunchAnimCoordinator: ActivityLaunchAnimCoordinator
 ) : NotifCoordinators {
 
@@ -94,7 +93,6 @@ class NotifCoordinatorsImpl @Inject constructor(
         mCoordinators.add(shadeEventCoordinator)
         mCoordinators.add(viewConfigCoordinator)
         mCoordinators.add(visualStabilityCoordinator)
-        mCoordinators.add(sensitiveContentCoordinator)
         mCoordinators.add(activityLaunchAnimCoordinator)
         if (notifPipelineFlags.isSmartspaceDedupingEnabled()) {
             mCoordinators.add(smartspaceDedupingCoordinator)

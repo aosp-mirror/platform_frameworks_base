@@ -60,6 +60,7 @@ import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Property;
+import android.util.Slog;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -93,8 +94,8 @@ import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
-import com.android.systemui.statusbar.notification.LaunchAnimationParameters;
 import com.android.systemui.statusbar.notification.FeedbackIcon;
+import com.android.systemui.statusbar.notification.LaunchAnimationParameters;
 import com.android.systemui.statusbar.notification.NotificationFadeAware;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorController;
 import com.android.systemui.statusbar.notification.NotificationUtils;
@@ -206,7 +207,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     /** Are we showing the "public" version */
     private boolean mShowingPublic;
     private boolean mSensitive;
-    private boolean mSensitiveHiddenInGeneral;
     private boolean mShowingPublicInitialized;
     private boolean mHideSensitiveForIntrinsicHeight;
     private float mHeaderVisibleAmount = DEFAULT_HEADER_VISIBLE_AMOUNT;
@@ -364,9 +364,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     @Nullable private OnExpansionChangedListener mExpansionChangedListener;
     @Nullable private Runnable mOnIntrinsicHeightReachedRunnable;
 
-    private SystemNotificationAsyncTask mSystemNotificationAsyncTask =
-            new SystemNotificationAsyncTask();
-
     private float mTopRoundnessDuringLaunchAnimation;
     private float mBottomRoundnessDuringLaunchAnimation;
 
@@ -376,44 +373,24 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * calls.
      */
     private static Boolean isSystemNotification(Context context, StatusBarNotification sbn) {
-        // TODO (b/194833441): clean up before launch
-        if (Settings.Secure.getIntForUser(context.getContentResolver(),
-                Settings.Secure.NOTIFICATION_PERMISSION_ENABLED, 0, USER_SYSTEM) == 1) {
-            INotificationManager iNm = INotificationManager.Stub.asInterface(
-                    ServiceManager.getService(Context.NOTIFICATION_SERVICE));
+        INotificationManager iNm = INotificationManager.Stub.asInterface(
+                ServiceManager.getService(Context.NOTIFICATION_SERVICE));
 
-            boolean isSystem = false;
-            try {
-                isSystem = iNm.isPermissionFixed(sbn.getPackageName(), sbn.getUserId());
-            } catch (RemoteException e) {
-                Log.e(TAG, "cannot reach NMS");
-            }
-            RoleManager rm = context.getSystemService(RoleManager.class);
-            List<String> fixedRoleHolders = new ArrayList<>();
-            fixedRoleHolders.addAll(rm.getRoleHolders(RoleManager.ROLE_DIALER));
-            fixedRoleHolders.addAll(rm.getRoleHolders(RoleManager.ROLE_EMERGENCY));
-            if (fixedRoleHolders.contains(sbn.getPackageName())) {
-                isSystem = true;
-            }
-
-            return isSystem;
-        } else {
-            PackageManager packageManager = CentralSurfaces.getPackageManagerForUser(
-                    context, sbn.getUser().getIdentifier());
-            Boolean isSystemNotification = null;
-
-            try {
-                PackageInfo packageInfo = packageManager.getPackageInfo(
-                        sbn.getPackageName(), PackageManager.GET_SIGNATURES);
-
-                isSystemNotification =
-                        com.android.settingslib.Utils.isSystemPackage(
-                                context.getResources(), packageManager, packageInfo);
-            } catch (PackageManager.NameNotFoundException e) {
-                Log.e(TAG, "cacheIsSystemNotification: Could not find package info");
-            }
-            return isSystemNotification;
+        boolean isSystem = false;
+        try {
+            isSystem = iNm.isPermissionFixed(sbn.getPackageName(), sbn.getUserId());
+        } catch (RemoteException e) {
+            Log.e(TAG, "cannot reach NMS");
         }
+        RoleManager rm = context.getSystemService(RoleManager.class);
+        List<String> fixedRoleHolders = new ArrayList<>();
+        fixedRoleHolders.addAll(rm.getRoleHolders(RoleManager.ROLE_DIALER));
+        fixedRoleHolders.addAll(rm.getRoleHolders(RoleManager.ROLE_EMERGENCY));
+        if (fixedRoleHolders.contains(sbn.getPackageName())) {
+            isSystem = true;
+        }
+
+        return isSystem;
     }
 
     public NotificationContentView[] getLayouts() {
@@ -538,47 +515,20 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     /**
-     * Caches whether or not this row contains a system notification. Note, this is only cached
-     * once per notification as the packageInfo can't technically change for a notification row.
-     */
-    private void cacheIsSystemNotification() {
-        //TODO: This probably shouldn't be in ExpandableNotificationRow
-        if (mEntry != null && mEntry.mIsSystemNotification == null) {
-            if (mSystemNotificationAsyncTask.getStatus() == AsyncTask.Status.PENDING) {
-                // Run async task once, only if it hasn't already been executed. Note this is
-                // executed in serial - no need to parallelize this small task.
-                mSystemNotificationAsyncTask.execute();
-            }
-        }
-    }
-
-    /**
      * Returns whether this row is considered non-blockable (i.e. it's a non-blockable system notif
      * or is in an allowList).
      */
     public boolean getIsNonblockable() {
-        // If the SystemNotifAsyncTask hasn't finished running or retrieved a value, we'll try once
-        // again, but in-place on the main thread this time. This should rarely ever get called.
-        if (mEntry != null && mEntry.mIsSystemNotification == null) {
-            if (DEBUG) {
-                Log.d(TAG, "Retrieving isSystemNotification on main thread");
-            }
-            mSystemNotificationAsyncTask.cancel(true /* mayInterruptIfRunning */);
-            mEntry.mIsSystemNotification = isSystemNotification(mContext, mEntry.getSbn());
+        if (mEntry == null || mEntry.getChannel() == null) {
+            Log.w(TAG, "missing entry or channel");
+            return true;
+        }
+        if (mEntry.getChannel().isImportanceLockedByCriticalDeviceFunction()
+                && !mEntry.getChannel().isBlockable()) {
+            return true;
         }
 
-        // TODO (b/194833441): remove when we've migrated to permission
-        boolean isNonblockable = mEntry.getChannel().isImportanceLockedByOEM()
-                || mEntry.getChannel().isImportanceLockedByCriticalDeviceFunction();
-
-        if (!isNonblockable && mEntry != null && mEntry.mIsSystemNotification != null) {
-            if (mEntry.mIsSystemNotification) {
-                if (mEntry.getChannel() != null && !mEntry.getChannel().isBlockable()) {
-                    isNonblockable = true;
-                }
-            }
-        }
-        return isNonblockable;
+        return false;
     }
 
     private boolean isConversation() {
@@ -1560,6 +1510,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mUseIncreasedHeadsUpHeight = use;
     }
 
+    // TODO: remove this method and mNeedsRedaction entirely once the old pipeline is gone
     public void setNeedsRedaction(boolean needsRedaction) {
         // TODO: Move inflation logic out of this call and remove this method
         if (mNeedsRedaction != needsRedaction) {
@@ -1648,8 +1599,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mBubblesManagerOptional = bubblesManagerOptional;
         mNotificationGutsManager = gutsManager;
         mMetricsLogger = metricsLogger;
-
-        cacheIsSystemNotification();
     }
 
     private void initDimens() {
@@ -2644,9 +2593,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         getShowingLayout().requestSelectLayout(needsAnimation || isUserLocked());
     }
 
-    public void setSensitive(boolean sensitive, boolean hideSensitive) {
+    public void setSensitive(boolean sensitive) {
         mSensitive = sensitive;
-        mSensitiveHiddenInGeneral = hideSensitive;
     }
 
     @Override
@@ -2736,7 +2684,15 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      *         see {@link NotificationEntry#isDismissable()}.
      */
     public boolean canViewBeDismissed() {
-        return mEntry.isDismissable() && (!shouldShowPublic() || !mSensitiveHiddenInGeneral);
+        // Entry not dismissable.
+        if (!mEntry.isDismissable()) {
+            return false;
+        }
+        // Entry shouldn't be showing the public layout, it can be dismissed.
+        if (!shouldShowPublic()) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -2745,7 +2701,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * clearability see {@link NotificationEntry#isClearable()}.
      */
     public boolean canViewBeCleared() {
-        return mEntry.isClearable() && (!shouldShowPublic() || !mSensitiveHiddenInGeneral);
+        return mEntry.isClearable() && !shouldShowPublic();
     }
 
     private boolean shouldShowPublic() {
@@ -3509,10 +3465,28 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             pw.print(", translation: " + getTranslation());
             pw.print(", removed: " + isRemoved());
             pw.print(", expandAnimationRunning: " + mExpandAnimationRunning);
-            NotificationContentView showingLayout = getShowingLayout();
-            pw.print(", privateShowing: " + (showingLayout == mPrivateLayout));
-            pw.println();
-            showingLayout.dump(pw, args);
+            pw.print(", sensitive: " + mSensitive);
+            pw.print(", hideSensitiveForIntrinsicHeight: " + mHideSensitiveForIntrinsicHeight);
+            pw.println(", privateShowing: " + !shouldShowPublic());
+            pw.print("privateLayout: ");
+            if (mPrivateLayout != null) {
+                pw.println();
+                DumpUtilsKt.withIncreasedIndent(pw, () -> {
+                    mPrivateLayout.dump(pw, args);
+                    mPrivateLayout.dumpSmartReplies(pw);
+                });
+            } else {
+                pw.println("null");
+            }
+            pw.print("publicLayout: ");
+            if (mPublicLayout != null) {
+                pw.println();
+                DumpUtilsKt.withIncreasedIndent(pw, () -> {
+                    mPublicLayout.dump(pw, args);
+                });
+            } else {
+                pw.println("null");
+            }
 
             if (getViewState() != null) {
                 getViewState().dump(pw, args);
@@ -3538,29 +3512,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 }
                 pw.decreaseIndent();
                 pw.println("}");
-            } else if (mPrivateLayout != null) {
-                mPrivateLayout.dumpSmartReplies(pw);
             }
         });
-    }
-
-    /**
-     * Background task for executing IPCs to check if the notification is a system notification. The
-     * output is used for both the blocking helper and the notification info.
-     */
-    private class SystemNotificationAsyncTask extends AsyncTask<Void, Void, Boolean> {
-
-        @Override
-        protected Boolean doInBackground(Void... voids) {
-            return isSystemNotification(mContext, mEntry.getSbn());
-        }
-
-        @Override
-        protected void onPostExecute(Boolean result) {
-            if (mEntry != null) {
-                mEntry.mIsSystemNotification = result;
-            }
-        }
     }
 
     private void setTargetPoint(Point p) {

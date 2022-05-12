@@ -416,7 +416,7 @@ public class WatchedArrayList<E> extends WatchableImpl
         dst.mStorage.ensureCapacity(end);
         for (int i = 0; i < end; i++) {
             final E val = Snapshots.maybeSnapshot(src.get(i));
-            dst.add(val);
+            dst.mStorage.add(val);
         }
         dst.seal();
     }

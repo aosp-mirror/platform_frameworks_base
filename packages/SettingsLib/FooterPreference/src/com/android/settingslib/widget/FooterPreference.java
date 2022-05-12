@@ -40,6 +40,8 @@ public class FooterPreference extends Preference {
     static final int ORDER_FOOTER = Integer.MAX_VALUE - 1;
     @VisibleForTesting
     View.OnClickListener mLearnMoreListener;
+    @VisibleForTesting
+    int mIconVisibility = View.VISIBLE;
     private CharSequence mContentDescription;
     private CharSequence mLearnMoreText;
     private CharSequence mLearnMoreContentDescription;
@@ -84,6 +86,9 @@ public class FooterPreference extends Preference {
         } else {
             learnMore.setVisibility(View.GONE);
         }
+
+        View icon = holder.itemView.findViewById(R.id.icon_frame);
+        icon.setVisibility(mIconVisibility);
     }
 
     @Override
@@ -163,6 +168,17 @@ public class FooterPreference extends Preference {
             mLearnMoreListener = listener;
             notifyChanged();
         }
+    }
+
+    /**
+     * Set visibility of footer icon.
+     */
+    public void setIconVisibility(int iconVisibility) {
+        if (mIconVisibility == iconVisibility) {
+            return;
+        }
+        mIconVisibility = iconVisibility;
+        notifyChanged();
     }
 
     private void init() {
