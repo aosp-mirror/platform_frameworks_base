@@ -2629,8 +2629,8 @@ public class Vpn {
         @Nullable private IpSecTunnelInterface mTunnelIface;
         @Nullable private IkeSession mSession;
         @Nullable private Network mActiveNetwork;
-        @Nullable private NetworkCapabilities mNetworkCapabilities;
-        @Nullable private LinkProperties mLinkProperties;
+        @Nullable private NetworkCapabilities mUnderlyingNetworkCapabilities;
+        @Nullable private LinkProperties mUnderlyingLinkProperties;
         private final String mSessionKey;
 
         IkeV2VpnRunner(@NonNull Ikev2VpnProfile profile) {
@@ -2862,12 +2862,12 @@ public class Vpn {
 
         /** Called when the NetworkCapabilities of underlying network is changed */
         public void onDefaultNetworkCapabilitiesChanged(@NonNull NetworkCapabilities nc) {
-            mNetworkCapabilities = nc;
+            mUnderlyingNetworkCapabilities = nc;
         }
 
         /** Called when the LinkProperties of underlying network is changed */
         public void onDefaultNetworkLinkPropertiesChanged(@NonNull LinkProperties lp) {
-            mLinkProperties = lp;
+            mUnderlyingLinkProperties = lp;
         }
 
         /** Marks the state as FAILED, and disconnects. */
@@ -2921,9 +2921,9 @@ public class Vpn {
                                         getPackage(), mSessionKey, makeVpnProfileStateLocked(),
                                         mActiveNetwork,
                                         getRedactedNetworkCapabilitiesOfUnderlyingNetwork(
-                                                this.mNetworkCapabilities),
+                                                mUnderlyingNetworkCapabilities),
                                         getRedactedLinkPropertiesOfUnderlyingNetwork(
-                                                this.mLinkProperties));
+                                                mUnderlyingLinkProperties));
                             }
                             markFailedAndDisconnect(exception);
                             return;
@@ -2939,9 +2939,9 @@ public class Vpn {
                                         getPackage(), mSessionKey, makeVpnProfileStateLocked(),
                                         mActiveNetwork,
                                         getRedactedNetworkCapabilitiesOfUnderlyingNetwork(
-                                                this.mNetworkCapabilities),
+                                                mUnderlyingNetworkCapabilities),
                                         getRedactedLinkPropertiesOfUnderlyingNetwork(
-                                                this.mLinkProperties));
+                                                mUnderlyingLinkProperties));
                             }
                     }
                 } else if (exception instanceof IllegalArgumentException) {
@@ -2958,9 +2958,9 @@ public class Vpn {
                                 getPackage(), mSessionKey, makeVpnProfileStateLocked(),
                                 mActiveNetwork,
                                 getRedactedNetworkCapabilitiesOfUnderlyingNetwork(
-                                        this.mNetworkCapabilities),
+                                        mUnderlyingNetworkCapabilities),
                                 getRedactedLinkPropertiesOfUnderlyingNetwork(
-                                        this.mLinkProperties));
+                                        mUnderlyingLinkProperties));
                     }
                 } else if (exception instanceof IkeNonProtocolException) {
                     if (exception.getCause() instanceof UnknownHostException) {
@@ -2973,9 +2973,9 @@ public class Vpn {
                                     getPackage(), mSessionKey, makeVpnProfileStateLocked(),
                                     mActiveNetwork,
                                     getRedactedNetworkCapabilitiesOfUnderlyingNetwork(
-                                            this.mNetworkCapabilities),
+                                            mUnderlyingNetworkCapabilities),
                                     getRedactedLinkPropertiesOfUnderlyingNetwork(
-                                            this.mLinkProperties));
+                                            mUnderlyingLinkProperties));
                         }
                     } else if (exception.getCause() instanceof IkeTimeoutException) {
                         // TODO(b/230548427): Remove SDK check once VPN related stuff are
@@ -2987,9 +2987,9 @@ public class Vpn {
                                     getPackage(), mSessionKey, makeVpnProfileStateLocked(),
                                     mActiveNetwork,
                                     getRedactedNetworkCapabilitiesOfUnderlyingNetwork(
-                                            this.mNetworkCapabilities),
+                                            mUnderlyingNetworkCapabilities),
                                     getRedactedLinkPropertiesOfUnderlyingNetwork(
-                                            this.mLinkProperties));
+                                            mUnderlyingLinkProperties));
                         }
                     } else if (exception.getCause() instanceof IOException) {
                         // TODO(b/230548427): Remove SDK check once VPN related stuff are
@@ -3001,9 +3001,9 @@ public class Vpn {
                                     getPackage(), mSessionKey, makeVpnProfileStateLocked(),
                                     mActiveNetwork,
                                     getRedactedNetworkCapabilitiesOfUnderlyingNetwork(
-                                            this.mNetworkCapabilities),
+                                            mUnderlyingNetworkCapabilities),
                                     getRedactedLinkPropertiesOfUnderlyingNetwork(
-                                            this.mLinkProperties));
+                                            mUnderlyingLinkProperties));
                         }
                     }
                 } else if (exception != null) {
@@ -3012,8 +3012,8 @@ public class Vpn {
             }
 
             mActiveNetwork = null;
-            mNetworkCapabilities = null;
-            mLinkProperties = null;
+            mUnderlyingNetworkCapabilities = null;
+            mUnderlyingLinkProperties = null;
 
             // Close all obsolete state, but keep VPN alive incase a usable network comes up.
             // (Mirrors VpnService behavior)
@@ -3078,8 +3078,8 @@ public class Vpn {
          */
         private void disconnectVpnRunner() {
             mActiveNetwork = null;
-            mNetworkCapabilities = null;
-            mLinkProperties = null;
+            mUnderlyingNetworkCapabilities = null;
+            mUnderlyingLinkProperties = null;
             mIsRunning = false;
 
             resetIkeState();
