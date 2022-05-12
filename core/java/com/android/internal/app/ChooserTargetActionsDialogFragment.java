@@ -269,7 +269,7 @@ public class ChooserTargetActionsDialogFragment extends DialogFragment
     protected CharSequence getItemLabel(DisplayResolveInfo dri) {
         final PackageManager pm = getContext().getPackageManager();
         return getPinLabel(isPinned(dri),
-                isShortcutTarget() ? "" : dri.getResolveInfo().loadLabel(pm));
+                isShortcutTarget() ? mShortcutTitle : dri.getResolveInfo().loadLabel(pm));
     }
 
     @Nullable
