@@ -149,6 +149,13 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
         onDeviceGone(mReportedSelfManagedDevices, associationId, "application-reported");
     }
 
+    /**
+     * Marks a "self-managed" device as disconnected when binderDied.
+     */
+    public void onSelfManagedDeviceReporterBinderDied(int associationId) {
+        onDeviceGone(mReportedSelfManagedDevices, associationId, "application-reported");
+    }
+
     @Override
     public void onBluetoothCompanionDeviceConnected(int associationId) {
         onDevicePresent(mConnectedBtDevices, associationId, /* sourceLoggingTag */ "bt");
@@ -259,16 +266,6 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
     }
 
     /**
-     * Remove the current connected devices by associationId.
-     */
-    public void removeDeviceFromMonitoring(int associationId) {
-        mConnectedBtDevices.remove(associationId);
-        mNearbyBleDevices.remove(associationId);
-        mReportedSelfManagedDevices.remove(associationId);
-        mSimulated.remove(associationId);
-    }
-
-    /**
      * Implements
      * {@link AssociationStore.OnChangeListener#onAssociationRemoved(AssociationInfo)}
      */
@@ -280,7 +277,9 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
             Log.d(TAG, "  > association=" + association);
         }
 
-        removeDeviceFromMonitoring(id);
+        mConnectedBtDevices.remove(id);
+        mNearbyBleDevices.remove(id);
+        mReportedSelfManagedDevices.remove(id);
 
         // Do NOT call mCallback.onDeviceDisappeared()!
         // CompanionDeviceManagerService will know that the association is removed, and will do
