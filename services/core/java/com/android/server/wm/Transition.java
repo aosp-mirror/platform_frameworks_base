@@ -27,6 +27,7 @@ import static android.view.WindowManager.INPUT_CONSUMER_RECENTS_ANIMATION;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECIFIED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_IS_RECENTS;
@@ -45,6 +46,7 @@ import static android.view.WindowManager.TransitionType;
 import static android.view.WindowManager.transitTypeToString;
 import static android.window.TransitionInfo.FLAG_DISPLAY_HAS_ALERT_WINDOWS;
 import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
+import static android.window.TransitionInfo.FLAG_IS_INPUT_METHOD;
 import static android.window.TransitionInfo.FLAG_IS_VOICE_INTERACTION;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_OCCLUDES_KEYGUARD;
@@ -1025,6 +1027,10 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         return wc.asWallpaperToken() != null;
     }
 
+    private static boolean isInputMethod(WindowContainer wc) {
+        return wc.getWindowType() == TYPE_INPUT_METHOD;
+    }
+
     private static boolean occludesKeyguard(WindowContainer wc) {
         final ActivityRecord ar = wc.asActivityRecord();
         if (ar != null) {
@@ -1613,6 +1619,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             }
             if (isWallpaper(wc)) {
                 flags |= FLAG_IS_WALLPAPER;
+            }
+            if (isInputMethod(wc)) {
+                flags |= FLAG_IS_INPUT_METHOD;
             }
             if (occludesKeyguard(wc)) {
                 flags |= FLAG_OCCLUDES_KEYGUARD;
