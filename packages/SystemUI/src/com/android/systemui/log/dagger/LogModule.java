@@ -230,6 +230,18 @@ public class LogModule {
         return factory.create("MediaBrowser", 100);
     }
 
+    /**
+     * Provides a buffer for updates to the media carousel.
+     *
+     * See {@link com.android.systemui.media.MediaCarouselController}.
+     */
+    @Provides
+    @SysUISingleton
+    @MediaCarouselControllerLog
+    public static LogBuffer provideMediaCarouselControllerBuffer(LogBufferFactory factory) {
+        return factory.create("MediaCarouselCtlrLog", 20);
+    }
+
     /** Allows logging buffers to be tweaked via adb on debug builds but not on prod builds. */
     @Provides
     @SysUISingleton
