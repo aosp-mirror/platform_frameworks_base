@@ -17,6 +17,7 @@
 package com.android.server.job.controllers;
 
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
+import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 import static com.android.server.job.JobSchedulerService.sSystemClock;
@@ -89,6 +90,14 @@ public class PrefetchController extends StateController {
     @GuardedBy("mLock")
     @CurrentTimeMillisLong
     private long mLaunchTimeThresholdMs = PcConstants.DEFAULT_LAUNCH_TIME_THRESHOLD_MS;
+
+    /**
+     * The additional time we'll add to a launch time estimate before considering it obsolete and
+     * try to get a new estimate. This will help make prefetch jobs more viable in case an estimate
+     * is a few minutes early.
+     */
+    @GuardedBy("mLock")
+    private long mLaunchTimeAllowanceMs = PcConstants.DEFAULT_LAUNCH_TIME_ALLOWANCE_MS;
 
     @SuppressWarnings("FieldCanBeLocal")
     private final EstimatedLaunchTimeChangedListener mEstimatedLaunchTimeChangedListener =
@@ -204,7 +213,8 @@ public class PrefetchController extends StateController {
     private long getNextEstimatedLaunchTimeLocked(int userId, @NonNull String pkgName,
             @CurrentTimeMillisLong long now) {
         final Long nextEstimatedLaunchTime = mEstimatedLaunchTimes.get(userId, pkgName);
-        if (nextEstimatedLaunchTime == null || nextEstimatedLaunchTime < now) {
+        if (nextEstimatedLaunchTime == null
+                || nextEstimatedLaunchTime < now - mLaunchTimeAllowanceMs) {
             // Don't query usage stats here because it may have to read from disk.
             mHandler.obtainMessage(MSG_RETRIEVE_ESTIMATED_LAUNCH_TIME, userId, 0, pkgName)
                     .sendToTarget();
@@ -335,7 +345,9 @@ public class PrefetchController extends StateController {
         }
 
         final long nextEstimatedLaunchTime = getNextEstimatedLaunchTimeLocked(userId, pkgName, now);
-        if (nextEstimatedLaunchTime - now > mLaunchTimeThresholdMs) {
+        // Avoid setting an alarm for the end of time.
+        if (nextEstimatedLaunchTime != Long.MAX_VALUE
+                && nextEstimatedLaunchTime - now > mLaunchTimeThresholdMs) {
             // Set alarm to be notified when this crosses the threshold.
             final long timeToCrossThresholdMs =
                     nextEstimatedLaunchTime - (now + mLaunchTimeThresholdMs);
@@ -354,7 +366,7 @@ public class PrefetchController extends StateController {
     private boolean willBeLaunchedSoonLocked(int userId, @NonNull String pkgName,
             @CurrentTimeMillisLong long now) {
         return getNextEstimatedLaunchTimeLocked(userId, pkgName, now)
-                <= now + mLaunchTimeThresholdMs;
+                <= now + mLaunchTimeThresholdMs - mLaunchTimeAllowanceMs;
     }
 
     @Override
@@ -494,16 +506,37 @@ public class PrefetchController extends StateController {
         @VisibleForTesting
         static final String KEY_LAUNCH_TIME_THRESHOLD_MS =
                 PC_CONSTANT_PREFIX + "launch_time_threshold_ms";
+        @VisibleForTesting
+        static final String KEY_LAUNCH_TIME_ALLOWANCE_MS =
+                PC_CONSTANT_PREFIX + "launch_time_allowance_ms";
 
         private static final long DEFAULT_LAUNCH_TIME_THRESHOLD_MS = 7 * HOUR_IN_MILLIS;
+        private static final long DEFAULT_LAUNCH_TIME_ALLOWANCE_MS = 20 * MINUTE_IN_MILLIS;
 
         /** How much time each app will have to run jobs within their standby bucket window. */
         public long LAUNCH_TIME_THRESHOLD_MS = DEFAULT_LAUNCH_TIME_THRESHOLD_MS;
+
+        /**
+         * How much additional time to add to an estimated launch time before considering it
+         * unusable.
+         */
+        public long LAUNCH_TIME_ALLOWANCE_MS = DEFAULT_LAUNCH_TIME_ALLOWANCE_MS;
 
         @GuardedBy("mLock")
         public void processConstantLocked(@NonNull DeviceConfig.Properties properties,
                 @NonNull String key) {
             switch (key) {
+                case KEY_LAUNCH_TIME_ALLOWANCE_MS:
+                    LAUNCH_TIME_ALLOWANCE_MS =
+                            properties.getLong(key, DEFAULT_LAUNCH_TIME_ALLOWANCE_MS);
+                    // Limit the allowance to the range [0 minutes, 2 hours].
+                    long newLaunchTimeAllowanceMs = Math.min(2 * HOUR_IN_MILLIS,
+                            Math.max(0, LAUNCH_TIME_ALLOWANCE_MS));
+                    if (mLaunchTimeAllowanceMs != newLaunchTimeAllowanceMs) {
+                        mLaunchTimeAllowanceMs = newLaunchTimeAllowanceMs;
+                        mShouldReevaluateConstraints = true;
+                    }
+                    break;
                 case KEY_LAUNCH_TIME_THRESHOLD_MS:
                     LAUNCH_TIME_THRESHOLD_MS =
                             properties.getLong(key, DEFAULT_LAUNCH_TIME_THRESHOLD_MS);
@@ -528,12 +561,18 @@ public class PrefetchController extends StateController {
             pw.increaseIndent();
 
             pw.print(KEY_LAUNCH_TIME_THRESHOLD_MS, LAUNCH_TIME_THRESHOLD_MS).println();
+            pw.print(KEY_LAUNCH_TIME_ALLOWANCE_MS, LAUNCH_TIME_ALLOWANCE_MS).println();
 
             pw.decreaseIndent();
         }
     }
 
     //////////////////////// TESTING HELPERS /////////////////////////////
+
+    @VisibleForTesting
+    long getLaunchTimeAllowanceMs() {
+        return mLaunchTimeAllowanceMs;
+    }
 
     @VisibleForTesting
     long getLaunchTimeThresholdMs() {
