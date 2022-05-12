@@ -82,6 +82,7 @@ abstract class InsetsSourceProvider {
     private boolean mIsLeashReadyForDispatching;
     private final Rect mSourceFrame = new Rect();
     private final Rect mLastSourceFrame = new Rect();
+    private @NonNull Insets mInsetsHint = Insets.NONE;
 
     private final Consumer<Transaction> mSetLeashPositionConsumer = t -> {
         if (mControl != null) {
@@ -298,6 +299,7 @@ abstract class InsetsSourceProvider {
                 if (!insetsHint.equals(mControl.getInsetsHint())) {
                     changed = true;
                     mControl.setInsetsHint(insetsHint);
+                    mInsetsHint = insetsHint;
                 }
                 mLastSourceFrame.set(mSource.getFrame());
             }
@@ -433,8 +435,8 @@ abstract class InsetsSourceProvider {
         final SurfaceControl leash = mAdapter.mCapturedLeash;
         mControlTarget = target;
         updateVisibility();
-        mControl = new InsetsSourceControl(mSource.getType(), leash, surfacePosition,
-                mSource.calculateInsets(mWindowContainer.getBounds(), true /* ignoreVisibility */));
+        mControl = new InsetsSourceControl(mSource.getType(), leash, surfacePosition, mInsetsHint);
+
         ProtoLog.d(WM_DEBUG_WINDOW_INSETS,
                 "InsetsSource Control %s for target %s", mControl, mControlTarget);
     }
