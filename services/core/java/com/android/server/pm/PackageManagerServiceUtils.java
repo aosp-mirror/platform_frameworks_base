@@ -60,6 +60,7 @@ import android.os.Debug;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Process;
+import android.os.SELinux;
 import android.os.SystemProperties;
 import android.os.incremental.IncrementalManager;
 import android.os.incremental.IncrementalStorage;
@@ -1386,6 +1387,30 @@ public class PackageManagerServiceUtils {
                     }
                 }
             }
+        }
+    }
+
+    // TODO(b/231951809): remove this workaround after figuring out why apk_tmp_file labels stay
+    // on the installed apps instead of the correct apk_data_file ones
+
+    public static final String SELINUX_BUG = "b/231951809";
+
+    /**
+     * A workaround for b/231951809:
+     * Verifies the SELinux labels of the passed path, and tries to correct them if detects them
+     * wrong or missing.
+     */
+    public static void verifySelinuxLabels(String path) {
+        final String expectedCon = SELinux.fileSelabelLookup(path);
+        final String actualCon = SELinux.getFileContext(path);
+        Slog.i(TAG, SELINUX_BUG + ": checking selinux labels for " + path + " expected / actual: "
+                + expectedCon + " / " + actualCon);
+        if (expectedCon == null || !expectedCon.equals(actualCon)) {
+            Slog.w(TAG, SELINUX_BUG + ": labels don't match, reapplying for " + path);
+            if (!SELinux.restoreconRecursive(new File(path))) {
+                Slog.w(TAG, SELINUX_BUG + ": Failed to reapply restorecon");
+            }
+            // well, if it didn't work now after not working at first, not much else can be done
         }
     }
 }
