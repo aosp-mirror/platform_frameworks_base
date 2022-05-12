@@ -876,9 +876,9 @@
     <string name="permgroupdesc_sms">send and view SMS messages</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_storage">Files and documents</string>
+    <string name="permgrouplab_storage">Files</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_storage">access files and documents on your device</string>
+    <string name="permgroupdesc_storage">access files on your device</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=40]-->
     <string name="permgrouplab_readMediaAural">Music and audio</string>
