@@ -361,8 +361,10 @@ class PrivacyItemControllerTest : SysuiTestCase() {
         privacyItemController.addCallback(callback)
         `when`(privacyConfig.micCameraAvailable).thenReturn(true)
         `when`(privacyConfig.locationAvailable).thenReturn(true)
+        `when`(privacyConfig.mediaProjectionAvailable).thenReturn(true)
         argCaptorConfigCallback.value.onFlagMicCameraChanged(true)
         argCaptorConfigCallback.value.onFlagLocationChanged(true)
+        argCaptorConfigCallback.value.onFlagMediaProjectionChanged(true)
         executor.runAllReady()
 
         assertTrue(privacyItemController.allIndicatorsAvailable)
@@ -390,6 +392,17 @@ class PrivacyItemControllerTest : SysuiTestCase() {
 
         assertTrue(privacyItemController.locationAvailable)
         verify(callback).onFlagLocationChanged(true)
+    }
+
+    @Test
+    fun testFlags_onFlagMediaProjectionChanged() {
+        verify(privacyConfig).addCallback(capture(argCaptorConfigCallback))
+        privacyItemController.addCallback(callback)
+        `when`(privacyConfig.mediaProjectionAvailable).thenReturn(true)
+        argCaptorConfigCallback.value.onFlagMediaProjectionChanged(true)
+        executor.runAllReady()
+
+        verify(callback).onFlagMediaProjectionChanged(true)
     }
 
     @Test
