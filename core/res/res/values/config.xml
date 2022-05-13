@@ -757,6 +757,15 @@
          bar for all apps. -->
     <bool name="config_remoteInsetsControllerControlsSystemBars">false</bool>
 
+    <!-- Control whether the system bars can be requested when using a remote insets control target.
+         This allows for specifying whether or not system bars can be shown by the user (via swipe
+         or other means) when they are hidden by the logic defined by the remote insets controller.
+         This is useful for cases where the system provides alternative affordances for showing and
+         hiding the bars or for cases in which it's desired the bars not be shown for any reason.
+         This configuration will only apply when config_remoteInsetsControllerControlsSystemBars.
+         is set to true. -->
+    <bool name="config_remoteInsetsControllerSystemBarsCanBeShownByUserAction">false</bool>
+
     <!-- HDMI behavior -->
 
     <!-- The number of degrees to rotate the display when the device has HDMI connected

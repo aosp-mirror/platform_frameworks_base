@@ -219,6 +219,7 @@ public class DisplayPolicy {
     @Px
     private int mRightGestureInset;
 
+    private boolean mCanSystemBarsBeShownByUser;
     private boolean mNavButtonForcedVisible;
 
     StatusBarManagerInternal getStatusBarManagerInternal() {
@@ -424,6 +425,9 @@ public class DisplayPolicy {
         final Resources r = mContext.getResources();
         mCarDockEnablesAccelerometer = r.getBoolean(R.bool.config_carDockEnablesAccelerometer);
         mDeskDockEnablesAccelerometer = r.getBoolean(R.bool.config_deskDockEnablesAccelerometer);
+        mCanSystemBarsBeShownByUser = !r.getBoolean(
+                R.bool.config_remoteInsetsControllerControlsSystemBars) || r.getBoolean(
+                R.bool.config_remoteInsetsControllerSystemBarsCanBeShownByUserAction);
 
         mAccessibilityManager = (AccessibilityManager) mContext.getSystemService(
                 Context.ACCESSIBILITY_SERVICE);
@@ -616,7 +620,7 @@ public class DisplayPolicy {
         displayContent.mAppTransition.registerListenerLocked(mAppTransitionListener);
         displayContent.mTransitionController.registerLegacyListener(mAppTransitionListener);
         mImmersiveModeConfirmation = new ImmersiveModeConfirmation(mContext, looper,
-                mService.mVrModeEnabled);
+                mService.mVrModeEnabled, mCanSystemBarsBeShownByUser);
 
         // TODO: Make it can take screenshot on external display
         mScreenshotHelper = displayContent.isDefaultDisplay
@@ -2019,6 +2023,11 @@ public class DisplayPolicy {
         return lp.width;
     }
 
+    @VisibleForTesting
+    void setCanSystemBarsBeShownByUser(boolean canBeShown) {
+        mCanSystemBarsBeShownByUser = canBeShown;
+    }
+
     void notifyDisplayReady() {
         mHandler.post(() -> {
             final int displayId = getDisplayId();
@@ -2256,9 +2265,15 @@ public class DisplayPolicy {
         updateSystemBarAttributes();
     }
 
-    private void requestTransientBars(WindowState swipeTarget, boolean isGestureOnSystemBar) {
+    @VisibleForTesting
+    void requestTransientBars(WindowState swipeTarget, boolean isGestureOnSystemBar) {
         if (swipeTarget == null || !mService.mPolicy.isUserSetupComplete()) {
             // Swipe-up for navigation bar is disabled during setup
+            return;
+        }
+        if (!mCanSystemBarsBeShownByUser) {
+            Slog.d(TAG, "Remote insets controller disallows showing system bars - ignoring "
+                    + "request");
             return;
         }
         final InsetsSourceProvider provider = swipeTarget.getControllableInsetProvider();
