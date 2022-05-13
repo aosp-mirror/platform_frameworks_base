@@ -28,6 +28,10 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import javax.inject.Inject
 
+/**
+ * Provides privacy dot views for each orientation. The PrivacyDot orientation and visibility
+ * of the privacy dot views are controlled by the PrivacyDotViewController.
+ */
 @SysUISingleton
 class PrivacyDotDecorProviderFactory @Inject constructor(
     @Main private val res: Resources
