@@ -2540,7 +2540,9 @@ public class Vpn {
             super(TAG);
             mProfile = profile;
             mIpSecManager = (IpSecManager) mContext.getSystemService(Context.IPSEC_SERVICE);
-            mNetworkCallback = new VpnIkev2Utils.Ikev2VpnNetworkCallback(TAG, this);
+            // Pass mExecutor into Ikev2VpnNetworkCallback and make sure that IkeV2VpnRunnerCallback
+            // will be called by the mExecutor thread.
+            mNetworkCallback = new VpnIkev2Utils.Ikev2VpnNetworkCallback(TAG, this, mExecutor);
             mSessionKey = UUID.randomUUID().toString();
         }
 
@@ -2695,73 +2697,68 @@ public class Vpn {
          * <p>The Ikev2VpnRunner will unconditionally switch to the new network, killing the old IKE
          * state in the process, and starting a new IkeSession instance.
          *
-         * <p>This method is called multiple times over the lifetime of the Ikev2VpnRunner, and is
-         * called on the ConnectivityService thread. Thus, the actual work MUST be proxied to the
-         * mExecutor thread in order to ensure consistency of the Ikev2VpnRunner fields.
+         * <p>This method MUST always be called on the mExecutor thread in order to ensure
+         * consistency of the Ikev2VpnRunner fields.
          */
         public void onDefaultNetworkChanged(@NonNull Network network) {
             Log.d(TAG, "Starting IKEv2/IPsec session on new network: " + network);
 
-            // Proxy to the Ikev2VpnRunner (single-thread) executor to ensure consistency in lieu
-            // of locking.
-            mExecutor.execute(() -> {
-                try {
-                    if (!mIsRunning) {
-                        Log.d(TAG, "onDefaultNetworkChanged after exit");
-                        return; // VPN has been shut down.
-                    }
-
-                    // Clear mInterface to prevent Ikev2VpnRunner being cleared when
-                    // interfaceRemoved() is called.
-                    mInterface = null;
-                    // Without MOBIKE, we have no way to seamlessly migrate. Close on old
-                    // (non-default) network, and start the new one.
-                    resetIkeState();
-                    mActiveNetwork = network;
-
-                    // Get Ike options from IkeTunnelConnectionParams if it's available in the
-                    // profile.
-                    final IkeTunnelConnectionParams ikeTunConnParams =
-                            mProfile.getIkeTunnelConnectionParams();
-                    final IkeSessionParams ikeSessionParams;
-                    final ChildSessionParams childSessionParams;
-                    if (ikeTunConnParams != null) {
-                        final IkeSessionParams.Builder builder = new IkeSessionParams.Builder(
-                                ikeTunConnParams.getIkeSessionParams()).setNetwork(network);
-                        ikeSessionParams = builder.build();
-                        childSessionParams = ikeTunConnParams.getTunnelModeChildSessionParams();
-                    } else {
-                        ikeSessionParams = VpnIkev2Utils.buildIkeSessionParams(
-                                mContext, mProfile, network);
-                        childSessionParams = VpnIkev2Utils.buildChildSessionParams(
-                                mProfile.getAllowedAlgorithms());
-                    }
-
-                    // TODO: Remove the need for adding two unused addresses with
-                    // IPsec tunnels.
-                    final InetAddress address = InetAddress.getLocalHost();
-                    mTunnelIface =
-                            mIpSecManager.createIpSecTunnelInterface(
-                                    address /* unused */,
-                                    address /* unused */,
-                                    network);
-                    NetdUtils.setInterfaceUp(mNetd, mTunnelIface.getInterfaceName());
-
-                    mSession = mIkev2SessionCreator.createIkeSession(
-                            mContext,
-                            ikeSessionParams,
-                            childSessionParams,
-                            mExecutor,
-                            new VpnIkev2Utils.IkeSessionCallbackImpl(
-                                    TAG, IkeV2VpnRunner.this, network),
-                            new VpnIkev2Utils.ChildSessionCallbackImpl(
-                                    TAG, IkeV2VpnRunner.this, network));
-                    Log.d(TAG, "Ike Session started for network " + network);
-                } catch (Exception e) {
-                    Log.i(TAG, "Setup failed for network " + network + ". Aborting", e);
-                    onSessionLost(network, e);
+            try {
+                if (!mIsRunning) {
+                    Log.d(TAG, "onDefaultNetworkChanged after exit");
+                    return; // VPN has been shut down.
                 }
-            });
+
+                // Clear mInterface to prevent Ikev2VpnRunner being cleared when
+                // interfaceRemoved() is called.
+                mInterface = null;
+                // Without MOBIKE, we have no way to seamlessly migrate. Close on old
+                // (non-default) network, and start the new one.
+                resetIkeState();
+                mActiveNetwork = network;
+
+                // Get Ike options from IkeTunnelConnectionParams if it's available in the
+                // profile.
+                final IkeTunnelConnectionParams ikeTunConnParams =
+                        mProfile.getIkeTunnelConnectionParams();
+                final IkeSessionParams ikeSessionParams;
+                final ChildSessionParams childSessionParams;
+                if (ikeTunConnParams != null) {
+                    final IkeSessionParams.Builder builder = new IkeSessionParams.Builder(
+                            ikeTunConnParams.getIkeSessionParams()).setNetwork(network);
+                    ikeSessionParams = builder.build();
+                    childSessionParams = ikeTunConnParams.getTunnelModeChildSessionParams();
+                } else {
+                    ikeSessionParams = VpnIkev2Utils.buildIkeSessionParams(
+                            mContext, mProfile, network);
+                    childSessionParams = VpnIkev2Utils.buildChildSessionParams(
+                            mProfile.getAllowedAlgorithms());
+                }
+
+                // TODO: Remove the need for adding two unused addresses with
+                // IPsec tunnels.
+                final InetAddress address = InetAddress.getLocalHost();
+                mTunnelIface =
+                        mIpSecManager.createIpSecTunnelInterface(
+                                address /* unused */,
+                                address /* unused */,
+                                network);
+                NetdUtils.setInterfaceUp(mNetd, mTunnelIface.getInterfaceName());
+
+                mSession = mIkev2SessionCreator.createIkeSession(
+                        mContext,
+                        ikeSessionParams,
+                        childSessionParams,
+                        mExecutor,
+                        new VpnIkev2Utils.IkeSessionCallbackImpl(
+                                TAG, IkeV2VpnRunner.this, network),
+                        new VpnIkev2Utils.ChildSessionCallbackImpl(
+                                TAG, IkeV2VpnRunner.this, network));
+                Log.d(TAG, "Ike Session started for network " + network);
+            } catch (Exception e) {
+                Log.i(TAG, "Setup failed for network " + network + ". Aborting", e);
+                onSessionLost(network, e);
+            }
         }
 
         /** Marks the state as FAILED, and disconnects. */
