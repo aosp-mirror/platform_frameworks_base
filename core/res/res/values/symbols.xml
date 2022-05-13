@@ -4425,4 +4425,5 @@
   <java-symbol type="bool" name="config_volumeShowRemoteSessions" />
 
   <java-symbol type="integer" name="config_customizedMaxCachedProcesses" />
+  <java-symbol type="array" name="config_serviceStateLocationAllowedPackages" />
 </resources>

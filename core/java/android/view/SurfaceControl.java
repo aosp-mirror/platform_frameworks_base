@@ -237,6 +237,7 @@ public final class SurfaceControl implements Parcelable {
     private static native int nativeGetGPUContextPriority();
     private static native void nativeSetTransformHint(long nativeObject, int transformHint);
     private static native int nativeGetTransformHint(long nativeObject);
+    private static native void nativeSanitize(long transactionObject);
 
     @Nullable
     @GuardedBy("mLock")
@@ -3426,7 +3427,14 @@ public final class SurfaceControl implements Parcelable {
             return this;
         }
 
-         /**
+        /**
+         * @hide
+         */
+        public void sanitize() {
+            nativeSanitize(mNativeObject);
+        }
+
+        /**
          * Merge the other transaction into this transaction, clearing the
          * other transaction as if it had been applied.
          *

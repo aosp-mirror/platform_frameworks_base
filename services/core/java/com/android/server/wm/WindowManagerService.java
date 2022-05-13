@@ -2642,6 +2642,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
     void finishDrawingWindow(Session session, IWindow client,
             @Nullable SurfaceControl.Transaction postDrawTransaction) {
+        if (postDrawTransaction != null) {
+            postDrawTransaction.sanitize();
+        }
+
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
