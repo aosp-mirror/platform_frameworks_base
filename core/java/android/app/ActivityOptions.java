@@ -16,6 +16,7 @@
 
 package android.app;
 
+import static android.Manifest.permission.CONTROL_KEYGUARD;
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
@@ -362,9 +363,8 @@ public class ActivityOptions extends ComponentOptions {
     private static final String KEY_LAUNCH_INTO_PIP_PARAMS =
             "android.activity.launchIntoPipParams";
 
-    /** See {@link #setDismissKeyguardIfInsecure()}. */
-    private static final String KEY_DISMISS_KEYGUARD_IF_INSECURE =
-            "android.activity.dismissKeyguardIfInsecure";
+    /** See {@link #setDismissKeyguard()}. */
+    private static final String KEY_DISMISS_KEYGUARD = "android.activity.dismissKeyguard";
 
     private static final String KEY_IGNORE_PENDING_INTENT_CREATOR_FOREGROUND_STATE =
             "android.activity.ignorePendingIntentCreatorForegroundState";
@@ -465,7 +465,7 @@ public class ActivityOptions extends ComponentOptions {
     private boolean mLaunchedFromBubble;
     private boolean mTransientLaunch;
     private PictureInPictureParams mLaunchIntoPipParams;
-    private boolean mDismissKeyguardIfInsecure;
+    private boolean mDismissKeyguard;
     private boolean mIgnorePendingIntentCreatorForegroundState;
 
     /**
@@ -1270,7 +1270,7 @@ public class ActivityOptions extends ComponentOptions {
         mLaunchIntoPipParams = opts.getParcelable(KEY_LAUNCH_INTO_PIP_PARAMS);
         mIsEligibleForLegacyPermissionPrompt =
                 opts.getBoolean(KEY_LEGACY_PERMISSION_PROMPT_ELIGIBLE);
-        mDismissKeyguardIfInsecure = opts.getBoolean(KEY_DISMISS_KEYGUARD_IF_INSECURE);
+        mDismissKeyguard = opts.getBoolean(KEY_DISMISS_KEYGUARD);
         mIgnorePendingIntentCreatorForegroundState = opts.getBoolean(
                 KEY_IGNORE_PENDING_INTENT_CREATOR_FOREGROUND_STATE);
     }
@@ -1869,24 +1869,24 @@ public class ActivityOptions extends ComponentOptions {
     }
 
     /**
-     * Sets whether the insecure keyguard should go away when this activity launches. In case the
-     * keyguard is secure, this option will be ignored.
+     * Sets whether the keyguard should go away when this activity launches.
      *
      * @see Activity#setShowWhenLocked(boolean)
      * @see android.R.attr#showWhenLocked
      * @hide
      */
-    public void setDismissKeyguardIfInsecure() {
-        mDismissKeyguardIfInsecure = true;
+    @RequiresPermission(CONTROL_KEYGUARD)
+    public void setDismissKeyguard() {
+        mDismissKeyguard = true;
     }
 
     /**
-     * @see #setDismissKeyguardIfInsecure()
+     * @see #setDismissKeyguard()
      * @return whether the insecure keyguard should go away when the activity launches.
      * @hide
      */
-    public boolean getDismissKeyguardIfInsecure() {
-        return mDismissKeyguardIfInsecure;
+    public boolean getDismissKeyguard() {
+        return mDismissKeyguard;
     }
 
     /**
@@ -2167,8 +2167,8 @@ public class ActivityOptions extends ComponentOptions {
             b.putBoolean(KEY_LEGACY_PERMISSION_PROMPT_ELIGIBLE,
                     mIsEligibleForLegacyPermissionPrompt);
         }
-        if (mDismissKeyguardIfInsecure) {
-            b.putBoolean(KEY_DISMISS_KEYGUARD_IF_INSECURE, mDismissKeyguardIfInsecure);
+        if (mDismissKeyguard) {
+            b.putBoolean(KEY_DISMISS_KEYGUARD, mDismissKeyguard);
         }
         if (mIgnorePendingIntentCreatorForegroundState) {
             b.putBoolean(KEY_IGNORE_PENDING_INTENT_CREATOR_FOREGROUND_STATE,

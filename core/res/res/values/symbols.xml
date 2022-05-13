@@ -3426,6 +3426,9 @@
   <!-- Search Selector -->
   <java-symbol type="string" name="config_defaultSearchSelectorPackageName" />
 
+  <!-- Captive Portal Login -->
+  <java-symbol type="string" name="config_defaultCaptivePortalLoginPackageName" />
+
   <!-- Optional IPsec algorithms -->
   <java-symbol type="array" name="config_optionalIpSecAlgorithms" />
 
@@ -4385,8 +4388,11 @@
   <java-symbol type="integer" name="config_letterboxBackgroundType" />
   <java-symbol type="color" name="config_letterboxBackgroundColor" />
   <java-symbol type="dimen" name="config_letterboxHorizontalPositionMultiplier" />
-  <java-symbol type="bool" name="config_letterboxIsReachabilityEnabled" />
-  <java-symbol type="integer" name="config_letterboxDefaultPositionForReachability" />
+  <java-symbol type="dimen" name="config_letterboxVerticalPositionMultiplier" />
+  <java-symbol type="bool" name="config_letterboxIsHorizontalReachabilityEnabled" />
+  <java-symbol type="bool" name="config_letterboxIsVerticalReachabilityEnabled" />
+  <java-symbol type="integer" name="config_letterboxDefaultPositionForHorizontalReachability" />
+  <java-symbol type="integer" name="config_letterboxDefaultPositionForVerticalReachability" />
   <java-symbol type="bool" name="config_letterboxIsEducationEnabled" />
   <java-symbol type="bool" name="config_isCameraCompatControlForStretchedIssuesEnabled" />
 
@@ -4761,7 +4767,10 @@
   <!-- For VirtualDeviceManager -->
   <java-symbol type="string" name="vdm_camera_access_denied" />
 
-  <java-symbol type="color" name="camera_privacy_light"/>
+  <java-symbol type="color" name="camera_privacy_light_day"/>
+  <java-symbol type="color" name="camera_privacy_light_night"/>
+  <java-symbol type="integer" name="config_cameraPrivacyLightAlsAveragingIntervalMillis"/>
+  <java-symbol type="integer" name="config_cameraPrivacyLightAlsNightThreshold"/>
 
   <java-symbol type="bool" name="config_bg_current_drain_monitor_enabled" />
   <java-symbol type="array" name="config_bg_current_drain_threshold_to_restricted_bucket" />
@@ -4780,8 +4789,8 @@
   <java-symbol type="integer" name="config_bg_current_drain_exempted_types" />
   <java-symbol type="bool" name="config_bg_current_drain_high_threshold_by_bg_location" />
   <java-symbol type="drawable" name="ic_swap_horiz" />
-  <java-symbol type="bool" name="config_notificationForceUserSetOnUpgrade" />
   <java-symbol type="array" name="config_deviceStatesAvailableForAppRequests" />
+  <java-symbol type="array" name="config_serviceStateLocationAllowedPackages" />
 
   <!-- For app language picker -->
   <java-symbol type="string" name="system_locale_title" />

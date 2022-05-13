@@ -313,6 +313,15 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @Nullable
     private CreateInlineSuggestionsRequest mPendingInlineSuggestionsRequest;
 
+    /**
+     * A callback into the autofill service obtained from the latest call to
+     * {@link #onCreateInlineSuggestionsRequestLocked}, which can be used to invalidate an
+     * autofill session in case the IME process dies.
+     */
+    @GuardedBy("ImfLock.class")
+    @Nullable
+    private IInlineSuggestionsRequestCallback mInlineSuggestionsRequestCallback;
+
     @UserIdInt
     private int mLastSwitchUserId;
 
@@ -2183,6 +2192,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             InlineSuggestionsRequestInfo requestInfo, IInlineSuggestionsRequestCallback callback,
             boolean touchExplorationEnabled) {
         clearPendingInlineSuggestionsRequestLocked();
+        mInlineSuggestionsRequestCallback = callback;
         final InputMethodInfo imi = mMethodMap.get(getSelectedMethodIdLocked());
         try {
             if (userId == mSettings.getCurrentUserId()
@@ -2804,6 +2814,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             if (DEBUG) {
                 Slog.d(TAG, "Avoiding IME startup and unbinding current input method.");
             }
+            invalidateAutofillSessionLocked();
             mBindingController.unbindCurrentMethod();
             return InputBindResult.NO_EDITOR;
         }
@@ -2839,6 +2850,17 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mBindingController.unbindCurrentMethod();
 
         return mBindingController.bindCurrentMethod();
+    }
+
+    @GuardedBy("ImfLock.class")
+    void invalidateAutofillSessionLocked() {
+        if (mInlineSuggestionsRequestCallback != null) {
+            try {
+                mInlineSuggestionsRequestCallback.onInlineSuggestionsSessionInvalidated();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Cannot invalidate autofill session.", e);
+            }
+        }
     }
 
     @GuardedBy("ImfLock.class")

@@ -2508,6 +2508,12 @@
     <string name="clipboard_send_nearby_description">Send to nearby device</string>
     <!-- Text informing user that copied content is hidden [CHAR LIMIT=NONE] -->
     <string name="clipboard_text_hidden">Tap to view</string>
+    <!-- Accessibility announcement informing user that text has been copied [CHAR LIMIT=NONE] -->
+    <string name="clipboard_text_copied">Text copied</string>
+    <!-- Accessibility announcement informing user that text has been copied [CHAR LIMIT=NONE] -->
+    <string name="clipboard_image_copied">Image copied</string>
+    <!-- Accessibility announcement informing user that something has been copied [CHAR LIMIT=NONE] -->
+    <string name="clipboard_content_copied">Content copied</string>
 
     <!-- Generic "add" string [CHAR LIMIT=NONE] -->
     <string name="add">Add</string>
@@ -2532,4 +2538,18 @@
     =1 {# notification}
     other {# notifications}
     }</string>
+
+    <!-- [CHAR LIMIT=NONE] Le audio broadcast dialog, media app is broadcasting -->
+    <string name="broadcasting_description_is_broadcasting">Broadcasting</string>
+    <!-- [CHAR LIMIT=NONE] Le audio broadcast dialog, title -->
+    <string name="bt_le_audio_broadcast_dialog_title">Stop broadcasting <xliff:g id="app_name" example="App Name 1">%1$s</xliff:g>?</string>
+    <!-- [CHAR LIMIT=NONE] Le audio broadcast dialog, sub-title -->
+    <string name="bt_le_audio_broadcast_dialog_sub_title">If you broadcast <xliff:g id="switchApp" example="App Name 2">%1$s</xliff:g> or change the output, your current broadcast will stop</string>
+    <!-- [CHAR LIMIT=NONE] Le audio broadcast dialog, switch to others app. -->
+    <string name="bt_le_audio_broadcast_dialog_switch_app">Broadcast <xliff:g id="switchApp" example="App Name 2">%1$s</xliff:g></string>
+    <!-- [CHAR LIMIT=NONE] Le audio broadcast dialog, different output. -->
+    <string name="bt_le_audio_broadcast_dialog_different_output">Change output</string>
+    <!-- [CHAR LIMIT=NONE] Le audio broadcast dialog, media app is unknown -->
+    <string name="bt_le_audio_broadcast_dialog_unknown_name">Unknown</string>
+
 </resources>

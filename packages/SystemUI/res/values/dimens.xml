@@ -1461,4 +1461,18 @@
     <dimen name="media_output_broadcast_info_title_height">24dp</dimen>
     <dimen name="media_output_broadcast_info_summary_height">20dp</dimen>
     <dimen name="media_output_broadcast_info_edit">18dp</dimen>
+
+    <!-- Broadcast dialog -->
+    <dimen name="broadcast_dialog_title_img_margin_top">18dp</dimen>
+    <dimen name="broadcast_dialog_title_text_size">24sp</dimen>
+    <dimen name="broadcast_dialog_title_text_margin">16dp</dimen>
+    <dimen name="broadcast_dialog_title_text_margin_top">18dp</dimen>
+    <dimen name="broadcast_dialog_subtitle_text_size">14sp</dimen>
+    <dimen name="broadcast_dialog_icon_size">24dp</dimen>
+    <dimen name="broadcast_dialog_icon_margin_top">25dp</dimen>
+    <dimen name="broadcast_dialog_btn_radius">100dp</dimen>
+    <dimen name="broadcast_dialog_btn_margin_bottom">4dp</dimen>
+    <dimen name="broadcast_dialog_btn_text_size">16sp</dimen>
+    <dimen name="broadcast_dialog_btn_minHeight">44dp</dimen>
+    <dimen name="broadcast_dialog_margin">16dp</dimen>
 </resources>

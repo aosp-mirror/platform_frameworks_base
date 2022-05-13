@@ -63,7 +63,7 @@ public class LetterboxTest {
         mLetterbox = new Letterbox(mSurfaces, StubTransaction::new,
                 () -> mAreCornersRounded, () -> Color.valueOf(mColor),
                 () -> mHasWallpaperBackground, () -> mBlurRadius, () -> mDarkScrimAlpha,
-                /* doubleTapCallback= */ x -> {});
+                /* doubleTapCallbackX= */ x -> {}, /* doubleTapCallbackY= */ y -> {});
         mTransaction = spy(StubTransaction.class);
     }
 

@@ -93,6 +93,7 @@ public class ShadeListBuilder implements Dumpable {
     private final NotificationInteractionTracker mInteractionTracker;
     private final DumpManager mDumpManager;
     // used exclusivly by ShadeListBuilder#notifySectionEntriesUpdated
+    // TODO replace temp with collection pool for readability
     private final ArrayList<ListEntry> mTempSectionMembers = new ArrayList<>();
     private final boolean mAlwaysLogList;
 
@@ -230,13 +231,7 @@ public class ShadeListBuilder implements Dumpable {
         mPipelineState.requireState(STATE_IDLE);
 
         mNotifSections.clear();
-        NotifSectioner lastSection = null;
         for (NotifSectioner sectioner : sectioners) {
-            if (lastSection != null && lastSection.getBucket() > sectioner.getBucket()) {
-                throw new IllegalArgumentException("setSectioners with non contiguous sections "
-                        + lastSection.getName() + " - " + lastSection.getBucket() + " & "
-                        + sectioner.getName() + " - " + sectioner.getBucket());
-            }
             final NotifSection section = new NotifSection(sectioner, mNotifSections.size());
             final NotifComparator sectionComparator = section.getComparator();
             mNotifSections.add(section);
@@ -244,10 +239,23 @@ public class ShadeListBuilder implements Dumpable {
             if (sectionComparator != null) {
                 sectionComparator.setInvalidationListener(this::onNotifComparatorInvalidated);
             }
-            lastSection = sectioner;
         }
 
         mNotifSections.add(new NotifSection(DEFAULT_SECTIONER, mNotifSections.size()));
+
+        // validate sections
+        final ArraySet<Integer> seenBuckets = new ArraySet<>();
+        int lastBucket = mNotifSections.size() > 0
+                ? mNotifSections.get(0).getBucket()
+                : 0;
+        for (NotifSection section : mNotifSections) {
+            if (lastBucket != section.getBucket() && seenBuckets.contains(section.getBucket())) {
+                throw new IllegalStateException("setSectioners with non contiguous sections "
+                        + section.getLabel() + " has an already seen bucket");
+            }
+            lastBucket = section.getBucket();
+            seenBuckets.add(lastBucket);
+        }
     }
 
     void setNotifStabilityManager(@NonNull NotifStabilityManager notifStabilityManager) {
@@ -982,7 +990,7 @@ public class ShadeListBuilder implements Dumpable {
         // Check for suppressed order changes
         if (!getStabilityManager().isEveryChangeAllowed()) {
             mForceReorderable = true;
-            boolean isSorted = isSorted(mNotifList, mTopLevelComparator);
+            boolean isSorted = isShadeSorted();
             mForceReorderable = false;
             if (!isSorted) {
                 getStabilityManager().onEntryReorderSuppressed();
@@ -991,9 +999,23 @@ public class ShadeListBuilder implements Dumpable {
         Trace.endSection();
     }
 
+    private boolean isShadeSorted() {
+        if (!isSorted(mNotifList, mTopLevelComparator)) {
+            return false;
+        }
+        for (ListEntry entry : mNotifList) {
+            if (entry instanceof GroupEntry) {
+                if (!isSorted(((GroupEntry) entry).getChildren(), mGroupChildrenComparator)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     /** Determine whether the items in the list are sorted according to the comparator */
     @VisibleForTesting
-    public static <T> boolean isSorted(List<T> items, Comparator<T> comparator) {
+    public static <T> boolean isSorted(List<T> items, Comparator<? super T> comparator) {
         if (items.size() <= 1) {
             return true;
         }
@@ -1201,7 +1223,7 @@ public class ShadeListBuilder implements Dumpable {
     };
 
 
-    private final Comparator<ListEntry> mGroupChildrenComparator = (o1, o2) -> {
+    private final Comparator<NotificationEntry> mGroupChildrenComparator = (o1, o2) -> {
         int index1 = canReorder(o1) ? -1 : o1.getPreviousAttachState().getStableIndex();
         int index2 = canReorder(o2) ? -1 : o2.getPreviousAttachState().getStableIndex();
         int cmp = Integer.compare(index1, index2);

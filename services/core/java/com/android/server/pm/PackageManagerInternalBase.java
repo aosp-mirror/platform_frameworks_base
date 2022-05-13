@@ -315,9 +315,9 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
     @Deprecated
     public final List<ResolveInfo> queryIntentReceivers(Intent intent,
             String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags,
-            int filterCallingUid, int userId) {
-        return getResolveIntentHelper().queryIntentReceiversInternal(
-                snapshot(), intent, resolvedType, flags, userId, filterCallingUid);
+            int filterCallingUid, int userId, boolean forSend) {
+        return getResolveIntentHelper().queryIntentReceiversInternal(snapshot(), intent,
+                resolvedType, flags, userId, filterCallingUid, forSend);
     }
 
     @Override

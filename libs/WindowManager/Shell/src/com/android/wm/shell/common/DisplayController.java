@@ -156,14 +156,14 @@ public class DisplayController {
      * Adds a display rotation controller.
      */
     public void addDisplayChangingController(OnDisplayChangingListener controller) {
-        mChangeController.addRotationListener(controller);
+        mChangeController.addDisplayChangeListener(controller);
     }
 
     /**
      * Removes a display rotation controller.
      */
     public void removeDisplayChangingController(OnDisplayChangingListener controller) {
-        mChangeController.removeRotationListener(controller);
+        mChangeController.removeDisplayChangeListener(controller);
     }
 
     private void onDisplayAdded(int displayId) {

@@ -76,6 +76,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     private static final String PREF_NAME = "MediaOutputDialog";
     private static final String PREF_IS_LE_BROADCAST_FIRST_LAUNCH = "PrefIsLeBroadcastFirstLaunch";
     private static final boolean DEBUG = true;
+    private static final int HANDLE_BROADCAST_FAILED_DELAY = 3000;
 
     private final Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
     private final RecyclerView.LayoutManager mLayoutManager;
@@ -119,7 +120,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
                         Log.d(TAG, "onBroadcastStarted(), reason = " + reason
                                 + ", broadcastId = " + broadcastId);
                     }
-                    mMainThreadHandler.post(() -> startLeBroadcastDialog());
+                    mMainThreadHandler.post(() -> handleLeBroadcastStarted());
                 }
 
                 @Override
@@ -127,7 +128,8 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
                     if (DEBUG) {
                         Log.d(TAG, "onBroadcastStartFailed(), reason = " + reason);
                     }
-                    handleLeBroadcastStartFailed();
+                    mMainThreadHandler.postDelayed(() -> handleLeBroadcastStartFailed(),
+                            HANDLE_BROADCAST_FAILED_DELAY);
                 }
 
                 @Override
@@ -137,7 +139,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
                         Log.d(TAG, "onBroadcastMetadataChanged(), broadcastId = " + broadcastId
                                 + ", metadata = " + metadata);
                     }
-                    mMainThreadHandler.post(() -> refresh());
+                    mMainThreadHandler.post(() -> handleLeBroadcastMetadataChanged());
                 }
 
                 @Override
@@ -146,7 +148,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
                         Log.d(TAG, "onBroadcastStopped(), reason = " + reason
                                 + ", broadcastId = " + broadcastId);
                     }
-                    mMainThreadHandler.post(() -> refresh());
+                    mMainThreadHandler.post(() -> handleLeBroadcastStopped());
                 }
 
                 @Override
@@ -154,7 +156,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
                     if (DEBUG) {
                         Log.d(TAG, "onBroadcastStopFailed(), reason = " + reason);
                     }
-                    mMainThreadHandler.post(() -> refresh());
+                    mMainThreadHandler.post(() -> handleLeBroadcastStopFailed());
                 }
 
                 @Override
@@ -163,7 +165,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
                         Log.d(TAG, "onBroadcastUpdated(), reason = " + reason
                                 + ", broadcastId = " + broadcastId);
                     }
-                    mMainThreadHandler.post(() -> refresh());
+                    mMainThreadHandler.post(() -> handleLeBroadcastUpdated());
                 }
 
                 @Override
@@ -172,7 +174,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
                         Log.d(TAG, "onBroadcastUpdateFailed(), reason = " + reason
                                 + ", broadcastId = " + broadcastId);
                     }
-                    mMainThreadHandler.post(() -> refresh());
+                    mMainThreadHandler.post(() -> handleLeBroadcastUpdateFailed());
                 }
 
                 @Override
@@ -368,10 +370,34 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
                 Bitmap.createScaledBitmap(bitmap, size, size, false));
     }
 
-    protected void handleLeBroadcastStartFailed() {
+    public void handleLeBroadcastStarted() {
+        startLeBroadcastDialog();
+    }
+
+    public void handleLeBroadcastStartFailed() {
         mStopButton.setText(R.string.media_output_broadcast_start_failed);
         mStopButton.setEnabled(false);
-        mMainThreadHandler.postDelayed(() -> refresh(), 3000);
+        refresh();
+    }
+
+    public void handleLeBroadcastMetadataChanged() {
+        refresh();
+    }
+
+    public void handleLeBroadcastStopped() {
+        refresh();
+    }
+
+    public void handleLeBroadcastStopFailed() {
+        refresh();
+    }
+
+    public void handleLeBroadcastUpdated() {
+        refresh();
+    }
+
+    public void handleLeBroadcastUpdateFailed() {
+        refresh();
     }
 
     protected void startLeBroadcast() {
