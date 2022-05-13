@@ -25,12 +25,9 @@ data class NotifSection(
     val sectioner: NotifSectioner,
     val index: Int
 ) {
-    val label: String
-        get() = "Section($index, $bucket, \"${sectioner.name}\")"
-
+    @PriorityBucket
+    val bucket: Int = sectioner.bucket
+    val label: String = "$index:$bucket:${sectioner.name}"
     val headerController: NodeController? = sectioner.headerNodeController
-
     val comparator: NotifComparator? = sectioner.comparator
-
-    @PriorityBucket val bucket: Int = sectioner.bucket
 }
