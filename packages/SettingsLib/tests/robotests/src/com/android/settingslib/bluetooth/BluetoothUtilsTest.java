@@ -51,6 +51,11 @@ public class BluetoothUtilsTest {
     private static final String STRING_METADATA = "string_metadata";
     private static final String BOOL_METADATA = "true";
     private static final String INT_METADATA = "25";
+    private static final int METADATA_FAST_PAIR_CUSTOMIZED_FIELDS = 25;
+    private static final String KEY_HEARABLE_CONTROL_SLICE = "HEARABLE_CONTROL_SLICE_WITH_WIDTH";
+    private static final String CONTROL_METADATA =
+            "<HEARABLE_CONTROL_SLICE_WITH_WIDTH>" + STRING_METADATA
+                    + "</HEARABLE_CONTROL_SLICE_WITH_WIDTH>";
 
     @Before
     public void setUp() {
@@ -149,6 +154,15 @@ public class BluetoothUtilsTest {
 
         assertThat(BluetoothUtils.getUriMetaData(mBluetoothDevice,
                 BluetoothDevice.METADATA_MAIN_ICON)).isNull();
+    }
+
+    @Test
+    public void getControlUriMetaData_hasMetaData_returnsCorrectMetaData() {
+        when(mBluetoothDevice.getMetadata(METADATA_FAST_PAIR_CUSTOMIZED_FIELDS)).thenReturn(
+                CONTROL_METADATA.getBytes());
+
+        assertThat(BluetoothUtils.getControlUriMetaData(mBluetoothDevice)).isEqualTo(
+                STRING_METADATA);
     }
 
     @Test
