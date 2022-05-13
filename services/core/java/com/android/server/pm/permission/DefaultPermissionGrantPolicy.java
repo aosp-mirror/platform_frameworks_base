@@ -57,7 +57,6 @@ import android.provider.Telephony.Sms.Intents;
 import android.security.Credentials;
 import android.speech.RecognitionService;
 import android.telephony.TelephonyManager;
-import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -913,14 +912,6 @@ final class DefaultPermissionGrantPolicy {
         // hardcoded in BackupManagerService.SHARED_BACKUP_AGENT_PACKAGE.
         grantSystemFixedPermissionsToSystemPackage(pm, "com.android.sharedstoragebackup", userId,
                 STORAGE_PERMISSIONS);
-
-        // System Captions Service
-        String systemCaptionsServicePackageName =
-                mContext.getPackageManager().getSystemCaptionsServicePackageName();
-        if (!TextUtils.isEmpty(systemCaptionsServicePackageName)) {
-            grantPermissionsToSystemPackage(pm, systemCaptionsServicePackageName, userId,
-                    MICROPHONE_PERMISSIONS);
-        }
 
         // Bluetooth MIDI Service
         grantSystemFixedPermissionsToSystemPackage(pm,
