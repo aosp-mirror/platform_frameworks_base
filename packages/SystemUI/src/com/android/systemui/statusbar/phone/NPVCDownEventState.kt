@@ -14,9 +14,9 @@
 package com.android.systemui.statusbar.phone
 
 import android.view.MotionEvent
-import com.android.internal.util.RingBuffer
 import com.android.systemui.dump.DumpsysTableLogger
 import com.android.systemui.dump.Row
+import com.android.systemui.util.collection.RingBuffer
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -67,16 +67,9 @@ class NPVCDownEventState private constructor(
      * Do not use [append] to add new elements. Instead use [insert], as it will recycle if
      * necessary.
      */
-    class Buffer(
-        capacity: Int
-    ) : RingBuffer<NPVCDownEventState>(NPVCDownEventState::class.java, capacity) {
-        override fun append(t: NPVCDownEventState?) {
-            throw UnsupportedOperationException("Not supported, use insert instead")
-        }
+    class Buffer(capacity: Int) {
 
-        override fun createNewItem(): NPVCDownEventState {
-            return NPVCDownEventState()
-        }
+        private val buffer = RingBuffer(capacity) { NPVCDownEventState() }
 
         /**
          * Insert a new element in the buffer.
@@ -94,7 +87,7 @@ class NPVCDownEventState private constructor(
             touchSlopExceededBeforeDown: Boolean,
             lastEventSynthesized: Boolean
         ) {
-            nextSlot.apply {
+            buffer.advance().apply {
                 this.timeStamp = timeStamp
                 this.x = x
                 this.y = y
@@ -115,7 +108,7 @@ class NPVCDownEventState private constructor(
          * @see NPVCDownEventState.asStringList
          */
         fun toList(): List<Row> {
-            return toArray().map { it.asStringList }
+            return buffer.asSequence().map { it.asStringList }.toList()
         }
     }
 
