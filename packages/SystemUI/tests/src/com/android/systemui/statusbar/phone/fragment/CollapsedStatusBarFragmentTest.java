@@ -375,7 +375,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 mCommandQueue,
                 mCarrierConfigTracker,
                 new CollapsedStatusBarFragmentLogger(
-                        new LogBuffer("TEST", 1, 1, mock(LogcatEchoTracker.class)),
+                        new LogBuffer("TEST", 1, mock(LogcatEchoTracker.class)),
                         new DisableFlagsLogger()
                         ),
                 mOperatorNameViewControllerFactory,
