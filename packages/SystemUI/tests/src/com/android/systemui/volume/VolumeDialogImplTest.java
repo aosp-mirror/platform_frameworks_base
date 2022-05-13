@@ -38,6 +38,7 @@ import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -85,6 +86,8 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     MediaOutputDialogFactory mMediaOutputDialogFactory;
     @Mock
     ActivityStarter mActivityStarter;
+    @Mock
+    InteractionJankMonitor mInteractionJankMonitor;
 
     @Before
     public void setup() throws Exception {
@@ -99,7 +102,8 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 mDeviceProvisionedController,
                 mConfigurationController,
                 mMediaOutputDialogFactory,
-                mActivityStarter);
+                mActivityStarter,
+                mInteractionJankMonitor);
         mDialog.init(0, null);
         State state = createShellState();
         mDialog.onStateChangedH(state);
