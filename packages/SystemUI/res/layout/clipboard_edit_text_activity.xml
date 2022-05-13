@@ -12,6 +12,7 @@
         android:layout_height="48dp"
         android:layout_marginTop="8dp"
         android:layout_marginStart="12dp"
+        android:paddingHorizontal="16dp"
         android:background="@drawable/overlay_button_background"
         android:text="@string/clipboard_edit_text_done"
         app:layout_constraintStart_toStartOf="parent"

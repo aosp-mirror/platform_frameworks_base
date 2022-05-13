@@ -209,7 +209,6 @@ public class Vpn {
     private final NetworkInfo mNetworkInfo;
     private int mLegacyState;
     @VisibleForTesting protected String mPackage;
-    private String mSessionKey;
     private int mOwnerUID;
     private boolean mIsPackageTargetingAtLeastQ;
     @VisibleForTesting
@@ -1534,11 +1533,17 @@ public class Vpn {
     }
 
     // Note: Return type guarantees results are deduped and sorted, which callers require.
+    // This method also adds the SDK sandbox UIDs corresponding to the applications by default,
+    // since apps are generally not aware of them, yet they should follow the VPN configuration
+    // of the app they belong to.
     private SortedSet<Integer> getAppsUids(List<String> packageNames, int userId) {
         SortedSet<Integer> uids = new TreeSet<>();
         for (String app : packageNames) {
             int uid = getAppUid(app, userId);
             if (uid != -1) uids.add(uid);
+            if (Process.isApplicationUid(uid)) {
+                uids.add(Process.toSdkSandboxUid(uid));
+            }
         }
         return uids;
     }
@@ -1991,9 +1996,7 @@ public class Vpn {
     public synchronized int getActiveVpnType() {
         if (!mNetworkInfo.isConnectedOrConnecting()) return VpnManager.TYPE_VPN_NONE;
         if (mVpnRunner == null) return VpnManager.TYPE_VPN_SERVICE;
-        return mVpnRunner instanceof IkeV2VpnRunner
-                ? VpnManager.TYPE_VPN_PLATFORM
-                : VpnManager.TYPE_VPN_LEGACY;
+        return isIkev2VpnRunner() ? VpnManager.TYPE_VPN_PLATFORM : VpnManager.TYPE_VPN_LEGACY;
     }
 
     private void updateAlwaysOnNotification(DetailedState networkState) {
@@ -2531,6 +2534,7 @@ public class Vpn {
         @Nullable private IpSecTunnelInterface mTunnelIface;
         @Nullable private IkeSession mSession;
         @Nullable private Network mActiveNetwork;
+        private final String mSessionKey;
 
         IkeV2VpnRunner(@NonNull Ikev2VpnProfile profile) {
             super(TAG);
@@ -2876,7 +2880,6 @@ public class Vpn {
          */
         private void disconnectVpnRunner() {
             mActiveNetwork = null;
-            mSessionKey = null;
             mIsRunning = false;
 
             resetIkeState();
@@ -3306,7 +3309,7 @@ public class Vpn {
     }
 
     private boolean isCurrentIkev2VpnLocked(@NonNull String packageName) {
-        return isCurrentPreparedPackage(packageName) && mVpnRunner instanceof IkeV2VpnRunner;
+        return isCurrentPreparedPackage(packageName) && isIkev2VpnRunner();
     }
 
     /**
@@ -3360,6 +3363,16 @@ public class Vpn {
         return VpnProfile.decode("" /* Key unused */, encoded);
     }
 
+    private boolean isIkev2VpnRunner() {
+        return (mVpnRunner instanceof IkeV2VpnRunner);
+    }
+
+    @GuardedBy("this")
+    @Nullable
+    private String getSessionKeyLocked() {
+        return isIkev2VpnRunner() ? ((IkeV2VpnRunner) mVpnRunner).mSessionKey : null;
+    }
+
     /**
      * Starts an already provisioned VPN Profile, keyed by package name.
      *
@@ -3387,7 +3400,11 @@ public class Vpn {
             }
 
             startVpnProfilePrivileged(profile, packageName);
-            return mSessionKey;
+            if (!isIkev2VpnRunner()) {
+                throw new IllegalStateException("mVpnRunner shouldn't be null and should also be "
+                        + "an instance of Ikev2VpnRunner");
+            }
+            return getSessionKeyLocked();
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -3490,11 +3507,8 @@ public class Vpn {
     }
 
     private VpnProfileState makeVpnProfileState() {
-        // TODO: mSessionKey will be moved to Ikev2VpnRunner once aosp/2007077 is merged, so after
-        //  merging aosp/2007077, here should check Ikev2VpnRunner is null or not. Session key will
-        //  be null if Ikev2VpnRunner is null.
-        return new VpnProfileState(getStateFromLegacyState(mLegacyState), mSessionKey, mAlwaysOn,
-                mLockdown);
+        return new VpnProfileState(getStateFromLegacyState(mLegacyState),
+                isIkev2VpnRunner() ? getSessionKeyLocked() : null, mAlwaysOn, mLockdown);
     }
 
     /**
