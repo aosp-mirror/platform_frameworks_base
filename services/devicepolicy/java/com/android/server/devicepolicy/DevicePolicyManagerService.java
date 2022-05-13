@@ -1937,6 +1937,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             updatePasswordQualityCacheForUserGroup(userHandle);
             mPolicyCache.onUserRemoved(userHandle);
 
+            if (isManagedProfile(userHandle)) {
+                clearManagedProfileApnUnchecked();
+            }
             isOrgOwned = mOwners.isProfileOwnerOfOrganizationOwnedDevice(userHandle);
 
             mOwners.removeProfileOwner(userHandle);
@@ -8749,6 +8752,18 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    private void clearManagedProfileApnUnchecked() {
+        if (!mHasTelephonyFeature) {
+            return;
+        }
+        final List<ApnSetting> apns = getOverrideApnsUnchecked();
+        for (ApnSetting apn : apns) {
+            if (apn.getApnTypeBitmask() == ApnSetting.TYPE_ENTERPRISE) {
+                removeOverrideApnUnchecked(apn.getId());
+            }
+        }
+    }
+
     private void clearDeviceOwnerLocked(ActiveAdmin admin, int userId) {
         mDeviceAdminServiceController.stopServiceForOwner(userId, "clear-device-owner");
 
@@ -12080,6 +12095,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             return getUserData(userHandle.getIdentifier()).mSecondaryLockscreenEnabled;
         }
+    }
+
+    private boolean isManagedProfileOwner(CallerIdentity caller) {
+        return isProfileOwner(caller) && isManagedProfile(caller.getUserId());
     }
 
     private boolean isDefaultSupervisor(CallerIdentity caller) {
@@ -16282,7 +16301,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final CallerIdentity caller = getCallerIdentity(who);
         if (apnSetting.getApnTypeBitmask() == ApnSetting.TYPE_ENTERPRISE) {
             Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller)
-                    || isProfileOwner(caller));
+                    || isManagedProfileOwner(caller));
         } else {
             Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller));
         }
@@ -16310,7 +16329,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (apn != null && apn.getApnTypeBitmask() == ApnSetting.TYPE_ENTERPRISE
                 && apnSetting.getApnTypeBitmask() == ApnSetting.TYPE_ENTERPRISE) {
             Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller)
-                    || isProfileOwner(caller));
+                    || isManagedProfileOwner(caller));
         } else {
             Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller));
         }
@@ -16338,7 +16357,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         ApnSetting apn = getApnSetting(apnId);
         if (apn != null && apn.getApnTypeBitmask() == ApnSetting.TYPE_ENTERPRISE) {
             Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller)
-                    || isProfileOwner(caller));
+                    || isManagedProfileOwner(caller));
         } else {
             Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller));
         }
@@ -16383,8 +16402,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Objects.requireNonNull(who, "ComponentName is null");
         final CallerIdentity caller = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller));
-        return getOverrideApnsUnchecked();
+        Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller)
+                || isManagedProfileOwner(caller));
+        List<ApnSetting> apnSettings = getOverrideApnsUnchecked();
+        if (isProfileOwner(caller)) {
+            List<ApnSetting> apnSettingList = new ArrayList<>();
+            for (ApnSetting apnSetting : apnSettings) {
+                if (apnSetting.getApnTypeBitmask() == ApnSetting.TYPE_ENTERPRISE) {
+                    apnSettingList.add(apnSetting);
+                }
+            }
+            return apnSettingList;
+        } else {
+            return apnSettings;
+        }
     }
 
     private List<ApnSetting> getOverrideApnsUnchecked() {
