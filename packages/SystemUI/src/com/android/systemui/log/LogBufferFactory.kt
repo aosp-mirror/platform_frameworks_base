@@ -27,22 +27,21 @@ class LogBufferFactory @Inject constructor(
     private val logcatEchoTracker: LogcatEchoTracker
 ) {
     /* limit the size of maxPoolSize for low ram (Go) devices */
-    private fun poolLimit(maxPoolSize_requested: Int): Int {
-        if (ActivityManager.isLowRamDeviceStatic()) {
-            return minOf(maxPoolSize_requested, 20) /* low ram max log size*/
+    private fun adjustMaxSize(requestedMaxSize: Int): Int {
+        return if (ActivityManager.isLowRamDeviceStatic()) {
+            minOf(requestedMaxSize, 20) /* low ram max log size*/
         } else {
-            return maxPoolSize_requested
+            requestedMaxSize
         }
     }
 
     @JvmOverloads
     fun create(
         name: String,
-        maxPoolSize: Int,
-        flexSize: Int = 10,
+        maxSize: Int,
         systrace: Boolean = true
     ): LogBuffer {
-        val buffer = LogBuffer(name, poolLimit(maxPoolSize), flexSize, logcatEchoTracker, systrace)
+        val buffer = LogBuffer(name, adjustMaxSize(maxSize), logcatEchoTracker, systrace)
         dumpManager.registerBuffer(name, buffer)
         return buffer
     }
