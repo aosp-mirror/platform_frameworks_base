@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.pm.UserInfo;
 import android.os.Environment;
 import android.os.FileUtils;
+import android.os.RecoverySystem;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.os.SystemProperties;
@@ -115,6 +116,16 @@ class UserDataPreparer {
                 // Try one last time; if we fail again we're really in trouble
                 prepareUserDataLI(volumeUuid, userId, userSerial,
                     flags | StorageManager.FLAG_STORAGE_DE, false);
+            } else {
+                try {
+                    Log.wtf(TAG, "prepareUserData failed for user " + userId, e);
+                    if (userId == UserHandle.USER_SYSTEM) {
+                        RecoverySystem.rebootPromptAndWipeUserData(mContext,
+                                "prepareUserData failed for system user");
+                    }
+                } catch (IOException e2) {
+                    throw new RuntimeException("error rebooting into recovery", e2);
+                }
             }
         }
     }
