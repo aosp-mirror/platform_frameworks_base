@@ -265,15 +265,16 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     public void testOnNotificationClicked_keyGuardShowing()
             throws PendingIntent.CanceledException, RemoteException {
         // Given
-        StatusBarNotification sbn = mNotificationRow.getEntry().getSbn();
-        sbn.getNotification().contentIntent = mContentIntent;
-        sbn.getNotification().flags |= Notification.FLAG_AUTO_CANCEL;
+        NotificationEntry entry = mNotificationRow.getEntry();
+        Notification notification = entry.getSbn().getNotification();
+        notification.contentIntent = mContentIntent;
+        notification.flags |= Notification.FLAG_AUTO_CANCEL;
 
         when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mCentralSurfaces.isOccluded()).thenReturn(true);
 
         // When
-        mNotificationActivityStarter.onNotificationClicked(sbn, mNotificationRow);
+        mNotificationActivityStarter.onNotificationClicked(entry, mNotificationRow);
 
         // Then
         verify(mShadeController, atLeastOnce()).collapsePanel();
@@ -285,22 +286,23 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
 
         InOrder orderVerifier = Mockito.inOrder(mClickNotifier, mOnUserInteractionCallback);
         orderVerifier.verify(mClickNotifier).onNotificationClick(
-                eq(sbn.getKey()), any(NotificationVisibility.class));
+                eq(entry.getKey()), any(NotificationVisibility.class));
         // Notification calls dismiss callback to remove notification due to FLAG_AUTO_CANCEL
-        orderVerifier.verify(mOnUserInteractionCallback).onDismiss(mNotificationRow.getEntry(),
+        orderVerifier.verify(mOnUserInteractionCallback).onDismiss(entry,
                 REASON_CLICK, null);
     }
 
     @Test
     public void testOnNotificationClicked_bubble_noContentIntent_noKeyGuard()
             throws RemoteException {
-        StatusBarNotification sbn = mBubbleNotificationRow.getEntry().getSbn();
+        NotificationEntry entry = mBubbleNotificationRow.getEntry();
+        StatusBarNotification sbn = entry.getSbn();
 
         // Given
         sbn.getNotification().contentIntent = null;
 
         // When
-        mNotificationActivityStarter.onNotificationClicked(sbn, mBubbleNotificationRow);
+        mNotificationActivityStarter.onNotificationClicked(entry, mBubbleNotificationRow);
 
         // Then
         verify(mBubblesManager).expandStackAndSelectBubble(eq(mBubbleNotificationRow.getEntry()));
@@ -311,7 +313,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         verify(mAssistManager).hideAssist();
 
         verify(mClickNotifier).onNotificationClick(
-                eq(sbn.getKey()), any(NotificationVisibility.class));
+                eq(entry.getKey()), any(NotificationVisibility.class));
 
         // The content intent should NOT be sent on click.
         verifyZeroInteractions(mContentIntent);
@@ -324,7 +326,8 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     @Test
     public void testOnNotificationClicked_bubble_noContentIntent_keyGuardShowing()
             throws RemoteException {
-        StatusBarNotification sbn = mBubbleNotificationRow.getEntry().getSbn();
+        NotificationEntry entry = mBubbleNotificationRow.getEntry();
+        StatusBarNotification sbn = entry.getSbn();
 
         // Given
         sbn.getNotification().contentIntent = null;
@@ -332,7 +335,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         when(mCentralSurfaces.isOccluded()).thenReturn(true);
 
         // When
-        mNotificationActivityStarter.onNotificationClicked(sbn, mBubbleNotificationRow);
+        mNotificationActivityStarter.onNotificationClicked(entry, mBubbleNotificationRow);
 
         // Then
         verify(mBubblesManager).expandStackAndSelectBubble(eq(mBubbleNotificationRow.getEntry()));
@@ -342,7 +345,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         verify(mAssistManager).hideAssist();
 
         verify(mClickNotifier).onNotificationClick(
-                eq(sbn.getKey()), any(NotificationVisibility.class));
+                eq(entry.getKey()), any(NotificationVisibility.class));
 
         // The content intent should NOT be sent on click.
         verifyZeroInteractions(mContentIntent);
@@ -354,7 +357,8 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     @Test
     public void testOnNotificationClicked_bubble_withContentIntent_keyGuardShowing()
             throws RemoteException {
-        StatusBarNotification sbn = mBubbleNotificationRow.getEntry().getSbn();
+        NotificationEntry entry = mBubbleNotificationRow.getEntry();
+        StatusBarNotification sbn = entry.getSbn();
 
         // Given
         sbn.getNotification().contentIntent = mContentIntent;
@@ -362,7 +366,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         when(mCentralSurfaces.isOccluded()).thenReturn(true);
 
         // When
-        mNotificationActivityStarter.onNotificationClicked(sbn, mBubbleNotificationRow);
+        mNotificationActivityStarter.onNotificationClicked(entry, mBubbleNotificationRow);
 
         // Then
         verify(mBubblesManager).expandStackAndSelectBubble(mBubbleNotificationRow.getEntry());
@@ -372,7 +376,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         verify(mAssistManager).hideAssist();
 
         verify(mClickNotifier).onNotificationClick(
-                eq(sbn.getKey()), any(NotificationVisibility.class));
+                eq(entry.getKey()), any(NotificationVisibility.class));
 
         // The content intent should NOT be sent on click.
         verify(mContentIntent).getIntent();
@@ -408,16 +412,17 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
 
     @Test
     public void testNotifActivityStarterEventSourceStartEvent_onNotificationClicked() {
+        final NotificationEntry entry = mNotificationRow.getEntry();
         NotifActivityLaunchEvents.Listener listener =
                 mock(NotifActivityLaunchEvents.Listener.class);
         mLaunchEventsEmitter.registerListener(listener);
-        mNotificationActivityStarter
-                .onNotificationClicked(mNotificationRow.getEntry().getSbn(), mNotificationRow);
-        verify(listener).onStartLaunchNotifActivity(mNotificationRow.getEntry());
+        mNotificationActivityStarter.onNotificationClicked(entry, mNotificationRow);
+        verify(listener).onStartLaunchNotifActivity(entry);
     }
 
     @Test
     public void testNotifActivityStarterEventSourceFinishEvent_dismissKeyguardCancelled() {
+        final NotificationEntry entry = mNotificationRow.getEntry();
         NotifActivityLaunchEvents.Listener listener =
                 mock(NotifActivityLaunchEvents.Listener.class);
         mLaunchEventsEmitter.registerListener(listener);
@@ -428,34 +433,36 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                 .when(mActivityStarter)
                 .dismissKeyguardThenExecute(any(OnDismissAction.class), any(), anyBoolean());
         mNotificationActivityStarter
-                .onNotificationClicked(mNotificationRow.getEntry().getSbn(), mNotificationRow);
-        verify(listener).onFinishLaunchNotifActivity(mNotificationRow.getEntry());
+                .onNotificationClicked(entry, mNotificationRow);
+        verify(listener).onFinishLaunchNotifActivity(entry);
     }
 
     @Test
     public void testNotifActivityStarterEventSourceFinishEvent_postPanelCollapse()
             throws Exception {
+        final NotificationEntry entry = mNotificationRow.getEntry();
         NotifActivityLaunchEvents.Listener listener =
                 mock(NotifActivityLaunchEvents.Listener.class);
         mLaunchEventsEmitter.registerListener(listener);
         mNotificationActivityStarter
-                .onNotificationClicked(mNotificationRow.getEntry().getSbn(), mNotificationRow);
+                .onNotificationClicked(entry, mNotificationRow);
         ArgumentCaptor<ActivityLaunchAnimator.Controller> controllerCaptor =
                 ArgumentCaptor.forClass(ActivityLaunchAnimator.Controller.class);
         verify(mActivityLaunchAnimator).startPendingIntentWithAnimation(
                 controllerCaptor.capture(), anyBoolean(), any(), any());
         controllerCaptor.getValue().onIntentStarted(false);
-        verify(listener).onFinishLaunchNotifActivity(mNotificationRow.getEntry());
+        verify(listener).onFinishLaunchNotifActivity(entry);
     }
 
     @Test
     public void testNotifActivityStarterEventSourceFinishEvent_postPanelCollapse_noAnimate() {
+        final NotificationEntry entry = mNotificationRow.getEntry();
         NotifActivityLaunchEvents.Listener listener =
                 mock(NotifActivityLaunchEvents.Listener.class);
         mLaunchEventsEmitter.registerListener(listener);
         when(mCentralSurfaces.shouldAnimateLaunch(anyBoolean())).thenReturn(false);
         mNotificationActivityStarter
-                .onNotificationClicked(mNotificationRow.getEntry().getSbn(), mNotificationRow);
-        verify(listener).onFinishLaunchNotifActivity(mNotificationRow.getEntry());
+                .onNotificationClicked(entry, mNotificationRow);
+        verify(listener).onFinishLaunchNotifActivity(entry);
     }
 }
