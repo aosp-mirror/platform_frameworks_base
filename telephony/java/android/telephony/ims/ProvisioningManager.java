@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.StringDef;
@@ -55,6 +56,7 @@ import java.util.concurrent.Executor;
  * applications and may vary. It is up to the carrier and OEM applications to ensure that the
  * correct provisioning keys are being used when integrating with a vendor's ImsService.
  */
+@RequiresFeature(PackageManager.FEATURE_TELEPHONY_IMS)
 public class ProvisioningManager {
 
     private static final String TAG = "ProvisioningManager";
