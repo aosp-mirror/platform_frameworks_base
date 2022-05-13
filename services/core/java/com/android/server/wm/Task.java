@@ -197,6 +197,7 @@ import android.window.WindowContainerToken;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
+import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.function.pooled.PooledConsumer;
@@ -5518,23 +5519,10 @@ class Task extends TaskFragment {
         }
     }
 
-    /**
-     * Worker method for rearranging history task. Implements the function of moving all
-     * activities for a specific task (gathering them if disjoint) into a single group at the
-     * bottom of the root task.
-     *
-     * If a watcher is installed, the action is preflighted and the watcher has an opportunity
-     * to premeptively cancel the move.
-     *
-     * @param tr The task to collect and move to the bottom.
-     * @return Returns true if the move completed, false if not.
-     */
-    boolean moveTaskToBack(Task tr) {
-        Slog.i(TAG, "moveTaskToBack: " + tr);
-
+    private boolean canMoveTaskToBack(Task task) {
         // In LockTask mode, moving a locked task to the back of the root task may expose unlocked
         // ones. Therefore we need to check if this operation is allowed.
-        if (!mAtmService.getLockTaskController().canMoveTaskToBack(tr)) {
+        if (!mAtmService.getLockTaskController().canMoveTaskToBack(task)) {
             return false;
         }
 
@@ -5542,7 +5530,7 @@ class Task extends TaskFragment {
         // for *other* available tasks, but if none are available, then try again allowing the
         // current task to be selected.
         if (isTopRootTaskInDisplayArea() && mAtmService.mController != null) {
-            ActivityRecord next = topRunningActivity(null, tr.mTaskId);
+            ActivityRecord next = topRunningActivity(null, task.mTaskId);
             if (next == null) {
                 next = topRunningActivity(null, INVALID_TASK_ID);
             }
@@ -5560,15 +5548,70 @@ class Task extends TaskFragment {
                 }
             }
         }
+        return true;
+    }
+
+    /**
+     * Worker method for rearranging history task. Implements the function of moving all
+     * activities for a specific task (gathering them if disjoint) into a single group at the
+     * bottom of the root task.
+     *
+     * If a watcher is installed, the action is preflighted and the watcher has an opportunity
+     * to premeptively cancel the move.
+     *
+     * If this is a pinned task, it will be removed instead of rearranged.
+     *
+     * @param tr The task to collect and move to the bottom.
+     * @return Returns true if the move completed, false if not.
+     */
+    boolean moveTaskToBack(Task tr) {
+        Slog.i(TAG, "moveTaskToBack: " + tr);
+
+        if (!canMoveTaskToBack(tr)) return false;
 
         if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION, "Prepare to back transition: task="
                 + tr.mTaskId);
 
-        // Skip the transition for pinned task.
-        if (!inPinnedWindowingMode()) {
-            mDisplayContent.requestTransitionAndLegacyPrepare(TRANSIT_TO_BACK, tr);
+        if (mTransitionController.isShellTransitionsEnabled()) {
+            final Transition transition = new Transition(TRANSIT_TO_BACK, 0 /* flags */,
+                    mTransitionController, mWmService.mSyncEngine);
+            // Guarantee that this gets its own transition by queueing on SyncEngine
+            if (mWmService.mSyncEngine.hasActiveSync()) {
+                ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+                        "Creating Pending Move-to-back: %s", transition);
+                mWmService.mSyncEngine.queueSyncSet(
+                        () -> mTransitionController.moveToCollecting(transition),
+                        () -> {
+                            mTransitionController.requestStartTransition(transition, tr,
+                                    null /* remoteTransition */, null /* displayChange */);
+                            // Need to check again since this happens later and the system might
+                            // be in a different state.
+                            if (!canMoveTaskToBack(tr)) {
+                                Slog.e(TAG, "Failed to move task to back after saying we could: "
+                                        + tr.mTaskId);
+                                transition.abort();
+                                return;
+                            }
+                            moveTaskToBackInner(tr);
+                        });
+            } else {
+                mTransitionController.moveToCollecting(transition);
+                mTransitionController.requestStartTransition(transition, tr,
+                        null /* remoteTransition */, null /* displayChange */);
+                moveTaskToBackInner(tr);
+            }
+        } else {
+            // Skip the transition for pinned task.
+            if (!inPinnedWindowingMode()) {
+                mDisplayContent.prepareAppTransition(TRANSIT_TO_BACK);
+            }
+            moveTaskToBackInner(tr);
         }
-        moveToBack("moveTaskToBackLocked", tr);
+        return true;
+    }
+
+    private boolean moveTaskToBackInner(@NonNull Task task) {
+        moveToBack("moveTaskToBackInner", task);
 
         if (inPinnedWindowingMode()) {
             mTaskSupervisor.removeRootTask(this);
