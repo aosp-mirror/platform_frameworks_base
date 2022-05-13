@@ -2569,6 +2569,7 @@ public class NotificationPanelViewController extends PanelViewController {
             mQsClipTop = (int) (top - currentTranslation - mQsFrame.getTop());
             mQsClipBottom = (int) (bottom - currentTranslation - mQsFrame.getTop());
             mQsVisible = qsVisible;
+            mQs.setQsVisible(mQsVisible);
             mQs.setFancyClipping(
                     mQsClipTop,
                     mQsClipBottom,
