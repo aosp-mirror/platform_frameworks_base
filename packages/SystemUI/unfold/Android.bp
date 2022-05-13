@@ -1,4 +1,4 @@
-// Copyright (C) 2017 The Android Open Source Project
+// Copyright (C) 2022 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,66 +21,19 @@ package {
     default_applicable_licenses: ["frameworks_base_packages_SystemUI_license"],
 }
 
-genrule {
-    name: "statslog-SystemUI-java-gen",
-    tools: ["stats-log-api-gen"],
-    cmd: "$(location stats-log-api-gen) --java $(out) --module sysui --javaPackage com.android.systemui.shared.system --javaClass SysUiStatsLog",
-    out: ["com/android/systemui/shared/system/SysUiStatsLog.java"],
-}
-
-java_library {
-    name: "SystemUI-statsd",
-
-    srcs: [
-        ":statslog-SystemUI-java-gen",
-    ],
-}
-
 android_library {
-    name: "SystemUISharedLib",
+    name: "SystemUIUnfoldLib",
     srcs: [
         "src/**/*.java",
         "src/**/*.kt",
         "src/**/*.aidl",
-        ":wm_shell-aidls",
-        ":wm_shell_util-sources",
     ],
     static_libs: [
-        "PluginCoreLib",
-        "SystemUIUnfoldLib",
         "androidx.dynamicanimation_dynamicanimation",
-        "androidx.concurrent_concurrent-futures",
         "dagger2",
         "jsr330",
     ],
     java_version: "1.8",
     min_sdk_version: "current",
     plugins: ["dagger2-compiler"],
-}
-
-java_library {
-    name: "SystemUI-flag-types",
-    srcs: [
-        "src/com/android/systemui/flags/Flag.kt",
-    ],
-    include_srcs: true,
-    static_kotlin_stdlib: false,
-    java_version: "1.8",
-    min_sdk_version: "current",
-}
-
-java_library {
-    name: "SystemUIFlagsLib",
-    srcs: [
-        "src/com/android/systemui/flags/**/*.kt",
-    ],
-    static_kotlin_stdlib: false,
-    libs: [
-        "androidx.concurrent_concurrent-futures",
-    ],
-    static_libs: [
-        "SystemUI-flag-types",
-    ],
-    java_version: "1.8",
-    min_sdk_version: "current",
 }

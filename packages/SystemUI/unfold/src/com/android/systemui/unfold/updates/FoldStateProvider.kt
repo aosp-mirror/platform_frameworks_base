@@ -15,10 +15,10 @@
  */
 package com.android.systemui.unfold.updates
 
-import android.annotation.FloatRange
-import android.annotation.IntDef
-import com.android.systemui.statusbar.policy.CallbackController
+import androidx.annotation.FloatRange
+import androidx.annotation.IntDef
 import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdatesListener
+import com.android.systemui.unfold.util.CallbackController
 
 /**
  * Allows to subscribe to main events related to fold/unfold process such as hinge angle update,
@@ -36,7 +36,6 @@ interface FoldStateProvider : CallbackController<FoldUpdatesListener> {
     }
 
     @IntDef(
-        prefix = ["FOLD_UPDATE_"],
         value =
             [
                 FOLD_UPDATE_START_OPENING,

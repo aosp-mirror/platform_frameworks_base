@@ -16,7 +16,6 @@
 package com.android.systemui.unfold.progress
 
 import android.util.Log
-import android.util.MathUtils.saturate
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.dynamicanimation.animation.SpringAnimation
@@ -69,6 +68,9 @@ class PhysicsBasedUnfoldTransitionProgressProvider(
         val progress = saturate(angle / FINAL_HINGE_ANGLE_POSITION)
         springAnimation.animateToFinalPosition(progress)
     }
+
+    private fun saturate(amount: Float, low: Float = 0f, high: Float = 1f): Float =
+        if (amount < low) low else if (amount > high) high else amount
 
     override fun onFoldUpdate(@FoldUpdate update: Int) {
         when (update) {

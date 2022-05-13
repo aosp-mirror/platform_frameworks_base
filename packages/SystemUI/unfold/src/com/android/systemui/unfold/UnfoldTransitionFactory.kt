@@ -17,14 +17,13 @@
 
 package com.android.systemui.unfold
 
-import android.app.ActivityManager
 import android.content.Context
 import android.hardware.SensorManager
-import android.hardware.devicestate.DeviceStateManager
 import android.os.Handler
-import com.android.systemui.unfold.config.ResourceUnfoldTransitionConfig
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
+import com.android.systemui.unfold.updates.FoldProvider
 import com.android.systemui.unfold.updates.screen.ScreenStatusProvider
+import com.android.systemui.unfold.util.CurrentActivityTypeProvider
 import java.util.concurrent.Executor
 
 /**
@@ -39,8 +38,8 @@ fun createUnfoldTransitionProgressProvider(
     context: Context,
     config: UnfoldTransitionConfig,
     screenStatusProvider: ScreenStatusProvider,
-    deviceStateManager: DeviceStateManager,
-    activityManager: ActivityManager,
+    foldProvider: FoldProvider,
+    activityTypeProvider: CurrentActivityTypeProvider,
     sensorManager: SensorManager,
     mainHandler: Handler,
     mainExecutor: Executor,
@@ -52,8 +51,8 @@ fun createUnfoldTransitionProgressProvider(
             context,
             config,
             screenStatusProvider,
-            deviceStateManager,
-            activityManager,
+            foldProvider,
+            activityTypeProvider,
             sensorManager,
             mainHandler,
             mainExecutor,
@@ -64,5 +63,3 @@ fun createUnfoldTransitionProgressProvider(
         ?: throw IllegalStateException(
             "Trying to create " +
                 "UnfoldTransitionProgressProvider when the transition is disabled")
-
-fun createConfig(context: Context): UnfoldTransitionConfig = ResourceUnfoldTransitionConfig(context)
