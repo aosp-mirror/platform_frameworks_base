@@ -291,9 +291,10 @@ public final class MediaFormat {
     /**
      * A key describing the log session ID for MediaCodec. The log session ID is a random 32-byte
      * hexadecimal string that is used to associate metrics from multiple media codec instances
-     * to the same playback or recording session.
+     * to the same playback or recording session. The value is created as
+     * {@link android.media.metrics.LogSessionId LogSessionId}. Sessions are created in
+     * {@link android.media.metrics.MediaMetricsManager MediaMetricsManager}.
      * The associated value is a string.
-     * @hide
      */
     public static final String LOG_SESSION_ID = "log-session-id";
 
