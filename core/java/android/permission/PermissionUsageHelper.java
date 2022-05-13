@@ -30,6 +30,7 @@ import static android.app.AppOpsManager.OPSTR_COARSE_LOCATION;
 import static android.app.AppOpsManager.OPSTR_FINE_LOCATION;
 import static android.app.AppOpsManager.OPSTR_PHONE_CALL_CAMERA;
 import static android.app.AppOpsManager.OPSTR_PHONE_CALL_MICROPHONE;
+import static android.app.AppOpsManager.OPSTR_RECEIVE_AMBIENT_TRIGGER_AUDIO;
 import static android.app.AppOpsManager.OPSTR_RECORD_AUDIO;
 import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_FLAGS_ALL_TRUSTED;
@@ -137,6 +138,7 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
 
     private static final List<String> MIC_OPS = List.of(
             OPSTR_PHONE_CALL_MICROPHONE,
+            OPSTR_RECEIVE_AMBIENT_TRIGGER_AUDIO,
             OPSTR_RECORD_AUDIO
     );
 
@@ -147,6 +149,7 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
 
     private static @NonNull String getGroupForOp(String op) {
         switch (op) {
+            case OPSTR_RECEIVE_AMBIENT_TRIGGER_AUDIO:
             case OPSTR_RECORD_AUDIO:
                 return MICROPHONE;
             case OPSTR_CAMERA:

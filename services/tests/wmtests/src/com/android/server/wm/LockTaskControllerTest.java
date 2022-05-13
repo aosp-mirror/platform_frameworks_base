@@ -82,6 +82,7 @@ import android.util.Pair;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.telephony.CellBroadcastUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
 import com.android.server.statusbar.StatusBarManagerInternal;
@@ -294,6 +295,22 @@ public class LockTaskControllerTest {
         assertTrue(mLockTaskController.isLockTaskModeViolation(keypad));
         assertTrue(mLockTaskController.isLockTaskModeViolation(callAction));
         assertTrue(mLockTaskController.isLockTaskModeViolation(dialer));
+    }
+
+    @Test
+    public void testLockTaskViolation_wirelessEmergencyAlerts() {
+        // GIVEN one task record with allowlisted auth that is in lock task mode
+        Task tr = getTask(LOCK_TASK_AUTH_ALLOWLISTED);
+        mLockTaskController.startLockTaskMode(tr, false, TEST_UID);
+
+        // GIVEN cellbroadcast task necessary for emergency warning alerts
+        Task cellbroadcastreceiver = getTask(
+                new Intent().setComponent(
+                        CellBroadcastUtils.getDefaultCellBroadcastAlertDialogComponent(mContext)),
+                LOCK_TASK_AUTH_PINNABLE);
+
+        // THEN the cellbroadcast task should all be allowed
+        assertFalse(mLockTaskController.isLockTaskModeViolation(cellbroadcastreceiver));
     }
 
     @Test
