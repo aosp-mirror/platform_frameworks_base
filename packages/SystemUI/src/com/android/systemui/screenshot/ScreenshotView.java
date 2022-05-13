@@ -820,7 +820,7 @@ public class ScreenshotView extends FrameLayout implements
                             animateDismissal();
                         });
                 actionChip.setAlpha(1);
-                mActionsView.addView(actionChip);
+                mActionsView.addView(actionChip, mActionsView.getChildCount() - 1);
                 mSmartChips.add(actionChip);
             }
         }
