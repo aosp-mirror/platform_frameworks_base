@@ -350,8 +350,7 @@ public interface NotificationsModule {
                         notifCollection.get(),
                         headsUpManager,
                         statusBarStateController,
-                        visualStabilityCoordinator.get(),
-                        groupMembershipManagerLazy.get())
+                        visualStabilityCoordinator.get())
                 : new OnUserInteractionCallbackImplLegacy(
                         entryManager,
                         visibilityProvider.get(),
