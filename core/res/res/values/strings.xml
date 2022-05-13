@@ -6325,5 +6325,5 @@ ul.</string>
     <string name="vdm_camera_access_denied" product="tablet">Can’t access the tablet’s camera from your <xliff:g id="device" example="Chromebook">%1$s</xliff:g></string>
 
     <!-- Title for preference of the system default locale. [CHAR LIMIT=50]-->
-    <string name="system_locale_title">System language</string>
+    <string name="system_locale_title">System default</string>
 </resources>
