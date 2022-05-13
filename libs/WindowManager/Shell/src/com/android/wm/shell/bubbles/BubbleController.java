@@ -1512,7 +1512,7 @@ public class BubbleController {
         public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
             mBubblePositioner.setImeVisible(imeVisible, imeHeight);
             if (mStackView != null) {
-                mStackView.animateForIme(imeVisible);
+                mStackView.setImeVisible(imeVisible);
             }
         }
     }

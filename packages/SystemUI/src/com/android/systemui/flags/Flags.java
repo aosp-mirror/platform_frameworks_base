@@ -166,6 +166,13 @@ public class Flags {
     public static final SysPropBooleanFlag WM_ENABLE_SHELL_TRANSITIONS =
             new SysPropBooleanFlag(1100, "persist.wm.debug.shell_transit", false);
 
+    /**
+     * b/170163464: animate bubbles expanded view collapse with home gesture
+     */
+    @Keep
+    public static final SysPropBooleanFlag BUBBLES_HOME_GESTURE =
+            new SysPropBooleanFlag(1101, "persist.wm.debug.bubbles_home_gesture", false);
+
     // 1200 - predictive back
     @Keep
     public static final SysPropBooleanFlag WM_ENABLE_PREDICTIVE_BACK = new SysPropBooleanFlag(

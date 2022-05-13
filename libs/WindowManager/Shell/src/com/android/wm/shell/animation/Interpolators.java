@@ -53,6 +53,19 @@ public class Interpolators {
     public static final Interpolator LINEAR_OUT_SLOW_IN = new PathInterpolator(0f, 0f, 0.2f, 1f);
 
     /**
+     * The accelerated emphasized interpolator. Used for hero / emphasized movement of content that
+     * is disappearing e.g. when moving off screen.
+     */
+    public static final Interpolator EMPHASIZED_ACCELERATE = new PathInterpolator(
+            0.3f, 0f, 0.8f, 0.15f);
+
+    /**
+     * The decelerating emphasized interpolator. Used for hero / emphasized movement of content that
+     * is appearing e.g. when coming from off screen
+     */
+    public static final Interpolator EMPHASIZED_DECELERATE = new PathInterpolator(
+            0.05f, 0.7f, 0.1f, 1f);
+    /**
      * Interpolator to be used when animating a move based on a click. Pair with enough duration.
      */
     public static final Interpolator TOUCH_RESPONSE = new PathInterpolator(0.3f, 0f, 0.1f, 1f);
