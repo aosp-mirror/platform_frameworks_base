@@ -27,7 +27,7 @@ class NotificationClickerLogger @Inject constructor(
 ) {
     fun logOnClick(entry: NotificationEntry) {
         buffer.log(TAG, LogLevel.DEBUG, {
-            str1 = entry.key
+            str1 = entry.logKey
             str2 = entry.ranking.channel.id
         }, {
             "CLICK $str1 (channel=$str2)"
@@ -36,7 +36,7 @@ class NotificationClickerLogger @Inject constructor(
 
     fun logMenuVisible(entry: NotificationEntry) {
         buffer.log(TAG, LogLevel.DEBUG, {
-            str1 = entry.key
+            str1 = entry.logKey
         }, {
             "Ignoring click on $str1; menu is visible"
         })
@@ -44,7 +44,7 @@ class NotificationClickerLogger @Inject constructor(
 
     fun logParentMenuVisible(entry: NotificationEntry) {
         buffer.log(TAG, LogLevel.DEBUG, {
-            str1 = entry.key
+            str1 = entry.logKey
         }, {
             "Ignoring click on $str1; parent menu is visible"
         })
@@ -52,7 +52,7 @@ class NotificationClickerLogger @Inject constructor(
 
     fun logChildrenExpanded(entry: NotificationEntry) {
         buffer.log(TAG, LogLevel.DEBUG, {
-            str1 = entry.key
+            str1 = entry.logKey
         }, {
             "Ignoring click on $str1; children are expanded"
         })
@@ -60,7 +60,7 @@ class NotificationClickerLogger @Inject constructor(
 
     fun logGutsExposed(entry: NotificationEntry) {
         buffer.log(TAG, LogLevel.DEBUG, {
-            str1 = entry.key
+            str1 = entry.logKey
         }, {
             "Ignoring click on $str1; guts are exposed"
         })
