@@ -91,7 +91,6 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             MODE_SHOW_BOUNCER,
             MODE_ONLY_WAKE,
             MODE_UNLOCK_COLLAPSING,
-            MODE_UNLOCK_FADING,
             MODE_DISMISS_BOUNCER,
             MODE_WAKE_AND_UNLOCK_FROM_DREAM
     })
@@ -138,15 +137,9 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     public static final int MODE_WAKE_AND_UNLOCK_FROM_DREAM = 6;
 
     /**
-     * Faster mode of dismissing the lock screen when we cross fade to an app
-     * (used for keyguard bypass.)
-     */
-    public static final int MODE_UNLOCK_FADING = 7;
-
-    /**
      * When bouncer is visible and will be dismissed.
      */
-    public static final int MODE_DISMISS_BOUNCER = 8;
+    public static final int MODE_DISMISS_BOUNCER = 7;
 
     /**
      * How much faster we collapse the lockscreen when authenticating with biometric.
@@ -451,8 +444,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         }
         switch (mMode) {
             case MODE_DISMISS_BOUNCER:
-            case MODE_UNLOCK_FADING:
-                Trace.beginSection("MODE_DISMISS_BOUNCER or MODE_UNLOCK_FADING");
+                Trace.beginSection("MODE_DISMISS_BOUNCER");
                 mKeyguardViewController.notifyKeyguardAuthenticated(
                         false /* strongAuth */);
                 Trace.endSection();
@@ -616,14 +608,9 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         if (mKeyguardViewController.isShowing()) {
             if ((mKeyguardViewController.bouncerIsOrWillBeShowing()
                     || mKeyguardBypassController.getAltBouncerShowing()) && unlockingAllowed) {
-                if (bypass && mKeyguardBypassController.canPlaySubtleWindowAnimations()) {
-                    return MODE_UNLOCK_FADING;
-                } else {
-                    return MODE_DISMISS_BOUNCER;
-                }
-            } else if (unlockingAllowed) {
-                return bypass || mAuthController.isUdfpsFingerDown()
-                        ? MODE_UNLOCK_FADING : MODE_NONE;
+                return MODE_DISMISS_BOUNCER;
+            } else if (unlockingAllowed && (bypass || mAuthController.isUdfpsFingerDown())) {
+                return MODE_UNLOCK_COLLAPSING;
             } else {
                 return bypass ? MODE_SHOW_BOUNCER : MODE_NONE;
             }
@@ -799,7 +786,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
      * on or off.
      */
     public boolean isBiometricUnlock() {
-        return isWakeAndUnlock() || mMode == MODE_UNLOCK_COLLAPSING || mMode == MODE_UNLOCK_FADING;
+        return isWakeAndUnlock() || mMode == MODE_UNLOCK_COLLAPSING;
     }
 
     /**
