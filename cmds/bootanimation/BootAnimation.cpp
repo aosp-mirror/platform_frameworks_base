@@ -509,7 +509,8 @@ status_t BootAnimation::readyToRun() {
     resolution = limitSurfaceSize(resolution.width, resolution.height);
     // create the native surface
     sp<SurfaceControl> control = session()->createSurface(String8("BootAnimation"),
-            resolution.getWidth(), resolution.getHeight(), PIXEL_FORMAT_RGB_565);
+            resolution.getWidth(), resolution.getHeight(), PIXEL_FORMAT_RGB_565,
+            ISurfaceComposerClient::eOpaque);
 
     SurfaceComposerClient::Transaction t;
 
