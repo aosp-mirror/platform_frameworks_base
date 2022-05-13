@@ -88,7 +88,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationSectionsMan
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.phone.NotifActivityLaunchEventsModule;
 import com.android.systemui.statusbar.phone.NotifPanelEventsModule;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -111,7 +110,6 @@ import dagger.Provides;
 @Module(includes = {
         CoordinatorsModule.class,
         KeyguardNotificationVisibilityProviderModule.class,
-        NotifActivityLaunchEventsModule.class,
         NotifPanelEventsModule.class,
         NotifPipelineChoreographerModule.class,
         NotificationSectionHeadersModule.class,

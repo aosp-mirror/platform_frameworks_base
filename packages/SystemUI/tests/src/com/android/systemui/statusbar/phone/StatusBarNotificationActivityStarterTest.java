@@ -85,7 +85,6 @@ import com.android.systemui.wmshell.BubblesManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -149,7 +148,6 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     private ActivityLaunchAnimator mActivityLaunchAnimator;
     @Mock
     private InteractionJankMonitor mJankMonitor;
-    private StatusBarNotificationActivityStarter.LaunchEventsEmitter mLaunchEventsEmitter;
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
     private NotificationTestHelper mNotificationTestHelper;
     private ExpandableNotificationRow mNotificationRow;
@@ -206,7 +204,6 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                         NotificationListContainer.class),
                         headsUpManager,
                         mJankMonitor);
-        mLaunchEventsEmitter = new StatusBarNotificationActivityStarter.LaunchEventsEmitter();
         mNotificationActivityStarter =
                 new StatusBarNotificationActivityStarter(
                         getContext(),
@@ -242,8 +239,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                         mock(NotificationPresenter.class),
                         mock(NotificationPanelViewController.class),
                         mActivityLaunchAnimator,
-                        notificationAnimationProvider,
-                        mLaunchEventsEmitter
+                        notificationAnimationProvider
                 );
 
         // set up dismissKeyguardThenExecute to synchronously invoke the OnDismissAction arg
@@ -420,61 +416,5 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
 
         // THEN display should try wake up for the full screen intent
         verify(mCentralSurfaces).wakeUpForFullScreenIntent();
-    }
-
-    @Test
-    public void testNotifActivityStarterEventSourceStartEvent_onNotificationClicked() {
-        final NotificationEntry entry = mNotificationRow.getEntry();
-        NotifActivityLaunchEvents.Listener listener =
-                mock(NotifActivityLaunchEvents.Listener.class);
-        mLaunchEventsEmitter.registerListener(listener);
-        mNotificationActivityStarter.onNotificationClicked(entry, mNotificationRow);
-        verify(listener).onStartLaunchNotifActivity(entry);
-    }
-
-    @Test
-    public void testNotifActivityStarterEventSourceFinishEvent_dismissKeyguardCancelled() {
-        final NotificationEntry entry = mNotificationRow.getEntry();
-        NotifActivityLaunchEvents.Listener listener =
-                mock(NotifActivityLaunchEvents.Listener.class);
-        mLaunchEventsEmitter.registerListener(listener);
-        // set up dismissKeyguardThenExecute to synchronously invoke the cancel runnable arg
-        doAnswer(answerVoid(
-                (OnDismissAction dismissAction, Runnable cancel, Boolean afterKeyguardGone) ->
-                        cancel.run()))
-                .when(mActivityStarter)
-                .dismissKeyguardThenExecute(any(OnDismissAction.class), any(), anyBoolean());
-        mNotificationActivityStarter
-                .onNotificationClicked(entry, mNotificationRow);
-        verify(listener).onFinishLaunchNotifActivity(entry);
-    }
-
-    @Test
-    public void testNotifActivityStarterEventSourceFinishEvent_postPanelCollapse()
-            throws Exception {
-        final NotificationEntry entry = mNotificationRow.getEntry();
-        NotifActivityLaunchEvents.Listener listener =
-                mock(NotifActivityLaunchEvents.Listener.class);
-        mLaunchEventsEmitter.registerListener(listener);
-        mNotificationActivityStarter
-                .onNotificationClicked(entry, mNotificationRow);
-        ArgumentCaptor<ActivityLaunchAnimator.Controller> controllerCaptor =
-                ArgumentCaptor.forClass(ActivityLaunchAnimator.Controller.class);
-        verify(mActivityLaunchAnimator).startPendingIntentWithAnimation(
-                controllerCaptor.capture(), anyBoolean(), any(), any());
-        controllerCaptor.getValue().onIntentStarted(false);
-        verify(listener).onFinishLaunchNotifActivity(entry);
-    }
-
-    @Test
-    public void testNotifActivityStarterEventSourceFinishEvent_postPanelCollapse_noAnimate() {
-        final NotificationEntry entry = mNotificationRow.getEntry();
-        NotifActivityLaunchEvents.Listener listener =
-                mock(NotifActivityLaunchEvents.Listener.class);
-        mLaunchEventsEmitter.registerListener(listener);
-        when(mCentralSurfaces.shouldAnimateLaunch(anyBoolean())).thenReturn(false);
-        mNotificationActivityStarter
-                .onNotificationClicked(entry, mNotificationRow);
-        verify(listener).onFinishLaunchNotifActivity(entry);
     }
 }
