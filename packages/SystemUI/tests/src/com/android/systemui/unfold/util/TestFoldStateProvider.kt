@@ -24,6 +24,8 @@ import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdatesListener
 class TestFoldStateProvider : FoldStateProvider {
 
     private val listeners: MutableList<FoldUpdatesListener> = arrayListOf()
+    val hasListeners: Boolean
+        get() = listeners.isNotEmpty()
 
     override fun start() {
     }

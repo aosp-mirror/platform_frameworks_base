@@ -15,9 +15,9 @@
  */
 package com.android.systemui.unfold
 
-import android.annotation.FloatRange
-import com.android.systemui.statusbar.policy.CallbackController
+import androidx.annotation.FloatRange
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
+import com.android.systemui.unfold.util.CallbackController
 
 /**
  * Interface that allows to receive unfold transition progress updates.

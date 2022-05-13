@@ -15,8 +15,8 @@
  */
 package com.android.systemui.unfold.updates.screen
 
-import com.android.systemui.statusbar.policy.CallbackController
 import com.android.systemui.unfold.updates.screen.ScreenStatusProvider.ScreenListener
+import com.android.systemui.unfold.util.CallbackController
 
 interface ScreenStatusProvider : CallbackController<ScreenListener> {
 
