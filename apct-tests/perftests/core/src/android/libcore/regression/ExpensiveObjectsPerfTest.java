@@ -141,15 +141,6 @@ public class ExpensiveObjectsPerfTest {
     }
 
     @Test
-    public void timeNumberFormatTrivialFormatLong() {
-        NumberFormat nf = NumberFormat.getInstance(Locale.US);
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        while (state.keepRunning()) {
-            nf.format(1024L);
-        }
-    }
-
-    @Test
     public void timeLongToString() {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
