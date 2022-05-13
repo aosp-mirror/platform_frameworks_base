@@ -228,6 +228,7 @@ import android.window.DisplayWindowPolicyController;
 import android.window.IDisplayAreaOrganizer;
 import android.window.TransitionRequestInfo;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -1074,7 +1075,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mDisplayPolicy = new DisplayPolicy(mWmService, this);
         mDisplayRotation = new DisplayRotation(mWmService, this);
         mCloseToSquareMaxAspectRatio = mWmService.mContext.getResources().getFloat(
-                com.android.internal.R.dimen.config_closeToSquareDisplayMaxAspectRatio);
+                R.dimen.config_closeToSquareDisplayMaxAspectRatio);
         if (isDefaultDisplay) {
             // The policy may be invoked right after here, so it requires the necessary default
             // fields of this display content.
@@ -1566,7 +1567,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 mAtmService.mContext.createConfigurationContext(getConfiguration());
         final float minimalSize =
                 displayConfigurationContext.getResources().getDimension(
-                                com.android.internal.R.dimen.default_minimal_size_resizable_task);
+                        R.dimen.default_minimal_size_resizable_task);
         if (Double.compare(mDisplayMetrics.density, 0.0) == 0) {
             throw new IllegalArgumentException("Display with ID=" + getDisplayId() + "has invalid "
                 + "DisplayMetrics.density= 0.0");
@@ -4550,9 +4551,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // if the wallpaper service is disabled on the device, we're never going to have
         // wallpaper, don't bother waiting for it
         boolean wallpaperEnabled = mWmService.mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_enableWallpaperService)
+                R.bool.config_enableWallpaperService)
                 && mWmService.mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_checkWallpaperAtBoot);
+                R.bool.config_checkWallpaperAtBoot);
 
         final boolean haveBootMsg = drawnWindowTypes.get(TYPE_BOOT_PROGRESS);
         final boolean haveApp = drawnWindowTypes.get(TYPE_BASE_APPLICATION);
@@ -6505,9 +6506,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     class RemoteInsetsControlTarget implements InsetsControlTarget {
         private final IDisplayWindowInsetsController mRemoteInsetsController;
         private final InsetsVisibilities mRequestedVisibilities = new InsetsVisibilities();
+        private final boolean mCanShowTransient;
 
         RemoteInsetsControlTarget(IDisplayWindowInsetsController controller) {
             mRemoteInsetsController = controller;
+            mCanShowTransient = mWmService.mContext.getResources().getBoolean(
+                    R.bool.config_remoteInsetsControllerSystemBarsCanBeShownByUserAction);
         }
 
         /**
@@ -6560,6 +6564,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to deliver showInsets", e);
             }
+        }
+
+        @Override
+        public boolean canShowTransient() {
+            return mCanShowTransient;
         }
 
         @Override
