@@ -78,8 +78,7 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Prófaðu að taka skjámynd aftur"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Ekki er hægt að vista skjámynd"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Forritið eða fyrirtækið þitt leyfir ekki skjámyndatöku"</string>
-    <!-- no translation found for screenshot_blocked_by_admin (5486757604822795797) -->
-    <skip />
+    <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Kerfisstjórinn lokaði á skjámyndatöku"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Breyta"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Breyta skjámynd"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Deila skjámynd"</string>
@@ -460,7 +459,8 @@
     <string name="wallet_title" msgid="5369767670735827105">"Veski"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Stilltu hlutina þannig að þú getir verslað með símanum á hraðari og öruggari hátt"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Sýna allt"</string>
-    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Bæta korti við"</string>
+    <!-- no translation found for wallet_secondary_label_no_card (8488069304491125713) -->
+    <skip />
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Uppfærir"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Taktu úr lás til að nota"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Vandamál kom upp við að sækja kortin þín. Reyndu aftur síðar"</string>
@@ -720,8 +720,7 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"Kveikja þegar rafhlaða er við það að klárast"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Nei, takk"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Vista SysUI-gögn"</string>
-    <!-- no translation found for ongoing_privacy_dialog_a11y_title (2205794093673327974) -->
-    <skip />
+    <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"Í notkun"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Forrit eru að nota <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" og "</string>
@@ -819,7 +818,6 @@
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Færðu nær til að spila í <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Færðu tækið nær <xliff:g id="DEVICENAME">%1$s</xliff:g> til að spila hér"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Í spilun í <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
-    <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Í spilun í þessum síma"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Eitthvað fór úrskeiðis. Reyndu aftur."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Óvirkt, athugaðu forrit"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Fannst ekki"</string>
@@ -849,6 +847,8 @@
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Vista"</string>
     <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Ræsir…"</string>
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Ekki hægt að senda út"</string>
+    <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Ekki hægt að vista. Reyndu aftur."</string>
+    <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Ekki hægt að vista."</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Útgáfunúmer smíðar"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Útgáfunúmer smíðar afritað á klippiborð."</string>
     <string name="basic_status" msgid="2315371112182658176">"Opna samtal"</string>
@@ -933,6 +933,8 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Breyta afrituðum texta"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Breyta afritaðri mynd"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Senda í nálægt tæki"</string>
+    <!-- no translation found for clipboard_text_hidden (7926899867471812305) -->
+    <skip />
     <string name="add" msgid="81036585205287996">"Bæta við"</string>
     <string name="manage_users" msgid="1823875311934643849">"Stjórna notendum"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Þessi tilkynning styður ekki að draga yfir á skiptan skjá."</string>

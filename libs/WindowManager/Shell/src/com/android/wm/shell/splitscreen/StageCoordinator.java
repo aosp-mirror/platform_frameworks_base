@@ -980,6 +980,9 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 updateUnfoldBounds();
                 return;
             }
+            // Clear the divider remote animating flag as the divider will be re-rendered to apply
+            // the new rotation config.
+            mIsDividerRemoteAnimating = false;
             mSplitLayout.update(null /* t */);
             onLayoutSizeChanged(mSplitLayout);
         }
@@ -1112,7 +1115,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             final SurfaceControl.Transaction transaction = mTransactionPool.acquire();
             mDividerFadeInAnimator = ValueAnimator.ofFloat(0f, 1f);
             mDividerFadeInAnimator.addUpdateListener(animation -> {
-                if (dividerLeash == null) {
+                if (dividerLeash == null || !dividerLeash.isValid()) {
                     mDividerFadeInAnimator.cancel();
                     return;
                 }
@@ -1122,7 +1125,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mDividerFadeInAnimator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationStart(Animator animation) {
-                    if (dividerLeash == null) {
+                    if (dividerLeash == null || !dividerLeash.isValid()) {
                         mDividerFadeInAnimator.cancel();
                         return;
                     }

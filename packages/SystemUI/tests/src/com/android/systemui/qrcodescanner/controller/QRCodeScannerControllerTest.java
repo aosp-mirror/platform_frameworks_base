@@ -24,7 +24,6 @@ import static com.android.systemui.qrcodescanner.controller.QRCodeScannerControl
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,6 +31,7 @@ import static org.mockito.Mockito.when;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.Resources;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
@@ -41,7 +41,6 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.DeviceConfigProxyFake;
@@ -90,8 +89,9 @@ public class QRCodeScannerControllerTest extends SysuiTestCase {
         when(mPackageManager.queryIntentActivities(any(Intent.class),
                 any(Integer.class))).thenReturn(resolveInfoList);
         when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA)).thenReturn(true);
-        mContext.getOrCreateTestableResources().addOverride(R.string.def_qr_code_component,
-                defaultActivity);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.string.config_defaultQrCodeComponent, defaultActivity);
+
         mContext.getOrCreateTestableResources().addOverride(
                 android.R.bool.config_enableQrCodeScannerOnLockScreen, enableOnLockScreen);
 

@@ -292,14 +292,13 @@ public class CompanionDeviceManagerService extends SystemService {
 
     private boolean onCompanionApplicationBindingDiedInternal(
             @UserIdInt int userId, @NonNull String packageName) {
-        // Update the current connected devices sets when binderDied, so that application is able
-        // to call notifyDeviceAppeared after re-launch the application.
         for (AssociationInfo ai :
                 mAssociationStore.getAssociationsForPackage(userId, packageName)) {
-            int id = ai.getId();
-            Slog.i(TAG, "Removing association id: " + id + " for package: "
-                    + packageName + " due to binderDied.");
-            mDevicePresenceMonitor.removeDeviceFromMonitoring(id);
+            final int associationId = ai.getId();
+            if (ai.isSelfManaged()
+                    && mDevicePresenceMonitor.isDevicePresent(associationId)) {
+                mDevicePresenceMonitor.onSelfManagedDeviceReporterBinderDied(associationId);
+            }
         }
         // TODO(b/218613015): implement.
         return false;
@@ -650,6 +649,12 @@ public class CompanionDeviceManagerService extends SystemService {
 
         private void registerDevicePresenceListenerActive(String packageName, String deviceAddress,
                 boolean active) throws RemoteException {
+            if (DEBUG) {
+                Log.i(TAG, "registerDevicePresenceListenerActive()"
+                        + " active=" + active
+                        + " deviceAddress=" + deviceAddress);
+            }
+
             getContext().enforceCallingOrSelfPermission(
                     android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE,
                     "[un]registerDevicePresenceListenerService");
@@ -665,6 +670,12 @@ public class CompanionDeviceManagerService extends SystemService {
                         + " for user " + userId));
             }
 
+            // If already at specified state, then no-op.
+            if (active == association.isNotifyOnDeviceNearby()) {
+                if (DEBUG) Log.d(TAG, "Device presence listener is already at desired state.");
+                return;
+            }
+
             // AssociationInfo class is immutable: create a new AssociationInfo object with updated
             // flag.
             association = AssociationInfo.builder(association)
@@ -675,7 +686,17 @@ public class CompanionDeviceManagerService extends SystemService {
             // an application sets/unsets the mNotifyOnDeviceNearby flag.
             mAssociationStore.updateAssociation(association);
 
-            // TODO(b/218615198): correctly handle the case when the device is currently present.
+            // If device is already present, then trigger callback.
+            if (active && mDevicePresenceMonitor.isDevicePresent(association.getId())) {
+                if (DEBUG) Log.d(TAG, "Device is already present. Triggering callback.");
+                onDeviceAppearedInternal(association.getId());
+            }
+
+            // If last listener is unregistered, then unbind application.
+            if (!active && !shouldBindPackage(userId, packageName)) {
+                if (DEBUG) Log.d(TAG, "Last listener unregistered. Unbinding application.");
+                mCompanionAppController.unbindCompanionApplication(userId, packageName);
+            }
         }
 
         @Override

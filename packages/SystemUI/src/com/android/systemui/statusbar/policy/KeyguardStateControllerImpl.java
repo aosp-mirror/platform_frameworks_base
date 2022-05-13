@@ -279,6 +279,11 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     }
 
     @Override
+    public boolean isAnimatingBetweenKeyguardAndSurfaceBehind() {
+        return mUnlockAnimationControllerLazy.get().isAnimatingBetweenKeyguardAndSurfaceBehind();
+    }
+
+    @Override
     public boolean isBypassFadingAnimation() {
         return mBypassFadingAnimation;
     }

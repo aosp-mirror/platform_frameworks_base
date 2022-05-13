@@ -61,6 +61,7 @@ import android.platform.test.annotations.Presubmit;
 import android.util.SparseBooleanArray;
 import android.view.IRecentsAnimationRunner;
 import android.view.SurfaceControl;
+import android.view.WindowManager.LayoutParams;
 import android.window.TaskSnapshot;
 
 import androidx.test.filters.SmallTest;
@@ -159,6 +160,30 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         assertTrue(mController.isAnimatingTask(homeActivity.getTask()));
         assertTrue(mController.isAnimatingTask(activity.getTask()));
         assertFalse(mController.isAnimatingTask(hiddenActivity.getTask()));
+    }
+
+    @Test
+    public void testLaunchAndStartRecents_expectTargetAndVisible() throws Exception {
+        mWm.setRecentsAnimationController(mController);
+        final ActivityRecord homeActivity = createHomeActivity();
+        final Task task = createTask(mDefaultDisplay);
+        // Emulate that activity1 has just launched activity2, but app transition has not yet been
+        // executed.
+        final ActivityRecord activity1 = createActivityRecord(task);
+        activity1.setVisible(true);
+        activity1.mVisibleRequested = false;
+        activity1.addWindow(createWindowState(new LayoutParams(TYPE_BASE_APPLICATION), activity1));
+
+        final ActivityRecord activity2 = createActivityRecord(task);
+        activity2.setVisible(false);
+        activity2.mVisibleRequested = true;
+
+        mDefaultDisplay.getConfiguration().windowConfiguration.setRotation(
+                mDefaultDisplay.getRotation());
+        initializeRecentsAnimationController(mController, homeActivity);
+        mController.startAnimation();
+        verify(mMockRunner, never()).onAnimationCanceled(null /* taskIds */,
+                null /* taskSnapshots */);
     }
 
     @Test

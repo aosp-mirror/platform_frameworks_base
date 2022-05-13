@@ -68,6 +68,7 @@ import static com.android.server.wm.AppTransition.isNormalTransit;
 import static com.android.server.wm.NonAppWindowAnimationAdapter.shouldAttachNavBarToApp;
 import static com.android.server.wm.NonAppWindowAnimationAdapter.shouldStartNonAppWindowAnimationsForKeyguardExit;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.WallpaperAnimationAdapter.shouldStartWallpaperAnimation;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
@@ -662,11 +663,16 @@ public class AppTransitionController {
                 "Override with TaskFragment remote animation for transit=%s",
                 AppTransition.appTransitionOldToString(transit));
 
+        final int organizerUid = mDisplayContent.mAtmService.mTaskFragmentOrganizerController
+                .getTaskFragmentOrganizerUid(organizer);
+        final boolean shouldDisableInputForRemoteAnimation = !task.isFullyTrustedEmbedding(
+                organizerUid);
         final RemoteAnimationController remoteAnimationController =
                 mDisplayContent.mAppTransition.getRemoteAnimationController();
-        if (remoteAnimationController != null) {
+        if (shouldDisableInputForRemoteAnimation && remoteAnimationController != null) {
             // We are going to use client-driven animation, Disable all input on activity windows
-            // during the animation to ensure it is safe to allow client to animate the surfaces.
+            // during the animation (unless it is fully trusted) to ensure it is safe to allow
+            // client to animate the surfaces.
             // This is needed for all activity windows in the animation Task.
             remoteAnimationController.setOnRemoteAnimationReady(() -> {
                 final Consumer<ActivityRecord> updateActivities =
@@ -1142,13 +1148,17 @@ public class AppTransitionController {
             if (activity == null) {
                 continue;
             }
+            if (activity.isAnimating(PARENTS, ANIMATION_TYPE_RECENTS)) {
+                ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
+                        "Delaying app transition for recents animation to finish");
+                return false;
+            }
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                     "Check opening app=%s: allDrawn=%b startingDisplayed=%b "
                             + "startingMoved=%b isRelaunching()=%b startingWindow=%s",
                     activity, activity.allDrawn, activity.startingDisplayed,
                     activity.startingMoved, activity.isRelaunching(),
                     activity.mStartingWindow);
-
             final boolean allDrawn = activity.allDrawn && !activity.isRelaunching();
             if (!allDrawn && !activity.startingDisplayed && !activity.startingMoved) {
                 return false;

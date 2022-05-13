@@ -659,4 +659,7 @@
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"நீங்கள் <xliff:g id="SWITCHAPP">%1$s</xliff:g> ஆப்ஸை ஒலிபரப்பினாலோ அவுட்புட்டை மாற்றினாலோ உங்களின் தற்போதைய ஒலிபரப்பு நிறுத்தப்படும்"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> ஆப்ஸை ஒலிபரப்பு"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"அவுட்புட்டை மாற்று"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"கணிக்கக்கூடிய பின்செல் சைகைக்கான அனிமேஷன்கள்"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"கணிக்கக்கூடிய பின்செல் சைகைக்காகச் சிஸ்டம் அனிமேஷன்களை இயக்கும்."</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"கணிக்கக்கூடிய சைகைக்கான அனிமேஷனுக்காக இந்த அமைப்பு சிஸ்டம் அனிமேஷன்களை இயக்கும். மெனிஃபெஸ்ட் ஃபைலில் ஒவ்வொரு ஆப்ஸுக்கும் enableOnBackInvokedCallbackகை \'சரி\' என அமைக்க வேண்டும்."</string>
 </resources>

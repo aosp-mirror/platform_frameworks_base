@@ -1861,10 +1861,10 @@ public class ChooserActivity extends ResolverActivity implements
         try {
             final Intent intent = getTargetIntent();
             String dataString = intent.getDataString();
-            if (!TextUtils.isEmpty(dataString)) {
-                return new IntentFilter(intent.getAction(), dataString);
-            }
             if (intent.getType() == null) {
+                if (!TextUtils.isEmpty(dataString)) {
+                    return new IntentFilter(intent.getAction(), dataString);
+                }
                 Log.e(TAG, "Failed to get target intent filter: intent data and type are null");
                 return null;
             }
