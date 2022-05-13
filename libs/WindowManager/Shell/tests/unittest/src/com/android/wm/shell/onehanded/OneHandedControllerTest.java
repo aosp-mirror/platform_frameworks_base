@@ -345,8 +345,8 @@ public class OneHandedControllerTest extends OneHandedTestCase {
         when(mMockSettingsUitl.getSettingsSwipeToNotificationEnabled(any(), anyInt())).thenReturn(
                 false);
         final WindowContainerTransaction handlerWCT = new WindowContainerTransaction();
-        mSpiedOneHandedController.onRotateDisplay(mDisplay.getDisplayId(), Surface.ROTATION_0,
-                Surface.ROTATION_90, handlerWCT);
+        mSpiedOneHandedController.onDisplayChange(mDisplay.getDisplayId(), Surface.ROTATION_0,
+                Surface.ROTATION_90, null /* newDisplayAreaInfo */, handlerWCT);
 
         verify(mMockDisplayAreaOrganizer, atLeastOnce()).onRotateDisplay(eq(mContext),
                 eq(Surface.ROTATION_90), any(WindowContainerTransaction.class));
@@ -358,8 +358,8 @@ public class OneHandedControllerTest extends OneHandedTestCase {
         when(mMockSettingsUitl.getSettingsSwipeToNotificationEnabled(any(), anyInt())).thenReturn(
                 false);
         final WindowContainerTransaction handlerWCT = new WindowContainerTransaction();
-        mSpiedOneHandedController.onRotateDisplay(mDisplay.getDisplayId(), Surface.ROTATION_0,
-                Surface.ROTATION_90, handlerWCT);
+        mSpiedOneHandedController.onDisplayChange(mDisplay.getDisplayId(), Surface.ROTATION_0,
+                Surface.ROTATION_90, null /* newDisplayAreaInfo */, handlerWCT);
 
         verify(mMockDisplayAreaOrganizer, never()).onRotateDisplay(eq(mContext),
                 eq(Surface.ROTATION_90), any(WindowContainerTransaction.class));
@@ -371,8 +371,8 @@ public class OneHandedControllerTest extends OneHandedTestCase {
         when(mMockSettingsUitl.getSettingsSwipeToNotificationEnabled(any(), anyInt())).thenReturn(
                 true);
         final WindowContainerTransaction handlerWCT = new WindowContainerTransaction();
-        mSpiedOneHandedController.onRotateDisplay(mDisplay.getDisplayId(), Surface.ROTATION_0,
-                Surface.ROTATION_90, handlerWCT);
+        mSpiedOneHandedController.onDisplayChange(mDisplay.getDisplayId(), Surface.ROTATION_0,
+                Surface.ROTATION_90, null /* newDisplayAreaInfo */, handlerWCT);
 
         verify(mMockDisplayAreaOrganizer, never()).onRotateDisplay(eq(mContext),
                 eq(Surface.ROTATION_90), any(WindowContainerTransaction.class));
@@ -384,8 +384,8 @@ public class OneHandedControllerTest extends OneHandedTestCase {
         when(mMockSettingsUitl.getSettingsSwipeToNotificationEnabled(any(), anyInt())).thenReturn(
                 false);
         final WindowContainerTransaction handlerWCT = new WindowContainerTransaction();
-        mSpiedOneHandedController.onRotateDisplay(mDisplay.getDisplayId(), Surface.ROTATION_0,
-                Surface.ROTATION_90, handlerWCT);
+        mSpiedOneHandedController.onDisplayChange(mDisplay.getDisplayId(), Surface.ROTATION_0,
+                Surface.ROTATION_90, null /* newDisplayAreaInfo */, handlerWCT);
 
         verify(mMockDisplayAreaOrganizer, atLeastOnce()).onRotateDisplay(eq(mContext),
                 eq(Surface.ROTATION_90), any(WindowContainerTransaction.class));

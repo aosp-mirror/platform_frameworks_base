@@ -39,7 +39,6 @@ import com.android.systemui.unfold.UnfoldLatencyTracker;
 import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider;
 import com.android.wm.shell.ShellCommandHandler;
 import com.android.wm.shell.TaskViewFactory;
-import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.compatui.CompatUI;
@@ -86,9 +85,6 @@ public interface SysUIComponent {
 
         @BindsInstance
         Builder setSplitScreen(Optional<SplitScreen> s);
-
-        @BindsInstance
-        Builder setAppPairs(Optional<AppPairs> s);
 
         @BindsInstance
         Builder setOneHanded(Optional<OneHanded> o);

@@ -38,8 +38,6 @@ import com.android.wm.shell.TaskViewFactory;
 import com.android.wm.shell.TaskViewFactoryController;
 import com.android.wm.shell.TaskViewTransitions;
 import com.android.wm.shell.WindowManagerShellWrapper;
-import com.android.wm.shell.apppairs.AppPairs;
-import com.android.wm.shell.apppairs.AppPairsController;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.back.BackAnimationController;
 import com.android.wm.shell.bubbles.BubbleController;
@@ -560,17 +558,6 @@ public abstract class WMShellBaseModule {
         return Optional.empty();
     }
 
-    // App Pairs (optional feature)
-
-    @WMSingleton
-    @Provides
-    static Optional<AppPairs> provideAppPairs(Optional<AppPairsController> appPairsController) {
-        return appPairsController.map((controller) -> controller.asAppPairs());
-    }
-
-    @BindsOptionalOf
-    abstract AppPairsController optionalAppPairs();
-
     //
     // Starting window
     //
@@ -651,7 +638,6 @@ public abstract class WMShellBaseModule {
             KidsModeTaskOrganizer kidsModeTaskOrganizer,
             Optional<BubbleController> bubblesOptional,
             Optional<SplitScreenController> splitScreenOptional,
-            Optional<AppPairsController> appPairsOptional,
             Optional<PipTouchHandler> pipTouchHandlerOptional,
             FullscreenTaskListener fullscreenTaskListener,
             Optional<FullscreenUnfoldController> appUnfoldTransitionController,
@@ -669,7 +655,6 @@ public abstract class WMShellBaseModule {
                 kidsModeTaskOrganizer,
                 bubblesOptional,
                 splitScreenOptional,
-                appPairsOptional,
                 pipTouchHandlerOptional,
                 fullscreenTaskListener,
                 appUnfoldTransitionController,
@@ -700,12 +685,11 @@ public abstract class WMShellBaseModule {
             Optional<Pip> pipOptional,
             Optional<OneHandedController> oneHandedOptional,
             Optional<HideDisplayCutoutController> hideDisplayCutout,
-            Optional<AppPairsController> appPairsOptional,
             Optional<RecentTasksController> recentTasksOptional,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new ShellCommandHandlerImpl(shellTaskOrganizer, kidsModeTaskOrganizer,
                 splitScreenOptional, pipOptional, oneHandedOptional, hideDisplayCutout,
-                appPairsOptional, recentTasksOptional, mainExecutor);
+                recentTasksOptional, mainExecutor);
     }
 
     @WMSingleton

@@ -238,10 +238,10 @@ import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.ICrossWindowBlurEnabledListener;
+import android.view.IDisplayChangeWindowController;
 import android.view.IDisplayFoldListener;
 import android.view.IDisplayWindowInsetsController;
 import android.view.IDisplayWindowListener;
-import android.view.IDisplayWindowRotationController;
 import android.view.IInputFilter;
 import android.view.IOnKeyguardExitResult;
 import android.view.IPinnedTaskListener;
@@ -682,9 +682,9 @@ public class WindowManagerService extends IWindowManager.Stub
     final WallpaperVisibilityListeners mWallpaperVisibilityListeners =
             new WallpaperVisibilityListeners();
 
-    IDisplayWindowRotationController mDisplayRotationController = null;
-    private final DeathRecipient mDisplayRotationControllerDeath =
-            () -> mDisplayRotationController = null;
+    IDisplayChangeWindowController mDisplayChangeController = null;
+    private final DeathRecipient mDisplayChangeControllerDeath =
+            () -> mDisplayChangeController = null;
 
     final DisplayWindowListenerController mDisplayNotificationController;
     final TaskSystemBarsListenerController mTaskSystemBarsListenerController;
@@ -4266,12 +4266,13 @@ public class WindowManagerService extends IWindowManager.Stub
                                 .notifyOnActivityRotation(displayContent.mDisplayId);
                     }
 
-                    final boolean pendingRemoteRotation = rotationChanged
-                            && (displayContent.getDisplayRotation().isWaitingForRemoteRotation()
+                    final boolean pendingRemoteDisplayChange = rotationChanged
+                            && (displayContent.mRemoteDisplayChangeController
+                                    .isWaitingForRemoteDisplayChange()
                             || displayContent.mTransitionController.isCollecting());
                     // Even if alwaysSend, we are waiting for a transition or remote to provide
-                    // rotated configuration, so we can't update configuration yet.
-                    if (!pendingRemoteRotation) {
+                    // updated configuration, so we can't update configuration yet.
+                    if (!pendingRemoteDisplayChange) {
                         if (!rotationChanged || forceRelayout) {
                             displayContent.setLayoutNeeded();
                             layoutNeeded = true;
@@ -4303,17 +4304,17 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void setDisplayWindowRotationController(IDisplayWindowRotationController controller) {
+    public void setDisplayChangeWindowController(IDisplayChangeWindowController controller) {
         mAtmService.enforceTaskPermission("setDisplayWindowRotationController");
         try {
             synchronized (mGlobalLock) {
-                if (mDisplayRotationController != null) {
-                    mDisplayRotationController.asBinder().unlinkToDeath(
-                            mDisplayRotationControllerDeath, 0);
-                    mDisplayRotationController = null;
+                if (mDisplayChangeController != null) {
+                    mDisplayChangeController.asBinder().unlinkToDeath(
+                            mDisplayChangeControllerDeath, 0);
+                    mDisplayChangeController = null;
                 }
-                controller.asBinder().linkToDeath(mDisplayRotationControllerDeath, 0);
-                mDisplayRotationController = controller;
+                controller.asBinder().linkToDeath(mDisplayChangeControllerDeath, 0);
+                mDisplayChangeController = controller;
             }
         } catch (RemoteException e) {
             throw new RuntimeException("Unable to set rotation controller");
@@ -6112,24 +6113,24 @@ public class WindowManagerService extends IWindowManager.Stub
         final DisplayContent displayContent = mRoot.getDisplayContent(mFrozenDisplayId);
         final int numOpeningApps;
         final boolean waitingForConfig;
-        final boolean waitingForRemoteRotation;
+        final boolean waitingForRemoteDisplayChange;
         if (displayContent != null) {
             numOpeningApps = displayContent.mOpeningApps.size();
             waitingForConfig = displayContent.mWaitingForConfig;
-            waitingForRemoteRotation =
-                    displayContent.getDisplayRotation().isWaitingForRemoteRotation();
+            waitingForRemoteDisplayChange = displayContent.mRemoteDisplayChangeController
+                    .isWaitingForRemoteDisplayChange();
         } else {
-            waitingForConfig = waitingForRemoteRotation = false;
+            waitingForConfig = waitingForRemoteDisplayChange = false;
             numOpeningApps = 0;
         }
-        if (waitingForConfig || waitingForRemoteRotation || mAppsFreezingScreen > 0
+        if (waitingForConfig || waitingForRemoteDisplayChange || mAppsFreezingScreen > 0
                 || mWindowsFreezingScreen == WINDOWS_FREEZING_SCREENS_ACTIVE
                 || mClientFreezingScreen || numOpeningApps > 0) {
             ProtoLog.d(WM_DEBUG_ORIENTATION, "stopFreezingDisplayLocked: Returning "
-                    + "waitingForConfig=%b, waitingForRemoteRotation=%b, "
+                    + "waitingForConfig=%b, waitingForRemoteDisplayChange=%b, "
                     + "mAppsFreezingScreen=%d, mWindowsFreezingScreen=%d, "
                     + "mClientFreezingScreen=%b, mOpeningApps.size()=%d",
-                    waitingForConfig, waitingForRemoteRotation,
+                    waitingForConfig, waitingForRemoteDisplayChange,
                     mAppsFreezingScreen, mWindowsFreezingScreen,
                     mClientFreezingScreen, numOpeningApps);
             return;

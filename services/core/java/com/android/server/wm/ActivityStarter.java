@@ -1674,6 +1674,7 @@ class ActivityStarter {
     private @Nullable Task handleStartResult(@NonNull ActivityRecord started,
             ActivityOptions options, int result, Transition newTransition,
             RemoteTransition remoteTransition) {
+        final boolean userLeaving = mSupervisor.mUserLeaving;
         mSupervisor.mUserLeaving = false;
         final Task currentRootTask = started.getRootTask();
         final Task startedActivityRootTask =
@@ -1747,7 +1748,7 @@ class ActivityStarter {
             // until after we launched to identify the relevant activity.
             transitionController.setTransientLaunch(mLastStartActivityRecord, mPriorAboveTask);
         }
-        if (!mSupervisor.mUserLeaving) {
+        if (!userLeaving) {
             // no-user-leaving implies not entering PiP.
             transitionController.setCanPipOnFinish(false /* canPipOnFinish */);
         }

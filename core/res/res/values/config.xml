@@ -1869,6 +1869,11 @@
     -->
     <string name="config_defaultSearchSelectorPackageName" translatable="false"></string>
 
+    <!-- The package name of the default captive portal login app. Must be granted the
+         POST_NOTIFICATIONS permission.
+    -->
+    <string name="config_defaultCaptivePortalLoginPackageName" translatable="false"></string>
+
     <!-- Whether to enable geocoder overlay which allows geocoder to be replaced
          by an app at run-time. When disabled, only the
          config_geocoderProviderPackageName package will be searched for
@@ -2997,12 +3002,6 @@
         <item>com.android.server.notification.CriticalNotificationExtractor</item>
 
     </string-array>
-
-    <!-- When migrating notification settings into the permission framework, whether all existing
-         apps should be marked as 'user-set' (true) or whether only the apps that have explicitly
-         modified notification settings should be marked as 'user-set' (false). Users will not see
-         system generated permission prompts for 'user-set' apps. -->
-    <bool name="config_notificationForceUserSetOnUpgrade">true</bool>
 
     <!-- Default Gravity setting for the system Toast view. Equivalent to: Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM -->
     <integer name="config_toastDefaultGravity">0x00000051</integer>
@@ -5683,6 +5682,9 @@
     <!-- Whether or not to enable the lock screen entry point for the QR code scanner. -->
     <bool name="config_enableQrCodeScannerOnLockScreen">false</bool>
 
+    <!-- Default component for QR code scanner -->
+    <string name="config_defaultQrCodeComponent"></string>
+
     <!-- Whether Low Power Standby is supported and can be enabled. -->
     <bool name="config_lowPowerStandbySupported">false</bool>
 
@@ -5808,4 +5810,17 @@
 
     <!-- List of the labels of requestable device state config values -->
     <string-array name="config_deviceStatesAvailableForAppRequests"/>
+
+    <!-- Interval in milliseconds to average light sensor values for camera light brightness -->
+    <integer name="config_cameraPrivacyLightAlsAveragingIntervalMillis">3000</integer>
+    <!-- Light sensor's lux value to use as the threshold between using day or night brightness -->
+    <integer name="config_cameraPrivacyLightAlsNightThreshold">4</integer>
+
+    <!-- List of system components which are allowed to receive ServiceState entries in an
+         un-sanitized form, even if the location toggle is off. This is intended ONLY for system
+         components, such as the telephony stack, which require access to the full ServiceState for
+         tasks such as network registration. -->
+    <string-array name="config_serviceStateLocationAllowedPackages">
+        <item>"com.android.phone"</item>
+    </string-array>
 </resources>
