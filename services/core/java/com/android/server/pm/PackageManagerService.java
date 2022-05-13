@@ -935,7 +935,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     private final DexOptHelper mDexOptHelper;
     private final SuspendPackageHelper mSuspendPackageHelper;
     private final DistractingPackageHelper mDistractingPackageHelper;
-    private final IntentResolverInterceptor mIntentResolverInterceptor;
     private final StorageEventHelper mStorageEventHelper;
 
     /**
@@ -1682,7 +1681,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         mSharedLibraries.setDeletePackageHelper(mDeletePackageHelper);
 
-        mIntentResolverInterceptor = null;
         mStorageEventHelper = testParams.storageEventHelper;
 
         registerObservers(false);
@@ -2231,8 +2229,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         ParsingPackageUtils.readConfigUseRoundIcon(mContext.getResources());
 
         mServiceStartWithDelay = SystemClock.uptimeMillis() + (60 * 1000L);
-
-        mIntentResolverInterceptor = new IntentResolverInterceptor(mContext);
 
         Slog.i(TAG, "Fix for b/169414761 is applied");
     }
@@ -4100,11 +4096,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         // Prune unused static shared libraries which have been cached a period of time
         schedulePruneUnusedStaticSharedLibraries(false /* delay */);
-
-        // TODO(b/222706900): Remove this intent interceptor before T launch
-        if (mIntentResolverInterceptor != null) {
-            mIntentResolverInterceptor.registerListeners();
-        }
     }
 
     //TODO: b/111402650
