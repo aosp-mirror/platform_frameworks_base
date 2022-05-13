@@ -16,16 +16,16 @@
 
 package com.android.systemui.unfold
 
-import android.app.ActivityManager
 import android.content.ContentResolver
 import android.content.Context
 import android.hardware.SensorManager
-import android.hardware.devicestate.DeviceStateManager
 import android.os.Handler
-import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.dagger.qualifiers.UiBackground
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
+import com.android.systemui.unfold.dagger.UnfoldBackground
+import com.android.systemui.unfold.dagger.UnfoldMain
+import com.android.systemui.unfold.updates.FoldProvider
 import com.android.systemui.unfold.updates.screen.ScreenStatusProvider
+import com.android.systemui.unfold.util.CurrentActivityTypeProvider
 import com.android.systemui.unfold.util.UnfoldTransitionATracePrefix
 import dagger.BindsInstance
 import dagger.Component
@@ -51,12 +51,12 @@ internal interface UnfoldSharedComponent {
             @BindsInstance context: Context,
             @BindsInstance config: UnfoldTransitionConfig,
             @BindsInstance screenStatusProvider: ScreenStatusProvider,
-            @BindsInstance deviceStateManager: DeviceStateManager,
-            @BindsInstance activityManager: ActivityManager,
+            @BindsInstance foldProvider: FoldProvider,
+            @BindsInstance activityTypeProvider: CurrentActivityTypeProvider,
             @BindsInstance sensorManager: SensorManager,
-            @BindsInstance @Main handler: Handler,
-            @BindsInstance @Main executor: Executor,
-            @BindsInstance @UiBackground backgroundExecutor: Executor,
+            @BindsInstance @UnfoldMain handler: Handler,
+            @BindsInstance @UnfoldMain executor: Executor,
+            @BindsInstance @UnfoldBackground backgroundExecutor: Executor,
             @BindsInstance @UnfoldTransitionATracePrefix tracingTagPrefix: String,
             @BindsInstance contentResolver: ContentResolver = context.contentResolver
         ): UnfoldSharedComponent
