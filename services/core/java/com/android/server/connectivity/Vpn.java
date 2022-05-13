@@ -27,6 +27,8 @@ import static android.net.VpnManager.NOTIFICATION_CHANNEL_VPN;
 import static android.os.PowerWhitelistManager.REASON_VPN;
 import static android.os.UserHandle.PER_USER_RANGE;
 
+import static com.android.server.vcn.util.PersistableBundleUtils.STRING_DESERIALIZER;
+
 import static java.util.Objects.requireNonNull;
 
 import android.Manifest;
@@ -97,6 +99,7 @@ import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
+import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -127,6 +130,7 @@ import com.android.net.module.util.NetworkStackConstants;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
 import com.android.server.net.BaseNetworkObserver;
+import com.android.server.vcn.util.PersistableBundleUtils;
 
 import libcore.io.IoUtils;
 
@@ -174,6 +178,8 @@ public class Vpn {
     private static final String VPN_PROVIDER_NAME_BASE = "VpnNetworkProvider:";
     private static final boolean LOGD = true;
     private static final String ANDROID_KEYSTORE_PROVIDER = "AndroidKeyStore";
+    /** Key containing prefix of vpn app excluded list */
+    @VisibleForTesting static final String VPN_APP_EXCLUDED = "VPN_APP_EXCLUDED_";
 
     // Length of time (in milliseconds) that an app hosting an always-on VPN is placed on
     // the device idle allowlist during service launch and VPN bootstrap.
@@ -2636,6 +2642,8 @@ public class Vpn {
 
                     mConfig.underlyingNetworks = new Network[] {network};
 
+                    mConfig.disallowedApplications = getAppExclusionList(mPackage);
+
                     networkAgent = mNetworkAgent;
 
                     // The below must be done atomically with the mConfig update, otherwise
@@ -3484,6 +3492,88 @@ public class Vpn {
         if (isCurrentIkev2VpnLocked(packageName)) {
             prepareInternal(VpnConfig.LEGACY_VPN);
         }
+    }
+
+    private boolean storeAppExclusionList(@NonNull String packageName,
+            @NonNull List<String> excludedApps) {
+        byte[] data;
+        try {
+            final PersistableBundle bundle = PersistableBundleUtils.fromList(
+                    excludedApps, PersistableBundleUtils.STRING_SERIALIZER);
+            data = PersistableBundleUtils.toDiskStableBytes(bundle);
+        } catch (IOException e) {
+            Log.e(TAG, "problem writing into stream", e);
+            return false;
+        }
+
+        final long oldId = Binder.clearCallingIdentity();
+        try {
+            getVpnProfileStore().put(getVpnAppExcludedForPackage(packageName), data);
+        } finally {
+            Binder.restoreCallingIdentity(oldId);
+        }
+        return true;
+    }
+
+    @VisibleForTesting
+    String getVpnAppExcludedForPackage(String packageName) {
+        return VPN_APP_EXCLUDED + mUserId + "_" + packageName;
+    }
+
+    /**
+     * Set the application exclusion list for the specified VPN profile.
+     *
+     * @param packageName the package name of the app provisioning this profile
+     * @param excludedApps the list of excluded packages
+     *
+     * @return whether setting the list is successful or not
+     */
+    public synchronized boolean setAppExclusionList(@NonNull String packageName,
+            @NonNull List<String> excludedApps) {
+        enforceNotRestrictedUser();
+        if (!storeAppExclusionList(packageName, excludedApps)) return false;
+        // Re-build and update NetworkCapabilities via NetworkAgent.
+        if (mNetworkAgent != null) {
+            // Only update the platform VPN
+            if (isIkev2VpnRunner()) {
+                mConfig.disallowedApplications = List.copyOf(excludedApps);
+                mNetworkCapabilities = new NetworkCapabilities.Builder(mNetworkCapabilities)
+                        .setUids(createUserAndRestrictedProfilesRanges(
+                                mUserId, null /* allowedApplications */, excludedApps))
+                        .build();
+                mNetworkAgent.sendNetworkCapabilities(mNetworkCapabilities);
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Gets the application exclusion list for the specified VPN profile.
+     *
+     * @param packageName the package name of the app provisioning this profile
+     * @return the list of excluded packages for the specified VPN profile or empty list if there is
+     *         no provisioned VPN profile.
+     */
+    @NonNull
+    public synchronized List<String> getAppExclusionList(@NonNull String packageName) {
+        enforceNotRestrictedUser();
+
+        final long oldId = Binder.clearCallingIdentity();
+        try {
+            final byte[] bytes = getVpnProfileStore().get(getVpnAppExcludedForPackage(packageName));
+
+            if (bytes == null || bytes.length == 0) return new ArrayList<>();
+
+            final PersistableBundle bundle = PersistableBundleUtils.fromDiskStableBytes(bytes);
+            return PersistableBundleUtils.toList(bundle, STRING_DESERIALIZER);
+        } catch (IOException e) {
+            Log.e(TAG, "problem reading from stream", e);
+        }  finally {
+            Binder.restoreCallingIdentity(oldId);
+        }
+
+        return new ArrayList<>();
     }
 
     private @VpnProfileState.State int getStateFromLegacyState(int legacyState) {
