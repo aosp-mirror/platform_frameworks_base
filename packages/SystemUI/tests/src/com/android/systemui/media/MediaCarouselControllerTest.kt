@@ -63,6 +63,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Mock lateinit var falsingManager: FalsingManager
     @Mock lateinit var dumpManager: DumpManager
     @Mock lateinit var logger: MediaUiEventLogger
+    @Mock lateinit var debugLogger: MediaCarouselControllerLogger
 
     private val clock = FakeSystemClock()
     private lateinit var mediaCarouselController: MediaCarouselController
@@ -83,7 +84,8 @@ class MediaCarouselControllerTest : SysuiTestCase() {
             falsingCollector,
             falsingManager,
             dumpManager,
-            logger
+            logger,
+            debugLogger
         )
 
         MediaPlayerData.clear()
