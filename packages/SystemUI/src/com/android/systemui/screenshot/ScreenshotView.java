@@ -620,7 +620,7 @@ public class ScreenshotView extends FrameLayout implements
             public void onAnimationStart(Animator animation) {
                 InteractionJankMonitor.Configuration.Builder builder =
                         InteractionJankMonitor.Configuration.Builder.withView(
-                                CUJ_TAKE_SCREENSHOT, mScreenshotPreview)
+                                        CUJ_TAKE_SCREENSHOT, mScreenshotPreview)
                                 .setTag("DropIn");
                 mInteractionJankMonitor.begin(builder);
             }
@@ -681,8 +681,10 @@ public class ScreenshotView extends FrameLayout implements
         });
         chips.add(mShareChip);
 
-        mEditChip.setContentDescription(mContext.getString(R.string.screenshot_edit_description));
-        mEditChip.setIcon(Icon.createWithResource(mContext, R.drawable.ic_screenshot_edit), true);
+        mEditChip.setContentDescription(
+                mContext.getString(R.string.screenshot_edit_description));
+        mEditChip.setIcon(Icon.createWithResource(mContext, R.drawable.ic_screenshot_edit),
+                true);
         mEditChip.setOnClickListener(v -> {
             mEditChip.setIsPending(true);
             mShareChip.setIsPending(false);
@@ -737,7 +739,7 @@ public class ScreenshotView extends FrameLayout implements
             public void onAnimationStart(Animator animation) {
                 InteractionJankMonitor.Configuration.Builder builder =
                         InteractionJankMonitor.Configuration.Builder.withView(
-                                CUJ_TAKE_SCREENSHOT, mScreenshotStatic)
+                                        CUJ_TAKE_SCREENSHOT, mScreenshotStatic)
                                 .setTag("Actions")
                                 .setTimeout(mDefaultTimeoutOfTimeoutHandler);
                 mInteractionJankMonitor.begin(builder);
