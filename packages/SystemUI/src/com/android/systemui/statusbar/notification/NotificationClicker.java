@@ -104,7 +104,7 @@ public final class NotificationClicker implements View.OnClickListener {
             mBubblesOptional.get().collapseStack();
         }
 
-        mNotificationActivityStarter.onNotificationClicked(entry.getSbn(), row);
+        mNotificationActivityStarter.onNotificationClicked(entry, row);
     }
 
     private boolean isMenuVisible(ExpandableNotificationRow row) {
