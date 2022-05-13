@@ -51,6 +51,8 @@ import java.util.regex.Pattern;
 final class OverlayManagerShellCommand extends ShellCommand {
     private final Context mContext;
     private final IOverlayManager mInterface;
+    private static final Map<String, Integer> TYPE_MAP = Map.of(
+            "color", TypedValue.TYPE_FIRST_COLOR_INT);
 
     OverlayManagerShellCommand(@NonNull final Context ctx, @NonNull final IOverlayManager iom) {
         mContext = ctx;
@@ -126,7 +128,7 @@ final class OverlayManagerShellCommand extends ShellCommand {
         out.println("    applying the current configuration and enabled overlays.");
         out.println("    For a more fine-grained alternative, use 'idmap2 lookup'.");
         out.println("  fabricate [--user USER_ID] [--target-name OVERLAYABLE] --target PACKAGE");
-        out.println("            --name NAME PACKAGE:TYPE/NAME ENCODED-TYPE-ID ENCODED-VALUE");
+        out.println("       --name NAME PACKAGE:TYPE/NAME ENCODED-TYPE-ID/TYPE-NAME ENCODED-VALUE");
         out.println("    Create an overlay from a single resource. Caller must be root. Example:");
         out.println("      fabricate --target android --name LighterGray \\");
         out.println("                android:color/lighter_gray 0x1c 0xffeeeeee");
@@ -273,12 +275,16 @@ final class OverlayManagerShellCommand extends ShellCommand {
         }
 
         final String resourceName = getNextArgRequired();
-        final String typeStr = getNextArgRequired();
+        final String typeStr = getNextArgRequired().toLowerCase();
         final int type;
-        if (typeStr.startsWith("0x")) {
-            type = Integer.parseUnsignedInt(typeStr.substring(2), 16);
+        if (TYPE_MAP.containsKey(typeStr)) {
+            type = TYPE_MAP.get(typeStr);
         } else {
-            type = Integer.parseUnsignedInt(typeStr);
+            if (typeStr.startsWith("0x")) {
+                type = Integer.parseUnsignedInt(typeStr.substring(2), 16);
+            } else {
+                type = Integer.parseUnsignedInt(typeStr);
+            }
         }
         final String dataStr = getNextArgRequired();
         final int data;
