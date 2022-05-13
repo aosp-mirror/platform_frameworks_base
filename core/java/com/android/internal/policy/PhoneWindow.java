@@ -333,6 +333,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private long mBackgroundFadeDurationMillis = -1;
     private Boolean mSharedElementsUseOverlay;
 
+    private Boolean mAllowFloatingWindowsFillScreen;
+
     private boolean mIsStartingWindow;
     private int mTheme = -1;
 
@@ -361,6 +363,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         mRenderShadowsInCompositor = Settings.Global.getInt(context.getContentResolver(),
                 DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR, 1) != 0;
         mProxyOnBackInvokedDispatcher = new ProxyOnBackInvokedDispatcher(context);
+        mAllowFloatingWindowsFillScreen = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_allowFloatingWindowsFillScreen);
     }
 
     /**
@@ -2422,7 +2426,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         mIsFloating = a.getBoolean(R.styleable.Window_windowIsFloating, false);
         int flagsToUpdate = (FLAG_LAYOUT_IN_SCREEN|FLAG_LAYOUT_INSET_DECOR)
                 & (~getForcedWindowFlags());
-        if (mIsFloating) {
+        if (mIsFloating && !mAllowFloatingWindowsFillScreen) {
             setLayout(WRAP_CONTENT, WRAP_CONTENT);
             setFlags(0, flagsToUpdate);
         } else {
