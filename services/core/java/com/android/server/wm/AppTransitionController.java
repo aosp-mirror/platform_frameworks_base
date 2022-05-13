@@ -663,11 +663,16 @@ public class AppTransitionController {
                 "Override with TaskFragment remote animation for transit=%s",
                 AppTransition.appTransitionOldToString(transit));
 
+        final int organizerUid = mDisplayContent.mAtmService.mTaskFragmentOrganizerController
+                .getTaskFragmentOrganizerUid(organizer);
+        final boolean shouldDisableInputForRemoteAnimation = !task.isFullyTrustedEmbedding(
+                organizerUid);
         final RemoteAnimationController remoteAnimationController =
                 mDisplayContent.mAppTransition.getRemoteAnimationController();
-        if (remoteAnimationController != null) {
+        if (shouldDisableInputForRemoteAnimation && remoteAnimationController != null) {
             // We are going to use client-driven animation, Disable all input on activity windows
-            // during the animation to ensure it is safe to allow client to animate the surfaces.
+            // during the animation (unless it is fully trusted) to ensure it is safe to allow
+            // client to animate the surfaces.
             // This is needed for all activity windows in the animation Task.
             remoteAnimationController.setOnRemoteAnimationReady(() -> {
                 final Consumer<ActivityRecord> updateActivities =
