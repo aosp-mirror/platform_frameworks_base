@@ -22,6 +22,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressAutoDoc;
 import android.annotation.SystemApi;
@@ -32,6 +33,7 @@ import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.CursorWindow;
 import android.net.Uri;
 import android.os.Build;
@@ -75,6 +77,7 @@ import java.util.concurrent.Executor;
  *
  * @see SubscriptionManager#getActiveSubscriptionInfoList()
  */
+@RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
 public final class SmsManager {
     private static final String TAG = "SmsManager";
 

@@ -11473,7 +11473,7 @@ package android.content.pm {
     field public static final String FEATURE_CAMERA_LEVEL_FULL = "android.hardware.camera.level.full";
     field public static final String FEATURE_CANT_SAVE_STATE = "android.software.cant_save_state";
     field public static final String FEATURE_COMPANION_DEVICE_SETUP = "android.software.companion_device_setup";
-    field public static final String FEATURE_CONNECTION_SERVICE = "android.software.connectionservice";
+    field @Deprecated public static final String FEATURE_CONNECTION_SERVICE = "android.software.connectionservice";
     field public static final String FEATURE_CONSUMER_IR = "android.hardware.consumerir";
     field public static final String FEATURE_CONTROLS = "android.software.controls";
     field public static final String FEATURE_DEVICE_ADMIN = "android.software.device_admin";
@@ -11544,12 +11544,18 @@ package android.content.pm {
     field public static final String FEATURE_SIP = "android.software.sip";
     field public static final String FEATURE_SIP_VOIP = "android.software.sip.voip";
     field public static final String FEATURE_STRONGBOX_KEYSTORE = "android.hardware.strongbox_keystore";
+    field public static final String FEATURE_TELECOM = "android.software.telecom";
     field public static final String FEATURE_TELEPHONY = "android.hardware.telephony";
+    field public static final String FEATURE_TELEPHONY_CALLING = "android.hardware.telephony.calling";
     field public static final String FEATURE_TELEPHONY_CDMA = "android.hardware.telephony.cdma";
+    field public static final String FEATURE_TELEPHONY_DATA = "android.hardware.telephony.data";
     field public static final String FEATURE_TELEPHONY_EUICC = "android.hardware.telephony.euicc";
     field public static final String FEATURE_TELEPHONY_GSM = "android.hardware.telephony.gsm";
     field public static final String FEATURE_TELEPHONY_IMS = "android.hardware.telephony.ims";
     field public static final String FEATURE_TELEPHONY_MBMS = "android.hardware.telephony.mbms";
+    field public static final String FEATURE_TELEPHONY_MESSAGING = "android.hardware.telephony.messaging";
+    field public static final String FEATURE_TELEPHONY_RADIO_ACCESS = "android.hardware.telephony.radio";
+    field public static final String FEATURE_TELEPHONY_SUBSCRIPTION = "android.hardware.telephony.subscription";
     field @Deprecated public static final String FEATURE_TELEVISION = "android.hardware.type.television";
     field public static final String FEATURE_TOUCHSCREEN = "android.hardware.touchscreen";
     field public static final String FEATURE_TOUCHSCREEN_MULTITOUCH = "android.hardware.touchscreen.multitouch";
