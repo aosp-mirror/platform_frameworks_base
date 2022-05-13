@@ -2407,7 +2407,9 @@ public class DisplayPolicy {
     private int updateSystemBarsLw(WindowState win, int disableFlags) {
         final TaskDisplayArea defaultTaskDisplayArea = mDisplayContent.getDefaultTaskDisplayArea();
         final boolean multiWindowTaskVisible =
-                defaultTaskDisplayArea.isRootTaskVisible(WINDOWING_MODE_MULTI_WINDOW);
+                defaultTaskDisplayArea.getRootTask(task -> task.isVisible()
+                        && task.getTopLeafTask().getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW)
+                        != null;
         final boolean freeformRootTaskVisible =
                 defaultTaskDisplayArea.isRootTaskVisible(WINDOWING_MODE_FREEFORM);
 
