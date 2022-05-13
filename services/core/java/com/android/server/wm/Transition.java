@@ -432,14 +432,10 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 t.setPosition(targetLeash, tmpPos.x, tmpPos.y);
                 final Rect clipRect;
                 // No need to clip the display in case seeing the clipped content when during the
-                // display rotation.
-                if (target.asDisplayContent() != null) {
+                // display rotation. No need to clip activities because they rely on clipping on
+                // task layers.
+                if (target.asDisplayContent() != null || target.asActivityRecord() != null) {
                     clipRect = null;
-                } else if (target.asActivityRecord() != null) {
-                    // Always use parent bounds of activity because letterbox area (e.g. fixed
-                    // aspect ratio or size compat mode) should be included.
-                    clipRect = target.getParent().getRequestedOverrideBounds();
-                    clipRect.offset(-tmpPos.x, -tmpPos.y);
                 } else {
                     clipRect = target.getRequestedOverrideBounds();
                     clipRect.offset(-tmpPos.x, -tmpPos.y);
