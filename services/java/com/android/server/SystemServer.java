@@ -1057,6 +1057,7 @@ public final class SystemServer implements Dumpable {
         t.traceBegin("StartWatchdog");
         final Watchdog watchdog = Watchdog.getInstance();
         watchdog.start();
+        mDumper.addDumpable(watchdog);
         t.traceEnd();
 
         Slog.i(TAG, "Reading configuration...");

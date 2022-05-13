@@ -55,14 +55,12 @@ public final class PermissionHelper {
     private final PermissionManagerServiceInternal mPmi;
     private final IPackageManager mPackageManager;
     private final IPermissionManager mPermManager;
-    private final boolean mForceUserSetOnUpgrade;
 
     public PermissionHelper(PermissionManagerServiceInternal pmi, IPackageManager packageManager,
-            IPermissionManager permManager, boolean forceUserSetOnUpgrade) {
+            IPermissionManager permManager) {
         mPmi = pmi;
         mPackageManager = packageManager;
         mPermManager = permManager;
-        mForceUserSetOnUpgrade = forceUserSetOnUpgrade;
     }
 
     /**
@@ -212,9 +210,8 @@ public final class PermissionHelper {
             return;
         }
         if (!isPermissionFixed(pkgPerm.packageName, pkgPerm.userId)) {
-            boolean userSet = mForceUserSetOnUpgrade ? true : pkgPerm.userModifiedSettings;
             setNotificationPermission(pkgPerm.packageName, pkgPerm.userId, pkgPerm.granted,
-                    userSet, !userSet);
+                    true /* userSet always true on upgrade */);
         }
     }
 
