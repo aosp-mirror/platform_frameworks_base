@@ -1629,7 +1629,9 @@ public class Vpn {
         for (String app : packageNames) {
             int uid = getAppUid(app, userId);
             if (uid != -1) uids.add(uid);
-            if (Process.isApplicationUid(uid)) {
+            // TODO(b/230548427): Remove SDK check once VPN related stuff are decoupled from
+            // ConnectivityServiceTest.
+            if (Process.isApplicationUid(uid) && SdkLevel.isAtLeastT()) {
                 uids.add(Process.toSdkSandboxUid(uid));
             }
         }
