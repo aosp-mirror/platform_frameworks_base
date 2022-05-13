@@ -18,17 +18,19 @@ package com.android.systemui.privacy.television;
 
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
+import android.util.MathUtils;
+import android.view.Gravity;
 
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
@@ -41,178 +43,172 @@ import com.android.systemui.R;
  * The icons are not included.
  */
 public class PrivacyChipDrawable extends Drawable {
-
     private static final String TAG = PrivacyChipDrawable.class.getSimpleName();
     private static final boolean DEBUG = false;
 
-    private float mWidth;
-    private float mHeight;
-    private float mMarginEnd;
-    private float mRadius;
-    private int mDotAlpha;
-    private int mBgAlpha;
-
-    private float mTargetWidth;
-    private final int mMinWidth;
-    private final int mIconWidth;
-    private final int mIconPadding;
+    private final Paint mChipPaint;
+    private final Paint mBgPaint;
+    private final Rect mTmpRect = new Rect();
+    private final Rect mBgRect = new Rect();
+    private final RectF mTmpRectF = new RectF();
+    private final Path mPath = new Path();
+    private final Animator mCollapse;
+    private final Animator mExpand;
+    private final int mLayoutDirection;
     private final int mBgWidth;
     private final int mBgHeight;
     private final int mBgRadius;
     private final int mDotSize;
+    private final float mExpandedChipRadius;
+    private final float mCollapsedChipRadius;
 
-    private final AnimatorSet mFadeIn;
-    private final AnimatorSet mFadeOut;
-    private final AnimatorSet mCollapse;
-    private final AnimatorSet mExpand;
-    private Animator mWidthAnimator;
-
-    private final Paint mChipPaint;
-    private final Paint mBgPaint;
-
-    private boolean mIsRtl;
+    private final boolean mCollapseToDot;
 
     private boolean mIsExpanded = true;
+    private float mCollapseProgress = 0f;
 
-    private PrivacyChipDrawableListener mListener;
+    public PrivacyChipDrawable(Context context, int chipColorRes, boolean collapseToDot) {
+        mCollapseToDot = collapseToDot;
 
-    interface PrivacyChipDrawableListener {
-        void onFadeOutFinished();
-    }
-
-    public PrivacyChipDrawable(Context context) {
         mChipPaint = new Paint();
         mChipPaint.setStyle(Paint.Style.FILL);
-        mChipPaint.setColor(context.getColor(R.color.privacy_circle));
-        mChipPaint.setAlpha(mDotAlpha);
+        mChipPaint.setColor(context.getColor(chipColorRes));
         mChipPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
 
         mBgPaint = new Paint();
         mBgPaint.setStyle(Paint.Style.FILL);
         mBgPaint.setColor(context.getColor(R.color.privacy_chip_dot_bg_tint));
-        mBgPaint.setAlpha(mBgAlpha);
         mBgPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
 
-        mBgWidth = context.getResources().getDimensionPixelSize(R.dimen.privacy_chip_dot_bg_width);
-        mBgHeight = context.getResources().getDimensionPixelSize(
-                R.dimen.privacy_chip_dot_bg_height);
-        mBgRadius = context.getResources().getDimensionPixelSize(
-                R.dimen.privacy_chip_dot_bg_radius);
+        Resources res = context.getResources();
+        mLayoutDirection = res.getConfiguration().getLayoutDirection();
+        mBgWidth = res.getDimensionPixelSize(R.dimen.privacy_chip_dot_bg_width);
+        mBgHeight = res.getDimensionPixelSize(R.dimen.privacy_chip_dot_bg_height);
+        mBgRadius = res.getDimensionPixelSize(R.dimen.privacy_chip_dot_bg_radius);
+        mDotSize = res.getDimensionPixelSize(R.dimen.privacy_chip_dot_size);
 
-        mMinWidth = context.getResources().getDimensionPixelSize(R.dimen.privacy_chip_min_width);
-        mIconWidth = context.getResources().getDimensionPixelSize(R.dimen.privacy_chip_icon_size);
-        mIconPadding = context.getResources().getDimensionPixelSize(
-                R.dimen.privacy_chip_icon_margin_in_between);
-        mDotSize = context.getResources().getDimensionPixelSize(R.dimen.privacy_chip_dot_size);
+        mExpandedChipRadius = res.getDimensionPixelSize(R.dimen.privacy_chip_radius);
+        mCollapsedChipRadius = res.getDimensionPixelSize(R.dimen.privacy_chip_dot_radius);
 
-        mWidth = mMinWidth;
-        mHeight = context.getResources().getDimensionPixelSize(R.dimen.privacy_chip_height);
-        mRadius = context.getResources().getDimensionPixelSize(R.dimen.privacy_chip_radius);
-
-        mExpand = (AnimatorSet) AnimatorInflater.loadAnimator(context,
-                R.anim.tv_privacy_chip_expand);
+        mExpand = AnimatorInflater.loadAnimator(context, R.anim.tv_privacy_chip_expand);
         mExpand.setTarget(this);
-
-        mCollapse = (AnimatorSet) AnimatorInflater.loadAnimator(context,
-                R.anim.tv_privacy_chip_collapse);
+        mCollapse = AnimatorInflater.loadAnimator(context, R.anim.tv_privacy_chip_collapse);
         mCollapse.setTarget(this);
-
-        mFadeIn = (AnimatorSet) AnimatorInflater.loadAnimator(context,
-                R.anim.tv_privacy_chip_fade_in);
-        mFadeIn.setTarget(this);
-
-        mFadeOut = (AnimatorSet) AnimatorInflater.loadAnimator(context,
-                R.anim.tv_privacy_chip_fade_out);
-        mFadeOut.setTarget(this);
-        mFadeOut.addListener(new Animator.AnimatorListener() {
-            private boolean mCancelled;
-
-            @Override
-            public void onAnimationStart(Animator animation) {
-                mCancelled = false;
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                if (!mCancelled && mListener != null) {
-                    if (DEBUG) Log.d(TAG, "Fade-out complete");
-                    mListener.onFadeOutFinished();
-                }
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-                mCancelled = true;
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-                // no-op
-            }
-        });
     }
 
     /**
-     * Pass null to remove listener.
+     * @return how far the chip is currently collapsed.
+     * @see #setCollapseProgress(float)
      */
-    public void setListener(@Nullable PrivacyChipDrawableListener listener) {
-        this.mListener = listener;
+    @Keep
+    public float getCollapseProgress() {
+        return mCollapseProgress;
     }
 
     /**
-     * Call once the view that is showing the drawable is visible to start fading the chip in.
+     * Sets the collapsing progress of the chip to its collapsed state.
+     * @param pct How far the chip is collapsed, in the range 0-1.
+     *            0=fully expanded, 1=fully collapsed.
      */
-    public void startInitialFadeIn() {
-        if (DEBUG) Log.d(TAG, "initial fade-in");
-        mFadeIn.start();
+    @Keep
+    public void setCollapseProgress(float pct) {
+        mCollapseProgress = pct;
+        invalidateSelf();
     }
 
     @Override
     public void draw(@NonNull Canvas canvas) {
-        Rect bounds = getBounds();
+        if (mCollapseProgress > 0f) {
+            // draw background
+            getBackgroundBounds(mBgRect);
+            mTmpRectF.set(mBgRect);
+            canvas.drawRoundRect(mTmpRectF, mBgRadius, mBgRadius, mBgPaint);
+        }
 
-        int centerVertical = (bounds.bottom - bounds.top) / 2;
-        // Dot background
-        RectF bgBounds = new RectF(
-                mIsRtl ? bounds.left : bounds.right - mBgWidth,
-                centerVertical - mBgHeight / 2f,
-                mIsRtl ? bounds.left + mBgWidth : bounds.right,
-                centerVertical + mBgHeight / 2f);
-        if (DEBUG) Log.v(TAG, "bg: " + bgBounds.toShortString());
-        canvas.drawRoundRect(bgBounds, mBgRadius, mBgRadius, mBgPaint);
+        getForegroundBounds(mTmpRectF);
+        float radius = MathUtils.lerp(
+                mExpandedChipRadius,
+                mCollapseToDot ? mCollapsedChipRadius : mBgRadius,
+                mCollapseProgress);
 
-        // Icon background / dot
-        RectF greenBounds = new RectF(
-                mIsRtl ? bounds.left + mMarginEnd : bounds.right - mWidth - mMarginEnd,
-                centerVertical - mHeight / 2,
-                mIsRtl ? bounds.left + mWidth + mMarginEnd : bounds.right - mMarginEnd,
-                centerVertical + mHeight / 2);
-        if (DEBUG) Log.v(TAG, "green: " + greenBounds.toShortString());
-        canvas.drawRoundRect(greenBounds, mRadius, mRadius, mChipPaint);
+        canvas.drawRoundRect(mTmpRectF, radius, radius, mChipPaint);
     }
 
-    private void animateToNewTargetWidth(float width) {
-        if (DEBUG) Log.d(TAG, "new target width: " + width);
-        if (width != mTargetWidth) {
-            mTargetWidth = width;
-            Animator newWidthAnimator = ObjectAnimator.ofFloat(this, "width", mTargetWidth);
-            newWidthAnimator.start();
-            if (mWidthAnimator != null) {
-                mWidthAnimator.cancel();
-            }
-            mWidthAnimator = newWidthAnimator;
+    private void getBackgroundBounds(Rect out) {
+        Rect bounds = getBounds();
+        Gravity.apply(Gravity.END, mBgWidth, mBgHeight, bounds, out, mLayoutDirection);
+    }
+
+    private void getCollapsedForegroundBounds(Rect out) {
+        Rect bounds = getBounds();
+        getBackgroundBounds(mBgRect);
+        if (mCollapseToDot) {
+            Gravity.apply(Gravity.CENTER, mDotSize, mDotSize, mBgRect, out);
+        } else {
+            out.set(bounds.left, mBgRect.top, bounds.right, mBgRect.bottom);
         }
     }
 
-    private void expand() {
+    private void getForegroundBounds(RectF out) {
+        Rect bounds = getBounds();
+        getCollapsedForegroundBounds(mTmpRect);
+        lerpRect(bounds, mTmpRect, mCollapseProgress, out);
+    }
+
+    private void lerpRect(Rect start, Rect stop, float amount, RectF out) {
+        float left = MathUtils.lerp(start.left, stop.left, amount);
+        float top = MathUtils.lerp(start.top, stop.top, amount);
+        float right = MathUtils.lerp(start.right, stop.right, amount);
+        float bottom = MathUtils.lerp(start.bottom, stop.bottom, amount);
+        out.set(left, top, right, bottom);
+    }
+
+    /**
+     * Clips the given canvas to this chip's foreground shape.
+     * @param canvas Canvas to clip.
+     */
+    public void clipToForeground(Canvas canvas) {
+        getForegroundBounds(mTmpRectF);
+        float radius = MathUtils.lerp(
+                mExpandedChipRadius,
+                mCollapseToDot ? mCollapsedChipRadius : mBgRadius,
+                mCollapseProgress);
+
+        mPath.reset();
+        mPath.addRoundRect(mTmpRectF, radius, radius, Path.Direction.CW);
+        canvas.clipPath(mPath);
+    }
+
+    @Override
+    protected void onBoundsChange(@NonNull Rect bounds) {
+        super.onBoundsChange(bounds);
+        invalidateSelf();
+    }
+
+    @Override
+    public void setAlpha(int alpha) {
+        mChipPaint.setAlpha(alpha);
+        mBgPaint.setAlpha(alpha);
+    }
+
+    /**
+     * Transitions to a full chip.
+     *
+     * @param animate Whether to animate the change to a full chip, or expand instantly.
+     */
+    public void expand(boolean animate) {
         if (DEBUG) Log.d(TAG, "expanding");
         if (mIsExpanded) {
             return;
         }
         mIsExpanded = true;
-
-        mExpand.start();
-        mCollapse.cancel();
+        if (animate) {
+            mCollapse.cancel();
+            mExpand.start();
+        } else {
+            mCollapseProgress = 0f;
+            invalidateSelf();
+        }
     }
 
     /**
@@ -224,80 +220,8 @@ public class PrivacyChipDrawable extends Drawable {
             return;
         }
         mIsExpanded = false;
-
-        animateToNewTargetWidth(mDotSize);
-        mCollapse.start();
         mExpand.cancel();
-    }
-
-    /**
-     * Fades out the view if 0 icons are to be shown, expands the chip if it has been collapsed and
-     * makes the width of the chip adjust to the amount of icons to be shown.
-     * Should not be called when only the order of the icons was changed as the chip will expand
-     * again without there being any real update.
-     *
-     * @param iconCount Can be 0 to fade out the chip.
-     */
-    public void updateIcons(int iconCount) {
-        if (DEBUG) Log.d(TAG, "updating icons: " + iconCount);
-
-        // calculate chip size and use it for end value of animation that is specified in code,
-        // not xml
-        if (iconCount == 0) {
-            // fade out if there are no icons
-            mFadeOut.start();
-
-            mWidthAnimator.cancel();
-            mFadeIn.cancel();
-            mExpand.cancel();
-            mCollapse.cancel();
-            return;
-        }
-
-        mFadeOut.cancel();
-        expand();
-        animateToNewTargetWidth(mMinWidth + (iconCount - 1) * (mIconWidth + mIconPadding));
-    }
-
-    @Override
-    public void setAlpha(int alpha) {
-        setDotAlpha(alpha);
-        setBgAlpha(alpha);
-    }
-
-    @Override
-    public int getAlpha() {
-        return mDotAlpha;
-    }
-
-    /**
-     * Set alpha value the green part of the chip.
-     */
-    @Keep
-    public void setDotAlpha(int alpha) {
-        if (DEBUG) Log.v(TAG, "dot alpha updated to: " + alpha);
-        mDotAlpha = alpha;
-        mChipPaint.setAlpha(alpha);
-    }
-
-    @Keep
-    public int getDotAlpha() {
-        return mDotAlpha;
-    }
-
-    /**
-     * Set alpha value of the background of the chip.
-     */
-    @Keep
-    public void setBgAlpha(int alpha) {
-        if (DEBUG) Log.v(TAG, "bg alpha updated to: " + alpha);
-        mBgAlpha = alpha;
-        mBgPaint.setAlpha(alpha);
-    }
-
-    @Keep
-    public int getBgAlpha() {
-        return mBgAlpha;
+        mCollapse.start();
     }
 
     @Override
@@ -309,82 +233,4 @@ public class PrivacyChipDrawable extends Drawable {
     public int getOpacity() {
         return PixelFormat.TRANSLUCENT;
     }
-
-    /**
-     * The radius of the green part of the chip, not the background.
-     */
-    @Keep
-    public void setRadius(float radius) {
-        mRadius = radius;
-        invalidateSelf();
-    }
-
-    /**
-     * @return The radius of the green part of the chip, not the background.
-     */
-    @Keep
-    public float getRadius() {
-        return mRadius;
-    }
-
-    /**
-     * Height of the green part of the chip, not including the background.
-     */
-    @Keep
-    public void setHeight(float height) {
-        mHeight = height;
-        invalidateSelf();
-    }
-
-    /**
-     * @return Height of the green part of the chip, not including the background.
-     */
-    @Keep
-    public float getHeight() {
-        return mHeight;
-    }
-
-    /**
-     * Width of the green part of the chip, not including the background.
-     */
-    @Keep
-    public void setWidth(float width) {
-        mWidth = width;
-        invalidateSelf();
-    }
-
-    /**
-     * @return Width of the green part of the chip, not including the background.
-     */
-    @Keep
-    public float getWidth() {
-        return mWidth;
-    }
-
-    /**
-     * Margin at the end of the green part of the chip, so that it will be placed in the middle of
-     * the rounded rectangle in the background.
-     */
-    @Keep
-    public void setMarginEnd(float marginEnd) {
-        mMarginEnd = marginEnd;
-        invalidateSelf();
-    }
-
-    /**
-     * @return Margin at the end of the green part of the chip, so that it will be placed in the
-     * middle of the rounded rectangle in the background.
-     */
-    @Keep
-    public float getMarginEnd() {
-        return mMarginEnd;
-    }
-
-    /**
-     * Sets the layout direction.
-     */
-    public void setRtl(boolean isRtl) {
-        mIsRtl = isRtl;
-    }
-
 }

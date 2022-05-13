@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -14,12 +14,16 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<set xmlns:android="http://schemas.android.com/apk/res/android"
-     android:ordering="together"
-     android:interpolator="@interpolator/tv_privacy_chip_collapse_interpolator"
-     android:duration="@integer/privacy_chip_animation_millis">
-    <objectAnimator
-        android:propertyName="dotAlpha"
-        android:valueTo="255"
-        android:valueType="intType"/>
-</set>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:minWidth="@dimen/privacy_chips_max_width"
+    android:orientation="horizontal"
+    android:clipToPadding="false"
+    android:gravity="end"
+    android:padding="@dimen/privacy_chips_bar_padding">
+    <Space
+        android:layout_width="0dp"
+        android:layout_height="@dimen/privacy_chip_height" />
+</LinearLayout>
