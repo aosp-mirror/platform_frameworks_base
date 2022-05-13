@@ -134,7 +134,7 @@ bool Properties::load() {
     skpCaptureEnabled = debuggingEnabled && base::GetBoolProperty(PROPERTY_CAPTURE_SKP_ENABLED, false);
 
     SkAndroidFrameworkTraceUtil::setEnableTracing(
-            base::GetBoolProperty(PROPERTY_SKIA_ATRACE_ENABLED, true));
+            base::GetBoolProperty(PROPERTY_SKIA_ATRACE_ENABLED, false));
 
     runningInEmulator = base::GetBoolProperty(PROPERTY_IS_EMULATOR, false);
 
