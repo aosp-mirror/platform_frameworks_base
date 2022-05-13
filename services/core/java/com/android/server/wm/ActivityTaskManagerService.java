@@ -95,6 +95,7 @@ import static com.android.server.am.EventLogTags.writeBootProgressEnableScreen;
 import static com.android.server.am.EventLogTags.writeConfigurationChanged;
 import static com.android.server.wm.ActivityInterceptorCallback.FIRST_ORDERED_ID;
 import static com.android.server.wm.ActivityInterceptorCallback.LAST_ORDERED_ID;
+import static com.android.server.wm.ActivityRecord.State.PAUSING;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_ROOT_TASK;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_SWITCH;
@@ -3449,10 +3450,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     /**
      * Puts the given activity in picture in picture mode if possible.
      *
+     * @param fromClient true if this comes from a client call (eg. Activity.enterPip).
      * @return true if the activity is now in picture-in-picture mode, or false if it could not
      * enter picture-in-picture mode.
      */
-    boolean enterPictureInPictureMode(@NonNull ActivityRecord r, PictureInPictureParams params) {
+    boolean enterPictureInPictureMode(@NonNull ActivityRecord r,
+            @NonNull PictureInPictureParams params, boolean fromClient) {
         // If the activity is already in picture in picture mode, then just return early
         if (r.inPinnedWindowingMode()) {
             return true;
@@ -3465,9 +3468,17 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             return false;
         }
 
-        // Create a transition for this pip entry. We guarantee that this gets its own transition
-        // by queueing this transition on SyncEngine. This is shared by all the entry paths.
-        final Transition transition = getTransitionController().isShellTransitionsEnabled()
+        // If the app is using legacy-entry (not auto-enter), then we will get a client-request
+        // that was actually a server-request (via pause(userLeaving=true)). This happens when
+        // the app is PAUSING, so detect that case here.
+        boolean originallyFromClient = fromClient
+                && (!r.isState(PAUSING) || params.isAutoEnterEnabled());
+
+        // Create a transition only for this pip entry if it is coming from the app without the
+        // system requesting that the app enter-pip. If the system requested it, that means it
+        // should be part of that transition if possible.
+        final Transition transition =
+                (getTransitionController().isShellTransitionsEnabled() && originallyFromClient)
                 ? new Transition(TRANSIT_PIP, 0 /* flags */,
                         getTransitionController(), mWindowManager.mSyncEngine)
                 : null;
@@ -3498,7 +3509,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mActivityClientController.dismissKeyguard(r.token, new KeyguardDismissCallback() {
                 @Override
                 public void onDismissSucceeded() {
-                    if (mWindowManager.mSyncEngine.hasActiveSync()) {
+                    if (transition != null && mWindowManager.mSyncEngine.hasActiveSync()) {
                         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                                 "Creating Pending Pip-Enter: %s", transition);
                         mWindowManager.mSyncEngine.queueSyncSet(
@@ -3516,7 +3527,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }, null /* message */);
         } else {
             // Enter picture in picture immediately otherwise
-            if (mWindowManager.mSyncEngine.hasActiveSync()) {
+            if (transition != null && mWindowManager.mSyncEngine.hasActiveSync()) {
                 ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                         "Creating Pending Pip-Enter: %s", transition);
                 mWindowManager.mSyncEngine.queueSyncSet(

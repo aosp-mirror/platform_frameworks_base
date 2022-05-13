@@ -725,7 +725,7 @@ class ActivityClientController extends IActivityClientController.Stub {
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ensureValidPictureInPictureActivityParams(
                         "enterPictureInPictureMode", token, params);
-                return mService.enterPictureInPictureMode(r, params);
+                return mService.enterPictureInPictureMode(r, params, true /* fromClient */);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -856,7 +856,8 @@ class ActivityClientController extends IActivityClientController.Stub {
         }
 
         if (r.pictureInPictureArgs.isAutoEnterEnabled()) {
-            return mService.enterPictureInPictureMode(r, r.pictureInPictureArgs);
+            return mService.enterPictureInPictureMode(r, r.pictureInPictureArgs,
+                    false /* fromClient */);
         }
 
         try {

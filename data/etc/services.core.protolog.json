@@ -763,6 +763,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-1383884640": {
+      "message": " allReady query: used=%b override=%b defer=%d states=[%s]",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
+    },
     "-1376035390": {
       "message": "No task found",
       "level": "DEBUG",
@@ -2545,12 +2551,6 @@
       "group": "WM_DEBUG_ADD_REMOVE",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
-    "352982444": {
-      "message": " allReady query: used=%b override=%b states=[%s]",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
-      "at": "com\/android\/server\/wm\/Transition.java"
-    },
     "355720268": {
       "message": "stopFreezingDisplayLocked: Unfreezing now",
       "level": "DEBUG",
@@ -2928,12 +2928,6 @@
       "level": "WARN",
       "group": "WM_DEBUG_LOCKTASK",
       "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
-    },
-    "716528224": {
-      "message": "Focused window found using wmService.getFocusedWindowLocked()",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_BACK_PREVIEW",
-      "at": "com\/android\/server\/wm\/BackNavigationController.java"
     },
     "726205185": {
       "message": "Moving to DESTROYED: %s (destroy skipped)",
