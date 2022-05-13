@@ -32,6 +32,8 @@ import static android.view.View.LAYOUT_DIRECTION_RTL;
 import static android.view.View.VISIBLE;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_VOLUME_CONTROL;
+import static com.android.internal.jank.InteractionJankMonitor.Configuration.Builder;
 import static com.android.systemui.volume.Events.DISMISS_REASON_SETTINGS_CLICKED;
 
 import android.animation.Animator;
@@ -68,6 +70,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.os.VibrationEffect;
 import android.provider.Settings;
 import android.provider.Settings.Global;
@@ -101,9 +104,11 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.graphics.drawable.BackgroundBlurDrawable;
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.view.RotationPolicy;
 import com.android.settingslib.Utils;
 import com.android.systemui.Prefs;
@@ -148,6 +153,13 @@ public class VolumeDialogImpl implements VolumeDialog,
 
     private static final int DRAWER_ANIMATION_DURATION_SHORT = 175;
     private static final int DRAWER_ANIMATION_DURATION = 250;
+
+    /** Shows volume dialog show animation. */
+    private static final String TYPE_SHOW = "show";
+    /** Dismiss volume dialog animation.  */
+    private static final String TYPE_DISMISS = "dismiss";
+    /** Volume dialog slider animation. */
+    private static final String TYPE_UPDATE = "update";
 
     private final int mDialogShowAnimationDurationMs;
     private final int mDialogHideAnimationDurationMs;
@@ -258,6 +270,7 @@ public class VolumeDialogImpl implements VolumeDialog,
     private final boolean mUseBackgroundBlur;
     private Consumer<Boolean> mCrossWindowBlurEnabledListener;
     private BackgroundBlurDrawable mDialogRowsViewBackground;
+    private final InteractionJankMonitor mInteractionJankMonitor;
 
     public VolumeDialogImpl(
             Context context,
@@ -266,7 +279,8 @@ public class VolumeDialogImpl implements VolumeDialog,
             DeviceProvisionedController deviceProvisionedController,
             ConfigurationController configurationController,
             MediaOutputDialogFactory mediaOutputDialogFactory,
-            ActivityStarter activityStarter) {
+            ActivityStarter activityStarter,
+            InteractionJankMonitor interactionJankMonitor) {
         mContext =
                 new ContextThemeWrapper(context, R.style.volume_dialog_theme);
         mController = volumeDialogController;
@@ -290,6 +304,7 @@ public class VolumeDialogImpl implements VolumeDialog,
             mContext.getResources().getInteger(R.integer.config_dialogHideAnimationDurationMs);
         mUseBackgroundBlur =
             mContext.getResources().getBoolean(R.bool.config_volumeDialogUseBackgroundBlur);
+        mInteractionJankMonitor = interactionJankMonitor;
 
         if (mUseBackgroundBlur) {
             final int dialogRowsViewColorAboveBlur = mContext.getColor(
@@ -422,6 +437,7 @@ public class VolumeDialogImpl implements VolumeDialog,
                     .alpha(1)
                     .translationX(0)
                     .setDuration(mDialogShowAnimationDurationMs)
+                    .setListener(getJankListener(getDialogView(), TYPE_SHOW, DIALOG_TIMEOUT_MILLIS))
                     .setInterpolator(new SystemUIInterpolators.LogDecelerateInterpolator())
                     .withEndAction(() -> {
                         if (!Prefs.getBoolean(mContext, Prefs.Key.TOUCHED_RINGER_TOGGLE, false)) {
@@ -692,7 +708,7 @@ public class VolumeDialogImpl implements VolumeDialog,
         final int m = seekBar.getMax();
         final int n = m / 100 - 1;
         final int level = progress == 0 ? 0
-                : progress == m ? (m / 100) : (1 + (int)((progress / (float) m) * n));
+                : progress == m ? (m / 100) : (1 + (int) ((progress / (float) m) * n));
         return level;
     }
 
@@ -1251,7 +1267,33 @@ public class VolumeDialogImpl implements VolumeDialog,
         mHandler.obtainMessage(H.DISMISS, reason, 0).sendToTarget();
     }
 
+    private Animator.AnimatorListener getJankListener(View v, String type, long timeout) {
+        return new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(@NonNull Animator animation) {
+                mInteractionJankMonitor.begin(Builder.withView(CUJ_VOLUME_CONTROL, v).setTag(type)
+                        .setTimeout(timeout));
+            }
+
+            @Override
+            public void onAnimationEnd(@NonNull Animator animation) {
+                mInteractionJankMonitor.end(CUJ_VOLUME_CONTROL);
+            }
+
+            @Override
+            public void onAnimationCancel(@NonNull Animator animation) {
+                mInteractionJankMonitor.cancel(CUJ_VOLUME_CONTROL);
+            }
+
+            @Override
+            public void onAnimationRepeat(@NonNull Animator animation) {
+                // no-op
+            }
+        };
+    }
+
     private void showH(int reason) {
+        Trace.beginSection("VolumeDialogImpl#showH");
         if (D.BUG) Log.d(TAG, "showH r=" + Events.SHOW_REASONS[reason]);
         mHandler.removeMessages(H.SHOW);
         mHandler.removeMessages(H.DISMISS);
@@ -1272,6 +1314,7 @@ public class VolumeDialogImpl implements VolumeDialog,
         mController.getCaptionsComponentState(false);
         checkODICaptionsTooltip(false);
         updateBackgroundForDrawerClosedAmount();
+        Trace.endSection();
     }
 
     protected void rescheduleTimeoutH() {
@@ -1305,6 +1348,7 @@ public class VolumeDialogImpl implements VolumeDialog,
     }
 
     protected void dismissH(int reason) {
+        Trace.beginSection("VolumeDialogImpl#dismissH");
         if (D.BUG) {
             Log.d(TAG, "mDialog.dismiss() reason: " + Events.DISMISS_REASONS[reason]
                     + " from: " + Debug.getCaller());
@@ -1335,7 +1379,8 @@ public class VolumeDialogImpl implements VolumeDialog,
                     hideRingerDrawer();
                 }, 50));
         if (!shouldSlideInVolumeTray()) animator.translationX(mDialogView.getWidth() / 2.0f);
-        animator.start();
+        animator.setListener(getJankListener(getDialogView(), TYPE_DISMISS,
+                mDialogHideAnimationDurationMs)).start();
         checkODICaptionsTooltip(true);
         mController.notifyVisible(false);
         synchronized (mSafetyWarningLock) {
@@ -1344,6 +1389,7 @@ public class VolumeDialogImpl implements VolumeDialog,
                 mSafetyWarning.dismiss();
             }
         }
+        Trace.endSection();
     }
 
     private boolean showActiveStreamOnly() {
@@ -1383,6 +1429,7 @@ public class VolumeDialogImpl implements VolumeDialog,
     }
 
     private void updateRowsH(final VolumeRow activeRow) {
+        Trace.beginSection("VolumeDialogImpl#updateRowsH");
         if (D.BUG) Log.d(TAG, "updateRowsH");
         if (!mShowing) {
             trimObsoleteH();
@@ -1446,6 +1493,7 @@ public class VolumeDialogImpl implements VolumeDialog,
         }
 
         updateBackgroundForDrawerClosedAmount();
+        Trace.endSection();
     }
 
     protected void updateRingerH() {
@@ -1730,7 +1778,9 @@ public class VolumeDialogImpl implements VolumeDialog,
         final boolean enableSlider = !zenMuted;
         final int vlevel = row.ss.muted && (!isRingStream && !zenMuted) ? 0
                 : row.ss.level;
+        Trace.beginSection("VolumeDialogImpl#updateVolumeRowSliderH");
         updateVolumeRowSliderH(row, enableSlider, vlevel);
+        Trace.endSection();
         if (row.number != null) row.number.setText(Integer.toString(vlevel));
     }
 
@@ -1824,6 +1874,8 @@ public class VolumeDialogImpl implements VolumeDialog,
                 }
                 row.animTargetProgress = newProgress;
                 row.anim.setDuration(UPDATE_ANIMATION_DURATION);
+                row.anim.addListener(
+                        getJankListener(row.view, TYPE_UPDATE, UPDATE_ANIMATION_DURATION));
                 row.anim.start();
             } else {
                 // update slider directly to clamped value
