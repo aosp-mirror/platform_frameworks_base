@@ -18,12 +18,14 @@ package com.android.server.clipboard;
 
 import android.annotation.Nullable;
 import android.content.ClipData;
+import android.os.SystemProperties;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
 import android.system.VmSocketAddress;
 import android.util.Slog;
 
+import java.io.EOFException;
 import java.io.FileDescriptor;
 import java.io.InterruptedIOException;
 import java.net.SocketException;
@@ -39,6 +41,8 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
     private static final String PIPE_NAME = "pipe:clipboard";
     private static final int HOST_PORT = 5000;
     private final Thread mHostMonitorThread;
+    private static final boolean LOG_CLIBOARD_ACCESS =
+            SystemProperties.getBoolean("ro.boot.qemu.log_clipboard_access", false);
     private FileDescriptor mPipe = null;
 
     private static byte[] createOpenHandshake() {
@@ -51,8 +55,8 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
         return bits;
     }
 
-    private boolean isPipeOpened() {
-        return mPipe != null;
+    private synchronized FileDescriptor getPipeFD() {
+        return mPipe;
     }
 
     private synchronized boolean openPipe() {
@@ -67,7 +71,7 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
                 Os.connect(fd, new VmSocketAddress(HOST_PORT, OsConstants.VMADDR_CID_HOST));
 
                 final byte[] handshake = createOpenHandshake();
-                Os.write(fd, handshake, 0, handshake.length);
+                writeFully(fd, handshake, 0, handshake.length);
                 mPipe = fd;
                 return true;
             } catch (ErrnoException | SocketException | InterruptedIOException e) {
@@ -90,28 +94,30 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
         }
     }
 
-    private byte[] receiveMessage() throws ErrnoException, InterruptedIOException {
+    private byte[] receiveMessage() throws ErrnoException, InterruptedIOException, EOFException {
         final byte[] lengthBits = new byte[4];
-        Os.read(mPipe, lengthBits, 0, lengthBits.length);
+        readFully(mPipe, lengthBits, 0, lengthBits.length);
 
         final ByteBuffer bb = ByteBuffer.wrap(lengthBits);
         bb.order(ByteOrder.LITTLE_ENDIAN);
         final int msgLen = bb.getInt();
 
         final byte[] msg = new byte[msgLen];
-        Os.read(mPipe, msg, 0, msg.length);
+        readFully(mPipe, msg, 0, msg.length);
 
         return msg;
     }
 
-    private void sendMessage(final byte[] msg) throws ErrnoException, InterruptedIOException {
+    private static void sendMessage(
+            final FileDescriptor fd,
+            final byte[] msg) throws ErrnoException, InterruptedIOException {
         final byte[] lengthBits = new byte[4];
         final ByteBuffer bb = ByteBuffer.wrap(lengthBits);
         bb.order(ByteOrder.LITTLE_ENDIAN);
         bb.putInt(msg.length);
 
-        Os.write(mPipe, lengthBits, 0, lengthBits.length);
-        Os.write(mPipe, msg, 0, msg.length);
+        writeFully(fd, lengthBits, 0, lengthBits.length);
+        writeFully(fd, msg, 0, msg.length);
     }
 
     EmulatorClipboardMonitor(final Consumer<ClipData> setAndroidClipboard) {
@@ -132,8 +138,11 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
                                                        new String[]{"text/plain"},
                                                        new ClipData.Item(str));
 
+                    if (LOG_CLIBOARD_ACCESS) {
+                        Slog.i(TAG, "Setting the guest clipboard to '" + str + "'");
+                    }
                     setAndroidClipboard.accept(clip);
-                } catch (ErrnoException | InterruptedIOException e) {
+                } catch (ErrnoException | EOFException | InterruptedIOException e) {
                     closePipe();
                 } catch (InterruptedException | IllegalArgumentException e) {
                 }
@@ -156,13 +165,50 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
     }
 
     private void setHostClipboardImpl(final String value) {
-        try {
-            if (isPipeOpened()) {
-                sendMessage(value.getBytes());
+        final FileDescriptor pipeFD = getPipeFD();
+
+        if (pipeFD != null) {
+            Thread t = new Thread(() -> {
+                if (LOG_CLIBOARD_ACCESS) {
+                    Slog.i(TAG, "Setting the host clipboard to '" + value + "'");
+                }
+
+                try {
+                    sendMessage(pipeFD, value.getBytes());
+                } catch (ErrnoException | InterruptedIOException e) {
+                    Slog.e(TAG, "Failed to set host clipboard " + e.getMessage());
+                } catch (IllegalArgumentException e) {
+                }
+            });
+            t.start();
+        }
+    }
+
+    private static void readFully(final FileDescriptor fd,
+                                  final byte[] buf, int offset, int size)
+                                  throws ErrnoException, InterruptedIOException, EOFException {
+        while (size > 0) {
+            final int r = Os.read(fd, buf, offset, size);
+            if (r > 0) {
+                offset += r;
+                size -= r;
+            } else {
+                throw new EOFException();
             }
-        } catch (ErrnoException | InterruptedIOException e) {
-            Slog.e(TAG, "Failed to set host clipboard " + e.getMessage());
-        } catch (IllegalArgumentException e) {
+        }
+    }
+
+    private static void writeFully(final FileDescriptor fd,
+                                   final byte[] buf, int offset, int size)
+                                   throws ErrnoException, InterruptedIOException {
+        while (size > 0) {
+            final int r = Os.write(fd, buf, offset, size);
+            if (r > 0) {
+                offset += r;
+                size -= r;
+            } else {
+                throw new ErrnoException("write", OsConstants.EIO);
+            }
         }
     }
 }
