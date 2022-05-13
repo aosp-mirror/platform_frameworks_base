@@ -26,6 +26,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.ActivityManager.RestrictionLevel;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
@@ -51,6 +52,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
 import android.database.IContentObserver;
 import android.net.Uri;
+import android.os.AppBackgroundRestrictionsInfo;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -1495,7 +1497,8 @@ public final class ContentService extends IContentService.Stub {
         }
         if (procState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND || isUidActive) {
             FrameworkStatsLog.write(FrameworkStatsLog.SYNC_EXEMPTION_OCCURRED,
-                    callingUid, getProcStateForStatsd(procState), isUidActive);
+                    callingUid, getProcStateForStatsd(procState), isUidActive,
+                    getRestrictionLevelForStatsd(ami.getRestrictionLevel(callingUid)));
             return ContentResolver.SYNC_EXEMPTION_PROMOTE_BUCKET;
         }
         return ContentResolver.SYNC_EXEMPTION_NONE;
@@ -1547,6 +1550,27 @@ public final class ContentService extends IContentService.Stub {
                 return FrameworkStatsLog.SYNC_EXEMPTION_OCCURRED__PROC_STATE__CACHED_EMPTY;
             default:
                 return FrameworkStatsLog.SYNC_EXEMPTION_OCCURRED__PROC_STATE__UNKNOWN;
+        }
+    }
+
+    private int getRestrictionLevelForStatsd(@RestrictionLevel int level) {
+        switch (level) {
+            case ActivityManager.RESTRICTION_LEVEL_UNKNOWN:
+                return AppBackgroundRestrictionsInfo.LEVEL_UNKNOWN;
+            case ActivityManager.RESTRICTION_LEVEL_UNRESTRICTED:
+                return AppBackgroundRestrictionsInfo.LEVEL_UNRESTRICTED;
+            case ActivityManager.RESTRICTION_LEVEL_EXEMPTED:
+                return AppBackgroundRestrictionsInfo.LEVEL_EXEMPTED;
+            case ActivityManager.RESTRICTION_LEVEL_ADAPTIVE_BUCKET:
+                return AppBackgroundRestrictionsInfo.LEVEL_ADAPTIVE_BUCKET;
+            case ActivityManager.RESTRICTION_LEVEL_RESTRICTED_BUCKET:
+                return AppBackgroundRestrictionsInfo.LEVEL_RESTRICTED_BUCKET;
+            case ActivityManager.RESTRICTION_LEVEL_BACKGROUND_RESTRICTED:
+                return AppBackgroundRestrictionsInfo.LEVEL_BACKGROUND_RESTRICTED;
+            case ActivityManager.RESTRICTION_LEVEL_HIBERNATION:
+                return AppBackgroundRestrictionsInfo.LEVEL_HIBERNATION;
+            default:
+                return AppBackgroundRestrictionsInfo.LEVEL_UNKNOWN;
         }
     }
 
