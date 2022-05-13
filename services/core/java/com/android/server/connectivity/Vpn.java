@@ -763,31 +763,36 @@ public class Vpn {
         // Also notify the new package if there was a provider change.
         final boolean shouldNotifyNewPkg = isVpnApp(packageName) && isPackageChanged;
 
-        if (setAlwaysOnPackageInternal(packageName, lockdown, lockdownAllowlist)) {
-            saveAlwaysOnPackage();
-            // TODO(b/230548427): Remove SDK check once VPN related stuff are decoupled from
-            //  ConnectivityServiceTest.
-            if (shouldNotifyOldPkg && SdkLevel.isAtLeastT()) {
-                // If both of shouldNotifyOldPkg & isPackageChanged are true, which means the
-                // always-on of old package is disabled or the old package is replaced with the new
-                // package. In this case, VpnProfileState should be disconnected.
-                sendEventToVpnManagerApp(VpnManager.CATEGORY_EVENT_ALWAYS_ON_STATE_CHANGED,
-                        -1 /* errorClass */, -1 /* errorCode*/, oldPackage,
-                        null /* sessionKey */, isPackageChanged ? makeDisconnectedVpnProfileState()
-                                : makeVpnProfileStateLocked(),
-                        null /* underlyingNetwork */, null /* nc */, null /* lp */);
-            }
-            // TODO(b/230548427): Remove SDK check once VPN related stuff are decoupled from
-            //  ConnectivityServiceTest.
-            if (shouldNotifyNewPkg && SdkLevel.isAtLeastT()) {
-                sendEventToVpnManagerApp(VpnManager.CATEGORY_EVENT_ALWAYS_ON_STATE_CHANGED,
-                        -1 /* errorClass */, -1 /* errorCode*/, packageName,
-                        getSessionKeyLocked(), makeVpnProfileStateLocked(),
-                        null /* underlyingNetwork */, null /* nc */, null /* lp */);
-            }
+        if (!setAlwaysOnPackageInternal(packageName, lockdown, lockdownAllowlist)) {
+            return false;
+        }
+
+        saveAlwaysOnPackage();
+
+        // TODO(b/230548427): Remove SDK check once VPN related stuff are decoupled from
+        //  ConnectivityServiceTest.
+        if (!SdkLevel.isAtLeastT()) {
             return true;
         }
-        return false;
+
+        if (shouldNotifyOldPkg) {
+            // If both of shouldNotifyOldPkg & isPackageChanged are true, that means the
+            // always-on of old package is disabled or the old package is replaced with the new
+            // package. In this case, VpnProfileState should be disconnected.
+            sendEventToVpnManagerApp(VpnManager.CATEGORY_EVENT_ALWAYS_ON_STATE_CHANGED,
+                    -1 /* errorClass */, -1 /* errorCode*/, oldPackage,
+                    null /* sessionKey */, isPackageChanged ? makeDisconnectedVpnProfileState()
+                            : makeVpnProfileStateLocked(),
+                    null /* underlyingNetwork */, null /* nc */, null /* lp */);
+        }
+
+        if (shouldNotifyNewPkg) {
+            sendEventToVpnManagerApp(VpnManager.CATEGORY_EVENT_ALWAYS_ON_STATE_CHANGED,
+                    -1 /* errorClass */, -1 /* errorCode*/, packageName,
+                    getSessionKeyLocked(), makeVpnProfileStateLocked(),
+                    null /* underlyingNetwork */, null /* nc */, null /* lp */);
+        }
+        return true;
     }
 
     /**
