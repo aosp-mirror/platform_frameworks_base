@@ -5754,6 +5754,14 @@
     -->
     <integer name="config_bg_current_drain_location_min_duration">1800</integer>
 
+    <!-- The behavior when the system detects it has abusive current drains, whether or not to
+         move the app to the restricted standby bucket level.
+         True - we'll move the app to restricted standby bucket as long as its bg battery usage
+         goes beyond the threshold, False - we'll not move it.
+         Note: This should be only enabled on devices with high confidence on power measurement.
+    -->
+    <bool name="config_bg_current_drain_auto_restrict_abusive_apps">false</bool>
+
     <!-- The behavior for an app with a FGS and its notification is still showing, when the system
          detects it's abusive and should be put into bg restricted level. True - we'll
          show the prompt to user, False - we'll not show it.
