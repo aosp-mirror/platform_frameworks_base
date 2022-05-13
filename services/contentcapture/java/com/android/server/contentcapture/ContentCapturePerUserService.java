@@ -330,7 +330,7 @@ final class ContentCapturePerUserService
             writeSessionEvent(sessionId,
                     FrameworkStatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
                     STATE_DISABLED | STATE_NO_SERVICE, serviceComponentName,
-                    componentName, /* isChildSession= */ false);
+                    /* isChildSession= */ false);
             return;
         }
         if (serviceComponentName == null) {
@@ -354,7 +354,7 @@ final class ContentCapturePerUserService
             writeSessionEvent(sessionId,
                     FrameworkStatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
                     STATE_DISABLED | STATE_NOT_WHITELISTED, serviceComponentName,
-                    componentName, /* isChildSession= */ false);
+                    /* isChildSession= */ false);
             return;
         }
 
@@ -368,7 +368,7 @@ final class ContentCapturePerUserService
             writeSessionEvent(sessionId,
                     FrameworkStatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
                     STATE_DISABLED | STATE_DUPLICATED_ID,
-                    serviceComponentName, componentName, /* isChildSession= */ false);
+                    serviceComponentName, /* isChildSession= */ false);
             return;
         }
 
@@ -385,7 +385,7 @@ final class ContentCapturePerUserService
             writeSessionEvent(sessionId,
                     FrameworkStatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
                     STATE_DISABLED | STATE_NO_SERVICE, serviceComponentName,
-                    componentName, /* isChildSession= */ false);
+                    /* isChildSession= */ false);
             return;
         }
 
@@ -740,7 +740,7 @@ final class ContentCapturePerUserService
         @Override
         public void writeSessionFlush(int sessionId, ComponentName app, FlushMetrics flushMetrics,
                 ContentCaptureOptions options, int flushReason) {
-            ContentCaptureMetricsLogger.writeSessionFlush(sessionId, getServiceComponentName(), app,
+            ContentCaptureMetricsLogger.writeSessionFlush(sessionId, getServiceComponentName(),
                     flushMetrics, options, flushReason);
         }
 
