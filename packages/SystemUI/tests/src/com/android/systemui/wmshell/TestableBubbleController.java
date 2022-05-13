@@ -69,7 +69,7 @@ public class TestableBubbleController extends BubbleController {
                 statusBarService, windowManager, windowManagerShellWrapper, launcherApps,
                 bubbleLogger, taskStackListener, shellTaskOrganizer, positioner, displayController,
                 oneHandedOptional, dragAndDropController, shellMainExecutor, shellMainHandler,
-                taskViewTransitions, syncQueue);
+                new SyncExecutor(), taskViewTransitions, syncQueue);
         setInflateSynchronously(true);
         initialize();
     }
