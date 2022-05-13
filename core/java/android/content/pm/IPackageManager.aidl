@@ -795,7 +795,8 @@ interface IPackageManager {
 
     void holdLock(in IBinder token, in int durationMs);
 
-    PackageManager.Property getProperty(String propertyName, String packageName, String className);
+    PackageManager.Property getPropertyAsUser(String propertyName, String packageName,
+            String className, int userId);
     ParceledListSlice queryProperty(String propertyName, int componentType);
 
     void setKeepUninstalledPackages(in List<String> packageList);

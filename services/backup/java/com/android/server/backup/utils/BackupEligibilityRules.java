@@ -189,8 +189,9 @@ public class BackupEligibilityRules {
                 boolean isDebuggable = (app.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
                 if (UserHandle.isCore(app.uid) || isPrivileged) {
                     try {
-                        return mPackageManager.getProperty(PackageManager.PROPERTY_ALLOW_ADB_BACKUP,
-                                packageName).getBoolean();
+                        return mPackageManager.getPropertyAsUser(
+                                PackageManager.PROPERTY_ALLOW_ADB_BACKUP, packageName,
+                                null /* className */, mUserId).getBoolean();
                     } catch (PackageManager.NameNotFoundException e) {
                         Slog.w(TAG, "Failed to read allowAdbBackup property for + "
                                 + packageName);

@@ -19,6 +19,7 @@ package com.android.server.backup.utils;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
@@ -250,9 +251,9 @@ public class BackupEligibilityRulesTest {
                 /* flags */ ApplicationInfo.PRIVATE_FLAG_PRIVILEGED, CUSTOM_BACKUP_AGENT_NAME);
         BackupEligibilityRules eligibilityRules = getBackupEligibilityRules(
                 OperationType.ADB_BACKUP);
-        when(mPackageManager.getProperty(eq(PackageManager.PROPERTY_ALLOW_ADB_BACKUP),
-                eq(TEST_PACKAGE_NAME))).thenReturn(getAdbBackupProperty(
-                        /* allowAdbBackup */ false));
+        when(mPackageManager.getPropertyAsUser(eq(PackageManager.PROPERTY_ALLOW_ADB_BACKUP),
+                eq(TEST_PACKAGE_NAME), isNull(), eq(mUserId)))
+                .thenReturn(getAdbBackupProperty(/* allowAdbBackup */ false));
 
         boolean isEligible = eligibilityRules.appIsEligibleForBackup(applicationInfo);
 
@@ -267,9 +268,9 @@ public class BackupEligibilityRulesTest {
                 /* flags */ ApplicationInfo.PRIVATE_FLAG_PRIVILEGED, CUSTOM_BACKUP_AGENT_NAME);
         BackupEligibilityRules eligibilityRules = getBackupEligibilityRules(
                 OperationType.ADB_BACKUP);
-        when(mPackageManager.getProperty(eq(PackageManager.PROPERTY_ALLOW_ADB_BACKUP),
-                eq(TEST_PACKAGE_NAME))).thenReturn(getAdbBackupProperty(
-                /* allowAdbBackup */ true));
+        when(mPackageManager.getPropertyAsUser(eq(PackageManager.PROPERTY_ALLOW_ADB_BACKUP),
+                eq(TEST_PACKAGE_NAME), isNull(), eq(mUserId)))
+                .thenReturn(getAdbBackupProperty(/* allowAdbBackup */ true));
 
         boolean isEligible = eligibilityRules.appIsEligibleForBackup(applicationInfo);
 
