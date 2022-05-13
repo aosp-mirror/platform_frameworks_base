@@ -18,7 +18,6 @@ package com.android.wm.shell;
 
 import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_FULLSCREEN;
 
-import com.android.wm.shell.apppairs.AppPairsController;
 import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
@@ -54,7 +53,6 @@ public class ShellInitImpl {
     private final KidsModeTaskOrganizer mKidsModeTaskOrganizer;
     private final Optional<BubbleController> mBubblesOptional;
     private final Optional<SplitScreenController> mSplitScreenOptional;
-    private final Optional<AppPairsController> mAppPairsOptional;
     private final Optional<PipTouchHandler> mPipTouchHandlerOptional;
     private final FullscreenTaskListener mFullscreenTaskListener;
     private final Optional<FullscreenUnfoldController> mFullscreenUnfoldController;
@@ -76,7 +74,6 @@ public class ShellInitImpl {
             KidsModeTaskOrganizer kidsModeTaskOrganizer,
             Optional<BubbleController> bubblesOptional,
             Optional<SplitScreenController> splitScreenOptional,
-            Optional<AppPairsController> appPairsOptional,
             Optional<PipTouchHandler> pipTouchHandlerOptional,
             FullscreenTaskListener fullscreenTaskListener,
             Optional<FullscreenUnfoldController> fullscreenUnfoldTransitionController,
@@ -94,7 +91,6 @@ public class ShellInitImpl {
         mKidsModeTaskOrganizer = kidsModeTaskOrganizer;
         mBubblesOptional = bubblesOptional;
         mSplitScreenOptional = splitScreenOptional;
-        mAppPairsOptional = appPairsOptional;
         mFullscreenTaskListener = fullscreenTaskListener;
         mPipTouchHandlerOptional = pipTouchHandlerOptional;
         mFullscreenUnfoldController = fullscreenUnfoldTransitionController;
@@ -122,7 +118,6 @@ public class ShellInitImpl {
         mShellTaskOrganizer.initStartingWindow(mStartingWindow);
         mShellTaskOrganizer.registerOrganizer();
 
-        mAppPairsOptional.ifPresent(AppPairsController::onOrganizerRegistered);
         mSplitScreenOptional.ifPresent(SplitScreenController::onOrganizerRegistered);
         mBubblesOptional.ifPresent(BubbleController::initialize);
 

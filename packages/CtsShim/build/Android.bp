@@ -47,6 +47,7 @@ android_app {
     uses_libs: ["android.test.runner"],
 
     apex_available: [
+        "//apex_available:platform",
         "com.android.apex.cts.shim.v2_apk_in_apex_upgrades",
     ],
 }

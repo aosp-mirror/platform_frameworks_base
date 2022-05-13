@@ -18,7 +18,6 @@ package com.android.wm.shell;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 
-import com.android.wm.shell.apppairs.AppPairsController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutoutController;
 import com.android.wm.shell.kidsmode.KidsModeTaskOrganizer;
@@ -42,7 +41,6 @@ public final class ShellCommandHandlerImpl {
     private final Optional<Pip> mPipOptional;
     private final Optional<OneHandedController> mOneHandedOptional;
     private final Optional<HideDisplayCutoutController> mHideDisplayCutout;
-    private final Optional<AppPairsController> mAppPairsOptional;
     private final Optional<RecentTasksController> mRecentTasks;
     private final ShellTaskOrganizer mShellTaskOrganizer;
     private final KidsModeTaskOrganizer mKidsModeTaskOrganizer;
@@ -56,7 +54,6 @@ public final class ShellCommandHandlerImpl {
             Optional<Pip> pipOptional,
             Optional<OneHandedController> oneHandedOptional,
             Optional<HideDisplayCutoutController> hideDisplayCutout,
-            Optional<AppPairsController> appPairsOptional,
             Optional<RecentTasksController> recentTasks,
             ShellExecutor mainExecutor) {
         mShellTaskOrganizer = shellTaskOrganizer;
@@ -66,7 +63,6 @@ public final class ShellCommandHandlerImpl {
         mPipOptional = pipOptional;
         mOneHandedOptional = oneHandedOptional;
         mHideDisplayCutout = hideDisplayCutout;
-        mAppPairsOptional = appPairsOptional;
         mMainExecutor = mainExecutor;
     }
 
@@ -82,9 +78,6 @@ public final class ShellCommandHandlerImpl {
         mPipOptional.ifPresent(pip -> pip.dump(pw));
         mOneHandedOptional.ifPresent(oneHanded -> oneHanded.dump(pw));
         mHideDisplayCutout.ifPresent(hideDisplayCutout -> hideDisplayCutout.dump(pw));
-        pw.println();
-        pw.println();
-        mAppPairsOptional.ifPresent(appPairs -> appPairs.dump(pw, ""));
         pw.println();
         pw.println();
         mSplitScreenOptional.ifPresent(splitScreen -> splitScreen.dump(pw, ""));
@@ -104,10 +97,6 @@ public final class ShellCommandHandlerImpl {
             return false;
         }
         switch (args[1]) {
-            case "pair":
-                return runPair(args, pw);
-            case "unpair":
-                return runUnpair(args, pw);
             case "moveToSideStage":
                 return runMoveToSideStage(args, pw);
             case "removeFromSideStage":
@@ -119,29 +108,6 @@ public final class ShellCommandHandlerImpl {
             default:
                 return false;
         }
-    }
-
-    private boolean runPair(String[] args, PrintWriter pw) {
-        if (args.length < 4) {
-            // First two arguments are "WMShell" and command name.
-            pw.println("Error: two task ids should be provided as arguments");
-            return false;
-        }
-        final int taskId1 = new Integer(args[2]);
-        final int taskId2 = new Integer(args[3]);
-        mAppPairsOptional.ifPresent(appPairs -> appPairs.pair(taskId1, taskId2));
-        return true;
-    }
-
-    private boolean runUnpair(String[] args, PrintWriter pw) {
-        if (args.length < 3) {
-            // First two arguments are "WMShell" and command name.
-            pw.println("Error: task id should be provided as an argument");
-            return false;
-        }
-        final int taskId = new Integer(args[2]);
-        mAppPairsOptional.ifPresent(appPairs -> appPairs.unpair(taskId));
-        return true;
     }
 
     private boolean runMoveToSideStage(String[] args, PrintWriter pw) {

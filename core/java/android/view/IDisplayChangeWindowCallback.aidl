@@ -17,13 +17,15 @@
 package android.view;
 
 import android.window.WindowContainerTransaction;
+import android.window.DisplayAreaInfo;
 
 /**
- * Interface to be invoked by the controller when it has finished preparing for a display rotation.
+ * Interface to be invoked by the controller when it has finished preparing for a display
+ * size change.
  *
- * @see IDisplayWindowRotationController
+ * @see IDisplayChangeWindowController
  * @hide
  */
-interface IDisplayWindowRotationCallback {
-    void continueRotateDisplay(int targetRotation, in WindowContainerTransaction t);
+interface IDisplayChangeWindowCallback {
+    void continueDisplayChange(in WindowContainerTransaction t);
 }

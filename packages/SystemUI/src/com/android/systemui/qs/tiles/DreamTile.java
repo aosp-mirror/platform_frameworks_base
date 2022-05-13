@@ -27,7 +27,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
-import android.os.UserManager;
 import android.provider.Settings;
 import android.service.dreams.IDreamManager;
 import android.service.quicksettings.Tile;
@@ -52,6 +51,7 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.SettingObserver;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.settings.SecureSettings;
 
 import javax.inject.Inject;
@@ -61,11 +61,12 @@ import javax.inject.Named;
 public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
 
     private static final String LOG_TAG = "QSDream";
+    private final Icon mIcon = ResourceIcon.get(R.drawable.ic_qs_screen_saver);
     private final IDreamManager mDreamManager;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final SettingObserver mEnabledSettingObserver;
     private final SettingObserver mDreamSettingObserver;
-    private final UserManager mUserManager;
+    private final UserTracker mUserTracker;
     private final boolean mDreamSupported;
     private final boolean mDreamOnlyEnabledForSystemUser;
 
@@ -89,7 +90,7 @@ public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
             IDreamManager dreamManager,
             SecureSettings secureSettings,
             BroadcastDispatcher broadcastDispatcher,
-            UserManager userManager,
+            UserTracker userTracker,
             @Named(DreamModule.DREAM_SUPPORTED) boolean dreamSupported,
             @Named(DreamModule.DREAM_ONLY_ENABLED_FOR_SYSTEM_USER)
                     boolean dreamOnlyEnabledForSystemUser
@@ -112,7 +113,7 @@ public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
                 refreshState();
             }
         };
-        mUserManager = userManager;
+        mUserTracker = userTracker;
         mDreamSupported = dreamSupported;
         mDreamOnlyEnabledForSystemUser = dreamOnlyEnabledForSystemUser;
     }
@@ -167,6 +168,7 @@ public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
         state.label = getTileLabel();
         state.secondaryLabel = getActiveDreamName();
         state.contentDescription = getContentDescription(state.secondaryLabel);
+        state.icon = mIcon;
 
         if (getActiveDream() == null || !isScreensaverEnabled()) {
             state.state = Tile.STATE_UNAVAILABLE;
@@ -192,7 +194,7 @@ public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
         // For now, restrict to debug users.
         return Build.isDebuggable()
                 && mDreamSupported
-                && (!mDreamOnlyEnabledForSystemUser || mUserManager.isSystemUser());
+                && (!mDreamOnlyEnabledForSystemUser || mUserTracker.getUserHandle().isSystem());
     }
 
     @VisibleForTesting

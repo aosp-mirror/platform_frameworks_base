@@ -23,6 +23,7 @@ import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
+import static android.window.TransitionInfo.FLAG_IS_INPUT_METHOD;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 
@@ -287,12 +288,14 @@ public class Transitions implements RemoteCallable<Transitions> {
                     finishT.setAlpha(leash, 1.f);
                 }
             } else if (mode == TRANSIT_CLOSE || mode == TRANSIT_TO_BACK) {
-                // Wallpaper is a bit of an anomaly: it's visibility is tied to other WindowStates.
-                // As a result, we actually can't hide it's WindowToken because there may not be a
-                // transition associated with it becoming visible again. Fortunately, since it is
-                // always z-ordered to the back, we don't have to worry about it flickering to the
-                // front during reparenting, so the hide here isn't necessary for it.
-                if ((change.getFlags() & FLAG_IS_WALLPAPER) == 0) {
+                // Wallpaper/IME are anomalies: their visibility is tied to other WindowStates.
+                // As a result, we actually can't hide their WindowTokens because there may not be a
+                // transition associated with them becoming visible again. Fortunately, since
+                // wallpapers are always z-ordered to the back, we don't have to worry about it
+                // flickering to the front during reparenting. Similarly, the IME is reparented to
+                // the associated app, so its visibility is coupled. So, an explicit hide is not
+                // needed visually anyways.
+                if ((change.getFlags() & (FLAG_IS_WALLPAPER | FLAG_IS_INPUT_METHOD)) == 0) {
                     finishT.hide(leash);
                 }
             }
@@ -626,8 +629,9 @@ public class Transitions implements RemoteCallable<Transitions> {
                 if (wct == null) {
                     wct = new WindowContainerTransaction();
                 }
-                mDisplayController.getChangeController().dispatchOnRotateDisplay(wct,
-                        change.getDisplayId(), change.getStartRotation(), change.getEndRotation());
+                mDisplayController.getChangeController().dispatchOnDisplayChange(wct,
+                        change.getDisplayId(), change.getStartRotation(), change.getEndRotation(),
+                        null /* newDisplayAreaInfo */);
             }
         }
         active.mToken = mOrganizer.startTransition(

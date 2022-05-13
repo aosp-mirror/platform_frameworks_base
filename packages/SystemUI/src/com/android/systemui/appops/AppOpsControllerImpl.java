@@ -376,7 +376,7 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
             Log.w(TAG, String.format("onActiveChanged(%d,%d,%s,%s,%d,%d)", code, uid, packageName,
                     Boolean.toString(active), attributionChainId, attributionFlags));
         }
-        if (attributionChainId != AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE
+        if (active && attributionChainId != AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE
                 && attributionFlags != AppOpsManager.ATTRIBUTION_FLAGS_NONE
                 && (attributionFlags & AppOpsManager.ATTRIBUTION_FLAG_ACCESSOR) == 0
                 && (attributionFlags & AppOpsManager.ATTRIBUTION_FLAG_TRUSTED) == 0) {

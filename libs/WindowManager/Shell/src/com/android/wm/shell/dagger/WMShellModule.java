@@ -29,7 +29,6 @@ import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.TaskViewTransitions;
 import com.android.wm.shell.WindowManagerShellWrapper;
-import com.android.wm.shell.apppairs.AppPairsController;
 import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
@@ -174,17 +173,6 @@ public class WMShellModule {
                 rootTaskDisplayAreaOrganizer, mainExecutor, displayController, displayImeController,
                 displayInsetsController, transitions, transactionPool, iconProvider,
                 recentTasks, stageTaskUnfoldControllerProvider);
-    }
-
-    @WMSingleton
-    @Provides
-    static AppPairsController provideAppPairs(ShellTaskOrganizer shellTaskOrganizer,
-            SyncTransactionQueue syncQueue, DisplayController displayController,
-            @ShellMainThread ShellExecutor mainExecutor,
-            DisplayImeController displayImeController,
-            DisplayInsetsController displayInsetsController) {
-        return new AppPairsController(shellTaskOrganizer, syncQueue, displayController,
-                mainExecutor, displayImeController, displayInsetsController);
     }
 
     //
