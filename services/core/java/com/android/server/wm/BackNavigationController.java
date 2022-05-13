@@ -187,7 +187,6 @@ class BackNavigationController {
             if (backType == BackNavigationInfo.TYPE_CALLBACK
                     || currentActivity == null
                     || currentTask == null
-                    || currentTask.getDisplayContent().getImeContainer().isVisible()
                     || currentActivity.isActivityTypeHome()) {
                 return infoBuilder
                         .setType(backType)

@@ -380,13 +380,17 @@
         <item name="android:buttonBarNegativeButtonStyle">@style/Widget.Dialog.Button.BorderButton</item>
         <item name="android:buttonBarNeutralButtonStyle">@style/Widget.Dialog.Button.BorderButton</item>
         <item name="android:colorBackground">?androidprv:attr/colorSurface</item>
-        <item name="android:alertDialogStyle">@style/AlertDialogStyle</item>
+        <item name="android:alertDialogStyle">@style/ScrollableAlertDialogStyle</item>
         <item name="android:buttonBarStyle">@style/ButtonBarStyle</item>
         <item name="android:buttonBarButtonStyle">@style/Widget.Dialog.Button.Large</item>
     </style>
 
     <style name="AlertDialogStyle" parent="@androidprv:style/AlertDialog.DeviceDefault">
         <item name="android:layout">@layout/alert_dialog_systemui</item>
+    </style>
+
+    <style name="ScrollableAlertDialogStyle" parent="@androidprv:style/AlertDialog.DeviceDefault">
+        <item name="android:layout">@layout/scrollable_alert_dialog_systemui</item>
     </style>
 
     <style name="ButtonBarStyle" parent="@androidprv:style/DeviceDefault.ButtonBar.AlertDialog">
@@ -994,6 +998,7 @@
 
     <style name="Theme.SystemUI.Dialog.Cast">
         <item name="android:textAppearanceMedium">@style/TextAppearance.CastItem</item>
+        <item name="android:alertDialogStyle">@style/AlertDialogStyle</item>
     </style>
     <!-- ************************************************************************************* -->
 

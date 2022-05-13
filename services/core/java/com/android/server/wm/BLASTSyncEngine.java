@@ -153,10 +153,10 @@ class BLASTSyncEngine {
             for (WindowContainer wc : mRootMembers) {
                 wc.waitForSyncTransactionCommit(wcAwaitingCommit);
             }
-            final Runnable callback = new Runnable() {
+            class CommitCallback implements Runnable {
                 // Can run a second time if the action completes after the timeout.
                 boolean ran = false;
-                public void run() {
+                public void onCommitted() {
                     synchronized (mWm.mGlobalLock) {
                         if (ran) {
                             return;
@@ -171,8 +171,23 @@ class BLASTSyncEngine {
                         wcAwaitingCommit.clear();
                     }
                 }
+
+                // Called in timeout
+                @Override
+                public void run() {
+                    // Sometimes we get a trace, sometimes we get a bugreport without
+                    // a trace. Since these kind of ANRs can trigger such an issue,
+                    // try and ensure we will have some visibility in both cases.
+                    Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "onTransactionCommitTimeout");
+                    Slog.e(TAG, "WM sent Transaction to organized, but never received" +
+                           " commit callback. Application ANR likely to follow.");
+                    Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+                    onCommitted();
+
+                }
             };
-            merged.addTransactionCommittedListener((r) -> { r.run(); }, callback::run);
+            CommitCallback callback = new CommitCallback();
+            merged.addTransactionCommittedListener((r) -> { r.run(); }, callback::onCommitted);
             mWm.mH.postDelayed(callback, BLAST_TIMEOUT_DURATION);
 
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "onTransactionReady");

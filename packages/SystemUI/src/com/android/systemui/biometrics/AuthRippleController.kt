@@ -335,15 +335,17 @@ class AuthRippleController @Inject constructor(
                 updateSensorLocation()
             }
 
-            override fun onEnrollmentsChanged() {
+            override fun onUdfpsLocationChanged() {
+                updateUdfpsDependentParams()
+                updateSensorLocation()
             }
         }
 
     private fun updateUdfpsDependentParams() {
         authController.udfpsProps?.let {
             if (it.size > 0) {
-                udfpsRadius = it[0].location.sensorRadius.toFloat()
                 udfpsController = udfpsControllerProvider.get()
+                udfpsRadius = authController.udfpsRadius
 
                 if (mView.isAttachedToWindow) {
                     udfpsController?.addCallback(udfpsControllerCallback)

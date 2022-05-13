@@ -336,7 +336,7 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
         // WHEN the position algorithm is run
         positionClock();
         // THEN the padding DOESN'T adjust for keyguard status height.
-        assertThat(mClockPositionAlgorithm.getMinStackScrollerPadding())
+        assertThat(mClockPositionAlgorithm.getLockscreenMinStackScrollerPadding())
                 .isEqualTo(mKeyguardStatusBarHeaderHeight);
     }
 

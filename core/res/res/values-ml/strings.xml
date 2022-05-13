@@ -1681,7 +1681,7 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> എന്നതിന് നിങ്ങളുടെ ഉപകരണത്തിന്മേൽ പൂർണ്ണ നിയന്ത്രണം അനുവദിക്കണോ?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"ഉപയോഗസഹായി ആവശ്യങ്ങൾക്കായി നിങ്ങളെ സഹായിക്കുന്ന ആപ്പുകൾക്ക് പൂർണ്ണ നിയന്ത്രണം അനുയോജ്യമാണെങ്കിലും മിക്ക ആപ്പുകൾക്കും അനുയോജ്യമല്ല."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"സ്‌ക്രീൻ കാണുക, നിയന്ത്രിക്കുക"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ഇതിന് സ്‌ക്രീനിലെ എല്ലാ ഉള്ളടക്കവും വായിക്കാനും മറ്റ് ആപ്പുകളിൽ ഉള്ളടക്കം പ്രദർശിപ്പിക്കാനുമാവും."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ഇതിന് സ്‌ക്രീനിലെ എല്ലാ ഉള്ളടക്കവും വായിക്കാനും മറ്റ് ആപ്പുകൾക്ക് മുകളിൽ ഉള്ളടക്കം പ്രദർശിപ്പിക്കാനുമാകും."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"കാണുക, പ്രവർത്തനങ്ങൾ നിർവഹിക്കുക"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"ഇതിന് ഒരു ആപ്പുമായോ ഹാർഡ്‌വെയർ സെൻസറുമായോ ഉള്ള നിങ്ങളുടെ ആശയവിനിമയങ്ങൾ ട്രാക്ക് ചെയ്യാനും നിങ്ങളുടെ പേരിൽ ആശയവിനിമയം നടത്താനും കഴിയും."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"അനുവദിക്കൂ"</string>

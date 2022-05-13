@@ -1074,11 +1074,61 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             if (DEBUG) Log.d(TAG, "Successfully unMarshaled SoftApConfiguration ");
             // Depending on device hardware, we may need to notify the user of a setting change
             SoftApConfiguration storedConfig = mWifiManager.getSoftApConfiguration();
-            if (!storedConfig.equals(configInCloud)) {
+
+            if (isNeedToNotifyUserConfigurationHasChanged(configInCloud, storedConfig)) {
                 Log.d(TAG, "restored ap configuration requires a conversion, notify the user");
                 WifiSoftApConfigChangedNotifier.notifyUserOfConfigConversion(this);
             }
         }
+    }
+
+    private boolean isNeedToNotifyUserConfigurationHasChanged(SoftApConfiguration configInCloud,
+            SoftApConfiguration storedConfig) {
+        // Check if the cloud configuration was modified when restored to the device.
+        // All elements of the configuration are compared except:
+        // 1. Persistent randomized MAC address (which is per device)
+        // 2. The flag indicating whether the configuration is "user modified"
+        return !(Objects.equals(configInCloud.getWifiSsid(), storedConfig.getWifiSsid())
+                && Objects.equals(configInCloud.getBssid(), storedConfig.getBssid())
+                && Objects.equals(configInCloud.getPassphrase(), storedConfig.getPassphrase())
+                && configInCloud.isHiddenSsid() == storedConfig.isHiddenSsid()
+                && configInCloud.getChannels().toString().equals(
+                        storedConfig.getChannels().toString())
+                && configInCloud.getSecurityType() == storedConfig.getSecurityType()
+                && configInCloud.getMaxNumberOfClients() == storedConfig.getMaxNumberOfClients()
+                && configInCloud.isAutoShutdownEnabled() == storedConfig.isAutoShutdownEnabled()
+                && configInCloud.getShutdownTimeoutMillis()
+                        == storedConfig.getShutdownTimeoutMillis()
+                && configInCloud.isClientControlByUserEnabled()
+                        == storedConfig.isClientControlByUserEnabled()
+                && Objects.equals(configInCloud.getBlockedClientList(),
+                        storedConfig.getBlockedClientList())
+                && Objects.equals(configInCloud.getAllowedClientList(),
+                        storedConfig.getAllowedClientList())
+                && configInCloud.getMacRandomizationSetting()
+                        == storedConfig.getMacRandomizationSetting()
+                && configInCloud.isBridgedModeOpportunisticShutdownEnabled()
+                        == storedConfig.isBridgedModeOpportunisticShutdownEnabled()
+                && configInCloud.isIeee80211axEnabled() == storedConfig.isIeee80211axEnabled()
+                && configInCloud.isIeee80211beEnabled() == storedConfig.isIeee80211beEnabled()
+                && configInCloud.getBridgedModeOpportunisticShutdownTimeoutMillis()
+                        == storedConfig.getBridgedModeOpportunisticShutdownTimeoutMillis()
+                && Objects.equals(configInCloud.getVendorElements(),
+                        storedConfig.getVendorElements())
+                && (configInCloud.getPersistentRandomizedMacAddress() != null
+                        ? Objects.equals(configInCloud.getPersistentRandomizedMacAddress(),
+                        storedConfig.getPersistentRandomizedMacAddress()) : true)
+                && Arrays.equals(configInCloud.getAllowedAcsChannels(
+                        SoftApConfiguration.BAND_2GHZ),
+                        storedConfig.getAllowedAcsChannels(SoftApConfiguration.BAND_2GHZ))
+                && Arrays.equals(configInCloud.getAllowedAcsChannels(
+                        SoftApConfiguration.BAND_5GHZ),
+                        storedConfig.getAllowedAcsChannels(SoftApConfiguration.BAND_5GHZ))
+                && Arrays.equals(configInCloud.getAllowedAcsChannels(
+                        SoftApConfiguration.BAND_6GHZ),
+                        storedConfig.getAllowedAcsChannels(SoftApConfiguration.BAND_6GHZ))
+                && configInCloud.getMaxChannelBandwidth() == storedConfig.getMaxChannelBandwidth()
+                        );
     }
 
     private byte[] getNetworkPolicies() {

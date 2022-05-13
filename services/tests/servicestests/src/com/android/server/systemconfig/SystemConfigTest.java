@@ -454,14 +454,14 @@ public class SystemConfigTest {
                         + "    <library \n"
                         + "        name=\"foo\"\n"
                         + "        file=\"" + mFooJar + "\"\n"
-                        + "        on-bootclasspath-before=\"Q\"\n"
+                        + "        on-bootclasspath-before=\"A\"\n"
                         + "        on-bootclasspath-since=\"W\"\n"
                         + "     />\n\n"
                         + " </permissions>";
         parseSharedLibraries(contents);
         assertFooIsOnlySharedLibrary();
         SystemConfig.SharedLibraryEntry entry = mSysConfig.getSharedLibraries().get("foo");
-        assertThat(entry.onBootclasspathBefore).isEqualTo("Q");
+        assertThat(entry.onBootclasspathBefore).isEqualTo("A");
         assertThat(entry.onBootclasspathSince).isEqualTo("W");
     }
 

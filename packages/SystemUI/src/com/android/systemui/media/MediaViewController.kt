@@ -278,13 +278,14 @@ class MediaViewController @Inject constructor(
     /**
      * Apply squishFraction to a copy of viewState such that the cached version is untouched.
      */
-    private fun squishViewState(
+    @VisibleForTesting
+    internal fun squishViewState(
         viewState: TransitionViewState,
         squishFraction: Float
     ): TransitionViewState {
         val squishedViewState = viewState.copy()
         squishedViewState.height = (squishedViewState.height * squishFraction).toInt()
-        val albumArtViewState = viewState.widgetStates.get(R.id.album_art)
+        val albumArtViewState = squishedViewState.widgetStates.get(R.id.album_art)
         if (albumArtViewState != null) {
             albumArtViewState.height = squishedViewState.height
         }
@@ -317,6 +318,7 @@ class MediaViewController @Inject constructor(
         if (transitionLayout == null) {
             return null
         }
+
         // Not cached. Let's create a new measurement
         if (state.expansion == 0.0f || state.expansion == 1.0f) {
             result = transitionLayout!!.calculateViewState(

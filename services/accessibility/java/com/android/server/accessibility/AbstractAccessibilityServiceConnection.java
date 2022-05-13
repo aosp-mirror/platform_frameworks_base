@@ -242,6 +242,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
         int getCurrentUserIdLocked();
 
+        Pair<float[], MagnificationSpec> getWindowTransformationMatrixAndMagnificationSpec(
+                int windowId);
+
         boolean isAccessibilityButtonShown();
 
         /**
@@ -551,8 +554,6 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         final int resolvedWindowId;
         RemoteAccessibilityConnection connection;
         Region partialInteractiveRegion = Region.obtain();
-        final MagnificationSpec spec;
-        final float[] transformMatrix;
         synchronized (mLock) {
             mUsesAccessibilityCache = true;
             if (!hasRightsToCurrentUserLocked()) {
@@ -576,11 +577,11 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 partialInteractiveRegion.recycle();
                 partialInteractiveRegion = null;
             }
-            final Pair<float[], MagnificationSpec> transformMatrixAndSpec =
-                    getTransformMatrixAndSpecLocked(resolvedWindowId);
-            transformMatrix = transformMatrixAndSpec.first;
-            spec = transformMatrixAndSpec.second;
         }
+        final Pair<float[], MagnificationSpec> transformMatrixAndSpec =
+                getWindowTransformationMatrixAndMagnificationSpec(resolvedWindowId);
+        final float[] transformMatrix = transformMatrixAndSpec.first;
+        final MagnificationSpec spec = transformMatrixAndSpec.second;
         if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
             return null;
         }
@@ -628,8 +629,6 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         final int resolvedWindowId;
         RemoteAccessibilityConnection connection;
         Region partialInteractiveRegion = Region.obtain();
-        final MagnificationSpec spec;
-        final float [] transformMatrix;
         synchronized (mLock) {
             mUsesAccessibilityCache = true;
             if (!hasRightsToCurrentUserLocked()) {
@@ -653,11 +652,11 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 partialInteractiveRegion.recycle();
                 partialInteractiveRegion = null;
             }
-            final Pair<float[], MagnificationSpec> transformMatrixAndSpec =
-                    getTransformMatrixAndSpecLocked(resolvedWindowId);
-            transformMatrix = transformMatrixAndSpec.first;
-            spec = transformMatrixAndSpec.second;
         }
+        final Pair<float[], MagnificationSpec> transformMatrixAndSpec =
+                getWindowTransformationMatrixAndMagnificationSpec(resolvedWindowId);
+        final float[] transformMatrix = transformMatrixAndSpec.first;
+        final MagnificationSpec spec = transformMatrixAndSpec.second;
         if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
             return null;
         }
@@ -706,8 +705,6 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         final int resolvedWindowId;
         RemoteAccessibilityConnection connection;
         Region partialInteractiveRegion = Region.obtain();
-        final MagnificationSpec spec;
-        final float[] transformMatrix;
         synchronized (mLock) {
             mUsesAccessibilityCache = true;
             if (!hasRightsToCurrentUserLocked()) {
@@ -731,11 +728,11 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 partialInteractiveRegion.recycle();
                 partialInteractiveRegion = null;
             }
-            final Pair<float[], MagnificationSpec> transformMatrixAndSpec =
-                    getTransformMatrixAndSpecLocked(resolvedWindowId);
-            transformMatrix = transformMatrixAndSpec.first;
-            spec = transformMatrixAndSpec.second;
         }
+        final Pair<float[], MagnificationSpec> transformMatrixAndSpec =
+                getWindowTransformationMatrixAndMagnificationSpec(resolvedWindowId);
+        final float[] transformMatrix = transformMatrixAndSpec.first;
+        final MagnificationSpec spec = transformMatrixAndSpec.second;
         if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
             return null;
         }
@@ -786,8 +783,6 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         final int resolvedWindowId;
         RemoteAccessibilityConnection connection;
         Region partialInteractiveRegion = Region.obtain();
-        final MagnificationSpec spec;
-        final float[] transformMatrix;
         synchronized (mLock) {
             if (!hasRightsToCurrentUserLocked()) {
                 return null;
@@ -811,11 +806,11 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 partialInteractiveRegion.recycle();
                 partialInteractiveRegion = null;
             }
-            final Pair<float[], MagnificationSpec> transformMatrixAndSpec =
-                    getTransformMatrixAndSpecLocked(resolvedWindowId);
-            transformMatrix = transformMatrixAndSpec.first;
-            spec = transformMatrixAndSpec.second;
         }
+        final Pair<float[], MagnificationSpec> transformMatrixAndSpec =
+                getWindowTransformationMatrixAndMagnificationSpec(resolvedWindowId);
+        final float[] transformMatrix = transformMatrixAndSpec.first;
+        final MagnificationSpec spec = transformMatrixAndSpec.second;
         if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
             return null;
         }
@@ -865,8 +860,6 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         final int resolvedWindowId;
         RemoteAccessibilityConnection connection;
         Region partialInteractiveRegion = Region.obtain();
-        final MagnificationSpec spec;
-        final float[] transformMatrix;
         synchronized (mLock) {
             if (!hasRightsToCurrentUserLocked()) {
                 return null;
@@ -889,12 +882,11 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 partialInteractiveRegion.recycle();
                 partialInteractiveRegion = null;
             }
-
-            final Pair<float[], MagnificationSpec> transformMatrixAndSpec =
-                    getTransformMatrixAndSpecLocked(resolvedWindowId);
-            transformMatrix = transformMatrixAndSpec.first;
-            spec = transformMatrixAndSpec.second;
         }
+        final Pair<float[], MagnificationSpec> transformMatrixAndSpec =
+                getWindowTransformationMatrixAndMagnificationSpec(resolvedWindowId);
+        final float[] transformMatrix = transformMatrixAndSpec.first;
+        final MagnificationSpec spec = transformMatrixAndSpec.second;
         if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
             return null;
         }
@@ -1672,21 +1664,10 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         mInvocationHandler.startInputLocked(connection, editorInfo, restarting);
     }
 
-
-
     @Nullable
-    Pair<float[], MagnificationSpec> getTransformMatrixAndSpecLocked(int resolvedWindowId) {
-        final WindowInfo windowInfo =
-                mA11yWindowManager.findWindowInfoByIdLocked(resolvedWindowId);
-        if (windowInfo == null) {
-            Slog.w(LOG_TAG, "getTransformMatrixAndSpec, windowInfo is null window id = "
-                    + resolvedWindowId);
-            return new Pair<>(null, null);
-        }
-
-        final MagnificationSpec spec = new MagnificationSpec();
-        spec.setTo(windowInfo.mMagnificationSpec);
-        return new Pair<>(windowInfo.mTransformMatrix, spec);
+    private Pair<float[], MagnificationSpec> getWindowTransformationMatrixAndMagnificationSpec(
+            int resolvedWindowId) {
+        return mSystemSupport.getWindowTransformationMatrixAndMagnificationSpec(resolvedWindowId);
     }
 
     /**

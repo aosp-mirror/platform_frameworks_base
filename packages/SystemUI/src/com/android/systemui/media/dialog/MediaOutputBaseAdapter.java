@@ -166,15 +166,6 @@ public abstract class MediaOutputBaseAdapter extends
 
         void onBind(MediaDevice device, boolean topMargin, boolean bottomMargin, int position) {
             mDeviceId = device.getId();
-            ThreadUtils.postOnBackgroundThread(() -> {
-                Icon icon = mController.getDeviceIconCompat(device).toIcon(mContext);
-                ThreadUtils.postOnMainThread(() -> {
-                    if (!TextUtils.equals(mDeviceId, device.getId())) {
-                        return;
-                    }
-                    mTitleIcon.setImageIcon(icon);
-                });
-            });
         }
 
         abstract void onBind(int customizedItem, boolean topMargin, boolean bottomMargin);
@@ -413,6 +404,18 @@ public abstract class MediaOutputBaseAdapter extends
         private void disableSeekBar() {
             mSeekBar.setEnabled(false);
             mSeekBar.setOnTouchListener((v, event) -> true);
+        }
+
+        protected void setUpDeviceIcon(MediaDevice device) {
+            ThreadUtils.postOnBackgroundThread(() -> {
+                Icon icon = mController.getDeviceIconCompat(device).toIcon(mContext);
+                ThreadUtils.postOnMainThread(() -> {
+                    if (!TextUtils.equals(mDeviceId, device.getId())) {
+                        return;
+                    }
+                    mTitleIcon.setImageIcon(icon);
+                });
+            });
         }
     }
 }

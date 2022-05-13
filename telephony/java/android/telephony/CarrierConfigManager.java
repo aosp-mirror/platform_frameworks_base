@@ -4980,6 +4980,25 @@ public class CarrierConfigManager {
                 KEY_PREFIX + "use_sip_uri_for_presence_subscribe_bool";
 
         /**
+         * Flag indicating whether or not to use TEL URI when setting the entity uri field and
+         * contact element of each tuple.
+         *
+         * When {@code true}, the device sets the entity uri field and contact element to be
+         * TEL URI. This is done by first searching for the first TEL URI provided in
+         * p-associated-uri header. If there are no TEL URIs in the p-associated-uri header, we will
+         * convert the first SIP URI provided in the header to a TEL URI. If there are no URIs in
+         * the p-associated-uri header, we will then fall back to using the SIM card to generate the
+         * TEL URI.
+         * If {@code false}, the first URI provided in the p-associated-uri header is used,
+         * independent of the URI scheme. If there are no URIs available from p-associated-uri
+         * header, we will try to generate a SIP URI or TEL URI from the information provided by the
+         * SIM card, depending on the information available.
+         * @hide
+         */
+        public static final String KEY_USE_TEL_URI_FOR_PIDF_XML_BOOL =
+                KEY_PREFIX + "use_tel_uri_for_pidf_xml";
+
+        /**
          * An integer key associated with the period of time in seconds the non-rcs capability
          * information of each contact is cached on the device.
          * <p>

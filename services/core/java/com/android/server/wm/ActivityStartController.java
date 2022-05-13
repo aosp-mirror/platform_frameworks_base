@@ -518,6 +518,8 @@ public class ActivityStartController {
                 .setRequestCode(-1)
                 .setCallingUid(callingUid)
                 .setCallingPid(callingPid)
+                .setRealCallingUid(callingUid)
+                .setRealCallingPid(callingPid)
                 .setUserId(caller != null ? caller.mUserId : mService.getCurrentUserId())
                 .execute();
     }

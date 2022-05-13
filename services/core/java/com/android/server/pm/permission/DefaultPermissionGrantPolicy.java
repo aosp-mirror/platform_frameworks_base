@@ -618,6 +618,10 @@ final class DefaultPermissionGrantPolicy {
         grantPermissionsToSystemPackage(pm, getDefaultSearchSelectorPackage(), userId,
                 NOTIFICATION_PERMISSIONS);
 
+        // Captive Portal Login
+        grantPermissionsToSystemPackage(pm, getDefaultCaptivePortalLoginPackage(), userId,
+                NOTIFICATION_PERMISSIONS);
+
         // Camera
         grantPermissionsToSystemPackage(pm,
                 getDefaultSystemHandlerActivityPackage(pm, MediaStore.ACTION_IMAGE_CAPTURE, userId),
@@ -933,6 +937,10 @@ final class DefaultPermissionGrantPolicy {
         return mContext.getString(R.string.config_defaultSearchSelectorPackageName);
     }
 
+    private String getDefaultCaptivePortalLoginPackage() {
+        return mContext.getString(R.string.config_defaultCaptivePortalLoginPackageName);
+    }
+
     @SafeVarargs
     private final void grantPermissionToEachSystemPackage(PackageManagerWrapper pm,
             ArrayList<String> packages, int userId, Set<String>... permissions) {
@@ -1018,8 +1026,6 @@ final class DefaultPermissionGrantPolicy {
         for (String packageName : packageNames) {
             grantPermissionsToSystemPackage(NO_PM_CACHE, packageName, userId,
                     PHONE_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS, SMS_PERMISSIONS);
-            grantPermissionsToPackage(NO_PM_CACHE, packageName, userId, false, false,
-                    NOTIFICATION_PERMISSIONS);
         }
     }
 

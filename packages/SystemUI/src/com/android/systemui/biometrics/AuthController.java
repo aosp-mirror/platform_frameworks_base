@@ -79,6 +79,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -446,11 +447,11 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
     /**
      * @return the radius of UDFPS on the screen in pixels
      */
-    public int getUdfpsRadius() {
+    public float getUdfpsRadius() {
         if (mUdfpsController == null || mUdfpsBounds == null) {
             return -1;
         }
-        return mUdfpsBounds.height() / 2;
+        return mUdfpsBounds.height() / 2f;
     }
 
     /**
@@ -634,11 +635,17 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
                     displayInfo.getNaturalHeight());
 
             final FingerprintSensorPropertiesInternal udfpsProp = mUdfpsProps.get(0);
+            final Rect previousUdfpsBounds = mUdfpsBounds;
             mUdfpsBounds = udfpsProp.getLocation().getRect();
             mUdfpsBounds.scale(scaleFactor);
             mUdfpsController.updateOverlayParams(udfpsProp.sensorId,
                     new UdfpsOverlayParams(mUdfpsBounds, displayInfo.getNaturalWidth(),
                             displayInfo.getNaturalHeight(), scaleFactor, displayInfo.rotation));
+            if (!Objects.equals(previousUdfpsBounds, mUdfpsBounds)) {
+                for (Callback cb : mCallbacks) {
+                    cb.onUdfpsLocationChanged();
+                }
+            }
         }
     }
 
@@ -1054,5 +1061,10 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
          * Called when the biometric prompt is no longer showing.
          */
         default void onBiometricPromptDismissed() {}
+
+        /**
+         * The location in pixels can change due to resolution changes.
+         */
+        default void onUdfpsLocationChanged() {}
     }
 }

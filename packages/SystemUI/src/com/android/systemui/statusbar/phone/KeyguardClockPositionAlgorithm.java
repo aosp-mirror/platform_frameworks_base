@@ -220,7 +220,7 @@ public class KeyguardClockPositionAlgorithm {
         }
     }
 
-    public float getMinStackScrollerPadding() {
+    public float getLockscreenMinStackScrollerPadding() {
         if (mBypassEnabled) {
             return mUnlockedStackScrollerPadding;
         } else if (mIsSplitShade) {

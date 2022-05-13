@@ -64,7 +64,9 @@ final class HandwritingEventReceiverSurface {
                         | InputConfig.INTERCEPTS_STYLUS
                         | InputConfig.TRUSTED_OVERLAY;
 
-        // The touchable region of this input surface is not initially configured.
+        // Configure the surface to receive stylus events across the entire display.
+        mWindowHandle.replaceTouchableRegionWithCrop(null /* use this surface's bounds */);
+
         final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
         t.setInputWindowInfo(mInputSurface, mWindowHandle);
         t.setLayer(mInputSurface, HANDWRITING_SURFACE_LAYER);
@@ -80,10 +82,6 @@ final class HandwritingEventReceiverSurface {
         mWindowHandle.ownerPid = imePid;
         mWindowHandle.ownerUid = imeUid;
         mWindowHandle.inputConfig &= ~InputConfig.SPY;
-
-        // Update the touchable region so that the IME can intercept stylus events
-        // across the entire display.
-        mWindowHandle.replaceTouchableRegionWithCrop(null /* use this surface's bounds */);
 
         new SurfaceControl.Transaction()
                 .setInputWindowInfo(mInputSurface, mWindowHandle)

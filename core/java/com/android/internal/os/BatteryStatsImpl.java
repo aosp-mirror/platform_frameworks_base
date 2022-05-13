@@ -167,7 +167,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    static final int VERSION = 207;
+    static final int VERSION = 208;
 
     // The maximum number of names wakelocks we will keep track of
     // per uid; once the limit is reached, we batch the remaining wakelocks
@@ -644,7 +644,7 @@ public class BatteryStatsImpl extends BatteryStats {
         /** Schedule removal of UIDs corresponding to a removed user */
         Future<?> scheduleCleanupDueToRemovedUser(int userId);
         /** Schedule a sync because of a process state change */
-        Future<?> scheduleSyncDueToProcessStateChange(long delayMillis);
+        void scheduleSyncDueToProcessStateChange(int flags, long delayMillis);
     }
 
     public Handler mHandler;
@@ -3981,8 +3981,7 @@ public class BatteryStatsImpl extends BatteryStats {
         if (idxObj != null) {
             idx = idxObj;
             if ((idx & TAG_FIRST_OCCURRENCE_FLAG) != 0) {
-                idx &= ~TAG_FIRST_OCCURRENCE_FLAG;
-                mHistoryTagPool.put(tag, idx);
+                mHistoryTagPool.put(tag, idx & ~TAG_FIRST_OCCURRENCE_FLAG);
             }
             return idx;
         } else if (mNextHistoryTagIdx < HISTORY_TAG_INDEX_LIMIT) {
@@ -6216,9 +6215,7 @@ public class BatteryStatsImpl extends BatteryStats {
             long elapsedRealtimeMs, long uptimeMs) {
         if (mMobileRadioPowerState != powerState) {
             long realElapsedRealtimeMs;
-            final boolean active =
-                    powerState == DataConnectionRealTimeInfo.DC_POWER_STATE_MEDIUM
-                            || powerState == DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH;
+            final boolean active = isActiveRadioPowerState(powerState);
             if (active) {
                 if (uid > 0) {
                     noteMobileRadioApWakeupLocked(elapsedRealtimeMs, uptimeMs, uid);
@@ -6258,6 +6255,11 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
         return false;
+    }
+
+    private static boolean isActiveRadioPowerState(int powerState) {
+        return powerState == DataConnectionRealTimeInfo.DC_POWER_STATE_MEDIUM
+                || powerState == DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH;
     }
 
     @GuardedBy("this")
@@ -12043,7 +12045,13 @@ public class BatteryStatsImpl extends BatteryStats {
                 return;
             }
 
-            mBsi.mExternalSync.scheduleSyncDueToProcessStateChange(
+            int flags = ExternalStatsSync.UPDATE_ON_PROC_STATE_CHANGE;
+            // Skip querying for inactive radio, where power usage is probably negligible.
+            if (!BatteryStatsImpl.isActiveRadioPowerState(mBsi.mMobileRadioPowerState)) {
+                flags &= ~ExternalStatsSync.UPDATE_RADIO;
+            }
+
+            mBsi.mExternalSync.scheduleSyncDueToProcessStateChange(flags,
                     mBsi.mConstants.PROC_STATE_CHANGE_COLLECTION_DELAY_MS);
         }
 

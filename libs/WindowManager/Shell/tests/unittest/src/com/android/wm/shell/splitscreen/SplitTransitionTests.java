@@ -139,6 +139,7 @@ public class SplitTransitionTests extends ShellTestCase {
     }
 
     @Test
+    @UiThreadTest
     public void testLaunchToSide() {
         ActivityManager.RunningTaskInfo newTask = new TestRunningTaskInfoBuilder()
                 .setParentTaskId(mSideStage.mRootTaskInfo.taskId).build();
@@ -173,6 +174,7 @@ public class SplitTransitionTests extends ShellTestCase {
     }
 
     @Test
+    @UiThreadTest
     public void testLaunchPair() {
         TransitionInfo info = createEnterPairInfo();
 
@@ -195,6 +197,7 @@ public class SplitTransitionTests extends ShellTestCase {
     }
 
     @Test
+    @UiThreadTest
     public void testMonitorInSplit() {
         enterSplit();
 
@@ -251,6 +254,7 @@ public class SplitTransitionTests extends ShellTestCase {
     }
 
     @Test
+    @UiThreadTest
     public void testEnterRecents() {
         enterSplit();
 
@@ -288,6 +292,7 @@ public class SplitTransitionTests extends ShellTestCase {
     }
 
     @Test
+    @UiThreadTest
     public void testDismissFromBeingOccluded() {
         enterSplit();
 
@@ -325,6 +330,7 @@ public class SplitTransitionTests extends ShellTestCase {
     }
 
     @Test
+    @UiThreadTest
     public void testDismissFromMultiWindowSupport() {
         enterSplit();
 
@@ -346,6 +352,7 @@ public class SplitTransitionTests extends ShellTestCase {
     }
 
     @Test
+    @UiThreadTest
     public void testDismissSnap() {
         enterSplit();
 
@@ -370,6 +377,7 @@ public class SplitTransitionTests extends ShellTestCase {
     }
 
     @Test
+    @UiThreadTest
     public void testDismissFromAppFinish() {
         enterSplit();
 

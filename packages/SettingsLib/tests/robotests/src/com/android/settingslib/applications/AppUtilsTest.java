@@ -129,6 +129,28 @@ public class AppUtilsTest {
         assertThat(mAppIconCacheManager.get(APP_PACKAGE_NAME, APP_UID)).isNotNull();
     }
 
+    @Test
+    public void isAppInstalled_noAppEntry_shouldReturnFalse() {
+        assertThat(AppUtils.isAppInstalled(null)).isFalse();
+    }
+
+    @Test
+    public void isAppInstalled_hasAppEntryWithInstalledFlag_shouldReturnTrue() {
+        final ApplicationsState.AppEntry appEntry = mock(ApplicationsState.AppEntry.class);
+        appEntry.info = new ApplicationInfo();
+        appEntry.info.flags = ApplicationInfo.FLAG_INSTALLED;
+
+        assertThat(AppUtils.isAppInstalled(appEntry)).isTrue();
+    }
+
+    @Test
+    public void isAppInstalled_hasAppEntryWithoutInstalledFlag_shouldReturnFalse() {
+        final ApplicationsState.AppEntry appEntry = mock(ApplicationsState.AppEntry.class);
+        appEntry.info = new ApplicationInfo();
+
+        assertThat(AppUtils.isAppInstalled(appEntry)).isFalse();
+    }
+
     private ApplicationsState.AppEntry createAppEntry(ApplicationInfo appInfo, int id) {
         ApplicationsState.AppEntry appEntry = new ApplicationsState.AppEntry(mContext, appInfo, id);
         appEntry.label = "label";

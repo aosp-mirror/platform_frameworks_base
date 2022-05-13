@@ -109,6 +109,14 @@ public class KeyguardUpdateMonitorCallback {
     public void onKeyguardBouncerFullyShowingChanged(boolean bouncerIsFullyShowing) { }
 
     /**
+     * Called when the dismissing animation of keyguard and surfaces behind is finished.
+     * If the surface behind is the Launcher, we may still be playing in-window animations
+     * when this is called (since it's only called once we dismiss the keyguard and end the
+     * remote animation).
+     */
+    public void onKeyguardDismissAnimationFinished() { }
+
+    /**
      * Called when visibility of lockscreen clock changes, such as when
      * obscured by a widget.
      */

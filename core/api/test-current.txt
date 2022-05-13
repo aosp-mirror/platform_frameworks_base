@@ -314,14 +314,12 @@ package android.app {
   public final class NotificationChannel implements android.os.Parcelable {
     method public int getOriginalImportance();
     method public boolean isImportanceLockedByCriticalDeviceFunction();
-    method public boolean isImportanceLockedByOEM();
     method public void lockFields(int);
     method public void setDeleted(boolean);
     method public void setDeletedTimeMs(long);
     method public void setDemoted(boolean);
     method public void setFgServiceShown(boolean);
     method public void setImportanceLockedByCriticalDeviceFunction(boolean);
-    method public void setImportanceLockedByOEM(boolean);
     method public void setImportantConversation(boolean);
     method public void setOriginalImportance(int);
   }
@@ -800,6 +798,7 @@ package android.content.pm {
     method public boolean hasRequestForegroundServiceExemption();
     method public boolean isPrivilegedApp();
     method public boolean isSystemApp();
+    method public void setEnableOnBackInvokedCallback(boolean);
     field public static final int PRIVATE_FLAG_PRIVILEGED = 8; // 0x8
     field public int privateFlags;
   }

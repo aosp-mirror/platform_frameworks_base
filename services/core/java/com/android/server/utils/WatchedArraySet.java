@@ -427,7 +427,7 @@ public class WatchedArraySet<E> extends WatchableImpl
         dst.mStorage.ensureCapacity(end);
         for (int i = 0; i < end; i++) {
             final E val = Snapshots.maybeSnapshot(src.valueAt(i));
-            dst.append(val);
+            dst.mStorage.append(val);
         }
         dst.seal();
     }
