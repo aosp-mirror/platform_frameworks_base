@@ -3377,9 +3377,9 @@ public class NotificationPanelViewController extends PanelViewController {
 
     @Override
     public void setIsLaunchAnimationRunning(boolean running) {
-        boolean wasRunning = isLaunchTransitionRunning();
+        boolean wasRunning = mIsLaunchAnimationRunning;
         super.setIsLaunchAnimationRunning(running);
-        if (wasRunning != isLaunchTransitionRunning()) {
+        if (wasRunning != mIsLaunchAnimationRunning) {
             mPanelEventsEmitter.notifyLaunchingActivityChanged(running);
         }
     }
