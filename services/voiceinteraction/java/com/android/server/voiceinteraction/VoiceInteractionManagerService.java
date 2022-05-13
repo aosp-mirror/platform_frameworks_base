@@ -172,11 +172,11 @@ public class VoiceInteractionManagerService extends SystemService {
         mAmInternal.setVoiceInteractionManagerProvider(
                 new ActivityManagerInternal.VoiceInteractionManagerProvider() {
                     @Override
-                    public void notifyActivityEventChanged() {
+                    public void notifyActivityDestroyed(IBinder activityToken) {
                         if (DEBUG) {
-                            Slog.d(TAG, "call notifyActivityEventChanged");
+                            Slog.d(TAG, "notifyActivityDestroyed activityToken=" + activityToken);
                         }
-                        mServiceStub.notifyActivityEventChanged();
+                        mServiceStub.notifyActivityDestroyed(activityToken);
                     }
                 });
     }
@@ -449,11 +449,12 @@ public class VoiceInteractionManagerService extends SystemService {
             return mImpl.supportsLocalVoiceInteraction();
         }
 
-        void notifyActivityEventChanged() {
+        void notifyActivityDestroyed(@NonNull IBinder activityToken) {
             synchronized (this) {
-                if (mImpl == null) return;
+                if (mImpl == null || activityToken == null) return;
 
-                Binder.withCleanCallingIdentity(() -> mImpl.notifyActivityEventChangedLocked());
+                Binder.withCleanCallingIdentity(
+                        () -> mImpl.notifyActivityDestroyedLocked(activityToken));
             }
         }
 
@@ -1226,6 +1227,16 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
+        @Override
+        public void notifyActivityEventChanged(@NonNull IBinder activityToken, int type) {
+            synchronized (this) {
+                if (mImpl == null || activityToken == null) {
+                    return;
+                }
+                Binder.withCleanCallingIdentity(
+                        () -> mImpl.notifyActivityEventChangedLocked(activityToken, type));
+            }
+        }
         //----------------- Hotword Detection/Validation APIs --------------------------------//
 
         @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION)

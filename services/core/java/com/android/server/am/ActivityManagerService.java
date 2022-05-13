@@ -2934,10 +2934,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                 || event == Event.ACTIVITY_DESTROYED)) {
             contentCaptureService.notifyActivityEvent(userId, activity, event);
         }
-        // TODO(b/201234353): Move the logic to client side.
-        if (mVoiceInteractionManagerProvider != null && (event == Event.ACTIVITY_PAUSED
-                || event == Event.ACTIVITY_RESUMED || event == Event.ACTIVITY_STOPPED)) {
-            mVoiceInteractionManagerProvider.notifyActivityEventChanged();
+        // Currently we have move most of logic to the client side. When the activity lifecycle
+        // event changed, the client side will notify the VoiceInteractionManagerService. But
+        // when the application process died, the VoiceInteractionManagerService will miss the
+        // activity lifecycle event changed, so we still need ACTIVITY_DESTROYED event here to
+        // know if the activity has been destroyed.
+        if (mVoiceInteractionManagerProvider != null && event == Event.ACTIVITY_DESTROYED) {
+            mVoiceInteractionManagerProvider.notifyActivityDestroyed(appToken);
         }
     }
 
