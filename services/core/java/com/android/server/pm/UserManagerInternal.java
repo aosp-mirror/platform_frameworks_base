@@ -312,4 +312,12 @@ public abstract class UserManagerInternal {
      */
     public abstract void setDefaultCrossProfileIntentFilters(
             @UserIdInt int parentUserId, @UserIdInt int profileUserId);
+
+    /**
+     * Returns {@code true} if the system should ignore errors when preparing
+     * the storage directories for the user with ID {@code userId}. This will
+     * return {@code false} for all new users; it will only return {@code true}
+     * for users that already existed on-disk from an older version of Android.
+     */
+    public abstract boolean shouldIgnorePrepareStorageErrors(int userId);
 }
