@@ -28,7 +28,6 @@ import android.util.ArraySet;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.util.NotificationChannels;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -41,7 +40,7 @@ import java.util.Set;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class ChannelsTest extends SysuiTestCase {
+public class NotificationChannelsTest extends SysuiTestCase {
     private final NotificationManager mMockNotificationManager = mock(NotificationManager.class);
 
     @Before
@@ -55,9 +54,10 @@ public class ChannelsTest extends SysuiTestCase {
                 NotificationChannels.ALERTS,
                 NotificationChannels.SCREENSHOTS_HEADSUP,
                 NotificationChannels.STORAGE,
-                NotificationChannels.GENERAL,
+                NotificationChannels.INSTANT,
                 NotificationChannels.BATTERY,
-                NotificationChannels.HINTS
+                NotificationChannels.HINTS,
+                NotificationChannels.SETUP
         ));
         NotificationChannels.createAll(mContext);
         ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
@@ -67,4 +67,11 @@ public class ChannelsTest extends SysuiTestCase {
         list.forEach((chan) -> assertTrue(ALL_CHANNELS.contains(chan.getId())));
     }
 
+    @Test
+    public void testChannelCleanup() {
+        new NotificationChannels(mContext).start();
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        verify(mMockNotificationManager).deleteNotificationChannel(captor.capture());
+        assertEquals(NotificationChannels.GENERAL, captor.getValue());
+    }
 }
