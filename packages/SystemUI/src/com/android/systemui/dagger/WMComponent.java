@@ -26,7 +26,6 @@ import com.android.systemui.tv.TvWMComponent;
 import com.android.wm.shell.ShellCommandHandler;
 import com.android.wm.shell.ShellInit;
 import com.android.wm.shell.TaskViewFactory;
-import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.common.annotations.ShellMainThread;
@@ -96,9 +95,6 @@ public interface WMComponent {
 
     @WMSingleton
     Optional<SplitScreen> getSplitScreen();
-
-    @WMSingleton
-    Optional<AppPairs> getAppPairs();
 
     @WMSingleton
     Optional<Bubbles> getBubbles();

@@ -206,6 +206,8 @@ class AndroidKeyStoreBCWorkaroundProvider extends Provider {
 
         putSignatureImpl("NONEwithECDSA",
                 PACKAGE_NAME + ".AndroidKeyStoreECDSASignatureSpi$NONE");
+        putSignatureImpl("Ed25519",
+                PACKAGE_NAME + ".AndroidKeyStoreECDSASignatureSpi$Ed25519");
 
         putSignatureImpl("SHA1withECDSA", PACKAGE_NAME + ".AndroidKeyStoreECDSASignatureSpi$SHA1");
         put("Alg.Alias.Signature.ECDSA", "SHA1withECDSA");

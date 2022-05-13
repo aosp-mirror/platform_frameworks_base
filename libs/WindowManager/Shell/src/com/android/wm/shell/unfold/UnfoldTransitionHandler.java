@@ -127,7 +127,8 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
     @Override
     public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
             @NonNull TransitionRequestInfo request) {
-        if (request.getType() == TRANSIT_CHANGE && request.getDisplayChange() != null) {
+        if (request.getType() == TRANSIT_CHANGE && request.getDisplayChange() != null
+                && request.getDisplayChange().isPhysicalDisplayChanged()) {
             mTransition = transition;
             return new WindowContainerTransaction();
         }
