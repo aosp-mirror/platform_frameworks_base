@@ -65,7 +65,7 @@ class PrivacyItemController @Inject constructor(
     val locationAvailable
         get() = privacyConfig.locationAvailable
     val allIndicatorsAvailable
-        get() = micCameraAvailable && locationAvailable
+        get() = micCameraAvailable && locationAvailable && privacyConfig.mediaProjectionAvailable
 
     private val notifyChanges = Runnable {
         val list = privacyList
@@ -84,6 +84,10 @@ class PrivacyItemController @Inject constructor(
 
         override fun onFlagMicCameraChanged(flag: Boolean) {
             callbacks.forEach { it.get()?.onFlagMicCameraChanged(flag) }
+        }
+
+        override fun onFlagMediaProjectionChanged(flag: Boolean) {
+            callbacks.forEach { it.get()?.onFlagMediaProjectionChanged(flag) }
         }
     }
 
