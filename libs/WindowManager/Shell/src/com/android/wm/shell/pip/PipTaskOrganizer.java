@@ -1296,7 +1296,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      */
     public void scheduleOffsetPip(Rect originalBounds, int offset, int duration,
             Consumer<Rect> updateBoundsCallback) {
-        if (mPipTransitionState.shouldBlockResizeRequest()) {
+        if (mPipTransitionState.shouldBlockResizeRequest()
+                || mPipTransitionState.getInSwipePipToHomeTransition()) {
             return;
         }
         if (mWaitForFixedRotation) {
