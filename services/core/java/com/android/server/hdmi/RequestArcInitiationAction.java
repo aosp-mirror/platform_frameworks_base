@@ -48,7 +48,7 @@ final class RequestArcInitiationAction extends RequestArcAction {
             public void onSendCompleted(int error) {
                 if (error != SendMessageResult.SUCCESS) {
                     // Turn off ARC status if <Request ARC Initiation> fails.
-                    tv().setArcStatus(false);
+                    tv().disableArc();
                     finish();
                 }
             }
