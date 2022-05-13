@@ -83,45 +83,31 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
         return null;
     }
 
-    private void openPipe() throws InterruptedException {
-        FileDescriptor fd = getPipeFD();
+    private static FileDescriptor openPipe() throws InterruptedException {
+        FileDescriptor fd = openPipeImpl();
 
-        if (fd == null) {
+        // There's no guarantee that QEMU pipes will be ready at the moment
+        // this method is invoked. We simply try to get the pipe open and
+        // retry on failure indefinitely.
+        while (fd == null) {
+            Thread.sleep(100);
             fd = openPipeImpl();
-
-            // There's no guarantee that QEMU pipes will be ready at the moment
-            // this method is invoked. We simply try to get the pipe open and
-            // retry on failure indefinitely.
-            while (fd == null) {
-                Thread.sleep(100);
-                fd = openPipeImpl();
-            }
         }
 
-        setPipeFD(fd);
+        return fd;
     }
 
-    private synchronized void closePipe() {
-        try {
-            final FileDescriptor fd = mPipe;
-            mPipe = null;
-            if (fd != null) {
-                Os.close(fd);
-            }
-        } catch (ErrnoException ignore) {
-        }
-    }
-
-    private byte[] receiveMessage() throws ErrnoException, InterruptedIOException, EOFException {
+    private static byte[] receiveMessage(final FileDescriptor fd) throws ErrnoException,
+            InterruptedIOException, EOFException {
         final byte[] lengthBits = new byte[4];
-        readFully(mPipe, lengthBits, 0, lengthBits.length);
+        readFully(fd, lengthBits, 0, lengthBits.length);
 
         final ByteBuffer bb = ByteBuffer.wrap(lengthBits);
         bb.order(ByteOrder.LITTLE_ENDIAN);
         final int msgLen = bb.getInt();
 
         final byte[] msg = new byte[msgLen];
-        readFully(mPipe, msg, 0, msg.length);
+        readFully(fd, msg, 0, msg.length);
 
         return msg;
     }
@@ -140,11 +126,16 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
 
     EmulatorClipboardMonitor(final Consumer<ClipData> setAndroidClipboard) {
         this.mHostMonitorThread = new Thread(() -> {
+            FileDescriptor fd = null;
+
             while (!Thread.interrupted()) {
                 try {
-                    openPipe();
+                    if (fd == null) {
+                        fd = openPipe();
+                        setPipeFD(fd);
+                    }
 
-                    final byte[] receivedData = receiveMessage();
+                    final byte[] receivedData = receiveMessage(fd);
 
                     final String str = new String(receivedData);
                     final ClipData clip = new ClipData("host clipboard",
@@ -158,9 +149,17 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
                         Slog.i(TAG, "Setting the guest clipboard to '" + str + "'");
                     }
                     setAndroidClipboard.accept(clip);
-                } catch (ErrnoException | EOFException | InterruptedIOException e) {
-                    closePipe();
-                } catch (InterruptedException | IllegalArgumentException e) {
+                } catch (ErrnoException | EOFException | InterruptedIOException
+                         | InterruptedException e) {
+                    setPipeFD(null);
+
+                    try {
+                        Os.close(fd);
+                    } catch (ErrnoException e2) {
+                        // ignore
+                    }
+
+                    fd = null;
                 }
             }
         });
