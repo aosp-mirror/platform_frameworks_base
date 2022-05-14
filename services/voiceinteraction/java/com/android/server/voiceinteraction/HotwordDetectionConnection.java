@@ -122,6 +122,10 @@ final class HotwordDetectionConnection {
     private static final long RESET_DEBUG_HOTWORD_LOGGING_TIMEOUT_MILLIS = 60 * 60 * 1000; // 1 hour
     private static final int MAX_ISOLATED_PROCESS_NUMBER = 10;
 
+    // The error codes are used for onError callback
+    private static final int HOTWORD_DETECTION_SERVICE_DIED = -1;
+    private static final int CALLBACK_ONDETECTED_GOT_SECURITY_EXCEPTION = -2;
+
     // Hotword metrics
     private static final int METRICS_INIT_UNKNOWN_TIMEOUT =
             HOTWORD_DETECTION_SERVICE_INIT_RESULT_REPORTED__RESULT__CALLBACK_INIT_STATE_UNKNOWN_TIMEOUT;
@@ -418,19 +422,24 @@ final class HotwordDetectionConnection {
                     Slog.d(TAG, "onDetected");
                 }
                 synchronized (mLock) {
-                    if (mPerformingSoftwareHotwordDetection) {
-                        enforcePermissionsForDataDelivery();
-                        mSoftwareCallback.onDetected(result, null, null);
-                        mPerformingSoftwareHotwordDetection = false;
-                        if (result != null) {
-                            Slog.i(TAG, "Egressed " + HotwordDetectedResult.getUsageSize(result)
-                                    + " bits from hotword trusted process");
-                            if (mDebugHotwordLogging) {
-                                Slog.i(TAG, "Egressed detected result: " + result);
-                            }
-                        }
-                    } else {
+                    if (!mPerformingSoftwareHotwordDetection) {
                         Slog.i(TAG, "Hotword detection has already completed");
+                        return;
+                    }
+                    mPerformingSoftwareHotwordDetection = false;
+                    try {
+                        enforcePermissionsForDataDelivery();
+                    } catch (SecurityException e) {
+                        mSoftwareCallback.onError();
+                        return;
+                    }
+                    mSoftwareCallback.onDetected(result, null, null);
+                    if (result != null) {
+                        Slog.i(TAG, "Egressed " + HotwordDetectedResult.getUsageSize(result)
+                                + " bits from hotword trusted process");
+                        if (mDebugHotwordLogging) {
+                            Slog.i(TAG, "Egressed detected result: " + result);
+                        }
                     }
                 }
             }
@@ -511,19 +520,24 @@ final class HotwordDetectionConnection {
             public void onDetected(HotwordDetectedResult result) throws RemoteException {
                 Slog.v(TAG, "onDetected");
                 synchronized (mLock) {
-                    if (mValidatingDspTrigger) {
-                        mValidatingDspTrigger = false;
-                        enforcePermissionsForDataDelivery();
-                        externalCallback.onKeyphraseDetected(recognitionEvent, result);
-                        if (result != null) {
-                            Slog.i(TAG, "Egressed " + HotwordDetectedResult.getUsageSize(result)
-                                    + " bits from hotword trusted process");
-                            if (mDebugHotwordLogging) {
-                                Slog.i(TAG, "Egressed detected result: " + result);
-                            }
-                        }
-                    } else {
+                    if (!mValidatingDspTrigger) {
                         Slog.i(TAG, "Ignored hotword detected since trigger has been handled");
+                        return;
+                    }
+                    mValidatingDspTrigger = false;
+                    try {
+                        enforcePermissionsForDataDelivery();
+                    } catch (SecurityException e) {
+                        externalCallback.onError(CALLBACK_ONDETECTED_GOT_SECURITY_EXCEPTION);
+                        return;
+                    }
+                    externalCallback.onKeyphraseDetected(recognitionEvent, result);
+                    if (result != null) {
+                        Slog.i(TAG, "Egressed " + HotwordDetectedResult.getUsageSize(result)
+                                + " bits from hotword trusted process");
+                        if (mDebugHotwordLogging) {
+                            Slog.i(TAG, "Egressed detected result: " + result);
+                        }
                     }
                 }
             }
@@ -593,7 +607,8 @@ final class HotwordDetectionConnection {
                         HotwordMetricsLogger.writeKeyphraseTriggerEvent(
                                 mDetectorType,
                                 METRICS_KEYPHRASE_TRIGGERED_DETECT_SECURITY_EXCEPTION);
-                        throw e;
+                        externalCallback.onError(CALLBACK_ONDETECTED_GOT_SECURITY_EXCEPTION);
+                        return;
                     }
                     externalCallback.onKeyphraseDetected(recognitionEvent, result);
                     if (result != null) {
@@ -883,7 +898,13 @@ final class HotwordDetectionConnection {
                                     throws RemoteException {
                                 bestEffortClose(serviceAudioSink);
                                 bestEffortClose(serviceAudioSource);
-                                enforcePermissionsForDataDelivery();
+                                try {
+                                    enforcePermissionsForDataDelivery();
+                                } catch (SecurityException e) {
+                                    bestEffortClose(audioSource);
+                                    callback.onError();
+                                    return;
+                                }
                                 callback.onDetected(triggerResult, null /* audioFormat */,
                                         null /* audioStream */);
                                 if (triggerResult != null) {
@@ -982,7 +1003,7 @@ final class HotwordDetectionConnection {
 
                 Slog.w(TAG, "binderDied");
                 try {
-                    mCallback.onError(-1);
+                    mCallback.onError(HOTWORD_DETECTION_SERVICE_DIED);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Failed to report onError status: " + e);
                 }
