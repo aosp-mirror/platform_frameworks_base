@@ -1448,8 +1448,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     // Enter overview panel, so start recent transition.
                     mSplitTransitions.setRecentTransition(transition,
                             request.getRemoteTransition());
-                } else {
-                    // Occluded by the other fullscreen task, so dismiss both.
+                } else if (mSplitTransitions.mPendingRecent == null) {
+                    // If split-task is not controlled by recents animation
+                    // and occluded by the other fullscreen task, dismiss both.
                     prepareExitSplitScreen(STAGE_TYPE_UNDEFINED, out);
                     mSplitTransitions.setDismissTransition(transition,
                             STAGE_TYPE_UNDEFINED, EXIT_REASON_UNKNOWN);
