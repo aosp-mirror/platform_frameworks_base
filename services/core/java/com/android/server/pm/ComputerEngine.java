@@ -367,6 +367,8 @@ public class ComputerEngine implements Computer {
         return (v1 > v2) ? -1 : ((v1 < v2) ? 1 : 0);
     };
 
+    private final int mVersion;
+
     // The administrative use counter.
     private int mUsed = 0;
 
@@ -424,7 +426,8 @@ public class ComputerEngine implements Computer {
         return mLocalAndroidApplication;
     }
 
-    ComputerEngine(PackageManagerService.Snapshot args) {
+    ComputerEngine(PackageManagerService.Snapshot args, int version) {
+        mVersion = version;
         mSettings = new Settings(args.settings);
         mIsolatedOwners = args.isolatedOwners;
         mPackages = args.packages;
@@ -464,11 +467,17 @@ public class ComputerEngine implements Computer {
         mService = args.service;
     }
 
+    @Override
+    public int getVersion() {
+        return mVersion;
+    }
+
     /**
      * Record that the snapshot was used.
      */
-    public final void use() {
+    public final Computer use() {
         mUsed++;
+        return this;
     }
 
     /**

@@ -402,6 +402,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         mScrimBehind.setFocusable(!state.isLowPowerState());
         mNotificationsScrim.setFocusable(!state.isLowPowerState());
 
+        mScrimInFront.setBlendWithMainColor(state.shouldBlendWithMainColor());
+
         // Cancel blanking transitions that were pending before we requested a new state
         if (mPendingFrameCallback != null) {
             mScrimBehind.removeCallbacks(mPendingFrameCallback);
