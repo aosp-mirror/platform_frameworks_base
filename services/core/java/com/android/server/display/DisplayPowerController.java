@@ -472,6 +472,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     private DisplayDeviceConfig mDisplayDeviceConfig;
 
+    // Identifiers for suspend blocker acuisition requests
+    private final String mSuspendBlockerIdUnfinishedBusiness;
+    private final String mSuspendBlockerIdOnStateChanged;
+    private final String mSuspendBlockerIdProxPositive;
+    private final String mSuspendBlockerIdProxNegative;
+    private final String mSuspendBlockerIdProxDebounce;
+
     /**
      * Creates the display power controller.
      */
@@ -482,7 +489,14 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             Runnable onBrightnessChangeRunnable) {
         mLogicalDisplay = logicalDisplay;
         mDisplayId = mLogicalDisplay.getDisplayIdLocked();
-        TAG = "DisplayPowerController[" + mDisplayId + "]";
+        final String displayIdStr = "[" + mDisplayId + "]";
+        TAG = "DisplayPowerController" + displayIdStr;
+        mSuspendBlockerIdUnfinishedBusiness = displayIdStr + "unfinished business";
+        mSuspendBlockerIdOnStateChanged = displayIdStr + "on state changed";
+        mSuspendBlockerIdProxPositive = displayIdStr + "prox positive";
+        mSuspendBlockerIdProxNegative = displayIdStr + "prox negative";
+        mSuspendBlockerIdProxDebounce = displayIdStr + "prox debounce";
+
         mDisplayDevice = mLogicalDisplay.getPrimaryDisplayDeviceLocked();
         mUniqueDisplayId = logicalDisplay.getPrimaryDisplayDeviceLocked().getUniqueId();
         mDisplayStatsId = mUniqueDisplayId.hashCode();
@@ -1084,7 +1098,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mBrightnessThrottler.stop();
         mHandler.removeCallbacksAndMessages(null);
         if (mUnfinishedBusiness) {
-            mCallbacks.releaseSuspendBlocker();
+            mCallbacks.releaseSuspendBlocker(mSuspendBlockerIdUnfinishedBusiness);
             mUnfinishedBusiness = false;
         }
 
@@ -1650,7 +1664,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             if (DEBUG) {
                 Slog.d(TAG, "Unfinished business...");
             }
-            mCallbacks.acquireSuspendBlocker();
+            mCallbacks.acquireSuspendBlocker(mSuspendBlockerIdUnfinishedBusiness);
             mUnfinishedBusiness = true;
         }
 
@@ -1675,7 +1689,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 Slog.d(TAG, "Finished business...");
             }
             mUnfinishedBusiness = false;
-            mCallbacks.releaseSuspendBlocker();
+            mCallbacks.releaseSuspendBlocker(mSuspendBlockerIdUnfinishedBusiness);
         }
 
         // Record if dozing for future comparison.
@@ -2228,19 +2242,19 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private void clearPendingProximityDebounceTime() {
         if (mPendingProximityDebounceTime >= 0) {
             mPendingProximityDebounceTime = -1;
-            mCallbacks.releaseSuspendBlocker(); // release wake lock
+            mCallbacks.releaseSuspendBlocker(mSuspendBlockerIdProxDebounce);
         }
     }
 
     private void setPendingProximityDebounceTime(long debounceTime) {
         if (mPendingProximityDebounceTime < 0) {
-            mCallbacks.acquireSuspendBlocker(); // acquire wake lock
+            mCallbacks.acquireSuspendBlocker(mSuspendBlockerIdProxDebounce);
         }
         mPendingProximityDebounceTime = debounceTime;
     }
 
     private void sendOnStateChangedWithWakelock() {
-        mCallbacks.acquireSuspendBlocker();
+        mCallbacks.acquireSuspendBlocker(mSuspendBlockerIdOnStateChanged);
         mHandler.post(mOnStateChangedRunnable);
     }
 
@@ -2400,12 +2414,12 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         @Override
         public void run() {
             mCallbacks.onStateChanged();
-            mCallbacks.releaseSuspendBlocker();
+            mCallbacks.releaseSuspendBlocker(mSuspendBlockerIdOnStateChanged);
         }
     };
 
     private void sendOnProximityPositiveWithWakelock() {
-        mCallbacks.acquireSuspendBlocker();
+        mCallbacks.acquireSuspendBlocker(mSuspendBlockerIdProxPositive);
         mHandler.post(mOnProximityPositiveRunnable);
     }
 
@@ -2413,12 +2427,12 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         @Override
         public void run() {
             mCallbacks.onProximityPositive();
-            mCallbacks.releaseSuspendBlocker();
+            mCallbacks.releaseSuspendBlocker(mSuspendBlockerIdProxPositive);
         }
     };
 
     private void sendOnProximityNegativeWithWakelock() {
-        mCallbacks.acquireSuspendBlocker();
+        mCallbacks.acquireSuspendBlocker(mSuspendBlockerIdProxNegative);
         mHandler.post(mOnProximityNegativeRunnable);
     }
 
@@ -2426,7 +2440,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         @Override
         public void run() {
             mCallbacks.onProximityNegative();
-            mCallbacks.releaseSuspendBlocker();
+            mCallbacks.releaseSuspendBlocker(mSuspendBlockerIdProxNegative);
         }
     };
 

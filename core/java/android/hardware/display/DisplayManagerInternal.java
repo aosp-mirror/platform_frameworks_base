@@ -560,8 +560,19 @@ public abstract class DisplayManagerInternal {
         void onProximityNegative();
         void onDisplayStateChange(boolean allInactive, boolean allOff);
 
-        void acquireSuspendBlocker();
-        void releaseSuspendBlocker();
+        /**
+         * Acquires a suspend blocker with a specified label.
+         *
+         * @param id A logging label for the acquisition.
+         */
+        void acquireSuspendBlocker(String id);
+
+        /**
+         * Releases a suspend blocker with a specified label.
+         *
+         * @param id A logging label for the release.
+         */
+        void releaseSuspendBlocker(String id);
     }
 
     /**
