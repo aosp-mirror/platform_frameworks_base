@@ -37,6 +37,7 @@ import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.Display;
 import android.view.InputDevice;
+import android.view.WindowManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -83,22 +84,26 @@ class InputController {
     private final NativeWrapper mNativeWrapper;
     private final DisplayManagerInternal mDisplayManagerInternal;
     private final InputManagerInternal mInputManagerInternal;
+    private final WindowManager mWindowManager;
     private final DeviceCreationThreadVerifier mThreadVerifier;
 
-    InputController(@NonNull Object lock, @NonNull Handler handler) {
-        this(lock, new NativeWrapper(), handler,
+    InputController(@NonNull Object lock, @NonNull Handler handler,
+            @NonNull WindowManager windowManager) {
+        this(lock, new NativeWrapper(), handler, windowManager,
                 // Verify that virtual devices are not created on the handler thread.
                 () -> !handler.getLooper().isCurrentThread());
     }
 
     @VisibleForTesting
     InputController(@NonNull Object lock, @NonNull NativeWrapper nativeWrapper,
-            @NonNull Handler handler, @NonNull DeviceCreationThreadVerifier threadVerifier) {
+            @NonNull Handler handler, @NonNull WindowManager windowManager,
+            @NonNull DeviceCreationThreadVerifier threadVerifier) {
         mLock = lock;
         mHandler = handler;
         mNativeWrapper = nativeWrapper;
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
+        mWindowManager = windowManager;
         mThreadVerifier = threadVerifier;
     }
 
@@ -207,6 +212,15 @@ class InputController {
 
     void setDisplayEligibilityForPointerCapture(boolean isEligible, int displayId) {
         mInputManagerInternal.setDisplayEligibilityForPointerCapture(displayId, isEligible);
+    }
+
+    void setLocalIme(int displayId) {
+        // WM throws a SecurityException if the display is untrusted.
+        if ((mDisplayManagerInternal.getDisplayInfo(displayId).flags & Display.FLAG_TRUSTED)
+                == Display.FLAG_TRUSTED) {
+            mWindowManager.setDisplayImePolicy(displayId,
+                    WindowManager.DISPLAY_IME_POLICY_LOCAL);
+        }
     }
 
     @GuardedBy("mLock")
