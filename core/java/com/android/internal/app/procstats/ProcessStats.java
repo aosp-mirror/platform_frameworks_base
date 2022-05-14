@@ -374,14 +374,12 @@ public final class ProcessStats implements Parcelable {
                     }
                 }
                 thisProc.add(otherProc);
-                if (thisProc.isActive()) {
-                    UidState uidState = mUidStates.get(uid);
-                    if (uidState == null) {
-                        uidState = new UidState(this, uid);
-                        mUidStates.put(uid, uidState);
-                    }
-                    uidState.addProcess(thisProc);
+                UidState uidState = mUidStates.get(uid);
+                if (uidState == null) {
+                    uidState = new UidState(this, uid);
+                    mUidStates.put(uid, uidState);
                 }
+                uidState.addProcess(thisProc);
             }
         }
 
@@ -1185,9 +1183,7 @@ public final class ProcessStats implements Parcelable {
                         + " " + proc);
                 mProcesses.put(procName, uid, proc);
 
-                if (proc.isActive()) {
-                    mUidStates.get(uid).addProcess(proc);
-                }
+                mUidStates.get(uid).addProcess(proc);
             }
         }
 

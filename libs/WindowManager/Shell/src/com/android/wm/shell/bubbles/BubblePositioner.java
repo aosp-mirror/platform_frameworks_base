@@ -344,6 +344,14 @@ public class BubblePositioner {
         return mImeVisible ? mImeHeight : 0;
     }
 
+    /** Return top position of the IME if it's visible */
+    public int getImeTop() {
+        if (mImeVisible) {
+            return getScreenRect().bottom - getImeHeight() - getInsets().bottom;
+        }
+        return 0;
+    }
+
     /** Sets whether the IME is visible. **/
     public void setImeVisible(boolean visible, int height) {
         mImeVisible = visible;
@@ -705,5 +713,22 @@ public class BubblePositioner {
      */
     public void setPinnedLocation(PointF point) {
         mPinLocation = point;
+    }
+
+    /**
+     * Navigation bar has an area where system gestures can be started from.
+     *
+     * @return {@link Rect} for system navigation bar gesture zone
+     */
+    public Rect getNavBarGestureZone() {
+        // Gesture zone height from the bottom
+        int gestureZoneHeight = mContext.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.navigation_bar_gesture_height);
+        Rect screen = getScreenRect();
+        return new Rect(
+                screen.left,
+                screen.bottom - gestureZoneHeight,
+                screen.right,
+                screen.bottom);
     }
 }

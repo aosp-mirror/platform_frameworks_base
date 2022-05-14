@@ -260,7 +260,7 @@ public class InstantAppNotifier extends CoreStartable
 
         Intent browserIntent = getTaskIntent(taskId, userId);
         Notification.Builder builder =
-                new Notification.Builder(mContext, NotificationChannels.GENERAL);
+                new Notification.Builder(mContext, NotificationChannels.INSTANT);
         if (browserIntent != null && browserIntent.isWebIntent()) {
             // Make sure that this doesn't resolve back to an instant app
             browserIntent

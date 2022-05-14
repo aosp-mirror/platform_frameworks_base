@@ -17,11 +17,13 @@
 package com.android.wm.shell.bubbles.animation;
 
 import static com.android.wm.shell.bubbles.BubblePositioner.NUM_VISIBLE_WHEN_RESTING;
+import static com.android.wm.shell.bubbles.BubbleStackView.HOME_GESTURE_ENABLED;
 
 import android.content.res.Resources;
 import android.graphics.Path;
 import android.graphics.PointF;
 import android.view.View;
+import android.view.animation.Interpolator;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -61,7 +63,10 @@ public class ExpandedAnimationController
     private static final float DAMPING_RATIO_MEDIUM_LOW_BOUNCY = 0.65f;
 
     /** Stiffness for the expand/collapse path-following animation. */
-    private static final int EXPAND_COLLAPSE_ANIM_STIFFNESS = 1000;
+    private static final int EXPAND_COLLAPSE_ANIM_STIFFNESS = 400;
+
+    /** Stiffness for the expand/collapse animation when home gesture handling is off */
+    private static final int EXPAND_COLLAPSE_ANIM_STIFFNESS_WITHOUT_HOME_GESTURE = 1000;
 
     /**
      * Velocity required to dismiss an individual bubble without dragging it into the dismiss
@@ -72,6 +77,11 @@ public class ExpandedAnimationController
     private final PhysicsAnimator.SpringConfig mAnimateOutSpringConfig =
             new PhysicsAnimator.SpringConfig(
                     EXPAND_COLLAPSE_ANIM_STIFFNESS, SpringForce.DAMPING_RATIO_NO_BOUNCY);
+
+    private final PhysicsAnimator.SpringConfig mAnimateOutSpringConfigWithoutHomeGesture =
+            new PhysicsAnimator.SpringConfig(
+                    EXPAND_COLLAPSE_ANIM_STIFFNESS_WITHOUT_HOME_GESTURE,
+                    SpringForce.DAMPING_RATIO_NO_BOUNCY);
 
     /** Horizontal offset between bubbles, which we need to know to re-stack them. */
     private float mStackOffsetPx;
@@ -278,11 +288,20 @@ public class ExpandedAnimationController
                     (firstBubbleLeads && index == 0)
                             || (!firstBubbleLeads && index == mLayout.getChildCount() - 1);
 
+            Interpolator interpolator;
+            if (HOME_GESTURE_ENABLED) {
+                // When home gesture is enabled, we use a different animation timing for collapse
+                interpolator = expanding
+                        ? Interpolators.EMPHASIZED_ACCELERATE : Interpolators.EMPHASIZED_DECELERATE;
+            } else {
+                interpolator = Interpolators.LINEAR;
+            }
+
             animation
                     .followAnimatedTargetAlongPath(
                             path,
                             EXPAND_COLLAPSE_TARGET_ANIM_DURATION /* targetAnimDuration */,
-                            Interpolators.LINEAR /* targetAnimInterpolator */,
+                            interpolator /* targetAnimInterpolator */,
                             isLeadBubble ? mLeadBubbleEndAction : null /* endAction */,
                             () -> mLeadBubbleEndAction = null /* endAction */)
                     .withStartDelay(startDelay)
@@ -525,10 +544,16 @@ public class ExpandedAnimationController
             finishRemoval.run();
             mOnBubbleAnimatedOutAction.run();
         } else {
+            PhysicsAnimator.SpringConfig springConfig;
+            if (HOME_GESTURE_ENABLED) {
+                springConfig = mAnimateOutSpringConfig;
+            } else {
+                springConfig = mAnimateOutSpringConfigWithoutHomeGesture;
+            }
             PhysicsAnimator.getInstance(child)
                     .spring(DynamicAnimation.ALPHA, 0f)
-                    .spring(DynamicAnimation.SCALE_X, 0f, mAnimateOutSpringConfig)
-                    .spring(DynamicAnimation.SCALE_Y, 0f, mAnimateOutSpringConfig)
+                    .spring(DynamicAnimation.SCALE_X, 0f, springConfig)
+                    .spring(DynamicAnimation.SCALE_Y, 0f, springConfig)
                     .withEndActions(finishRemoval, mOnBubbleAnimatedOutAction)
                     .start();
         }

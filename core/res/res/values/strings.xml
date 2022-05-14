@@ -876,9 +876,9 @@
     <string name="permgroupdesc_sms">send and view SMS messages</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_storage">Files and documents</string>
+    <string name="permgrouplab_storage">Files</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_storage">access files and documents on your device</string>
+    <string name="permgroupdesc_storage">access files on your device</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=40]-->
     <string name="permgrouplab_readMediaAural">Music and audio</string>
@@ -6325,5 +6325,5 @@ ul.</string>
     <string name="vdm_camera_access_denied" product="tablet">Can’t access the tablet’s camera from your <xliff:g id="device" example="Chromebook">%1$s</xliff:g></string>
 
     <!-- Title for preference of the system default locale. [CHAR LIMIT=50]-->
-    <string name="system_locale_title">System language</string>
+    <string name="system_locale_title">System default</string>
 </resources>
