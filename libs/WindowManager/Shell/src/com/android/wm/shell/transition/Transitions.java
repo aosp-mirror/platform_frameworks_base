@@ -312,13 +312,14 @@ public class Transitions implements RemoteCallable<Transitions> {
         if (info.getRootLeash().isValid()) {
             t.show(info.getRootLeash());
         }
+        final int numChanges = info.getChanges().size();
         // Put animating stuff above this line and put static stuff below it.
-        int zSplitLine = info.getChanges().size();
+        final int zSplitLine = numChanges + 1;
         // changes should be ordered top-to-bottom in z
-        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+        for (int i = numChanges - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
             final SurfaceControl leash = change.getLeash();
-            final int mode = info.getChanges().get(i).getMode();
+            final int mode = change.getMode();
 
             // Don't reparent anything that isn't independent within its parents
             if (!TransitionInfo.isIndependent(change, info)) {
@@ -332,26 +333,31 @@ public class Transitions implements RemoteCallable<Transitions> {
                 t.setPosition(leash, change.getStartAbsBounds().left - info.getRootOffset().x,
                         change.getStartAbsBounds().top - info.getRootOffset().y);
             }
+            final int layer;
             // Put all the OPEN/SHOW on top
-            if (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT) {
+            if ((change.getFlags() & FLAG_IS_WALLPAPER) != 0) {
+                // Wallpaper is always at the bottom.
+                layer = 0;
+            } else if (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT) {
                 if (isOpening) {
                     // put on top
-                    t.setLayer(leash, zSplitLine + info.getChanges().size() - i);
+                    layer = zSplitLine + numChanges - i;
                 } else {
                     // put on bottom
-                    t.setLayer(leash, zSplitLine - i);
+                    layer = zSplitLine - i;
                 }
             } else if (mode == TRANSIT_CLOSE || mode == TRANSIT_TO_BACK) {
                 if (isOpening) {
                     // put on bottom and leave visible
-                    t.setLayer(leash, zSplitLine - i);
+                    layer = zSplitLine - i;
                 } else {
                     // put on top
-                    t.setLayer(leash, zSplitLine + info.getChanges().size() - i);
+                    layer = zSplitLine + numChanges - i;
                 }
             } else { // CHANGE or other
-                t.setLayer(leash, zSplitLine + info.getChanges().size() - i);
+                layer = zSplitLine + numChanges - i;
             }
+            t.setLayer(leash, layer);
         }
     }
 

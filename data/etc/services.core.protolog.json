@@ -163,6 +163,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-1941440781": {
+      "message": "Creating Pending Move-to-back: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Task.java"
+    },
     "-1939861963": {
       "message": "Create root task displayId=%d winMode=%d",
       "level": "VERBOSE",
@@ -2928,12 +2934,6 @@
       "level": "WARN",
       "group": "WM_DEBUG_LOCKTASK",
       "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
-    },
-    "716528224": {
-      "message": "Focused window found using wmService.getFocusedWindowLocked()",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_BACK_PREVIEW",
-      "at": "com\/android\/server\/wm\/BackNavigationController.java"
     },
     "726205185": {
       "message": "Moving to DESTROYED: %s (destroy skipped)",

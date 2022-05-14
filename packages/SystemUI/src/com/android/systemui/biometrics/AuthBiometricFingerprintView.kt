@@ -22,6 +22,7 @@ import android.util.Log
 import android.widget.FrameLayout
 import android.widget.TextView
 import com.android.systemui.R
+import com.android.systemui.biometrics.AuthController.ScaleFactorProvider
 
 private const val TAG = "AuthBiometricFingerprintView"
 
@@ -35,6 +36,7 @@ open class AuthBiometricFingerprintView(
         private set
 
     private var udfpsAdapter: UdfpsDialogMeasureAdapter? = null
+    private var scaleFactorProvider: ScaleFactorProvider? = null
 
     /** Set the [sensorProps] of this sensor so the view can be customized prior to layout. */
     fun setSensorProperties(sensorProps: FingerprintSensorPropertiesInternal) {
@@ -42,9 +44,15 @@ open class AuthBiometricFingerprintView(
         udfpsAdapter = if (isUdfps) UdfpsDialogMeasureAdapter(this, sensorProps) else null
     }
 
+    fun setScaleFactorProvider(scaleProvider: ScaleFactorProvider?) {
+        scaleFactorProvider = scaleProvider
+    }
+
     override fun onMeasureInternal(width: Int, height: Int): AuthDialog.LayoutParams {
         val layoutParams = super.onMeasureInternal(width, height)
-        return udfpsAdapter?.onMeasureInternal(width, height, layoutParams) ?: layoutParams
+        val scale = scaleFactorProvider?.provide() ?: 1.0f
+        return udfpsAdapter?.onMeasureInternal(width, height, layoutParams,
+            scale) ?: layoutParams
     }
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {

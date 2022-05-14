@@ -378,6 +378,11 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         }
     }
 
+    int getTaskFragmentOrganizerUid(ITaskFragmentOrganizer organizer) {
+        final TaskFragmentOrganizerState state = validateAndGetState(organizer);
+        return state.mOrganizerUid;
+    }
+
     void onTaskFragmentAppeared(ITaskFragmentOrganizer organizer, TaskFragment taskFragment) {
         final TaskFragmentOrganizerState state = validateAndGetState(organizer);
         if (!state.addTaskFragment(taskFragment)) {

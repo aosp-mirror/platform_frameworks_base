@@ -271,8 +271,8 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 /**
@@ -939,7 +939,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     private final DexOptHelper mDexOptHelper;
     private final SuspendPackageHelper mSuspendPackageHelper;
     private final DistractingPackageHelper mDistractingPackageHelper;
-    private final IntentResolverInterceptor mIntentResolverInterceptor;
     private final StorageEventHelper mStorageEventHelper;
 
     /**
@@ -1038,22 +1037,15 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     // times during the PackageManagerService constructor but it should not be modified thereafter.
     private ComputerLocked mLiveComputer;
 
-    // A lock-free cache for frequently called functions.
-    private volatile Computer mSnapshotComputer;
+    private static final AtomicReference<Computer> sSnapshot = new AtomicReference<>();
 
-    // If true, the snapshot is invalid (stale).  The attribute is static since it may be
-    // set from outside classes.  The attribute may be set to true anywhere, although it
-    // should only be set true while holding mLock.  However, the attribute id guaranteed
-    // to be set false only while mLock and mSnapshotLock are both held.
-    private static final AtomicBoolean sSnapshotInvalid = new AtomicBoolean(true);
-
-    static final ThreadLocal<ThreadComputer> sThreadComputer =
-            ThreadLocal.withInitial(ThreadComputer::new);
+    // If this differs from Computer#getVersion, the snapshot is invalid (stale).
+    private static final AtomicInteger sSnapshotPendingVersion = new AtomicInteger(1);
 
     /**
-     * This lock is used to make reads from {@link #sSnapshotInvalid} and
-     * {@link #mSnapshotComputer} atomic inside {@code snapshotComputer()}.  This lock is
-     * not meant to be used outside that method.  This lock must be taken before
+     * This lock is used to make reads from {@link #sSnapshotPendingVersion} and
+     * {@link #sSnapshot} atomic inside {@code snapshotComputer()} when the versions mismatch.
+     * This lock is not meant to be used outside that method. This lock must be taken before
      * {@link #mLock} is taken.
      */
     private final Object mSnapshotLock = new Object();
@@ -1077,48 +1069,53 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             // yet invalidated the snapshot.  Always give the thread the live computer.
             return mLiveComputer;
         }
-        synchronized (mSnapshotLock) {
-            // This synchronization block serializes access to the snapshot computer and
-            // to the code that samples mSnapshotInvalid.
-            Computer c = mSnapshotComputer;
-            if (sSnapshotInvalid.getAndSet(false) || (c == null)) {
-                // The snapshot is invalid if it is marked as invalid or if it is null.  If it
-                // is null, then it is currently being rebuilt by rebuildSnapshot().
-                synchronized (mLock) {
-                    // Rebuild the snapshot if it is invalid.  Note that the snapshot might be
-                    // invalidated as it is rebuilt.  However, the snapshot is still
-                    // self-consistent (the lock is being held) and is current as of the time
-                    // this function is entered.
-                    rebuildSnapshot();
 
-                    // Guaranteed to be non-null.  mSnapshotComputer is only be set to null
-                    // temporarily in rebuildSnapshot(), which is guarded by mLock().  Since
-                    // the mLock is held in this block and since rebuildSnapshot() is
-                    // complete, the attribute can not now be null.
-                    c = mSnapshotComputer;
-                }
+        var oldSnapshot = sSnapshot.get();
+        var pendingVersion = sSnapshotPendingVersion.get();
+
+        if (oldSnapshot != null && oldSnapshot.getVersion() == pendingVersion) {
+            return oldSnapshot.use();
+        }
+
+        synchronized (mSnapshotLock) {
+            // Re-capture pending version in case a new invalidation occurred since last check
+            var rebuildSnapshot = sSnapshot.get();
+            var rebuildVersion = sSnapshotPendingVersion.get();
+
+            // Check the versions again while the lock is held, in case the rebuild time caused
+            // multiple threads to wait on the snapshot lock. When the first thread finishes
+            // a rebuild, the snapshot is now valid and the other waiting threads can use it
+            // without kicking off their own rebuilds.
+            if (rebuildSnapshot != null && rebuildSnapshot.getVersion() == rebuildVersion) {
+                return rebuildSnapshot.use();
             }
-            c.use();
-            return c;
+
+            synchronized (mLock) {
+                // Fetch version one last time to ensure that the rebuilt snapshot matches
+                // the latest invalidation, which could have come in between entering the
+                // SnapshotLock and mLock sync blocks.
+                rebuildVersion = sSnapshotPendingVersion.get();
+
+                // Build the snapshot for this version
+                var newSnapshot = rebuildSnapshot(rebuildSnapshot, rebuildVersion);
+                sSnapshot.set(newSnapshot);
+                return newSnapshot.use();
+            }
         }
     }
 
-    /**
-     * Rebuild the cached computer.  mSnapshotComputer is temporarily set to null to block other
-     * threads from using the invalid computer until it is rebuilt.
-     */
     @GuardedBy({ "mLock", "mSnapshotLock"})
-    private void rebuildSnapshot() {
-        final long now = SystemClock.currentTimeMicro();
-        final int hits = mSnapshotComputer == null ? -1 : mSnapshotComputer.getUsed();
-        mSnapshotComputer = null;
-        final Snapshot args = new Snapshot(Snapshot.SNAPPED);
-        mSnapshotComputer = new ComputerEngine(args);
-        final long done = SystemClock.currentTimeMicro();
+    private Computer rebuildSnapshot(@Nullable Computer oldSnapshot, int newVersion) {
+        var now = SystemClock.currentTimeMicro();
+        var hits = oldSnapshot == null ? -1 : oldSnapshot.getUsed();
+        var args = new Snapshot(Snapshot.SNAPPED);
+        var newSnapshot = new ComputerEngine(args, newVersion);
+        var done = SystemClock.currentTimeMicro();
 
         if (mSnapshotStatistics != null) {
             mSnapshotStatistics.rebuild(now, done, hits);
         }
+        return newSnapshot;
     }
 
     /**
@@ -1138,7 +1135,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         if (TRACE_SNAPSHOTS) {
             Log.i(TAG, "snapshot: onChange(" + what + ")");
         }
-        sSnapshotInvalid.set(true);
+        sSnapshotPendingVersion.incrementAndGet();
     }
 
     /**
@@ -1665,7 +1662,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mRequiredSdkSandboxPackage = testParams.requiredSdkSandboxPackage;
 
         mLiveComputer = createLiveComputer();
-        mSnapshotComputer = null;
         mSnapshotStatistics = null;
 
         mPackages.putAll(testParams.packages);
@@ -1691,7 +1687,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         mSharedLibraries.setDeletePackageHelper(mDeletePackageHelper);
 
-        mIntentResolverInterceptor = null;
         mStorageEventHelper = testParams.storageEventHelper;
 
         registerObservers(false);
@@ -1855,9 +1850,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             // cached computer is the same as the live computer until the end of the
             // constructor, at which time the invalidation method updates it.
             mSnapshotStatistics = new SnapshotStatistics();
-            sSnapshotInvalid.set(true);
+            sSnapshotPendingVersion.incrementAndGet();
             mLiveComputer = createLiveComputer();
-            mSnapshotComputer = null;
             registerObservers(true);
         }
 
@@ -2251,8 +2245,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         ParsingPackageUtils.readConfigUseRoundIcon(mContext.getResources());
 
         mServiceStartWithDelay = SystemClock.uptimeMillis() + (60 * 1000L);
-
-        mIntentResolverInterceptor = new IntentResolverInterceptor(mContext);
 
         Slog.i(TAG, "Fix for b/169414761 is applied");
     }
@@ -4143,11 +4135,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         // Prune unused static shared libraries which have been cached a period of time
         schedulePruneUnusedStaticSharedLibraries(false /* delay */);
-
-        // TODO(b/222706900): Remove this intent interceptor before T launch
-        if (mIntentResolverInterceptor != null) {
-            mIntentResolverInterceptor.registerListeners();
-        }
     }
 
     //TODO: b/111402650
@@ -5388,10 +5375,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         @Override
         public void setApplicationCategoryHint(String packageName, int categoryHint,
                 String callerPackageName) {
-            final PackageStateMutator.InitialState initialState = recordInitialState();
-
-            final FunctionalUtils.ThrowingFunction<Computer, PackageStateMutator.Result>
-                    implementation = computer -> {
+            final FunctionalUtils.ThrowingBiFunction<PackageStateMutator.InitialState, Computer,
+                    PackageStateMutator.Result> implementation = (initialState, computer) -> {
                 if (computer.getInstantAppPackageName(Binder.getCallingUid()) != null) {
                     throw new SecurityException(
                             "Instant applications don't have access to this method");
@@ -5419,12 +5404,13 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 }
             };
 
-            PackageStateMutator.Result result = implementation.apply(snapshotComputer());
+            PackageStateMutator.Result result =
+                    implementation.apply(recordInitialState(), snapshotComputer());
             if (result != null && result.isStateChanged() && !result.isSpecificPackageNull()) {
                 // TODO: Specific return value of what state changed?
                 // The installer on record might have changed, retry with lock
                 synchronized (mPackageStateWriteLock) {
-                    result = implementation.apply(snapshotComputer());
+                    result = implementation.apply(recordInitialState(), snapshotComputer());
                 }
             }
 
@@ -7156,9 +7142,19 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     public PackageStateMutator.Result commitPackageStateMutation(
             @Nullable PackageStateMutator.InitialState initialState, @NonNull String packageName,
             @NonNull Consumer<PackageStateWrite> consumer) {
+        PackageStateMutator.Result result = null;
+        if (Thread.holdsLock(mPackageStateWriteLock)) {
+            // If the thread is already holding the lock, this is likely a retry based on a prior
+            // failure, and re-calculating whether a state change occurred can be skipped.
+            result = PackageStateMutator.Result.SUCCESS;
+        }
         synchronized (mPackageStateWriteLock) {
-            final PackageStateMutator.Result result = mPackageStateMutator.generateResult(
-                    initialState, mChangedPackagesTracker.getSequenceNumber());
+            if (result == null) {
+                // If the thread wasn't previously holding, this is a first-try commit and so a
+                // state change may have happened.
+                result = mPackageStateMutator.generateResult(
+                        initialState, mChangedPackagesTracker.getSequenceNumber());
+            }
             if (result != PackageStateMutator.Result.SUCCESS) {
                 return result;
             }

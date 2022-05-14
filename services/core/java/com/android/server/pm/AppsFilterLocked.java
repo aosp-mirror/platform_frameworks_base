@@ -32,7 +32,7 @@ abstract class AppsFilterLocked extends AppsFilterBase {
     /**
      * Guards the access for {@link AppsFilterBase#mShouldFilterCache};
      */
-    protected Object mCacheLock = new Object();
+    protected final Object mCacheLock = new Object();
 
     @Override
     protected boolean isForceQueryable(int appId) {
