@@ -1,3 +1,17 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the specific language governing
+ * permissions and limitations under the License.
+ */
 package com.android.systemui.shared.animation
 
 import android.testing.AndroidTestingRunner
@@ -7,31 +21,24 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.Direction
 import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.ViewIdToTranslate
-import com.android.systemui.unfold.UnfoldTransitionProgressProvider
-import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
+import com.android.systemui.unfold.TestUnfoldTransitionProvider
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentCaptor
-import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 class UnfoldConstantTranslateAnimatorTest : SysuiTestCase() {
 
-    @Mock private lateinit var progressProvider: UnfoldTransitionProgressProvider
+    private val progressProvider = TestUnfoldTransitionProvider()
 
     @Mock private lateinit var parent: ViewGroup
 
-    @Captor private lateinit var progressListenerCaptor: ArgumentCaptor<TransitionProgressListener>
-
     private lateinit var animator: UnfoldConstantTranslateAnimator
-    private lateinit var progressListener: TransitionProgressListener
 
     private val viewsIdToRegister =
         setOf(
@@ -46,17 +53,14 @@ class UnfoldConstantTranslateAnimatorTest : SysuiTestCase() {
             UnfoldConstantTranslateAnimator(viewsIdToRegister, progressProvider)
 
         animator.init(parent, MAX_TRANSLATION)
-
-        verify(progressProvider).addCallback(progressListenerCaptor.capture())
-        progressListener = progressListenerCaptor.value
     }
 
     @Test
     fun onTransition_noMatchingIds() {
         // GIVEN no views matching any ids
         // WHEN the transition starts
-        progressListener.onTransitionStarted()
-        progressListener.onTransitionProgress(.1f)
+        progressProvider.onTransitionStarted()
+        progressProvider.onTransitionProgress(.1f)
 
         // THEN nothing... no exceptions
     }
@@ -86,22 +90,22 @@ class UnfoldConstantTranslateAnimatorTest : SysuiTestCase() {
         // Compare values as ints because -0f != 0f
 
         // WHEN the transition starts
-        progressListener.onTransitionStarted()
-        progressListener.onTransitionProgress(0f)
+        progressProvider.onTransitionStarted()
+        progressProvider.onTransitionProgress(0f)
 
         list.forEach { (view, direction) ->
             assertEquals((-MAX_TRANSLATION * direction).toInt(), view.translationX.toInt())
         }
 
         // WHEN the transition progresses, translation is updated
-        progressListener.onTransitionProgress(.5f)
+        progressProvider.onTransitionProgress(.5f)
         list.forEach { (view, direction) ->
             assertEquals((-MAX_TRANSLATION / 2f * direction).toInt(), view.translationX.toInt())
         }
 
         // WHEN the transition ends, translation is completed
-        progressListener.onTransitionProgress(1f)
-        progressListener.onTransitionFinished()
+        progressProvider.onTransitionProgress(1f)
+        progressProvider.onTransitionFinished()
         list.forEach { (view, _) -> assertEquals(0, view.translationX.toInt()) }
     }
 

@@ -22313,6 +22313,7 @@ package android.media {
     field public static final String KEY_VIDEO_QP_P_MAX = "video-qp-p-max";
     field public static final String KEY_VIDEO_QP_P_MIN = "video-qp-p-min";
     field public static final String KEY_WIDTH = "width";
+    field public static final String LOG_SESSION_ID = "log-session-id";
     field public static final String MIMETYPE_AUDIO_AAC = "audio/mp4a-latm";
     field public static final String MIMETYPE_AUDIO_AAC_ELD = "audio/mp4a.40.39";
     field public static final String MIMETYPE_AUDIO_AAC_HE_V1 = "audio/mp4a.40.05";

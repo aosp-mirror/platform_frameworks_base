@@ -1,6 +1,9 @@
 {
   "presubmit": [
     {
+      "name": "CtsMediaBetterTogetherTestCases"
+    },
+    {
       "name": "CtsCameraTestCases",
       "options" : [
         {

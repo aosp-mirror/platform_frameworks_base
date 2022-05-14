@@ -50,8 +50,13 @@ class Dimmer {
         }
 
         @Override
-        public SurfaceControl.Transaction getPendingTransaction() {
+        public SurfaceControl.Transaction getSyncTransaction() {
             return mHost.getSyncTransaction();
+        }
+
+        @Override
+        public SurfaceControl.Transaction getPendingTransaction() {
+            return mHost.getPendingTransaction();
         }
 
         @Override
@@ -105,7 +110,7 @@ class Dimmer {
 
         void removeSurface() {
             if (mDimLayer != null && mDimLayer.isValid()) {
-                getPendingTransaction().remove(mDimLayer);
+                getSyncTransaction().remove(mDimLayer);
             }
             mDimLayer = null;
         }

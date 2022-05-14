@@ -136,6 +136,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     private class UnfoldConfig : UnfoldTransitionConfig {
         override var isEnabled: Boolean = false
         override var isHingeAngleEnabled: Boolean = false
+        override val halfFoldedTimeoutMillis: Int = 0
     }
 
     private class TestTouchEventHandler : PhoneStatusBarView.TouchEventHandler {

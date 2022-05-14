@@ -68,13 +68,34 @@ class DeletePackageHelperTest {
     }
 
     @Test
-    fun deleteSystemPackageFailsIfNotAdmin() {
+    fun deleteSystemPackageFailsIfNotAdminAndNotProfile() {
         val ps = mPms.mSettings.getPackageLPr("a.data.package")
         whenever(PackageManagerServiceUtils.isSystemApp(ps)).thenReturn(true)
         whenever(mUserManagerInternal.getUserInfo(1)).thenReturn(UserInfo(1, "test", 0))
+        whenever(mUserManagerInternal.getProfileParentId(1)).thenReturn(1)
 
         val dph = DeletePackageHelper(mPms)
-        val result = dph.deletePackageX("a.data.package", 1L, 1, 0, false)
+        val result = dph.deletePackageX("a.data.package", 1L, 1,
+            PackageManager.DELETE_SYSTEM_APP, false)
+
+        assertThat(result).isEqualTo(PackageManager.DELETE_FAILED_USER_RESTRICTED)
+    }
+
+    @Test
+    fun deleteSystemPackageFailsIfProfileOfNonAdmin() {
+        val userId = 1
+        val parentId = 5
+        val ps = mPms.mSettings.getPackageLPr("a.data.package")
+        whenever(PackageManagerServiceUtils.isSystemApp(ps)).thenReturn(true)
+        whenever(mUserManagerInternal.getUserInfo(userId)).thenReturn(
+            UserInfo(userId, "test", UserInfo.FLAG_PROFILE))
+        whenever(mUserManagerInternal.getProfileParentId(userId)).thenReturn(parentId)
+        whenever(mUserManagerInternal.getUserInfo(parentId)).thenReturn(
+            UserInfo(userId, "testparent", 0))
+
+        val dph = DeletePackageHelper(mPms)
+        val result = dph.deletePackageX("a.data.package", 1L, userId,
+            PackageManager.DELETE_SYSTEM_APP, false)
 
         assertThat(result).isEqualTo(PackageManager.DELETE_FAILED_USER_RESTRICTED)
     }
@@ -88,6 +109,25 @@ class DeletePackageHelperTest {
 
         val dph = DeletePackageHelper(mPms)
         val result = dph.deletePackageX("a.data.package", 1L, 1,
+            PackageManager.DELETE_SYSTEM_APP, false)
+
+        assertThat(result).isEqualTo(PackageManager.DELETE_SUCCEEDED)
+    }
+
+    @Test
+    fun deleteSystemPackageSucceedsIfProfileOfAdmin() {
+        val userId = 1
+        val parentId = 5
+        val ps = mPms.mSettings.getPackageLPr("a.data.package")
+        whenever(PackageManagerServiceUtils.isSystemApp(ps)).thenReturn(true)
+        whenever(mUserManagerInternal.getUserInfo(userId)).thenReturn(
+            UserInfo(userId, "test", UserInfo.FLAG_PROFILE))
+        whenever(mUserManagerInternal.getProfileParentId(userId)).thenReturn(parentId)
+        whenever(mUserManagerInternal.getUserInfo(parentId)).thenReturn(
+            UserInfo(userId, "testparent", UserInfo.FLAG_ADMIN))
+
+        val dph = DeletePackageHelper(mPms)
+        val result = dph.deletePackageX("a.data.package", 1L, userId,
             PackageManager.DELETE_SYSTEM_APP, false)
 
         assertThat(result).isEqualTo(PackageManager.DELETE_SUCCEEDED)

@@ -524,6 +524,18 @@ public class ApexManagerTest {
         assertThat(backingApexFile).isNull();
     }
 
+    @Test
+    public void testActiveApexChanged() throws RemoteException {
+        ApexInfo apex1 = createApexInfo(
+                "com.apex1", 37, true, true, new File("/data/apex/active/com.apex@37.apex"));
+        apex1.activeApexChanged = true;
+        apex1.preinstalledModulePath = apex1.modulePath;
+        when(mApexService.getActivePackages()).thenReturn(new ApexInfo[]{apex1});
+        final ApexManager.ActiveApexInfo activeApex = mApexManager.getActiveApexInfos().get(0);
+        assertThat(activeApex.apexModuleName).isEqualTo("com.apex1");
+        assertThat(activeApex.activeApexChanged).isTrue();
+    }
+
     private ApexInfo createApexInfoForTestPkg(boolean isActive, boolean isFactory, int version) {
         File apexFile = extractResource(TEST_APEX_PKG,  TEST_APEX_FILE_NAME);
         ApexInfo apexInfo = new ApexInfo();

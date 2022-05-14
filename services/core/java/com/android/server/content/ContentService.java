@@ -26,6 +26,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.ActivityManager.RestrictionLevel;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
@@ -51,6 +52,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
 import android.database.IContentObserver;
 import android.net.Uri;
+import android.os.AppBackgroundRestrictionsInfo;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -77,6 +79,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BinderDeathDispatcher;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -1493,9 +1496,82 @@ public final class ContentService extends IContentService.Stub {
             return ContentResolver.SYNC_EXEMPTION_PROMOTE_BUCKET_WITH_TEMP;
         }
         if (procState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND || isUidActive) {
+            FrameworkStatsLog.write(FrameworkStatsLog.SYNC_EXEMPTION_OCCURRED,
+                    callingUid, getProcStateForStatsd(procState), isUidActive,
+                    getRestrictionLevelForStatsd(ami.getRestrictionLevel(callingUid)));
             return ContentResolver.SYNC_EXEMPTION_PROMOTE_BUCKET;
         }
         return ContentResolver.SYNC_EXEMPTION_NONE;
+    }
+
+    private int getProcStateForStatsd(int procState) {
+        switch (procState) {
+            case ActivityManager.PROCESS_STATE_UNKNOWN:
+                return FrameworkStatsLog.SYNC_EXEMPTION_OCCURRED__PROC_STATE__UNKNOWN;
+            case ActivityManager.PROCESS_STATE_PERSISTENT:
+                return FrameworkStatsLog.SYNC_EXEMPTION_OCCURRED__PROC_STATE__PERSISTENT;
+            case ActivityManager.PROCESS_STATE_PERSISTENT_UI:
+                return FrameworkStatsLog.SYNC_EXEMPTION_OCCURRED__PROC_STATE__PERSISTENT_UI;
+            case ActivityManager.PROCESS_STATE_TOP:
+                return FrameworkStatsLog.SYNC_EXEMPTION_OCCURRED__PROC_STATE__TOP;
+            case ActivityManager.PROCESS_STATE_BOUND_TOP:
+                return FrameworkStatsLog.SYNC_EXEMPTION_OCCURRED__PROC_STATE__BOUND_TOP;
+            case ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE:
+                return FrameworkStatsLog.SYNC_EXEMPTION_OCCURRED__PROC_STATE__FOREGROUND_SERVICE;
+            case ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE:
+                return FrameworkStatsLog
+                        .SYNC_EXEMPTION_OCCURRED__PROC_STATE__BOUND_FOREGROUND_SERVICE;
+            case ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND:
+                return FrameworkStatsLog.SYNC_EXEMPTION_OCCURRED__PROC_STATE__IMPORTANT_FOREGROUND;
+            case ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND:
+                return FrameworkStatsLog.SYNC_EXEMPTION_OCCURRED__PROC_STATE__IMPORTANT_BACKGROUND;
+            case ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND:
+                return FrameworkStatsLog.SYNC_EXEMPTION_OCCURRED__PROC_STATE__TRANSIENT_BACKGROUND;
+            case ActivityManager.PROCESS_STATE_BACKUP:
+                return FrameworkStatsLog.SYNC_EXEMPTION_OCCURRED__PROC_STATE__BACKUP;
+            case ActivityManager.PROCESS_STATE_SERVICE:
+                return FrameworkStatsLog.SYNC_EXEMPTION_OCCURRED__PROC_STATE__SERVICE;
+            case ActivityManager.PROCESS_STATE_RECEIVER:
+                return FrameworkStatsLog.SYNC_EXEMPTION_OCCURRED__PROC_STATE__RECEIVER;
+            case ActivityManager.PROCESS_STATE_TOP_SLEEPING:
+                return FrameworkStatsLog.SYNC_EXEMPTION_OCCURRED__PROC_STATE__TOP_SLEEPING;
+            case ActivityManager.PROCESS_STATE_HEAVY_WEIGHT:
+                return FrameworkStatsLog.SYNC_EXEMPTION_OCCURRED__PROC_STATE__HEAVY_WEIGHT;
+            case ActivityManager.PROCESS_STATE_LAST_ACTIVITY:
+                return FrameworkStatsLog.SYNC_EXEMPTION_OCCURRED__PROC_STATE__LAST_ACTIVITY;
+            case ActivityManager.PROCESS_STATE_CACHED_ACTIVITY:
+                return FrameworkStatsLog.SYNC_EXEMPTION_OCCURRED__PROC_STATE__CACHED_ACTIVITY;
+            case ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT:
+                return FrameworkStatsLog
+                        .SYNC_EXEMPTION_OCCURRED__PROC_STATE__CACHED_ACTIVITY_CLIENT;
+            case ActivityManager.PROCESS_STATE_CACHED_RECENT:
+                return FrameworkStatsLog.SYNC_EXEMPTION_OCCURRED__PROC_STATE__CACHED_RECENT;
+            case ActivityManager.PROCESS_STATE_CACHED_EMPTY:
+                return FrameworkStatsLog.SYNC_EXEMPTION_OCCURRED__PROC_STATE__CACHED_EMPTY;
+            default:
+                return FrameworkStatsLog.SYNC_EXEMPTION_OCCURRED__PROC_STATE__UNKNOWN;
+        }
+    }
+
+    private int getRestrictionLevelForStatsd(@RestrictionLevel int level) {
+        switch (level) {
+            case ActivityManager.RESTRICTION_LEVEL_UNKNOWN:
+                return AppBackgroundRestrictionsInfo.LEVEL_UNKNOWN;
+            case ActivityManager.RESTRICTION_LEVEL_UNRESTRICTED:
+                return AppBackgroundRestrictionsInfo.LEVEL_UNRESTRICTED;
+            case ActivityManager.RESTRICTION_LEVEL_EXEMPTED:
+                return AppBackgroundRestrictionsInfo.LEVEL_EXEMPTED;
+            case ActivityManager.RESTRICTION_LEVEL_ADAPTIVE_BUCKET:
+                return AppBackgroundRestrictionsInfo.LEVEL_ADAPTIVE_BUCKET;
+            case ActivityManager.RESTRICTION_LEVEL_RESTRICTED_BUCKET:
+                return AppBackgroundRestrictionsInfo.LEVEL_RESTRICTED_BUCKET;
+            case ActivityManager.RESTRICTION_LEVEL_BACKGROUND_RESTRICTED:
+                return AppBackgroundRestrictionsInfo.LEVEL_BACKGROUND_RESTRICTED;
+            case ActivityManager.RESTRICTION_LEVEL_HIBERNATION:
+                return AppBackgroundRestrictionsInfo.LEVEL_HIBERNATION;
+            default:
+                return AppBackgroundRestrictionsInfo.LEVEL_UNKNOWN;
+        }
     }
 
     /** {@hide} */
