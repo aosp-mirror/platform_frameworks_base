@@ -1909,8 +1909,10 @@
     <string name="notification_channel_battery">Battery</string>
     <!-- Title for the notification channel dedicated to screenshot progress. [CHAR LIMIT=NONE] -->
     <string name="notification_channel_screenshot">Screenshots</string>
-    <!-- Title for the notification channel for miscellaneous notices. [CHAR LIMIT=NONE] -->
-    <string name="notification_channel_general">General Messages</string>
+    <!-- Title for the notification channel for instant app notices. [CHAR LIMIT=NONE] -->
+    <string name="notification_channel_instant">Instant Apps</string>
+    <!-- Title for the notification channel for setup notices. [CHAR LIMIT=NONE] -->
+    <string name="notification_channel_setup">Setup</string>
     <!-- Title for the notification channel for problems with storage (i.e. low disk). [CHAR LIMIT=NONE] -->
     <string name="notification_channel_storage">Storage</string>
     <!-- Title for the notification channel for hints and suggestions. [CHAR LIMIT=NONE] -->
