@@ -19,6 +19,7 @@ package com.android.server.companion;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import android.companion.AssociationInfo;
+import android.os.Binder;
 import android.os.ShellCommand;
 import android.util.Base64;
 
@@ -127,6 +128,16 @@ class CompanionDeviceShellCommand extends ShellCommand {
                     mDevicePresenceMonitor.simulateDeviceDisappeared(associationId);
                     break;
 
+                case "remove-inactive-associations": {
+                    // This command should trigger the same "clean-up" job as performed by the
+                    // InactiveAssociationsRemovalService JobService. However, since the
+                    // InactiveAssociationsRemovalService run as system, we want to run this
+                    // as system (not as shell/root) as well.
+                    Binder.withCleanCallingIdentity(
+                            mService::removeInactiveSelfManagedAssociations);
+                }
+                break;
+
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -180,6 +191,12 @@ class CompanionDeviceShellCommand extends ShellCommand {
         pw.println("      NOTE: This will only have effect if 'simulate-device-appeared' was");
         pw.println("      invoked for the same device (same ASSOCIATION_ID) no longer than");
         pw.println("      60 seconds ago.");
+        pw.println("      USE FOR DEBUGGING AND/OR TESTING PURPOSES ONLY.");
+
+        pw.println("  remove-inactive-associations");
+        pw.println("      Remove self-managed associations that have not been active ");
+        pw.println("      for a long time (90 days or as configured via ");
+        pw.println("      \"debug.cdm.cdmservice.cleanup_time_window\" system property). ");
         pw.println("      USE FOR DEBUGGING AND/OR TESTING PURPOSES ONLY.");
     }
 }
