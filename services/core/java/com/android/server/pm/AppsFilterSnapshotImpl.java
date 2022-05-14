@@ -17,7 +17,6 @@
 package com.android.server.pm;
 
 import com.android.server.utils.SnapshotCache;
-import com.android.server.utils.WatchedSparseBooleanMatrix;
 
 import java.util.Arrays;
 
@@ -50,18 +49,12 @@ public final class AppsFilterSnapshotImpl extends AppsFilterBase {
         mFeatureConfig = orig.mFeatureConfig.snapshot();
         mOverlayReferenceMapper = orig.mOverlayReferenceMapper;
         mSystemSigningDetails = orig.mSystemSigningDetails;
-
-        mCacheReady = orig.mCacheReady;
-        if (mCacheReady) {
-            synchronized (orig.mCacheLock) {
-                mShouldFilterCache = orig.mShouldFilterCacheSnapshot.snapshot();
-            }
-        } else {
-            // cache is not ready, use an empty cache for the snapshot
-            mShouldFilterCache = new WatchedSparseBooleanMatrix();
+        synchronized (orig.mCacheLock) {
+            mShouldFilterCache = orig.mShouldFilterCacheSnapshot.snapshot();
+            mShouldFilterCacheSnapshot = new SnapshotCache.Sealed<>();
         }
-        mShouldFilterCacheSnapshot = new SnapshotCache.Sealed<>();
 
         mBackgroundExecutor = null;
+        mSystemReady = orig.mSystemReady;
     }
 }
