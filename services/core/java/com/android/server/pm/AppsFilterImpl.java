@@ -404,8 +404,7 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
                     + recipientUid + " -> " + visibleUid);
         }
 
-        // TODO(b/231528435): invalidate cache instead of locking.
-        if (true/*mCacheReady*/) {
+        if (mSystemReady) {
             synchronized (mCacheLock) {
                 // update the cache in a one-off manner since we've got all the information we
                 // need.
@@ -421,6 +420,7 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
         mFeatureConfig.onSystemReady();
 
         updateEntireShouldFilterCacheAsync(pmInternal);
+        mSystemReady = true;
     }
 
     /**
@@ -444,8 +444,7 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
             final UserInfo[] users = snapshot.getUserInfos();
             final ArraySet<String> additionalChangedPackages =
                     addPackageInternal(newPkgSetting, settings);
-            // TODO(b/231528435): invalidate cache instead of locking.
-            if (true/*mCacheReady*/) {
+            if (mSystemReady) {
                 synchronized (mCacheLock) {
                     updateShouldFilterCacheForPackage(snapshot, null, newPkgSetting,
                             settings, users, USER_ALL, settings.size());
@@ -587,7 +586,7 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
     }
 
     private void removeAppIdFromVisibilityCache(int appId) {
-        if (!mCacheReady) {
+        if (!mSystemReady) {
             return;
         }
         synchronized (mCacheLock) {
@@ -662,20 +661,18 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
 
             updateEntireShouldFilterCacheInner(snapshot, settings, usersRef[0], USER_ALL);
             onChanged();
-
-            mCacheReady = true;
         });
     }
 
     public void onUserCreated(PackageDataSnapshot snapshot, int newUserId) {
-        if (!mCacheReady) {
+        if (!mSystemReady) {
             return;
         }
         updateEntireShouldFilterCache(snapshot, newUserId);
     }
 
     public void onUserDeleted(@UserIdInt int userId) {
-        if (!mCacheReady) {
+        if (!mSystemReady) {
             return;
         }
         removeShouldFilterCacheForUser(userId);
@@ -684,7 +681,7 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
 
     private void updateShouldFilterCacheForPackage(PackageDataSnapshot snapshot,
             String packageName) {
-        if (!mCacheReady) {
+        if (!mSystemReady) {
             return;
         }
         final ArrayMap<String, ? extends PackageStateInternal> settings =
@@ -933,8 +930,7 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
         }
 
         removeAppIdFromVisibilityCache(setting.getAppId());
-        // TODO(b/231528435): invalidate cache instead of locking.
-        if (/*mCacheReady && */setting.hasSharedUser()) {
+        if (mSystemReady && setting.hasSharedUser()) {
             final ArraySet<? extends PackageStateInternal> sharedUserPackages =
                     getSharedUserPackages(setting.getSharedUserAppId(), sharedUserSettings);
             for (int i = sharedUserPackages.size() - 1; i >= 0; i--) {
@@ -951,8 +947,7 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
             }
         }
 
-        // TODO(b/231528435): invalidate cache instead of locking.
-        if (true/*mCacheReady*/) {
+        if (mSystemReady) {
             if (additionalChangedPackages != null) {
                 for (int index = 0; index < additionalChangedPackages.size(); index++) {
                     String changedPackage = additionalChangedPackages.valueAt(index);
