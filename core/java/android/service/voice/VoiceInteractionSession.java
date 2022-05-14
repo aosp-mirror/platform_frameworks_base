@@ -16,6 +16,7 @@
 
 package android.service.voice;
 
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 import android.annotation.CallbackExecutor;
@@ -38,6 +39,7 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.hardware.display.DisplayManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.CancellationSignal;
@@ -1043,13 +1045,31 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
     }
 
     public VoiceInteractionSession(Context context, Handler handler) {
-        mContext = context;
         mHandlerCaller = new HandlerCaller(context, handler.getLooper(),
                 mCallbacks, true);
+        mContext = createWindowContextIfNeeded(context);
     }
 
     public Context getContext() {
         return mContext;
+    }
+
+    private Context createWindowContextIfNeeded(Context context) {
+        try {
+            if (!context.isUiContext()) {
+                DisplayManager displayManager = context.getSystemService(DisplayManager.class);
+                if (displayManager != null) {
+                    return context.createWindowContext(
+                            displayManager.getDisplay(DEFAULT_DISPLAY),
+                            WindowManager.LayoutParams.TYPE_VOICE_INTERACTION,
+                            /* options= */ null);
+                }
+            }
+            return context;
+        } catch (RuntimeException e) {
+            Log.w(TAG, "Fail to createWindowContext, Exception = " + e);
+            return context;
+        }
     }
 
     void addRequest(Request req) {
