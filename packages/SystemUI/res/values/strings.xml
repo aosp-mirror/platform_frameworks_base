@@ -2279,6 +2279,8 @@
     <string name="media_output_dialog_unknown_launch_app_name">Unknown app</string>
     <!-- Button text for stopping casting [CHAR LIMIT=60] -->
     <string name="media_output_dialog_button_stop_casting">Stop casting</string>
+    <!-- Accessibility text describing purpose of media output dialog. [CHAR LIMIT=NONE] -->
+    <string name="media_output_dialog_accessibility_title">Available devices for audio output.</string>
 
     <!-- Media Output Broadcast Dialog -->
     <!-- Title for Broadcast First Notify Dialog [CHAR LIMIT=60] -->

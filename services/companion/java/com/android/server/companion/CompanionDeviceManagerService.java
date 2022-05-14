@@ -78,6 +78,7 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.ShellCallback;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.ArraySet;
@@ -121,8 +122,10 @@ public class CompanionDeviceManagerService extends SystemService {
 
     private static final String PREF_FILE_NAME = "companion_device_preferences.xml";
     private static final String PREF_KEY_AUTO_REVOKE_GRANTS_DONE = "auto_revoke_grants_done";
+    private static final String SYS_PROP_DEBUG_REMOVAL_TIME_WINDOW =
+            "debug.cdm.cdmservice.removal_time_window";
 
-    private static final long ASSOCIATION_CLEAN_UP_TIME_WINDOW = DAYS.toMillis(3 * 30); // 3 months
+    private static final long ASSOCIATION_REMOVAL_TIME_WINDOW_DEFAULT = DAYS.toMillis(90);
 
     private PersistentDataStore mPersistentStore;
     private final PersistUserStateHandler mUserPersistenceHandler;
@@ -211,8 +214,8 @@ public class CompanionDeviceManagerService extends SystemService {
             mPackageMonitor.register(context, FgThread.get().getLooper(), UserHandle.ALL, true);
             mDevicePresenceMonitor.init(context);
         } else if (phase == PHASE_BOOT_COMPLETED) {
-            // Run the Association CleanUp job service daily.
-            AssociationCleanUpService.schedule(getContext());
+            // Run the Inactive Association Removal job service daily.
+            InactiveAssociationsRemovalService.schedule(getContext());
         }
     }
 
@@ -410,17 +413,20 @@ public class CompanionDeviceManagerService extends SystemService {
         mCompanionAppController.onPackagesChanged(userId);
     }
 
-    // Revoke associations if the selfManaged companion device does not connect for 3
-    // months for specific profile.
-    private void associationCleanUp(String profile) {
+    // Revoke associations if the selfManaged companion device does not connect for 3 months.
+    void removeInactiveSelfManagedAssociations() {
+        final long currentTime = System.currentTimeMillis();
+        long removalWindow = SystemProperties.getLong(SYS_PROP_DEBUG_REMOVAL_TIME_WINDOW, -1);
+        if (removalWindow <= 0) {
+            // 0 or negative values indicate that the sysprop was never set or should be ignored.
+            removalWindow = ASSOCIATION_REMOVAL_TIME_WINDOW_DEFAULT;
+        }
+
         for (AssociationInfo ai : mAssociationStore.getAssociations()) {
-            if (ai.isSelfManaged()
-                    && profile.equals(ai.getDeviceProfile())
-                    && System.currentTimeMillis() - ai.getLastTimeConnectedMs()
-                    >= ASSOCIATION_CLEAN_UP_TIME_WINDOW) {
-                Slog.i(TAG, "Removing the association for associationId: "
-                        + ai.getId()
-                        + " due to the device does not connect for 3 months.");
+            if (!ai.isSelfManaged()) continue;
+            final boolean isInactive =  currentTime - ai.getLastTimeConnectedMs() >= removalWindow;
+            if (isInactive) {
+                Slog.i(TAG, "Removing inactive self-managed association: " + ai.getId());
                 disassociateInternal(ai.getId());
             }
         }
@@ -1078,10 +1084,10 @@ public class CompanionDeviceManagerService extends SystemService {
         return ArrayUtils.contains(array, a) || ArrayUtils.contains(array, b);
     }
 
-    private class LocalService extends CompanionDeviceManagerServiceInternal {
+    private class LocalService implements CompanionDeviceManagerServiceInternal {
         @Override
-        public void associationCleanUp(String profile) {
-            CompanionDeviceManagerService.this.associationCleanUp(profile);
+        public void removeInactiveSelfManagedAssociations() {
+            CompanionDeviceManagerService.this.removeInactiveSelfManagedAssociations();
         }
     }
 
