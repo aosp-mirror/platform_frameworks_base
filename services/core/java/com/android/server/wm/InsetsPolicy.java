@@ -46,6 +46,7 @@ import android.annotation.Nullable;
 import android.app.ActivityTaskManager;
 import android.app.StatusBarManager;
 import android.app.WindowConfiguration;
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.util.ArrayMap;
 import android.util.IntArray;
@@ -123,14 +124,17 @@ class InsetsPolicy {
      * Let remote insets controller control system bars regardless of other settings.
      */
     private boolean mRemoteInsetsControllerControlsSystemBars;
+    private final boolean mHideNavBarForKeyboard;
     private final float[] mTmpFloat9 = new float[9];
 
     InsetsPolicy(InsetsStateController stateController, DisplayContent displayContent) {
         mStateController = stateController;
         mDisplayContent = displayContent;
         mPolicy = displayContent.getDisplayPolicy();
-        mRemoteInsetsControllerControlsSystemBars = mPolicy.getContext().getResources().getBoolean(
+        final Resources r = mPolicy.getContext().getResources();
+        mRemoteInsetsControllerControlsSystemBars = r.getBoolean(
                 R.bool.config_remoteInsetsControllerControlsSystemBars);
+        mHideNavBarForKeyboard = r.getBoolean(R.bool.config_hideNavBarForKeyboard);
     }
 
     boolean getRemoteInsetsControllerControlsSystemBars() {
@@ -428,13 +432,15 @@ class InsetsPolicy {
     private InsetsState adjustVisibilityForIme(WindowState w, InsetsState originalState,
             boolean copyState) {
         if (w.mIsImWindow) {
-            // Navigation bar insets is always visible to IME.
+            // If navigation bar is not hidden by IME, IME should always receive visible
+            // navigation bar insets.
+            final boolean navVisible = !mHideNavBarForKeyboard;
             final InsetsSource originalNavSource = originalState.peekSource(ITYPE_NAVIGATION_BAR);
-            if (originalNavSource != null && !originalNavSource.isVisible()) {
+            if (originalNavSource != null && originalNavSource.isVisible() != navVisible) {
                 final InsetsState state = copyState ? new InsetsState(originalState)
                         : originalState;
                 final InsetsSource navSource = new InsetsSource(originalNavSource);
-                navSource.setVisible(true);
+                navSource.setVisible(navVisible);
                 state.addSource(navSource);
                 return state;
             }
@@ -573,8 +579,9 @@ class InsetsPolicy {
     private @Nullable InsetsControlTarget getNavControlTarget(@Nullable WindowState focusedWin,
             boolean fake) {
         final WindowState imeWin = mDisplayContent.mInputMethodWindow;
-        if (imeWin != null && imeWin.isVisible()) {
-            // Force showing navigation bar while IME is visible.
+        if (imeWin != null && imeWin.isVisible() && !mHideNavBarForKeyboard) {
+            // Force showing navigation bar while IME is visible and if navigation bar is not
+            // configured to be hidden by the IME.
             return null;
         }
         if (!fake && isShowingTransientTypes(Type.navigationBars())) {

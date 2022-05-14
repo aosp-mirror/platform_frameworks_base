@@ -14,17 +14,22 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone;
+package com.android.systemui.log.dagger;
 
-import com.android.systemui.dagger.SysUISingleton;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import dagger.Binds;
-import dagger.Module;
+import com.android.systemui.log.LogBuffer;
 
-/** Provides a {@link NotifActivityLaunchEvents} in {@link SysUISingleton} scope. */
-@Module
-public abstract class NotifActivityLaunchEventsModule {
-    @Binds
-    abstract NotifActivityLaunchEvents bindLaunchEvents(
-            StatusBarNotificationActivityStarter.LaunchEventsEmitter impl);
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+
+import javax.inject.Qualifier;
+
+/**
+ * A {@link LogBuffer} for {@link com.android.systemui.media.MediaCarouselController}
+ */
+@Qualifier
+@Documented
+@Retention(RUNTIME)
+public @interface MediaCarouselControllerLog {
 }
