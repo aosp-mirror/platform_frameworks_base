@@ -173,7 +173,7 @@ public abstract class AppsFilterBase implements AppsFilterSnapshot {
      * {@link #shouldFilterApplicationInternal(PackageDataSnapshot, int, Object,
      * PackageStateInternal, int)} call.
      * NOTE: It can only be relied upon after the system is ready to avoid unnecessary update on
-     * initial scam and is empty until {@link #mCacheReady} is true.
+     * initial scam and is empty until {@link #mSystemReady} is true.
      */
     @NonNull
     @Watched
@@ -181,7 +181,7 @@ public abstract class AppsFilterBase implements AppsFilterSnapshot {
     @NonNull
     protected SnapshotCache<WatchedSparseBooleanMatrix> mShouldFilterCacheSnapshot;
 
-    protected volatile boolean mCacheReady = false;
+    protected volatile boolean mSystemReady = false;
 
     protected boolean isForceQueryable(int callingAppId) {
         return mForceQueryable.contains(callingAppId);
@@ -312,7 +312,7 @@ public abstract class AppsFilterBase implements AppsFilterSnapshot {
                     || callingAppId == targetPkgSetting.getAppId()) {
                 return false;
             }
-            if (mCacheReady) { // use cache
+            if (mSystemReady) { // use cache
                 if (!shouldFilterApplicationUsingCache(callingUid,
                         targetPkgSetting.getAppId(),
                         userId)) {
