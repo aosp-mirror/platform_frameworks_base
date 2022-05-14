@@ -96,6 +96,49 @@ public class MediaOutputMetricLogger {
     }
 
     /**
+     * Do the metric logging of volume adjustment.
+     * @param source the device been adjusted
+     */
+    public void logInteractionAdjustVolume(MediaDevice source) {
+        if (DEBUG) {
+            Log.d(TAG, "logInteraction - AdjustVolume");
+        }
+
+        SysUiStatsLog.write(
+                SysUiStatsLog.MEDIAOUTPUT_OP_INTERACTION_REPORT,
+                SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__INTERACTION_TYPE__ADJUST_VOLUME,
+                getInteractionDeviceType(source));
+    }
+
+    /**
+     * Do the metric logging of stop casting.
+     */
+    public void logInteractionStopCasting() {
+        if (DEBUG) {
+            Log.d(TAG, "logInteraction - Stop casting");
+        }
+
+        SysUiStatsLog.write(
+                SysUiStatsLog.MEDIAOUTPUT_OP_INTERACTION_REPORT,
+                SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__INTERACTION_TYPE__STOP_CASTING,
+                SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__TARGET__UNKNOWN_TYPE);
+    }
+
+    /**
+     * Do the metric logging of device expansion.
+     */
+    public void logInteractionExpansion(MediaDevice source) {
+        if (DEBUG) {
+            Log.d(TAG, "logInteraction - Expansion");
+        }
+
+        SysUiStatsLog.write(
+                SysUiStatsLog.MEDIAOUTPUT_OP_INTERACTION_REPORT,
+                SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__INTERACTION_TYPE__EXPANSION,
+                getInteractionDeviceType(source));
+    }
+
+    /**
      * Do the metric logging of content switching failure.
      * @param deviceList media device list for device count updating
      * @param reason the reason of content switching failure
@@ -184,6 +227,27 @@ public class MediaOutputMetricLogger {
                         : SysUiStatsLog.MEDIA_OUTPUT_OP_SWITCH_REPORTED__TARGET__UNKNOWN_TYPE;
         }
     }
+
+    private int getInteractionDeviceType(MediaDevice device) {
+        switch (device.getDeviceType()) {
+            case MediaDevice.MediaDeviceType.TYPE_PHONE_DEVICE:
+                return SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__TARGET__BUILTIN_SPEAKER;
+            case MediaDevice.MediaDeviceType.TYPE_3POINT5_MM_AUDIO_DEVICE:
+                return SysUiStatsLog
+                        .MEDIA_OUTPUT_OP_INTERACTION_REPORTED__TARGET__WIRED_3POINT5_MM_AUDIO;
+            case MediaDevice.MediaDeviceType.TYPE_USB_C_AUDIO_DEVICE:
+                return SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__TARGET__USB_C_AUDIO;
+            case MediaDevice.MediaDeviceType.TYPE_BLUETOOTH_DEVICE:
+                return SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__TARGET__BLUETOOTH;
+            case MediaDevice.MediaDeviceType.TYPE_CAST_DEVICE:
+                return SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__TARGET__REMOTE_SINGLE;
+            case MediaDevice.MediaDeviceType.TYPE_CAST_GROUP_DEVICE:
+                return SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__TARGET__REMOTE_GROUP;
+            default:
+                return SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__TARGET__UNKNOWN_TYPE;
+        }
+    }
+
 
     private int getLoggingSwitchOpSubResult(int reason) {
         switch (reason) {
