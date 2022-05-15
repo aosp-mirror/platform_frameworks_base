@@ -319,6 +319,10 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"قفلْ با چهره باز شد. برای باز کردن، فشار دهید."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"چهره شناسایی شد. برای باز کردن، فشار دهید."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"چهره شناسایی شد. برای باز کردن، نماد قفل‌گشایی را فشار دهید."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"برای امتحان مجدد، انگشتتان را تند به‌بالا بکشید"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"‏برای استفاده از NFC، قفل را باز کنید"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"این دستگاه به سازمان شما تعلق دارد"</string>
@@ -420,7 +424,7 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"برنامه سنجاق شده است"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"تا زمانی که سنجاق را برندارید، در نما نگه‌داشته می‌شود. برای برداشتن سنجاق، «برگشت» و «نمای کلی» را لمس کنید و نگه‌دارید."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"تا برداشتن سنجاق، در نما نگه‌داشته می‌شود. برای برداشتن سنجاق، «برگشت» و «صفحه اصلی» را لمس کنید و نگه‌دارید."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"به این ترتیب تا زمانی پین آن را برندارید قابل‌مشاهده است. برای برداشتن سنجاق، از پایین صفحه تند به‌طرف بالا بکشید و نگه دارید."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"به این ترتیب تا زمانی که پین آن را برندارید قابل‌مشاهده است. برای برداشتن سنجاق، از پایین صفحه تند به‌طرف بالا بکشید و نگه دارید."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"تا زمانی که پین را بردارید، در نما نگه‌داشته می‌شود. برای برداشتن سنجاق، «نمای کلی» را لمس کنید و نگه‌دارید."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"تا برداشتن سنجاق، در نما نگه‌داشته می‌شود. برای برداشتن سنجاق، «صفحه اصلی» را لمس کنید و نگه‌دارید."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"ممکن است داده‌های شخصی (مانند مخاطبین و محتوای ایمیل) در دسترس باشد."</string>
@@ -465,8 +469,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"کیف‌پول"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"برای خرید سریع‌تر و امن‌تر با تلفن، راه‌اندازی کنید"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"نمایش همه"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (8488069304491125713) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"برای باز کردن ضربه بزنید"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"درحال به‌روزرسانی"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"برای استفاده، قفل را باز کنید"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"هنگام دریافت کارت‌ها مشکلی پیش آمد، لطفاً بعداً دوباره امتحان کنید"</string>
@@ -844,6 +847,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"برای ارسال محتوای این جلسه، لطفاً برنامه را باز کنید."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"برنامه ناشناس"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"توقف ارسال محتوا"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"همه‌فرتستی چطور کار می‌کند"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"همه‌فرستی"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"‏افرادی که در اطرافتان دستگاه‌های Bluetooth سازگار دارند می‌توانند به رسانه‌ای که همه‌فرستی می‌کنید گوش کنند"</string>
@@ -939,7 +944,12 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"ویرایش نوشتار کپی‌شده"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"ویرایش تصویر کپی‌شده"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"ارسال به دستگاهی در اطراف"</string>
-    <!-- no translation found for clipboard_text_hidden (7926899867471812305) -->
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"برای مشاهده، ضربه بزنید"</string>
+    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
+    <skip />
+    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
+    <skip />
+    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
     <skip />
     <string name="add" msgid="81036585205287996">"افزودن"</string>
     <string name="manage_users" msgid="1823875311934643849">"مدیریت کاربران"</string>

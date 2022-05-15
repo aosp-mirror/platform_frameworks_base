@@ -319,6 +319,10 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"បានដោះសោដោយប្រើមុខ។ សូមចុច ដើម្បីបើក។"</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"បានស្គាល់មុខ។ សូមចុច ដើម្បីបើក។"</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"បានស្គាល់មុខ។ សូមចុចរូបដោះសោ ដើម្បីបើក។"</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"អូសឡើងលើ ដើម្បី​ព្យាយាម​ម្ដងទៀត"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"ដោះសោ ដើម្បីប្រើ NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ឧបករណ៍​នេះគឺជា​កម្មសិទ្ធិរបស់​ស្ថាប័ន​អ្នក"</string>
@@ -465,8 +469,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"កាបូប"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"ធ្វើការ​រៀបចំ ដើម្បី​ធ្វើការទិញ​កាន់តែលឿន​ជាងមុន សុវត្ថិភាព​ជាងមុន ដោយ​ប្រើ​ទូរសព្ទ​របស់អ្នក"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"បង្ហាញ​ទាំងអស់"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (8488069304491125713) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"ចុចដើម្បីបើក"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"កំពុង​ធ្វើ​បច្ចុប្បន្នភាព"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ដោះសោដើម្បីប្រើប្រាស់"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"មានបញ្ហា​ក្នុងការទាញយក​កាត​របស់អ្នក សូម​ព្យាយាមម្ដងទៀត​នៅពេលក្រោយ"</string>
@@ -844,6 +847,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"ដើម្បីភ្ជាប់វគ្គនេះ សូមបើកកម្មវិធី។"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"កម្មវិធី​ដែលមិន​ស្គាល់"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"បញ្ឈប់ការភ្ជាប់"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"របៀបដែលការផ្សាយដំណើរការ"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ការ​ផ្សាយ"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"មនុស្សនៅជិត​អ្នកដែលមាន​ឧបករណ៍ប៊្លូធូស​ត្រូវគ្នា​អាចស្តាប់​មេឌៀ​ដែលអ្នកកំពុងផ្សាយបាន"</string>
@@ -939,7 +944,12 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"កែអត្ថបទ​ដែលបានចម្លង"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"កែរូបភាព​ដែលបានចម្លង"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"ផ្ញើទៅ​ឧបករណ៍​នៅជិត"</string>
-    <!-- no translation found for clipboard_text_hidden (7926899867471812305) -->
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"ចុចដើម្បីមើល"</string>
+    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
+    <skip />
+    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
+    <skip />
+    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
     <skip />
     <string name="add" msgid="81036585205287996">"បញ្ចូល"</string>
     <string name="manage_users" msgid="1823875311934643849">"គ្រប់គ្រង​អ្នក​ប្រើប្រាស់"</string>
