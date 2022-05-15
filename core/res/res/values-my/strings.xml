@@ -1239,7 +1239,7 @@
     <string name="screen_compat_mode_scale" msgid="8627359598437527726">"စကေး"</string>
     <string name="screen_compat_mode_show" msgid="5080361367584709857">"အမြဲပြသရန်"</string>
     <string name="screen_compat_mode_hint" msgid="4032272159093750908">"ဒါကို စနစ် ဆက်တင်များထဲ ပြန်ဖွင့်ပေးရန် &gt; Apps &gt; ဒေါင်းလုဒ် လုပ်ပြီး။"</string>
-    <string name="unsupported_display_size_message" msgid="7265211375269394699">"<xliff:g id="APP_NAME">%1$s</xliff:g> သည် လက်ရှိ မျက်နှာပြင်အရွယ်အစားကို ပံ့ပိုးထားခြင်း မရှိပါ။ မမျှော်လင့်နိုင်သည့် ချွတ်ယွင်းချက်များ ဖြစ်ပေါ်နိုင်ပါသည်။"</string>
+    <string name="unsupported_display_size_message" msgid="7265211375269394699">"<xliff:g id="APP_NAME">%1$s</xliff:g> သည် လက်ရှိ ပြကွက်အရွယ်ကို ပံ့ပိုးထားခြင်း မရှိပါ။ မမျှော်လင့်နိုင်သည့် ချွတ်ယွင်းချက်များ ဖြစ်ပေါ်နိုင်ပါသည်။"</string>
     <string name="unsupported_display_size_show" msgid="980129850974919375">"အမြဲပြပါ"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"ကိုက်ညီမှုမရှိသည့် Android OS ဗားရှင်းအတွက် <xliff:g id="APP_NAME">%1$s</xliff:g> ကို ပြုလုပ်ထားခြင်းဖြစ်ပြီး ပုံမှန်အလုပ်မလုပ်နိုင်ပါ။ ဤအက်ပ်အတွက် အပ်ဒိတ်လုပ်ထားသည့် ဗားရှင်း ရနိုင်ပါမည်။"</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"အမြဲပြရန်"</string>
