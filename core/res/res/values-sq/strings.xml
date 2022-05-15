@@ -305,8 +305,10 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"qasje te kalendari yt"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"dërgo dhe shiko mesazhet SMS"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"Skedarët dhe dokumentet"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"përfito qasje te skedarët dhe dokumentet në pajisjen tënde"</string>
+    <!-- no translation found for permgrouplab_storage (17339216290379241) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_storage (5378659041354582769) -->
+    <skip />
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Muzika dhe audioja"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"të qaset te muzika dhe audioja në pajisjen tënde"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotografitë dhe videot"</string>
@@ -2286,5 +2288,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Kontrollo aplikacionet aktive"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Nuk mund të qasesh në kamerën e telefonit tënd nga <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Nuk mund të qasesh në kamerën e tabletit tënd nga <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"Gjuha e sistemit"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Parazgjedhja e sistemit"</string>
 </resources>
