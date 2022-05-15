@@ -377,7 +377,7 @@
     <string name="force_allow_on_external" msgid="9187902444231637880">"Vynútiť povolenie aplikácií na externom úložisku"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Umožniť zapísať akúkoľvek aplikáciu do externého úložiska bez ohľadu na hodnoty v manifeste"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Vynútiť možnosť zmeny veľkosti aktivít"</string>
-    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Umožniť veľkosť všetkých aktivít na niekoľko okien (bez ohľadu na hodnoty manifestu)"</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Umožniť zmeniť veľkosť všetkých aktivít na niekoľko okien (bez ohľadu na hodnoty manifestu)"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Povoliť okná s voľným tvarom"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Povoliť podporu pre experimentálne okná s voľným tvarom"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Heslo pre zálohy v počítači"</string>

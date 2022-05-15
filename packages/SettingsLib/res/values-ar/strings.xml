@@ -87,7 +87,7 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"نقل الملف"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"جهاز الإرسال"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"استخدام الإنترنت"</string>
-    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"مشاركة جهة الاتصال"</string>
+    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"مشاركة جهات الاتصال"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"استخدام مع مشاركة جهة الاتصال"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"مشاركة اتصال الإنترنت"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"الرسائل النصية"</string>
@@ -195,8 +195,8 @@
     <item msgid="581904787661470707">"الأسرع"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"اختيار ملف شخصي"</string>
-    <string name="category_personal" msgid="6236798763159385225">"شخصي"</string>
-    <string name="category_work" msgid="4014193632325996115">"للعمل"</string>
+    <string name="category_personal" msgid="6236798763159385225">"التطبيقات الشخصية"</string>
+    <string name="category_work" msgid="4014193632325996115">"تطبيقات العمل"</string>
     <string name="development_settings_title" msgid="140296922921597393">"خيارات المطورين"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"تفعيل خيارات المطورين"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"تعيين خيارات تطوير التطبيق"</string>
@@ -550,7 +550,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"المستخدم"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"ملف شخصي محظور"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"هل تريد إضافة مستخدم جديد؟"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"‏يمكنك مشاركة هذا الجهاز مع أشخاص آخرين من خلال إنشاء حسابات لمستخدمين إضافيين. وسيحصل كل مستخدم على مساحته الخاصة التي يمكنه تخصيصها بتطبيقاته وخلفياته التي يريدها وغيرها. كما يمكن للمستخدمين أيضًا ضبط إعدادات الجهاز مثل Wi-Fi والتي تؤثر في جميع المستخدمين.\n\nعند إضافة مستخدم جديد، عليه إعداد مساحته.\n\nيمكن لأي مستخدم تحديث التطبيقات لجميع المستخدمين الآخرين. وقد لا يتم نقل إعدادات وخدمات \"سهولة الاستخدام\" إلى المستخدم الجديد."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"‏يمكنك مشاركة هذا الجهاز مع أشخاص آخرين من خلال إنشاء حسابات لمستخدمين إضافيين. وسيحصل كل مستخدم على مساحته الخاصة التي يمكنه تخصيصها بتطبيقاته وخلفياته التي يريدها وغير ذلك. ويمكن أيضًا للمستخدمين ضبط إعدادات الجهاز مثل Wi-Fi والتي تؤثر في جميع المستخدمين.\n\nعند إضافة مستخدم جديد، عليه إعداد مساحته.\n\nيمكن لأي مستخدم تحديث التطبيقات لجميع المستخدمين الآخرين. وقد لا يتم نقل إعدادات وخدمات \"سهولة الاستخدام\" إلى المستخدم الجديد."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"عند إضافة مستخدم جديد، عليه إعداد مساحته.\n\nويمكن لأي مستخدم تحديث التطبيقات لجميع المستخدمين الآخرين."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"هل تريد إعداد المستخدم الآن؟"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"يُرجى التأكّد من أن الشخص يمكنه استخدام الجهاز الآن وإعداد مساحته."</string>
