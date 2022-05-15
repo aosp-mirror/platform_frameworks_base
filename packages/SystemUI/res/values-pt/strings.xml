@@ -620,7 +620,7 @@
     <string name="left_icon" msgid="5036278531966897006">"Ícone à esquerda"</string>
     <string name="right_icon" msgid="1103955040645237425">"Ícone à direita"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"Mantenha pressionado e arraste para adicionar blocos"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Mantenha o bloco pressionado e arraste para reorganizar"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Para reorganizar, toque no bloco sem soltar e arraste."</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Arraste aqui para remover"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"É preciso haver pelo menos <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> blocos"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Editar"</string>

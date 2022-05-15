@@ -85,7 +85,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"స్క్రీన్ రికార్డింగ్ అవుతోంది"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"స్క్రీన్ రికార్డ్ సెషన్ కోసం ఆన్‌గోయింగ్ నోటిఫికేషన్"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"రికార్డింగ్‌ను ప్రారంభించాలా?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"రికార్డ్ చేస్తున్నప్పుడు, Android సిస్టమ్ మీ స్క్రీన్‌పై ప్రదర్శించబడిన లేదా మీ పరికరం నుండి ప్లే చేయబడిన ఏ సున్నితమైన సమాచారాన్నయినా క్యాప్చర్ చేయగలదు. ఈ సమాచారంలో, పాస్‌వర్డ్‌లు, పేమెంట్ వివరాలు, ఫోటోలు, మెసేజ్‌లు, ఆడియో కూడా ఉంటాయి."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"రికార్డ్ చేస్తున్నప్పుడు, Android సిస్టమ్ మీ స్క్రీన్‌పై ప్రదర్శించబడిన లేదా మీ పరికరం నుండి ప్లే చేయబడిన ఏ సున్నితమైన సమాచారాన్నయినా క్యాప్చర్ చేయగలదు. ఈ సమాచారంలో పాస్‌వర్డ్‌లు, పేమెంట్ వివరాలు, ఫోటోలు, మెసేజ్‌లు, ఆడియో కూడా ఉంటాయి."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ఆడియోను రికార్డ్ చేయి"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"పరికరం ఆడియో"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"మీ పరికరం నుండి వచ్చే మ్యూజిక్, కాల్స్‌, రింగ్‌టోన్‌ల వంటి ధ్వనులు"</string>

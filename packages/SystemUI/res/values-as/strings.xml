@@ -342,7 +342,7 @@
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"আকৌ আৰম্ভ কৰক"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"হয়, অব্যাহত ৰাখক"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"নতুন ব্যৱহাৰকাৰী যোগ কৰিবনে?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"আপুনি যেতিয়া এজন নতুন ব্যৱহাৰকাৰী যোগ কৰে, তেওঁ নিজৰ স্থান ছেট আপ কৰা প্ৰয়োজন।\n\nযিকোনো ব্যৱহাৰকাৰীয়ে নিজৰ লগতে আন ব্যৱহাৰকাৰীৰো এপ্ আপডে’ট কৰিব পাৰে।"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"আপুনি যেতিয়া এজন নতুন ব্যৱহাৰকাৰী যোগ কৰে, তেওঁ নিজৰ স্থান ছেট আপ কৰাৰ প্ৰয়োজন।\n\nযিকোনো ব্যৱহাৰকাৰীয়ে সকলো অন্য ব্যৱহাৰকাৰীৰ বাবে এপ্ আপডে’ট কৰিব পাৰে।"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"অধিকতম ব্যৱহাৰকাৰী সৃষ্টি কৰা হ’ল"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="one">আপুনি <xliff:g id="COUNT">%d</xliff:g> জনলৈকে ব্যৱহাৰকাৰী যোগ কৰিব পাৰে।</item>

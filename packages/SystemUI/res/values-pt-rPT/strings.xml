@@ -881,6 +881,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"Veja tudo"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Para mudar de rede, desligue a Ethernet"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Para melhorar a experiência do dispositivo, as apps e os serviços podem continuar a procurar redes Wi-Fi em qualquer altura, mesmo quando o Wi-Fi está desativado. Pode alterar esta opção nas definições de procura de Wi-Fi. "<annotation id="link">"Alterar"</annotation></string>
-    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Desative o modo de avião"</string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Desativar o modo de avião"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Selecione utilizador"</string>
 </resources>
