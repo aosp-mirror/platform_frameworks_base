@@ -96,6 +96,8 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
+import com.android.wm.shell.common.annotations.ShellBackgroundThread;
+import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
@@ -157,6 +159,8 @@ public class BubbleController {
     // Used to post to main UI thread
     private final ShellExecutor mMainExecutor;
     private final Handler mMainHandler;
+
+    private final ShellExecutor mBackgroundExecutor;
 
     private BubbleLogger mLogger;
     private BubbleData mBubbleData;
@@ -234,8 +238,9 @@ public class BubbleController {
             DisplayController displayController,
             Optional<OneHandedController> oneHandedOptional,
             DragAndDropController dragAndDropController,
-            ShellExecutor mainExecutor,
-            Handler mainHandler,
+            @ShellMainThread ShellExecutor mainExecutor,
+            @ShellMainThread Handler mainHandler,
+            @ShellBackgroundThread ShellExecutor bgExecutor,
             TaskViewTransitions taskViewTransitions,
             SyncTransactionQueue syncQueue) {
         BubbleLogger logger = new BubbleLogger(uiEventLogger);
@@ -245,7 +250,7 @@ public class BubbleController {
                 new BubbleDataRepository(context, launcherApps, mainExecutor),
                 statusBarService, windowManager, windowManagerShellWrapper, launcherApps,
                 logger, taskStackListener, organizer, positioner, displayController,
-                oneHandedOptional, dragAndDropController, mainExecutor, mainHandler,
+                oneHandedOptional, dragAndDropController, mainExecutor, mainHandler, bgExecutor,
                 taskViewTransitions, syncQueue);
     }
 
@@ -269,8 +274,9 @@ public class BubbleController {
             DisplayController displayController,
             Optional<OneHandedController> oneHandedOptional,
             DragAndDropController dragAndDropController,
-            ShellExecutor mainExecutor,
-            Handler mainHandler,
+            @ShellMainThread ShellExecutor mainExecutor,
+            @ShellMainThread Handler mainHandler,
+            @ShellBackgroundThread ShellExecutor bgExecutor,
             TaskViewTransitions taskViewTransitions,
             SyncTransactionQueue syncQueue) {
         mContext = context;
@@ -286,6 +292,7 @@ public class BubbleController {
         mLogger = bubbleLogger;
         mMainExecutor = mainExecutor;
         mMainHandler = mainHandler;
+        mBackgroundExecutor = bgExecutor;
         mTaskStackListener = taskStackListener;
         mTaskOrganizer = organizer;
         mSurfaceSynchronizer = synchronizer;
@@ -725,7 +732,8 @@ public class BubbleController {
 
         try {
             mAddedToWindowManager = false;
-            mContext.unregisterReceiver(mBroadcastReceiver);
+            // Put on background for this binder call, was causing jank
+            mBackgroundExecutor.execute(() -> mContext.unregisterReceiver(mBroadcastReceiver));
             if (mStackView != null) {
                 mWindowManager.removeView(mStackView);
                 mBubbleData.getOverflow().cleanUpExpandedState();

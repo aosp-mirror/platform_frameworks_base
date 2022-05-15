@@ -182,7 +182,7 @@ class AssociationRequestsProcessor {
         // 2b.1. Populate the request with required info.
         request.setPackageName(packageName);
         request.setUserId(userId);
-        request.setSkipPrompt(mayAssociateWithoutPrompt(request, packageName, userId));
+        request.setSkipPrompt(mayAssociateWithoutPrompt(packageName, userId));
 
         // 2b.2. Prepare extras and create an Intent.
         final Bundle extras = new Bundle();
@@ -321,18 +321,7 @@ class AssociationRequestsProcessor {
         }
     };
 
-    private boolean mayAssociateWithoutPrompt(@NonNull AssociationRequest request,
-            @NonNull String packageName, @UserIdInt int userId) {
-        final String deviceProfile = request.getDeviceProfile();
-        if (deviceProfile != null) {
-            final boolean isRoleHolder = Binder.withCleanCallingIdentity(
-                    () -> isRoleHolder(mContext, userId, packageName, deviceProfile));
-            if (isRoleHolder) {
-                // Don't need to collect user's consent since app already holds the role.
-                return true;
-            }
-        }
-
+    private boolean mayAssociateWithoutPrompt(@NonNull String packageName, @UserIdInt int userId) {
         // Below we check if the requesting package is allowlisted (usually by the OEM) for creating
         // CDM associations without user confirmation (prompt).
         // For this we'll check to config arrays:

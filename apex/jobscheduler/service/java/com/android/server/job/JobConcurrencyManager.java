@@ -959,7 +959,7 @@ class JobConcurrencyManager {
         for (int i = 0; i < mActiveServices.size(); i++) {
             JobServiceContext jsc = mActiveServices.get(i);
             final JobStatus executing = jsc.getRunningJobLocked();
-            if (executing != null && executing.matches(job.getUid(), job.getJobId())) {
+            if (executing == job) {
                 jsc.cancelExecutingJobLocked(reason, internalReasonCode, debugReason);
                 return true;
             }

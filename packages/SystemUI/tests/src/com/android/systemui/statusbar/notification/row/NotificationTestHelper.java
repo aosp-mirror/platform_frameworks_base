@@ -23,8 +23,11 @@ import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -121,6 +124,7 @@ public class NotificationTestHelper {
     private StatusBarStateController mStatusBarStateController;
     private final PeopleNotificationIdentifier mPeopleNotificationIdentifier;
     public final OnUserInteractionCallback mOnUserInteractionCallback;
+    public final Runnable mFutureDismissalRunnable;
 
     public NotificationTestHelper(
             Context context,
@@ -182,6 +186,9 @@ public class NotificationTestHelper {
         mBindPipelineEntryListener = collectionListenerCaptor.getValue();
         mPeopleNotificationIdentifier = mock(PeopleNotificationIdentifier.class);
         mOnUserInteractionCallback = mock(OnUserInteractionCallback.class);
+        mFutureDismissalRunnable = mock(Runnable.class);
+        when(mOnUserInteractionCallback.registerFutureDismissal(any(), anyInt()))
+                .thenReturn(mFutureDismissalRunnable);
     }
 
     /**

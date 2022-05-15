@@ -49,8 +49,7 @@ public class LogModule {
     @SysUISingleton
     @NotificationLog
     public static LogBuffer provideNotificationsLogBuffer(LogBufferFactory factory) {
-        return factory.create("NotifLog", 1000 /* maxPoolSize */,
-                10 /* flexSize */, false /* systrace */);
+        return factory.create("NotifLog", 1000 /* maxSize */, false /* systrace */);
     }
 
     /** Provides a logging buffer for all logs related to the data layer of notifications. */
@@ -74,8 +73,7 @@ public class LogModule {
     @SysUISingleton
     @NotificationSectionLog
     public static LogBuffer provideNotificationSectionLogBuffer(LogBufferFactory factory) {
-        return factory.create("NotifSectionLog", 1000 /* maxPoolSize */,
-                10 /* flexSize */, false /* systrace */);
+        return factory.create("NotifSectionLog", 1000 /* maxSize */, false /* systrace */);
     }
 
     /** Provides a logging buffer for all logs related to the data layer of notifications. */
@@ -91,8 +89,7 @@ public class LogModule {
     @SysUISingleton
     @QSLog
     public static LogBuffer provideQuickSettingsLogBuffer(LogBufferFactory factory) {
-        return factory.create("QSLog", 500 /* maxPoolSize */,
-                10 /* flexSize */, false /* systrace */);
+        return factory.create("QSLog", 500 /* maxSize */, false /* systrace */);
     }
 
     /** Provides a logging buffer for {@link com.android.systemui.broadcast.BroadcastDispatcher} */
@@ -100,8 +97,8 @@ public class LogModule {
     @SysUISingleton
     @BroadcastDispatcherLog
     public static LogBuffer provideBroadcastDispatcherLogBuffer(LogBufferFactory factory) {
-        return factory.create("BroadcastDispatcherLog", 500 /* maxPoolSize */,
-                10 /* flexSize */, false /* systrace */);
+        return factory.create("BroadcastDispatcherLog", 500 /* maxSize */,
+                false /* systrace */);
     }
 
     /** Provides a logging buffer for all logs related to Toasts shown by SystemUI. */
@@ -139,8 +136,8 @@ public class LogModule {
     @SysUISingleton
     @QSFragmentDisableLog
     public static LogBuffer provideQSFragmentDisableLogBuffer(LogBufferFactory factory) {
-        return factory.create("QSFragmentDisableFlagsLog", 10 /* maxPoolSize */,
-                10 /* flexSize */, false /* systrace */);
+        return factory.create("QSFragmentDisableFlagsLog", 10 /* maxSize */,
+                false /* systrace */);
     }
 
     /**
@@ -228,6 +225,18 @@ public class LogModule {
     @MediaBrowserLog
     public static LogBuffer provideMediaBrowserBuffer(LogBufferFactory factory) {
         return factory.create("MediaBrowser", 100);
+    }
+
+    /**
+     * Provides a buffer for updates to the media carousel.
+     *
+     * See {@link com.android.systemui.media.MediaCarouselController}.
+     */
+    @Provides
+    @SysUISingleton
+    @MediaCarouselControllerLog
+    public static LogBuffer provideMediaCarouselControllerBuffer(LogBufferFactory factory) {
+        return factory.create("MediaCarouselCtlrLog", 20);
     }
 
     /** Allows logging buffers to be tweaked via adb on debug builds but not on prod builds. */

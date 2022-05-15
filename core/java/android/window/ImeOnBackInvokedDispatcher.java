@@ -158,6 +158,12 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
 
     /** Clears all registered callbacks on the instance. */
     public void clear() {
+        // Unregister previously registered callbacks if there's any.
+        if (getReceivingDispatcher() != null) {
+            for (OnBackInvokedCallback callback : mImeCallbackMap.values()) {
+                getReceivingDispatcher().unregisterOnBackInvokedCallback(callback);
+            }
+        }
         mImeCallbackMap.clear();
     }
 

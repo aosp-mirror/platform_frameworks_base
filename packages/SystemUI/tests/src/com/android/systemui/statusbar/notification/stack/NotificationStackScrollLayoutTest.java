@@ -31,6 +31,8 @@ import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyFloat;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
@@ -607,6 +609,12 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
         MotionEvent event3 = transformEventForView(createMotionEvent(250f, 250f), mStackScroller);
         assertTrue(mStackScroller.isInsideQsHeader(event2));
+    }
+
+    @Test
+    public void setFractionToShade_recomputesStackHeight() {
+        mStackScroller.setFractionToShade(1f);
+        verify(mNotificationStackSizeCalculator).computeHeight(any(), anyInt(), anyFloat());
     }
 
     private void setBarStateForTest(int state) {
