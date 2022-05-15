@@ -355,7 +355,7 @@
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"zobrazovanie upozornení ako aktivít na celej obrazovke v uzamknutom zariadení"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Táto možnosť umožňuje aplikácii zobrazovať upozornenia ako aktivity na celej obrazovke v uzamknutom zariadení"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"Inštalovať odkazy"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Povoľuje aplikácii pridať odkazy na ploche bez zásahu používateľa."</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"povoliť aplikácii pridať odkazy na ploche bez zásahu používateľa."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"odinštalovať odkazy"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Povoľuje aplikácii odstrániť odkazy na ploche bez zásahu používateľa."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"presmerovať odchádzajúce hovory"</string>

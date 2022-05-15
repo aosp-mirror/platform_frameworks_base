@@ -1768,7 +1768,7 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Išjungti spartųjį klavišą"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Naudoti spartųjį klavišą"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Spalvų inversija"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"Spalvų taisymas"</string>
+    <string name="color_correction_feature_name" msgid="3655077237805422597">"Spalvų koregavimas"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Vienos rankos režimas"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Itin blanku"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Laikomi garsumo klavišai. „<xliff:g id="SERVICE_NAME">%1$s</xliff:g>“ įjungta."</string>

@@ -1421,7 +1421,7 @@
     <string name="select_input_method" msgid="3971267998568587025">"Odaberite način unosa"</string>
     <string name="show_ime" msgid="6406112007347443383">"Prikaži na ekranu dok je fizička tastatura aktivna"</string>
     <string name="hardware" msgid="1800597768237606953">"Prikaz virtuelne tastature"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Konfiguriraj fizičku tastaturu"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Konfigurirajte fizičku tastaturu"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Dodirnite za odabir jezika i rasporeda"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1732,7 +1732,7 @@
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Ako uključite uslugu <xliff:g id="SERVICE">%1$s</xliff:g>, uređaj neće koristiti zaključavanje ekrana za poboljšanje šifriranja podataka."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Puna kontrola je prikladna za aplikacije koje vam pomažu kod potreba pristupačnosti, ali nije za većinu aplikacija."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Prikaz i kontrola ekrana"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Može čitati sav sadržaj na ekranu i prikazivati sadržaj u drugim aplikacijama."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Može čitati sav sadržaj na ekranu i prikazivati sadržaj preko drugih aplikacija."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Prikaz i izvršavanje radnji"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Može pratiti vaše interakcije s aplikacijom ili hardverskim senzorom te ostvariti interakciju s aplikacijama umjesto vas."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Dozvoli"</string>

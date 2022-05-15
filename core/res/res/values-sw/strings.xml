@@ -324,7 +324,7 @@
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"kusoma na kuandika kumbukumbu za simu"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Simu"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"piga na udhibiti simu"</string>
-    <string name="permgrouplab_sensors" msgid="9134046949784064495">"Vitambua shughuli za mwili"</string>
+    <string name="permgrouplab_sensors" msgid="9134046949784064495">"Vitambuzi vya shughuli za mwili"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"fikia data ya kitambuzi kuhusu alama zako muhimu"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Kufikia maudhui ya dirisha"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Kuchunguza maudhui ya dirisha unalotumia."</string>
@@ -1710,9 +1710,9 @@
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Ukiwasha <xliff:g id="SERVICE">%1$s</xliff:g>, kifaa chako hakitatumia kipengele cha kufunga skrini yako ili kuboresha usimbaji wa data kwa njia fiche."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Udhibiti kamili unafaa kwa programu zinazokusaidia kwa mahitaji ya ufikivu, ila si kwa programu nyingi."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Kuangalia na kudhibiti skrini"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Kinaweza kusoma maudhui yote kwenye skrini na kuonyesha maudhui kwenye programu zingine."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Inaweza kusoma maudhui yote kwenye skrini na kuonyesha maudhui kwenye programu zingine."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Kuangalia na kutekeleza vitendo"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Kinaweza kufuatilia mawasiliano yako na programu au kitambuzi cha maunzi na kuwasiliana na programu zingine kwa niaba yako."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Inaweza kufuatilia mawasiliano yako na programu au kitambuzi cha maunzi na kuwasiliana na programu zingine kwa niaba yako."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Ruhusu"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Kataa"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Gusa kipengele ili uanze kukitumia:"</string>

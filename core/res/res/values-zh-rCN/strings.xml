@@ -1999,7 +1999,7 @@
     <string name="profile_encrypted_message" msgid="1128512616293157802">"点按即可解锁工作资料"</string>
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"已连接到<xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"点按即可查看文件"</string>
-    <string name="pin_target" msgid="8036028973110156895">"固定"</string>
+    <string name="pin_target" msgid="8036028973110156895">"置顶"</string>
     <string name="pin_specific_target" msgid="7824671240625957415">"将<xliff:g id="LABEL">%1$s</xliff:g>置顶"</string>
     <string name="unpin_target" msgid="3963318576590204447">"取消固定"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"取消置顶<xliff:g id="LABEL">%1$s</xliff:g>"</string>
