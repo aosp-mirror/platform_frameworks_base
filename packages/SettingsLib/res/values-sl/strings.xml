@@ -667,9 +667,6 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Vklop zaslona"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Dovoli vklop zaslona"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Dovolite aplikaciji, da vklopi zaslon. Če ji to odobrite, lahko aplikacija kadar koli brez vašega eksplicitnega namena vklopi zaslon."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Optično branje kode QR"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Če želite začeti poslušati, postavite spodnjo kodo QR na sredino."</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Koda QR nima pravilne oblike zapisa."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Želite ustaviti oddajanje aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Če oddajate aplikacijo <xliff:g id="SWITCHAPP">%1$s</xliff:g> ali spremenite izhod, bo trenutno oddajanje ustavljeno."</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Oddajaj aplikacijo <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>

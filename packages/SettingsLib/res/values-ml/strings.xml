@@ -570,7 +570,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"നിയന്ത്രിത പ്രൊഫൈൽ"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"പുതിയ ഉപയോക്താവിനെ ചേർക്കണോ?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"കൂടുതൽ ഉപയോക്താക്കളെ സൃഷ്‌ടിച്ചുകൊണ്ട് ഈ ഉപകരണം മറ്റുള്ളവരുമായി നിങ്ങൾക്ക് പങ്കിടാം. ആപ്പുകളും വാൾപേപ്പറുകളും മറ്റും ഉപയോഗിച്ച് ഇഷ്‌ടാനുസൃതമാക്കാൻ ഓരോ ഉപയോക്താവിനും സാധിക്കും. വൈഫൈ പോലെ എല്ലാവരെയും ബാധിക്കുന്ന ഉപകരണ ക്രമീകരണവും ഉപയോക്താക്കൾക്ക് അഡ്ജസ്റ്റ് ചെയ്യാം.\n\nനിങ്ങളൊരു പുതിയ ഉപയോക്താവിനെ ചേർക്കുമ്പോൾ, ആ വ്യക്തി സ്വന്തമായ ഇടം സജ്ജീകരിക്കേണ്ടതുണ്ട്.\n\n ഏതെങ്കിലും ഉപയോക്താവിന് എല്ലാ ഉപയോക്താക്കൾക്കുമായി ആപ്പുകൾ അപ്‌ഡേറ്റ് ചെയ്യാനാകും. ഉപയോഗസഹായി ക്രമീകരണവും സേവനങ്ങളും പുതിയ ഉപയോക്താവിന് കൈമാറുകയില്ല."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"നിങ്ങൾ ഒരു പുതിയ ഉപയോക്താവിനെ ചേർക്കുമ്പോൾ, ആ വ്യക്തിയ്‌ക്ക് അവരുടെ ഇടം സജ്ജീകരിക്കേണ്ടതുണ്ട്.\n\nമറ്റ് എല്ലാ ഉപയോക്താക്കൾക്കുമായി ഏതൊരു ഉപയോക്താവിനും ആപ്പുകൾ അപ്‌ഡേറ്റ് ചെയ്യാനാവും."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"നിങ്ങൾ ഒരു പുതിയ ഉപയോക്താവിനെ ചേർക്കുമ്പോൾ, ആ വ്യക്തി സ്വന്തമായ ഇടം സജ്ജീകരിക്കേണ്ടതുണ്ട്.\n\nമറ്റെല്ലാ ഉപയോക്താക്കൾക്കുമായി ഏതെങ്കിലും ഉപയോക്താവിന് ആപ്പുകൾ അപ്‌ഡേറ്റ് ചെയ്യാം."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"ഉപയോക്താവിനെ ഇപ്പോൾ സജ്ജീകരിക്കണോ?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"ഉപകരണം എടുത്ത് ഇടം സജ്ജീകരിക്കുന്നതിന് വ്യക്തി ലഭ്യമാണെന്ന് ഉറപ്പാക്കുക"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"ഇപ്പോൾ പ്രൊഫൈൽ സജ്ജീകരിക്കണോ?"</string>
@@ -667,17 +667,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"സ്ക്രീൻ ഓണാക്കുക"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"സ്ക്രീൻ ഓണാക്കാൻ അനുവദിക്കുക"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"സ്ക്രീൻ ഓണാക്കാൻ ആപ്പിനെ അനുവദിക്കുക. അനുവദിക്കുകയാണെങ്കിൽ, നിങ്ങളുടെ താൽപ്പര്യം കൂടാതെ ഏതുസമയത്തും സ്ക്രീൻ ഓണാക്കാൻ ആപ്പിന് കഴിയും."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR കോഡ് സ്‌കാൻ ചെയ്യുക"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"കേട്ട് തുടങ്ങാൻ ചുവടെയുള്ള QR കോഡിലേക്ക് കേന്ദ്രീകരിക്കുക"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR കോഡ് ഫോർമാറ്റ് അസാധുവാണ്"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> ബ്രോഡ്‌കാസ്റ്റ് ചെയ്യുന്നത് അവസാനിപ്പിക്കണോ?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"നിങ്ങൾ <xliff:g id="SWITCHAPP">%1$s</xliff:g> ബ്രോഡ്‌കാസ്റ്റ് ചെയ്യുകയോ ഔട്ട്പുട്ട് മാറ്റുകയോ ചെയ്താൽ നിങ്ങളുടെ നിലവിലുള്ള ബ്രോഡ്‌കാസ്റ്റ് അവസാനിക്കും"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> ബ്രോഡ്‌കാസ്റ്റ് ചെയ്യുക"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"ഔട്ട്പുട്ട് മാറ്റുക"</string>
-    <!-- no translation found for back_navigation_animation (8105467568421689484) -->
-    <skip />
-    <!-- no translation found for back_navigation_animation_summary (741292224121599456) -->
-    <skip />
-    <!-- no translation found for back_navigation_animation_dialog (8696966520944625596) -->
-    <skip />
+    <string name="back_navigation_animation" msgid="8105467568421689484">"പ്രെഡിക്റ്റീവ് ബാക്ക് ആനിമേഷനുകൾ"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"പ്രെഡിക്റ്റീവ് ബാക്കിനായി സിസ്റ്റം ആനിമേഷനുകൾ പ്രവർത്തനക്ഷമമാക്കുക."</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"ഈ ക്രമീകരണം പ്രെഡിക്റ്റീവ് ജെസ്ച്ചർ ആനിമേഷന് വേണ്ടി സിസ്റ്റം ആനിമേഷനുകളെ പ്രവർത്തനക്ഷമമാക്കുന്നു. ഇതിന് ഓരോ ആപ്പിലും enableOnBackInvokedCallback എന്നത് മാനിഫെസ്റ്റ് ഫയലിൽ ശരി എന്ന് സജ്ജീകരിക്കേണ്ടതുണ്ട്."</string>
 </resources>

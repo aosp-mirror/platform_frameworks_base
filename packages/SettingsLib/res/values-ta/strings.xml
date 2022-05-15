@@ -117,7 +117,7 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ஃபைல் இடமாற்றம்"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"உள்ளீட்டுச் சாதனம்"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"இணைய அணுகல்"</string>
-    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"தொடர்புப் பகிர்தல்"</string>
+    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"தொடர்பைப் பகிர்தல்"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"தொடர்புப் பகிர்தலுக்குப் பயன்படுத்து"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"இணைய இணைப்பு பகிர்தல்"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"உரைச் செய்திகள்"</string>
@@ -667,9 +667,6 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"திரையை ஆன் செய்தல்"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"திரையை ஆன் செய்வதை அனுமதி"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"திரையை ஆன் செய்ய ஓர் ஆப்ஸை அனுமதிக்கவும். அனுமதித்தால், உங்கள் தலையீடு இல்லாமலே ஆப்ஸ் எப்போது வேண்டுமானாலும் திரையை ஆன் செய்யக்கூடும்."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR குறியீட்டை ஸ்கேன் செய்யுங்கள்"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"ஆடியோவைக் கேட்க, கீழுள்ள QR குறியீட்டை மையப்படுத்திக் காட்டுங்கள்"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR குறியீடு சரியான வடிவமைப்பில் இல்லை"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸ் ஒலிபரப்பப்படுவதை நிறுத்தவா?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"நீங்கள் <xliff:g id="SWITCHAPP">%1$s</xliff:g> ஆப்ஸை ஒலிபரப்பினாலோ அவுட்புட்டை மாற்றினாலோ உங்களின் தற்போதைய ஒலிபரப்பு நிறுத்தப்படும்"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> ஆப்ஸை ஒலிபரப்பு"</string>

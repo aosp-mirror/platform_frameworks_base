@@ -667,17 +667,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Kveikja á skjánum"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Leyfa að kveikt sé á skjánum"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Leyfa forriti að kveikja á skjánum. Ef þetta er leyft getur forritið kveikt á skjánum hvenær sem er án þess að þú samþykkir það sérstaklega."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Skanna QR-kóða"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Byrjaðu að hlusta með því að skanna QR-kóðann hér að neðan"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR-kóði er ekki gilt snið"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Hætta að senda út <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Ef þú sendir út <xliff:g id="SWITCHAPP">%1$s</xliff:g> eða skiptir um úttak lýkur yfirstandandi útsendingu"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Senda út <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Skipta um úttak"</string>
-    <!-- no translation found for back_navigation_animation (8105467568421689484) -->
-    <skip />
-    <!-- no translation found for back_navigation_animation_summary (741292224121599456) -->
-    <skip />
-    <!-- no translation found for back_navigation_animation_dialog (8696966520944625596) -->
-    <skip />
+    <string name="back_navigation_animation" msgid="8105467568421689484">"Hreyfimyndir flýtiritunar við bendinguna „til baka“"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Kveikja á hreyfimyndum í kerfinu til að sýna hreyfimyndir þegar bendingin „til baka“ er gerð."</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Þessi stilling kveikir á hreyfimyndum í kerfinu til að sýna hreyfimyndir flýtiritunar með bendingum. Stillingin krefst þess að kveikt sé á enableOnBackInvokedCallback í upplýsingaskránni fyrir hvert forrit."</string>
 </resources>
