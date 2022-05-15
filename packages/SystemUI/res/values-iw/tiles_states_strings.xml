@@ -171,7 +171,9 @@
     <item msgid="146088982397753810">"כבוי"</item>
     <item msgid="460891964396502657">"פועל"</item>
   </string-array>
-    <!-- no translation found for tile_states_dream:0 (6184819793571079513) -->
-    <!-- no translation found for tile_states_dream:1 (8014986104355098744) -->
-    <!-- no translation found for tile_states_dream:2 (5966994759929723339) -->
+  <string-array name="tile_states_dream">
+    <item msgid="6184819793571079513">"לא זמין"</item>
+    <item msgid="8014986104355098744">"כבוי"</item>
+    <item msgid="5966994759929723339">"מופעל"</item>
+  </string-array>
 </resources>
