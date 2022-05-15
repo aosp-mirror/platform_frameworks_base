@@ -45,7 +45,7 @@
     <string name="status_bar_settings_notifications" msgid="5285316949980621438">"การแจ้งเตือน"</string>
     <string name="bluetooth_tethered" msgid="4171071193052799041">"บลูทูธที่ปล่อยสัญญาณ"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="2972273031043777851">"ตั้งค่าวิธีการป้อนข้อมูล"</string>
-    <string name="status_bar_use_physical_keyboard" msgid="4849251850931213371">"แป้นพิมพ์บนเครื่อง"</string>
+    <string name="status_bar_use_physical_keyboard" msgid="4849251850931213371">"แป้นพิมพ์จริง"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"อนุญาตให้ <xliff:g id="APPLICATION">%1$s</xliff:g> เข้าถึง <xliff:g id="USB_DEVICE">%2$s</xliff:g> ไหม"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"อนุญาตให้ <xliff:g id="APPLICATION">%1$s</xliff:g> เข้าถึง <xliff:g id="USB_DEVICE">%2$s</xliff:g> ไหม\nแอปนี้ไม่ได้รับอนุญาตให้อัดเสียงแต่อาจเก็บเสียงผ่านอุปกรณ์ USB นี้ได้"</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"อนุญาตให้ <xliff:g id="APPLICATION">%1$s</xliff:g> เข้าถึง <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ไหม"</string>

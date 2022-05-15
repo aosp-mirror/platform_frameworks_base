@@ -734,7 +734,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Varsayılan"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Otomatik"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Sessiz veya titreşim yok"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Sessizdir veya titreşim yoktur ve görüşme bölümünün altında görünür"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Ses veya titreşim yok, görüşme bölümünün altında görünür"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Telefon ayarlarına bağlı olarak zili çalabilir veya titreyebilir"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Telefon ayarlarına bağlı olarak zili çalabilir veya titreyebilir <xliff:g id="APP_NAME">%1$s</xliff:g> adlı uygulamadan görüşmeler varsayılan olarak baloncukla gösterilir."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Kayan kısayolla dikkatinizi bu içerik üzerinde tutar."</string>

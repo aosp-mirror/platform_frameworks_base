@@ -45,7 +45,7 @@
     <string name="status_bar_settings_notifications" msgid="5285316949980621438">"सूचनाहरू"</string>
     <string name="bluetooth_tethered" msgid="4171071193052799041">"ब्लुटुथ टेदर भयो"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="2972273031043777851">"इनपुट विधिहरू सेटअप गर्नुहोस्"</string>
-    <string name="status_bar_use_physical_keyboard" msgid="4849251850931213371">"वास्तविक किबोर्ड"</string>
+    <string name="status_bar_use_physical_keyboard" msgid="4849251850931213371">"फिजिकल किबोर्ड"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="APPLICATION">%1$s</xliff:g> लाई <xliff:g id="USB_DEVICE">%2$s</xliff:g> माथि पहुँच राख्ने अनुमति दिने हो?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="APPLICATION">%1$s</xliff:g> लाई <xliff:g id="USB_DEVICE">%2$s</xliff:g> माथि पहुँच राख्न अनुमति दिने हो?\nयो एपलाई रेकर्ड गर्ने अनुमति प्रदान गरिएको छैन तर यसले USB यन्त्रमार्फत अडियो क्याप्चर गर्न सक्छ।"</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="APPLICATION">%1$s</xliff:g> लाई <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> माथि पहुँच राख्ने अनुमति दिने हो?"</string>
@@ -998,7 +998,7 @@
     <string name="slice_permission_deny" msgid="6870256451658176895">"अस्वीकार गर्नु…"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"ब्याट्री सेभरको समयतालिका बनाउन ट्याप गर्नुहोस्"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"ब्याट्री सकिने सम्भावना भएमा अन गर्नुहोस्"</string>
-    <string name="no_auto_saver_action" msgid="7467924389609773835">"पर्दैन धन्यवाद"</string>
+    <string name="no_auto_saver_action" msgid="7467924389609773835">"पर्दैन, धन्यवाद"</string>
     <string name="auto_saver_enabled_title" msgid="4294726198280286333">"ब्याट्री सेभरको समयतालिका सक्रिय गरियो"</string>
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"ब्याट्री <xliff:g id="PERCENTAGE">%d</xliff:g>%% भन्दा कम भएको बेला ब्याट्री सेभर स्वतः अन हुने छ।"</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"सेटिङहरू"</string>

@@ -494,7 +494,7 @@
     <string name="user_logout_notification_text" msgid="7441286737342997991">"I-logout ang kasalukuyang user"</string>
     <string name="user_logout_notification_action" msgid="7974458760719361881">"I-LOGOUT ANG USER"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"Magdagdag ng bagong user?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Kapag nagdagdag ka ng bagong user, kailangang i-set up ng taong iyon ang kanyang espasyo.\n\nAng sinumang user ay maaaring mag-update ng mga app para sa lahat ng iba pang user."</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Kapag nagdagdag ka ng bagong user, kailangang i-set up ng taong iyon ang kanyang espasyo.\n\nAng sinumang user ay puwedeng mag-update ng mga app para sa lahat ng iba pang user."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Naabot na ang limitasyon sa user"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="one">Maaari kang magdagdag ng hanggang <xliff:g id="COUNT">%d</xliff:g> user.</item>

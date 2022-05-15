@@ -611,7 +611,7 @@
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Dit hou dit in sig totdat jy dit ontspeld. Raak en hou Oorsig om dit te ontspeld."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Dit hou dit in sig totdat jy dit ontspeld. Raak en hou Tuis om dit te ontspeld."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Persoonlike data (soos kontakte en e-posinhoud) kan toeganklik wees."</string>
-    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Kan vasgespelde program ander programme oopmaak."</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Vasgespelde program kan ander programme oopmaak."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Raak en hou die terug- en oorsigknoppie om hierdie program te ontspeld"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Raak en hou die terug- en tuisknoppie om hierdie program te ontspeld"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Swiep op en hou om hierdie program te ontspeld"</string>
