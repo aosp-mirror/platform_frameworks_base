@@ -7045,7 +7045,7 @@
                  android:permission="android.permission.BIND_JOB_SERVICE">
         </service>
 
-        <service android:name="com.android.server.companion.AssociationCleanUpService"
+        <service android:name="com.android.server.companion.InactiveAssociationsRemovalService"
                  android:permission="android.permission.BIND_JOB_SERVICE">
         </service>
 

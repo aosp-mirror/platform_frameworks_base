@@ -3262,7 +3262,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             return AppOpsManager.MODE_IGNORED;
         }
         synchronized (this) {
-            if (isOpRestrictedLocked(uid, code, packageName, attributionTag, pvr.bypass)) {
+            if (isOpRestrictedLocked(uid, code, packageName, attributionTag, pvr.bypass, true)) {
                 return AppOpsManager.MODE_IGNORED;
             }
             code = AppOpsManager.opToSwitch(code);
@@ -3492,7 +3492,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
             final int switchCode = AppOpsManager.opToSwitch(code);
             final UidState uidState = ops.uidState;
-            if (isOpRestrictedLocked(uid, code, packageName, attributionTag, pvr.bypass)) {
+            if (isOpRestrictedLocked(uid, code, packageName, attributionTag, pvr.bypass, false)) {
                 attributedOp.rejected(uidState.state, flags);
                 scheduleOpNotedIfNeededLocked(code, uid, packageName, attributionTag, flags,
                         AppOpsManager.MODE_IGNORED);
@@ -4012,7 +4012,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             final Op op = getOpLocked(ops, code, uid, true);
             final AttributedOp attributedOp = op.getOrCreateAttribution(op, attributionTag);
             final UidState uidState = ops.uidState;
-            isRestricted = isOpRestrictedLocked(uid, code, packageName, attributionTag, pvr.bypass);
+            isRestricted = isOpRestrictedLocked(uid, code, packageName, attributionTag, pvr.bypass,
+                    false);
             final int switchCode = AppOpsManager.opToSwitch(code);
             // If there is a non-default per UID policy (we set UID op mode only if
             // non-default) it takes over, otherwise use the per package policy.
@@ -4873,7 +4874,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private boolean isOpRestrictedLocked(int uid, int code, String packageName,
-            String attributionTag, @Nullable RestrictionBypass appBypass) {
+            String attributionTag, @Nullable RestrictionBypass appBypass, boolean isCheckOp) {
         int restrictionSetCount = mOpGlobalRestrictions.size();
 
         for (int i = 0; i < restrictionSetCount; i++) {
@@ -4890,7 +4891,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             // For each client, check that the given op is not restricted, or that the given
             // package is exempt from the restriction.
             ClientUserRestrictionState restrictionState = mOpUserRestrictions.valueAt(i);
-            if (restrictionState.hasRestriction(code, packageName, attributionTag, userHandle)) {
+            if (restrictionState.hasRestriction(code, packageName, attributionTag, userHandle,
+                    isCheckOp)) {
                 RestrictionBypass opBypass = opAllowSystemBypassRestriction(code);
                 if (opBypass != null) {
                     // If we are the system, bypass user restrictions for certain codes
@@ -7265,7 +7267,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         public boolean hasRestriction(int restriction, String packageName, String attributionTag,
-                int userId) {
+                int userId, boolean isCheckOp) {
             if (perUserRestrictions == null) {
                 return false;
             }
@@ -7284,6 +7286,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return true;
             }
 
+            if (isCheckOp) {
+                return !perUserExclusions.includes(packageName);
+            }
             return !perUserExclusions.contains(packageName, attributionTag);
         }
 
@@ -7450,7 +7455,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                 int numRestrictions = mOpUserRestrictions.size();
                 for (int i = 0; i < numRestrictions; i++) {
                     if (mOpUserRestrictions.valueAt(i)
-                            .hasRestriction(code, pkg, attributionTag, user.getIdentifier())) {
+                            .hasRestriction(code, pkg, attributionTag, user.getIdentifier(),
+                                    false)) {
                         number++;
                     }
                 }

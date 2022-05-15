@@ -56,6 +56,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
+import com.android.systemui.biometrics.AuthController.ScaleFactorProvider;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -133,6 +134,7 @@ public class AuthContainerView extends LinearLayout
         long mRequestId = -1;
         boolean mSkipAnimation = false;
         @BiometricMultiSensorMode int mMultiSensorConfig = BIOMETRIC_MULTI_SENSOR_DEFAULT;
+        ScaleFactorProvider mScaleProvider;
     }
 
     public static class Builder {
@@ -193,6 +195,11 @@ public class AuthContainerView extends LinearLayout
         /** The multi-sensor mode. */
         public Builder setMultiSensorConfig(@BiometricMultiSensorMode int multiSensorConfig) {
             mConfig.mMultiSensorConfig = multiSensorConfig;
+            return this;
+        }
+
+        public Builder setScaleFactorProvider(ScaleFactorProvider scaleProvider) {
+            mConfig.mScaleProvider = scaleProvider;
             return this;
         }
 
@@ -296,12 +303,14 @@ public class AuthContainerView extends LinearLayout
                         (AuthBiometricFingerprintAndFaceView) layoutInflater.inflate(
                                 R.layout.auth_biometric_fingerprint_and_face_view, null, false);
                 fingerprintAndFaceView.setSensorProperties(fpProperties);
+                fingerprintAndFaceView.setScaleFactorProvider(config.mScaleProvider);
                 mBiometricView = fingerprintAndFaceView;
             } else if (fpProperties != null) {
                 final AuthBiometricFingerprintView fpView =
                         (AuthBiometricFingerprintView) layoutInflater.inflate(
                                 R.layout.auth_biometric_fingerprint_view, null, false);
                 fpView.setSensorProperties(fpProperties);
+                fpView.setScaleFactorProvider(config.mScaleProvider);
                 mBiometricView = fpView;
             } else if (faceProperties != null) {
                 mBiometricView = (AuthBiometricFaceView) layoutInflater.inflate(
