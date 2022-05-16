@@ -225,7 +225,7 @@
     <string name="choose_profile" msgid="343803890897657450">"ເລືອກໂປຣໄຟລ໌"</string>
     <string name="category_personal" msgid="6236798763159385225">"​ສ່ວນ​ໂຕ"</string>
     <string name="category_work" msgid="4014193632325996115">"​ບ່ອນ​ເຮັດ​ວຽກ"</string>
-    <string name="development_settings_title" msgid="140296922921597393">"ໂຕເລືອກນັກພັດທະນາ"</string>
+    <string name="development_settings_title" msgid="140296922921597393">"ຕົວເລືອກນັກພັດທະນາ"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"ເປີດໃຊ້ຕົວເລືອກນັກພັດທະນາ"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"ຕັ້ງຄ່າໂຕເລືອກສຳລັບການພັດທະນາແອັບຯ"</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"ໂຕເລືອກສຳລັບນັກພັດທະນາບໍ່ສາມາດໃຊ້ໄດ້ກັບຜູ່ໃຊ້ນີ້"</string>
@@ -601,7 +601,7 @@
     <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"ຣີເຊັດເຊດຊັນຂອງແຂກບໍ?"</string>
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"ນີ້ຈະເລີ່ມໄລຍະເວລາຂອງແຂກໃໝ່ ແລະ ລຶບແອັບ ແລະ ຂໍ້ມູນທັງໝົດອອກຈາກເຊດຊັນປັດຈຸບັນ"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"ອອກຈາກໂໝດແຂກບໍ?"</string>
-    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"ນີ້ຈະລຶບແອັບ ແລະ ຂໍ້ມູນອອກຈາກໄລຍະເວລາຂອງແຂກປັດຈຸບັນ"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"ນີ້ຈະລຶບແອັບ ແລະ ຂໍ້ມູນອອກຈາກເຊດຊັນແຂກປັດຈຸບັນ"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"ອອກ"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"ບັນທຶກການເຄື່ອນໄຫວແຂກບໍ?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"ທ່ານສາມາດບັນທຶກການເຄື່ອນໄຫວຈາກເຊດຊັນປັດຈຸບັນ ຫຼື ລຶບແອັບ ແລະ ຂໍ້ມູນທັງໝົດໄດ້"</string>
@@ -667,9 +667,6 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"ເປີດໜ້າຈໍ"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"ອະນຸຍາດໃຫ້ເປີດໜ້າຈໍ"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"ອະນຸຍາດໃຫ້ແອັບເປີດໜ້າຈໍໄດ້. ຫາກອະນຸມັດ, ແອັບຈະສາມາດເປີດໜ້າຈໍຕອນໃດກໍໄດ້ໂດຍທີ່ທ່ານບໍ່ຕ້ອງມີເຈດຕະນາຢ່າງຈະແຈ້ງ."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"ສະແກນລະຫັດ QR"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"ເພື່ອເລີ່ມການຟັງ, ໃຫ້ວາງລະຫັດ QR ທາງລຸ່ມນີ້ໄວ້ທາງກາງ"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"ຮູບແບບລະຫັດ QR ບໍ່ຖືກຕ້ອງ"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"ຢຸດການອອກອາກາດ <xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"ຫາກທ່ານອອກອາກາດ <xliff:g id="SWITCHAPP">%1$s</xliff:g> ຫຼື ປ່ຽນເອົ້າພຸດ, ການອອກອາກາດປັດຈຸບັນຂອງທ່ານຈະຢຸດ"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"ອອກອາກາດ <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>

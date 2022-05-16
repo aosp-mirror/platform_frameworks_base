@@ -601,7 +601,7 @@
     <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"รีเซ็ตเซสชันผู้ใช้ชั่วคราวไหม"</string>
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"การดำเนินการนี้จะเริ่มเซสชันผู้ใช้ชั่วคราวใหม่ และจะลบแอปและข้อมูลทั้งหมดจากเซสชันปัจจุบัน"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"ออกจากโหมดผู้ใช้ชั่วคราวไหม"</string>
-    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"การดำเนินการนี้จะลบแอปและข้อมูลออกจากเซสชันผู้มาเยือนในปัจจุบัน"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"การดำเนินการนี้จะลบแอปและข้อมูลออกจากเซสชันผู้ใช้ชั่วคราวในปัจจุบัน"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"ออก"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"บันทึกกิจกรรมของผู้ใช้ชั่วคราวไหม"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"คุณสามารถบันทึกกิจกรรมจากเซสชันปัจจุบันหรือจะลบแอปและข้อมูลทั้งหมดก็ได้"</string>
@@ -667,9 +667,6 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"เปิดหน้าจอ"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"อนุญาตให้เปิดหน้าจอ"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"อนุญาตให้แอปเปิดหน้าจอ หากอนุญาต แอปอาจเปิดหน้าจอได้ทุกเมื่อแม้คุณไม่ได้ระบุเจตนาที่ชัดแจ้ง"</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"สแกนคิวอาร์โค้ด"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"ถือให้คิวอาร์โค้ดอยู่กลางช่องด้านล่างเพื่อเริ่มฟัง"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"คิวอาร์โค้ดมีรูปแบบไม่ถูกต้อง"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"หยุดการออกอากาศ <xliff:g id="APP_NAME">%1$s</xliff:g> ไหม"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"หากคุณออกอากาศ <xliff:g id="SWITCHAPP">%1$s</xliff:g> หรือเปลี่ยนแปลงเอาต์พุต การออกอากาศในปัจจุบันจะหยุดลง"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"ออกอากาศ <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
