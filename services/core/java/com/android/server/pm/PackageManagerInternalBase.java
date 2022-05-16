@@ -720,6 +720,11 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
         return snapshot().isUidPrivileged(uid);
     }
 
+    @Override
+    public int checkUidSignaturesForAllUsers(int uid1, int uid2) {
+        return snapshot().checkUidSignaturesForAllUsers(uid1, uid2);
+    }
+
     @NonNull
     @Override
     @Deprecated

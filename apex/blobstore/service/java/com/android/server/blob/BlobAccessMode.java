@@ -24,6 +24,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
 import android.os.UserHandle;
 import android.util.ArraySet;
@@ -32,6 +33,7 @@ import android.util.DebugUtils;
 import android.util.IndentingPrintWriter;
 
 import com.android.internal.util.XmlUtils;
+import com.android.server.LocalServices;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -108,7 +110,7 @@ class BlobAccessMode {
         }
 
         if ((mAccessType & ACCESS_TYPE_SAME_SIGNATURE) != 0) {
-            if (checkSignatures(context, callingUid, committerUid)) {
+            if (checkSignatures(callingUid, committerUid)) {
                 return true;
             }
         }
@@ -133,11 +135,11 @@ class BlobAccessMode {
     /**
      * Compare signatures for two packages of different users.
      */
-    private boolean checkSignatures(Context context, int uid1, int uid2) {
+    private boolean checkSignatures(int uid1, int uid2) {
         final long token = Binder.clearCallingIdentity();
         try {
-            return context.getPackageManager().checkSignatures(uid1, uid2)
-                    == PackageManager.SIGNATURE_MATCH;
+            return LocalServices.getService(PackageManagerInternal.class)
+                    .checkUidSignaturesForAllUsers(uid1, uid2) == PackageManager.SIGNATURE_MATCH;
         } finally {
             Binder.restoreCallingIdentity(token);
         }

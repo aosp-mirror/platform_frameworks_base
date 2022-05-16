@@ -28,6 +28,7 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.PackageManager.SignatureResult;
 import android.content.pm.SigningDetails.CertCapabilities;
 import android.content.pm.overlay.OverlayPaths;
 import android.os.Bundle;
@@ -1283,4 +1284,15 @@ public abstract class PackageManagerInternal {
     public abstract void shutdown();
 
     public abstract DynamicCodeLogger getDynamicCodeLogger();
+
+    /**
+     * Compare the signatures of two packages that are installed in different users.
+     *
+     * @param uid1 First UID whose signature will be compared.
+     * @param uid2 Second UID whose signature will be compared.
+     * @return {@link PackageManager#SIGNATURE_MATCH} if signatures are matched.
+     * @throws SecurityException if the caller does not hold the
+     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS}.
+     */
+    public abstract @SignatureResult int checkUidSignaturesForAllUsers(int uid1, int uid2);
 }
