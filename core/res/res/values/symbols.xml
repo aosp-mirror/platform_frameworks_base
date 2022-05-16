@@ -4154,7 +4154,7 @@
   <java-symbol type="bool" name="config_disable_all_cb_messages" />
   <java-symbol type="drawable" name="ic_close" />
 
-  <java-symbol type="bool" name="config_automotiveHideNavBarForKeyboard" />
+  <java-symbol type="bool" name="config_hideNavBarForKeyboard" />
 
   <java-symbol type="bool" name="config_showBuiltinWirelessChargingAnim" />
 
@@ -4774,6 +4774,7 @@
   <java-symbol type="array" name="config_bg_current_drain_high_threshold_to_bg_restricted" />
   <java-symbol type="integer" name="config_bg_current_drain_media_playback_min_duration" />
   <java-symbol type="integer" name="config_bg_current_drain_location_min_duration" />
+  <java-symbol type="bool" name="config_bg_current_drain_auto_restrict_abusive_apps" />
   <java-symbol type="bool" name="config_bg_prompt_fgs_with_noti_to_bg_restricted" />
   <java-symbol type="bool" name="config_bg_prompt_abusive_apps_to_bg_restricted" />
   <java-symbol type="integer" name="config_bg_current_drain_exempted_types" />

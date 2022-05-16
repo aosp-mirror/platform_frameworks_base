@@ -62,6 +62,7 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
+import android.view.WindowManager;
 import android.widget.Toast;
 import android.window.DisplayWindowPolicyController;
 
@@ -167,7 +168,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         mParams = params;
         if (inputController == null) {
             mInputController = new InputController(
-                    mVirtualDeviceLock, context.getMainThreadHandler());
+                    mVirtualDeviceLock,
+                    context.getMainThreadHandler(),
+                    context.getSystemService(WindowManager.class));
         } else {
             mInputController = inputController;
         }
@@ -537,6 +540,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             mInputController.setPointerAcceleration(1f, displayId);
             mInputController.setDisplayEligibilityForPointerCapture(/* isEligible= */ false,
                     displayId);
+            mInputController.setLocalIme(displayId);
 
             // Since we're being called in the middle of the display being created, we post a
             // task to grab the wakelock instead of doing it synchronously here, to avoid
