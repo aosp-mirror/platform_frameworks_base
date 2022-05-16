@@ -143,13 +143,6 @@ public class TaskInfo {
     public LocusId mTopActivityLocusId;
 
     /**
-     * True if the task can go in the split-screen primary stack.
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public boolean supportsSplitScreenMultiWindow;
-
-    /**
      * Whether this task supports multi windowing modes based on the device settings and the
      * root activity resizability and configuration.
      * @hide
@@ -516,7 +509,6 @@ public class TaskInfo {
         lastActiveTime = source.readLong();
 
         taskDescription = source.readTypedObject(ActivityManager.TaskDescription.CREATOR);
-        supportsSplitScreenMultiWindow = source.readBoolean();
         supportsMultiWindow = source.readBoolean();
         resizeMode = source.readInt();
         configuration.readFromParcel(source);
@@ -563,7 +555,6 @@ public class TaskInfo {
         dest.writeLong(lastActiveTime);
 
         dest.writeTypedObject(taskDescription, flags);
-        dest.writeBoolean(supportsSplitScreenMultiWindow);
         dest.writeBoolean(supportsMultiWindow);
         dest.writeInt(resizeMode);
         configuration.writeToParcel(dest, flags);
@@ -601,7 +592,6 @@ public class TaskInfo {
                 + " realActivity=" + realActivity
                 + " numActivities=" + numActivities
                 + " lastActiveTime=" + lastActiveTime
-                + " supportsSplitScreenMultiWindow=" + supportsSplitScreenMultiWindow
                 + " supportsMultiWindow=" + supportsMultiWindow
                 + " resizeMode=" + resizeMode
                 + " isResizeable=" + isResizeable
