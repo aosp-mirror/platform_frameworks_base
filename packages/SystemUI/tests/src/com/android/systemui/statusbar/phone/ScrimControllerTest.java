@@ -831,7 +831,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void scrimBlanksWhenUnlockingFromPulse() {
+    public void scrimBlankCallbackWhenUnlockingFromPulse() {
         boolean[] blanked = {false};
         // Simulate unlock with fingerprint
         mScrimController.transitionTo(ScrimState.PULSING);
@@ -844,7 +844,50 @@ public class ScrimControllerTest extends SysuiTestCase {
                     }
                 });
         finishAnimationsImmediately();
-        Assert.assertTrue("Scrim should blank when unlocking from pulse.", blanked[0]);
+        Assert.assertTrue("Scrim should send display blanked callback when unlocking "
+                + "from pulse.", blanked[0]);
+    }
+
+    @Test
+    public void blankingNotRequired_leavingAoD() {
+        // GIVEN display does NOT need blanking
+        when(mDozeParameters.getDisplayNeedsBlanking()).thenReturn(false);
+
+        mScrimController = new ScrimController(mLightBarController,
+                mDozeParameters, mAlarmManager, mKeyguardStateController, mDelayedWakeLockBuilder,
+                new FakeHandler(mLooper.getLooper()), mKeyguardUpdateMonitor,
+                mDockManager, mConfigurationController, new FakeExecutor(new FakeSystemClock()),
+                mScreenOffAnimationController,
+                mPanelExpansionStateManager,
+                mKeyguardUnlockAnimationController,
+                mStatusBarKeyguardViewManager);
+        mScrimController.setScrimVisibleListener(visible -> mScrimVisibility = visible);
+        mScrimController.attachViews(mScrimBehind, mNotificationsScrim, mScrimInFront);
+        mScrimController.setAnimatorListener(mAnimatorListener);
+        mScrimController.setHasBackdrop(false);
+        mScrimController.setWallpaperSupportsAmbientMode(false);
+        mScrimController.transitionTo(ScrimState.KEYGUARD);
+        finishAnimationsImmediately();
+
+        // WHEN Simulate unlock with fingerprint
+        mScrimController.transitionTo(ScrimState.AOD);
+        finishAnimationsImmediately();
+
+        // WHEN transitioning to UNLOCKED, onDisplayCallbackBlanked callback called to continue
+        // the transition but the scrim was not actually blanked
+        mScrimController.transitionTo(ScrimState.UNLOCKED,
+                new ScrimController.Callback() {
+                    @Override
+                    public void onDisplayBlanked() {
+                        // Front scrim should not be black nor opaque
+                        Assert.assertTrue("Scrim should NOT be visible during transition."
+                                + " Alpha: " + mScrimInFront.getViewAlpha(),
+                                mScrimInFront.getViewAlpha() == 0f);
+                        Assert.assertSame("Scrim should not be visible during transition.",
+                                mScrimVisibility, TRANSPARENT);
+                    }
+                });
+        finishAnimationsImmediately();
     }
 
     @Test
