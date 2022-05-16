@@ -45,6 +45,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -59,6 +60,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.UserInfo;
 import android.graphics.Color;
+import android.hardware.biometrics.BiometricFaceConstants;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
@@ -106,6 +108,9 @@ import org.mockito.MockitoAnnotations;
 
 import java.text.NumberFormat;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -578,6 +583,80 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void faceErrorTimeout_whenFingerprintEnrolled_doesNotShowMessage() {
+        createController();
+        when(mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
+                0)).thenReturn(true);
+        String message = "A message";
+
+        mController.setVisible(true);
+        mController.getKeyguardCallback().onBiometricError(
+                FaceManager.FACE_ERROR_TIMEOUT, message, BiometricSourceType.FACE);
+        verifyNoMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE);
+    }
+
+    @Test
+    public void doNotSendFaceHelpMessages_fingerprintEnrolled() {
+        createController();
+
+        // GIVEN fingerprint enrolled
+        when(mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
+                0)).thenReturn(true);
+
+        // WHEN help messages received
+        final String helpString = "helpString";
+        final int[] msgIds = new int[]{
+                BiometricFaceConstants.FACE_ACQUIRED_FACE_OBSCURED,
+                BiometricFaceConstants.FACE_ACQUIRED_DARK_GLASSES_DETECTED,
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_RIGHT,
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_LEFT,
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_HIGH,
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_LOW,
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_BRIGHT,
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_DARK
+        };
+        for (int msgId : msgIds) {
+            mKeyguardUpdateMonitorCallback.onBiometricHelp(
+                    msgId,  helpString + msgId, BiometricSourceType.FACE);
+        }
+
+        // THEN no messages shown
+        verifyNoMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE);
+    }
+
+    @Test
+    public void sendAllFaceHelpMessages_fingerprintNotEnrolled() {
+        createController();
+
+        // GIVEN fingerprint NOT enrolled
+        when(mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
+                0)).thenReturn(false);
+
+        // WHEN help messages received
+        final Set<CharSequence> helpStrings = new HashSet<>();
+        final String helpString = "helpString";
+        final int[] msgIds = new int[]{
+                BiometricFaceConstants.FACE_ACQUIRED_FACE_OBSCURED,
+                BiometricFaceConstants.FACE_ACQUIRED_DARK_GLASSES_DETECTED,
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_RIGHT,
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_LEFT,
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_HIGH,
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_LOW,
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_BRIGHT,
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_DARK
+        };
+        for (int msgId : msgIds) {
+            final String numberedHelpString = helpString + msgId;
+            mKeyguardUpdateMonitorCallback.onBiometricHelp(
+                    msgId,  numberedHelpString, BiometricSourceType.FACE);
+            helpStrings.add(numberedHelpString);
+        }
+
+        // THEN message shown for each call
+        verifyIndicationMessages(INDICATION_TYPE_BIOMETRIC_MESSAGE, helpStrings);
+    }
+
+    @Test
     public void updateMonitor_listenerUpdatesIndication() {
         createController();
         String restingIndication = "Resting indication";
@@ -848,6 +927,19 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
     private void sendUpdateDisclosureBroadcast() {
         mBroadcastReceiver.onReceive(mContext, new Intent());
+    }
+
+    private void verifyIndicationMessages(int type, Set<CharSequence> messages) {
+        verify(mRotateTextViewController, times(messages.size())).updateIndication(eq(type),
+                mKeyguardIndicationCaptor.capture(), anyBoolean());
+        List<KeyguardIndication> kis = mKeyguardIndicationCaptor.getAllValues();
+
+        for (KeyguardIndication ki : kis) {
+            final CharSequence msg = ki.getMessage();
+            assertTrue(messages.contains(msg)); // check message is shown
+            messages.remove(msg);
+        }
+        assertThat(messages.size()).isEqualTo(0); // check that all messages accounted for (removed)
     }
 
     private void verifyIndicationMessage(int type, String message) {
