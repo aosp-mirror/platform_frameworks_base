@@ -16,7 +16,6 @@
 
 package com.android.server.notification;
 
-import static android.content.pm.PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -70,8 +69,7 @@ public final class PermissionHelper {
     public boolean hasPermission(int uid) {
         final long callingId = Binder.clearCallingIdentity();
         try {
-            return mPmi.checkPostNotificationsPermissionGrantedOrLegacyAccess(uid)
-                    == PERMISSION_GRANTED;
+            return mPmi.checkUidPermission(uid, NOTIFICATION_PERMISSION) == PERMISSION_GRANTED;
         } finally {
             Binder.restoreCallingIdentity(callingId);
         }
@@ -151,21 +149,13 @@ public final class PermissionHelper {
     }
 
     /**
-     * @see setNotificationPermission(String, int, boolean, boolean, boolean)
-     */
-    public void setNotificationPermission(String packageName, @UserIdInt int userId, boolean grant,
-            boolean userSet) {
-        setNotificationPermission(packageName, userId, grant, userSet, false);
-    }
-
-    /**
      * Grants or revokes the notification permission for a given package/user. UserSet should
      * only be true if this method is being called to migrate existing user choice, because it
      * can prevent the user from seeing the in app permission dialog. Must not be called
      * with a lock held.
      */
     public void setNotificationPermission(String packageName, @UserIdInt int userId, boolean grant,
-            boolean userSet, boolean reviewRequired) {
+            boolean userSet) {
         final long callingId = Binder.clearCallingIdentity();
         try {
             // Do not change the permission if the package doesn't request it, do not change fixed
@@ -179,7 +169,7 @@ public final class PermissionHelper {
 
             boolean currentlyGranted = mPmi.checkPermission(packageName, NOTIFICATION_PERMISSION,
                     userId) != PackageManager.PERMISSION_DENIED;
-            if (grant && !reviewRequired && !currentlyGranted) {
+            if (grant && !currentlyGranted) {
                 mPermManager.grantRuntimePermission(packageName, NOTIFICATION_PERMISSION, userId);
             } else if (!grant && currentlyGranted) {
                 mPermManager.revokeRuntimePermission(packageName, NOTIFICATION_PERMISSION,
@@ -187,12 +177,10 @@ public final class PermissionHelper {
             }
             if (userSet) {
                 mPermManager.updatePermissionFlags(packageName, NOTIFICATION_PERMISSION,
-                        FLAG_PERMISSION_USER_SET | FLAG_PERMISSION_REVIEW_REQUIRED,
-                        FLAG_PERMISSION_USER_SET, true, userId);
-            } else if (reviewRequired) {
+                        FLAG_PERMISSION_USER_SET, FLAG_PERMISSION_USER_SET, true, userId);
+            } else {
                 mPermManager.updatePermissionFlags(packageName, NOTIFICATION_PERMISSION,
-                        FLAG_PERMISSION_REVIEW_REQUIRED, FLAG_PERMISSION_REVIEW_REQUIRED, true,
-                        userId);
+                        0, FLAG_PERMISSION_USER_SET, true, userId);
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "Could not reach system server", e);

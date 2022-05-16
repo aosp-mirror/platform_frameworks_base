@@ -30,6 +30,8 @@ import static android.app.AlarmManager.INTERVAL_HOUR;
 import static android.app.AlarmManager.RTC;
 import static android.app.AlarmManager.RTC_WAKEUP;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
+import static android.os.PowerExemptionManager.REASON_ALARM_MANAGER_ALARM_CLOCK;
+import static android.os.PowerExemptionManager.REASON_DENIED;
 import static android.os.PowerExemptionManager.REASON_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED;
 import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 import static android.os.PowerWhitelistManager.REASON_ALARM_MANAGER_WHILE_IDLE;
@@ -329,6 +331,7 @@ public class AlarmManagerService extends SystemService {
     });
 
     BroadcastOptions mOptsWithFgs = BroadcastOptions.makeBasic();
+    BroadcastOptions mOptsWithFgsForAlarmClock = BroadcastOptions.makeBasic();
     BroadcastOptions mOptsWithoutFgs = BroadcastOptions.makeBasic();
     BroadcastOptions mOptsTimeBroadcast = BroadcastOptions.makeBasic();
     ActivityOptions mActivityOptsRestrictBal = ActivityOptions.makeBasic();
@@ -730,9 +733,12 @@ public class AlarmManagerService extends SystemService {
                 mOptsWithFgs.setTemporaryAppAllowlist(ALLOW_WHILE_IDLE_WHITELIST_DURATION,
                         TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
                         REASON_ALARM_MANAGER_WHILE_IDLE, "");
+                mOptsWithFgsForAlarmClock.setTemporaryAppAllowlist(
+                        ALLOW_WHILE_IDLE_WHITELIST_DURATION,
+                        TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
+                        REASON_ALARM_MANAGER_ALARM_CLOCK, "");
                 mOptsWithoutFgs.setTemporaryAppAllowlist(ALLOW_WHILE_IDLE_WHITELIST_DURATION,
-                        TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED,
-                        REASON_ALARM_MANAGER_WHILE_IDLE, "");
+                        TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED, REASON_DENIED, "");
             }
         }
 
@@ -1710,6 +1716,7 @@ public class AlarmManagerService extends SystemService {
     public void onStart() {
         mInjector.init();
         mOptsWithFgs.setPendingIntentBackgroundActivityLaunchAllowed(false);
+        mOptsWithFgsForAlarmClock.setPendingIntentBackgroundActivityLaunchAllowed(false);
         mOptsWithoutFgs.setPendingIntentBackgroundActivityLaunchAllowed(false);
         mOptsTimeBroadcast.setPendingIntentBackgroundActivityLaunchAllowed(false);
         mActivityOptsRestrictBal.setPendingIntentBackgroundActivityLaunchAllowed(false);
@@ -2707,7 +2714,12 @@ public class AlarmManagerService extends SystemService {
                 if (isExactAlarmChangeEnabled(callingPackage, callingUserId)) {
                     needsPermission = exact;
                     lowerQuota = !exact;
-                    idleOptions = exact ? mOptsWithFgs.toBundle() : mOptsWithoutFgs.toBundle();
+                    if (exact) {
+                        idleOptions = (alarmClock != null) ? mOptsWithFgsForAlarmClock.toBundle()
+                                : mOptsWithFgs.toBundle();
+                    } else {
+                        idleOptions = mOptsWithoutFgs.toBundle();
+                    }
                 } else {
                     changeDisabled = true;
                     needsPermission = false;
