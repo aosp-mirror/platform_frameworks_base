@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityManager.PROCESS_STATE_CACHED_ACTIVITY;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.content.res.Configuration.ASSETS_SEQ_UNDEFINED;
@@ -195,6 +196,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     /** Whether the process configuration is waiting to be dispatched to the process. */
     private boolean mHasPendingConfigurationChange;
 
+    /** If the process state is in (<=) the cached state, then defer delivery of the config. */
+    private static final int CACHED_CONFIG_PROC_STATE = PROCESS_STATE_CACHED_ACTIVITY;
+    /** Whether {@link #mLastReportedConfiguration} is deferred by the cached state. */
+    private volatile boolean mHasCachedConfiguration;
+
     /**
      * Registered {@link DisplayArea} as a listener to override config changes. {@code null} if not
      * registered.
@@ -316,8 +322,27 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         return mCurProcState;
     }
 
+    /**
+     * Sets the computed process state from the oom adjustment calculation. This is frequently
+     * called in activity manager's lock, so don't use window manager lock here.
+     */
+    @HotPath(caller = HotPath.OOM_ADJUSTMENT)
     public void setReportedProcState(int repProcState) {
+        final int prevProcState = mRepProcState;
         mRepProcState = repProcState;
+
+        // Deliver the cached config if the app changes from cached state to non-cached state.
+        final IApplicationThread thread = mThread;
+        if (prevProcState >= CACHED_CONFIG_PROC_STATE && repProcState < CACHED_CONFIG_PROC_STATE
+                && thread != null && mHasCachedConfiguration) {
+            final Configuration config;
+            synchronized (mLastReportedConfiguration) {
+                config = new Configuration(mLastReportedConfiguration);
+            }
+            // Schedule immediately to make sure the app component (e.g. receiver, service) can get
+            // the latest configuration in their lifecycle callbacks (e.g. onReceive, onCreate).
+            scheduleConfigurationChange(thread, config);
+        }
     }
 
     int getReportedProcState() {
@@ -1328,12 +1353,22 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     @Override
     public void onConfigurationChanged(Configuration newGlobalConfig) {
         super.onConfigurationChanged(newGlobalConfig);
-        updateConfiguration();
-    }
+        final Configuration config = getConfiguration();
+        if (mLastReportedConfiguration.equals(config)) {
+            // Nothing changed.
+            if (Build.IS_DEBUGGABLE && mHasImeService) {
+                // TODO (b/135719017): Temporary log for debugging IME service.
+                Slog.w(TAG_CONFIGURATION, "Current config: " + config
+                        + " unchanged for IME proc " + mName);
+            }
+            return;
+        }
 
-    @Override
-    public void onRequestedOverrideConfigurationChanged(Configuration overrideConfiguration) {
-        super.onRequestedOverrideConfigurationChanged(overrideConfiguration);
+        if (mPauseConfigurationDispatchCount > 0) {
+            mHasPendingConfigurationChange = true;
+            return;
+        }
+        dispatchConfiguration(config);
     }
 
     @Override
@@ -1359,25 +1394,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         resolvedConfig.seq = newParentConfig.seq;
     }
 
-    private void updateConfiguration() {
-        final Configuration config = getConfiguration();
-        if (mLastReportedConfiguration.diff(config) == 0) {
-            // Nothing changed.
-            if (Build.IS_DEBUGGABLE && mHasImeService) {
-                // TODO (b/135719017): Temporary log for debugging IME service.
-                Slog.w(TAG_CONFIGURATION, "Current config: " + config
-                        + " unchanged for IME proc " + mName);
-            }
-            return;
-        }
-
-        if (mPauseConfigurationDispatchCount > 0) {
-            mHasPendingConfigurationChange = true;
-            return;
-        }
-        dispatchConfiguration(config);
-    }
-
     void dispatchConfiguration(Configuration config) {
         mHasPendingConfigurationChange = false;
         if (mThread == null) {
@@ -1388,29 +1404,47 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             }
             return;
         }
+
+        config.seq = mAtm.increaseConfigurationSeqLocked();
+        setLastReportedConfiguration(config);
+
+        // A cached process doesn't have running application components, so it is unnecessary to
+        // notify the configuration change. The last-reported-configuration is still set because
+        // setReportedProcState() should not write any fields that require WM lock.
+        if (mRepProcState >= CACHED_CONFIG_PROC_STATE) {
+            mHasCachedConfiguration = true;
+            // Because there are 2 volatile accesses in setReportedProcState(): mRepProcState and
+            // mHasCachedConfiguration, check again in case mRepProcState is changed but hasn't
+            // read the change of mHasCachedConfiguration.
+            if (mRepProcState >= CACHED_CONFIG_PROC_STATE) {
+                return;
+            }
+        }
+
+        scheduleConfigurationChange(mThread, config);
+    }
+
+    private void scheduleConfigurationChange(IApplicationThread thread, Configuration config) {
         ProtoLog.v(WM_DEBUG_CONFIGURATION, "Sending to proc %s new config %s", mName,
                 config);
         if (Build.IS_DEBUGGABLE && mHasImeService) {
             // TODO (b/135719017): Temporary log for debugging IME service.
             Slog.v(TAG_CONFIGURATION, "Sending to IME proc " + mName + " new config " + config);
         }
-
+        mHasCachedConfiguration = false;
         try {
-            config.seq = mAtm.increaseConfigurationSeqLocked();
-            mAtm.getLifecycleManager().scheduleTransaction(mThread,
+            mAtm.getLifecycleManager().scheduleTransaction(thread,
                     ConfigurationChangeItem.obtain(config));
-            setLastReportedConfiguration(config);
         } catch (Exception e) {
-            Slog.e(TAG_CONFIGURATION, "Failed to schedule configuration change", e);
+            Slog.e(TAG_CONFIGURATION, "Failed to schedule configuration change: " + mOwner, e);
         }
     }
 
     void setLastReportedConfiguration(Configuration config) {
-        mLastReportedConfiguration.setTo(config);
-    }
-
-    Configuration getLastReportedConfiguration() {
-        return mLastReportedConfiguration;
+        // Synchronize for the access from setReportedProcState().
+        synchronized (mLastReportedConfiguration) {
+            mLastReportedConfiguration.setTo(config);
+        }
     }
 
     void pauseConfigurationDispatch() {
@@ -1461,6 +1495,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             // config seq. This increment ensures that the client won't ignore the configuration.
             config.seq = mAtm.increaseConfigurationSeqLocked();
         }
+        // LaunchActivityItem includes the latest process configuration.
+        mHasCachedConfiguration = false;
         return config;
     }
 
@@ -1688,7 +1724,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
         pw.println(prefix + " Configuration=" + getConfiguration());
         pw.println(prefix + " OverrideConfiguration=" + getRequestedOverrideConfiguration());
-        pw.println(prefix + " mLastReportedConfiguration=" + mLastReportedConfiguration);
+        pw.println(prefix + " mLastReportedConfiguration=" + (mHasCachedConfiguration
+                ? ("(cached) " + mLastReportedConfiguration) : mLastReportedConfiguration));
 
         final int stateFlags = mActivityStateFlags;
         if (stateFlags != ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER) {
