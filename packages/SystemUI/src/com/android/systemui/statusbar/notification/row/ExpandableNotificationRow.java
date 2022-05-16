@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.notification.row;
 
 import static android.app.Notification.Action.SEMANTIC_ACTION_MARK_CONVERSATION_AS_PRIORITY;
-import static android.os.UserHandle.USER_SYSTEM;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 
 import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_HEADSUP;
@@ -34,8 +33,6 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.role.RoleManager;
 import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Canvas;
@@ -51,7 +48,6 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.Trace;
-import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
 import android.util.AttributeSet;
@@ -113,7 +109,6 @@ import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.SwipeableView;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
@@ -1428,8 +1423,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         dismiss(fromAccessibility);
         if (mEntry.isDismissable()) {
             if (mOnUserInteractionCallback != null) {
-                mOnUserInteractionCallback.onDismiss(mEntry, REASON_CANCEL,
-                        mOnUserInteractionCallback.getGroupSummaryToDismiss(mEntry));
+                mOnUserInteractionCallback.registerFutureDismissal(mEntry, REASON_CANCEL).run();
             }
         }
     }

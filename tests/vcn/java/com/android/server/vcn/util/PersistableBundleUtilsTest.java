@@ -268,6 +268,15 @@ public class PersistableBundleUtilsTest {
     }
 
     @Test
+    public void testToFromDiskStableBytes() throws Exception {
+        final PersistableBundle testBundle = getTestBundle();
+        final PersistableBundle result =
+                PersistableBundleUtils.fromDiskStableBytes(
+                        PersistableBundleUtils.toDiskStableBytes(testBundle));
+        assertTrue(PersistableBundleUtils.isEqual(testBundle, result));
+    }
+
+    @Test
     public void testEquality_identical() throws Exception {
         final PersistableBundle left = getTestBundle();
         final PersistableBundle right = getTestBundle();
