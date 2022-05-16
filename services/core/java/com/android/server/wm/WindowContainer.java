@@ -1004,7 +1004,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     void onDisplayChanged(DisplayContent dc) {
         if (mDisplayContent != null && mDisplayContent.mChangingContainers.remove(this)) {
             // Cancel any change transition queued-up for this container on the old display.
-            mSurfaceFreezer.unfreeze(getPendingTransaction());
+            mSurfaceFreezer.unfreeze(getSyncTransaction());
         }
         mDisplayContent = dc;
         if (dc != null && dc != this) {
@@ -2697,6 +2697,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * @return {@link #mBLASTSyncTransaction} if available. Otherwise, returns
      * {@link #getPendingTransaction()}
      */
+    @Override
     public Transaction getSyncTransaction() {
         if (mSyncTransactionCommitCallbackDepth > 0) {
             return mSyncTransaction;
@@ -2767,7 +2768,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     void cancelAnimation() {
         doAnimationFinished(mSurfaceAnimator.getAnimationType(), mSurfaceAnimator.getAnimation());
         mSurfaceAnimator.cancelAnimation();
-        mSurfaceFreezer.unfreeze(getPendingTransaction());
+        mSurfaceFreezer.unfreeze(getSyncTransaction());
     }
 
     /** Whether we can start change transition with this window and current display status. */

@@ -51,7 +51,6 @@ import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.LatencyTracker;
-import com.android.keyguard.ActiveUnlockConfig;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastSender;
@@ -382,6 +381,27 @@ public class UdfpsController implements DozeReceiver {
                 && mOverlayParams.getSensorBounds().contains((int) x, (int) y);
     }
 
+    private Point getTouchInNativeCoordinates(@NonNull MotionEvent event, int idx) {
+        Point portraitTouch = new Point(
+                (int) event.getRawX(idx),
+                (int) event.getRawY(idx)
+        );
+        final int rot = mOverlayParams.getRotation();
+        if (rot == Surface.ROTATION_90 || rot == Surface.ROTATION_270) {
+            RotationUtils.rotatePoint(portraitTouch,
+                    RotationUtils.deltaRotation(rot, Surface.ROTATION_0),
+                    mOverlayParams.getLogicalDisplayWidth(),
+                    mOverlayParams.getLogicalDisplayHeight()
+            );
+        }
+
+        // Scale the coordinates to native resolution.
+        final float scale = mOverlayParams.getScaleFactor();
+        portraitTouch.x = (int) (portraitTouch.x / scale);
+        portraitTouch.y = (int) (portraitTouch.y / scale);
+        return portraitTouch;
+    }
+
     @VisibleForTesting
     boolean onTouch(long requestId, @NonNull MotionEvent event, boolean fromUdfpsView) {
         if (mOverlay == null) {
@@ -435,6 +455,7 @@ public class UdfpsController implements DozeReceiver {
                     mKeyguardViewManager.notifyKeyguardAuthenticated(false /* strongAuth */);
                     mAttemptedToDismissKeyguard = true;
                 }
+
                 Trace.endSection();
                 break;
 
@@ -458,6 +479,8 @@ public class UdfpsController implements DozeReceiver {
                         mAttemptedToDismissKeyguard = true;
                         break;
                     }
+                    // Map the touch to portrait mode if the device is in landscape mode.
+                    final Point scaledTouch = getTouchInNativeCoordinates(event, idx);
                     if (actionMoveWithinSensorArea) {
                         if (mVelocityTracker == null) {
                             // touches could be injected, so the velocity tracker may not have
@@ -478,28 +501,13 @@ public class UdfpsController implements DozeReceiver {
                         final long sinceLastLog = mSystemClock.elapsedRealtime() - mTouchLogTime;
                         if (!isIlluminationRequested && !mAcquiredReceived
                                 && !exceedsVelocityThreshold) {
-                            // Map the touch to portrait mode if the device is in landscape mode.
-                            Point portraitTouch = new Point(
-                                    (int) event.getRawX(idx),
-                                    (int) event.getRawY(idx)
-                            );
-                            final int rot = mOverlayParams.getRotation();
-                            if (rot == Surface.ROTATION_90 || rot == Surface.ROTATION_270) {
-                                RotationUtils.rotatePoint(portraitTouch,
-                                        RotationUtils.deltaRotation(rot, Surface.ROTATION_0),
-                                        mOverlayParams.getLogicalDisplayWidth(),
-                                        mOverlayParams.getLogicalDisplayHeight()
-                                );
-                            }
 
-                            // Scale the coordinates to native resolution.
                             final float scale = mOverlayParams.getScaleFactor();
-                            int scaledX = (int) (portraitTouch.x / scale);
-                            int scaledY = (int) (portraitTouch.y / scale);
                             float scaledMinor = minor / scale;
                             float scaledMajor = major / scale;
 
-                            onFingerDown(requestId, scaledX, scaledY, scaledMinor, scaledMajor);
+                            onFingerDown(requestId, scaledTouch.x, scaledTouch.y, scaledMinor,
+                                    scaledMajor);
                             Log.v(TAG, "onTouch | finger down: " + touchInfo);
                             mTouchLogTime = mSystemClock.elapsedRealtime();
                             mPowerManager.userActivity(mSystemClock.uptimeMillis(),
@@ -512,6 +520,24 @@ public class UdfpsController implements DozeReceiver {
                     } else {
                         Log.v(TAG, "onTouch | finger outside");
                         onFingerUp(requestId, udfpsView);
+                        // Maybe announce for accessibility.
+                        mFgExecutor.execute(() -> {
+                            if (mOverlay == null) {
+                                Log.e(TAG, "touch outside sensor area received"
+                                        + "but serverRequest is null");
+                                return;
+                            }
+                            // Scale the coordinates to native resolution.
+                            final float scale = mOverlayParams.getScaleFactor();
+                            final float scaledSensorX =
+                                    mOverlayParams.getSensorBounds().centerX() / scale;
+                            final float scaledSensorY =
+                                    mOverlayParams.getSensorBounds().centerY() / scale;
+
+                            mOverlay.onTouchOutsideOfSensorArea(
+                                    scaledTouch.x, scaledTouch.y, scaledSensorX, scaledSensorY,
+                                    mOverlayParams.getRotation());
+                        });
                     }
                 }
                 Trace.endSection();
@@ -808,10 +834,6 @@ public class UdfpsController implements DozeReceiver {
             if (!mKeyguardUpdateMonitor.isFaceDetectionRunning()) {
                 mKeyguardUpdateMonitor.requestFaceAuth(/* userInitiatedRequest */ false);
             }
-
-            mKeyguardUpdateMonitor.requestActiveUnlock(
-                    ActiveUnlockConfig.ACTIVE_UNLOCK_REQUEST_ORIGIN.UNLOCK_INTENT,
-                    "udfpsFingerDown");
         }
         mOnFingerDown = true;
         if (mAlternateTouchProvider != null) {

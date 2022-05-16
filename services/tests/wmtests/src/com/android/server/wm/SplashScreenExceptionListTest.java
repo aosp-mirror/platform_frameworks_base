@@ -90,13 +90,50 @@ public class SplashScreenExceptionListTest {
     public void packageFromDeviceConfigIgnored() {
         setExceptionListAndWaitForCallback("com.test.nosplashscreen1,com.test.nosplashscreen2");
 
-        assertIsException("com.test.nosplashscreen1", null);
-        assertIsException("com.test.nosplashscreen2", null);
+        // In list, up to T included
+        assertIsException("com.test.nosplashscreen1", VERSION_CODES.R);
+        assertIsException("com.test.nosplashscreen1", VERSION_CODES.S);
+        assertIsException("com.test.nosplashscreen1", VERSION_CODES.TIRAMISU);
 
-        assertIsNotException("com.test.nosplashscreen1", VERSION_CODES.S, null);
-        assertIsNotException("com.test.nosplashscreen2", VERSION_CODES.S, null);
-        assertIsNotException("com.test.splashscreen", VERSION_CODES.S, null);
-        assertIsNotException("com.test.splashscreen", VERSION_CODES.R, null);
+        // In list, after T
+        assertIsNotException("com.test.nosplashscreen2", VERSION_CODES.TIRAMISU + 1);
+        assertIsNotException("com.test.nosplashscreen2", VERSION_CODES.CUR_DEVELOPMENT);
+
+        // Not in list, up to T included
+        assertIsNotException("com.test.splashscreen", VERSION_CODES.S);
+        assertIsNotException("com.test.splashscreen", VERSION_CODES.R);
+        assertIsNotException("com.test.splashscreen", VERSION_CODES.TIRAMISU);
+    }
+
+    @Test
+    public void metaDataOptOut() {
+        String packageName = "com.test.nosplashscreen_opt_out";
+        setExceptionListAndWaitForCallback(packageName);
+
+        Bundle metaData = new Bundle();
+        ApplicationInfo activityInfo = new ApplicationInfo();
+        activityInfo.metaData = metaData;
+
+        // No Exceptions
+        metaData.putBoolean("android.splashscreen.exception_opt_out", true);
+        assertIsNotException(packageName, VERSION_CODES.R, activityInfo);
+        assertIsNotException(packageName, VERSION_CODES.S, activityInfo);
+        assertIsNotException(packageName, VERSION_CODES.TIRAMISU, activityInfo);
+
+        // Exception up to T
+        metaData.putBoolean("android.splashscreen.exception_opt_out", false);
+        assertIsException(packageName, VERSION_CODES.R, activityInfo);
+        assertIsException(packageName, VERSION_CODES.S, activityInfo);
+        assertIsException(packageName, VERSION_CODES.TIRAMISU, activityInfo);
+
+        // No Exception after T
+        assertIsNotException(packageName, VERSION_CODES.TIRAMISU + 1, activityInfo);
+        assertIsNotException(packageName, VERSION_CODES.CUR_DEVELOPMENT, activityInfo);
+
+        // Edge Cases
+        activityInfo.metaData = null;
+        assertIsException(packageName, VERSION_CODES.R, activityInfo);
+        assertIsException(packageName, VERSION_CODES.R);
     }
 
     private void setExceptionListAndWaitForCallback(String commaSeparatedList) {
@@ -116,42 +153,25 @@ public class SplashScreenExceptionListTest {
         }
     }
 
-    @Test
-    public void metaDataOptOut() {
-        String packageName = "com.test.nosplashscreen_opt_out";
-        setExceptionListAndWaitForCallback(packageName);
-
-        Bundle metaData = new Bundle();
-        ApplicationInfo activityInfo = new ApplicationInfo();
-        activityInfo.metaData = metaData;
-
-        // No Exceptions
-        metaData.putBoolean("android.splashscreen.exception_opt_out", true);
-        assertIsNotException(packageName, VERSION_CODES.R, activityInfo);
-        assertIsNotException(packageName, VERSION_CODES.S, activityInfo);
-
-        // Exception Pre S
-        metaData.putBoolean("android.splashscreen.exception_opt_out", false);
-        assertIsException(packageName, activityInfo);
-        assertIsNotException(packageName, VERSION_CODES.S, activityInfo);
-
-        // Edge Cases
-        activityInfo.metaData = null;
-        assertIsException(packageName, activityInfo);
-        assertIsException(packageName, null);
+    private void assertIsNotException(String packageName, int targetSdk) {
+        assertIsNotException(packageName, targetSdk, null);
     }
 
     private void assertIsNotException(String packageName, int targetSdk,
             ApplicationInfo activityInfo) {
         assertFalse(String.format("%s (sdk=%d) should have not been considered as an exception",
-                packageName, targetSdk),
+                        packageName, targetSdk),
                 mList.isException(packageName, targetSdk, () -> activityInfo));
     }
 
+    private void assertIsException(String packageName, int targetSdk) {
+        assertIsException(packageName, targetSdk, null);
+    }
+
     private void assertIsException(String packageName,
-            ApplicationInfo activityInfo) {
+            int targetSdk, ApplicationInfo activityInfo) {
         assertTrue(String.format("%s (sdk=%d) should have been considered as an exception",
-                packageName, VERSION_CODES.R),
-                mList.isException(packageName, VERSION_CODES.R, () -> activityInfo));
+                        packageName, targetSdk),
+                mList.isException(packageName, targetSdk, () -> activityInfo));
     }
 }

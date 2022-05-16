@@ -6475,11 +6475,17 @@ public final class ActiveServices {
             }
         }
 
-        if (ret == REASON_DENIED && verifyPackage(callingPackage, callingUid)) {
-            final boolean isAllowedPackage =
-                    mAllowListWhileInUsePermissionInFgs.contains(callingPackage);
-            if (isAllowedPackage) {
-                ret = REASON_ALLOWLISTED_PACKAGE;
+        if (ret == REASON_DENIED) {
+            if (verifyPackage(callingPackage, callingUid)) {
+                final boolean isAllowedPackage =
+                        mAllowListWhileInUsePermissionInFgs.contains(callingPackage);
+                if (isAllowedPackage) {
+                    ret = REASON_ALLOWLISTED_PACKAGE;
+                }
+            } else {
+                EventLog.writeEvent(0x534e4554, "215003903", callingUid,
+                        "callingPackage:" + callingPackage + " does not belong to callingUid:"
+                                + callingUid);
             }
         }
 
