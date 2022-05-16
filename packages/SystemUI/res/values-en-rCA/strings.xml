@@ -319,6 +319,10 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Unlocked by face. Press to open."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Face recognised. Press to open."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Face recognised. Press the unlock icon to open."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"Swipe up to try again"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Unlock to use NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"This device belongs to your organisation"</string>
@@ -843,6 +847,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"To cast this session, please open the app."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Unknown app"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Stop casting"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"How broadcasting works"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Broadcast"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"People near you with compatible Bluetooth devices can listen to the media that you\'re broadcasting"</string>
@@ -938,8 +944,10 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Edit copied text"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Edit copied image"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Send to nearby device"</string>
-    <!-- no translation found for clipboard_text_hidden (7926899867471812305) -->
-    <skip />
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"Tap to view"</string>
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"Text copied"</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"Image copied"</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"Content copied"</string>
     <string name="add" msgid="81036585205287996">"Add"</string>
     <string name="manage_users" msgid="1823875311934643849">"Manage users"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"This notification does not support dragging to Split screen."</string>

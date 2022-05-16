@@ -327,6 +327,10 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"تم فتح قفل جهازك عند تقريبه من وجهك. اضغط لفتح الجهاز."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"تم التعرّف على الوجه. اضغط لفتح الجهاز."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"تم التعرّف على الوجه. اضغط على رمز فتح القفل لفتح الجهاز."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"مرِّر سريعًا للأعلى لإعادة المحاولة."</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"‏افتح قفل الشاشة لاستخدام تقنية NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"هذا الجهاز يخص مؤسستك."</string>
@@ -477,8 +481,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"المحفظة"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"يمكنك إعداد طريقة دفع لإجراء عمليات شراء بسرعة وأمان أكبر باستخدام هاتفك."</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"عرض الكل"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (8488069304491125713) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"انقر لفتح قفل الجهاز."</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"جارٍ تحديث تطبيق المحفظة"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"فتح القفل للاستخدام"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"حدثت مشكلة أثناء الحصول على البطاقات، يُرجى إعادة المحاولة لاحقًا."</string>
@@ -511,7 +514,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"تلقائية"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"تلقائي"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"بدون صوت أو اهتزاز"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"بدون صوت أو اهتزاز وتظهر في موضع أسفل في قسم المحادثات."</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"بدون صوت أو اهتزاز وتظهر في أسفل قسم المحادثات"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"يمكن إصدار رنين أو اهتزاز بناءً على إعدادات الهاتف."</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"يمكن إصدار رنين أو اهتزاز بناءً على إعدادات الهاتف. تظهر المحادثات من <xliff:g id="APP_NAME">%1$s</xliff:g> كفقاعات تلقائيًا."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"السماح للنظام بتحديد ما إذا يجب اهتزاز الجهاز أو إصدار رنين عند تلقّي هذا الإشعار"</string>
@@ -724,7 +727,7 @@
     <string name="mobile_data" msgid="4564407557775397216">"بيانات الجوّال"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>، <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
-    <string name="wifi_is_off" msgid="5389597396308001471">"‏شبكة Wi-Fi متوقفة."</string>
+    <string name="wifi_is_off" msgid="5389597396308001471">"‏ميزة Wi-Fi غير مفعّلة"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"تم إيقاف البلوتوث."</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"تم إيقاف وضع \"عدم الإزعاج\""</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"تم تفعيل وضع \"عدم الإزعاج\" بواسطة قاعدة تلقائية (<xliff:g id="ID_1">%s</xliff:g>)."</string>
@@ -868,6 +871,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"لبث هذه الجلسة، يُرجى فتح التطبيق"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"تطبيق غير معروف"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"إيقاف البث"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"كيفية عمل البث"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"البث"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"يمكن للأشخاص القريبين منك الذين لديهم أجهزة متوافقة تتضمّن بلوتوث الاستماع إلى الوسائط التي تبثها."</string>
@@ -967,7 +972,12 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"تعديل النص المنسوخ"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"تعديل الصورة المنسوخة"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"الإرسال إلى جهاز مجاور"</string>
-    <!-- no translation found for clipboard_text_hidden (7926899867471812305) -->
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"انقر لعرض المحتوى."</string>
+    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
+    <skip />
+    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
+    <skip />
+    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
     <skip />
     <string name="add" msgid="81036585205287996">"إضافة"</string>
     <string name="manage_users" msgid="1823875311934643849">"إدارة المستخدمين"</string>
