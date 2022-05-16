@@ -190,6 +190,8 @@ final class LetterboxConfiguration {
                 R.dimen.config_letterboxBackgroundWallaperDarkScrimAlpha);
         mLetterboxHorizontalPositionMultiplier = mContext.getResources().getFloat(
                 R.dimen.config_letterboxHorizontalPositionMultiplier);
+        mLetterboxVerticalPositionMultiplier = mContext.getResources().getFloat(
+                R.dimen.config_letterboxVerticalPositionMultiplier);
         mIsHorizontalReachabilityEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsHorizontalReachabilityEnabled);
         mIsVerticalReachabilityEnabled = mContext.getResources().getBoolean(
