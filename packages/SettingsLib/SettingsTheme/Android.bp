@@ -22,5 +22,6 @@ android_library {
         "//apex_available:platform",
         "com.android.cellbroadcast",
         "com.android.permission",
+        "com.android.adservices",
     ],
 }
