@@ -1035,7 +1035,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Ampliar pantalla completa"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Ampliar parte de la pantalla"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Cambiar"</string>
-    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"El botón Accesibilidad ha reemplazado el gesto de accesibilidad\n\nVer ajustes"<annotation id="link"></annotation></string>
+    <string name="accessibility_floating_button_migration_tooltip" msgid="4431046858918714564">"El botón de accesibilidad ha reemplazado el gesto de accesibilidad\n\nVer ajustes"<annotation id="link"></annotation></string>
     <string name="accessibility_floating_button_switch_migration_tooltip" msgid="6248529129221218770">"Puedes cambiar el gesto de accesibilidad por un botón\n\n"<annotation id="link">"Ajustes"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Mueve el botón hacia el borde para ocultarlo temporalmente"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Mover arriba a la izquierda"</string>
