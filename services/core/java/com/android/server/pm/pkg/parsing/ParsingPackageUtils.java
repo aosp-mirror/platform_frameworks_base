@@ -95,6 +95,7 @@ import com.android.server.pm.SharedUidMigration;
 import com.android.server.pm.permission.CompatibilityPermissionInfo;
 import com.android.server.pm.pkg.component.ComponentMutateUtils;
 import com.android.server.pm.pkg.component.ComponentParseUtils;
+import com.android.server.pm.pkg.component.InstallConstraintsTagParser;
 import com.android.server.pm.pkg.component.ParsedActivity;
 import com.android.server.pm.pkg.component.ParsedActivityUtils;
 import com.android.server.pm.pkg.component.ParsedApexSystemService;
@@ -1735,14 +1736,7 @@ public class ParsingPackageUtils {
     private static ParseResult<ParsingPackage> parseInstallConstraints(
             ParseInput input, ParsingPackage pkg, Resources res, XmlResourceParser parser)
             throws IOException, XmlPullParserException {
-        final int depth = parser.getDepth();
-        int type;
-        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                && (type != XmlPullParser.END_TAG
-                || parser.getDepth() > depth)) {
-            // TODO(b/232475788): call input.skip if constraints check fails
-        }
-        return input.success(pkg);
+        return InstallConstraintsTagParser.parseInstallConstraints(input, pkg, res, parser);
     }
 
     private static ParseResult<ParsingPackage> parseQueries(ParseInput input, ParsingPackage pkg,
