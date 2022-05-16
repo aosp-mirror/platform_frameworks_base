@@ -29,5 +29,11 @@
 
     <dimen name="notification_panel_margin_horizontal">80dp</dimen>
     <dimen name="notification_side_paddings">40dp</dimen>
+
+    <!-- qs_tiles_page_horizontal_margin should be margin / 2, otherwise full space between two
+     pages is margin * 2, and that makes tiles page not appear immediately after user swipes to the
+     side -->
+    <dimen name="qs_tiles_page_horizontal_margin">60dp</dimen>
+
     <dimen name="notification_section_divider_height">16dp</dimen>
 </resources>
