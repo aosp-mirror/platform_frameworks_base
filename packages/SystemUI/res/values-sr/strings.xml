@@ -510,7 +510,7 @@
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Приказује се у врху обавештења о конверзацијама и као слика профила на закључаном екрану, појављује се као облачић"</string>
     <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Приказује се у врху обавештења о конверзацијама и као слика профила на закључаном екрану, прекида режим Не узнемиравај"</string>
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Приказује се у врху обавештења о конверзацијама и као слика профила на закључаном екрану, појављује се као облачић, прекида режим Не узнемиравај"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Приоритет"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Приоритетно"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> не подржава функције конверзације"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Ова обавештења не могу да се мењају."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Ова група обавештења не може да се конфигурише овде"</string>

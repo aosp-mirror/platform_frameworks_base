@@ -342,7 +342,7 @@
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Anza upya"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Ndiyo, endelea"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"Ungependa kuongeza mtumiaji?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Mtumiaji mpya utakayemwongeza atahitaji kuongeza akaunti yake.\n\nMtumiaji yoyote anaweza kusasisha programu kwa niaba ya wengine wote."</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Mtumiaji mpya utakayemwongeza atahitaji kujitayarishia nafasi yake.\n\nMtumiaji yoyote anaweza kusasisha programu kwa niaba ya wengine wote."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Umefikia kima cha juu cha watumiaji"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Unaruhusiwa kuongeza hadi watumiaji <xliff:g id="COUNT">%d</xliff:g>.</item>

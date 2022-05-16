@@ -413,7 +413,7 @@
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"‏להגדרות ה-VPN"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"מכשיר זה מנוהל על ידי ההורה שלך. להורה שלך יש אפשרות לצפות בפרטים כמו האפליקציות שבשימוש, המיקום וזמן המסך שלך, ולנהל אותם."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
-    <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"הנעילה נמנעת על ידי סביבה אמינה"</string>
+    <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"הנעילה נמנעת על ידי סביבה מהימנה"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>‏. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"הגדרות צליל"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"הוספת כתוביות באופן אוטומטי למדיה"</string>
@@ -605,7 +605,7 @@
     <string name="switch_bar_off" msgid="5669805115416379556">"כבוי"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"לא זמין"</string>
     <string name="tile_disabled" msgid="373212051546573069">"מושבת"</string>
-    <string name="nav_bar" msgid="4642708685386136807">"סרגל ניווט"</string>
+    <string name="nav_bar" msgid="4642708685386136807">"סרגל הניווט"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"פריסה"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"סוג נוסף של לחצן שמאלי"</string>
     <string name="right_nav_bar_button_type" msgid="4472566498647364715">"סוג נוסף של לחצן ימני"</string>

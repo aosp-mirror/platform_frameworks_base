@@ -88,7 +88,7 @@
     <string name="screenrecord_description" msgid="1123231719680353736">"錄製螢幕畫面時，Android 系統可擷取螢幕上顯示或裝置播放的任何機密資訊，包括密碼、付款資訊、相片、訊息和音訊。"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"錄音"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"裝置音訊"</string>
-    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"裝置播放的音效，例如音樂、通話和鈴聲"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"裝置所播放的音效，例如音樂、通話和鈴聲等等"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"麥克風"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"裝置音訊和麥克風"</string>
     <string name="screenrecord_start" msgid="330991441575775004">"開始"</string>

@@ -88,7 +88,7 @@
     <string name="screenrecord_description" msgid="1123231719680353736">"रेकॉर्डिंग करताना, Android सिस्टीम तुमच्या स्क्रीनवर दिसणारी किंवा तुमच्या डिव्हाइसवर प्ले केलेली कोणतीही संवेदनशील माहिती कॅप्चर करू शकते. यात पासवर्ड, पेमेंट माहिती, फोटो, मेसेज आणि ऑडिओचा समावेश आहे."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ऑडिओ रेकॉर्ड करा"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"डिव्हाइस ऑडिओ"</string>
-    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"तुमच्या डिव्हाइसवरील आवाज जसे की, संगीत, कॉल आणि रिंगटोन"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"तुमच्या डिव्हाइसवरील आवाज, जसे की संगीत, कॉल आणि रिंगटोन"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"मायक्रोफोन"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"डिव्हाइस ऑडिओ आणि मायक्रोफोन"</string>
     <string name="screenrecord_start" msgid="330991441575775004">"सुरू"</string>

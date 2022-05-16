@@ -418,7 +418,7 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"برنامه سنجاق شده است"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"تا زمانی که سنجاق را برندارید، در نما نگه‌داشته می‌شود. برای برداشتن سنجاق، «برگشت» و «نمای کلی» را لمس کنید و نگه‌دارید."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"تا برداشتن سنجاق، در نما نگه‌داشته می‌شود. برای برداشتن سنجاق، «برگشت» و «صفحه اصلی» را لمس کنید و نگه‌دارید."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"به این ترتیب تا زمانی پین آن را برندارید قابل‌مشاهده است. برای برداشتن سنجاق، از پایین صفحه تند به‌طرف بالا بکشید و نگه دارید."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"به این ترتیب تا زمانی که پین آن را برندارید قابل‌مشاهده است. برای برداشتن سنجاق، از پایین صفحه تند به‌طرف بالا بکشید و نگه دارید."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"تا زمانی که پین را بردارید، در نما نگه‌داشته می‌شود. برای برداشتن سنجاق، «نمای کلی» را لمس کنید و نگه‌دارید."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"تا برداشتن سنجاق، در نما نگه‌داشته می‌شود. برای برداشتن سنجاق، «صفحه اصلی» را لمس کنید و نگه‌دارید."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"ممکن است داده‌های شخصی (مانند مخاطبین و محتوای ایمیل) در دسترس باشد."</string>

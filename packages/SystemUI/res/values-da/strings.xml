@@ -868,7 +868,7 @@
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobildata"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Forbundet"</string>
-    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Der oprettes ikke automatisk mobildataforbindelse"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Ingen automatisk mobildataforbindelse"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Der er ingen forbindelse"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Der er ingen andre tilgængelige netværk"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Der er ingen tilgængelige netværk"</string>

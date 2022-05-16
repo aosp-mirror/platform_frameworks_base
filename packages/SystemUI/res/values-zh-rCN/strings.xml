@@ -342,7 +342,7 @@
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"重新开始"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"是，继续"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"要添加新用户吗？"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"当您添加新用户时，该用户必须设置自己的空间。\n\n任何用户均可为其他所有用户更新应用。"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"当您添加新用户后，该用户需要自行设置个人空间。\n\n任何用户都可以为所有其他用户更新应用。"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"已达到用户数上限"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">您最多可以添加 <xliff:g id="COUNT">%d</xliff:g> 位用户。</item>

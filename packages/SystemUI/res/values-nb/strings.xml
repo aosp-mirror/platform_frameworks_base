@@ -880,7 +880,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wi-Fi kobles ikke til automatisk inntil videre"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Se alle"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"For å bytte nettverk, koble fra Ethernet"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"For å forbedre brukeropplevelsen på enheten kan apper og tjenester søke etter Wi-Fi-nettverk når som helst – også når Wi-Fi er slått av. Du kan endre dette i innstillingene for Wi-Fi-skanning. "<annotation id="link">"Bytt"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"For å forbedre brukeropplevelsen på enheten kan apper og tjenester søke etter Wi-Fi-nettverk når som helst – også når Wi-Fi er slått av. Du kan endre dette i innstillingene for Wi-Fi-skanning. "<annotation id="link">"Endre"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Slå av flymodus"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Velg bruker"</string>
 </resources>

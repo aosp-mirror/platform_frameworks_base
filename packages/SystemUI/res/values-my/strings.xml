@@ -868,7 +868,7 @@
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"မိုဘိုင်းဒေတာ"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"ချိတ်ဆက်ထားသည်"</string>
-    <string name="mobile_data_off_summary" msgid="3663995422004150567">"မိုဘိုင်းဒေတာက အလိုအလျောက် ချိတ်ဆက်မည်မဟုတ်ပါ"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"မိုဘိုင်းဒေတာ အော်တိုမချိတ်ပါ"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"ချိတ်ဆက်မှုမရှိပါ"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"အခြားကွန်ရက်များ မရှိပါ"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"ကွန်ရက်များ မရှိပါ"</string>
