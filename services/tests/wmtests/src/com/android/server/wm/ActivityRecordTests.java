@@ -2630,7 +2630,11 @@ public class ActivityRecordTests extends WindowTestsBase {
             DeviceConfig.setProperty(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
                     "splash_screen_exception_list", DEFAULT_COMPONENT_PACKAGE_NAME, false);
             testLegacySplashScreen(Build.VERSION_CODES.R, TYPE_PARAMETER_LEGACY_SPLASH_SCREEN);
-            testLegacySplashScreen(Build.VERSION_CODES.S, 0);
+            testLegacySplashScreen(Build.VERSION_CODES.S, TYPE_PARAMETER_LEGACY_SPLASH_SCREEN);
+            testLegacySplashScreen(Build.VERSION_CODES.TIRAMISU,
+                    TYPE_PARAMETER_LEGACY_SPLASH_SCREEN);
+            // Above T
+            testLegacySplashScreen(Build.VERSION_CODES.TIRAMISU + 1, 0);
         } finally {
             try {
                 DeviceConfig.setProperties(properties);
