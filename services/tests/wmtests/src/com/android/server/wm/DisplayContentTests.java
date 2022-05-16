@@ -2215,23 +2215,28 @@ public class DisplayContentTests extends WindowTestsBase {
      */
     @Test
     public void testCreateTestDisplayContentFromDimensions() {
-        final int displayWidth = 1000;
-        final int displayHeight = 2000;
+        final int displayWidth = 540;
+        final int displayHeight = 960;
+        final int density = 192;
+        final int expectedWidthDp = 450; // = 540/(192/160)
+        final int expectedHeightDp = 800; // = 960/(192/160)
         final int windowingMode = WINDOWING_MODE_FULLSCREEN;
         final boolean ignoreOrientationRequests = false;
         final float fixedOrientationLetterboxRatio = 0;
         final DisplayContent testDisplayContent = new TestDisplayContent.Builder(mAtm, displayWidth,
-                displayHeight).build();
+                displayHeight).setDensityDpi(density).build();
 
         // test display info
         final DisplayInfo di = testDisplayContent.getDisplayInfo();
         assertEquals(displayWidth, di.logicalWidth);
         assertEquals(displayHeight, di.logicalHeight);
-        assertEquals(TestDisplayContent.DEFAULT_LOGICAL_DISPLAY_DENSITY, di.logicalDensityDpi);
+        assertEquals(density, di.logicalDensityDpi);
 
         // test configuration
-        final WindowConfiguration windowConfig = testDisplayContent.getConfiguration()
-                .windowConfiguration;
+        final Configuration config = testDisplayContent.getConfiguration();
+        assertEquals(expectedWidthDp, config.screenWidthDp);
+        assertEquals(expectedHeightDp, config.screenHeightDp);
+        final WindowConfiguration windowConfig = config.windowConfiguration;
         assertEquals(displayWidth, windowConfig.getBounds().width());
         assertEquals(displayHeight, windowConfig.getBounds().height());
         assertEquals(windowingMode, windowConfig.getWindowingMode());
