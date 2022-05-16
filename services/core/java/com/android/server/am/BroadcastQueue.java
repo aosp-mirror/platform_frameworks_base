@@ -67,6 +67,7 @@ import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
 
 import java.io.FileDescriptor;
@@ -766,6 +767,22 @@ public final class BroadcastQueue {
                 skip = true;
             }
         }
+
+        // Check that the receiver does *not* belong to any of the excluded packages
+        if (!skip && r.excludedPackages != null && r.excludedPackages.length > 0) {
+            if (ArrayUtils.contains(r.excludedPackages, filter.packageName)) {
+                Slog.w(TAG, "Skipping delivery of excluded package "
+                        + r.intent.toString()
+                        + " to " + filter.receiverList.app
+                        + " (pid=" + filter.receiverList.pid
+                        + ", uid=" + filter.receiverList.uid + ")"
+                        + " excludes package " + filter.packageName
+                        + " due to sender " + r.callerPackage
+                        + " (uid " + r.callingUid + ")");
+                skip = true;
+            }
+        }
+
         // If the broadcast also requires an app op check that as well.
         if (!skip && r.appOp != AppOpsManager.OP_NONE
                 && mService.getAppOpsManager().noteOpNoThrow(r.appOp,
@@ -1597,6 +1614,19 @@ public final class BroadcastQueue {
                         break;
                     }
                 }
+            }
+        }
+
+        // Check that the receiver does *not* belong to any of the excluded packages
+        if (!skip && r.excludedPackages != null && r.excludedPackages.length > 0) {
+            if (ArrayUtils.contains(r.excludedPackages, component.getPackageName())) {
+                Slog.w(TAG, "Skipping delivery of excluded package "
+                        + r.intent + " to "
+                        + component.flattenToShortString()
+                        + " excludes package " + component.getPackageName()
+                        + " due to sender " + r.callerPackage
+                        + " (uid " + r.callingUid + ")");
+                skip = true;
             }
         }
 
