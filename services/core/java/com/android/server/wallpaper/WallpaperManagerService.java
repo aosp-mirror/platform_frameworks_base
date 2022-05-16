@@ -147,6 +147,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     private static final String TAG = "WallpaperManagerService";
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_LIVE = true;
+    private static final boolean DEBUG_CROP = true;
     private static final @NonNull RectF LOCAL_COLOR_BOUNDS =
             new RectF(0, 0, 1, 1);
 
@@ -668,7 +669,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 }
             }
 
-            if (DEBUG) {
+            if (DEBUG_CROP) {
                 Slog.v(TAG, "crop: w=" + cropHint.width() + " h=" + cropHint.height());
                 Slog.v(TAG, "dims: w=" + wpData.mWidth + " h=" + wpData.mHeight);
                 Slog.v(TAG, "meas: w=" + options.outWidth + " h=" + options.outHeight);
@@ -743,7 +744,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     final int safeHeight = (int) (estimateCrop.height() * hRatio);
                     final int safeWidth = (int) (estimateCrop.width() * hRatio);
 
-                    if (DEBUG) {
+                    if (DEBUG_CROP) {
                         Slog.v(TAG, "Decode parameters:");
                         Slog.v(TAG, "  cropHint=" + cropHint + ", estimateCrop=" + estimateCrop);
                         Slog.v(TAG, "  down sampling=" + options.inSampleSize
