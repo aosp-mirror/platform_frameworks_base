@@ -1697,23 +1697,6 @@ class Task extends TaskFragment {
                 lockTaskAuthToString());
     }
 
-    @Override
-    public boolean supportsSplitScreenWindowingMode() {
-        return supportsSplitScreenWindowingModeInDisplayArea(getDisplayArea());
-    }
-
-    boolean supportsSplitScreenWindowingModeInDisplayArea(@Nullable TaskDisplayArea tda) {
-        final Task topTask = getTopMostTask();
-        return super.supportsSplitScreenWindowingMode()
-                && (topTask == null || topTask.supportsSplitScreenWindowingModeInner(tda));
-    }
-
-    private boolean supportsSplitScreenWindowingModeInner(@Nullable TaskDisplayArea tda) {
-        return super.supportsSplitScreenWindowingMode()
-                && mAtmService.mSupportsSplitScreenMultiWindow
-                && supportsMultiWindowInDisplayArea(tda);
-    }
-
     boolean supportsFreeform() {
         return supportsFreeformInDisplayArea(getDisplayArea());
     }
@@ -3397,9 +3380,7 @@ class Task extends TaskFragment {
         info.realActivity = realActivity;
         info.lastActiveTime = lastActiveTime;
         info.taskDescription = new ActivityManager.TaskDescription(getTaskDescription());
-        info.supportsSplitScreenMultiWindow = supportsSplitScreenWindowingModeInDisplayArea(tda);
-        info.supportsMultiWindow = info.supportsSplitScreenMultiWindow
-                || supportsMultiWindowInDisplayArea(tda);
+        info.supportsMultiWindow = supportsMultiWindowInDisplayArea(tda);
         info.configuration.setTo(getConfiguration());
         // Update to the task's current activity type and windowing mode which may differ from the
         // window configuration
