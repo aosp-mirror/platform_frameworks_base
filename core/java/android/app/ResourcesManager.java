@@ -365,8 +365,8 @@ public class ResourcesManager {
             @NonNull Configuration config) {
         config.touchscreen = Configuration.TOUCHSCREEN_NOTOUCH;
         config.densityDpi = dm.densityDpi;
-        config.screenWidthDp = (int) (dm.widthPixels / dm.density);
-        config.screenHeightDp = (int) (dm.heightPixels / dm.density);
+        config.screenWidthDp = (int) (dm.widthPixels / dm.density + 0.5f);
+        config.screenHeightDp = (int) (dm.heightPixels / dm.density + 0.5f);
         int sl = Configuration.resetScreenLayout(config.screenLayout);
         if (dm.widthPixels > dm.heightPixels) {
             config.orientation = Configuration.ORIENTATION_LANDSCAPE;
