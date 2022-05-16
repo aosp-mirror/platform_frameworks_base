@@ -305,8 +305,10 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"acceder al calendario"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"enviar y ver mensajes SMS"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"Archivos y documentos"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"Accede a archivos y documentos en tu dispositivo"</string>
+    <!-- no translation found for permgrouplab_storage (17339216290379241) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_storage (5378659041354582769) -->
+    <skip />
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Música y audio"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"acceder a música y audio de tu dispositivo"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotos y videos"</string>
@@ -1383,7 +1385,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"COMPARTIR"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"RECHAZAR"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Selecciona el método de entrada"</string>
-    <string name="show_ime" msgid="6406112007347443383">"Mantener en la pantalla cuando el teclado físico está activo"</string>
+    <string name="show_ime" msgid="6406112007347443383">"Mientras el teclado físico está activo"</string>
     <string name="hardware" msgid="1800597768237606953">"Mostrar teclado virtual"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Configura el teclado físico"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Presiona para seleccionar el idioma y el diseño"</string>
@@ -2286,5 +2288,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Consulta las apps activas"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"No se puede acceder a la cámara del dispositivo desde tu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"No se puede acceder a la cámara de la tablet desde tu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"Idioma del sistema"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Predeterminado del sistema"</string>
 </resources>
