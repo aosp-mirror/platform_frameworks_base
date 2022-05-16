@@ -338,6 +338,11 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         }
 
         @Override
+        public SurfaceControl.Transaction getSyncTransaction() {
+            return mTransaction;
+        }
+
+        @Override
         public Transaction getPendingTransaction() {
             return mTransaction;
         }
