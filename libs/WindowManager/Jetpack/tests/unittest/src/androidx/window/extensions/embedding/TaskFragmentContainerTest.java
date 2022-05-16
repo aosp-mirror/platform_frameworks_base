@@ -18,6 +18,7 @@ package androidx.window.extensions.embedding;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -29,13 +30,17 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 
 import android.app.Activity;
+import android.os.Binder;
 import android.os.Handler;
+import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.window.TaskFragmentInfo;
 import android.window.WindowContainerTransaction;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
+
+import com.google.android.collect.Lists;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -44,6 +49,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Test class for {@link TaskFragmentContainer}.
@@ -62,16 +68,16 @@ public class TaskFragmentContainerTest {
     @Mock
     private SplitController mController;
     @Mock
-    private Activity mActivity;
-    @Mock
     private TaskFragmentInfo mInfo;
     @Mock
     private Handler mHandler;
+    private Activity mActivity;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         doReturn(mHandler).when(mController).getHandler();
+        mActivity = createMockActivity();
     }
 
     @Test
@@ -164,5 +170,73 @@ public class TaskFragmentContainerTest {
 
         assertNull(container.mAppearEmptyTimeout);
         verify(mController).onTaskFragmentAppearEmptyTimeout(container);
+    }
+
+    @Test
+    public void testCollectActivities() {
+        final TaskContainer taskContainer = new TaskContainer(TASK_ID);
+        final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,
+                taskContainer, mController);
+        List<Activity> activities = container.collectActivities();
+
+        assertTrue(activities.isEmpty());
+
+        container.addPendingAppearedActivity(mActivity);
+        activities = container.collectActivities();
+
+        assertEquals(1, activities.size());
+
+        final Activity activity0 = createMockActivity();
+        final Activity activity1 = createMockActivity();
+        final List<IBinder> runningActivities = Lists.newArrayList(activity0.getActivityToken(),
+                activity1.getActivityToken());
+        doReturn(runningActivities).when(mInfo).getActivities();
+        container.setInfo(mInfo);
+        activities = container.collectActivities();
+
+        assertEquals(3, activities.size());
+        assertEquals(activity0, activities.get(0));
+        assertEquals(activity1, activities.get(1));
+        assertEquals(mActivity, activities.get(2));
+    }
+
+    @Test
+    public void testAddPendingActivity() {
+        final TaskContainer taskContainer = new TaskContainer(TASK_ID);
+        final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,
+                taskContainer, mController);
+        container.addPendingAppearedActivity(mActivity);
+
+        assertEquals(1, container.collectActivities().size());
+
+        container.addPendingAppearedActivity(mActivity);
+
+        assertEquals(1, container.collectActivities().size());
+    }
+
+    @Test
+    public void testGetBottomMostActivity() {
+        final TaskContainer taskContainer = new TaskContainer(TASK_ID);
+        final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,
+                taskContainer, mController);
+        container.addPendingAppearedActivity(mActivity);
+
+        assertEquals(mActivity, container.getBottomMostActivity());
+
+        final Activity activity = createMockActivity();
+        final List<IBinder> runningActivities = Lists.newArrayList(activity.getActivityToken());
+        doReturn(runningActivities).when(mInfo).getActivities();
+        container.setInfo(mInfo);
+
+        assertEquals(activity, container.getBottomMostActivity());
+    }
+
+    /** Creates a mock activity in the organizer process. */
+    private Activity createMockActivity() {
+        final Activity activity = mock(Activity.class);
+        final IBinder activityToken = new Binder();
+        doReturn(activityToken).when(activity).getActivityToken();
+        doReturn(activity).when(mController).getActivity(activityToken);
+        return activity;
     }
 }

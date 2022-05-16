@@ -395,7 +395,7 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
         @SyncAndDrawResult
         public int renderView(View view, Rect sourceRect) {
             HardwareRenderer.FrameRenderRequest request = mRenderer.createRenderRequest();
-            request.setVsyncTime(SystemClock.elapsedRealtimeNanos());
+            request.setVsyncTime(System.nanoTime());
             if (updateForView(view)) {
                 setupLighting(view);
             }

@@ -1258,6 +1258,16 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                 + "current_drain_event_duration_based_threshold_enabled";
 
         /**
+         * Whether or not we should move the app into the restricted bucket level if its background
+         * battery usage goes beyond the threshold. Note this different from the flag
+         * {@link AppRestrictionController.ConstantsObserver#KEY_BG_AUTO_RESTRICT_ABUSIVE_APPS}
+         * which is to control the overall auto bg restrictions.
+         */
+        static final String KEY_BG_CURRENT_DRAIN_AUTO_RESTRICT_ABUSIVE_APPS_ENABLED =
+                DEVICE_CONFIG_SUBNAMESPACE_PREFIX
+                + "current_drain_auto_restrict_abusive_apps_enabled";
+
+        /**
          * The types of battery drain we're checking on each app; if the sum of the battery drain
          * exceeds the threshold, it'll be moved to restricted standby bucket; the type here
          * must be one of, or combination of {@link #BATTERY_USAGE_TYPE_BACKGROUND},
@@ -1353,6 +1363,11 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
         final boolean mDefaultBgCurrentDrainEventDurationBasedThresholdEnabled;
 
         /**
+         * Default value to {@link #mBgCurrentDrainAutoRestrictAbusiveAppsEnabled}.
+         */
+        final boolean mDefaultBgCurrentDrainAutoRestrictAbusiveAppsEnabled;
+
+        /**
          * Default value to {@link #mBgCurrentDrainRestrictedBucketTypes}.
          */
         final int mDefaultCurrentDrainTypesToRestrictedBucket;
@@ -1428,6 +1443,11 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
          * @see #KEY_BG_CURRENT_DRAIN_EVENT_DURATION_BASED_THRESHOLD_ENABLED.
          */
         volatile boolean mBgCurrentDrainEventDurationBasedThresholdEnabled;
+
+        /**
+         * @see #KEY_BG_CURRENT_DRAIN_AUTO_RESTRICT_ABUSIVE_APPS_ENABLED.
+         */
+        volatile boolean mBgCurrentDrainAutoRestrictAbusiveAppsEnabled;
 
         /**
          * @see #KEY_BG_CURRENT_DRAIN_TYPES_TO_RESTRICTED_BUCKET.
@@ -1520,6 +1540,8 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                     R.integer.config_bg_current_drain_location_min_duration) * 1_000;
             mDefaultBgCurrentDrainEventDurationBasedThresholdEnabled = resources.getBoolean(
                     R.bool.config_bg_current_drain_event_duration_based_threshold_enabled);
+            mDefaultBgCurrentDrainAutoRestrictAbusiveAppsEnabled = resources.getBoolean(
+                    R.bool.config_bg_current_drain_auto_restrict_abusive_apps);
             mDefaultCurrentDrainTypesToRestrictedBucket = resources.getInteger(
                     R.integer.config_bg_current_drain_types_to_restricted_bucket);
             mDefaultBgCurrentDrainTypesToBgRestricted = resources.getInteger(
@@ -1568,6 +1590,9 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                 case KEY_BG_CURRENT_DRAIN_TYPES_TO_BG_RESTRICTED:
                 case KEY_BG_CURRENT_DRAIN_POWER_COMPONENTS:
                     updateCurrentDrainThreshold();
+                    break;
+                case KEY_BG_CURRENT_DRAIN_AUTO_RESTRICT_ABUSIVE_APPS_ENABLED:
+                    updateBgCurrentDrainAutoRestrictAbusiveAppsEnabled();
                     break;
                 case KEY_BG_CURRENT_DRAIN_WINDOW:
                     updateCurrentDrainWindow();
@@ -1701,6 +1726,13 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                     DEFAULT_BG_CURRENT_DRAIN_DECOUPLE_THRESHOLD);
         }
 
+        private void updateBgCurrentDrainAutoRestrictAbusiveAppsEnabled() {
+            mBgCurrentDrainAutoRestrictAbusiveAppsEnabled = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    KEY_BG_CURRENT_DRAIN_AUTO_RESTRICT_ABUSIVE_APPS_ENABLED,
+                    mDefaultBgCurrentDrainAutoRestrictAbusiveAppsEnabled);
+        }
+
         @Override
         public void onSystemReady() {
             mBatteryFullChargeMah =
@@ -1714,6 +1746,7 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
             updateCurrentDrainEventDurationBasedThresholdEnabled();
             updateCurrentDrainExemptedTypes();
             updateCurrentDrainDecoupleThresholds();
+            updateBgCurrentDrainAutoRestrictAbusiveAppsEnabled();
         }
 
         @Override
@@ -1728,9 +1761,12 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                 if (pair != null) {
                     final long lastInteractionTime = mLastInteractionTime.get(uid, 0L);
                     final long[] ts = pair.first;
-                    final int restrictedLevel = ts[TIME_STAMP_INDEX_RESTRICTED_BUCKET]
-                            > (lastInteractionTime + mBgCurrentDrainInteractionGracePeriodMs)
-                            && mTracker.mAppRestrictionController.isAutoRestrictAbusiveAppEnabled()
+                    final boolean noInteractionRecently = ts[TIME_STAMP_INDEX_RESTRICTED_BUCKET]
+                            > (lastInteractionTime + mBgCurrentDrainInteractionGracePeriodMs);
+                    final boolean canRestrict =
+                            mTracker.mAppRestrictionController.isAutoRestrictAbusiveAppEnabled()
+                            && mBgCurrentDrainAutoRestrictAbusiveAppsEnabled;
+                    final int restrictedLevel = noInteractionRecently && canRestrict
                             ? RESTRICTION_LEVEL_RESTRICTED_BUCKET
                             : RESTRICTION_LEVEL_ADAPTIVE_BUCKET;
                     if (maxLevel > RESTRICTION_LEVEL_BACKGROUND_RESTRICTED) {
@@ -2065,6 +2101,10 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                 pw.print(KEY_BG_CURRENT_DRAIN_EVENT_DURATION_BASED_THRESHOLD_ENABLED);
                 pw.print('=');
                 pw.println(mBgCurrentDrainEventDurationBasedThresholdEnabled);
+                pw.print(prefix);
+                pw.print(KEY_BG_CURRENT_DRAIN_AUTO_RESTRICT_ABUSIVE_APPS_ENABLED);
+                pw.print('=');
+                pw.println(mBgCurrentDrainAutoRestrictAbusiveAppsEnabled);
                 pw.print(prefix);
                 pw.print(KEY_BG_CURRENT_DRAIN_TYPES_TO_RESTRICTED_BUCKET);
                 pw.print('=');
