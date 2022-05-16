@@ -305,8 +305,10 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"acesse sua agenda"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"envie e veja mensagens SMS"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"Arquivos e documentos"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"acessar arquivos e documentos no seu dispositivo"</string>
+    <!-- no translation found for permgrouplab_storage (17339216290379241) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_storage (5378659041354582769) -->
+    <skip />
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Música e áudio"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"acessar música e áudio no dispositivo"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotos e vídeos"</string>
@@ -1686,7 +1688,7 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Permitir que o <xliff:g id="SERVICE">%1$s</xliff:g> tenha controle total do seu dispositivo?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"O controle total é adequado para apps que ajudam você com as necessidades de acessibilidade, mas não para a maioria dos apps."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Ver e controlar tela"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Pode ler todo o conteúdo na tela e mostrar conteúdo sobreposto a outros apps."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Pode ler todo o conteúdo na tela e o conteúdo se sobrepõe ao de outros apps."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Ver e realizar ações"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Pode monitorar suas interações com um app ou um sensor de hardware e interagir com apps em seu nome."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Permitir"</string>
@@ -1702,7 +1704,7 @@
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversão de cores"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Correção de cor"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Modo para uma mão"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Mais escuro"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Escurecer a tela"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Teclas de volume pressionadas. Serviço <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ativado."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Teclas de volume pressionadas. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> desativado."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Toque nos dois botões de volume e os mantenha pressionados por três segundo para usar o <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -1717,7 +1719,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"Alternando para <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Desconectando <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Proprietário"</string>
-    <string name="guest_name" msgid="8502103277839834324">"Convidado"</string>
+    <string name="guest_name" msgid="8502103277839834324">"Visitante"</string>
     <string name="error_message_title" msgid="4082495589294631966">"Erro"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"Esta alteração não é permitida pelo administrador"</string>
     <string name="app_not_found" msgid="3429506115332341800">"Nenhum app encontrado para executar a ação"</string>
@@ -2286,5 +2288,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Verificar apps ativos"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Não é possível acessar a câmera do smartphone pelo <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Não é possível acessar a câmera do tablet pelo <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"Idioma do sistema"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Padrão do sistema"</string>
 </resources>

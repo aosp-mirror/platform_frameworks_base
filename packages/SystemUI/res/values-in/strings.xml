@@ -319,6 +319,10 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Kunci dibuka dengan wajah. Tekan untuk membuka."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Wajah dikenali. Tekan untuk membuka."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Wajah dikenali. Tekan ikon buka kunci untuk membuka."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"Geser ke atas untuk mencoba lagi"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Buka kunci untuk menggunakan NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Perangkat ini milik organisasi Anda"</string>
@@ -465,8 +469,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Siapkan metode pembayaran untuk melakukan pembelian dengan lebih cepat dan aman menggunakan ponsel Anda"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Tampilkan semua"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (8488069304491125713) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Ketuk untuk membuka"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Memperbarui"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Buka kunci untuk menggunakan"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Terjadi masalah saat mendapatkan kartu Anda, coba lagi nanti"</string>
@@ -844,6 +847,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Buka aplikasi untuk mentransmisikan sesi ini."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Aplikasi tidak dikenal"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Hentikan transmisi"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Cara kerja siaran"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Siaran"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Orang di dekat Anda dengan perangkat Bluetooth yang kompatibel dapat mendengarkan media yang sedang Anda siarkan"</string>
@@ -939,7 +944,12 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Edit teks yang disalin"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Edit gambar yang disalin"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Kirim ke perangkat di sekitar"</string>
-    <!-- no translation found for clipboard_text_hidden (7926899867471812305) -->
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"Ketuk untuk melihat"</string>
+    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
+    <skip />
+    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
+    <skip />
+    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
     <skip />
     <string name="add" msgid="81036585205287996">"Tambahkan"</string>
     <string name="manage_users" msgid="1823875311934643849">"Kelola pengguna"</string>

@@ -319,6 +319,10 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"얼굴 인식으로 잠금 해제되었습니다. 열려면 누르세요."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"얼굴이 인식되었습니다. 열려면 누르세요."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"얼굴이 인식되었습니다. 열려면 잠금 해제 아이콘을 누르세요."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"위로 스와이프하여 다시 시도해 주세요"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"잠금 해제하여 NFC 사용"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"내 조직에 속한 기기입니다."</string>
@@ -465,8 +469,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"설정하여 휴대전화로 더욱 빠르고 안전하게 구매하세요."</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"모두 표시"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (8488069304491125713) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"탭하여 열기"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"업데이트 중"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"잠금 해제하여 사용"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"카드를 가져오는 중에 문제가 발생했습니다. 나중에 다시 시도해 보세요."</string>
@@ -844,6 +847,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"세션을 전송하려면 앱을 열어 주세요"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"알 수 없는 앱"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"전송 중지"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"브로드캐스팅 작동 원리"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"브로드캐스트"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"호환되는 블루투스 기기를 가진 근처의 사용자가 내가 브로드캐스트 중인 미디어를 수신 대기할 수 있습니다."</string>
@@ -939,7 +944,12 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"복사된 텍스트 편집"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"복사된 이미지 편집"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"근처 기기에 전송"</string>
-    <!-- no translation found for clipboard_text_hidden (7926899867471812305) -->
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"탭하여 보기"</string>
+    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
+    <skip />
+    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
+    <skip />
+    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
     <skip />
     <string name="add" msgid="81036585205287996">"추가"</string>
     <string name="manage_users" msgid="1823875311934643849">"사용자 관리"</string>
