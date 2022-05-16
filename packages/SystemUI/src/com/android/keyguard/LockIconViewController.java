@@ -188,7 +188,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     protected void onViewAttached() {
         updateIsUdfpsEnrolled();
         updateConfiguration();
-        updateLockIconLocation();
         updateKeyguardShowing();
         mUserUnlockedWithBiometric = false;
 
@@ -347,6 +346,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                 R.string.accessibility_unlock_button);
         mLockedLabel = mView.getContext()
                 .getResources().getString(R.string.accessibility_lock_icon);
+        updateLockIconLocation();
     }
 
     private void updateLockIconLocation() {
@@ -691,7 +691,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mExecutor.execute(() -> {
             updateIsUdfpsEnrolled();
             updateConfiguration();
-            updateLockIconLocation();
         });
     }
 
@@ -708,7 +707,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
 
         @Override
         public void onUdfpsLocationChanged() {
-            updateLockIconLocation();
+            updateUdfpsConfig();
         }
     };
 
