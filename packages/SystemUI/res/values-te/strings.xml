@@ -93,7 +93,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"స్క్రీన్ రికార్డింగ్ అవుతోంది"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"స్క్రీన్ రికార్డ్ సెషన్ కోసం ఆన్‌గోయింగ్ నోటిఫికేషన్"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"రికార్డింగ్‌ను ప్రారంభించాలా?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"రికార్డ్ చేస్తున్నప్పుడు, Android సిస్టమ్ మీ స్క్రీన్‌పై ప్రదర్శించబడిన లేదా మీ పరికరం నుండి ప్లే చేయబడిన ఏ సున్నితమైన సమాచారాన్నయినా క్యాప్చర్ చేయగలదు. ఈ సమాచారంలో, పాస్‌వర్డ్‌లు, పేమెంట్ వివరాలు, ఫోటోలు, మెసేజ్‌లు, ఆడియో కూడా ఉంటాయి."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"రికార్డ్ చేస్తున్నప్పుడు, Android సిస్టమ్ మీ స్క్రీన్‌పై ప్రదర్శించబడిన లేదా మీ పరికరం నుండి ప్లే చేయబడిన ఏ సున్నితమైన సమాచారాన్నయినా క్యాప్చర్ చేయగలదు. ఈ సమాచారంలో పాస్‌వర్డ్‌లు, పేమెంట్ వివరాలు, ఫోటోలు, మెసేజ్‌లు, ఆడియో కూడా ఉంటాయి."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ఆడియోను రికార్డ్ చేయి"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"పరికరం ఆడియో"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"మీ పరికరం నుండి వచ్చే మ్యూజిక్, కాల్స్‌, రింగ్‌టోన్‌ల వంటి ధ్వనులు"</string>
@@ -226,8 +226,7 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"ఆటో-రొటేట్‌"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"స్క్రీన్ ఆటో-రొటేట్‌"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"లొకేషన్"</string>
-    <!-- no translation found for quick_settings_screensaver_label (1495003469366524120) -->
-    <skip />
+    <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"స్క్రీన్ సేవర్"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"కెమెరా యాక్సెస్"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"మైక్ యాక్సెస్"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"అందుబాటులో ఉంది"</string>
@@ -321,6 +320,10 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"ముఖం ద్వారా అన్‌లాక్ చేయబడింది. తెరవడానికి నొక్కండి."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"ముఖం గుర్తించబడింది. తెరవడానికి నొక్కండి."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"ముఖం గుర్తించబడింది. తెరవడానికి అన్‌లాక్ చిహ్నం నొక్కండి."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"మళ్ళీ ప్రయత్నించడానికి పైకి స్వైప్ చేయండి"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFCని ఉపయోగించడానికి అన్‌లాక్ చేయండి"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ఈ పరికరం మీ సంస్థకు చెందినది"</string>
@@ -349,7 +352,7 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"అవును, కొనసాగించు"</string>
     <string name="guest_notification_app_name" msgid="2110425506754205509">"గెస్ట్ మోడ్"</string>
     <string name="guest_notification_session_active" msgid="5567273684713471450">"మీరు గెస్ట్ మోడ్‌లో ఉన్నారు"</string>
-    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"కొత్త యూజర్‌ను జోడించడం వలన గెస్ట్ మోడ్ నుండి నిష్క్రమించబడుతుంది, ప్రస్తుత గెస్ట్ సెషన్ నుండి అన్ని యాప్‌లు, డేటా తొలగించండి."</string>
+    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"కొత్త యూజర్‌ను జోడించడం వలన గెస్ట్ మోడ్ నుండి వైదొలుగుతుంది. అలాగే ప్రస్తుత గెస్ట్ సెషన్ నుండి అన్ని యాప్‌లతో పాటు మొత్తం డేటా తొలగించబడుతుంది."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"వినియోగదారు పరిమితిని చేరుకున్నారు"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">మీరు <xliff:g id="COUNT">%d</xliff:g> వినియోగదారుల వరకు జోడించవచ్చు.</item>
@@ -470,8 +473,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"మీ ఫోన్‌తో మరింత వేగంగా, సురక్షితంగా కొనుగోళ్లు చేయడానికి సెటప్ చేయండి"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"అన్నింటినీ చూపు"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (8488069304491125713) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"తెరవడం కోసం ట్యాప్ చేయండి"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"అప్‌డేట్ చేస్తోంది"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ఉపయోగించడానికి అన్‌లాక్ చేయండి"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"మీ కార్డ్‌లను పొందడంలో సమస్య ఉంది, దయచేసి తర్వాత మళ్లీ ట్రై చేయండి"</string>
@@ -697,7 +699,10 @@
     <string name="notification_channel_alerts" msgid="3385787053375150046">"అలర్ట్‌లు"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"బ్యాటరీ"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"స్క్రీన్‌షాట్‌లు"</string>
-    <string name="notification_channel_general" msgid="4384774889645929705">"సాధారణ మెసేజ్‌లు"</string>
+    <!-- no translation found for notification_channel_instant (7556135423486752680) -->
+    <skip />
+    <!-- no translation found for notification_channel_setup (7660580986090760350) -->
+    <skip />
     <string name="notification_channel_storage" msgid="2720725707628094977">"స్టోరేజ్"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"సూచనలు"</string>
     <string name="instant_apps" msgid="8337185853050247304">"ఇన్‌స్టంట్ యాప్‌లు"</string>
@@ -849,6 +854,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"ఈ సెషన్‌ను ప్రసారం చేయడానికి, దయచేసి యాప్‌ను తెరవండి."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"తెలియని యాప్"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"ప్రసారాన్ని ఆపివేయండి"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ప్రసారం కావడం అనేది ఎలా పని చేస్తుంది"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ప్రసారం"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"మీకు సమీపంలో ఉన్న వ్యక్తులు అనుకూలత ఉన్న బ్లూటూత్ పరికరాలతో మీరు ప్రసారం చేస్తున్న మీడియాను వినగలరు"</string>
@@ -944,7 +951,12 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"కాపీ చేసిన టెక్స్ట్‌ను ఎడిట్ చేయండి"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"కాపీ చేసిన ఇమేజ్‌లను ఎడిట్ చేయండి"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"సమీపంలోని పరికరానికి పంపండి"</string>
-    <!-- no translation found for clipboard_text_hidden (7926899867471812305) -->
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"చూడటానికి ట్యాప్ చేయండి"</string>
+    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
+    <skip />
+    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
+    <skip />
+    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
     <skip />
     <string name="add" msgid="81036585205287996">"జోడించండి"</string>
     <string name="manage_users" msgid="1823875311934643849">"యూజర్‌లను మేనేజ్ చేయండి"</string>
@@ -954,4 +966,12 @@
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"అలారం సెట్ చేశాను"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"కెమెరా, మైక్ ఆఫ్‌లో ఉన్నాయి"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# నోటిఫికేషన్}other{# నోటిఫికేషన్‌లు}}"</string>
+    <!-- no translation found for broadcasting_description_is_broadcasting (765627502786404290) -->
+    <skip />
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> ప్రసారం చేయడాన్ని ఆపివేయాలా?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"మీరు <xliff:g id="SWITCHAPP">%1$s</xliff:g> ప్రసారం చేస్తే లేదా అవుట్‌పుట్‌ను మార్చినట్లయితే, మీ ప్రస్తుత ప్రసారం ఆగిపోతుంది"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> ప్రసారం చేయండి"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"అవుట్‌పుట్‌ను మార్చండి"</string>
+    <!-- no translation found for bt_le_audio_broadcast_dialog_unknown_name (3791472237793443044) -->
+    <skip />
 </resources>

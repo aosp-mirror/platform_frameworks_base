@@ -96,7 +96,7 @@
     <string name="screenrecord_description" msgid="1123231719680353736">"रेकॉर्डिंग करताना, Android सिस्टीम तुमच्या स्क्रीनवर दिसणारी किंवा तुमच्या डिव्हाइसवर प्ले केलेली कोणतीही संवेदनशील माहिती कॅप्चर करू शकते. यात पासवर्ड, पेमेंट माहिती, फोटो, मेसेज आणि ऑडिओचा समावेश आहे."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ऑडिओ रेकॉर्ड करा"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"डिव्हाइस ऑडिओ"</string>
-    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"तुमच्या डिव्हाइसवरील आवाज जसे की, संगीत, कॉल आणि रिंगटोन"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"तुमच्या डिव्हाइसवरील आवाज, जसे की संगीत, कॉल आणि रिंगटोन"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"मायक्रोफोन"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"डिव्हाइस ऑडिओ आणि मायक्रोफोन"</string>
     <string name="screenrecord_start" msgid="330991441575775004">"सुरू"</string>
@@ -226,8 +226,7 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"ऑटो-रोटेट"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"ऑटो-रोटेट स्क्रीन"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"स्थान"</string>
-    <!-- no translation found for quick_settings_screensaver_label (1495003469366524120) -->
-    <skip />
+    <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"स्क्रीन सेव्हर"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"कॅमेराचा अ‍ॅक्सेस"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"माइकचा ॲक्सेस"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"उपलब्ध आहे"</string>
@@ -321,6 +320,10 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"चेहऱ्याने अनलॉक केले आहे. उघडण्यासाठी दाबा."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"चेहरा ओळखला आहे. उघडण्यासाठी दाबा."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"चेहरा ओळखला आहे. उघडण्यासाठी अनलॉक करा आयकन दाबा."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"पुन्हा प्रयत्न करण्यासाठी वर स्‍वाइप करा"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC वापरण्यासाठी स्क्रीन अनलॉक करा"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"हे डिव्हाइस तुमच्या संस्थेचे आहे"</string>
@@ -470,8 +473,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"तुमचा फोन वापरून जलदरीत्या, अधिक सुरक्षित खरेदी करण्यासाठी सेट करा"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"सर्व दाखवा"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (8488069304491125713) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"उघडण्यासाठी टॅप करा"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"अपडेट करत आहे"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"वापरण्यासाठी अनलॉक करा"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"तुमची कार्ड मिळवताना समस्या आली, कृपया नंतर पुन्हा प्रयत्न करा"</string>
@@ -697,7 +699,10 @@
     <string name="notification_channel_alerts" msgid="3385787053375150046">"सूचना"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"बॅटरी"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"स्क्रीनशॉट"</string>
-    <string name="notification_channel_general" msgid="4384774889645929705">"सर्वसाधारण मेसेज"</string>
+    <!-- no translation found for notification_channel_instant (7556135423486752680) -->
+    <skip />
+    <!-- no translation found for notification_channel_setup (7660580986090760350) -->
+    <skip />
     <string name="notification_channel_storage" msgid="2720725707628094977">"स्टोरेज"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"सूचना"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
@@ -849,6 +854,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"हे सेशन कास्ट करण्यासाठी, कृपया ॲप उघडा."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"अज्ञात अ‍ॅप"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"कास्ट करणे थांबवा"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ब्रॉडकास्टिंग कसे काम करते"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ब्रॉडकास्ट करा"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"कंपॅटिबिल ब्लूटूथ डिव्‍हाइस असलेले तुमच्या जवळपासचे लोक हे तुम्ही ब्रॉडकास्ट करत असलेला मीडिया ऐकू शकतात"</string>
@@ -934,7 +941,7 @@
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"नवीन माहिती"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"अ‍ॅक्टिव्ह ॲप्स"</string>
-    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"तुम्ही ही अ‍ॅप्स वापरत नसलात तरीही, ती अ‍ॅक्टिव्ह असतात आणि बॅटरी लाइफवर त्याचा परिणाम होऊ शकतो"</string>
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"तुम्ही ही अ‍ॅप्स वापरत नसलात, तरीही ती अ‍ॅक्टिव्ह असतात आणि बॅटरी लाइफवर त्याचा परिणाम होऊ शकतो"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"थांबवा"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"थांबवले"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"पूर्ण झाले"</string>
@@ -944,7 +951,12 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"कॉपी केलेला मजकूर संपादित करा"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"कॉपी केलेली इमेज संपादित करा"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"जवळपासच्या डिव्हाइसवर पाठवा"</string>
-    <!-- no translation found for clipboard_text_hidden (7926899867471812305) -->
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"पाहण्यासाठी टॅप करा"</string>
+    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
+    <skip />
+    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
+    <skip />
+    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
     <skip />
     <string name="add" msgid="81036585205287996">"जोडा"</string>
     <string name="manage_users" msgid="1823875311934643849">"वापरकर्ते व्यवस्‍थापित करा"</string>
@@ -954,4 +966,12 @@
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"अलार्म सेट केला"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"कॅमेरा आणि माइक बंद आहेत"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# सूचना}other{# सूचना}}"</string>
+    <!-- no translation found for broadcasting_description_is_broadcasting (765627502786404290) -->
+    <skip />
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> चे प्रसारण थांबवायचे आहे का?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"तुम्ही <xliff:g id="SWITCHAPP">%1$s</xliff:g> चे प्रसारण केल्यास किंवा आउटपुट बदलल्यास, तुमचे सध्याचे प्रसारण बंद होईल"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> चे प्रसारण करा"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"आउटपूट बदला"</string>
+    <!-- no translation found for bt_le_audio_broadcast_dialog_unknown_name (3791472237793443044) -->
+    <skip />
 </resources>

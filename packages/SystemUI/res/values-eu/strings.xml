@@ -93,7 +93,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Pantaila-grabaketa prozesatzen"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Pantailaren grabaketa-saioaren jakinarazpen jarraitua"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Grabatzen hasi nahi duzu?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Pantaila grabatzen duzun bitartean, baliteke Android sistemak pantailan agertzen den edo gailuak erreproduzitzen duen kontuzko informazioa detektatzea; besteak beste, pasahitzak, ordainketa-informazioa, argazkiak, mezuak eta audioa."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"Pantaila grabatzen duzun bitartean, baliteke Android sistemak pantailan agertzen den edo gailuak erreproduzitzen duen kontuzko informazioa grabatzea; besteak beste, pasahitzak, ordainketa-informazioa, argazkiak, mezuak eta audioa."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Grabatu audioa"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Gailuaren audioa"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Gailuko soinuak; adibidez, musika, deiak eta tonuak"</string>
@@ -226,8 +226,7 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Biratze automatikoa"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Biratu pantaila automatikoki"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Kokapena"</string>
-    <!-- no translation found for quick_settings_screensaver_label (1495003469366524120) -->
-    <skip />
+    <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Pantaila-babeslea"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"Kamera"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Mikrofonoa"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Baimenduta"</string>
@@ -321,6 +320,10 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Aurpegiaren bidez desblokeatu da. Sakatu irekitzeko."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Ezagutu da aurpegia. Sakatu irekitzeko."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Ezagutu da aurpegia. Irekitzeko, sakatu desblokeatzeko ikonoa."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"Berriro saiatzeko, pasatu hatza gora"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Desblokea ezazu NFCa erabiltzeko"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Gailu hau zure erakundearena da"</string>
@@ -470,8 +473,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Konfiguratu erosketa bizkorrago eta seguruagoak egiteko telefonoarekin"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Erakutsi guztiak"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (8488069304491125713) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Irekitzeko, sakatu hau"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Eguneratzen"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Desblokeatu erabiltzeko"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Arazo bat izan da txartelak eskuratzean. Saiatu berriro geroago."</string>
@@ -697,7 +699,10 @@
     <string name="notification_channel_alerts" msgid="3385787053375150046">"Alertak"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"Bateria"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"Pantaila-argazkiak"</string>
-    <string name="notification_channel_general" msgid="4384774889645929705">"Mezu orokorrak"</string>
+    <!-- no translation found for notification_channel_instant (7556135423486752680) -->
+    <skip />
+    <!-- no translation found for notification_channel_setup (7660580986090760350) -->
+    <skip />
     <string name="notification_channel_storage" msgid="2720725707628094977">"Memoria"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Aholkuak"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Zuzeneko aplikazioak"</string>
@@ -849,6 +854,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Saioa ireki nahi baduzu, ireki aplikazioa."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Aplikazio ezezaguna"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Gelditu igorpena"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Nola funtzionatzen dute iragarpenek?"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Iragarri"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Bluetooth bidezko gailu bateragarriak dituzten inguruko pertsonek iragartzen ari zaren multimedia-edukia entzun dezakete"</string>
@@ -934,7 +941,7 @@
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Informazio berria"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktibo dauden aplikazioak"</string>
-    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Aplikazio horiek erabiltzen ari ez bazara ere, aktibo daude eta bateria kontsumitzen jarraitzen dute"</string>
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Aplikazio hauek erabiltzen ari ez bazara ere, aktibo daude eta bateria kontsumitzen jarraitzen dute"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Gelditu"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Geldituta"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Eginda"</string>
@@ -944,7 +951,12 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Editatu kopiatutako testua"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Editatu kopiatutako irudia"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Bidali inguruko gailu batera"</string>
-    <!-- no translation found for clipboard_text_hidden (7926899867471812305) -->
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"Ikusteko, sakatu hau"</string>
+    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
+    <skip />
+    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
+    <skip />
+    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
     <skip />
     <string name="add" msgid="81036585205287996">"Gehitu"</string>
     <string name="manage_users" msgid="1823875311934643849">"Kudeatu erabiltzaileak"</string>
@@ -954,4 +966,12 @@
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Alarma ezarrita dago"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Kamera eta mikrofonoa desaktibatuta daude"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# jakinarazpen}other{# jakinarazpen}}"</string>
+    <!-- no translation found for broadcasting_description_is_broadcasting (765627502786404290) -->
+    <skip />
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioaren audioa igortzeari utzi nahi diozu?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> aplikazioaren audioa igortzen baduzu, edo audio-irteera aldatzen baduzu, une hartako igorpena eten egingo da"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"Igorri <xliff:g id="SWITCHAPP">%1$s</xliff:g> aplikazioaren audioa"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"Aldatu audio-irteera"</string>
+    <!-- no translation found for bt_le_audio_broadcast_dialog_unknown_name (3791472237793443044) -->
+    <skip />
 </resources>
