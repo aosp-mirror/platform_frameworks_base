@@ -212,7 +212,8 @@ class ActivityMetricsLogger {
             if (mAssociatedTransitionInfo == null) {
                 launchResult = ":failed";
             } else {
-                launchResult = (abort ? ":canceled:" : ":completed:")
+                launchResult = (abort ? ":canceled:" : mAssociatedTransitionInfo.mProcessSwitch
+                        ? ":completed:" : ":completed-same-process:")
                         + mAssociatedTransitionInfo.mLastLaunchedActivity.packageName;
             }
             // Put a supplement trace as the description of the async trace with the same id.
