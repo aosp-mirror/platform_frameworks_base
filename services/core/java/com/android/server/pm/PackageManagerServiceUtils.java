@@ -1076,11 +1076,11 @@ public class PackageManagerServiceUtils {
         return null;
     }
 
-    public static boolean isSystemApp(PackageSetting ps) {
+    public static boolean isSystemApp(PackageStateInternal ps) {
         return (ps.getFlags() & ApplicationInfo.FLAG_SYSTEM) != 0;
     }
 
-    public static boolean isUpdatedSystemApp(PackageSetting ps) {
+    public static boolean isUpdatedSystemApp(PackageStateInternal ps) {
         return (ps.getFlags() & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
     }
 

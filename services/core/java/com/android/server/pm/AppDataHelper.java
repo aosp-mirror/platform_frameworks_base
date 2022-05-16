@@ -520,14 +520,13 @@ final class AppDataHelper {
             int count = 0;
             final Installer.Batch batch = new Installer.Batch();
             for (String pkgName : deferPackages) {
-                AndroidPackage pkg = null;
-                synchronized (mPm.mLock) {
-                    PackageSetting ps = mPm.mSettings.getPackageLPr(pkgName);
-                    if (ps != null && ps.getInstalled(UserHandle.USER_SYSTEM)) {
-                        pkg = ps.getPkg();
-                    }
-                }
-                if (pkg != null) {
+                final Computer snapshot = mPm.snapshotComputer();
+                final PackageStateInternal packageStateInternal = snapshot.getPackageStateInternal(
+                        pkgName);
+                if (packageStateInternal != null
+                        && packageStateInternal.getUserStateOrDefault(
+                                UserHandle.USER_SYSTEM).isInstalled()) {
+                    AndroidPackage pkg = packageStateInternal.getPkg();
                     prepareAppDataAndMigrate(batch, pkg, UserHandle.USER_SYSTEM, storageFlags,
                             true /* maybeMigrateAppData */);
                     count++;
@@ -554,12 +553,12 @@ final class AppDataHelper {
     }
 
     private void clearAppDataLeafLIF(AndroidPackage pkg, int userId, int flags) {
-        final PackageSetting ps;
-        synchronized (mPm.mLock) {
-            ps = mPm.mSettings.getPackageLPr(pkg.getPackageName());
-        }
+        final Computer snapshot = mPm.snapshotComputer();
+        final PackageStateInternal packageStateInternal =
+                snapshot.getPackageStateInternal(pkg.getPackageName());
         for (int realUserId : mPm.resolveUserIds(userId)) {
-            final long ceDataInode = (ps != null) ? ps.getCeDataInode(realUserId) : 0;
+            final long ceDataInode = (packageStateInternal != null)
+                    ? packageStateInternal.getUserStateOrDefault(realUserId).getCeDataInode() : 0;
             try {
                 mInstaller.clearAppData(pkg.getVolumeUuid(), pkg.getPackageName(), realUserId,
                         flags, ceDataInode);
@@ -586,12 +585,12 @@ final class AppDataHelper {
     }
 
     public void destroyAppDataLeafLIF(AndroidPackage pkg, int userId, int flags) {
-        final PackageSetting ps;
-        synchronized (mPm.mLock) {
-            ps = mPm.mSettings.getPackageLPr(pkg.getPackageName());
-        }
+        final Computer snapshot = mPm.snapshotComputer();
+        final PackageStateInternal packageStateInternal =
+                snapshot.getPackageStateInternal(pkg.getPackageName());
         for (int realUserId : mPm.resolveUserIds(userId)) {
-            final long ceDataInode = (ps != null) ? ps.getCeDataInode(realUserId) : 0;
+            final long ceDataInode = (packageStateInternal != null)
+                    ? packageStateInternal.getUserStateOrDefault(realUserId).getCeDataInode() : 0;
             try {
                 mInstaller.destroyAppData(pkg.getVolumeUuid(), pkg.getPackageName(), realUserId,
                         flags, ceDataInode);

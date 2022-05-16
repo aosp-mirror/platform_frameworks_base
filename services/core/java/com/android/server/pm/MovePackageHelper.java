@@ -303,10 +303,8 @@ public final class MovePackageHelper {
      * @param packageName The package that was moved.
      */
     private void logAppMovedStorage(String packageName, boolean isPreviousLocationExternal) {
-        final AndroidPackage pkg;
-        synchronized (mPm.mLock) {
-            pkg = mPm.mPackages.get(packageName);
-        }
+        final Computer snapshot = mPm.snapshotComputer();
+        final AndroidPackage pkg = snapshot.getPackage(packageName);
         if (pkg == null) {
             return;
         }
@@ -334,26 +332,26 @@ public final class MovePackageHelper {
 
     @GuardedBy("mPm.mInstallLock")
     private boolean getPackageSizeInfoLI(String packageName, int userId, PackageStats stats) {
-        final PackageSetting ps;
-        synchronized (mPm.mLock) {
-            ps = mPm.mSettings.getPackageLPr(packageName);
-            if (ps == null) {
-                Slog.w(TAG, "Failed to find settings for " + packageName);
-                return false;
-            }
+        final Computer snapshot = mPm.snapshotComputer();
+        final PackageStateInternal packageStateInternal =
+                snapshot.getPackageStateInternal(packageName);
+        if (packageStateInternal == null) {
+            Slog.w(TAG, "Failed to find settings for " + packageName);
+            return false;
         }
 
         final String[] packageNames = { packageName };
-        final long[] ceDataInodes = { ps.getCeDataInode(userId) };
-        final String[] codePaths = { ps.getPathString() };
+        final long[] ceDataInodes = {
+                packageStateInternal.getUserStateOrDefault(userId).getCeDataInode() };
+        final String[] codePaths = { packageStateInternal.getPathString() };
 
         try {
-            mPm.mInstaller.getAppSize(ps.getVolumeUuid(), packageNames, userId, 0,
-                    ps.getAppId(), ceDataInodes, codePaths, stats);
+            mPm.mInstaller.getAppSize(packageStateInternal.getVolumeUuid(), packageNames, userId,
+                    0, packageStateInternal.getAppId(), ceDataInodes, codePaths, stats);
 
             // For now, ignore code size of packages on system partition
-            if (PackageManagerServiceUtils.isSystemApp(ps)
-                    && !PackageManagerServiceUtils.isUpdatedSystemApp(ps)) {
+            if (PackageManagerServiceUtils.isSystemApp(packageStateInternal)
+                    && !PackageManagerServiceUtils.isUpdatedSystemApp(packageStateInternal)) {
                 stats.codeSize = 0;
             }
 
