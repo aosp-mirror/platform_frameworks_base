@@ -340,6 +340,11 @@ public class LocalBluetoothProfileManager {
             if (getHearingAidProfile() != null &&
                 mProfile instanceof HearingAidProfile &&
                 (newState == BluetoothProfile.STATE_CONNECTED)) {
+                final int side = getHearingAidProfile().getDeviceSide(cachedDevice.getDevice());
+                final int mode = getHearingAidProfile().getDeviceMode(cachedDevice.getDevice());
+                cachedDevice.setDeviceSide(side);
+                cachedDevice.setDeviceMode(mode);
+
                 // Check if the HiSyncID has being initialized
                 if (cachedDevice.getHiSyncId() == BluetoothHearingAid.HI_SYNC_ID_INVALID) {
                     long newHiSyncId = getHearingAidProfile().getHiSyncId(cachedDevice.getDevice());

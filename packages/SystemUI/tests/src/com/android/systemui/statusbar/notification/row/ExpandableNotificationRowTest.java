@@ -346,7 +346,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
                 .build();
         row.performDismiss(false);
         verify(mNotificationTestHelper.mOnUserInteractionCallback)
-                .onDismiss(any(), anyInt(), any());
+                .registerFutureDismissal(any(), anyInt());
     }
 
     @Test
@@ -358,6 +358,6 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
                 .build();
         row.performDismiss(false);
         verify(mNotificationTestHelper.mOnUserInteractionCallback, never())
-                .onDismiss(any(), anyInt(), any());
+                .registerFutureDismissal(any(), anyInt());
     }
 }
