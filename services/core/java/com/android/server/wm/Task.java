@@ -5997,6 +5997,9 @@ class Task extends TaskFragment {
 
         if (canBeLaunchedOnDisplay(newParent.getDisplayId())) {
             reparent(newParent, onTop ? POSITION_TOP : POSITION_BOTTOM);
+            if (isLeafTask()) {
+                newParent.onLeafTaskMoved(this, onTop);
+            }
         } else {
             Slog.w(TAG, "Task=" + this + " can't reparent to " + newParent);
         }
