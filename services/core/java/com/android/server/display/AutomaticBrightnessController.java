@@ -1057,6 +1057,7 @@ class AutomaticBrightnessController {
 
     public void recalculateSplines(boolean applyAdjustment, float[] adjustment) {
         mCurrentBrightnessMapper.recalculateSplines(applyAdjustment, adjustment);
+        updateAutoBrightness(true /*sendUpdate*/, false /*isManuallySet*/);
     }
 
     private final class AutomaticBrightnessHandler extends Handler {
