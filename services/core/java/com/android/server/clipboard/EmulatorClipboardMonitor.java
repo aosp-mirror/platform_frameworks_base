@@ -60,11 +60,11 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
         return mPipe;
     }
 
-    private synchronized boolean openPipe() {
-        if (mPipe != null) {
-            return true;
-        }
+    private synchronized void setPipeFD(final FileDescriptor fd) {
+        mPipe = fd;
+    }
 
+    private static FileDescriptor openPipeImpl() {
         try {
             final FileDescriptor fd = Os.socket(OsConstants.AF_VSOCK, OsConstants.SOCK_STREAM, 0);
 
@@ -72,39 +72,42 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
                 Os.connect(fd, new VmSocketAddress(HOST_PORT, OsConstants.VMADDR_CID_HOST));
 
                 final byte[] handshake = createOpenHandshake();
-                Os.write(fd, handshake, 0, handshake.length);
-                mPipe = fd;
-                return true;
+                writeFully(fd, handshake, 0, handshake.length);
+                return fd;
             } catch (ErrnoException | SocketException | InterruptedIOException e) {
                 Os.close(fd);
             }
         } catch (ErrnoException e) {
         }
 
-        return false;
+        return null;
     }
 
-    private synchronized void closePipe() {
-        try {
-            final FileDescriptor fd = mPipe;
-            mPipe = null;
-            if (fd != null) {
-                Os.close(fd);
-            }
-        } catch (ErrnoException ignore) {
+    private static FileDescriptor openPipe() throws InterruptedException {
+        FileDescriptor fd = openPipeImpl();
+
+        // There's no guarantee that QEMU pipes will be ready at the moment
+        // this method is invoked. We simply try to get the pipe open and
+        // retry on failure indefinitely.
+        while (fd == null) {
+            Thread.sleep(100);
+            fd = openPipeImpl();
         }
+
+        return fd;
     }
 
-    private byte[] receiveMessage() throws ErrnoException, InterruptedIOException, EOFException {
+    private static byte[] receiveMessage(final FileDescriptor fd) throws ErrnoException,
+            InterruptedIOException, EOFException {
         final byte[] lengthBits = new byte[4];
-        readFully(mPipe, lengthBits, 0, lengthBits.length);
+        readFully(fd, lengthBits, 0, lengthBits.length);
 
         final ByteBuffer bb = ByteBuffer.wrap(lengthBits);
         bb.order(ByteOrder.LITTLE_ENDIAN);
         final int msgLen = bb.getInt();
 
         final byte[] msg = new byte[msgLen];
-        readFully(mPipe, msg, 0, msg.length);
+        readFully(fd, msg, 0, msg.length);
 
         return msg;
     }
@@ -123,16 +126,16 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
 
     EmulatorClipboardMonitor(final Consumer<ClipData> setAndroidClipboard) {
         this.mHostMonitorThread = new Thread(() -> {
+            FileDescriptor fd = null;
+
             while (!Thread.interrupted()) {
                 try {
-                    // There's no guarantee that QEMU pipes will be ready at the moment
-                    // this method is invoked. We simply try to get the pipe open and
-                    // retry on failure indefinitely.
-                    while (!openPipe()) {
-                        Thread.sleep(100);
+                    if (fd == null) {
+                        fd = openPipe();
+                        setPipeFD(fd);
                     }
 
-                    final byte[] receivedData = receiveMessage();
+                    final byte[] receivedData = receiveMessage(fd);
 
                     final String str = new String(receivedData);
                     final ClipData clip = new ClipData("host clipboard",
@@ -146,9 +149,17 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
                         Slog.i(TAG, "Setting the guest clipboard to '" + str + "'");
                     }
                     setAndroidClipboard.accept(clip);
-                } catch (ErrnoException | EOFException | InterruptedIOException e) {
-                    closePipe();
-                } catch (InterruptedException | IllegalArgumentException e) {
+                } catch (ErrnoException | EOFException | InterruptedIOException
+                         | InterruptedException e) {
+                    setPipeFD(null);
+
+                    try {
+                        Os.close(fd);
+                    } catch (ErrnoException e2) {
+                        // ignore
+                    }
+
+                    fd = null;
                 }
             }
         });
@@ -158,34 +169,43 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
 
     @Override
     public void accept(final @Nullable ClipData clip) {
-        if (clip == null) {
-            setHostClipboardImpl("");
-        } else if (clip.getItemCount() > 0) {
-            final CharSequence text = clip.getItemAt(0).getText();
-            if (text != null) {
-                setHostClipboardImpl(text.toString());
-            }
+        final FileDescriptor fd = getPipeFD();
+        if (fd != null) {
+            setHostClipboard(fd, getClipString(clip));
         }
     }
 
-    private void setHostClipboardImpl(final String value) {
-        final FileDescriptor pipeFD = getPipeFD();
-
-        if (pipeFD != null) {
-            Thread t = new Thread(() -> {
-                if (LOG_CLIBOARD_ACCESS) {
-                    Slog.i(TAG, "Setting the host clipboard to '" + value + "'");
-                }
-
-                try {
-                    sendMessage(pipeFD, value.getBytes());
-                } catch (ErrnoException | InterruptedIOException e) {
-                    Slog.e(TAG, "Failed to set host clipboard " + e.getMessage());
-                } catch (IllegalArgumentException e) {
-                }
-            });
-            t.start();
+    private String getClipString(final @Nullable ClipData clip) {
+        if (clip == null) {
+            return "";
         }
+
+        if (clip.getItemCount() == 0) {
+            return "";
+        }
+
+        final CharSequence text = clip.getItemAt(0).getText();
+        if (text == null) {
+            return "";
+        }
+
+        return text.toString();
+    }
+
+    private static void setHostClipboard(final FileDescriptor fd, final String value) {
+        Thread t = new Thread(() -> {
+            if (LOG_CLIBOARD_ACCESS) {
+                Slog.i(TAG, "Setting the host clipboard to '" + value + "'");
+            }
+
+            try {
+                sendMessage(fd, value.getBytes());
+            } catch (ErrnoException | InterruptedIOException e) {
+                Slog.e(TAG, "Failed to set host clipboard " + e.getMessage());
+            } catch (IllegalArgumentException e) {
+            }
+        });
+        t.start();
     }
 
     private static void readFully(final FileDescriptor fd,
