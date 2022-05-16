@@ -90,6 +90,7 @@ import android.util.AttributeSet;
 import android.util.Base64;
 import android.util.ByteStringUtils;
 import android.util.DisplayMetrics;
+import android.util.EventLog;
 import android.util.Log;
 import android.util.PackageUtils;
 import android.util.Pair;
@@ -134,6 +135,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -2502,6 +2504,12 @@ public class PackageParser {
             }
         }
 
+        if (declareDuplicatePermission(pkg)) {
+            outError[0] = "Found duplicate permission with a different attribute value.";
+            mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+            return null;
+        }
+
         if (supportsSmallScreens < 0 || (supportsSmallScreens > 0
                 && pkg.applicationInfo.targetSdkVersion
                         >= android.os.Build.VERSION_CODES.DONUT)) {
@@ -2556,6 +2564,51 @@ public class PackageParser {
                 throw e.rethrowFromSystemServer();
             }
         }
+    }
+
+    /**
+     * @return {@code true} if the package declares malformed duplicate permissions.
+     */
+    public static boolean declareDuplicatePermission(@NonNull Package pkg) {
+        final List<Permission> permissions = pkg.permissions;
+        final int size = permissions.size();
+        if (size > 0) {
+            final ArrayMap<String, Permission> checkDuplicatePerm = new ArrayMap<>(size);
+            for (int i = 0; i < size; i++) {
+                final Permission permissionDefinition = permissions.get(i);
+                final String name = permissionDefinition.info.name;
+                final Permission perm = checkDuplicatePerm.get(name);
+                if (isMalformedDuplicate(permissionDefinition, perm)) {
+                    // Fix for b/213323615
+                    EventLog.writeEvent(0x534e4554, "213323615",
+                            "The package " + pkg.packageName + " seems malicious");
+                    return true;
+                }
+                checkDuplicatePerm.put(name, permissionDefinition);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Determines if a duplicate permission is malformed .i.e. defines different protection level
+     * or group.
+     */
+    private static boolean isMalformedDuplicate(Permission p1, Permission p2) {
+        // Since a permission tree is also added as a permission with normal protection
+        // level, we need to skip if the parsedPermission is a permission tree.
+        if (p1 == null || p2 == null || p1.tree || p2.tree) {
+            return false;
+        }
+
+        if (p1.info.getProtection() != p2.info.getProtection()) {
+            return true;
+        }
+        if (!Objects.equals(p1.info.group, p2.info.group)) {
+            return true;
+        }
+
+        return false;
     }
 
     private boolean checkOverlayRequiredSystemProperty(String propName, String propValue) {
