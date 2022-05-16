@@ -551,6 +551,9 @@ public class ClipboardOverlayController {
     }
 
     private void animateOut() {
+        if (mExitAnimator != null && mExitAnimator.isRunning()) {
+            return;
+        }
         Animator anim = getExitAnimation();
         anim.addListener(new AnimatorListenerAdapter() {
             private boolean mCancelled;

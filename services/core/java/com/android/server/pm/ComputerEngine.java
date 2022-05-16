@@ -367,6 +367,8 @@ public class ComputerEngine implements Computer {
         return (v1 > v2) ? -1 : ((v1 < v2) ? 1 : 0);
     };
 
+    private final int mVersion;
+
     // The administrative use counter.
     private int mUsed = 0;
 
@@ -424,7 +426,8 @@ public class ComputerEngine implements Computer {
         return mLocalAndroidApplication;
     }
 
-    ComputerEngine(PackageManagerService.Snapshot args) {
+    ComputerEngine(PackageManagerService.Snapshot args, int version) {
+        mVersion = version;
         mSettings = new Settings(args.settings);
         mIsolatedOwners = args.isolatedOwners;
         mPackages = args.packages;
@@ -464,11 +467,17 @@ public class ComputerEngine implements Computer {
         mService = args.service;
     }
 
+    @Override
+    public int getVersion() {
+        return mVersion;
+    }
+
     /**
      * Record that the snapshot was used.
      */
-    public final void use() {
+    public final Computer use() {
         mUsed++;
+        return this;
     }
 
     /**
@@ -5434,22 +5443,18 @@ public class ComputerEngine implements Computer {
                 false /*checkShell*/, "may package query");
         final PackageStateInternal sourceSetting = getPackageStateInternal(sourcePackageName);
         final PackageStateInternal targetSetting = getPackageStateInternal(targetPackageName);
-        if (sourceSetting == null || targetSetting == null) {
-            throw new ParcelableException(new PackageManager.NameNotFoundException("Package(s) "
-                    + (sourceSetting == null ? sourcePackageName + " " : "")
-                    + (targetSetting == null ? targetPackageName + " " : "")
-                    + "not found."));
+        boolean throwException = sourceSetting == null || targetSetting == null;
+        if (!throwException) {
+            final boolean filterSource =
+                    shouldFilterApplication(sourceSetting, callingUid, userId);
+            final boolean filterTarget =
+                    shouldFilterApplication(targetSetting, callingUid, userId);
+            // The caller must have visibility of the both packages
+            throwException = filterSource || filterTarget;
         }
-        final boolean filterSource =
-                shouldFilterApplication(sourceSetting, callingUid, userId);
-        final boolean filterTarget =
-                shouldFilterApplication(targetSetting, callingUid, userId);
-        // The caller must have visibility of the both packages
-        if (filterSource || filterTarget) {
+        if (throwException) {
             throw new ParcelableException(new PackageManager.NameNotFoundException("Package(s) "
-                    + (filterSource ? sourcePackageName + " " : "")
-                    + (filterTarget ? targetPackageName + " " : "")
-                    + "not found."));
+                    + sourcePackageName + " and/or " + targetPackageName + " not found."));
         }
         final int sourcePackageUid = UserHandle.getUid(userId, sourceSetting.getAppId());
         return !shouldFilterApplication(targetSetting, sourcePackageUid, userId);

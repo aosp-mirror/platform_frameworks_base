@@ -810,35 +810,24 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         }
     }
 
-    /**
-     * Change ARC status into the given {@code enabled} status.
-     *
-     * @return {@code true} if ARC was in "Enabled" status
-     */
     @ServiceThreadOnly
-    boolean setArcStatus(boolean enabled) {
+    void enableArc(List<byte[]> supportedSads) {
         assertRunOnServiceThread();
+        HdmiLogger.debug("Set Arc Status[old:%b new:true]", mArcEstablished);
 
-        HdmiLogger.debug("Set Arc Status[old:%b new:%b]", mArcEstablished, enabled);
-        boolean oldStatus = mArcEstablished;
-        if (enabled) {
-            RequestSadAction action = new RequestSadAction(
-                    this, Constants.ADDR_AUDIO_SYSTEM,
-                    new RequestSadAction.RequestSadCallback() {
-                        @Override
-                        public void onRequestSadDone(List<byte[]> supportedSads) {
-                            enableAudioReturnChannel(enabled);
-                            notifyArcStatusToAudioService(enabled, supportedSads);
-                            mArcEstablished = enabled;
-                        }
-                    });
-            addAndStartAction(action);
-        } else {
-            enableAudioReturnChannel(enabled);
-            notifyArcStatusToAudioService(enabled, new ArrayList<>());
-            mArcEstablished = enabled;
-        }
-        return oldStatus;
+        enableAudioReturnChannel(true);
+        notifyArcStatusToAudioService(true, supportedSads);
+        mArcEstablished = true;
+    }
+
+    @ServiceThreadOnly
+    void disableArc() {
+        assertRunOnServiceThread();
+        HdmiLogger.debug("Set Arc Status[old:%b new:false]", mArcEstablished);
+
+        enableAudioReturnChannel(false);
+        notifyArcStatusToAudioService(false, new ArrayList<>());
+        mArcEstablished = false;
     }
 
     /**
@@ -1066,7 +1055,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     protected int handleTerminateArc(HdmiCecMessage message) {
         assertRunOnServiceThread();
         if (mService .isPowerStandbyOrTransient()) {
-            setArcStatus(false);
+            disableArc();
             return Constants.HANDLED;
         }
         // Do not check ARC configuration since the AVR might have been already removed.
@@ -1353,7 +1342,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         if (avr == null) {
             return;
         }
-        setArcStatus(false);
+        disableArc();
 
         // Seq #44.
         removeAllRunningArcAction();

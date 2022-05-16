@@ -63,7 +63,7 @@ abstract class RequestArcAction extends HdmiCecFeatureAction {
                     finish();
                     return true;
                 } else if (originalOpcode == Constants.MESSAGE_REQUEST_ARC_INITIATION) {
-                    tv().setArcStatus(false);
+                    tv().disableArc();
                     finish();
                     return true;
                 }

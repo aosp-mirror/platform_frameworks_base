@@ -77,6 +77,7 @@ import android.testing.TestableLooper;
 import android.util.ArraySet;
 import android.view.DisplayInfo;
 import android.view.KeyEvent;
+import android.view.WindowManager;
 
 import androidx.test.InstrumentationRegistry;
 
@@ -208,7 +209,8 @@ public class VirtualDeviceManagerServiceTest {
         // Allow virtual devices to be created on the looper thread for testing.
         final InputController.DeviceCreationThreadVerifier threadVerifier = () -> true;
         mInputController = new InputController(new Object(), mNativeWrapperMock,
-                new Handler(TestableLooper.get(this).getLooper()), threadVerifier);
+                new Handler(TestableLooper.get(this).getLooper()),
+                mContext.getSystemService(WindowManager.class), threadVerifier);
 
         mAssociationInfo = new AssociationInfo(1, 0, null,
                 MacAddress.BROADCAST_ADDRESS, "", null, true, false, 0, 0);
