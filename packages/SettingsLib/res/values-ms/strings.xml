@@ -452,8 +452,8 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Tablet mungkin ditutup tidak lama lagi (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Peranti mungkin ditutup tidak lama lagi (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> lagi hingga penuh"</string>
-    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> lagi hingga penuh"</string>
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> lagi sebelum penuh"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> lagi sebelum penuh"</string>
     <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - Pengecasan terhad sementara"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Tidak diketahui"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Mengecas"</string>

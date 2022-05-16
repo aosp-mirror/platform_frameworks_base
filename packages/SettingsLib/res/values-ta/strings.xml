@@ -87,7 +87,7 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ஃபைல் இடமாற்றம்"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"உள்ளீட்டுச் சாதனம்"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"இணைய அணுகல்"</string>
-    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"தொடர்புப் பகிர்தல்"</string>
+    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"தொடர்பைப் பகிர்தல்"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"தொடர்புப் பகிர்தலுக்குப் பயன்படுத்து"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"இணைய இணைப்பு பகிர்தல்"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"உரைச் செய்திகள்"</string>
