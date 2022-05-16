@@ -763,31 +763,36 @@ public class Vpn {
         // Also notify the new package if there was a provider change.
         final boolean shouldNotifyNewPkg = isVpnApp(packageName) && isPackageChanged;
 
-        if (setAlwaysOnPackageInternal(packageName, lockdown, lockdownAllowlist)) {
-            saveAlwaysOnPackage();
-            // TODO(b/230548427): Remove SDK check once VPN related stuff are decoupled from
-            //  ConnectivityServiceTest.
-            if (shouldNotifyOldPkg && SdkLevel.isAtLeastT()) {
-                // If both of shouldNotifyOldPkg & isPackageChanged are true, which means the
-                // always-on of old package is disabled or the old package is replaced with the new
-                // package. In this case, VpnProfileState should be disconnected.
-                sendEventToVpnManagerApp(VpnManager.CATEGORY_EVENT_ALWAYS_ON_STATE_CHANGED,
-                        -1 /* errorClass */, -1 /* errorCode*/, oldPackage,
-                        null /* sessionKey */, isPackageChanged ? makeDisconnectedVpnProfileState()
-                                : makeVpnProfileStateLocked(),
-                        null /* underlyingNetwork */, null /* nc */, null /* lp */);
-            }
-            // TODO(b/230548427): Remove SDK check once VPN related stuff are decoupled from
-            //  ConnectivityServiceTest.
-            if (shouldNotifyNewPkg && SdkLevel.isAtLeastT()) {
-                sendEventToVpnManagerApp(VpnManager.CATEGORY_EVENT_ALWAYS_ON_STATE_CHANGED,
-                        -1 /* errorClass */, -1 /* errorCode*/, packageName,
-                        getSessionKeyLocked(), makeVpnProfileStateLocked(),
-                        null /* underlyingNetwork */, null /* nc */, null /* lp */);
-            }
+        if (!setAlwaysOnPackageInternal(packageName, lockdown, lockdownAllowlist)) {
+            return false;
+        }
+
+        saveAlwaysOnPackage();
+
+        // TODO(b/230548427): Remove SDK check once VPN related stuff are decoupled from
+        //  ConnectivityServiceTest.
+        if (!SdkLevel.isAtLeastT()) {
             return true;
         }
-        return false;
+
+        if (shouldNotifyOldPkg) {
+            // If both of shouldNotifyOldPkg & isPackageChanged are true, that means the
+            // always-on of old package is disabled or the old package is replaced with the new
+            // package. In this case, VpnProfileState should be disconnected.
+            sendEventToVpnManagerApp(VpnManager.CATEGORY_EVENT_ALWAYS_ON_STATE_CHANGED,
+                    -1 /* errorClass */, -1 /* errorCode*/, oldPackage,
+                    null /* sessionKey */, isPackageChanged ? makeDisconnectedVpnProfileState()
+                            : makeVpnProfileStateLocked(),
+                    null /* underlyingNetwork */, null /* nc */, null /* lp */);
+        }
+
+        if (shouldNotifyNewPkg) {
+            sendEventToVpnManagerApp(VpnManager.CATEGORY_EVENT_ALWAYS_ON_STATE_CHANGED,
+                    -1 /* errorClass */, -1 /* errorCode*/, packageName,
+                    getSessionKeyLocked(), makeVpnProfileStateLocked(),
+                    null /* underlyingNetwork */, null /* nc */, null /* lp */);
+        }
+        return true;
     }
 
     /**
@@ -2644,8 +2649,8 @@ public class Vpn {
         @Nullable private IpSecTunnelInterface mTunnelIface;
         @Nullable private IkeSession mSession;
         @Nullable private Network mActiveNetwork;
-        @Nullable private NetworkCapabilities mNetworkCapabilities;
-        @Nullable private LinkProperties mLinkProperties;
+        @Nullable private NetworkCapabilities mUnderlyingNetworkCapabilities;
+        @Nullable private LinkProperties mUnderlyingLinkProperties;
         private final String mSessionKey;
 
         IkeV2VpnRunner(@NonNull Ikev2VpnProfile profile) {
@@ -2877,12 +2882,12 @@ public class Vpn {
 
         /** Called when the NetworkCapabilities of underlying network is changed */
         public void onDefaultNetworkCapabilitiesChanged(@NonNull NetworkCapabilities nc) {
-            mNetworkCapabilities = nc;
+            mUnderlyingNetworkCapabilities = nc;
         }
 
         /** Called when the LinkProperties of underlying network is changed */
         public void onDefaultNetworkLinkPropertiesChanged(@NonNull LinkProperties lp) {
-            mLinkProperties = lp;
+            mUnderlyingLinkProperties = lp;
         }
 
         /** Marks the state as FAILED, and disconnects. */
@@ -2936,9 +2941,9 @@ public class Vpn {
                                         getPackage(), mSessionKey, makeVpnProfileStateLocked(),
                                         mActiveNetwork,
                                         getRedactedNetworkCapabilitiesOfUnderlyingNetwork(
-                                                this.mNetworkCapabilities),
+                                                mUnderlyingNetworkCapabilities),
                                         getRedactedLinkPropertiesOfUnderlyingNetwork(
-                                                this.mLinkProperties));
+                                                mUnderlyingLinkProperties));
                             }
                             markFailedAndDisconnect(exception);
                             return;
@@ -2954,9 +2959,9 @@ public class Vpn {
                                         getPackage(), mSessionKey, makeVpnProfileStateLocked(),
                                         mActiveNetwork,
                                         getRedactedNetworkCapabilitiesOfUnderlyingNetwork(
-                                                this.mNetworkCapabilities),
+                                                mUnderlyingNetworkCapabilities),
                                         getRedactedLinkPropertiesOfUnderlyingNetwork(
-                                                this.mLinkProperties));
+                                                mUnderlyingLinkProperties));
                             }
                     }
                 } else if (exception instanceof IllegalArgumentException) {
@@ -2973,9 +2978,9 @@ public class Vpn {
                                 getPackage(), mSessionKey, makeVpnProfileStateLocked(),
                                 mActiveNetwork,
                                 getRedactedNetworkCapabilitiesOfUnderlyingNetwork(
-                                        this.mNetworkCapabilities),
+                                        mUnderlyingNetworkCapabilities),
                                 getRedactedLinkPropertiesOfUnderlyingNetwork(
-                                        this.mLinkProperties));
+                                        mUnderlyingLinkProperties));
                     }
                 } else if (exception instanceof IkeNonProtocolException) {
                     if (exception.getCause() instanceof UnknownHostException) {
@@ -2988,9 +2993,9 @@ public class Vpn {
                                     getPackage(), mSessionKey, makeVpnProfileStateLocked(),
                                     mActiveNetwork,
                                     getRedactedNetworkCapabilitiesOfUnderlyingNetwork(
-                                            this.mNetworkCapabilities),
+                                            mUnderlyingNetworkCapabilities),
                                     getRedactedLinkPropertiesOfUnderlyingNetwork(
-                                            this.mLinkProperties));
+                                            mUnderlyingLinkProperties));
                         }
                     } else if (exception.getCause() instanceof IkeTimeoutException) {
                         // TODO(b/230548427): Remove SDK check once VPN related stuff are
@@ -3002,9 +3007,9 @@ public class Vpn {
                                     getPackage(), mSessionKey, makeVpnProfileStateLocked(),
                                     mActiveNetwork,
                                     getRedactedNetworkCapabilitiesOfUnderlyingNetwork(
-                                            this.mNetworkCapabilities),
+                                            mUnderlyingNetworkCapabilities),
                                     getRedactedLinkPropertiesOfUnderlyingNetwork(
-                                            this.mLinkProperties));
+                                            mUnderlyingLinkProperties));
                         }
                     } else if (exception.getCause() instanceof IOException) {
                         // TODO(b/230548427): Remove SDK check once VPN related stuff are
@@ -3016,9 +3021,9 @@ public class Vpn {
                                     getPackage(), mSessionKey, makeVpnProfileStateLocked(),
                                     mActiveNetwork,
                                     getRedactedNetworkCapabilitiesOfUnderlyingNetwork(
-                                            this.mNetworkCapabilities),
+                                            mUnderlyingNetworkCapabilities),
                                     getRedactedLinkPropertiesOfUnderlyingNetwork(
-                                            this.mLinkProperties));
+                                            mUnderlyingLinkProperties));
                         }
                     }
                 } else if (exception != null) {
@@ -3027,8 +3032,8 @@ public class Vpn {
             }
 
             mActiveNetwork = null;
-            mNetworkCapabilities = null;
-            mLinkProperties = null;
+            mUnderlyingNetworkCapabilities = null;
+            mUnderlyingLinkProperties = null;
 
             // Close all obsolete state, but keep VPN alive incase a usable network comes up.
             // (Mirrors VpnService behavior)
@@ -3093,8 +3098,8 @@ public class Vpn {
          */
         private void disconnectVpnRunner() {
             mActiveNetwork = null;
-            mNetworkCapabilities = null;
-            mLinkProperties = null;
+            mUnderlyingNetworkCapabilities = null;
+            mUnderlyingLinkProperties = null;
             mIsRunning = false;
 
             resetIkeState();
