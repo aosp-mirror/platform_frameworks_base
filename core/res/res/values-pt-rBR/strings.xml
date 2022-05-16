@@ -1710,7 +1710,7 @@
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Se o <xliff:g id="SERVICE">%1$s</xliff:g> for ativado, o dispositivo não usará o bloqueio de tela para melhorar a criptografia de dados."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"O controle total é adequado para apps que ajudam você com as necessidades de acessibilidade, mas não para a maioria dos apps."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Ver e controlar tela"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Pode ler todo o conteúdo na tela e mostrar conteúdo sobreposto a outros apps."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Pode ler todo o conteúdo na tela e o conteúdo se sobrepõe ao de outros apps."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Ver e realizar ações"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Pode monitorar suas interações com um app ou um sensor de hardware e interagir com apps em seu nome."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Permitir"</string>
@@ -1726,7 +1726,7 @@
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversão de cores"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Correção de cor"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Modo para uma mão"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Mais escuro"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Escurecer a tela"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Teclas de volume pressionadas. Serviço <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ativado."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Teclas de volume pressionadas. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> desativado."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Toque nos dois botões de volume e os mantenha pressionados por três segundo para usar o <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
