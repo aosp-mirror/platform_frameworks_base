@@ -305,8 +305,10 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"juurdepääs kalendrile"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"saata ja vaadata SMS-sõnumeid"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"Failid ja dokumendid"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"juurdepääs teie seadmes olevatele failidele ja dokumentidele"</string>
+    <!-- no translation found for permgrouplab_storage (17339216290379241) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_storage (5378659041354582769) -->
+    <skip />
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Muusika ja heli"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"teie seadmes muusikale ja helile juurdepääsemine"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotod ja videod"</string>
@@ -2281,5 +2283,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Vaadake aktiivseid rakendusi"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Teie seadmest <xliff:g id="DEVICE">%1$s</xliff:g> ei pääse telefoni kaamerale juurde"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Teie seadmest <xliff:g id="DEVICE">%1$s</xliff:g> ei pääse tahvelarvuti kaamerale juurde"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"Süsteemi keel"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Süsteemi vaikeseade"</string>
 </resources>

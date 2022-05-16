@@ -74,6 +74,8 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
@@ -345,7 +347,9 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
     @Test
     public void onSettingChanged_honorThemeStyle() {
         when(mDeviceProvisionedController.isUserSetup(anyInt())).thenReturn(true);
-        for (Style style : Style.values()) {
+        List<Style> validStyles = Arrays.asList(Style.EXPRESSIVE, Style.SPRITZ, Style.TONAL_SPOT,
+                Style.FRUIT_SALAD, Style.RAINBOW, Style.VIBRANT);
+        for (Style style : validStyles) {
             reset(mSecureSettings);
 
             String jsonString = "{\"android.theme.customization.system_palette\":\"A16B00\","

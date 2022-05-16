@@ -65,6 +65,10 @@ public class FaceResetLockoutClient extends HalClientMonitor<IBiometricsFace> {
         startHalOperation();
     }
 
+    public boolean interruptsPrecedingClients() {
+        return true;
+    }
+
     @Override
     protected void startHalOperation() {
         try {

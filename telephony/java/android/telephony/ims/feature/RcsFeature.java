@@ -118,8 +118,10 @@ public class RcsFeature extends ImsFeature {
         @Override
         public void setCapabilityExchangeEventListener(
                 @Nullable ICapabilityExchangeEventListener listener) throws RemoteException {
-            CapabilityExchangeEventListener listenerWrapper =
-                    new CapabilityExchangeAidlWrapper(listener);
+            // Set the listener wrapper to null if the listener passed in is null. This will notify
+            // the RcsFeature to trigger the destruction of active capability exchange interface.
+            CapabilityExchangeEventListener listenerWrapper = listener != null
+                    ? new CapabilityExchangeAidlWrapper(listener) : null;
             executeMethodAsync(() -> mReference.setCapabilityExchangeEventListener(listenerWrapper),
                     "setCapabilityExchangeEventListener");
         }

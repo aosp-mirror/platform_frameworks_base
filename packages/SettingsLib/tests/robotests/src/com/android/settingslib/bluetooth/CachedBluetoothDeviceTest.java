@@ -78,6 +78,7 @@ public class CachedBluetoothDeviceTest {
     @Mock
     private BluetoothDevice mSubDevice;
     private CachedBluetoothDevice mCachedDevice;
+    private CachedBluetoothDevice mSubCachedDevice;
     private AudioManager mAudioManager;
     private Context mContext;
     private int mBatteryLevel = BluetoothDevice.BATTERY_LEVEL_UNKNOWN;
@@ -95,7 +96,9 @@ public class CachedBluetoothDeviceTest {
         when(mPanProfile.isProfileReady()).thenReturn(true);
         when(mHearingAidProfile.isProfileReady()).thenReturn(true);
         mCachedDevice = spy(new CachedBluetoothDevice(mContext, mProfileManager, mDevice));
+        mSubCachedDevice = spy(new CachedBluetoothDevice(mContext, mProfileManager, mSubDevice));
         doAnswer((invocation) -> mBatteryLevel).when(mCachedDevice).getBatteryLevel();
+        doAnswer((invocation) -> mBatteryLevel).when(mSubCachedDevice).getBatteryLevel();
     }
 
     @Test
@@ -351,8 +354,9 @@ public class CachedBluetoothDeviceTest {
         assertThat(mCachedDevice.getConnectionSummary()).isNull();
 
         // Set device as Active for Hearing Aid and test connection state summary
+        mCachedDevice.setDeviceSide(HearingAidProfile.DeviceSide.SIDE_LEFT);
         mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.HEARING_AID);
-        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active");
+        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active, left only");
 
         // Set Hearing Aid profile to be disconnected and test connection state summary
         mCachedDevice.onActiveDeviceChanged(false, BluetoothProfile.HEARING_AID);
@@ -390,17 +394,36 @@ public class CachedBluetoothDeviceTest {
     }
 
     @Test
-    public void getConnectionSummary_testHearingAidInCall_returnActive() {
+    public void getConnectionSummary_testHearingAidRightEarInCall_returnActiveRightEar() {
         // Arrange:
-        //   1. Profile:       {HEARING_AID, Connected, Active}
+        //   1. Profile:       {HEARING_AID, Connected, Active, Right ear}
         //   2. Audio Manager: In Call
         updateProfileStatus(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
+        mCachedDevice.setDeviceSide(HearingAidProfile.DeviceSide.SIDE_RIGHT);
         mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.HEARING_AID);
         mAudioManager.setMode(AudioManager.MODE_IN_CALL);
 
         // Act & Assert:
         //   Get "Active" result without Battery Level.
-        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active");
+        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active, right only");
+    }
+
+    @Test
+    public void getConnectionSummary_testHearingAidBothEarInCall_returnActiveBothEar() {
+        // Arrange:
+        //   1. Profile:       {HEARING_AID, Connected, Active, Both ear}
+        //   2. Audio Manager: In Call
+        mCachedDevice.setDeviceSide(HearingAidProfile.DeviceSide.SIDE_RIGHT);
+        updateProfileStatus(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
+        mSubCachedDevice.setDeviceSide(HearingAidProfile.DeviceSide.SIDE_LEFT);
+        updateSubDeviceProfileStatus(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
+        mCachedDevice.setSubDevice(mSubCachedDevice);
+        mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.HEARING_AID);
+        mAudioManager.setMode(AudioManager.MODE_IN_CALL);
+
+        // Act & Assert:
+        //   Get "Active" result without Battery Level.
+        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active, left and right");
     }
 
     @Test
@@ -925,39 +948,41 @@ public class CachedBluetoothDeviceTest {
         mCachedDevice.onProfileStateChanged(profile, status);
     }
 
+    private void updateSubDeviceProfileStatus(LocalBluetoothProfile profile, int status) {
+        doReturn(status).when(profile).getConnectionStatus(mSubDevice);
+        mSubCachedDevice.onProfileStateChanged(profile, status);
+    }
+
     @Test
     public void getSubDevice_setSubDevice() {
-        CachedBluetoothDevice subCachedDevice = new CachedBluetoothDevice(mContext, mProfileManager,
-                mSubDevice);
-        mCachedDevice.setSubDevice(subCachedDevice);
+        mCachedDevice.setSubDevice(mSubCachedDevice);
 
-        assertThat(mCachedDevice.getSubDevice()).isEqualTo(subCachedDevice);
+        assertThat(mCachedDevice.getSubDevice()).isEqualTo(mSubCachedDevice);
     }
 
     @Test
     public void switchSubDeviceContent() {
-        CachedBluetoothDevice subCachedDevice = new CachedBluetoothDevice(mContext, mProfileManager,
-                mSubDevice);
+
         mCachedDevice.mRssi = RSSI_1;
         mCachedDevice.mJustDiscovered = JUSTDISCOVERED_1;
-        subCachedDevice.mRssi = RSSI_2;
-        subCachedDevice.mJustDiscovered = JUSTDISCOVERED_2;
-        mCachedDevice.setSubDevice(subCachedDevice);
+        mSubCachedDevice.mRssi = RSSI_2;
+        mSubCachedDevice.mJustDiscovered = JUSTDISCOVERED_2;
+        mCachedDevice.setSubDevice(mSubCachedDevice);
 
         assertThat(mCachedDevice.mRssi).isEqualTo(RSSI_1);
         assertThat(mCachedDevice.mJustDiscovered).isEqualTo(JUSTDISCOVERED_1);
         assertThat(mCachedDevice.mDevice).isEqualTo(mDevice);
-        assertThat(subCachedDevice.mRssi).isEqualTo(RSSI_2);
-        assertThat(subCachedDevice.mJustDiscovered).isEqualTo(JUSTDISCOVERED_2);
-        assertThat(subCachedDevice.mDevice).isEqualTo(mSubDevice);
+        assertThat(mSubCachedDevice.mRssi).isEqualTo(RSSI_2);
+        assertThat(mSubCachedDevice.mJustDiscovered).isEqualTo(JUSTDISCOVERED_2);
+        assertThat(mSubCachedDevice.mDevice).isEqualTo(mSubDevice);
         mCachedDevice.switchSubDeviceContent();
 
         assertThat(mCachedDevice.mRssi).isEqualTo(RSSI_2);
         assertThat(mCachedDevice.mJustDiscovered).isEqualTo(JUSTDISCOVERED_2);
         assertThat(mCachedDevice.mDevice).isEqualTo(mSubDevice);
-        assertThat(subCachedDevice.mRssi).isEqualTo(RSSI_1);
-        assertThat(subCachedDevice.mJustDiscovered).isEqualTo(JUSTDISCOVERED_1);
-        assertThat(subCachedDevice.mDevice).isEqualTo(mDevice);
+        assertThat(mSubCachedDevice.mRssi).isEqualTo(RSSI_1);
+        assertThat(mSubCachedDevice.mJustDiscovered).isEqualTo(JUSTDISCOVERED_1);
+        assertThat(mSubCachedDevice.mDevice).isEqualTo(mDevice);
     }
 
     @Test

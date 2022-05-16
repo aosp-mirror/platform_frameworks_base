@@ -44,6 +44,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 public class Installer extends SystemService {
     private static final String TAG = "Installer";
@@ -118,9 +120,13 @@ public class Installer extends SystemService {
     public static final int FLAG_CLEAR_APP_DATA_KEEP_ART_PROFILES =
             IInstalld.FLAG_CLEAR_APP_DATA_KEEP_ART_PROFILES;
 
+    private static final long CONNECT_RETRY_DELAY_MS = DateUtils.SECOND_IN_MILLIS;
+    private static final long CONNECT_WAIT_MS = 10 * DateUtils.SECOND_IN_MILLIS;
+
     private final boolean mIsolated;
     private volatile boolean mDeferSetFirstBoot;
-    private volatile IInstalld mInstalld;
+    private volatile IInstalld mInstalld = null;
+    private volatile CountDownLatch mInstalldLatch = new CountDownLatch(1);
     private volatile Object mWarnIfHeld;
 
     public Installer(Context context) {
@@ -149,6 +155,7 @@ public class Installer extends SystemService {
     public void onStart() {
         if (mIsolated) {
             mInstalld = null;
+            mInstalldLatch.countDown();
         } else {
             connect();
         }
@@ -160,6 +167,7 @@ public class Installer extends SystemService {
             try {
                 binder.linkToDeath(() -> {
                     Slog.w(TAG, "installd died; reconnecting");
+                    mInstalldLatch = new CountDownLatch(1);
                     connect();
                 }, 0);
             } catch (RemoteException e) {
@@ -168,7 +176,9 @@ public class Installer extends SystemService {
         }
 
         if (binder != null) {
-            mInstalld = IInstalld.Stub.asInterface(binder);
+            IInstalld installd = IInstalld.Stub.asInterface(binder);
+            mInstalld = installd;
+            mInstalldLatch.countDown();
             try {
                 invalidateMounts();
                 executeDeferredActions();
@@ -176,7 +186,7 @@ public class Installer extends SystemService {
             }
         } else {
             Slog.w(TAG, "installd not found; trying again");
-            BackgroundThread.getHandler().postDelayed(this::connect, DateUtils.SECOND_IN_MILLIS);
+            BackgroundThread.getHandler().postDelayed(this::connect, CONNECT_RETRY_DELAY_MS);
         }
     }
 
@@ -194,7 +204,7 @@ public class Installer extends SystemService {
      *
      * @return if the remote call should continue.
      */
-    private boolean checkBeforeRemote() {
+    private boolean checkBeforeRemote() throws InstallerException {
         if (mWarnIfHeld != null && Thread.holdsLock(mWarnIfHeld)) {
             Slog.wtf(TAG, "Calling thread " + Thread.currentThread().getName() + " is holding 0x"
                     + Integer.toHexString(System.identityHashCode(mWarnIfHeld)), new Throwable());
@@ -202,9 +212,17 @@ public class Installer extends SystemService {
         if (mIsolated) {
             Slog.i(TAG, "Ignoring request because this installer is isolated");
             return false;
-        } else {
-            return true;
         }
+
+        try {
+            if (!mInstalldLatch.await(CONNECT_WAIT_MS, TimeUnit.MILLISECONDS)) {
+                throw new InstallerException("time out waiting for the installer to be ready");
+            }
+        } catch (InterruptedException e) {
+            // Do nothing.
+        }
+
+        return true;
     }
 
     // We explicitly do NOT set previousAppId because the default value should always be 0.
