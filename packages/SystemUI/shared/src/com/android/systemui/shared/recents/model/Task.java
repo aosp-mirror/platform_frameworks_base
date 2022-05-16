@@ -243,7 +243,7 @@ public class Task {
         return new Task(taskKey,
                 td != null ? td.getPrimaryColor() : 0,
                 td != null ? td.getBackgroundColor() : 0,
-                taskInfo.supportsSplitScreenMultiWindow, isLocked, td, taskInfo.topActivity);
+                taskInfo.supportsMultiWindow, isLocked, td, taskInfo.topActivity);
     }
 
     public Task(TaskKey key) {
