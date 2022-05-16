@@ -121,7 +121,7 @@
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Kontaktlarni ulashish uchun ishlatilsin"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Internet aloqasi ulashmasi"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"SMS xabarlari"</string>
-    <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM-kartaga kirish"</string>
+    <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM kartaga kirish"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD audio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD audio"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Eshitish apparatlari"</string>
@@ -652,9 +652,6 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Ekranni yoqish"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Ekranni yoqishga ruxsat"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Ilovaga ekranni yoqishga ruxsat berish. Ruxsat berilsa, ilova istalgan vaqt ruxsatingizsiz ekranni yoqishi mumkin."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR kodni skanerlash"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Tinglashni boshlash uchun quyidagi QR kodni markazga joylang"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR xato formatda"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> ilovasiga translatsiya toʻxtatilsinmi?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Agar <xliff:g id="SWITCHAPP">%1$s</xliff:g> ilovasiga translatsiya qilsangiz yoki ovoz chiqishini oʻzgartirsangiz, joriy translatsiya toʻxtab qoladi"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> ilovasiga translatsiya"</string>
