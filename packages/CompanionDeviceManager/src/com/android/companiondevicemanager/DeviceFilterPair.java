@@ -47,7 +47,7 @@ class DeviceFilterPair<T extends Parcelable> {
     }
 
     String getDisplayName() {
-        if (mFilter != null) mFilter.getDeviceDisplayName(mDevice);
+        if (mFilter != null) return mFilter.getDeviceDisplayName(mDevice);
 
         if (mDevice instanceof BluetoothDevice) {
             return getDeviceDisplayNameInternal((BluetoothDevice) mDevice);

@@ -22,7 +22,7 @@ import android.media.tv.interactive.TvInteractiveAppServiceInfo;
  * Interface to receive callbacks from ITvInteractiveAppManager regardless of sessions.
  * @hide
  */
-interface ITvInteractiveAppManagerCallback {
+oneway interface ITvInteractiveAppManagerCallback {
     void onInteractiveAppServiceAdded(in String iAppServiceId);
     void onInteractiveAppServiceRemoved(in String iAppServiceId);
     void onInteractiveAppServiceUpdated(in String iAppServiceId);
