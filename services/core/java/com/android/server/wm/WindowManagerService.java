@@ -2303,12 +2303,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         || (flagChanges & FLAG_DISMISS_KEYGUARD) != 0)) {
                     win.mActivityRecord.checkKeyguardFlagsChanged();
                 }
-                if (((attrChanges & LayoutParams.ACCESSIBILITY_TITLE_CHANGED) != 0)
-                        && (mAccessibilityController.hasCallbacks())) {
-                    // No move or resize, but the controller checks for title changes as well
-                    mAccessibilityController.onSomeWindowResizedOrMovedWithCallingUid(
-                            uid, win.getDisplayContent().getDisplayId());
-                }
 
                 if ((privateFlagChanges & SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS) != 0) {
                     updateNonSystemOverlayWindowsVisibilityIfNeeded(

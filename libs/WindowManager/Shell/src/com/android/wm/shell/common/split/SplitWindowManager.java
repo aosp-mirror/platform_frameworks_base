@@ -126,6 +126,7 @@ public final class SplitWindowManager extends WindowlessWindowManager {
         lp.token = new Binder();
         lp.setTitle(mWindowName);
         lp.privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION | PRIVATE_FLAG_TRUSTED_OVERLAY;
+        lp.accessibilityTitle = mContext.getResources().getString(R.string.accessibility_divider);
         mViewHost.setView(mDividerView, lp);
         mDividerView.setup(splitLayout, this, mViewHost, insetsState);
     }
