@@ -1391,7 +1391,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"BAGIKAN"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"TOLAK"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Pilih metode masukan"</string>
-    <string name="show_ime" msgid="6406112007347443383">"Pertahankan di layar jika keyboard fisik masih aktif"</string>
+    <string name="show_ime" msgid="6406112007347443383">"Biarkan di layar meski keyboard fisik aktif"</string>
     <string name="hardware" msgid="1800597768237606953">"Tampilkan keyboard virtual"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Mengonfigurasi keyboard fisik"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Ketuk untuk memilih bahasa dan tata letak"</string>
