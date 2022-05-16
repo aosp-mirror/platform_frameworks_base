@@ -1090,6 +1090,21 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testQsExpansionChangedToDefaultWhenRotatingFromOrToSplitShade() {
+        // to make sure shade is in expanded state
+        mNotificationPanelViewController.startWaitingForOpenPanelGesture();
+        assertThat(mNotificationPanelViewController.isQsExpanded()).isFalse();
+
+        // switch to split shade from portrait (default state)
+        enableSplitShade(/* enabled= */ true);
+        assertThat(mNotificationPanelViewController.isQsExpanded()).isTrue();
+
+        // switch to portrait from split shade
+        enableSplitShade(/* enabled= */ false);
+        assertThat(mNotificationPanelViewController.isQsExpanded()).isFalse();
+    }
+
+    @Test
     public void interceptTouchEvent_withinQs_shadeExpanded_startsQsTracking() {
         mNotificationPanelViewController.mQs = mQs;
         when(mQsFrame.getX()).thenReturn(0f);

@@ -313,6 +313,10 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Desliza el dedo hacia arriba para abrir"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Presiona el ícono de desbloquear para abrir"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Desbloqueo con rostro. Presiona ícono desbloq. para abrir."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"Desliza el dedo hacia arriba para volver a intentarlo"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Desbloquea el dispositivo para usar NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Este dispositivo pertenece a tu organización"</string>
@@ -459,8 +463,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Prepárate para realizar compras rápidas y seguras con tu teléfono"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Mostrar todo"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (8488069304491125713) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Presiona para abrir"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Actualizando"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Desbloquear para usar"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Ocurrió un problema al obtener las tarjetas; vuelve a intentarlo más tarde"</string>
@@ -838,6 +841,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Para transmitir esta sesión, abre la app"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"App desconocida"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Detener transmisión"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Cómo funciona la transmisión"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Transmisión"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Las personas cercanas con dispositivos Bluetooth compatibles pueden escuchar el contenido multimedia que transmites"</string>
@@ -923,7 +928,7 @@
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nueva información"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Apps activas"</string>
-    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Incluso aunque no uses estas apps, todavía están activas y podrían afectar la duración de batería"</string>
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Aunque no uses estas apps, todavía están activas y podrían afectar la duración de batería"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Detener"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Detenida"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Listo"</string>
@@ -933,7 +938,12 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Editar el texto copiado"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Editar la imagen copiada"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Enviar a dispositivos cercanos"</string>
-    <!-- no translation found for clipboard_text_hidden (7926899867471812305) -->
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"Presiona para ver"</string>
+    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
+    <skip />
+    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
+    <skip />
+    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
     <skip />
     <string name="add" msgid="81036585205287996">"Agregar"</string>
     <string name="manage_users" msgid="1823875311934643849">"Administrar usuarios"</string>

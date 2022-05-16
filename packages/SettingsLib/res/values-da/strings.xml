@@ -652,9 +652,6 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Aktivér skærmen"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Tillad aktivering af skærmen"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Tillad, at en app aktiverer skærmen. Hvis du giver denne tilladelse, kan appen til enhver tid aktiverer skærmen, uden at du eksplicit har bedt om det."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Scan QR-kode"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Centrer QR-koden nedenfor for at gå i gang med at lytte"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR-koden har ikke et gyldigt format"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Stop udsendelsen <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Hvis du udsender <xliff:g id="SWITCHAPP">%1$s</xliff:g> eller skifter output, stopper din aktuelle udsendelse"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Udsend <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>

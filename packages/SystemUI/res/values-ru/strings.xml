@@ -317,6 +317,10 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Проведите вверх, чтобы открыть"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Нажмите на значок разблокировки."</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Сканирование выполнено. Нажмите на значок разблокировки."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"Чтобы повторить попытку, проведите вверх"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Чтобы использовать NFC, разблокируйте устройство."</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Это устройство принадлежит вашей организации"</string>
@@ -465,8 +469,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"Кошелек"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Расплачивайтесь через телефон быстро и безопасно."</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Показать все"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (8488069304491125713) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Нажмите, чтобы открыть"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Обновление…"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Разблокировать для использования"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Не удалось получить информацию о картах. Повторите попытку позже."</string>
@@ -850,6 +853,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Чтобы начать трансляцию сеанса, откройте приложение"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Неизвестное приложение"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Остановить трансляцию"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Как работают трансляции"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Трансляция"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Находящиеся рядом с вами люди с совместимыми устройствами Bluetooth могут слушать медиафайлы, которые вы транслируете."</string>
@@ -930,10 +935,10 @@
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Не добавлять"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Выберите профиль"</string>
     <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
-      <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> приложение активно</item>
-      <item quantity="few"><xliff:g id="COUNT_1">%s</xliff:g> приложения активно</item>
-      <item quantity="many"><xliff:g id="COUNT_1">%s</xliff:g> приложений активно</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> приложения активно</item>
+      <item quantity="one">Активно <xliff:g id="COUNT_1">%s</xliff:g> приложение</item>
+      <item quantity="few">Активно <xliff:g id="COUNT_1">%s</xliff:g> приложения</item>
+      <item quantity="many">Активно <xliff:g id="COUNT_1">%s</xliff:g> приложений</item>
+      <item quantity="other">Активно <xliff:g id="COUNT_1">%s</xliff:g> приложения</item>
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Новая информация"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Активные приложения"</string>
@@ -947,7 +952,12 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Изменить скопированный текст"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Изменить скопированное изображение"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Отправить на устройство поблизости"</string>
-    <!-- no translation found for clipboard_text_hidden (7926899867471812305) -->
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"Нажмите, чтобы посмотреть"</string>
+    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
+    <skip />
+    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
+    <skip />
+    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
     <skip />
     <string name="add" msgid="81036585205287996">"Добавить"</string>
     <string name="manage_users" msgid="1823875311934643849">"Управление пользователями"</string>
