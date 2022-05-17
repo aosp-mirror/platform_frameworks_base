@@ -199,8 +199,9 @@ public class SystemActions extends CoreStartable {
         mNotificationShadeController = notificationShadeController;
         // Saving in instance variable since to prevent GC since
         // NotificationShadeWindowController.registerCallback() only keeps weak references.
-        mNotificationShadeCallback = (keyguardShowing, keyguardOccluded, bouncerShowing, mDozing) ->
-                registerOrUnregisterDismissNotificationShadeAction();
+        mNotificationShadeCallback =
+                (keyguardShowing, keyguardOccluded, bouncerShowing, mDozing, panelExpanded) ->
+                        registerOrUnregisterDismissNotificationShadeAction();
         mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
     }
 

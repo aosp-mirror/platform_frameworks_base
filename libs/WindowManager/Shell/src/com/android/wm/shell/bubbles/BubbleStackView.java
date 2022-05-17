@@ -21,6 +21,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import static com.android.wm.shell.animation.Interpolators.ALPHA_IN;
 import static com.android.wm.shell.animation.Interpolators.ALPHA_OUT;
+import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_GESTURE;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_STACK_VIEW;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
@@ -1930,11 +1931,13 @@ public class BubbleStackView extends FrameLayout
             return;
         }
 
+        boolean wasExpanded = mIsExpanded;
+
         hideCurrentInputMethod();
 
         mBubbleController.getSysuiProxy().onStackExpandChanged(shouldExpand);
 
-        if (mIsExpanded) {
+        if (wasExpanded) {
             stopMonitoringSwipeUpGesture();
             if (HOME_GESTURE_ENABLED) {
                 animateCollapse();
@@ -1949,14 +1952,24 @@ public class BubbleStackView extends FrameLayout
             logBubbleEvent(mExpandedBubble,
                     FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__STACK_EXPANDED);
             if (HOME_GESTURE_ENABLED) {
-                startMonitoringSwipeUpGesture();
+                mBubbleController.isNotificationPanelExpanded(notifPanelExpanded -> {
+                    if (!notifPanelExpanded && mIsExpanded) {
+                        startMonitoringSwipeUpGesture();
+                    }
+                });
             }
         }
         notifyExpansionChanged(mExpandedBubble, mIsExpanded);
     }
 
-    private void startMonitoringSwipeUpGesture() {
-        stopMonitoringSwipeUpGesture();
+    /**
+     * Monitor for swipe up gesture that is used to collapse expanded view
+     */
+    void startMonitoringSwipeUpGesture() {
+        if (DEBUG_BUBBLE_GESTURE) {
+            Log.d(TAG, "startMonitoringSwipeUpGesture");
+        }
+        stopMonitoringSwipeUpGestureInternal();
 
         if (isGestureNavEnabled()) {
             mBubblesNavBarGestureTracker = new BubblesNavBarGestureTracker(mContext, mPositioner);
@@ -1971,7 +1984,17 @@ public class BubbleStackView extends FrameLayout
                 == WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
     }
 
-    private void stopMonitoringSwipeUpGesture() {
+    /**
+     * Stop monitoring for swipe up gesture
+     */
+    void stopMonitoringSwipeUpGesture() {
+        if (DEBUG_BUBBLE_GESTURE) {
+            Log.d(TAG, "stopMonitoringSwipeUpGesture");
+        }
+        stopMonitoringSwipeUpGestureInternal();
+    }
+
+    private void stopMonitoringSwipeUpGestureInternal() {
         if (mBubblesNavBarGestureTracker != null) {
             mBubblesNavBarGestureTracker.stop();
             mBubblesNavBarGestureTracker = null;
