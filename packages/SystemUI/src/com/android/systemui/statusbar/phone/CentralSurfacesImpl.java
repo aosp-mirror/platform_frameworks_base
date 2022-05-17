@@ -2496,6 +2496,12 @@ public class CentralSurfacesImpl extends CoreStartable implements
                     animate, intent.getPackage(), (adapter) -> {
                         ActivityOptions options = new ActivityOptions(
                                 CentralSurfaces.getActivityOptions(mDisplayId, adapter));
+
+                        // We know that the intent of the caller is to dismiss the keyguard and
+                        // this runnable is called right after the keyguard is solved, so we tell
+                        // WM that we should dismiss it to avoid flickers when opening an activity
+                        // that can also be shown over the keyguard.
+                        options.setDismissKeyguard();
                         options.setDisallowEnterPictureInPictureWhileLaunching(
                                 disallowEnterPictureInPictureWhileLaunching);
                         if (CameraIntents.isInsecureCameraIntent(intent)) {
