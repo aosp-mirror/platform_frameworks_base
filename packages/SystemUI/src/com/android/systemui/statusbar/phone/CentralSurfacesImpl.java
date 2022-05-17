@@ -107,7 +107,6 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.DateTimeView;
-import android.window.SplashScreen;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
@@ -3185,14 +3184,12 @@ public class CentralSurfacesImpl extends CoreStartable implements
 
     /**
      * Notifies the status bar the Keyguard is fading away with the specified timings.
-     *  @param startTime the start time of the animations in uptime millis
+     * @param startTime the start time of the animations in uptime millis
      * @param delay the precalculated animation delay in milliseconds
      * @param fadeoutDuration the duration of the exit animation, in milliseconds
-     * @param isBypassFading is this a fading away animation while bypassing
      */
     @Override
-    public void setKeyguardFadingAway(long startTime, long delay, long fadeoutDuration,
-            boolean isBypassFading) {
+    public void setKeyguardFadingAway(long startTime, long delay, long fadeoutDuration) {
         mCommandQueue.appTransitionStarting(mDisplayId, startTime + fadeoutDuration
                         - LightBarTransitionsController.DEFAULT_TINT_ANIMATION_DURATION,
                 LightBarTransitionsController.DEFAULT_TINT_ANIMATION_DURATION, true);
@@ -3200,7 +3197,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
         mCommandQueue.appTransitionStarting(mDisplayId,
                     startTime - LightBarTransitionsController.DEFAULT_TINT_ANIMATION_DURATION,
                     LightBarTransitionsController.DEFAULT_TINT_ANIMATION_DURATION, true);
-        mKeyguardStateController.notifyKeyguardFadingAway(delay, fadeoutDuration, isBypassFading);
+        mKeyguardStateController.notifyKeyguardFadingAway(delay, fadeoutDuration);
     }
 
     /**
