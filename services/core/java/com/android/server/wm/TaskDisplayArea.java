@@ -654,12 +654,14 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         }
 
         // Apps and their containers are not allowed to specify an orientation of non floating
-        // visible tasks created by organizer. The organizer handles the orientation instead.
+        // visible tasks created by organizer and that has an adjacent task.
         final Task nonFloatingTopTask =
-                getRootTask(t -> !t.getWindowConfiguration().tasksAreFloating());
-        if (nonFloatingTopTask != null && nonFloatingTopTask.mCreatedByOrganizer
-                && nonFloatingTopTask.isVisible()) {
-            return SCREEN_ORIENTATION_UNSPECIFIED;
+                getTask(t -> !t.getWindowConfiguration().tasksAreFloating());
+        if (nonFloatingTopTask != null) {
+            final Task task = nonFloatingTopTask.getCreatedByOrganizerTask();
+            if (task != null && task.getAdjacentTaskFragment() != null && task.isVisible()) {
+                return SCREEN_ORIENTATION_UNSPECIFIED;
+            }
         }
 
         final int orientation = super.getOrientation(candidate);

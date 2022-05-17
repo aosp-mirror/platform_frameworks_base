@@ -2910,6 +2910,10 @@ public class AudioTrack extends PlayerBase
      * For portability, an application should prime the data path to the maximum allowed
      * by writing data until the write() method returns a short transfer count.
      * This allows play() to start immediately, and reduces the chance of underrun.
+     *<p>
+     * As of {@link android.os.Build.VERSION_CODES#S} the minimum level to start playing
+     * can be obtained using {@link #getStartThresholdInFrames()} and set with
+     * {@link #setStartThresholdInFrames(int)}.
      *
      * @throws IllegalStateException if the track isn't properly initialized
      */

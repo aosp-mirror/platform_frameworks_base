@@ -50,6 +50,20 @@ int getBufferWidth(BufferItem *buffer);
 
 int getBufferHeight(BufferItem *buffer);
 
+// Must be in sync with AIDL CameraBlob : android.hardware.camera.device.CameraBlob
+// HALs must NOT copy this definition.
+// for details: http://b/229688810
+typedef struct camera3_jpeg_blob_v2 {
+  uint32_t jpeg_blob_id;
+  uint32_t jpeg_size;
+} camera3_jpeg_blobv2_t;
+
+// Must be in sync with AIDL CameraBlob : android.hardware.camera.device.CameraBlobId
+enum {
+      CAMERA3_JPEG_BLOB_ID = 0x00FF,
+      CAMERA3_JPEG_APP_SEGMENTS_BLOB_ID = 0x0100,
+};
+
 };  // namespace android
 
 #endif //  _ANDROID_MEDIA_UTILS_H_

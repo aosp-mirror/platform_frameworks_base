@@ -66,6 +66,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.plugins.FalsingManager;
@@ -186,6 +187,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private ActivityLaunchAnimator mActivityLaunchAnimator;
     @Mock
     private AlternateUdfpsTouchProvider mAlternateTouchProvider;
+    @Mock
+    private BroadcastSender mBroadcastSender;
 
     // Capture listeners so that they can be used to send events
     @Captor private ArgumentCaptor<IUdfpsOverlayController> mOverlayCaptor;
@@ -261,7 +264,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mSystemUIDialogManager,
                 mLatencyTracker,
                 mActivityLaunchAnimator,
-                Optional.of(mAlternateTouchProvider));
+                Optional.of(mAlternateTouchProvider),
+                mBroadcastSender);
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
         verify(mScreenLifecycle).addObserver(mScreenObserverCaptor.capture());
