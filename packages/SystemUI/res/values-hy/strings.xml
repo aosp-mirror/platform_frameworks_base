@@ -31,6 +31,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Ինքնապտտվող էկրան"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Թույլատրե՞լ <xliff:g id="APPLICATION">%1$s</xliff:g> հավելվածին օգտագործել <xliff:g id="USB_DEVICE">%2$s</xliff:g> լրասարքը։"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Թույլատրե՞լ <xliff:g id="APPLICATION">%1$s</xliff:g> հավելվածին օգտագործել <xliff:g id="USB_DEVICE">%2$s</xliff:g>ը։\nՀավելվածը ձայնագրելու թույլտվություն չունի, սակայն կկարողանա գրանցել ձայնն այս USB սարքի միջոցով։"</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Հասանելի դարձնե՞լ <xliff:g id="APPLICATION">%1$s</xliff:g> հավելվածին <xliff:g id="USB_DEVICE">%2$s</xliff:g> սարքը"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Բացե՞լ <xliff:g id="APPLICATION">%1$s</xliff:g>-ը՝ <xliff:g id="USB_DEVICE">%2$s</xliff:g>-ը կառավարելու համար"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Հավելվածը ձայնագրելու թույլտվություն չունի, սակայն կկարողանա գրանցել ձայնն այս USB սարքի միջոցով։ <xliff:g id="APPLICATION">%1$s</xliff:g> հավելվածն այս սարքի հետ օգտագործելիս հնարավոր է, որ չլսեք զանգերի, ծանուցումների և զարթուցիչների ձայները։"</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"<xliff:g id="APPLICATION">%1$s</xliff:g> հավելվածն այս սարքի հետ օգտագործելիս հնարավոր է, որ չլսեք զանգերի, ծանուցումների և զարթուցիչների ձայները։"</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Թույլատրե՞լ <xliff:g id="APPLICATION">%1$s</xliff:g> հավելվածին օգտագործել <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> լրասարքը։"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Բացե՞լ <xliff:g id="APPLICATION">%1$s</xliff:g> հավելվածը <xliff:g id="USB_DEVICE">%2$s</xliff:g> լրասարքը մշակելու համար։"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Բացե՞լ <xliff:g id="APPLICATION">%1$s</xliff:g> հավելվածը՝ <xliff:g id="USB_DEVICE">%2$s</xliff:g>ն օգտագործելու համար:\nՀավելվածը ձայնագրելու թույլտվություն չունի, սակայն կկարողանա գրանցել ձայնն այս USB սարքի միջոցով։"</string>
@@ -549,7 +553,7 @@
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Մուտք"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Հետշարժ"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"Նվագարկում/դադար"</string>
-    <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Դադարեցնել"</string>
+    <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Կանգնեցնել"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"Հաջորդը"</string>
     <string name="keyboard_key_media_previous" msgid="5637875709190955351">"Նախորդը"</string>
     <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"Հետ անցնել"</string>

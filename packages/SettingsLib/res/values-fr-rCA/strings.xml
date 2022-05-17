@@ -494,7 +494,7 @@
     <string name="ims_reg_title" msgid="8197592958123671062">"État d\'enregistrement IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Enregistré"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Non enregistré"</string>
-    <string name="status_unavailable" msgid="5279036186589861608">"Non accessible"</string>
+    <string name="status_unavailable" msgid="5279036186589861608">"Non disponible"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"Les adresses MAC sont randomisées"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
       <item quantity="one">%1$d appareil connecté</item>

@@ -31,6 +31,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"自動旋轉螢幕"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"要允許「<xliff:g id="APPLICATION">%1$s</xliff:g>」存取「<xliff:g id="USB_DEVICE">%2$s</xliff:g>」嗎？"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"要允許「<xliff:g id="APPLICATION">%1$s</xliff:g>」存取「<xliff:g id="USB_DEVICE">%2$s</xliff:g>」嗎？\n此應用程式尚未獲授予錄音權限，但可透過此 USB 裝置記錄音訊。"</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"要允許「<xliff:g id="APPLICATION">%1$s</xliff:g>」存取「<xliff:g id="USB_DEVICE">%2$s</xliff:g>」嗎？"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"要開啟「<xliff:g id="APPLICATION">%1$s</xliff:g>」處理「<xliff:g id="USB_DEVICE">%2$s</xliff:g>」嗎？"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"此應用程式尚未獲授予錄音權限，但可透過此 USB 裝置記錄音訊。如將「<xliff:g id="APPLICATION">%1$s</xliff:g>」與此裝置配合使用，您可能無法聽見來電、通知及鬧鐘的音效。"</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"如將「<xliff:g id="APPLICATION">%1$s</xliff:g>」與此裝置配合使用，您可能無法聽見來電、通知及鬧鐘的音效。"</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"要允許「<xliff:g id="APPLICATION">%1$s</xliff:g>」存取「<xliff:g id="USB_ACCESSORY">%2$s</xliff:g>」嗎？"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"要開啟「<xliff:g id="APPLICATION">%1$s</xliff:g>」處理「<xliff:g id="USB_DEVICE">%2$s</xliff:g>」嗎？"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"要開啟「<xliff:g id="APPLICATION">%1$s</xliff:g>」應用程式來控制「<xliff:g id="USB_DEVICE">%2$s</xliff:g>」嗎？\n此應用程式尚未獲授予錄音權限，但可透過此 USB 裝置記錄音訊。"</string>
@@ -80,7 +84,7 @@
     <string name="screenrecord_name" msgid="2596401223859996572">"螢幕畫面錄影工具"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"正在處理螢幕錄影內容"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"持續顯示錄影畫面工作階段通知"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"要開始錄影嗎？"</string>
+    <string name="screenrecord_start_label" msgid="1750350278888217473">"要開始錄製嗎？"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"錄影時，Android 系統可擷取螢幕上顯示或裝置播放的任何敏感資料，包括密碼、付款資料、相片、訊息和音訊。"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"錄音"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"裝置音訊"</string>

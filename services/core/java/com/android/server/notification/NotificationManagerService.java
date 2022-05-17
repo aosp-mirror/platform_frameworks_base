@@ -7714,7 +7714,9 @@ public class NotificationManagerService extends SystemService {
 
             int index = mToastQueue.indexOf(record);
             if (index >= 0) {
-                mToastQueue.remove(index);
+                ToastRecord toast = mToastQueue.remove(index);
+                mWindowManagerInternal.removeWindowToken(
+                        toast.windowToken, true /* removeWindows */, toast.displayId);
             }
             record = (mToastQueue.size() > 0) ? mToastQueue.get(0) : null;
         }
@@ -10073,10 +10075,10 @@ public class NotificationManagerService extends SystemService {
                 boolean isPrimary, boolean enabled, boolean userSet) {
             super.setPackageOrComponentEnabled(pkgOrComponent, userId, isPrimary, enabled, userSet);
 
-            getContext().sendBroadcastAsUser(
+            mContext.sendBroadcastAsUser(
                     new Intent(ACTION_NOTIFICATION_LISTENER_ENABLED_CHANGED)
                             .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY),
-                    UserHandle.ALL, null);
+                    UserHandle.of(userId), null);
         }
 
         @Override

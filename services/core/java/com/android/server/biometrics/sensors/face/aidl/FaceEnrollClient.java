@@ -82,13 +82,14 @@ public class FaceEnrollClient extends EnrollClient<ISession> {
 
     FaceEnrollClient(@NonNull Context context, @NonNull LazyDaemon<ISession> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
-            @NonNull byte[] hardwareAuthToken, @NonNull String opPackageName,
+            @NonNull byte[] hardwareAuthToken, @NonNull String opPackageName, long requestId,
             @NonNull BiometricUtils<Face> utils, @NonNull int[] disabledFeatures, int timeoutSec,
             @Nullable Surface previewSurface, int sensorId, int maxTemplatesPerUser,
             boolean debugConsent) {
         super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, opPackageName, utils,
                 timeoutSec, BiometricsProtoEnums.MODALITY_FACE, sensorId,
                 false /* shouldVibrate */);
+        setRequestId(requestId);
         mEnrollIgnoreList = getContext().getResources()
                 .getIntArray(R.array.config_face_acquire_enroll_ignorelist);
         mEnrollIgnoreListVendor = getContext().getResources()

@@ -16,8 +16,12 @@
 
 package androidx.window.common;
 
+import static androidx.window.common.CommonFoldingFeature.COMMON_STATE_FLAT;
+import static androidx.window.common.CommonFoldingFeature.COMMON_STATE_HALF_OPENED;
+import static androidx.window.common.CommonFoldingFeature.COMMON_STATE_UNKNOWN;
+import static androidx.window.common.CommonFoldingFeature.parseListFromString;
+
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
@@ -26,24 +30,24 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.Log;
 
 import androidx.window.util.BaseDataProducer;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 /**
  * Implementation of {@link androidx.window.util.DataProducer} that produces
- * {@link CommonDisplayFeature} parsed from a string stored in {@link Settings}.
+ * {@link CommonFoldingFeature} parsed from a string stored in {@link Settings}.
  */
 public final class SettingsDisplayFeatureProducer
-        extends BaseDataProducer<List<DisplayFeature>> {
-    private static final boolean DEBUG = false;
-    private static final String TAG = "SettingsDisplayFeatureProducer";
+        extends BaseDataProducer<List<CommonFoldingFeature>> {
     private static final String DISPLAY_FEATURES = "display_features";
+    private static final String DEVICE_POSTURE = "device_posture";
 
+    private final Uri mDevicePostureUri =
+            Settings.Global.getUriFor(DEVICE_POSTURE);
     private final Uri mDisplayFeaturesUri =
             Settings.Global.getUriFor(DISPLAY_FEATURES);
 
@@ -56,33 +60,27 @@ public final class SettingsDisplayFeatureProducer
         mObserver = new SettingsObserver();
     }
 
+    private int getPosture() {
+        int posture = Settings.Global.getInt(mResolver, DEVICE_POSTURE, COMMON_STATE_UNKNOWN);
+        if (posture == COMMON_STATE_HALF_OPENED || posture == COMMON_STATE_FLAT) {
+            return posture;
+        } else {
+            return COMMON_STATE_UNKNOWN;
+        }
+    }
+
     @Override
-    @Nullable
-    public Optional<List<DisplayFeature>> getData() {
+    @NonNull
+    public Optional<List<CommonFoldingFeature>> getData() {
         String displayFeaturesString = Settings.Global.getString(mResolver, DISPLAY_FEATURES);
         if (displayFeaturesString == null) {
             return Optional.empty();
         }
 
-        List<DisplayFeature> features = new ArrayList<>();
         if (TextUtils.isEmpty(displayFeaturesString)) {
-            return Optional.of(features);
+            return Optional.of(Collections.emptyList());
         }
-        String[] featureStrings =  displayFeaturesString.split(";");
-
-        for (String featureString : featureStrings) {
-            CommonDisplayFeature feature;
-            try {
-                feature = CommonDisplayFeature.parseFromString(featureString);
-            } catch (IllegalArgumentException e) {
-                if (DEBUG) {
-                    Log.w(TAG, "Failed to parse display feature: " + featureString, e);
-                }
-                continue;
-            }
-            features.add(feature);
-        }
-        return Optional.of(features);
+        return Optional.of(parseListFromString(displayFeaturesString, getPosture()));
     }
 
     /**
@@ -96,6 +94,7 @@ public final class SettingsDisplayFeatureProducer
         mRegisteredObservers = true;
         mResolver.registerContentObserver(mDisplayFeaturesUri, false /* notifyForDescendants */,
                 mObserver /* ContentObserver */);
+        mResolver.registerContentObserver(mDevicePostureUri, false, mObserver);
     }
 
     /**
@@ -117,7 +116,7 @@ public final class SettingsDisplayFeatureProducer
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
-            if (mDisplayFeaturesUri.equals(uri)) {
+            if (mDisplayFeaturesUri.equals(uri) || mDevicePostureUri.equals(uri)) {
                 notifyDataChanged();
             }
         }

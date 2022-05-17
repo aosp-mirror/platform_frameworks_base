@@ -486,7 +486,7 @@
     <string name="retail_demo_reset_message" msgid="5392824901108195463">"डेमो मोडमा फ्याक्ट्री रिसेट गर्न पासवर्ड प्रविष्टि गर्नुहोस्"</string>
     <string name="retail_demo_reset_next" msgid="3688129033843885362">"अर्को"</string>
     <string name="retail_demo_reset_title" msgid="1866911701095959800">"पासवर्ड आवश्यक छ"</string>
-    <string name="active_input_method_subtypes" msgid="4232680535471633046">"आगत विधिहरू सक्रिय गर्नुहोस्"</string>
+    <string name="active_input_method_subtypes" msgid="4232680535471633046">"आगत विधिहरू अन गर्नुहोस्"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"सिष्टममा भएका भाषा प्रयोग गरियोस्"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>का लागि सेटिङहरू खोल्न विफल भयो।"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"यस इनपुट विधिले तपाईँले टाइप गर्नुहुने सम्पूर्ण पाठ बटु्ल्न सक्छ, व्यक्तिगत डेटा जस्तै पासवर्ड र क्रेडिट कार्ड नम्बर लगायतका। यो <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> अनुप्रयोगबाट आउँदछ। यो इनपुट विधि प्रयोग गर्ने हो?"</string>
@@ -509,8 +509,8 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"घडी तथा रिमाइन्डरहरू"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"यो एपलाई अलार्म सेट गर्ने र समयमै पूरा गर्नु पर्ने कारबाहीहरूको रुटिन बनाउने अनुमति दिनुहोस्। यो अनुमति दिइएको छ भने यो एप ब्याकग्राउन्डमा चल्छ र धेरै ब्याट्री खपत हुन्छ।\n\nयो अनुमति दिइएको छैन भने सेट गरिएका अलार्म बज्दैनन् र यो एपले तय गरेका गतिविधि चल्दैनन्।"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"समयतालिका, अलार्म, रिमाइन्डर, घडी"</string>
-    <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"सक्रिय गर्नुहोस्"</string>
-    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"बाधा नपुऱ्याउनुहोस् नामक मोडलाई सक्रिय गर्नुहोस्"</string>
+    <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"अन गर्नुहोस्"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"बाधा नपुऱ्याउनुहोस् नामक मोडलाई अन गर्नुहोस्"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"कहिल्यै होइन"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"प्राथमिकता दिइएको मात्र"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>। <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
@@ -524,7 +524,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"अहिले भर्खरै"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"फोनको स्पिकर"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"यो फोन"</string>
-    <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"जोड्ने क्रममा समस्या भयो। यन्त्रलाई निष्क्रिय पारेर फेरि सक्रिय गर्नुहोस्"</string>
+    <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"जोड्ने क्रममा समस्या भयो। यन्त्रलाई निष्क्रिय पारेर फेरि अन गर्नुहोस्"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"तारयुक्त अडियो यन्त्र"</string>
     <string name="help_label" msgid="3528360748637781274">"मद्दत र प्रतिक्रिया"</string>
     <string name="storage_category" msgid="2287342585424631813">"भण्डारण"</string>

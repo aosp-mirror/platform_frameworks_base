@@ -177,13 +177,9 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 mConnectedItem = mContainerLayout;
                 mBottomDivider.setVisibility(View.GONE);
                 mCheckBox.setVisibility(View.GONE);
-                if (mController.getSelectableMediaDevice().size() > 0) {
-                    mAddIcon.setVisibility(View.VISIBLE);
-                    mAddIcon.setTransitionAlpha(1);
-                    mAddIcon.setOnClickListener(this::onEndItemClick);
-                } else {
-                    mAddIcon.setVisibility(View.GONE);
-                }
+                mAddIcon.setVisibility(View.VISIBLE);
+                mAddIcon.setTransitionAlpha(1);
+                mAddIcon.setOnClickListener(this::onEndItemClick);
                 mTitleIcon.setImageDrawable(getSpeakerDrawable());
                 final CharSequence sessionName = mController.getSessionName();
                 final CharSequence title = TextUtils.isEmpty(sessionName)
@@ -198,7 +194,10 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             if (mController.isTransferring()) {
                 return;
             }
-
+            if (isCurrentlyConnected(device)) {
+                Log.d(TAG, "This device is already connected! : " + device.getName());
+                return;
+            }
             mCurrentActivePosition = -1;
             playSwitchingAnim(mConnectedItem, view);
             mController.connectDevice(device);

@@ -238,7 +238,7 @@
     <string name="reboot_safemode_title" msgid="5853949122655346734">"راه‌اندازی مجدد در حالت امن"</string>
     <string name="reboot_safemode_confirm" msgid="1658357874737219624">"آیا می‌خواهید با حالت امن راه‌اندازی مجدد کنید؟ با این کار همهٔ برنامه‌های شخص ثالثی که نصب کرده‌اید غیرفعال می‌شوند. با راه‌اندازی دوباره سیستم این برنامه‌ها دوباره بازیابی می‌شوند."</string>
     <string name="recent_tasks_title" msgid="8183172372995396653">"اخیر"</string>
-    <string name="no_recent_tasks" msgid="9063946524312275906">"‏برنامه‎های جدید موجود نیست."</string>
+    <string name="no_recent_tasks" msgid="9063946524312275906">"برنامه‌های جدید موجود نیست."</string>
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"گزینه‌های رایانهٔ لوحی"</string>
     <string name="global_actions" product="tv" msgid="3871763739487450369">"‏گزینه‌های Android TV"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"گزینه‌های تلفن"</string>
@@ -365,7 +365,7 @@
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"مدیریت تماس‌های درحال انجام"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"به برنامه اجازه می‌دهد جزئیات تماس‌های درحال انجام در دستگاه را ببیند و این تماس‌ها را کنترل کند."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"خواندن پیام‌های پخش سلولی"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"‏به برنامه اجازه می‎دهد پیام‌های پخش سلولی دستگاه شما را بخواند. هشدارهای پخش سلولی در برخی از موقعیت‌های مکانی تحویل داده می‎شوند تا موقعیت‌های اضطراری را به شما اعلام کنند. وقتی پخش سلولی دریافت می‎شود، ممکن است برنامه‎های مخرب در عملکرد یا کارکرد دستگاه شما اختلال ایجاد کنند."</string>
+    <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"‏به برنامه اجازه می‎دهد پیام‌های پخش سلولی دستگاه شما را بخواند. هشدارهای پخش سلولی در برخی از موقعیت‌های مکانی تحویل داده می‎شوند تا موقعیت‌های اضطراری را به شما اعلام کنند. وقتی پخش سلولی دریافت می‎شود، ممکن است برنامه‌های مخرب در عملکرد یا کارکرد دستگاه شما اختلال ایجاد کنند."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"خواندن فیدهای مشترک"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="6911349196661811865">"‏به برنامه اجازه می‎دهد تا جزئیات مربوط به فیدهای همگام شده کنونی را دریافت کند."</string>
     <string name="permlab_sendSms" msgid="7757368721742014252">"ارسال و نمایش پیام‌های پیامک"</string>
@@ -376,11 +376,11 @@
     <string name="permdesc_readSms" product="default" msgid="774753371111699782">"این برنامه می‌تواند همه پیامک‌های ذخیره‌شده در تلفن شما را بخواند."</string>
     <string name="permlab_receiveWapPush" msgid="4223747702856929056">"‏دریافت پیام‌های نوشتاری (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="1638677888301778457">"‏به برنامه اجازه می‌دهد پیام‌های WAP را دریافت و پردازش کند. این مجوز می‌تواند پیام‌های ارسالی به شما را بدون نمایش آن‌ها به شما حذف یا کنترل کند."</string>
-    <string name="permlab_getTasks" msgid="7460048811831750262">"‏بازیابی برنامه‎های در حال اجرا"</string>
+    <string name="permlab_getTasks" msgid="7460048811831750262">"بازیابی برنامه‌های در حال اجرا"</string>
     <string name="permdesc_getTasks" msgid="7388138607018233726">"به برنامه امکان می‌دهد اطلاعات مربوط به کارهای در حال اجرای اخیر و کنونی را بازیابی کند. این ممکن است به برنامه امکان دهد به اطلاعات مربوط به برنامه‌هایی که در دستگاه استفاده می‌شوند دست یابد."</string>
     <string name="permlab_manageProfileAndDeviceOwners" msgid="639849495253987493">"مدیریت نمایه و مالکان دستگاه"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="7304240671781989283">"به برنامه‌ها امکان می‌دهد، مالکان نمایه و مالک دستگاه را تنظیم کنند."</string>
-    <string name="permlab_reorderTasks" msgid="7598562301992923804">"‏تنظیم مجدد ترتیب برنامه‎های در حال اجرا"</string>
+    <string name="permlab_reorderTasks" msgid="7598562301992923804">"تنظیم مجدد ترتیب برنامه‌های در حال اجرا"</string>
     <string name="permdesc_reorderTasks" msgid="8796089937352344183">"‏به برنامه اجازه می‎دهد تا کارها را به پیش‌زمینه و پس‌زمینه منتقل کند. برنامه‎ ممکن است بدون دخالت شما این کار را انجام دهد."</string>
     <string name="permlab_enableCarMode" msgid="893019409519325311">"فعال کردن حالت خودرو"</string>
     <string name="permdesc_enableCarMode" msgid="56419168820473508">"‏به برنامه اجازه می‎دهد تا حالت خودرو را فعال کند."</string>
@@ -401,7 +401,7 @@
     <string name="permlab_getPackageSize" msgid="375391550792886641">"اندازه‌گیری اندازه فضای ذخیره‌سازی برنامه"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"‏به برنامه اجازه می‎دهد تا کدها، داده‎ها و اندازه‎های حافظهٔ پنهان خود را بازیابی کند"</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"تغییر تنظیمات سیستم"</string>
-    <string name="permdesc_writeSettings" msgid="8293047411196067188">"‏به برنامه اجازه می‎دهد تا داده‎های تنظیم سیستم را تغییر دهد. برنامه‎های مخرب می‎توانند پیکربندی سیستم شما را خراب کنند."</string>
+    <string name="permdesc_writeSettings" msgid="8293047411196067188">"‏به برنامه اجازه می‎دهد تا داده‎های تنظیم سیستم را تغییر دهد. برنامه‌های مخرب می‎توانند پیکربندی سیستم شما را خراب کنند."</string>
     <string name="permlab_receiveBootCompleted" msgid="6643339400247325379">"اجرا شدن در هنگام راه‌اندازی"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="5565659082718177484">"به برنامه اجازه می‌دهد که به محض پایان راه‌اندازی سیستم، راه‌اندازی شود. این ویژگی ممکن است باعث شود راه‌اندازی دستگاه مدت زمان بیشتری طول بکشد و به برنامه اجازه می‌دهد با همیشه درحال اجرا بودنش باعث کاهش سرعت کلی دستگاه شود."</string>
     <string name="permdesc_receiveBootCompleted" product="tv" msgid="4900842256047614307">"‏به برنامه اجازه می‌دهد به‌محض اتمام راه‌اندازی سیستم، خود را راه‌اندازی کند. ممکن است این مجوز باعث شود دستگاه Android TV آهسته‌تر راه‌اندازی شود و به برنامه اجازه می‌دهد با همیشه درحال اجرا بودن، سرعت کلی دستگاه را کاهش دهد."</string>
@@ -694,7 +694,7 @@
     <string name="permlab_manageNetworkPolicy" msgid="6872549423152175378">"مدیریت خط‌مشی شبکه"</string>
     <string name="permdesc_manageNetworkPolicy" msgid="1865663268764673296">"‏به برنامه اجازه می‎دهد تا خط‌مشی‎های شبکه را مدیریت کند و قوانین خاص برنامه را تعیین کند."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="7448790834938749041">"تغییر محاسبه استفاده از شبکه"</string>
-    <string name="permdesc_modifyNetworkAccounting" msgid="5076042642247205390">"‏به برنامه اجازه می‎دهد تا نحوه محاسبه کاربرد شبکه در برنامه را تغییر دهد. برای استفاده برنامه‎های عادی نیست."</string>
+    <string name="permdesc_modifyNetworkAccounting" msgid="5076042642247205390">"‏به برنامه اجازه می‎دهد تا نحوه محاسبه کاربرد شبکه در برنامه را تغییر دهد. برای استفاده برنامه‌های عادی نیست."</string>
     <string name="permlab_accessNotifications" msgid="7130360248191984741">"اعلان‌های دسترسی"</string>
     <string name="permdesc_accessNotifications" msgid="761730149268789668">"به برنامه اجازه می‌دهد به بازیابی، بررسی و پاک کردن اعلان‌ها از جمله موارد پست شده توسط سایر برنامه‌ها بپردازد."</string>
     <string name="permlab_bindNotificationListenerService" msgid="5848096702733262458">"اتصال به یک سرویس شنونده اعلان"</string>
@@ -909,7 +909,7 @@
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"آهنگ بعدی"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"مکث"</string>
     <string name="lockscreen_transport_play_description" msgid="106868788691652733">"پخش"</string>
-    <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"توقف"</string>
+    <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"متوقف کردن"</string>
     <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"عقب بردن"</string>
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"جلو بردن سریع"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"فقط تماس‌های اضطراری"</string>
@@ -1018,11 +1018,11 @@
     <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="88642768580408561">"‏به برنامه اجازه می‎دهد سابقه مرورگر یا نشانک‎های ذخیره‌شده در دستگاه Android TV را تغییر دهد. ممکن است به برنامه اجازه دهد داده‌های مرورگر را پاک کند یا تغییر دهد. توجه: ممکن است این مجوز توسط مرورگرهای شخص ثالث یا سایر برنامه‌های دارای قابلیت مرور وب اجرا نشود."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="2245203087160913652">"به برنامه اجازه می‌دهد سابقه مرورگر یا نشانک‌های ذخیره‌شده در تلفن شما را تغییر دهد. این ممکن است به برنامه اجازه دهد داده‌های مرورگر را حذف کند یا تغییر دهد. توجه: این مجوز ممکن است توسط مرورگرهای شخص ثالث یا سایر برنامه‌های دارای قابلیت مرور وب قابل اجرا نباشد."</string>
     <string name="permlab_setAlarm" msgid="1158001610254173567">"تنظیم زنگ"</string>
-    <string name="permdesc_setAlarm" msgid="2185033720060109640">"‏به برنامه اجازه می‎دهد تا زنگی را در برنامه ساعت زنگدار نصب‌شده تنظیم کند. برخی از برنامه‎های ساعت زنگدار نمی‌‎توانند این ویژگی را اعمال کنند."</string>
+    <string name="permdesc_setAlarm" msgid="2185033720060109640">"‏به برنامه اجازه می‎دهد تا زنگی را در برنامه ساعت زنگدار نصب‌شده تنظیم کند. برخی از برنامه‌های ساعت زنگدار نمی‌‎توانند این ویژگی را اعمال کنند."</string>
     <string name="permlab_addVoicemail" msgid="4770245808840814471">"افزودن پست صوتی"</string>
     <string name="permdesc_addVoicemail" msgid="5470312139820074324">"به برنامه اجازه می‌دهد تا پیام‌ها را به صندوق ورودی پست صوتی شما اضافه کند."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="8605631647492879449">"تغییر مجوزهای مکان جغرافیایی مرورگر"</string>
-    <string name="permdesc_writeGeolocationPermissions" msgid="5817346421222227772">"‏به برنامه اجازه می‎دهد تا مجوزهای جغرافیایی مرورگر را تغییر دهد. برنامه‎های مخرب می‎توانند از آن استفاده کنند تا اطلاعات موقعیت مکانی را به سایت‌های وب کتابخانه بفرستند."</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="5817346421222227772">"‏به برنامه اجازه می‎دهد تا مجوزهای جغرافیایی مرورگر را تغییر دهد. برنامه‌های مخرب می‎توانند از آن استفاده کنند تا اطلاعات موقعیت مکانی را به سایت‌های وب کتابخانه بفرستند."</string>
     <string name="save_password_message" msgid="2146409467245462965">"می‌خواهید مرورگر این گذرواژه را به خاطر داشته باشد؟"</string>
     <string name="save_password_notnow" msgid="2878327088951240061">"اکنون نه"</string>
     <string name="save_password_remember" msgid="6490888932657708341">"به خاطر سپردن"</string>
@@ -1335,7 +1335,7 @@
     <string name="select_character" msgid="3352797107930786979">"درج نویسه"</string>
     <string name="sms_control_title" msgid="4748684259903148341">"درحال ارسال پیامک‌ها"</string>
     <string name="sms_control_message" msgid="6574313876316388239">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; درحال ارسال تعداد زیادی پیامک است. آیا اجازه می‌دهید این برنامه همچنان پیامک ارسال کند؟"</string>
-    <string name="sms_control_yes" msgid="4858845109269524622">"مجاز بودن"</string>
+    <string name="sms_control_yes" msgid="4858845109269524622">"مجاز است"</string>
     <string name="sms_control_no" msgid="4845717880040355570">"مجاز نبودن"</string>
     <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; مایل است پیامی به &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; ارسال کند."</string>
     <string name="sms_short_code_details" msgid="2723725738333388351">"این مورد "<b>"شاید هزینه‌ای"</b>" را به حساب دستگاه همراهتان بگذارد."</string>
@@ -1881,8 +1881,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"توسط سرپرست سیستم به‌روزرسانی شد"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"توسط سرپرست سیستم حذف شد"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"تأیید"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"«بهینه‌سازی باتری» «طرح زمینه تیره» را روشن می‌کند و فعالیت پس‌زمینه، برخی از جلوه‌های بصری، ویژگی‌هایی خاص، و برخی از اتصال‌های شبکه را محدود یا خاموش می‌کند."</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"«بهینه‌سازی باتری» «طرح زمینه تیره» را روشن می‌کند و فعالیت پس‌زمینه، برخی از جلوه‌های بصری، ویژگی‌هایی خاص، و برخی از اتصال‌های شبکه را محدود یا خاموش می‌کند."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"«بهینه‌سازی باتری» «زمینه تیره» را روشن می‌کند و فعالیت پس‌زمینه، برخی از جلوه‌های بصری، ویژگی‌هایی خاص، و برخی از اتصال‌های شبکه را محدود یا خاموش می‌کند."</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"«بهینه‌سازی باتری» «زمینه تیره» را روشن می‌کند و فعالیت پس‌زمینه، برخی از جلوه‌های بصری، ویژگی‌هایی خاص، و برخی از اتصال‌های شبکه را محدود یا خاموش می‌کند."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"برای کمک به کاهش مصرف داده، «صرفه‌جویی داده» از ارسال و دریافت داده در پس‌زمینه در بعضی برنامه‌ها جلوگیری می‌کند. برنامه‌ای که درحال‌حاضر استفاده می‌کنید می‌تواند به داده‌ها دسترسی داشته باشد اما دفعات دسترسی آن محدود است. این می‌تواند به این معنی باشد که، برای مثال، تصاویر تازمانی‌که روی آن‌ها ضربه نزنید نشان داده نمی‌شوند."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"«صرفه‌جویی داده» روشن شود؟"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"روشن کردن"</string>

@@ -70,6 +70,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Debug;
@@ -3563,7 +3564,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         private void setTaskBackgroundColor(@ColorInt int backgroundColor) {
             TaskDisplayArea taskDisplayArea = getTaskDisplayArea();
 
-            if (taskDisplayArea != null) {
+            if (taskDisplayArea != null && backgroundColor != Color.TRANSPARENT) {
                 taskDisplayArea.setBackgroundColor(backgroundColor);
 
                 // Atomic counter to make sure the clearColor callback is only called one.

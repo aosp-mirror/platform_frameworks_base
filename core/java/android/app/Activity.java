@@ -1537,7 +1537,10 @@ public class Activity extends ContextThemeWrapper
     }
 
     private void dispatchActivityConfigurationChanged() {
-        getApplication().dispatchActivityConfigurationChanged(this);
+        // In case the new config comes before mApplication is assigned.
+        if (getApplication() != null) {
+            getApplication().dispatchActivityConfigurationChanged(this);
+        }
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
             for (int i = 0; i < callbacks.length; i++) {

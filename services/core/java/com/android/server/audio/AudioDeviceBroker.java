@@ -252,8 +252,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
                         return;
                     }
                 }
-                setCommunicationRouteForClient(
-                        cb, pid, device, BtHelper.SCO_MODE_UNDEFINED, eventSource);
+                postSetCommunicationRouteForClient(new CommunicationClientInfo(
+                        cb, pid, device, BtHelper.SCO_MODE_UNDEFINED, eventSource));
             }
         }
     }
@@ -283,8 +283,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
                         return false;
                     }
                 }
-                setCommunicationRouteForClient(
-                        cb, pid, deviceAttr, BtHelper.SCO_MODE_UNDEFINED, eventSource);
+                postSetCommunicationRouteForClient(new CommunicationClientInfo(
+                        cb, pid, deviceAttr, BtHelper.SCO_MODE_UNDEFINED, eventSource));
             }
         }
         return true;
@@ -348,26 +348,35 @@ import java.util.concurrent.atomic.AtomicBoolean;
     }
 
     /**
-     * Returns the device currently requested for communication use case.
-     * If the current audio mode owner is in the communication route client list,
-     * use this preference.
-     * Otherwise use first client's preference (first client corresponds to latest request).
-     * null is returned if no client is in the list.
-     * @return AudioDeviceAttributes the requested device for communication.
+     * Returns the communication client with the highest priority:
+     * - 1) the client which is currently also controlling the audio mode
+     * - 2) the first client in the stack if there is no audio mode owner
+     * - 3) no client otherwise
+     * @return CommunicationRouteClient the client driving the communication use case routing.
      */
-
     @GuardedBy("mDeviceStateLock")
-    private AudioDeviceAttributes requestedCommunicationDevice() {
-        AudioDeviceAttributes device = null;
-        for (CommunicationRouteClient cl : mCommunicationRouteClients) {
-            if (cl.getPid() == mModeOwnerPid) {
-                device = cl.getDevice();
+    private CommunicationRouteClient topCommunicationRouteClient() {
+        for (CommunicationRouteClient crc : mCommunicationRouteClients) {
+            if (crc.getPid() == mModeOwnerPid) {
+                return crc;
             }
         }
         if (!mCommunicationRouteClients.isEmpty() && mModeOwnerPid == 0) {
-            device = mCommunicationRouteClients.get(0).getDevice();
+            return mCommunicationRouteClients.get(0);
         }
+        return null;
+    }
 
+    /**
+     * Returns the device currently requested for communication use case.
+     * Use the device requested by the communication route client selected by
+     * {@link #topCommunicationRouteClient()} if any or none otherwise.
+     * @return AudioDeviceAttributes the requested device for communication.
+     */
+    @GuardedBy("mDeviceStateLock")
+    private AudioDeviceAttributes requestedCommunicationDevice() {
+        CommunicationRouteClient crc = topCommunicationRouteClient();
+        AudioDeviceAttributes device = crc != null ? crc.getDevice() : null;
         if (AudioService.DEBUG_COMM_RTE) {
             Log.v(TAG, "requestedCommunicationDevice, device: "
                     + device + " mode owner pid: " + mModeOwnerPid);
@@ -644,7 +653,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
         }
         synchronized (mDeviceStateLock) {
             mBluetoothScoOn = on;
-            sendLMsgNoDelay(MSG_L_UPDATE_COMMUNICATION_ROUTE, SENDMSG_QUEUE, eventSource);
+            postUpdateCommunicationRouteClient(eventSource);
         }
     }
 
@@ -699,7 +708,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
             synchronized (mDeviceStateLock) {
                 AudioDeviceAttributes device =
                         new AudioDeviceAttributes(AudioSystem.DEVICE_OUT_BLUETOOTH_SCO, "");
-                setCommunicationRouteForClient(cb, pid, device, scoAudioMode, eventSource);
+
+                postSetCommunicationRouteForClient(new CommunicationClientInfo(
+                        cb, pid, device, scoAudioMode, eventSource));
             }
         }
     }
@@ -717,8 +728,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
                 if (client == null || !client.requestsBluetoothSco()) {
                     return;
                 }
-                setCommunicationRouteForClient(
-                        cb, pid, null, BtHelper.SCO_MODE_UNDEFINED, eventSource);
+                postSetCommunicationRouteForClient(new CommunicationClientInfo(
+                        cb, pid, null, BtHelper.SCO_MODE_UNDEFINED, eventSource));
             }
         }
     }
@@ -958,6 +969,61 @@ import java.util.concurrent.atomic.AtomicBoolean;
     /*package*/ void postSaveClearPreferredDevicesForCapturePreset(int capturePreset) {
         sendIMsgNoDelay(
                 MSG_I_SAVE_CLEAR_PREF_DEVICES_FOR_CAPTURE_PRESET, SENDMSG_QUEUE, capturePreset);
+    }
+
+    /*package*/ void postUpdateCommunicationRouteClient(String eventSource) {
+        sendLMsgNoDelay(MSG_L_UPDATE_COMMUNICATION_ROUTE_CLIENT, SENDMSG_QUEUE, eventSource);
+    }
+
+    /*package*/ void postSetCommunicationRouteForClient(CommunicationClientInfo info) {
+        sendLMsgNoDelay(MSG_L_SET_COMMUNICATION_ROUTE_FOR_CLIENT, SENDMSG_QUEUE, info);
+    }
+
+    /*package*/ void postScoAudioStateChanged(int state) {
+        sendIMsgNoDelay(MSG_I_SCO_AUDIO_STATE_CHANGED, SENDMSG_QUEUE, state);
+    }
+
+    /*package*/ static final class CommunicationClientInfo {
+        final @NonNull IBinder mCb;
+        final int mPid;
+        final @NonNull AudioDeviceAttributes mDevice;
+        final int mScoAudioMode;
+        final @NonNull String mEventSource;
+
+        CommunicationClientInfo(@NonNull IBinder cb, int pid, @NonNull AudioDeviceAttributes device,
+                int scoAudioMode, @NonNull String eventSource) {
+            mCb = cb;
+            mPid = pid;
+            mDevice = device;
+            mScoAudioMode = scoAudioMode;
+            mEventSource = eventSource;
+        }
+
+        // redefine equality op so we can match messages intended for this client
+        @Override
+        public boolean equals(Object o) {
+            if (o == null) {
+                return false;
+            }
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof CommunicationClientInfo)) {
+                return false;
+            }
+
+            return mCb.equals(((CommunicationClientInfo) o).mCb)
+                    && mPid == ((CommunicationClientInfo) o).mPid;
+        }
+
+        @Override
+        public String toString() {
+            return "CommunicationClientInfo mCb=" + mCb.toString()
+                    +"mPid=" + mPid
+                    +"mDevice=" + mDevice.toString()
+                    +"mScoAudioMode=" + mScoAudioMode
+                    +"mEventSource=" + mEventSource;
+        }
     }
 
     //---------------------------------------------------------------------
@@ -1270,18 +1336,30 @@ import java.util.concurrent.atomic.AtomicBoolean;
                         synchronized (mDeviceStateLock) {
                             mModeOwnerPid = msg.arg1;
                             if (msg.arg2 != AudioSystem.MODE_RINGTONE) {
-                                onUpdateCommunicationRoute("setNewModeOwner");
+                                onUpdateCommunicationRouteClient("setNewModeOwner");
                             }
                         }
                     }
                     break;
-                case MSG_L_COMMUNICATION_ROUTE_CLIENT_DIED:
+
+                case MSG_L_SET_COMMUNICATION_ROUTE_FOR_CLIENT:
                     synchronized (mSetModeLock) {
                         synchronized (mDeviceStateLock) {
-                            onCommunicationRouteClientDied((CommunicationRouteClient) msg.obj);
+                            CommunicationClientInfo info = (CommunicationClientInfo) msg.obj;
+                            setCommunicationRouteForClient(info.mCb, info.mPid, info.mDevice,
+                                    info.mScoAudioMode, info.mEventSource);
                         }
                     }
                     break;
+
+                case MSG_L_UPDATE_COMMUNICATION_ROUTE_CLIENT:
+                    synchronized (mSetModeLock) {
+                        synchronized (mDeviceStateLock) {
+                            onUpdateCommunicationRouteClient((String) msg.obj);
+                        }
+                    }
+                    break;
+
                 case MSG_L_UPDATE_COMMUNICATION_ROUTE:
                     synchronized (mSetModeLock) {
                         synchronized (mDeviceStateLock) {
@@ -1289,6 +1367,23 @@ import java.util.concurrent.atomic.AtomicBoolean;
                         }
                     }
                     break;
+
+                case MSG_L_COMMUNICATION_ROUTE_CLIENT_DIED:
+                    synchronized (mSetModeLock) {
+                        synchronized (mDeviceStateLock) {
+                            onCommunicationRouteClientDied((CommunicationRouteClient) msg.obj);
+                        }
+                    }
+                    break;
+
+                case MSG_I_SCO_AUDIO_STATE_CHANGED:
+                    synchronized (mSetModeLock) {
+                        synchronized (mDeviceStateLock) {
+                            mBtHelper.onScoAudioStateChanged(msg.arg1);
+                        }
+                    }
+                    break;
+
                 case MSG_TOGGLE_HDMI:
                     synchronized (mDeviceStateLock) {
                         mDeviceInventory.onToggleHdmi();
@@ -1495,6 +1590,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
     private static final int MSG_L_UPDATE_COMMUNICATION_ROUTE = 39;
     private static final int MSG_IL_SET_PREF_DEVICES_FOR_STRATEGY = 40;
     private static final int MSG_I_REMOVE_PREF_DEVICES_FOR_STRATEGY = 41;
+    private static final int MSG_L_SET_COMMUNICATION_ROUTE_FOR_CLIENT = 42;
+    private static final int MSG_L_UPDATE_COMMUNICATION_ROUTE_CLIENT = 43;
+    private static final int MSG_I_SCO_AUDIO_STATE_CHANGED = 44;
 
     private static boolean isMessageHandledUnderWakelock(int msgId) {
         switch(msgId) {
@@ -1720,9 +1818,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
             return;
         }
         Log.w(TAG, "Communication client died");
-        setCommunicationRouteForClient(
-                client.getBinder(), client.getPid(), null, BtHelper.SCO_MODE_UNDEFINED,
-                "onCommunicationRouteClientDied");
+        removeCommunicationRouteClient(client.getBinder(), true);
+        onUpdateCommunicationRouteClient("onCommunicationRouteClientDied");
     }
 
     /**
@@ -1776,10 +1873,30 @@ import java.util.concurrent.atomic.AtomicBoolean;
             AudioSystem.setParameters("BT_SCO=on");
         }
         if (preferredCommunicationDevice == null) {
-            postRemovePreferredDevicesForStrategy(mCommunicationStrategyId);
+            removePreferredDevicesForStrategySync(mCommunicationStrategyId);
         } else {
-            postSetPreferredDevicesForStrategy(
+            setPreferredDevicesForStrategySync(
                     mCommunicationStrategyId, Arrays.asList(preferredCommunicationDevice));
+        }
+        onUpdatePhoneStrategyDevice(preferredCommunicationDevice);
+    }
+
+    /**
+     * Select new communication device from communication route client at the top of the stack
+     * and restore communication route including restarting SCO audio if needed.
+     */
+    // @GuardedBy("mSetModeLock")
+    @GuardedBy("mDeviceStateLock")
+    private void onUpdateCommunicationRouteClient(String eventSource) {
+        onUpdateCommunicationRoute(eventSource);
+        CommunicationRouteClient crc = topCommunicationRouteClient();
+        if (AudioService.DEBUG_COMM_RTE) {
+            Log.v(TAG, "onUpdateCommunicationRouteClient, crc: "
+                    + crc + " eventSource: " + eventSource);
+        }
+        if (crc != null) {
+            setCommunicationRouteForClient(crc.getBinder(), crc.getPid(), crc.getDevice(),
+                    BtHelper.SCO_MODE_UNDEFINED, eventSource);
         }
     }
 

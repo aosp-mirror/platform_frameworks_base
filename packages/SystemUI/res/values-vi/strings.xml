@@ -31,6 +31,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Tự động xoay màn hình"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Cho phép <xliff:g id="APPLICATION">%1$s</xliff:g> truy cập <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Cho phép <xliff:g id="APPLICATION">%1$s</xliff:g> truy cập vào <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nỨng dụng này chưa được cấp quyền ghi âm nhưng vẫn có thể ghi âm thông qua thiết bị USB này."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Cho phép <xliff:g id="APPLICATION">%1$s</xliff:g> truy cập vào <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Mở <xliff:g id="APPLICATION">%1$s</xliff:g> để điều khiển <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Ứng dụng này chưa được cấp quyền ghi âm nhưng vẫn có thể ghi âm thông qua thiết bị USB này. Việc sử dụng <xliff:g id="APPLICATION">%1$s</xliff:g> cùng với thiết bị này có thể giúp bạn tránh phải nghe cuộc gọi, thông báo và chuông báo."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Việc sử dụng <xliff:g id="APPLICATION">%1$s</xliff:g> cùng với thiết bị này có thể giúp bạn tránh phải nghe cuộc gọi, thông báo và chuông báo."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Cho phép <xliff:g id="APPLICATION">%1$s</xliff:g> truy cập <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Mở <xliff:g id="APPLICATION">%1$s</xliff:g> để điều khiển <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Mở <xliff:g id="APPLICATION">%1$s</xliff:g> để điều khiển <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nDù chưa được cấp quyền ghi âm, nhưng ứng dụng có thể ghi âm thông qua thiết bị USB này."</string>
@@ -696,7 +700,7 @@
     <string name="mobile_data" msgid="4564407557775397216">"Dữ liệu di động"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
-    <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi tắt"</string>
+    <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi đang tắt"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth tắt"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Không làm phiền tắt"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Không làm phiền đã được một quy tắc tự động (<xliff:g id="ID_1">%s</xliff:g>) bật."</string>

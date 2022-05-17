@@ -24,13 +24,17 @@
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> restante"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Não é possível carregar através de USB."</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Utilize o carregador fornecido com o dispositivo."</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Pretende ativar a Poupança de bateria?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Ativar a Poupança de bateria?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Acerca da Poupança de bateria"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Ativar"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Ativar a Poupança de bateria"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Rodar ecrã automaticamente"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Permitir que a app <xliff:g id="APPLICATION">%1$s</xliff:g> aceda ao dispositivo <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Permitir que <xliff:g id="APPLICATION">%1$s</xliff:g> aceda a <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nEsta app não recebeu autorização de gravação, mas pode capturar áudio através deste dispositivo USB."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Permitir que a app <xliff:g id="APPLICATION">%1$s</xliff:g> aceda a <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Abrir a app <xliff:g id="APPLICATION">%1$s</xliff:g> para controlar <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Esta app não recebeu autorização de gravação, mas pode capturar áudio através deste dispositivo USB. A utilização da app <xliff:g id="APPLICATION">%1$s</xliff:g> neste dispositivo pode impedir a audição de chamadas, notificações e alarmes."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"A utilização da app <xliff:g id="APPLICATION">%1$s</xliff:g> neste dispositivo pode impedir a audição de chamadas, notificações e alarmes."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Permitir que a app <xliff:g id="APPLICATION">%1$s</xliff:g> aceda ao acessório <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Pretende abrir a app <xliff:g id="APPLICATION">%1$s</xliff:g> para controlar o acessório <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Pretende abrir a app <xliff:g id="APPLICATION">%1$s</xliff:g> para controlar o acessório <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nEsta app não recebeu autorização de gravação, mas pode capturar áudio através deste dispositivo USB."</string>
@@ -80,7 +84,7 @@
     <string name="screenrecord_name" msgid="2596401223859996572">"Gravador de ecrã"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"A processar a gravação de ecrã"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificação persistente de uma sessão de gravação de ecrã"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"Pretende iniciar a gravação?"</string>
+    <string name="screenrecord_start_label" msgid="1750350278888217473">"Iniciar a gravação?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Enquanto estiver a gravar, o sistema Android pode capturar quaisquer informações confidenciais que estejam visíveis no ecrã ou que sejam reproduzidas no dispositivo. Isto inclui palavras-passe, informações de pagamento, fotos, mensagens e áudio."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Gravar áudio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Áudio do dispositivo"</string>
@@ -211,8 +215,8 @@
     <string name="accessibility_clear_all" msgid="970525598287244592">"Limpar todas as notificações."</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
-      <item quantity="one">Mais <xliff:g id="NUMBER_0">%s</xliff:g> notificação no grupo.</item>
       <item quantity="other">Mais <xliff:g id="NUMBER_1">%s</xliff:g> notificações no grupo.</item>
+      <item quantity="one">Mais <xliff:g id="NUMBER_0">%s</xliff:g> notificação no grupo.</item>
     </plurals>
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"O ecrã está bloqueado na orientação horizontal."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"O ecrã está bloqueado na orientação vertical."</string>
@@ -261,8 +265,8 @@
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"A ativar..."</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Poup. dados ativada"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
-      <item quantity="one">%d dispositivo</item>
       <item quantity="other">%d dispositivos</item>
+      <item quantity="one">%d dispositivo</item>
     </plurals>
     <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Lanterna"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"Câmara em utilização"</string>
@@ -341,16 +345,16 @@
     <string name="user_add_user_message_short" msgid="2599370307878014791">"Ao adicionar um novo utilizador, essa pessoa tem de configurar o respetivo espaço.\n\nQualquer utilizador pode atualizar apps para todos os outros utilizadores."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Limite de utilizadores alcançado"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
-      <item quantity="one">Apenas é possível criar um utilizador.</item>
       <item quantity="other">Pode adicionar até <xliff:g id="COUNT">%d</xliff:g> utilizadores.</item>
+      <item quantity="one">Apenas é possível criar um utilizador.</item>
     </plurals>
     <string name="user_remove_user_title" msgid="9124124694835811874">"Remover o utilizador?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Serão eliminados todos os dados e todas as aplicações deste utilizador."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Remover"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"A app <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> terá acesso a todas as informações que estiverem visíveis no ecrã ou que forem reproduzidas a partir do dispositivo durante a gravação ou transmissão. Isto inclui informações como palavras-passe, detalhes de pagamentos, fotos, mensagens e áudio reproduzido."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"O serviço que fornece esta função terá acesso a todas as informações que estiverem visíveis no ecrã ou que forem reproduzidas a partir do dispositivo durante a gravação ou transmissão. Isto inclui informações como palavras-passe, detalhes de pagamentos, fotos, mensagens e áudio reproduzido."</string>
-    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Pretende começar a gravar ou a transmitir?"</string>
-    <string name="media_projection_dialog_title" msgid="3316063622495360646">"Pretende começar a gravar ou a transmitir com a app <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Começar a gravar ou a transmitir?"</string>
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"Começar a gravar ou a transmitir com a app <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Limpar tudo"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Gerir"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Histórico"</string>
@@ -528,12 +532,12 @@
     <string name="snooze_undo" msgid="2738844148845992103">"Anular"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Suspensa por <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
-      <item quantity="one">%d hora</item>
       <item quantity="other">%d horas</item>
+      <item quantity="one">%d hora</item>
     </plurals>
     <plurals name="snoozeMinuteOptions" formatted="false" msgid="8998483159208055980">
-      <item quantity="one">%d minuto</item>
       <item quantity="other">%d minutos</item>
+      <item quantity="one">%d minuto</item>
     </plurals>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"Poupança de bateria"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Botão <xliff:g id="NAME">%1$s</xliff:g>"</string>
@@ -716,7 +720,7 @@
     <string name="slice_permission_deny" msgid="6870256451658176895">"Recusar"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"Tocar para agendar a Poupança de bateria"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"Ativar quando for provável que a bateria se esgote"</string>
-    <string name="no_auto_saver_action" msgid="7467924389609773835">"Não, obrigado"</string>
+    <string name="no_auto_saver_action" msgid="7467924389609773835">"Não"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Despejar pilha SysUI"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"As aplicações estão a utilizar o(a) <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
@@ -755,8 +759,8 @@
     <string name="quick_controls_title" msgid="6839108006171302273">"Controlos de dispositivos"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Escolha uma app para adicionar controlos"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
-      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> controlo adicionado.</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> controlos adicionados.</item>
+      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> controlo adicionado.</item>
     </plurals>
     <string name="controls_removed" msgid="3731789252222856959">"Removido"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Adicionado aos favoritos"</string>

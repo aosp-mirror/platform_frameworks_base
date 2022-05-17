@@ -324,7 +324,7 @@
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"फोन कलको लग पढ्नुहोस् र लेख्नुहोस्"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"फोन"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"फोन कलहरू गर्नुहोस् र व्यवस्थापन गर्नुहोस्"</string>
-    <string name="permgrouplab_sensors" msgid="9134046949784064495">"शारीरिक सेन्सरहरू"</string>
+    <string name="permgrouplab_sensors" msgid="9134046949784064495">"बडी सेन्सरहरू"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"तपाईंको महत्त्वपूर्ण संकेत बारे सेन्सर डेटा पहुँच गर्नुहोस्"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"विन्डो सामग्रीको पुनःबहाली गर्नुहोस्।"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"तपाईँको अन्तरक्रिया भइरहेको विन्डोको सामग्रीको निरीक्षण गर्नुहोस्।"</string>
@@ -424,7 +424,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"आगमन तथा बहर्गमन डेटासहित तपाईँको ट्याब्लेटको कल लगको परिमार्जन गर्न एपलाई अनुमति दिन्छ। खराब एपहरूले यसलाई तपाईँको कल लग परिमार्जन गर्न वा मेटाउन प्रयोग गर्न सक्छन्।"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"एपलाई तपाईंको Android टिभी डिभाइसको आगमन र बहिर्गमन कलसम्बन्धी डेटासहित कल लग परिमार्जन गर्ने अनुमति दिन्छ। हानिकारक एपहरूले यसलाई तपाईंको कल लग मेटाउन वा परिमार्जन गर्न प्रयोग गर्न सक्छन्।"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"एपलाई तपाईंको फोनको आउने र बाहिर जाने कलहरूको बारेको डेटा सहित कल लग परिमार्जन गर्न अनुमति दिन्छ। खराब एपहरूले यसलाई तपाईंको कल लग मेटाउन वा परिमार्जन गर्न प्रयोग गर्न सक्दछ।"</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"शरीरका सेन्सरहरूमा पहुँच गराउनुहोस् (जस्तै हृदय धड्कन निगरानीहरू)"</string>
+    <string name="permlab_bodySensors" msgid="3411035315357380862">"मुटुको धडकनको मोनिटर जस्ता बडी सेन्सर हेर्ने अनुमति दिनुहोस्"</string>
     <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"तपाईँको हृदय गति जस्तो सेंसर बाट डेटा पहुँचको लागि एप अनुमति दिन्छ जसले तपाईँको भौतिक अवस्था अनुगमन गर्छ।"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"पात्रोका कार्यक्रम र विवरणहरू पढ्ने"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"यस एपले तपाईंको ट्याब्लेटमा भण्डारण गरिएका पात्रो सम्बन्धी सबै कार्यक्रमहरू पढ्न र तपाईंको पात्रोको डेटा आदान प्रदान वा सुरक्षित गर्न सक्छ।"</string>

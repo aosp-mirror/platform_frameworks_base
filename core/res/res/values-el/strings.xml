@@ -1367,7 +1367,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"Δεν απαιτούνται άδειες"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"ενδέχεται να χρεωθείτε"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"ΟΚ"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Φόρτιση αυτής της συσκευής μέσω USB"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Φόρτιση μέσω USB"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Φόρτιση συνδεδεμένης συσκευής μέσω USB"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"Η μεταφορά αρχείων μέσω USB ενεργοποιήθηκε"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Η λειτουργία PTP μέσω USB ενεργοποιήθηκε"</string>
@@ -1884,7 +1884,7 @@
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Η Εξοικονόμηση μπαταρίας ενεργοποιεί το Σκούρο θέμα και περιορίζει ή απενεργοποιεί τη δραστηριότητα στο παρασκήνιο, ορισμένα οπτικά εφέ, συγκεκριμένες λειτουργίες και κάποιες συνδέσεις δικτύου."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Η Εξοικονόμηση μπαταρίας ενεργοποιεί το Σκούρο θέμα και περιορίζει ή απενεργοποιεί τη δραστηριότητα στο παρασκήνιο, ορισμένα οπτικά εφέ, συγκεκριμένες λειτουργίες και ορισμένες συνδέσεις δικτύου."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Προκειμένου να μειωθεί η χρήση δεδομένων, η Εξοικονόμηση δεδομένων αποτρέπει την αποστολή ή λήψη δεδομένων από ορισμένες εφαρμογές στο παρασκήνιο. Μια εφαρμογή που χρησιμοποιείτε αυτήν τη στιγμή μπορεί να χρησιμοποιήσει δεδομένα αλλά με μικρότερη συχνότητα. Για παράδειγμα, οι εικόνες μπορεί να μην εμφανίζονται μέχρι να τις πατήσετε."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Ενεργ.Εξοικονόμησης δεδομένων;"</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Ενεργ. Εξοικονόμησης δεδομένων;"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Ενεργοποίηση"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">Για %1$d λεπτά (έως τις <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

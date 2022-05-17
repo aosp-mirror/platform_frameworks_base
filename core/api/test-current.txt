@@ -444,6 +444,7 @@ package android.app.admin {
     method @NonNull @RequiresPermission("android.permission.MANAGE_DEVICE_ADMINS") public java.util.Set<java.lang.String> getPolicyExemptApps();
     method public boolean isCurrentInputMethodSetByOwner();
     method public boolean isFactoryResetProtectionPolicySupported();
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public boolean isNewUserDisclaimerAcknowledged();
     method @RequiresPermission(anyOf={"android.permission.MARK_DEVICE_ORGANIZATION_OWNED", "android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS"}, conditional=true) public void markProfileOwnerOnOrganizationOwnedDevice(@NonNull android.content.ComponentName);
     method @NonNull public static String operationSafetyReasonToString(int);
     method @NonNull public static String operationToString(int);

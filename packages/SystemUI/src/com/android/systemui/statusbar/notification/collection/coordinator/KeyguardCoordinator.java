@@ -157,6 +157,8 @@ public class KeyguardCoordinator implements Coordinator {
         }
     }
 
+    // TODO(b/206118999): merge this class with SensitiveContentCoordinator which also depends on
+    // these same updates
     private void setupInvalidateNotifListCallbacks() {
         // register onKeyguardShowing callback
         mKeyguardStateController.addCallback(mKeyguardCallback);

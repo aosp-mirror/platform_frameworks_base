@@ -17,7 +17,10 @@
 package com.android.systemui.statusbar.notification.collection.coordinator
 
 import android.os.UserHandle
+import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
+import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.DynamicPrivacyController
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.ListEntry
@@ -26,6 +29,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Invalidator
+import com.android.systemui.statusbar.policy.KeyguardStateController
 import dagger.Module
 import dagger.Provides
 
@@ -36,9 +40,13 @@ object SensitiveContentCoordinatorModule {
     @CoordinatorScope
     fun provideCoordinator(
         dynamicPrivacyController: DynamicPrivacyController,
-        lockscreenUserManager: NotificationLockscreenUserManager
+        lockscreenUserManager: NotificationLockscreenUserManager,
+        keyguardUpdateMonitor: KeyguardUpdateMonitor,
+        statusBarStateController: StatusBarStateController,
+        keyguardStateController: KeyguardStateController
     ): SensitiveContentCoordinator =
-            SensitiveContentCoordinatorImpl(dynamicPrivacyController, lockscreenUserManager)
+            SensitiveContentCoordinatorImpl(dynamicPrivacyController, lockscreenUserManager,
+            keyguardUpdateMonitor, statusBarStateController, keyguardStateController)
 }
 
 /** Coordinates re-inflation and post-processing of sensitive notification content. */
@@ -46,7 +54,10 @@ interface SensitiveContentCoordinator : Coordinator
 
 private class SensitiveContentCoordinatorImpl(
     private val dynamicPrivacyController: DynamicPrivacyController,
-    private val lockscreenUserManager: NotificationLockscreenUserManager
+    private val lockscreenUserManager: NotificationLockscreenUserManager,
+    private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
+    private val statusBarStateController: StatusBarStateController,
+    private val keyguardStateController: KeyguardStateController
 ) : Invalidator("SensitiveContentInvalidator"),
         SensitiveContentCoordinator,
         DynamicPrivacyController.Listener,
@@ -61,6 +72,19 @@ private class SensitiveContentCoordinatorImpl(
     override fun onDynamicPrivacyChanged(): Unit = invalidateList()
 
     override fun onBeforeRenderList(entries: List<ListEntry>) {
+        if (keyguardStateController.isKeyguardGoingAway() ||
+                statusBarStateController.getState() == StatusBarState.KEYGUARD &&
+                keyguardUpdateMonitor.getUserUnlockedWithBiometricAndIsBypassing(
+                        KeyguardUpdateMonitor.getCurrentUser())) {
+            // don't update yet if:
+            // - the keyguard is currently going away
+            // - LS is about to be dismissed by a biometric that bypasses LS (avoid notif flash)
+
+            // TODO(b/206118999): merge this class with KeyguardCoordinator which ensures the
+            // dependent state changes invalidate the pipeline
+            return
+        }
+
         val currentUserId = lockscreenUserManager.currentUserId
         val devicePublic = lockscreenUserManager.isLockscreenPublicMode(currentUserId)
         val deviceSensitive = devicePublic &&

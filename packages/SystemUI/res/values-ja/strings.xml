@@ -31,6 +31,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"自動回転画面"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="APPLICATION">%1$s</xliff:g> に <xliff:g id="USB_DEVICE">%2$s</xliff:g> へのアクセスを許可しますか？"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="APPLICATION">%1$s</xliff:g> に <xliff:g id="USB_DEVICE">%2$s</xliff:g>へのアクセスを許可しますか？\nこのアプリに録音権限は付与されていませんが、アクセスを許可すると、この USB デバイスから音声を収集できるようになります。"</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"<xliff:g id="APPLICATION">%1$s</xliff:g> に <xliff:g id="USB_DEVICE">%2$s</xliff:g> へのアクセスを許可しますか？"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="APPLICATION">%1$s</xliff:g> を起動して <xliff:g id="USB_DEVICE">%2$s</xliff:g> を処理しますか？"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"このアプリに録音権限は付与されていませんが、この USB デバイスから音声を収集できるようになります。このデバイスで <xliff:g id="APPLICATION">%1$s</xliff:g> を使用すると、着信音、通知音、アラームが鳴らなくなる可能性があります。"</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"このデバイスで <xliff:g id="APPLICATION">%1$s</xliff:g> を使用すると、着信音、通知音、アラームが鳴らなくなる可能性があります。"</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="APPLICATION">%1$s</xliff:g> に <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> へのアクセスを許可しますか？"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="APPLICATION">%1$s</xliff:g> を起動して <xliff:g id="USB_DEVICE">%2$s</xliff:g> を処理しますか？"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="APPLICATION">%1$s</xliff:g> を開いて <xliff:g id="USB_DEVICE">%2$s</xliff:g>を利用しますか？\nこのアプリに録音権限は付与されていませんが、この USB デバイスから音声を収集できるようになります。"</string>
@@ -38,8 +42,8 @@
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"このUSBアクセサリを扱うアプリはインストールされていません。詳細: <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"USBアクセサリ"</string>
     <string name="label_view" msgid="6815442985276363364">"表示"</string>
-    <string name="always_use_device" msgid="210535878779644679">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> を接続したら常に <xliff:g id="APPLICATION">%1$s</xliff:g> を起動する"</string>
-    <string name="always_use_accessory" msgid="1977225429341838444">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> を接続したら常に <xliff:g id="APPLICATION">%1$s</xliff:g> を起動する"</string>
+    <string name="always_use_device" msgid="210535878779644679">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> を接続している場合は常に <xliff:g id="APPLICATION">%1$s</xliff:g> を起動する"</string>
+    <string name="always_use_accessory" msgid="1977225429341838444">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> を接続している場合は常に <xliff:g id="APPLICATION">%1$s</xliff:g> を起動する"</string>
     <string name="usb_debugging_title" msgid="8274884945238642726">"USB デバッグを許可しますか？"</string>
     <string name="usb_debugging_message" msgid="5794616114463921773">"このパソコンのRSAキーのフィンガープリント:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4003121804294739548">"このパソコンからの USB デバッグを常に許可する"</string>

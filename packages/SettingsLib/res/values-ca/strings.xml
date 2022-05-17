@@ -283,7 +283,7 @@
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"No s\'ha pogut connectar"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Mostra les opcions per a la certificació de pantalla sense fil"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Augmenta el nivell de registre de la connexió Wi‑Fi i es mostra per SSID RSSI al selector de Wi‑Fi"</string>
-    <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Redueix el consum de bateria i millora el rendiment de la xarxa"</string>
+    <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Exhaureix menys la bateria i millora el rendiment de la xarxa"</string>
     <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Quan aquest mode està activat, és possible que l’adreça MAC d’aquest dispositiu canviï cada vegada que es connecti a una xarxa amb l\'aleatorització d\'adreces MAC activada"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"D\'ús mesurat"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"D\'ús no mesurat"</string>
@@ -480,7 +480,7 @@
     <string name="screen_zoom_summary_default" msgid="1888865694033865408">"Predeterminat"</string>
     <string name="screen_zoom_summary_large" msgid="4706951482598978984">"Gran"</string>
     <string name="screen_zoom_summary_very_large" msgid="7317423942896999029">"Més gran"</string>
-    <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"Més grans possible"</string>
+    <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"El més gran"</string>
     <string name="screen_zoom_summary_custom" msgid="3468154096832912210">"Personalitzat (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="content_description_menu_button" msgid="6254844309171779931">"Menú"</string>
     <string name="retail_demo_reset_message" msgid="5392824901108195463">"Introdueix la contrasenya per restablir les dades de fàbrica en mode de demostració"</string>

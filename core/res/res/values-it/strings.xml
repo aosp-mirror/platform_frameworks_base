@@ -51,8 +51,8 @@
     <string name="needPuk2" msgid="7032612093451537186">"Digita il PUK2 per sbloccare la SIM."</string>
     <string name="enablePin" msgid="2543771964137091212">"Operazione non riuscita; attiva blocco SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
-      <item quantity="one">You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM is locked.</item>
       <item quantity="other">Hai ancora <xliff:g id="NUMBER_1">%d</xliff:g> tentativi a disposizione prima che la SIM venga bloccata.</item>
+      <item quantity="one">Hai ancora <xliff:g id="NUMBER_0">%d</xliff:g> tentativo a disposizione prima che la SIM venga bloccata.</item>
     </plurals>
     <string name="imei" msgid="2157082351232630390">"IMEI"</string>
     <string name="meid" msgid="3291227361605924674">"MEID"</string>
@@ -181,8 +181,8 @@
     <string name="low_memory" product="tv" msgid="6663680413790323318">"Lo spazio di archiviazione del dispositivo Android TV è pieno. Elimina alcuni file per liberare spazio."</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"Spazio di archiviazione del telefono esaurito. Elimina alcuni file per liberare spazio."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="2288194355006173029">
-      <item quantity="one">Certificate authorities installed</item>
       <item quantity="other">Autorità di certificazione installate</item>
+      <item quantity="one">Autorità di certificazione installata</item>
     </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"Da una terza parte sconosciuta"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"Dall\'amministratore del tuo profilo di lavoro"</string>
@@ -257,8 +257,8 @@
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"Report completo"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Utilizza questa opzione per ridurre al minimo l\'interferenza di sistema quando il dispositivo non risponde, è troppo lento oppure quando ti servono tutte le sezioni della segnalazione. Non puoi inserire altri dettagli o acquisire altri screenshot."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="3906120379260059206">
-      <item quantity="one">Taking screenshot for bug report in <xliff:g id="NUMBER_1">%d</xliff:g> seconds.</item>
       <item quantity="other">Lo screenshot per la segnalazione di bug verrà acquisito tra <xliff:g id="NUMBER_1">%d</xliff:g> secondi.</item>
+      <item quantity="one">Lo screenshot per la segnalazione di bug verrà acquisito tra <xliff:g id="NUMBER_0">%d</xliff:g> secondo.</item>
     </plurals>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Screenshot con segnalazione di bug effettuato correttamente"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Impossibile acquisire screenshot con segnalazione di bug"</string>
@@ -533,11 +533,11 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Consente all\'applicazione di visualizzare la configurazione del Bluetooth sul tablet e di stabilire e accettare connessioni con dispositivi accoppiati."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Consente all\'app di visualizzare la configurazione del Bluetooth del dispositivo Android TV, nonché di stabilire e accettare connessioni con dispositivi accoppiati."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Consente all\'applicazione di visualizzare la configurazione del Bluetooth sul telefono e di stabilire e accettare connessioni con dispositivi accoppiati."</string>
-    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"Rilevamento/accopp. dispositivi Bluetooth vicini"</string>
+    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"Rilevamento e accoppiamento di dispositivi Bluetooth vicini"</string>
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Consente all\'app di rilevare e accoppiare dispositivi Bluetooth nelle vicinanze"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"Connessione a dispositivi Bluetooth accoppiati"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Consente all\'app di connettersi ai dispositivi Bluetooth accoppiati"</string>
-    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"trasmettere annunci a dispositivi Bluetooth vicini"</string>
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"Trasmissione di annunci a dispositivi Bluetooth vicini"</string>
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Consente all\'app di trasmettere annunci ai dispositivi Bluetooth nelle vicinanze"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"Possibilità di stabilire la posizione relativa tra dispositivi a banda ultralarga nelle vicinanze"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Consenti all\'app di stabilire la posizione relativa tra dispositivi a banda ultralarga nelle vicinanze"</string>
@@ -671,9 +671,9 @@
     <string name="permdesc_writeSyncSettings" msgid="6029151549667182687">"Consente a un\'applicazione di modificare le impostazioni di sincronizzazione per un account. Ad esempio, può servire per attivare la sincronizzazione dell\'applicazione Persone con un account."</string>
     <string name="permlab_readSyncStats" msgid="3747407238320105332">"lettura statistiche di sincronizz."</string>
     <string name="permdesc_readSyncStats" msgid="3867809926567379434">"Consente a un\'applicazione di leggere le statistiche di sincronizzazione per un account, incluse la cronologia degli eventi di sincronizzazione e la quantità di dati sincronizzati."</string>
-    <string name="permlab_sdcardRead" msgid="5791467020950064920">"lettura dei contenuti dell\'archivio condiviso"</string>
+    <string name="permlab_sdcardRead" msgid="5791467020950064920">"Lettura dei contenuti dell\'archivio condiviso"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"Consente all\'app di leggere i contenuti del tuo archivio condiviso."</string>
-    <string name="permlab_sdcardWrite" msgid="4863021819671416668">"modifica/eliminazione dei contenuti dell\'archivio condiviso"</string>
+    <string name="permlab_sdcardWrite" msgid="4863021819671416668">"Modifica/eliminazione dei contenuti dell\'archivio condiviso"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Consente all\'app di modificare i contenuti del tuo archivio condiviso."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"invio/ricezione di chiamate SIP"</string>
     <string name="permdesc_use_sip" msgid="3590270893253204451">"Consente all\'app di effettuare e ricevere chiamate SIP."</string>
@@ -1059,8 +1059,8 @@
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"1 mese fa"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Oltre 1 mese fa"</string>
     <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
-      <item quantity="one">Last <xliff:g id="COUNT_1">%d</xliff:g> days</item>
       <item quantity="other">Ultimi <xliff:g id="COUNT_1">%d</xliff:g> giorni</item>
+      <item quantity="one">Ultimo giorno (<xliff:g id="COUNT_0">%d</xliff:g>)</item>
     </plurals>
     <string name="last_month" msgid="1528906781083518683">"Ultimo mese"</string>
     <string name="older" msgid="1645159827884647400">"Precedente"</string>
@@ -1081,68 +1081,68 @@
     <string name="years" msgid="5797714729103773425">"anni"</string>
     <string name="now_string_shortest" msgid="3684914126941650330">"ora"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="7519574894537185135">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>m</item>
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> m</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> m</item>
     </plurals>
     <plurals name="duration_hours_shortest" formatted="false" msgid="2838655994500499651">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>h</item>
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> h</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> h</item>
     </plurals>
     <plurals name="duration_days_shortest" formatted="false" msgid="3686058472983158496">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>d</item>
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> g</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> g</item>
     </plurals>
     <plurals name="duration_years_shortest" formatted="false" msgid="8299112348723640338">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>y</item>
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> a</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> a</item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="849196137176399440">
-      <item quantity="one">in <xliff:g id="COUNT_1">%d</xliff:g>m</item>
       <item quantity="other">tra <xliff:g id="COUNT_1">%d</xliff:g> m</item>
+      <item quantity="one">tra <xliff:g id="COUNT_0">%d</xliff:g> m</item>
     </plurals>
     <plurals name="duration_hours_shortest_future" formatted="false" msgid="5386373597343170388">
-      <item quantity="one">in <xliff:g id="COUNT_1">%d</xliff:g>h</item>
       <item quantity="other">tra <xliff:g id="COUNT_1">%d</xliff:g> h</item>
+      <item quantity="one">tra <xliff:g id="COUNT_0">%d</xliff:g> h</item>
     </plurals>
     <plurals name="duration_days_shortest_future" formatted="false" msgid="814754627092787227">
-      <item quantity="one">in <xliff:g id="COUNT_1">%d</xliff:g>d</item>
       <item quantity="other">tra <xliff:g id="COUNT_1">%d</xliff:g> g</item>
+      <item quantity="one">tra <xliff:g id="COUNT_0">%d</xliff:g> g</item>
     </plurals>
     <plurals name="duration_years_shortest_future" formatted="false" msgid="7683731800140202145">
-      <item quantity="one">in <xliff:g id="COUNT_1">%d</xliff:g>y</item>
       <item quantity="other">tra <xliff:g id="COUNT_1">%d</xliff:g> a</item>
+      <item quantity="one">tra <xliff:g id="COUNT_0">%d</xliff:g> a</item>
     </plurals>
     <plurals name="duration_minutes_relative" formatted="false" msgid="6569851308583028344">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> minutes ago</item>
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> minuti fa</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> minuto fa</item>
     </plurals>
     <plurals name="duration_hours_relative" formatted="false" msgid="420434788589102019">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> hours ago</item>
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ore fa</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> ora fa</item>
     </plurals>
     <plurals name="duration_days_relative" formatted="false" msgid="6056425878237482431">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> days ago</item>
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> giorni fa</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> giorno fa</item>
     </plurals>
     <plurals name="duration_years_relative" formatted="false" msgid="2179998228861172159">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> years ago</item>
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> anni fa</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> anno fa</item>
     </plurals>
     <plurals name="duration_minutes_relative_future" formatted="false" msgid="5759885720917567723">
-      <item quantity="one">in <xliff:g id="COUNT_1">%d</xliff:g> minutes</item>
       <item quantity="other">tra <xliff:g id="COUNT_1">%d</xliff:g> minuti</item>
+      <item quantity="one">tra <xliff:g id="COUNT_0">%d</xliff:g> minuto</item>
     </plurals>
     <plurals name="duration_hours_relative_future" formatted="false" msgid="8963511608507707959">
-      <item quantity="one">in <xliff:g id="COUNT_1">%d</xliff:g> hours</item>
       <item quantity="other">tra <xliff:g id="COUNT_1">%d</xliff:g> ore</item>
+      <item quantity="one">tra <xliff:g id="COUNT_0">%d</xliff:g> ora</item>
     </plurals>
     <plurals name="duration_days_relative_future" formatted="false" msgid="1964709470979250702">
-      <item quantity="one">in <xliff:g id="COUNT_1">%d</xliff:g> days</item>
       <item quantity="other">tra <xliff:g id="COUNT_1">%d</xliff:g> giorni</item>
+      <item quantity="one">tra <xliff:g id="COUNT_0">%d</xliff:g> giorno</item>
     </plurals>
     <plurals name="duration_years_relative_future" formatted="false" msgid="3985129025134896371">
-      <item quantity="one">in <xliff:g id="COUNT_1">%d</xliff:g> years</item>
       <item quantity="other">tra <xliff:g id="COUNT_1">%d</xliff:g> anni</item>
+      <item quantity="one">tra <xliff:g id="COUNT_0">%d</xliff:g> anno</item>
     </plurals>
     <string name="VideoView_error_title" msgid="5750686717225068016">"Problemi video"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"Questo video non è valido per lo streaming su questo dispositivo."</string>
@@ -1523,8 +1523,8 @@
     <string name="no_matches" msgid="6472699895759164599">"Nessuna corrispondenza"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Trova nella pagina"</string>
     <plurals name="matches_found" formatted="false" msgid="1101758718194295554">
-      <item quantity="one"><xliff:g id="INDEX">%d</xliff:g> of <xliff:g id="TOTAL">%d</xliff:g></item>
       <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> di <xliff:g id="TOTAL">%d</xliff:g></item>
+      <item quantity="one">1 partita</item>
     </plurals>
     <string name="action_mode_done" msgid="2536182504764803222">"Fine"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Cancellazione archivio condiviso…"</string>
@@ -1656,8 +1656,8 @@
     <string name="kg_wrong_password" msgid="2384677900494439426">"Password sbagliata"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"PIN errato"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">
-      <item quantity="one">Try again in <xliff:g id="NUMBER">%d</xliff:g> seconds.</item>
       <item quantity="other">Riprova fra <xliff:g id="NUMBER">%d</xliff:g> secondi.</item>
+      <item quantity="one">Riprova fra 1 secondo.</item>
     </plurals>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"Inserisci la sequenza"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"Inserisci il PIN della SIM"</string>
@@ -1856,8 +1856,8 @@
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"I PIN non corrispondono. Riprova."</string>
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"Il PIN è troppo corto. Deve avere almeno quattro cifre."</string>
     <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
-      <item quantity="one">Try again in <xliff:g id="COUNT">%d</xliff:g> seconds</item>
       <item quantity="other">Riprova tra <xliff:g id="COUNT">%d</xliff:g> secondi</item>
+      <item quantity="one">Riprova tra 1 secondo</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Riprova più tardi"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Visualizzazione a schermo intero"</string>
@@ -1887,36 +1887,36 @@
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Attivare Risparmio dati?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Attiva"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
-      <item quantity="one">For %1$d minutes (until <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">Per %1$d minuti (fino alle ore <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">Per un minuto (fino alle ore <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="4230730310318858312">
-      <item quantity="one">For %1$d min (until <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">Per %1$d minuti (fino alle ore <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">Per 1 minuto (fino alle ore <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="7725354244196466758">
-      <item quantity="one">For %1$d hours (until <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">Per %1$d ore (fino alle ore <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">Per 1 ora (fino alle ore <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="588719069121765642">
-      <item quantity="one">For %1$d hr (until <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">Per %1$d ore (fino alle ore <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">Per 1 ora (fino alle ore <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="1148568456958944998">
-      <item quantity="one">For %d minutes</item>
       <item quantity="other">Per %d minuti</item>
+      <item quantity="one">Per un minuto</item>
     </plurals>
     <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2742377799995454859">
-      <item quantity="one">For %d min</item>
       <item quantity="other">Per %d minuti</item>
+      <item quantity="one">Per 1 minuto</item>
     </plurals>
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="525401855645490022">
-      <item quantity="one">For %d hours</item>
       <item quantity="other">Per %d ore</item>
+      <item quantity="one">Per 1 ora</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="7644653189680911640">
-      <item quantity="one">For %d hr</item>
       <item quantity="other">Per %d ore</item>
+      <item quantity="one">Per 1 ora</item>
     </plurals>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Fino a: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"Fino a <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
@@ -1965,8 +1965,8 @@
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Chiamata in corso"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"Applicazione filtro a chiamata in arrivo"</string>
     <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
-      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> selected</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> file selezionati</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> file selezionato</item>
     </plurals>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Senza categoria"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Stabilisci tu l\'importanza di queste notifiche."</string>
@@ -2033,8 +2033,8 @@
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"Impossibile compilare automaticamente i contenuti"</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Nessun suggerimento di Compilazione automatica"</string>
     <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="6651883186966959978">
-      <item quantity="one"><xliff:g id="COUNT">%1$s</xliff:g> autofill suggestions</item>
       <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> suggerimenti di Compilazione automatica</item>
+      <item quantity="one">Un suggerimento di Compilazione automatica</item>
     </plurals>
     <string name="autofill_save_title" msgid="7719802414283739775">"Vuoi salvare su "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"Vuoi salvare la <xliff:g id="TYPE">%1$s</xliff:g> su "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
@@ -2137,8 +2137,8 @@
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Il Bluetooth rimane attivo durante l\'uso della modalità aereo"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Caricamento"</string>
     <plurals name="file_count" formatted="false" msgid="7063513834724389247">
-      <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> file</item>
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> file</item>
+      <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> file</item>
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Nessuna persona consigliata per la condivisione"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Elenco di app"</string>

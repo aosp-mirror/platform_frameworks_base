@@ -389,7 +389,7 @@
     <string name="permlab_systemAlertWindow" msgid="5757218350944719065">"Апликацијава може да се појави врз други апликации"</string>
     <string name="permdesc_systemAlertWindow" msgid="1145660714855738308">"Апликацијава може да се појави врз други апликации или делови од екранот. Тоа може да го попречи нормалното користење на апликацијата и да го смени начинот на кој се појавуваат другите апликации."</string>
     <string name="permlab_runInBackground" msgid="541863968571682785">"извршување во заднина"</string>
-    <string name="permdesc_runInBackground" msgid="4344539472115495141">"Апликацијава може да се извршува во заднина. Тоа може побрзо да ја троши батеријата."</string>
+    <string name="permdesc_runInBackground" msgid="4344539472115495141">"Апликацијава може да работи во заднина. Тоа може побрзо да ја троши батеријата."</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"користење мобилен интернет во заднина"</string>
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Апликацијава може да користи мобилен интернет во заднина. Тоа може да го зголеми користењето мобилен интернет."</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"направи апликацијата постојано да биде активна"</string>

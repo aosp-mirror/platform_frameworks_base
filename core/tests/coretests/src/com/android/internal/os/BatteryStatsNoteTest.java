@@ -23,6 +23,8 @@ import static android.os.BatteryStats.WAKE_TYPE_PARTIAL;
 import static com.android.internal.os.BatteryStatsImpl.ExternalStatsSync.UPDATE_CPU;
 import static com.android.internal.os.BatteryStatsImpl.ExternalStatsSync.UPDATE_DISPLAY;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import android.app.ActivityManager;
 import android.os.BatteryStats;
 import android.os.BatteryStats.HistoryItem;
@@ -206,6 +208,116 @@ public class BatteryStatsNoteTest extends TestCase {
         assertEquals(120_000, bgTime);
     }
 
+    /**
+     * Test BatteryStatsImpl.Uid.noteLongPartialWakelockStart for an isolated uid.
+     */
+    @SmallTest
+    public void testNoteLongPartialWakelockStart_isolatedUid() throws Exception {
+        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+
+
+        bi.setRecordAllHistoryLocked(true);
+        bi.forceRecordAllHistory();
+
+        int pid = 10;
+        String name = "name";
+        String historyName = "historyName";
+
+        WorkSource.WorkChain isolatedWorkChain = new WorkSource.WorkChain();
+        isolatedWorkChain.addNode(ISOLATED_UID, name);
+
+        // Map ISOLATED_UID to UID.
+        bi.addIsolatedUidLocked(ISOLATED_UID, UID);
+
+        bi.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
+        bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_TOP);
+        bi.noteLongPartialWakelockStart(name, historyName, ISOLATED_UID);
+
+        clocks.realtime = clocks.uptime = 100;
+        bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND);
+
+        clocks.realtime = clocks.uptime = 220;
+        bi.noteLongPartialWakelockFinish(name, historyName, ISOLATED_UID);
+
+        final BatteryStatsHistoryIterator iterator =
+                bi.createBatteryStatsHistoryIterator();
+
+        BatteryStats.HistoryItem item = new BatteryStats.HistoryItem();
+
+        while (iterator.next(item)) {
+            if (item.eventCode == HistoryItem.EVENT_LONG_WAKE_LOCK_START) break;
+        }
+        assertThat(item.eventCode).isEqualTo(HistoryItem.EVENT_LONG_WAKE_LOCK_START);
+        assertThat(item.eventTag).isNotNull();
+        assertThat(item.eventTag.string).isEqualTo(historyName);
+        assertThat(item.eventTag.uid).isEqualTo(UID);
+
+        while (iterator.next(item)) {
+            if (item.eventCode == HistoryItem.EVENT_LONG_WAKE_LOCK_FINISH) break;
+        }
+        assertThat(item.eventCode).isEqualTo(HistoryItem.EVENT_LONG_WAKE_LOCK_FINISH);
+        assertThat(item.eventTag).isNotNull();
+        assertThat(item.eventTag.string).isEqualTo(historyName);
+        assertThat(item.eventTag.uid).isEqualTo(UID);
+    }
+
+    /**
+     * Test BatteryStatsImpl.Uid.noteLongPartialWakelockStart for an isolated uid.
+     */
+    @SmallTest
+    public void testNoteLongPartialWakelockStart_isolatedUidRace() throws Exception {
+        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+
+
+        bi.setRecordAllHistoryLocked(true);
+        bi.forceRecordAllHistory();
+
+        int pid = 10;
+        String name = "name";
+        String historyName = "historyName";
+
+        WorkSource.WorkChain isolatedWorkChain = new WorkSource.WorkChain();
+        isolatedWorkChain.addNode(ISOLATED_UID, name);
+
+        // Map ISOLATED_UID to UID.
+        bi.addIsolatedUidLocked(ISOLATED_UID, UID);
+
+        bi.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
+        bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_TOP);
+        bi.noteLongPartialWakelockStart(name, historyName, ISOLATED_UID);
+
+        clocks.realtime = clocks.uptime = 100;
+        bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND);
+
+        clocks.realtime = clocks.uptime = 150;
+        bi.maybeRemoveIsolatedUidLocked(ISOLATED_UID, clocks.realtime, clocks.uptime);
+
+        clocks.realtime = clocks.uptime = 220;
+        bi.noteLongPartialWakelockFinish(name, historyName, ISOLATED_UID);
+
+        final BatteryStatsHistoryIterator iterator =
+                bi.createBatteryStatsHistoryIterator();
+
+        BatteryStats.HistoryItem item = new BatteryStats.HistoryItem();
+
+        while (iterator.next(item)) {
+            if (item.eventCode == HistoryItem.EVENT_LONG_WAKE_LOCK_START) break;
+        }
+        assertThat(item.eventCode).isEqualTo(HistoryItem.EVENT_LONG_WAKE_LOCK_START);
+        assertThat(item.eventTag).isNotNull();
+        assertThat(item.eventTag.string).isEqualTo(historyName);
+        assertThat(item.eventTag.uid).isEqualTo(UID);
+
+        while (iterator.next(item)) {
+            if (item.eventCode == HistoryItem.EVENT_LONG_WAKE_LOCK_FINISH) break;
+        }
+        assertThat(item.eventCode).isEqualTo(HistoryItem.EVENT_LONG_WAKE_LOCK_FINISH);
+        assertThat(item.eventTag).isNotNull();
+        assertThat(item.eventTag.string).isEqualTo(historyName);
+        assertThat(item.eventTag.uid).isEqualTo(UID);
+    }
 
     /**
      * Test BatteryStatsImpl.noteUidProcessStateLocked.

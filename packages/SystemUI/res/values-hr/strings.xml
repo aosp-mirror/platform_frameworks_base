@@ -24,15 +24,19 @@
     <string name="battery_low_percent_format" msgid="4276661262843170964">"Preostalo <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Punjenje putem USB-a nije moguće"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Koristite punjač koji ste dobili s uređajem"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Uključiti Štednju baterije?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Uključiti štednju baterije?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"O Štednji baterije"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Uključi"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Uključite Štednju baterije"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Automatski zakreni zaslon"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Želite li dopustiti aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g> pristup uređaju <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Želite li dopustiti aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g> da pristupa uređaju <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nTa aplikacija nema dopuštenje za snimanje, no mogla bi primati zvuk putem tog USB uređaja."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Dopustiti aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g> pristup uređaju <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Želite li otvoriti aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> radi upravljanja uređajem <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Ta aplikacija nema dopuštenje za snimanje, no mogla bi primati zvuk putem ovog USB uređaja. Zbog upotrebe aplikacije <xliff:g id="APPLICATION">%1$s</xliff:g> s ovim uređajem možda nećete čuti pozive, obavijesti i alarme."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Zbog upotrebe aplikacije <xliff:g id="APPLICATION">%1$s</xliff:g> s ovim uređajem možda nećete čuti pozive, obavijesti i alarme."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Želite li dopustiti aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g> pristup uređaju <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
-    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Želite li otvoriti aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> radi upravljanja uređajem <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Otvoriti aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> radi upravljanja uređajem <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Želite li upravljati uređajem <xliff:g id="USB_DEVICE">%2$s</xliff:g> putem aplikacije <xliff:g id="APPLICATION">%1$s</xliff:g>?\nTa aplikacija nema dopuštenje za snimanje, no mogla bi primati zvuk putem tog USB uređaja."</string>
     <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"Želite li otvoriti aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> radi upravljanja uređajem <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"Nijedna instalirana aplikacija ne radi s ovim USB dodatkom. Saznajte više na <xliff:g id="URL">%1$s</xliff:g>"</string>

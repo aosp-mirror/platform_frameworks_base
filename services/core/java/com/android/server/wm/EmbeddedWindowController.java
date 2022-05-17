@@ -41,6 +41,8 @@ class EmbeddedWindowController {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "EmbeddedWindowController" : TAG_WM;
     /* maps input token to an embedded window */
     private ArrayMap<IBinder /*input token */, EmbeddedWindow> mWindows = new ArrayMap<>();
+    private ArrayMap<IBinder /*focus grant token */, EmbeddedWindow> mWindowsByFocusToken =
+        new ArrayMap<>();
     private final Object mGlobalLock;
     private final ActivityTaskManagerService mAtmService;
 
@@ -59,10 +61,13 @@ class EmbeddedWindowController {
     void add(IBinder inputToken, EmbeddedWindow window) {
         try {
             mWindows.put(inputToken, window);
+            final IBinder focusToken = window.getFocusGrantToken();
+            mWindowsByFocusToken.put(focusToken, window);
             updateProcessController(window);
             window.mClient.asBinder().linkToDeath(()-> {
                 synchronized (mGlobalLock) {
                     mWindows.remove(inputToken);
+                    mWindowsByFocusToken.remove(focusToken);
                 }
             }, 0);
         } catch (RemoteException e) {
@@ -95,8 +100,10 @@ class EmbeddedWindowController {
 
     void remove(IWindow client) {
         for (int i = mWindows.size() - 1; i >= 0; i--) {
-            if (mWindows.valueAt(i).mClient.asBinder() == client.asBinder()) {
+            EmbeddedWindow ew = mWindows.valueAt(i);
+            if (ew.mClient.asBinder() == client.asBinder()) {
                 mWindows.removeAt(i).onRemoved();
+                mWindowsByFocusToken.remove(ew.getFocusGrantToken());
                 return;
             }
         }
@@ -104,14 +111,20 @@ class EmbeddedWindowController {
 
     void onWindowRemoved(WindowState host) {
         for (int i = mWindows.size() - 1; i >= 0; i--) {
-            if (mWindows.valueAt(i).mHostWindowState == host) {
+            EmbeddedWindow ew = mWindows.valueAt(i);
+            if (ew.mHostWindowState == host) {
                 mWindows.removeAt(i).onRemoved();
+                mWindowsByFocusToken.remove(ew.getFocusGrantToken());
             }
         }
     }
 
     EmbeddedWindow get(IBinder inputToken) {
         return mWindows.get(inputToken);
+    }
+
+    EmbeddedWindow getByFocusToken(IBinder focusGrantToken) {
+        return mWindowsByFocusToken.get(focusGrantToken);
     }
 
     void onActivityRemoved(ActivityRecord activityRecord) {
@@ -139,6 +152,8 @@ class EmbeddedWindowController {
         InputChannel mInputChannel;
         final int mWindowType;
 
+        private IBinder mFocusGrantToken;
+
         /**
          * @param session  calling session to check ownership of the window
          * @param clientToken client token used to clean up the map if the embedding process dies
@@ -153,7 +168,7 @@ class EmbeddedWindowController {
          */
         EmbeddedWindow(Session session, WindowManagerService service, IWindow clientToken,
                        WindowState hostWindowState, int ownerUid, int ownerPid, int windowType,
-                       int displayId) {
+                       int displayId, IBinder focusGrantToken) {
             mSession = session;
             mWmService = service;
             mClient = clientToken;
@@ -164,6 +179,7 @@ class EmbeddedWindowController {
             mOwnerPid = ownerPid;
             mWindowType = windowType;
             mDisplayId = displayId;
+            mFocusGrantToken = focusGrantToken;
         }
 
         @Override
@@ -215,6 +231,17 @@ class EmbeddedWindowController {
         @Override
         public int getPid() {
             return mOwnerPid;
+        }
+
+        IBinder getFocusGrantToken() {
+            return mFocusGrantToken;
+        }
+
+        IBinder getInputChannelToken() {
+            if (mInputChannel != null) {
+                return mInputChannel.getToken();
+            }
+            return null;
         }
     }
 }

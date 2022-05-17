@@ -21,10 +21,13 @@ import static com.android.systemui.statusbar.policy.DevicePostureController.DEVI
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 
+import androidx.constraintlayout.helper.widget.Flow;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 
@@ -87,48 +90,45 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
     }
 
     private void updateMargins() {
+        Resources res = mContext.getResources();
+
         // Re-apply everything to the keys...
-        int bottomMargin = mContext.getResources().getDimensionPixelSize(
-                R.dimen.num_pad_entry_row_margin_bottom);
-        int rightMargin = mContext.getResources().getDimensionPixelSize(
-                R.dimen.num_pad_key_margin_end);
-        String ratio = mContext.getResources().getString(R.string.num_pad_key_ratio);
+        int verticalMargin = res.getDimensionPixelSize(R.dimen.num_pad_entry_row_margin_bottom);
+        int horizontalMargin = res.getDimensionPixelSize(R.dimen.num_pad_key_margin_end);
+        String ratio = res.getString(R.string.num_pad_key_ratio);
 
-        // mView contains all Views that make up the PIN pad; row0 = the entry test field, then
-        // rows 1-4 contain the buttons. Iterate over all views that make up the buttons in the pad,
-        // and re-set all the margins.
-        for (int row = 1; row < 5; row++) {
-            for (int column = 0; column < 3; column++) {
-                View key = mViews[row][column];
-
-                ConstraintLayout.LayoutParams lp =
-                        (ConstraintLayout.LayoutParams) key.getLayoutParams();
-
-                lp.dimensionRatio = ratio;
-
-                // Don't set any margins on the last row of buttons.
-                if (row != 4) {
-                    lp.bottomMargin = bottomMargin;
-                }
-
-                // Don't set margins on the rightmost buttons.
-                if (column != 2) {
-                    lp.rightMargin = rightMargin;
-                }
-
-                key.setLayoutParams(lp);
-            }
-        }
+        Flow flow = (Flow) mContainer.findViewById(R.id.flow1);
+        flow.setHorizontalGap(horizontalMargin);
+        flow.setVerticalGap(verticalMargin);
 
         // Update the guideline based on the device posture...
-        float halfOpenPercentage =
-                mContext.getResources().getFloat(R.dimen.half_opened_bouncer_height_ratio);
+        float halfOpenPercentage = res.getFloat(R.dimen.half_opened_bouncer_height_ratio);
 
         ConstraintSet cs = new ConstraintSet();
         cs.clone(mContainer);
         cs.setGuidelinePercent(R.id.pin_pad_top_guideline,
                 mLastDevicePosture == DEVICE_POSTURE_HALF_OPENED ? halfOpenPercentage : 0.0f);
         cs.applyTo(mContainer);
+
+        // Password entry area
+        int passwordHeight = res.getDimensionPixelSize(R.dimen.keyguard_password_height);
+        View pinEntry = findViewById(getPasswordTextViewId());
+        ViewGroup.LayoutParams lp = pinEntry.getLayoutParams();
+        lp.height = passwordHeight;
+        pinEntry.setLayoutParams(lp);
+
+        // Below row0
+        View row0 = findViewById(R.id.row0);
+        row0.setPadding(0, 0, 0, verticalMargin);
+
+        // Above the emergency contact area
+        int marginTop = res.getDimensionPixelSize(R.dimen.keyguard_eca_top_margin);
+        View eca = findViewById(R.id.keyguard_selector_fade_container);
+        if (eca != null) {
+            ViewGroup.MarginLayoutParams mLp = (ViewGroup.MarginLayoutParams) eca.getLayoutParams();
+            mLp.topMargin = marginTop;
+            eca.setLayoutParams(mLp);
+        }
     }
 
     @Override

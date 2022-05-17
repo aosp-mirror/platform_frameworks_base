@@ -3390,6 +3390,12 @@ public final class ViewRootImpl implements ViewParent,
                     mReportNextDraw = false;
                     pendingDrawFinished();
                 }
+
+                // Make sure the consumer is not waiting if the view root was just made invisible.
+                if (mBLASTDrawConsumer != null) {
+                    mBLASTDrawConsumer.accept(null);
+                    mBLASTDrawConsumer = null;
+                }
             }
         }
 

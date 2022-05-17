@@ -41,14 +41,13 @@ import static com.android.server.wm.DisplayContent.alwaysCreateRootTask;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ROOT_TASK;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
-import static java.lang.Integer.MIN_VALUE;
-
 import android.annotation.ColorInt;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.WindowConfiguration;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.os.UserHandle;
 import android.util.IntArray;
 import android.util.Slog;
@@ -83,9 +82,9 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
     DisplayContent mDisplayContent;
 
     /**
-     * A color layer that serves as a solid color background to certain animations.
+     * Keeps track of the last set color layer so that it can be reset during surface migrations.
      */
-    private SurfaceControl mColorBackgroundLayer;
+    private @ColorInt int mBackgroundColor = 0;
 
     /**
      * This counter is used to make sure we don't prematurely clear the background color in the
@@ -356,6 +355,14 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         } else if (rootTask == mRootSplitScreenPrimaryTask) {
             mRootSplitScreenPrimaryTask = null;
         }
+    }
+
+    @Override
+    void setInitialSurfaceControlProperties(SurfaceControl.Builder b) {
+        // We want an effect layer instead of the default container layer so that we can set a
+        // background color on it for task animations.
+        b.setEffectLayer();
+        super.setInitialSurfaceControlProperties(b);
     }
 
     @Override
@@ -946,11 +953,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
     void onParentChanged(ConfigurationContainer newParent, ConfigurationContainer oldParent) {
         if (getParent() != null) {
             super.onParentChanged(newParent, oldParent, () -> {
-                mColorBackgroundLayer = makeChildSurface(null)
-                        .setColorLayer()
-                        .setName("colorBackgroundLayer")
-                        .setCallsite("TaskDisplayArea.onParentChanged")
-                        .build();
                 mSplitScreenDividerAnchor = makeChildSurface(null)
                         .setName("splitScreenDividerAnchor")
                         .setCallsite("TaskDisplayArea.onParentChanged")
@@ -962,43 +964,45 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         } else {
             super.onParentChanged(newParent, oldParent);
             mWmService.mTransactionFactory.get()
-                    .remove(mColorBackgroundLayer)
                     .remove(mSplitScreenDividerAnchor)
                     .apply();
-            mColorBackgroundLayer = null;
             mSplitScreenDividerAnchor = null;
         }
     }
 
-    void setBackgroundColor(@ColorInt int color) {
-        if (mColorBackgroundLayer == null) {
-            return;
+    void setBackgroundColor(@ColorInt int colorInt) {
+        setBackgroundColor(colorInt, false /* restore */);
+    }
+
+    void setBackgroundColor(@ColorInt int colorInt, boolean restore) {
+        mBackgroundColor = colorInt;
+        Color color = Color.valueOf(colorInt);
+
+        // We don't want to increment the mColorLayerCounter if we are restoring the background
+        // color after a surface migration because in that case the mColorLayerCounter already
+        // accounts for setting that background color.
+        if (!restore) {
+            mColorLayerCounter++;
         }
 
-        float r = ((color >> 16) & 0xff) / 255.0f;
-        float g = ((color >>  8) & 0xff) / 255.0f;
-        float b = ((color >>  0) & 0xff) / 255.0f;
-        float a = ((color >> 24) & 0xff) / 255.0f;
-
-        mColorLayerCounter++;
-
-        getPendingTransaction().setLayer(mColorBackgroundLayer, MIN_VALUE)
-                .setColor(mColorBackgroundLayer, new float[]{r, g, b})
-                .setAlpha(mColorBackgroundLayer, a)
-                .setWindowCrop(mColorBackgroundLayer, getSurfaceWidth(), getSurfaceHeight())
-                .setPosition(mColorBackgroundLayer, 0, 0)
-                .show(mColorBackgroundLayer);
-
-        scheduleAnimation();
+        // Only apply the background color if the TDA is actually attached and has a valid surface
+        // to set the background color on. We still want to keep track of the background color state
+        // even if we are not showing it for when/if the TDA is reattached and gets a valid surface
+        if (mSurfaceControl != null) {
+            getPendingTransaction()
+                    .setColor(mSurfaceControl,
+                            new float[]{color.red(), color.green(), color.blue()});
+            scheduleAnimation();
+        }
     }
 
     void clearBackgroundColor() {
         mColorLayerCounter--;
 
         // Only clear the color layer if we have received the same amounts of clear as set
-        // requests.
-        if (mColorLayerCounter == 0) {
-            getPendingTransaction().hide(mColorBackgroundLayer);
+        // requests and TDA has a non null surface control (i.e. is attached)
+        if (mColorLayerCounter == 0 && mSurfaceControl != null) {
+            getPendingTransaction().unsetColor(mSurfaceControl);
             scheduleAnimation();
         }
     }
@@ -1006,12 +1010,12 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
     @Override
     void migrateToNewSurfaceControl(SurfaceControl.Transaction t) {
         super.migrateToNewSurfaceControl(t);
-        if (mColorBackgroundLayer == null) {
-            return;
+
+        if (mColorLayerCounter > 0) {
+            setBackgroundColor(mBackgroundColor, true /* restore */);
         }
 
         // As TaskDisplayArea is getting a new surface, reparent and reorder the child surfaces.
-        t.reparent(mColorBackgroundLayer, mSurfaceControl);
         t.reparent(mSplitScreenDividerAnchor, mSurfaceControl);
         reassignLayer(t);
         scheduleAnimation();

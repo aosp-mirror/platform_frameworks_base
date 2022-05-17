@@ -31,6 +31,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"ಪರದೆಯನ್ನು ಸ್ವಯಂ-ತಿರುಗಿಸಿ"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ಪ್ರವೇಶಿಸಲು <xliff:g id="APPLICATION">%1$s</xliff:g> ಅನ್ನು ಅನುಮತಿಸುವುದೇ?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ಅನ್ನು ಪ್ರವೇಶಿಸಲು <xliff:g id="APPLICATION">%1$s</xliff:g> ಅನ್ನು ಅನುಮತಿಸುವುದೇ?\nಈ ಆ್ಯಪ್‌ಗೆ ರೆಕಾರ್ಡ್ ಅನುಮತಿಯನ್ನು ನೀಡಲಾಗಿಲ್ಲ, ಆದರೆ ಈ USB ಸಾಧನದ ಮೂಲಕ ಆಡಿಯೊವನ್ನು ಸೆರೆಹಿಡಿಯಬಹುದು."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ಗೆ ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಲು <xliff:g id="APPLICATION">%1$s</xliff:g> ಅನ್ನು ಅನುಮತಿಸುವುದೇ?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ಅನ್ನು ನಿರ್ವಹಿಸಲು <xliff:g id="APPLICATION">%1$s</xliff:g> ಅನ್ನು ತೆರೆಯುವುದೇ?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"ಈ ಆ್ಯಪ್‌ಗೆ ರೆಕಾರ್ಡ್ ಅನುಮತಿಯನ್ನು ನೀಡಲಾಗಿಲ್ಲ, ಆದರೆ ಈ USB ಸಾಧನದ ಮೂಲಕ ಆಡಿಯೊವನ್ನು ಸೆರೆಹಿಡಿಯಬಲ್ಲದು. ಈ ಸಾಧನದ ಮೂಲಕ <xliff:g id="APPLICATION">%1$s</xliff:g> ಅನ್ನು ಬಳಸುವುದರಿಂದ ಕರೆಗಳು, ಅಧಿಸೂಚನೆಗಳು ಮತ್ತು ಅಲಾರಾಂಗಳನ್ನು ಕೇಳುವುದನ್ನು ತಡೆಯಬಹುದು."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"ಈ ಸಾಧನದ ಮೂಲಕ <xliff:g id="APPLICATION">%1$s</xliff:g> ಅನ್ನು ಬಳಸುವುದರಿಂದ ಕರೆಗಳು, ಅಧಿಸೂಚನೆಗಳು ಮತ್ತು ಅಲಾರಾಂಗಳನ್ನು ಕೇಳುವುದನ್ನು ತಡೆಯಬಹುದು."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ಗೆ ಪ್ರವೇಶಿಸಲು <xliff:g id="APPLICATION">%1$s</xliff:g> ಅನ್ನು ಅನುಮತಿಸುವುದೇ?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ಅನ್ನು ನಿರ್ವಹಿಸಲು <xliff:g id="APPLICATION">%1$s</xliff:g> ಅನ್ನು ತೆರೆಯುವುದೇ?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ಅನ್ನು ನಿಯಂತ್ರಿಸಲು <xliff:g id="APPLICATION">%1$s</xliff:g> ಅನ್ನು ತೆರೆಯುವುದೇ?\nಈ ಆ್ಯಪ್‌ಗೆ ರೆಕಾರ್ಡ್ ಅನುಮತಿಯನ್ನು ನೀಡಲಾಗಿಲ್ಲ, ಆದರೆ ಈ USB ಸಾಧನದ ಮೂಲಕ ಆಡಿಯೊವನ್ನು ಸೆರೆಹಿಡಿಯಬಹುದು."</string>
@@ -171,7 +175,7 @@
     <skip />
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"ಅಧಿಸೂಚನೆಯ ಛಾಯೆ."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‍ಗಳು."</string>
-    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"ಲಾಕ್‌ ಪರದೆ."</string>
+    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"ಲಾಕ್‌ ಸ್ಕ್ರೀನ್."</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"ಕೆಲಸದ ಲಾಕ್ ಪರದೆ"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"ಮುಚ್ಚು"</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="2230487165558877262">"ವೈಫೈ ಆಫ್ ಮಾಡಲಾಗಿದೆ."</string>

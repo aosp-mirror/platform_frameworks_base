@@ -31,6 +31,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Авт. завъртане на екрана"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Да се разреши ли на <xliff:g id="APPLICATION">%1$s</xliff:g> достъп до <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Наистина ли искате да разрешите на <xliff:g id="APPLICATION">%1$s</xliff:g> достъп до <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nНа приложението не е предоставено разрешение за записване, но е възможно да запише звук чрез това USB устройство."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Да се разреши ли на <xliff:g id="APPLICATION">%1$s</xliff:g> достъп до <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Да се използва ли <xliff:g id="APPLICATION">%1$s</xliff:g> за <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Приложението няма разрешение за записване, но може да записва звук чрез това USB устройство. Ако използвате <xliff:g id="APPLICATION">%1$s</xliff:g> с това устройство, е възможно да не чувате обажданията, известията и будилниците."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Ако използвате <xliff:g id="APPLICATION">%1$s</xliff:g> с това устройство, е възможно да не чувате обажданията, известията и будилниците."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Да се разреши ли на <xliff:g id="APPLICATION">%1$s</xliff:g> достъп до <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Да се използва ли <xliff:g id="APPLICATION">%1$s</xliff:g> за работата с/ъс <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Искате ли да използвате <xliff:g id="APPLICATION">%1$s</xliff:g> за работа с(ъс) <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nПриложението няма разрешение за записване, но може да записва звук чрез това USB устройство."</string>
@@ -38,8 +42,8 @@
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"Инстал. приложения не работят с този аксесоар за USB. Научете повече на адрес <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"Аксесоар за USB"</string>
     <string name="label_view" msgid="6815442985276363364">"Преглед"</string>
-    <string name="always_use_device" msgid="210535878779644679">"<xliff:g id="APPLICATION">%1$s</xliff:g> да се отваря винаги при връзка с/ъс <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
-    <string name="always_use_accessory" msgid="1977225429341838444">"<xliff:g id="APPLICATION">%1$s</xliff:g> да се отваря винаги при връзка с/ъс <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
+    <string name="always_use_device" msgid="210535878779644679">"<xliff:g id="APPLICATION">%1$s</xliff:g> да се отваря винаги при връзка с(ъс) <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
+    <string name="always_use_accessory" msgid="1977225429341838444">"<xliff:g id="APPLICATION">%1$s</xliff:g> да се отваря винаги при връзка с(ъс) <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
     <string name="usb_debugging_title" msgid="8274884945238642726">"Да се разреши ли отстраняването на грешки през USB?"</string>
     <string name="usb_debugging_message" msgid="5794616114463921773">"Отпечатъкът на RSA ключа на компютъра е:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4003121804294739548">"Винаги да се разрешава от този компютър"</string>

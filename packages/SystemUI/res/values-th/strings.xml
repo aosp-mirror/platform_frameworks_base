@@ -31,6 +31,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"หมุนหน้าจออัตโนมัติ"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"อนุญาตให้ <xliff:g id="APPLICATION">%1$s</xliff:g> เข้าถึง <xliff:g id="USB_DEVICE">%2$s</xliff:g> ไหม"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"อนุญาตให้ <xliff:g id="APPLICATION">%1$s</xliff:g> เข้าถึง <xliff:g id="USB_DEVICE">%2$s</xliff:g> ไหม\nแอปนี้ไม่ได้รับอนุญาตให้อัดเสียงแต่จะอัดเสียงผ่านอุปกรณ์ USB นี้ได้"</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"อนุญาตให้ <xliff:g id="APPLICATION">%1$s</xliff:g> เข้าถึง <xliff:g id="USB_DEVICE">%2$s</xliff:g> ใช่ไหม"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"เปิด <xliff:g id="APPLICATION">%1$s</xliff:g> เพื่อจัดการ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ใช่ไหม"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"แอปนี้ไม่ได้รับอนุญาตให้อัดเสียงแต่จะอัดเสียงผ่านอุปกรณ์ USB นี้ได้ การใช้ <xliff:g id="APPLICATION">%1$s</xliff:g> กับอุปกรณ์นี้อาจทำให้คุณไม่ได้ยินเสียงสายเรียกเข้า การแจ้งเตือน และการปลุก"</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"การใช้ <xliff:g id="APPLICATION">%1$s</xliff:g> กับอุปกรณ์นี้อาจทำให้คุณไม่ได้ยินเสียงสายเรียกเข้า การแจ้งเตือน และการปลุก"</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"อนุญาตให้ <xliff:g id="APPLICATION">%1$s</xliff:g> เข้าถึง <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ไหม"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"เปิด <xliff:g id="APPLICATION">%1$s</xliff:g> เพื่อจัดการ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ไหม"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"เปิด <xliff:g id="APPLICATION">%1$s</xliff:g> เพื่อจัดการ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ใช่ไหม\nแอปนี้ไม่ได้รับอนุญาตให้อัดเสียงแต่จะอัดเสียงผ่านอุปกรณ์ USB นี้ได้"</string>
@@ -876,7 +880,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wi-Fi จะไม่เชื่อมต่ออัตโนมัติในตอนนี้"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"ดูทั้งหมด"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"ตัดการเชื่อมต่ออีเทอร์เน็ตเพื่อสลับเครือข่าย"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"เพื่อปรับปรุงประสบการณ์การใช้อุปกรณ์ แอปและบริการต่างๆ จะยังคงสแกนหาเครือข่าย Wi‑Fi ได้ทุกเมื่อแม้ว่า Wi‑Fi จะปิดอยู่ คุณเปลี่ยนตัวเลือกนี้ได้ในการตั้งค่าการสแกนหา Wi-Fi "<annotation id="link">"เปลี่ยน"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"เพื่อปรับปรุงประสบการณ์การใช้อุปกรณ์ แอปและบริการต่างๆ จะยังคงสแกนหาเครือข่าย Wi‑Fi ได้ทุกเมื่อแม้ว่า Wi‑Fi จะปิดอยู่ คุณเปลี่ยนตัวเลือกนี้ได้ในการตั้งค่าการสแกนหา Wi-Fi "<annotation id="link">"เปลี่ยนการตั้งค่า"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"ปิดโหมดบนเครื่องบิน"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"เลือกผู้ใช้"</string>
 </resources>

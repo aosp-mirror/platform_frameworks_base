@@ -968,7 +968,7 @@
     <string name="keyguard_accessibility_widget_deleted" msgid="1509738950119878705">"Logrīks <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> ir izdzēsts."</string>
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Izvērst atbloķēšanas apgabalu."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Autorizācija, velkot ar pirkstu."</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Autorizācija ar kombināciju."</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Atbloķēšanas kombinācija."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Autorizācija pēc sejas."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Autorizācija ar PIN kodu."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"SIM kartes atbloķēšanas PIN"</string>
@@ -1333,7 +1333,7 @@
     <!-- no translation found for network_available_sign_in_detailed (7520423801613396556) -->
     <skip />
     <string name="wifi_no_internet" msgid="1386911698276448061">"Tīklā <xliff:g id="NETWORK_SSID">%1$s</xliff:g> nav piekļuves internetam"</string>
-    <string name="wifi_no_internet_detailed" msgid="634938444133558942">"Pieskarieties, lai skatītu iespējas."</string>
+    <string name="wifi_no_internet_detailed" msgid="634938444133558942">"Pieskarieties, lai skatītu opcijas."</string>
     <string name="mobile_no_internet" msgid="4014455157529909781">"Mobilajā tīklā nav piekļuves internetam."</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"Tīklā nav piekļuves internetam."</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Nevar piekļūt privātam DNS serverim."</string>
@@ -1394,7 +1394,7 @@
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Ieslēgta USB piesaiste"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Ieslēgts MIDI režīms, izmantojot USB savienojumu"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB piederums ir pievienots"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Pieskarieties, lai skatītu citas iespējas."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Pieskarieties, lai skatītu citas opcijas."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Pievienotā ierīce tiek uzlādēta. Pieskarieties, lai skatītu citas opcijas."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Konstatēts analogs audio piederums"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Pievienotā ierīce nav saderīga ar šo tālruni. Pieskarieties, lai uzzinātu vairāk."</string>
@@ -1898,7 +1898,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2. darba profils: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3. darba profils: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Prasīt PIN kodu pirms atspraušanas"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Pirms atspraušanas pieprasīt grafisko atsl."</string>
+    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Pirms atspraušanas pieprasīt atbloķēšanas kombināciju"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Pirms atspraušanas pieprasīt paroli"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"Instalēja administrators"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Atjaunināja administrators"</string>

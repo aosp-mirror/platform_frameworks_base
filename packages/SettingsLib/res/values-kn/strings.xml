@@ -204,7 +204,7 @@
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"VPN ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಈ ಬಳಕೆದಾರರಿಗೆ ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="tethering_settings_not_available" msgid="266821736434699780">"ಟೆಥರಿಂಗ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಈ ಬಳಕೆದಾರರಿಗೆ ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"ಪ್ರವೇಶ ಬಿಂದು ಹೆಸರಿನ ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಈ ಬಳಕೆದಾರರಿಗೆ ಲಭ್ಯವಿಲ್ಲ"</string>
-    <string name="enable_adb" msgid="8072776357237289039">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆ"</string>
+    <string name="enable_adb" msgid="8072776357237289039">"USB ಡೀಬಗಿಂಗ್‌"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB ಸಂಪರ್ಕಗೊಂಡಾಗ ಡೀಬಗ್ ಮೋಡ್"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB ಡೀಬಗ್‌ ಮಾಡುವಿಕೆಯ ಅಧಿಕೃತಗೊಳಿಸುವಿಕೆಗಳನ್ನು ಹಿಂತೆಗೆದುಕೊಳ್ಳಿ"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"ವೈರ್‌ಲೆಸ್ ಡೀಬಗಿಂಗ್"</string>

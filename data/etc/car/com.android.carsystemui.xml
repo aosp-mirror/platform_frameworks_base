@@ -24,5 +24,6 @@
         <permission name="android.car.permission.CONTROL_CAR_CLIMATE"/>
         <permission name="android.car.permission.CONTROL_CAR_EVS_ACTIVITY"/>
         <permission name="android.car.permission.MONITOR_CAR_EVS_STATUS"/>
+        <permission name="android.car.permission.CONTROL_CAR_APP_LAUNCH"/>
     </privapp-permissions>
 </permissions>

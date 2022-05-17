@@ -31,6 +31,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Scherm automatisch draaien"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="APPLICATION">%1$s</xliff:g> toegang geven tot <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="APPLICATION">%1$s</xliff:g> toegang geven tot <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nDeze app heeft geen opnamerechten gekregen, maar zou audio kunnen vastleggen via dit USB-apparaat."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"<xliff:g id="APPLICATION">%1$s</xliff:g> toegang geven tot <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="APPLICATION">%1$s</xliff:g> openen om <xliff:g id="USB_DEVICE">%2$s</xliff:g> te verwerken?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Deze app heeft geen opnamerechten gekregen, maar zou audio kunnen vastleggen via dit USB-apparaat. Als je <xliff:g id="APPLICATION">%1$s</xliff:g> gebruikt met dit apparaat, hoor je misschien geen gesprekken, meldingen en wekkers."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Als je <xliff:g id="APPLICATION">%1$s</xliff:g> gebruikt met dit apparaat, hoor je misschien geen gesprekken, meldingen en wekkers."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="APPLICATION">%1$s</xliff:g> toegang geven tot <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="APPLICATION">%1$s</xliff:g> openen om <xliff:g id="USB_DEVICE">%2$s</xliff:g> te verwerken?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="APPLICATION">%1$s</xliff:g> openen om <xliff:g id="USB_DEVICE">%2$s</xliff:g> te verwerken?\nDeze app heeft geen opnamerechten gekregen, maar zou audio kunnen vastleggen via dit USB-apparaat."</string>
@@ -38,8 +42,8 @@
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"Er werken geen geïnstalleerde apps met dit USB-accessoire. Meer informatie op: <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"USB-accessoire"</string>
     <string name="label_view" msgid="6815442985276363364">"Bekijken"</string>
-    <string name="always_use_device" msgid="210535878779644679">"<xliff:g id="APPLICATION">%1$s</xliff:g> altijd openen wanneer <xliff:g id="USB_DEVICE">%2$s</xliff:g> is verbonden"</string>
-    <string name="always_use_accessory" msgid="1977225429341838444">"<xliff:g id="APPLICATION">%1$s</xliff:g> altijd openen wanneer <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> is verbonden"</string>
+    <string name="always_use_device" msgid="210535878779644679">"<xliff:g id="APPLICATION">%1$s</xliff:g> altijd openen wanneer <xliff:g id="USB_DEVICE">%2$s</xliff:g> verbonden is"</string>
+    <string name="always_use_accessory" msgid="1977225429341838444">"<xliff:g id="APPLICATION">%1$s</xliff:g> altijd openen wanneer <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> verbonden is"</string>
     <string name="usb_debugging_title" msgid="8274884945238642726">"USB-foutopsporing toestaan?"</string>
     <string name="usb_debugging_message" msgid="5794616114463921773">"De vingerafdruk voor de RSA-sleutel van de computer is:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4003121804294739548">"Altijd toestaan vanaf deze computer"</string>
@@ -276,13 +280,13 @@
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Werk-apps"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Nachtverlichting"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Aan bij zonsondergang"</string>
-    <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Tot zonsopgang"</string>
+    <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Tot zonsopkomst"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Aan om <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Tot <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"Donker thema"</string>
     <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"Batterijbesparing"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"Aan bij zonsondergang"</string>
-    <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Tot zonsopgang"</string>
+    <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Tot zonsopkomst"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"Aan om <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"Tot <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
@@ -348,7 +352,7 @@
     <string name="user_remove_user_message" msgid="6702834122128031833">"Alle apps en gegevens van deze gebruiker worden verwijderd."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Verwijderen"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> krijgt toegang tot alle informatie die zichtbaar is op je scherm of die wordt afgespeeld vanaf je apparaat tijdens het opnemen of casten. Dit omvat informatie zoals wachtwoorden, betalingsgegevens, foto\'s, berichten en audio die je afspeelt."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"De service die deze functie levert, krijgt toegang tot alle informatie die zichtbaar is op je scherm of die wordt afgespeeld vanaf je apparaat tijdens het opnemen of casten. Dit omvat informatie zoals wachtwoorden, betalingsgegevens, foto\'s, berichten en audio die je afspeelt."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"De service die deze functie levert, krijgt tijdens het opnemen of casten toegang tot alle informatie die op je scherm te zien is of op je apparaat wordt afgespeeld. Dit omvat informatie zoals wachtwoorden, betalingsgegevens, foto\'s, berichten en audio die je afspeelt."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Beginnen met opnemen of casten?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Beginnen met opnemen of casten met <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Alles wissen"</string>
@@ -590,7 +594,7 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"Aan"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Uit"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Niet beschikbaar"</string>
-    <string name="tile_disabled" msgid="373212051546573069">"Uit"</string>
+    <string name="tile_disabled" msgid="373212051546573069">"Uitgezet"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Navigatiebalk"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Lay-out"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Extra knoptype links"</string>
@@ -716,7 +720,7 @@
     <string name="slice_permission_deny" msgid="6870256451658176895">"Weigeren"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"Tikken om Batterijbesparing aan te zetten"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"Aanzetten als de batterij waarschijnlijk leeg raakt"</string>
-    <string name="no_auto_saver_action" msgid="7467924389609773835">"Nee"</string>
+    <string name="no_auto_saver_action" msgid="7467924389609773835">"Nee, bedankt"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Apps gebruiken je <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
@@ -766,7 +770,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"als favoriet verwijderen"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Verplaatsen naar positie <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Bedieningselementen"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Kies welke bedieningselementen je in Snelle instellingen wilt zien"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Kies welke bedieningselementen je wilt zien in Snelle instellingen"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Houd vast en sleep om de bedieningselementen opnieuw in te delen"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Alle bedieningselementen verwijderd"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Wijzigingen zijn niet opgeslagen"</string>
@@ -814,8 +818,8 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(verbinding verbroken)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Kan geen verbinding maken. Probeer het nog eens."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Nieuw apparaat koppelen"</string>
-    <string name="build_number_clip_data_label" msgid="3623176728412560914">"Build-nummer"</string>
-    <string name="build_number_copy_toast" msgid="877720921605503046">"Build-nummer naar klembord gekopieerd."</string>
+    <string name="build_number_clip_data_label" msgid="3623176728412560914">"Buildnummer"</string>
+    <string name="build_number_copy_toast" msgid="877720921605503046">"Buildnummer naar klembord gekopieerd."</string>
     <string name="basic_status" msgid="2315371112182658176">"Gesprek openen"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Gesprekswidgets"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Tik op een gesprek om het toe te voegen aan je startscherm"</string>

@@ -513,6 +513,13 @@ public final class DeviceConfig {
     public static final String NAMESPACE_WINDOW_MANAGER_NATIVE_BOOT = "window_manager_native_boot";
 
     /**
+     * Definitions for voice interaction related functions.
+     *
+     * @hide
+     */
+    public static final String NAMESPACE_VOICE_INTERACTION = "voice_interaction";
+
+    /**
      * List of namespaces which can be read without READ_DEVICE_CONFIG permission
      *
      * @hide

@@ -31,6 +31,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Xirar pantalla automaticamente"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Queres permitir que <xliff:g id="APPLICATION">%1$s</xliff:g> acceda a <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Queres permitir que a aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> acceda ao dispositivo (<xliff:g id="USB_DEVICE">%2$s</xliff:g>)?\nEsta aplicación non está autorizada para realizar gravacións, pero pode capturar audio a través deste dispositivo USB."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Queres permitir que a aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> acceda a <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Queres abrir a aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> para utilizar <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Esta aplicación non está autorizada a realizar gravacións, pero pode capturar audio a través deste dispositivo USB. Ao usar a aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> con este dispositivo, é posible que non se escoiten chamadas, notificacións nin alarmas."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Ao usar a aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> con este dispositivo, é posible que non se escoiten chamadas, notificacións nin alarmas."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Queres permitir que <xliff:g id="APPLICATION">%1$s</xliff:g> acceda a <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Queres abrir <xliff:g id="APPLICATION">%1$s</xliff:g> para utilizar <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Queres abrir a aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> para xestionar o dispositivo (<xliff:g id="USB_DEVICE">%2$s</xliff:g>)?\nEsta aplicación non está autorizada a realizar gravacións, pero pode capturar audio a través deste dispositivo USB."</string>
@@ -81,10 +85,10 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Procesando gravación pantalla"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificación en curso sobre unha sesión de gravación de pantalla"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Queres iniciar a gravación?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Durante a gravación, o sistema Android pode captar información confidencial visible na pantalla ou reproducila no dispositivo. Isto inclúe contrasinais, información de pago, fotos, mensaxes e audio."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"Durante a gravación, o sistema Android pode captar información confidencial que apareza na pantalla ou se reproduza no dispositivo, como contrasinais, información de pago, fotos, mensaxes e audio."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Gravar audio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audio do dispositivo"</string>
-    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Son do dispositivo, por exemplo, música, chamadas e tons de chamada"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Son do dispositivo (por exemplo, música, chamadas e tons de chamada)"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Micrófono"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Audio e micrófono do dispositivo"</string>
     <string name="screenrecord_start" msgid="330991441575775004">"Iniciar"</string>

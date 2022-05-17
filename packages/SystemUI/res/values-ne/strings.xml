@@ -24,13 +24,17 @@
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> बाँकी"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"USB मार्फत चार्ज गर्न सकिँदैन"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"तपाईंको यन्त्रसँगै आएको चार्जर प्रयोग गर्नुहोस्‌"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"ब्याट्री सेभर सक्रिय गर्ने हो?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"ब्याट्री सेभर अन गर्ने हो?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"ब्याट्री सेभरका बारेमा"</string>
-    <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"खोल्नुहोस्"</string>
-    <string name="battery_saver_start_action" msgid="4553256017945469937">"ब्याट्री सेभर सक्रिय गर्नुहोस्"</string>
+    <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"अन गर्नुहोस्"</string>
+    <string name="battery_saver_start_action" msgid="4553256017945469937">"ब्याट्री सेभर अन गर्नुहोस्"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"स्वत:घुम्ने स्क्रिन"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="APPLICATION">%1$s</xliff:g> लाई <xliff:g id="USB_DEVICE">%2$s</xliff:g> माथि पहुँच राख्ने अनुमति दिने हो?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="APPLICATION">%1$s</xliff:g> लाई <xliff:g id="USB_DEVICE">%2$s</xliff:g> माथि पहुँच राख्न अनुमति दिने हो?\nयो एपलाई रेकर्ड गर्ने अनुमति प्रदान गरिएको छैन तर यसले USB यन्त्रमार्फत अडियो क्याप्चर गर्न सक्छ।"</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"<xliff:g id="APPLICATION">%1$s</xliff:g> लाई <xliff:g id="USB_DEVICE">%2$s</xliff:g> प्रयोग गर्ने अनुमति दिने हो?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> को व्यवस्थापन गर्न <xliff:g id="APPLICATION">%1$s</xliff:g> खोल्ने हो?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"यो एपलाई रेकर्ड गर्ने अनुमति दिइएको छैन तर यसले यो USB डिभाइसमार्फत अडियो रेकर्ड गर्न सक्छ। तपाईंले यो डिभाइसमा <xliff:g id="APPLICATION">%1$s</xliff:g> प्रयोग गर्नुभयो भने तपाईंले कल, सूचना र अलार्मको आवाज नसुन्ने सम्भावना हुन्छ।"</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"तपाईंले यो डिभाइसमा <xliff:g id="APPLICATION">%1$s</xliff:g> प्रयोग गर्नुभयो भने तपाईंले कल, सूचना र अलार्मको आवाज नसुन्ने सम्भावना हुन्छ।"</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="APPLICATION">%1$s</xliff:g> लाई <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> माथि पहुँच राख्ने अनुमति दिने हो?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> को व्यवस्थापन गर्न <xliff:g id="APPLICATION">%1$s</xliff:g> खोल्ने हो?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="APPLICATION">%1$s</xliff:g> लाई <xliff:g id="USB_DEVICE">%2$s</xliff:g> सञ्चालन गर्न खोल्ने हो?\nयो एपलाई रेकर्ड गर्ने अनुमति प्रदान गरिएको छैन तर यसले USB यन्त्रमार्फत अडियो क्याप्चर गर्न सक्छ।"</string>
@@ -696,7 +700,7 @@
     <string name="mobile_data" msgid="4564407557775397216">"मोबाइल डेटा"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
-    <string name="wifi_is_off" msgid="5389597396308001471">"Wi‑Fi निष्क्रिय छ"</string>
+    <string name="wifi_is_off" msgid="5389597396308001471">"Wi‑Fi अफ छ"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"ब्लुटुथ निष्क्रिय छ"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"बाधा नपुर्‍याउनुहोस् नामक विकल्प निष्क्रिय छ"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"कुनै स्वचालित नियमले बाधा नपुऱ्याउनुहोस् नामक विकल्पलाई सक्रियो गऱ्यो (<xliff:g id="ID_1">%s</xliff:g>)।"</string>
@@ -715,7 +719,7 @@
     <string name="slice_permission_allow" msgid="6340449521277951123">"अनुमति दिनुहोस्"</string>
     <string name="slice_permission_deny" msgid="6870256451658176895">"अस्वीकार गर्नु…"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"ब्याट्री सेभरको समयतालिका बनाउन ट्याप गर्नुहोस्"</string>
-    <string name="auto_saver_text" msgid="3214960308353838764">"ब्याट्री सकिने सम्भावना भएमा सक्रिय गर्नुहोस्"</string>
+    <string name="auto_saver_text" msgid="3214960308353838764">"ब्याट्री सकिने सम्भावना भएमा अन गर्नुहोस्"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"पर्दैन धन्यवाद"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"एपहरूले तपाईंको <xliff:g id="TYPES_LIST">%s</xliff:g> प्रयोग गर्दै छन्‌।"</string>
