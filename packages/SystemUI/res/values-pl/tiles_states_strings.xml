@@ -62,9 +62,9 @@
     <item msgid="8527389108867454098">"Włączona"</item>
   </string-array>
   <string-array name="tile_states_rotation">
-    <item msgid="4578491772376121579">"Niedostępny"</item>
-    <item msgid="5776427577477729185">"Wyłączony"</item>
-    <item msgid="7105052717007227415">"Włączony"</item>
+    <item msgid="4578491772376121579">"Niedostępne"</item>
+    <item msgid="5776427577477729185">"Wyłączone"</item>
+    <item msgid="7105052717007227415">"Włączone"</item>
   </string-array>
   <string-array name="tile_states_bt">
     <item msgid="5330252067413512277">"Niedostępny"</item>
