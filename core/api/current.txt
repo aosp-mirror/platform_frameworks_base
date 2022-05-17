@@ -36147,7 +36147,7 @@ package android.provider {
     field public static final int RESULT_SMS_NULL_MESSAGE = 8; // 0x8
     field public static final int RESULT_SMS_NULL_PDU = 7; // 0x7
     field public static final int RESULT_SMS_OUT_OF_MEMORY = 3; // 0x3
-    field @Deprecated public static final int RESULT_SMS_RECEIVED_WHILE_ENCRYPTED = 9; // 0x9
+    field public static final int RESULT_SMS_RECEIVED_WHILE_ENCRYPTED = 9; // 0x9
     field public static final int RESULT_SMS_UNSUPPORTED = 4; // 0x4
     field @Deprecated public static final String SECRET_CODE_ACTION = "android.provider.Telephony.SECRET_CODE";
     field public static final String SIM_FULL_ACTION = "android.provider.Telephony.SIM_FULL";
