@@ -184,6 +184,12 @@ public final class DevicePolicyResources {
                     PREFIX + "WORK_PROFILE_IT_ADMIN_CANT_RESET_SCREEN_LOCK";
 
             /**
+             * Text shown on the CTA link shown to user to set a separate lock for work apps
+             */
+            public static final String WORK_PROFILE_IT_ADMIN_CANT_RESET_SCREEN_LOCK_ACTION =
+                    PREFIX + "WORK_PROFILE_IT_ADMIN_CANT_RESET_SCREEN_LOCK_ACTION";
+
+            /**
              * Message shown in screen lock picker for setting up a work profile screen lock
              */
             public static final String WORK_PROFILE_SCREEN_LOCK_SETUP_MESSAGE =
@@ -1492,6 +1498,45 @@ public final class DevicePolicyResources {
              * Content description for the work profile lock screen.
              */
             public static final String WORK_LOCK_ACCESSIBILITY = PREFIX + "WORK_LOCK_ACCESSIBILITY";
+
+            /**
+             * Notification text displayed when screenshots are blocked by an IT admin.
+             */
+            public static final String SCREENSHOT_BLOCKED_BY_ADMIN =
+                    PREFIX + "SCREENSHOT_BLOCKED_BY_ADMIN";
+
+            /**
+             * Message shown when user is almost at the limit of password attempts where the
+             * profile will be removed. Accepts number of failed attempts and remaining failed
+             * attempts as params.
+             */
+            public static final String KEYGUARD_DIALOG_FAILED_ATTEMPTS_ALMOST_ERASING_PROFILE =
+                    PREFIX + "KEYGUARD_DIALOG_FAILED_ATTEMPTS_ALMOST_ERASING_PROFILE";
+
+            /**
+             * Message shown in dialog when user has exceeded the maximum attempts and the profile
+             * will be removed. Accepts number of failed attempts as a param.
+             */
+            public static final String KEYGUARD_DIALOG_FAILED_ATTEMPTS_ERASING_PROFILE =
+                    PREFIX + "KEYGUARD_DIALOG_FAILED_ATTEMPTS_ERASING_PROFILE";
+
+            /**
+             * Monitoring dialog subtitle for the section describing VPN.
+             */
+            public static final String QS_DIALOG_MONITORING_VPN_SUBTITLE =
+                    PREFIX + "QS_DIALOG_MONITORING_VPN_SUBTITLE";
+
+            /**
+             * Monitoring dialog subtitle for the section describing network logging.
+             */
+            public static final String QS_DIALOG_MONITORING_NETWORK_SUBTITLE =
+                    PREFIX + "QS_DIALOG_MONITORING_NETWORK_SUBTITLE";
+
+            /**
+             * Monitoring dialog subtitle for the section describing certificate authorities.
+             */
+            public static final String QS_DIALOG_MONITORING_CA_CERT_SUBTITLE =
+                    PREFIX + "QS_DIALOG_MONITORING_CA_CERT_SUBTITLE";
         }
 
         /**

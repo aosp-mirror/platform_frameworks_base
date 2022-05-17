@@ -53,6 +53,8 @@ public class PhoneStatusBarView extends FrameLayout {
     private View mCutoutSpace;
     @Nullable
     private DisplayCutout mDisplayCutout;
+    @Nullable
+    private Rect mDisplaySize;
     private int mStatusBarHeight;
     @Nullable
     private TouchEventHandler mTouchEventHandler;
@@ -87,7 +89,7 @@ public class PhoneStatusBarView extends FrameLayout {
         // Always have Battery meters in the status bar observe the dark/light modes.
         Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mBattery);
         Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mClock);
-        if (updateOrientationAndCutout()) {
+        if (updateDisplayParameters()) {
             updateLayoutForCutout();
         }
     }
@@ -106,7 +108,7 @@ public class PhoneStatusBarView extends FrameLayout {
         updateResources();
 
         // May trigger cutout space layout-ing
-        if (updateOrientationAndCutout()) {
+        if (updateDisplayParameters()) {
             updateLayoutForCutout();
             requestLayout();
         }
@@ -114,7 +116,7 @@ public class PhoneStatusBarView extends FrameLayout {
 
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
-        if (updateOrientationAndCutout()) {
+        if (updateDisplayParameters()) {
             updateLayoutForCutout();
             requestLayout();
         }
@@ -124,7 +126,7 @@ public class PhoneStatusBarView extends FrameLayout {
     /**
      * @return boolean indicating if we need to update the cutout location / margins
      */
-    private boolean updateOrientationAndCutout() {
+    private boolean updateDisplayParameters() {
         boolean changed = false;
         int newRotation = RotationUtils.getExactRotation(mContext);
         if (newRotation != mRotationOrientation) {
@@ -135,6 +137,13 @@ public class PhoneStatusBarView extends FrameLayout {
         if (!Objects.equals(getRootWindowInsets().getDisplayCutout(), mDisplayCutout)) {
             changed = true;
             mDisplayCutout = getRootWindowInsets().getDisplayCutout();
+        }
+
+        final Rect newSize = mContext.getResources().getConfiguration().windowConfiguration
+                .getMaxBounds();
+        if (!Objects.equals(newSize, mDisplaySize)) {
+            changed = true;
+            mDisplaySize = newSize;
         }
 
         return changed;

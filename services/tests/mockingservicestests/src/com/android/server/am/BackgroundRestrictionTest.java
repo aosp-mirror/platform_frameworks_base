@@ -585,6 +585,7 @@ public final class BackgroundRestrictionTest {
         DeviceConfigSession<Long> bgCurrentDrainInteractionGracePeriod = null;
         DeviceConfigSession<Float> bgCurrentDrainRestrictedBucketThreshold = null;
         DeviceConfigSession<Float> bgCurrentDrainBgRestrictedThreshold = null;
+        DeviceConfigSession<Boolean> bgCurrentDrainAutoRestrictAbusiveApps = null;
         DeviceConfigSession<Boolean> bgPromptFgsWithNotiToBgRestricted = null;
         DeviceConfigSession<Boolean> bgPromptAbusiveAppToBgRestricted = null;
         DeviceConfigSession<Long> bgNotificationMinInterval = null;
@@ -643,6 +644,14 @@ public final class BackgroundRestrictionTest {
                             R.array.config_bg_current_drain_threshold_to_bg_restricted))[
                             isLowRamDeviceStatic() ? 1 : 0]);
             bgCurrentDrainBgRestrictedThreshold.set(bgRestrictedThreshold);
+
+            bgCurrentDrainAutoRestrictAbusiveApps = new DeviceConfigSession<>(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    AppBatteryPolicy.KEY_BG_CURRENT_DRAIN_AUTO_RESTRICT_ABUSIVE_APPS_ENABLED,
+                    DeviceConfig::getBoolean,
+                    mContext.getResources().getBoolean(
+                            R.bool.config_bg_current_drain_auto_restrict_abusive_apps));
+            bgCurrentDrainAutoRestrictAbusiveApps.set(true);
 
             bgPromptFgsWithNotiToBgRestricted = new DeviceConfigSession<>(
                     DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
@@ -1099,6 +1108,7 @@ public final class BackgroundRestrictionTest {
             closeIfNotNull(bgCurrentDrainInteractionGracePeriod);
             closeIfNotNull(bgCurrentDrainRestrictedBucketThreshold);
             closeIfNotNull(bgCurrentDrainBgRestrictedThreshold);
+            closeIfNotNull(bgCurrentDrainAutoRestrictAbusiveApps);
             closeIfNotNull(bgPromptFgsWithNotiToBgRestricted);
             closeIfNotNull(bgPromptAbusiveAppToBgRestricted);
             closeIfNotNull(bgNotificationMinInterval);
@@ -1651,6 +1661,7 @@ public final class BackgroundRestrictionTest {
         DeviceConfigSession<Float> bgCurrentDrainBgRestrictedThreshold = null;
         DeviceConfigSession<Float> bgCurrentDrainRestrictedBucketHighThreshold = null;
         DeviceConfigSession<Float> bgCurrentDrainBgRestrictedHighThreshold = null;
+        DeviceConfigSession<Boolean> bgCurrentDrainAutoRestrictAbusiveApps = null;
         DeviceConfigSession<Long> bgMediaPlaybackMinDurationThreshold = null;
         DeviceConfigSession<Long> bgLocationMinDurationThreshold = null;
         DeviceConfigSession<Boolean> bgCurrentDrainEventDurationBasedThresholdEnabled = null;
@@ -1735,6 +1746,14 @@ public final class BackgroundRestrictionTest {
                             R.array.config_bg_current_drain_high_threshold_to_bg_restricted))[
                             isLowRamDeviceStatic() ? 1 : 0]);
             bgCurrentDrainBgRestrictedHighThreshold.set(bgRestrictedHighThreshold);
+
+            bgCurrentDrainAutoRestrictAbusiveApps = new DeviceConfigSession<>(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    AppBatteryPolicy.KEY_BG_CURRENT_DRAIN_AUTO_RESTRICT_ABUSIVE_APPS_ENABLED,
+                    DeviceConfig::getBoolean,
+                    mContext.getResources().getBoolean(
+                            R.bool.config_bg_current_drain_auto_restrict_abusive_apps));
+            bgCurrentDrainAutoRestrictAbusiveApps.set(true);
 
             bgMediaPlaybackMinDurationThreshold = new DeviceConfigSession<>(
                     DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
@@ -2226,6 +2245,7 @@ public final class BackgroundRestrictionTest {
             closeIfNotNull(bgCurrentDrainBgRestrictedThreshold);
             closeIfNotNull(bgCurrentDrainRestrictedBucketHighThreshold);
             closeIfNotNull(bgCurrentDrainBgRestrictedHighThreshold);
+            closeIfNotNull(bgCurrentDrainAutoRestrictAbusiveApps);
             closeIfNotNull(bgMediaPlaybackMinDurationThreshold);
             closeIfNotNull(bgLocationMinDurationThreshold);
             closeIfNotNull(bgCurrentDrainEventDurationBasedThresholdEnabled);
