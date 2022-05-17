@@ -59,7 +59,7 @@ public class BluetoothMediaDevice extends MediaDevice {
 
     @Override
     public Drawable getIcon() {
-        return BluetoothUtils.getBtDrawableWithDescription(mContext, mCachedDevice).first;
+        return BluetoothUtils.getBtClassDrawableWithDescription(mContext, mCachedDevice).first;
     }
 
     @Override

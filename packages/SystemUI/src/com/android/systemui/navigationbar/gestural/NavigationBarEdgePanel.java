@@ -363,6 +363,7 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
         initializeBackAnimation();
 
         setVisibility(GONE);
+
         Executor backgroundExecutor = Dependency.get(Dependency.BACKGROUND_EXECUTOR);
         boolean isPrimaryDisplay = mContext.getDisplayId() == DEFAULT_DISPLAY;
         mRegionSamplingHelper = new RegionSamplingHelper(this,

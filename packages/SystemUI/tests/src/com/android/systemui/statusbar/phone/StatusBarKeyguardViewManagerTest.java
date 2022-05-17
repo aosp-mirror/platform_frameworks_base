@@ -412,13 +412,13 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testBouncerIsInTransit() {
+    public void testIsBouncerInTransit() {
         when(mBouncer.inTransit()).thenReturn(true);
-        Truth.assertThat(mStatusBarKeyguardViewManager.bouncerIsInTransit()).isTrue();
+        Truth.assertThat(mStatusBarKeyguardViewManager.isBouncerInTransit()).isTrue();
         when(mBouncer.inTransit()).thenReturn(false);
-        Truth.assertThat(mStatusBarKeyguardViewManager.bouncerIsInTransit()).isFalse();
+        Truth.assertThat(mStatusBarKeyguardViewManager.isBouncerInTransit()).isFalse();
         mBouncer = null;
-        Truth.assertThat(mStatusBarKeyguardViewManager.bouncerIsInTransit()).isFalse();
+        Truth.assertThat(mStatusBarKeyguardViewManager.isBouncerInTransit()).isFalse();
     }
 
     private static PanelExpansionChangeEvent expansionEvent(

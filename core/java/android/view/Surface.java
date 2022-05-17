@@ -341,10 +341,12 @@ public class Surface implements Parcelable {
      */
     @UnsupportedAppUsage
     public void destroy() {
-        if (mNativeObject != 0) {
-            nativeDestroy(mNativeObject);
+        synchronized (mLock) {
+            if (mNativeObject != 0) {
+                nativeDestroy(mNativeObject);
+            }
+            release();
         }
-        release();
     }
 
     /**

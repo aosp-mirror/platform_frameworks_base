@@ -54,6 +54,7 @@ public class EditUserInfoController {
 
     private Dialog mEditUserInfoDialog;
     private Bitmap mSavedPhoto;
+    private Drawable mSavedDrawable;
     private EditUserPhotoController mEditUserPhotoController;
     private boolean mWaitingForActivityResult = false;
     private final String mFileAuthority;
@@ -68,6 +69,7 @@ public class EditUserInfoController {
         }
         mEditUserInfoDialog = null;
         mSavedPhoto = null;
+        mSavedDrawable = null;
     }
 
     /**
@@ -170,7 +172,8 @@ public class EditUserInfoController {
 
     private Drawable getUserIcon(Activity activity, Drawable defaultUserIcon) {
         if (mSavedPhoto != null) {
-            return CircleFramedDrawable.getInstance(activity, mSavedPhoto);
+            mSavedDrawable = CircleFramedDrawable.getInstance(activity, mSavedPhoto);
+            return mSavedDrawable;
         }
         return defaultUserIcon;
     }
@@ -229,6 +232,6 @@ public class EditUserInfoController {
     EditUserPhotoController createEditUserPhotoController(Activity activity,
             ActivityStarter activityStarter, ImageView userPhotoView) {
         return new EditUserPhotoController(activity, activityStarter, userPhotoView,
-                mSavedPhoto, mFileAuthority);
+                mSavedPhoto, mSavedDrawable, mFileAuthority);
     }
 }
