@@ -17,11 +17,12 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"கம்பேனியன் சாதன நிர்வாகி"</string>
-    <string name="confirmation_title" msgid="8455544820286920304">"உங்கள் &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ஐ நிர்வகிக்க &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ஆப்ஸை அனுமதியுங்கள்"</string>
+    <!-- no translation found for confirmation_title (3785000297483688997) -->
+    <skip />
     <string name="profile_name_watch" msgid="576290739483672360">"வாட்ச்"</string>
     <string name="chooser_title" msgid="2262294130493605839">"&lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt; ஆப்ஸ் நிர்வகிக்கக்கூடிய <xliff:g id="PROFILE_NAME">%1$s</xliff:g> ஐத் தேர்ந்தெடுங்கள்"</string>
-    <string name="summary_watch" product="default" msgid="7113724443198337683">"உங்கள் அறிவிப்புகளைப் பார்க்கவும் மொபைல், மெசேஜ், தொடர்புகள், கேலெண்டர் ஆகியவற்றை அணுகவும் <xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸுக்கு அனுமதி வழங்கப்படும்."</string>
-    <string name="summary_watch" product="tablet" msgid="7113724443198337683">"உங்கள் அறிவிப்புகளைப் பார்க்கவும் மொபைல், மெசேஜ், தொடர்புகள், கேலெண்டர் ஆகியவற்றை அணுகவும் <xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸுக்கு அனுமதி வழங்கப்படும்."</string>
+    <!-- no translation found for summary_watch (3002344206574997652) -->
+    <skip />
     <string name="permission_apps" msgid="6142133265286656158">"ஆப்ஸ்"</string>
     <string name="permission_apps_summary" msgid="798718816711515431">"உங்கள் மொபைலின் ஆப்ஸை ஸ்ட்ரீம் செய்யலாம்"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"மொபைலில் உள்ள இந்தத் தகவல்களை அணுக, &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ஆப்ஸை அனுமதிக்கவும்"</string>
@@ -44,4 +45,6 @@
     <string name="consent_back" msgid="2560683030046918882">"பின்செல்"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"&lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; சாதனத்தில் இருக்கும் அதே அனுமதிகளை &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; சாதனத்தில் உள்ள ஆப்ஸுக்கும் வழங்கவா?"</string>
     <string name="permission_sync_summary" msgid="4866838188678457084">"&lt;p&gt;&lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt; &lt;p&gt; சாதனத்தில் உள்ள மைக்ரோஃபோன், கேமரா, இருப்பிட அணுகல், பாதுகாக்கவேண்டிய பிற தகவல்கள் ஆகியவற்றுக்கான அனுமதிகள் இதிலடங்கும்.&lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt; சாதனத்தில் உள்ள அமைப்புகளில் இந்த அனுமதிகளை எப்போது வேண்டுமானாலும் நீங்கள் மாற்றிக்கொள்ளலாம்."</string>
+    <string name="vendor_icon_description" msgid="4445875290032225965">"ஆப்ஸ் ஐகான்"</string>
+    <string name="vendor_header_button_description" msgid="6566660389500630608">"கூடுதல் தகவல்கள் பட்டன்"</string>
 </resources>
