@@ -167,7 +167,10 @@ public class BubbleOverflowContainerView extends LinearLayout {
 
     void updateOverflow() {
         Resources res = getResources();
-        final int columns = res.getInteger(R.integer.bubbles_overflow_columns);
+        int columns = (int) Math.round(getWidth()
+                / (res.getDimension(R.dimen.bubble_name_width)));
+        columns = columns > 0 ? columns : res.getInteger(R.integer.bubbles_overflow_columns);
+
         mRecyclerView.setLayoutManager(
                 new OverflowGridLayoutManager(getContext(), columns));
         if (mRecyclerView.getItemDecorationCount() == 0) {
