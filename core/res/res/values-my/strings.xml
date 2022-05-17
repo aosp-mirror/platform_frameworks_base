@@ -305,8 +305,10 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"သင့်ပြက္ခဒိန်အား ဝင်ရောက်သုံးရန်"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS စာတိုစနစ်"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS စာများကို ပို့ကာ ကြည့်မည်"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"ဖိုင်နှင့် မှတ်တမ်းများ"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"သင့်စက်ရှိ ဖိုင်နှင့် မှတ်တမ်းများ သုံးခွင့်"</string>
+    <!-- no translation found for permgrouplab_storage (17339216290379241) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_storage (5378659041354582769) -->
+    <skip />
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"တေးဂီတနှင့် အသံ"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"သင့်စက်တွင် တေးဂီတနှင့် အသံများ ဖွင့်နိုင်သည်"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ဓာတ်ပုံနှင့် ဗီဒီယိုများ"</string>
@@ -1220,7 +1222,7 @@
     <string name="screen_compat_mode_scale" msgid="8627359598437527726">"စကေး"</string>
     <string name="screen_compat_mode_show" msgid="5080361367584709857">"အမြဲပြသရန်"</string>
     <string name="screen_compat_mode_hint" msgid="4032272159093750908">"ဒါကို စနစ် ဆက်တင်များထဲ ပြန်ဖွင့်ပေးရန် &gt; Apps &gt; ဒေါင်းလုဒ် လုပ်ပြီး။"</string>
-    <string name="unsupported_display_size_message" msgid="7265211375269394699">"<xliff:g id="APP_NAME">%1$s</xliff:g> သည် လက်ရှိ မျက်နှာပြင်အရွယ်အစားကို ပံ့ပိုးထားခြင်း မရှိပါ။ မမျှော်လင့်နိုင်သည့် ချွတ်ယွင်းချက်များ ဖြစ်ပေါ်နိုင်ပါသည်။"</string>
+    <string name="unsupported_display_size_message" msgid="7265211375269394699">"<xliff:g id="APP_NAME">%1$s</xliff:g> သည် လက်ရှိ ပြကွက်အရွယ်ကို ပံ့ပိုးထားခြင်း မရှိပါ။ မမျှော်လင့်နိုင်သည့် ချွတ်ယွင်းချက်များ ဖြစ်ပေါ်နိုင်ပါသည်။"</string>
     <string name="unsupported_display_size_show" msgid="980129850974919375">"အမြဲပြပါ"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"ကိုက်ညီမှုမရှိသည့် Android OS ဗားရှင်းအတွက် <xliff:g id="APP_NAME">%1$s</xliff:g> ကို ပြုလုပ်ထားခြင်းဖြစ်ပြီး ပုံမှန်အလုပ်မလုပ်နိုင်ပါ။ ဤအက်ပ်အတွက် အပ်ဒိတ်လုပ်ထားသည့် ဗားရှင်း ရနိုင်ပါမည်။"</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"အမြဲပြရန်"</string>
@@ -2281,5 +2283,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ပွင့်နေသည့်အက်ပ်များ စစ်ဆေးရန်"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"သင်၏ <xliff:g id="DEVICE">%1$s</xliff:g> မှ ဖုန်းကင်မရာကို သုံး၍မရပါ"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"သင်၏ <xliff:g id="DEVICE">%1$s</xliff:g> မှ တက်ဘလက်ကင်မရာကို သုံး၍မရပါ"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"စနစ်၏ ဘာသာစကား"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"စနစ်မူရင်း"</string>
 </resources>
