@@ -2039,13 +2039,14 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             }
 
             if (inOutConfig.screenWidthDp == Configuration.SCREEN_WIDTH_DP_UNDEFINED) {
-                final int overrideScreenWidthDp = (int) (mTmpStableBounds.width() / density);
+                final int overrideScreenWidthDp = (int) (mTmpStableBounds.width() / density + 0.5f);
                 inOutConfig.screenWidthDp = (insideParentBounds && !customContainerPolicy)
                         ? Math.min(overrideScreenWidthDp, parentConfig.screenWidthDp)
                         : overrideScreenWidthDp;
             }
             if (inOutConfig.screenHeightDp == Configuration.SCREEN_HEIGHT_DP_UNDEFINED) {
-                final int overrideScreenHeightDp = (int) (mTmpStableBounds.height() / density);
+                final int overrideScreenHeightDp =
+                        (int) (mTmpStableBounds.height() / density + 0.5f);
                 inOutConfig.screenHeightDp = (insideParentBounds && !customContainerPolicy)
                         ? Math.min(overrideScreenHeightDp, parentConfig.screenHeightDp)
                         : overrideScreenHeightDp;
@@ -2063,8 +2064,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                         && !mTmpFullBounds.isEmpty() && mTmpFullBounds.equals(parentBounds);
                 if (WindowConfiguration.isFloating(windowingMode) && !inPipTransition) {
                     // For floating tasks, calculate the smallest width from the bounds of the task
-                    inOutConfig.smallestScreenWidthDp = (int) (
-                            Math.min(mTmpFullBounds.width(), mTmpFullBounds.height()) / density);
+                    inOutConfig.smallestScreenWidthDp = (int) (0.5f
+                            + Math.min(mTmpFullBounds.width(), mTmpFullBounds.height()) / density);
                 }
                 // otherwise, it will just inherit
             }
@@ -2078,8 +2079,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             // For calculating screen layout, we need to use the non-decor inset screen area for the
             // calculation for compatibility reasons, i.e. screen area without system bars that
             // could never go away in Honeycomb.
-            int compatScreenWidthDp = (int) (mTmpNonDecorBounds.width() / density);
-            int compatScreenHeightDp = (int) (mTmpNonDecorBounds.height() / density);
+            int compatScreenWidthDp = (int) (mTmpNonDecorBounds.width() / density + 0.5f);
+            int compatScreenHeightDp = (int) (mTmpNonDecorBounds.height() / density + 0.5f);
             // Use overrides if provided. If both overrides are provided, mTmpNonDecorBounds is
             // undefined so it can't be used.
             if (inOutConfig.screenWidthDp != Configuration.SCREEN_WIDTH_DP_UNDEFINED) {
