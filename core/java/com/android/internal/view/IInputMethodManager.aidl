@@ -20,6 +20,7 @@ import android.os.ResultReceiver;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 import android.view.inputmethod.EditorInfo;
+import android.window.ImeOnBackInvokedDispatcher;
 
 import com.android.internal.inputmethod.InputBindResult;
 import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
@@ -57,7 +58,7 @@ interface IInputMethodManager {
             /* @android.view.WindowManager.LayoutParams.SoftInputModeFlags */ int softInputMode,
             int windowFlags, in EditorInfo attribute, in IInputContext inputContext,
             in IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
-            int unverifiedTargetSdkVersion);
+            int unverifiedTargetSdkVersion, in ImeOnBackInvokedDispatcher imeDispatcher);
 
     void showInputMethodPickerFromClient(in IInputMethodClient client,
             int auxiliarySubtypeMode);

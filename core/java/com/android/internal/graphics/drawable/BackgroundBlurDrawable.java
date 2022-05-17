@@ -36,6 +36,7 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.view.ViewRootImpl;
+import android.view.ViewTreeObserver;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -232,9 +233,12 @@ public final class BackgroundBlurDrawable extends Drawable {
         private final ArraySet<BackgroundBlurDrawable> mDrawables = new ArraySet();
         @GuardedBy("mRtLock")
         private final LongSparseArray<ArraySet<Runnable>> mFrameRtUpdates = new LongSparseArray();
+        private long mLastFrameNumber = 0;
+        private BlurRegion[] mLastFrameBlurRegions = null;
         private final ViewRootImpl mViewRoot;
         private BlurRegion[] mTmpBlurRegionsForFrame = new BlurRegion[0];
         private boolean mHasUiUpdates;
+        private ViewTreeObserver.OnPreDrawListener mOnPreDrawListener;
 
         public Aggregator(ViewRootImpl viewRoot) {
             mViewRoot = viewRoot;
@@ -277,6 +281,38 @@ public final class BackgroundBlurDrawable extends Drawable {
                     Log.d(TAG, "Remove " + drawable);
                 }
             }
+
+            if (mOnPreDrawListener == null && mViewRoot.getView() != null
+                    && hasRegions()) {
+                registerPreDrawListener();
+            }
+        }
+
+        private void registerPreDrawListener() {
+            mOnPreDrawListener = () -> {
+                final boolean hasUiUpdates = hasUpdates();
+
+                if (hasUiUpdates || hasRegions()) {
+                    final BlurRegion[] blurRegionsForNextFrame = getBlurRegionsCopyForRT();
+
+                    mViewRoot.registerRtFrameCallback(frame -> {
+                        synchronized (mRtLock) {
+                            mLastFrameNumber = frame;
+                            mLastFrameBlurRegions = blurRegionsForNextFrame;
+                            handleDispatchBlurTransactionLocked(
+                                    frame, blurRegionsForNextFrame, hasUiUpdates);
+                        }
+                    });
+                }
+                if (!hasRegions() && mViewRoot.getView() != null) {
+                    mViewRoot.getView().getViewTreeObserver()
+                            .removeOnPreDrawListener(mOnPreDrawListener);
+                    mOnPreDrawListener = null;
+                }
+                return true;
+            };
+
+            mViewRoot.getView().getViewTreeObserver().addOnPreDrawListener(mOnPreDrawListener);
         }
 
         // Called from a thread pool
@@ -290,7 +326,14 @@ public final class BackgroundBlurDrawable extends Drawable {
                     mFrameRtUpdates.put(frameNumber, frameRtUpdates);
                 }
                 frameRtUpdates.add(update);
+
+                if (mLastFrameNumber == frameNumber) {
+                    // The transaction for this frame has already been sent, so we have to manually
+                    // trigger sending a transaction here in order to apply this position update
+                    handleDispatchBlurTransactionLocked(frameNumber, mLastFrameBlurRegions, true);
+                }
             }
+
         }
 
         /**
@@ -329,29 +372,27 @@ public final class BackgroundBlurDrawable extends Drawable {
         /**
          * Called on RenderThread.
          *
-         * @return all blur regions if there are any ui or position updates for this frame,
-         *         null otherwise
+         * @return true if it is necessary to send an update to Sf this frame
          */
+        @GuardedBy("mRtLock")
         @VisibleForTesting
-        public float[][] getBlurRegionsToDispatchToSf(long frameNumber,
-                BlurRegion[] blurRegionsForFrame, boolean hasUiUpdatesForFrame) {
-            synchronized (mRtLock) {
-                if (!hasUiUpdatesForFrame && (mFrameRtUpdates.size() == 0
-                            || mFrameRtUpdates.keyAt(0) > frameNumber)) {
-                    return null;
-                }
+        public float[][] getBlurRegionsForFrameLocked(long frameNumber,
+                BlurRegion[] blurRegionsForFrame, boolean forceUpdate) {
+            if (!forceUpdate && (mFrameRtUpdates.size() == 0
+                        || mFrameRtUpdates.keyAt(0) > frameNumber)) {
+                return null;
+            }
 
-                // mFrameRtUpdates holds position updates coming from a thread pool span from
-                // RenderThread. At this point, all position updates for frame frameNumber should
-                // have been added to mFrameRtUpdates.
-                // Here, we apply all updates for frames <= frameNumber in case some previous update
-                // has been missed. This also protects mFrameRtUpdates from memory leaks.
-                while (mFrameRtUpdates.size() != 0 && mFrameRtUpdates.keyAt(0) <= frameNumber) {
-                    final ArraySet<Runnable> frameUpdates = mFrameRtUpdates.valueAt(0);
-                    mFrameRtUpdates.removeAt(0);
-                    for (int i = 0; i < frameUpdates.size(); i++) {
-                        frameUpdates.valueAt(i).run();
-                    }
+            // mFrameRtUpdates holds position updates coming from a thread pool span from
+            // RenderThread. At this point, all position updates for frame frameNumber should
+            // have been added to mFrameRtUpdates.
+            // Here, we apply all updates for frames <= frameNumber in case some previous update
+            // has been missed. This also protects mFrameRtUpdates from memory leaks.
+            while (mFrameRtUpdates.size() != 0 && mFrameRtUpdates.keyAt(0) <= frameNumber) {
+                final ArraySet<Runnable> frameUpdates = mFrameRtUpdates.valueAt(0);
+                mFrameRtUpdates.removeAt(0);
+                for (int i = 0; i < frameUpdates.size(); i++) {
+                    frameUpdates.valueAt(i).run();
                 }
             }
 
@@ -370,13 +411,13 @@ public final class BackgroundBlurDrawable extends Drawable {
         }
 
         /**
-         * Called on RenderThread in FrameDrawingCallback.
-         * Dispatch all blur regions if there are any ui or position updates.
+         * Dispatch all blur regions if there are any ui or position updates for that frame.
          */
-        public void dispatchBlurTransactionIfNeeded(long frameNumber,
-                BlurRegion[] blurRegionsForFrame, boolean hasUiUpdatesForFrame) {
-            final float[][] blurRegionsArray = getBlurRegionsToDispatchToSf(frameNumber,
-                    blurRegionsForFrame, hasUiUpdatesForFrame);
+        @GuardedBy("mRtLock")
+        private void handleDispatchBlurTransactionLocked(long frameNumber, BlurRegion[] blurRegions,
+                boolean forceUpdate) {
+            float[][] blurRegionsArray =
+                    getBlurRegionsForFrameLocked(frameNumber, blurRegions, forceUpdate);
             if (blurRegionsArray != null) {
                 mViewRoot.dispatchBlurRegions(blurRegionsArray, frameNumber);
             }

@@ -246,6 +246,18 @@ class ActivityClientController extends IActivityClientController.Stub {
     }
 
     @Override
+    public void activityLocalRelaunch(IBinder token) {
+        final long origId = Binder.clearCallingIdentity();
+        synchronized (mGlobalLock) {
+            final ActivityRecord r = ActivityRecord.forTokenLocked(token);
+            if (r != null) {
+                r.startRelaunching();
+            }
+        }
+        Binder.restoreCallingIdentity(origId);
+    }
+
+    @Override
     public void activityRelaunched(IBinder token) {
         final long origId = Binder.clearCallingIdentity();
         synchronized (mGlobalLock) {
@@ -739,20 +751,7 @@ class ActivityClientController extends IActivityClientController.Stub {
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ensureValidPictureInPictureActivityParams(
                         "setPictureInPictureParams", token, params);
-
-                // Only update the saved args from the args that are set.
                 r.setPictureInPictureParams(params);
-                if (r.inPinnedWindowingMode()) {
-                    // If the activity is already in picture-in-picture, update the pinned task now
-                    // if it is not already expanding to fullscreen. Otherwise, the arguments will
-                    // be used the next time the activity enters PiP.
-                    final Task rootTask = r.getRootTask();
-                    rootTask.setPictureInPictureAspectRatio(
-                            r.pictureInPictureArgs.getAspectRatioFloat(),
-                            r.pictureInPictureArgs.getExpandedAspectRatioFloat());
-                    rootTask.setPictureInPictureActions(r.pictureInPictureArgs.getActions(),
-                            r.pictureInPictureArgs.getCloseAction());
-                }
             }
         } finally {
             Binder.restoreCallingIdentity(origId);

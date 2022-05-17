@@ -116,8 +116,8 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER) public void addHomeVisibilityListener(@NonNull java.util.concurrent.Executor, @NonNull android.app.HomeVisibilityListener);
     method public void alwaysShowUnsupportedCompileSdkWarning(android.content.ComponentName);
     method public long getTotalRam();
-    method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int getUidProcessCapabilities(int);
-    method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int getUidProcessState(int);
+    method @RequiresPermission(allOf={android.Manifest.permission.PACKAGE_USAGE_STATS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}, conditional=true) public int getUidProcessCapabilities(int);
+    method @RequiresPermission(allOf={android.Manifest.permission.PACKAGE_USAGE_STATS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}, conditional=true) public int getUidProcessState(int);
     method public void holdLock(android.os.IBinder, int);
     method public static boolean isHighEndGfx();
     method @RequiresPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER) public void removeHomeVisibilityListener(@NonNull android.app.HomeVisibilityListener);
@@ -314,14 +314,12 @@ package android.app {
   public final class NotificationChannel implements android.os.Parcelable {
     method public int getOriginalImportance();
     method public boolean isImportanceLockedByCriticalDeviceFunction();
-    method public boolean isImportanceLockedByOEM();
     method public void lockFields(int);
     method public void setDeleted(boolean);
     method public void setDeletedTimeMs(long);
     method public void setDemoted(boolean);
     method public void setFgServiceShown(boolean);
     method public void setImportanceLockedByCriticalDeviceFunction(boolean);
-    method public void setImportanceLockedByOEM(boolean);
     method public void setImportantConversation(boolean);
     method public void setOriginalImportance(int);
   }
@@ -800,6 +798,7 @@ package android.content.pm {
     method public boolean hasRequestForegroundServiceExemption();
     method public boolean isPrivilegedApp();
     method public boolean isSystemApp();
+    method public void setEnableOnBackInvokedCallback(boolean);
     field public static final int PRIVATE_FLAG_PRIVILEGED = 8; // 0x8
     field public int privateFlags;
   }
@@ -919,7 +918,7 @@ package android.content.pm {
     field public int id;
     field public String lastLoggedInFingerprint;
     field public long lastLoggedInTime;
-    field public String name;
+    field @Nullable public String name;
     field public boolean partial;
     field public boolean preCreated;
     field public int profileBadge;

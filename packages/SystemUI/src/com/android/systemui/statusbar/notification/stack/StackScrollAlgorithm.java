@@ -49,9 +49,10 @@ public class StackScrollAlgorithm {
 
     public static final float START_FRACTION = 0.5f;
 
-    private static final String LOG_TAG = "StackScrollAlgorithm";
-    private final ViewGroup mHostView;
+    private static final String TAG = "StackScrollAlgorithm";
+    private static final Boolean DEBUG = false;
 
+    private final ViewGroup mHostView;
     private int mPaddingBetweenElements;
     private int mGapHeight;
     private int mGapHeightOnLockscreen;
@@ -124,6 +125,37 @@ public class StackScrollAlgorithm {
      */
     public float getNotificationSquishinessFraction(AmbientState ambientState) {
         return getExpansionFractionWithoutShelf(mTempAlgorithmState, ambientState);
+    }
+
+    private void log(String s) {
+        if (DEBUG) {
+            android.util.Log.i(TAG, s);
+        }
+    }
+
+    public void logView(View view, String s) {
+        String viewString = "";
+        if (view instanceof ExpandableNotificationRow) {
+            ExpandableNotificationRow row = ((ExpandableNotificationRow) view);
+            if (row.getEntry() == null) {
+                viewString = "ExpandableNotificationRow has null NotificationEntry";
+            } else {
+                viewString = row.getEntry().getSbn().getId() + "";
+            }
+        } else if (view == null) {
+            viewString = "View is null";
+        } else if (view instanceof SectionHeaderView) {
+            viewString = "SectionHeaderView";
+        } else if (view instanceof FooterView) {
+            viewString = "FooterView";
+        } else if (view instanceof MediaContainerView) {
+            viewString = "MediaContainerView";
+        } else if (view instanceof EmptyShadeView) {
+            viewString = "EmptyShadeView";
+        } else {
+            viewString = view.toString();
+        }
+        log(viewString + " " + s);
     }
 
     private void resetChildViewStates() {
@@ -314,7 +346,8 @@ public class StackScrollAlgorithm {
 
             if (ambientState.getShelf() != null) {
                 final float shelfStart = ambientState.getStackEndHeight()
-                        - ambientState.getShelf().getIntrinsicHeight();
+                        - ambientState.getShelf().getIntrinsicHeight()
+                        - mPaddingBetweenElements;
                 if (currentY >= shelfStart
                         && !(view instanceof FooterView)
                         && state.firstViewInShelf == null) {
@@ -507,8 +540,9 @@ public class StackScrollAlgorithm {
                                     || bypassPulseNotExpanding
                                     ? ambientState.getInnerHeight()
                                     : (int) ambientState.getStackHeight();
-                    final int shelfStart =
-                            stackBottom - ambientState.getShelf().getIntrinsicHeight();
+                    final int shelfStart = stackBottom
+                            - ambientState.getShelf().getIntrinsicHeight()
+                            - mPaddingBetweenElements;
                     viewState.yTranslation = Math.min(viewState.yTranslation, shelfStart);
                     if (viewState.yTranslation >= shelfStart) {
                         viewState.hidden = !view.isExpandAnimationRunning()

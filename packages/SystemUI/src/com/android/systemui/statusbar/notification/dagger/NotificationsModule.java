@@ -70,6 +70,8 @@ import com.android.systemui.statusbar.notification.collection.render.GroupMember
 import com.android.systemui.statusbar.notification.collection.render.NotifGutsViewManager;
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
+import com.android.systemui.statusbar.notification.icon.ConversationIconManager;
+import com.android.systemui.statusbar.notification.icon.IconManager;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.init.NotificationsControllerImpl;
 import com.android.systemui.statusbar.notification.init.NotificationsControllerStub;
@@ -86,7 +88,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationSectionsMan
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.phone.NotifActivityLaunchEventsModule;
 import com.android.systemui.statusbar.phone.NotifPanelEventsModule;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -109,7 +110,6 @@ import dagger.Provides;
 @Module(includes = {
         CoordinatorsModule.class,
         KeyguardNotificationVisibilityProviderModule.class,
-        NotifActivityLaunchEventsModule.class,
         NotifPanelEventsModule.class,
         NotifPipelineChoreographerModule.class,
         NotificationSectionHeadersModule.class,
@@ -348,8 +348,7 @@ public interface NotificationsModule {
                         notifCollection.get(),
                         headsUpManager,
                         statusBarStateController,
-                        visualStabilityCoordinator.get(),
-                        groupMembershipManagerLazy.get())
+                        visualStabilityCoordinator.get())
                 : new OnUserInteractionCallbackImplLegacy(
                         entryManager,
                         visibilityProvider.get(),
@@ -367,6 +366,10 @@ public interface NotificationsModule {
     /** */
     @Binds
     NotifInflater bindNotifInflater(NotifInflaterImpl notifInflaterImpl);
+
+    /** */
+    @Binds
+    ConversationIconManager bindConversationIconManager(IconManager iconManager);
 
     /** */
     @Binds

@@ -70,6 +70,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.policy.SystemBarUtils;
+import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.keyguard.KeyguardSliceView;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
@@ -415,6 +416,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private boolean mForwardScrollable;
     private boolean mBackwardScrollable;
     private NotificationShelf mShelf;
+    /**
+     * Limits the number of visible notifications. The remaining are collapsed in the notification
+     * shelf. -1 when there is no limit.
+     */
     private int mMaxDisplayedNotifications = -1;
     private float mKeyguardBottomPadding = -1;
     @VisibleForTesting int mStatusBarHeight;
@@ -1309,7 +1314,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         final float endTopPosition = mTopPadding + mExtraTopInsetForFullShadeTransition
                 + mAmbientState.getOverExpansion()
                 - getCurrentOverScrollAmount(false /* top */);
-        final float fraction = mAmbientState.getExpansionFraction();
+        float fraction = mAmbientState.getExpansionFraction();
+        if (mAmbientState.isBouncerInTransit()) {
+            fraction = BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(fraction);
+        }
         final float stackY = MathUtils.lerp(0, endTopPosition, fraction);
         mAmbientState.setStackY(stackY);
         if (mOnStackYChanged != null) {
@@ -1323,7 +1331,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     private float updateStackEndHeight(float height, float bottomMargin, float topPadding) {
-        final float stackEndHeight = Math.max(0f, height - bottomMargin - topPadding);
+        final float stackEndHeight;
+        if (mMaxDisplayedNotifications != -1) {
+            // The stack intrinsic height already contains the correct value when there is a limit
+            // in the max number of notifications (e.g. as in keyguard).
+            stackEndHeight = mIntrinsicContentHeight;
+        } else {
+            stackEndHeight = Math.max(0f, height - bottomMargin - topPadding);
+        }
         mAmbientState.setStackEndHeight(stackEndHeight);
         return stackEndHeight;
     }
@@ -1790,13 +1805,20 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
-    public void dismissViewAnimated(View child, Runnable endRunnable, int delay, long duration) {
+    public void dismissViewAnimated(
+            View child, Consumer<Boolean> endRunnable, int delay, long duration) {
         if (child instanceof SectionHeaderView) {
              ((StackScrollerDecorView) child).setContentVisible(
                      false /* visible */, true /* animate */, endRunnable);
              return;
         }
-        mSwipeHelper.dismissChild(child, 0, endRunnable, delay, true, duration,
+        mSwipeHelper.dismissChild(
+                child,
+                0 /* velocity */,
+                endRunnable,
+                delay,
+                true /* useAccelerateInterpolator */,
+                duration,
                 true /* isClearAll */);
     }
 
@@ -5181,11 +5203,15 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (mClearAllListener != null) {
             mClearAllListener.onClearAll(selection);
         }
-        final Runnable dismissInBackend = () -> {
-            onClearAllAnimationsEnd(rowsToDismissInBackend, selection);
+        final Consumer<Boolean> dismissInBackend = (cancelled) -> {
+            if (cancelled) {
+                post(() -> onClearAllAnimationsEnd(rowsToDismissInBackend, selection));
+            } else {
+                onClearAllAnimationsEnd(rowsToDismissInBackend, selection);
+            }
         };
         if (viewsToAnimateAway.isEmpty()) {
-            dismissInBackend.run();
+            dismissInBackend.accept(true);
             return;
         }
         // Disable normal animations
@@ -5200,7 +5226,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         final int numItems = viewsToAnimateAway.size();
         for (int i = numItems - 1; i >= 0; i--) {
             View view = viewsToAnimateAway.get(i);
-            Runnable endRunnable = null;
+            Consumer<Boolean> endRunnable = null;
             if (i == 0) {
                 endRunnable = dismissInBackend;
             }
@@ -5502,6 +5528,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      */
     public void setFractionToShade(float fraction) {
         mAmbientState.setFractionToShade(fraction);
+        updateContentHeight();  // Recompute stack height with different section gap.
         requestChildrenUpdate();
     }
 

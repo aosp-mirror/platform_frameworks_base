@@ -104,7 +104,7 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
 
     @Override
     public CharSequence getStopButtonText() {
-        int resId = R.string.keyboard_key_media_stop;
+        int resId = R.string.media_output_dialog_button_stop_casting;
         if (isBroadcastSupported() && mMediaOutputController.isPlaying()
                 && !mMediaOutputController.isBluetoothLeBroadcastEnabled()) {
             resId = R.string.media_output_broadcast;

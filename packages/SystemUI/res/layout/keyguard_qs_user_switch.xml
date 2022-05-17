@@ -22,18 +22,25 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="end">
-    <com.android.systemui.statusbar.phone.UserAvatarView
-        android:id="@+id/kg_multi_user_avatar"
-        android:layout_width="@dimen/kg_framed_avatar_size"
-        android:layout_height="@dimen/kg_framed_avatar_size"
-        android:layout_centerHorizontal="true"
+    <!-- We add a background behind the UserAvatarView with the same color and with a circular shape
+         so that this view can be expanded into a Dialog or an Activity. -->
+    <FrameLayout
+        android:id="@+id/kg_multi_user_avatar_with_background"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="top|end"
         android:layout_marginEnd="16dp"
-        systemui:avatarPadding="0dp"
-        systemui:badgeDiameter="18dp"
-        systemui:badgeMargin="1dp"
-        systemui:frameColor="@color/kg_user_avatar_frame"
-        systemui:framePadding="0dp"
-        systemui:frameWidth="0dp">
-    </com.android.systemui.statusbar.phone.UserAvatarView>
+        android:background="@drawable/keyguard_framed_avatar_background">
+        <com.android.systemui.statusbar.phone.UserAvatarView
+            android:id="@+id/kg_multi_user_avatar"
+            android:layout_width="@dimen/kg_framed_avatar_size"
+            android:layout_height="@dimen/kg_framed_avatar_size"
+            systemui:avatarPadding="0dp"
+            systemui:badgeDiameter="18dp"
+            systemui:badgeMargin="1dp"
+            systemui:frameColor="@color/kg_user_avatar_frame"
+            systemui:framePadding="0dp"
+            systemui:frameWidth="0dp">
+        </com.android.systemui.statusbar.phone.UserAvatarView>
+    </FrameLayout>
 </FrameLayout>

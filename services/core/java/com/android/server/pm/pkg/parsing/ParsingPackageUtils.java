@@ -392,6 +392,9 @@ public class ParsingPackageUtils {
         if ((flags & PARSE_FRAMEWORK_RES_SPLITS) != 0) {
             liteParseFlags = flags;
         }
+        if ((flags & PARSE_APK_IN_APEX) != 0) {
+            liteParseFlags |= PARSE_APK_IN_APEX;
+        }
         final ParseResult<PackageLite> liteResult =
                 ApkLiteParseUtils.parseClusterPackageLite(input, packageDir, frameworkSplits,
                         liteParseFlags);
@@ -965,7 +968,7 @@ public class ParsingPackageUtils {
         if (ParsedPermissionUtils.declareDuplicatePermission(pkg)) {
             return input.error(
                     INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
-                    "Declare duplicate permissions with different protection levels."
+                    "Found duplicate permission with a different attribute value."
             );
         }
 
@@ -3105,11 +3108,9 @@ public class ParsingPackageUtils {
         }
         final ParseResult<SigningDetails> verified;
         if (skipVerify) {
-            // systemDir APKs are already trusted, save time by not verifying; since the
-            // signature is not verified and some system apps can have their V2+ signatures
-            // stripped allow pulling the certs from the jar signature.
+            // systemDir APKs are already trusted, save time by not verifying
             verified = ApkSignatureVerifier.unsafeGetCertsWithoutVerification(input, baseCodePath,
-                    SigningDetails.SignatureSchemeVersion.JAR);
+                    minSignatureScheme);
         } else {
             verified = ApkSignatureVerifier.verify(input, baseCodePath, minSignatureScheme);
         }

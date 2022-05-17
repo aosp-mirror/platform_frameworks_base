@@ -48,6 +48,7 @@ public interface WindowManagerPolicyConstants {
     int KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS = 1 << 1;
     int KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER = 1 << 2;
     int KEYGUARD_GOING_AWAY_FLAG_SUBTLE_WINDOW_ANIMATIONS = 1 << 3;
+    int KEYGUARD_GOING_AWAY_FLAG_TO_LAUNCHER_CLEAR_SNAPSHOT = 1 << 4;
 
     // Flags used for indicating whether the internal and/or external input devices
     // of some type are available.

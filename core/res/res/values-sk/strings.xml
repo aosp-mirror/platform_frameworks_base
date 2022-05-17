@@ -307,12 +307,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"prístup ku kalendáru"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"posielanie a zobrazovanie SMS"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Súbory a dokumenty"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Súbory a dokumenty"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"prístup k súborom a dokumentom vo vašom zariadení"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Hudba a iné zvuky"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"prístup k zvukovým súborom vo vašom zariadení"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Fotky a videá"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"prístup k súborom obrázka a videosúborom vo vašom zariadení"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Hudba a zvuk"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"prístup k hudbe a zvuku vo vašom zariadení"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotky a videá"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"prístup k fotkám a videám vo vašom zariadení"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofón"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"nahrávanie zvuku"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Fyzická aktivita"</string>
@@ -351,7 +351,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Umožňuje aplikácii rozbaliť alebo zbaliť stavový riadok."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"zobrazovanie upozornení ako aktivít na celej obrazovke v uzamknutom zariadení"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Táto možnosť umožňuje aplikácii zobrazovať upozornenia ako aktivity na celej obrazovke v uzamknutom zariadení"</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"inštalovať odkazy"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Inštalovať odkazy"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Povoľuje aplikácii pridať odkazy na ploche bez zásahu používateľa."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"odinštalovať odkazy"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Povoľuje aplikácii odstrániť odkazy na ploche bez zásahu používateľa."</string>
@@ -1846,7 +1846,7 @@
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3. <xliff:g id="LABEL">%1$s</xliff:g> do práce"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Pred odopnutím požiadať o číslo PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Pred uvoľnením požiadať o bezpečnostný vzor"</string>
-    <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Pred uvoľnením požiadať o heslo"</string>
+    <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Pred odopnutím požiadať o heslo"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"Nainštaloval správca"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Aktualizoval správca"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Odstránil správca"</string>
@@ -2055,8 +2055,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Režim bez vyrušení sa zmenil"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Klepnutím skontrolujete, čo je blokované."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Kontrola nastavení upozornení"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"V Androide verzie 13 a novších vyžadujú nainštalované aplikácie povolenie, aby mohli odosielať upozornenia. Klepnutím môžete zmeniť toto povolenie pre existujúce aplikácie."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Pripomenúť neskôr"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Zavrieť"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Systém"</string>

@@ -184,6 +184,12 @@ public final class DevicePolicyResources {
                     PREFIX + "WORK_PROFILE_IT_ADMIN_CANT_RESET_SCREEN_LOCK";
 
             /**
+             * Text shown on the CTA link shown to user to set a separate lock for work apps
+             */
+            public static final String WORK_PROFILE_IT_ADMIN_CANT_RESET_SCREEN_LOCK_ACTION =
+                    PREFIX + "WORK_PROFILE_IT_ADMIN_CANT_RESET_SCREEN_LOCK_ACTION";
+
+            /**
              * Message shown in screen lock picker for setting up a work profile screen lock
              */
             public static final String WORK_PROFILE_SCREEN_LOCK_SETUP_MESSAGE =
@@ -863,12 +869,6 @@ public final class DevicePolicyResources {
                     PREFIX + "REMOVE_AND_UNINSTALL_DEVICE_ADMIN";
 
             /**
-             * Title for selecting device admin apps
-             */
-            public static final String SELECT_DEVICE_ADMIN_APPS =
-                    PREFIX + "SELECT_DEVICE_ADMIN_APPS";
-
-            /**
              * Message when there are no available device admin apps to display
              */
             public static final String NO_DEVICE_ADMINS = PREFIX + "NO_DEVICE_ADMINS";
@@ -908,11 +908,6 @@ public final class DevicePolicyResources {
              */
             public static final String ACTIVE_DEVICE_ADMIN_WARNING =
                     PREFIX + "ACTIVE_DEVICE_ADMIN_WARNING";
-
-            /**
-             * Title for screen to set a profile owner
-             */
-            public static final String SET_PROFILE_OWNER_TITLE = PREFIX + "SET_PROFILE_OWNER_TITLE";
 
             /**
              * Simplified title for dialog to set a profile owner
@@ -1173,7 +1168,93 @@ public final class DevicePolicyResources {
             /**
              * Header for items under the personal user
              */
-            public static final String PERSONAL_CATEGORY_HEADER = PREFIX + "category_personal";
+            public static final String PERSONAL_CATEGORY_HEADER =
+                    PREFIX + "PERSONAL_CATEGORY_HEADER";
+
+            /**
+             * Text to indicate work notification content will be shown on the lockscreen.
+             */
+            public static final String LOCK_SCREEN_SHOW_WORK_NOTIFICATION_CONTENT =
+                    PREFIX + "LOCK_SCREEN_SHOW_WORK_NOTIFICATION_CONTENT";
+
+            /**
+             * Text to indicate work notification content will be shown on the lockscreen.
+             */
+            public static final String LOCK_SCREEN_HIDE_WORK_NOTIFICATION_CONTENT =
+                    PREFIX + "LOCK_SCREEN_HIDE_WORK_NOTIFICATION_CONTENT";
+
+            /**
+             * Text for toggle to enable auto-sycing personal data
+             */
+            public static final String AUTO_SYNC_PERSONAL_DATA = PREFIX
+                    + "AUTO_SYNC_PERSONAL_DATA";
+
+            /**
+             * Text for toggle to enable auto-sycing work data
+             */
+            public static final String AUTO_SYNC_WORK_DATA = PREFIX + "AUTO_SYNC_WORK_DATA";
+
+            /**
+             * Summary for "More security settings" section when a work profile is on the device.
+             */
+            public static final String MORE_SECURITY_SETTINGS_WORK_PROFILE_SUMMARY = PREFIX
+                    + "MORE_SECURITY_SETTINGS_WORK_PROFILE_SUMMARY";
+
+            /**
+             * Title for screen asking the user to choose a type of screen lock (such as a pattern,
+             * PIN, or password) that they need to enter to use their work apps
+             */
+            public static final String LOCK_SETTINGS_NEW_PROFILE_LOCK_TITLE = PREFIX
+                    + "LOCK_SETTINGS_NEW_PROFILE_LOCK_TITLE";
+
+            /**
+             * Title for screen asking the user to update the type of screen lock (such as a
+             * pattern, PIN, or password) that they need to enter to use their work apps
+             */
+            public static final String LOCK_SETTINGS_UPDATE_PROFILE_LOCK_TITLE = PREFIX
+                    + "LOCK_SETTINGS_UPDATE_PROFILE_LOCK_TITLE";
+
+            /**
+             * Title for section listing information that can be seen by organization
+             */
+            public static final String INFORMATION_SEEN_BY_ORGANIZATION_TITLE = PREFIX
+                    + "INFORMATION_SEEN_BY_ORGANIZATION_TITLE";
+
+            /**
+             * Title for section listing changes made by the organization.
+             */
+            public static final String CHANGES_BY_ORGANIZATION_TITLE =
+                    PREFIX + "CHANGES_BY_ORGANIZATION_TITLE";
+
+            /**
+             * Footer for enterprise privacy screen.
+             */
+            public static final String ENTERPRISE_PRIVACY_FOOTER =
+                    PREFIX + "ENTERPRISE_PRIVACY_FOOTER";
+
+            /**
+             * Title for spell checker settings for work.
+             */
+            public static final String SPELL_CHECKER_FOR_WORK =
+                    PREFIX + "SPELL_CHECKER_FOR_WORK";
+
+            /**
+             * Title for personal dictionary for work settings.
+             */
+            public static final String PERSONAL_DICTIONARY_FOR_WORK =
+                    PREFIX + "PERSONAL_DICTIONARY_FOR_WORK";
+
+            /**
+             * Summary for switch preference to indicate it is disabled by the admin
+             */
+            public static final String DISABLED_BY_ADMIN_SWITCH_SUMMARY =
+                    PREFIX + "DISABLED_BY_ADMIN_SWITCH_SUMMARY";
+
+            /**
+             * Summary for switch preference to indicate it is enabled by the admin
+             */
+            public static final String ENABLED_BY_ADMIN_SWITCH_SUMMARY =
+                    PREFIX + "ENABLED_BY_ADMIN_SWITCH_SUMMARY";
         }
 
         /**
@@ -1417,6 +1498,45 @@ public final class DevicePolicyResources {
              * Content description for the work profile lock screen.
              */
             public static final String WORK_LOCK_ACCESSIBILITY = PREFIX + "WORK_LOCK_ACCESSIBILITY";
+
+            /**
+             * Notification text displayed when screenshots are blocked by an IT admin.
+             */
+            public static final String SCREENSHOT_BLOCKED_BY_ADMIN =
+                    PREFIX + "SCREENSHOT_BLOCKED_BY_ADMIN";
+
+            /**
+             * Message shown when user is almost at the limit of password attempts where the
+             * profile will be removed. Accepts number of failed attempts and remaining failed
+             * attempts as params.
+             */
+            public static final String KEYGUARD_DIALOG_FAILED_ATTEMPTS_ALMOST_ERASING_PROFILE =
+                    PREFIX + "KEYGUARD_DIALOG_FAILED_ATTEMPTS_ALMOST_ERASING_PROFILE";
+
+            /**
+             * Message shown in dialog when user has exceeded the maximum attempts and the profile
+             * will be removed. Accepts number of failed attempts as a param.
+             */
+            public static final String KEYGUARD_DIALOG_FAILED_ATTEMPTS_ERASING_PROFILE =
+                    PREFIX + "KEYGUARD_DIALOG_FAILED_ATTEMPTS_ERASING_PROFILE";
+
+            /**
+             * Monitoring dialog subtitle for the section describing VPN.
+             */
+            public static final String QS_DIALOG_MONITORING_VPN_SUBTITLE =
+                    PREFIX + "QS_DIALOG_MONITORING_VPN_SUBTITLE";
+
+            /**
+             * Monitoring dialog subtitle for the section describing network logging.
+             */
+            public static final String QS_DIALOG_MONITORING_NETWORK_SUBTITLE =
+                    PREFIX + "QS_DIALOG_MONITORING_NETWORK_SUBTITLE";
+
+            /**
+             * Monitoring dialog subtitle for the section describing certificate authorities.
+             */
+            public static final String QS_DIALOG_MONITORING_CA_CERT_SUBTITLE =
+                    PREFIX + "QS_DIALOG_MONITORING_CA_CERT_SUBTITLE";
         }
 
         /**

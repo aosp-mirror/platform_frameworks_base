@@ -27,7 +27,6 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
-import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.android.internal.R;
@@ -222,6 +221,7 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
                         convertView = mInflater.inflate(
                                 R.layout.app_language_picker_current_locale_item, parent, false);
                         title = convertView.findViewById(R.id.language_picker_item);
+                        addStateDescriptionIntoCurrentLocaleItem(convertView);
                     } else {
                         convertView = mInflater.inflate(
                                 R.layout.language_picker_item, parent, false);
@@ -234,6 +234,7 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
                 if (!(convertView instanceof ViewGroup)) {
                     convertView = mInflater.inflate(
                             R.layout.app_language_picker_current_locale_item, parent, false);
+                    addStateDescriptionIntoCurrentLocaleItem(convertView);
                 }
                 updateTextView(
                         convertView, convertView.findViewById(R.id.language_picker_item), position);
@@ -368,5 +369,10 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
                     ? View.TEXT_DIRECTION_RTL
                     : View.TEXT_DIRECTION_LTR);
         }
+    }
+
+    private void addStateDescriptionIntoCurrentLocaleItem(View root) {
+        String description = root.getContext().getResources().getString(R.string.checked);
+        root.setStateDescription(description);
     }
 }

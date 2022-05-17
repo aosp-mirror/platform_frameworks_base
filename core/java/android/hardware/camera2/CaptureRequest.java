@@ -1767,7 +1767,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * routine is enabled, overriding the application's selected
      * {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform}, {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains} and
      * {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode}. Note that when {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode}
-     * is OFF, the behavior of AWB is device dependent. It is recommened to
+     * is OFF, the behavior of AWB is device dependent. It is recommended to
      * also set AWB mode to OFF or lock AWB by using {@link CaptureRequest#CONTROL_AWB_LOCK android.control.awbLock} before
      * setting AE mode to OFF.</p>
      * <p>When set to the OFF mode, the camera device's auto-white balance
@@ -1917,13 +1917,15 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * strategy.</p>
      * <p>This control (except for MANUAL) is only effective if
      * <code>{@link CaptureRequest#CONTROL_MODE android.control.mode} != OFF</code> and any 3A routine is active.</p>
-     * <p>All intents are supported by all devices, except that:
-     *   * ZERO_SHUTTER_LAG will be supported if {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains
-     * PRIVATE_REPROCESSING or YUV_REPROCESSING.
-     *   * MANUAL will be supported if {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains
-     * MANUAL_SENSOR.
-     *   * MOTION_TRACKING will be supported if {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains
-     * MOTION_TRACKING.</p>
+     * <p>All intents are supported by all devices, except that:</p>
+     * <ul>
+     * <li>ZERO_SHUTTER_LAG will be supported if {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains
+     * PRIVATE_REPROCESSING or YUV_REPROCESSING.</li>
+     * <li>MANUAL will be supported if {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains
+     * MANUAL_SENSOR.</li>
+     * <li>MOTION_TRACKING will be supported if {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains
+     * MOTION_TRACKING.</li>
+     * </ul>
      * <p><b>Possible values:</b></p>
      * <ul>
      *   <li>{@link #CONTROL_CAPTURE_INTENT_CUSTOM CUSTOM}</li>
@@ -2680,7 +2682,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      *   and keep jpeg and thumbnail image data unrotated.</li>
      * <li>Rotate the jpeg and thumbnail image data and not set
      *   {@link android.media.ExifInterface#TAG_ORIENTATION EXIF orientation flag}. In this
-     *   case, LIMITED or FULL hardware level devices will report rotated thumnail size in
+     *   case, LIMITED or FULL hardware level devices will report rotated thumbnail size in
      *   capture result, so the width and height will be interchanged if 90 or 270 degree
      *   orientation is requested. LEGACY device will always report unrotated thumbnail
      *   size.</li>
@@ -3806,9 +3808,11 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     /**
      * <p>Tonemapping curve to use when {@link CaptureRequest#TONEMAP_MODE android.tonemap.mode} is
      * GAMMA_VALUE</p>
-     * <p>The tonemap curve will be defined the following formula:
-     * * OUT = pow(IN, 1.0 / gamma)
-     * where IN and OUT is the input pixel value scaled to range [0.0, 1.0],
+     * <p>The tonemap curve will be defined the following formula:</p>
+     * <ul>
+     * <li>OUT = pow(IN, 1.0 / gamma)</li>
+     * </ul>
+     * <p>where IN and OUT is the input pixel value scaled to range [0.0, 1.0],
      * pow is the power function and gamma is the gamma value specified by this
      * key.</p>
      * <p>The same curve will be applied to all color channels. The camera device

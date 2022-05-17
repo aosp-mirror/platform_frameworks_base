@@ -93,6 +93,7 @@ public class ShadeListBuilder implements Dumpable {
     private final NotificationInteractionTracker mInteractionTracker;
     private final DumpManager mDumpManager;
     // used exclusivly by ShadeListBuilder#notifySectionEntriesUpdated
+    // TODO replace temp with collection pool for readability
     private final ArrayList<ListEntry> mTempSectionMembers = new ArrayList<>();
     private final boolean mAlwaysLogList;
 
@@ -230,13 +231,7 @@ public class ShadeListBuilder implements Dumpable {
         mPipelineState.requireState(STATE_IDLE);
 
         mNotifSections.clear();
-        NotifSectioner lastSection = null;
         for (NotifSectioner sectioner : sectioners) {
-            if (lastSection != null && lastSection.getBucket() > sectioner.getBucket()) {
-                throw new IllegalArgumentException("setSectioners with non contiguous sections "
-                        + lastSection.getName() + " - " + lastSection.getBucket() + " & "
-                        + sectioner.getName() + " - " + sectioner.getBucket());
-            }
             final NotifSection section = new NotifSection(sectioner, mNotifSections.size());
             final NotifComparator sectionComparator = section.getComparator();
             mNotifSections.add(section);
@@ -244,10 +239,23 @@ public class ShadeListBuilder implements Dumpable {
             if (sectionComparator != null) {
                 sectionComparator.setInvalidationListener(this::onNotifComparatorInvalidated);
             }
-            lastSection = sectioner;
         }
 
         mNotifSections.add(new NotifSection(DEFAULT_SECTIONER, mNotifSections.size()));
+
+        // validate sections
+        final ArraySet<Integer> seenBuckets = new ArraySet<>();
+        int lastBucket = mNotifSections.size() > 0
+                ? mNotifSections.get(0).getBucket()
+                : 0;
+        for (NotifSection section : mNotifSections) {
+            if (lastBucket != section.getBucket() && seenBuckets.contains(section.getBucket())) {
+                throw new IllegalStateException("setSectioners with non contiguous sections "
+                        + section.getLabel() + " has an already seen bucket");
+            }
+            lastBucket = section.getBucket();
+            seenBuckets.add(lastBucket);
+        }
     }
 
     void setNotifStabilityManager(@NonNull NotifStabilityManager notifStabilityManager) {
@@ -709,8 +717,8 @@ public class ShadeListBuilder implements Dumpable {
                 new ArraySet<>(groupsWithChildrenLostToStability);
         // Any group which lost a child to filtering or promotion is exempt from having its summary
         // promoted when it has no attached children.
-        getGroupsWithChildrenLostToFiltering(groupsExemptFromSummaryPromotion);
-        getGroupsWithChildrenLostToPromotion(shadeList, groupsExemptFromSummaryPromotion);
+        addGroupsWithChildrenLostToFiltering(groupsExemptFromSummaryPromotion);
+        addGroupsWithChildrenLostToPromotion(shadeList, groupsExemptFromSummaryPromotion);
 
         // Iterate backwards, so that we can remove elements without affecting indices of
         // yet-to-be-accessed entries.
@@ -749,7 +757,7 @@ public class ShadeListBuilder implements Dumpable {
                         continue;
                     }
                     if (group.wasAttachedInPreviousPass()
-                            && !getStabilityManager().isGroupChangeAllowed(group.getSummary())) {
+                            && !getStabilityManager().isGroupPruneAllowed(group)) {
                         checkState(!children.isEmpty(), "empty group should have been pruned");
                         // This group was previously attached and group changes aren't
                         //  allowed; keep it around until group changes are allowed again.
@@ -865,7 +873,7 @@ public class ShadeListBuilder implements Dumpable {
      *
      * These groups will be exempt from appearing without any children.
      */
-    private void getGroupsWithChildrenLostToPromotion(List<ListEntry> shadeList, Set<String> out) {
+    private void addGroupsWithChildrenLostToPromotion(List<ListEntry> shadeList, Set<String> out) {
         for (int i = 0; i < shadeList.size(); i++) {
             final ListEntry tle = shadeList.get(i);
             if (tle.getAttachState().getPromoter() != null) {
@@ -882,13 +890,13 @@ public class ShadeListBuilder implements Dumpable {
      *
      * These groups will be exempt from appearing without any children.
      */
-    private void getGroupsWithChildrenLostToFiltering(Set<String> out) {
+    private void addGroupsWithChildrenLostToFiltering(Set<String> out) {
         for (ListEntry tle : mAllEntries) {
             StatusBarNotification sbn = tle.getRepresentativeEntry().getSbn();
             if (sbn.isGroup()
                     && !sbn.getNotification().isGroupSummary()
                     && tle.getAttachState().getExcludingFilter() != null) {
-                out.add(sbn.getGroup());
+                out.add(sbn.getGroupKey());
             }
         }
     }

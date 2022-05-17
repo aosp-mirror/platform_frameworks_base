@@ -6996,22 +6996,23 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         dpm.setUserControlDisabledPackages(admin1, testPackages);
 
         verify(getServices().packageManagerInternal)
-                .setDeviceOwnerProtectedPackages(admin1.getPackageName(), testPackages);
+                .setOwnerProtectedPackages(UserHandle.USER_ALL, testPackages);
         assertThat(dpm.getUserControlDisabledPackages(admin1)).isEqualTo(testPackages);
     }
 
     @Test
-    public void testSetUserControlDisabledPackages_failingAsPO() {
+    public void testSetUserControlDisabledPackages_asPO() {
         final List<String> testPackages = new ArrayList<>();
         testPackages.add("package_1");
         testPackages.add("package_2");
         mServiceContext.permissions.add(permission.MANAGE_DEVICE_ADMINS);
         setAsProfileOwner(admin1);
 
-        assertExpectException(SecurityException.class, /* messageRegex= */ null,
-                () -> dpm.setUserControlDisabledPackages(admin1, testPackages));
-        assertExpectException(SecurityException.class, /* messageRegex= */ null,
-                () -> dpm.getUserControlDisabledPackages(admin1));
+        dpm.setUserControlDisabledPackages(admin1, testPackages);
+
+        verify(getServices().packageManagerInternal)
+                .setOwnerProtectedPackages(CALLER_USER_HANDLE, testPackages);
+        assertThat(dpm.getUserControlDisabledPackages(admin1)).isEqualTo(testPackages);
     }
 
     private void configureProfileOwnerOfOrgOwnedDevice(ComponentName who, int userId) {
@@ -7845,7 +7846,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         dpm.setUserControlDisabledPackages(admin1, packages);
 
         verify(getServices().packageManagerInternal)
-                .setDeviceOwnerProtectedPackages(eq(admin1.getPackageName()), eq(packages));
+                .setOwnerProtectedPackages(eq(UserHandle.USER_ALL), eq(packages));
     }
 
     @Test
@@ -8613,8 +8614,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     private File getProfileOwnerPoliciesFile() {
-        File parentDir = dpms.mMockInjector.environmentGetUserSystemDirectory(
-                CALLER_USER_HANDLE);
+        File parentDir = getServices().pathProvider.getUserSystemDirectory(CALLER_USER_HANDLE);
         return getPoliciesFile(parentDir);
     }
 

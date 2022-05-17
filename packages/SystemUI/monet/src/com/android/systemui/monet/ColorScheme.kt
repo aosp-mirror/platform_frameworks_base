@@ -21,8 +21,8 @@ import android.app.WallpaperColors
 import android.graphics.Color
 import com.android.internal.graphics.ColorUtils
 import com.android.internal.graphics.cam.Cam
-import com.android.internal.graphics.cam.CamUtils.lstarFromInt
 import kotlin.math.absoluteValue
+import kotlin.math.max
 import kotlin.math.roundToInt
 
 const val TAG = "ColorScheme"
@@ -49,7 +49,7 @@ internal interface Hue {
             val previousHue = hueAndRotations[previousIndex].first
             if (ColorScheme.angleIsBetween(sourceHue, thisHue, previousHue)) {
                 return ColorScheme.wrapDegreesDouble(sourceHue.toDouble() +
-                        hueAndRotations[previousIndex].first)
+                        hueAndRotations[previousIndex].second)
             }
         }
 
@@ -78,36 +78,32 @@ internal class HueSubtract(val amountDegrees: Double) : Hue {
 }
 
 internal class HueVibrantSecondary() : Hue {
-    val hueToRotations = listOf(Pair(24, 15), Pair(53, 15), Pair(91, 15), Pair(123, 15),
-            Pair(141, 15), Pair(172, 15), Pair(198, 15), Pair(234, 18), Pair(272, 18),
-            Pair(302, 18), Pair(329, 30), Pair(354, 15))
+    val hueToRotations = listOf(Pair(0, 18), Pair(41, 15), Pair(61, 10), Pair(101, 12),
+            Pair(131, 15), Pair(181, 18), Pair(251, 15), Pair(301, 12))
     override fun get(sourceColor: Cam): Double {
         return getHueRotation(sourceColor.hue, hueToRotations)
     }
 }
 
 internal class HueVibrantTertiary() : Hue {
-    val hueToRotations = listOf(Pair(24, 30), Pair(53, 30), Pair(91, 15), Pair(123, 30),
-            Pair(141, 27), Pair(172, 27), Pair(198, 30), Pair(234, 35), Pair(272, 30),
-            Pair(302, 30), Pair(329, 60), Pair(354, 30))
+    val hueToRotations = listOf(Pair(0, 35), Pair(41, 30), Pair(61, 20), Pair(101, 25),
+            Pair(131, 30), Pair(181, 35), Pair(251, 30), Pair(301, 25))
     override fun get(sourceColor: Cam): Double {
         return getHueRotation(sourceColor.hue, hueToRotations)
     }
 }
 
 internal class HueExpressiveSecondary() : Hue {
-    val hueToRotations = listOf(Pair(24, 95), Pair(53, 45), Pair(91, 45), Pair(123, 20),
-            Pair(141, 45), Pair(172, 45), Pair(198, 15), Pair(234, 15),
-            Pair(272, 45), Pair(302, 45), Pair(329, 45), Pair(354, 45))
+    val hueToRotations = listOf(Pair(0, 45), Pair(21, 95), Pair(51, 45), Pair(121, 20),
+            Pair(141, 45), Pair(191, 90), Pair(271, 45), Pair(321, 45))
     override fun get(sourceColor: Cam): Double {
         return getHueRotation(sourceColor.hue, hueToRotations)
     }
 }
 
 internal class HueExpressiveTertiary() : Hue {
-    val hueToRotations = listOf(Pair(24, 20), Pair(53, 20), Pair(91, 20), Pair(123, 45),
-            Pair(141, 20), Pair(172, 20), Pair(198, 90), Pair(234, 90), Pair(272, 20),
-            Pair(302, 20), Pair(329, 120), Pair(354, 120))
+    val hueToRotations = listOf(Pair(0, 120), Pair(21, 120), Pair(51, 20), Pair(121, 45),
+            Pair(141, 20), Pair(191, 15), Pair(271, 20), Pair(321, 120))
     override fun get(sourceColor: Cam): Double {
         return getHueRotation(sourceColor.hue, hueToRotations)
     }
@@ -140,18 +136,27 @@ internal interface Chroma {
     }
 }
 
+internal class ChromaMinimum(val chroma: Double) : Chroma {
+    override fun get(sourceColor: Cam): Double {
+        return max(sourceColor.chroma.toDouble(), chroma)
+    }
+}
+
+internal class ChromaMultiple(val multiple: Double) : Chroma {
+    override fun get(sourceColor: Cam): Double {
+        return sourceColor.chroma * multiple
+    }
+}
+
 internal class ChromaConstant(val chroma: Double) : Chroma {
     override fun get(sourceColor: Cam): Double {
         return chroma
     }
 }
 
-internal class ChromaExpressiveNeutral() : Chroma {
-    val hueToChromas = listOf(Pair(24, 8), Pair(53, 8), Pair(91, 8), Pair(123, 8),
-            Pair(141, 6), Pair(172, 6), Pair(198, 8), Pair(234, 8), Pair(272, 8),
-            Pair(302, 8), Pair(329, 8), Pair(354, 8))
+internal class ChromaSource : Chroma {
     override fun get(sourceColor: Cam): Double {
-        return getSpecifiedChroma(sourceColor.hue, hueToChromas)
+        return sourceColor.chroma.toDouble()
     }
 }
 
@@ -187,17 +192,17 @@ enum class Style(internal val coreSpec: CoreSpec) {
             n2 = TonalSpec(HueSource(), ChromaConstant(8.0))
     )),
     VIBRANT(CoreSpec(
-            a1 = TonalSpec(HueSource(), ChromaConstant(48.0)),
+            a1 = TonalSpec(HueSource(), ChromaMinimum(48.0)),
             a2 = TonalSpec(HueVibrantSecondary(), ChromaConstant(24.0)),
             a3 = TonalSpec(HueVibrantTertiary(), ChromaConstant(32.0)),
-            n1 = TonalSpec(HueSource(), ChromaConstant(6.0)),
-            n2 = TonalSpec(HueSource(), ChromaConstant(12.0))
+            n1 = TonalSpec(HueSource(), ChromaConstant(12.0)),
+            n2 = TonalSpec(HueSource(), ChromaConstant(14.0))
     )),
     EXPRESSIVE(CoreSpec(
             a1 = TonalSpec(HueAdd(240.0), ChromaConstant(40.0)),
             a2 = TonalSpec(HueExpressiveSecondary(), ChromaConstant(24.0)),
-            a3 = TonalSpec(HueExpressiveTertiary(), ChromaConstant(40.0)),
-            n1 = TonalSpec(HueAdd(15.0), ChromaExpressiveNeutral()),
+            a3 = TonalSpec(HueExpressiveTertiary(), ChromaConstant(32.0)),
+            n1 = TonalSpec(HueAdd(15.0), ChromaConstant(8.0)),
             n2 = TonalSpec(HueAdd(15.0), ChromaConstant(12.0))
     )),
     RAINBOW(CoreSpec(
@@ -213,6 +218,13 @@ enum class Style(internal val coreSpec: CoreSpec) {
             a3 = TonalSpec(HueSource(), ChromaConstant(36.0)),
             n1 = TonalSpec(HueSource(), ChromaConstant(10.0)),
             n2 = TonalSpec(HueSource(), ChromaConstant(16.0))
+    )),
+    CONTENT(CoreSpec(
+            a1 = TonalSpec(HueSource(), ChromaSource()),
+            a2 = TonalSpec(HueSource(), ChromaMultiple(0.33)),
+            a3 = TonalSpec(HueSource(), ChromaMultiple(0.66)),
+            n1 = TonalSpec(HueSource(), ChromaMultiple(0.0833)),
+            n2 = TonalSpec(HueSource(), ChromaMultiple(0.1666))
     )),
 }
 
@@ -231,8 +243,13 @@ class ColorScheme(
     constructor(@ColorInt seed: Int, darkTheme: Boolean):
             this(seed, darkTheme, Style.TONAL_SPOT)
 
-    constructor(wallpaperColors: WallpaperColors, darkTheme: Boolean):
-            this(getSeedColor(wallpaperColors), darkTheme)
+    @JvmOverloads
+    constructor(
+        wallpaperColors: WallpaperColors,
+        darkTheme: Boolean,
+        style: Style = Style.TONAL_SPOT
+    ):
+            this(getSeedColor(wallpaperColors, style != Style.CONTENT), darkTheme, style)
 
     val allAccentColors: List<Int>
         get() {
@@ -261,7 +278,7 @@ class ColorScheme(
         val proposedSeedCam = Cam.fromInt(seed)
         val seedArgb = if (seed == Color.TRANSPARENT) {
             GOOGLE_BLUE
-        } else if (proposedSeedCam.chroma < 5) {
+        } else if (style != Style.CONTENT && proposedSeedCam.chroma < 5) {
             GOOGLE_BLUE
         } else {
             seed
@@ -290,22 +307,26 @@ class ColorScheme(
          * Identifies a color to create a color scheme from.
          *
          * @param wallpaperColors Colors extracted from an image via quantization.
+         * @param filter If false, allow colors that have low chroma, creating grayscale themes.
          * @return ARGB int representing the color
          */
         @JvmStatic
+        @JvmOverloads
         @ColorInt
-        fun getSeedColor(wallpaperColors: WallpaperColors): Int {
-            return getSeedColors(wallpaperColors).first()
+        fun getSeedColor(wallpaperColors: WallpaperColors, filter: Boolean = true): Int {
+            return getSeedColors(wallpaperColors, filter).first()
         }
 
         /**
          * Filters and ranks colors from WallpaperColors.
          *
          * @param wallpaperColors Colors extracted from an image via quantization.
+         * @param filter If false, allow colors that have low chroma, creating grayscale themes.
          * @return List of ARGB ints, ordered from highest scoring to lowest.
          */
         @JvmStatic
-        fun getSeedColors(wallpaperColors: WallpaperColors): List<Int> {
+        @JvmOverloads
+        fun getSeedColors(wallpaperColors: WallpaperColors, filter: Boolean = true): List<Int> {
             val totalPopulation = wallpaperColors.allColors.values.reduce { a, b -> a + b }
                     .toDouble()
             val totalPopulationMeaningless = (totalPopulation == 0.0)
@@ -318,9 +339,12 @@ class ColorScheme(
                 val distinctColors = wallpaperColors.mainColors.map {
                     it.toArgb()
                 }.distinct().filter {
-                    Cam.fromInt(it).chroma >= MIN_CHROMA
+                    if (!filter) {
+                        true
+                    } else {
+                        Cam.fromInt(it).chroma >= MIN_CHROMA
+                    }
                 }.toList()
-
                 if (distinctColors.isEmpty()) {
                     return listOf(GOOGLE_BLUE)
                 }
@@ -333,7 +357,7 @@ class ColorScheme(
             val intToCam = wallpaperColors.allColors.mapValues { Cam.fromInt(it.key) }
 
             // Get an array with 360 slots. A slot contains the percentage of colors with that hue.
-            val hueProportions = huePopulations(intToCam, intToProportion)
+            val hueProportions = huePopulations(intToCam, intToProportion, filter)
             // Map each color to the percentage of the image with its hue.
             val intToHueProportion = wallpaperColors.allColors.mapValues {
                 val cam = intToCam[it.key]!!
@@ -347,13 +371,12 @@ class ColorScheme(
             // Remove any inappropriate seed colors. For example, low chroma colors look grayscale
             // raising their chroma will turn them to a much louder color that may not have been
             // in the image.
-            val filteredIntToCam = intToCam.filter {
+            val filteredIntToCam = if (!filter) intToCam else (intToCam.filter {
                 val cam = it.value
-                val lstar = lstarFromInt(it.key)
                 val proportion = intToHueProportion[it.key]!!
                 cam.chroma >= MIN_CHROMA &&
                         (totalPopulationMeaningless || proportion > 0.01)
-            }
+            })
             // Sort the colors by score, from high to low.
             val intToScoreIntermediate = filteredIntToCam.mapValues {
                 score(it.value, intToHueProportion[it.key]!!)
@@ -445,7 +468,8 @@ class ColorScheme(
 
         private fun huePopulations(
             camByColor: Map<Int, Cam>,
-            populationByColor: Map<Int, Double>
+            populationByColor: Map<Int, Double>,
+            filter: Boolean = true
         ): List<Double> {
             val huePopulation = List(size = 360, init = { 0.0 }).toMutableList()
 
@@ -453,7 +477,7 @@ class ColorScheme(
                 val population = populationByColor[entry.key]!!
                 val cam = camByColor[entry.key]!!
                 val hue = cam.hue.roundToInt() % 360
-                if (cam.chroma <= MIN_CHROMA) {
+                if (filter && cam.chroma <= MIN_CHROMA) {
                     continue
                 }
                 huePopulation[hue] = huePopulation[hue] + population

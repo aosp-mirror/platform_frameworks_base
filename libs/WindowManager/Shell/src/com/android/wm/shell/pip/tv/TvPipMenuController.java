@@ -24,7 +24,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ParceledListSlice;
 import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Rect;
@@ -169,6 +168,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         mPipMenuView.setListener(this);
         setUpViewSurfaceZOrder(mPipMenuView, 1);
         addPipMenuViewToSystemWindows(mPipMenuView, MENU_WINDOW_TITLE);
+        maybeUpdateMenuViewActions();
     }
 
     private void attachPipBackgroundView() {
@@ -199,6 +199,9 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
 
     void notifyPipAnimating(boolean animating) {
         mPipMenuView.setEduTextActive(!animating);
+        if (!animating) {
+            mPipMenuView.onPipTransitionFinished();
+        }
     }
 
     void showMovementMenuOnly() {
@@ -206,7 +209,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: showMovementMenuOnly()", TAG);
         }
-        mInMoveMode = true;
+        setInMoveMode(true);
         mCloseAfterExitMoveMenu = true;
         showMenuInternal();
     }
@@ -216,7 +219,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         if (DEBUG) {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE, "%s: showMenu()", TAG);
         }
-        mInMoveMode = false;
+        setInMoveMode(false);
         mCloseAfterExitMoveMenu = false;
         showMenuInternal();
     }
@@ -234,6 +237,13 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
             mPipMenuView.showMoveMenu(mDelegate.getPipGravity());
         } else {
             mPipMenuView.showButtonsMenu();
+        }
+        mPipMenuView.updateBounds(mTvPipBoundsState.getBounds());
+    }
+
+    void onPipTransitionStarted(Rect finishBounds) {
+        if (mPipMenuView != null) {
+            mPipMenuView.onPipTransitionStarted(finishBounds);
         }
     }
 
@@ -283,6 +293,17 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         return mInMoveMode;
     }
 
+    private void setInMoveMode(boolean moveMode) {
+        if (mInMoveMode == moveMode) {
+            return;
+        }
+
+        mInMoveMode = moveMode;
+        if (mDelegate != null) {
+            mDelegate.onInMoveModeChanged();
+        }
+    }
+
     @Override
     public void onEnterMoveMode() {
         if (DEBUG) {
@@ -290,7 +311,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
                     "%s: onEnterMoveMode - %b, close when exiting move menu: %b", TAG, mInMoveMode,
                     mCloseAfterExitMoveMenu);
         }
-        mInMoveMode = true;
+        setInMoveMode(true);
         mPipMenuView.showMoveMenu(mDelegate.getPipGravity());
     }
 
@@ -302,13 +323,13 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
                     mCloseAfterExitMoveMenu);
         }
         if (mCloseAfterExitMoveMenu) {
-            mInMoveMode = false;
+            setInMoveMode(false);
             mCloseAfterExitMoveMenu = false;
             closeMenu();
             return true;
         }
         if (mInMoveMode) {
-            mInMoveMode = false;
+            setInMoveMode(false);
             mPipMenuView.showButtonsMenu();
             return true;
         }
@@ -336,12 +357,12 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     }
 
     @Override
-    public void setAppActions(ParceledListSlice<RemoteAction> actions, RemoteAction closeAction) {
+    public void setAppActions(List<RemoteAction> actions, RemoteAction closeAction) {
         if (DEBUG) {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: setAppActions()", TAG);
         }
-        updateAdditionalActionsList(mAppActions, actions.getList(), closeAction);
+        updateAdditionalActionsList(mAppActions, actions, closeAction);
     }
 
     private void onMediaActionsChanged(List<RemoteAction> actions) {
@@ -559,7 +580,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
                         menuBounds.height()));
 
         if (mPipMenuView != null) {
-            mPipMenuView.updateLayout(destinationBounds);
+            mPipMenuView.updateBounds(destinationBounds);
         }
     }
 

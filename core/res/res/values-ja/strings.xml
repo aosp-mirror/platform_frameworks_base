@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"カレンダーへのアクセス"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMSメッセージの送信と表示"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"ファイル、ドキュメント"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"ファイルとドキュメント"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"デバイス内のファイルやドキュメントへのアクセス"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"音楽やその他の音声"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"デバイス上の音声ファイルへのアクセス"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"写真と動画"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"デバイス上の画像、動画ファイルへのアクセス"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"音楽とオーディオ"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"デバイス上の音楽とオーディオにアクセスする"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"写真と動画"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"デバイス上の写真と動画にアクセスする"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"マイク"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"音声の録音"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"身体活動"</string>
@@ -639,8 +639,8 @@
     <string name="face_acquired_too_dark" msgid="252573548464426546">"暗すぎます。もっと明るい場所でお試しください。"</string>
     <string name="face_acquired_too_close" msgid="1628767882971469833">"スマートフォンをもっと離してください。"</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"スマートフォンをもっと近づけてください。"</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"スマートフォンをもっと高い位置に上げてください。"</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"スマートフォンをもっと低い位置に下げてください。"</string>
+    <string name="face_acquired_too_high" msgid="4868033653626081839">"スマートフォンを上に動かしてください。"</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"スマートフォンを下に動かしてください。"</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"スマートフォンを左に動かしてください。"</string>
     <string name="face_acquired_too_left" msgid="8882499346502714350">"スマートフォンを右に動かしてください。"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"もっとまっすぐデバイスに顔を向けてください。"</string>
@@ -834,7 +834,7 @@
     <string name="phoneTypeFaxHome" msgid="6678559953115904345">"FAX（自宅）"</string>
     <string name="phoneTypePager" msgid="576402072263522767">"ポケベル"</string>
     <string name="phoneTypeOther" msgid="6918196243648754715">"その他"</string>
-    <string name="phoneTypeCallback" msgid="3455781500844157767">"かけ直す"</string>
+    <string name="phoneTypeCallback" msgid="3455781500844157767">"コールバック"</string>
     <string name="phoneTypeCar" msgid="4604775148963129195">"クルマ"</string>
     <string name="phoneTypeCompanyMain" msgid="4482773154536455441">"会社代表番号"</string>
     <string name="phoneTypeIsdn" msgid="2496238954533998512">"ISDN"</string>
@@ -2053,8 +2053,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"サイレント モードが変わりました"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"タップしてブロック対象をご確認ください。"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"通知設定の確認"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13 以降では、インストールするアプリに、通知を送信する権限を付与する必要があります。既存のアプリのこの権限を変更するには、タップしてください。"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"後で"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"閉じる"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"システム"</string>
@@ -2140,7 +2139,7 @@
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"このコンテンツを個人用アプリと共有することはできません"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"このコンテンツを個人用アプリで開くことはできません"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"仕事用プロファイルが一時停止しています"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"タップすると有効になります"</string>
+    <string name="resolver_switch_on_work" msgid="463709043650610420">"タップして有効化"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"仕事用アプリはありません"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"個人用アプリはありません"</string>
     <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"個人用プロファイルで <xliff:g id="APP">%s</xliff:g> を開きますか？"</string>

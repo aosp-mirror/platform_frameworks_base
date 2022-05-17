@@ -720,8 +720,27 @@ public class Dialog implements DialogInterface, Window.Callback,
      * key.  The default implementation simply cancels the dialog (only if
      * it is cancelable), but you can override this to do whatever you want.
      *
+     * <p>
+     * If you target version {@link android.os.Build.VERSION_CODES#TIRAMISU} or later, you
+     * should not use this method but register an {@link OnBackInvokedCallback} on an
+     * {@link OnBackInvokedDispatcher} that you can retrieve using
+     * {@link #getOnBackInvokedDispatcher()}. You should also set
+     * {@code android:enableOnBackInvokedCallback="true"} in the application manifest.
+     *
+     * <p>Alternatively, you
+     * can use {@code androidx.activity.ComponentDialog#getOnBackPressedDispatcher()}
+     * for backward compatibility.
+     *
      * @deprecated Use {@link OnBackInvokedCallback} or
      * {@code androidx.activity.OnBackPressedCallback} to handle back navigation instead.
+     * <p>
+     * Starting from Android 13 (API level 33), back event handling is
+     * moving to an ahead-of-time model and {@link #onBackPressed()} and
+     * {@link KeyEvent#KEYCODE_BACK} should not be used to handle back events (back gesture or
+     * back button click). Instead, an {@link OnBackInvokedCallback} should be registered using
+     * {@link Dialog#getOnBackInvokedDispatcher()}
+     * {@link OnBackInvokedDispatcher#registerOnBackInvokedCallback(int, OnBackInvokedCallback)
+     * .registerOnBackInvokedCallback(priority, callback)}.
      */
     @Deprecated
     public void onBackPressed() {

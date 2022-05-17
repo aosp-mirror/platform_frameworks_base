@@ -21,12 +21,19 @@
     <dimen name="keyguard_indication_margin_bottom">25dp</dimen>
     <dimen name="ambient_indication_margin_bottom">115dp</dimen>
     <dimen name="lock_icon_margin_bottom">60dp</dimen>
-
-    <dimen name="qs_media_session_height_expanded">172dp</dimen>
-
     <!-- margin from keyguard status bar to clock. For split shade it should be
          keyguard_split_shade_top_margin - status_bar_header_height_keyguard = 8dp -->
     <dimen name="keyguard_clock_top_margin">8dp</dimen>
+
+    <!-- QS-->
+    <dimen name="qs_panel_padding_top">16dp</dimen>
+    <dimen name="qs_content_horizontal_padding">24dp</dimen>
+    <dimen name="qs_horizontal_margin">24dp</dimen>
+    <!-- in split shade qs_tiles_page_horizontal_margin should be equal of qs_horizontal_margin/2,
+         otherwise full space between two pages is qs_horizontal_margin*2, and that makes tiles page
+         not appear immediately after user swipes to the side -->
+    <dimen name="qs_tiles_page_horizontal_margin">12dp</dimen>
+    <dimen name="qs_media_session_height_expanded">172dp</dimen>
 
     <dimen name="split_shade_notifications_scrim_margin_bottom">16dp</dimen>
 

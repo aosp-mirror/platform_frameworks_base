@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"takviminize erişme"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS mesajları gönderme ve görüntüleme"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Dosyalar ve dokümanlar"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Dosyalar ve dokümanlar"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"cihazınızdaki dosyalara ve dokümanlara erişme"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Müzik ve diğer sesler"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"cihazınızdaki ses dosyalarına erişme"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Fotoğraflar ve videolar"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"cihazınızdaki resim ve video dosyalarına erişme"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Müzik ve ses"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"cihazınızdaki müziklere ve seslere erişme"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotoğraflar ve videolar"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"cihazınızdaki fotoğraflara ve videolara erişme"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ses kaydetme"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Fiziksel aktivite"</string>
@@ -626,7 +626,7 @@
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Yüz Tanıma Kilidi"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Yüz Tanıma Kilidi sorunu"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Yüz modelinizi silmek için dokunup ardından yüzünüzü yeniden ekleyin"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Yüz Tanıma Kilidi\'ni kurma"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Yüz Tanıma Kilidi\'ni kurun"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Telefonunuza bakarak kilidini açın"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Yüz Tanıma Kilidi\'ni kullanmak için Ayarlar &gt; Gizlilik bölümünden "<b>"Kamera erişimi"</b>"\'ni açın"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Kilidi açmak için daha fazla yöntem ayarlayın"</string>
@@ -2053,8 +2053,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Rahatsız Etmeyin modu değişti"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Nelerin engellendiğini kontrol etmek için dokunun."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Bildirim ayarlarını inceleyin"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13\'te başlayarak yüklediğiniz uygulamaların bildirim gönderebilmesi için izniniz gereklidir. Mevcut uygulamalarda bu izni değiştirmek için dokunun."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Sonra hatırlat"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Kapat"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistem"</string>

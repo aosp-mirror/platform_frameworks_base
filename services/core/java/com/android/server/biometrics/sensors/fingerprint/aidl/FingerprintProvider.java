@@ -122,18 +122,12 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                         continue; // Keyguard is always allowed
                     }
 
-                    final List<ActivityManager.RunningTaskInfo> runningTasks =
-                            mActivityTaskManager.getTasks(1);
-                    if (!runningTasks.isEmpty()) {
-                        final String topPackage =
-                                runningTasks.get(0).topActivity.getPackageName();
-                        if (!topPackage.contentEquals(client.getOwnerString())
-                                && !client.isAlreadyDone()) {
-                            Slog.e(getTag(), "Stopping background authentication, top: "
-                                    + topPackage + " currentClient: " + client);
-                            mSensors.valueAt(i).getScheduler().cancelAuthenticationOrDetection(
-                                    client.getToken(), client.getRequestId());
-                        }
+                    if (Utils.isBackground(client.getOwnerString())
+                            && !client.isAlreadyDone()) {
+                        Slog.e(getTag(), "Stopping background authentication,"
+                                + " currentClient: " + client);
+                        mSensors.valueAt(i).getScheduler().cancelAuthenticationOrDetection(
+                                client.getToken(), client.getRequestId());
                     }
                 }
             });
@@ -176,6 +170,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                             prop.commonProps.maxEnrollmentsPerUser,
                             componentInfo,
                             prop.sensorType,
+                            prop.halControlsIllumination,
                             true /* resetLockoutRequiresHardwareAuthToken */,
                             !workaroundLocations.isEmpty() ? workaroundLocations :
                                     Arrays.stream(prop.sensorLocations).map(location ->
@@ -582,35 +577,35 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     @Override
     public void onPointerDown(long requestId, int sensorId, int x, int y,
             float minor, float major) {
-        final BaseClientMonitor client =
-                mSensors.get(sensorId).getScheduler().getCurrentClientIfMatches(requestId);
-        if (!(client instanceof Udfps)) {
-            Slog.e(getTag(), "onPointerDown received during client: " + client);
-            return;
-        }
-        ((Udfps) client).onPointerDown(x, y, minor, major);
+        mSensors.get(sensorId).getScheduler().getCurrentClientIfMatches(requestId, (client) -> {
+            if (!(client instanceof Udfps)) {
+                Slog.e(getTag(), "onPointerDown received during client: " + client);
+                return;
+            }
+            ((Udfps) client).onPointerDown(x, y, minor, major);
+        });
     }
 
     @Override
     public void onPointerUp(long requestId, int sensorId) {
-        final BaseClientMonitor client =
-                mSensors.get(sensorId).getScheduler().getCurrentClientIfMatches(requestId);
-        if (!(client instanceof Udfps)) {
-            Slog.e(getTag(), "onPointerUp received during client: " + client);
-            return;
-        }
-        ((Udfps) client).onPointerUp();
+        mSensors.get(sensorId).getScheduler().getCurrentClientIfMatches(requestId, (client) -> {
+            if (!(client instanceof Udfps)) {
+                Slog.e(getTag(), "onPointerUp received during client: " + client);
+                return;
+            }
+            ((Udfps) client).onPointerUp();
+        });
     }
 
     @Override
     public void onUiReady(long requestId, int sensorId) {
-        final BaseClientMonitor client =
-                mSensors.get(sensorId).getScheduler().getCurrentClientIfMatches(requestId);
-        if (!(client instanceof Udfps)) {
-            Slog.e(getTag(), "onUiReady received during client: " + client);
-            return;
-        }
-        ((Udfps) client).onUiReady();
+        mSensors.get(sensorId).getScheduler().getCurrentClientIfMatches(requestId, (client) -> {
+            if (!(client instanceof Udfps)) {
+                Slog.e(getTag(), "onUiReady received during client: " + client);
+                return;
+            }
+            ((Udfps) client).onUiReady();
+        });
     }
 
     @Override

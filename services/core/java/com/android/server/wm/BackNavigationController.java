@@ -124,8 +124,7 @@ class BackNavigationController {
                     LocalServices.getService(WindowManagerInternal.class);
             IBinder focusedWindowToken = windowManagerInternal.getFocusedWindowToken();
 
-            window = wmService.windowForClientLocked(null, focusedWindowToken,
-                    false /* throwOnError */);
+            window = wmService.getFocusedWindowLocked();
 
             if (window == null) {
                 EmbeddedWindowController.EmbeddedWindow embeddedWindow =
@@ -144,12 +143,6 @@ class BackNavigationController {
             if (window != null) {
                 ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
                         "Focused window found using getFocusedWindowToken");
-            }
-
-            if (window == null) {
-                window = wmService.getFocusedWindowLocked();
-                ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
-                        "Focused window found using wmService.getFocusedWindowLocked()");
             }
 
             if (window == null) {
@@ -194,7 +187,6 @@ class BackNavigationController {
             if (backType == BackNavigationInfo.TYPE_CALLBACK
                     || currentActivity == null
                     || currentTask == null
-                    || currentTask.getDisplayContent().getImeContainer().isVisible()
                     || currentActivity.isActivityTypeHome()) {
                 return infoBuilder
                         .setType(backType)

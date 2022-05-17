@@ -47,11 +47,13 @@ import android.hardware.graphics.common.AlphaInterpretation;
 import android.hardware.graphics.common.DisplayDecorationSupport;
 import android.os.Handler;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings.Secure;
 import android.util.DisplayUtils;
 import android.util.Log;
 import android.util.Size;
+import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.DisplayCutout.BoundsPosition;
 import android.view.DisplayInfo;
@@ -150,12 +152,13 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
     private SettingObserver mColorInversionSetting;
     private DelayableExecutor mExecutor;
     private Handler mHandler;
-    boolean mPendingRotationChange;
+    boolean mPendingConfigChange;
     @VisibleForTesting
     String mDisplayUniqueId;
     private int mTintColor = Color.BLACK;
     @VisibleForTesting
     protected DisplayDecorationSupport mHwcScreenDecorationSupport;
+    private Display.Mode mDisplayMode;
 
     private CameraAvailabilityListener.CameraTransitionCallback mCameraTransitionCallback =
             new CameraAvailabilityListener.CameraTransitionCallback() {
@@ -323,6 +326,7 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         mWindowManager = mContext.getSystemService(WindowManager.class);
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
         mRotation = mContext.getDisplay().getRotation();
+        mDisplayMode = mContext.getDisplay().getMode();
         mDisplayUniqueId = mContext.getDisplay().getUniqueId();
         mRoundedCornerResDelegate = new RoundedCornerResDelegate(mContext.getResources(),
                 mDisplayUniqueId);
@@ -348,7 +352,10 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
             @Override
             public void onDisplayChanged(int displayId) {
                 final int newRotation = mContext.getDisplay().getRotation();
-                if (mOverlays != null && mRotation != newRotation) {
+                final Display.Mode newDisplayMode = mContext.getDisplay().getMode();
+                if ((mOverlays != null || mScreenDecorHwcWindow != null)
+                        && (mRotation != newRotation
+                        || displayModeChanged(mDisplayMode, newDisplayMode))) {
                     // We cannot immediately update the orientation. Otherwise
                     // WindowManager is still deferring layout until it has finished dispatching
                     // the config changes, which may cause divergence between what we draw
@@ -356,17 +363,26 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
                     // Instead we wait until either:
                     // - we are trying to redraw. This because WM resized our window and told us to.
                     // - the config change has been dispatched, so WM is no longer deferring layout.
-                    mPendingRotationChange = true;
+                    mPendingConfigChange = true;
                     if (DEBUG) {
-                        Log.i(TAG, "Rotation changed, deferring " + newRotation + ", staying at "
-                                + mRotation);
+                        if (mRotation != newRotation) {
+                            Log.i(TAG, "Rotation changed, deferring " + newRotation
+                                            + ", staying at " + mRotation);
+                        }
+                        if (displayModeChanged(mDisplayMode, newDisplayMode)) {
+                            Log.i(TAG, "Resolution changed, deferring " + newDisplayMode
+                                    + ", staying at " + mDisplayMode);
+                        }
                     }
 
-                    for (int i = 0; i < BOUNDS_POSITION_LENGTH; i++) {
-                        if (mOverlays[i] != null) {
-                            final ViewGroup overlayView = mOverlays[i].getRootView();
-                            overlayView.getViewTreeObserver().addOnPreDrawListener(
-                                    new RestartingPreDrawListener(overlayView, i, newRotation));
+                    if (mOverlays != null) {
+                        for (int i = 0; i < BOUNDS_POSITION_LENGTH; i++) {
+                            if (mOverlays[i] != null) {
+                                final ViewGroup overlayView = mOverlays[i].getRootView();
+                                overlayView.getViewTreeObserver().addOnPreDrawListener(
+                                        new RestartingPreDrawListener(
+                                                overlayView, i, newRotation, newDisplayMode));
+                            }
                         }
                     }
 
@@ -375,7 +391,10 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
                                 new RestartingPreDrawListener(
                                         mScreenDecorHwcWindow,
                                         -1, // Pass -1 for views with no specific position.
-                                        newRotation));
+                                        newRotation, newDisplayMode));
+                    }
+                    if (mScreenDecorHwcLayer != null) {
+                        mScreenDecorHwcLayer.pendingConfigChange = true;
                     }
                 }
 
@@ -431,7 +450,7 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         };
 
         mDisplayManager.registerDisplayListener(mDisplayListener, mHandler);
-        updateOrientation();
+        updateConfiguration();
     }
 
     @Nullable
@@ -803,6 +822,17 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         }
     }
 
+    private static boolean displayModeChanged(Display.Mode oldMode, Display.Mode newMode) {
+        if (oldMode == null) {
+            return true;
+        }
+
+        // We purposely ignore refresh rate and id changes here, because we don't need to
+        // invalidate for those, and they can trigger the refresh rate to increase
+        return oldMode.getPhysicalWidth() != newMode.getPhysicalWidth()
+                || oldMode.getPhysicalHeight() != newMode.getPhysicalHeight();
+    }
+
     private int getOverlayWindowGravity(@BoundsPosition int pos) {
         final int rotated = getBoundPositionFromRotation(pos, mRotation);
         switch (rotated) {
@@ -896,8 +926,8 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         final DisplayInfo displayInfo = new DisplayInfo();
         mContext.getDisplay().getDisplayInfo(displayInfo);
         return DisplayUtils.getPhysicalPixelDisplaySizeRatio(
-                stableDisplaySize.x, stableDisplaySize.y, displayInfo.logicalWidth,
-                displayInfo.logicalHeight);
+                stableDisplaySize.x, stableDisplaySize.y, displayInfo.getNaturalWidth(),
+                displayInfo.getNaturalHeight());
     }
 
     @Override
@@ -909,8 +939,8 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
 
         mExecutor.execute(() -> {
             int oldRotation = mRotation;
-            mPendingRotationChange = false;
-            updateOrientation();
+            mPendingConfigChange = false;
+            updateConfiguration();
             if (DEBUG) Log.i(TAG, "onConfigChanged from rot " + oldRotation + " to " + mRotation);
             setupDecorations();
             if (mOverlays != null) {
@@ -937,7 +967,7 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         pw.println("  DEBUG_DISABLE_SCREEN_DECORATIONS:" + DEBUG_DISABLE_SCREEN_DECORATIONS);
         pw.println("  mIsPrivacyDotEnabled:" + isPrivacyDotEnabled());
         pw.println("  isOnlyPrivacyDotInSwLayer:" + isOnlyPrivacyDotInSwLayer());
-        pw.println("  mPendingRotationChange:" + mPendingRotationChange);
+        pw.println("  mPendingConfigChange:" + mPendingConfigChange);
         if (mHwcScreenDecorationSupport != null) {
             pw.println("  mHwcScreenDecorationSupport:");
             pw.println("    format="
@@ -953,15 +983,23 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         } else {
             pw.println("  mScreenDecorHwcLayer: null");
         }
-        pw.println("  mOverlays(left,top,right,bottom)=("
-                + (mOverlays != null && mOverlays[BOUNDS_POSITION_LEFT] != null) + ","
-                + (mOverlays != null && mOverlays[BOUNDS_POSITION_TOP] != null) + ","
-                + (mOverlays != null && mOverlays[BOUNDS_POSITION_RIGHT] != null) + ","
-                + (mOverlays != null && mOverlays[BOUNDS_POSITION_BOTTOM] != null) + ")");
+        if (mOverlays != null) {
+            pw.println("  mOverlays(left,top,right,bottom)=("
+                    + (mOverlays[BOUNDS_POSITION_LEFT] != null) + ","
+                    + (mOverlays[BOUNDS_POSITION_TOP] != null) + ","
+                    + (mOverlays[BOUNDS_POSITION_RIGHT] != null) + ","
+                    + (mOverlays[BOUNDS_POSITION_BOTTOM] != null) + ")");
+
+            for (int i = BOUNDS_POSITION_LEFT; i < BOUNDS_POSITION_LENGTH; i++) {
+                if (mOverlays[i] != null) {
+                    mOverlays[i].dump(pw, getWindowTitleByPos(i));
+                }
+            }
+        }
         mRoundedCornerResDelegate.dump(pw, args);
     }
 
-    private void updateOrientation() {
+    private void updateConfiguration() {
         Preconditions.checkState(mHandler.getLooper().getThread() == Thread.currentThread(),
                 "must call on " + mHandler.getLooper().getThread()
                         + ", but was " + Thread.currentThread());
@@ -970,11 +1008,14 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         if (mRotation != newRotation) {
             mDotViewController.setNewRotation(newRotation);
         }
+        final Display.Mode newMod = mContext.getDisplay().getMode();
 
-        if (!mPendingRotationChange && newRotation != mRotation) {
+        if (!mPendingConfigChange
+                && (newRotation != mRotation || displayModeChanged(mDisplayMode, newMod))) {
             mRotation = newRotation;
+            mDisplayMode = newMod;
             if (mScreenDecorHwcLayer != null) {
-                mScreenDecorHwcLayer.pendingRotationChange = false;
+                mScreenDecorHwcLayer.pendingConfigChange = false;
                 mScreenDecorHwcLayer.updateRotation(mRotation);
                 updateHwLayerRoundedCornerExistAndSize();
                 updateHwLayerRoundedCornerDrawable();
@@ -1064,15 +1105,22 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
     }
 
     private void updateLayoutParams() {
-        if (mOverlays == null) {
-            return;
+        //ToDo: We should skip unnecessary call to update view layout.
+        Trace.beginSection("ScreenDecorations#updateLayoutParams");
+        if (mScreenDecorHwcWindow != null) {
+            mWindowManager.updateViewLayout(mScreenDecorHwcWindow, getHwcWindowLayoutParams());
         }
-        for (int i = 0; i < BOUNDS_POSITION_LENGTH; i++) {
-            if (mOverlays[i] == null) {
-                continue;
+
+        if (mOverlays != null) {
+            for (int i = 0; i < BOUNDS_POSITION_LENGTH; i++) {
+                if (mOverlays[i] == null) {
+                    continue;
+                }
+                mWindowManager.updateViewLayout(
+                        mOverlays[i].getRootView(), getWindowLayoutParams(i));
             }
-            mWindowManager.updateViewLayout(mOverlays[i].getRootView(), getWindowLayoutParams(i));
         }
+        Trace.endSection();
     }
 
     @Override
@@ -1178,7 +1226,7 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
         @Override
         public void updateCutout() {
-            if (!isAttachedToWindow() || pendingRotationChange) {
+            if (!isAttachedToWindow() || pendingConfigChange) {
                 return;
             }
             mPosition = getBoundPositionFromRotation(mInitialPosition, mRotation);
@@ -1319,40 +1367,47 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
 
         private final View mView;
         private final int mTargetRotation;
+        private final Display.Mode mTargetDisplayMode;
         // Pass -1 for ScreenDecorHwcLayer since it's a fullscreen window and has no specific
         // position.
         private final int mPosition;
 
         private RestartingPreDrawListener(View view, @BoundsPosition int position,
-                int targetRotation) {
+                int targetRotation, Display.Mode targetDisplayMode) {
             mView = view;
             mTargetRotation = targetRotation;
+            mTargetDisplayMode = targetDisplayMode;
             mPosition = position;
         }
 
         @Override
         public boolean onPreDraw() {
             mView.getViewTreeObserver().removeOnPreDrawListener(this);
-
-            if (mTargetRotation == mRotation) {
+            if (mTargetRotation == mRotation
+                    && !displayModeChanged(mDisplayMode, mTargetDisplayMode)) {
                 if (DEBUG) {
                     final String title = mPosition < 0 ? "ScreenDecorHwcLayer"
                             : getWindowTitleByPos(mPosition);
                     Log.i(TAG, title + " already in target rot "
-                            + mTargetRotation + ", allow draw without restarting it");
+                            + mTargetRotation + " and in target resolution "
+                            + mTargetDisplayMode.getPhysicalWidth() + "x"
+                            + mTargetDisplayMode.getPhysicalHeight()
+                            + ", allow draw without restarting it");
                 }
                 return true;
             }
 
-            mPendingRotationChange = false;
+            mPendingConfigChange = false;
             // This changes the window attributes - we need to restart the traversal for them to
             // take effect.
-            updateOrientation();
+            updateConfiguration();
             if (DEBUG) {
                 final String title = mPosition < 0 ? "ScreenDecorHwcLayer"
                         : getWindowTitleByPos(mPosition);
                 Log.i(TAG, title
-                        + " restarting listener fired, restarting draw for rot " + mRotation);
+                        + " restarting listener fired, restarting draw for rot " + mRotation
+                        + ", resolution " + mDisplayMode.getPhysicalWidth() + "x"
+                        + mDisplayMode.getPhysicalHeight());
             }
             mView.invalidate();
             return false;
@@ -1360,8 +1415,8 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
     }
 
     /**
-     * A pre-draw listener, that validates that the rotation we draw in matches the displays
-     * rotation before continuing the draw.
+     * A pre-draw listener, that validates that the rotation and display resolution we draw in
+     * matches the display's rotation and resolution before continuing the draw.
      *
      * This is to prevent a race condition, where we have not received the display changed event
      * yet, and would thus draw in an old orientation.
@@ -1377,10 +1432,20 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         @Override
         public boolean onPreDraw() {
             final int displayRotation = mContext.getDisplay().getRotation();
-            if (displayRotation != mRotation && !mPendingRotationChange) {
+            final Display.Mode displayMode = mContext.getDisplay().getMode();
+            if (displayRotation != mRotation && displayModeChanged(mDisplayMode, displayMode)
+                    && !mPendingConfigChange) {
                 if (DEBUG) {
-                    Log.i(TAG, "Drawing rot " + mRotation + ", but display is at rot "
-                            + displayRotation + ". Restarting draw");
+                    if (displayRotation != mRotation) {
+                        Log.i(TAG, "Drawing rot " + mRotation + ", but display is at rot "
+                                + displayRotation + ". Restarting draw");
+                    }
+                    if (displayModeChanged(mDisplayMode, displayMode)) {
+                        Log.i(TAG, "Drawing at " + mDisplayMode.getPhysicalWidth()
+                                + "x" + mDisplayMode.getPhysicalHeight() + ", but display is at "
+                                + displayMode.getPhysicalWidth() + "x"
+                                + displayMode.getPhysicalHeight() + ". Restarting draw");
+                    }
                 }
                 mView.invalidate();
                 return false;

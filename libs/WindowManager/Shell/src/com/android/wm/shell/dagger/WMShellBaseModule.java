@@ -55,6 +55,7 @@ import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ShellAnimationThread;
+import com.android.wm.shell.common.annotations.ShellBackgroundThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.common.annotations.ShellSplashscreenThread;
 import com.android.wm.shell.compatui.CompatUI;
@@ -77,7 +78,6 @@ import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipUiEventLogger;
-import com.android.wm.shell.pip.phone.PipAppOpsListener;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.recents.RecentTasks;
 import com.android.wm.shell.recents.RecentTasksController;
@@ -434,14 +434,6 @@ public abstract class WMShellBaseModule {
         return new FloatingContentCoordinator();
     }
 
-    @WMSingleton
-    @Provides
-    static PipAppOpsListener providePipAppOpsListener(Context context,
-            PipTouchHandler pipTouchHandler,
-            @ShellMainThread ShellExecutor mainExecutor) {
-        return new PipAppOpsListener(context, pipTouchHandler.getMotionHelper(), mainExecutor);
-    }
-
     // Needs handler for registering broadcast receivers
     @WMSingleton
     @Provides
@@ -734,11 +726,12 @@ public abstract class WMShellBaseModule {
     @Provides
     static Optional<BackAnimationController> provideBackAnimationController(
             Context context,
-            @ShellMainThread ShellExecutor shellExecutor
+            @ShellMainThread ShellExecutor shellExecutor,
+            @ShellBackgroundThread Handler backgroundHandler
     ) {
         if (BackAnimationController.IS_ENABLED) {
             return Optional.of(
-                    new BackAnimationController(shellExecutor, context));
+                    new BackAnimationController(shellExecutor, backgroundHandler, context));
         }
         return Optional.empty();
     }

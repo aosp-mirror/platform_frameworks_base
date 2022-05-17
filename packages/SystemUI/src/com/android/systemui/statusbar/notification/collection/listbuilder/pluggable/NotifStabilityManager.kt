@@ -15,6 +15,7 @@
  */
 package com.android.systemui.statusbar.notification.collection.listbuilder.pluggable
 
+import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 
@@ -50,6 +51,14 @@ abstract class NotifStabilityManager protected constructor(name: String) :
      * this entry is being suppressed.
      */
     abstract fun isGroupChangeAllowed(entry: NotificationEntry): Boolean
+
+    /**
+     * Returns whether this notification group can be pruned for not having enough children.
+     * Per iteration of the notification pipeline, locally stores this information until the next
+     * run of the pipeline. When this method returns false, it's expected that a group prune for
+     * this entry is being suppressed.
+     */
+    abstract fun isGroupPruneAllowed(entry: GroupEntry): Boolean
 
     /**
      * Returns whether this notification entry can currently change sections.
@@ -89,6 +98,7 @@ object DefaultNotifStabilityManager : NotifStabilityManager("DefaultNotifStabili
     override fun isPipelineRunAllowed(): Boolean = true
     override fun onBeginRun() {}
     override fun isGroupChangeAllowed(entry: NotificationEntry): Boolean = true
+    override fun isGroupPruneAllowed(entry: GroupEntry): Boolean = true
     override fun isSectionChangeAllowed(entry: NotificationEntry): Boolean = true
     override fun isEntryReorderingAllowed(entry: ListEntry): Boolean = true
     override fun isEveryChangeAllowed(): Boolean = true

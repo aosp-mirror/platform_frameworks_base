@@ -31,8 +31,6 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.drawable.AnimatedStateListDrawable;
 import android.hardware.biometrics.BiometricSourceType;
-import android.hardware.biometrics.SensorLocationInternal;
-import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Process;
 import android.os.VibrationAttributes;
 import android.util.DisplayMetrics;
@@ -125,6 +123,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private float mHeightPixels;
     private float mWidthPixels;
     private int mBottomPaddingPx;
+    private int mDefaultPaddingPx;
 
     private boolean mShowUnlockIcon;
     private boolean mShowLockIcon;
@@ -340,29 +339,28 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mWidthPixels = bounds.right;
         mHeightPixels = bounds.bottom;
         mBottomPaddingPx = getResources().getDimensionPixelSize(R.dimen.lock_icon_margin_bottom);
+        mDefaultPaddingPx =
+                getResources().getDimensionPixelSize(R.dimen.lock_icon_padding);
 
         mUnlockedLabel = mView.getContext().getResources().getString(
                 R.string.accessibility_unlock_button);
         mLockedLabel = mView.getContext()
                 .getResources().getString(R.string.accessibility_lock_icon);
-
         updateLockIconLocation();
     }
 
     private void updateLockIconLocation() {
+        final float scaleFactor = mAuthController.getScaleFactor();
+        final int scaledPadding = (int) (mDefaultPaddingPx * scaleFactor);
         if (mUdfpsSupported) {
-            FingerprintSensorPropertiesInternal props = mAuthController.getUdfpsProps().get(0);
-            final SensorLocationInternal location = props.getLocation();
-            mView.setCenterLocation(new PointF(location.sensorLocationX, location.sensorLocationY),
-                    location.sensorRadius);
+            mView.setCenterLocation(mAuthController.getUdfpsLocation(),
+                    mAuthController.getUdfpsRadius(), scaledPadding);
         } else {
             mView.setCenterLocation(
                     new PointF(mWidthPixels / 2,
-                        mHeightPixels - mBottomPaddingPx - sLockIconRadiusPx),
-                        sLockIconRadiusPx);
+                        mHeightPixels - ((mBottomPaddingPx + sLockIconRadiusPx) * scaleFactor)),
+                        sLockIconRadiusPx * scaleFactor, scaledPadding);
         }
-
-        mView.getHitRect(mSensorTouchLocation);
     }
 
     @Override
@@ -385,6 +383,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         pw.println("  mCanDismissLockScreen: " + mCanDismissLockScreen);
         pw.println("  mStatusBarState: " + StatusBarState.toString(mStatusBarState));
         pw.println("  mInterpolatedDarkAmount: " + mInterpolatedDarkAmount);
+        pw.println("  mSensorTouchLocation: " + mSensorTouchLocation);
 
         if (mView != null) {
             mView.dump(pw, args);
@@ -668,10 +667,10 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             mVelocityTracker.recycle();
             mVelocityTracker = null;
         }
-        mVibrator.cancel();
     }
 
     private boolean inLockIconArea(MotionEvent event) {
+        mView.getHitRect(mSensorTouchLocation);
         return mSensorTouchLocation.contains((int) event.getX(), (int) event.getY())
                 && mView.getVisibility() == View.VISIBLE;
     }
@@ -703,6 +702,11 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
 
         @Override
         public void onEnrollmentsChanged() {
+            updateUdfpsConfig();
+        }
+
+        @Override
+        public void onUdfpsLocationChanged() {
             updateUdfpsConfig();
         }
     };

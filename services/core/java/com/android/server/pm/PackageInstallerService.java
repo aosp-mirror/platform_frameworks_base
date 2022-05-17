@@ -1034,7 +1034,16 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         }
 
         if (!SELinux.restorecon(stageDir)) {
-            throw new IOException("Failed to restorecon session dir: " + stageDir);
+            String path = stageDir.getCanonicalPath();
+            String ctx = SELinux.fileSelabelLookup(path);
+            boolean success = SELinux.setFileContext(path, ctx);
+            Slog.e(TAG,
+                    "Failed to SELinux.restorecon session dir, path: [" + path + "], ctx: [" + ctx
+                            + "]. Retrying via SELinux.fileSelabelLookup/SELinux.setFileContext: "
+                            + (success ? "SUCCESS" : "FAILURE"));
+            if (!success) {
+                throw new IOException("Failed to restorecon session dir: " + stageDir);
+            }
         }
     }
 

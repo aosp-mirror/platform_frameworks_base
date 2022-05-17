@@ -50,7 +50,7 @@ public abstract class SignalController<T extends ConnectivityState, I extends Ic
     protected final T mLastState;
     protected final int mTransportType;
     protected final Context mContext;
-    // The owner of the SignalController (i.e. NetworkController will maintain the following
+    // The owner of the SignalController (i.e. NetworkController) will maintain the following
     // lists and call notifyListeners whenever the list has changed to ensure everyone
     // is aware of current state.
     protected final NetworkControllerImpl mNetworkController;
@@ -103,7 +103,7 @@ public abstract class SignalController<T extends ConnectivityState, I extends Ic
      * Determines if the state of this signal controller has changed and
      * needs to trigger callbacks related to it.
      */
-    public boolean isDirty() {
+    boolean isDirty() {
         if (!mLastState.equals(mCurrentState)) {
             if (DEBUG) {
                 Log.d(mTag, "Change in state from: " + mLastState + "\n"

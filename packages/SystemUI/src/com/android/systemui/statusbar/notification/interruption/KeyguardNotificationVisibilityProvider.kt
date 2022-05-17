@@ -18,6 +18,8 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
+import com.android.systemui.statusbar.StatusBarState
+import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider
@@ -72,7 +74,7 @@ private class KeyguardNotificationVisibilityProviderImpl @Inject constructor(
     private val lockscreenUserManager: NotificationLockscreenUserManager,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val highPriorityProvider: HighPriorityProvider,
-    private val statusBarStateController: StatusBarStateController,
+    private val statusBarStateController: SysuiStatusBarStateController,
     private val broadcastDispatcher: BroadcastDispatcher,
     private val secureSettings: SecureSettings,
     private val globalSettings: GlobalSettings
@@ -105,7 +107,8 @@ private class KeyguardNotificationVisibilityProviderImpl @Inject constructor(
                 if (uri == showSilentNotifsUri) {
                     readShowSilentNotificationSetting()
                 }
-                if (keyguardStateController.isShowing) {
+                if (statusBarStateController.getCurrentOrUpcomingState()
+                        == StatusBarState.KEYGUARD) {
                     notifyStateChanged("Settings $uri changed")
                 }
             }
@@ -131,13 +134,14 @@ private class KeyguardNotificationVisibilityProviderImpl @Inject constructor(
 
         // register (maybe) public mode changed callbacks:
         statusBarStateController.addCallback(object : StatusBarStateController.StateListener {
-            override fun onStateChanged(state: Int) {
-                notifyStateChanged("onStatusBarStateChanged")
+            override fun onUpcomingStateChanged(state: Int) {
+                notifyStateChanged("onStatusBarUpcomingStateChanged")
             }
         })
         broadcastDispatcher.registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
-                if (keyguardStateController.isShowing) {
+                if (statusBarStateController.getCurrentOrUpcomingState()
+                        == StatusBarState.KEYGUARD) {
                     // maybe public mode changed
                     notifyStateChanged(intent.action!!)
                 }
@@ -159,17 +163,28 @@ private class KeyguardNotificationVisibilityProviderImpl @Inject constructor(
 
     override fun shouldHideNotification(entry: NotificationEntry): Boolean = when {
         // Keyguard state doesn't matter if the keyguard is not showing.
-        !keyguardStateController.isShowing -> false
+        statusBarStateController.getCurrentOrUpcomingState() != StatusBarState.KEYGUARD -> false
         // Notifications not allowed on the lockscreen, always hide.
         !lockscreenUserManager.shouldShowLockscreenNotifications() -> true
         // User settings do not allow this notification on the lockscreen, so hide it.
         userSettingsDisallowNotification(entry) -> true
+        // if entry is silent, apply custom logic to see if should hide
+        shouldHideIfEntrySilent(entry) -> true
+        else -> false
+    }
+
+    private fun shouldHideIfEntrySilent(entry: ListEntry): Boolean = when {
+        // Show if high priority (not hidden)
+        highPriorityProvider.isHighPriority(entry) -> false
+        // Ambient notifications are hidden always from lock screen
+        entry.representativeEntry?.isAmbient == true -> true
+        // [Now notification is silent]
+        // Hide regardless of parent priority if user wants silent notifs hidden
+        hideSilentNotificationsOnLockscreen -> true
         // Parent priority is high enough to be shown on the lockscreen, do not hide.
-        entry.parent?.let(::priorityExceedsLockscreenShowingThreshold) == true -> false
-        // Entry priority is high enough to be shown on the lockscreen, do not hide.
-        priorityExceedsLockscreenShowingThreshold(entry) -> false
-        // Priority is too low, hide.
-        else -> true
+        entry.parent?.let(::shouldHideIfEntrySilent) == false -> false
+        // Show when silent notifications are allowed on lockscreen
+        else -> false
     }
 
     private fun userSettingsDisallowNotification(entry: NotificationEntry): Boolean {
@@ -191,11 +206,6 @@ private class KeyguardNotificationVisibilityProviderImpl @Inject constructor(
             notifUser == currentUser -> false
             else -> disallowForUser(notifUser)
         }
-    }
-
-    private fun priorityExceedsLockscreenShowingThreshold(entry: ListEntry): Boolean = when {
-        hideSilentNotificationsOnLockscreen -> highPriorityProvider.isHighPriority(entry)
-        else -> entry.representativeEntry?.ranking?.isAmbient == false
     }
 
     private fun readShowSilentNotificationSetting() {

@@ -805,9 +805,10 @@ public class AuthService extends SystemService {
         if (isUdfps && udfpsProps.length == 3) {
             return new FingerprintSensorPropertiesInternal(sensorId,
                     Utils.authenticatorStrengthToPropertyStrength(strength), maxEnrollmentsPerUser,
-                    componentInfo, sensorType, resetLockoutRequiresHardwareAuthToken,
-                    List.of(new SensorLocationInternal("" /* display */,
-                            udfpsProps[0], udfpsProps[1], udfpsProps[2])));
+                    componentInfo, sensorType, true /* halControlsIllumination */,
+                    resetLockoutRequiresHardwareAuthToken,
+                    List.of(new SensorLocationInternal("" /* display */, udfpsProps[0],
+                            udfpsProps[1], udfpsProps[2])));
         } else {
             return new FingerprintSensorPropertiesInternal(sensorId,
                     Utils.authenticatorStrengthToPropertyStrength(strength), maxEnrollmentsPerUser,

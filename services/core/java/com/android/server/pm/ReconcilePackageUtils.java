@@ -22,11 +22,9 @@ import static android.content.pm.SigningDetails.CapabilityMergeRule.MERGE_RESTRI
 
 import static com.android.server.pm.PackageManagerService.SCAN_BOOTING;
 import static com.android.server.pm.PackageManagerService.SCAN_DONT_KILL_APP;
-import static com.android.server.pm.PackageManagerServiceUtils.compareSignatures;
 
 import android.content.pm.PackageManager;
 import android.content.pm.SharedLibraryInfo;
-import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
 import android.os.SystemProperties;
 import android.util.ArrayMap;
@@ -212,12 +210,10 @@ final class ReconcilePackageUtils {
                     // the signatures on the first package scanned for the shared user (i.e. if the
                     // signaturesChanged state hasn't been initialized yet in SharedUserSetting).
                     if (sharedUserSetting != null) {
-                        final Signature[] sharedUserSignatures = sharedUserSetting
-                                .signatures.mSigningDetails.getSignatures();
                         if (sharedUserSetting.signaturesChanged != null
-                                && compareSignatures(sharedUserSignatures,
-                                parsedPackage.getSigningDetails().getSignatures())
-                                != PackageManager.SIGNATURE_MATCH) {
+                                && !PackageManagerServiceUtils.canJoinSharedUserId(
+                                parsedPackage.getSigningDetails(),
+                                sharedUserSetting.getSigningDetails())) {
                             if (SystemProperties.getInt("ro.product.first_api_level", 0) <= 29) {
                                 // Mismatched signatures is an error and silently skipping system
                                 // packages will likely break the device in unforeseen ways.

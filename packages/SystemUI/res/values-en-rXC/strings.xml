@@ -78,6 +78,8 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‎‎‏‏‏‎‏‎‎‎‏‎‎‏‏‎‎‎‎‏‎‏‏‏‎‎‏‏‏‏‏‏‏‏‏‎‏‎‎‎‏‎‏‎‎‎‎‎‎‏‎‏‏‎‎‎‎‏‎Try taking screenshot again‎‏‎‎‏‎"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‎‎‎‏‎‏‏‏‏‏‏‏‎‏‏‎‏‎‏‎‏‎‏‎‎‏‏‎‏‏‎‏‎‎‏‏‎‏‏‏‏‏‏‎‏‏‏‏‎‏‎‎‏‏‏‎‎‎‎Can\'t save screenshot‎‏‎‎‏‎"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‎‎‏‎‎‎‎‎‎‎‎‎‏‎‎‏‎‎‎‎‎‎‎‎‏‎‎‏‏‎‏‎‎‎‎‏‎‏‏‎‎‏‎‏‏‏‎‎‎‎‎‎‎‏‏‎‏‏‎Taking screenshots isn\'t allowed by the app or your organization‎‏‎‎‏‎"</string>
+    <!-- no translation found for screenshot_blocked_by_admin (5486757604822795797) -->
+    <skip />
     <string name="screenshot_edit_label" msgid="8754981973544133050">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‎‏‎‏‏‏‏‏‏‏‏‏‏‏‎‎‎‏‏‎‏‏‏‎‎‎‎‎‎‏‎‏‎‎‎‎‎‎‏‎‏‏‏‏‏‎‎‎‎‏‏‎‏‏‏‎‏‎‎Edit‎‏‎‎‏‎"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‏‎‎‏‎‎‎‎‎‏‏‎‎‎‎‏‎‏‏‎‏‏‏‏‏‏‎‎‎‎‎‏‎‏‎‏‏‎‎‏‏‏‎‏‏‎‏‎‏‎‎‎‏‎‏‎‏‎‎Edit screenshot‎‏‎‎‏‎"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‏‏‎‏‏‎‏‏‎‏‎‎‎‏‏‎‎‎‏‎‏‏‎‏‏‎‎‎‎‎‏‏‎‎‎‎‏‎‏‏‏‏‎‏‎‏‏‎‏‏‏‏‎‎‏‎‎‎Share screenshot‎‏‎‎‏‎"</string>
@@ -718,6 +720,8 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‎‎‏‎‎‏‏‏‎‏‏‏‎‏‎‏‎‏‎‏‎‏‏‏‎‏‏‏‏‎‏‎‏‎‎‏‏‎‏‎‎‏‎‎‏‎‏‏‏‎‏‎‏‎‏‏‎‎‎Turn on when battery is likely to run out‎‏‎‎‏‎"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‏‏‏‎‏‎‎‎‏‏‎‏‏‎‎‏‎‏‏‎‏‎‏‎‏‎‎‏‏‎‎‏‎‎‎‎‏‎‏‎‏‎‏‎‎‏‏‎‏‏‎‎‎‎‏‎‏‏‎No thanks‎‏‎‎‏‎"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‏‎‎‎‏‏‎‎‏‎‏‎‎‎‏‏‏‏‏‎‎‏‏‏‏‎‎‏‎‏‏‏‏‎‏‎‎‎‏‎‏‎‏‎‎‎‎‎‏‎‏‎‎‎‎‏‏‎‎Dump SysUI Heap‎‏‎‎‏‎"</string>
+    <!-- no translation found for ongoing_privacy_dialog_a11y_title (2205794093673327974) -->
+    <skip />
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‏‏‏‎‎‎‎‎‏‏‏‏‏‎‎‏‏‏‏‎‎‎‏‏‏‎‏‎‏‏‏‎‎‎‏‏‏‏‎‎‏‏‎‎‏‏‎‏‎‎‏‎‏‎‎‏‎‎Applications are using your ‎‏‎‎‏‏‎<xliff:g id="TYPES_LIST">%s</xliff:g>‎‏‎‎‏‏‏‎.‎‏‎‎‏‎"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‎‏‏‏‏‎‎‏‏‎‎‎‏‎‎‏‏‏‎‏‏‏‏‎‎‏‏‏‎‏‎‎‎‎‎‎‎‏‏‏‎‎‏‎‎‎‏‎‎‎‎‏‎‎‏‎‏‏‎, ‎‏‎‎‏‎ "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" ‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‎‏‏‏‏‎‏‏‏‏‏‎‎‏‏‎‎‏‏‎‎‏‎‎‏‎‎‏‎‏‏‏‎‏‏‎‎‎‏‎‏‏‏‎‏‏‎‏‎‏‎‎‏‎‎‏‏‏‎ and ‎‏‎‎‏‎ "</string>
@@ -845,6 +849,10 @@
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‎‏‏‏‎‎‏‎‎‏‎‎‎‎‏‎‏‎‎‏‎‏‎‏‏‏‏‎‎‎‎‎‏‏‎‎‎‎‏‎‏‏‏‏‎‏‎‏‎‏‎‏‎‏‎‏‏‎‎Save‎‏‎‎‏‎"</string>
     <string name="media_output_broadcast_starting" msgid="8130153654166235557">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‎‎‏‏‎‏‎‏‎‎‎‎‎‏‏‎‏‏‏‎‏‎‏‏‎‎‎‏‎‎‏‏‎‏‏‏‏‎‏‏‎‎‎‎‏‎‏‎‎‏‏‎‏‎‎‏‎‏‎Starting…‎‏‎‎‏‎"</string>
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‏‎‏‏‏‏‎‎‎‏‎‏‏‎‏‏‎‏‏‏‎‏‏‎‎‎‎‏‎‎‎‎‎‏‎‎‎‏‏‎‎‎‎‎‏‎‎‏‎‎‏‏‏‎‏‏‏‏‎Can’t broadcast‎‏‎‎‏‎"</string>
+    <!-- no translation found for media_output_broadcast_update_error (1420868236079122521) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast_last_update_error (5484328807296895491) -->
+    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‏‎‎‏‎‎‏‎‎‎‎‎‎‏‏‏‎‎‎‎‎‎‏‎‎‏‏‎‏‏‏‏‏‏‎‏‏‏‏‏‏‎‎‎‎‏‏‏‏‎‎‎‎‏‎‎‏‎‎Build number‎‏‎‎‏‎"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‎‎‎‎‏‎‏‏‏‎‎‏‎‎‏‎‏‎‏‎‎‎‎‏‏‏‎‎‏‎‎‎‎‎‎‎‏‏‏‎‎‏‎‏‏‏‏‎‎‎‎‏‎‎‎‏‏‎‎Build number copied to clipboard.‎‏‎‎‏‎"</string>
     <string name="basic_status" msgid="2315371112182658176">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‎‎‎‎‏‎‎‎‎‏‏‏‎‏‏‎‎‏‏‏‎‎‎‎‏‎‎‏‎‏‏‎‎‎‏‏‎‏‏‎‎‏‎‎‏‏‎‏‎‎‏‎‎‎‎‎‎‎‎Open conversation‎‏‎‎‏‎"</string>

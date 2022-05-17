@@ -401,39 +401,15 @@ class ShortcutUser {
 
     private void saveShortcutPackageItem(TypedXmlSerializer out, ShortcutPackageItem spi,
             boolean forBackup) throws IOException, XmlPullParserException {
+        spi.waitForBitmapSaves();
         if (forBackup) {
             if (spi.getPackageUserId() != spi.getOwnerUserId()) {
                 return; // Don't save cross-user information.
             }
             spi.saveToXml(out, forBackup);
         } else {
-            // Save each ShortcutPackageItem in a separate Xml file.
-            final File path = getShortcutPackageItemFile(spi);
-            if (ShortcutService.DEBUG || ShortcutService.DEBUG_REBOOT) {
-                Slog.d(TAG, "Saving package item " + spi.getPackageName() + " to " + path);
-            }
-
-            path.getParentFile().mkdirs();
-            spi.saveToFile(path, forBackup);
+            spi.saveShortcutPackageItem();
         }
-    }
-
-    private File getShortcutPackageItemFile(ShortcutPackageItem spi) {
-        boolean isShortcutLauncher = spi instanceof ShortcutLauncher;
-
-        final File path = new File(mService.injectUserDataPath(mUserId),
-                isShortcutLauncher ? DIRECTORY_LUANCHERS : DIRECTORY_PACKAGES);
-
-        final String fileName;
-        if (isShortcutLauncher) {
-            // Package user id and owner id can have different values for ShortcutLaunchers. Adding
-            // user Id to the file name to create a unique path. Owner id is used in the root path.
-            fileName = spi.getPackageName() + spi.getPackageUserId() + ".xml";
-        } else {
-            fileName = spi.getPackageName() + ".xml";
-        }
-
-        return new File(path, fileName);
     }
 
     public static ShortcutUser loadFromXml(ShortcutService s, TypedXmlPullParser parser, int userId,

@@ -88,4 +88,7 @@ public class GroupEntryBuilder {
         return this;
     }
 
+    public static List<NotificationEntry> getRawChildren(GroupEntry groupEntry) {
+        return groupEntry.getRawChildren();
+    }
 }

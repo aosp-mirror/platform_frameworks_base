@@ -20,6 +20,7 @@ import static android.view.KeyEvent.KEYCODE_UNKNOWN;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManagerInternal;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -164,6 +165,7 @@ public class InputManagerService extends IInputManager.Stub
     private static final int MSG_UPDATE_KEYBOARD_LAYOUTS = 4;
     private static final int MSG_RELOAD_DEVICE_ALIASES = 5;
     private static final int MSG_DELIVER_TABLET_MODE_CHANGED = 6;
+    private static final int MSG_POINTER_DISPLAY_ID_CHANGED = 7;
 
     private static final int DEFAULT_VIBRATION_MAGNITUDE = 192;
 
@@ -276,11 +278,24 @@ public class InputManagerService extends IInputManager.Stub
     @GuardedBy("mAssociationLock")
     private final Map<String, String> mUniqueIdAssociations = new ArrayMap<>();
 
+    // Guards per-display input properties and properties relating to the mouse pointer.
+    // Threads can wait on this lock to be notified the next time the display on which the mouse
+    // pointer is shown has changed.
     private final Object mAdditionalDisplayInputPropertiesLock = new Object();
 
-    // Forces the MouseCursorController to target a specific display id.
+    // Forces the PointerController to target a specific display id.
     @GuardedBy("mAdditionalDisplayInputPropertiesLock")
     private int mOverriddenPointerDisplayId = Display.INVALID_DISPLAY;
+
+    // PointerController is the source of truth of the pointer display. This is the value of the
+    // latest pointer display id reported by PointerController.
+    @GuardedBy("mAdditionalDisplayInputPropertiesLock")
+    private int mAcknowledgedPointerDisplayId = Display.INVALID_DISPLAY;
+    // This is the latest display id that IMS has requested PointerController to use. If there are
+    // no devices that can control the pointer, PointerController may end up disregarding this
+    // value.
+    @GuardedBy("mAdditionalDisplayInputPropertiesLock")
+    private int mRequestedPointerDisplayId = Display.INVALID_DISPLAY;
     @GuardedBy("mAdditionalDisplayInputPropertiesLock")
     private final SparseArray<AdditionalDisplayInputProperties> mAdditionalDisplayInputProperties =
             new SparseArray<>();
@@ -288,7 +303,6 @@ public class InputManagerService extends IInputManager.Stub
     private int mIconType = PointerIcon.TYPE_NOT_SPECIFIED;
     @GuardedBy("mAdditionalDisplayInputPropertiesLock")
     private PointerIcon mIcon;
-
 
     // Holds all the registered gesture monitors that are implemented as spy windows. The spy
     // windows are mapped by their InputChannel tokens.
@@ -383,6 +397,10 @@ public class InputManagerService extends IInputManager.Stub
         NativeInputManagerService getNativeService(InputManagerService service) {
             return new NativeInputManagerService.NativeImpl(service, mContext, mLooper.getQueue());
         }
+
+        void registerLocalService(InputManagerInternal localService) {
+            LocalServices.addService(InputManagerInternal.class, localService);
+        }
     }
 
     public InputManagerService(Context context) {
@@ -391,11 +409,14 @@ public class InputManagerService extends IInputManager.Stub
 
     @VisibleForTesting
     InputManagerService(Injector injector) {
+        // The static association map is accessed by both java and native code, so it must be
+        // initialized before initializing the native service.
+        mStaticAssociations = loadStaticInputPortAssociations();
+
         mContext = injector.getContext();
         mHandler = new InputManagerHandler(injector.getLooper());
         mNative = injector.getNativeService(this);
 
-        mStaticAssociations = loadStaticInputPortAssociations();
         mUseDevInputEventForAudioJack =
                 mContext.getResources().getBoolean(R.bool.config_useDevInputEventForAudioJack);
         Slog.i(TAG, "Initializing input manager, mUseDevInputEventForAudioJack="
@@ -406,7 +427,7 @@ public class InputManagerService extends IInputManager.Stub
         mDoubleTouchGestureEnableFile = TextUtils.isEmpty(doubleTouchGestureEnablePath) ? null :
             new File(doubleTouchGestureEnablePath);
 
-        LocalServices.addService(InputManagerInternal.class, new LocalService());
+        injector.registerLocalService(new LocalService());
     }
 
     public void setWindowManagerCallbacks(WindowManagerCallbacks callbacks) {
@@ -556,6 +577,8 @@ public class InputManagerService extends IInputManager.Stub
                 vArray[i] = viewports.get(i);
             }
             mNative.setDisplayViewports(vArray);
+            // Always attempt to update the pointer display when viewports change.
+            updatePointerDisplayId();
 
             if (mOverriddenPointerDisplayId != Display.INVALID_DISPLAY) {
                 final AdditionalDisplayInputProperties properties =
@@ -838,6 +861,19 @@ public class InputManagerService extends IInputManager.Stub
 
     @Override // Binder call
     public boolean injectInputEvent(InputEvent event, int mode) {
+        return injectInputEventToTarget(event, mode, Process.INVALID_UID);
+    }
+
+    @Override // Binder call
+    public boolean injectInputEventToTarget(InputEvent event, int mode, int targetUid) {
+        if (!checkCallingPermission(android.Manifest.permission.INJECT_EVENTS,
+                "injectInputEvent()", true /*checkInstrumentationSource*/)) {
+            throw new SecurityException(
+                    "Injecting input events requires the caller (or the source of the "
+                            + "instrumentation, if any) to have the INJECT_EVENTS permission.");
+        }
+        // We are not checking if targetUid matches the callingUid, since having the permission
+        // already means you can inject into any window.
         Objects.requireNonNull(event, "event must not be null");
         if (mode != InputEventInjectionSync.NONE
                 && mode != InputEventInjectionSync.WAIT_FOR_FINISHED
@@ -846,22 +882,39 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         final int pid = Binder.getCallingPid();
-        final int uid = Binder.getCallingUid();
         final long ident = Binder.clearCallingIdentity();
+        final boolean injectIntoUid = targetUid != Process.INVALID_UID;
         final int result;
         try {
-            result = mNative.injectInputEvent(event, pid, uid, mode,
-                    INJECTION_TIMEOUT_MILLIS, WindowManagerPolicy.FLAG_DISABLE_KEY_REPEAT);
+            result = mNative.injectInputEvent(event, injectIntoUid,
+                    targetUid, mode, INJECTION_TIMEOUT_MILLIS,
+                    WindowManagerPolicy.FLAG_DISABLE_KEY_REPEAT);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
         switch (result) {
-            case InputEventInjectionResult.PERMISSION_DENIED:
-                Slog.w(TAG, "Input event injection from pid " + pid + " permission denied.");
-                throw new SecurityException(
-                        "Injecting to another application requires INJECT_EVENTS permission");
             case InputEventInjectionResult.SUCCEEDED:
                 return true;
+            case InputEventInjectionResult.TARGET_MISMATCH:
+                if (!injectIntoUid) {
+                    throw new IllegalStateException("Injection should not result in TARGET_MISMATCH"
+                            + " when it is not targeted into to a specific uid.");
+                }
+                // TODO(b/228161340): Remove the fallback of targeting injection into all windows
+                //  when the caller has the injection permission.
+                // Explicitly maintain the same behavior as previous versions of Android, where
+                // injection is allowed into all windows if the caller has the INJECT_EVENTS
+                // permission, even if it is targeting a certain uid.
+                if (checkCallingPermission(android.Manifest.permission.INJECT_EVENTS,
+                        "injectInputEvent-target-mismatch-fallback")) {
+                    Slog.w(TAG, "Targeted input event was not directed at a window owned by uid "
+                            + targetUid + ". Falling back to injecting into all windows.");
+                    return injectInputEventToTarget(event, mode, Process.INVALID_UID);
+                }
+                throw new IllegalArgumentException(
+                    "Targeted input event injection from pid " + pid
+                            + " was not directed at a window owned by uid "
+                            + targetUid + ".");
             case InputEventInjectionResult.TIMED_OUT:
                 Slog.w(TAG, "Input event injection from pid " + pid + " timed out.");
                 return false;
@@ -1690,6 +1743,13 @@ public class InputManagerService extends IInputManager.Stub
             mPointerIconDisplayContext = null;
         }
 
+        synchronized (mAdditionalDisplayInputPropertiesLock) {
+            setPointerIconVisible(AdditionalDisplayInputProperties.DEFAULT_POINTER_ICON_VISIBLE,
+                    displayId);
+            setPointerAcceleration(AdditionalDisplayInputProperties.DEFAULT_POINTER_ACCELERATION,
+                    displayId);
+        }
+
         mNative.displayRemoved(displayId);
     }
 
@@ -1961,10 +2021,43 @@ public class InputManagerService extends IInputManager.Stub
         return result;
     }
 
-    private void setVirtualMousePointerDisplayId(int displayId) {
+    /**
+     * Update the display on which the mouse pointer is shown.
+     * If there is an overridden display for the mouse pointer, use that. Otherwise, query
+     * WindowManager for the pointer display.
+     *
+     * @return true if the pointer displayId changed, false otherwise.
+     */
+    private boolean updatePointerDisplayId() {
+        synchronized (mAdditionalDisplayInputPropertiesLock) {
+            final int pointerDisplayId = mOverriddenPointerDisplayId != Display.INVALID_DISPLAY
+                    ? mOverriddenPointerDisplayId : mWindowManagerCallbacks.getPointerDisplayId();
+            if (mRequestedPointerDisplayId == pointerDisplayId) {
+                return false;
+            }
+            mRequestedPointerDisplayId = pointerDisplayId;
+            mNative.setPointerDisplayId(pointerDisplayId);
+            return true;
+        }
+    }
+
+    private void handlePointerDisplayIdChanged(PointerDisplayIdChangedArgs args) {
+        synchronized (mAdditionalDisplayInputPropertiesLock) {
+            mAcknowledgedPointerDisplayId = args.mPointerDisplayId;
+            // Notify waiting threads that the display of the mouse pointer has changed.
+            mAdditionalDisplayInputPropertiesLock.notifyAll();
+        }
+        mWindowManagerCallbacks.notifyPointerDisplayIdChanged(
+                args.mPointerDisplayId, args.mXPosition, args.mYPosition);
+    }
+
+    private boolean setVirtualMousePointerDisplayIdBlocking(int displayId) {
+        // Indicates whether this request is for removing the override.
+        final boolean removingOverride = displayId == Display.INVALID_DISPLAY;
+
         synchronized (mAdditionalDisplayInputPropertiesLock) {
             mOverriddenPointerDisplayId = displayId;
-            if (displayId != Display.INVALID_DISPLAY) {
+            if (!removingOverride) {
                 final AdditionalDisplayInputProperties properties =
                         mAdditionalDisplayInputProperties.get(displayId);
                 if (properties != null) {
@@ -1972,9 +2065,30 @@ public class InputManagerService extends IInputManager.Stub
                     updatePointerIconVisibleLocked(properties.pointerIconVisible);
                 }
             }
+            if (!updatePointerDisplayId() && mAcknowledgedPointerDisplayId == displayId) {
+                // The requested pointer display is already set.
+                return true;
+            }
+            if (removingOverride && mAcknowledgedPointerDisplayId == Display.INVALID_DISPLAY) {
+                // The pointer display override is being removed, but the current pointer display
+                // is already invalid. This can happen when the PointerController is destroyed as a
+                // result of the removal of all input devices that can control the pointer.
+                return true;
+            }
+            try {
+                // The pointer display changed, so wait until the change has propagated.
+                mAdditionalDisplayInputPropertiesLock.wait(5_000 /*mills*/);
+            } catch (InterruptedException ignored) {
+            }
+            // This request succeeds in two cases:
+            // - This request was to remove the override, in which case the new pointer display
+            //   could be anything that WM has set.
+            // - We are setting a new override, in which case the request only succeeds if the
+            //   reported new displayId is the one we requested. This check ensures that if two
+            //   competing overrides are requested in succession, the caller can be notified if one
+            //   of them fails.
+            return  removingOverride || mAcknowledgedPointerDisplayId == displayId;
         }
-        // TODO(b/215597605): trigger MousePositionTracker update
-        mNative.notifyPointerDisplayIdChanged();
     }
 
     private int getVirtualMousePointerDisplayId() {
@@ -2697,8 +2811,12 @@ public class InputManagerService extends IInputManager.Stub
             }
         }
     }
-
     private boolean checkCallingPermission(String permission, String func) {
+        return checkCallingPermission(permission, func, false /*checkInstrumentationSource*/);
+    }
+
+    private boolean checkCallingPermission(String permission, String func,
+            boolean checkInstrumentationSource) {
         // Quick check: if the calling permission is me, it's all okay.
         if (Binder.getCallingPid() == Process.myPid()) {
             return true;
@@ -2707,6 +2825,28 @@ public class InputManagerService extends IInputManager.Stub
         if (mContext.checkCallingPermission(permission) == PackageManager.PERMISSION_GRANTED) {
             return true;
         }
+
+        if (checkInstrumentationSource) {
+            final ActivityManagerInternal ami =
+                    LocalServices.getService(ActivityManagerInternal.class);
+            Objects.requireNonNull(ami, "ActivityManagerInternal should not be null.");
+            final int instrumentationUid = ami.getInstrumentationSourceUid(Binder.getCallingUid());
+            if (instrumentationUid != Process.INVALID_UID) {
+                // Clear the calling identity when checking if the instrumentation source has
+                // permission because PackageManager will deny all permissions to some callers,
+                // such as instant apps.
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    if (mContext.checkPermission(permission, -1 /*pid*/, instrumentationUid)
+                            == PackageManager.PERMISSION_GRANTED) {
+                        return true;
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+            }
+        }
+
         String msg = "Permission Denial: " + func + " from pid="
                 + Binder.getCallingPid()
                 + ", uid=" + Binder.getCallingUid()
@@ -2952,13 +3092,6 @@ public class InputManagerService extends IInputManager.Stub
 
     // Native callback.
     @SuppressWarnings("unused")
-    private boolean checkInjectEventsPermission(int injectorPid, int injectorUid) {
-        return mContext.checkPermission(android.Manifest.permission.INJECT_EVENTS,
-                injectorPid, injectorUid) == PackageManager.PERMISSION_GRANTED;
-    }
-
-    // Native callback.
-    @SuppressWarnings("unused")
     private void onPointerDownOutsideFocus(IBinder touchedToken) {
         mWindowManagerCallbacks.onPointerDownOutsideFocus(touchedToken);
     }
@@ -3156,18 +3289,6 @@ public class InputManagerService extends IInputManager.Stub
 
     // Native callback.
     @SuppressWarnings("unused")
-    private int getPointerDisplayId() {
-        synchronized (mAdditionalDisplayInputPropertiesLock) {
-            // Prefer the override to all other displays.
-            if (mOverriddenPointerDisplayId != Display.INVALID_DISPLAY) {
-                return mOverriddenPointerDisplayId;
-            }
-        }
-        return mWindowManagerCallbacks.getPointerDisplayId();
-    }
-
-    // Native callback.
-    @SuppressWarnings("unused")
     private String[] getKeyboardLayoutOverlay(InputDeviceIdentifier identifier) {
         if (!mSystemReady) {
             return null;
@@ -3204,6 +3325,26 @@ public class InputManagerService extends IInputManager.Stub
             return null;
         }
         return null;
+    }
+
+    private static class PointerDisplayIdChangedArgs {
+        final int mPointerDisplayId;
+        final float mXPosition;
+        final float mYPosition;
+        PointerDisplayIdChangedArgs(int pointerDisplayId, float xPosition, float yPosition) {
+            mPointerDisplayId = pointerDisplayId;
+            mXPosition = xPosition;
+            mYPosition = yPosition;
+        }
+    }
+
+    // Native callback.
+    @SuppressWarnings("unused")
+    @VisibleForTesting
+    void onPointerDisplayIdChanged(int pointerDisplayId, float xPosition, float yPosition) {
+        mHandler.obtainMessage(MSG_POINTER_DISPLAY_ID_CHANGED,
+                new PointerDisplayIdChangedArgs(pointerDisplayId, xPosition,
+                        yPosition)).sendToTarget();
     }
 
     /**
@@ -3329,6 +3470,14 @@ public class InputManagerService extends IInputManager.Stub
          */
         @Nullable
         SurfaceControl createSurfaceForGestureMonitor(String name, int displayId);
+
+        /**
+         * Notify WindowManagerService when the display of the mouse pointer changes.
+         * @param displayId The display on which the mouse pointer is shown.
+         * @param x The x coordinate of the mouse pointer.
+         * @param y The y coordinate of the mouse pointer.
+         */
+        void notifyPointerDisplayIdChanged(int displayId, float x, float y);
     }
 
     /**
@@ -3381,6 +3530,9 @@ public class InputManagerService extends IInputManager.Stub
                     boolean inTabletMode = (boolean) args.arg1;
                     deliverTabletModeChanged(whenNanos, inTabletMode);
                     break;
+                case MSG_POINTER_DISPLAY_ID_CHANGED:
+                    handlePointerDisplayIdChanged((PointerDisplayIdChangedArgs) msg.obj);
+                    break;
             }
         }
     }
@@ -3399,12 +3551,17 @@ public class InputManagerService extends IInputManager.Stub
 
         @Override
         public void sendInputEvent(InputEvent event, int policyFlags) {
+            if (!checkCallingPermission(android.Manifest.permission.INJECT_EVENTS,
+                    "sendInputEvent()")) {
+                throw new SecurityException(
+                        "The INJECT_EVENTS permission is required for injecting input events.");
+            }
             Objects.requireNonNull(event, "event must not be null");
 
             synchronized (mInputFilterLock) {
                 if (!mDisconnected) {
-                    mNative.injectInputEvent(event, 0, 0,
-                            InputManager.INJECT_INPUT_EVENT_MODE_ASYNC, 0,
+                    mNative.injectInputEvent(event, false /* injectIntoUid */, -1 /* uid */,
+                            InputManager.INJECT_INPUT_EVENT_MODE_ASYNC, 0 /* timeout */,
                             policyFlags | WindowManagerPolicy.FLAG_FILTERED);
                 }
             }
@@ -3631,8 +3788,9 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         @Override
-        public void setVirtualMousePointerDisplayId(int pointerDisplayId) {
-            InputManagerService.this.setVirtualMousePointerDisplayId(pointerDisplayId);
+        public boolean setVirtualMousePointerDisplayId(int pointerDisplayId) {
+            return InputManagerService.this
+                    .setVirtualMousePointerDisplayIdBlocking(pointerDisplayId);
         }
 
         @Override

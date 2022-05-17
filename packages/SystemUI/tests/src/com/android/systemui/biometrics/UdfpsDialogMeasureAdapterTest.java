@@ -62,6 +62,7 @@ public class UdfpsDialogMeasureAdapterTest extends SysuiTestCase {
                 0 /* sensorId */, SensorProperties.STRENGTH_STRONG, 5 /* maxEnrollmentsPerUser */,
                 componentInfo,
                 FingerprintSensorProperties.TYPE_UDFPS_OPTICAL,
+                true /* halControlsIllumination */,
                 true /* resetLockoutRequiresHardwareAuthToken */,
                 List.of(new SensorLocationInternal("" /* displayId */,
                         sensorLocationX, sensorLocationY, sensorRadius)));
@@ -127,6 +128,7 @@ public class UdfpsDialogMeasureAdapterTest extends SysuiTestCase {
                 0 /* sensorId */, SensorProperties.STRENGTH_STRONG, 5 /* maxEnrollmentsPerUser */,
                 componentInfo,
                 FingerprintSensorProperties.TYPE_UDFPS_OPTICAL,
+                true /* halControlsIllumination */,
                 true /* resetLockoutRequiresHardwareAuthToken */,
                 List.of(new SensorLocationInternal("" /* displayId */,
                         sensorLocationX, sensorLocationY, sensorRadius)));

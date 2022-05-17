@@ -65,6 +65,7 @@ import com.android.systemui.util.Assert
 import com.android.systemui.util.Utils
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.time.SystemClock
+import com.android.systemui.util.traceSection
 import java.io.IOException
 import java.io.PrintWriter
 import java.util.concurrent.Executor
@@ -105,7 +106,6 @@ private val LOADING = MediaData(
 internal val EMPTY_SMARTSPACE_MEDIA_DATA = SmartspaceMediaData(
     targetId = "INVALID",
     isActive = false,
-    isValid = false,
     packageName = "INVALID",
     cardAction = null,
     recommendations = emptyList(),
@@ -261,6 +261,8 @@ class MediaDataManager(
         // Set up links back into the pipeline for listeners that need to send events upstream.
         mediaTimeoutListener.timeoutCallback = { key: String, timedOut: Boolean ->
             setTimedOut(key, timedOut) }
+        mediaTimeoutListener.stateCallback = { key: String, state: PlaybackState ->
+            updateState(key, state) }
         mediaResumeListener.setManager(this)
         mediaDataFilter.mediaDataManager = this
 
@@ -502,6 +504,21 @@ class MediaDataManager(
         }
     }
 
+    /**
+     * Called when the player's [PlaybackState] has been updated with new actions and/or state
+     */
+    private fun updateState(key: String, state: PlaybackState) {
+        mediaEntries.get(key)?.let {
+            val actions = createActionsFromState(it.packageName,
+                    mediaControllerFactory.create(it.token), UserHandle(it.userId))
+            val data = it.copy(
+                    semanticActions = actions,
+                    isPlaying = isPlayingState(state.state))
+            if (DEBUG) Log.d(TAG, "State updated outside of notification")
+            onMediaDataLoaded(key, key, data)
+        }
+    }
+
     private fun removeEntry(key: String) {
         mediaEntries.remove(key)?.let {
             logger.logMediaRemoved(it.appUid, it.packageName, it.instanceId)
@@ -534,7 +551,7 @@ class MediaDataManager(
      * connection session.
      */
     fun dismissSmartspaceRecommendation(key: String, delay: Long) {
-        if (smartspaceMediaData.targetId != key || !smartspaceMediaData.isValid) {
+        if (smartspaceMediaData.targetId != key || !smartspaceMediaData.isValid()) {
             // If this doesn't match, or we've already invalidated the data, no action needed
             return
         }
@@ -673,11 +690,8 @@ class MediaDataManager(
         // Otherwise, use the notification actions
         var actionIcons: List<MediaAction> = emptyList()
         var actionsToShowCollapsed: List<Int> = emptyList()
-        var semanticActions: MediaButton? = null
-        if (mediaFlags.areMediaSessionActionsEnabled(sbn.packageName, sbn.user) &&
-                mediaController.playbackState != null) {
-            semanticActions = createActionsFromState(sbn.packageName, mediaController)
-        } else {
+        val semanticActions = createActionsFromState(sbn.packageName, mediaController, sbn.user)
+        if (semanticActions == null) {
             val actions = createActionsFromNotification(sbn)
             actionIcons = actions.first
             actionsToShowCollapsed = actions.second
@@ -789,13 +803,17 @@ class MediaDataManager(
      * @return a Pair consisting of a list of media actions, and a list of ints representing which
      *      of those actions should be shown in the compact player
      */
-    private fun createActionsFromState(packageName: String, controller: MediaController):
-            MediaButton? {
+    private fun createActionsFromState(
+        packageName: String,
+        controller: MediaController,
+        user: UserHandle
+    ): MediaButton? {
         val state = controller.playbackState
-        if (state == null) {
-            return MediaButton()
+        if (state == null || !mediaFlags.areMediaSessionActionsEnabled(packageName, user)) {
+            return null
         }
-        // First, check for} standard actions
+
+        // First, check for standard actions
         val playOrPause = if (isConnectingState(state.state)) {
             // Spinner needs to be animating to render anything. Start it here.
             val drawable = context.getDrawable(
@@ -1014,7 +1032,11 @@ class MediaDataManager(
         )
     }
 
-    fun onMediaDataLoaded(key: String, oldKey: String?, data: MediaData) {
+    fun onMediaDataLoaded(
+        key: String,
+        oldKey: String?,
+        data: MediaData
+    ) = traceSection("MediaDataManager#onMediaDataLoaded") {
         Assert.isMainThread()
         if (mediaEntries.containsKey(key)) {
             // Otherwise this was removed already
@@ -1222,7 +1244,6 @@ class MediaDataManager(
             return SmartspaceMediaData(
                 targetId = target.smartspaceTargetId,
                 isActive = isActive,
-                isValid = true,
                 packageName = it,
                 cardAction = target.baseAction,
                 recommendations = target.iconGrid,

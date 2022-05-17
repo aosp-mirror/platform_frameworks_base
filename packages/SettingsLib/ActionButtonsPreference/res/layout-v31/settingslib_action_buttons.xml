@@ -28,7 +28,8 @@
         style="@style/SettingsLibActionButton"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="1"/>
+        android:layout_weight="1"
+        android:hyphenationFrequency="normalFast"/>
 
     <View
         android:id="@+id/divider1"
@@ -43,7 +44,8 @@
         style="@style/SettingsLibActionButton"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="1"/>
+        android:layout_weight="1"
+        android:hyphenationFrequency="normalFast"/>
 
     <View
         android:id="@+id/divider2"
@@ -58,7 +60,8 @@
         style="@style/SettingsLibActionButton"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="1"/>
+        android:layout_weight="1"
+        android:hyphenationFrequency="normalFast"/>
 
     <View
         android:id="@+id/divider3"
@@ -73,5 +76,6 @@
         style="@style/SettingsLibActionButton"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="1"/>
+        android:layout_weight="1"
+        android:hyphenationFrequency="normalFast"/>
 </LinearLayout>

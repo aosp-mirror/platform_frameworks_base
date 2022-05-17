@@ -24,6 +24,7 @@ import android.view.WindowManager;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.navigationbar.NavigationBarComponent.NavigationBarScope;
+import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 
 import dagger.Module;
 import dagger.Provides;
@@ -53,6 +54,14 @@ public interface NavigationBarModule {
             @DisplayId LayoutInflater layoutInflater, NavigationBarFrame frame) {
         View barView = layoutInflater.inflate(R.layout.navigation_bar, frame);
         return barView.findViewById(R.id.navigation_bar_view);
+    }
+
+    /** */
+    @Provides
+    @NavigationBarScope
+    static EdgeBackGestureHandler provideEdgeBackGestureHandler(
+            EdgeBackGestureHandler.Factory factory, @DisplayId Context context) {
+        return factory.create(context);
     }
 
     /** A WindowManager specific to the display's context. */

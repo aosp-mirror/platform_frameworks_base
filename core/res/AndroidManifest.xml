@@ -377,6 +377,8 @@
     <protected-broadcast android:name="com.android.server.action.REMOTE_BUGREPORT_SHARING_ACCEPTED" />
     <protected-broadcast android:name="com.android.server.action.REMOTE_BUGREPORT_SHARING_DECLINED" />
     <protected-broadcast android:name="com.android.internal.action.EUICC_FACTORY_RESET" />
+    <protected-broadcast
+        android:name="com.android.internal.action.EUICC_REMOVE_INVISIBLE_SUBSCRIPTIONS" />
     <protected-broadcast android:name="com.android.server.usb.ACTION_OPEN_IN_APPS" />
     <protected-broadcast android:name="com.android.server.am.DELETE_DUMPHEAP" />
     <protected-broadcast android:name="com.android.server.net.action.SNOOZE_WARNING" />
@@ -6439,11 +6441,11 @@
 
     <!-- @SystemApi Must be required by a safety source to send an update using the
              {@link android.safetycenter.SafetyCenterManager}.
-             <p>Protection level: signature|privileged
+             <p>Protection level: internal|privileged
              @hide
         -->
     <permission android:name="android.permission.SEND_SAFETY_CENTER_UPDATE"
-                android:protectionLevel="signature|privileged" />
+                android:protectionLevel="internal|privileged" />
 
     <!-- @SystemApi Allows an application to launch device manager setup screens.
          <p>Not for use by third-party applications.
@@ -6774,9 +6776,8 @@
         </activity>
 
         <activity android:name="com.android.server.logcat.LogAccessDialogActivity"
-                  android:theme="@style/Theme.DeviceDefault.Dialog.Alert.DayNight"
+                  android:theme="@style/Theme.Translucent.NoTitleBar"
                   android:excludeFromRecents="true"
-                  android:label="@string/log_access_confirmation_title"
                   android:exported="false">
         </activity>
 
@@ -6790,7 +6791,7 @@
                   android:excludeFromRecents="true"
                   android:exported="true"
                   android:permission="android.permission.MANAGE_GAME_ACTIVITY"
-                  android:theme="@style/Theme.Translucent.NoTitleBar">
+                  android:theme="@style/Theme.GameSessionTrampoline">
         </activity>
 
         <receiver android:name="com.android.server.BootReceiver"
@@ -7043,7 +7044,7 @@
                  android:permission="android.permission.BIND_JOB_SERVICE">
         </service>
 
-        <service android:name="com.android.server.companion.AssociationCleanUpService"
+        <service android:name="com.android.server.companion.InactiveAssociationsRemovalService"
                  android:permission="android.permission.BIND_JOB_SERVICE">
         </service>
 
@@ -7052,6 +7053,10 @@
         </service>
 
         <service android:name="com.android.server.BinaryTransparencyService$UpdateMeasurementsJobService"
+                 android:permission="android.permission.BIND_JOB_SERVICE">
+        </service>
+
+        <service android:name="com.android.server.notification.ReviewNotificationPermissionsJobService"
                  android:permission="android.permission.BIND_JOB_SERVICE">
         </service>
 

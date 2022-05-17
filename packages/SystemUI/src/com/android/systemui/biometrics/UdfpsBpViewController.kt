@@ -15,9 +15,11 @@
  */
 package com.android.systemui.biometrics
 
+import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
+import com.android.systemui.statusbar.phone.panelstate.PanelExpansionListener
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager
 
 /**
@@ -28,6 +30,7 @@ class UdfpsBpViewController(
     statusBarStateController: StatusBarStateController,
     panelExpansionStateManager: PanelExpansionStateManager,
     systemUIDialogManager: SystemUIDialogManager,
+    val broadcastSender: BroadcastSender,
     dumpManager: DumpManager
 ) : UdfpsAnimationViewController<UdfpsBpView>(
     view,
@@ -37,4 +40,29 @@ class UdfpsBpViewController(
     dumpManager
 ) {
     override val tag = "UdfpsBpViewController"
+    private val bpPanelExpansionListener = PanelExpansionListener { event ->
+        // Notification shade can be expanded but not visible (fraction: 0.0), for example
+        // when a heads-up notification (HUN) is showing.
+        notificationShadeVisible = event.expanded && event.fraction > 0f
+        view.onExpansionChanged(event.fraction)
+        cancelAuth()
+    }
+
+    fun cancelAuth() {
+        if (shouldPauseAuth()) {
+            broadcastSender.closeSystemDialogs()
+        }
+    }
+
+    override fun onViewAttached() {
+        super.onViewAttached()
+
+        panelExpansionStateManager.addExpansionListener(bpPanelExpansionListener)
+    }
+
+    override fun onViewDetached() {
+        super.onViewDetached()
+
+        panelExpansionStateManager.removeExpansionListener(bpPanelExpansionListener)
+    }
 }

@@ -30,6 +30,8 @@ import static android.app.AlarmManager.INTERVAL_HOUR;
 import static android.app.AlarmManager.RTC;
 import static android.app.AlarmManager.RTC_WAKEUP;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
+import static android.os.PowerExemptionManager.REASON_ALARM_MANAGER_ALARM_CLOCK;
+import static android.os.PowerExemptionManager.REASON_DENIED;
 import static android.os.PowerExemptionManager.REASON_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED;
 import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 import static android.os.PowerWhitelistManager.REASON_ALARM_MANAGER_WHILE_IDLE;
@@ -329,6 +331,7 @@ public class AlarmManagerService extends SystemService {
     });
 
     BroadcastOptions mOptsWithFgs = BroadcastOptions.makeBasic();
+    BroadcastOptions mOptsWithFgsForAlarmClock = BroadcastOptions.makeBasic();
     BroadcastOptions mOptsWithoutFgs = BroadcastOptions.makeBasic();
     BroadcastOptions mOptsTimeBroadcast = BroadcastOptions.makeBasic();
     ActivityOptions mActivityOptsRestrictBal = ActivityOptions.makeBasic();
@@ -565,9 +568,6 @@ public class AlarmManagerService extends SystemService {
         @VisibleForTesting
         static final String KEY_KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED =
                 "kill_on_schedule_exact_alarm_revoked";
-        @VisibleForTesting
-        static final String KEY_SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT =
-                "schedule_exact_alarm_denied_by_default";
 
         private static final long DEFAULT_MIN_FUTURITY = 5 * 1000;
         private static final long DEFAULT_MIN_INTERVAL = 60 * 1000;
@@ -611,8 +611,6 @@ public class AlarmManagerService extends SystemService {
         private static final long DEFAULT_MAX_DEVICE_IDLE_FUZZ = 15 * 60_000;
 
         private static final boolean DEFAULT_KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED = true;
-
-        private static final boolean DEFAULT_SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT = true;
 
         // Minimum futurity of a new alarm
         public long MIN_FUTURITY = DEFAULT_MIN_FUTURITY;
@@ -701,14 +699,6 @@ public class AlarmManagerService extends SystemService {
         public boolean KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED =
                 DEFAULT_KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED;
 
-        /**
-         * When this is {@code true}, apps with the change
-         * {@link AlarmManager#SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT} enabled will not get
-         * {@link Manifest.permission#SCHEDULE_EXACT_ALARM} unless the user grants it to them.
-         */
-        public volatile boolean SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT =
-                DEFAULT_SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT;
-
         public boolean USE_TARE_POLICY = Settings.Global.DEFAULT_ENABLE_TARE == 1;
 
         private long mLastAllowWhileIdleWhitelistDuration = -1;
@@ -743,9 +733,12 @@ public class AlarmManagerService extends SystemService {
                 mOptsWithFgs.setTemporaryAppAllowlist(ALLOW_WHILE_IDLE_WHITELIST_DURATION,
                         TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
                         REASON_ALARM_MANAGER_WHILE_IDLE, "");
+                mOptsWithFgsForAlarmClock.setTemporaryAppAllowlist(
+                        ALLOW_WHILE_IDLE_WHITELIST_DURATION,
+                        TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
+                        REASON_ALARM_MANAGER_ALARM_CLOCK, "");
                 mOptsWithoutFgs.setTemporaryAppAllowlist(ALLOW_WHILE_IDLE_WHITELIST_DURATION,
-                        TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED,
-                        REASON_ALARM_MANAGER_WHILE_IDLE, "");
+                        TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED, REASON_DENIED, "");
             }
         }
 
@@ -892,15 +885,6 @@ public class AlarmManagerService extends SystemService {
                                     KEY_KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED,
                                     DEFAULT_KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED);
                             break;
-                        case KEY_SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT:
-                            final boolean oldValue = SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT;
-
-                            SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT = properties.getBoolean(
-                                    KEY_SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT,
-                                    DEFAULT_SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT);
-                            handleScheduleExactAlarmDeniedByDefaultChange(oldValue,
-                                    SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT);
-                            break;
                         default:
                             if (name.startsWith(KEY_PREFIX_STANDBY_QUOTA) && !standbyQuotaUpdated) {
                                 // The quotas need to be updated in order, so we can't just rely
@@ -969,15 +953,6 @@ public class AlarmManagerService extends SystemService {
             } else {
                 EXACT_ALARM_DENY_LIST = newSet;
             }
-        }
-
-        private void handleScheduleExactAlarmDeniedByDefaultChange(boolean oldValue,
-                boolean newValue) {
-            if (oldValue == newValue) {
-                return;
-            }
-            mHandler.obtainMessage(AlarmHandler.CHECK_EXACT_ALARM_PERMISSION_ON_FEATURE_TOGGLE,
-                    newValue).sendToTarget();
         }
 
         private void migrateAlarmsToNewStoreLocked() {
@@ -1155,9 +1130,6 @@ public class AlarmManagerService extends SystemService {
 
             pw.print(KEY_KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED,
                     KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED);
-            pw.println();
-            pw.print(KEY_SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT,
-                    SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT);
             pw.println();
 
             pw.print(Settings.Global.ENABLE_TARE, USE_TARE_POLICY);
@@ -1744,6 +1716,7 @@ public class AlarmManagerService extends SystemService {
     public void onStart() {
         mInjector.init();
         mOptsWithFgs.setPendingIntentBackgroundActivityLaunchAllowed(false);
+        mOptsWithFgsForAlarmClock.setPendingIntentBackgroundActivityLaunchAllowed(false);
         mOptsWithoutFgs.setPendingIntentBackgroundActivityLaunchAllowed(false);
         mOptsTimeBroadcast.setPendingIntentBackgroundActivityLaunchAllowed(false);
         mActivityOptsRestrictBal.setPendingIntentBackgroundActivityLaunchAllowed(false);
@@ -2637,15 +2610,18 @@ public class AlarmManagerService extends SystemService {
      * Returns true if the given uid can set window to be as small as it wants.
      */
     boolean isExemptFromMinWindowRestrictions(int uid) {
-        return isExemptFromExactAlarmPermission(uid);
+        return isExemptFromExactAlarmPermissionNoLock(uid);
     }
 
     /**
      * Returns true if the given uid does not require SCHEDULE_EXACT_ALARM to set exact,
      * allow-while-idle alarms.
-     * Note: It is ok to call this method without the lock {@link #mLock} held.
+     * <b> Note: This should not be called with {@link #mLock} held.</b>
      */
-    boolean isExemptFromExactAlarmPermission(int uid) {
+    boolean isExemptFromExactAlarmPermissionNoLock(int uid) {
+        if (Build.IS_DEBUGGABLE && Thread.holdsLock(mLock)) {
+            Slog.wtfStack(TAG, "Alarm lock held while calling into DeviceIdleController");
+        }
         return (UserHandle.isSameApp(mSystemUiUid, uid)
                 || UserHandle.isCore(uid)
                 || mLocalDeviceIdleController == null
@@ -2738,7 +2714,12 @@ public class AlarmManagerService extends SystemService {
                 if (isExactAlarmChangeEnabled(callingPackage, callingUserId)) {
                     needsPermission = exact;
                     lowerQuota = !exact;
-                    idleOptions = exact ? mOptsWithFgs.toBundle() : mOptsWithoutFgs.toBundle();
+                    if (exact) {
+                        idleOptions = (alarmClock != null) ? mOptsWithFgsForAlarmClock.toBundle()
+                                : mOptsWithFgs.toBundle();
+                    } else {
+                        idleOptions = mOptsWithoutFgs.toBundle();
+                    }
                 } else {
                     changeDisabled = true;
                     needsPermission = false;
@@ -2747,7 +2728,7 @@ public class AlarmManagerService extends SystemService {
                 }
                 if (needsPermission && !hasScheduleExactAlarmInternal(callingPackage, callingUid)
                         && !hasUseExactAlarmInternal(callingPackage, callingUid)) {
-                    if (!isExemptFromExactAlarmPermission(callingUid)) {
+                    if (!isExemptFromExactAlarmPermissionNoLock(callingUid)) {
                         final String errorMessage = "Caller " + callingPackage + " needs to hold "
                                 + Manifest.permission.SCHEDULE_EXACT_ALARM + " to set "
                                 + "exact alarms.";
@@ -2810,7 +2791,7 @@ public class AlarmManagerService extends SystemService {
             if (!isExactAlarmChangeEnabled(packageName, userId)) {
                 return true;
             }
-            return isExemptFromExactAlarmPermission(packageUid)
+            return isExemptFromExactAlarmPermissionNoLock(packageUid)
                     || hasScheduleExactAlarmInternal(packageName, packageUid)
                     || hasUseExactAlarmInternal(packageName, packageUid);
         }
@@ -2925,10 +2906,8 @@ public class AlarmManagerService extends SystemService {
     }
 
     private boolean isScheduleExactAlarmDeniedByDefault(String packageName, int userId) {
-        return mConstants.SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT
-                && CompatChanges.isChangeEnabled(
-                AlarmManager.SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT, packageName,
-                UserHandle.of(userId));
+        return CompatChanges.isChangeEnabled(AlarmManager.SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT,
+                packageName, UserHandle.of(userId));
     }
 
     @NeverCompile // Avoid size overhead of debugging code.
@@ -3862,10 +3841,7 @@ public class AlarmManagerService extends SystemService {
                 // added: true => package was added to the deny list
                 // added: false => package was removed from the deny list
                 if (added) {
-                    synchronized (mLock) {
-                        removeExactAlarmsOnPermissionRevokedLocked(uid,
-                                changedPackage, /*killUid = */ true);
-                    }
+                    removeExactAlarmsOnPermissionRevoked(uid, changedPackage, /*killUid = */ true);
                 } else {
                     sendScheduleExactAlarmPermissionStateChangedBroadcast(changedPackage, userId);
                 }
@@ -3880,9 +3856,8 @@ public class AlarmManagerService extends SystemService {
      *
      * This is not expected to get called frequently.
      */
-    @GuardedBy("mLock")
-    void removeExactAlarmsOnPermissionRevokedLocked(int uid, String packageName, boolean killUid) {
-        if (isExemptFromExactAlarmPermission(uid)
+    void removeExactAlarmsOnPermissionRevoked(int uid, String packageName, boolean killUid) {
+        if (isExemptFromExactAlarmPermissionNoLock(uid)
                 || !isExactAlarmChangeEnabled(packageName, UserHandle.getUserId(uid))) {
             return;
         }
@@ -3891,7 +3866,9 @@ public class AlarmManagerService extends SystemService {
 
         final Predicate<Alarm> whichAlarms = a -> (a.uid == uid && a.packageName.equals(packageName)
                 && a.windowLength == 0);
-        removeAlarmsInternalLocked(whichAlarms, REMOVE_REASON_EXACT_PERMISSION_REVOKED);
+        synchronized (mLock) {
+            removeAlarmsInternalLocked(whichAlarms, REMOVE_REASON_EXACT_PERMISSION_REVOKED);
+        }
 
         if (killUid && mConstants.KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED) {
             PermissionManagerService.killUid(UserHandle.getAppId(uid), UserHandle.getUserId(uid),
@@ -4706,7 +4683,6 @@ public class AlarmManagerService extends SystemService {
         public static final int REFRESH_EXACT_ALARM_CANDIDATES = 11;
         public static final int TARE_AFFORDABILITY_CHANGED = 12;
         public static final int CHECK_EXACT_ALARM_PERMISSION_ON_UPDATE = 13;
-        public static final int CHECK_EXACT_ALARM_PERMISSION_ON_FEATURE_TOGGLE = 14;
 
         AlarmHandler() {
             super(Looper.myLooper());
@@ -4807,10 +4783,7 @@ public class AlarmManagerService extends SystemService {
                 case REMOVE_EXACT_ALARMS:
                     int uid = msg.arg1;
                     String packageName = (String) msg.obj;
-                    synchronized (mLock) {
-                        removeExactAlarmsOnPermissionRevokedLocked(uid, packageName, /*killUid = */
-                                true);
-                    }
+                    removeExactAlarmsOnPermissionRevoked(uid, packageName, /*killUid = */true);
                     break;
                 case EXACT_ALARM_DENY_LIST_PACKAGES_ADDED:
                     handleChangesToExactAlarmDenyList((ArraySet<String>) msg.obj, true);
@@ -4826,39 +4799,7 @@ public class AlarmManagerService extends SystemService {
                     uid = msg.arg1;
                     if (!hasScheduleExactAlarmInternal(packageName, uid)
                             && !hasUseExactAlarmInternal(packageName, uid)) {
-                        synchronized (mLock) {
-                            removeExactAlarmsOnPermissionRevokedLocked(uid,
-                                    packageName, /*killUid = */false);
-                        }
-                    }
-                    break;
-                case CHECK_EXACT_ALARM_PERMISSION_ON_FEATURE_TOGGLE:
-                    final boolean defaultDenied = (Boolean) msg.obj;
-
-                    final int[] startedUserIds = mActivityManagerInternal.getStartedUserIds();
-                    for (int appId : mExactAlarmCandidates) {
-                        for (int userId : startedUserIds) {
-                            uid = UserHandle.getUid(userId, appId);
-
-                            final AndroidPackage packageForUid =
-                                    mPackageManagerInternal.getPackage(uid);
-                            if (packageForUid == null) {
-                                continue;
-                            }
-                            final String pkg = packageForUid.getPackageName();
-                            if (defaultDenied) {
-                                if (!hasScheduleExactAlarmInternal(pkg, uid)
-                                        && !hasUseExactAlarmInternal(pkg, uid)) {
-                                    synchronized (mLock) {
-                                        removeExactAlarmsOnPermissionRevokedLocked(uid, pkg,
-                                                true);
-                                    }
-                                }
-                            } else if (hasScheduleExactAlarmInternal(pkg, uid)) {
-                                sendScheduleExactAlarmPermissionStateChangedBroadcast(pkg,
-                                        UserHandle.getUserId(uid));
-                            }
-                        }
+                        removeExactAlarmsOnPermissionRevoked(uid, packageName, /*killUid = */false);
                     }
                     break;
                 default:

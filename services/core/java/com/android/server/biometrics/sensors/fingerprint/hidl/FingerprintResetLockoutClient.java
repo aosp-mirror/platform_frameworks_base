@@ -50,6 +50,10 @@ public class FingerprintResetLockoutClient extends BaseClientMonitor {
         callback.onClientFinished(this, true /* success */);
     }
 
+    public boolean interruptsPrecedingClients() {
+        return true;
+    }
+
     @Override
     public int getProtoEnum() {
         return BiometricsProto.CM_RESET_LOCKOUT;

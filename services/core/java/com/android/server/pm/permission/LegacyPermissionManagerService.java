@@ -16,11 +16,15 @@
 
 package com.android.server.pm.permission;
 
+import static android.Manifest.permission.RECORD_AUDIO;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
+import android.content.PermissionChecker;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
@@ -248,6 +252,15 @@ public class LegacyPermissionManagerService extends ILegacyPermissionManager.Stu
     }
 
     @Override
+    public void grantDefaultPermissionsToCarrierServiceApp(@NonNull String packageName,
+            @UserIdInt int userId) {
+        PackageManagerServiceUtils.enforceSystemOrRoot(
+                "grantDefaultPermissionsForCarrierServiceApp");
+        Binder.withCleanCallingIdentity(() -> mDefaultPermissionGrantPolicy
+                .grantDefaultPermissionsToCarrierServiceApp(packageName, userId));
+    }
+
+    @Override
     public void grantDefaultPermissionsToActiveLuiApp(String packageName, int userId) {
         final int callingUid = Binder.getCallingUid();
         PackageManagerServiceUtils.enforceSystemOrPhoneCaller(
@@ -388,6 +401,21 @@ public class LegacyPermissionManagerService extends ILegacyPermissionManager.Stu
         @Override
         public void scheduleReadDefaultPermissionExceptions() {
             mDefaultPermissionGrantPolicy.scheduleReadDefaultPermissionExceptions();
+        }
+
+        @Override
+        public int checkSoundTriggerRecordAudioPermissionForDataDelivery(int uid,
+                @NonNull String packageName, @Nullable String attributionTag,
+                @NonNull String reason) {
+            int result = PermissionChecker.checkPermissionForPreflight(mContext, RECORD_AUDIO, -1,
+                    uid, packageName);
+            if (result != PermissionChecker.PERMISSION_GRANTED) {
+                return result;
+            }
+            mContext.getSystemService(AppOpsManager.class).noteOpNoThrow(
+                    AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO, uid, packageName,
+                    attributionTag, reason);
+            return result;
         }
     }
 

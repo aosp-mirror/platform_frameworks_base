@@ -72,7 +72,7 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 
 public final class CameraExtensionSessionImpl extends CameraExtensionSession {
-    private static final int PREVIEW_QUEUE_SIZE = 3;
+    private static final int PREVIEW_QUEUE_SIZE = 10;
     private static final String TAG = "CameraExtensionSessionImpl";
 
     private final Executor mExecutor;
@@ -1057,15 +1057,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                                                 mClientRequest));
 
                         if (mCaptureResultHandler != null) {
-                            CameraMetadataNative captureResults = new CameraMetadataNative();
-                            for (CaptureResult.Key key : mSupportedResultKeys) {
-                                Object value = result.get(key);
-                                if (value != null) {
-                                    captureResults.set(key, value);
-                                }
-                            }
                             mCaptureResultHandler.onCaptureCompleted(timestamp,
-                                    captureResults);
+                                    initializeFilteredResults(result));
                         }
                     } finally {
                         Binder.restoreCallingIdentity(ident);
@@ -1127,6 +1120,11 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
 
         private class ImageCallback implements OnImageAvailableListener {
             @Override
+            public void onImageDropped(long timestamp) {
+                notifyCaptureFailed();
+            }
+
+            @Override
             public void onImageAvailable(ImageReader reader, Image img) {
                 if (mCaptureFailed) {
                     img.close();
@@ -1159,6 +1157,9 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
     }
 
     private class ImageLoopbackCallback implements OnImageAvailableListener {
+        @Override
+        public void onImageDropped(long timestamp) { }
+
         @Override
         public void onImageAvailable(ImageReader reader, Image img) {
             img.close();
@@ -1221,7 +1222,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
     }
 
     private interface OnImageAvailableListener {
-        public void onImageAvailable (ImageReader reader, Image img);
+        void onImageDropped(long timestamp);
+        void onImageAvailable (ImageReader reader, Image img);
     }
 
     private class CameraOutputImageCallback implements ImageReader.OnImageAvailableListener,
@@ -1263,6 +1265,29 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             } else {
                 mImageListenerMap.put(img.getTimestamp(), new Pair<>(img, null));
             }
+
+            notifyDroppedImages(timestamp);
+        }
+
+        private void notifyDroppedImages(long timestamp) {
+            Set<Long> timestamps = mImageListenerMap.keySet();
+            ArrayList<Long> removedTs = new ArrayList<>();
+            for (long ts : timestamps) {
+                if (ts < timestamp) {
+                    Log.e(TAG, "Dropped image with ts: " + ts);
+                    Pair<Image, OnImageAvailableListener> entry = mImageListenerMap.get(ts);
+                    if (entry.second != null) {
+                        entry.second.onImageDropped(ts);
+                    }
+                    if (entry.first != null) {
+                        entry.first.close();
+                    }
+                    removedTs.add(ts);
+                }
+            }
+            for (long ts : removedTs) {
+                mImageListenerMap.remove(ts);
+            }
         }
 
         public void registerListener(Long timestamp, OnImageAvailableListener listener) {
@@ -1289,6 +1314,12 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             for (Pair<Image, OnImageAvailableListener> entry : mImageListenerMap.values()) {
                 if (entry.first != null) {
                     entry.first.close();
+                }
+            }
+            for (long timestamp : mImageListenerMap.keySet()) {
+                Pair<Image, OnImageAvailableListener> entry = mImageListenerMap.get(timestamp);
+                if (entry.second != null) {
+                    entry.second.onImageDropped(timestamp);
                 }
             }
             mImageListenerMap.clear();
@@ -1447,7 +1478,6 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             } else {
                 notifyConfigurationFailure();
             }
-
         }
 
         @Override
@@ -1536,7 +1566,16 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                     } else if (mPreviewProcessorType ==
                             IPreviewExtenderImpl.PROCESSOR_TYPE_IMAGE_PROCESSOR) {
                         int idx = mPendingResultMap.indexOfKey(timestamp);
-                        if (idx >= 0) {
+
+                        if ((idx >= 0) && (mPendingResultMap.get(timestamp).first == null)) {
+                            // Image was dropped before we can receive the capture results
+                            if ((mCaptureResultHandler != null)) {
+                                mCaptureResultHandler.onCaptureCompleted(timestamp,
+                                        initializeFilteredResults(result));
+                            }
+                            discardPendingRepeatingResults(idx, mPendingResultMap, false);
+                        } else  if (idx >= 0) {
+                            // Image came before the capture results
                             ParcelImage parcelImage = initializeParcelImage(
                                     mPendingResultMap.get(timestamp).first);
                             try {
@@ -1563,6 +1602,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                             }
                             discardPendingRepeatingResults(idx, mPendingResultMap, false);
                         } else {
+                            // Image not yet available
                             notifyClient = false;
                             mPendingResultMap.put(timestamp,
                                     new Pair<>(null,
@@ -1581,16 +1621,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                                                 mClientRequest));
                                 if ((mCaptureResultHandler != null) && (mPreviewProcessorType !=
                                         IPreviewExtenderImpl.PROCESSOR_TYPE_IMAGE_PROCESSOR)) {
-                                    CameraMetadataNative captureResults =
-                                            new CameraMetadataNative();
-                                    for (CaptureResult.Key key : mSupportedResultKeys) {
-                                        Object value = result.get(key);
-                                        if (value != null) {
-                                            captureResults.set(key, value);
-                                        }
-                                    }
                                     mCaptureResultHandler.onCaptureCompleted(timestamp,
-                                            captureResults);
+                                            initializeFilteredResults(result));
                                 }
                             } else {
                                 mExecutor.execute(
@@ -1657,19 +1689,24 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             for (int i = idx; i >= 0; i--) {
                 if (previewMap.valueAt(i).first != null) {
                     previewMap.valueAt(i).first.close();
-                } else {
-                    if (mClientNotificationsEnabled && ((i != idx) || notifyCurrentIndex)) {
-                        Log.w(TAG, "Preview frame drop with timestamp: " + previewMap.keyAt(i));
-                        final long ident = Binder.clearCallingIdentity();
-                        try {
-                            mExecutor.execute(
-                                    () -> mCallbacks
-                                            .onCaptureFailed(CameraExtensionSessionImpl.this,
-                                                    mClientRequest));
-                        } finally {
-                            Binder.restoreCallingIdentity(ident);
-                        }
+                } else if (mClientNotificationsEnabled && (previewMap.valueAt(i).second != null) &&
+                        ((i != idx) || notifyCurrentIndex)) {
+                    TotalCaptureResult result = previewMap.valueAt(i).second;
+                    Long timestamp = result.get(CaptureResult.SENSOR_TIMESTAMP);
+                    mCaptureResultHandler.onCaptureCompleted(timestamp,
+                            initializeFilteredResults(result));
+
+                    Log.w(TAG, "Preview frame drop with timestamp: " + previewMap.keyAt(i));
+                    final long ident = Binder.clearCallingIdentity();
+                    try {
+                        mExecutor.execute(
+                                () -> mCallbacks
+                                        .onCaptureFailed(CameraExtensionSessionImpl.this,
+                                                mClientRequest));
+                    } finally {
+                        Binder.restoreCallingIdentity(ident);
                     }
+
                 }
                 previewMap.removeAt(i);
             }
@@ -1680,6 +1717,12 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
 
             public ImageForwardCallback(@NonNull ImageWriter imageWriter) {
                 mOutputWriter = imageWriter;
+            }
+
+            @Override
+            public void onImageDropped(long timestamp) {
+                discardPendingRepeatingResults(mPendingResultMap.indexOfKey(timestamp),
+                        mPendingResultMap, true);
             }
 
             @Override
@@ -1701,6 +1744,15 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         }
 
         private class ImageProcessCallback implements OnImageAvailableListener {
+
+            @Override
+            public void onImageDropped(long timestamp) {
+                discardPendingRepeatingResults(mPendingResultMap.indexOfKey(timestamp),
+                        mPendingResultMap, true);
+                // Add an empty frame&results entry to flag that we dropped a frame
+                // and valid capture results can immediately return to client.
+                mPendingResultMap.put(timestamp, new Pair<>(null, null));
+            }
 
             @Override
             public void onImageAvailable(ImageReader reader, Image img) {
@@ -1766,6 +1818,17 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 }
             }
         }
+    }
+
+    private CameraMetadataNative initializeFilteredResults(TotalCaptureResult result) {
+        CameraMetadataNative captureResults = new CameraMetadataNative();
+        for (CaptureResult.Key key : mSupportedResultKeys) {
+            Object value = result.get(key);
+            if (value != null) {
+                captureResults.set(key, value);
+            }
+        }
+        return captureResults;
     }
 
     private static Size findSmallestAspectMatchedSize(@NonNull List<Size> sizes,

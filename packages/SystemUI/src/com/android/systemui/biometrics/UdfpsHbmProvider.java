@@ -34,8 +34,11 @@ public interface UdfpsHbmProvider {
      * invoked from the UI thread.
      *
      * @param onHbmEnabled A runnable that will be executed once HBM is enabled.
+     *
+     * TODO(b/231335067): enableHbm with halControlsIllumination=true shouldn't make sense.
+     *     This only makes sense now because vendor code may rely on the side effects of enableHbm.
      */
-    void enableHbm(@Nullable Runnable onHbmEnabled);
+    void enableHbm(boolean halControlsIllumination, @Nullable Runnable onHbmEnabled);
 
     /**
      * UdfpsView will call this to disable HBM when illumination is no longer needed.
@@ -45,8 +48,6 @@ public interface UdfpsHbmProvider {
      *
      * The call must be made from the UI thread. The callback, if provided, will also be invoked
      * from the UI thread.
-     *
-     *
      *
      * @param onHbmDisabled A runnable that will be executed once HBM is disabled.
      */

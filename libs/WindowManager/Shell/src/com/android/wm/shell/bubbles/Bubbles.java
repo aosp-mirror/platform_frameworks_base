@@ -57,7 +57,7 @@ public interface Bubbles {
             DISMISS_NOTIF_CANCEL, DISMISS_ACCESSIBILITY_ACTION, DISMISS_NO_LONGER_BUBBLE,
             DISMISS_USER_CHANGED, DISMISS_GROUP_CANCELLED, DISMISS_INVALID_INTENT,
             DISMISS_OVERFLOW_MAX_REACHED, DISMISS_SHORTCUT_REMOVED, DISMISS_PACKAGE_REMOVED,
-            DISMISS_NO_BUBBLE_UP, DISMISS_RELOAD_FROM_DISK})
+            DISMISS_NO_BUBBLE_UP, DISMISS_RELOAD_FROM_DISK, DISMISS_USER_REMOVED})
     @Target({FIELD, LOCAL_VARIABLE, PARAMETER})
     @interface DismissReason {}
 
@@ -76,6 +76,7 @@ public interface Bubbles {
     int DISMISS_PACKAGE_REMOVED = 13;
     int DISMISS_NO_BUBBLE_UP = 14;
     int DISMISS_RELOAD_FROM_DISK = 15;
+    int DISMISS_USER_REMOVED = 16;
 
     /**
      * @return {@code true} if there is a bubble associated with the provided key and if its
@@ -243,6 +244,13 @@ public interface Bubbles {
     void onCurrentProfilesChanged(SparseArray<UserInfo> currentProfiles);
 
     /**
+     * Called when a user is removed.
+     *
+     * @param removedUserId the id of the removed user.
+     */
+    void onUserRemoved(int removedUserId);
+
+    /**
      * Called when config changed.
      *
      * @param newConfig the new config.
@@ -263,10 +271,10 @@ public interface Bubbles {
         void onBubbleExpandChanged(boolean isExpanding, String key);
     }
 
-    /** Listener to be notified when the flags for notification or bubble suppression changes.*/
-    interface SuppressionChangedListener {
-        /** Called when the notification suppression state of a bubble changes. */
-        void onBubbleNotificationSuppressionChange(Bubble bubble);
+    /** Listener to be notified when the flags on BubbleMetadata have changed. */
+    interface BubbleMetadataFlagListener {
+        /** Called when the flags on BubbleMetadata have changed for the provided bubble. */
+        void onBubbleMetadataFlagChanged(Bubble bubble);
     }
 
     /** Listener to be notified when a pending intent has been canceled for a bubble. */

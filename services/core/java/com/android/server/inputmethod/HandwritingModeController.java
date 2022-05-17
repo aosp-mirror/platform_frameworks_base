@@ -91,7 +91,7 @@ final class HandwritingModeController {
      * InputEventReceiver that batches events according to the current thread's Choreographer.
      */
     @UiThread
-    void initializeHandwritingSpy(int displayId, IBinder focusedWindowToken) {
+    void initializeHandwritingSpy(int displayId) {
         // When resetting, reuse resources if we are reinitializing on the same display.
         reset(displayId == mCurrentDisplayId);
         mCurrentDisplayId = displayId;
@@ -114,12 +114,6 @@ final class HandwritingModeController {
 
         mHandwritingSurface = new HandwritingEventReceiverSurface(
                 name, displayId, surface, channel);
-
-        // Configure the handwriting window to receive events over the focused window's bounds.
-        mWindowManagerInternal.replaceInputSurfaceTouchableRegionWithWindowCrop(
-                mHandwritingSurface.getSurface(),
-                mHandwritingSurface.getInputWindowHandle(),
-                focusedWindowToken);
 
         // Use a dup of the input channel so that event processing can be paused by disposing the
         // event receiver without causing a fd hangup.
@@ -149,7 +143,8 @@ final class HandwritingModeController {
      */
     @UiThread
     @Nullable
-    HandwritingSession startHandwritingSession(int requestId, int imePid, int imeUid) {
+    HandwritingSession startHandwritingSession(
+            int requestId, int imePid, int imeUid, IBinder focusedWindowToken) {
         if (mHandwritingSurface == null) {
             Slog.e(TAG, "Cannot start handwriting session: Handwriting was not initialized.");
             return null;
@@ -158,12 +153,20 @@ final class HandwritingModeController {
             Slog.e(TAG, "Cannot start handwriting session: Invalid request id: " + requestId);
             return null;
         }
-        if (!mRecordingGesture) {
+        if (!mRecordingGesture || mHandwritingBuffer.isEmpty()) {
             Slog.e(TAG, "Cannot start handwriting session: No stylus gesture is being recorded.");
             return null;
         }
         Objects.requireNonNull(mHandwritingEventReceiver,
                 "Handwriting session was already transferred to IME.");
+        final MotionEvent downEvent = mHandwritingBuffer.get(0);
+        assert (downEvent.getActionMasked() == MotionEvent.ACTION_DOWN);
+        if (!mWindowManagerInternal.isPointInsideWindow(
+                focusedWindowToken, mCurrentDisplayId, downEvent.getRawX(), downEvent.getRawY())) {
+            Slog.e(TAG, "Cannot start handwriting session: "
+                    + "Stylus gesture did not start inside the focused window.");
+            return null;
+        }
         if (DEBUG) Slog.d(TAG, "Starting handwriting session in display: " + mCurrentDisplayId);
 
         mInputManagerInternal.pilferPointers(mHandwritingSurface.getInputChannel().getToken());
@@ -226,11 +229,15 @@ final class HandwritingModeController {
         }
 
         if (!(ev instanceof MotionEvent)) {
-            Slog.e("Stylus", "Received non-motion event in stylus monitor.");
+            Slog.wtf(TAG, "Received non-motion event in stylus monitor.");
             return false;
         }
         final MotionEvent event = (MotionEvent) ev;
         if (!isStylusEvent(event)) {
+            return false;
+        }
+        if (event.getDisplayId() != mCurrentDisplayId) {
+            Slog.wtf(TAG, "Received stylus event associated with the incorrect display.");
             return false;
         }
 

@@ -19,9 +19,9 @@ package com.android.systemui.media
 import org.mockito.Mockito.`when` as whenever
 import android.animation.ValueAnimator
 import android.graphics.Color
-import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.monet.ColorScheme
 import junit.framework.Assert.assertEquals
@@ -46,28 +46,32 @@ class ColorSchemeTransitionTest : SysuiTestCase() {
 
     private interface ExtractCB : (ColorScheme) -> Int
     private interface ApplyCB : (Int) -> Unit
-    private lateinit var colorTransition: ColorTransition
+    private lateinit var colorTransition: AnimatingColorTransition
     private lateinit var colorSchemeTransition: ColorSchemeTransition
 
-    @Mock private lateinit var mockTransition: ColorTransition
+    @Mock private lateinit var mockAnimatingTransition: AnimatingColorTransition
     @Mock private lateinit var valueAnimator: ValueAnimator
     @Mock private lateinit var colorScheme: ColorScheme
     @Mock private lateinit var extractColor: ExtractCB
     @Mock private lateinit var applyColor: ApplyCB
 
-    private lateinit var transitionFactory: ColorTransitionFactory
+    private lateinit var animatingColorTransitionFactory: AnimatingColorTransitionFactory
     @Mock private lateinit var mediaViewHolder: MediaViewHolder
 
     @JvmField @Rule val mockitoRule = MockitoJUnit.rule()
 
     @Before
     fun setUp() {
-        transitionFactory = { default, extractColor, applyColor -> mockTransition }
+        animatingColorTransitionFactory = { _, _, _ -> mockAnimatingTransition }
         whenever(extractColor.invoke(colorScheme)).thenReturn(TARGET_COLOR)
 
-        colorSchemeTransition = ColorSchemeTransition(context, mediaViewHolder, transitionFactory)
+        colorSchemeTransition = ColorSchemeTransition(
+            context, mediaViewHolder, animatingColorTransitionFactory
+        )
 
-        colorTransition = object : ColorTransition(DEFAULT_COLOR, extractColor, applyColor) {
+        colorTransition = object : AnimatingColorTransition(
+            DEFAULT_COLOR, extractColor, applyColor
+        ) {
             override fun buildAnimator(): ValueAnimator {
                 return valueAnimator
             }
@@ -141,7 +145,7 @@ class ColorSchemeTransitionTest : SysuiTestCase() {
 
     @Test
     fun testColorSchemeTransition_update() {
-        colorSchemeTransition.updateColorScheme(colorScheme)
-        verify(mockTransition, times(6)).updateColorScheme(colorScheme)
+        colorSchemeTransition.updateColorScheme(colorScheme, true)
+        verify(mockAnimatingTransition, times(9)).updateColorScheme(colorScheme)
     }
 }

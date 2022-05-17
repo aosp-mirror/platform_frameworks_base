@@ -589,7 +589,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Imeshindwa kuweka mtumiaji mpya"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Imeshindwa kuunda wasifu mpya wa mgeni"</string>
     <string name="user_nickname" msgid="262624187455825083">"Jina wakilishi"</string>
-    <string name="user_add_user" msgid="7876449291500212468">"Weka mtumiaji"</string>
+    <string name="user_add_user" msgid="7876449291500212468">"Ongeza mtumiaji"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Ongeza mgeni"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Ondoa mgeni"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Badilisha kipindi cha mgeni"</string>
@@ -659,4 +659,10 @@
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Ikiwa unatangaza kwenye <xliff:g id="SWITCHAPP">%1$s</xliff:g> au unabadilisha maudhui, tangazo lako la sasa litasimamishwa"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Tangaza kwenye <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Badilisha maudhui"</string>
+    <!-- no translation found for back_navigation_animation (8105467568421689484) -->
+    <skip />
+    <!-- no translation found for back_navigation_animation_summary (741292224121599456) -->
+    <skip />
+    <!-- no translation found for back_navigation_animation_dialog (8696966520944625596) -->
+    <skip />
 </resources>

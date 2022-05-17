@@ -106,6 +106,7 @@ PointerController::PointerController(const sp<PointerControllerPolicyInterface>&
 PointerController::~PointerController() {
     mDisplayInfoListener->onPointerControllerDestroyed();
     mUnregisterWindowInfosListener(mDisplayInfoListener);
+    mContext.getPolicy()->onPointerDisplayIdChanged(ADISPLAY_ID_NONE, 0, 0);
 }
 
 std::mutex& PointerController::getLock() const {
@@ -255,6 +256,12 @@ void PointerController::setDisplayViewport(const DisplayViewport& viewport) {
         getAdditionalMouseResources = true;
     }
     mCursorController.setDisplayViewport(viewport, getAdditionalMouseResources);
+    if (viewport.displayId != mLocked.pointerDisplayId) {
+        float xPos, yPos;
+        mCursorController.getPosition(&xPos, &yPos);
+        mContext.getPolicy()->onPointerDisplayIdChanged(viewport.displayId, xPos, yPos);
+        mLocked.pointerDisplayId = viewport.displayId;
+    }
 }
 
 void PointerController::updatePointerIcon(int32_t iconId) {

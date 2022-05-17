@@ -2758,7 +2758,7 @@ public class AlarmManagerServiceTest {
         mService.handleChangesToExactAlarmDenyList(new ArraySet<>(packages), false);
 
         // No permission revoked.
-        verify(mService, never()).removeExactAlarmsOnPermissionRevokedLocked(anyInt(), anyString(),
+        verify(mService, never()).removeExactAlarmsOnPermissionRevoked(anyInt(), anyString(),
                 anyBoolean());
 
         // Permission got granted only for (appId1, userId2).
@@ -2813,14 +2813,14 @@ public class AlarmManagerServiceTest {
         mService.handleChangesToExactAlarmDenyList(new ArraySet<>(packages), true);
 
         // Permission got revoked only for (appId1, userId2)
-        verify(mService, never()).removeExactAlarmsOnPermissionRevokedLocked(
+        verify(mService, never()).removeExactAlarmsOnPermissionRevoked(
                 eq(UserHandle.getUid(userId1, appId1)), eq(packages[0]), eq(true));
-        verify(mService, never()).removeExactAlarmsOnPermissionRevokedLocked(
+        verify(mService, never()).removeExactAlarmsOnPermissionRevoked(
                 eq(UserHandle.getUid(userId1, appId2)), eq(packages[1]), eq(true));
-        verify(mService, never()).removeExactAlarmsOnPermissionRevokedLocked(
+        verify(mService, never()).removeExactAlarmsOnPermissionRevoked(
                 eq(UserHandle.getUid(userId2, appId2)), eq(packages[1]), eq(true));
 
-        verify(mService).removeExactAlarmsOnPermissionRevokedLocked(
+        verify(mService).removeExactAlarmsOnPermissionRevoked(
                 eq(UserHandle.getUid(userId2, appId1)), eq(packages[0]), eq(true));
     }
 
@@ -2833,7 +2833,7 @@ public class AlarmManagerServiceTest {
 
         mIAppOpsCallback.opChanged(OP_SCHEDULE_EXACT_ALARM, TEST_CALLING_UID, TEST_CALLING_PACKAGE);
         assertAndHandleMessageSync(REMOVE_EXACT_ALARMS);
-        verify(mService).removeExactAlarmsOnPermissionRevokedLocked(TEST_CALLING_UID,
+        verify(mService).removeExactAlarmsOnPermissionRevoked(TEST_CALLING_UID,
                 TEST_CALLING_PACKAGE, true);
     }
 
@@ -2919,7 +2919,7 @@ public class AlarmManagerServiceTest {
                 null);
         assertEquals(6, mService.mAlarmStore.size());
 
-        mService.removeExactAlarmsOnPermissionRevokedLocked(TEST_CALLING_UID, TEST_CALLING_PACKAGE,
+        mService.removeExactAlarmsOnPermissionRevoked(TEST_CALLING_UID, TEST_CALLING_PACKAGE,
                 true);
 
         final ArrayList<Alarm> remaining = mService.mAlarmStore.asList();
@@ -3220,8 +3220,7 @@ public class AlarmManagerServiceTest {
         when(mRoleManager.getRoleHolders(RoleManager.ROLE_SYSTEM_WELLBEING)).thenReturn(
                 Arrays.asList(package4));
 
-        mockChangeEnabled(SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT, true);
-        mService.mConstants.SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT = false;
+        mockChangeEnabled(SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT, false);
         mService.mConstants.EXACT_ALARM_DENY_LIST = new ArraySet<>(new String[] {
                 package1,
                 package3,
@@ -3233,21 +3232,7 @@ public class AlarmManagerServiceTest {
         assertFalse(mService.isScheduleExactAlarmAllowedByDefault(package3, uid3));
         assertTrue(mService.isScheduleExactAlarmAllowedByDefault(package4, uid4));
 
-        mockChangeEnabled(SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT, false);
-        mService.mConstants.SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT = true;
-        mService.mConstants.EXACT_ALARM_DENY_LIST = new ArraySet<>(new String[] {
-                package1,
-                package3,
-        });
-
-        // Same as above, deny listed packages will be false.
-        assertFalse(mService.isScheduleExactAlarmAllowedByDefault(package1, uid1));
-        assertTrue(mService.isScheduleExactAlarmAllowedByDefault(package2, uid2));
-        assertFalse(mService.isScheduleExactAlarmAllowedByDefault(package3, uid3));
-        assertTrue(mService.isScheduleExactAlarmAllowedByDefault(package4, uid4));
-
         mockChangeEnabled(SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT, true);
-        mService.mConstants.SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT = true;
         mService.mConstants.EXACT_ALARM_DENY_LIST = new ArraySet<>(new String[] {
                 package1,
                 package3,

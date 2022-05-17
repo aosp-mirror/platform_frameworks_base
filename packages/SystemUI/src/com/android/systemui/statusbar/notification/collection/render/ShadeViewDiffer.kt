@@ -68,7 +68,7 @@ class ShadeViewDiffer(
             nodes.values.firstOrNull { node -> node.view === view }?.label ?: view.toString()
 
     private fun detachChildren(parentNode: ShadeNode, specMap: Map<NodeController, NodeSpec>) {
-        val views = nodes.values.asSequence().map { node -> node.view to node }.toMap()
+        val views = nodes.values.associateBy { it.view }
         fun detachRecursively(parentNode: ShadeNode, specMap: Map<NodeController, NodeSpec>) {
             val parentSpec = specMap[parentNode.controller]
             for (i in parentNode.getChildCount() - 1 downTo 0) {

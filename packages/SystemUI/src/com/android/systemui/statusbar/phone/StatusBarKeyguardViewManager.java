@@ -364,12 +364,15 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                         || mNotificationPanelViewController.isExpanding());
 
         // We don't want to translate the bounce when:
+        // • device is dozing and not pulsing
         // • Keyguard is occluded, because we're in a FLAG_SHOW_WHEN_LOCKED activity and need to
         //   conserve the original animation.
         // • The user quickly taps on the display and we show "swipe up to unlock."
         // • Keyguard will be dismissed by an action. a.k.a: FLAG_DISMISS_KEYGUARD_ACTIVITY
         // • Full-screen user switcher is displayed.
-        if (mNotificationPanelViewController.isUnlockHintRunning()) {
+        if (mDozing && !mPulsing) {
+            return;
+        } else if (mNotificationPanelViewController.isUnlockHintRunning()) {
             mBouncer.setExpansion(KeyguardBouncer.EXPANSION_HIDDEN);
         } else if (mStatusBarStateController.getState() == StatusBarState.SHADE_LOCKED
                 && mKeyguardUpdateManager.isUdfpsEnrolled()) {
@@ -390,6 +393,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                     && !mBouncer.isShowing() && !mBouncer.isAnimatingAway()) {
                 mBouncer.show(false /* resetSecuritySelection */, false /* scrimmed */);
             }
+        } else if (!mShowing && mBouncer.inTransit()) {
+            // Keyguard is not visible anymore, but expansion animation was still running.
+            // We need to keep propagating the expansion state to the bouncer, otherwise it will be
+            // stuck in transit.
+            mBouncer.setExpansion(fraction);
         } else if (mPulsing && fraction == KeyguardBouncer.EXPANSION_VISIBLE) {
             // Panel expanded while pulsing but didn't translate the bouncer (because we are
             // unlocked.) Let's simply wake-up to dismiss the lock screen.

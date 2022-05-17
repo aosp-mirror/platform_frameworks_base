@@ -87,6 +87,8 @@
     <!-- How high we lift the divider when touching -->
     <dimen name="docked_stack_divider_lift_elevation">4dp</dimen>
 
+    <!-- Icon size for split screen -->
+    <dimen name="split_icon_size">72dp</dimen>
     <!-- Divider handle size for legacy split screen -->
     <dimen name="docked_divider_handle_width">16dp</dimen>
     <dimen name="docked_divider_handle_height">2dp</dimen>

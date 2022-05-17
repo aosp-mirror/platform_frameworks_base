@@ -128,6 +128,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
+import com.android.systemui.statusbar.phone.shade.transition.ShadeTransitionController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardQsUserSwitchController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -138,6 +139,7 @@ import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
+import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.wallet.controller.QuickAccessWalletController;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
@@ -337,6 +339,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     @Mock
     private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
     @Mock
+    private ShadeTransitionController mShadeTransitionController;
+    @Mock
     private QS mQs;
     @Mock
     private View mQsHeader;
@@ -352,10 +356,14 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     private FalsingManagerFake mFalsingManager = new FalsingManagerFake();
     private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
     private Handler mMainHandler;
+    private final PanelExpansionStateManager mPanelExpansionStateManager =
+            new PanelExpansionStateManager();
+    private SystemClock mSystemClock;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        mSystemClock = new FakeSystemClock();
         mStatusBarStateController = new StatusBarStateControllerImpl(mUiEventLogger, mDumpManager,
                 mInteractionJankMonitor);
 
@@ -516,7 +524,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mLargeScreenShadeHeaderController,
                 mScreenOffAnimationController,
                 mLockscreenGestureLogger,
-                new PanelExpansionStateManager(),
+                mPanelExpansionStateManager,
                 mNotificationRemoteInputManager,
                 mSysUIUnfoldComponent,
                 mControlsComponent,
@@ -527,7 +535,9 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mNotificationListContainer,
                 mPanelEventsEmitter,
                 mNotificationStackSizeCalculator,
-                mUnlockedScreenOffAnimationController);
+                mUnlockedScreenOffAnimationController,
+                mShadeTransitionController,
+                mSystemClock);
         mNotificationPanelViewController.initDependencies(
                 mCentralSurfaces,
                 () -> {},
@@ -555,6 +565,58 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     public void tearDown() {
         mNotificationPanelViewController.cancelHeightAnimator();
         mMainHandler.removeCallbacksAndMessages(null);
+    }
+
+    @Test
+    public void computeMaxKeyguardNotifications_lockscreenToShade_returnsExistingMax() {
+        when(mAmbientState.getFractionToShade()).thenReturn(0.5f);
+        mNotificationPanelViewController.setMaxDisplayedNotifications(-1);
+
+        // computeMaxKeyguardNotifications sets maxAllowed to 0 at minimum if it updates the value
+        assertThat(mNotificationPanelViewController.computeMaxKeyguardNotifications())
+                .isEqualTo(-1);
+    }
+
+    @Test
+    public void computeMaxKeyguardNotifications_dozeAmountNotZero_returnsExistingMax() {
+        when(mAmbientState.getDozeAmount()).thenReturn(0.5f);
+        mNotificationPanelViewController.setMaxDisplayedNotifications(-1);
+
+        // computeMaxKeyguardNotifications sets maxAllowed to 0 at minimum if it updates the value
+        assertThat(mNotificationPanelViewController.computeMaxKeyguardNotifications())
+                .isEqualTo(-1);
+    }
+
+    @Test
+    public void computeMaxKeyguardNotifications_noTransition_updatesMax() {
+        when(mAmbientState.getFractionToShade()).thenReturn(0f);
+        when(mAmbientState.getDozeAmount()).thenReturn(0f);
+        mNotificationPanelViewController.setMaxDisplayedNotifications(-1);
+
+        // computeMaxKeyguardNotifications sets maxAllowed to 0 at minimum if it updates the value
+        assertThat(mNotificationPanelViewController.computeMaxKeyguardNotifications())
+                .isNotEqualTo(-1);
+    }
+
+    @Test
+    public void getLockscreenSpaceForNotifications_includesOverlapWithLockIcon() {
+        when(mResources.getDimensionPixelSize(R.dimen.keyguard_indication_bottom_padding))
+                .thenReturn(0);
+        mNotificationPanelViewController.setAmbientIndicationTop(
+                /* ambientIndicationTop= */ 0, /* ambientTextVisible */ false);
+
+        // Use lock icon padding (100 - 80 - 5 = 15) as bottom padding
+        when(mNotificationStackScrollLayoutController.getBottom()).thenReturn(100);
+        when(mLockIconViewController.getTop()).thenReturn(80f);
+        when(mResources.getDimensionPixelSize(R.dimen.shelf_and_lock_icon_overlap)).thenReturn(5);
+
+        // Available space (100 - 0 - 15 = 85)
+        when(mNotificationStackScrollLayoutController.getHeight()).thenReturn(100);
+        when(mNotificationStackScrollLayoutController.getTop()).thenReturn(0);
+        mNotificationPanelViewController.updateResources();
+
+        assertThat(mNotificationPanelViewController.getSpaceForLockscreenNotifications())
+                .isEqualTo(85);
     }
 
     @Test
@@ -947,6 +1009,17 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testExpandWithQsMethodIsUsingLockscreenTransitionController() {
+        enableSplitShade(/* enabled= */ true);
+        mStatusBarStateController.setState(KEYGUARD);
+
+        mNotificationPanelViewController.expandWithQs();
+
+        verify(mLockscreenShadeTransitionController).goToLockedShade(
+                /* expandedView= */null, /* needsQSAnimation= */false);
+    }
+
+    @Test
     public void testUnlockAnimationDoesNotAffectScrim() {
         mNotificationPanelViewController.onUnlockHintStarted();
         verify(mScrimController).setExpansionAffectsAlpha(false);
@@ -987,12 +1060,48 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testQsToBeImmediatelyExpandedInSplitShade() {
+    public void testQsToBeImmediatelyExpandedWhenOpeningPanelInSplitShade() {
         enableSplitShade(/* enabled= */ true);
+        // set panel state to CLOSED
+        mPanelExpansionStateManager.onPanelExpansionChanged(/* fraction= */ 0,
+                /* expanded= */ false, /* tracking= */ false, /* dragDownPxAmount= */ 0);
+        assertThat(mNotificationPanelViewController.mQsExpandImmediate).isFalse();
 
-        mNotificationPanelViewController.onTrackingStarted();
+        // change panel state to OPENING
+        mPanelExpansionStateManager.onPanelExpansionChanged(/* fraction= */ 0.5f,
+                /* expanded= */ true, /* tracking= */ true, /* dragDownPxAmount= */ 100);
 
         assertThat(mNotificationPanelViewController.mQsExpandImmediate).isTrue();
+    }
+
+    @Test
+    public void testQsNotToBeImmediatelyExpandedWhenGoingFromUnlockedToLocked() {
+        enableSplitShade(/* enabled= */ true);
+        // set panel state to CLOSED
+        mPanelExpansionStateManager.onPanelExpansionChanged(/* fraction= */ 0,
+                /* expanded= */ false, /* tracking= */ false, /* dragDownPxAmount= */ 0);
+
+        // go to lockscreen, which also sets fraction to 1.0f and makes shade "expanded"
+        mStatusBarStateController.setState(KEYGUARD);
+        mPanelExpansionStateManager.onPanelExpansionChanged(/* fraction= */ 1,
+                /* expanded= */ true, /* tracking= */ true, /* dragDownPxAmount= */ 0);
+
+        assertThat(mNotificationPanelViewController.mQsExpandImmediate).isFalse();
+    }
+
+    @Test
+    public void testQsExpansionChangedToDefaultWhenRotatingFromOrToSplitShade() {
+        // to make sure shade is in expanded state
+        mNotificationPanelViewController.startWaitingForOpenPanelGesture();
+        assertThat(mNotificationPanelViewController.isQsExpanded()).isFalse();
+
+        // switch to split shade from portrait (default state)
+        enableSplitShade(/* enabled= */ true);
+        assertThat(mNotificationPanelViewController.isQsExpanded()).isTrue();
+
+        // switch to portrait from split shade
+        enableSplitShade(/* enabled= */ false);
+        assertThat(mNotificationPanelViewController.isQsExpanded()).isFalse();
     }
 
     @Test

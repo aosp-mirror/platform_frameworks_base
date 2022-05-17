@@ -400,7 +400,7 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
                 .getInteger(R.integer.config_fingerprintMaxTemplatesPerUser);
         mSensorProperties = new FingerprintSensorPropertiesInternal(sensorProps.sensorId,
                 sensorProps.sensorStrength, maxTemplatesAllowed, sensorProps.componentInfo,
-                FingerprintSensorProperties.TYPE_UDFPS_OPTICAL,
+                FingerprintSensorProperties.TYPE_UDFPS_OPTICAL, false /* halControlsIllumination */,
                 resetLockoutRequiresHardwareAuthToken, sensorProps.getAllLocations());
         mMockHalResultController = controller;
         mUserHasTrust = new SparseBooleanArray();

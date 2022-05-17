@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_CHANGE;
@@ -46,7 +47,6 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -89,14 +89,6 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         mAppTransitionController = new AppTransitionController(mWm, mDisplayContent);
     }
 
-    @Override
-    ActivityRecord createActivityRecord(DisplayContent dc, int windowingMode, int activityType) {
-        final ActivityRecord r = super.createActivityRecord(dc, windowingMode, activityType);
-        // Ensure that ActivityRecord#setOccludesParent takes effect.
-        doCallRealMethod().when(r).fillsParent();
-        return r;
-    }
-
     @Test
     public void testSkipOccludedActivityCloseTransition() {
         final ActivityRecord behind = createActivityRecord(mDisplayContent,
@@ -135,7 +127,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         final ActivityRecord translucentOpening = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-        translucentOpening.setOccludesParent(false);
+        doReturn(false).when(translucentOpening).fillsParent();
         translucentOpening.setVisible(false);
         mDisplayContent.prepareAppTransition(TRANSIT_OPEN);
         mDisplayContent.mOpeningApps.add(behind);
@@ -153,7 +145,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         final ActivityRecord translucentClosing = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-        translucentClosing.setOccludesParent(false);
+        doReturn(false).when(translucentClosing).fillsParent();
         mDisplayContent.prepareAppTransition(TRANSIT_CLOSE);
         mDisplayContent.mClosingApps.add(translucentClosing);
         assertEquals(WindowManager.TRANSIT_OLD_TRANSLUCENT_ACTIVITY_CLOSE,
@@ -559,6 +551,37 @@ public class AppTransitionControllerTest extends WindowTestsBase {
                 new ArraySet<>(new WindowContainer[]{activity2.getTask()}),
                 AppTransitionController.getAnimationTargets(
                         opening, closing, false /* visible */));
+    }
+
+    @Test
+    public void testGetAnimationTargets_splitScreenOpening() {
+        // [DisplayContent] - [Task] -+- [split task 1] -+- [Task1] - [AR1] (opening, invisible)
+        //                            +- [split task 2] -+- [Task2] - [AR2] (opening, invisible)
+        final Task singleTopRoot = createTask(mDisplayContent);
+        final TaskBuilder builder = new TaskBuilder(mSupervisor)
+                .setWindowingMode(WINDOWING_MODE_MULTI_WINDOW)
+                .setParentTaskFragment(singleTopRoot)
+                .setCreatedByOrganizer(true);
+        final Task splitRoot1 = builder.build();
+        final Task splitRoot2 = builder.build();
+        splitRoot1.setAdjacentTaskFragment(splitRoot2, false /* moveTogether */);
+        final ActivityRecord activity1 = createActivityRecordWithParentTask(splitRoot1);
+        activity1.setVisible(false);
+        activity1.mVisibleRequested = true;
+        final ActivityRecord activity2 = createActivityRecordWithParentTask(splitRoot2);
+        activity2.setVisible(false);
+        activity2.mVisibleRequested = true;
+
+        final ArraySet<ActivityRecord> opening = new ArraySet<>();
+        opening.add(activity1);
+        opening.add(activity2);
+        final ArraySet<ActivityRecord> closing = new ArraySet<>();
+
+        // Promote animation targets up to Task level, not beyond.
+        assertEquals(
+                new ArraySet<>(new WindowContainer[]{splitRoot1, splitRoot2}),
+                AppTransitionController.getAnimationTargets(
+                        opening, closing, true /* visible */));
     }
 
     @Test
@@ -1105,6 +1128,41 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         verify(activity).setDropInputMode(DropInputMode.NONE);
     }
 
+    /**
+     * We don't need to drop input for fully trusted embedding (system app, and embedding in the
+     * same app). This will allow users to do fast tapping.
+     */
+    @Test
+    public void testOverrideTaskFragmentAdapter_noInputProtectedForFullyTrustedAnimation() {
+        final Task task = createTask(mDisplayContent);
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        final TestRemoteAnimationRunner remoteAnimationRunner = new TestRemoteAnimationRunner();
+        setupTaskFragmentRemoteAnimation(organizer, task.mTaskId, remoteAnimationRunner);
+
+        // Create a TaskFragment with only trusted embedded activity
+        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .createActivityCount(1)
+                .setOrganizer(organizer)
+                .build();
+        final ActivityRecord activity = taskFragment.getChildAt(0).asActivityRecord();
+        prepareActivityForAppTransition(activity);
+        final int uid = mAtm.mTaskFragmentOrganizerController.getTaskFragmentOrganizerUid(
+                getITaskFragmentOrganizer(organizer));
+        doReturn(true).when(task).isFullyTrustedEmbedding(uid);
+        spyOn(mDisplayContent.mAppTransition);
+
+        // Prepare and start transition.
+        prepareAndTriggerAppTransition(activity, null /* closingActivity */, taskFragment);
+        mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+
+        // The animation will be animated remotely by client, but input should not be dropped for
+        // fully trusted.
+        assertTrue(remoteAnimationRunner.isAnimationStarted());
+        verify(activity, never()).setDropInputForAnimation(true);
+        verify(activity, never()).setDropInputMode(DropInputMode.ALL);
+    }
+
     @Test
     public void testTransitionGoodToGoForTaskFragments() {
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
@@ -1174,8 +1232,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
             TestRemoteAnimationRunner remoteAnimationRunner) {
         final RemoteAnimationAdapter adapter = new RemoteAnimationAdapter(
                 remoteAnimationRunner, 10, 1);
-        final ITaskFragmentOrganizer iOrganizer =
-                ITaskFragmentOrganizer.Stub.asInterface(organizer.getOrganizerToken().asBinder());
+        final ITaskFragmentOrganizer iOrganizer = getITaskFragmentOrganizer(organizer);
         final RemoteAnimationDefinition definition = new RemoteAnimationDefinition();
         definition.addRemoteAnimation(TRANSIT_OLD_TASK_FRAGMENT_CHANGE, adapter);
         definition.addRemoteAnimation(TRANSIT_OLD_TASK_FRAGMENT_OPEN, adapter);
@@ -1183,6 +1240,11 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         mAtm.mTaskFragmentOrganizerController.registerOrganizer(iOrganizer);
         mAtm.mTaskFragmentOrganizerController.registerRemoteAnimations(iOrganizer, taskId,
                 definition);
+    }
+
+    private static ITaskFragmentOrganizer getITaskFragmentOrganizer(
+            TaskFragmentOrganizer organizer) {
+        return ITaskFragmentOrganizer.Stub.asInterface(organizer.getOrganizerToken().asBinder());
     }
 
     private void prepareAndTriggerAppTransition(@Nullable ActivityRecord openingActivity,

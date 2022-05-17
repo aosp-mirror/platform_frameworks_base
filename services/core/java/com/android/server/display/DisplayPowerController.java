@@ -1389,12 +1389,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 // Brightness throttling is needed, so do so quickly.
                 // Later, when throttling is removed, we let other mechanisms decide on speed.
                 slowChange = false;
-                updateScreenBrightnessSetting = true;
             }
             mAppliedThrottling = true;
         } else if (mAppliedThrottling) {
             mAppliedThrottling = false;
-            updateScreenBrightnessSetting = true;
         }
 
         if (updateScreenBrightnessSetting) {

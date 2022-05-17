@@ -94,15 +94,8 @@
                 android:id="@android:id/tabs"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="gone">
-            </TabWidget>
-            <View
-                android:id="@+id/resolver_tab_divider"
-                android:visibility="gone"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="?attr/colorBackground"
-                android:foreground="?attr/dividerVertical"/>
+                android:tabStripEnabled="false"
+                android:visibility="gone" />
             <FrameLayout
                 android:id="@android:id/tabcontent"
                 android:layout_width="match_parent"
