@@ -102,9 +102,11 @@ public class CompanionMessageProcessor {
                     Math.min((i + 1) * MESSAGE_SIZE_IN_BYTES, data.length));
             proto.write(CompanionMessage.DATA, currentData);
 
-            Slog.i(LOG_TAG, "Sending " + currentData.length + " bytes to " + packageName);
+            byte[] message = proto.getBytes();
 
-            mSecureCommsManager.sendSecureMessage(associationId, messageId, proto.getBytes());
+            Slog.i(LOG_TAG, "Sending [" + message.length + "] bytes to " + packageName);
+
+            mSecureCommsManager.sendSecureMessage(associationId, messageId, message);
         }
     }
 
@@ -115,6 +117,9 @@ public class CompanionMessageProcessor {
      */
     public CompanionMessageInfo onDecryptedMessageReceived(int messageId, int associationId,
             byte[] message) {
+        Slog.i(LOG_TAG, "Partial message received, size [" + message.length
+                + "], reading from protobuf.");
+
         ProtoInputStream proto = new ProtoInputStream(message);
         try {
             int id = 0;
@@ -178,7 +183,8 @@ public class CompanionMessageProcessor {
                 mAssociationsMessagesMap.put(associationId, associationMessages);
                 // Check if all the messages with the same parentId are received.
                 if (childMessages.size() == total) {
-                    Slog.i(LOG_TAG, "All [" + total + "] messages are received. Processing.");
+                    Slog.i(LOG_TAG, "All [" + total + "] messages are received for parentId ["
+                            + parentId + "]. Processing.");
 
                     childMessages.sort(Comparator.comparing(CompanionMessageInfo::getPage));
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();

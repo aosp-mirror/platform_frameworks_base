@@ -49,6 +49,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,6 +69,7 @@ public class BackupHelper {
     private static final String ATTR_HAS_MULTIPLE_SIGNERS = "multi-signers";
 
     private static final String TAG_SIGNATURE = "sig";
+    private static final String ATTR_SIGNATURE_VALUE = "v";
 
     private static final String TAG_PERMISSION = "perm";
     private static final String ATTR_PERMISSION_NAME = "name";
@@ -584,7 +586,8 @@ public class BackupHelper {
                                 skipToEndOfTag(parser);
                                 break;
                             case TAG_SIGNATURE:
-                                signatureList.add(new Signature(parser.getText()));
+                                signatureList.add(new Signature(
+                                        parser.getAttributeValue(null, ATTR_SIGNATURE_VALUE)));
                                 skipToEndOfTag(parser);
                                 break;
                             default:
@@ -681,7 +684,7 @@ public class BackupHelper {
                     String.valueOf(mHasMultipleSigners));
             for (Signature signature : mSignatures) {
                 serializer.startTag(null, TAG_SIGNATURE);
-                serializer.text(signature.toCharsString());
+                serializer.attribute(null, ATTR_SIGNATURE_VALUE, signature.toCharsString());
                 serializer.endTag(null, TAG_SIGNATURE);
             }
 
@@ -700,6 +703,47 @@ public class BackupHelper {
          * @param pkgInfo The package to restore.
          */
         void restore(@NonNull Context context, @NonNull PackageInfo pkgInfo) {
+            Slog.e(LOG_TAG, "Restoring permissions for package [" + mPackageName + "]");
+
+            // Verify signature info
+            try {
+                if (mHasMultipleSigners && pkgInfo.signingInfo.hasMultipleSigners()) {
+                    // If both packages are signed by multi signers, check if two signature sets are
+                    // effectively matched.
+                    if (!Signature.areEffectiveMatch(mSignatures,
+                            pkgInfo.signingInfo.getApkContentsSigners())) {
+                        Slog.e(LOG_TAG, "Multi-signers signatures don't match for package ["
+                                + mPackageName + "], skipped.");
+                        return;
+                    }
+                } else if (!mHasMultipleSigners && !pkgInfo.signingInfo.hasMultipleSigners()) {
+                    // If both packages are not signed by multi signers, check if two signature sets
+                    // have overlaps.
+                    Signature[] signatures = pkgInfo.signingInfo.getSigningCertificateHistory();
+                    if (signatures == null) {
+                        Slog.e(LOG_TAG, "The dest package is unsigned.");
+                        return;
+                    }
+                    boolean isMatched = false;
+                    for (int i = 0; i < mSignatures.length; i++) {
+                        for (int j = 0; j < signatures.length; j++) {
+                            isMatched = Signature.areEffectiveMatch(mSignatures[i], signatures[j]);
+                        }
+                    }
+                    if (!isMatched) {
+                        Slog.e(LOG_TAG, "Single signer signatures don't match for package ["
+                                + mPackageName + "], skipped.");
+                        return;
+                    }
+                } else {
+                    Slog.e(LOG_TAG, "Number of signers don't match.");
+                    return;
+                }
+            } catch (CertificateException ce) {
+                Slog.e(LOG_TAG, "Either the source or the dest package's bounced cert length "
+                        + "looks fishy, skipped package [" + pkgInfo.packageName + "]");
+            }
+
             AppPermissions appPerms = new AppPermissions(context, pkgInfo, false, true, null);
 
             ArraySet<String> affectedPermissions = new ArraySet<>();
