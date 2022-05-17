@@ -40,6 +40,7 @@ import android.app.ActivityTaskManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
+import android.app.WindowConfiguration;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -921,6 +922,8 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                     }
 
                     final RemoteAnimationTarget primary = apps[0];
+                    final boolean isDream = (apps[0].taskInfo.topActivityType
+                            == WindowConfiguration.ACTIVITY_TYPE_DREAM);
 
                     final SyncRtSurfaceTransactionApplier applier =
                             new SyncRtSurfaceTransactionApplier(
@@ -942,20 +945,24 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
 
                                     final float surfaceHeight = primary.screenSpaceBounds.height();
 
-                                    mUnoccludeMatrix.setTranslate(
-                                            0f,
-                                            (1f - animatedValue)
-                                                    * surfaceHeight
-                                                    * UNOCCLUDE_TRANSLATE_DISTANCE_PERCENT);
-
-                                    SyncRtSurfaceTransactionApplier.SurfaceParams params =
+                                    // Fade for all types of activities.
+                                    SyncRtSurfaceTransactionApplier.SurfaceParams.Builder
+                                            paramsBuilder =
                                             new SyncRtSurfaceTransactionApplier.SurfaceParams
                                                     .Builder(primary.leash)
-                                                    .withMatrix(mUnoccludeMatrix)
-                                                    .withCornerRadius(mWindowCornerRadius)
-                                                    .withAlpha(animatedValue)
-                                                    .build();
-                                    applier.scheduleApply(params);
+                                                    .withAlpha(animatedValue);
+                                    // Set translate if the occluding activity isn't Dream.
+                                    if (!isDream) {
+                                        mUnoccludeMatrix.setTranslate(
+                                                0f,
+                                                (1f - animatedValue)
+                                                        * surfaceHeight
+                                                        * UNOCCLUDE_TRANSLATE_DISTANCE_PERCENT);
+
+                                        paramsBuilder.withMatrix(mUnoccludeMatrix).withCornerRadius(
+                                                mWindowCornerRadius);
+                                    }
+                                    applier.scheduleApply(paramsBuilder.build());
                                 });
                         mUnoccludeAnimator.addListener(new AnimatorListenerAdapter() {
                             @Override
