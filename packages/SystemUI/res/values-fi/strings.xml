@@ -93,9 +93,9 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Näytön tallennusta käsitellään"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Pysyvä ilmoitus näytön tallentamisesta"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Aloitetaanko tallennus?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Tallennuksen aikana Android-järjestelmä voi tallentaa mitä tahansa näytöllä näkyvää tai laitteen toistamaa arkaluontoista tietoa. Näitä tietoja ovat esimerkiksi salasanat, maksutiedot, kuvat, viestit ja äänisisältö."</string>
-    <string name="screenrecord_audio_label" msgid="6183558856175159629">"Tallenna ääntä"</string>
-    <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Laitteen äänet"</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"Tallennuksen aikana Android-järjestelmä voi tallentaa mitä tahansa näytöllä näkyvää tai laitteen toistamaa arkaluontoista tietoa. Näitä tietoja ovat esimerkiksi salasanat, maksutiedot, kuvat, viestit ja audio."</string>
+    <string name="screenrecord_audio_label" msgid="6183558856175159629">"Tallenna audiota"</string>
+    <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Laitteen audio"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Musiikki, puhelut, soittoäänet ja muut äänet laitteesta"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofoni"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Laitteen äänet ja mikrofoni"</string>
