@@ -16,6 +16,9 @@
 
 package com.android.server.pm;
 
+import static com.android.server.pm.BackgroundDexOptService.STATUS_DEX_OPT_FAILED;
+import static com.android.server.pm.BackgroundDexOptService.STATUS_OK;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -23,12 +26,14 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
 
+import android.annotation.Nullable;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
@@ -38,10 +43,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.HandlerThread;
 import android.os.PowerManager;
+import android.util.Log;
 
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.PinnerService;
 import com.android.server.pm.dex.DexManager;
+import com.android.server.pm.dex.DexoptOptions;
 
 import org.junit.After;
 import org.junit.Before;
@@ -52,7 +60,11 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
@@ -66,8 +78,12 @@ public final class BackgroundDexOptServiceUnitTest {
 
     private static final long TEST_WAIT_TIMEOUT_MS = 10_000;
 
-    private static final List<String> DEFAULT_PACKAGE_LIST = List.of("aaa", "bbb");
-    private static final List<String> EMPTY_PACKAGE_LIST = List.of();
+    private static final String PACKAGE_AAA = "aaa";
+    private static final List<String> DEFAULT_PACKAGE_LIST = List.of(PACKAGE_AAA, "bbb");
+    private int mDexOptResultForPackageAAA = PackageDexOptimizer.DEX_OPT_PERFORMED;
+
+    // Store expected dexopt sequence for verification.
+    private ArrayList<DexOptInfo> mDexInfoSequence = new ArrayList<>();
 
     @Mock
     private Context mContext;
@@ -116,12 +132,21 @@ public final class BackgroundDexOptServiceUnitTest {
         when(mInjector.getDexOptThermalCutoff()).thenReturn(PowerManager.THERMAL_STATUS_CRITICAL);
         when(mInjector.getCurrentThermalStatus()).thenReturn(PowerManager.THERMAL_STATUS_NONE);
         when(mInjector.supportSecondaryDex()).thenReturn(true);
-        when(mDexOptHelper.getOptimizablePackages(any())).thenReturn(DEFAULT_PACKAGE_LIST);
-        when(mDexOptHelper.performDexOptWithStatus(any())).thenReturn(
-                PackageDexOptimizer.DEX_OPT_PERFORMED);
-        when(mDexOptHelper.performDexOpt(any())).thenReturn(true);
+        setupDexOptHelper();
 
         mService = new BackgroundDexOptService(mInjector);
+    }
+
+    private void setupDexOptHelper() {
+        when(mDexOptHelper.getOptimizablePackages(any())).thenReturn(DEFAULT_PACKAGE_LIST);
+        when(mDexOptHelper.performDexOptWithStatus(any())).thenAnswer(inv -> {
+            DexoptOptions opt = inv.getArgument(0);
+            if (opt.getPackageName().equals(PACKAGE_AAA)) {
+                return mDexOptResultForPackageAAA;
+            }
+            return PackageDexOptimizer.DEX_OPT_PERFORMED;
+        });
+        when(mDexOptHelper.performDexOpt(any())).thenReturn(true);
     }
 
     @After
@@ -159,7 +184,7 @@ public final class BackgroundDexOptServiceUnitTest {
     @Test
     public void testNoExecutionForNoOptimizablePackages() {
         initUntilBootCompleted();
-        when(mDexOptHelper.getOptimizablePackages(any())).thenReturn(EMPTY_PACKAGE_LIST);
+        when(mDexOptHelper.getOptimizablePackages(any())).thenReturn(Collections.emptyList());
 
         assertThat(mService.onStartJob(mJobServiceForPostBoot,
                 mJobParametersForPostBoot)).isFalse();
@@ -170,15 +195,70 @@ public final class BackgroundDexOptServiceUnitTest {
     public void testPostBootUpdateFullRun() {
         initUntilBootCompleted();
 
-        runFullJob(mJobServiceForPostBoot, mJobParametersForPostBoot, false, 1);
+        runFullJob(mJobServiceForPostBoot, mJobParametersForPostBoot,
+                /* expectedReschedule= */ false, /* expectedStatus= */ STATUS_OK,
+                /* totalJobFinishedWithParams= */ 1, /* expectedSkippedPackage= */ null);
+    }
+
+    @Test
+    public void testPostBootUpdateFullRunWithPackageFailure() {
+        mDexOptResultForPackageAAA = PackageDexOptimizer.DEX_OPT_FAILED;
+
+        initUntilBootCompleted();
+
+        runFullJob(mJobServiceForPostBoot, mJobParametersForPostBoot,
+                /* expectedReschedule= */ false, /* expectedStatus= */ STATUS_DEX_OPT_FAILED,
+                /* totalJobFinishedWithParams= */ 1, /* expectedSkippedPackage= */ PACKAGE_AAA);
+
+        assertThat(getFailedPackageNamesPrimary()).containsExactly(PACKAGE_AAA);
+        assertThat(getFailedPackageNamesSecondary()).isEmpty();
     }
 
     @Test
     public void testIdleJobFullRun() {
         initUntilBootCompleted();
+        runFullJob(mJobServiceForPostBoot, mJobParametersForPostBoot,
+                /* expectedReschedule= */ false, /* expectedStatus= */ STATUS_OK,
+                /* totalJobFinishedWithParams= */ 1, /* expectedSkippedPackage= */ null);
+        runFullJob(mJobServiceForIdle, mJobParametersForIdle,
+                /* expectedReschedule= */ true, /* expectedStatus= */ STATUS_OK,
+                /* totalJobFinishedWithParams= */ 1, /* expectedSkippedPackage= */ null);
+    }
 
-        runFullJob(mJobServiceForPostBoot, mJobParametersForPostBoot, false, 1);
-        runFullJob(mJobServiceForIdle, mJobParametersForIdle, true, 2);
+    @Test
+    public void testIdleJobFullRunWithFailureOnceAndSuccessAfterUpdate() {
+        mDexOptResultForPackageAAA = PackageDexOptimizer.DEX_OPT_FAILED;
+
+        initUntilBootCompleted();
+
+        runFullJob(mJobServiceForPostBoot, mJobParametersForPostBoot,
+                /* expectedReschedule= */ false, /* expectedStatus= */ STATUS_DEX_OPT_FAILED,
+                /* totalJobFinishedWithParams= */ 1, /* expectedSkippedPackage= */ PACKAGE_AAA);
+
+        assertThat(getFailedPackageNamesPrimary()).containsExactly(PACKAGE_AAA);
+        assertThat(getFailedPackageNamesSecondary()).isEmpty();
+
+        runFullJob(mJobServiceForIdle, mJobParametersForIdle,
+                /* expectedReschedule= */ true, /* expectedStatus= */ STATUS_OK,
+                /* totalJobFinishedWithParams= */ 1, /* expectedSkippedPackage= */ PACKAGE_AAA);
+
+        assertThat(getFailedPackageNamesPrimary()).containsExactly(PACKAGE_AAA);
+        assertThat(getFailedPackageNamesSecondary()).isEmpty();
+
+        mService.notifyPackageChanged(PACKAGE_AAA);
+
+        assertThat(getFailedPackageNamesPrimary()).isEmpty();
+        assertThat(getFailedPackageNamesSecondary()).isEmpty();
+
+        // Succeed this time.
+        mDexOptResultForPackageAAA = PackageDexOptimizer.DEX_OPT_PERFORMED;
+
+        runFullJob(mJobServiceForIdle, mJobParametersForIdle,
+                /* expectedReschedule= */ true, /* expectedStatus= */ STATUS_OK,
+                /* totalJobFinishedWithParams= */ 2, /* expectedSkippedPackage= */ null);
+
+        assertThat(getFailedPackageNamesPrimary()).isEmpty();
+        assertThat(getFailedPackageNamesSecondary()).isEmpty();
     }
 
     @Test
@@ -404,8 +484,10 @@ public final class BackgroundDexOptServiceUnitTest {
     }
 
     private void runFullJob(BackgroundDexOptJobService jobService, JobParameters params,
-            boolean expectedReschedule, int totalJobRuns) {
+            boolean expectedReschedule, int expectedStatus, int totalJobFinishedWithParams,
+            @Nullable String expectedSkippedPackage) {
         when(mInjector.createAndStartThread(any(), any())).thenReturn(Thread.currentThread());
+        addFullRunSequence(expectedSkippedPackage);
         assertThat(mService.onStartJob(jobService, params)).isTrue();
 
         ArgumentCaptor<Runnable> argThreadRunnable = ArgumentCaptor.forClass(Runnable.class);
@@ -413,20 +495,99 @@ public final class BackgroundDexOptServiceUnitTest {
 
         argThreadRunnable.getValue().run();
 
-        verify(jobService).jobFinished(params, expectedReschedule);
+        verify(jobService, times(totalJobFinishedWithParams)).jobFinished(params,
+                expectedReschedule);
         // Never block
         verify(mDexOptHelper, never()).controlDexOptBlocking(true);
-        verifyPerformDexOpt(DEFAULT_PACKAGE_LIST, totalJobRuns);
+        verifyPerformDexOpt();
+        assertThat(getLastExecutionStatus()).isEqualTo(expectedStatus);
     }
 
-    private void verifyPerformDexOpt(List<String> pkgs, int expectedRuns) {
+    private void verifyPerformDexOpt() {
         InOrder inOrder = inOrder(mDexOptHelper);
-        for (int i = 0; i < expectedRuns; i++) {
-            for (String pkg : pkgs) {
-                inOrder.verify(mDexOptHelper, times(1)).performDexOptWithStatus(argThat((option) ->
-                        option.getPackageName().equals(pkg) && !option.isDexoptOnlySecondaryDex()));
-                inOrder.verify(mDexOptHelper, times(1)).performDexOpt(argThat((option) ->
-                        option.getPackageName().equals(pkg) && option.isDexoptOnlySecondaryDex()));
+        inOrder.verify(mDexOptHelper).getOptimizablePackages(any());
+        for (DexOptInfo info : mDexInfoSequence) {
+            if (info.isPrimary) {
+                verify(mDexOptHelper).performDexOptWithStatus(
+                        argThat((option) -> option.getPackageName().equals(info.packageName)
+                                && !option.isDexoptOnlySecondaryDex()));
+            } else {
+                inOrder.verify(mDexOptHelper).performDexOpt(
+                        argThat((option) -> option.getPackageName().equals(info.packageName)
+                                && option.isDexoptOnlySecondaryDex()));
+            }
+        }
+
+        // Even InOrder cannot check the order if the same call is made multiple times.
+        // To check the order across multiple runs, we reset the mock so that order can be checked
+        // in each call.
+        mDexInfoSequence.clear();
+        reset(mDexOptHelper);
+        setupDexOptHelper();
+    }
+
+    private String findDumpValueForKey(String key) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        PrintWriter pw = new PrintWriter(out, true);
+        IndentingPrintWriter writer = new IndentingPrintWriter(pw, "");
+        try {
+            mService.dump(writer);
+            writer.flush();
+            Log.i(TAG, "dump output:" + out.toString());
+            for (String line : out.toString().split(System.lineSeparator())) {
+                String[] vals = line.split(":");
+                if (vals[0].equals(key)) {
+                    if (vals.length == 2) {
+                        return vals[1].strip();
+                    } else {
+                        break;
+                    }
+                }
+            }
+            return "";
+        } finally {
+            writer.close();
+        }
+    }
+
+    List<String> findStringListFromDump(String key) {
+        String values = findDumpValueForKey(key);
+        if (values.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return Arrays.asList(values.split(","));
+    }
+
+    private List<String> getFailedPackageNamesPrimary() {
+        return findStringListFromDump("mFailedPackageNamesPrimary");
+    }
+
+    private List<String> getFailedPackageNamesSecondary() {
+        return findStringListFromDump("mFailedPackageNamesSecondary");
+    }
+
+    private int getLastExecutionStatus() {
+        return Integer.parseInt(findDumpValueForKey("mLastExecutionStatus"));
+    }
+
+    private static class DexOptInfo {
+        public final String packageName;
+        public final boolean isPrimary;
+
+        private DexOptInfo(String packageName, boolean isPrimary) {
+            this.packageName = packageName;
+            this.isPrimary = isPrimary;
+        }
+    }
+
+    private void addFullRunSequence(@Nullable String expectedSkippedPackage) {
+        for (String packageName : DEFAULT_PACKAGE_LIST) {
+            if (packageName.equals(expectedSkippedPackage)) {
+                // only fails primary dexopt in mocking but add secodary
+                mDexInfoSequence.add(new DexOptInfo(packageName, /* isPrimary= */ false));
+            } else {
+                mDexInfoSequence.add(new DexOptInfo(packageName, /* isPrimary= */ true));
+                mDexInfoSequence.add(new DexOptInfo(packageName, /* isPrimary= */ false));
             }
         }
     }

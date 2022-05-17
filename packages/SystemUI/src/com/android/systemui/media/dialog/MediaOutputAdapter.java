@@ -211,16 +211,13 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                             View.IMPORTANT_FOR_ACCESSIBILITY_YES);
                     setUpContentDescriptionForView(mEndTouchArea, true, device);
                 } else if (!mController.hasAdjustVolumeUserRestriction() && currentlyConnected) {
-                    mStatusIcon.setImageDrawable(
-                            mContext.getDrawable(R.drawable.media_output_status_check));
-                    mStatusIcon.setColorFilter(mController.getColorItemContent());
                     mTitleIcon.setImageDrawable(
                             mContext.getDrawable(R.drawable.media_output_icon_volume));
                     mTitleIcon.setColorFilter(mController.getColorItemContent());
                     mTitleText.setTextColor(mController.getColorItemContent());
                     setSingleLineLayout(getItemTitle(device), true /* bFocused */,
                             true /* showSeekBar */,
-                            false /* showProgressBar */, true /* showStatus */);
+                            false /* showProgressBar */, false /* showStatus */);
                     initSeekbar(device, isCurrentSeekbarInvisible);
                     setUpContentDescriptionForView(mContainerLayout, false, device);
                     mCurrentActivePosition = position;

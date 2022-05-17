@@ -85,6 +85,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.media.AudioAttributes;
@@ -120,6 +121,8 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.os.AtomsProto.PackageNotificationPreferences;
 import com.android.server.UiServiceTestCase;
 import com.android.server.notification.PermissionHelper.PackagePermission;
+
+import com.google.common.collect.ImmutableList;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -3523,8 +3526,37 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     @Test
     public void testUpdateNotificationChannel_fixedPermission() {
+        List<UserInfo> users = ImmutableList.of(new UserInfo(UserHandle.USER_SYSTEM, "user0", 0));
         when(mPermissionHelper.isPermissionFixed(PKG_O, 0)).thenReturn(true);
+        PackageInfo pm = new PackageInfo();
+        pm.packageName = PKG_O;
+        pm.applicationInfo = new ApplicationInfo();
+        pm.applicationInfo.uid = UID_O;
+        List<PackageInfo> packages = ImmutableList.of(pm);
+        when(mPm.getInstalledPackagesAsUser(any(), anyInt())).thenReturn(packages);
+        mHelper.updateFixedImportance(users);
 
+        assertTrue(mHelper.isImportanceLocked(PKG_O, UID_O));
+
+        NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
+        mHelper.createNotificationChannel(PKG_O, UID_O, a, true, false);
+
+        NotificationChannel update = new NotificationChannel("a", "a", IMPORTANCE_NONE);
+        update.setAllowBubbles(false);
+
+        mHelper.updateNotificationChannel(PKG_O, UID_O, update, true);
+
+        assertEquals(IMPORTANCE_HIGH,
+                mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false).getImportance());
+        assertEquals(false,
+                mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false).canBubble());
+    }
+
+    @Test
+    public void testUpdateNotificationChannel_defaultApp() {
+        ArraySet<Pair<String, Integer>> toAdd = new ArraySet<>();
+        toAdd.add(new Pair(PKG_O, UID_O));
+        mHelper.updateDefaultApps(0, null, toAdd);
         NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
         mHelper.createNotificationChannel(PKG_O, UID_O, a, true, false);
 
@@ -3592,6 +3624,58 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false).getImportance());
         assertEquals(false,
                 mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false).canBubble());
+    }
+
+    @Test
+    public void testUpdateFixedImportance_multiUser() {
+        NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
+        NotificationChannel b = new NotificationChannel("b", "b", IMPORTANCE_LOW);
+        NotificationChannel c = new NotificationChannel("c", "c", IMPORTANCE_DEFAULT);
+        // different uids, same package
+        mHelper.createNotificationChannel(PKG_O, UID_O, a, true, false);
+        mHelper.createNotificationChannel(PKG_O, UID_O, b, false, false);
+        mHelper.createNotificationChannel(PKG_O, UserHandle.PER_USER_RANGE + 1, c, true, true);
+
+        UserInfo user = new UserInfo();
+        user.id = 0;
+        List<UserInfo> users = ImmutableList.of(user);
+        when(mPermissionHelper.isPermissionFixed(PKG_O, 0)).thenReturn(true);
+        PackageInfo pm = new PackageInfo();
+        pm.packageName = PKG_O;
+        pm.applicationInfo = new ApplicationInfo();
+        pm.applicationInfo.uid = UID_O;
+        List<PackageInfo> packages = ImmutableList.of(pm);
+        when(mPm.getInstalledPackagesAsUser(any(), eq(0))).thenReturn(packages);
+        mHelper.updateFixedImportance(users);
+
+        assertTrue(mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false)
+                .isImportanceLockedByCriticalDeviceFunction());
+        assertTrue(mHelper.getNotificationChannel(PKG_O, UID_O, b.getId(), false)
+                .isImportanceLockedByCriticalDeviceFunction());
+        assertFalse(mHelper.getNotificationChannel(
+                        PKG_O, UserHandle.PER_USER_RANGE + 1, c.getId(), false)
+                .isImportanceLockedByCriticalDeviceFunction());
+    }
+
+    @Test
+    public void testUpdateFixedImportance_channelDoesNotExistYet() {
+        UserInfo user = new UserInfo();
+        user.id = 0;
+        List<UserInfo> users = ImmutableList.of(user);
+        when(mPermissionHelper.isPermissionFixed(PKG_O, 0)).thenReturn(true);
+        PackageInfo pm = new PackageInfo();
+        pm.packageName = PKG_O;
+        pm.applicationInfo = new ApplicationInfo();
+        pm.applicationInfo.uid = UID_O;
+        List<PackageInfo> packages = ImmutableList.of(pm);
+        when(mPm.getInstalledPackagesAsUser(any(), eq(0))).thenReturn(packages);
+        mHelper.updateFixedImportance(users);
+
+        NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
+        mHelper.createNotificationChannel(PKG_O, UID_O, a, true, false);
+
+        assertTrue(mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false)
+                .isImportanceLockedByCriticalDeviceFunction());
     }
 
     @Test
@@ -3756,6 +3840,62 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.createNotificationChannel(PKG_O, UID_O, a, true, false);
 
         assertTrue(a.isImportanceLockedByCriticalDeviceFunction());
+    }
+
+    @Test
+    public void testUpdateFixedImportance_thenDefaultAppsRemoves() {
+        UserInfo user = new UserInfo();
+        user.id = 0;
+        List<UserInfo> users = ImmutableList.of(user);
+        when(mPermissionHelper.isPermissionFixed(PKG_O, 0)).thenReturn(true);
+        PackageInfo pm = new PackageInfo();
+        pm.packageName = PKG_O;
+        pm.applicationInfo = new ApplicationInfo();
+        pm.applicationInfo.uid = UID_O;
+        List<PackageInfo> packages = ImmutableList.of(pm);
+        when(mPm.getInstalledPackagesAsUser(any(), eq(0))).thenReturn(packages);
+        mHelper.updateFixedImportance(users);
+
+        ArraySet<String> toRemove = new ArraySet<>();
+        toRemove.add(PKG_O);
+        mHelper.updateDefaultApps(0, toRemove, null);
+
+        assertTrue(mHelper.isImportanceLocked(PKG_O, UID_O));
+
+        NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
+        mHelper.createNotificationChannel(PKG_O, UID_O, a, true, false);
+
+        // Still locked by permission if not role
+        assertTrue(mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false)
+                .isImportanceLockedByCriticalDeviceFunction());
+    }
+
+    @Test
+    public void testUpdateDefaultApps_thenNotFixedPermission() {
+        ArraySet<Pair<String, Integer>> toAdd = new ArraySet<>();
+        toAdd.add(new Pair(PKG_O, UID_O));
+        mHelper.updateDefaultApps(0, null, toAdd);
+
+        UserInfo user = new UserInfo();
+        user.id = 0;
+        List<UserInfo> users = ImmutableList.of(user);
+        when(mPermissionHelper.isPermissionFixed(PKG_O, 0)).thenReturn(false);
+        PackageInfo pm = new PackageInfo();
+        pm.packageName = PKG_O;
+        pm.applicationInfo = new ApplicationInfo();
+        pm.applicationInfo.uid = UID_O;
+        List<PackageInfo> packages = ImmutableList.of(pm);
+        when(mPm.getInstalledPackagesAsUser(any(), eq(0))).thenReturn(packages);
+        mHelper.updateFixedImportance(users);
+
+        assertTrue(mHelper.isImportanceLocked(PKG_O, UID_O));
+
+        NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
+        mHelper.createNotificationChannel(PKG_O, UID_O, a, true, false);
+
+        // Still locked by role if not permission
+        assertTrue(mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false)
+                .isImportanceLockedByCriticalDeviceFunction());
     }
 
     @Test

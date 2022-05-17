@@ -18,12 +18,15 @@ package com.android.systemui.statusbar.notification.collection.legacy;
 
 import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
 
-import android.annotation.Nullable;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationStats;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotifCollection.CancellationReason;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
@@ -68,8 +71,7 @@ public class OnUserInteractionCallbackImplLegacy implements OnUserInteractionCal
      *                              along with this dismissal. If null, does not additionally
      *                              dismiss any notifications.
      */
-    @Override
-    public void onDismiss(
+    private void onDismiss(
             NotificationEntry entry,
             @NotificationListenerService.NotificationCancelReason int cancellationReason,
             @Nullable NotificationEntry groupSummaryToDismiss
@@ -106,14 +108,21 @@ public class OnUserInteractionCallbackImplLegacy implements OnUserInteractionCal
      * @return the group summary to dismiss along with this entry if this is the last entry in
      * the group. Else, returns null.
      */
-    @Override
     @Nullable
-    public NotificationEntry getGroupSummaryToDismiss(NotificationEntry entry) {
+    private NotificationEntry getGroupSummaryToDismiss(NotificationEntry entry) {
         if (mGroupMembershipManager.isOnlyChildInGroup(entry)) {
             NotificationEntry groupSummary = mGroupMembershipManager.getLogicalGroupSummary(entry);
             return groupSummary.isDismissable() ? groupSummary : null;
         }
         return null;
+    }
+
+    @Override
+    @NonNull
+    public Runnable registerFutureDismissal(@NonNull NotificationEntry entry,
+            @CancellationReason int cancellationReason) {
+        NotificationEntry groupSummaryToDismiss = getGroupSummaryToDismiss(entry);
+        return () -> onDismiss(entry, cancellationReason, groupSummaryToDismiss);
     }
 }
 
