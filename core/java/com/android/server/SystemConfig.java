@@ -682,7 +682,6 @@ public class SystemConfig {
             readPermissions(parser, Environment.buildPath(f, "etc", "permissions"),
                     apexPermissionFlag);
         }
-        pruneVendorApexPrivappAllowlists();
     }
 
     @VisibleForTesting
@@ -1595,21 +1594,6 @@ public class SystemConfig {
         grantMap.put(packageName, permissions);
         if (denyPermissions != null) {
             denyMap.put(packageName, denyPermissions);
-        }
-    }
-
-    /**
-     * Prunes out any privileged permission allowlists bundled in vendor apexes.
-     */
-    @VisibleForTesting
-    public void pruneVendorApexPrivappAllowlists() {
-        for (String moduleName: mAllowedVendorApexes.keySet()) {
-            if (mApexPrivAppPermissions.containsKey(moduleName)
-                    || mApexPrivAppDenyPermissions.containsKey(moduleName)) {
-                Slog.w(TAG, moduleName + " is a vendor apex, ignore its priv-app allowlist");
-                mApexPrivAppPermissions.remove(moduleName);
-                mApexPrivAppDenyPermissions.remove(moduleName);
-            }
         }
     }
 
