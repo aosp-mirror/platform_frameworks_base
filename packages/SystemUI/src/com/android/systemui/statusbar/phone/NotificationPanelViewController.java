@@ -4707,6 +4707,11 @@ public class NotificationPanelViewController extends PanelViewController {
                     duration = StackStateAnimator.ANIMATION_DURATION_STANDARD;
                 }
                 mKeyguardStatusBarViewController.animateKeyguardStatusBarOut(startDelay, duration);
+                if (mSplitShadeEnabled) {
+                    // temporary workaround for QS height not being updated during lockscreen to
+                    // shade transition
+                    setQsExpanded(true);
+                }
                 updateQSMinHeight();
             } else if (oldState == StatusBarState.SHADE_LOCKED
                     && statusBarState == KEYGUARD) {
