@@ -27,7 +27,7 @@ namespace aapt {
 
 static ApiVersion sDevelopmentSdkLevel = 10000;
 static const auto sDevelopmentSdkCodeNames =
-    std::unordered_set<StringPiece>({"Q", "R", "S", "Sv2", "Tiramisu"});
+    std::unordered_set<StringPiece>({"Q", "R", "S", "Sv2", "Tiramisu", "UpsideDownCake"});
 
 static const std::vector<std::pair<uint16_t, ApiVersion>> sAttrIdMap = {
     {0x021c, 1},

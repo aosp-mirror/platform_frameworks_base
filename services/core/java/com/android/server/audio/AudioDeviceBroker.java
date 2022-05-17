@@ -1202,8 +1202,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
                     break;
                 case MSG_L_SET_BT_ACTIVE_DEVICE:
                     synchronized (mDeviceStateLock) {
-                        mDeviceInventory.onSetBtActiveDevice((BtDeviceInfo) msg.obj,
-                                mAudioService.getBluetoothContextualVolumeStream());
+                        BtDeviceInfo btInfo = (BtDeviceInfo) msg.obj;
+                        mDeviceInventory.onSetBtActiveDevice(btInfo,
+                                (btInfo.mProfile != BluetoothProfile.LE_AUDIO || btInfo.mIsLeOutput)
+                                        ? mAudioService.getBluetoothContextualVolumeStream()
+                                        : AudioSystem.STREAM_DEFAULT);
                     }
                     break;
                 case MSG_BT_HEADSET_CNCT_FAILED:

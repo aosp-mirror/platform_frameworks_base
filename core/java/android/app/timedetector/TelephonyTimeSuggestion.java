@@ -20,8 +20,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.ShellCommand;
 import android.os.TimestampedValue;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -86,6 +88,61 @@ public final class TelephonyTimeSuggestion implements Parcelable {
             suggestion.addDebugInfo(debugInfo);
         }
         return suggestion;
+    }
+
+    /** @hide */
+    public static TelephonyTimeSuggestion parseCommandLineArg(@NonNull ShellCommand cmd)
+            throws IllegalArgumentException {
+        Integer slotIndex = null;
+        Long referenceTimeMillis = null;
+        Long unixEpochTimeMillis = null;
+        String opt;
+        while ((opt = cmd.getNextArg()) != null) {
+            switch (opt) {
+                case "--slot_index": {
+                    slotIndex = Integer.parseInt(cmd.getNextArgRequired());
+                    break;
+                }
+                case "--reference_time": {
+                    referenceTimeMillis = Long.parseLong(cmd.getNextArgRequired());
+                    break;
+                }
+                case "--unix_epoch_time": {
+                    unixEpochTimeMillis = Long.parseLong(cmd.getNextArgRequired());
+                    break;
+                }
+                default: {
+                    throw new IllegalArgumentException("Unknown option: " + opt);
+                }
+            }
+        }
+
+        if (slotIndex == null) {
+            throw new IllegalArgumentException("No slotIndex specified.");
+        }
+        if (referenceTimeMillis == null) {
+            throw new IllegalArgumentException("No referenceTimeMillis specified.");
+        }
+        if (unixEpochTimeMillis == null) {
+            throw new IllegalArgumentException("No unixEpochTimeMillis specified.");
+        }
+
+        TimestampedValue<Long> timeSignal =
+                new TimestampedValue<>(referenceTimeMillis, unixEpochTimeMillis);
+        Builder builder = new Builder(slotIndex)
+                .setUnixEpochTime(timeSignal)
+                .addDebugInfo("Command line injection");
+        return builder.build();
+    }
+
+    /** @hide */
+    public static void printCommandLineOpts(PrintWriter pw) {
+        pw.println("Telephony suggestion options:");
+        pw.println("  --slot_index <number>");
+        pw.println("  --reference_time <elapsed realtime millis>");
+        pw.println("  --unix_epoch_time <Unix epoch time millis>");
+        pw.println();
+        pw.println("See " + TelephonyTimeSuggestion.class.getName() + " for more information");
     }
 
     @Override

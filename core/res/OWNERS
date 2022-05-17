@@ -35,3 +35,7 @@ per-file res/xml/config_user_types.xml = file:/MULTIUSER_OWNERS
 
 # Car
 per-file res/values/dimens_car.xml = file:/platform/packages/services/Car:/OWNERS
+
+# Telephony
+per-file res/values/config_telephony.xml = file:/platform/frameworks/opt/telephony:/OWNERS
+per-file res/xml/sms_short_codes.xml = file:/platform/frameworks/opt/telephony:/OWNERS

@@ -179,7 +179,7 @@ func createFilteredApiVersions(ctx android.LoadHookContext, modules []string) {
 	// Note: order matters: first parameter is the full api-versions.xml
 	// after that the stubs files in any order
 	// stubs files are all modules that export API surfaces EXCEPT ART
-	props.Srcs = append([]string{":framework-doc-stubs{.api_versions.xml}"}, createSrcs(modules, ".stubs{.jar}")...)
+	props.Srcs = append([]string{":api_versions_public{.api_versions.xml}"}, createSrcs(modules, ".stubs{.jar}")...)
 	props.Dists = []android.Dist{{Targets: []string{"sdk"}}}
 	ctx.CreateModule(genrule.GenRuleFactory, &props)
 }

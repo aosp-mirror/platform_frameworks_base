@@ -38,5 +38,4 @@ android_test_helper_app {
         "androidx.test.rules",
         "truth-prebuilt",
     ],
-    platform_apis: true,
 }

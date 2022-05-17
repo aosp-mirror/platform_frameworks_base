@@ -110,6 +110,8 @@ using android::base::GetBoolProperty;
 
 using android::zygote::ZygoteFailure;
 
+using Action = android_mallopt_gwp_asan_options_t::Action;
+
 // This type is duplicated in fd_utils.h
 typedef const std::function<void(std::string)>& fail_fn_t;
 
@@ -1151,8 +1153,8 @@ static void relabelDir(const char* path, const char* context, fail_fn_t fail_fn)
   }
 }
 
-// Relabel all directories under a path non-recursively.
-static void relabelAllDirs(const char* path, const char* context, fail_fn_t fail_fn) {
+// Relabel the subdirectories and symlinks in the given directory, non-recursively.
+static void relabelSubdirs(const char* path, const char* context, fail_fn_t fail_fn) {
   DIR* dir = opendir(path);
   if (dir == nullptr) {
     fail_fn(CREATE_ERROR("Failed to opendir %s", path));
@@ -1175,38 +1177,40 @@ static void relabelAllDirs(const char* path, const char* context, fail_fn_t fail
 }
 
 /**
- * Make other apps data directory not visible in CE, DE storage.
+ * Hide the CE and DE data directories of non-related apps.
  *
- * Apps without app data isolation can detect if another app is installed on system,
- * by "touching" other apps data directory like /data/data/com.whatsapp, if it returns
- * "Permission denied" it means apps installed, otherwise it returns "File not found".
- * Traditional file permissions or SELinux can only block accessing those directories but
- * can't fix fingerprinting like this.
- * We fix it by "overlaying" data directory, and only relevant app data packages exists
- * in data directories.
+ * Without this, apps can detect if any app is installed by trying to "touch" the app's CE
+ * or DE data directory, e.g. /data/data/com.whatsapp.  This fails with EACCES if the app
+ * is installed, or ENOENT if it's not.  Traditional file permissions or SELinux can only
+ * block accessing those directories but can't fix fingerprinting like this.
+ *
+ * Instead, we hide non-related apps' data directories from the filesystem entirely by
+ * mounting tmpfs instances over their parent directories and bind-mounting in just the
+ * needed app data directories.  This is done in a private mount namespace.
  *
  * Steps:
- * 1). Collect a list of all related apps (apps with same uid and allowlisted apps) data info
- * (package name, data stored volume uuid, and inode number of its CE data directory)
- * 2). Mount tmpfs on /data/data, /data/user(_de) and /mnt/expand, so apps no longer
- * able to access apps data directly.
- * 3). For each related app, create its app data directory and bind mount the actual content
- * from apps data mirror directory. This works on both CE and DE storage, as DE storage
- * is always available even storage is FBE locked, while we use inode number to find
- * the encrypted DE directory in mirror so we can still bind mount it successfully.
+ * (1) Collect a list of all related apps (apps with same uid and allowlisted apps) data info
+ *     (package name, data stored volume uuid, and inode number of its CE data directory)
+ * (2) Mount tmpfs on /data/data and /data/user{,_de}, and on /mnt/expand/$volume/user{,_de}
+ *     for all adoptable storage volumes.  This hides all app data directories.
+ * (3) For each related app, create stubs for its data directories in the relevant tmpfs
+ *     instances, then bind mount in the actual directories from /data_mirror.  This works
+ *     for both the CE and DE directories.  DE storage is always unlocked, whereas the
+ *     app's CE directory can be found via inode number if CE storage is locked.
  *
- * Example:
- * 0). Assuming com.android.foo CE data is stored in /data/data and no shared uid
- * 1). Mount a tmpfs on /data/data, /data/user, /data/user_de, /mnt/expand
- * List = ["com.android.foo", "null" (volume uuid "null"=default),
- * 123456 (inode number)]
- * 2). On DE storage, we create a directory /data/user_de/0/com.com.android.foo, and bind
- * mount (in the app's mount namespace) it from /data_mirror/data_de/0/com.android.foo.
- * 3). We do similar for CE storage. But in direct boot mode, as /data_mirror/data_ce/0/ is
- * encrypted, we can't find a directory with name com.android.foo on it, so we will
- * use the inode number to find the right directory instead, which that directory content will
- * be decrypted after storage is decrypted.
- *
+ * Example assuming user 0, app "com.android.foo", no shared uid, and no adoptable storage:
+ * (1) Info = ["com.android.foo", "null" (volume uuid "null"=default), "123456" (inode number)]
+ * (2) Mount tmpfs on /data/data, /data/user, and /data/user_de.
+ * (3) For DE storage, create a directory /data/user_de/0/com.android.foo and bind mount
+ *     /data_mirror/data_de/0/com.android.foo onto it.
+ * (4) Do similar for CE storage.  But if the device is in direct boot mode, then CE
+ *     storage will be locked, so the app's CE data directory won't exist at the usual
+ *     path /data_mirror/data_ce/0/com.android.foo.  It will still exist in
+ *     /data_mirror/data_ce/0, but its filename will be an unpredictable no-key name.  In
+ *     this case, we use the inode number to find the right directory instead.  Note that
+ *     the bind-mounted app CE data directory will remain locked.  It will be unlocked
+ *     automatically if/when the user's CE storage is unlocked, since adding an encryption
+ *     key takes effect on a whole filesystem instance including all its mounts.
  */
 static void isolateAppData(JNIEnv* env, const std::vector<std::string>& merged_data_info_list,
     uid_t uid, const char* process_name,
@@ -1227,10 +1231,18 @@ static void isolateAppData(JNIEnv* env, const std::vector<std::string>& merged_d
   snprintf(internalDePath, PATH_MAX, "/data/user_de");
   snprintf(externalPrivateMountPath, PATH_MAX, "/mnt/expand");
 
-  char* dataDataContext = nullptr;
-  if (getfilecon(internalDePath, &dataDataContext) < 0) {
-    fail_fn(CREATE_ERROR("Unable to getfilecon on %s %s", internalDePath,
+  // Get the "u:object_r:system_userdir_file:s0" security context.  This can be
+  // gotten from several different places; we use /data/user.
+  char* dataUserdirContext = nullptr;
+  if (getfilecon(internalCePath, &dataUserdirContext) < 0) {
+    fail_fn(CREATE_ERROR("Unable to getfilecon on %s %s", internalCePath,
         strerror(errno)));
+  }
+  // Get the "u:object_r:system_data_file:s0" security context.  This can be
+  // gotten from several different places; we use /data/misc.
+  char* dataFileContext = nullptr;
+  if (getfilecon("/data/misc", &dataFileContext) < 0) {
+    fail_fn(CREATE_ERROR("Unable to getfilecon on /data/misc %s", strerror(errno)));
   }
 
   MountAppDataTmpFs(internalLegacyCePath, fail_fn);
@@ -1326,19 +1338,19 @@ static void isolateAppData(JNIEnv* env, const std::vector<std::string>& merged_d
   // the file operations on tmpfs. If we set the label when we mount
   // tmpfs, SELinux will not happy as we are changing system_data_files.
   // Relabel dir under /data/user, including /data/user/0
-  relabelAllDirs(internalCePath, dataDataContext, fail_fn);
+  relabelSubdirs(internalCePath, dataFileContext, fail_fn);
 
   // Relabel /data/user
-  relabelDir(internalCePath, dataDataContext, fail_fn);
+  relabelDir(internalCePath, dataUserdirContext, fail_fn);
 
   // Relabel /data/data
-  relabelDir(internalLegacyCePath, dataDataContext, fail_fn);
+  relabelDir(internalLegacyCePath, dataFileContext, fail_fn);
 
-  // Relabel dir under /data/user_de
-  relabelAllDirs(internalDePath, dataDataContext, fail_fn);
+  // Relabel subdirectories of /data/user_de
+  relabelSubdirs(internalDePath, dataFileContext, fail_fn);
 
   // Relabel /data/user_de
-  relabelDir(internalDePath, dataDataContext, fail_fn);
+  relabelDir(internalDePath, dataUserdirContext, fail_fn);
 
   // Relabel CE and DE dirs under /mnt/expand
   dir = opendir(externalPrivateMountPath);
@@ -1351,14 +1363,15 @@ static void isolateAppData(JNIEnv* env, const std::vector<std::string>& merged_d
     auto cePath = StringPrintf("%s/user", volPath.c_str());
     auto dePath = StringPrintf("%s/user_de", volPath.c_str());
 
-    relabelAllDirs(cePath.c_str(), dataDataContext, fail_fn);
-    relabelDir(cePath.c_str(), dataDataContext, fail_fn);
-    relabelAllDirs(dePath.c_str(), dataDataContext, fail_fn);
-    relabelDir(dePath.c_str(), dataDataContext, fail_fn);
+    relabelSubdirs(cePath.c_str(), dataFileContext, fail_fn);
+    relabelDir(cePath.c_str(), dataUserdirContext, fail_fn);
+    relabelSubdirs(dePath.c_str(), dataFileContext, fail_fn);
+    relabelDir(dePath.c_str(), dataUserdirContext, fail_fn);
   }
   closedir(dir);
 
-  freecon(dataDataContext);
+  freecon(dataUserdirContext);
+  freecon(dataFileContext);
 }
 
 static void insertPackagesToMergedList(JNIEnv* env,
@@ -1597,10 +1610,11 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids, 
     // since the directory is owned by root.
     if (!is_system_server && getuid() == 0) {
         const int rc = createProcessGroup(uid, getpid());
-        if (rc == -EROFS) {
-            ALOGW("createProcessGroup failed, kernel missing CONFIG_CGROUP_CPUACCT?");
-        } else if (rc != 0) {
-            ALOGE("createProcessGroup(%d, %d) failed: %s", uid, /* pid= */ 0, strerror(-rc));
+        if (rc != 0) {
+            fail_fn(rc == -EROFS ? CREATE_ERROR("createProcessGroup failed, kernel missing "
+                                                "CONFIG_CGROUP_CPUACCT?")
+                                 : CREATE_ERROR("createProcessGroup(%d, %d) failed: %s", uid,
+                                                /* pid= */ 0, strerror(-rc)));
         }
     }
 
@@ -1717,16 +1731,24 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids, 
     // runtime.
     runtime_flags &= ~RuntimeFlags::NATIVE_HEAP_ZERO_INIT;
 
-    bool forceEnableGwpAsan = false;
+    const char* nice_name_ptr = nice_name.has_value() ? nice_name.value().c_str() : nullptr;
+    android_mallopt_gwp_asan_options_t gwp_asan_options;
+    // The system server doesn't have its nice name set by the time SpecializeCommon is called.
+    gwp_asan_options.program_name = nice_name_ptr ?: process_name;
     switch (runtime_flags & RuntimeFlags::GWP_ASAN_LEVEL_MASK) {
         default:
         case RuntimeFlags::GWP_ASAN_LEVEL_NEVER:
+            gwp_asan_options.desire = Action::DONT_TURN_ON_UNLESS_OVERRIDDEN;
+            android_mallopt(M_INITIALIZE_GWP_ASAN, &gwp_asan_options, sizeof(gwp_asan_options));
             break;
         case RuntimeFlags::GWP_ASAN_LEVEL_ALWAYS:
-            forceEnableGwpAsan = true;
-            [[fallthrough]];
+            gwp_asan_options.desire = Action::TURN_ON_FOR_APP;
+            android_mallopt(M_INITIALIZE_GWP_ASAN, &gwp_asan_options, sizeof(gwp_asan_options));
+            break;
         case RuntimeFlags::GWP_ASAN_LEVEL_LOTTERY:
-            android_mallopt(M_INITIALIZE_GWP_ASAN, &forceEnableGwpAsan, sizeof(forceEnableGwpAsan));
+            gwp_asan_options.desire = Action::TURN_ON_WITH_SAMPLING;
+            android_mallopt(M_INITIALIZE_GWP_ASAN, &gwp_asan_options, sizeof(gwp_asan_options));
+            break;
     }
     // Now that we've used the flag, clear it so that we don't pass unknown flags to the ART
     // runtime.
@@ -1739,7 +1761,6 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids, 
     AStatsSocket_close();
 
     const char* se_info_ptr = se_info.has_value() ? se_info.value().c_str() : nullptr;
-    const char* nice_name_ptr = nice_name.has_value() ? nice_name.value().c_str() : nullptr;
 
     if (selinux_android_setcontext(uid, is_system_server, se_info_ptr, nice_name_ptr) == -1) {
         fail_fn(CREATE_ERROR("selinux_android_setcontext(%d, %d, \"%s\", \"%s\") failed", uid,

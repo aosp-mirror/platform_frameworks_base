@@ -270,13 +270,13 @@ interface ITelephony {
      * Allow mobile data connections.
      */
     @UnsupportedAppUsage
-    boolean enableDataConnectivity();
+    boolean enableDataConnectivity(String callingPackage);
 
     /**
      * Disallow mobile data connections.
      */
     @UnsupportedAppUsage
-    boolean disableDataConnectivity();
+    boolean disableDataConnectivity(String callingPackage);
 
     /**
      * Report whether data connectivity is possible.
@@ -959,8 +959,9 @@ interface ITelephony {
      * @param subId user preferred subId.
      * @param reason the reason the data enable change is taking place
      * @param enable true to turn on, else false
+     * @param callingPackage the package that changed the data enabled state
      */
-     void setDataEnabledForReason(int subId, int reason, boolean enable);
+     void setDataEnabledForReason(int subId, int reason, boolean enable, String callingPackage);
 
     /**
      * Return whether data is enabled for certain reason
@@ -976,14 +977,6 @@ interface ITelephony {
      * @return {@code true} if manual network selection is allowed, otherwise return {@code false}.
      */
      boolean isManualNetworkSelectionAllowed(int subId);
-
-    /**
-     * Get P-CSCF address from PCO after data connection is established or modified.
-     * @param apnType the apnType, "ims" for IMS APN, "emergency" for EMERGENCY APN
-     * @param callingPackage The package making the call.
-     * @param callingFeatureId The feature in the package.
-     */
-    String[] getPcscfAddress(String apnType, String callingPackage, String callingFeatureId);
 
     /**
      * Set IMS registration state
@@ -1340,7 +1333,7 @@ interface ITelephony {
      */
     PhoneAccountHandle getPhoneAccountHandleForSubscriptionId(int subscriptionId);
 
-    void factoryReset(int subId);
+    void factoryReset(int subId, String callingPackage);
 
     /**
      * Returns users's current locale based on the SIM.

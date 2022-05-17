@@ -18,6 +18,7 @@ package android.hardware.usb;
 
 import android.app.PendingIntent;
 import android.content.ComponentName;
+import android.hardware.usb.IUsbOperationInternal;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.ParcelableUsbPort;
@@ -136,7 +137,7 @@ interface IUsbManager
     void resetUsbGadget();
 
     /* Set USB data on or off */
-    boolean enableUsbDataSignal(boolean enable);
+    boolean enableUsbData(in String portId, boolean enable, int operationId, in IUsbOperationInternal callback);
 
     /* Gets the USB Hal Version. */
     int getUsbHalVersion();
@@ -159,6 +160,6 @@ interface IUsbManager
     /* Enable/disable contaminant detection */
     void enableContaminantDetection(in String portId, boolean enable);
 
-   /* Sets USB device connection handler. */
-   void setUsbDeviceConnectionHandler(in ComponentName usbDeviceConnectionHandler);
+    /* Sets USB device connection handler. */
+    void setUsbDeviceConnectionHandler(in ComponentName usbDeviceConnectionHandler);
 }

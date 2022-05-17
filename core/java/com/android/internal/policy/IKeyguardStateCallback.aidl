@@ -16,7 +16,7 @@
 package com.android.internal.policy;
 
 interface IKeyguardStateCallback {
-    void onShowingStateChanged(boolean showing);
+    void onShowingStateChanged(boolean showing, int userId);
     void onSimSecureStateChanged(boolean simSecure);
     void onInputRestrictedStateChanged(boolean inputRestricted);
     void onTrustedChanged(boolean trusted);

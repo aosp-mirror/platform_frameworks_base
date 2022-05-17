@@ -230,9 +230,10 @@ public final class MediaFormat {
     /**
      * A key describing the log session ID for MediaCodec. The log session ID is a random 32-byte
      * hexadecimal string that is used to associate metrics from multiple media codec instances
-     * to the same playback or recording session.
+     * to the same playback or recording session. The value is created as
+     * {@link android.media.metrics.LogSessionId LogSessionId}. Sessions are created in
+     * {@link android.media.metrics.MediaMetricsManager MediaMetricsManager}.
      * The associated value is a string.
-     * @hide
      */
     public static final String LOG_SESSION_ID = "log-session-id";
 
@@ -1147,7 +1148,7 @@ public final class MediaFormat {
      * A key describing the per-frame average block QP (Quantization Parameter).
      * This is a part of a video 'Encoding Statistics' export feature.
      * This value is emitted from video encoder for a video frame.
-     * The average value is rounded down (using floor()) to integer value.
+     * The average value is rounded to the nearest integer value.
      *
      * The associated value is an integer.
      */

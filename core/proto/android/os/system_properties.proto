@@ -434,8 +434,9 @@ message SystemPropertiesProto {
             optional string vibrator = 37;
             optional string virtual_device = 38;
             optional string vulkan = 39;
+            optional string egl_legacy = 40;
 
-            // Next Tag: 40
+            // Next Tag: 41
         }
         optional Hardware hardware = 27;
 
@@ -555,4 +556,3 @@ message SystemPropertiesProto {
 
     // Next Tag: 32
 }
-
