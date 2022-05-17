@@ -19,16 +19,23 @@ package android.view;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.content.Context;
+import android.widget.FrameLayout;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.filters.MediumTest;
 import androidx.test.rule.ActivityTestRule;
 
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 @MediumTest
 public class RenderNodeAnimatorTest  {
@@ -56,5 +63,47 @@ public class RenderNodeAnimatorTest  {
         assertNull(view.mTransformationInfo);
         anim.start(); // should initialize mTransformationInfo
         assertNotNull(view.mTransformationInfo);
+    }
+
+    @Test
+    public void testViewDetachCancelsRenderNodeAnimator() {
+        // Start a RenderNodeAnimator with a long duration time, then detach the target view
+        // before the animation completes. Detaching of a View from a window should force cancel all
+        // RenderNodeAnimators
+        CountDownLatch latch = new CountDownLatch(1);
+
+        FrameLayout container = new FrameLayout(getContext());
+        View view = new View(getContext());
+
+        getActivity().runOnUiThread(() -> {
+            container.addView(view, new FrameLayout.LayoutParams(100, 100));
+            getActivity().setContentView(container);
+        });
+        getActivity().runOnUiThread(() -> {
+            RenderNodeAnimator anim = new RenderNodeAnimator(0, 0, 10f, 30f);
+            anim.setDuration(10000);
+            anim.setTarget(view);
+            anim.addListener(new AnimatorListenerAdapter() {
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    latch.countDown();
+                }
+            });
+
+            anim.start();
+        });
+
+        getActivity().runOnUiThread(()-> {
+            container.removeView(view);
+        });
+
+        try {
+            Assert.assertTrue("onAnimationEnd not invoked",
+                    latch.await(3000, TimeUnit.MILLISECONDS));
+        } catch (InterruptedException excep) {
+            Assert.fail("Interrupted waiting for onAnimationEnd callback");
+        }
     }
 }

@@ -190,6 +190,7 @@ public class ChooserActivity extends ResolverActivity implements
     private static final String SHORTCUT_TARGET = "shortcut_target";
     private static final int APP_PREDICTION_SHARE_TARGET_QUERY_PACKAGE_LIMIT = 20;
     public static final String APP_PREDICTION_INTENT_FILTER_KEY = "intent_filter";
+    private static final String SHARED_TEXT_KEY = "shared_text";
 
     private static final String PLURALS_COUNT = "count";
     private static final String PLURALS_FILE_NAME = "file_name";
@@ -2201,6 +2202,7 @@ public class ChooserActivity extends ResolverActivity implements
         final IntentFilter filter = getTargetIntentFilter();
         Bundle extras = new Bundle();
         extras.putParcelable(APP_PREDICTION_INTENT_FILTER_KEY, filter);
+        populateTextContent(extras);
         AppPredictionContext appPredictionContext = new AppPredictionContext.Builder(contextAsUser)
             .setUiSurface(APP_PREDICTION_SHARE_UI_SURFACE)
             .setPredictedTargetCount(APP_PREDICTION_SHARE_TARGET_QUERY_PACKAGE_LIMIT)
@@ -2217,6 +2219,12 @@ public class ChooserActivity extends ResolverActivity implements
             mWorkAppPredictor = appPredictionSession;
         }
         return appPredictionSession;
+    }
+
+    private void populateTextContent(Bundle extras) {
+        final Intent intent = getTargetIntent();
+        String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
+        extras.putString(SHARED_TEXT_KEY, sharedText);
     }
 
     /**

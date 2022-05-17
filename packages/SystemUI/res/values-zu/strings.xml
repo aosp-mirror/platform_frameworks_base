@@ -313,6 +313,10 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Swayiphela phezulu ukuze uvule"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Cindezela isithonjana sokuvula ukuze uvule"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Ivulwe ngobuso. Cindezela isithonjana sokuvula ukuze uvule."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"Swayiphela phezulu ukuze uzame futhi"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Vula ukuze usebenzise i-NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Le divayisi eyenhlangano yakho"</string>
@@ -459,8 +463,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"I-wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Lungela ukuthenga ngokushesha, ngokuphepha ngefoni yakho"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Bonisa konke"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (8488069304491125713) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Thepha ukuze uvule"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Iyabuyekeza"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Vula ukuze usebenzise"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Kube khona inkinga yokuthola amakhadi akho, sicela uzame futhi ngemuva kwesikhathi"</string>
@@ -838,6 +841,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Ukuze usakaze le seshini, sicela uvule i-app."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"I-app engaziwa"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Misa ukusakaza"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Indlela ukusakaza okusebenza ngayo"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Sakaza"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Abantu abaseduze nawe abanamadivayisi e-Bluetooth ahambisanayo bangalalela imidiya oyisakazayo"</string>
@@ -933,7 +938,12 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Hlela umbhalo okopishiwe"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Hlela umfanekiso okopishiwe"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Thumela kudivayisi eseduze"</string>
-    <!-- no translation found for clipboard_text_hidden (7926899867471812305) -->
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"Thepha ukuze ubuke"</string>
+    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
+    <skip />
+    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
+    <skip />
+    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
     <skip />
     <string name="add" msgid="81036585205287996">"Faka"</string>
     <string name="manage_users" msgid="1823875311934643849">"Phatha abasebenzisi"</string>

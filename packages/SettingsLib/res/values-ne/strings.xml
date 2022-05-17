@@ -652,9 +652,6 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"स्क्रिन अन गर्नुहोस्"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"स्क्रिन अन गर्ने अनुमति दिइयोस्"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"कुनै एपलाई स्क्रिन अन गर्ने अनुमति दिइयोस्। यो अनुमति दिइएका खण्डमा तपाईंले अन गर्न नखोजेका बेलामा पनि एपले जुनसुकै बेला स्क्रिन अन गर्न सक्छ।"</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR कोड स्क्यान गर्नुहोस्"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"अडियो सुन्न तलको QR कोडलाई केन्द्र भागमा पार्नुहोस्"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR कोडको फर्म्याट वैध छैन"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> ब्रोडकास्ट गर्न छाड्ने हो?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"तपाईंले <xliff:g id="SWITCHAPP">%1$s</xliff:g> ब्रोडकास्ट गर्नुभयो वा आउटपुट परिवर्तन गर्नुभयो भने तपाईंको हालको ब्रोडकास्ट रोकिने छ"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> ब्रोडकास्ट गर्नुहोस्"</string>

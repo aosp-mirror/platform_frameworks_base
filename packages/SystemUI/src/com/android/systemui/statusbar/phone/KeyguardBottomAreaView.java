@@ -1198,15 +1198,19 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             if (tileIcon != null) {
                 mWalletButton.setImageDrawable(tileIcon);
             }
-            updateWalletVisibility();
-            updateAffordanceColors();
+            post(() -> {
+                updateWalletVisibility();
+                updateAffordanceColors();
+            });
         }
 
         @Override
         public void onWalletCardRetrievalError(@NonNull GetWalletCardsError error) {
             mHasCard = false;
-            updateWalletVisibility();
-            updateAffordanceColors();
+            post(() -> {
+                updateWalletVisibility();
+                updateAffordanceColors();
+            });
         }
     }
 }

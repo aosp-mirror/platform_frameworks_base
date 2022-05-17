@@ -31,6 +31,8 @@ import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyFloat;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
@@ -69,6 +71,7 @@ import com.android.systemui.statusbar.notification.row.FooterView;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ShadeController;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 
 import org.junit.Assert;
@@ -109,6 +112,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
     @Mock private NotificationShelf mNotificationShelf;
     @Mock private NotificationStackSizeCalculator mNotificationStackSizeCalculator;
+    @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
     @Before
     @UiThreadTest
@@ -116,7 +120,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         allowTestableLooperAsMainThread();
 
         // Interact with real instance of AmbientState.
-        mAmbientState = new AmbientState(mContext, mNotificationSectionsManager, mBypassController);
+        mAmbientState = new AmbientState(mContext, mNotificationSectionsManager, mBypassController,
+                mStatusBarKeyguardViewManager);
 
         // Inject dependencies before initializing the layout
         mDependency.injectTestDependency(SysuiStatusBarStateController.class, mBarState);
@@ -607,6 +612,12 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
         MotionEvent event3 = transformEventForView(createMotionEvent(250f, 250f), mStackScroller);
         assertTrue(mStackScroller.isInsideQsHeader(event2));
+    }
+
+    @Test
+    public void setFractionToShade_recomputesStackHeight() {
+        mStackScroller.setFractionToShade(1f);
+        verify(mNotificationStackSizeCalculator).computeHeight(any(), anyInt(), anyFloat());
     }
 
     private void setBarStateForTest(int state) {

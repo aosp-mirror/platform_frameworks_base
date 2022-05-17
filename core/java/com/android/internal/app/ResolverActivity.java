@@ -1471,10 +1471,14 @@ public class ResolverActivity extends Activity implements
                 mMultiProfilePagerAdapter.getActiveListAdapter().mDisplayList.get(0);
         boolean inWorkProfile = getCurrentProfile() == PROFILE_WORK;
 
-        DisplayResolveInfo otherProfileResolveInfo =
-                mMultiProfilePagerAdapter.getInactiveListAdapter().mDisplayList.get(0);
+        ResolverListAdapter inactiveAdapter = mMultiProfilePagerAdapter.getInactiveListAdapter();
+        DisplayResolveInfo otherProfileResolveInfo = inactiveAdapter.mDisplayList.get(0);
+
+        // Load the icon asynchronously
         ImageView icon = findViewById(R.id.icon);
-        // TODO: Set icon drawable to app icon.
+        ResolverListAdapter.LoadIconTask iconTask = inactiveAdapter.new LoadIconTask(
+                        otherProfileResolveInfo, new ResolverListAdapter.ViewHolder(icon));
+        iconTask.execute();
 
         ((TextView) findViewById(R.id.open_cross_profile)).setText(
                 getResources().getString(
@@ -1494,8 +1498,7 @@ public class ResolverActivity extends Activity implements
                 prepareIntentForCrossProfileLaunch(intent);
             }
             safelyStartActivityAsUser(otherProfileResolveInfo,
-                    mMultiProfilePagerAdapter.getInactiveListAdapter().mResolverListController
-                            .getUserHandle());
+                    inactiveAdapter.mResolverListController.getUserHandle());
         });
     }
 

@@ -273,9 +273,8 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                 mLongClicked = false;
                 setPressed(true);
 
-                // Use raw X and Y to detect gestures in case a parent changes the x and y values
-                mTouchDownX = (int) ev.getRawX();
-                mTouchDownY = (int) ev.getRawY();
+                mTouchDownX = (int) ev.getX();
+                mTouchDownY = (int) ev.getY();
                 if (mCode != KEYCODE_UNKNOWN) {
                     sendEvent(KeyEvent.ACTION_DOWN, 0, mDownTime);
                 } else {
@@ -289,8 +288,8 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                 postDelayed(mCheckLongPress, ViewConfiguration.getLongPressTimeout());
                 break;
             case MotionEvent.ACTION_MOVE:
-                x = (int)ev.getRawX();
-                y = (int)ev.getRawY();
+                x = (int) ev.getX();
+                y = (int) ev.getY();
 
                 float slop = QuickStepContract.getQuickStepTouchSlopPx(getContext());
                 if (Math.abs(x - mTouchDownX) > slop || Math.abs(y - mTouchDownY) > slop) {
