@@ -1271,6 +1271,10 @@ public class VolumeDialogImpl implements VolumeDialog,
         return new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(@NonNull Animator animation) {
+                if (!v.isAttachedToWindow()) {
+                    if (D.BUG) Log.d(TAG, "onAnimationStart view do not attached to window:" + v);
+                    return;
+                }
                 mInteractionJankMonitor.begin(Builder.withView(CUJ_VOLUME_CONTROL, v).setTag(type)
                         .setTimeout(timeout));
             }
