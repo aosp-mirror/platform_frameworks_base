@@ -62,7 +62,7 @@ public class EditUserPhotoController {
     private Drawable mNewUserPhotoDrawable;
 
     public EditUserPhotoController(Activity activity, ActivityStarter activityStarter,
-            ImageView view, Bitmap bitmap, String fileAuthority) {
+            ImageView view, Bitmap savedBitmap, Drawable savedDrawable, String fileAuthority) {
         mActivity = activity;
         mActivityStarter = activityStarter;
         mFileAuthority = fileAuthority;
@@ -71,7 +71,9 @@ public class EditUserPhotoController {
         mImagesDir.mkdir();
         mImageView = view;
         mImageView.setOnClickListener(v -> showAvatarPicker());
-        mNewUserPhotoBitmap = bitmap;
+
+        mNewUserPhotoBitmap = savedBitmap;
+        mNewUserPhotoDrawable = savedDrawable;
     }
 
     /**

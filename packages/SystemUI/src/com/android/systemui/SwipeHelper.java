@@ -46,6 +46,8 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
+import java.util.function.Consumer;
+
 public class SwipeHelper implements Gefingerpoken {
     static final String TAG = "com.android.systemui.SwipeHelper";
     private static final boolean DEBUG = false;
@@ -399,7 +401,7 @@ public class SwipeHelper implements Gefingerpoken {
      * @param useAccelerateInterpolator Should an accelerating Interpolator be used
      * @param fixedDuration If not 0, this exact duration will be taken
      */
-    public void dismissChild(final View animView, float velocity, final Runnable endAction,
+    public void dismissChild(final View animView, float velocity, final Consumer<Boolean> endAction,
             long delay, boolean useAccelerateInterpolator, long fixedDuration,
             boolean isDismissAll) {
         final boolean canBeDismissed = mCallback.canChildBeDismissed(animView);
@@ -487,7 +489,7 @@ public class SwipeHelper implements Gefingerpoken {
                     resetSwipeState();
                 }
                 if (endAction != null) {
-                    endAction.run();
+                    endAction.accept(mCancelled);
                 }
                 if (!mDisableHwLayers) {
                     animView.setLayerType(View.LAYER_TYPE_NONE, null);

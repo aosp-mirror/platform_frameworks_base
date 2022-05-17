@@ -652,11 +652,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"સ્ક્રીન ચાલુ કરો"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"સ્ક્રીન ચાલુ કરવાની મંજૂરી આપો"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"ઍપને સ્ક્રીન ચાલુ કરવાની મંજૂરી આપો. જો મંજૂરી આપી હોય, તો ઍપ તમારા સ્પષ્ટ હેતુ વિના કોઈપણ સમયે સ્ક્રીન ચાલુ કરી શકે છે."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR કોડ સ્કૅન કરો"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"સાંભળવાનું શરૂ કરવા માટે, QR કોડને નીચે ફ્રેમની મધ્યમાં લાવો"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"આ QR કોડ માન્ય ફૉર્મેટમાં નથી"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> બ્રોડકાસ્ટ કરવાનું રોકીએ?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"જો તમે <xliff:g id="SWITCHAPP">%1$s</xliff:g> બ્રોડકાસ્ટ કરો અથવા આઉટપુટ બદલો, તો તમારું હાલનું બ્રોડકાસ્ટ બંધ થઈ જશે"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> બ્રોડકાસ્ટ કરો"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"આઉટપુટ બદલો"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"પાછળના પૂર્વાનુમાનિત ઍનિમેશન્સ"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"પાછળના પૂર્વાનુમાનિત સંકેત માટે સિસ્ટમ ઍનિમેશન ચાલુ કરો."</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"આ સેટિંગ પૂર્વાનુમાનિત સંકેત ઍનિમેશન માટે સિસ્ટમ ઍનિમેશન ચાલુ કરે છે. તેના માટે દરેક ઍપ માટે મેનિફેસ્ટ ફાઇલમાં enableOnBackInvokedCallbackને true પર સેટ કરવાની જરૂર પડે છે."</string>
 </resources>

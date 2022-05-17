@@ -316,9 +316,11 @@ public final class LocationAccessPolicy {
             return LocationPermissionResult.ALLOWED;
         }
 
-        // Check the system-wide requirements. If the location main switch is off or
-        // the app's profile isn't in foreground, return a soft denial.
-        if (!checkSystemLocationAccess(context, query.callingUid, query.callingPid)) {
+        // Check the system-wide requirements. If the location main switch is off and the caller is
+        // not in the allowlist of apps that always have loation access or the app's profile
+        // isn't in the foreground, return a soft denial.
+        if (!checkSystemLocationAccess(context, query.callingUid, query.callingPid,
+                query.callingPackage)) {
             return LocationPermissionResult.DENIED_SOFT;
         }
 
@@ -344,15 +346,16 @@ public final class LocationAccessPolicy {
         return LocationPermissionResult.ALLOWED;
     }
 
-
     private static boolean checkManifestPermission(Context context, int pid, int uid,
             String permissionToCheck) {
         return context.checkPermission(permissionToCheck, pid, uid)
                 == PackageManager.PERMISSION_GRANTED;
     }
 
-    private static boolean checkSystemLocationAccess(@NonNull Context context, int uid, int pid) {
-        if (!isLocationModeEnabled(context, UserHandle.getUserHandleForUid(uid).getIdentifier())) {
+    private static boolean checkSystemLocationAccess(@NonNull Context context, int uid, int pid,
+            @NonNull String callingPackage) {
+        if (!isLocationModeEnabled(context, UserHandle.getUserHandleForUid(uid).getIdentifier())
+                && !isLocationBypassAllowed(context, callingPackage)) {
             if (DBG) Log.w(TAG, "Location disabled, failed, (" + uid + ")");
             return false;
         }
@@ -361,13 +364,34 @@ public final class LocationAccessPolicy {
         return isCurrentProfile(context, uid) || checkInteractAcrossUsersFull(context, pid, uid);
     }
 
-    private static boolean isLocationModeEnabled(@NonNull Context context, @UserIdInt int userId) {
+    /**
+     * @return Whether location is enabled for the given user.
+     */
+    public static boolean isLocationModeEnabled(@NonNull Context context, @UserIdInt int userId) {
         LocationManager locationManager = context.getSystemService(LocationManager.class);
         if (locationManager == null) {
             Log.w(TAG, "Couldn't get location manager, denying location access");
             return false;
         }
         return locationManager.isLocationEnabledForUser(UserHandle.of(userId));
+    }
+
+    private static boolean isLocationBypassAllowed(@NonNull Context context,
+            @NonNull String callingPackage) {
+        for (String bypassPackage : getLocationBypassPackages(context)) {
+            if (callingPackage.equals(bypassPackage)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @return An array of packages that are always allowed to access location.
+     */
+    public static @NonNull String[] getLocationBypassPackages(@NonNull Context context) {
+        return context.getResources().getStringArray(
+                com.android.internal.R.array.config_serviceStateLocationAllowedPackages);
     }
 
     private static boolean checkInteractAcrossUsersFull(
