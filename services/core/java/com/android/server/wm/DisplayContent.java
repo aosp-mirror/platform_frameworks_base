@@ -2212,9 +2212,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         final float density = mDisplayMetrics.density;
         outConfig.screenWidthDp = (int) (mDisplayPolicy.getConfigDisplayWidth(dw, dh, rotation,
-                uiMode, displayCutout) / density);
+                uiMode, displayCutout) / density + 0.5f);
         outConfig.screenHeightDp = (int) (mDisplayPolicy.getConfigDisplayHeight(dw, dh, rotation,
-                uiMode, displayCutout) / density);
+                uiMode, displayCutout) / density + 0.5f);
         outConfig.compatScreenWidthDp = (int) (outConfig.screenWidthDp / mCompatibleScreenScale);
         outConfig.compatScreenHeightDp = (int) (outConfig.screenHeightDp / mCompatibleScreenScale);
 

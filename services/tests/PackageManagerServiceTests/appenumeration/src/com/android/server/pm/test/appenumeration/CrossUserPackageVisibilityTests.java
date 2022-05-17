@@ -27,6 +27,8 @@ import android.app.Instrumentation;
 import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.content.pm.KeySet;
+import android.content.pm.PackageManager;
+import android.os.Process;
 import android.os.UserHandle;
 
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -56,8 +58,12 @@ public class CrossUserPackageVisibilityTests {
     private static final String TEST_DATA_DIR = "/data/local/tmp/appenumerationtests";
     private static final String CROSS_USER_TEST_PACKAGE_NAME =
             "com.android.appenumeration.crossuserpackagevisibility";
+    private static final String SHARED_USER_TEST_PACKAGE_NAME =
+            "com.android.appenumeration.shareduid";
     private static final File CROSS_USER_TEST_APK_FILE =
             new File(TEST_DATA_DIR, "AppEnumerationCrossUserPackageVisibilityTestApp.apk");
+    private static final File SHARED_USER_TEST_APK_FILE =
+            new File(TEST_DATA_DIR, "AppEnumerationSharedUserTestApp.apk");
 
     @ClassRule
     @Rule
@@ -66,6 +72,7 @@ public class CrossUserPackageVisibilityTests {
     private Instrumentation mInstrumentation;
     private IPackageManager mIPackageManager;
     private Context mContext;
+    private UserReference mCurrentUser;
     private UserReference mOtherUser;
 
     @Before
@@ -77,17 +84,21 @@ public class CrossUserPackageVisibilityTests {
         // Get another user
         final UserReference primaryUser = sDeviceState.primaryUser();
         if (primaryUser.id() == UserHandle.myUserId()) {
+            mCurrentUser = primaryUser;
             mOtherUser = sDeviceState.secondaryUser();
         } else {
+            mCurrentUser = sDeviceState.secondaryUser();
             mOtherUser = primaryUser;
         }
 
         uninstallPackage(CROSS_USER_TEST_PACKAGE_NAME);
+        uninstallPackage(SHARED_USER_TEST_PACKAGE_NAME);
     }
 
     @After
     public void tearDown() {
         uninstallPackage(CROSS_USER_TEST_PACKAGE_NAME);
+        uninstallPackage(SHARED_USER_TEST_PACKAGE_NAME);
     }
 
     @Test
@@ -151,16 +162,61 @@ public class CrossUserPackageVisibilityTests {
         assertThat(e1.getMessage()).isEqualTo(e2.getMessage());
     }
 
+    @Test
+    public void testGetFlagsForUid_cannotDetectCrossUserPkg() throws Exception {
+        installPackage(CROSS_USER_TEST_APK_FILE);
+        final int uid = mContext.getPackageManager().getPackageUid(
+                CROSS_USER_TEST_PACKAGE_NAME, PackageManager.PackageInfoFlags.of(0));
+
+        uninstallPackageForUser(CROSS_USER_TEST_PACKAGE_NAME, mCurrentUser);
+
+        assertThat(mIPackageManager.getFlagsForUid(uid)).isEqualTo(0);
+    }
+
+    @Test
+    public void testGetUidForSharedUser_cannotDetectSharedUserPkg() throws Exception {
+        assertThat(mIPackageManager.getUidForSharedUser(SHARED_USER_TEST_PACKAGE_NAME))
+                .isEqualTo(Process.INVALID_UID);
+
+        installPackageForUser(SHARED_USER_TEST_APK_FILE, mOtherUser, true /* forceQueryable */);
+
+        assertThat(mIPackageManager.getUidForSharedUser(SHARED_USER_TEST_PACKAGE_NAME))
+                .isEqualTo(Process.INVALID_UID);
+    }
+
+    private static void installPackage(File apk) {
+        installPackageForUser(apk, null, false /* forceQueryable */);
+    }
+
     private static void installPackageForUser(File apk, UserReference user) {
+        installPackageForUser(apk, user, false /* forceQueryable */);
+    }
+
+    private static void installPackageForUser(File apk, UserReference user,
+            boolean forceQueryable) {
         assertThat(apk.exists()).isTrue();
-        final StringBuilder cmd = new StringBuilder("pm install --user ");
-        cmd.append(user.id()).append(" ");
+        final StringBuilder cmd = new StringBuilder("pm install -t ");
+        if (forceQueryable) {
+            cmd.append("--force-queryable ");
+        }
+        if (user != null) {
+            cmd.append("--user ").append(user.id()).append(" ");
+        }
         cmd.append(apk.getPath());
         final String result = runShellCommand(cmd.toString());
         assertThat(result.trim()).contains("Success");
     }
 
     private static void uninstallPackage(String packageName) {
-        runShellCommand("pm uninstall " + packageName);
+        uninstallPackageForUser(packageName, null /* user */);
+    }
+
+    private static void uninstallPackageForUser(String packageName, UserReference user) {
+        final StringBuilder cmd = new StringBuilder("pm uninstall ");
+        if (user != null) {
+            cmd.append("--user ").append(user.id()).append(" ");
+        }
+        cmd.append(packageName);
+        runShellCommand(cmd.toString());
     }
 }

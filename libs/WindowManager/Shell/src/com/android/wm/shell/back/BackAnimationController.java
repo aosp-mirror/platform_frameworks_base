@@ -58,6 +58,11 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     @VisibleForTesting
     boolean mEnableAnimations = SystemProperties.getInt(
             "persist.wm.debug.predictive_back_anim", 0) != 0;
+    /**
+     * Max duration to wait for a transition to finish before accepting another gesture start
+     * request.
+     */
+    private static final long MAX_TRANSITION_DURATION = 2000;
 
     /**
      * Location of the initial touch event of the back gesture.
@@ -73,6 +78,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     /** True when a back gesture is ongoing */
     private boolean mBackGestureStarted = false;
 
+    /** Tracks if an uninterruptible transition is in progress */
+    private boolean mTransitionInProgress = false;
     /** @see #setTriggerBack(boolean) */
     private boolean mTriggerBack;
 
@@ -85,6 +92,12 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     private IOnBackInvokedCallback mBackToLauncherCallback;
     private float mTriggerThreshold;
     private float mProgressThreshold;
+    private final Runnable mResetTransitionRunnable = () -> {
+        finishAnimation();
+        mTransitionInProgress = false;
+        ProtoLog.w(WM_SHELL_BACK_PREVIEW, "Transition didn't finish in %d ms. Resetting...",
+                MAX_TRANSITION_DURATION);
+    };
 
     public BackAnimationController(
             @ShellMainThread ShellExecutor shellExecutor,
@@ -189,7 +202,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         mBackToLauncherCallback = null;
     }
 
-    private void onBackToLauncherAnimationFinished() {
+    @VisibleForTesting
+    void onBackToLauncherAnimationFinished() {
         if (mBackNavigationInfo != null) {
             IOnBackInvokedCallback callback = mBackNavigationInfo.getOnBackInvokedCallback();
             if (mTriggerBack) {
@@ -206,6 +220,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
      * {@link BackAnimationController}
      */
     public void onMotionEvent(MotionEvent event, int action, @BackEvent.SwipeEdge int swipeEdge) {
+        if (mTransitionInProgress) {
+            return;
+        }
         if (action == MotionEvent.ACTION_MOVE) {
             if (!mBackGestureStarted) {
                 // Let the animation initialized here to make sure the onPointerDownOutsideFocus
@@ -330,6 +347,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         IOnBackInvokedCallback targetCallback = shouldDispatchToLauncher
                 ? mBackToLauncherCallback
                 : mBackNavigationInfo.getOnBackInvokedCallback();
+        if (shouldDispatchToLauncher) {
+            startTransition();
+        }
         if (mTriggerBack) {
             dispatchOnBackInvoked(targetCallback);
         } else {
@@ -401,6 +421,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
      * Sets to true when the back gesture has passed the triggering threshold, false otherwise.
      */
     public void setTriggerBack(boolean triggerBack) {
+        if (mTransitionInProgress) {
+            return;
+        }
         mTriggerBack = triggerBack;
     }
 
@@ -432,6 +455,23 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             mTransaction.remove(screenshotSurface);
         }
         mTransaction.apply();
+        stopTransition();
         backNavigationInfo.onBackNavigationFinished(triggerBack);
+    }
+
+    private void startTransition() {
+        if (mTransitionInProgress) {
+            return;
+        }
+        mTransitionInProgress = true;
+        mShellExecutor.executeDelayed(mResetTransitionRunnable, MAX_TRANSITION_DURATION);
+    }
+
+    private void stopTransition() {
+        if (!mTransitionInProgress) {
+            return;
+        }
+        mShellExecutor.removeCallbacks(mResetTransitionRunnable);
+        mTransitionInProgress = false;
     }
 }

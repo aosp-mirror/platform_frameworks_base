@@ -17,6 +17,6 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
      package="com.android.appenumeration.crossuserpackagevisibility">
-    <application>
+    <application android:testOnly="true">
     </application>
 </manifest>

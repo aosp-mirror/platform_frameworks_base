@@ -19,6 +19,7 @@ package com.android.server.pm;
 import static android.content.pm.PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE;
+import static android.content.pm.SigningDetails.CertCapabilities.SHARED_USER_ID;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDWR;
 
@@ -565,13 +566,8 @@ public class PackageManagerServiceUtils {
             // the older ones.  We check to see if either the new package is signed by an older cert
             // with which the current sharedUser is ok, or if it is signed by a newer one, and is ok
             // with being sharedUser with the existing signing cert.
-            boolean match =
-                    parsedSignatures.checkCapability(
-                            sharedUserSetting.getSigningDetails(),
-                            SigningDetails.CertCapabilities.SHARED_USER_ID)
-                    || sharedUserSetting.getSigningDetails().checkCapability(
-                            parsedSignatures,
-                            SigningDetails.CertCapabilities.SHARED_USER_ID);
+            boolean match = canJoinSharedUserId(parsedSignatures,
+                    sharedUserSetting.getSigningDetails());
             // Special case: if the sharedUserId capability check failed it could be due to this
             // being the only package in the sharedUserId so far and the lineage being updated to
             // deny the sharedUserId capability of the previous key in the lineage.
@@ -643,6 +639,28 @@ public class PackageManagerServiceUtils {
             }
         }
         return compatMatch;
+    }
+
+    /**
+     * Returns whether the package with {@code packageSigningDetails} can join the sharedUserId
+     * with {@code sharedUserSigningDetails}.
+     * <p>
+     * A sharedUserId maintains a shared {@link SigningDetails} containing the full lineage and
+     * capabilities for each package in the sharedUserId. A package can join the sharedUserId if
+     * its current signer is the same as the shared signer, or if the current signer of either
+     * is in the signing lineage of the other with the {@link
+     * SigningDetails.CertCapabilities#SHARED_USER_ID} capability granted to that previous signer
+     * in the lineage.
+     *
+     * @param packageSigningDetails the {@code SigningDetails} of the package seeking to join the
+     *                             sharedUserId
+     * @param sharedUserSigningDetails the {@code SigningDetails} of the sharedUserId
+     * @return true if the package seeking to join the sharedUserId meets the requirements
+     */
+    public static boolean canJoinSharedUserId(@NonNull SigningDetails packageSigningDetails,
+            @NonNull SigningDetails sharedUserSigningDetails) {
+        return packageSigningDetails.checkCapability(sharedUserSigningDetails, SHARED_USER_ID)
+                || sharedUserSigningDetails.checkCapability(packageSigningDetails, SHARED_USER_ID);
     }
 
     /**
