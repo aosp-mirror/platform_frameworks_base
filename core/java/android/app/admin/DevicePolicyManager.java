@@ -6472,53 +6472,50 @@ public class DevicePolicyManager {
     public static final int ENCRYPTION_STATUS_UNSUPPORTED = 0;
 
     /**
-     * @deprecated {@link #getStorageEncryptionStatus} could only return this value on devices that
-     * use Full Disk Encryption.  However, support for Full Disk Encryption was entirely removed in
-     * API level 33, being replaced by File Based Encryption.  {@link #setStorageEncryption} can
-     * return this value for an unrelated reason, but {@link #setStorageEncryption} is deprecated
-     * since it doesn't do anything useful.
-     *
      * Result code for {@link #setStorageEncryption} and {@link #getStorageEncryptionStatus}:
      * indicating that encryption is supported, but is not currently active.
+     * <p>
+     * {@link #getStorageEncryptionStatus} can only return this value on devices that use Full Disk
+     * Encryption.  Support for Full Disk Encryption was entirely removed in API level 33, having
+     * been replaced by File Based Encryption.  Devices that use File Based Encryption always
+     * automatically activate their encryption on first boot.
+     * <p>
+     * {@link #setStorageEncryption} can still return this value for an unrelated reason, but {@link
+     * #setStorageEncryption} is deprecated since it doesn't do anything useful.
      */
     public static final int ENCRYPTION_STATUS_INACTIVE = 1;
 
     /**
-     * @deprecated {@link #getStorageEncryptionStatus} could only return this value on devices that
-     * use Full Disk Encryption.  However, support for Full Disk Encryption was entirely removed in
-     * API level 33, being replaced by File Based Encryption.
-     *
-     * Result code for {@link #getStorageEncryptionStatus}:
-     * indicating that encryption is not currently active, but is currently
-     * being activated.  This is only reported by devices that support
-     * encryption of data and only when the storage is currently
-     * undergoing a process of becoming encrypted.  A device that must reboot and/or wipe data
-     * to become encrypted will never return this value.
+     * Result code for {@link #getStorageEncryptionStatus}: indicating that encryption is not
+     * currently active, but is currently being activated.
+     * <p>
+     * This result code has never actually been used.
      */
     public static final int ENCRYPTION_STATUS_ACTIVATING = 2;
 
     /**
-     * @deprecated {@link #getStorageEncryptionStatus} could only return this value for apps
-     * targeting API level 23 or lower, or on devices that use Full Disk Encryption.  However,
-     * support for Full Disk Encryption was entirely removed in API level 33, being replaced by File
-     * Based Encryption.  {@link #setStorageEncryption} can return this value for an unrelated
-     * reason, but {@link #setStorageEncryption} is deprecated since it doesn't do anything useful.
-     *
      * Result code for {@link #setStorageEncryption} and {@link #getStorageEncryptionStatus}:
      * indicating that encryption is active.
      * <p>
-     * Also see {@link #ENCRYPTION_STATUS_ACTIVE_PER_USER}.
+     * {@link #getStorageEncryptionStatus} can only return this value for apps targeting API level
+     * 23 or lower, or on devices that use Full Disk Encryption.  Support for Full Disk Encryption
+     * was entirely removed in API level 33, having been replaced by File Based Encryption.  The
+     * result code {@link #ENCRYPTION_STATUS_ACTIVE_PER_USER} is used on devices that use File Based
+     * Encryption, except when the app targets API level 23 or lower.
+     * <p>
+     * {@link #setStorageEncryption} can still return this value for an unrelated reason, but {@link
+     * #setStorageEncryption} is deprecated since it doesn't do anything useful.
      */
     public static final int ENCRYPTION_STATUS_ACTIVE = 3;
 
     /**
-     * @deprecated {@link #getStorageEncryptionStatus} could only return this value on devices that
-     * use Full Disk Encryption.  However, support for Full Disk Encryption was entirely removed in
-     * API level 33, being replaced by File Based Encryption.
-     *
-     * Result code for {@link #getStorageEncryptionStatus}:
-     * indicating that encryption is active, but an encryption key has not
-     * been set by the user.
+     * Result code for {@link #getStorageEncryptionStatus}: indicating that encryption is active,
+     * but the encryption key is not cryptographically protected by the user's credentials.
+     * <p>
+     * This value can only be returned on devices that use Full Disk Encryption.  Support for Full
+     * Disk Encryption was entirely removed in API level 33, having been replaced by File Based
+     * Encryption.  With File Based Encryption, each user's credential-encrypted storage is always
+     * cryptographically protected by the user's credentials.
      */
     public static final int ENCRYPTION_STATUS_ACTIVE_DEFAULT_KEY = 4;
 

@@ -7673,11 +7673,11 @@ package android.app.admin {
     field public static final String DELEGATION_PACKAGE_ACCESS = "delegation-package-access";
     field public static final String DELEGATION_PERMISSION_GRANT = "delegation-permission-grant";
     field public static final String DELEGATION_SECURITY_LOGGING = "delegation-security-logging";
-    field @Deprecated public static final int ENCRYPTION_STATUS_ACTIVATING = 2; // 0x2
-    field @Deprecated public static final int ENCRYPTION_STATUS_ACTIVE = 3; // 0x3
-    field @Deprecated public static final int ENCRYPTION_STATUS_ACTIVE_DEFAULT_KEY = 4; // 0x4
+    field public static final int ENCRYPTION_STATUS_ACTIVATING = 2; // 0x2
+    field public static final int ENCRYPTION_STATUS_ACTIVE = 3; // 0x3
+    field public static final int ENCRYPTION_STATUS_ACTIVE_DEFAULT_KEY = 4; // 0x4
     field public static final int ENCRYPTION_STATUS_ACTIVE_PER_USER = 5; // 0x5
-    field @Deprecated public static final int ENCRYPTION_STATUS_INACTIVE = 1; // 0x1
+    field public static final int ENCRYPTION_STATUS_INACTIVE = 1; // 0x1
     field public static final int ENCRYPTION_STATUS_UNSUPPORTED = 0; // 0x0
     field public static final String EXTRA_ADD_EXPLANATION = "android.app.extra.ADD_EXPLANATION";
     field public static final String EXTRA_DELEGATION_SCOPES = "android.app.extra.DELEGATION_SCOPES";
