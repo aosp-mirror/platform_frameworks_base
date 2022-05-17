@@ -45,14 +45,15 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Slog;
+import android.view.ContentRecordingSession;
 import android.window.WindowContainerToken;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.SystemService.TargetUser;
 import com.android.server.Watchdog;
+import com.android.server.wm.WindowManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -378,6 +379,27 @@ public final class MediaProjectionManagerService extends SystemService
                 MediaProjectionManagerService.this.removeCallback(callback);
             } finally {
                 Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        /**
+         * Updates the current content mirroring session.
+         */
+        @Override
+        public void setContentRecordingSession(@Nullable ContentRecordingSession incomingSession,
+                @NonNull IMediaProjection projection) {
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    if (!isValidMediaProjection(projection)) {
+                        throw new SecurityException("Invalid media projection");
+                    }
+                    LocalServices.getService(
+                            WindowManagerInternal.class).setContentRecordingSession(
+                            incomingSession);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(origId);
             }
         }
 

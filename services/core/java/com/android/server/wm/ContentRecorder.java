@@ -207,7 +207,8 @@ final class ContentRecorder {
         // Update the cached session state first, since updating the service will result in always
         // returning to this instance to update recording state.
         mContentRecordingSession = null;
-        mDisplayContent.mWmService.setContentRecordingSession(null);
+        mDisplayContent.mWmService.mContentRecordingController.setContentRecordingSessionLocked(
+                null, mDisplayContent.mWmService);
     }
 
     /**
