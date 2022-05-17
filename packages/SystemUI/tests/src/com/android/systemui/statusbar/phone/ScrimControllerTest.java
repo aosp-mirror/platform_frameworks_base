@@ -1238,7 +1238,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void expansionNotificationAlpha_shadeLocked_bouncerActive_usesBouncerInterpolator() {
-        when(mStatusBarKeyguardViewManager.bouncerIsInTransit()).thenReturn(true);
+        when(mStatusBarKeyguardViewManager.isBouncerInTransit()).thenReturn(true);
 
         mScrimController.transitionTo(ScrimState.SHADE_LOCKED);
 
@@ -1254,7 +1254,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void expansionNotificationAlpha_shadeLocked_bouncerNotActive_usesShadeInterpolator() {
-        when(mStatusBarKeyguardViewManager.bouncerIsInTransit()).thenReturn(false);
+        when(mStatusBarKeyguardViewManager.isBouncerInTransit()).thenReturn(false);
 
         mScrimController.transitionTo(ScrimState.SHADE_LOCKED);
 
@@ -1291,7 +1291,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void notificationAlpha_unnocclusionAnimating_bouncerNotActive_usesKeyguardNotifAlpha() {
-        when(mStatusBarKeyguardViewManager.bouncerIsInTransit()).thenReturn(false);
+        when(mStatusBarKeyguardViewManager.isBouncerInTransit()).thenReturn(false);
 
         mScrimController.transitionTo(ScrimState.KEYGUARD);
         mScrimController.setUnocclusionAnimationRunning(true);
@@ -1488,6 +1488,13 @@ public class ScrimControllerTest extends SysuiTestCase {
 
         float expansion = 0.8f;
         assertAlphaAfterExpansion(mNotificationsScrim, 0f, expansion);
+    }
+
+    @Test
+    public void aodStateSetsFrontScrimToNotBlend() {
+        mScrimController.transitionTo(ScrimState.AOD);
+        Assert.assertFalse("Front scrim should not blend with main color",
+                mScrimInFront.shouldBlendWithMainColor());
     }
 
     private void assertAlphaAfterExpansion(ScrimView scrim, float expectedAlpha, float expansion) {

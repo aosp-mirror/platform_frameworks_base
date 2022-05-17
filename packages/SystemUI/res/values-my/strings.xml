@@ -313,6 +313,10 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"ဖွင့်ရန် အပေါ်သို့ပွတ်ဆွဲပါ"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"ဖွင့်ရန် လော့ခ်ဖွင့်သင်္ကေတကို နှိပ်ပါ"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"မျက်နှာဖြင့် ဖွင့်ထားသည်။ ဖွင့်ရန် လော့ခ်ဖွင့်သင်္ကေတကို နှိပ်ပါ။"</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"ထပ်စမ်းကြည့်ရန် အပေါ်သို့ပွတ်ဆွဲပါ"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ကို အသုံးပြုရန် လော့ခ်ဖွင့်ပါ"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ဤစက်ကို သင့်အဖွဲ့အစည်းက ပိုင်ဆိုင်သည်"</string>
@@ -837,6 +841,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"အက်ပ်ဖွင့်ပြီး ဤစက်ရှင်ကို ကာစ်လုပ်နိုင်သည်။"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"အမည်မသိ အက်ပ်"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"ကာစ် ရပ်ရန်"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ထုတ်လွှင့်မှုဆောင်ရွက်ပုံ"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ထုတ်လွှင့်ခြင်း"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"အနီးရှိတွဲသုံးနိုင်သော ဘလူးတုသ်သုံးစက် အသုံးပြုသူများက သင်ထုတ်လွှင့်နေသော မီဒီယာကို နားဆင်နိုင်သည်"</string>
@@ -898,7 +904,7 @@
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"မိုဘိုင်းဒေတာ"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"ချိတ်ဆက်ထားသည်"</string>
-    <string name="mobile_data_off_summary" msgid="3663995422004150567">"မိုဘိုင်းဒေတာက အလိုအလျောက် ချိတ်ဆက်မည်မဟုတ်ပါ"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"မိုဘိုင်းဒေတာ အော်တိုမချိတ်ပါ"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"ချိတ်ဆက်မှုမရှိပါ"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"အခြားကွန်ရက်များ မရှိပါ"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"ကွန်ရက်များ မရှိပါ"</string>
@@ -932,7 +938,12 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"ကူးထားသည့်စာသားကို တည်းဖြတ်ရန်"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"ကူးထားသည့်ပုံကို ပြင်ဆင်ရန်"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"အနီးတစ်ဝိုက်ရှိ စက်များသို့ ပို့ရန်"</string>
-    <!-- no translation found for clipboard_text_hidden (7926899867471812305) -->
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"ကြည့်ရှုရန် တို့ပါ"</string>
+    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
+    <skip />
+    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
+    <skip />
+    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
     <skip />
     <string name="add" msgid="81036585205287996">"ထည့်ရန်"</string>
     <string name="manage_users" msgid="1823875311934643849">"အသုံးပြုသူများ စီမံရန်"</string>

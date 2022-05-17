@@ -507,7 +507,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         public void onPanelExpansionChanged(PanelExpansionChangeEvent event) {
             float fraction = event.getFraction();
             mPanelExpansionFraction =
-                    mKeyguardViewManager.bouncerIsInTransit() ? BouncerPanelExpansionCalculator
+                    mKeyguardViewManager.isBouncerInTransit() ? BouncerPanelExpansionCalculator
                             .aboutToShowBouncerProgress(fraction) : fraction;
             updateAlpha();
         }
