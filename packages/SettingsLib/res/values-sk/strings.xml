@@ -405,7 +405,7 @@
     <string name="force_allow_on_external" msgid="9187902444231637880">"Vynútiť povolenie aplikácií na externom úložisku"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Umožniť zapísať akúkoľvek aplikáciu do externého úložiska bez ohľadu na hodnoty v manifeste"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Vynútiť možnosť zmeny veľkosti aktivít"</string>
-    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Umožniť veľkosť všetkých aktivít na niekoľko okien (bez ohľadu na hodnoty manifestu)"</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Umožniť zmeniť veľkosť všetkých aktivít na niekoľko okien (bez ohľadu na hodnoty manifestu)"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Povoliť okná s voľným tvarom"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Povoliť podporu pre experimentálne okná s voľným tvarom"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Heslo pre zálohy v počítači"</string>
@@ -667,9 +667,6 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Zapínanie obrazovky"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Povolenie zapínania obrazovky"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Povoľte aplikácii zapínať obrazovku. Ak to urobíte, aplikácia bude môcť kedykoľvek zapínať obrazovku, a to aj vtedy, keď to nebudete mať v úmysle."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Naskenovanie QR kódu"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Ak chcete začať počúvať, umiestnite QR kód do stredu nižšie"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR kód nie je platný formát"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Chcete zastaviť vysielanie aplikácie <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Ak vysielate aplikáciu <xliff:g id="SWITCHAPP">%1$s</xliff:g> alebo zmeníte výstup, aktuálne vysielanie bude zastavené"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Vysielanie aplikácie <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>

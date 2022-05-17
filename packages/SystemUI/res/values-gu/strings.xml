@@ -226,8 +226,7 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"ઑટો રોટેટ"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"ઑટો રોટેટ સ્ક્રીન"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"સ્થાન"</string>
-    <!-- no translation found for quick_settings_screensaver_label (1495003469366524120) -->
-    <skip />
+    <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"સ્ક્રીન સેવર"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"કૅમેરાનો ઍક્સેસ"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"માઇકનો ઍક્સેસ"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"ઉપલબ્ધ છે"</string>
@@ -321,6 +320,10 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"ચહેરા દ્વારા અનલૉક કર્યું. ખોલવા માટે દબાવો."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"ચહેરો ઓળખ્યો. ખોલવા માટે દબાવો."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"ચહેરો ઓળખ્યો. ખોલવા માટે \'અનલૉક કરો\' આઇકન દબાવો."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"ફરી પ્રયાસ કરવા માટે ઉપરની તરફ સ્વાઇપ કરો"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFCનો ઉપયોગ કરવા માટે અનલૉક કરો"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"આ ડિવાઇસ તમારી સંસ્થાની માલિકીનું છે"</string>
@@ -470,8 +473,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"વૉલેટ"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"તમારા ફોન વડે વધુ ઝડપી તેમજ સુરક્ષિત ખરીદીઓ કરવાની રીત સેટઅપ કરી લો"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"બધું બતાવો"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (8488069304491125713) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"ખોલવા માટે ટૅપ કરો"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"અપડેટ કરી રહ્યાં છીએ"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ઉપયોગ કરવા માટે અનલૉક કરો"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"તમારા કાર્ડની માહિતી મેળવવામાં સમસ્યા આવી હતી, કૃપા કરીને થોડા સમય પછી ફરી પ્રયાસ કરો"</string>
@@ -697,7 +699,10 @@
     <string name="notification_channel_alerts" msgid="3385787053375150046">"અલર્ટ"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"બૅટરી"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"સ્ક્રીનશૉટ"</string>
-    <string name="notification_channel_general" msgid="4384774889645929705">"સામાન્ય સંદેશા"</string>
+    <!-- no translation found for notification_channel_instant (7556135423486752680) -->
+    <skip />
+    <!-- no translation found for notification_channel_setup (7660580986090760350) -->
+    <skip />
     <string name="notification_channel_storage" msgid="2720725707628094977">"સ્ટોરેજ"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"હિન્ટ"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
@@ -849,6 +854,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"આ સત્ર કાસ્ટ કરવા માટે, કૃપા કરીને ઍપ ખોલો."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"અજાણી ઍપ"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"કાસ્ટ કરવાનું રોકો"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"બ્રોડકાસ્ટ પ્રક્રિયાની કામ કરવાની રીત"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"બ્રોડકાસ્ટ કરો"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"સુસંગત બ્લૂટૂથ ડિવાઇસ ધરાવતા નજીકના લોકો તમે જે મીડિયા બ્રોડકાસ્ટ કરી રહ્યાં છો તે સાંભળી શકે છે"</string>
@@ -944,7 +951,12 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"કૉપિ કરેલી ટેક્સ્ટમાં ફેરફાર કરો"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"કૉપિ કરેલી છબીમાં ફેરફાર કરો"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"નજીકના ડિવાઇસને મોકલો"</string>
-    <!-- no translation found for clipboard_text_hidden (7926899867471812305) -->
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"જોવા માટે ટૅપ કરો"</string>
+    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
+    <skip />
+    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
+    <skip />
+    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
     <skip />
     <string name="add" msgid="81036585205287996">"ઉમેરો"</string>
     <string name="manage_users" msgid="1823875311934643849">"વપરાશકર્તાઓને મેનેજ કરો"</string>
@@ -954,4 +966,12 @@
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"અલાર્મ સેટ"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"કૅમેરા અને માઇક બંધ છે"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# નોટિફિકેશન}one{# નોટિફિકેશન}other{# નોટિફિકેશન}}"</string>
+    <!-- no translation found for broadcasting_description_is_broadcasting (765627502786404290) -->
+    <skip />
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> બ્રોડકાસ્ટ કરવાનું રોકીએ?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"જો તમે <xliff:g id="SWITCHAPP">%1$s</xliff:g> બ્રોડકાસ્ટ કરો અથવા આઉટપુટ બદલો, તો તમારું હાલનું બ્રોડકાસ્ટ બંધ થઈ જશે"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> બ્રોડકાસ્ટ કરો"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"આઉટપુટ બદલો"</string>
+    <!-- no translation found for bt_le_audio_broadcast_dialog_unknown_name (3791472237793443044) -->
+    <skip />
 </resources>

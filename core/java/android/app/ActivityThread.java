@@ -3410,26 +3410,12 @@ public final class ActivityThread extends ClientTransactionHandler
         }
     }
 
-    /**
-     * Returns {@code true} if the {@link android.app.ActivityManager.ProcessState} of the current
-     * process is cached.
-     */
-    @Override
-    @VisibleForTesting
-    public boolean isCachedProcessState() {
-        synchronized (mAppThread) {
-            return mLastProcessState >= ActivityManager.PROCESS_STATE_CACHED_ACTIVITY;
-        }
-    }
-
     @Override
     public void updateProcessState(int processState, boolean fromIpc) {
-        final boolean wasCached;
         synchronized (mAppThread) {
             if (mLastProcessState == processState) {
                 return;
             }
-            wasCached = isCachedProcessState();
             mLastProcessState = processState;
             // Defer the top state for VM to avoid aggressive JIT compilation affecting activity
             // launch time.
@@ -3444,22 +3430,6 @@ public final class ActivityThread extends ClientTransactionHandler
             if (localLOGV) {
                 Slog.i(TAG, "******************* PROCESS STATE CHANGED TO: " + processState
                         + (fromIpc ? " (from ipc" : ""));
-            }
-        }
-
-        // Handle the pending configuration if the process state is changed from cached to
-        // non-cached. Except the case where there is a launching activity because the
-        // LaunchActivityItem will handle it.
-        if (wasCached && !isCachedProcessState() && mNumLaunchingActivities.get() == 0) {
-            final Configuration pendingConfig =
-                    mConfigurationController.getPendingConfiguration(false /* clearPending */);
-            if (pendingConfig == null) {
-                return;
-            }
-            if (Looper.myLooper() == mH.getLooper()) {
-                handleConfigurationChanged(pendingConfig);
-            } else {
-                sendMessage(H.CONFIGURATION_CHANGED, pendingConfig);
             }
         }
     }
@@ -5728,6 +5698,7 @@ public final class ActivityThread extends ClientTransactionHandler
             return;
         }
 
+        ActivityClient.getInstance().activityLocalRelaunch(r.token);
         // Initialize a relaunch request.
         final MergedConfiguration mergedConfiguration = new MergedConfiguration(
                 r.createdConfig != null

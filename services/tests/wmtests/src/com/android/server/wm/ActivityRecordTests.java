@@ -2168,39 +2168,6 @@ public class ActivityRecordTests extends WindowTestsBase {
     }
 
     @Test
-    public void testSupportsSplitScreenWindowingMode() {
-        final ActivityRecord activity = new ActivityBuilder(mAtm)
-                .setCreateTask(true)
-                .setResizeMode(ActivityInfo.RESIZE_MODE_UNRESIZEABLE)
-                .setScreenOrientation(SCREEN_ORIENTATION_LANDSCAPE)
-                .build();
-
-        // Not allow non-resizable
-        mAtm.mForceResizableActivities = false;
-        mAtm.mSupportsNonResizableMultiWindow = -1;
-        mAtm.mDevEnableNonResizableMultiWindow = false;
-        assertFalse(activity.supportsSplitScreenWindowingMode());
-
-        // Force resizable
-        mAtm.mForceResizableActivities = true;
-        mAtm.mSupportsNonResizableMultiWindow = -1;
-        mAtm.mDevEnableNonResizableMultiWindow = false;
-        assertTrue(activity.supportsSplitScreenWindowingMode());
-
-        // Use development option to allow non-resizable
-        mAtm.mForceResizableActivities = false;
-        mAtm.mSupportsNonResizableMultiWindow = -1;
-        mAtm.mDevEnableNonResizableMultiWindow = true;
-        assertTrue(activity.supportsSplitScreenWindowingMode());
-
-        // Always allow non-resizable
-        mAtm.mForceResizableActivities = false;
-        mAtm.mSupportsNonResizableMultiWindow = 1;
-        mAtm.mDevEnableNonResizableMultiWindow = false;
-        assertTrue(activity.supportsSplitScreenWindowingMode());
-    }
-
-    @Test
     public void testSupportsFreeform() {
         final ActivityRecord activity = new ActivityBuilder(mAtm)
                 .setCreateTask(true)
@@ -2633,7 +2600,11 @@ public class ActivityRecordTests extends WindowTestsBase {
             DeviceConfig.setProperty(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
                     "splash_screen_exception_list", DEFAULT_COMPONENT_PACKAGE_NAME, false);
             testLegacySplashScreen(Build.VERSION_CODES.R, TYPE_PARAMETER_LEGACY_SPLASH_SCREEN);
-            testLegacySplashScreen(Build.VERSION_CODES.S, 0);
+            testLegacySplashScreen(Build.VERSION_CODES.S, TYPE_PARAMETER_LEGACY_SPLASH_SCREEN);
+            testLegacySplashScreen(Build.VERSION_CODES.TIRAMISU,
+                    TYPE_PARAMETER_LEGACY_SPLASH_SCREEN);
+            // Above T
+            testLegacySplashScreen(Build.VERSION_CODES.TIRAMISU + 1, 0);
         } finally {
             try {
                 DeviceConfig.setProperties(properties);

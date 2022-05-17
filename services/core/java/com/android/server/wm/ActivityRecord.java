@@ -2314,7 +2314,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final int type = getStartingWindowType(newTask, taskSwitch, processRunning,
                 allowTaskSnapshot, activityCreated, activityAllDrawn, snapshot);
 
-        //TODO(191787740) Remove for T
+        //TODO(191787740) Remove for T+
         final boolean useLegacy = type == STARTING_WINDOW_TYPE_SPLASH_SCREEN
                 && mWmService.mStartingSurfaceController.isExceptionApp(packageName, mTargetSdk,
                     () -> {
@@ -2993,25 +2993,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     boolean supportsPictureInPicture() {
         return mAtmService.mSupportsPictureInPicture && isActivityTypeStandardOrUndefined()
                 && info.supportsPictureInPicture();
-    }
-
-    /**
-     * @return whether this activity supports split-screen multi-window and can be put in
-     *         split-screen.
-     */
-    @Override
-    public boolean supportsSplitScreenWindowingMode() {
-        return supportsSplitScreenWindowingModeInDisplayArea(getDisplayArea());
-    }
-
-    /**
-     * @return whether this activity supports split-screen multi-window and can be put in
-     *         split-screen if it is in the given {@link TaskDisplayArea}.
-     */
-    boolean supportsSplitScreenWindowingModeInDisplayArea(@Nullable TaskDisplayArea tda) {
-        return super.supportsSplitScreenWindowingMode()
-                && mAtmService.mSupportsSplitScreenMultiWindow
-                && supportsMultiWindowInDisplayArea(tda);
     }
 
     boolean supportsFreeform() {

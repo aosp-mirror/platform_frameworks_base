@@ -171,7 +171,9 @@
     <item msgid="146088982397753810">"Išjungta"</item>
     <item msgid="460891964396502657">"Įjungta"</item>
   </string-array>
-    <!-- no translation found for tile_states_dream:0 (6184819793571079513) -->
-    <!-- no translation found for tile_states_dream:1 (8014986104355098744) -->
-    <!-- no translation found for tile_states_dream:2 (5966994759929723339) -->
+  <string-array name="tile_states_dream">
+    <item msgid="6184819793571079513">"Nepasiekiama"</item>
+    <item msgid="8014986104355098744">"Išjungta"</item>
+    <item msgid="5966994759929723339">"Įjungta"</item>
+  </string-array>
 </resources>

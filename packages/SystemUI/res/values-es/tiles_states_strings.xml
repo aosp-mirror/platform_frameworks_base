@@ -58,8 +58,8 @@
   </string-array>
   <string-array name="tile_states_flashlight">
     <item msgid="3465257127433353857">"No disponible"</item>
-    <item msgid="5044688398303285224">"Desactivado"</item>
-    <item msgid="8527389108867454098">"Activado"</item>
+    <item msgid="5044688398303285224">"Desactivada"</item>
+    <item msgid="8527389108867454098">"Activada"</item>
   </string-array>
   <string-array name="tile_states_rotation">
     <item msgid="4578491772376121579">"No disponible"</item>
@@ -171,7 +171,9 @@
     <item msgid="146088982397753810">"Desactivado"</item>
     <item msgid="460891964396502657">"Activado"</item>
   </string-array>
-    <!-- no translation found for tile_states_dream:0 (6184819793571079513) -->
-    <!-- no translation found for tile_states_dream:1 (8014986104355098744) -->
-    <!-- no translation found for tile_states_dream:2 (5966994759929723339) -->
+  <string-array name="tile_states_dream">
+    <item msgid="6184819793571079513">"No disponible"</item>
+    <item msgid="8014986104355098744">"Desactivado"</item>
+    <item msgid="5966994759929723339">"Activado"</item>
+  </string-array>
 </resources>
