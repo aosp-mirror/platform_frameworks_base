@@ -2314,7 +2314,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final int type = getStartingWindowType(newTask, taskSwitch, processRunning,
                 allowTaskSnapshot, activityCreated, activityAllDrawn, snapshot);
 
-        //TODO(191787740) Remove for T
+        //TODO(191787740) Remove for T+
         final boolean useLegacy = type == STARTING_WINDOW_TYPE_SPLASH_SCREEN
                 && mWmService.mStartingSurfaceController.isExceptionApp(packageName, mTargetSdk,
                     () -> {

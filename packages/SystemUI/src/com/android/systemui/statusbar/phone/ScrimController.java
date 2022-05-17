@@ -1080,7 +1080,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     }
 
     private float getInterpolatedFraction() {
-        if (mStatusBarKeyguardViewManager.bouncerIsInTransit()) {
+        if (mStatusBarKeyguardViewManager.isBouncerInTransit()) {
             return BouncerPanelExpansionCalculator
                     .aboutToShowBouncerProgress(mPanelExpansionFraction);
         }
