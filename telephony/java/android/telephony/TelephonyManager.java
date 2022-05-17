@@ -9290,6 +9290,7 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
+                networkTypeBitmask = checkNetworkTypeBitmask(networkTypeBitmask);
                 return telephony.setAllowedNetworkTypesForReason(getSubId(),
                         TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_USER, networkTypeBitmask);
             }
@@ -9297,6 +9298,20 @@ public class TelephonyManager {
             Rlog.e(TAG, "setPreferredNetworkTypeBitmask RemoteException", ex);
         }
         return false;
+    }
+
+    /**
+     * If {@link #NETWORK_TYPE_BITMASK_LTE_CA} bit is set, convert it to NETWORK_TYPE_BITMASK_LTE.
+     *
+     * @param networkTypeBitmask The networkTypeBitmask being checked
+     * @return The checked/converted networkTypeBitmask
+     */
+    private long checkNetworkTypeBitmask(@NetworkTypeBitMask long networkTypeBitmask) {
+        if ((networkTypeBitmask & NETWORK_TYPE_BITMASK_LTE_CA) != 0) {
+            networkTypeBitmask ^= NETWORK_TYPE_BITMASK_LTE_CA;
+            networkTypeBitmask |= NETWORK_TYPE_BITMASK_LTE;
+        }
+        return networkTypeBitmask;
     }
 
     /**
@@ -9325,6 +9340,7 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
+                allowedNetworkTypes = checkNetworkTypeBitmask(allowedNetworkTypes);
                 return telephony.setAllowedNetworkTypesForReason(getSubId(),
                         TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_CARRIER, allowedNetworkTypes);
             }
@@ -9410,6 +9426,7 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
+                allowedNetworkTypes = checkNetworkTypeBitmask(allowedNetworkTypes);
                 telephony.setAllowedNetworkTypesForReason(getSubId(), reason,
                         allowedNetworkTypes);
             } else {
@@ -13727,7 +13744,11 @@ public class TelephonyManager {
      */
     public static final long NETWORK_TYPE_BITMASK_LTE = (1 << (NETWORK_TYPE_LTE -1));
     /**
+     * NOT USED; this bitmask is exposed accidentally, will be deprecated in U.
+     * If used, will be converted to {@link #NETWORK_TYPE_BITMASK_LTE}.
      * network type bitmask indicating the support of radio tech LTE CA (carrier aggregation).
+     *
+     * @see #NETWORK_TYPE_BITMASK_LTE
      */
     public static final long NETWORK_TYPE_BITMASK_LTE_CA = (1 << (NETWORK_TYPE_LTE_CA -1));
 
@@ -16984,5 +17005,42 @@ public class TelephonyManager {
             throw new IllegalStateException("Telephony registry service is null");
         }
         mTelephonyRegistryMgr.removeCarrierPrivilegesCallback(callback);
+    }
+
+    /**
+     * set removable eSIM as default eUICC.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_EUICC)
+    public void setRemovableEsimAsDefaultEuicc(boolean isDefault) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.setRemovableEsimAsDefaultEuicc(isDefault, getOpPackageName());
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error in setRemovableEsimAsDefault: " + e);
+        }
+    }
+
+    /**
+     * Returns whether the removable eSIM is default eUICC or not.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_EUICC)
+    public boolean isRemovableEsimDefaultEuicc() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.isRemovableEsimDefaultEuicc(getOpPackageName());
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error in isRemovableEsimDefaultEuicc: " + e);
+        }
+        return false;
     }
 }

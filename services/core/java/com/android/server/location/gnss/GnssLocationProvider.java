@@ -1587,6 +1587,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         if (isGpsEnabled()) {
             setGpsEnabled(false);
             updateEnabled();
+            restartLocationRequest();
         }
     }
 

@@ -305,8 +305,10 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"আপনার ক্যালেন্ডারে অ্যাক্সেস"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"এসএমএসগুলি পাঠাতে এবং দেখতে"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"ফাইল এবং ডকুমেন্ট"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"আপনার ডিভাইসে ফাইল ও ডকুমেন্ট অ্যাক্সেস করুন"</string>
+    <!-- no translation found for permgrouplab_storage (17339216290379241) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_storage (5378659041354582769) -->
+    <skip />
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"মিউজিক এবং অডিও"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"আপনার ডিভাইসে মিউজিক এবং অডিও অ্যাক্সেস করুন"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ফটো এবং ভিডিও"</string>
@@ -2281,5 +2283,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"অ্যাক্টিভ অ্যাপ চেক করুন"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"আপনার <xliff:g id="DEVICE">%1$s</xliff:g> থেকে ফোনের ক্যামেরা অ্যাক্সেস করা যাচ্ছে না"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"আপনার <xliff:g id="DEVICE">%1$s</xliff:g> থেকে ট্যাবলেটের ক্যামেরা অ্যাক্সেস করা যাচ্ছে না"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"সিস্টেমের ভাষা"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"সিস্টেম ডিফল্ট"</string>
 </resources>

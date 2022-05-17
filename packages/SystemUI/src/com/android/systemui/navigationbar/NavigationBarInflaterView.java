@@ -168,6 +168,7 @@ public class NavigationBarInflaterView extends FrameLayout
 
     public void setButtonDispatchers(SparseArray<ButtonDispatcher> buttonDispatchers) {
         mButtonDispatchers = buttonDispatchers;
+        clearDispatcherViews();
         for (int i = 0; i < buttonDispatchers.size(); i++) {
             initiallyFill(buttonDispatchers.valueAt(i));
         }
@@ -454,12 +455,16 @@ public class NavigationBarInflaterView extends FrameLayout
         }
     }
 
-    private void clearViews() {
+    private void clearDispatcherViews() {
         if (mButtonDispatchers != null) {
             for (int i = 0; i < mButtonDispatchers.size(); i++) {
                 mButtonDispatchers.valueAt(i).clear();
             }
         }
+    }
+
+    private void clearViews() {
+        clearDispatcherViews();
         clearAllChildren(mHorizontal.findViewById(R.id.nav_buttons));
         clearAllChildren(mVertical.findViewById(R.id.nav_buttons));
     }

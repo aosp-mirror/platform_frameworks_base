@@ -2625,6 +2625,9 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
 
             // The remote animation is over, so we're not going away anymore.
             mKeyguardStateController.notifyKeyguardGoingAway(false);
+
+            // Dispatch the callback on animation finishes.
+            mUpdateMonitor.dispatchKeyguardDismissAnimationFinished();
         });
 
         mKeyguardUnlockAnimationControllerLazy.get().notifyFinishedKeyguardExitAnimation(
