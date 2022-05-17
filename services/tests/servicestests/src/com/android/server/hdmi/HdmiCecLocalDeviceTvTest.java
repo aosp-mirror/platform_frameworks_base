@@ -560,8 +560,19 @@ public class HdmiCecLocalDeviceTvTest {
         HdmiCecMessage reportArcInitiated = HdmiCecMessageBuilder.buildReportArcInitiated(
                 ADDR_TV,
                 ADDR_AUDIO_SYSTEM);
-        assertThat(mNativeWrapper.getResultMessages()).contains(reportArcInitiated);
+        // <Report ARC Initiated> should only be sent after SAD querying is done
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(reportArcInitiated);
+
+        // Finish querying SADs
         assertThat(mNativeWrapper.getResultMessages()).contains(SAD_QUERY);
+        mNativeWrapper.clearResultMessages();
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+        assertThat(mNativeWrapper.getResultMessages()).contains(SAD_QUERY);
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+
+        assertThat(mNativeWrapper.getResultMessages()).contains(reportArcInitiated);
     }
 
     @Test

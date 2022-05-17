@@ -50,6 +50,7 @@
             android:visibility="gone" />
     </LinearLayout>
 
+    <!-- For Authentication. -->
     <LinearLayout
         android:id="@+id/autofill_dialog_container"
         android:layout_width="fill_parent"
@@ -58,7 +59,7 @@
         android:paddingStart="@dimen/autofill_save_inner_padding"
         android:paddingEnd="@dimen/autofill_save_inner_padding"
         android:visibility="gone"
-        style="@style/AutofillDatasetPicker" />
+        android:background="@drawable/autofill_dataset_picker_background"/>
 
     <ListView
         android:id="@+id/autofill_dialog_list"
@@ -68,8 +69,8 @@
         android:drawSelectorOnTop="true"
         android:clickable="true"
         android:divider="?android:attr/listDivider"
-        android:visibility="gone"
-        style="@style/AutofillDatasetPicker" />
+        android:background="@drawable/autofill_dataset_picker_background"
+        android:visibility="gone"/>
 
     <com.android.internal.widget.ButtonBarLayout
         android:layout_width="match_parent"

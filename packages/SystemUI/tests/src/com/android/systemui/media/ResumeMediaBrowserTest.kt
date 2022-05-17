@@ -35,6 +35,7 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito
+import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when` as whenever
@@ -73,6 +74,7 @@ public class ResumeMediaBrowserTest : SysuiTestCase() {
 
     @Captor lateinit var connectionCallback: ArgumentCaptor<MediaBrowser.ConnectionCallback>
     @Captor lateinit var subscriptionCallback: ArgumentCaptor<MediaBrowser.SubscriptionCallback>
+    @Captor lateinit var mediaControllerCallback: ArgumentCaptor<MediaController.Callback>
 
     @Before
     fun setUp() {
@@ -82,6 +84,7 @@ public class ResumeMediaBrowserTest : SysuiTestCase() {
                 .thenReturn(browser)
 
         whenever(mediaController.transportControls).thenReturn(transportControls)
+        whenever(mediaController.sessionToken).thenReturn(token)
 
         resumeBrowser = TestableResumeMediaBrowser(
             context,
@@ -137,6 +140,22 @@ public class ResumeMediaBrowserTest : SysuiTestCase() {
     }
 
     @Test
+    fun testConnection_thenSessionDestroyed_disconnects() {
+        // When testConnection is called and we connect successfully
+        setupBrowserConnection()
+        resumeBrowser.testConnection()
+        verify(mediaController).registerCallback(mediaControllerCallback.capture())
+        reset(browser)
+
+        // And a sessionDestroyed event is triggered
+        mediaControllerCallback.value.onSessionDestroyed()
+
+        // Then we disconnect the browser and unregister the callback
+        verify(browser).disconnect()
+        verify(mediaController).unregisterCallback(mediaControllerCallback.value)
+    }
+
+    @Test
     fun testConnection_calledTwice_oldBrowserDisconnected() {
         val oldBrowser = mock<MediaBrowser>()
         whenever(browserFactory.create(any(), any(), any())).thenReturn(oldBrowser)
@@ -185,6 +204,22 @@ public class ResumeMediaBrowserTest : SysuiTestCase() {
 
         // Then it calls onConnected
         verify(callback).onConnected()
+    }
+
+    @Test
+    fun testFindRecentMedia_thenSessionDestroyed_disconnects() {
+        // When findRecentMedia is called and we connect successfully
+        setupBrowserConnection()
+        resumeBrowser.findRecentMedia()
+        verify(mediaController).registerCallback(mediaControllerCallback.capture())
+        reset(browser)
+
+        // And a sessionDestroyed event is triggered
+        mediaControllerCallback.value.onSessionDestroyed()
+
+        // Then we disconnect the browser and unregister the callback
+        verify(browser).disconnect()
+        verify(mediaController).unregisterCallback(mediaControllerCallback.value)
     }
 
     @Test
@@ -258,6 +293,22 @@ public class ResumeMediaBrowserTest : SysuiTestCase() {
         // Then it creates a new controller and sends play command
         verify(transportControls).prepare()
         verify(transportControls).play()
+    }
+
+    @Test
+    fun testRestart_thenSessionDestroyed_disconnects() {
+        // When restart is called and we connect successfully
+        setupBrowserConnection()
+        resumeBrowser.restart()
+        verify(mediaController).registerCallback(mediaControllerCallback.capture())
+        reset(browser)
+
+        // And a sessionDestroyed event is triggered
+        mediaControllerCallback.value.onSessionDestroyed()
+
+        // Then we disconnect the browser and unregister the callback
+        verify(browser).disconnect()
+        verify(mediaController).unregisterCallback(mediaControllerCallback.value)
     }
 
     @Test

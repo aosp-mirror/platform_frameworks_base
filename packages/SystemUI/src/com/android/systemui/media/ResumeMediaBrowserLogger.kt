@@ -48,6 +48,27 @@ class ResumeMediaBrowserLogger @Inject constructor(
         },
         { "Disconnecting browser for component $str1" }
     )
+
+    /**
+     * Logs that we received a [android.media.session.MediaController.Callback.onSessionDestroyed]
+     * event.
+     *
+     * @param isBrowserConnected true if there's a currently connected
+     *     [android.media.browse.MediaBrowser] and false otherwise.
+     * @param componentName the component name for the [ResumeMediaBrowser] that triggered this log.
+     */
+    fun logSessionDestroyed(
+        isBrowserConnected: Boolean,
+        componentName: ComponentName
+    ) = buffer.log(
+        TAG,
+        LogLevel.DEBUG,
+        {
+            bool1 = isBrowserConnected
+            str1 = componentName.toShortString()
+        },
+        { "Session destroyed. Active browser = $bool1. Browser component = $str1." }
+    )
 }
 
 private const val TAG = "MediaBrowser"

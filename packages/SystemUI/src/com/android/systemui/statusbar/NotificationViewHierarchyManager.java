@@ -53,6 +53,7 @@ import com.android.wm.shell.bubbles.Bubbles;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
@@ -207,12 +208,9 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
                     || !mLockscreenUserManager.needsSeparateWorkChallenge(userId))) {
                 userPublic = false;
             }
-            boolean needsRedaction = mLockscreenUserManager.needsRedaction(ent);
+            boolean needsRedaction = mLockscreenUserManager.notifNeedsRedactionInPublic(ent);
             boolean sensitive = userPublic && needsRedaction;
-            boolean deviceSensitive = devicePublic
-                    && !mLockscreenUserManager.userAllowsPrivateNotificationsInPublic(
-                    currentUserId);
-            ent.setSensitive(sensitive, deviceSensitive);
+            ent.getRow().setSensitive(sensitive);
             ent.getRow().setNeedsRedaction(needsRedaction);
             mLowPriorityInflationHelper.recheckLowPriorityViewAndInflate(ent, ent.getRow());
             boolean isChildInGroup = mGroupManager.isChildInGroup(ent);
@@ -365,6 +363,8 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
         boolean hasClearableAlertingNotifs = false;
         boolean hasNonClearableSilentNotifs = false;
         boolean hasClearableSilentNotifs = false;
+        HashSet<Integer> clearableAlertingSensitiveNotifUsers = new HashSet<>();
+        HashSet<Integer> clearableSilentSensitiveNotifUsers = new HashSet<>();
         final int childCount = mListContainer.getContainerChildCount();
         int visibleTopLevelEntries = 0;
         for (int i = 0; i < childCount; i++) {
@@ -376,10 +376,11 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
                 continue;
             }
             final ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-            boolean isSilent = row.getEntry().getBucket() == BUCKET_SILENT;
+            NotificationEntry entry = row.getEntry();
+            boolean isSilent = entry.getBucket() == BUCKET_SILENT;
             // NOTE: NotificationEntry.isClearable() will internally check group children to ensure
             //  the group itself definitively clearable.
-            boolean isClearable = row.getEntry().isClearable();
+            boolean isClearable = entry.isClearable();
             visibleTopLevelEntries++;
             if (isSilent) {
                 if (isClearable) {
@@ -394,13 +395,24 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
                     hasNonClearableAlertingNotifs = true;
                 }
             }
+            if (isClearable && entry.hasSensitiveContents()) {
+                int userId = entry.getSbn().getUserId();
+                if (isSilent) {
+                    clearableSilentSensitiveNotifUsers.add(userId);
+                } else {
+                    clearableAlertingSensitiveNotifUsers.add(userId);
+                }
+            }
         }
         mStackController.setNotifStats(new NotifStats(
                 visibleTopLevelEntries /* numActiveNotifs */,
                 hasNonClearableAlertingNotifs /* hasNonClearableAlertingNotifs */,
                 hasClearableAlertingNotifs /* hasClearableAlertingNotifs */,
                 hasNonClearableSilentNotifs /* hasNonClearableSilentNotifs */,
-                hasClearableSilentNotifs /* hasClearableSilentNotifs */
+                hasClearableSilentNotifs /* hasClearableSilentNotifs */,
+                clearableAlertingSensitiveNotifUsers /* clearableAlertingSensitiveNotifUsers */,
+                clearableSilentSensitiveNotifUsers /* clearableSilentSensitiveNotifUsers */
+
         ));
         Trace.endSection();
     }
