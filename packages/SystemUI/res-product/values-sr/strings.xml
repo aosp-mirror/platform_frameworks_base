@@ -43,8 +43,6 @@
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"Откључајте телефон за још опција"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"Откључајте таблет за још опција"</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Откључајте уређај за још опција"</string>
-    <!-- no translation found for media_transfer_playing_this_device (5795784619523545556) -->
-    <skip />
-    <!-- no translation found for media_transfer_playing_this_device (222514408550408633) -->
-    <skip />
+    <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"Пушта се на овом телефону"</string>
+    <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"Пушта се на овом таблету"</string>
 </resources>

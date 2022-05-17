@@ -227,9 +227,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         lp.setFitInsetsIgnoringVisibility(true);
         window.setAttributes(lp);
         window.setContentView(mDialogView);
-        // Sets window to a blank string to avoid talkback announce app label first when pop up,
-        // which doesn't make sense.
-        window.setTitle(EMPTY_TITLE);
+        window.setTitle(mContext.getString(R.string.media_output_dialog_accessibility_title));
 
         mHeaderTitle = mDialogView.requireViewById(R.id.header_title);
         mHeaderSubtitle = mDialogView.requireViewById(R.id.header_subtitle);

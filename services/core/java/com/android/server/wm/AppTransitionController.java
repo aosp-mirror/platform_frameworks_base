@@ -899,7 +899,11 @@ public class AppTransitionController {
                     // We cannot promote the animation on Task's parent when the task is in
                     // clearing task in case the animating get stuck when performing the opening
                     // task that behind it.
-                    || (current.asTask() != null && current.asTask().mInRemoveTask)) {
+                    || (current.asTask() != null && current.asTask().mInRemoveTask)
+                    // We cannot promote the animation to changing window. This may happen when an
+                    // activity is open in a TaskFragment that is resizing, while the existing
+                    // activity in the TaskFragment is reparented to another TaskFragment.
+                    || parent.isChangingAppTransition()) {
                 canPromote = false;
             } else {
                 // In case a descendant of the parent belongs to the other group, we cannot promote

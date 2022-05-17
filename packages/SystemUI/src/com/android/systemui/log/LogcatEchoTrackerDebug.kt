@@ -60,7 +60,7 @@ class LogcatEchoTrackerDebug private constructor(
                 Settings.Global.getUriFor(BUFFER_PATH),
                 true,
                 object : ContentObserver(Handler(mainLooper)) {
-                    override fun onChange(selfChange: Boolean, uri: Uri) {
+                    override fun onChange(selfChange: Boolean, uri: Uri?) {
                         super.onChange(selfChange, uri)
                         cachedBufferLevels.clear()
                     }
@@ -70,7 +70,7 @@ class LogcatEchoTrackerDebug private constructor(
                 Settings.Global.getUriFor(TAG_PATH),
                 true,
                 object : ContentObserver(Handler(mainLooper)) {
-                    override fun onChange(selfChange: Boolean, uri: Uri) {
+                    override fun onChange(selfChange: Boolean, uri: Uri?) {
                         super.onChange(selfChange, uri)
                         cachedTagLevels.clear()
                     }
@@ -110,7 +110,7 @@ class LogcatEchoTrackerDebug private constructor(
     }
 
     private fun parseProp(propValue: String?): LogLevel {
-        return when (propValue?.toLowerCase()) {
+        return when (propValue?.lowercase()) {
             "verbose" -> LogLevel.VERBOSE
             "v" -> LogLevel.VERBOSE
             "debug" -> LogLevel.DEBUG
