@@ -1846,7 +1846,7 @@
     <string name="restr_pin_confirm_pin" msgid="7143161971614944989">"新しいPINの確認"</string>
     <string name="restr_pin_create_pin" msgid="917067613896366033">"制限を変更するためのPINを作成してください"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PIN が一致しません。もう一度お試しください。"</string>
-    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PINが短すぎます。4桁以上で作成してください。"</string>
+    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PINが短すぎます。4桁以上で設定してください。"</string>
     <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g>秒後にもう一度お試しください</item>
       <item quantity="one">1秒後にもう一度お試しください</item>
