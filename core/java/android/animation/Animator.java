@@ -93,6 +93,20 @@ public abstract class Animator implements Cloneable {
     }
 
     /**
+     * Sets the behavior of animator pausing when apps go into the background.
+     * This is exposed as a test API for verification, but is intended for use by internal/
+     * platform code, potentially for use by a system property that could disable it
+     * system wide.
+     *
+     * @param enable Enable (default behavior) or disable background pausing behavior.
+     * @hide
+     */
+    @TestApi
+    public static void setAnimatorPausingEnabled(boolean enable) {
+        AnimationHandler.setAnimatorPausingEnabled(enable);
+    }
+
+    /**
      * Starts this animation. If the animation has a nonzero startDelay, the animation will start
      * running after that delay elapses. A non-delayed animation will have its initial
      * value(s) set immediately, followed by calls to
