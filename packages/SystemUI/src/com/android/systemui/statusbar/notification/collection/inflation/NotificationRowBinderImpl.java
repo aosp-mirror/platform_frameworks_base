@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.notification.collection.inflation;
 
-import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_PUBLIC;
-
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.Nullable;
@@ -251,13 +249,10 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         RowContentBindParams params = mRowContentBindStage.getStageParams(entry);
         params.setUseIncreasedCollapsedHeight(useIncreasedCollapsedHeight);
         params.setUseLowPriority(isLowPriority);
-        boolean needsRedaction =
-                mNotificationLockscreenUserManager.notifNeedsRedactionInPublic(entry);
-        if (needsRedaction) {
-            params.requireContentViews(FLAG_CONTENT_VIEW_PUBLIC);
-        } else {
-            params.markContentViewsFreeable(FLAG_CONTENT_VIEW_PUBLIC);
-        }
+
+        // TODO: Replace this API with RowContentBindParams directly. Also move to a separate
+        // redaction controller.
+        row.setNeedsRedaction(mNotificationLockscreenUserManager.needsRedaction(entry));
 
         params.rebindAllContentViews();
         mRowContentBindStage.requestRebind(entry, en -> {
