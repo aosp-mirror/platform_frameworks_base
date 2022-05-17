@@ -1777,7 +1777,7 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
-        mForceNextWindowRelayout = forceNextWindowRelayout;
+        mForceNextWindowRelayout |= forceNextWindowRelayout;
         mPendingAlwaysConsumeSystemBars = args.argi2 != 0;
         mSyncSeqId = args.argi4 > mSyncSeqId ? args.argi4 : mSyncSeqId;
 
@@ -5238,6 +5238,9 @@ public final class ViewRootImpl implements ViewParent,
             // the buffers may still have content in previous rotation. And the next draw may
             // not update all regions, that causes some afterimages to flicker.
             mUpdateSurfaceNeeded = true;
+            if (!mIsInTraversal) {
+                mForceNextWindowRelayout = true;
+            }
         }
 
         Configuration globalConfig = mergedConfiguration.getGlobalConfiguration();
