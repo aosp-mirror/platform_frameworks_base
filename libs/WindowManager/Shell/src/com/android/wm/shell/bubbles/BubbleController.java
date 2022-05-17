@@ -25,6 +25,7 @@ import static android.view.View.VISIBLE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_CONTROLLER;
+import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_GESTURE;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.wm.shell.bubbles.BubblePositioner.TASKBAR_POSITION_BOTTOM;
@@ -879,6 +880,19 @@ public class BubbleController {
         }
     }
 
+    private void onNotificationPanelExpandedChanged(boolean expanded) {
+        if (DEBUG_BUBBLE_GESTURE) {
+            Log.d(TAG, "onNotificationPanelExpandedChanged: expanded=" + expanded);
+        }
+        if (mStackView != null && mStackView.isExpanded()) {
+            if (expanded) {
+                mStackView.stopMonitoringSwipeUpGesture();
+            } else {
+                mStackView.startMonitoringSwipeUpGesture();
+            }
+        }
+    }
+
     private void setSysuiProxy(Bubbles.SysuiProxy proxy) {
         mSysuiProxy = proxy;
     }
@@ -1462,6 +1476,18 @@ public class BubbleController {
     }
 
     /**
+     * Check if notification panel is in an expanded state.
+     * Makes a call to System UI process and delivers the result via {@code callback} on the
+     * WM Shell main thread.
+     *
+     * @param callback callback that has the result of notification panel expanded state
+     */
+    public void isNotificationPanelExpanded(Consumer<Boolean> callback) {
+        mSysuiProxy.isNotificationPanelExpand(expanded ->
+                mMainExecutor.execute(() -> callback.accept(expanded)));
+    }
+
+    /**
      * Description of current bubble state.
      */
     private void dump(PrintWriter pw, String[] args) {
@@ -1834,6 +1860,12 @@ public class BubbleController {
             mMainExecutor.execute(() -> {
                 BubbleController.this.onConfigChanged(newConfig);
             });
+        }
+
+        @Override
+        public void onNotificationPanelExpandedChanged(boolean expanded) {
+            mMainExecutor.execute(
+                    () -> BubbleController.this.onNotificationPanelExpandedChanged(expanded));
         }
 
         @Override
