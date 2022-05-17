@@ -59,6 +59,13 @@ public interface AppStandbyInternal {
         public void onUserInteractionStarted(String packageName, @UserIdInt int userId) {
             // No-op by default
         }
+
+        /**
+         * Optional callback to inform the listener to give the app a temporary quota bump.
+         */
+        public void triggerTemporaryQuotaBump(String packageName, @UserIdInt int userId) {
+            // No-op by default
+        }
     }
 
     void onBootPhase(int phase);
