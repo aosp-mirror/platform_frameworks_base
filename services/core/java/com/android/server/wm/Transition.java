@@ -54,6 +54,7 @@ import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 
+import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_RECENTS_ANIM;
 import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_SPLASH_SCREEN;
 import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_WINDOWS_DRAWN;
@@ -477,6 +478,58 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         mCanPipOnFinish = canPipOnFinish;
     }
 
+    private boolean didCommitTransientLaunch() {
+        if (mTransientLaunches == null) return false;
+        for (int j = 0; j < mTransientLaunches.size(); ++j) {
+            if (mTransientLaunches.keyAt(j).isVisibleRequested()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check if pip-entry is possible after finishing and enter-pip if it is.
+     *
+     * @return true if we are *guaranteed* to enter-pip. This means we return false if there's
+     *         a chance we won't thus legacy-entry (via pause+userLeaving) will return false.
+     */
+    private boolean checkEnterPipOnFinish(@NonNull ActivityRecord ar) {
+        if (!mCanPipOnFinish || !ar.isVisible() || ar.getTask() == null) return false;
+
+        if (ar.pictureInPictureArgs != null && ar.pictureInPictureArgs.isAutoEnterEnabled()) {
+            if (didCommitTransientLaunch()) {
+                // force enable pip-on-task-switch now that we've committed to actually launching
+                // to the transient activity.
+                ar.supportsEnterPipOnTaskSwitch = true;
+            }
+            return mController.mAtm.enterPictureInPictureMode(ar, ar.pictureInPictureArgs,
+                    false /* fromClient */);
+        }
+
+        // Legacy pip-entry (not via isAutoEnterEnabled).
+        boolean canPip = ar.getDeferHidingClient();
+        if (!canPip && didCommitTransientLaunch()) {
+            // force enable pip-on-task-switch now that we've committed to actually launching to the
+            // transient activity, and then recalculate whether we can attempt pip.
+            ar.supportsEnterPipOnTaskSwitch = true;
+            canPip = ar.checkEnterPictureInPictureState(
+                    "finishTransition", true /* beforeStopping */)
+                    && ar.isState(RESUMED);
+        }
+        if (!canPip) return false;
+        try {
+            // Legacy PIP-enter requires pause event with user-leaving.
+            mController.mAtm.mTaskSupervisor.mUserLeaving = true;
+            ar.getTaskFragment().startPausing(false /* uiSleeping */,
+                    null /* resuming */, "finishTransition");
+        } finally {
+            mController.mAtm.mTaskSupervisor.mUserLeaving = false;
+        }
+        // Return false anyway because there's no guarantee that the app will enter pip.
+        return false;
+    }
+
     /**
      * The transition has finished animating and is ready to finalize WM state. This should not
      * be called directly; use {@link TransitionController#finishTransition} instead.
@@ -503,32 +556,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 // then doing commitVisibility here would actually be out-of-order and leave the
                 // activity in a bad state.
                 if (!visibleAtTransitionEnd && !ar.isVisibleRequested()) {
-                    boolean commitVisibility = true;
-                    if (mCanPipOnFinish && ar.isVisible() && ar.getTask() != null) {
-                        if (ar.pictureInPictureArgs != null
-                                && ar.pictureInPictureArgs.isAutoEnterEnabled()) {
-                            if (mTransientLaunches != null) {
-                                for (int j = 0; j < mTransientLaunches.size(); ++j) {
-                                    if (mTransientLaunches.keyAt(j).isVisibleRequested()) {
-                                        // force enable pip-on-task-switch now that we've committed
-                                        // to actually launching to the transient activity.
-                                        ar.supportsEnterPipOnTaskSwitch = true;
-                                        break;
-                                    }
-                                }
-                            }
-                            mController.mAtm.enterPictureInPictureMode(ar, ar.pictureInPictureArgs);
-                            // Avoid commit visibility to false here, or else we will get a sudden
-                            // "flash" / surface going invisible for a split second.
-                            commitVisibility = false;
-                        } else if (ar.getDeferHidingClient()) {
-                            // Legacy PIP-enter requires pause event with user-leaving.
-                            mController.mAtm.mTaskSupervisor.mUserLeaving = true;
-                            ar.getTaskFragment().startPausing(false /* uiSleeping */,
-                                    null /* resuming */, "finishTransition");
-                            mController.mAtm.mTaskSupervisor.mUserLeaving = false;
-                        }
-                    }
+                    final boolean commitVisibility = !checkEnterPipOnFinish(ar);
+                    // Avoid commit visibility if entering pip or else we will get a sudden
+                    // "flash" / surface going invisible for a split second.
                     if (commitVisibility) {
                         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                                 "  Commit activity becoming invisible: %s", ar);
@@ -1720,7 +1750,8 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         /** @return true if all tracked subtrees are ready. */
         boolean allReady() {
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, " allReady query: used=%b "
-                    + "override=%b states=[%s]", mUsed, mReadyOverride, groupsToString());
+                    + "override=%b defer=%d states=[%s]", mUsed, mReadyOverride, mDeferReadyDepth,
+                    groupsToString());
             // If the readiness has never been touched, mUsed will be false. We never want to
             // consider a transition ready if nothing has been reported on it.
             if (!mUsed) return false;
