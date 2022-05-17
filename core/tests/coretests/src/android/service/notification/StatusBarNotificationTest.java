@@ -17,10 +17,13 @@
 package android.service.notification;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNotSame;
 import static junit.framework.Assert.assertNull;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -51,6 +54,8 @@ public class StatusBarNotificationTest {
 
     private final Context mMockContext = mock(Context.class);
     @Mock
+    private Context mRealContext;
+    @Mock
     private PackageManager mPm;
 
     private static final String PKG = "com.example.o";
@@ -75,6 +80,9 @@ public class StatusBarNotificationTest {
                 InstrumentationRegistry.getContext().getResources());
         when(mMockContext.getPackageManager()).thenReturn(mPm);
         when(mMockContext.getApplicationInfo()).thenReturn(new ApplicationInfo());
+        when(mPm.getApplicationLabel(any())).thenReturn("");
+
+        mRealContext = InstrumentationRegistry.getContext();
     }
 
     @Test
@@ -197,6 +205,39 @@ public class StatusBarNotificationTest {
         sbn = getNotification(PKG, nb);
         assertTrue(sbn.isAppGroup());
 
+    }
+
+    @Test
+    public void testGetPackageContext_worksWithUserAll() {
+        String pkg = "com.android.systemui";
+        int uid = 1000;
+        Notification notification = getNotificationBuilder(GROUP_ID_1, CHANNEL_ID).build();
+        StatusBarNotification sbn = new StatusBarNotification(
+                pkg, pkg, ID, TAG, uid, uid, notification, UserHandle.ALL, null, UID);
+        Context resultContext = sbn.getPackageContext(mRealContext);
+        assertNotNull(resultContext);
+        assertNotSame(mRealContext, resultContext);
+        assertEquals(pkg, resultContext.getPackageName());
+    }
+
+    @Test
+    public void testGetUidFromKey() {
+        StatusBarNotification sbn = getNotification("pkg", null, "channel");
+
+        assertEquals(UID, StatusBarNotification.getUidFromKey(sbn.getKey()));
+
+        sbn.setOverrideGroupKey("addsToKey");
+        assertEquals(UID, StatusBarNotification.getUidFromKey(sbn.getKey()));
+    }
+
+    @Test
+    public void testGetPkgFromKey() {
+        StatusBarNotification sbn = getNotification("pkg", null, "channel");
+
+        assertEquals("pkg", StatusBarNotification.getPkgFromKey(sbn.getKey()));
+
+        sbn.setOverrideGroupKey("addsToKey");
+        assertEquals("pkg", StatusBarNotification.getPkgFromKey(sbn.getKey()));
     }
 
     private StatusBarNotification getNotification(String pkg, String group, String channelId) {

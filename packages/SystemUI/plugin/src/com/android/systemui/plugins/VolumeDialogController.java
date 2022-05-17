@@ -60,7 +60,6 @@ public interface VolumeDialogController {
 
     boolean areCaptionsEnabled();
     void setCaptionsEnabled(boolean isEnabled);
-    boolean isCaptionStreamOptedOut();
 
     void getCaptionsComponentState(boolean fromTooltip);
 

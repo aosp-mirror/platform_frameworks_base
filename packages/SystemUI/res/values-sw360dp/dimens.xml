@@ -19,9 +19,6 @@
     <!-- The width of the view containing navigation buttons -->
     <dimen name="navigation_key_width">80dip</dimen>
 
-    <!-- The width of the view containing the menu/ime navigation bar icons -->
-    <dimen name="navigation_extra_key_width">40dip</dimen>
-
     <!-- The padding on the side of the navigation bar. Must be greater than or equal to
          navigation_extra_key_width -->
     <dimen name="navigation_side_padding">40dip</dimen>

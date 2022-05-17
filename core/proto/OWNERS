@@ -8,9 +8,6 @@ yaochen@google.com
 yro@google.com
 zhouwenjie@google.com
 
-# Settings UI
-per-file settings_enums.proto=tmfang@google.com
-
 # Frameworks
 ogunwale@google.com
 jjaggi@google.com
@@ -21,7 +18,8 @@ per-file usagestatsservice.proto, usagestatsservice_v2.proto = file:/core/java/a
 per-file apphibernationservice.proto = file:/core/java/android/apphibernation/OWNERS
 
 # Biometrics
-kchyn@google.com
+jaggies@google.com
+jbolinger@google.com
 
 # Launcher
 hyunyoungs@google.com

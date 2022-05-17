@@ -64,12 +64,12 @@ public class SparseDoubleArrayTest {
     }
 
     @Test
-    public void testAdd() {
+    public void testIncrementValue() {
         final SparseDoubleArray sda = new SparseDoubleArray();
 
         sda.put(4, 6.1);
-        sda.add(4, -1.2);
-        sda.add(2, -1.2);
+        sda.incrementValue(4, -1.2);
+        sda.incrementValue(2, -1.2);
 
         assertEquals(6.1 - 1.2, sda.get(4), PRECISION);
         assertEquals(-1.2, sda.get(2), PRECISION);

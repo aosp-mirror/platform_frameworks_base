@@ -57,6 +57,11 @@
 	        <property android:name="android.cts.PROPERTY_SERVICE" android:value="@integer/integer_property" />
 	        <property android:name="android.cts.PROPERTY_COMPONENT" android:resource="@integer/integer_property" />
 	    </service>
+		<apex-system-service
+			android:name="com.android.servicestests.apps.packageparserapp.SystemService"
+			android:path="service-test.jar"
+			android:minSdkVersion = "30"
+			android:maxSdkVersion = "31" />
     </application>
 
     <instrumentation

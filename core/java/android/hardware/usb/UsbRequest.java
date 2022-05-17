@@ -103,7 +103,7 @@ public class UsbRequest {
                 endpoint.getAttributes(), endpoint.getMaxPacketSize(), endpoint.getInterval());
 
         if (wasInitialized) {
-            mCloseGuard.open("close");
+            mCloseGuard.open("UsbRequest.close");
         }
 
         return wasInitialized;

@@ -46,7 +46,7 @@ public class AccessibilityNodeInfoTest {
     // The number of fields tested in the corresponding CTS AccessibilityNodeInfoTest:
     // See fullyPopulateAccessibilityNodeInfo, assertEqualsAccessibilityNodeInfo,
     // and assertAccessibilityNodeInfoCleared in that class.
-    private static final int NUM_MARSHALLED_PROPERTIES = 39;
+    private static final int NUM_MARSHALLED_PROPERTIES = 40;
 
     /**
      * The number of properties that are purposely not marshalled
@@ -58,7 +58,7 @@ public class AccessibilityNodeInfoTest {
 
     // The number of flags held in boolean properties. Their values should also be double-checked
     // in the methods above.
-    private static final int NUM_BOOLEAN_PROPERTIES = 23;
+    private static final int NUM_BOOLEAN_PROPERTIES = 24;
 
     @Test
     public void testStandardActions_serializationFlagIsValid() {

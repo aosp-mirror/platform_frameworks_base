@@ -67,8 +67,7 @@ void ClearDirectory(const android::StringPiece& path) {
 }
 
 void TestDirectoryFixture::SetUp() {
-  temp_dir_ = file::BuildPath({android::base::GetExecutableDirectory(),
-                               "_temp",
+  temp_dir_ = file::BuildPath({testing::TempDir(), "_temp",
                                testing::UnitTest::GetInstance()->current_test_case()->name(),
                                testing::UnitTest::GetInstance()->current_test_info()->name()});
   ASSERT_TRUE(file::mkdirs(temp_dir_));
@@ -126,7 +125,7 @@ bool CommandTestFixture::Link(const std::vector<std::string>& args,
   link_args.insert(link_args.end(), {"-I", android_sdk});
 
   // Add the files from the compiled resources directory to the link file arguments
-  Maybe<std::vector<std::string>> compiled_files = file::FindFiles(flat_dir, diag);
+  std::optional<std::vector<std::string>> compiled_files = file::FindFiles(flat_dir, diag);
   if (compiled_files) {
     for (std::string& compile_file : compiled_files.value()) {
       compile_file = file::BuildPath({flat_dir, compile_file});
@@ -236,4 +235,4 @@ std::vector<std::string> LinkCommandBuilder::Build(const std::string& out_apk) {
   return args_;
 }
 
-} // namespace aapt
+}  // namespace aapt

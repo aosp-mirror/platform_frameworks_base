@@ -22,17 +22,21 @@ import android.app.ActivityTaskManager;
 import android.app.AlarmManager;
 import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
+import android.app.INotificationManager;
 import android.app.IWallpaperManager;
 import android.app.KeyguardManager;
 import android.app.NotificationManager;
 import android.app.StatsManager;
+import android.app.UiModeManager;
 import android.app.WallpaperManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.role.RoleManager;
 import android.app.smartspace.SmartspaceManager;
 import android.app.trust.TrustManager;
+import android.content.ClipboardManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.om.OverlayManager;
 import android.content.pm.IPackageManager;
 import android.content.pm.LauncherApps;
@@ -41,6 +45,8 @@ import android.content.pm.ShortcutManager;
 import android.content.res.Resources;
 import android.hardware.SensorManager;
 import android.hardware.SensorPrivacyManager;
+import android.hardware.devicestate.DeviceStateManager;
+import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.DisplayManager;
 import android.hardware.face.FaceManager;
@@ -58,25 +64,33 @@ import android.os.ServiceManager;
 import android.os.UserManager;
 import android.os.Vibrator;
 import android.permission.PermissionManager;
+import android.safetycenter.SafetyCenterManager;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 import android.telecom.TelecomManager;
+import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.view.Choreographer;
 import android.view.CrossWindowBlurListeners;
 import android.view.IWindowManager;
+import android.view.LayoutInflater;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.CaptioningManager;
 import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.appwidget.IAppWidgetService;
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.LatencyTracker;
+import com.android.systemui.Prefs;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dagger.qualifiers.TestHarness;
 import com.android.systemui.shared.system.PackageManagerWrapper;
 
 import java.util.Optional;
@@ -109,10 +123,29 @@ public class FrameworkServicesModule {
         return context.getSystemService(AlarmManager.class);
     }
 
+    /** */
+    @Provides
+    public AmbientDisplayConfiguration provideAmbientDisplayConfiguration(Context context) {
+        return new AmbientDisplayConfiguration(context);
+    }
+
     @Provides
     @Singleton
     static AudioManager provideAudioManager(Context context) {
         return context.getSystemService(AudioManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static CaptioningManager provideCaptioningManager(Context context) {
+        return context.getSystemService(CaptioningManager.class);
+    }
+
+    /** */
+    @Provides
+    @Singleton
+    public Choreographer providesChoreographer() {
+        return Choreographer.getInstance();
     }
 
     @Provides
@@ -155,6 +188,12 @@ public class FrameworkServicesModule {
     @Singleton
     static DisplayManager provideDisplayManager(Context context) {
         return context.getSystemService(DisplayManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static DeviceStateManager provideDeviceStateManager(Context context) {
+        return context.getSystemService(DeviceStateManager.class);
     }
 
     @Provides
@@ -209,6 +248,12 @@ public class FrameworkServicesModule {
     @Nullable
     static FingerprintManager providesFingerprintManager(Context context) {
         return context.getSystemService(FingerprintManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static InteractionJankMonitor provideInteractionJankMonitor() {
+        return InteractionJankMonitor.getInstance();
     }
 
     @Provides
@@ -268,6 +313,13 @@ public class FrameworkServicesModule {
         return context.getSystemService(LauncherApps.class);
     }
 
+    /** */
+    @Provides
+    @Singleton
+    public LayoutInflater providerLayoutInflater(Context context) {
+        return LayoutInflater.from(context);
+    }
+
     @Provides
     static MediaRouter2Manager provideMediaRouter2Manager(Context context) {
         return MediaRouter2Manager.getInstance(context);
@@ -290,6 +342,14 @@ public class FrameworkServicesModule {
         return context.getSystemService(NotificationManager.class);
     }
 
+    /** */
+    @Provides
+    @Singleton
+    public INotificationManager provideINotificationManager() {
+        return INotificationManager.Stub.asInterface(
+                ServiceManager.getService(Context.NOTIFICATION_SERVICE));
+    }
+
     @Provides
     @Singleton
     static PackageManager providePackageManager(Context context) {
@@ -307,6 +367,20 @@ public class FrameworkServicesModule {
     @Singleton
     static PowerManager providePowerManager(Context context) {
         return context.getSystemService(PowerManager.class);
+    }
+
+    /** */
+    @Provides
+    @Main
+    public SharedPreferences provideSharePreferences(Context context) {
+        return Prefs.get(context);
+    }
+
+    /** */
+    @Provides
+    @Singleton
+    static UiModeManager provideUiModeManager(Context context) {
+        return context.getSystemService(UiModeManager.class);
     }
 
     @Provides
@@ -360,8 +434,21 @@ public class FrameworkServicesModule {
 
     @Provides
     @Singleton
+    static Optional<TelecomManager> provideOptionalTelecomManager(Context context) {
+        return Optional.ofNullable(context.getSystemService(TelecomManager.class));
+    }
+
+    @Provides
+    @Singleton
     static TelephonyManager provideTelephonyManager(Context context) {
         return context.getSystemService(TelephonyManager.class);
+    }
+
+    @Provides
+    @Singleton
+    @TestHarness
+    static boolean provideIsTestHarness() {
+        return ActivityManager.isRunningInUserTestHarness();
     }
 
     @Provides
@@ -415,6 +502,12 @@ public class FrameworkServicesModule {
 
     @Provides
     @Singleton
+    static CarrierConfigManager provideCarrierConfigManager(Context context) {
+        return context.getSystemService(CarrierConfigManager.class);
+    }
+
+    @Provides
+    @Singleton
     static WindowManager provideWindowManager(Context context) {
         return context.getSystemService(WindowManager.class);
     }
@@ -422,12 +515,28 @@ public class FrameworkServicesModule {
     @Provides
     @Singleton
     static PermissionManager providePermissionManager(Context context) {
-        return context.getSystemService(PermissionManager.class);
+        PermissionManager pm = context.getSystemService(PermissionManager.class);
+        if (pm != null) {
+            pm.initializeUsageHelper();
+        }
+        return pm;
+    }
+
+    @Provides
+    @Singleton
+    static ClipboardManager provideClipboardManager(Context context) {
+        return context.getSystemService(ClipboardManager.class);
     }
 
     @Provides
     @Singleton
     static SmartspaceManager provideSmartspaceManager(Context context) {
         return context.getSystemService(SmartspaceManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static SafetyCenterManager provideSafetyCenterManager(Context context) {
+        return context.getSystemService(SafetyCenterManager.class);
     }
 }

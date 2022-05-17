@@ -17,6 +17,7 @@
 package android.media.tv.tuner.frontend;
 
 import android.annotation.SystemApi;
+import android.media.tv.tuner.TunerVersionChecker;
 
 /**
  * ISDBT Capabilities.
@@ -30,14 +31,21 @@ public class IsdbtFrontendCapabilities extends FrontendCapabilities {
     private final int mModulationCap;
     private final int mCodeRateCap;
     private final int mGuardIntervalCap;
+    private final int mTimeInterleaveCap;
+    private final boolean mIsSegmentAutoSupported;
+    private final boolean mIsFullSegmentSupported;
 
     private IsdbtFrontendCapabilities(int modeCap, int bandwidthCap, int modulationCap,
-            int codeRateCap, int guardIntervalCap) {
+            int codeRateCap, int guardIntervalCap, int timeInterleaveCap,
+            boolean isSegmentAutoSupported, boolean isFullSegmentSupported) {
         mModeCap = modeCap;
         mBandwidthCap = bandwidthCap;
         mModulationCap = modulationCap;
         mCodeRateCap = codeRateCap;
         mGuardIntervalCap = guardIntervalCap;
+        mTimeInterleaveCap = timeInterleaveCap;
+        mIsSegmentAutoSupported = isSegmentAutoSupported;
+        mIsFullSegmentSupported = isFullSegmentSupported;
     }
 
     /**
@@ -74,5 +82,36 @@ public class IsdbtFrontendCapabilities extends FrontendCapabilities {
     @DvbtFrontendSettings.GuardInterval
     public int getGuardIntervalCapability() {
         return mGuardIntervalCap;
+    }
+    /**
+     * Gets time interleave mode capability.
+     *
+     * <p>This query is only supported by Tuner HAL 2.0 or higher. Unsupported version will
+     * return {@link IsdbtFrontendSettings#TIME_INTERLEAVE_MODE_UNDEFINED}.
+     * Use {@link TunerVersionChecker#getTunerVersion()} to check the version.
+     */
+    @IsdbtFrontendSettings.TimeInterleaveMode
+    public int getTimeInterleaveModeCapability() {
+        return mTimeInterleaveCap;
+    }
+    /**
+     * If auto segment is supported or not.
+     *
+     * <p>This query is only supported by Tuner HAL 2.0 or higher. Unsupported version will
+     * return false.
+     * Use {@link TunerVersionChecker#getTunerVersion()} to check the version.
+     */
+    public boolean isSegmentAutoSupported() {
+        return mIsSegmentAutoSupported;
+    }
+    /**
+     * If full segment is supported or not.
+     *
+     * <p>This query is only supported by Tuner HAL 2.0 or higher. Unsupported version will
+     * return false.
+     * Use {@link TunerVersionChecker#getTunerVersion()} to check the version.
+     */
+    public boolean isFullSegmentSupported() {
+        return mIsFullSegmentSupported;
     }
 }

@@ -19,8 +19,6 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="mic_active" msgid="5766614241012047024">"Микрофон күйүк"</string>
-    <string name="app_accessed_mic" msgid="2754428675130470196">"%1$s микрофонуңузду колдонууда"</string>
     <string name="notification_vpn_connected" msgid="3891023882833274730">"VPN туташтырылды"</string>
     <string name="notification_vpn_disconnected" msgid="7150747626448044843">"VPN ажыратылды"</string>
     <string name="notification_disclosure_vpn_text" msgid="3873532735584866236">"<xliff:g id="VPN_APP">%1$s</xliff:g> аркылуу"</string>

@@ -16,12 +16,20 @@
 
 package android.os.storage;
 
+import static com.google.common.truth.Truth.assertThat;
+
+import static org.mockito.Mockito.when;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.test.InstrumentationTestCase;
 import android.util.Log;
 
 import libcore.io.Streams;
+
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -39,6 +47,7 @@ public class StorageManagerBaseTest extends InstrumentationTestCase {
 
     protected Context mContext = null;
     protected StorageManager mSm = null;
+    @Mock private File mFile;
     private static String LOG_TAG = "StorageManagerBaseTest";
     protected static final long MAX_WAIT_TIME = 120*1000;
     protected static final long WAIT_TIME_INCR = 5*1000;
@@ -46,11 +55,7 @@ public class StorageManagerBaseTest extends InstrumentationTestCase {
     protected static String OBB_FILE_1_CONTENTS_1 = "OneToOneThousandInts.bin";
     protected static String OBB_FILE_2 = "obb_file2.obb";
     protected static String OBB_FILE_3 = "obb_file3.obb";
-    protected static String OBB_FILE_1_PASSWORD = "password1";
-    protected static String OBB_FILE_1_ENCRYPTED = "obb_enc_file100_orig1.obb";
     protected static String OBB_FILE_2_UNSIGNED = "obb_file2_nosign.obb";
-    protected static String OBB_FILE_3_PASSWORD = "password3";
-    protected static String OBB_FILE_3_ENCRYPTED = "obb_enc_file100_orig3.obb";
     protected static String OBB_FILE_3_BAD_PACKAGENAME = "obb_file3_bad_packagename.obb";
 
     protected static boolean FORCE = true;
@@ -121,9 +126,47 @@ public class StorageManagerBaseTest extends InstrumentationTestCase {
      */
     @Override
     public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
         mContext = getInstrumentation().getContext();
         mSm = (StorageManager)mContext.getSystemService(android.content.Context.STORAGE_SERVICE);
 
+    }
+
+    /**
+     * Tests the space reserved for cache when system has high free space i.e. more than
+     * StorageManager.STORAGE_THRESHOLD_PERCENT_HIGH of total space.
+     */
+    @Test
+    public void testGetStorageCacheBytesUnderHighStorage() throws Exception {
+        when(mFile.getUsableSpace()).thenReturn(10000L);
+        when(mFile.getTotalSpace()).thenReturn(15000L);
+        long result = mSm.getStorageCacheBytes(mFile, 0);
+        assertThat(result).isEqualTo(1500L);
+    }
+
+    /**
+     * Tests the space reserved for cache when system has low free space i.e. less than
+     * StorageManager.STORAGE_THRESHOLD_PERCENT_LOW of total space.
+     */
+    @Test
+    public void testGetStorageCacheBytesUnderLowStorage() throws Exception {
+        when(mFile.getUsableSpace()).thenReturn(10000L);
+        when(mFile.getTotalSpace()).thenReturn(250000L);
+        long result = mSm.getStorageCacheBytes(mFile, 0);
+        assertThat(result).isEqualTo(5000L);
+    }
+
+    /**
+     * Tests the space reserved for cache when system has moderate free space i.e.more than
+     * StorageManager.STORAGE_THRESHOLD_PERCENT_LOW of total space but less than
+     * StorageManager.STORAGE_THRESHOLD_PERCENT_HIGH of total space.
+     */
+    @Test
+    public void testGetStorageCacheBytesUnderModerateStorage() throws Exception {
+        when(mFile.getUsableSpace()).thenReturn(10000L);
+        when(mFile.getTotalSpace()).thenReturn(100000L);
+        long result = mSm.getStorageCacheBytes(mFile, 0);
+        assertThat(result).isEqualTo(4667L);
     }
 
     /**
@@ -180,22 +223,21 @@ public class StorageManagerBaseTest extends InstrumentationTestCase {
      * Mounts an OBB file
      *
      * @param obbFilePath The full path to the OBB file to mount
-     * @param key (optional) The key to use to unencrypt the OBB; pass null for no encryption
      * @param expectedState The expected state resulting from trying to mount the OBB
      * @return A {@link String} representing the normalized path to OBB file that was mounted
      */
-    protected String mountObb(String obbFilePath, String key, int expectedState) {
-        return doMountObb(obbFilePath, key, expectedState);
+    protected String mountObb(String obbFilePath, int expectedState) {
+        return doMountObb(obbFilePath, expectedState);
     }
 
     /**
-     * Mounts an OBB file with default options (no encryption, mounting succeeds)
+     * Mounts an OBB file with default options.
      *
      * @param obbFilePath The full path to the OBB file to mount
      * @return A {@link String} representing the normalized path to OBB file that was mounted
      */
     protected String mountObb(String obbFilePath) {
-        return doMountObb(obbFilePath, null, OnObbStateChangeListener.MOUNTED);
+        return doMountObb(obbFilePath, OnObbStateChangeListener.MOUNTED);
     }
 
     /**
@@ -232,13 +274,13 @@ public class StorageManagerBaseTest extends InstrumentationTestCase {
      * @return true if the listener was signaled of a state change by the system; else a fail()
      *      is triggered if we timed out
      */
-    protected String doMountObb_noThrow(String obbFilePath, String key, int expectedState) {
-        Log.i(LOG_TAG, "doMountObb() on " + obbFilePath + " using key: " + key);
+    protected String doMountObb_noThrow(String obbFilePath, int expectedState) {
+        Log.i(LOG_TAG, "doMountObb() on " + obbFilePath);
         assertTrue ("Null path was passed in for OBB file!", obbFilePath != null);
         assertTrue ("Null path was passed in for OBB file!", obbFilePath != null);
 
         ObbListener obbListener = new ObbListener();
-        boolean success = mSm.mountObb(obbFilePath, key, obbListener);
+        boolean success = mSm.mountObb(obbFilePath, null, obbListener);
         success &= obbFilePath.equals(doWaitForObbStateChange(obbListener));
         success &= (expectedState == obbListener.state());
 
@@ -260,17 +302,16 @@ public class StorageManagerBaseTest extends InstrumentationTestCase {
      * Mounts an OBB file without throwing and synchronously waits for it to finish mounting
      *
      * @param obbFilePath The full path to the OBB file to mount
-     * @param key (optional) The key to use to unencrypt the OBB; pass null for no encryption
      * @param expectedState The expected state resulting from trying to mount the OBB
      * @return A {@link String} representing the actual normalized path to OBB file that was
      *      mounted, or null if the mounting failed
      */
-    protected String doMountObb(String obbFilePath, String key, int expectedState) {
-        Log.i(LOG_TAG, "doMountObb() on " + obbFilePath + " using key: " + key);
+    protected String doMountObb(String obbFilePath, int expectedState) {
+        Log.i(LOG_TAG, "doMountObb() on " + obbFilePath);
         assertTrue ("Null path was passed in for OBB file!", obbFilePath != null);
 
         ObbListener obbListener = new ObbListener();
-        assertTrue("mountObb call failed", mSm.mountObb(obbFilePath, key, obbListener));
+        assertTrue("mountObb call failed", mSm.mountObb(obbFilePath, null, obbListener));
         assertTrue("Failed to get OBB mount status change for file: " + obbFilePath,
                 doWaitForObbStateChange(obbListener));
         assertEquals("OBB mount state not what was expected!", expectedState,

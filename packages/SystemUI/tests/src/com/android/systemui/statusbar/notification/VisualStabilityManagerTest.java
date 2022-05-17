@@ -32,11 +32,13 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
 import org.junit.Before;
@@ -52,6 +54,7 @@ public class VisualStabilityManagerTest extends SysuiTestCase {
     private TestableLooper mTestableLooper;
 
     private VisualStabilityManager mVisualStabilityManager;
+    private VisualStabilityProvider mVisualStabilityProvider = mock(VisualStabilityProvider.class);
     private VisualStabilityManager.Callback mCallback = mock(VisualStabilityManager.Callback.class);
     private VisibilityLocationProvider mLocationProvider = mock(VisibilityLocationProvider.class);
     private ExpandableNotificationRow mRow = mock(ExpandableNotificationRow.class);
@@ -68,9 +71,11 @@ public class VisualStabilityManagerTest extends SysuiTestCase {
         mTestableLooper = TestableLooper.get(this);
         mVisualStabilityManager = new VisualStabilityManager(
                 mock(NotificationEntryManager.class),
+                mVisualStabilityProvider,
                 new Handler(mTestableLooper.getLooper()),
                 statusBarStateController,
-                wakefulnessLifecycle);
+                wakefulnessLifecycle,
+                mock(DumpManager.class));
 
         mVisualStabilityManager.setVisibilityLocationProvider(mLocationProvider);
         mEntry = new NotificationEntryBuilder().build();

@@ -56,48 +56,13 @@ public final class CellInfoLte extends CellInfo implements Parcelable {
     }
 
     /** @hide */
-    public CellInfoLte(android.hardware.radio.V1_0.CellInfo ci) {
-        super(ci);
-        final android.hardware.radio.V1_0.CellInfoLte cil = ci.lte.get(0);
-        mCellIdentityLte = new CellIdentityLte(cil.cellIdentityLte);
-        mCellSignalStrengthLte = new CellSignalStrengthLte(cil.signalStrengthLte);
-        mCellConfig = new CellConfigLte();
-    }
-
-    /** @hide */
-    public CellInfoLte(android.hardware.radio.V1_2.CellInfo ci) {
-        super(ci);
-        final android.hardware.radio.V1_2.CellInfoLte cil = ci.lte.get(0);
-        mCellIdentityLte = new CellIdentityLte(cil.cellIdentityLte);
-        mCellSignalStrengthLte = new CellSignalStrengthLte(cil.signalStrengthLte);
-        mCellConfig = new CellConfigLte();
-    }
-
-    /** @hide */
-    public CellInfoLte(android.hardware.radio.V1_4.CellInfo ci, long timeStamp) {
-        super(ci, timeStamp);
-        final android.hardware.radio.V1_4.CellInfoLte cil = ci.info.lte();
-        mCellIdentityLte = new CellIdentityLte(cil.base.cellIdentityLte);
-        mCellSignalStrengthLte = new CellSignalStrengthLte(cil.base.signalStrengthLte);
-        mCellConfig = new CellConfigLte(cil.cellConfig);
-    }
-
-    /** @hide */
-    public CellInfoLte(android.hardware.radio.V1_5.CellInfo ci, long timeStamp) {
-        super(ci, timeStamp);
-        final android.hardware.radio.V1_5.CellInfoLte cil = ci.ratSpecificInfo.lte();
-        mCellIdentityLte = new CellIdentityLte(cil.cellIdentityLte);
-        mCellSignalStrengthLte = new CellSignalStrengthLte(cil.signalStrengthLte);
-        mCellConfig = new CellConfigLte();
-    }
-
-    /** @hide */
-    public CellInfoLte(android.hardware.radio.V1_6.CellInfo ci, long timeStamp) {
-        super(ci, timeStamp);
-        final android.hardware.radio.V1_6.CellInfoLte cil = ci.ratSpecificInfo.lte();
-        mCellIdentityLte = new CellIdentityLte(cil.cellIdentityLte);
-        mCellSignalStrengthLte = new CellSignalStrengthLte(cil.signalStrengthLte);
-        mCellConfig = new CellConfigLte();
+    public CellInfoLte(int connectionStatus, boolean registered, long timeStamp,
+            CellIdentityLte cellIdentityLte, CellSignalStrengthLte cellSignalStrengthLte,
+            CellConfigLte cellConfig) {
+        super(connectionStatus, registered, timeStamp);
+        mCellIdentityLte = cellIdentityLte;
+        mCellSignalStrengthLte = cellSignalStrengthLte;
+        mCellConfig = cellConfig;
     }
 
     /**

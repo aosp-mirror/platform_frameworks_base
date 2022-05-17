@@ -65,7 +65,7 @@ public final class ManualTimeZoneSuggestion implements Parcelable {
         String zoneId = in.readString();
         ManualTimeZoneSuggestion suggestion = new ManualTimeZoneSuggestion(zoneId);
         @SuppressWarnings("unchecked")
-        ArrayList<String> debugInfo = (ArrayList<String>) in.readArrayList(null /* classLoader */);
+        ArrayList<String> debugInfo = (ArrayList<String>) in.readArrayList(null /* classLoader */, java.lang.String.class);
         suggestion.mDebugInfo = debugInfo;
         return suggestion;
     }

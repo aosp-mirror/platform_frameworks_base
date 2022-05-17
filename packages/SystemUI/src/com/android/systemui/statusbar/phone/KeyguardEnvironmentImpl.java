@@ -14,13 +14,12 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.statusbar.phone.StatusBar.DEBUG;
-import static com.android.systemui.statusbar.phone.StatusBar.MULTIUSER_DEBUG;
+import static com.android.systemui.statusbar.phone.CentralSurfaces.DEBUG;
+import static com.android.systemui.statusbar.phone.CentralSurfaces.MULTIUSER_DEBUG;
 
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManager.KeyguardEnvironment;
@@ -33,13 +32,15 @@ public class KeyguardEnvironmentImpl implements KeyguardEnvironment {
 
     private static final String TAG = "KeyguardEnvironmentImpl";
 
-    private final NotificationLockscreenUserManager mLockscreenUserManager =
-            Dependency.get(NotificationLockscreenUserManager.class);
-    private final DeviceProvisionedController mDeviceProvisionedController =
-            Dependency.get(DeviceProvisionedController.class);
+    private final NotificationLockscreenUserManager mLockscreenUserManager;
+    private final DeviceProvisionedController mDeviceProvisionedController;
 
     @Inject
-    public KeyguardEnvironmentImpl() {
+    public KeyguardEnvironmentImpl(
+            NotificationLockscreenUserManager notificationLockscreenUserManager,
+            DeviceProvisionedController deviceProvisionedController) {
+        mLockscreenUserManager = notificationLockscreenUserManager;
+        mDeviceProvisionedController = deviceProvisionedController;
     }
 
     @Override  // NotificationEntryManager.KeyguardEnvironment

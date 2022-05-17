@@ -241,6 +241,11 @@ public class AudioMix {
     }
 
     /** @hide */
+    public boolean isForCallRedirection() {
+        return mRule.isForCallRedirection();
+    }
+
+    /** @hide */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -422,6 +427,20 @@ public class AudioMix {
                     rate = 44100;
                 }
                 mFormat = new AudioFormat.Builder().setSampleRate(rate).build();
+            } else {
+                // Ensure that 'mFormat' uses an output channel mask. Using an input channel
+                // mask was not made 'illegal' initially, however the framework code
+                // assumes usage in AudioMixes of output channel masks only (b/194910301).
+                if ((mFormat.getPropertySetMask()
+                                & AudioFormat.AUDIO_FORMAT_HAS_PROPERTY_CHANNEL_MASK) != 0) {
+                    if (mFormat.getChannelCount() == 1
+                            && mFormat.getChannelMask() == AudioFormat.CHANNEL_IN_MONO) {
+                        mFormat = new AudioFormat.Builder(mFormat).setChannelMask(
+                                AudioFormat.CHANNEL_OUT_MONO).build();
+                    }
+                    // CHANNEL_IN_STEREO == CHANNEL_OUT_STEREO so no need to correct.
+                    // CHANNEL_IN_FRONT_BACK is hidden, should not appear.
+                }
             }
             if ((mDeviceSystemType != AudioSystem.DEVICE_NONE)
                     && (mDeviceSystemType != AudioSystem.DEVICE_OUT_REMOTE_SUBMIX)

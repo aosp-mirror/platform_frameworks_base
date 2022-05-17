@@ -22,6 +22,8 @@ import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.Objects;
 
 
@@ -76,7 +78,8 @@ public final class DataSpecificRegistrationInfo implements Parcelable {
     /**
      * @hide
      */
-    DataSpecificRegistrationInfo(
+    @VisibleForTesting
+    public DataSpecificRegistrationInfo(
             int maxDataCalls, boolean isDcNrRestricted, boolean isNrAvailable,
             boolean isEnDcAvailable, @Nullable VopsSupportInfo vops) {
         this.maxDataCalls = maxDataCalls;
@@ -105,7 +108,7 @@ public final class DataSpecificRegistrationInfo implements Parcelable {
         isDcNrRestricted = source.readBoolean();
         isNrAvailable = source.readBoolean();
         isEnDcAvailable = source.readBoolean();
-        mVopsSupportInfo = source.readParcelable(VopsSupportInfo.class.getClassLoader());
+        mVopsSupportInfo = source.readParcelable(VopsSupportInfo.class.getClassLoader(), android.telephony.VopsSupportInfo.class);
     }
 
     @Override
@@ -186,7 +189,7 @@ public final class DataSpecificRegistrationInfo implements Parcelable {
     /**
      * @return The VOPS (Voice over Packet Switched) support information.
      *
-     * The instance of {@link LTEVopsSupportInfo}, or {@link NrVopsSupportInfo},
+     * The instance of {@link LteVopsSupportInfo}, or {@link NrVopsSupportInfo},
      * null if there is there is no VOPS support information available.
      */
     @Nullable

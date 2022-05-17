@@ -15,6 +15,7 @@
  */
 package com.android.server.hdmi;
 
+import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 import static com.android.server.hdmi.Constants.ADDR_AUDIO_SYSTEM;
 import static com.android.server.hdmi.Constants.ADDR_BROADCAST;
 import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_1;
@@ -31,11 +32,7 @@ import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.media.AudioManager;
-import android.os.Handler;
-import android.os.IPowerManager;
-import android.os.IThermalService;
 import android.os.Looper;
-import android.os.PowerManager;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
 
@@ -49,10 +46,9 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 @SmallTest
 @Presubmit
@@ -69,6 +65,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     private HdmiCecLocalDeviceAudioSystem mHdmiCecLocalDeviceAudioSystem;
     private HdmiCecLocalDevicePlayback mHdmiCecLocalDevicePlayback;
     private FakeNativeWrapper mNativeWrapper;
+    private FakePowerManagerWrapper mPowerManager;
     private Looper mMyLooper;
     private TestLooper mTestLooper = new TestLooper();
     private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
@@ -83,20 +80,15 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     private HdmiDeviceInfo mDeviceInfo;
     private boolean mArcSupport;
     private HdmiPortInfo[] mHdmiPortInfo;
-    private boolean mWokenUp;
-
-    @Mock private IPowerManager mIPowerManagerMock;
-    @Mock private IThermalService mIThermalServiceMock;
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
-
         Context context = InstrumentationRegistry.getTargetContext();
         mMyLooper = mTestLooper.getLooper();
 
         mHdmiControlService =
-            new HdmiControlService(InstrumentationRegistry.getTargetContext()) {
+            new HdmiControlService(InstrumentationRegistry.getTargetContext(),
+                    Collections.emptyList(), new FakeAudioDeviceVolumeManagerWrapper()) {
                 @Override
                 AudioManager getAudioManager() {
                     return new AudioManager() {
@@ -154,11 +146,6 @@ public class HdmiCecLocalDeviceAudioSystemTest {
                 }
 
                 @Override
-                void wakeUp() {
-                    mWokenUp = true;
-                }
-
-                @Override
                 void invokeDeviceEventListeners(HdmiDeviceInfo device, int status) {
                     mDeviceInfo = device;
                     mInvokeDeviceEventState = status;
@@ -177,12 +164,6 @@ public class HdmiCecLocalDeviceAudioSystemTest {
                         default:
                             return defVal;
                     }
-                }
-
-                @Override
-                protected PowerManager getPowerManager() {
-                    return new PowerManager(context, mIPowerManagerMock,
-                            mIThermalServiceMock, new Handler(mMyLooper));
                 }
             };
 
@@ -207,10 +188,9 @@ public class HdmiCecLocalDeviceAudioSystemTest {
                 mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setCecController(mHdmiCecController);
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
-        mHdmiControlService.setMessageValidator(new HdmiCecMessageValidator(mHdmiControlService));
         mLocalDevices.add(mHdmiCecLocalDeviceAudioSystem);
         mLocalDevices.add(mHdmiCecLocalDevicePlayback);
-        mHdmiCecLocalDeviceAudioSystem.setRoutingControlFeatureEnables(true);
+        mHdmiCecLocalDeviceAudioSystem.setRoutingControlFeatureEnabled(true);
         mHdmiPortInfo = new HdmiPortInfo[4];
         mHdmiPortInfo[0] =
             new HdmiPortInfo(
@@ -226,6 +206,9 @@ public class HdmiCecLocalDeviceAudioSystemTest {
                 4, HdmiPortInfo.PORT_INPUT, HDMI_3_PHYSICAL_ADDRESS, true, false, false);
         mNativeWrapper.setPortInfo(mHdmiPortInfo);
         mHdmiControlService.initService();
+        mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
+        mPowerManager = new FakePowerManagerWrapper(context);
+        mHdmiControlService.setPowerManager(mPowerManager);
         // No TV device interacts with AVR so system audio control won't be turned on here
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTestLooper.dispatchAll();
@@ -673,16 +656,16 @@ public class HdmiCecLocalDeviceAudioSystemTest {
 
     @Test
     public void doNotWakeUpOnHotPlug_PlugIn() {
-        mWokenUp = false;
+        mPowerManager.setInteractive(false);
         mHdmiCecLocalDeviceAudioSystem.onHotplug(0, true);
-        assertThat(mWokenUp).isFalse();
+        assertThat(mPowerManager.isInteractive()).isFalse();
     }
 
     @Test
     public void doNotWakeUpOnHotPlug_PlugOut() {
-        mWokenUp = false;
+        mPowerManager.setInteractive(false);
         mHdmiCecLocalDeviceAudioSystem.onHotplug(0, false);
-        assertThat(mWokenUp).isFalse();
+        assertThat(mPowerManager.isInteractive()).isFalse();
     }
 
     @Test
@@ -793,12 +776,13 @@ public class HdmiCecLocalDeviceAudioSystemTest {
 
     @Test
     public void setActiveSource_localDevice_playback() {
-        mHdmiControlService.setActiveSource(mHdmiCecLocalDevicePlayback.mAddress,
+        mHdmiControlService.setActiveSource(
+                mHdmiCecLocalDevicePlayback.getDeviceInfo().getLogicalAddress(),
                 SELF_PHYSICAL_ADDRESS,
                 "HdmiControlServiceTest");
 
-        assertThat(mHdmiControlService.getLocalActiveSource().logicalAddress).isEqualTo(
-                mHdmiCecLocalDevicePlayback.mAddress);
+        assertThat(mHdmiControlService.getLocalActiveSource().logicalAddress)
+                .isEqualTo(mHdmiCecLocalDevicePlayback.getDeviceInfo().getLogicalAddress());
         assertThat(mHdmiControlService.getLocalActiveSource().physicalAddress).isEqualTo(
                 SELF_PHYSICAL_ADDRESS);
         assertThat(mHdmiCecLocalDevicePlayback.isActiveSource()).isTrue();
@@ -807,12 +791,13 @@ public class HdmiCecLocalDeviceAudioSystemTest {
 
     @Test
     public void setActiveSource_localDevice_audio() {
-        mHdmiControlService.setActiveSource(mHdmiCecLocalDeviceAudioSystem.mAddress,
+        mHdmiControlService.setActiveSource(
+                mHdmiCecLocalDeviceAudioSystem.getDeviceInfo().getLogicalAddress(),
                 SELF_PHYSICAL_ADDRESS,
                 "HdmiControlServiceTest");
 
-        assertThat(mHdmiControlService.getLocalActiveSource().logicalAddress).isEqualTo(
-                mHdmiCecLocalDeviceAudioSystem.mAddress);
+        assertThat(mHdmiControlService.getLocalActiveSource().logicalAddress)
+                .isEqualTo(mHdmiCecLocalDeviceAudioSystem.getDeviceInfo().getLogicalAddress());
         assertThat(mHdmiControlService.getLocalActiveSource().physicalAddress).isEqualTo(
                 SELF_PHYSICAL_ADDRESS);
         assertThat(mHdmiCecLocalDevicePlayback.isActiveSource()).isFalse();

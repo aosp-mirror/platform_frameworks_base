@@ -27,7 +27,7 @@ import android.annotation.Nullable;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.Property;
 import android.content.pm.PackageManager.PropertyLocation;
-import android.content.pm.parsing.component.ParsedComponent;
+import com.android.server.pm.pkg.component.ParsedComponent;
 import android.os.Binder;
 import android.os.UserHandle;
 import android.util.ArrayMap;

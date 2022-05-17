@@ -123,7 +123,7 @@ class TableFlattenerTest : public ::testing::Test {
       return ::testing::AssertionFailure() << "failed to find resource name";
     }
 
-    Maybe<ResourceName> resName = ResourceUtils::ToResourceName(actual_name);
+    std::optional<ResourceName> resName = ResourceUtils::ToResourceName(actual_name);
     if (!resName) {
       return ::testing::AssertionFailure()
              << "expected name '" << expected_res_name << "' but got '"
@@ -423,7 +423,7 @@ TEST_F(TableFlattenerTest, FlattenSharedLibrary) {
   ResourceTable result;
   ASSERT_TRUE(Flatten(context.get(), {}, table.get(), &result));
 
-  Maybe<ResourceTable::SearchResult> search_result =
+  std::optional<ResourceTable::SearchResult> search_result =
       result.FindResource(test::ParseNameOrDie("lib:id/foo"));
   ASSERT_TRUE(search_result);
   EXPECT_EQ(0x00u, search_result.value().entry->id.value().package_id());
@@ -454,7 +454,7 @@ TEST_F(TableFlattenerTest, FlattenSharedLibraryWithStyle) {
   ResourceTable result;
   ASSERT_TRUE(Flatten(context.get(), {}, table.get(), &result));
 
-  Maybe<ResourceTable::SearchResult> search_result =
+  std::optional<ResourceTable::SearchResult> search_result =
       result.FindResource(test::ParseNameOrDie("lib:style/Theme"));
   ASSERT_TRUE(search_result);
   EXPECT_EQ(0x00030001u, search_result.value().entry->id.value());

@@ -19,6 +19,7 @@ package com.android.server.pm;
 import android.content.ComponentName;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.util.Slog;
@@ -27,6 +28,7 @@ import android.util.TypedXmlSerializer;
 
 import com.android.internal.util.XmlUtils;
 import com.android.server.LocalServices;
+import com.android.server.pm.pkg.PackageUserState;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -55,7 +57,6 @@ public class PreferredComponent {
     private String mParseError;
 
     private final Callbacks mCallbacks;
-    private final String mSetupWizardPackageName;
 
     public interface Callbacks {
         public boolean onReadTag(String tagName, TypedXmlPullParser parser)
@@ -70,7 +71,6 @@ public class PreferredComponent {
         mAlways = always;
         mShortComponent = component.flattenToShortString();
         mParseError = null;
-        mSetupWizardPackageName = null;
         if (set != null) {
             final int N = set.length;
             String[] myPackages = new String[N];
@@ -172,8 +172,6 @@ public class PreferredComponent {
         mSetPackages = myPackages;
         mSetClasses = myClasses;
         mSetComponents = myComponents;
-        final PackageManagerInternal packageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
-        mSetupWizardPackageName = packageManagerInternal.getSetupWizardPackageName();
     }
 
     public String getParseError() {
@@ -197,7 +195,7 @@ public class PreferredComponent {
         }
     }
 
-    public boolean sameSet(List<ResolveInfo> query, boolean excludeSetupWizardPackage) {
+    public boolean sameSet(List<ResolveInfo> query, boolean excludeSetupWizardPackage, int userId) {
         if (mSetPackages == null) {
             return query == null;
         }
@@ -206,6 +204,8 @@ public class PreferredComponent {
         }
         final int NQ = query.size();
         final int NS = mSetPackages.length;
+        final PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
+        String setupWizardPackageName = pmi.getSetupWizardPackageName();
         int numMatch = 0;
         for (int i=0; i<NQ; i++) {
             ResolveInfo ri = query.get(i);
@@ -214,7 +214,16 @@ public class PreferredComponent {
 
             // ignore SetupWizard package's launcher capability because it is only existed
             // during SetupWizard is running
-            if (excludeSetupWizardPackage && ai.packageName.equals(mSetupWizardPackageName)) {
+            if (excludeSetupWizardPackage && ai.packageName.equals(setupWizardPackageName)) {
+                continue;
+            }
+
+            // Avoid showing the disambiguation dialog if the package which is installed with
+            // reason INSTALL_REASON_DEVICE_SETUP.
+            final PackageUserState pkgUserState =
+                    pmi.getPackageStateInternal(ai.packageName).getUserStates().get(userId);
+            if (pkgUserState != null && pkgUserState.getInstallReason()
+                    == PackageManager.INSTALL_REASON_DEVICE_SETUP) {
                 continue;
             }
 
@@ -295,6 +304,8 @@ public class PreferredComponent {
         if (!excludeSetupWizardPackage && NS < NQ) {
             return false;
         }
+        final PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
+        String setupWizardPackageName = pmi.getSetupWizardPackageName();
         for (int i=0; i<NQ; i++) {
             ResolveInfo ri = query.get(i);
             ActivityInfo ai = ri.activityInfo;
@@ -302,7 +313,7 @@ public class PreferredComponent {
 
             // ignore SetupWizard package's launcher capability because it is only existed
             // during SetupWizard is running
-            if (excludeSetupWizardPackage && ai.packageName.equals(mSetupWizardPackageName)) {
+            if (excludeSetupWizardPackage && ai.packageName.equals(setupWizardPackageName)) {
                 continue;
             }
 

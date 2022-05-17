@@ -35,12 +35,16 @@ import org.xmlpull.v1.XmlSerializer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * A mapping from String keys to values of various types. The set of types
  * supported by this class is purposefully restricted to simple objects that can
  * safely be persisted to and restored from disk.
+ *
+ * <p><b>Warning:</b> Note that {@link PersistableBundle} is a lazy container and as such it does
+ * NOT implement {@link #equals(Object)} or {@link #hashCode()}.
  *
  * @see Bundle
  */
@@ -103,6 +107,10 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
     /**
      * Constructs a PersistableBundle from a Bundle.  Does only a shallow copy of the Bundle.
      *
+     * <p><b>Warning:</b> This method will deserialize every item on the bundle, including custom
+     * types such as {@link Parcelable} and {@link Serializable}, so only use this when you trust
+     * the source. Specifically don't use this method on app-provided bundles.
+     *
      * @param b a Bundle to be copied.
      *
      * @throws IllegalArgumentException if any element of {@code b} cannot be persisted.
@@ -110,7 +118,7 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
      * @hide
      */
     public PersistableBundle(Bundle b) {
-        this(b.getMap());
+        this(b.getItemwiseMap());
     }
 
     /**
@@ -148,10 +156,15 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
     }
 
     /**
-     * Constructs a PersistableBundle without initializing it.
+     * Constructs a {@link PersistableBundle} containing a copy of {@code from}.
+     *
+     * @param from The bundle to be copied.
+     * @param deep Whether is a deep or shallow copy.
+     *
+     * @hide
      */
-    PersistableBundle(boolean doInit) {
-        super(doInit);
+    PersistableBundle(PersistableBundle from, boolean deep) {
+        super(from, deep);
     }
 
     /**
@@ -182,9 +195,7 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
      * are referenced as-is and not copied in any way.
      */
     public PersistableBundle deepCopy() {
-        PersistableBundle b = new PersistableBundle(false);
-        b.copyInternal(this, true);
-        return b;
+        return new PersistableBundle(this, /* deep */ true);
     }
 
     /**
@@ -316,11 +327,15 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
                         new MyReadMapCallback()));
             }
         }
-        return EMPTY;
+        return new PersistableBundle();  // An empty mutable PersistableBundle
     }
 
+    /**
+     * Returns a string representation of the {@link PersistableBundle} that may be suitable for
+     * debugging. It won't print the internal map if its content hasn't been unparcelled.
+     */
     @Override
-    synchronized public String toString() {
+    public synchronized String toString() {
         if (mParcelledData != null) {
             if (isEmptyParcel()) {
                 return "PersistableBundle[EMPTY_PARCEL]";

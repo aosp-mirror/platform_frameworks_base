@@ -33,8 +33,12 @@ import static com.android.systemui.people.PeopleSpaceUtils.VALID_CONTACT;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.app.people.ConversationStatus;
@@ -44,6 +48,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.UserHandle;
@@ -578,6 +583,27 @@ public class PeopleTileViewHelperTest extends SysuiTestCase {
         View result = views.apply(mContext, null);
 
         assertEquals(result.getSourceLayoutResId(), R.layout.people_tile_suppressed_layout);
+    }
+
+    @Test
+    public void testCreateRemoteViewsWithNotificationContent() throws Exception {
+        PeopleTileViewHelper helper = spy(getPeopleTileViewHelper(PERSON_TILE));
+        doReturn(new BitmapDrawable()).when(helper).resolveImage(any(), any());
+        RemoteViews views = helper.getViews();
+        View result = views.apply(mContext, null);
+
+        assertEquals(View.VISIBLE, result.findViewById(R.id.image).getVisibility());
+    }
+
+    @Test
+    public void testCreateRemoteViewsWithInvalidNotificationContent() throws Exception {
+        PeopleTileViewHelper helper = spy(getPeopleTileViewHelper(PERSON_TILE));
+        doThrow(SecurityException.class).when(helper).resolveImage(any(), any());
+        RemoteViews views = helper.getViews();
+        View result = views.apply(mContext, null);
+
+        assertEquals(View.GONE, result.findViewById(R.id.image).getVisibility());
+        assertEquals(View.VISIBLE, result.findViewById(R.id.text_content).getVisibility());
     }
 
     @Test

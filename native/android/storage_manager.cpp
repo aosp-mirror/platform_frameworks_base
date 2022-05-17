@@ -140,8 +140,7 @@ public:
         }
     }
 
-    void mountObb(const char* rawPath, const char* key, AStorageManager_obbCallbackFunc func,
-            void* data) {
+    void mountObb(const char* rawPath, AStorageManager_obbCallbackFunc func, void* data) {
         // Resolve path before sending to MountService
         char canonicalPath[PATH_MAX];
         if (realpath(rawPath, canonicalPath) == NULL) {
@@ -158,9 +157,7 @@ public:
         ObbCallback* cb = registerObbCallback(func, data);
         String16 rawPath16(rawPath);
         String16 canonicalPath16(canonicalPath);
-        String16 key16(key);
-        mMountService->mountObb(rawPath16, canonicalPath16, key16, mObbActionListener,
-                cb->nonce, obbInfo);
+        mMountService->mountObb(rawPath16, canonicalPath16, mObbActionListener, cb->nonce, obbInfo);
     }
 
     void unmountObb(const char* filename, const bool force, AStorageManager_obbCallbackFunc func, void* data) {
@@ -207,7 +204,11 @@ void AStorageManager_delete(AStorageManager* mgr) {
 
 void AStorageManager_mountObb(AStorageManager* mgr, const char* filename, const char* key,
         AStorageManager_obbCallbackFunc cb, void* data) {
-    mgr->mountObb(filename, key, cb, data);
+    if (key != nullptr && key[0] != '\0') {
+        ALOGE("mounting encrypted OBBs is no longer supported");
+        return;
+    }
+    mgr->mountObb(filename, cb, data);
 }
 
 void AStorageManager_unmountObb(AStorageManager* mgr, const char* filename, const int force,

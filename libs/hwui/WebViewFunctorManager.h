@@ -88,6 +88,7 @@ public:
     }
 
 private:
+    bool prepareRootSurfaceControl();
     void reparentSurfaceControl(ASurfaceControl* parent);
 
 private:

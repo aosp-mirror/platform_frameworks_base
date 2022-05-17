@@ -16,6 +16,7 @@
 
 package com.android.server.location.injector;
 
+import static android.location.LocationDeviceConfig.ADAS_SETTINGS_ALLOWLIST;
 import static android.location.LocationDeviceConfig.IGNORE_SETTINGS_ALLOWLIST;
 import static android.provider.Settings.Global.ENABLE_GNSS_RAW_MEAS_FULL_TRACKING;
 import static android.provider.Settings.Global.LOCATION_BACKGROUND_THROTTLE_INTERVAL_MS;
@@ -80,6 +81,7 @@ public class SystemSettingsHelper extends SettingsHelper {
     private final StringListCachedSecureSetting mLocationPackageBlacklist;
     private final StringListCachedSecureSetting mLocationPackageWhitelist;
     private final StringSetCachedGlobalSetting mBackgroundThrottlePackageWhitelist;
+    private final PackageTagsListSetting mAdasPackageAllowlist;
     private final PackageTagsListSetting mIgnoreSettingsPackageAllowlist;
 
     public SystemSettingsHelper(Context context) {
@@ -98,6 +100,9 @@ public class SystemSettingsHelper extends SettingsHelper {
                 LOCATION_BACKGROUND_THROTTLE_PACKAGE_WHITELIST,
                 () -> SystemConfig.getInstance().getAllowUnthrottledLocation(),
                 FgThread.getHandler());
+        mAdasPackageAllowlist = new PackageTagsListSetting(
+                ADAS_SETTINGS_ALLOWLIST,
+                () -> SystemConfig.getInstance().getAllowAdasLocationSettings());
         mIgnoreSettingsPackageAllowlist = new PackageTagsListSetting(
                 IGNORE_SETTINGS_ALLOWLIST,
                 () -> SystemConfig.getInstance().getAllowIgnoreLocationSettings());
@@ -233,6 +238,21 @@ public class SystemSettingsHelper extends SettingsHelper {
     }
 
     @Override
+    public PackageTagsList getAdasAllowlist() {
+        return mAdasPackageAllowlist.getValue();
+    }
+
+    @Override
+    public void addAdasAllowlistChangedListener(GlobalSettingChangedListener listener) {
+        mAdasPackageAllowlist.addListener(listener);
+    }
+
+    @Override
+    public void removeAdasAllowlistChangedListener(GlobalSettingChangedListener listener) {
+        mAdasPackageAllowlist.removeListener(listener);
+    }
+
+    @Override
     public PackageTagsList getIgnoreSettingsAllowlist() {
         return mIgnoreSettingsPackageAllowlist.getValue();
     }
@@ -359,9 +379,17 @@ public class SystemSettingsHelper extends SettingsHelper {
 
         PackageTagsList ignoreSettingsAllowlist = mIgnoreSettingsPackageAllowlist.getValue();
         if (!ignoreSettingsAllowlist.isEmpty()) {
-            ipw.println("Bypass Allow Packages:");
+            ipw.println("Emergency Bypass Allow Packages:");
             ipw.increaseIndent();
             ignoreSettingsAllowlist.dump(ipw);
+            ipw.decreaseIndent();
+        }
+
+        PackageTagsList adasPackageAllowlist = mAdasPackageAllowlist.getValue();
+        if (!adasPackageAllowlist.isEmpty()) {
+            ipw.println("ADAS Bypass Allow Packages:");
+            ipw.increaseIndent();
+            adasPackageAllowlist.dump(ipw);
             ipw.decreaseIndent();
         }
     }

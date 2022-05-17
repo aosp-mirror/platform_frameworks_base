@@ -108,14 +108,18 @@ public class OneTimePermissionUserManager {
      * </p>
      * @param packageName The package to start a one-time permission session for
      * @param timeoutMillis Number of milliseconds for an app to be in an inactive state
+     * @param revokeAfterKilledDelayMillis Number of milliseconds to wait after the process dies
+     *                                     before ending the session. Set to -1 to use default value
+     *                                     for the device.
      * @param importanceToResetTimer The least important level to uid must be to reset the timer
      * @param importanceToKeepSessionAlive The least important level the uid must be to keep the
-     *                                    session alive
+     *                                     session alive
      *
      * @hide
      */
     void startPackageOneTimeSession(@NonNull String packageName, long timeoutMillis,
-            int importanceToResetTimer, int importanceToKeepSessionAlive) {
+            long revokeAfterKilledDelayMillis, int importanceToResetTimer,
+            int importanceToKeepSessionAlive) {
         int uid;
         try {
             uid = mContext.getPackageManager().getPackageUid(packageName, 0);
@@ -126,11 +130,15 @@ public class OneTimePermissionUserManager {
 
         synchronized (mLock) {
             PackageInactivityListener listener = mListeners.get(uid);
-            if (listener == null) {
-                listener = new PackageInactivityListener(uid, packageName, timeoutMillis,
+            if (listener != null) {
+                listener.updateSessionParameters(timeoutMillis, revokeAfterKilledDelayMillis,
                         importanceToResetTimer, importanceToKeepSessionAlive);
-                mListeners.put(uid, listener);
+                return;
             }
+            listener = new PackageInactivityListener(uid, packageName, timeoutMillis,
+                    revokeAfterKilledDelayMillis, importanceToResetTimer,
+                    importanceToKeepSessionAlive);
+            mListeners.put(uid, listener);
         }
     }
 
@@ -159,15 +167,6 @@ public class OneTimePermissionUserManager {
     }
 
     /**
-     * The delay to wait before revoking on the event an app is terminated. Recommended to be long
-     * enough so that apps don't lose permission on an immediate restart
-     */
-    private static long getKilledDelayMillis() {
-        return DeviceConfig.getLong(DeviceConfig.NAMESPACE_PERMISSIONS,
-                PROPERTY_KILLED_DELAY_CONFIG_KEY, DEFAULT_KILLED_DELAY_MILLIS);
-    }
-
-    /**
      * Register to listen for Uids being uninstalled. This must be done outside of the
      * PermissionManagerService lock.
      */
@@ -185,9 +184,10 @@ public class OneTimePermissionUserManager {
 
         private final int mUid;
         private final @NonNull String mPackageName;
-        private final long mTimeout;
-        private final int mImportanceToResetTimer;
-        private final int mImportanceToKeepSessionAlive;
+        private long mTimeout;
+        private long mRevokeAfterKilledDelay;
+        private int mImportanceToResetTimer;
+        private int mImportanceToKeepSessionAlive;
 
         private boolean mIsAlarmSet;
         private boolean mIsFinished;
@@ -202,16 +202,23 @@ public class OneTimePermissionUserManager {
         private final Object mToken = new Object();
 
         private PackageInactivityListener(int uid, @NonNull String packageName, long timeout,
-                int importanceToResetTimer, int importanceToKeepSessionAlive) {
+                long revokeAfterkilledDelay, int importanceToResetTimer,
+                int importanceToKeepSessionAlive) {
 
             Log.i(LOG_TAG,
                     "Start tracking " + packageName + ". uid=" + uid + " timeout=" + timeout
+                            + " killedDelay=" + revokeAfterkilledDelay
                             + " importanceToResetTimer=" + importanceToResetTimer
                             + " importanceToKeepSessionAlive=" + importanceToKeepSessionAlive);
 
             mUid = uid;
             mPackageName = packageName;
             mTimeout = timeout;
+            mRevokeAfterKilledDelay = revokeAfterkilledDelay == -1
+                    ? DeviceConfig.getLong(
+                            DeviceConfig.NAMESPACE_PERMISSIONS, PROPERTY_KILLED_DELAY_CONFIG_KEY,
+                            DEFAULT_KILLED_DELAY_MILLIS)
+                    : revokeAfterkilledDelay;
             mImportanceToResetTimer = importanceToResetTimer;
             mImportanceToKeepSessionAlive = importanceToKeepSessionAlive;
 
@@ -231,6 +238,28 @@ public class OneTimePermissionUserManager {
             onImportanceChanged(mUid, mActivityManager.getPackageImportance(packageName));
         }
 
+        public void updateSessionParameters(long timeoutMillis, long revokeAfterKilledDelayMillis,
+                int importanceToResetTimer, int importanceToKeepSessionAlive) {
+            synchronized (mInnerLock) {
+                mTimeout = Math.min(mTimeout, timeoutMillis);
+                mRevokeAfterKilledDelay = Math.min(mRevokeAfterKilledDelay,
+                        revokeAfterKilledDelayMillis == -1
+                                ? DeviceConfig.getLong(
+                                DeviceConfig.NAMESPACE_PERMISSIONS,
+                                PROPERTY_KILLED_DELAY_CONFIG_KEY, DEFAULT_KILLED_DELAY_MILLIS)
+                                : revokeAfterKilledDelayMillis);
+                mImportanceToResetTimer = Math.min(importanceToResetTimer, mImportanceToResetTimer);
+                mImportanceToKeepSessionAlive = Math.min(importanceToKeepSessionAlive,
+                        mImportanceToKeepSessionAlive);
+                Log.v(LOG_TAG,
+                        "Updated params for " + mPackageName + ". timeout=" + mTimeout
+                                + " killedDelay=" + mRevokeAfterKilledDelay
+                                + " importanceToResetTimer=" + mImportanceToResetTimer
+                                + " importanceToKeepSessionAlive=" + mImportanceToKeepSessionAlive);
+                onImportanceChanged(mUid, mActivityManager.getPackageImportance(mPackageName));
+            }
+        }
+
         private void onImportanceChanged(int uid, int importance) {
             if (uid != mUid) {
                 return;
@@ -243,6 +272,10 @@ public class OneTimePermissionUserManager {
                 mHandler.removeCallbacksAndMessages(mToken);
 
                 if (importance > IMPORTANCE_CACHED) {
+                    if (mRevokeAfterKilledDelay == 0) {
+                        onPackageInactiveLocked();
+                        return;
+                    }
                     // Delay revocation in case app is restarting
                     mHandler.postDelayed(() -> {
                         int imp = mActivityManager.getUidImportance(mUid);
@@ -255,7 +288,7 @@ public class OneTimePermissionUserManager {
                             }
                             onImportanceChanged(mUid, imp);
                         }
-                    }, mToken, getKilledDelayMillis());
+                    }, mToken, mRevokeAfterKilledDelay);
                     return;
                 }
                 if (importance > mImportanceToResetTimer) {
@@ -284,9 +317,21 @@ public class OneTimePermissionUserManager {
             synchronized (mInnerLock) {
                 mIsFinished = true;
                 cancelAlarmLocked();
-                mActivityManager.removeOnUidImportanceListener(mStartTimerListener);
-                mActivityManager.removeOnUidImportanceListener(mSessionKillableListener);
-                mActivityManager.removeOnUidImportanceListener(mGoneListener);
+                try {
+                    mActivityManager.removeOnUidImportanceListener(mStartTimerListener);
+                } catch (IllegalArgumentException e) {
+                    Log.e(LOG_TAG, "Could not remove start timer listener", e);
+                }
+                try {
+                    mActivityManager.removeOnUidImportanceListener(mSessionKillableListener);
+                } catch (IllegalArgumentException e) {
+                    Log.e(LOG_TAG, "Could not remove session killable listener", e);
+                }
+                try {
+                    mActivityManager.removeOnUidImportanceListener(mGoneListener);
+                } catch (IllegalArgumentException e) {
+                    Log.e(LOG_TAG, "Could not remove gone listener", e);
+                }
             }
         }
 

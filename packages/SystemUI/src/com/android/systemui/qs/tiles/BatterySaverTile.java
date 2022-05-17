@@ -18,6 +18,7 @@ package com.android.systemui.qs.tiles;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.service.quicksettings.Tile;
 import android.view.View;
@@ -36,7 +37,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
-import com.android.systemui.qs.SecureSetting;
+import com.android.systemui.qs.SettingObserver;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -49,7 +50,7 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
 
     private final BatteryController mBatteryController;
     @VisibleForTesting
-    protected final SecureSetting mSetting;
+    protected final SettingObserver mSetting;
 
     private int mLevel;
     private boolean mPowerSave;
@@ -76,7 +77,7 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
         mBatteryController = batteryController;
         mBatteryController.observe(getLifecycle(), this);
         int currentUser = host.getUserContext().getUserId();
-        mSetting = new SecureSetting(
+        mSetting = new SettingObserver(
                 secureSettings,
                 mHandler,
                 Secure.LOW_POWER_WARNING_ACKNOWLEDGED,
@@ -115,11 +116,16 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
     public void handleSetListening(boolean listening) {
         super.handleSetListening(listening);
         mSetting.setListening(listening);
+        if (!listening) {
+            // If we stopped listening, it means that the tile is not visible. In that case, we
+            // don't need to save the view anymore
+            mBatteryController.clearLastPowerSaverStartView();
+        }
     }
 
     @Override
     public Intent getLongClickIntent() {
-        return new Intent(Intent.ACTION_POWER_USAGE_SUMMARY);
+        return new Intent(Settings.ACTION_BATTERY_SAVER_SETTINGS);
     }
 
     @Override
@@ -127,7 +133,7 @@ public class BatterySaverTile extends QSTileImpl<BooleanState> implements
         if (getState().state == Tile.STATE_UNAVAILABLE) {
             return;
         }
-        mBatteryController.setPowerSaveMode(!mPowerSave);
+        mBatteryController.setPowerSaveMode(!mPowerSave, view);
     }
 
     @Override

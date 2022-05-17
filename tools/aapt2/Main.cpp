@@ -147,7 +147,7 @@ class DaemonCommand : public Command {
  private:
   io::FileOutputStream* out_;
   IDiagnostics* diagnostics_;
-  Maybe<std::string> trace_folder_;
+  std::optional<std::string> trace_folder_;
 };
 
 }  // namespace aapt

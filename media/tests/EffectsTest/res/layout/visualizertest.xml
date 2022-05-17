@@ -175,6 +175,11 @@
 
     </LinearLayout>
 
+    <Button android:id="@+id/hammer_on_release_bug"
+            android:layout_width="fill_parent" android:layout_height="wrap_content"
+            android:text="@string/hammer_on_release_bug_name">
+    </Button>
+
     <ImageView
          android:src="@android:drawable/divider_horizontal_dark"
          android:layout_width="fill_parent"

@@ -16,6 +16,8 @@
 
 package com.android.internal.location;
 
+import android.Manifest;
+import android.annotation.RequiresPermission;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -28,8 +30,9 @@ import android.location.LocationManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
+import android.telephony.emergency.EmergencyNumber;
 import android.util.Log;
 
 import com.android.internal.R;
@@ -90,7 +93,6 @@ public class GpsNetInitiatedHandler {
 
     private final Context mContext;
     private final TelephonyManager mTelephonyManager;
-    private final PhoneStateListener mPhoneStateListener;
 
     // parent gps location provider
     private final LocationManager mLocationManager;
@@ -138,33 +140,37 @@ public class GpsNetInitiatedHandler {
         public int requestorIdEncoding;
         @UnsupportedAppUsage
         public int textEncoding;
-    };
+    }
 
-    public static class GpsNiResponse {
-        /* User response, one of the values in GpsUserResponseType */
-        int userResponse;
-    };
+    private class EmergencyCallListener extends TelephonyCallback implements
+            TelephonyCallback.OutgoingEmergencyCallListener,
+            TelephonyCallback.CallStateListener {
 
-    private final BroadcastReceiver mBroadcastReciever = new BroadcastReceiver() {
+        @Override
+        @RequiresPermission(Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION)
+        public void onOutgoingEmergencyCall(EmergencyNumber placedEmergencyNumber,
+                int subscriptionId) {
+            mIsInEmergencyCall = true;
+            if (DEBUG) Log.d(TAG, "onOutgoingEmergencyCall(): inEmergency = " + getInEmergency());
+        }
 
-        @Override public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action.equals(Intent.ACTION_NEW_OUTGOING_CALL)) {
-                String phoneNumber = intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER);
-                /*
-                   Tracks the emergency call:
-                       mIsInEmergencyCall records if the phone is in emergency call or not. It will
-                       be set to true when the phone is having emergency call, and then will
-                       be set to false by mPhoneStateListener when the emergency call ends.
-                */
-                mIsInEmergencyCall = mTelephonyManager.isEmergencyNumber(phoneNumber);
-                if (DEBUG) Log.v(TAG, "ACTION_NEW_OUTGOING_CALL - " + getInEmergency());
-            } else if (action.equals(LocationManager.MODE_CHANGED_ACTION)) {
-                updateLocationMode();
-                if (DEBUG) Log.d(TAG, "location enabled :" + getLocationEnabled());
+        @Override
+        @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
+        public void onCallStateChanged(int state) {
+            if (DEBUG) Log.d(TAG, "onCallStateChanged(): state is " + state);
+            // listening for emergency call ends
+            if (state == TelephonyManager.CALL_STATE_IDLE) {
+                if (mIsInEmergencyCall) {
+                    mCallEndElapsedRealtimeMillis = SystemClock.elapsedRealtime();
+                    mIsInEmergencyCall = false;
+                }
             }
         }
-    };
+    }
+
+    // The internal implementation of TelephonyManager uses WeakReference so we have to keep a
+    // reference here.
+    private final EmergencyCallListener mEmergencyCallListener = new EmergencyCallListener();
 
     /**
      * The notification that is shown when a network-initiated notification
@@ -190,26 +196,22 @@ public class GpsNetInitiatedHandler {
         updateLocationMode();
         mTelephonyManager =
             (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+        mTelephonyManager.registerTelephonyCallback(mContext.getMainExecutor(),
+                mEmergencyCallListener);
 
-        mPhoneStateListener = new PhoneStateListener() {
+        BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+
             @Override
-            public void onCallStateChanged(int state, String incomingNumber) {
-                if (DEBUG) Log.d(TAG, "onCallStateChanged(): state is "+ state);
-                // listening for emergency call ends
-                if (state == TelephonyManager.CALL_STATE_IDLE) {
-                    if (mIsInEmergencyCall) {
-                        mCallEndElapsedRealtimeMillis = SystemClock.elapsedRealtime();
-                        mIsInEmergencyCall = false;
-                    }
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if (action.equals(LocationManager.MODE_CHANGED_ACTION)) {
+                    updateLocationMode();
+                    if (DEBUG) Log.d(TAG, "location enabled :" + getLocationEnabled());
                 }
             }
         };
-        mTelephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
-
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(Intent.ACTION_NEW_OUTGOING_CALL);
-        intentFilter.addAction(LocationManager.MODE_CHANGED_ACTION);
-        mContext.registerReceiver(mBroadcastReciever, intentFilter);
+        mContext.registerReceiver(broadcastReceiver,
+                new IntentFilter(LocationManager.MODE_CHANGED_ACTION));
     }
 
     public void setSuplEsEnabled(boolean isEnabled) {

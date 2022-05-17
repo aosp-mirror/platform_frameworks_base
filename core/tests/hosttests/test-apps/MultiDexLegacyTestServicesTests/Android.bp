@@ -24,7 +24,7 @@ package {
 android_test {
     name: "MultiDexLegacyTestServicesTests",
     srcs: ["src/**/*.java"],
-    sdk_version: "9",
+    sdk_version: "16",
     dex_preopt: {
         enabled: false,
     },

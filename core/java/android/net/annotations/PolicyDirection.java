@@ -24,10 +24,6 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * IPsec traffic direction.
- *
- * <p>Mainline modules cannot reference hidden @IntDef. Moving this annotation to a separate class
- * to allow others to statically include it.
- *
  * @hide
  */
 @IntDef(value = {IpSecManager.DIRECTION_IN, IpSecManager.DIRECTION_OUT})

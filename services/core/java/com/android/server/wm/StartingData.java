@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import com.android.server.policy.WindowManagerPolicy.StartingSurface;
+import com.android.server.wm.StartingSurfaceController.StartingSurface;
 
 /**
  * Represents the model about how a starting window should be constructed.
@@ -31,6 +31,12 @@ public abstract class StartingData {
      * {@link android.view.WindowManager.LayoutParams#SOFT_INPUT_IS_FORWARD_NAVIGATION}.
      */
     boolean mIsTransitionForward;
+
+    /**
+     * Non-null if the starting window should cover the bounds of associated task. It is assigned
+     * when the parent activity of starting window may be put in a partial area of the task.
+     */
+    Task mAssociatedTask;
 
     protected StartingData(WindowManagerService service, int typeParams) {
         mService = service;

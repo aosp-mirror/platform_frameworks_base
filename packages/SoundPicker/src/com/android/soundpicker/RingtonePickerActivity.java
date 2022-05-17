@@ -256,6 +256,14 @@ public final class RingtonePickerActivity extends AlertActivity implements
         }
 
         setupAlert();
+
+        ListView listView = mAlert.getListView();
+        if (listView != null) {
+            // List view needs to gain focus in order for RSB to work.
+            if (!listView.requestFocus()) {
+                Log.e(TAG, "Unable to gain focus! RSB may not work properly.");
+            }
+        }
     }
     @Override
     public void onSaveInstanceState(Bundle outState) {

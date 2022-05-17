@@ -16,14 +16,29 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
+import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION;
+import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
+
+import static com.android.internal.policy.DecorView.NAVIGATION_BAR_COLOR_VIEW_ATTRIBUTES;
+import static com.android.internal.policy.DecorView.STATUS_BAR_COLOR_VIEW_ATTRIBUTES;
+import static com.android.internal.policy.DecorView.getNavigationBarRect;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREENSHOT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
+import android.app.ActivityThread;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.RecordingCanvas;
@@ -44,16 +59,17 @@ import android.view.WindowInsetsController.Appearance;
 import android.view.WindowManager.LayoutParams;
 import android.window.TaskSnapshot;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
+import com.android.internal.policy.DecorView;
 import com.android.server.policy.WindowManagerPolicy.ScreenOffListener;
-import com.android.server.policy.WindowManagerPolicy.StartingSurface;
-import com.android.server.wm.TaskSnapshotSurface.SystemBarBackgroundPainter;
 import com.android.server.wm.utils.InsetUtils;
 
 import com.google.android.collect.Sets;
 
 import java.io.PrintWriter;
+import java.util.Set;
 
 /**
  * When an app token becomes invisible, we take a snapshot (bitmap) of the corresponding task and
@@ -114,9 +130,9 @@ class TaskSnapshotController {
     private final boolean mIsRunningOnIoT;
 
     /**
-     * Flag indicating whether we are running on an Android Wear device.
+     * Flag indicating if task snapshot is enabled on this device.
      */
-    private final boolean mIsRunningOnWear;
+    private boolean mTaskSnapshotEnabled;
 
     TaskSnapshotController(WindowManagerService service) {
         mService = service;
@@ -127,10 +143,12 @@ class TaskSnapshotController {
                 PackageManager.FEATURE_LEANBACK);
         mIsRunningOnIoT = mService.mContext.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_EMBEDDED);
-        mIsRunningOnWear = mService.mContext.getPackageManager().hasSystemFeature(
-            PackageManager.FEATURE_WATCH);
         mHighResTaskSnapshotScale = mService.mContext.getResources().getFloat(
                 com.android.internal.R.dimen.config_highResTaskSnapshotScale);
+        mTaskSnapshotEnabled =
+                !mService.mContext
+                        .getResources()
+                        .getBoolean(com.android.internal.R.bool.config_disableTaskSnapshots);
     }
 
     void systemReady() {
@@ -167,7 +185,10 @@ class TaskSnapshotController {
      * calling {@link #snapshotTasks} to ensure that the task has an up-to-date snapshot.
      */
     @VisibleForTesting
-    void addSkipClosingAppSnapshotTasks(ArraySet<Task> tasks) {
+    void addSkipClosingAppSnapshotTasks(Set<Task> tasks) {
+        if (shouldDisableSnapshots()) {
+            return;
+        }
         mSkipClosingAppSnapshotTasks.addAll(tasks);
     }
 
@@ -175,43 +196,60 @@ class TaskSnapshotController {
         snapshotTasks(tasks, false /* allowSnapshotHome */);
     }
 
+    /**
+     * This is different than {@link #recordTaskSnapshot(Task, boolean)} because it doesn't store
+     * the snapshot to the cache and returns the TaskSnapshot immediately.
+     *
+     * This is only used for testing so the snapshot content can be verified.
+     */
+    @VisibleForTesting
+    TaskSnapshot captureTaskSnapshot(Task task, boolean snapshotHome) {
+        final TaskSnapshot snapshot;
+        if (snapshotHome) {
+            snapshot = snapshotTask(task);
+        } else {
+            switch (getSnapshotMode(task)) {
+                case SNAPSHOT_MODE_NONE:
+                    return null;
+                case SNAPSHOT_MODE_APP_THEME:
+                    snapshot = drawAppThemeSnapshot(task);
+                    break;
+                case SNAPSHOT_MODE_REAL:
+                    snapshot = snapshotTask(task);
+                    break;
+                default:
+                    snapshot = null;
+                    break;
+            }
+        }
+        return snapshot;
+    }
+
+    void recordTaskSnapshot(Task task, boolean allowSnapshotHome) {
+        final boolean snapshotHome = allowSnapshotHome && task.isActivityTypeHome();
+        final TaskSnapshot snapshot = captureTaskSnapshot(task, snapshotHome);
+        if (snapshot == null) {
+            return;
+        }
+
+        final HardwareBuffer buffer = snapshot.getHardwareBuffer();
+        if (buffer.getWidth() == 0 || buffer.getHeight() == 0) {
+            buffer.close();
+            Slog.e(TAG, "Invalid task snapshot dimensions " + buffer.getWidth() + "x"
+                    + buffer.getHeight());
+        } else {
+            mCache.putSnapshot(task, snapshot);
+            // Don't persist or notify the change for the temporal snapshot.
+            if (!snapshotHome) {
+                mPersister.persistSnapshot(task.mTaskId, task.mUserId, snapshot);
+                task.onSnapshotChanged(snapshot);
+            }
+        }
+    }
+
     private void snapshotTasks(ArraySet<Task> tasks, boolean allowSnapshotHome) {
         for (int i = tasks.size() - 1; i >= 0; i--) {
-            final Task task = tasks.valueAt(i);
-            final TaskSnapshot snapshot;
-            final boolean snapshotHome = allowSnapshotHome && task.isActivityTypeHome();
-            if (snapshotHome) {
-                snapshot = snapshotTask(task);
-            } else {
-                switch (getSnapshotMode(task)) {
-                    case SNAPSHOT_MODE_NONE:
-                        continue;
-                    case SNAPSHOT_MODE_APP_THEME:
-                        snapshot = drawAppThemeSnapshot(task);
-                        break;
-                    case SNAPSHOT_MODE_REAL:
-                        snapshot = snapshotTask(task);
-                        break;
-                    default:
-                        snapshot = null;
-                        break;
-                }
-            }
-            if (snapshot != null) {
-                final HardwareBuffer buffer = snapshot.getHardwareBuffer();
-                if (buffer.getWidth() == 0 || buffer.getHeight() == 0) {
-                    buffer.close();
-                    Slog.e(TAG, "Invalid task snapshot dimensions " + buffer.getWidth() + "x"
-                            + buffer.getHeight());
-                } else {
-                    mCache.putSnapshot(task, snapshot);
-                    // Don't persist or notify the change for the temporal snapshot.
-                    if (!snapshotHome) {
-                        mPersister.persistSnapshot(task.mTaskId, task.mUserId, snapshot);
-                        task.onSnapshotChanged(snapshot);
-                    }
-                }
-            }
+            recordTaskSnapshot(tasks.valueAt(i), allowSnapshotHome);
         }
     }
 
@@ -231,15 +269,6 @@ class TaskSnapshotController {
      */
     public void clearSnapshotCache() {
         mCache.clearRunningCache();
-    }
-
-    /**
-     * Creates a starting surface for {@param token} with {@param snapshot}. DO NOT HOLD THE WINDOW
-     * MANAGER LOCK WHEN CALLING THIS METHOD!
-     */
-    StartingSurface createStartingSurface(ActivityRecord activity,
-            TaskSnapshot snapshot) {
-        return TaskSnapshotSurface.create(mService, activity, snapshot);
     }
 
     /**
@@ -281,13 +310,15 @@ class TaskSnapshotController {
         }
         final ActivityRecord activity = result.first;
         final WindowState mainWindow = result.second;
-        final Rect contentInsets = getSystemBarInsets(task.getBounds(),
+        final Rect contentInsets = getSystemBarInsets(mainWindow.getFrame(),
                 mainWindow.getInsetsStateWithVisibilityOverride());
-        InsetUtils.addInsets(contentInsets, activity.getLetterboxInsets());
+        final Rect letterboxInsets = activity.getLetterboxInsets();
+        InsetUtils.addInsets(contentInsets, letterboxInsets);
 
         builder.setIsRealSnapshot(true);
         builder.setId(System.currentTimeMillis());
         builder.setContentInsets(contentInsets);
+        builder.setLetterboxInsets(letterboxInsets);
 
         final boolean isWindowTranslucent = mainWindow.getAttrs().format != PixelFormat.OPAQUE;
         final boolean isShowWallpaper = mainWindow.hasWallpaper();
@@ -367,12 +398,6 @@ class TaskSnapshotController {
     }
 
     @Nullable
-    SurfaceControl.ScreenshotHardwareBuffer createTaskSnapshot(@NonNull Task task,
-            float scaleFraction, TaskSnapshot.Builder builder) {
-        return createTaskSnapshot(task, scaleFraction, PixelFormat.RGBA_8888, null, builder);
-    }
-
-    @Nullable
     private SurfaceControl.ScreenshotHardwareBuffer createImeSnapshot(@NonNull Task task,
             int pixelFormat) {
         if (task.getSurfaceControl() == null) {
@@ -384,7 +409,7 @@ class TaskSnapshotController {
         final WindowState imeWindow = task.getDisplayContent().mInputMethodWindow;
         SurfaceControl.ScreenshotHardwareBuffer imeBuffer = null;
         if (imeWindow != null && imeWindow.isWinVisibleLw()) {
-            final Rect bounds = imeWindow.getContainingFrame();
+            final Rect bounds = imeWindow.getParentFrame();
             bounds.offsetTo(0, 0);
             imeBuffer = SurfaceControl.captureLayersExcluding(imeWindow.getSurfaceControl(),
                     bounds, 1.0f, pixelFormat, null);
@@ -455,10 +480,15 @@ class TaskSnapshotController {
         }
         final HardwareBuffer buffer = screenshotBuffer == null ? null
                 : screenshotBuffer.getHardwareBuffer();
-        if (buffer == null || buffer.getWidth() <= 1 || buffer.getHeight() <= 1) {
+        if (isInvalidHardwareBuffer(buffer)) {
             return null;
         }
         return screenshotBuffer;
+    }
+
+    static boolean isInvalidHardwareBuffer(HardwareBuffer buffer) {
+        return buffer == null || buffer.isClosed() // This must be checked before getting size.
+                || buffer.getWidth() <= 1 || buffer.getHeight() <= 1;
     }
 
     @Nullable
@@ -487,8 +517,12 @@ class TaskSnapshotController {
         return builder.build();
     }
 
+    void setTaskSnapshotEnabled(boolean enabled) {
+        mTaskSnapshotEnabled = enabled;
+    }
+
     boolean shouldDisableSnapshots() {
-        return mIsRunningOnWear || mIsRunningOnTv || mIsRunningOnIoT;
+        return mIsRunningOnTv || mIsRunningOnIoT || !mTaskSnapshotEnabled;
     }
 
     /**
@@ -505,7 +539,7 @@ class TaskSnapshotController {
             // Since RecentsAnimation will handle task snapshot while switching apps with the
             // best capture timing (e.g. IME window capture),
             // No need additional task capture while task is controlled by RecentsAnimation.
-            if (task.isAnimatingByRecents()) {
+            if (isAnimatingByRecents(task)) {
                 mSkipClosingAppSnapshotTasks.add(task);
             }
             // If the task of the app is not visible anymore, it means no other app in that task
@@ -546,7 +580,7 @@ class TaskSnapshotController {
         final LayoutParams attrs = mainWindow.getAttrs();
         final Rect taskBounds = task.getBounds();
         final InsetsState insetsState = mainWindow.getInsetsStateWithVisibilityOverride();
-        final Rect systemBarInsets = getSystemBarInsets(taskBounds, insetsState);
+        final Rect systemBarInsets = getSystemBarInsets(mainWindow.getFrame(), insetsState);
         final SystemBarBackgroundPainter decorPainter = new SystemBarBackgroundPainter(attrs.flags,
                 attrs.privateFlags, attrs.insetsFlags.appearance, task.getTaskDescription(),
                 mHighResTaskSnapshotScale, insetsState);
@@ -561,14 +595,15 @@ class TaskSnapshotController {
         final RecordingCanvas c = node.start(width, height);
         c.drawColor(color);
         decorPainter.setInsets(systemBarInsets);
-        decorPainter.drawDecors(c, null /* statusBarExcludeFrame */);
+        decorPainter.drawDecors(c /* statusBarExcludeFrame */);
         node.end(c);
         final Bitmap hwBitmap = ThreadedRenderer.createHardwareBitmap(node, width, height);
         if (hwBitmap == null) {
             return null;
         }
         final Rect contentInsets = new Rect(systemBarInsets);
-        InsetUtils.addInsets(contentInsets, topChild.getLetterboxInsets());
+        final Rect letterboxInsets = topChild.getLetterboxInsets();
+        InsetUtils.addInsets(contentInsets, letterboxInsets);
 
         // Note, the app theme snapshot is never translucent because we enforce a non-translucent
         // color above
@@ -577,9 +612,9 @@ class TaskSnapshotController {
                 topChild.mActivityComponent, hwBitmap.getHardwareBuffer(),
                 hwBitmap.getColorSpace(), mainWindow.getConfiguration().orientation,
                 mainWindow.getWindowConfiguration().getRotation(), new Point(taskWidth, taskHeight),
-                contentInsets, false /* isLowResolution */, false /* isRealSnapshot */,
-                task.getWindowingMode(), getAppearance(task), false /* isTranslucent */,
-                false /* hasImeSurface */);
+                contentInsets, letterboxInsets, false /* isLowResolution */,
+                false /* isRealSnapshot */, task.getWindowingMode(),
+                getAppearance(task), false /* isTranslucent */, false /* hasImeSurface */);
     }
 
     /**
@@ -656,7 +691,7 @@ class TaskSnapshotController {
             // Since RecentsAnimation will handle task snapshot while switching apps with the best
             // capture timing (e.g. IME window capture), No need additional task capture while task
             // is controlled by RecentsAnimation.
-            if (task.isVisible() && !task.isAnimatingByRecents()) {
+            if (task.isVisible() && !isAnimatingByRecents(task)) {
                 mTmpTasks.add(task);
             }
         });
@@ -683,11 +718,106 @@ class TaskSnapshotController {
     }
 
     static Rect getSystemBarInsets(Rect frame, InsetsState state) {
-        return state.calculateInsets(frame, Type.systemBars(), false /* ignoreVisibility */);
+        return state.calculateInsets(
+                frame, Type.systemBars(), false /* ignoreVisibility */).toRect();
+    }
+
+    private boolean isAnimatingByRecents(@NonNull Task task) {
+        return task.isAnimatingByRecents()
+                || mService.mAtmService.getTransitionController().inRecentsTransition(task);
     }
 
     void dump(PrintWriter pw, String prefix) {
         pw.println(prefix + "mHighResTaskSnapshotScale=" + mHighResTaskSnapshotScale);
+        pw.println(prefix + "mTaskSnapshotEnabled=" + mTaskSnapshotEnabled);
         mCache.dump(pw, prefix);
+    }
+
+    /**
+     * Helper class to draw the background of the system bars in regions the task snapshot isn't
+     * filling the window.
+     */
+    static class SystemBarBackgroundPainter {
+
+        private final Paint mStatusBarPaint = new Paint();
+        private final Paint mNavigationBarPaint = new Paint();
+        private final int mStatusBarColor;
+        private final int mNavigationBarColor;
+        private final int mWindowFlags;
+        private final int mWindowPrivateFlags;
+        private final float mScale;
+        private final InsetsState mInsetsState;
+        private final Rect mSystemBarInsets = new Rect();
+
+        SystemBarBackgroundPainter(int windowFlags, int windowPrivateFlags, int appearance,
+                ActivityManager.TaskDescription taskDescription, float scale,
+                InsetsState insetsState) {
+            mWindowFlags = windowFlags;
+            mWindowPrivateFlags = windowPrivateFlags;
+            mScale = scale;
+            final Context context = ActivityThread.currentActivityThread().getSystemUiContext();
+            final int semiTransparent = context.getColor(
+                    R.color.system_bar_background_semi_transparent);
+            mStatusBarColor = DecorView.calculateBarColor(windowFlags, FLAG_TRANSLUCENT_STATUS,
+                    semiTransparent, taskDescription.getStatusBarColor(), appearance,
+                    APPEARANCE_LIGHT_STATUS_BARS,
+                    taskDescription.getEnsureStatusBarContrastWhenTransparent());
+            mNavigationBarColor = DecorView.calculateBarColor(windowFlags,
+                    FLAG_TRANSLUCENT_NAVIGATION, semiTransparent,
+                    taskDescription.getNavigationBarColor(), appearance,
+                    APPEARANCE_LIGHT_NAVIGATION_BARS,
+                    taskDescription.getEnsureNavigationBarContrastWhenTransparent()
+                            && context.getResources().getBoolean(R.bool.config_navBarNeedsScrim));
+            mStatusBarPaint.setColor(mStatusBarColor);
+            mNavigationBarPaint.setColor(mNavigationBarColor);
+            mInsetsState = insetsState;
+        }
+
+        void setInsets(Rect systemBarInsets) {
+            mSystemBarInsets.set(systemBarInsets);
+        }
+
+        int getStatusBarColorViewHeight() {
+            final boolean forceBarBackground =
+                    (mWindowPrivateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS) != 0;
+            if (STATUS_BAR_COLOR_VIEW_ATTRIBUTES.isVisible(
+                    mInsetsState, mStatusBarColor, mWindowFlags, forceBarBackground)) {
+                return (int) (mSystemBarInsets.top * mScale);
+            } else {
+                return 0;
+            }
+        }
+
+        private boolean isNavigationBarColorViewVisible() {
+            final boolean forceBarBackground =
+                    (mWindowPrivateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS) != 0;
+            return NAVIGATION_BAR_COLOR_VIEW_ATTRIBUTES.isVisible(
+                    mInsetsState, mNavigationBarColor, mWindowFlags, forceBarBackground);
+        }
+
+        void drawDecors(Canvas c) {
+            drawStatusBarBackground(c, getStatusBarColorViewHeight());
+            drawNavigationBarBackground(c);
+        }
+
+        @VisibleForTesting
+        void drawStatusBarBackground(Canvas c,
+                int statusBarHeight) {
+            if (statusBarHeight > 0 && Color.alpha(mStatusBarColor) != 0) {
+                final int rightInset = (int) (mSystemBarInsets.right * mScale);
+                c.drawRect(0, 0, c.getWidth() - rightInset, statusBarHeight, mStatusBarPaint);
+            }
+        }
+
+        @VisibleForTesting
+        void drawNavigationBarBackground(Canvas c) {
+            final Rect navigationBarRect = new Rect();
+            getNavigationBarRect(c.getWidth(), c.getHeight(), mSystemBarInsets, navigationBarRect,
+                    mScale);
+            final boolean visible = isNavigationBarColorViewVisible();
+            if (visible && Color.alpha(mNavigationBarColor) != 0 && !navigationBarRect.isEmpty()) {
+                c.drawRect(navigationBarRect, mNavigationBarPaint);
+            }
+        }
     }
 }

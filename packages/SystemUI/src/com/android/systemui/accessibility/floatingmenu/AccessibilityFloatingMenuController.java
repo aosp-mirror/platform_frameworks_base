@@ -51,26 +51,19 @@ public class AccessibilityFloatingMenuController implements
     private int mBtnMode;
     private String mBtnTargets;
     private boolean mIsKeyguardVisible;
-    private boolean mIsAccessibilityManagerServiceReady;
 
     @VisibleForTesting
     final KeyguardUpdateMonitorCallback mKeyguardCallback = new KeyguardUpdateMonitorCallback() {
-        // Accessibility floating menu needs to retrieve information from
-        // AccessibilityManagerService, and it would be ready before onUserUnlocked().
+
         @Override
         public void onUserUnlocked() {
-            mIsAccessibilityManagerServiceReady = true;
             handleFloatingMenuVisibility(mIsKeyguardVisible, mBtnMode, mBtnTargets);
         }
 
-        // Keyguard state would be changed before AccessibilityManagerService is ready to retrieve,
-        // need to wait until receive onUserUnlocked().
         @Override
         public void onKeyguardVisibilityChanged(boolean showing) {
             mIsKeyguardVisible = showing;
-            if (mIsAccessibilityManagerServiceReady) {
-                handleFloatingMenuVisibility(mIsKeyguardVisible, mBtnMode, mBtnTargets);
-            }
+            handleFloatingMenuVisibility(mIsKeyguardVisible, mBtnMode, mBtnTargets);
         }
 
         @Override
@@ -98,7 +91,7 @@ public class AccessibilityFloatingMenuController implements
         mAccessibilityButtonModeObserver = accessibilityButtonModeObserver;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
 
-        init();
+        mIsKeyguardVisible = false;
     }
 
     /**
@@ -124,9 +117,8 @@ public class AccessibilityFloatingMenuController implements
         handleFloatingMenuVisibility(mIsKeyguardVisible, mBtnMode, mBtnTargets);
     }
 
-    private void init() {
-        mIsKeyguardVisible = false;
-        mIsAccessibilityManagerServiceReady = false;
+    /** Initializes the AccessibilityFloatingMenuController configurations. */
+    public void init() {
         mBtnMode = mAccessibilityButtonModeObserver.getCurrentAccessibilityButtonMode();
         mBtnTargets = mAccessibilityButtonTargetsObserver.getCurrentAccessibilityButtonTargets();
         registerContentObservers();

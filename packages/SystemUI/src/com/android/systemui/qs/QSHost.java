@@ -19,7 +19,6 @@ import android.content.Context;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.plugins.qs.QSTile;
-import com.android.systemui.qs.external.TileServices;
 
 import java.util.Collection;
 
@@ -35,8 +34,8 @@ public interface QSHost {
     Collection<QSTile> getTiles();
     void addCallback(Callback callback);
     void removeCallback(Callback callback);
-    TileServices getTileServices();
     void removeTile(String tileSpec);
+    void removeTiles(Collection<String> specs);
     void unmarkTileAsAutoAdded(String tileSpec);
 
     int indexOf(String tileSpec);

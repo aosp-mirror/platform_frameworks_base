@@ -34,6 +34,16 @@
     <style name="LayoutInDisplayCutoutModeAlways">
         <item name="android:windowLayoutInDisplayCutoutMode">always</item>
     </style>
+    <style name="RelativeLayoutAlignBottom50Alpha">
+        <item name="android:layout_alignParentTop">false</item>
+        <item name="android:layout_alignParentBottom">true</item>
+        <item name="android:alpha">0.5</item>
+    </style>
+    <style name="RelativeLayoutAlignTop25Alpha">
+        <item name="android:layout_alignParentTop">true</item>
+        <item name="android:layout_alignParentBottom">false</item>
+        <item name="android:alpha">0.25</item>
+    </style>
     <style name="WindowBackgroundColorLiteral">
         <item name="android:windowBackground">#00FF00</item>
     </style>

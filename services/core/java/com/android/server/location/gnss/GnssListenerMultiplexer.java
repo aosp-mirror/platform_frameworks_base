@@ -119,8 +119,8 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
          */
         protected void onGnssListenerUnregister() {}
 
-        boolean onLocationPermissionsChanged(String packageName) {
-            if (getIdentity().getPackageName().equals(packageName)) {
+        boolean onLocationPermissionsChanged(@Nullable String packageName) {
+            if (packageName == null || getIdentity().getPackageName().equals(packageName)) {
                 return onLocationPermissionsChanged();
             }
 
@@ -197,7 +197,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
             mLocationPermissionsListener =
             new LocationPermissionsHelper.LocationPermissionsListener() {
                 @Override
-                public void onLocationPermissionsChanged(String packageName) {
+                public void onLocationPermissionsChanged(@Nullable String packageName) {
                     GnssListenerMultiplexer.this.onLocationPermissionsChanged(packageName);
                 }
 
@@ -390,7 +390,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
         updateRegistrations(registration -> registration.getIdentity().getUserId() == userId);
     }
 
-    private void onLocationPermissionsChanged(String packageName) {
+    private void onLocationPermissionsChanged(@Nullable String packageName) {
         updateRegistrations(registration -> registration.onLocationPermissionsChanged(packageName));
     }
 

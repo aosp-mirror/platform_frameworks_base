@@ -472,7 +472,7 @@ public class TvRecordingClient {
         }
 
         @Override
-        void onTuned(TvInputManager.Session session, Uri channelUri) {
+        public void onTuned(TvInputManager.Session session, Uri channelUri) {
             if (DEBUG) {
                 Log.d(TAG, "onTuned()");
             }

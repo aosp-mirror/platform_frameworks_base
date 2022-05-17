@@ -51,7 +51,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center_horizontal|top"
-                        android:textAppearance="@style/TextAppearance.Material.Subhead"
+                        android:textAppearance="@style/TextAppearance.DeviceDefault.Body1"
                         android:paddingStart="?dialogPreferredPadding"
                         android:paddingEnd="?dialogPreferredPadding"
                         android:paddingTop="8dip"

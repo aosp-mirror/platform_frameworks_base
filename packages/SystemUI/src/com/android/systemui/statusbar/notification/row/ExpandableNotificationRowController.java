@@ -20,21 +20,30 @@ import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME
 import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENABLE_REMOTE_INPUT;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
+import com.android.systemui.statusbar.SmartReplyController;
+import com.android.systemui.statusbar.notification.FeedbackIcon;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.collection.render.NodeController;
+import com.android.systemui.statusbar.notification.collection.render.NotifViewController;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.dagger.AppName;
@@ -43,6 +52,8 @@ import com.android.systemui.statusbar.notification.row.dagger.NotificationRowSco
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.policy.SmartReplyConstants;
+import com.android.systemui.statusbar.policy.dagger.RemoteInputViewSubcomponent;
 import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.wmshell.BubblesManager;
 
@@ -56,9 +67,12 @@ import javax.inject.Named;
  * Controller for {@link ExpandableNotificationRow}.
  */
 @NotificationRowScope
-public class ExpandableNotificationRowController implements NodeController {
+public class ExpandableNotificationRowController implements NotifViewController {
+    private static final String TAG = "NotifRowController";
     private final ExpandableNotificationRow mView;
+    private final NotificationLockscreenUserManager mLockscreenUserManager;
     private final NotificationListContainer mListContainer;
+    private final RemoteInputViewSubcomponent.Factory mRemoteInputViewSubcomponentFactory;
     private final ActivatableNotificationViewController mActivatableNotificationViewController;
     private final NotificationMediaManager mMediaManager;
     private final PluginManager mPluginManager;
@@ -73,7 +87,7 @@ public class ExpandableNotificationRowController implements NodeController {
     private final HeadsUpManager mHeadsUpManager;
     private final ExpandableNotificationRow.OnExpandClickListener mOnExpandClickListener;
     private final StatusBarStateController mStatusBarStateController;
-
+    private final MetricsLogger mMetricsLogger;
     private final ExpandableNotificationRow.ExpansionLogger mExpansionLogger =
             this::logNotificationExpansion;
     private final ExpandableNotificationRow.CoordinateOnClickListener mOnFeedbackClickListener;
@@ -81,16 +95,25 @@ public class ExpandableNotificationRowController implements NodeController {
     private final OnUserInteractionCallback mOnUserInteractionCallback;
     private final FalsingManager mFalsingManager;
     private final FalsingCollector mFalsingCollector;
+    private final FeatureFlags mFeatureFlags;
     private final boolean mAllowLongPress;
     private final PeopleNotificationIdentifier mPeopleNotificationIdentifier;
     private final Optional<BubblesManager> mBubblesManagerOptional;
+    private final SmartReplyConstants mSmartReplyConstants;
+    private final SmartReplyController mSmartReplyController;
+    private final ExpandableNotificationRowDragController mDragController;
 
     @Inject
     public ExpandableNotificationRowController(
             ExpandableNotificationRow view,
-            NotificationListContainer listContainer,
+            NotificationLockscreenUserManager lockscreenUserManager,
             ActivatableNotificationViewController activatableNotificationViewController,
+            RemoteInputViewSubcomponent.Factory rivSubcomponentFactory,
+            MetricsLogger metricsLogger,
+            NotificationListContainer listContainer,
             NotificationMediaManager mediaManager,
+            SmartReplyConstants smartReplyConstants,
+            SmartReplyController smartReplyController,
             PluginManager pluginManager,
             SystemClock clock,
             @AppName String appName,
@@ -108,10 +131,14 @@ public class ExpandableNotificationRowController implements NodeController {
             OnUserInteractionCallback onUserInteractionCallback,
             FalsingManager falsingManager,
             FalsingCollector falsingCollector,
+            FeatureFlags featureFlags,
             PeopleNotificationIdentifier peopleNotificationIdentifier,
-            Optional<BubblesManager> bubblesManagerOptional) {
+            Optional<BubblesManager> bubblesManagerOptional,
+            ExpandableNotificationRowDragController dragController) {
         mView = view;
+        mLockscreenUserManager = lockscreenUserManager;
         mListContainer = listContainer;
+        mRemoteInputViewSubcomponentFactory = rivSubcomponentFactory;
         mActivatableNotificationViewController = activatableNotificationViewController;
         mMediaManager = mediaManager;
         mPluginManager = pluginManager;
@@ -132,8 +159,13 @@ public class ExpandableNotificationRowController implements NodeController {
         mOnFeedbackClickListener = mNotificationGutsManager::openGuts;
         mAllowLongPress = allowLongPress;
         mFalsingCollector = falsingCollector;
+        mFeatureFlags = featureFlags;
         mPeopleNotificationIdentifier = peopleNotificationIdentifier;
         mBubblesManagerOptional = bubblesManagerOptional;
+        mDragController = dragController;
+        mMetricsLogger = metricsLogger;
+        mSmartReplyConstants = smartReplyConstants;
+        mSmartReplyController = smartReplyController;
     }
 
     /**
@@ -143,6 +175,7 @@ public class ExpandableNotificationRowController implements NodeController {
         mActivatableNotificationViewController.init();
         mView.initialize(
                 entry,
+                mRemoteInputViewSubcomponentFactory,
                 mAppName,
                 mNotificationKey,
                 mExpansionLogger,
@@ -160,10 +193,17 @@ public class ExpandableNotificationRowController implements NodeController {
                 mPeopleNotificationIdentifier,
                 mOnUserInteractionCallback,
                 mBubblesManagerOptional,
-                mNotificationGutsManager
+                mNotificationGutsManager,
+                mMetricsLogger,
+                mSmartReplyConstants,
+                mSmartReplyController
         );
         mView.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         if (mAllowLongPress) {
+            if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_DRAG_TO_CONTENTS)) {
+                mView.setDragController(mDragController);
+            }
+
             mView.setLongPressListener((v, x, y, item) -> {
                 if (mView.isSummaryWithChildren()) {
                     mView.expandNotification();
@@ -175,6 +215,10 @@ public class ExpandableNotificationRowController implements NodeController {
         if (ENABLE_REMOTE_INPUT) {
             mView.setDescendantFocusability(ViewGroup.FOCUS_BEFORE_DESCENDANTS);
         }
+
+        mLockscreenUserManager
+                .addOnNeedsRedactionInPublicChangedListener(mNeedsRedactionListener);
+        mNeedsRedactionListener.run();
 
         mView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override
@@ -193,6 +237,14 @@ public class ExpandableNotificationRowController implements NodeController {
             }
         });
     }
+
+    private final Runnable mNeedsRedactionListener = new Runnable() {
+        @Override
+        public void run() {
+            mView.setSensitive(
+                    mLockscreenUserManager.notifNeedsRedactionInPublic(mView.getEntry()));
+        }
+    };
 
     private final StatusBarStateController.StateListener mStatusBarStateListener =
             new StatusBarStateController.StateListener() {
@@ -227,21 +279,27 @@ public class ExpandableNotificationRowController implements NodeController {
     public void addChildAt(NodeController child, int index) {
         ExpandableNotificationRow childView = (ExpandableNotificationRow) child.getView();
 
-        mView.addChildNotification((ExpandableNotificationRow) child.getView());
+        mView.addChildNotification((ExpandableNotificationRow) child.getView(), index);
         mListContainer.notifyGroupChildAdded(childView);
+        childView.setChangingPosition(false);
     }
 
     @Override
     public void moveChildTo(NodeController child, int index) {
         ExpandableNotificationRow childView = (ExpandableNotificationRow) child.getView();
+        childView.setChangingPosition(true);
         mView.removeChildNotification(childView);
         mView.addChildNotification(childView, index);
+        childView.setChangingPosition(false);
     }
 
     @Override
     public void removeChild(NodeController child, boolean isTransfer) {
         ExpandableNotificationRow childView = (ExpandableNotificationRow) child.getView();
 
+        if (isTransfer) {
+            childView.setChangingPosition(true);
+        }
         mView.removeChildNotification(childView);
         if (!isTransfer) {
             mListContainer.notifyGroupChildRemoved(childView, mView);
@@ -249,8 +307,45 @@ public class ExpandableNotificationRowController implements NodeController {
     }
 
     @Override
+    public void onViewAdded() {
+    }
+
+    @Override
+    public void onViewMoved() {
+    }
+
+    @Override
+    public void onViewRemoved() {
+    }
+
+    @Override
     public int getChildCount() {
         final List<ExpandableNotificationRow> mChildren = mView.getAttachedChildren();
         return mChildren != null ? mChildren.size() : 0;
     }
+
+    @Override
+    public void setUntruncatedChildCount(int childCount) {
+        if (mView.isSummaryWithChildren()) {
+            mView.setUntruncatedChildCount(childCount);
+        } else {
+            Log.w(TAG, "Called setUntruncatedChildCount(" + childCount + ") on a leaf row");
+        }
+    }
+
+    @Override
+    public void setSystemExpanded(boolean systemExpanded) {
+        mView.setSystemExpanded(systemExpanded);
+    }
+
+    @Override
+    public void setLastAudiblyAlertedMs(long lastAudiblyAlertedMs) {
+        mView.setLastAudiblyAlertedMs(lastAudiblyAlertedMs);
+    }
+
+    @Override
+    public void setFeedbackIcon(@Nullable FeedbackIcon icon) {
+        mView.setFeedbackIcon(icon);
+    }
+
 }

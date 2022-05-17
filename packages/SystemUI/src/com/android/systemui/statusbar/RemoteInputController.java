@@ -23,12 +23,15 @@ import android.net.Uri;
 import android.os.SystemProperties;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
+import android.util.IndentingPrintWriter;
 import android.util.Pair;
 
-import com.android.internal.util.Preconditions;
+import androidx.annotation.NonNull;
+
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.RemoteInputView;
+import com.android.systemui.util.DumpUtilsKt;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -245,6 +248,10 @@ public class RemoteInputController {
         mCallbacks.add(callback);
     }
 
+    public void removeCallback(Callback callback) {
+        mCallbacks.remove(callback);
+    }
+
     public void remoteInputSent(NotificationEntry entry) {
         int N = mCallbacks.size();
         for (int i = 0; i < N; i++) {
@@ -290,12 +297,37 @@ public class RemoteInputController {
         mRemoteInputUriController.grantInlineReplyUriPermission(sbn, data);
     }
 
+    /** dump debug info; called by {@link NotificationRemoteInputManager} */
+    public void dump(@NonNull IndentingPrintWriter pw) {
+        pw.print("isRemoteInputActive: ");
+        pw.println(isRemoteInputActive()); // Note that this prunes the mOpen list, printed later.
+        pw.println("mOpen: " + mOpen.size());
+        DumpUtilsKt.withIncreasedIndent(pw, () -> {
+            for (Pair<WeakReference<NotificationEntry>, Object> open : mOpen) {
+                NotificationEntry entry = open.first.get();
+                pw.println(entry == null ? "???" : entry.getKey());
+            }
+        });
+        pw.println("mSpinning: " + mSpinning.size());
+        DumpUtilsKt.withIncreasedIndent(pw, () -> {
+            for (String key : mSpinning.keySet()) {
+                pw.println(key);
+            }
+        });
+        pw.println(mSpinning);
+        pw.print("mDelegate: ");
+        pw.println(mDelegate);
+    }
+
     public interface Callback {
         default void onRemoteInputActive(boolean active) {}
 
         default void onRemoteInputSent(NotificationEntry entry) {}
     }
 
+    /**
+     * This is a delegate which implements some view controller pieces of the remote input process
+     */
     public interface Delegate {
         /**
          * Activate remote input if necessary.

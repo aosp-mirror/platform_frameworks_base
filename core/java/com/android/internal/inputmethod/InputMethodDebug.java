@@ -64,6 +64,8 @@ public final class InputMethodDebug {
                 return "DEACTIVATED_BY_IMMS";
             case StartInputReason.SESSION_CREATED_BY_IME:
                 return "SESSION_CREATED_BY_IME";
+            case StartInputReason.BOUND_ACCESSIBILITY_SESSION_TO_IMMS:
+                return "BOUND_ACCESSIBILITY_SESSION_TO_IMMS";
             default:
                 return "Unknown=" + reason;
         }
@@ -91,6 +93,8 @@ public final class InputMethodDebug {
                 return "SWITCH_IME_FAILED";
             case UnbindReason.SWITCH_USER:
                 return "SWITCH_USER";
+            case UnbindReason.ACCESSIBILITY_SERVICE_DISABLED:
+                return "ACCESSIBILITY_SERVICE_DISABLED";
             default:
                 return "Unknown=" + reason;
         }
@@ -236,6 +240,8 @@ public final class InputMethodDebug {
                 return "HIDE_TOGGLE_SOFT_INPUT";
             case SoftInputShowHideReason.SHOW_SOFT_INPUT_BY_INSETS_API:
                 return "SHOW_SOFT_INPUT_BY_INSETS_API";
+            case SoftInputShowHideReason.HIDE_DISPLAY_IME_POLICY_HIDE:
+                return "HIDE_DISPLAY_IME_POLICY_HIDE";
             default:
                 return "Unknown=" + reason;
         }

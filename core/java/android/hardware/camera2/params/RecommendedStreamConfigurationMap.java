@@ -16,6 +16,8 @@
 
 package android.hardware.camera2.params;
 
+import static com.android.internal.R.string.hardware;
+
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -149,6 +151,16 @@ public final class RecommendedStreamConfigurationMap {
     public static final int USECASE_LOW_LATENCY_SNAPSHOT = 0x6;
 
     /**
+     * If supported, the recommended 10-bit output stream configurations must include
+     * a subset of the advertised {@link android.graphics.ImageFormat#YCBCR_P010} and
+     * {@link android.graphics.ImageFormat#PRIVATE} outputs that are optimized for power
+     * and performance when registered along with a supported 10-bit dynamic range profile.
+     * {@see android.hardware.camera2.params.OutputConfiguration#setDynamicRangeProfile} for
+     * details.
+     */
+     public static final int USECASE_10BIT_OUTPUT = 0x8;
+
+    /**
      * Device specific use cases.
      * @hide
      */
@@ -163,7 +175,8 @@ public final class RecommendedStreamConfigurationMap {
         USECASE_SNAPSHOT,
         USECASE_ZSL,
         USECASE_RAW,
-        USECASE_LOW_LATENCY_SNAPSHOT})
+        USECASE_LOW_LATENCY_SNAPSHOT,
+        USECASE_10BIT_OUTPUT})
      public @interface RecommendedUsecase {};
 
     /**

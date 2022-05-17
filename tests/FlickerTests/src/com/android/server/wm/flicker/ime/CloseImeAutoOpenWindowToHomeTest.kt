@@ -30,15 +30,14 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group2
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
-import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
-import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
-import com.android.server.wm.flicker.noUncoveredRegions
-import com.android.server.wm.flicker.startRotation
-import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.navBarWindowIsVisible
+import com.android.server.wm.flicker.entireScreenCovered
+import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
-import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
+import com.android.server.wm.flicker.statusBarWindowIsVisible
+import com.android.server.wm.traces.common.FlickerComponentName
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -47,6 +46,14 @@ import org.junit.runners.Parameterized
 
 /**
  * Test IME window closing back to app window transitions.
+ *
+ * This test doesn't work on 90 degrees. According to the InputMethodService documentation:
+ *
+ *     Don't show if this is not explicitly requested by the user and the input method
+ *     is fullscreen. That would be too disruptive.
+ *
+ * More details on b/190352379
+ *
  * To run this test: `atest FlickerTests:CloseImeAutoOpenWindowToHomeTest`
  */
 @RequiresDevice
@@ -56,7 +63,7 @@ import org.junit.runners.Parameterized
 @Group2
 class CloseImeAutoOpenWindowToHomeTest(private val testSpec: FlickerTestParameter) {
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
-    private val testApp = ImeAppAutoFocusHelper(instrumentation, testSpec.config.startRotation)
+    private val testApp = ImeAppAutoFocusHelper(instrumentation, testSpec.startRotation)
 
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
@@ -75,76 +82,94 @@ class CloseImeAutoOpenWindowToHomeTest(private val testSpec: FlickerTestParamete
             transitions {
                 device.pressHome()
                 wmHelper.waitForHomeActivityVisible()
-                wmHelper.waitImeWindowGone()
+                wmHelper.waitImeGone()
             }
         }
     }
 
     @Presubmit
     @Test
-    fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
+    fun navBarWindowIsVisible() = testSpec.navBarWindowIsVisible()
 
     @Presubmit
     @Test
-    fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
+    fun statusBarWindowIsVisible() = testSpec.statusBarWindowIsVisible()
 
     @Presubmit
     @Test
     fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
         testSpec.assertWm {
-            this.visibleWindowsShownMoreThanOneConsecutiveEntry(listOf(IME_WINDOW_TITLE,
-                WindowManagerStateHelper.SPLASH_SCREEN_NAME,
-                WindowManagerStateHelper.SNAPSHOT_WINDOW_NAME))
+            this.visibleWindowsShownMoreThanOneConsecutiveEntry()
         }
     }
 
-    @FlakyTest
+    @Presubmit
     @Test
-    fun imeWindowBecomesInvisible() = testSpec.imeWindowBecomesInvisible()
-
-    @FlakyTest
-    @Test
-    fun imeAppWindowBecomesInvisible() = testSpec.imeAppWindowBecomesInvisible(testApp)
+    fun imeAppWindowBecomesInvisible() {
+        testSpec.assertWm {
+            this.isAppWindowOnTop(testApp.component)
+                .then()
+                .isAppWindowNotOnTop(testApp.component)
+        }
+    }
 
     @Presubmit
     @Test
-    fun noUncoveredRegions() = testSpec.noUncoveredRegions(testSpec.config.startRotation,
-        Surface.ROTATION_0)
+    fun entireScreenCovered() = testSpec.entireScreenCovered()
 
-    @FlakyTest
+    @Presubmit
+    @Test
+    fun imeLayerVisibleStart() {
+        testSpec.assertLayersStart {
+            this.isVisible(FlickerComponentName.IME)
+        }
+    }
+
+    @Presubmit
+    @Test
+    fun imeLayerInvisibleEnd() {
+        testSpec.assertLayersEnd {
+            this.isInvisible(FlickerComponentName.IME)
+        }
+    }
+
+    @Presubmit
     @Test
     fun imeLayerBecomesInvisible() = testSpec.imeLayerBecomesInvisible()
 
     @Presubmit
     @Test
-    fun imeAppLayerBecomesInvisible() = testSpec.imeAppLayerBecomesInvisible(testApp)
-
-    @FlakyTest
-    @Test
-    fun navBarLayerRotatesAndScales() {
-        testSpec.navBarLayerRotatesAndScales(testSpec.config.startRotation, Surface.ROTATION_0)
+    fun imeAppLayerBecomesInvisible() {
+        testSpec.assertLayers {
+            this.isVisible(testApp.component)
+                    .then()
+                    .isInvisible(testApp.component)
+        }
     }
 
     @Presubmit
     @Test
-    fun statusBarLayerRotatesScales() {
-        testSpec.statusBarLayerRotatesScales(testSpec.config.startRotation, Surface.ROTATION_0)
-    }
+    fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales()
+
+    @FlakyTest(bugId = 206753786)
+    @Test
+    fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
 
     @Presubmit
     @Test
-    fun navBarLayerIsAlwaysVisible() = testSpec.navBarLayerIsAlwaysVisible()
+    fun navBarLayerIsVisible() = testSpec.navBarLayerIsVisible()
 
-    @FlakyTest
+    @Presubmit
     @Test
-    fun statusBarLayerIsAlwaysVisible() = testSpec.statusBarLayerIsAlwaysVisible()
+    fun statusBarLayerIsVisible() = testSpec.statusBarLayerIsVisible()
 
     @Presubmit
     @Test
     fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         testSpec.assertLayers {
-            this.visibleLayersShownMoreThanOneConsecutiveEntry(
-                listOf(IME_WINDOW_TITLE, WindowManagerStateHelper.SPLASH_SCREEN_NAME))
+            this.visibleLayersShownMoreThanOneConsecutiveEntry(listOf(
+                FlickerComponentName.IME,
+                FlickerComponentName.SPLASH_SCREEN))
         }
     }
 
@@ -153,9 +178,12 @@ class CloseImeAutoOpenWindowToHomeTest(private val testSpec: FlickerTestParamete
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(repetitions = 1,
+                .getConfigNonRotationTests(repetitions = 3,
+                    // b/190352379 (IME doesn't show on app launch in 90 degrees)
+                    supportedRotations = listOf(Surface.ROTATION_0),
                     supportedNavigationModes = listOf(
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY)
+                        WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
+                        WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY)
                 )
         }
     }

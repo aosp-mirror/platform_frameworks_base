@@ -74,6 +74,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
     public static final float CALLER_TARGET_SCORE_BOOST = 900.f;
     /** {@link #getBaseScore} */
     public static final float SHORTCUT_TARGET_SCORE_BOOST = 90.f;
+    private static final float PINNED_SHORTCUT_TARGET_SCORE_BOOST = 1000.f;
 
     private final int mMaxShortcutTargetsPerApp;
     private final ChooserListCommunicator mChooserListCommunicator;
@@ -143,7 +144,9 @@ public class ChooserListAdapter extends ResolverListAdapter {
                     }
                 }
                 if (ai == null) {
-                    ri = packageManager.resolveActivity(ii, PackageManager.MATCH_DEFAULT_ONLY);
+                    // Because of AIDL bug, resolveActivity can't accept subclasses of Intent.
+                    final Intent rii = (ii.getClass() == Intent.class) ? ii : new Intent(ii);
+                    ri = packageManager.resolveActivity(rii, PackageManager.MATCH_DEFAULT_ONLY);
                     ai = ri != null ? ri.activityInfo : null;
                 }
                 if (ai == null) {
@@ -275,8 +278,10 @@ public class ChooserListAdapter extends ResolverListAdapter {
             Drawable bkg = mContext.getDrawable(R.drawable.chooser_group_background);
             holder.text.setPaddingRelative(0, 0, bkg.getIntrinsicWidth() /* end */, 0);
             holder.text.setBackground(bkg);
-        } else if (info.isPinned() && getPositionTargetType(position) == TARGET_STANDARD) {
-            // If the target is pinned and in the suggested row show a pinned indicator
+        } else if (info.isPinned() && (getPositionTargetType(position) == TARGET_STANDARD
+                || getPositionTargetType(position) == TARGET_SERVICE)) {
+            // If the appShare or directShare target is pinned and in the suggested row show a
+            // pinned indicator
             Drawable bkg = mContext.getDrawable(R.drawable.chooser_pinned_background);
             holder.text.setPaddingRelative(bkg.getIntrinsicWidth() /* start */, 0, 0, 0);
             holder.text.setBackground(bkg);
@@ -299,18 +304,19 @@ public class ChooserListAdapter extends ResolverListAdapter {
                 // Consolidate multiple targets from same app.
                 Map<String, DisplayResolveInfo> consolidated = new HashMap<>();
                 for (DisplayResolveInfo info : allTargets) {
-                    String packageName = info.getResolvedComponentName().getPackageName();
-                    DisplayResolveInfo multiDri = consolidated.get(packageName);
+                    String resolvedTarget = info.getResolvedComponentName().getPackageName()
+                        + '#' + info.getDisplayLabel();
+                    DisplayResolveInfo multiDri = consolidated.get(resolvedTarget);
                     if (multiDri == null) {
-                        consolidated.put(packageName, info);
+                        consolidated.put(resolvedTarget, info);
                     } else if (multiDri instanceof MultiDisplayResolveInfo) {
                         ((MultiDisplayResolveInfo) multiDri).addTarget(info);
                     } else {
                         // create consolidated target from the single DisplayResolveInfo
                         MultiDisplayResolveInfo multiDisplayResolveInfo =
-                            new MultiDisplayResolveInfo(packageName, multiDri);
+                            new MultiDisplayResolveInfo(resolvedTarget, multiDri);
                         multiDisplayResolveInfo.addTarget(info);
-                        consolidated.put(packageName, multiDisplayResolveInfo);
+                        consolidated.put(resolvedTarget, multiDisplayResolveInfo);
                     }
                 }
                 List<DisplayResolveInfo> groupedTargets = new ArrayList<>();
@@ -491,9 +497,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
      */
     public void addServiceResults(DisplayResolveInfo origTarget, List<ChooserTarget> targets,
             @ChooserActivity.ShareTargetType int targetType,
-            Map<ChooserTarget, ShortcutInfo> directShareToShortcutInfos,
-            List<ChooserActivity.ChooserTargetServiceConnection>
-                    pendingChooserTargetServiceConnections) {
+            Map<ChooserTarget, ShortcutInfo> directShareToShortcutInfos) {
         if (DEBUG) {
             Log.d(TAG, "addServiceResults " + origTarget.getResolvedComponentName() + ", "
                     + targets.size()
@@ -524,11 +528,16 @@ public class ChooserListAdapter extends ResolverListAdapter {
                     targetScore = lastScore * 0.95f;
                 }
             }
+            ShortcutInfo shortcutInfo = isShortcutResult ? directShareToShortcutInfos.get(target)
+                    : null;
+            if ((shortcutInfo != null) && shortcutInfo.isPinned()) {
+                targetScore += PINNED_SHORTCUT_TARGET_SCORE_BOOST;
+            }
             UserHandle userHandle = getUserHandle();
             Context contextAsUser = mContext.createContextAsUser(userHandle, 0 /* flags */);
             boolean isInserted = insertServiceTarget(new SelectableTargetInfo(contextAsUser,
                     origTarget, target, targetScore, mSelectableTargetInfoCommunicator,
-                    (isShortcutResult ? directShareToShortcutInfos.get(target) : null)));
+                    shortcutInfo));
 
             if (isInserted && isShortcutResult) {
                 mNumShortcutResults++;

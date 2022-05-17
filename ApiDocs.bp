@@ -55,43 +55,11 @@ framework_docs_only_libs = [
     "android-support-multidex-instrumentation",
 ]
 
+// These defaults enable doc-stub generation, api lint database generation and sdk value generation.
 stubs_defaults {
     name: "android-non-updatable-doc-stubs-defaults",
     defaults: ["android-non-updatable-stubs-defaults"],
     srcs: [
-        // No longer part of the stubs, but are included in the docs.
-        "test-base/src/**/*.java",
-        "test-mock/src/**/*.java",
-        "test-runner/src/**/*.java",
-    ],
-    libs: framework_docs_only_libs,
-    create_doc_stubs: true,
-    write_sdk_values: true,
-}
-
-stubs_defaults {
-    name: "framework-doc-stubs-default",
-    srcs: [
-        ":android-non-updatable-stub-sources",
-
-        // Module sources
-        ":art.module.public.api{.public.stubs.source}",
-        ":conscrypt.module.public.api{.public.stubs.source}",
-        ":framework-appsearch-sources",
-        ":framework-connectivity-sources",
-        ":framework-graphics-srcs",
-        ":framework-mediaprovider-sources",
-        ":framework-permission-sources",
-        ":framework-permission-s-sources",
-        ":framework-scheduling-sources",
-        ":framework-sdkextensions-sources",
-        ":framework-statsd-sources",
-        ":framework-tethering-srcs",
-        ":framework-wifi-updatable-sources",
-        ":i18n.module.public.api{.public.stubs.source}",
-        ":ike-srcs",
-        ":updatable-media-srcs",
-
         // No longer part of the stubs, but are included in the docs.
         ":android-test-base-sources",
         ":android-test-mock-sources",
@@ -99,59 +67,89 @@ stubs_defaults {
     ],
     libs: framework_docs_only_libs,
     create_doc_stubs: true,
-    annotations_enabled: true,
-    filter_packages: packages_to_document,
-    api_levels_annotations_enabled: true,
-    api_levels_annotations_dirs: [
-        "sdk-dir",
-        "api-versions-jars-dir",
+    write_sdk_values: true,
+}
+
+// Defaults module for doc-stubs targets that use module source code as input.
+stubs_defaults {
+    name: "framework-doc-stubs-sources-default",
+    defaults: ["android-non-updatable-doc-stubs-defaults"],
+    srcs: [
+        ":art.module.public.api{.public.stubs.source}",
+        ":conscrypt.module.public.api{.public.stubs.source}",
+        ":i18n.module.public.api{.public.stubs.source}",
+
+        ":framework-adservices-sources",
+        ":framework-appsearch-sources",
+        ":framework-connectivity-sources",
+        ":framework-bluetooth-sources",
+        ":framework-connectivity-tiramisu-updatable-sources",
+        ":framework-graphics-srcs",
+        ":framework-mediaprovider-sources",
+        ":framework-nearby-sources",
+        ":framework-ondevicepersonalization-sources",
+        ":framework-permission-sources",
+        ":framework-permission-s-sources",
+        ":framework-scheduling-sources",
+        ":framework-sdkextensions-sources",
+        ":framework-statsd-sources",
+        ":framework-sdksandbox-sources",
+        ":framework-tethering-srcs",
+        ":framework-uwb-updatable-sources",
+        ":framework-wifi-updatable-sources",
+        ":ike-srcs",
+        ":updatable-media-srcs",
     ],
-    previous_api: ":android.api.public.latest",
-    merge_annotations_dirs: [
-        "metalava-manual",
-    ],
-    // TODO(b/169090544): remove below aidl includes.
-    aidl: {
-        local_include_dirs: ["media/aidl"],
-        include_dirs: [
-            "frameworks/av/aidl",
-            "frameworks/native/libs/permission/aidl",
-        ],
-    },
 }
 
 droidstubs {
     name: "android-non-updatable-doc-stubs",
-    defaults: ["android-non-updatable-doc-stubs-defaults"],
+    defaults: [
+        "android-non-updatable-doc-stubs-defaults",
+        "module-classpath-stubs-defaults",
+    ],
     args: metalava_framework_docs_args,
 }
 
 droidstubs {
     name: "android-non-updatable-doc-stubs-system",
-    defaults: ["android-non-updatable-doc-stubs-defaults"],
+    defaults: [
+        "android-non-updatable-doc-stubs-defaults",
+        "module-classpath-stubs-defaults",
+    ],
     args: metalava_framework_docs_args +
         " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS\\) ",
-}
-
-droidstubs {
-    name: "framework-doc-stubs",
-    defaults: ["framework-doc-stubs-default"],
-    arg_files: [
-        "core/res/AndroidManifest.xml",
-    ],
-    args: metalava_framework_docs_args,
-    write_sdk_values: true,
 }
 
 droidstubs {
     name: "framework-doc-system-stubs",
-    defaults: ["framework-doc-stubs-default"],
-    arg_files: [
-        "core/res/AndroidManifest.xml",
-    ],
+    defaults: ["framework-doc-stubs-sources-default"],
     args: metalava_framework_docs_args +
         " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS\\) ",
-    write_sdk_values: true,
+    api_levels_annotations_enabled: true,
+    api_levels_annotations_dirs: [
+        "sdk-dir",
+        "api-versions-jars-dir",
+    ],
+    api_levels_sdk_type: "system",
+}
+
+droidstubs {
+    name: "framework-doc-stubs",
+    defaults: ["android-non-updatable-doc-stubs-defaults"],
+    srcs: [":all-modules-public-stubs-source"],
+    args: metalava_framework_docs_args,
+    api_levels_annotations_enabled: true,
+    api_levels_annotations_dirs: [
+        "sdk-dir",
+        "api-versions-jars-dir",
+    ],
+    aidl: {
+        include_dirs: [
+            "packages/modules/Connectivity/framework/aidl-export",
+            "packages/modules/Media/apex/aidl/stable",
+        ],
+    },
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -233,7 +231,7 @@ droiddoc {
         "android.whichdoc offline",
     ],
     compat_config: ":global-compat-config",
-    proofread_file: "offline-sdk-docs-proofrerad.txt",
+    proofread_file: "offline-sdk-docs-proofread.txt",
     args: framework_docs_only_args + " -offlinemode -title \"Android SDK\"",
     static_doc_index_redirect: "docs/docs-preview-index.html",
 }
@@ -250,7 +248,7 @@ droiddoc {
     hdf: [
         "android.whichdoc offline",
     ],
-    proofread_file: "offline-sdk-referenceonly-docs-proofrerad.txt",
+    proofread_file: "offline-sdk-referenceonly-docs-proofread.txt",
     args: framework_docs_only_args + " -offlinemode -title \"Android SDK\" -referenceonly",
     static_doc_index_redirect: "docs/docs-documentation-redirect.html",
     static_doc_properties: "docs/source.properties",
@@ -268,7 +266,7 @@ droiddoc {
     hdf: [
         "android.whichdoc offline",
     ],
-    proofread_file: "offline-system-sdk-referenceonly-docs-proofrerad.txt",
+    proofread_file: "offline-system-sdk-referenceonly-docs-proofread.txt",
     args: framework_docs_only_args + " -hide 101 -hide 104 -hide 108" +
     " -offlinemode -title \"Android System SDK\" -referenceonly",
     static_doc_index_redirect: "docs/docs-documentation-redirect.html",
@@ -285,7 +283,7 @@ droiddoc {
         "android.whichdoc online",
         "android.hasSamples true",
     ],
-    proofread_file: "online-sdk-docs-proofrerad.txt",
+    proofread_file: "online-sdk-docs-proofread.txt",
     args: framework_docs_only_args +
         " -toroot / -samplegroup Admin " +
         " -samplegroup Background " +
@@ -314,7 +312,7 @@ droiddoc {
         "android.whichdoc online",
         "android.hasSamples true",
     ],
-    proofread_file: "online-system-api-sdk-docs-proofrerad.txt",
+    proofread_file: "online-system-api-sdk-docs-proofread.txt",
     args: framework_docs_only_args +
         " -referenceonly " +
         " -title \"Android SDK - Including system APIs.\" " +
@@ -349,7 +347,7 @@ droiddoc {
         "android.whichdoc online",
         "android.hasSamples true",
     ],
-    proofread_file: "ds-docs-proofrerad.txt",
+    proofread_file: "ds-docs-proofread.txt",
     args: framework_docs_only_args +
         " -toroot / -yamlV2 -metalavaApiSince -samplegroup Admin " +
         " -samplegroup Background " +
@@ -460,7 +458,7 @@ droiddoc {
         "android.whichdoc online",
         "android.hasSamples true",
     ],
-    proofread_file: "online-sdk-dev-docs-proofrerad.txt",
+    proofread_file: "online-sdk-dev-docs-proofread.txt",
     args: framework_docs_only_args +
         " -toroot / -samplegroup Admin " +
         " -samplegroup Background " +
@@ -485,7 +483,7 @@ droiddoc {
     srcs: [
         ":framework-doc-stubs",
     ],
-    proofread_file: "hidden-docs-proofrerad.txt",
+    proofread_file: "hidden-docs-proofread.txt",
     args: framework_docs_only_args +
         " -referenceonly " +
         " -title \"Android SDK - Including hidden APIs.\"",

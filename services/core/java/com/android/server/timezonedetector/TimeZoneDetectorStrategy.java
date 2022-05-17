@@ -17,7 +17,6 @@ package com.android.server.timezonedetector;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
-import android.app.time.TimeZoneConfiguration;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 import android.util.IndentingPrintWriter;
@@ -30,7 +29,7 @@ import android.util.IndentingPrintWriter;
  * Suggestions are acted on or ignored as needed, depending on previously received suggestions and
  * the current user's configuration (see {@link ConfigurationInternal}).
  *
- * <p>Devices can have zero, one or two automatic time zone detection algorithm available at any
+ * <p>Devices can have zero, one or two automatic time zone detection algorithms available at any
  * point in time.
  *
  * <p>The two automatic detection algorithms supported are "telephony" and "geolocation". Algorithm
@@ -63,46 +62,36 @@ import android.util.IndentingPrintWriter;
  * have an empty suggestion submitted in order to "withdraw" their previous suggestion otherwise it
  * will remain in use.
  *
+ * <p>The strategy uses only one algorithm at a time and does not attempt consensus even when
+ * more than one is available on a device. This "use only one" behavior is deliberate as different
+ * algorithms have edge cases and blind spots that lead to incorrect answers or uncertainty;
+ * different algorithms aren't guaranteed to agree, and algorithms may frequently lose certainty as
+ * users enter areas without the necessary signals. Ultimately, with no perfect algorithm available,
+ * the user is left to choose which algorithm works best for their circumstances.
+ *
+ * <p>When geolocation detection is supported and enabled, in certain circumstances, such as during
+ * international travel, it makes sense to prioritize speed of detection via telephony (when
+ * available) Vs waiting for the geolocation algorithm to reach certainty. Geolocation detection can
+ * sometimes be slow to get a location fix and can require network connectivity (which cannot be
+ * assumed when users are travelling) for server-assisted location detection or time zone lookup.
+ * Therefore, as a restricted form of prioritization between geolocation and telephony algorithms,
+ * the strategy provides "telephony fallback" behavior, which can be set to "supported" via device
+ * config. Fallback mode is toggled on at runtime via {@link #enableTelephonyTimeZoneFallback()} in
+ * response to signals outside of the scope of this class. Telephony fallback allows the use of
+ * telephony suggestions to help with faster detection but only until geolocation detection
+ * provides a concrete, "certain" suggestion. After geolocation has made the first certain
+ * suggestion, telephony fallback is disabled until the next call to {@link
+ * #enableTelephonyTimeZoneFallback()}.
+ *
  * <p>Threading:
  *
- * <p>Suggestion calls with a void return type may be handed off to a separate thread and handled
- * asynchronously. Synchronous calls like {@link #getCurrentUserConfigurationInternal()},
- * {@link #generateMetricsState()} and debug calls like {@link
- * #dump(IndentingPrintWriter, String[])}, may be called on a different thread concurrently with
- * other operations.
+ * <p>Implementations of this class must be thread-safe as calls calls like {@link
+ * #generateMetricsState()} and {@link #dump(IndentingPrintWriter, String[])} may be called on
+ * differents thread concurrently with other operations.
  *
  * @hide
  */
-public interface TimeZoneDetectorStrategy extends Dumpable, Dumpable.Container {
-
-    /**
-     * Adds a listener that will be triggered whenever {@link ConfigurationInternal} may have
-     * changed.
-     */
-    void addConfigChangeListener(@NonNull ConfigurationChangeListener listener);
-
-    /**
-     * Returns a snapshot of the configuration that controls time zone detector behavior for the
-     * specified user.
-     */
-    @NonNull
-    ConfigurationInternal getConfigurationInternal(@UserIdInt int userId);
-
-    /**
-     * Returns a snapshot of the configuration that controls time zone detector behavior for the
-     * current user.
-     */
-    @NonNull
-    ConfigurationInternal getCurrentUserConfigurationInternal();
-
-    /**
-     * Updates the configuration properties that control a device's time zone behavior.
-     *
-     * <p>This method returns {@code true} if the configuration was changed,
-     * {@code false} otherwise.
-     */
-    boolean updateConfiguration(
-            @UserIdInt int userId, @NonNull TimeZoneConfiguration configuration);
+public interface TimeZoneDetectorStrategy extends Dumpable {
 
     /**
      * Suggests zero, one or more time zones for the device, or withdraws a previous suggestion if
@@ -125,7 +114,20 @@ public interface TimeZoneDetectorStrategy extends Dumpable, Dumpable.Container {
      */
     void suggestTelephonyTimeZone(@NonNull TelephonyTimeZoneSuggestion suggestion);
 
+    /**
+     * Tells the strategy that it can fall back to telephony detection while geolocation detection
+     * remains uncertain. {@link #suggestGeolocationTimeZone(GeolocationTimeZoneSuggestion)} can
+     * disable it again. See {@link TimeZoneDetectorStrategy} for details.
+     */
+    void enableTelephonyTimeZoneFallback();
+
     /** Generates a state snapshot for metrics. */
     @NonNull
     MetricsTimeZoneDetectorState generateMetricsState();
+
+    /** Returns {@code true} if the device supports telephony time zone detection. */
+    boolean isTelephonyTimeZoneDetectionSupported();
+
+    /** Returns {@code true} if the device supports geolocation time zone detection. */
+    boolean isGeoTimeZoneDetectionSupported();
 }

@@ -34,7 +34,10 @@ import java.util.Objects;
  * <ul>
  *  <li>The component name of the associated connection service.</li>
  *  <li>A string identifier that is unique across {@code PhoneAccountHandle}s with the same
- *      component name.</li>
+ *      component name. Apps registering {@link PhoneAccountHandle}s should ensure that the
+ *      {@link #getId()} provided does not expose personally identifying information.  A
+ *      {@link ConnectionService} should use an opaque token as the {@link PhoneAccountHandle}
+ *      identifier.</li>
  * </ul>
  *
  * Note: This Class requires a non-null {@link ComponentName} and {@link UserHandle} to operate
@@ -43,18 +46,49 @@ import java.util.Objects;
  * See {@link PhoneAccount}, {@link TelecomManager}.
  */
 public final class PhoneAccountHandle implements Parcelable {
+    /**
+     * Expected component name of Telephony phone accounts; ONLY used to determine if we should log
+     * the phone account handle ID.
+     */
+    private static final ComponentName TELEPHONY_COMPONENT_NAME =
+            new ComponentName("com.android.phone",
+                    "com.android.services.telephony.TelephonyConnectionService");
+
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 127403196)
     private final ComponentName mComponentName;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final String mId;
     private final UserHandle mUserHandle;
 
+    /**
+     * Creates a new {@link PhoneAccountHandle}.
+     *
+     * @param componentName The {@link ComponentName} of the {@link ConnectionService} which
+     *                      services this {@link PhoneAccountHandle}.
+     * @param id A string identifier that is unique across {@code PhoneAccountHandle}s with the same
+     *           component name. Apps registering {@link PhoneAccountHandle}s should ensure that the
+     *           ID provided does not expose personally identifying information.  A
+     *           {@link ConnectionService} should use an opaque token as the
+     *           {@link PhoneAccountHandle} identifier.
+     */
     public PhoneAccountHandle(
             @NonNull ComponentName componentName,
             @NonNull String id) {
         this(componentName, id, Process.myUserHandle());
     }
 
+    /**
+     * Creates a new {@link PhoneAccountHandle}.
+     *
+     * @param componentName The {@link ComponentName} of the {@link ConnectionService} which
+     *                      services this {@link PhoneAccountHandle}.
+     * @param id A string identifier that is unique across {@code PhoneAccountHandle}s with the same
+     *           component name. Apps registering {@link PhoneAccountHandle}s should ensure that the
+     *           ID provided does not expose personally identifying information.  A
+     *           {@link ConnectionService} should use an opaque token as the
+     *           {@link PhoneAccountHandle} identifier.
+     * @param userHandle The {@link UserHandle} associated with this {@link PhoneAccountHandle}.
+     */
     public PhoneAccountHandle(
             @NonNull ComponentName componentName,
             @NonNull String id,
@@ -80,17 +114,17 @@ public final class PhoneAccountHandle implements Parcelable {
      * others supported by the connection service that created it.
      * <p>
      * A connection service must select identifiers that are stable for the lifetime of
-     * their users' relationship with their service, across many Android devices. For example, a
-     * good set of identifiers might be the email addresses with which with users registered for
-     * their accounts with a particular service. Depending on how a service chooses to operate,
-     * a bad set of identifiers might be an increasing series of integers
-     * ({@code 0}, {@code 1}, {@code 2}, ...) that are generated locally on each phone and could
-     * collide with values generated on other phones or after a data wipe of a given phone.
-     *
+     * their users' relationship with their service, across many Android devices.  The identifier
+     * should be a stable opaque token which uniquely identifies the user within the service.
+     * Depending on how a service chooses to operate, a bad set of identifiers might be an
+     * increasing series of integers ({@code 0}, {@code 1}, {@code 2}, ...) that are generated
+     * locally on each phone and could collide with values generated on other phones or after a data
+     * wipe of a given phone.
+     * <p>
      * Important: A non-unique identifier could cause non-deterministic call-log backup/restore
      * behavior.
      *
-     * @return A service-specific unique identifier for this {@code PhoneAccountHandle}.
+     * @return A service-specific unique opaque identifier for this {@code PhoneAccountHandle}.
      */
     public String getId() {
         return mId;
@@ -110,14 +144,23 @@ public final class PhoneAccountHandle implements Parcelable {
 
     @Override
     public String toString() {
-        // Note: Log.pii called for mId as it can contain personally identifying phone account
-        // information such as SIP account IDs.
-        return new StringBuilder().append(mComponentName)
-                    .append(", ")
-                    .append(Log.pii(mId))
-                    .append(", ")
-                    .append(mUserHandle)
-                    .toString();
+        StringBuilder sb = new StringBuilder()
+                .append(mComponentName)
+                .append(", ");
+
+        if (TELEPHONY_COMPONENT_NAME.equals(mComponentName)) {
+            // Telephony phone account handles are now keyed by subscription id which is not
+            // sensitive.
+            sb.append(mId);
+        } else {
+            // Note: Log.pii called for mId as it can contain personally identifying phone account
+            // information such as SIP account IDs.
+            sb.append(Log.pii(mId));
+        }
+        sb.append(", ");
+        sb.append(mUserHandle);
+
+        return sb.toString();
     }
 
     @Override
@@ -157,7 +200,8 @@ public final class PhoneAccountHandle implements Parcelable {
         }
     }
 
-    public static final @android.annotation.NonNull Creator<PhoneAccountHandle> CREATOR = new Creator<PhoneAccountHandle>() {
+    public static final @android.annotation.NonNull Creator<PhoneAccountHandle> CREATOR =
+            new Creator<PhoneAccountHandle>() {
         @Override
         public PhoneAccountHandle createFromParcel(Parcel in) {
             return new PhoneAccountHandle(in);

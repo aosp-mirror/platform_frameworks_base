@@ -68,6 +68,9 @@ public class HdmiDeviceInfo implements Parcelable {
      */
     public static final int ADDR_INTERNAL = 0;
 
+    /** Invalid or uninitialized logical address */
+    public static final int ADDR_INVALID = -1;
+
     /**
      * Physical address used to indicate the source comes from internal device. The physical address
      * of TV(0) is used.
@@ -83,7 +86,15 @@ public class HdmiDeviceInfo implements Parcelable {
     /** Invalid device ID */
     public static final int ID_INVALID = 0xFFFF;
 
-    /** Device info used to indicate an inactivated device. */
+    /** Unknown vendor ID */
+    public static final int VENDOR_ID_UNKNOWN = 0xFFFFFF;
+
+    /**
+     * Instance that represents an inactive device.
+     * Can be passed to an input change listener to indicate that the active source
+     * yielded its status, allowing the listener to take an appropriate action such as
+     * switching to another input.
+     */
     public static final HdmiDeviceInfo INACTIVE_DEVICE = new HdmiDeviceInfo();
 
     private static final int HDMI_DEVICE_TYPE_CEC = 0;
@@ -109,10 +120,11 @@ public class HdmiDeviceInfo implements Parcelable {
     private final int mLogicalAddress;
     private final int mDeviceType;
     @HdmiCecVersion
-    private final int mHdmiCecVersion;
+    private final int mCecVersion;
     private final int mVendorId;
     private final String mDisplayName;
     private final int mDevicePowerStatus;
+    private final DeviceFeatures mDeviceFeatures;
 
     // MHL only parameters.
     private final int mDeviceId;
@@ -137,14 +149,22 @@ public class HdmiDeviceInfo implements Parcelable {
                             int powerStatus = source.readInt();
                             String displayName = source.readString();
                             int cecVersion = source.readInt();
-                            return new HdmiDeviceInfo(logicalAddress, physicalAddress, portId,
-                                    deviceType, vendorId, displayName, powerStatus, cecVersion);
+                            return cecDeviceBuilder()
+                                    .setLogicalAddress(logicalAddress)
+                                    .setPhysicalAddress(physicalAddress)
+                                    .setPortId(portId)
+                                    .setDeviceType(deviceType)
+                                    .setVendorId(vendorId)
+                                    .setDisplayName(displayName)
+                                    .setDevicePowerStatus(powerStatus)
+                                    .setCecVersion(cecVersion)
+                                    .build();
                         case HDMI_DEVICE_TYPE_MHL:
                             int deviceId = source.readInt();
                             int adopterId = source.readInt();
-                            return new HdmiDeviceInfo(physicalAddress, portId, adopterId, deviceId);
+                            return mhlDevice(physicalAddress, portId, adopterId, deviceId);
                         case HDMI_DEVICE_TYPE_HARDWARE:
-                            return new HdmiDeviceInfo(physicalAddress, portId);
+                            return hardwarePort(physicalAddress, portId);
                         case HDMI_DEVICE_TYPE_INACTIVE:
                             return HdmiDeviceInfo.INACTIVE_DEVICE;
                         default:
@@ -159,97 +179,82 @@ public class HdmiDeviceInfo implements Parcelable {
             };
 
     /**
-     * Constructor. Used to initialize the instance for CEC device.
+     * Constructor. Initializes the instance representing an inactive device.
+     * Can be passed to an input change listener to indicate that the active source
+     * yielded its status, allowing the listener to take an appropriate action such as
+     * switching to another input.
      *
-     * @param logicalAddress logical address of HDMI-CEC device
-     * @param physicalAddress physical address of HDMI-CEC device
-     * @param portId HDMI port ID (1 for HDMI1)
-     * @param deviceType type of device
-     * @param vendorId vendor id of device. Used for vendor specific command.
-     * @param displayName name of device
-     * @param powerStatus device power status
-     * @hide
+     * @deprecated Use {@link #INACTIVE_DEVICE} instead.
      */
-    public HdmiDeviceInfo(int logicalAddress, int physicalAddress, int portId, int deviceType,
-            int vendorId, String displayName, int powerStatus, int hdmiCecVersion) {
-        mHdmiDeviceType = HDMI_DEVICE_TYPE_CEC;
-        mPhysicalAddress = physicalAddress;
-        mPortId = portId;
+    @Deprecated
+    public HdmiDeviceInfo() {
+        mHdmiDeviceType = HDMI_DEVICE_TYPE_INACTIVE;
+        mPhysicalAddress = PATH_INVALID;
+        mId = ID_INVALID;
 
-        mId = idForCecDevice(logicalAddress);
-        mLogicalAddress = logicalAddress;
-        mDeviceType = deviceType;
-        mHdmiCecVersion = hdmiCecVersion;
-        mVendorId = vendorId;
-        mDevicePowerStatus = powerStatus;
-        mDisplayName = displayName;
-
-        mDeviceId = -1;
-        mAdopterId = -1;
-    }
-
-    /**
-     * Constructor. Used to initialize the instance for CEC device.
-     *
-     * @param logicalAddress logical address of HDMI-CEC device
-     * @param physicalAddress physical address of HDMI-CEC device
-     * @param portId HDMI port ID (1 for HDMI1)
-     * @param deviceType type of device
-     * @param vendorId vendor id of device. Used for vendor specific command.
-     * @param displayName name of device
-     * @param powerStatus device power status
-     * @hide
-     */
-    public HdmiDeviceInfo(int logicalAddress, int physicalAddress, int portId, int deviceType,
-            int vendorId, String displayName, int powerStatus) {
-        this(logicalAddress, physicalAddress, portId, deviceType,
-                vendorId, displayName, powerStatus, HdmiControlManager.HDMI_CEC_VERSION_1_4_B);
-    }
-
-    /**
-     * Constructor. Used to initialize the instance for CEC device.
-     *
-     * @param logicalAddress  logical address of HDMI-CEC device
-     * @param physicalAddress physical address of HDMI-CEC device
-     * @param portId          HDMI port ID (1 for HDMI1)
-     * @param deviceType      type of device
-     * @param vendorId        vendor id of device. Used for vendor specific command.
-     * @param displayName     name of device
-     * @hide
-     */
-    public HdmiDeviceInfo(int logicalAddress, int physicalAddress, int portId, int deviceType,
-            int vendorId, String displayName) {
-        this(logicalAddress, physicalAddress, portId, deviceType,
-                vendorId, displayName, HdmiControlManager.POWER_STATUS_UNKNOWN,
-                HdmiControlManager.HDMI_CEC_VERSION_1_4_B);
-    }
-
-    /**
-     * Constructor. Used to initialize the instance for device representing hardware port.
-     *
-     * @param physicalAddress physical address of the port
-     * @param portId HDMI port ID (1 for HDMI1)
-     * @hide
-     */
-    public HdmiDeviceInfo(int physicalAddress, int portId) {
-        mHdmiDeviceType = HDMI_DEVICE_TYPE_HARDWARE;
-        mPhysicalAddress = physicalAddress;
-        mPortId = portId;
-
-        mId = idForHardware(portId);
-        mLogicalAddress = -1;
-        mDeviceType = DEVICE_RESERVED;
-        mHdmiCecVersion = HdmiControlManager.HDMI_CEC_VERSION_1_4_B;
-        mVendorId = 0;
+        mLogicalAddress = ADDR_INVALID;
+        mDeviceType = DEVICE_INACTIVE;
+        mCecVersion = HdmiControlManager.HDMI_CEC_VERSION_1_4_B;
+        mPortId = PORT_INVALID;
         mDevicePowerStatus = HdmiControlManager.POWER_STATUS_UNKNOWN;
-        mDisplayName = "HDMI" + portId;
+        mDisplayName = "Inactive";
+        mVendorId = 0;
+        mDeviceFeatures = DeviceFeatures.ALL_FEATURES_SUPPORT_UNKNOWN;
 
         mDeviceId = -1;
         mAdopterId = -1;
     }
 
     /**
-     * Constructor. Used to initialize the instance for MHL device.
+     * Converts an instance to a builder.
+     *
+     * @hide
+     */
+    public Builder toBuilder() {
+        return new Builder(this);
+    }
+
+    private HdmiDeviceInfo(Builder builder) {
+        this.mHdmiDeviceType = builder.mHdmiDeviceType;
+        this.mPhysicalAddress = builder.mPhysicalAddress;
+        this.mPortId = builder.mPortId;
+        this.mLogicalAddress = builder.mLogicalAddress;
+        this.mDeviceType = builder.mDeviceType;
+        this.mCecVersion = builder.mCecVersion;
+        this.mVendorId = builder.mVendorId;
+        this.mDisplayName = builder.mDisplayName;
+        this.mDevicePowerStatus = builder.mDevicePowerStatus;
+        this.mDeviceFeatures = builder.mDeviceFeatures;
+        this.mDeviceId = builder.mDeviceId;
+        this.mAdopterId = builder.mAdopterId;
+
+        switch (mHdmiDeviceType) {
+            case HDMI_DEVICE_TYPE_MHL:
+                this.mId = idForMhlDevice(mPortId);
+                break;
+            case HDMI_DEVICE_TYPE_HARDWARE:
+                this.mId = idForHardware(mPortId);
+                break;
+            case HDMI_DEVICE_TYPE_CEC:
+                this.mId = idForCecDevice(mLogicalAddress);
+                break;
+            case HDMI_DEVICE_TYPE_INACTIVE:
+            default:
+                this.mId = ID_INVALID;
+        }
+    }
+
+    /**
+     * Creates a Builder for an {@link HdmiDeviceInfo} representing a CEC device.
+     *
+     * @hide
+     */
+    public static Builder cecDeviceBuilder() {
+        return new Builder(HDMI_DEVICE_TYPE_CEC);
+    }
+
+    /**
+     * Creates an {@link HdmiDeviceInfo} representing an MHL device.
      *
      * @param physicalAddress physical address of HDMI device
      * @param portId portId HDMI port ID (1 for HDMI1)
@@ -257,44 +262,32 @@ public class HdmiDeviceInfo implements Parcelable {
      * @param deviceId device id of MHL
      * @hide
      */
-    public HdmiDeviceInfo(int physicalAddress, int portId, int adopterId, int deviceId) {
-        mHdmiDeviceType = HDMI_DEVICE_TYPE_MHL;
-        mPhysicalAddress = physicalAddress;
-        mPortId = portId;
-
-        mId = idForMhlDevice(portId);
-        mLogicalAddress = -1;
-        mDeviceType = DEVICE_RESERVED;
-        mHdmiCecVersion = HdmiControlManager.HDMI_CEC_VERSION_1_4_B;
-        mVendorId = 0;
-        mDevicePowerStatus = HdmiControlManager.POWER_STATUS_UNKNOWN;
-        mDisplayName = "Mobile";
-
-        mDeviceId = adopterId;
-        mAdopterId = deviceId;
+    public static HdmiDeviceInfo mhlDevice(
+            int physicalAddress, int portId, int adopterId, int deviceId) {
+        return new Builder(HDMI_DEVICE_TYPE_MHL)
+                .setPhysicalAddress(physicalAddress)
+                .setPortId(portId)
+                .setVendorId(0)
+                .setDisplayName("Mobile")
+                .setDeviceId(adopterId)
+                .setAdopterId(deviceId)
+                .build();
     }
 
     /**
-     * Constructor. Used to initialize the instance representing an inactivated device.
-     * Can be passed input change listener to indicate the active source yielded
-     * its status, hence the listener should take an appropriate action such as
-     * switching to other input.
+     * Creates an {@link HdmiDeviceInfo} representing a hardware port.
+     *
+     * @param physicalAddress physical address of the port
+     * @param portId HDMI port ID (1 for HDMI1)
+     * @hide
      */
-    public HdmiDeviceInfo() {
-        mHdmiDeviceType = HDMI_DEVICE_TYPE_INACTIVE;
-        mPhysicalAddress = PATH_INVALID;
-        mId = ID_INVALID;
-
-        mLogicalAddress = -1;
-        mDeviceType = DEVICE_INACTIVE;
-        mHdmiCecVersion = HdmiControlManager.HDMI_CEC_VERSION_1_4_B;
-        mPortId = PORT_INVALID;
-        mDevicePowerStatus = HdmiControlManager.POWER_STATUS_UNKNOWN;
-        mDisplayName = "Inactive";
-        mVendorId = 0;
-
-        mDeviceId = -1;
-        mAdopterId = -1;
+    public static HdmiDeviceInfo hardwarePort(int physicalAddress, int portId) {
+        return new Builder(HDMI_DEVICE_TYPE_HARDWARE)
+                .setPhysicalAddress(physicalAddress)
+                .setPortId(portId)
+                .setVendorId(0)
+                .setDisplayName("HDMI" + portId)
+                .build();
     }
 
     /**
@@ -302,6 +295,15 @@ public class HdmiDeviceInfo implements Parcelable {
      */
     public int getId() {
         return mId;
+    }
+
+    /**
+     * Returns the CEC features that this device supports.
+     *
+     * @hide
+     */
+    public DeviceFeatures getDeviceFeatures() {
+        return mDeviceFeatures;
     }
 
     /**
@@ -372,7 +374,7 @@ public class HdmiDeviceInfo implements Parcelable {
      */
     @HdmiCecVersion
     public int getCecVersion() {
-        return mHdmiCecVersion;
+        return mCecVersion;
     }
 
     /**
@@ -485,7 +487,7 @@ public class HdmiDeviceInfo implements Parcelable {
                 dest.writeInt(mVendorId);
                 dest.writeInt(mDevicePowerStatus);
                 dest.writeString(mDisplayName);
-                dest.writeInt(mHdmiCecVersion);
+                dest.writeInt(mCecVersion);
                 break;
             case HDMI_DEVICE_TYPE_MHL:
                 dest.writeInt(mDeviceId);
@@ -508,7 +510,7 @@ public class HdmiDeviceInfo implements Parcelable {
                 s.append("logical_address: ").append(String.format("0x%02X", mLogicalAddress));
                 s.append(" ");
                 s.append("device_type: ").append(mDeviceType).append(" ");
-                s.append("cec_version: ").append(mHdmiCecVersion).append(" ");
+                s.append("cec_version: ").append(mCecVersion).append(" ");
                 s.append("vendor_id: ").append(mVendorId).append(" ");
                 s.append("display_name: ").append(mDisplayName).append(" ");
                 s.append("power_status: ").append(mDevicePowerStatus).append(" ");
@@ -531,6 +533,11 @@ public class HdmiDeviceInfo implements Parcelable {
         s.append("physical_address: ").append(String.format("0x%04X", mPhysicalAddress));
         s.append(" ");
         s.append("port_id: ").append(mPortId);
+
+        if (mHdmiDeviceType == HDMI_DEVICE_TYPE_CEC) {
+            s.append("\n  ").append(mDeviceFeatures.toString());
+        }
+
         return s.toString();
     }
 
@@ -546,7 +553,7 @@ public class HdmiDeviceInfo implements Parcelable {
                 && mPortId == other.mPortId
                 && mLogicalAddress == other.mLogicalAddress
                 && mDeviceType == other.mDeviceType
-                && mHdmiCecVersion == other.mHdmiCecVersion
+                && mCecVersion == other.mCecVersion
                 && mVendorId == other.mVendorId
                 && mDevicePowerStatus == other.mDevicePowerStatus
                 && mDisplayName.equals(other.mDisplayName)
@@ -562,11 +569,180 @@ public class HdmiDeviceInfo implements Parcelable {
                 mPortId,
                 mLogicalAddress,
                 mDeviceType,
-                mHdmiCecVersion,
+                mCecVersion,
                 mVendorId,
                 mDevicePowerStatus,
                 mDisplayName,
                 mDeviceId,
                 mAdopterId);
+    }
+
+    /**
+     * Builder for {@link HdmiDeviceInfo} instances.
+     *
+     * @hide
+     */
+    public static final class Builder {
+        // Required parameters
+        private final int mHdmiDeviceType;
+
+        // Common parameters
+        private int mPhysicalAddress = PATH_INVALID;
+        private int mPortId = PORT_INVALID;
+
+        // CEC parameters
+        private int mLogicalAddress = ADDR_INVALID;
+        private int mDeviceType = DEVICE_RESERVED;
+        @HdmiCecVersion
+        private int mCecVersion = HdmiControlManager.HDMI_CEC_VERSION_1_4_B;
+        private int mVendorId = VENDOR_ID_UNKNOWN;
+        private String mDisplayName = "";
+        private int mDevicePowerStatus = HdmiControlManager.POWER_STATUS_UNKNOWN;
+        private DeviceFeatures mDeviceFeatures;
+
+        // MHL parameters
+        private int mDeviceId = -1;
+        private int mAdopterId = -1;
+
+        private Builder(int hdmiDeviceType) {
+            mHdmiDeviceType = hdmiDeviceType;
+            if (hdmiDeviceType == HDMI_DEVICE_TYPE_CEC) {
+                mDeviceFeatures = DeviceFeatures.ALL_FEATURES_SUPPORT_UNKNOWN;
+            } else {
+                mDeviceFeatures = DeviceFeatures.NO_FEATURES_SUPPORTED;
+            }
+        }
+
+        private Builder(@NonNull HdmiDeviceInfo hdmiDeviceInfo) {
+            mHdmiDeviceType = hdmiDeviceInfo.mHdmiDeviceType;
+            mPhysicalAddress = hdmiDeviceInfo.mPhysicalAddress;
+            mPortId = hdmiDeviceInfo.mPortId;
+            mLogicalAddress = hdmiDeviceInfo.mLogicalAddress;
+            mDeviceType = hdmiDeviceInfo.mDeviceType;
+            mCecVersion = hdmiDeviceInfo.mCecVersion;
+            mVendorId = hdmiDeviceInfo.mVendorId;
+            mDisplayName = hdmiDeviceInfo.mDisplayName;
+            mDevicePowerStatus = hdmiDeviceInfo.mDevicePowerStatus;
+            mDeviceId = hdmiDeviceInfo.mDeviceId;
+            mAdopterId = hdmiDeviceInfo.mAdopterId;
+            mDeviceFeatures = hdmiDeviceInfo.mDeviceFeatures;
+        }
+
+        /**
+         * Create a new {@link HdmiDeviceInfo} object.
+         */
+        @NonNull
+        public HdmiDeviceInfo build() {
+            return new HdmiDeviceInfo(this);
+        }
+
+        /**
+         * Sets the value for {@link #getPhysicalAddress()}.
+         */
+        @NonNull
+        public Builder setPhysicalAddress(int physicalAddress) {
+            mPhysicalAddress = physicalAddress;
+            return this;
+        }
+
+        /**
+         * Sets the value for {@link #getPortId()}.
+         */
+        @NonNull
+        public Builder setPortId(int portId) {
+            mPortId = portId;
+            return this;
+        }
+
+        /**
+         * Sets the value for {@link #getLogicalAddress()}.
+         */
+        @NonNull
+        public Builder setLogicalAddress(int logicalAddress) {
+            mLogicalAddress = logicalAddress;
+            return this;
+        }
+
+        /**
+         * Sets the value for {@link #getDeviceType()}.
+         */
+        @NonNull
+        public Builder setDeviceType(int deviceType) {
+            mDeviceType = deviceType;
+            return this;
+        }
+
+        /**
+         * Sets the value for {@link #getCecVersion()}.
+         */
+        @NonNull
+        public Builder setCecVersion(int hdmiCecVersion) {
+            mCecVersion = hdmiCecVersion;
+            return this;
+        }
+
+        /**
+         * Sets the value for {@link #getVendorId()}.
+         */
+        @NonNull
+        public Builder setVendorId(int vendorId) {
+            mVendorId = vendorId;
+            return this;
+        }
+
+        /**
+         * Sets the value for {@link #getDisplayName()}.
+         */
+        @NonNull
+        public Builder setDisplayName(@NonNull String displayName) {
+            mDisplayName = displayName;
+            return this;
+        }
+
+        /**
+         * Sets the value for {@link #getDevicePowerStatus()}.
+         */
+        @NonNull
+        public Builder setDevicePowerStatus(int devicePowerStatus) {
+            mDevicePowerStatus = devicePowerStatus;
+            return this;
+        }
+
+        /**
+         * Sets the value for {@link #getDeviceFeatures()}.
+         */
+        @NonNull
+        public Builder setDeviceFeatures(DeviceFeatures deviceFeatures) {
+            this.mDeviceFeatures = deviceFeatures;
+            return this;
+        }
+
+        /**
+         * Sets the value for {@link #getDeviceId()}.
+         */
+        @NonNull
+        public Builder setDeviceId(int deviceId) {
+            mDeviceId = deviceId;
+            return this;
+        }
+
+        /**
+         * Sets the value for {@link #getAdopterId()}.
+         */
+        @NonNull
+        public Builder setAdopterId(int adopterId) {
+            mAdopterId = adopterId;
+            return this;
+        }
+
+        /**
+         * Updates the value for {@link #getDeviceFeatures()} with a new set of device features.
+         * New information overrides the old, except when feature support was unknown.
+         */
+        @NonNull
+        public Builder updateDeviceFeatures(DeviceFeatures deviceFeatures) {
+            mDeviceFeatures = mDeviceFeatures.toBuilder().update(deviceFeatures).build();
+            return this;
+        }
     }
 }

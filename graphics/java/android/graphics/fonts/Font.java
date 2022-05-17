@@ -179,7 +179,7 @@ public final class Font {
          */
         public Builder(@NonNull AssetManager am, @NonNull String path) {
             try {
-                mBuffer = createBuffer(am, path, true /* is asset */, 0 /* cookie */);
+                mBuffer = createBuffer(am, path, true /* is asset */, AssetManager.COOKIE_UNKNOWN);
             } catch (IOException e) {
                 mException = e;
             }

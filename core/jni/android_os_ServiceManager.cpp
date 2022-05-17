@@ -29,11 +29,8 @@ namespace android {
 
 // Native because we have a client-side wait in waitForService() and we do not
 // want an unnecessary second copy of it.
-static jobject android_os_ServiceManager_waitForService(
-        JNIEnv *env,
-        jclass /* clazzObj */,
-        jstring serviceNameObj) {
-
+static jobject android_os_ServiceManager_waitForServiceNative(JNIEnv* env, jclass /* clazzObj */,
+                                                              jstring serviceNameObj) {
     const jchar* serviceName = env->GetStringCritical(serviceNameObj, nullptr);
     if (!serviceName) {
         jniThrowNullPointerException(env, nullptr);
@@ -55,12 +52,9 @@ static jobject android_os_ServiceManager_waitForService(
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod method_table[] = {
-     /* name, signature, funcPtr */
-    {
-        "waitForService",
-        "(Ljava/lang/String;)Landroid/os/IBinder;",
-        (void*)android_os_ServiceManager_waitForService
-    },
+        /* name, signature, funcPtr */
+        {"waitForServiceNative", "(Ljava/lang/String;)Landroid/os/IBinder;",
+         (void*)android_os_ServiceManager_waitForServiceNative},
 };
 
 int register_android_os_ServiceManager(JNIEnv* env) {

@@ -65,12 +65,12 @@ struct NamespaceDecl {
 };
 
 struct AaptAttribute {
-  explicit AaptAttribute(const ::aapt::Attribute& attr, const Maybe<ResourceId>& resid = {})
+  explicit AaptAttribute(const ::aapt::Attribute& attr, const std::optional<ResourceId>& resid = {})
       : attribute(attr), id(resid) {
   }
 
   aapt::Attribute attribute;
-  Maybe<ResourceId> id;
+  std::optional<ResourceId> id;
 };
 
 // An XML attribute.
@@ -79,7 +79,7 @@ struct Attribute {
   std::string name;
   std::string value;
 
-  Maybe<AaptAttribute> compiled_attribute;
+  std::optional<AaptAttribute> compiled_attribute;
   std::unique_ptr<Item> compiled_value;
 };
 
@@ -235,7 +235,8 @@ class PackageAwareVisitor : public Visitor, public IPackageDeclStack {
  public:
   using Visitor::Visit;
 
-  Maybe<ExtractedPackage> TransformPackageAlias(const android::StringPiece& alias) const override;
+  std::optional<ExtractedPackage> TransformPackageAlias(
+      const android::StringPiece& alias) const override;
 
  protected:
   PackageAwareVisitor() = default;

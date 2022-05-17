@@ -25,7 +25,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <asm/byteorder.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -151,13 +150,8 @@ int register_android_server_UsbAlsaJackDetector(JNIEnv *env)
         return -1;
     }
 
-    if (!jniRegisterNativeMethods(env, "com/android/server/usb/UsbAlsaJackDetector",
-            method_table, NELEM(method_table))) {
-      ALOGE("Can't register UsbAlsaJackDetector native methods");
-      return -1;
-    }
-
-    return 0;
+    return jniRegisterNativeMethods(env, "com/android/server/usb/UsbAlsaJackDetector",
+            method_table, NELEM(method_table));
 }
 
 }

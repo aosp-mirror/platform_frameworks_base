@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"Осы қолданба жойылсын ба?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Бұл қолданба "<b>"барлық"</b>" пайдаланушылар үшін жойылсын ба? Қолданба және оның деректері құрылғыдағы "<b>"барлық"</b>" пайдаланушылардан өшіріледі."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"<xliff:g id="USERNAME">%1$s</xliff:g> үшін осы қолданба жойылсын ба?"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Бұл қолданба жұмыс профиліңізден жойылсын ба?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Осы қолданбаны зауыттық нұсқамен ауыстыру керек пе? Барлық деректер жойылады."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Осы қолданбаны зауыттық нұсқамен ауыстыру керек пе? Барлық деректер жойылады. Бұл осы құрылғының барлық пайдаланушыларына, соның ішінде жұмыс профильдері бар пайдаланушыларға әсер етеді."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Қолданба деректерін (<xliff:g id="SIZE">%1$s</xliff:g>) сақтау."</string>

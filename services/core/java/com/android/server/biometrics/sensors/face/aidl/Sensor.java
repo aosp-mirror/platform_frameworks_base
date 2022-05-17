@@ -18,6 +18,9 @@ package com.android.server.biometrics.sensors.face.aidl;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
+import android.app.SynchronousUserSwitchObserver;
+import android.app.UserSwitchObserver;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricsProtoEnums;
@@ -42,18 +45,20 @@ import android.os.UserManager;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.biometrics.HardwareAuthTokenUtils;
 import com.android.server.biometrics.SensorServiceStateProto;
 import com.android.server.biometrics.SensorStateProto;
 import com.android.server.biometrics.UserStateProto;
 import com.android.server.biometrics.Utils;
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.AuthenticationConsumer;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.EnumerateConsumer;
 import com.android.server.biometrics.sensors.ErrorConsumer;
-import com.android.server.biometrics.sensors.HalClientMonitor;
 import com.android.server.biometrics.sensors.Interruptable;
 import com.android.server.biometrics.sensors.LockoutCache;
 import com.android.server.biometrics.sensors.LockoutConsumer;
@@ -67,6 +72,7 @@ import com.android.server.biometrics.sensors.face.FaceUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * Maintains the state of a single sensor within an instance of the {@link IFace} HAL.
@@ -84,26 +90,20 @@ public class Sensor {
     @NonNull private final UserAwareBiometricScheduler mScheduler;
     @NonNull private final LockoutCache mLockoutCache;
     @NonNull private final Map<Integer, Long> mAuthenticatorIds;
-    @NonNull private final HalClientMonitor.LazyDaemon<ISession> mLazySession;
-    @Nullable private Session mCurrentSession;
 
-    static class Session {
-        @NonNull final HalSessionCallback mHalSessionCallback;
-        @NonNull private final String mTag;
-        @NonNull private final ISession mSession;
-        private final int mUserId;
+    @NonNull private final Supplier<AidlSession> mLazySession;
+    @Nullable private AidlSession mCurrentSession;
 
-        Session(@NonNull String tag, @NonNull ISession session, int userId,
-                @NonNull HalSessionCallback halSessionCallback) {
-            mTag = tag;
-            mSession = session;
-            mUserId = userId;
-            mHalSessionCallback = halSessionCallback;
-            Slog.d(mTag, "New session created for user: " + userId);
+    private final UserSwitchObserver mUserSwitchObserver = new SynchronousUserSwitchObserver() {
+        @Override
+        public void onUserSwitching(int newUserId) {
+            mProvider.scheduleInternalCleanup(
+                    mSensorProperties.sensorId, newUserId, null /* callback */);
         }
-    }
+    };
 
-    static class HalSessionCallback extends ISessionCallback.Stub {
+    @VisibleForTesting
+    public static class HalSessionCallback extends ISessionCallback.Stub {
         /**
          * Interface to sends results to the HalSessionCallback's owner.
          */
@@ -487,7 +487,8 @@ public class Sensor {
 
     Sensor(@NonNull String tag, @NonNull FaceProvider provider, @NonNull Context context,
             @NonNull Handler handler, @NonNull FaceSensorPropertiesInternal sensorProperties,
-            @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
+            @NonNull LockoutResetDispatcher lockoutResetDispatcher,
+            @NonNull BiometricContext biometricContext) {
         mTag = tag;
         mProvider = provider;
         mContext = context;
@@ -496,33 +497,36 @@ public class Sensor {
         mSensorProperties = sensorProperties;
         mScheduler = new UserAwareBiometricScheduler(tag,
                 BiometricScheduler.SENSOR_TYPE_FACE, null /* gestureAvailabilityDispatcher */,
-                () -> mCurrentSession != null ? mCurrentSession.mUserId : UserHandle.USER_NULL,
+                () -> mCurrentSession != null ? mCurrentSession.getUserId() : UserHandle.USER_NULL,
                 new UserAwareBiometricScheduler.UserSwitchCallback() {
                     @NonNull
                     @Override
                     public StopUserClient<?> getStopUserClient(int userId) {
                         return new FaceStopUserClient(mContext, mLazySession, mToken, userId,
-                                mSensorProperties.sensorId, () -> mCurrentSession = null);
+                                mSensorProperties.sensorId,
+                                BiometricLogger.ofUnknown(mContext), biometricContext,
+                                () -> mCurrentSession = null);
                     }
 
                     @NonNull
                     @Override
                     public StartUserClient<?, ?> getStartUserClient(int newUserId) {
-                        final HalSessionCallback.Callback callback = () -> {
-                            Slog.e(mTag, "Got ERROR_HW_UNAVAILABLE");
-                            mCurrentSession = null;
-                        };
-
                         final int sensorId = mSensorProperties.sensorId;
 
                         final HalSessionCallback resultController = new HalSessionCallback(mContext,
                                 mHandler, mTag, mScheduler, sensorId, newUserId, mLockoutCache,
-                                lockoutResetDispatcher, callback);
+                                lockoutResetDispatcher, () -> {
+                            Slog.e(mTag, "Got ERROR_HW_UNAVAILABLE");
+                            mCurrentSession = null;
+                        });
 
                         final StartUserClient.UserStartedCallback<ISession> userStartedCallback =
-                                (userIdStarted, newSession) -> {
-                                    mCurrentSession = new Session(mTag, newSession, userIdStarted,
-                                            resultController);
+                                (userIdStarted, newSession, halInterfaceVersion) -> {
+                                    Slog.d(mTag, "New session created for user: "
+                                            + userIdStarted + " with hal version: "
+                                            + halInterfaceVersion);
+                                    mCurrentSession = new AidlSession(halInterfaceVersion,
+                                            newSession, userIdStarted, resultController);
                                     if (FaceUtils.getLegacyInstance(sensorId)
                                             .isInvalidationInProgress(mContext, userIdStarted)) {
                                         Slog.w(mTag,
@@ -537,15 +541,22 @@ public class Sensor {
 
                         return new FaceStartUserClient(mContext, provider::getHalInstance,
                                 mToken, newUserId, mSensorProperties.sensorId,
+                                BiometricLogger.ofUnknown(mContext), biometricContext,
                                 resultController, userStartedCallback);
                     }
                 });
         mLockoutCache = new LockoutCache();
         mAuthenticatorIds = new HashMap<>();
-        mLazySession = () -> mCurrentSession != null ? mCurrentSession.mSession : null;
+        mLazySession = () -> mCurrentSession != null ? mCurrentSession : null;
+
+        try {
+            ActivityManager.getService().registerUserSwitchObserver(mUserSwitchObserver, mTag);
+        } catch (RemoteException e) {
+            Slog.e(mTag, "Unable to register user switch observer");
+        }
     }
 
-    @NonNull HalClientMonitor.LazyDaemon<ISession> getLazySession() {
+    @NonNull Supplier<AidlSession> getLazySession() {
         return mLazySession;
     }
 
@@ -553,8 +564,8 @@ public class Sensor {
         return mSensorProperties;
     }
 
-    @Nullable Session getSessionForUser(int userId) {
-        if (mCurrentSession != null && mCurrentSession.mUserId == userId) {
+    @Nullable AidlSession getSessionForUser(int userId) {
+        if (mCurrentSession != null && mCurrentSession.getUserId() == userId) {
             return mCurrentSession;
         } else {
             return null;
@@ -583,10 +594,10 @@ public class Sensor {
         if (enabled != mTestHalEnabled) {
             // The framework should retrieve a new session from the HAL.
             try {
-                if (mCurrentSession != null && mCurrentSession.mSession != null) {
+                if (mCurrentSession != null) {
                     // TODO(181984005): This should be scheduled instead of directly invoked
                     Slog.d(mTag, "Closing old session");
-                    mCurrentSession.mSession.close();
+                    mCurrentSession.getSession().close();
                 }
             } catch (RemoteException e) {
                 Slog.e(mTag, "RemoteException", e);

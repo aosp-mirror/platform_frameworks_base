@@ -19,6 +19,7 @@ package com.android.internal.widget;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Insets;
 import android.graphics.Paint;
 import android.graphics.Paint.FontMetricsInt;
 import android.graphics.Path;
@@ -36,6 +37,7 @@ import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
+import android.view.RoundedCorner;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -65,15 +67,15 @@ public class PointerLocationView extends View implements InputDeviceListener,
         private float[] mTraceY = new float[32];
         private boolean[] mTraceCurrent = new boolean[32];
         private int mTraceCount;
-        
+
         // True if the pointer is down.
         @UnsupportedAppUsage
         private boolean mCurDown;
-        
+
         // Most recent coordinates.
         private PointerCoords mCoords = new PointerCoords();
         private int mToolType;
-        
+
         // Most recent velocity.
         private float mXVelocity;
         private float mYVelocity;
@@ -106,7 +108,7 @@ public class PointerLocationView extends View implements InputDeviceListener,
                 float[] newTraceX = new float[traceCapacity];
                 System.arraycopy(mTraceX, 0, newTraceX, 0, mTraceCount);
                 mTraceX = newTraceX;
-                
+
                 float[] newTraceY = new float[traceCapacity];
                 System.arraycopy(mTraceY, 0, newTraceY, 0, mTraceCount);
                 mTraceY = newTraceY;
@@ -115,7 +117,7 @@ public class PointerLocationView extends View implements InputDeviceListener,
                 System.arraycopy(mTraceCurrent, 0, newTraceCurrent, 0, mTraceCount);
                 mTraceCurrent= newTraceCurrent;
             }
-            
+
             mTraceX[mTraceCount] = x;
             mTraceY[mTraceCount] = y;
             mTraceCurrent[mTraceCount] = current;
@@ -136,6 +138,7 @@ public class PointerLocationView extends View implements InputDeviceListener,
     private final FontMetricsInt mTextMetrics = new FontMetricsInt();
     private int mHeaderBottom;
     private int mHeaderPaddingTop = 0;
+    private Insets mWaterfallInsets = Insets.NONE;
     @UnsupportedAppUsage
     private boolean mCurDown;
     @UnsupportedAppUsage
@@ -160,7 +163,7 @@ public class PointerLocationView extends View implements InputDeviceListener,
 
     @UnsupportedAppUsage
     private boolean mPrintCoords = true;
-    
+
     public PointerLocationView(Context c) {
         super(c);
         setFocusableInTouchMode(true);
@@ -209,7 +212,7 @@ public class PointerLocationView extends View implements InputDeviceListener,
         PointerState ps = new PointerState();
         mPointers.add(ps);
         mActivePointerId = 0;
-        
+
         mVelocity = VelocityTracker.obtain();
 
         String altStrategy = SystemProperties.get(ALT_STRATEGY_PROPERY_KEY);
@@ -227,11 +230,29 @@ public class PointerLocationView extends View implements InputDeviceListener,
 
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
-        if (insets.getDisplayCutout() != null) {
-            mHeaderPaddingTop = insets.getDisplayCutout().getSafeInsetTop();
-        } else {
-            mHeaderPaddingTop = 0;
+        int headerPaddingTop = 0;
+        Insets waterfallInsets = Insets.NONE;
+
+        final RoundedCorner topLeftRounded =
+                insets.getRoundedCorner(RoundedCorner.POSITION_TOP_LEFT);
+        if (topLeftRounded != null) {
+            headerPaddingTop = topLeftRounded.getRadius();
         }
+
+        final RoundedCorner topRightRounded =
+                insets.getRoundedCorner(RoundedCorner.POSITION_TOP_RIGHT);
+        if (topRightRounded != null) {
+            headerPaddingTop = Math.max(headerPaddingTop, topRightRounded.getRadius());
+        }
+
+        if (insets.getDisplayCutout() != null) {
+            headerPaddingTop =
+                    Math.max(headerPaddingTop, insets.getDisplayCutout().getSafeInsetTop());
+            waterfallInsets = insets.getDisplayCutout().getWaterfallInsets();
+        }
+
+        mHeaderPaddingTop = headerPaddingTop;
+        mWaterfallInsets = waterfallInsets;
         return super.onApplyWindowInsets(insets);
     }
 
@@ -248,7 +269,7 @@ public class PointerLocationView extends View implements InputDeviceListener,
                     + " bottom=" + mTextMetrics.bottom);
         }
     }
-    
+
     // Draw an oval.  When angle is 0 radians, orients the major axis vertically,
     // angles less than or greater than 0 radians rotate the major axis left or right.
     private RectF mReusableOvalRect = new RectF();
@@ -266,11 +287,6 @@ public class PointerLocationView extends View implements InputDeviceListener,
 
     @Override
     protected void onDraw(Canvas canvas) {
-        final int w = getWidth();
-        final int itemW = w/7;
-        final int base = mHeaderPaddingTop-mTextMetrics.ascent+1;
-        final int bottom = mHeaderBottom;
-
         final int NP = mPointers.size();
 
         if (!mSystemGestureExclusion.isEmpty()) {
@@ -286,71 +302,7 @@ public class PointerLocationView extends View implements InputDeviceListener,
         }
 
         // Labels
-        if (mActivePointerId >= 0) {
-            final PointerState ps = mPointers.get(mActivePointerId);
-            
-            canvas.drawRect(0, mHeaderPaddingTop, itemW-1, bottom,mTextBackgroundPaint);
-            canvas.drawText(mText.clear()
-                    .append("P: ").append(mCurNumPointers)
-                    .append(" / ").append(mMaxNumPointers)
-                    .toString(), 1, base, mTextPaint);
-
-            final int N = ps.mTraceCount;
-            if ((mCurDown && ps.mCurDown) || N == 0) {
-                canvas.drawRect(itemW, mHeaderPaddingTop, (itemW * 2) - 1, bottom,
-                        mTextBackgroundPaint);
-                canvas.drawText(mText.clear()
-                        .append("X: ").append(ps.mCoords.x, 1)
-                        .toString(), 1 + itemW, base, mTextPaint);
-                canvas.drawRect(itemW * 2, mHeaderPaddingTop, (itemW * 3) - 1, bottom,
-                        mTextBackgroundPaint);
-                canvas.drawText(mText.clear()
-                        .append("Y: ").append(ps.mCoords.y, 1)
-                        .toString(), 1 + itemW * 2, base, mTextPaint);
-            } else {
-                float dx = ps.mTraceX[N - 1] - ps.mTraceX[0];
-                float dy = ps.mTraceY[N - 1] - ps.mTraceY[0];
-                canvas.drawRect(itemW, mHeaderPaddingTop, (itemW * 2) - 1, bottom,
-                        Math.abs(dx) < mVC.getScaledTouchSlop()
-                        ? mTextBackgroundPaint : mTextLevelPaint);
-                canvas.drawText(mText.clear()
-                        .append("dX: ").append(dx, 1)
-                        .toString(), 1 + itemW, base, mTextPaint);
-                canvas.drawRect(itemW * 2, mHeaderPaddingTop, (itemW * 3) - 1, bottom,
-                        Math.abs(dy) < mVC.getScaledTouchSlop()
-                        ? mTextBackgroundPaint : mTextLevelPaint);
-                canvas.drawText(mText.clear()
-                        .append("dY: ").append(dy, 1)
-                        .toString(), 1 + itemW * 2, base, mTextPaint);
-            }
-
-            canvas.drawRect(itemW * 3, mHeaderPaddingTop, (itemW * 4) - 1, bottom,
-                    mTextBackgroundPaint);
-            canvas.drawText(mText.clear()
-                    .append("Xv: ").append(ps.mXVelocity, 3)
-                    .toString(), 1 + itemW * 3, base, mTextPaint);
-
-            canvas.drawRect(itemW * 4, mHeaderPaddingTop, (itemW * 5) - 1, bottom,
-                    mTextBackgroundPaint);
-            canvas.drawText(mText.clear()
-                    .append("Yv: ").append(ps.mYVelocity, 3)
-                    .toString(), 1 + itemW * 4, base, mTextPaint);
-
-            canvas.drawRect(itemW * 5, mHeaderPaddingTop, (itemW * 6) - 1, bottom,
-                    mTextBackgroundPaint);
-            canvas.drawRect(itemW * 5, mHeaderPaddingTop,
-                    (itemW * 5) + (ps.mCoords.pressure * itemW) - 1, bottom, mTextLevelPaint);
-            canvas.drawText(mText.clear()
-                    .append("Prs: ").append(ps.mCoords.pressure, 2)
-                    .toString(), 1 + itemW * 5, base, mTextPaint);
-
-            canvas.drawRect(itemW * 6, mHeaderPaddingTop, w, bottom, mTextBackgroundPaint);
-            canvas.drawRect(itemW * 6, mHeaderPaddingTop,
-                    (itemW * 6) + (ps.mCoords.size * itemW) - 1, bottom, mTextLevelPaint);
-            canvas.drawText(mText.clear()
-                    .append("Size: ").append(ps.mCoords.size, 2)
-                    .toString(), 1 + itemW * 6, base, mTextPaint);
-        }
+        drawLabels(canvas);
 
         // Pointer trace.
         for (int p = 0; p < NP; p++) {
@@ -461,6 +413,84 @@ public class PointerLocationView extends View implements InputDeviceListener,
                 }
             }
         }
+    }
+
+    private void drawLabels(Canvas canvas) {
+        if (mActivePointerId < 0 || mActivePointerId >= mPointers.size()) {
+            return;
+        }
+
+        final int w = getWidth() - mWaterfallInsets.left - mWaterfallInsets.right;
+        final int itemW = w / 7;
+        final int base = mHeaderPaddingTop - mTextMetrics.ascent + 1;
+        final int bottom = mHeaderBottom;
+
+        canvas.save();
+        canvas.translate(mWaterfallInsets.left, 0);
+        final PointerState ps = mPointers.get(mActivePointerId);
+
+        canvas.drawRect(0, mHeaderPaddingTop, itemW - 1, bottom, mTextBackgroundPaint);
+        canvas.drawText(mText.clear()
+                .append("P: ").append(mCurNumPointers)
+                .append(" / ").append(mMaxNumPointers)
+                .toString(), 1, base, mTextPaint);
+
+        final int count = ps.mTraceCount;
+        if ((mCurDown && ps.mCurDown) || count == 0) {
+            canvas.drawRect(itemW, mHeaderPaddingTop, (itemW * 2) - 1, bottom,
+                    mTextBackgroundPaint);
+            canvas.drawText(mText.clear()
+                    .append("X: ").append(ps.mCoords.x, 1)
+                    .toString(), 1 + itemW, base, mTextPaint);
+            canvas.drawRect(itemW * 2, mHeaderPaddingTop, (itemW * 3) - 1, bottom,
+                    mTextBackgroundPaint);
+            canvas.drawText(mText.clear()
+                    .append("Y: ").append(ps.mCoords.y, 1)
+                    .toString(), 1 + itemW * 2, base, mTextPaint);
+        } else {
+            float dx = ps.mTraceX[count - 1] - ps.mTraceX[0];
+            float dy = ps.mTraceY[count - 1] - ps.mTraceY[0];
+            canvas.drawRect(itemW, mHeaderPaddingTop, (itemW * 2) - 1, bottom,
+                    Math.abs(dx) < mVC.getScaledTouchSlop()
+                            ? mTextBackgroundPaint : mTextLevelPaint);
+            canvas.drawText(mText.clear()
+                    .append("dX: ").append(dx, 1)
+                    .toString(), 1 + itemW, base, mTextPaint);
+            canvas.drawRect(itemW * 2, mHeaderPaddingTop, (itemW * 3) - 1, bottom,
+                    Math.abs(dy) < mVC.getScaledTouchSlop()
+                            ? mTextBackgroundPaint : mTextLevelPaint);
+            canvas.drawText(mText.clear()
+                    .append("dY: ").append(dy, 1)
+                    .toString(), 1 + itemW * 2, base, mTextPaint);
+        }
+
+        canvas.drawRect(itemW * 3, mHeaderPaddingTop, (itemW * 4) - 1, bottom,
+                mTextBackgroundPaint);
+        canvas.drawText(mText.clear()
+                .append("Xv: ").append(ps.mXVelocity, 3)
+                .toString(), 1 + itemW * 3, base, mTextPaint);
+
+        canvas.drawRect(itemW * 4, mHeaderPaddingTop, (itemW * 5) - 1, bottom,
+                mTextBackgroundPaint);
+        canvas.drawText(mText.clear()
+                .append("Yv: ").append(ps.mYVelocity, 3)
+                .toString(), 1 + itemW * 4, base, mTextPaint);
+
+        canvas.drawRect(itemW * 5, mHeaderPaddingTop, (itemW * 6) - 1, bottom,
+                mTextBackgroundPaint);
+        canvas.drawRect(itemW * 5, mHeaderPaddingTop,
+                (itemW * 5) + (ps.mCoords.pressure * itemW) - 1, bottom, mTextLevelPaint);
+        canvas.drawText(mText.clear()
+                .append("Prs: ").append(ps.mCoords.pressure, 2)
+                .toString(), 1 + itemW * 5, base, mTextPaint);
+
+        canvas.drawRect(itemW * 6, mHeaderPaddingTop, w, bottom, mTextBackgroundPaint);
+        canvas.drawRect(itemW * 6, mHeaderPaddingTop,
+                (itemW * 6) + (ps.mCoords.size * itemW) - 1, bottom, mTextLevelPaint);
+        canvas.drawText(mText.clear()
+                .append("Size: ").append(ps.mCoords.size, 2)
+                .toString(), 1 + itemW * 6, base, mTextPaint);
+        canvas.restore();
     }
 
     private void logMotionEvent(String type, MotionEvent event) {
@@ -601,8 +631,8 @@ public class PointerLocationView extends View implements InputDeviceListener,
                 NP++;
             }
 
-            if (mActivePointerId < 0 ||
-                    !mPointers.get(mActivePointerId).mCurDown) {
+            if (mActivePointerId < 0 || mActivePointerId >= NP
+                    || !mPointers.get(mActivePointerId).mCurDown) {
                 mActivePointerId = id;
             }
 
@@ -697,7 +727,7 @@ public class PointerLocationView extends View implements InputDeviceListener,
 
         invalidate();
     }
-    
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         onPointerEvent(event);
@@ -849,16 +879,16 @@ public class PointerLocationView extends View implements InputDeviceListener,
     private static final class FasterStringBuilder {
         private char[] mChars;
         private int mLength;
-        
+
         public FasterStringBuilder() {
             mChars = new char[64];
         }
-        
+
         public FasterStringBuilder clear() {
             mLength = 0;
             return this;
         }
-        
+
         public FasterStringBuilder append(String value) {
             final int valueLength = value.length();
             final int index = reserve(valueLength);
@@ -866,11 +896,11 @@ public class PointerLocationView extends View implements InputDeviceListener,
             mLength += valueLength;
             return this;
         }
-        
+
         public FasterStringBuilder append(int value) {
             return append(value, 0);
         }
-        
+
         public FasterStringBuilder append(int value, int zeroPadWidth) {
             final boolean negative = value < 0;
             if (negative) {
@@ -880,16 +910,16 @@ public class PointerLocationView extends View implements InputDeviceListener,
                     return this;
                 }
             }
-            
+
             int index = reserve(11);
             final char[] chars = mChars;
-            
+
             if (value == 0) {
                 chars[index++] = '0';
                 mLength += 1;
                 return this;
             }
-            
+
             if (negative) {
                 chars[index++] = '-';
             }
@@ -903,18 +933,18 @@ public class PointerLocationView extends View implements InputDeviceListener,
                     chars[index++] = '0';
                 }
             }
-            
+
             do {
                 int digit = value / divisor;
                 value -= digit * divisor;
                 divisor /= 10;
                 chars[index++] = (char) (digit + '0');
             } while (divisor != 0);
-            
+
             mLength = index;
             return this;
         }
-        
+
         public FasterStringBuilder append(float value, int precision) {
             int scale = 1;
             for (int i = 0; i < precision; i++) {
@@ -934,15 +964,15 @@ public class PointerLocationView extends View implements InputDeviceListener,
                 value -= Math.floor(value);
                 append((int) (value * scale), precision);
             }
-            
+
             return this;
         }
-        
+
         @Override
         public String toString() {
             return new String(mChars, 0, mLength);
         }
-        
+
         private int reserve(int length) {
             final int oldLength = mLength;
             final int newLength = mLength + length;

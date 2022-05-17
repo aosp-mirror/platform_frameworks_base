@@ -27,10 +27,10 @@ import android.os.Parcelable;
 import android.util.ArrayMap;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.Preconditions;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Represents the result of language detection of a piece of text.
@@ -168,7 +168,7 @@ public final class TextLanguage implements Parcelable {
         public Builder putLocale(
                 @NonNull ULocale locale,
                 @FloatRange(from = 0.0, to = 1.0) float confidenceScore) {
-            Preconditions.checkNotNull(locale);
+            Objects.requireNonNull(locale);
             mEntityConfidenceMap.put(locale.toLanguageTag(), confidenceScore);
             return this;
         }
@@ -187,7 +187,7 @@ public final class TextLanguage implements Parcelable {
          */
         @NonNull
         public Builder setExtras(@NonNull Bundle bundle) {
-            mBundle = Preconditions.checkNotNull(bundle);
+            mBundle = Objects.requireNonNull(bundle);
             return this;
         }
 
@@ -295,7 +295,7 @@ public final class TextLanguage implements Parcelable {
         private static Request readFromParcel(Parcel in) {
             final CharSequence text = in.readCharSequence();
             final Bundle extra = in.readBundle();
-            final SystemTextClassifierMetadata systemTcMetadata = in.readParcelable(null);
+            final SystemTextClassifierMetadata systemTcMetadata = in.readParcelable(null, android.view.textclassifier.SystemTextClassifierMetadata.class);
 
             final Request request = new Request(text, extra);
             request.setSystemTextClassifierMetadata(systemTcMetadata);
@@ -316,7 +316,7 @@ public final class TextLanguage implements Parcelable {
              * @param text the text to process.
              */
             public Builder(@NonNull CharSequence text) {
-                mText = Preconditions.checkNotNull(text);
+                mText = Objects.requireNonNull(text);
             }
 
             /**
@@ -324,7 +324,7 @@ public final class TextLanguage implements Parcelable {
              */
             @NonNull
             public Builder setExtras(@NonNull Bundle bundle) {
-                mBundle = Preconditions.checkNotNull(bundle);
+                mBundle = Objects.requireNonNull(bundle);
                 return this;
             }
 

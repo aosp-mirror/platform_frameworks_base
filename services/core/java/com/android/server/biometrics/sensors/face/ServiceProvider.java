@@ -29,7 +29,7 @@ import android.os.IBinder;
 import android.util.proto.ProtoOutputStream;
 import android.view.Surface;
 
-import com.android.server.biometrics.sensors.BaseClientMonitor;
+import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutTracker;
 
@@ -94,25 +94,30 @@ public interface ServiceProvider {
     void scheduleRevokeChallenge(int sensorId, int userId, @NonNull IBinder token,
             @NonNull String opPackageName, long challenge);
 
-    void scheduleEnroll(int sensorId, @NonNull IBinder token, @NonNull byte[] hardwareAuthToken,
+    long scheduleEnroll(int sensorId, @NonNull IBinder token, @NonNull byte[] hardwareAuthToken,
             int userId, @NonNull IFaceServiceReceiver receiver, @NonNull String opPackageName,
             @NonNull int[] disabledFeatures, @Nullable Surface previewSurface,
             boolean debugConsent);
 
-    void cancelEnrollment(int sensorId, @NonNull IBinder token);
+    void cancelEnrollment(int sensorId, @NonNull IBinder token, long requestId);
 
-    void scheduleFaceDetect(int sensorId, @NonNull IBinder token, int userId,
+    long scheduleFaceDetect(int sensorId, @NonNull IBinder token, int userId,
             @NonNull ClientMonitorCallbackConverter callback, @NonNull String opPackageName,
             int statsClient);
 
-    void cancelFaceDetect(int sensorId, @NonNull IBinder token);
+    void cancelFaceDetect(int sensorId, @NonNull IBinder token, long requestId);
 
-    void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId, int userId,
+    long scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId, int userId,
             int cookie, @NonNull ClientMonitorCallbackConverter callback,
             @NonNull String opPackageName, boolean restricted, int statsClient,
             boolean allowBackgroundAuthentication, boolean isKeyguardBypassEnabled);
 
-    void cancelAuthentication(int sensorId, @NonNull IBinder token);
+    void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId, int userId,
+            int cookie, @NonNull ClientMonitorCallbackConverter callback,
+            @NonNull String opPackageName, long requestId, boolean restricted, int statsClient,
+            boolean allowBackgroundAuthentication, boolean isKeyguardBypassEnabled);
+
+    void cancelAuthentication(int sensorId, @NonNull IBinder token, long requestId);
 
     void scheduleRemove(int sensorId, @NonNull IBinder token, int faceId, int userId,
             @NonNull IFaceServiceReceiver receiver, @NonNull String opPackageName);
@@ -132,7 +137,7 @@ public interface ServiceProvider {
     void startPreparedClient(int sensorId, int cookie);
 
     void scheduleInternalCleanup(int sensorId, int userId,
-            @Nullable BaseClientMonitor.Callback callback);
+            @Nullable ClientMonitorCallback callback);
 
     void dumpProtoState(int sensorId, @NonNull ProtoOutputStream proto,
             boolean clearSchedulerBuffer);

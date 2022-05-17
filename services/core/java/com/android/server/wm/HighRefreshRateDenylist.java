@@ -22,12 +22,12 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.Resources;
 import android.provider.DeviceConfig;
+import android.provider.DeviceConfigInterface;
 import android.util.ArraySet;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
-import com.android.server.utils.DeviceConfigInterface;
 
 import java.io.PrintWriter;
 
@@ -41,9 +41,6 @@ class HighRefreshRateDenylist {
     private final String[] mDefaultDenylist;
     private final Object mLock = new Object();
 
-    private DeviceConfigInterface mDeviceConfig;
-    private OnPropertiesChangedListener mListener = new OnPropertiesChangedListener();
-
     static HighRefreshRateDenylist create(@NonNull Resources r) {
         return new HighRefreshRateDenylist(r, DeviceConfigInterface.REAL);
     }
@@ -51,10 +48,9 @@ class HighRefreshRateDenylist {
     @VisibleForTesting
     HighRefreshRateDenylist(Resources r, DeviceConfigInterface deviceConfig) {
         mDefaultDenylist = r.getStringArray(R.array.config_highRefreshRateBlacklist);
-        mDeviceConfig = deviceConfig;
-        mDeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
-                BackgroundThread.getExecutor(), mListener);
-        final String property = mDeviceConfig.getProperty(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
+        deviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
+                BackgroundThread.getExecutor(), new OnPropertiesChangedListener());
+        final String property = deviceConfig.getProperty(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
                 KEY_HIGH_REFRESH_RATE_BLACKLIST);
         updateDenylist(property);
     }
@@ -93,14 +89,6 @@ class HighRefreshRateDenylist {
                 pw.println("    " + pkg);
             }
         }
-    }
-
-    /** Used to prevent WmTests leaking issues. */
-    @VisibleForTesting
-    void dispose() {
-        mDeviceConfig.removeOnPropertiesChangedListener(mListener);
-        mDeviceConfig = null;
-        mDenylistedPackages.clear();
     }
 
     private class OnPropertiesChangedListener implements DeviceConfig.OnPropertiesChangedListener {

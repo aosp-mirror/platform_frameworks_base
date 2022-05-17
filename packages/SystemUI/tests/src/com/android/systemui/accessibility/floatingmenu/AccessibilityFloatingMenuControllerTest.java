@@ -41,6 +41,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -78,6 +79,14 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
                 return getBaseContext();
             }
         };
+    }
+
+    @After
+    public void tearDown() {
+        if (mController != null) {
+            mController.onAccessibilityButtonTargetsChanged("");
+            mController = null;
+        }
     }
 
     @Test
@@ -282,9 +291,12 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
         mTargetsObserver = spy(Dependency.get(AccessibilityButtonTargetsObserver.class));
         mModeObserver = spy(Dependency.get(AccessibilityButtonModeObserver.class));
         mKeyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
+        final AccessibilityFloatingMenuController controller =
+                new AccessibilityFloatingMenuController(mContextWrapper, mTargetsObserver,
+                        mModeObserver, mKeyguardUpdateMonitor);
+        controller.init();
 
-        return new AccessibilityFloatingMenuController(mContextWrapper, mTargetsObserver,
-                mModeObserver, mKeyguardUpdateMonitor);
+        return controller;
     }
 
     private void enableAccessibilityFloatingMenuConfig() {

@@ -16,23 +16,16 @@
 
 package com.android.settingslib.net;
 
-import static android.net.NetworkStatsHistory.FIELD_RX_BYTES;
-import static android.net.NetworkStatsHistory.FIELD_TX_BYTES;
-
+import android.annotation.NonNull;
 import android.app.usage.NetworkStats;
 import android.app.usage.NetworkStatsManager;
 import android.content.Context;
-import android.net.INetworkStatsService;
-import android.net.INetworkStatsSession;
 import android.net.NetworkPolicy;
 import android.net.NetworkPolicyManager;
-import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
-import android.net.TrafficStats;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.text.format.DateUtils;
 import android.util.Pair;
+import android.util.Range;
 
 import androidx.annotation.VisibleForTesting;
 import androidx.loader.content.AsyncTaskLoader;
@@ -52,8 +45,6 @@ public abstract class NetworkCycleDataLoader<D> extends AsyncTaskLoader<D> {
     protected final NetworkTemplate mNetworkTemplate;
     private final NetworkPolicy mPolicy;
     private final ArrayList<Long> mCycles;
-    @VisibleForTesting
-    final INetworkStatsService mNetworkStatsService;
 
     protected NetworkCycleDataLoader(Builder<?> builder) {
         super(builder.mContext);
@@ -61,8 +52,6 @@ public abstract class NetworkCycleDataLoader<D> extends AsyncTaskLoader<D> {
         mCycles = builder.mCycles;
         mNetworkStatsManager = (NetworkStatsManager)
             builder.mContext.getSystemService(Context.NETWORK_STATS_SERVICE);
-        mNetworkStatsService = INetworkStatsService.Stub.asInterface(
-            ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
         final NetworkPolicyEditor policyEditor =
             new NetworkPolicyEditor(NetworkPolicyManager.from(builder.mContext));
         policyEditor.read();
@@ -112,23 +101,20 @@ public abstract class NetworkCycleDataLoader<D> extends AsyncTaskLoader<D> {
 
     @VisibleForTesting
     void loadFourWeeksData() {
+        if (mNetworkTemplate == null) return;
+        final NetworkStats stats = mNetworkStatsManager.queryDetailsForDevice(
+                mNetworkTemplate, Long.MIN_VALUE, Long.MAX_VALUE);
         try {
-            final INetworkStatsSession networkSession = mNetworkStatsService.openSession();
-            final NetworkStatsHistory networkHistory = networkSession.getHistoryForNetwork(
-                mNetworkTemplate, FIELD_RX_BYTES | FIELD_TX_BYTES);
-            final long historyStart = networkHistory.getStart();
-            final long historyEnd = networkHistory.getEnd();
+            final Range<Long> historyTimeRange = getTimeRangeOf(stats);
 
-            long cycleEnd = historyEnd;
-            while (cycleEnd > historyStart) {
+            long cycleEnd = historyTimeRange.getUpper();
+            while (cycleEnd > historyTimeRange.getLower()) {
                 final long cycleStart = cycleEnd - (DateUtils.WEEK_IN_MILLIS * 4);
                 recordUsage(cycleStart, cycleEnd);
                 cycleEnd = cycleStart;
             }
-
-            TrafficStats.closeQuietly(networkSession);
-        } catch (RemoteException e) {
-            throw new RuntimeException(e);
+        } catch (IllegalArgumentException e) {
+            // Empty history, ignore.
         }
     }
 
@@ -167,6 +153,32 @@ public abstract class NetworkCycleDataLoader<D> extends AsyncTaskLoader<D> {
             stats.close();
         }
         return bytes;
+    }
+
+    @NonNull
+    @VisibleForTesting
+    Range getTimeRangeOf(@NonNull NetworkStats stats) {
+        long start = Long.MAX_VALUE;
+        long end = Long.MIN_VALUE;
+        while (hasNextBucket(stats)) {
+            final NetworkStats.Bucket bucket = getNextBucket(stats);
+            start = Math.min(start, bucket.getStartTimeStamp());
+            end = Math.max(end, bucket.getEndTimeStamp());
+        }
+        return new Range(start, end);
+    }
+
+    @VisibleForTesting
+    boolean hasNextBucket(@NonNull NetworkStats stats) {
+        return stats.hasNextBucket();
+    }
+
+    @NonNull
+    @VisibleForTesting
+    NetworkStats.Bucket getNextBucket(@NonNull NetworkStats stats) {
+        NetworkStats.Bucket bucket = new NetworkStats.Bucket();
+        stats.getNextBucket(bucket);
+        return bucket;
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.NONE)

@@ -106,14 +106,6 @@ public class ActivityTaskManager {
             RESIZE_MODE_PRESERVE_WINDOW | RESIZE_MODE_FORCED;
 
     /**
-     * Extra included on intents that are delegating the call to
-     * ActivityManager#startActivityAsCaller to another app.  This token is necessary for that call
-     * to succeed.  Type is IBinder.
-     * @hide
-     */
-    public static final String EXTRA_PERMISSION_TOKEN = "android.app.extra.PERMISSION_TOKEN";
-
-    /**
      * Extra included on intents that contain an EXTRA_INTENT, with options that the contained
      * intent may want to be started with.  Type is Bundle.
      * TODO: remove once the ChooserActivity moves to systemui
@@ -470,6 +462,19 @@ public class ActivityTaskManager {
     public boolean removeTask(int taskId) {
         try {
             return getService().removeTask(taskId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Detaches the navigation bar from the app it was attached to during a transition.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS)
+    public void detachNavigationBarFromApp(@NonNull IBinder transition) {
+        try {
+            getService().detachNavigationBarFromApp(transition);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

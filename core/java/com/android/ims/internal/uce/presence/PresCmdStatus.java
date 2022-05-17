@@ -146,8 +146,8 @@ public class PresCmdStatus implements Parcelable{
     public void readFromParcel(Parcel source) {
         mUserData = source.readInt();
         mRequestId = source.readInt();
-        mCmdId = source.readParcelable(PresCmdId.class.getClassLoader());
-        mStatus = source.readParcelable(StatusCode.class.getClassLoader());
+        mCmdId = source.readParcelable(PresCmdId.class.getClassLoader(), com.android.ims.internal.uce.presence.PresCmdId.class);
+        mStatus = source.readParcelable(StatusCode.class.getClassLoader(), com.android.ims.internal.uce.common.StatusCode.class);
     }
 
 }

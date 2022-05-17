@@ -33,6 +33,7 @@ import android.view.WindowManager
 import android.widget.ImageView
 import com.android.internal.policy.ScreenDecorationsUtils
 import com.android.systemui.R
+import com.android.systemui.broadcast.BroadcastSender
 import com.android.wm.shell.TaskView
 
 /**
@@ -41,12 +42,13 @@ import com.android.wm.shell.TaskView
  * The activity being launched is specified by {@link android.service.controls.Control#getAppIntent}.
  */
 class DetailDialog(
-    val activityContext: Context?,
+    val activityContext: Context,
+    val broadcastSender: BroadcastSender,
     val taskView: TaskView,
-    val intent: Intent,
+    val pendingIntent: PendingIntent,
     val cvh: ControlViewHolder
 ) : Dialog(
-    activityContext ?: cvh.context,
+    activityContext,
     R.style.Theme_SystemUI_Dialog_Control_DetailPanel
 ) {
     companion object {
@@ -58,6 +60,18 @@ class DetailDialog(
     }
 
     var detailTaskId = INVALID_TASK_ID
+    private lateinit var taskViewContainer: View
+    private val taskWidthPercentWidth = activityContext.resources.getFloat(
+        R.dimen.controls_task_view_width_percentage
+    )
+
+    private val fillInIntent = Intent().apply {
+        putExtra(EXTRA_USE_PANEL, true)
+
+        // Apply flags to make behaviour match documentLaunchMode=always.
+        addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT)
+        addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
+    }
 
     fun removeDetailTask() {
         if (detailTaskId == INVALID_TASK_ID) return
@@ -67,24 +81,21 @@ class DetailDialog(
 
     val stateCallback = object : TaskView.Listener {
         override fun onInitialized() {
-            val launchIntent = Intent(intent)
-            launchIntent.putExtra(EXTRA_USE_PANEL, true)
+            taskViewContainer.apply {
+                // For some devices, limit the overall width of the taskView
+                val lp = getLayoutParams()
+                lp.width = (getWidth() * taskWidthPercentWidth).toInt()
+                setLayoutParams(lp)
+            }
 
-            // Apply flags to make behaviour match documentLaunchMode=always.
-            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT)
-            launchIntent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
-
-            val options = activityContext?.let {
-                ActivityOptions.makeCustomAnimation(
-                    it,
-                    0 /* enterResId */,
-                    0 /* exitResId */
-                )
-            } ?: ActivityOptions.makeBasic()
+            val options = ActivityOptions.makeCustomAnimation(
+                activityContext,
+                0 /* enterResId */,
+                0 /* exitResId */
+            )
             taskView.startActivity(
-                PendingIntent.getActivity(context, 0, launchIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE),
-                null /* fillInIntent */,
+                pendingIntent,
+                fillInIntent,
                 options,
                 getTaskViewBounds()
             )
@@ -97,6 +108,9 @@ class DetailDialog(
 
         override fun onTaskCreated(taskId: Int, name: ComponentName?) {
             detailTaskId = taskId
+            requireViewById<ViewGroup>(R.id.controls_activity_view).apply {
+                setAlpha(1f)
+            }
         }
 
         override fun onReleased() {
@@ -109,21 +123,23 @@ class DetailDialog(
     }
 
     init {
-        if (activityContext == null) {
-            window.setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY)
-        }
-
         // To pass touches to the task inside TaskView.
         window.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)
         window.addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY)
 
         setContentView(R.layout.controls_detail_dialog)
 
+        taskViewContainer = requireViewById<ViewGroup>(R.id.control_task_view_container)
+
         requireViewById<ViewGroup>(R.id.controls_activity_view).apply {
             addView(taskView)
+            setAlpha(0f)
         }
 
         requireViewById<ImageView>(R.id.control_detail_close).apply {
+            setOnClickListener { _: View -> dismiss() }
+        }
+        requireViewById<View>(R.id.control_detail_root).apply {
             setOnClickListener { _: View -> dismiss() }
         }
 
@@ -133,25 +149,18 @@ class DetailDialog(
                 // startActivity() below is called.
                 removeDetailTask()
                 dismiss()
-                context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
-                v.context.startActivity(intent)
+                broadcastSender.closeSystemDialogs()
+                pendingIntent.send()
             }
         }
 
         // consume all insets to achieve slide under effect
         window.getDecorView().setOnApplyWindowInsetsListener {
             v: View, insets: WindowInsets ->
-                taskView.apply {
-                    val l = getPaddingLeft()
-                    val t = getPaddingTop()
-                    val r = getPaddingRight()
-                    setPadding(l, t, r, insets.getInsets(Type.systemBars()).bottom)
-                }
-
                 val l = v.getPaddingLeft()
-                val b = v.getPaddingBottom()
                 val r = v.getPaddingRight()
-                v.setPadding(l, insets.getInsets(Type.systemBars()).top, r, b)
+                val insets = insets.getInsets(Type.systemBars())
+                v.setPadding(l, insets.top, r, insets.bottom)
 
                 WindowInsets.CONSUMED
         }

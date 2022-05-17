@@ -85,10 +85,6 @@ static const JNINativeMethod gRegisterMethods[] = {
       (void*) android_app_admin_SecurityLog_isLoggingEnabled
     },
     { "writeEvent",
-      "(ILjava/lang/String;)I",
-      (void*) SLog::writeEventString
-    },
-    { "writeEvent",
       "(I[Ljava/lang/Object;)I",
       (void*) SLog::writeEventArray
     },

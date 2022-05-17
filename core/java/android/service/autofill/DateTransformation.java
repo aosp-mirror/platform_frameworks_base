@@ -29,9 +29,8 @@ import android.view.autofill.AutofillValue;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 
-import com.android.internal.util.Preconditions;
-
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * Replaces a {@link TextView} child of a {@link CustomDescription} with the contents of a field
@@ -57,8 +56,8 @@ public final class DateTransformation extends InternalTransformation implements
      * @param dateFormat object used to transform the date value of the field to a String.
      */
     public DateTransformation(@NonNull AutofillId id, @NonNull DateFormat dateFormat) {
-        mFieldId = Preconditions.checkNotNull(id);
-        mDateFormat = Preconditions.checkNotNull(dateFormat);
+        mFieldId = Objects.requireNonNull(id);
+        mDateFormat = Objects.requireNonNull(dateFormat);
     }
 
     /** @hide */
@@ -115,8 +114,8 @@ public final class DateTransformation extends InternalTransformation implements
             new Parcelable.Creator<DateTransformation>() {
         @Override
         public DateTransformation createFromParcel(Parcel parcel) {
-            return new DateTransformation(parcel.readParcelable(null),
-                    (DateFormat) parcel.readSerializable());
+            return new DateTransformation(parcel.readParcelable(null, android.view.autofill.AutofillId.class),
+                    (DateFormat) parcel.readSerializable(android.icu.text.DateFormat.class.getClassLoader(), android.icu.text.DateFormat.class));
         }
 
         @Override

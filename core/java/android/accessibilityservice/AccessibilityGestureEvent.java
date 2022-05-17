@@ -150,7 +150,12 @@ public final class AccessibilityGestureEvent implements Parcelable {
     private final int mDisplayId;
     private List<MotionEvent> mMotionEvents = new ArrayList<>();
 
-    /** @hide */
+/**
+ * Constructs an AccessibilityGestureEvent to be dispatched to an accessibility service.
+ * @param gestureId the id number of the gesture.
+ * @param displayId the display on which this gesture was performed.
+ * @param motionEvents the motion events that lead to this gesture.
+ */
     public AccessibilityGestureEvent(
             int gestureId, int displayId, @NonNull List<MotionEvent> motionEvents) {
         mGestureId = gestureId;
@@ -167,7 +172,7 @@ public final class AccessibilityGestureEvent implements Parcelable {
     private AccessibilityGestureEvent(@NonNull Parcel parcel) {
         mGestureId = parcel.readInt();
         mDisplayId = parcel.readInt();
-        ParceledListSlice<MotionEvent> slice = parcel.readParcelable(getClass().getClassLoader());
+        ParceledListSlice<MotionEvent> slice = parcel.readParcelable(getClass().getClassLoader(), android.content.pm.ParceledListSlice.class);
         mMotionEvents = slice.getList();
     }
 

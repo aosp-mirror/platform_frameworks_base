@@ -59,6 +59,7 @@ The update procedure basically consists of 3 parts:
       * The next two factors are either it was the previous process with visible UI to the user, or it's a backup agent.
       * And then it goes to the massive searches against the service connections and the content providers, each of the clients will be evaluated, and the Oom Adj score could get updated according to its clients' scores. However there are a bunch of service binding flags which could impact the result:
         * Below table captures the results with given various service binding states:
+
         | Conditon #1                     | Condition #2                                               | Condition #3                                 | Condition #4                                      | Result                   |
         |---------------------------------|------------------------------------------------------------|----------------------------------------------|---------------------------------------------------|--------------------------|
         | `BIND_WAIVE_PRIORITY` not set   | `BIND_ALLOW_OOM_MANAGEMENT` set                            | Shown UI && Not Home                         |                                                   | Use the app's own Adj    |
@@ -83,6 +84,7 @@ The update procedure basically consists of 3 parts:
         |                                 |                                                            | `BIND_NOT_FOREGROUND` not set                | `BIND_IMPORTANT` is set                           | Sched = top app bound    |
         |                                 |                                                            |                                              | `BIND_IMPORTANT` is NOT set                       | Sched = default          |
         * Below table captures the results with given various content provider binding states:
+
         | Conditon #1                     | Condition #2                                               | Condition #3                                 | Result                   |
         |---------------------------------|------------------------------------------------------------|----------------------------------------------|--------------------------|
         | Client's process state >= cached|                                                            |                                              | Client ProcState = empty |
@@ -95,6 +97,7 @@ The update procedure basically consists of 3 parts:
         | Still within retain time        | Adj > previous app Adj                                     |                                              | adj = previuos app adj   |
         |                                 | Process state > last activity                              |                                              | ProcState = last activity|
         * Some additional tweaks after the above ones:
+
         | Conditon #1                     | Condition #2                                               | Condition #3                                 | Result                             |
         |---------------------------------|------------------------------------------------------------|----------------------------------------------|------------------------------------|
         | Process state >= cached empty   | Has client activities                                      |                                              | ProcState = cached activity client |

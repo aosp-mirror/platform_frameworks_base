@@ -69,7 +69,7 @@ import java.util.Objects;
  * @hide
  */
 @VisibleForTesting
-public class InsetsAnimationControlImpl implements WindowInsetsAnimationController,
+public class InsetsAnimationControlImpl implements InternalInsetsAnimationController,
         InsetsAnimationControlRunner {
 
     private static final String TAG = "InsetsAnimationCtrlImpl";
@@ -105,7 +105,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
     private float mCurrentAlpha = 1.0f;
     private float mPendingAlpha = 1.0f;
     @VisibleForTesting(visibility = PACKAGE)
-    public boolean mReadyDispatched;
+    private boolean mReadyDispatched;
     private Boolean mPerceptible;
 
     @VisibleForTesting
@@ -167,6 +167,11 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
     @Override
     public boolean hasZeroInsetsIme() {
         return mHasZeroInsetsIme;
+    }
+
+    @Override
+    public void setReadyDispatched(boolean dispatched) {
+        mReadyDispatched = dispatched;
     }
 
     @Override
@@ -279,8 +284,8 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
                     mShownOnFinish, mCurrentAlpha, mCurrentInsets));
             mController.notifyFinished(this, mShownOnFinish);
             releaseLeashes();
+            if (DEBUG) Log.d(TAG, "Animation finished abruptly.");
         }
-        if (DEBUG) Log.d(TAG, "Animation finished abruptly.");
         return mFinished;
     }
 

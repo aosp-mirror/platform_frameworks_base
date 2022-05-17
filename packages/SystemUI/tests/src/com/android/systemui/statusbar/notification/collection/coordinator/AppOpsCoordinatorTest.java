@@ -28,6 +28,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.Notification;
+import android.app.PendingIntent;
+import android.app.Person;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
@@ -150,5 +154,36 @@ public class AppOpsCoordinatorTest extends SysuiTestCase {
 
         // THEN the entry is NOT in the fgs section
         assertFalse(mFgsSection.isInSection(mEntryBuilder.build()));
+    }
+
+    @Test
+    public void testIncludeCallInSection_importanceDefault() {
+        // GIVEN the notification represents a call with > min importance
+        mEntryBuilder
+                .setImportance(IMPORTANCE_DEFAULT)
+                .modifyNotification(mContext)
+                .setStyle(makeCallStyle());
+
+        // THEN the entry is in the fgs section
+        assertTrue(mFgsSection.isInSection(mEntryBuilder.build()));
+    }
+
+    @Test
+    public void testDiscludeCallInSection_importanceMin() {
+        // GIVEN the notification represents a call with min importance
+        mEntryBuilder
+                .setImportance(IMPORTANCE_MIN)
+                .modifyNotification(mContext)
+                .setStyle(makeCallStyle());
+
+        // THEN the entry is NOT in the fgs section
+        assertFalse(mFgsSection.isInSection(mEntryBuilder.build()));
+    }
+
+    private Notification.CallStyle makeCallStyle() {
+        final PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0,
+                new Intent("action"), PendingIntent.FLAG_IMMUTABLE);
+        final Person person = new Person.Builder().setName("person").build();
+        return Notification.CallStyle.forIncomingCall(person, pendingIntent, pendingIntent);
     }
 }

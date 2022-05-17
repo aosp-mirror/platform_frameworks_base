@@ -54,7 +54,7 @@ public class WakelockPowerCalculatorTest {
         batteryStats.noteStopWakeFromSourceLocked(new WorkSource(APP_UID), APP_PID, "awake", "",
                 BatteryStats.WAKE_TYPE_PARTIAL, 2000, 2000);
 
-        mStatsRule.setTime(10_000_000, 6_000_000);
+        mStatsRule.setTime(10_000, 6_000);
 
         WakelockPowerCalculator calculator =
                 new WakelockPowerCalculator(mStatsRule.getPowerProfile());

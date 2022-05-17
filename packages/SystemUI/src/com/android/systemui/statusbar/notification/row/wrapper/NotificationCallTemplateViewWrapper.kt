@@ -21,6 +21,7 @@ import android.view.View
 import com.android.internal.widget.CachingIconView
 import com.android.internal.widget.CallLayout
 import com.android.systemui.R
+import com.android.systemui.statusbar.notification.NotificationFadeAware
 import com.android.systemui.statusbar.notification.NotificationUtils
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 
@@ -37,6 +38,7 @@ class NotificationCallTemplateViewWrapper constructor(
             NotificationUtils.getFontScaledHeight(ctx, R.dimen.notification_max_height)
     private val callLayout: CallLayout = view as CallLayout
 
+    private lateinit var conversationIconContainer: View
     private lateinit var conversationIconView: CachingIconView
     private lateinit var conversationBadgeBg: View
     private lateinit var expandBtn: View
@@ -45,6 +47,8 @@ class NotificationCallTemplateViewWrapper constructor(
 
     private fun resolveViews() {
         with(callLayout) {
+            conversationIconContainer =
+                    requireViewById(com.android.internal.R.id.conversation_icon_container)
             conversationIconView = requireViewById(com.android.internal.R.id.conversation_icon)
             conversationBadgeBg =
                     requireViewById(com.android.internal.R.id.conversation_icon_badge_bg)
@@ -82,4 +86,14 @@ class NotificationCallTemplateViewWrapper constructor(
     }
 
     override fun getMinLayoutHeight(): Int = minHeightWithActions
+
+    /**
+     * Apply the faded state as a layer type change to the face pile view which needs to have
+     * overlapping contents render precisely.
+     */
+    override fun setNotificationFaded(faded: Boolean) {
+        // Do not call super
+        NotificationFadeAware.setLayerTypeForFaded(expandBtn, faded)
+        NotificationFadeAware.setLayerTypeForFaded(conversationIconContainer, faded)
+    }
 }

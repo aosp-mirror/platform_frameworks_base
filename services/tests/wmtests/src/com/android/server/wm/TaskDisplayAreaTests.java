@@ -25,8 +25,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT;
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
@@ -37,8 +35,8 @@ import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
-import static com.android.server.wm.Task.ActivityState.RESUMED;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -84,8 +82,7 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
                 mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
         adjacentRootTask.mCreatedByOrganizer = true;
         final TaskDisplayArea taskDisplayArea = rootTask.getDisplayArea();
-        adjacentRootTask.mAdjacentTask = rootTask;
-        rootTask.mAdjacentTask = adjacentRootTask;
+        adjacentRootTask.setAdjacentTaskFragment(rootTask, false /* moveTogether */);
 
         taskDisplayArea.setLaunchAdjacentFlagRootTask(adjacentRootTask);
         Task actualRootTask = taskDisplayArea.getLaunchRootTask(
@@ -111,8 +108,7 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
         final Task adjacentRootTask = createTask(
                 mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
         adjacentRootTask.mCreatedByOrganizer = true;
-        adjacentRootTask.mAdjacentTask = rootTask;
-        rootTask.mAdjacentTask = adjacentRootTask;
+        adjacentRootTask.setAdjacentTaskFragment(rootTask, false /* moveTogether */);
 
         taskDisplayArea.setLaunchRootTask(rootTask,
                 new int[]{WINDOWING_MODE_MULTI_WINDOW}, new int[]{ACTIVITY_TYPE_STANDARD});
@@ -133,8 +129,7 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
                 mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
         adjacentRootTask.mCreatedByOrganizer = true;
         final TaskDisplayArea taskDisplayArea = rootTask.getDisplayArea();
-        adjacentRootTask.mAdjacentTask = rootTask;
-        rootTask.mAdjacentTask = adjacentRootTask;
+        adjacentRootTask.setAdjacentTaskFragment(rootTask, false /* moveTogether */);
 
         taskDisplayArea.setLaunchAdjacentFlagRootTask(adjacentRootTask);
         final Task actualRootTask = taskDisplayArea.getLaunchRootTask(
@@ -358,14 +353,10 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
                 true /* reuseCandidate */);
         assertGetOrCreateRootTask(WINDOWING_MODE_UNDEFINED, type, candidateTask,
                 true /* reuseCandidate */);
-        assertGetOrCreateRootTask(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, type, candidateTask,
-                true /* reuseCandidate */);
         assertGetOrCreateRootTask(WINDOWING_MODE_FREEFORM, type, candidateTask,
                 true /* reuseCandidate */);
         assertGetOrCreateRootTask(WINDOWING_MODE_MULTI_WINDOW, type, candidateTask,
                 true /* reuseCandidate */);
-        assertGetOrCreateRootTask(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, type, candidateTask,
-                false /* reuseCandidate */);
         assertGetOrCreateRootTask(WINDOWING_MODE_PINNED, type, candidateTask,
                 true /* reuseCandidate */);
 
@@ -391,7 +382,7 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
 
         final Task primarySplitTask = new TaskBuilder(mSupervisor)
                 .setTaskDisplayArea(defaultTaskDisplayArea)
-                .setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY)
+                .setWindowingMode(WINDOWING_MODE_MULTI_WINDOW)
                 .setActivityType(ACTIVITY_TYPE_STANDARD)
                 .setOnTop(true)
                 .setCreateActivity(true)
@@ -623,7 +614,7 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
         final Task pinnedRootTask = mRootWindowContainer.getDefaultTaskDisplayArea()
                 .createRootTask(WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, ON_TOP);
         final Task pinnedTask = new TaskBuilder(mAtm.mTaskSupervisor)
-                .setParentTask(pinnedRootTask).build();
+                .setParentTaskFragment(pinnedRootTask).build();
         new ActivityBuilder(mAtm).setActivityFlags(FLAG_ALWAYS_FOCUSABLE)
                 .setTask(pinnedTask).build();
         pinnedRootTask.moveToFront("movePinnedRootTaskToFront");
@@ -749,5 +740,36 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
                 .getBoolean(com.android.internal.R.bool.config_assistantOnTopOfDream);
         assertEquals(isAssistantOnTop ? topPosition : topPosition - 4,
                 getTaskIndexOf(taskDisplayArea, assistRootTask));
+    }
+
+    /**
+     * This test verifies proper launch root based on source and candidate task for split screen.
+     * If a task is launching from a created-by-organizer task, it should be launched into the
+     * same created-by-organizer task as well. Unless, the candidate task is already positioned in
+     * the split.
+     */
+    @Test
+    public void getLaunchRootTaskInSplit() {
+        final Task rootTask = createTask(
+                mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
+        rootTask.mCreatedByOrganizer = true;
+        final Task adjacentRootTask = createTask(
+                mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
+        adjacentRootTask.mCreatedByOrganizer = true;
+        final Task candidateTask = createTaskInRootTask(rootTask, 0 /* userId*/);
+        final TaskDisplayArea taskDisplayArea = rootTask.getDisplayArea();
+        adjacentRootTask.setAdjacentTaskFragment(rootTask, false /* moveTogether */);
+
+        // Verify the launch root with candidate task
+        Task actualRootTask = taskDisplayArea.getLaunchRootTask(WINDOWING_MODE_UNDEFINED,
+                ACTIVITY_TYPE_STANDARD, null /* options */, adjacentRootTask /* sourceTask */,
+                0 /* launchFlags */, candidateTask);
+        assertSame(rootTask, actualRootTask.getRootTask());
+
+        // Verify the launch root task without candidate task
+        actualRootTask = taskDisplayArea.getLaunchRootTask(WINDOWING_MODE_UNDEFINED,
+                ACTIVITY_TYPE_STANDARD, null /* options */, adjacentRootTask /* sourceTask */,
+                0 /* launchFlags */);
+        assertSame(adjacentRootTask, actualRootTask.getRootTask());
     }
 }

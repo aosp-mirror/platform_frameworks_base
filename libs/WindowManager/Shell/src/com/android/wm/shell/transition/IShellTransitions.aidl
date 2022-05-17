@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.transition;
 
-import android.window.IRemoteTransition;
+import android.window.RemoteTransition;
 import android.window.TransitionFilter;
 
 /**
@@ -28,10 +28,10 @@ interface IShellTransitions {
      * Registers a remote transition handler.
      */
     oneway void registerRemote(in TransitionFilter filter,
-            in IRemoteTransition remoteTransition) = 1;
+            in RemoteTransition remoteTransition) = 1;
 
     /**
      * Unregisters a remote transition handler.
      */
-    oneway void unregisterRemote(in IRemoteTransition remoteTransition) = 2;
+    oneway void unregisterRemote(in RemoteTransition remoteTransition) = 2;
 }

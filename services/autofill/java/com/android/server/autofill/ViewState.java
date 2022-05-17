@@ -43,7 +43,7 @@ final class ViewState {
          * Called when the fill UI is ready to be shown for this view.
          */
         void onFillReady(@NonNull FillResponse fillResponse, @NonNull AutofillId focusedId,
-                @Nullable AutofillValue value);
+                @Nullable AutofillValue value, int flags);
     }
 
     private static final String TAG = "ViewState";
@@ -82,6 +82,8 @@ final class ViewState {
     public static final int STATE_INLINE_DISABLED = 0x8000;
     /** The View is waiting for an inline suggestions request from IME.*/
     public static final int STATE_PENDING_CREATE_INLINE_REQUEST = 0x10000;
+    /** Fill dialog were shown for this View. */
+    public static final int STATE_FILL_DIALOG_SHOWN = 0x20000;
 
     public final AutofillId id;
 
@@ -200,7 +202,7 @@ final class ViewState {
 
     /**
      * Calls {@link
-     * Listener#onFillReady(FillResponse, AutofillId, AutofillValue)} if the
+     * Listener#onFillReady(FillResponse, AutofillId, AutofillValue, int)} if the
      * fill UI is ready to be displayed (i.e. when response and bounds are set).
      */
     void maybeCallOnFillReady(int flags) {
@@ -211,7 +213,7 @@ final class ViewState {
         // First try the current response associated with this View.
         if (mResponse != null) {
             if (mResponse.getDatasets() != null || mResponse.getAuthentication() != null) {
-                mListener.onFillReady(mResponse, this.id, mCurrentValue);
+                mListener.onFillReady(mResponse, this.id, mCurrentValue, flags);
             }
         }
     }

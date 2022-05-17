@@ -57,9 +57,6 @@ import java.util.Map;
 public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnClickListener,
         ExpandableNotificationRow.LayoutListener {
 
-    private static final boolean DEBUG = false;
-    private static final String TAG = "swipe";
-
     // Notification must be swiped at least this fraction of a single menu item to show menu
     private static final float SWIPED_FAR_ENOUGH_MENU_FRACTION = 0.25f;
     private static final float SWIPED_FAR_ENOUGH_MENU_UNCLEARABLE_FRACTION = 0.15f;
@@ -82,7 +79,6 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     private ArrayList<MenuItem> mRightMenuItems;
     private final Map<View, MenuItem> mMenuItemsByView = new ArrayMap<>();
     private OnMenuEventListener mMenuListener;
-    private boolean mDismissRtl;
 
     private ValueAnimator mFadeAnimator;
     private boolean mAnimating;
@@ -302,12 +298,9 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         } else {
             mMenuContainer = new FrameLayout(mContext);
         }
-        // The setting can win (which is needed for tests) but if not set, then use the flag
         final int showDismissSetting =  Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.SHOW_NEW_NOTIF_DISMISS, -1);
-        final boolean newFlowHideShelf = showDismissSetting == -1
-                ? mContext.getResources().getBoolean(R.bool.flag_notif_updates)
-                : showDismissSetting == 1;
+                Settings.Global.SHOW_NEW_NOTIF_DISMISS, /* default = */ 1);
+        final boolean newFlowHideShelf = showDismissSetting == 1;
         if (newFlowHideShelf) {
             return;
         }
@@ -785,14 +778,6 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     @Override
     public boolean canBeDismissed() {
         return getParent().canViewBeDismissed();
-    }
-
-    @Override
-    public void setDismissRtl(boolean dismissRtl) {
-        mDismissRtl = dismissRtl;
-        if (mMenuContainer != null) {
-            createMenuViews(true);
-        }
     }
 
     public static class NotificationMenuItem implements MenuItem {

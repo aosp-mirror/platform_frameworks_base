@@ -69,7 +69,7 @@ public class ShadowBluetoothAdapter extends org.robolectric.shadows.ShadowBlueto
     }
 
     @Implementation
-    protected boolean removeActiveDevice(@BluetoothAdapter.ActiveDeviceUse int profiles) {
+    protected boolean removeActiveDevice(int profiles) {
         if (profiles != ACTIVE_DEVICE_AUDIO && profiles != ACTIVE_DEVICE_PHONE_CALL
                 && profiles != ACTIVE_DEVICE_ALL) {
             return false;
@@ -78,8 +78,7 @@ public class ShadowBluetoothAdapter extends org.robolectric.shadows.ShadowBlueto
     }
 
     @Implementation
-    protected boolean setActiveDevice(BluetoothDevice device,
-            @BluetoothAdapter.ActiveDeviceUse int profiles) {
+    protected boolean setActiveDevice(BluetoothDevice device, int profiles) {
         if (device == null) {
             return false;
         }

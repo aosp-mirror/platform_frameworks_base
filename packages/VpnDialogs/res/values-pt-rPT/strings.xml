@@ -18,6 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"Pedido de ligação"</string>
     <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> pretende configurar uma ligação VPN que lhe permita monitorizar o tráfego de rede. Aceite apenas se confiar na fonte. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; aparece na parte superior do seu ecrã quando a VPN está ativa."</string>
+    <string name="warning" product="tv" msgid="5188957997628124947">"A app <xliff:g id="APP">%s</xliff:g> pretende configurar uma ligação VPN que lhe permita monitorizar o tráfego de rede. Aceite apenas se confiar na origem. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; aparece no ecrã quando a VPN está ativa."</string>
     <string name="legacy_title" msgid="192936250066580964">"A VPN está ligada"</string>
     <string name="session" msgid="6470628549473641030">"Sessão"</string>
     <string name="duration" msgid="3584782459928719435">"Duração:"</string>
@@ -25,12 +26,12 @@
     <string name="data_received" msgid="4062776929376067820">"Recebidos:"</string>
     <string name="data_value_format" msgid="2192466557826897580">"<xliff:g id="NUMBER_0">%1$s</xliff:g> bytes / <xliff:g id="NUMBER_1">%2$s</xliff:g> pacotes"</string>
     <string name="always_on_disconnected_title" msgid="1906740176262776166">"Não é possível estabelecer ligação à VPN sempre ativada"</string>
-    <string name="always_on_disconnected_message" msgid="555634519845992917">"A aplicação <xliff:g id="VPN_APP_0">%1$s</xliff:g> está configurada para se manter sempre ligada, mas, neste momento, não é possível estabelecer ligação. O seu telemóvel irá utilizar uma rede pública até conseguir restabelecer ligação à aplicação <xliff:g id="VPN_APP_1">%1$s</xliff:g>."</string>
-    <string name="always_on_disconnected_message_lockdown" msgid="4232225539869452120">"A aplicação <xliff:g id="VPN_APP">%1$s</xliff:g> está configurada para se manter sempre ligada, mas, neste momento, não é possível estabelecer ligação. Não terá ligação até que a VPN a consiga restabelecer."</string>
+    <string name="always_on_disconnected_message" msgid="555634519845992917">"A app <xliff:g id="VPN_APP_0">%1$s</xliff:g> está configurada para se manter sempre ligada, mas, neste momento, não é possível estabelecer ligação. O seu telemóvel irá utilizar uma rede pública até conseguir restabelecer ligação à app <xliff:g id="VPN_APP_1">%1$s</xliff:g>."</string>
+    <string name="always_on_disconnected_message_lockdown" msgid="4232225539869452120">"A app <xliff:g id="VPN_APP">%1$s</xliff:g> está configurada para se manter sempre ligada, mas, neste momento, não é possível estabelecer ligação. Não terá ligação até que a VPN a consiga restabelecer."</string>
     <string name="always_on_disconnected_message_separator" msgid="3310614409322581371">" "</string>
     <string name="always_on_disconnected_message_settings_link" msgid="6172280302829992412">"Alterar as definições da VPN"</string>
     <string name="configure" msgid="4905518375574791375">"Configurar"</string>
     <string name="disconnect" msgid="971412338304200056">"Desligar"</string>
-    <string name="open_app" msgid="3717639178595958667">"Abrir aplicação"</string>
+    <string name="open_app" msgid="3717639178595958667">"Abrir app"</string>
     <string name="dismiss" msgid="6192859333764711227">"Ignorar"</string>
 </resources>

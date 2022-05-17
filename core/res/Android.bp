@@ -37,7 +37,6 @@ license {
     visibility: [":__subpackages__"],
     license_kinds: [
         "SPDX-license-identifier-Apache-2.0",
-        "SPDX-license-identifier-GPL",
     ],
     license_text: [
         "NOTICE",

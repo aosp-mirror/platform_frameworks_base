@@ -48,12 +48,14 @@ final class AppNotRespondingDialog extends BaseErrorDialog implements View.OnCli
 
     private final ActivityManagerService mService;
     private final ProcessRecord mProc;
+    private final Data mData;
 
     public AppNotRespondingDialog(ActivityManagerService service, Context context, Data data) {
         super(context);
 
         mService = service;
         mProc = data.proc;
+        mData = data;
         Resources res = context.getResources();
 
         setCancelable(false);
@@ -161,10 +163,14 @@ final class AppNotRespondingDialog extends BaseErrorDialog implements View.OnCli
 
                         synchronized (mService.mProcLock) {
                             errState.setNotResponding(false);
-                            errState.setNotRespondingReport(null);
+                            // We're not clearing the ANR report here, in case we'd need to report
+                            // it again when the ANR dialog shows again.
+                            // errState.setNotRespondingReport(null);
                             errState.getDialogController().clearAnrDialogs();
                         }
                         mService.mServices.scheduleServiceTimeoutLocked(app);
+                        // If the app remains unresponsive, show the dialog again after a delay.
+                        mService.mInternal.rescheduleAnrDialog(mData);
                     }
                     break;
             }

@@ -119,6 +119,10 @@ class BinaryResourceParser {
 
   // A mapping of resource ID to type spec flags.
   std::unordered_map<ResourceId, uint32_t> entry_type_spec_flags_;
+
+  // A collection of staged resources that got finalized already and we're supposed to prune -
+  // but the original staged resource record hasn't been parsed yet.
+  std::set<std::pair<ResourceName, ResourceId>> staged_entries_to_remove_;
 };
 
 }  // namespace aapt

@@ -17,6 +17,7 @@
 package com.android.server.display;
 
 import android.annotation.NonNull;
+import android.os.Trace;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayAddress;
@@ -38,6 +39,7 @@ import java.util.function.Consumer;
  */
 class DisplayDeviceRepository implements DisplayAdapter.Listener {
     private static final String TAG = "DisplayDeviceRepository";
+    private static final Boolean DEBUG = false;
 
     public static final int DISPLAY_DEVICE_EVENT_ADDED = 1;
     public static final int DISPLAY_DEVICE_EVENT_CHANGED = 2;
@@ -75,6 +77,11 @@ class DisplayDeviceRepository implements DisplayAdapter.Listener {
 
     @Override
     public void onDisplayDeviceEvent(DisplayDevice device, int event) {
+        String tag = null;
+        if (DEBUG) {
+            tag = "DisplayDeviceRepository#onDisplayDeviceEvent (event=" + event + ")";
+            Trace.beginAsyncSection(tag, 0);
+        }
         switch (event) {
             case DISPLAY_DEVICE_EVENT_ADDED:
                 handleDisplayDeviceAdded(device);
@@ -87,6 +94,9 @@ class DisplayDeviceRepository implements DisplayAdapter.Listener {
             case DISPLAY_DEVICE_EVENT_REMOVED:
                 handleDisplayDeviceRemoved(device);
                 break;
+        }
+        if (DEBUG) {
+            Trace.endAsyncSection(tag, 0);
         }
     }
 
@@ -123,6 +133,17 @@ class DisplayDeviceRepository implements DisplayAdapter.Listener {
         return null;
     }
 
+    // String uniqueId -> DisplayDevice object with that given uniqueId
+    public DisplayDevice getByUniqueIdLocked(@NonNull String uniqueId) {
+        for (int i = mDisplayDevices.size() - 1; i >= 0; i--) {
+            final DisplayDevice displayDevice = mDisplayDevices.get(i);
+            if (displayDevice.getUniqueId().equals(uniqueId)) {
+                return displayDevice;
+            }
+        }
+        return null;
+    }
+
     private void handleDisplayDeviceAdded(DisplayDevice device) {
         synchronized (mSyncRoot) {
             DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
@@ -145,7 +166,9 @@ class DisplayDeviceRepository implements DisplayAdapter.Listener {
                 Slog.w(TAG, "Attempted to change non-existent display device: " + info);
                 return;
             }
-
+            if (DEBUG) {
+                Trace.beginSection("handleDisplayDeviceChanged");
+            }
             int diff = device.mDebugLastLoggedDeviceInfo.diff(info);
             if (diff == DisplayDeviceInfo.DIFF_STATE) {
                 Slog.i(TAG, "Display device changed state: \"" + info.name
@@ -165,6 +188,9 @@ class DisplayDeviceRepository implements DisplayAdapter.Listener {
 
             device.applyPendingDisplayDeviceInfoChangesLocked();
             sendEventLocked(device, DISPLAY_DEVICE_EVENT_CHANGED);
+            if (DEBUG) {
+                Trace.endSection();
+            }
         }
     }
 

@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"Voulez-vous désinstaller cette application ?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Voulez-vous désinstaller cette application pour "<b>"tous"</b>" les utilisateurs ? L\'application et ses données seront supprimées pour "<b>"tous"</b>" les utilisateurs de l\'appareil."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Voulez-vous désinstaller cette application pour l\'utilisateur <xliff:g id="USERNAME">%1$s</xliff:g> ?"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Voulez-vous désinstaller cette appli de votre profil professionnel ?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Remplacer cette application par la version d\'usine ? Toutes les données seront supprimées."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Remplacer cette application par la version d\'usine ? Toutes les données seront supprimées. Tous les utilisateurs de cet appareil seront affectés, y compris ceux qui ont un profil professionnel."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Conserver <xliff:g id="SIZE">%1$s</xliff:g> de données d\'application."</string>
@@ -64,7 +65,7 @@
     <string name="uninstalling" msgid="8709566347688966845">"Désinstallation…"</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"Désinstallation de <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Désinstallation terminée."</string>
-    <string name="uninstall_done_app" msgid="4588850984473605768">"Le package <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> a été désinstallé"</string>
+    <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> a été désinstallé"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Échec de la désinstallation."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Échec de la désinstallation du package <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>."</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Impossible de désinstaller une application d\'administration de l\'appareil active"</string>

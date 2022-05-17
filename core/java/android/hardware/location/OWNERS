@@ -1,9 +1,12 @@
 # Bug component: 880425
 
-mstogaitis@google.com
-wyattriley@google.com
+dnchrist@google.com
 etn@google.com
-weiwa@google.com
+lifu@google.com
+mstogaitis@google.com
+sooniln@google.com
+wyattriley@google.com
+yuhany@google.com
 
 # ContextHub team
 per-file *ContextHub*,*NanoApp* = file:platform/system/chre:/OWNERS

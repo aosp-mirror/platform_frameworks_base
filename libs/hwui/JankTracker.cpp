@@ -111,19 +111,22 @@ void JankTracker::calculateLegacyJank(FrameInfo& frame) REQUIRES(mDataMutex) {
             // the actual time spent blocked.
             nsecs_t forgiveAmount =
                     std::min(expectedDequeueDuration, frame[FrameInfoIndex::DequeueBufferDuration]);
-            LOG_ALWAYS_FATAL_IF(forgiveAmount >= totalDuration,
-                                "Impossible dequeue duration! dequeue duration reported %" PRId64
-                                ", total duration %" PRId64,
-                                forgiveAmount, totalDuration);
+            if (forgiveAmount >= totalDuration) {
+                ALOGV("Impossible dequeue duration! dequeue duration reported %" PRId64
+                      ", total duration %" PRId64,
+                      forgiveAmount, totalDuration);
+                return;
+            }
             totalDuration -= forgiveAmount;
         }
     }
 
-    LOG_ALWAYS_FATAL_IF(totalDuration <= 0, "Impossible totalDuration %" PRId64 " start=%" PRIi64
-                        " gpuComplete=%" PRIi64, totalDuration,
-                        frame[FrameInfoIndex::IntendedVsync],
-                        frame[FrameInfoIndex::GpuCompleted]);
-
+    if (totalDuration <= 0) {
+        ALOGV("Impossible totalDuration %" PRId64 " start=%" PRIi64 " gpuComplete=%" PRIi64,
+              totalDuration, frame[FrameInfoIndex::IntendedVsync],
+              frame[FrameInfoIndex::GpuCompleted]);
+        return;
+    }
 
     // Only things like Surface.lockHardwareCanvas() are exempt from tracking
     if (CC_UNLIKELY(frame[FrameInfoIndex::Flags] & EXEMPT_FRAMES_FLAGS)) {
@@ -164,7 +167,8 @@ void JankTracker::calculateLegacyJank(FrameInfo& frame) REQUIRES(mDataMutex) {
             - lastFrameOffset + mFrameIntervalLegacy;
 }
 
-void JankTracker::finishFrame(FrameInfo& frame, std::unique_ptr<FrameMetricsReporter>& reporter) {
+void JankTracker::finishFrame(FrameInfo& frame, std::unique_ptr<FrameMetricsReporter>& reporter,
+                              int64_t frameNumber, int32_t surfaceControlId) {
     std::lock_guard lock(mDataMutex);
 
     calculateLegacyJank(frame);
@@ -173,7 +177,10 @@ void JankTracker::finishFrame(FrameInfo& frame, std::unique_ptr<FrameMetricsRepo
     int64_t totalDuration = frame.duration(FrameInfoIndex::IntendedVsync,
             FrameInfoIndex::FrameCompleted);
 
-    LOG_ALWAYS_FATAL_IF(totalDuration <= 0, "Impossible totalDuration %" PRId64, totalDuration);
+    if (totalDuration <= 0) {
+        ALOGV("Impossible totalDuration %" PRId64, totalDuration);
+        return;
+    }
     mData->reportFrame(totalDuration);
     (*mGlobalData)->reportFrame(totalDuration);
 
@@ -253,7 +260,8 @@ void JankTracker::finishFrame(FrameInfo& frame, std::unique_ptr<FrameMetricsRepo
     }
 
     if (CC_UNLIKELY(reporter.get() != nullptr)) {
-        reporter->reportFrameMetrics(frame.data(), false /* hasPresentTime */);
+        reporter->reportFrameMetrics(frame.data(), false /* hasPresentTime */, frameNumber,
+                                     surfaceControlId);
     }
 }
 

@@ -184,11 +184,26 @@ static bool waitpid_with_timeout(pid_t pid, int timeout_ms, int* status) {
     sigemptyset(&child_mask);
     sigaddset(&child_mask, SIGCHLD);
 
+    // block SIGCHLD before we check if a process has exited
     if (sigprocmask(SIG_BLOCK, &child_mask, &old_mask) == -1) {
-        ALOGW("sigprocmask failed: %s", strerror(errno));
+        ALOGW("*** sigprocmask failed: %s\n", strerror(errno));
         return false;
     }
 
+    // if the child has exited already, handle and reset signals before leaving
+    pid_t child_pid = waitpid(pid, status, WNOHANG);
+    if (child_pid != pid) {
+        if (child_pid > 0) {
+            ALOGW("*** Waiting for pid %d, got pid %d instead\n", pid, child_pid);
+            sigprocmask(SIG_SETMASK, &old_mask, nullptr);
+            return false;
+        }
+    } else {
+        sigprocmask(SIG_SETMASK, &old_mask, nullptr);
+        return true;
+    }
+
+    // wait for a SIGCHLD
     timespec ts;
     ts.tv_sec = timeout_ms / 1000;
     ts.tv_nsec = (timeout_ms % 1000) * 1000000;
@@ -197,7 +212,7 @@ static bool waitpid_with_timeout(pid_t pid, int timeout_ms, int* status) {
 
     // Set the signals back the way they were.
     if (sigprocmask(SIG_SETMASK, &old_mask, nullptr) == -1) {
-        ALOGW("sigprocmask failed: %s", strerror(errno));
+        ALOGW("*** sigprocmask failed: %s\n", strerror(errno));
         if (ret == 0) {
             return false;
         }
@@ -207,21 +222,21 @@ static bool waitpid_with_timeout(pid_t pid, int timeout_ms, int* status) {
         if (errno == EAGAIN) {
             errno = ETIMEDOUT;
         } else {
-            ALOGW("sigtimedwait failed: %s", strerror(errno));
+            ALOGW("*** sigtimedwait failed: %s\n", strerror(errno));
         }
         return false;
     }
 
-    pid_t child_pid = waitpid(pid, status, WNOHANG);
-    if (child_pid == pid) {
-        return true;
+    child_pid = waitpid(pid, status, WNOHANG);
+    if (child_pid != pid) {
+        if (child_pid != -1) {
+            ALOGW("*** Waiting for pid %d, got pid %d instead\n", pid, child_pid);
+        } else {
+            ALOGW("*** waitpid failed: %s\n", strerror(errno));
+        }
+        return false;
     }
-    if (child_pid == -1) {
-        ALOGW("waitpid failed: %s", strerror(errno));
-    } else {
-        ALOGW("Waiting for pid %d, got pid %d instead", pid, child_pid);
-    }
-    return false;
+    return true;
 }
 
 status_t kill_child(pid_t pid) {

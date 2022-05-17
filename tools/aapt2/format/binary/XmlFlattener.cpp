@@ -264,7 +264,7 @@ class XmlFlattenerVisitor : public xml::ConstVisitor {
       }
 
       std::string processed_str;
-      Maybe<StringPiece> compiled_text;
+      std::optional<StringPiece> compiled_text;
       if (xml_attr->compiled_value != nullptr) {
         // Make sure we're not flattening a String. A String can be referencing a string from
         // a different StringPool than we're using here to build the binary XML.

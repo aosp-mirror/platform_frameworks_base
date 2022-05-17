@@ -16,13 +16,14 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
     <style name="DockedDividerBackground">
-        <item name="android:layout_width">10dp</item>
+        <item name="android:layout_width">@dimen/split_divider_bar_width</item>
         <item name="android:layout_height">match_parent</item>
         <item name="android:layout_gravity">center_horizontal</item>
+        <item name="android:background">@color/split_divider_background</item>
     </style>
 
     <style name="DockedDividerHandle">
-        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:layout_gravity">center</item>
         <item name="android:layout_width">48dp</item>
         <item name="android:layout_height">96dp</item>
     </style>

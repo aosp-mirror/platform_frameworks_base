@@ -25,6 +25,7 @@ import com.android.systemui.controls.controller.ControlsBindingControllerImpl
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.controller.ControlsControllerImpl
 import com.android.systemui.controls.controller.ControlsFavoritePersistenceWrapper
+import com.android.systemui.controls.controller.ControlsTileResourceConfiguration
 import com.android.systemui.controls.management.ControlsEditingActivity
 import com.android.systemui.controls.management.ControlsFavoritingActivity
 import com.android.systemui.controls.management.ControlsListingController
@@ -91,6 +92,9 @@ abstract class ControlsModule {
 
     @BindsOptionalOf
     abstract fun optionalPersistenceWrapper(): ControlsFavoritePersistenceWrapper
+
+    @BindsOptionalOf
+    abstract fun provideControlsTileResourceConfiguration(): ControlsTileResourceConfiguration
 
     @Binds
     @IntoMap

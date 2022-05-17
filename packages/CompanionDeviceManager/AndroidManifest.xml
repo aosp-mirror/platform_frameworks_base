@@ -19,10 +19,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.companiondevicemanager">
 
-    <permission
-        android:name="com.android.companiondevicemanager.permission.BIND"
-        android:protectionLevel="signature" />
-
     <uses-permission android:name="android.permission.BLUETOOTH"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE"/>
@@ -35,6 +31,7 @@
     <uses-permission android:name="android.permission.RADIO_SCAN_WITHOUT_LOCATION"/>
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"/>
     <uses-permission android:name="android.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS"/>
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS"/>
 
     <application
         android:allowClearUserData="true"
@@ -43,23 +40,18 @@
         android:forceQueryable="true"
         android:supportsRtl="true">
 
-        <service
-            android:name=".CompanionDeviceDiscoveryService"
-            android:permission="android.permission.BIND_COMPANION_DEVICE_MANAGER_SERVICE"
-            android:exported="true">
-        </service>
-
         <activity
             android:name=".CompanionDeviceActivity"
-            android:theme="@style/ChooserActivity"
+            android:exported="true"
+            android:launchMode="singleInstance"
+            android:excludeFromRecents="true"
             android:permission="android.permission.BIND_COMPANION_DEVICE_MANAGER_SERVICE"
-            android:exported="true">
-            <!--TODO include url scheme filter similar to PrintSpooler -->
-            <intent-filter>
-                <action android:name="android.companiondevice.START_DISCOVERY" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
+            android:configChanges="orientation|screenSize"
+            android:theme="@style/ChooserActivity"/>
+
+        <service
+            android:name=".CompanionDeviceDiscoveryService"
+            android:exported="false" />
 
     </application>
 

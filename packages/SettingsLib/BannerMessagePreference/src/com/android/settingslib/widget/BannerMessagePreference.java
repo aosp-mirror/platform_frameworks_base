@@ -152,10 +152,22 @@ public class BannerMessagePreference extends Preference {
         mPositiveButtonInfo.mButton = (Button) holder.findViewById(R.id.banner_positive_btn);
         mNegativeButtonInfo.mButton = (Button) holder.findViewById(R.id.banner_negative_btn);
 
+        final Resources.Theme theme = context.getTheme();
+        @ColorInt final int accentColor =
+                context.getResources().getColor(mAttentionLevel.getAccentColorResId(), theme);
+
+        final ImageView iconView = (ImageView) holder.findViewById(R.id.banner_icon);
+        if (iconView != null) {
+            Drawable icon = getIcon();
+            iconView.setImageDrawable(
+                    icon == null
+                            ? getContext().getDrawable(R.drawable.ic_warning)
+                            : icon);
+            iconView.setColorFilter(
+                    new PorterDuffColorFilter(accentColor, PorterDuff.Mode.SRC_IN));
+        }
+
         if (IS_AT_LEAST_S) {
-            final Resources.Theme theme = context.getTheme();
-            @ColorInt final int accentColor =
-                    context.getResources().getColor(mAttentionLevel.getAccentColorResId(), theme);
             @ColorInt final int backgroundColor =
                     context.getResources().getColor(
                             mAttentionLevel.getBackgroundColorResId(), theme);
@@ -174,16 +186,6 @@ public class BannerMessagePreference extends Preference {
             subtitleView.setText(mSubtitle);
             subtitleView.setVisibility(mSubtitle == null ? View.GONE : View.VISIBLE);
 
-            final ImageView iconView = (ImageView) holder.findViewById(R.id.banner_icon);
-            if (iconView != null) {
-                Drawable icon = getIcon();
-                iconView.setImageDrawable(
-                        icon == null
-                                ? getContext().getDrawable(R.drawable.ic_warning)
-                                : icon);
-                iconView.setColorFilter(
-                        new PorterDuffColorFilter(accentColor, PorterDuff.Mode.SRC_IN));
-            }
         } else {
             holder.setDividerAllowedAbove(true);
             holder.setDividerAllowedBelow(true);
@@ -323,7 +325,6 @@ public class BannerMessagePreference extends Preference {
     /**
      * Sets the attention level. This will update the color theme of the preference.
      */
-    @RequiresApi(Build.VERSION_CODES.S)
     public BannerMessagePreference setAttentionLevel(AttentionLevel attentionLevel) {
         if (attentionLevel == mAttentionLevel) {
             return this;

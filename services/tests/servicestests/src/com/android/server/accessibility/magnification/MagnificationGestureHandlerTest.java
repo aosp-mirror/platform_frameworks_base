@@ -31,6 +31,8 @@ import android.view.MotionEvent;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.accessibility.AccessibilityTraceManager;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,6 +51,8 @@ public class MagnificationGestureHandlerTest {
             Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 
     @Mock
+    AccessibilityTraceManager mTraceManager;
+    @Mock
     MagnificationGestureHandler.Callback mCallback;
 
     @Before
@@ -57,6 +61,7 @@ public class MagnificationGestureHandlerTest {
         mMgh = new TestMagnificationGestureHandler(DISPLAY_0,
                 /* detectTripleTap= */true,
                 /* detectShortcutTrigger= */true,
+                mTraceManager,
                 mCallback);
     }
 
@@ -116,21 +121,14 @@ public class MagnificationGestureHandlerTest {
         }
     }
 
-
-    @Test
-    public void notifyShortcutTriggered_callsOnShortcutTriggered() {
-        mMgh.notifyShortcutTriggered();
-
-        verify(mCallback).onShortcutTriggered(eq(DISPLAY_0), eq(mMgh.getMode()));
-    }
-
     private static class TestMagnificationGestureHandler extends MagnificationGestureHandler {
 
         boolean mIsInternalMethodCalled = false;
 
         TestMagnificationGestureHandler(int displayId, boolean detectTripleTap,
-                boolean detectShortcutTrigger, @NonNull Callback callback) {
-            super(displayId, detectTripleTap, detectShortcutTrigger, callback);
+                boolean detectShortcutTrigger, @NonNull AccessibilityTraceManager trace,
+                @NonNull Callback callback) {
+            super(displayId, detectTripleTap, detectShortcutTrigger, trace, callback);
         }
 
         @Override

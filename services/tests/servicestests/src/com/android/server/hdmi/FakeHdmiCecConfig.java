@@ -69,11 +69,26 @@ final class FakeHdmiCecConfig extends HdmiCecConfig {
                 R.bool.config_cecHdmiCecVersion20_default);
 
         doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecRoutingControl_userConfigurable);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecRoutingControlEnabled_allowed);
+        doReturn(false).when(resources).getBoolean(
+                R.bool.config_cecRoutingControlEnabled_default);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecRoutingControlDisabled_allowed);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecRoutingControlDisabled_default);
+
+        doReturn(true).when(resources).getBoolean(
                 R.bool.config_cecPowerControlMode_userConfigurable);
         doReturn(true).when(resources).getBoolean(
                 R.bool.config_cecPowerControlModeTv_allowed);
-        doReturn(true).when(resources).getBoolean(
+        doReturn(false).when(resources).getBoolean(
                 R.bool.config_cecPowerControlModeTv_default);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecPowerControlModeTvAndAudioSystem_allowed);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecPowerControlModeTvAndAudioSystem_default);
         doReturn(true).when(resources).getBoolean(
                 R.bool.config_cecPowerControlModeBroadcast_allowed);
         doReturn(false).when(resources).getBoolean(
@@ -93,6 +108,17 @@ final class FakeHdmiCecConfig extends HdmiCecConfig {
                 R.bool.config_cecPowerStateChangeOnActiveSourceLostStandbyNow_allowed);
         doReturn(false).when(resources).getBoolean(
                 R.bool.config_cecPowerStateChangeOnActiveSourceLostStandbyNow_default);
+
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecSystemAudioControl_userConfigurable);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecSystemAudioControlEnabled_allowed);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecSystemAudioControlEnabled_default);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecSystemAudioControlDisabled_allowed);
+        doReturn(false).when(resources).getBoolean(
+                R.bool.config_cecSystemAudioControlDisabled_default);
 
         doReturn(true).when(resources).getBoolean(
                 R.bool.config_cecSystemAudioModeMuting_userConfigurable);
@@ -137,6 +163,17 @@ final class FakeHdmiCecConfig extends HdmiCecConfig {
                 R.bool.config_cecTvSendStandbyOnSleepDisabled_allowed);
         doReturn(false).when(resources).getBoolean(
                 R.bool.config_cecTvSendStandbyOnSleepDisabled_default);
+
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecSetMenuLanguage_userConfigurable);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecSetMenuLanguageEnabled_allowed);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecSetMenuLanguageEnabled_default);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecSetMenuLanguageDisabled_allowed);
+        doReturn(false).when(resources).getBoolean(
+                R.bool.config_cecSetMenuLanguageDisabled_default);
 
         doReturn(true).when(resources).getBoolean(
                 R.bool.config_cecRcProfileTv_userConfigurable);
@@ -215,6 +252,101 @@ final class FakeHdmiCecConfig extends HdmiCecConfig {
                 R.bool.config_cecRcProfileSourceMediaContextSensitiveMenuNotHandled_allowed);
         doReturn(true).when(resources).getBoolean(
                 R.bool.config_cecRcProfileSourceMediaContextSensitiveMenuNotHandled_default);
+
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadLpcm_userConfigurable);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadLpcmEnabled_allowed);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadLpcmEnabled_default);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadLpcmDisabled_allowed);
+        doReturn(false).when(resources).getBoolean(R.bool.config_cecQuerySadLpcmDisabled_default);
+
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadDd_userConfigurable);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadDdEnabled_allowed);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadDdEnabled_default);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadDdDisabled_allowed);
+        doReturn(false).when(resources).getBoolean(R.bool.config_cecQuerySadDdDisabled_default);
+
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadMpeg1_userConfigurable);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadMpeg1Enabled_allowed);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadMpeg1Enabled_default);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadMpeg1Disabled_allowed);
+        doReturn(false).when(resources).getBoolean(R.bool.config_cecQuerySadMpeg1Disabled_default);
+
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadMp3_userConfigurable);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadMp3Enabled_allowed);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadMp3Enabled_default);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadMp3Disabled_allowed);
+        doReturn(false).when(resources).getBoolean(R.bool.config_cecQuerySadMp3Disabled_default);
+
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadMpeg2_userConfigurable);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadMpeg2Enabled_allowed);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadMpeg2Enabled_default);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadMpeg2Disabled_allowed);
+        doReturn(false).when(resources).getBoolean(R.bool.config_cecQuerySadMpeg2Disabled_default);
+
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadAac_userConfigurable);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadAacEnabled_allowed);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadAacEnabled_default);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadAacDisabled_allowed);
+        doReturn(false).when(resources).getBoolean(R.bool.config_cecQuerySadAacDisabled_default);
+
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadDts_userConfigurable);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadDtsEnabled_allowed);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadDtsEnabled_default);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadDtsDisabled_allowed);
+        doReturn(false).when(resources).getBoolean(R.bool.config_cecQuerySadDtsDisabled_default);
+
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadAtrac_userConfigurable);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadAtracEnabled_allowed);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadAtracEnabled_default);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadAtracDisabled_allowed);
+        doReturn(false).when(resources).getBoolean(R.bool.config_cecQuerySadAtracDisabled_default);
+
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecQuerySadOnebitaudio_userConfigurable);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecQuerySadOnebitaudioEnabled_allowed);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecQuerySadOnebitaudioEnabled_default);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecQuerySadOnebitaudioDisabled_allowed);
+        doReturn(false).when(resources).getBoolean(
+                R.bool.config_cecQuerySadOnebitaudioDisabled_default);
+
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadDdp_userConfigurable);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadDdpEnabled_allowed);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadDdpEnabled_default);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadDdpDisabled_allowed);
+        doReturn(false).when(resources).getBoolean(R.bool.config_cecQuerySadDdpDisabled_default);
+
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadDtshd_userConfigurable);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadDtshdEnabled_allowed);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadDtshdEnabled_default);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadDtshdDisabled_allowed);
+        doReturn(false).when(resources).getBoolean(R.bool.config_cecQuerySadDtshdDisabled_default);
+
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadTruehd_userConfigurable);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadTruehdEnabled_allowed);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadTruehdEnabled_default);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadTruehdDisabled_allowed);
+        doReturn(false).when(resources).getBoolean(R.bool.config_cecQuerySadTruehdDisabled_default);
+
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadDst_userConfigurable);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadDstEnabled_allowed);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadDstEnabled_default);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadDstDisabled_allowed);
+        doReturn(false).when(resources).getBoolean(R.bool.config_cecQuerySadDstDisabled_default);
+
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadWmapro_userConfigurable);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadWmaproEnabled_allowed);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadWmaproEnabled_default);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadWmaproDisabled_allowed);
+        doReturn(false).when(resources).getBoolean(R.bool.config_cecQuerySadWmaproDisabled_default);
+
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadMax_userConfigurable);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadMaxEnabled_allowed);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadMaxEnabled_default);
+        doReturn(true).when(resources).getBoolean(R.bool.config_cecQuerySadMaxDisabled_allowed);
+        doReturn(false).when(resources).getBoolean(R.bool.config_cecQuerySadMaxDisabled_default);
 
         return resources;
     }

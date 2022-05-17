@@ -47,7 +47,6 @@ import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.DeviceControlsControllerImpl.Companion.PREFS_CONTROLS_FILE
 import com.android.systemui.statusbar.policy.DeviceControlsControllerImpl.Companion.PREFS_CONTROLS_SEEDING_COMPLETED
 import com.android.systemui.util.concurrency.DelayableExecutor
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.util.Optional
 import java.util.concurrent.TimeUnit
@@ -244,7 +243,8 @@ class ControlsControllerImpl @Inject constructor (
             restoreFinishedReceiver,
             IntentFilter(BackupHelper.ACTION_RESTORE_FINISHED),
             PERMISSION_SELF,
-            null
+            null,
+            Context.RECEIVER_NOT_EXPORTED
         )
         listingController.addCallback(listingCallback)
     }
@@ -560,7 +560,7 @@ class ControlsControllerImpl @Inject constructor (
         return uiController.getPreferredStructure(getFavorites())
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("ControlsController state:")
         pw.println("  Changing users: $userChanging")
         pw.println("  Current user: ${currentUser.identifier}")

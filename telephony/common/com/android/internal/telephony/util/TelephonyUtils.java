@@ -26,7 +26,6 @@ import android.content.pm.ResolveInfo;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.PersistableBundle;
-import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.telephony.TelephonyManager;
 
@@ -74,11 +73,6 @@ public final class TelephonyUtils {
         return cur == null ? Collections.emptyList() : cur;
     }
 
-    /** Throws a {@link RuntimeException} that wrapps the {@link RemoteException}. */
-    public static RuntimeException rethrowAsRuntimeException(RemoteException remoteException) {
-        throw new RuntimeException(remoteException);
-    }
-
     /**
      * Returns a {@link ComponentInfo} from the {@link ResolveInfo},
      * or throws an {@link IllegalStateException} if not available.
@@ -104,6 +98,25 @@ public final class TelephonyUtils {
             action.run();
         } finally {
             Binder.restoreCallingIdentity(callingIdentity);
+        }
+    }
+
+    /**
+     * Convenience method for running the provided action in the provided
+     * executor enclosed in
+     * {@link Binder#clearCallingIdentity}/{@link Binder#restoreCallingIdentity}
+     *
+     * Any exception thrown by the given action will need to be handled by caller.
+     *
+     */
+    public static void runWithCleanCallingIdentity(
+            @NonNull Runnable action, @NonNull Executor executor) {
+        if (action != null) {
+            if (executor != null) {
+                executor.execute(() -> runWithCleanCallingIdentity(action));
+            } else {
+                runWithCleanCallingIdentity(action);
+            }
         }
     }
 

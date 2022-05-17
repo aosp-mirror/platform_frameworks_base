@@ -56,6 +56,7 @@ import android.net.LinkProperties;
 import android.net.NetworkAgent;
 import android.net.NetworkCapabilities;
 import android.net.ipsec.ike.ChildSaProposal;
+import android.net.ipsec.ike.IkeSessionConnectionInfo;
 import android.net.ipsec.ike.exceptions.IkeException;
 import android.net.ipsec.ike.exceptions.IkeInternalException;
 import android.net.ipsec.ike.exceptions.IkeProtocolException;
@@ -118,8 +119,10 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
 
     @Test
     public void testNullNetworkDoesNotTriggerDisconnect() throws Exception {
+        doReturn(false).when(mDeps).isAirplaneModeOn(any());
+
         mGatewayConnection
-                .getUnderlyingNetworkTrackerCallback()
+                .getUnderlyingNetworkControllerCallback()
                 .onSelectedUnderlyingNetworkChanged(null);
         mTestLooper.dispatchAll();
 
@@ -129,9 +132,22 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
     }
 
     @Test
+    public void testNullNetworkAirplaneModeDisconnects() throws Exception {
+        doReturn(true).when(mDeps).isAirplaneModeOn(any());
+
+        mGatewayConnection
+                .getUnderlyingNetworkControllerCallback()
+                .onSelectedUnderlyingNetworkChanged(null);
+        mTestLooper.dispatchAll();
+
+        assertEquals(mGatewayConnection.mDisconnectingState, mGatewayConnection.getCurrentState());
+        verify(mIkeSession).kill();
+    }
+
+    @Test
     public void testNewNetworkTriggersMigration() throws Exception {
         mGatewayConnection
-                .getUnderlyingNetworkTrackerCallback()
+                .getUnderlyingNetworkControllerCallback()
                 .onSelectedUnderlyingNetworkChanged(TEST_UNDERLYING_NETWORK_RECORD_2);
         mTestLooper.dispatchAll();
 
@@ -143,7 +159,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
     @Test
     public void testSameNetworkDoesNotTriggerMigration() throws Exception {
         mGatewayConnection
-                .getUnderlyingNetworkTrackerCallback()
+                .getUnderlyingNetworkControllerCallback()
                 .onSelectedUnderlyingNetworkChanged(TEST_UNDERLYING_NETWORK_RECORD_1);
         mTestLooper.dispatchAll();
 
@@ -201,13 +217,22 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
     @Test
     public void testMigration() throws Exception {
         triggerChildOpened();
+        mTestLooper.dispatchAll();
+        assertEquals(mIkeConnectionInfo, mGatewayConnection.getIkeConnectionInfo());
 
         mGatewayConnection
-                .getUnderlyingNetworkTrackerCallback()
+                .getUnderlyingNetworkControllerCallback()
                 .onSelectedUnderlyingNetworkChanged(TEST_UNDERLYING_NETWORK_RECORD_2);
+
+        final IkeSessionConnectionInfo newIkeConnectionInfo =
+                new IkeSessionConnectionInfo(
+                        TEST_ADDR_V4, TEST_ADDR_V4_2, TEST_UNDERLYING_NETWORK_RECORD_2.network);
+        getIkeSessionCallback().onIkeSessionConnectionInfoChanged(newIkeConnectionInfo);
         getChildSessionCallback()
                 .onIpSecTransformsMigrated(makeDummyIpSecTransform(), makeDummyIpSecTransform());
         mTestLooper.dispatchAll();
+
+        assertEquals(newIkeConnectionInfo, mGatewayConnection.getIkeConnectionInfo());
 
         verify(mIpSecSvc, times(2))
                 .setNetworkForTunnelInterface(
@@ -231,12 +256,16 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
                 MtuUtils.getMtu(
                         saProposals,
                         mConfig.getMaxMtu(),
-                        TEST_UNDERLYING_NETWORK_RECORD_2.linkProperties.getMtu());
+                        TEST_UNDERLYING_NETWORK_RECORD_2.linkProperties.getMtu(),
+                        true /* isIpv4 */);
         verify(mNetworkAgent).sendLinkProperties(
                 argThat(lp -> expectedMtu == lp.getMtu()
                         && TEST_TCP_BUFFER_SIZES_2.equals(lp.getTcpBufferSizes())));
         verify(mNetworkAgent)
                 .setUnderlyingNetworks(eq(singletonList(TEST_UNDERLYING_NETWORK_RECORD_2.network)));
+
+        // Verify revalidation is triggered on VCN network
+        verify(mConnMgr).reportNetworkConnectivity(eq(mNetworkAgent.getNetwork()), eq(false));
     }
 
     private void triggerChildOpened() {
@@ -251,6 +280,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
                 .when(mMockChildSessionConfig)
                 .getInternalDnsServers();
 
+        getIkeSessionCallback().onOpened(mIkeSessionConfiguration);
         getChildSessionCallback().onOpened(mMockChildSessionConfig);
     }
 
@@ -280,6 +310,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
         mTestLooper.dispatchAll();
 
         assertEquals(mGatewayConnection.mConnectedState, mGatewayConnection.getCurrentState());
+        assertEquals(mIkeConnectionInfo, mGatewayConnection.getIkeConnectionInfo());
 
         final ArgumentCaptor<LinkProperties> lpCaptor =
                 ArgumentCaptor.forClass(LinkProperties.class);
@@ -292,13 +323,14 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
                         ncCaptor.capture(),
                         lpCaptor.capture(),
                         any(),
-                        argThat(nac -> nac.getLegacyType() == ConnectivityManager.TYPE_MOBILE),
+                        // Subtype integer/name and extras do not have getters; cannot be tested.
+                        argThat(nac -> nac.getLegacyType() == ConnectivityManager.TYPE_MOBILE
+                                && nac.getLegacyTypeName().equals(
+                                        VcnGatewayConnection.NETWORK_INFO_NETWORK_TYPE_STRING)),
                         any(),
                         any(),
                         any());
         verify(mNetworkAgent).register();
-        verify(mNetworkAgent)
-                .setUnderlyingNetworks(eq(singletonList(TEST_UNDERLYING_NETWORK_RECORD_1.network)));
         verify(mNetworkAgent).markConnected();
 
         verify(mIpSecSvc)
@@ -313,6 +345,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
         final NetworkCapabilities nc = ncCaptor.getValue();
         assertTrue(nc.hasTransport(TRANSPORT_CELLULAR));
         assertFalse(nc.hasTransport(TRANSPORT_WIFI));
+        assertEquals(List.of(TEST_UNDERLYING_NETWORK_RECORD_1.network), nc.getUnderlyingNetworks());
         for (int cap : mConfig.getAllExposedCapabilities()) {
             assertTrue(nc.hasCapability(cap));
         }
@@ -322,6 +355,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
         triggerValidation(NetworkAgent.VALIDATION_STATUS_VALID);
         verify(mSafeModeTimeoutAlarm).cancel();
         assertFalse(mGatewayConnection.isInSafeMode());
+        verifySafeModeStateAndCallbackFired(1 /* invocationCount */, false /* isInSafeMode */);
     }
 
     @Test
@@ -391,6 +425,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
 
         triggerValidation(NetworkAgent.VALIDATION_STATUS_VALID);
 
+        verifySafeModeStateAndCallbackFired(2 /* invocationCount */, false /* isInSafeMode */);
         assertFalse(mGatewayConnection.isInSafeMode());
     }
 
@@ -400,11 +435,14 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
         mTestLooper.dispatchAll();
 
         triggerValidation(NetworkAgent.VALIDATION_STATUS_VALID);
-        assertFalse(mGatewayConnection.isInSafeMode());
+        verifySafeModeStateAndCallbackFired(1 /* invocationCount */, false /* isInSafeMode */);
 
         // Trigger a failed validation, and the subsequent safemode timeout.
         triggerValidation(NetworkAgent.VALIDATION_STATUS_NOT_VALID);
         mTestLooper.dispatchAll();
+
+        verify(mConnMgr)
+                .reportNetworkConnectivity(eq(TEST_UNDERLYING_NETWORK_RECORD_1.network), eq(false));
 
         final ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
         verify(mDeps, times(2))
@@ -416,7 +454,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
         runnableCaptor.getValue().run();
         mTestLooper.dispatchAll();
 
-        assertTrue(mGatewayConnection.isInSafeMode());
+        verifySafeModeStateAndCallbackFired(2 /* invocationCount */, true /* isInSafeMode */);
     }
 
     private Consumer<VcnNetworkAgent> setupNetworkAndGetUnwantedCallback() {

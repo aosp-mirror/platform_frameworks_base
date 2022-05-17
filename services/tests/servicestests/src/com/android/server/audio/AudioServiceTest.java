@@ -45,6 +45,7 @@ public class AudioServiceTest {
     private Context mContext;
     private AudioSystemAdapter mAudioSystem;
     @Spy private SystemServerAdapter mSpySystemServer;
+    private SettingsAdapter mSettingsAdapter;
     // the class being unit-tested here
     private AudioService mAudioService;
 
@@ -59,7 +60,9 @@ public class AudioServiceTest {
         mContext = InstrumentationRegistry.getTargetContext();
         mAudioSystem = new NoOpAudioSystemAdapter();
         mSpySystemServer = spy(new NoOpSystemServerAdapter());
-        mAudioService = new AudioService(mContext, mAudioSystem, mSpySystemServer);
+        mSettingsAdapter = new NoOpSettingsAdapter();
+        mAudioService = new AudioService(mContext, mAudioSystem, mSpySystemServer,
+                mSettingsAdapter, null);
     }
 
     /**
@@ -75,7 +78,7 @@ public class AudioServiceTest {
         for (boolean muted : new boolean[] { true, false}) {
             testAudioSystem.configureIsMicrophoneMuted(!muted);
             mAudioService.setMicrophoneMute(muted, mContext.getOpPackageName(),
-                    UserHandle.getCallingUserId());
+                    UserHandle.getCallingUserId(), null);
             Assert.assertEquals("mic mute reporting wrong value",
                     muted, mAudioService.isMicrophoneMuted());
             // verify the intent for mic mute changed is supposed to be fired
@@ -100,7 +103,7 @@ public class AudioServiceTest {
         for (boolean muted : new boolean[] { true, false}) {
             testAudioSystem.configureIsMicrophoneMuted(!muted);
             mAudioService.setMicrophoneMute(muted, mContext.getOpPackageName(),
-                    UserHandle.getCallingUserId());
+                    UserHandle.getCallingUserId(), null);
             Assert.assertEquals("mic mute reporting wrong value",
                     !muted, mAudioService.isMicrophoneMuted());
             // verify the intent for mic mute changed is supposed to be fired

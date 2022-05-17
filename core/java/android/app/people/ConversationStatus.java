@@ -126,7 +126,7 @@ public final class ConversationStatus implements Parcelable {
         mActivity = p.readInt();
         mAvailability = p.readInt();
         mDescription = p.readCharSequence();
-        mIcon = p.readParcelable(Icon.class.getClassLoader());
+        mIcon = p.readParcelable(Icon.class.getClassLoader(), android.graphics.drawable.Icon.class);
         mStartTimeMs = p.readLong();
         mEndTimeMs = p.readLong();
     }

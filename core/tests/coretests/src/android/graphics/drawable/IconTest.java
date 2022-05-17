@@ -180,6 +180,61 @@ public class IconTest extends AndroidTestCase {
         }
     }
 
+    /**
+     * Icon resource test that ensures we can load and draw non-bitmaps. (In this case,
+     * stat_sys_adb is assumed, and asserted, to be a vector drawable.)
+     */
+    @SmallTest
+    public void testWithStatSysAdbResource() throws Exception {
+        // establish reference bitmap
+        final float dp = getContext().getResources().getDisplayMetrics().density;
+        final int stat_sys_adb_width = (int) (24 * dp);
+        final int stat_sys_adb_height = (int) (24 * dp);
+
+        final Drawable stat_sys_adb = getContext()
+                .getDrawable(com.android.internal.R.drawable.stat_sys_adb);
+        if (!(stat_sys_adb instanceof VectorDrawable)) {
+            fail("stat_sys_adb is a " + stat_sys_adb.toString()
+                    + ", not a VectorDrawable; stat_sys_adb malformed");
+        }
+
+        if (stat_sys_adb.getIntrinsicWidth() != stat_sys_adb_width) {
+            fail("intrinsic width of stat_sys_adb is not 24dp; stat_sys_adb malformed");
+        }
+        if (stat_sys_adb.getIntrinsicHeight() != stat_sys_adb_height) {
+            fail("intrinsic height of stat_sys_adb is not 24dp; stat_sys_adb malformed");
+        }
+        final Bitmap referenceBitmap = Bitmap.createBitmap(
+                stat_sys_adb_width,
+                stat_sys_adb_height,
+                Bitmap.Config.ARGB_8888);
+        stat_sys_adb.setBounds(0, 0, stat_sys_adb_width, stat_sys_adb_height);
+        stat_sys_adb.draw(new Canvas(referenceBitmap));
+
+        final Icon im1 = Icon.createWithResource(getContext(),
+                com.android.internal.R.drawable.stat_sys_adb);
+        final Drawable draw1 = im1.loadDrawable(getContext());
+
+        assertEquals(stat_sys_adb.getIntrinsicWidth(), draw1.getIntrinsicWidth());
+        assertEquals(stat_sys_adb.getIntrinsicHeight(), draw1.getIntrinsicHeight());
+        assertEquals(im1.getResId(), com.android.internal.R.drawable.stat_sys_adb);
+
+        final Bitmap test1 = Bitmap.createBitmap(
+                draw1.getIntrinsicWidth(),
+                draw1.getIntrinsicHeight(),
+                Bitmap.Config.ARGB_8888);
+        draw1.setBounds(0, 0, test1.getWidth(), test1.getHeight());
+        draw1.draw(new Canvas(test1));
+
+        final File dir = getContext().getExternalFilesDir(null);
+        test1.compress(Bitmap.CompressFormat.PNG, 100,
+                new FileOutputStream(new File(dir, "testWithVectorDrawableResource-test.png")));
+        if (!equalBitmaps(referenceBitmap, test1)) {
+            findBitmapDifferences(referenceBitmap, test1);
+            fail("testWithFile: file1 differs, check " + dir);
+        }
+    }
+
     @SmallTest
     public void testWithFile() throws Exception {
         final Bitmap bit1 = ((BitmapDrawable) getContext().getDrawable(R.drawable.landscape))

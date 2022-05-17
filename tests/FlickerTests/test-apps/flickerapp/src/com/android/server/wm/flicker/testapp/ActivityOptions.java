@@ -37,8 +37,54 @@ public class ActivityOptions {
             new ComponentName(FLICKER_APP_PACKAGE,
                     FLICKER_APP_PACKAGE + ".ImeActivity");
 
+    public static final String IME_ACTIVITY_INITIALIZE_LAUNCHER_NAME = "ImeStateInitializeActivity";
+    public static final ComponentName IME_ACTIVITY_INITIALIZE_COMPONENT_NAME =
+            new ComponentName(FLICKER_APP_PACKAGE,
+                    FLICKER_APP_PACKAGE + ".ImeStateInitializeActivity");
+
     public static final String SIMPLE_ACTIVITY_LAUNCHER_NAME = "SimpleApp";
     public static final ComponentName SIMPLE_ACTIVITY_AUTO_FOCUS_COMPONENT_NAME =
             new ComponentName(FLICKER_APP_PACKAGE,
                     FLICKER_APP_PACKAGE + ".SimpleActivity");
+
+    public static final String NON_RESIZEABLE_ACTIVITY_LAUNCHER_NAME = "NonResizeableApp";
+    public static final ComponentName NON_RESIZEABLE_ACTIVITY_COMPONENT_NAME =
+            new ComponentName(FLICKER_APP_PACKAGE,
+                    FLICKER_APP_PACKAGE + ".NonResizeableActivity");
+
+    public static final String BUTTON_ACTIVITY_LAUNCHER_NAME = "ButtonApp";
+    public static final ComponentName BUTTON_ACTIVITY_COMPONENT_NAME =
+            new ComponentName(FLICKER_APP_PACKAGE,
+                    FLICKER_APP_PACKAGE + ".ButtonActivity");
+
+    public static final String LAUNCH_NEW_TASK_ACTIVITY_LAUNCHER_NAME = "LaunchNewTaskApp";
+    public static final ComponentName LAUNCH_NEW_TASK_ACTIVITY_COMPONENT_NAME =
+            new ComponentName(FLICKER_APP_PACKAGE,
+                    FLICKER_APP_PACKAGE + ".LaunchNewTaskActivity");
+
+    public static final String DIALOG_THEMED_ACTIVITY = "DialogThemedActivity";
+    public static final ComponentName DIALOG_THEMED_ACTIVITY_COMPONENT_NAME =
+            new ComponentName(FLICKER_APP_PACKAGE,
+                    FLICKER_APP_PACKAGE + ".DialogThemedActivity");
+
+    public static final String PORTRAIT_ONLY_ACTIVITY_LAUNCHER_NAME = "PortraitOnlyActivity";
+    public static final ComponentName PORTRAIT_ONLY_ACTIVITY_COMPONENT_NAME =
+            new ComponentName(FLICKER_APP_PACKAGE,
+                    FLICKER_APP_PACKAGE + ".PortraitOnlyActivity");
+
+    public static final String EDITOR_POPUP_DIALOG_ACTIVITY_LAUNCHER_NAME =
+            "ImeEditorPopupDialogActivity";
+    public static final ComponentName EDITOR_POPUP_DIALOG_ACTIVITY_COMPONENT_NAME =
+            new ComponentName(FLICKER_APP_PACKAGE,
+                    FLICKER_APP_PACKAGE + ".ImeEditorPopupDialogActivity");
+
+    public static final String SHOW_WHEN_LOCKED_ACTIVITY_LAUNCHER_NAME = "ShowWhenLockedApp";
+    public static final ComponentName SHOW_WHEN_LOCKED_ACTIVITY_COMPONENT_NAME =
+            new ComponentName(FLICKER_APP_PACKAGE,
+                    FLICKER_APP_PACKAGE + ".ShowWhenLockedActivity");
+
+    public static final String NOTIFICATION_ACTIVITY_LAUNCHER_NAME = "NotificationApp";
+    public static final ComponentName NOTIFICATION_ACTIVITY_COMPONENT_NAME =
+            new ComponentName(FLICKER_APP_PACKAGE,
+                    FLICKER_APP_PACKAGE + ".NotificationActivity");
 }

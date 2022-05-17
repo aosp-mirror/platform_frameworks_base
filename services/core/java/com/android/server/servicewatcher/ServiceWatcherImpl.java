@@ -25,6 +25,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -239,7 +240,7 @@ class ServiceWatcherImpl<TBoundServiceInfo extends BoundServiceInfo> implements 
             Preconditions.checkState(Looper.myLooper() == mHandler.getLooper());
 
             if (mBinder == null) {
-                operation.onError();
+                operation.onError(new DeadObjectException());
                 return;
             }
 
@@ -249,7 +250,7 @@ class ServiceWatcherImpl<TBoundServiceInfo extends BoundServiceInfo> implements 
                 // binders may propagate some specific non-RemoteExceptions from the other side
                 // through the binder as well - we cannot allow those to crash the system server
                 Log.e(TAG, "[" + mTag + "] error running operation on " + mBoundServiceInfo, e);
-                operation.onError();
+                operation.onError(e);
             }
         }
 

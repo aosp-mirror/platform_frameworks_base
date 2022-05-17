@@ -120,6 +120,13 @@ bool BinaryResourceParser::Parse() {
                                   static_cast<int>(parser.chunk()->type)));
     }
   }
+
+  if (!staged_entries_to_remove_.empty()) {
+    diag_->Error(DiagMessage(source_) << "didn't find " << staged_entries_to_remove_.size()
+                                      << " original staged resources");
+    return false;
+  }
+
   return true;
 }
 
@@ -393,6 +400,12 @@ bool BinaryResourceParser::ParseType(const ResourceTablePackage* package,
       return false;
     }
 
+    if (const auto to_remove_it = staged_entries_to_remove_.find({name, res_id});
+        to_remove_it != staged_entries_to_remove_.end()) {
+      staged_entries_to_remove_.erase(to_remove_it);
+      continue;
+    }
+
     NewResourceBuilder res_builder(name);
     res_builder.SetValue(std::move(resource_value), config)
         .SetId(res_id, OnIdConflict::CREATE_ENTRY)
@@ -533,9 +546,8 @@ bool BinaryResourceParser::ParseStagedAliases(const ResChunk_header* chunk) {
     // Since a the finalized resource entry is cloned and added to the resource table under the
     // staged resource id, remove the cloned resource entry from the table.
     if (!table_->RemoveResource(resource_name, staged_id)) {
-      diag_->Error(DiagMessage(source_) << "failed to find resource entry for staged "
-                                        << " resource ID " << staged_id);
-      return false;
+      // If we haven't seen this resource yet let's add a record to skip it when parsing.
+      staged_entries_to_remove_.insert({resource_name, staged_id});
     }
   }
   return true;
@@ -544,8 +556,8 @@ bool BinaryResourceParser::ParseStagedAliases(const ResChunk_header* chunk) {
 std::unique_ptr<Item> BinaryResourceParser::ParseValue(const ResourceNameRef& name,
                                                        const ConfigDescription& config,
                                                        const android::Res_value& value) {
-  std::unique_ptr<Item> item = ResourceUtils::ParseBinaryResValue(name.type, config, value_pool_,
-                                                                  value, &table_->string_pool);
+  std::unique_ptr<Item> item = ResourceUtils::ParseBinaryResValue(
+      name.type.type, config, value_pool_, value, &table_->string_pool);
   if (files_ != nullptr) {
     FileReference* file_ref = ValueCast<FileReference>(item.get());
     if (file_ref != nullptr) {
@@ -563,8 +575,10 @@ std::unique_ptr<Item> BinaryResourceParser::ParseValue(const ResourceNameRef& na
 std::unique_ptr<Value> BinaryResourceParser::ParseMapEntry(const ResourceNameRef& name,
                                                            const ConfigDescription& config,
                                                            const ResTable_map_entry* map) {
-  switch (name.type) {
+  switch (name.type.type) {
     case ResourceType::kStyle:
+      // fallthrough
+    case ResourceType::kConfigVarying:  // legacy thing used in tests
       return ParseStyle(name, config, map);
     case ResourceType::kAttrPrivate:
       // fallthrough
@@ -580,8 +594,8 @@ std::unique_ptr<Value> BinaryResourceParser::ParseMapEntry(const ResourceNameRef
       // We can ignore the value here.
       return util::make_unique<Id>();
     default:
-      diag_->Error(DiagMessage() << "illegal map type '" << to_string(name.type) << "' ("
-                                 << (int)name.type << ")");
+      diag_->Error(DiagMessage() << "illegal map type '" << name.type << "' ("
+                                 << (int)name.type.type << ")");
       break;
   }
   return {};

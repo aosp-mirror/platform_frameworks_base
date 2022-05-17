@@ -75,13 +75,24 @@ public class AppWindowTokenAnimationTests extends WindowTestsBase {
 
     @Test
     public void clipAfterAnim_boundsLayerZBoosted() {
+        final Task task = mActivity.getTask();
+        final ActivityRecord topActivity = createActivityRecord(task);
+        task.assignChildLayers(mTransaction);
+
+        assertThat(topActivity.getLastLayer()).isGreaterThan(mActivity.getLastLayer());
+
         mActivity.mNeedsAnimationBoundsLayer = true;
         mActivity.mNeedsZBoost = true;
-
         mActivity.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */,
                 ANIMATION_TYPE_APP_TRANSITION);
+
         verify(mTransaction).setLayer(eq(mActivity.mAnimationBoundsLayer),
-                intThat(layer -> layer >= ActivityRecord.Z_BOOST_BASE));
+                intThat(layer -> layer > topActivity.getLastLayer()));
+
+        // The layer should be restored after the animation leash is removed.
+        mActivity.onAnimationLeashLost(mTransaction);
+        assertThat(mActivity.mNeedsZBoost).isFalse();
+        assertThat(topActivity.getLastLayer()).isGreaterThan(mActivity.getLastLayer());
     }
 
     @Test

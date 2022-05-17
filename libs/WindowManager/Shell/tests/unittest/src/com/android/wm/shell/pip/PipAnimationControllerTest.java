@@ -30,7 +30,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 import android.app.TaskInfo;
-import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -104,7 +103,7 @@ public class PipAnimationControllerTest extends ShellTestCase {
         final PipAnimationController.PipTransitionAnimator oldAnimator = mPipAnimationController
                 .getAnimator(mTaskInfo, mLeash, baseValue, startValue, endValue1, null,
                         TRANSITION_DIRECTION_TO_PIP, 0, ROTATION_0);
-        oldAnimator.setSurfaceControlTransactionFactory(DummySurfaceControlTx::new);
+        oldAnimator.setSurfaceControlTransactionFactory(PipDummySurfaceControlTx::new);
         oldAnimator.start();
 
         final PipAnimationController.PipTransitionAnimator newAnimator = mPipAnimationController
@@ -134,7 +133,7 @@ public class PipAnimationControllerTest extends ShellTestCase {
 
     @Test
     public void pipTransitionAnimator_rotatedEndValue() {
-        final DummySurfaceControlTx tx = new DummySurfaceControlTx();
+        final PipDummySurfaceControlTx tx = new PipDummySurfaceControlTx();
         final Rect startBounds = new Rect(200, 700, 400, 800);
         final Rect endBounds = new Rect(0, 0, 500, 1000);
         // Fullscreen to PiP.
@@ -184,7 +183,7 @@ public class PipAnimationControllerTest extends ShellTestCase {
         final PipAnimationController.PipTransitionAnimator animator = mPipAnimationController
                 .getAnimator(mTaskInfo, mLeash, baseValue, startValue, endValue, null,
                         TRANSITION_DIRECTION_TO_PIP, 0, ROTATION_0);
-        animator.setSurfaceControlTransactionFactory(DummySurfaceControlTx::new);
+        animator.setSurfaceControlTransactionFactory(PipDummySurfaceControlTx::new);
 
         animator.setPipAnimationCallback(mPipAnimationCallback);
 
@@ -200,45 +199,5 @@ public class PipAnimationControllerTest extends ShellTestCase {
         animator.onAnimationEnd(animator);
         verify(mPipAnimationCallback).onPipAnimationEnd(eq(mTaskInfo),
                 any(SurfaceControl.Transaction.class), eq(animator));
-    }
-
-    /**
-     * A dummy {@link SurfaceControl.Transaction} class.
-     * This is created as {@link Mock} does not support method chaining.
-     */
-    public static class DummySurfaceControlTx extends SurfaceControl.Transaction {
-        @Override
-        public SurfaceControl.Transaction setAlpha(SurfaceControl leash, float alpha) {
-            return this;
-        }
-
-        @Override
-        public SurfaceControl.Transaction setPosition(SurfaceControl leash, float x, float y) {
-            return this;
-        }
-
-        @Override
-        public SurfaceControl.Transaction setWindowCrop(SurfaceControl leash, int w, int h) {
-            return this;
-        }
-
-        @Override
-        public SurfaceControl.Transaction setCornerRadius(SurfaceControl leash, float radius) {
-            return this;
-        }
-
-        @Override
-        public SurfaceControl.Transaction setMatrix(SurfaceControl leash, Matrix matrix,
-                float[] float9) {
-            return this;
-        }
-
-        @Override
-        public SurfaceControl.Transaction setFrameTimelineVsync(long frameTimelineVsyncId) {
-            return this;
-        }
-
-        @Override
-        public void apply() {}
     }
 }

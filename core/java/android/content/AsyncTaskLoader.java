@@ -52,7 +52,7 @@ import java.util.concurrent.Executor;
  * @param <D> the data type to be loaded.
  *
  * @deprecated Use the <a href="{@docRoot}tools/extras/support-library.html">Support Library</a>
- *      {@link android.support.v4.content.AsyncTaskLoader}
+ *      {@link androidx.loader.content.AsyncTaskLoader}
  */
 @Deprecated
 public abstract class AsyncTaskLoader<D> extends Loader<D> {

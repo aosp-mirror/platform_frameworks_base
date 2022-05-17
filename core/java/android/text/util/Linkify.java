@@ -111,19 +111,25 @@ public class Linkify {
      *  {@link android.webkit.WebView#findAddress(String)} for more information.
      *
      *  @deprecated use {@link android.view.textclassifier.TextClassifier#generateLinks(
-     *  TextLinks.Request)} instead and avoid it even when targeting API levels where no alternative
-     *  is available.
+     *  TextLinks.Request)} instead, and avoid {@link #MAP_ADDRESSES} even when targeting API levels
+     *  where no alternative is available.
      */
     @Deprecated
     public static final int MAP_ADDRESSES = 0x08;
 
     /**
-     *  Bit mask indicating that all available patterns should be matched in
-     *  methods that take an options mask
-     *  <p><strong>Note:</strong></p> {@link #MAP_ADDRESSES} is deprecated.
-     *  Use {@link android.view.textclassifier.TextClassifier#generateLinks(TextLinks.Request)}
-     *  instead and avoid it even when targeting API levels where no alternative is available.
+     *  Bit mask indicating that all available patterns should be matched in methods
+     *  that take an options mask. Note that this should be avoided, as the {@link
+     *  #MAP_ADDRESSES} field uses the {@link android.webkit.WebView#findAddress(
+     *  String)} method, which has various limitations and has been deprecated: see
+     *  the documentation for {@link android.webkit.WebView#findAddress(String)} for
+     *  more information.
+     *
+     *  @deprecated use {@link android.view.textclassifier.TextClassifier#generateLinks(
+     *  TextLinks.Request)} instead, and avoid {@link #ALL} even when targeting API levels where no
+     *  alternative is available.
      */
+    @Deprecated
     public static final int ALL = WEB_URLS | EMAIL_ADDRESSES | PHONE_NUMBERS | MAP_ADDRESSES;
 
     /**

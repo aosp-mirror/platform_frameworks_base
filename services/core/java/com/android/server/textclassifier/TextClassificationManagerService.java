@@ -86,6 +86,9 @@ public final class TextClassificationManagerService extends ITextClassifierServi
 
     private static final String LOG_TAG = "TextClassificationManagerService";
 
+    // TODO: consider using device config to control it.
+    private static final boolean DEBUG = false;
+
     private static final ITextClassifierCallback NO_OP_CALLBACK = new ITextClassifierCallback() {
         @Override
         public void onSuccess(Bundle result) {}
@@ -175,8 +178,6 @@ public final class TextClassificationManagerService extends ITextClassifierServi
     private final String mDefaultTextClassifierPackage;
     @Nullable
     private final String mSystemTextClassifierPackage;
-    // TODO: consider using device config to control it.
-    private boolean DEBUG = false;
 
     private TextClassificationManagerService(Context context) {
         mContext = Objects.requireNonNull(context);
@@ -527,17 +528,28 @@ public final class TextClassificationManagerService extends ITextClassifierServi
                     callback.onFailure();
                     return;
                 }
-                textClassifierServiceConsumer.accept(serviceState.mService);
+                consumeServiceNoExceptLocked(textClassifierServiceConsumer, serviceState.mService);
             } else {
                 serviceState.mPendingRequests.add(
                         new PendingRequest(
                                 methodName,
-                                () -> textClassifierServiceConsumer.accept(serviceState.mService),
+                                () -> consumeServiceNoExceptLocked(
+                                        textClassifierServiceConsumer, serviceState.mService),
                                 callback::onFailure, callback.asBinder(),
                                 this,
                                 serviceState,
                                 Binder.getCallingUid()));
             }
+        }
+    }
+
+    private static void consumeServiceNoExceptLocked(
+            @NonNull ThrowingConsumer<ITextClassifierService> textClassifierServiceConsumer,
+            @Nullable ITextClassifierService service) {
+        try {
+            textClassifierServiceConsumer.accept(service);
+        } catch (RuntimeException | Error e) {
+            Slog.e(LOG_TAG, "Exception when consume textClassifierService: " + e);
         }
     }
 

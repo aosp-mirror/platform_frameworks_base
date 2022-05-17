@@ -28,6 +28,8 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.util.ArrayUtils;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
@@ -50,15 +52,15 @@ public class UserDetailItemView extends LinearLayout {
         this(context, null);
     }
 
-    public UserDetailItemView(Context context, AttributeSet attrs) {
+    public UserDetailItemView(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public UserDetailItemView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public UserDetailItemView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 
-    public UserDetailItemView(Context context, AttributeSet attrs, int defStyleAttr,
+    public UserDetailItemView(Context context, @Nullable AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
@@ -148,6 +150,6 @@ public class UserDetailItemView extends LinearLayout {
     }
 
     protected int getFontSizeDimen() {
-        return R.dimen.qs_detail_item_secondary_text_size;
+        return R.dimen.qs_tile_text_size;
     }
 }

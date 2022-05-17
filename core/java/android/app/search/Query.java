@@ -70,7 +70,7 @@ public final class Query implements Parcelable {
             @NonNull Bundle extras) {
         mInput = input;
         mTimestampMillis = timestampMillis;
-        mExtras = extras == null ? extras : new Bundle();
+        mExtras = extras != null ? extras : new Bundle();
     }
 
     /**

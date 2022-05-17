@@ -70,7 +70,7 @@ public final class BluetoothDeviceFilter implements DeviceFilter<BluetoothDevice
     }
 
     private static List<ParcelUuid> readUuids(Parcel in) {
-        return in.readParcelableList(new ArrayList<>(), ParcelUuid.class.getClassLoader());
+        return in.readParcelableList(new ArrayList<>(), ParcelUuid.class.getClassLoader(), android.os.ParcelUuid.class);
     }
 
     /** @hide */

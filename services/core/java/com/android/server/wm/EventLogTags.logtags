@@ -52,7 +52,7 @@ option java_package com.android.server.wm
 30066 wm_add_to_stopping (User|1|5),(Token|1|5),(Component Name|3),(Reason|3)
 
 # Keyguard status changed
-30067 wm_set_keyguard_shown (keyguardShowing|1),(aodShowing|1),(keyguardGoingAway|1),(Reason|3)
+30067 wm_set_keyguard_shown (Display Id|1|5),(keyguardShowing|1),(aodShowing|1),(keyguardGoingAway|1),(Reason|3)
 
 # Out of memory for surfaces.
 31000 wm_no_surface_memory (Window|3),(PID|1|5),(Operation|3)
@@ -65,3 +65,5 @@ option java_package com.android.server.wm
 # bootanim finished:
 31007 wm_boot_animation_done (time|2|3)
 
+# Request surface flinger to show / hide the wallpaper surface.
+33001 wm_wallpaper_surface (Display Id|1|5),(visible|1)

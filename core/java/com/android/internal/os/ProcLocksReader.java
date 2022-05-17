@@ -18,8 +18,6 @@ package com.android.internal.os;
 
 import com.android.internal.util.ProcFileReader;
 
-import libcore.io.IoUtils;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 
@@ -36,6 +34,7 @@ import java.io.IOException;
  */
 public class ProcLocksReader {
     private final String mPath;
+    private ProcFileReader mReader = null;
 
     public ProcLocksReader() {
         mPath = "/proc/locks";
@@ -46,44 +45,54 @@ public class ProcLocksReader {
     }
 
     /**
-     * Checks if a process corresponding to a specific pid owns any file locks.
-     * @param pid The process ID for which we want to know the existence of file locks.
-     * @return true If the process holds any file locks, false otherwise.
-     * @throws IOException if /proc/locks can't be accessed.
+     * This interface is for AMS to run callback function on every processes one by one
+     * that hold file locks blocking other processes.
      */
-    public boolean hasFileLocks(int pid) throws Exception {
-        ProcFileReader reader = null;
+    public interface ProcLocksReaderCallback {
+        /**
+         * Call the callback function of handleBlockingFileLocks().
+         * @param pid Each process that hold file locks blocking other processes.
+         */
+        void onBlockingFileLock(int pid);
+    }
+
+    /**
+     * Checks if a process corresponding to a specific pid owns any file locks.
+     * @param callback Callback function, accepting pid as the input parameter.
+     * @throws IOException if /proc/locks can't be accessed or correctly parsed.
+     */
+    public void handleBlockingFileLocks(ProcLocksReaderCallback callback) throws IOException {
         long last = -1;
         long id; // ordinal position of the lock in the list
-        int owner; // the PID of the process that owns the lock
+        int owner = -1; // the PID of the process that owns the lock
+        int pid = -1; // the PID of the process blocking others
 
-        try {
-            reader = new ProcFileReader(new FileInputStream(mPath));
-
-            while (reader.hasMoreData()) {
-                id = reader.nextLong(true); // lock id
-                if (id == last) {
-                    reader.finishLine(); // blocked lock
-                    continue;
-                }
-
-                reader.nextIgnored(); // lock type: POSIX?
-                reader.nextIgnored(); // lock type: MANDATORY?
-                reader.nextIgnored(); // lock type: RW?
-
-                owner = reader.nextInt(); // pid
-                if (owner == pid) {
-                    return true;
-                }
-                reader.finishLine();
-                last = id;
-            }
-        } catch (IOException e) {
-            // TODO: let ProcFileReader log the failed line
-            throw new Exception("Exception parsing /proc/locks");
-        } finally {
-            IoUtils.closeQuietly(reader);
+        if (mReader == null) {
+            mReader = new ProcFileReader(new FileInputStream(mPath));
+        } else {
+            mReader.rewind();
         }
-        return false;
+
+        while (mReader.hasMoreData()) {
+            id = mReader.nextLong(true); // lock id
+            if (id == last) {
+                mReader.finishLine(); // blocked lock
+                if (pid < 0) {
+                    pid = owner; // get pid from the previous line
+                    callback.onBlockingFileLock(pid);
+                }
+                continue;
+            } else {
+                pid = -1; // a new lock
+            }
+
+            mReader.nextIgnored(); // lock type: POSIX?
+            mReader.nextIgnored(); // lock type: MANDATORY?
+            mReader.nextIgnored(); // lock type: RW?
+
+            owner = mReader.nextInt(); // pid
+            mReader.finishLine();
+            last = id;
+        }
     }
 }

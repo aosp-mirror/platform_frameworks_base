@@ -48,6 +48,7 @@
 
 #include <jni.h>
 #include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedUtfChars.h>
 
 using namespace android;
 using namespace img_utils;
@@ -920,26 +921,6 @@ static bool validateDngHeader(JNIEnv* env, sp<TiffWriter> writer,
     return true;
 }
 
-static status_t moveEntries(sp<TiffWriter> writer, uint32_t ifdFrom, uint32_t ifdTo,
-        const Vector<uint16_t>& entries) {
-    for (size_t i = 0; i < entries.size(); ++i) {
-        uint16_t tagId = entries[i];
-        sp<TiffEntry> entry = writer->getEntry(tagId, ifdFrom);
-        if (entry.get() == nullptr) {
-            ALOGE("%s: moveEntries failed, entry %u not found in IFD %u", __FUNCTION__, tagId,
-                    ifdFrom);
-            return BAD_VALUE;
-        }
-        if (writer->addEntry(entry, ifdTo) != OK) {
-            ALOGE("%s: moveEntries failed, could not add entry %u to IFD %u", __FUNCTION__, tagId,
-                    ifdFrom);
-            return BAD_VALUE;
-        }
-        writer->removeEntry(tagId, ifdFrom);
-    }
-    return OK;
-}
-
 /**
  * Write CFA pattern for given CFA enum into cfaOut.  cfaOut must have length >= 4.
  * Returns OK on success, or a negative error code if the CFA enum was invalid.
@@ -1284,16 +1265,14 @@ static void DngCreator_init(JNIEnv* env, jobject thiz, jobject characteristicsPt
 
     sp<NativeContext> nativeContext = new NativeContext(characteristics, results);
 
-    const char* captureTime = env->GetStringUTFChars(formattedCaptureTime, nullptr);
-
-    size_t len = strlen(captureTime) + 1;
-    if (len != NativeContext::DATETIME_COUNT) {
+    ScopedUtfChars captureTime(env, formattedCaptureTime);
+    if (captureTime.size() + 1 != NativeContext::DATETIME_COUNT) {
         jniThrowException(env, "java/lang/IllegalArgumentException",
                 "Formatted capture time string length is not required 20 characters");
         return;
     }
 
-    nativeContext->setCaptureTime(String8(captureTime));
+    nativeContext->setCaptureTime(String8(captureTime.c_str()));
 
     DngCreator_setNativeContext(env, thiz, nativeContext);
 }
@@ -2255,66 +2234,27 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
             }
         }
 
-        Vector<uint16_t> tagsToMove;
-        tagsToMove.add(TAG_NEWSUBFILETYPE);
-        tagsToMove.add(TAG_ACTIVEAREA);
-        tagsToMove.add(TAG_BITSPERSAMPLE);
-        tagsToMove.add(TAG_COMPRESSION);
-        tagsToMove.add(TAG_IMAGEWIDTH);
-        tagsToMove.add(TAG_IMAGELENGTH);
-        tagsToMove.add(TAG_PHOTOMETRICINTERPRETATION);
-        tagsToMove.add(TAG_BLACKLEVEL);
-        tagsToMove.add(TAG_BLACKLEVELREPEATDIM);
-        tagsToMove.add(TAG_SAMPLESPERPIXEL);
-        tagsToMove.add(TAG_PLANARCONFIGURATION);
-        if (isBayer) {
-            tagsToMove.add(TAG_CFAREPEATPATTERNDIM);
-            tagsToMove.add(TAG_CFAPATTERN);
-            tagsToMove.add(TAG_CFAPLANECOLOR);
-            tagsToMove.add(TAG_CFALAYOUT);
-        }
-        tagsToMove.add(TAG_XRESOLUTION);
-        tagsToMove.add(TAG_YRESOLUTION);
-        tagsToMove.add(TAG_RESOLUTIONUNIT);
-        tagsToMove.add(TAG_WHITELEVEL);
-        tagsToMove.add(TAG_DEFAULTSCALE);
-        tagsToMove.add(TAG_DEFAULTCROPORIGIN);
-        tagsToMove.add(TAG_DEFAULTCROPSIZE);
-
-        if (nullptr != writer->getEntry(TAG_OPCODELIST2, TIFF_IFD_0).get()) {
-            tagsToMove.add(TAG_OPCODELIST2);
-        }
-
-        if (nullptr != writer->getEntry(TAG_OPCODELIST3, TIFF_IFD_0).get()) {
-            tagsToMove.add(TAG_OPCODELIST3);
-        }
-
-        if (moveEntries(writer, TIFF_IFD_0, TIFF_IFD_SUB1, tagsToMove) != OK) {
-            jniThrowException(env, "java/lang/IllegalStateException", "Failed to move entries");
-            return nullptr;
-        }
-
         // Setup thumbnail tags
 
         {
             // Set photometric interpretation
             uint16_t interpretation = 2; // RGB
             BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_PHOTOMETRICINTERPRETATION, 1,
-                    &interpretation, TIFF_IFD_0), env, TAG_PHOTOMETRICINTERPRETATION, writer);
+                    &interpretation, TIFF_IFD_SUB1), env, TAG_PHOTOMETRICINTERPRETATION, writer);
         }
 
         {
             // Set planar configuration
             uint16_t config = 1; // Chunky
             BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_PLANARCONFIGURATION, 1, &config,
-                    TIFF_IFD_0), env, TAG_PLANARCONFIGURATION, writer);
+                    TIFF_IFD_SUB1), env, TAG_PLANARCONFIGURATION, writer);
         }
 
         {
             // Set samples per pixel
             uint16_t samples = SAMPLES_PER_RGB_PIXEL;
             BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_SAMPLESPERPIXEL, 1, &samples,
-                    TIFF_IFD_0), env, TAG_SAMPLESPERPIXEL, writer);
+                    TIFF_IFD_SUB1), env, TAG_SAMPLESPERPIXEL, writer);
         }
 
         {
@@ -2322,7 +2262,7 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
             uint16_t bits[SAMPLES_PER_RGB_PIXEL];
             for (int i = 0; i < SAMPLES_PER_RGB_PIXEL; i++) bits[i] = BITS_PER_RGB_SAMPLE;
             BAIL_IF_INVALID_RET_NULL_SP(
-                    writer->addEntry(TAG_BITSPERSAMPLE, SAMPLES_PER_RGB_PIXEL, bits, TIFF_IFD_0),
+                    writer->addEntry(TAG_BITSPERSAMPLE, SAMPLES_PER_RGB_PIXEL, bits, TIFF_IFD_SUB1),
                     env, TAG_BITSPERSAMPLE, writer);
         }
 
@@ -2330,55 +2270,55 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
             // Set subfiletype
             uint32_t subfileType = 1; // Thumbnail image
             BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_NEWSUBFILETYPE, 1, &subfileType,
-                    TIFF_IFD_0), env, TAG_NEWSUBFILETYPE, writer);
+                    TIFF_IFD_SUB1), env, TAG_NEWSUBFILETYPE, writer);
         }
 
         {
             // Set compression
             uint16_t compression = 1; // None
             BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_COMPRESSION, 1, &compression,
-                    TIFF_IFD_0), env, TAG_COMPRESSION, writer);
+                    TIFF_IFD_SUB1), env, TAG_COMPRESSION, writer);
         }
 
         {
             // Set dimensions
             uint32_t uWidth = nativeContext->getThumbnailWidth();
             uint32_t uHeight = nativeContext->getThumbnailHeight();
-            BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_IMAGEWIDTH, 1, &uWidth, TIFF_IFD_0),
+            BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_IMAGEWIDTH, 1, &uWidth, TIFF_IFD_SUB1),
                     env, TAG_IMAGEWIDTH, writer);
-            BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_IMAGELENGTH, 1, &uHeight, TIFF_IFD_0),
-                    env, TAG_IMAGELENGTH, writer);
+            BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_IMAGELENGTH, 1, &uHeight,
+                    TIFF_IFD_SUB1), env, TAG_IMAGELENGTH, writer);
         }
 
         {
             // x resolution
             uint32_t xres[] = { 72, 1 }; // default 72 ppi
-            BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_XRESOLUTION, 1, xres, TIFF_IFD_0),
+            BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_XRESOLUTION, 1, xres, TIFF_IFD_SUB1),
                     env, TAG_XRESOLUTION, writer);
 
             // y resolution
             uint32_t yres[] = { 72, 1 }; // default 72 ppi
-            BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_YRESOLUTION, 1, yres, TIFF_IFD_0),
+            BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_YRESOLUTION, 1, yres, TIFF_IFD_SUB1),
                     env, TAG_YRESOLUTION, writer);
 
             uint16_t unit = 2; // inches
-            BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_RESOLUTIONUNIT, 1, &unit, TIFF_IFD_0),
-                    env, TAG_RESOLUTIONUNIT, writer);
+            BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_RESOLUTIONUNIT, 1, &unit,
+                    TIFF_IFD_SUB1), env, TAG_RESOLUTIONUNIT, writer);
         }
     }
 
     if (writer->addStrip(TIFF_IFD_0) != OK) {
-        ALOGE("%s: Could not setup thumbnail strip tags.", __FUNCTION__);
+        ALOGE("%s: Could not setup main image strip tags.", __FUNCTION__);
         jniThrowException(env, "java/lang/IllegalStateException",
-                "Failed to setup thumbnail strip tags.");
+                "Failed to setup main image strip tags.");
         return nullptr;
     }
 
     if (writer->hasIfd(TIFF_IFD_SUB1)) {
         if (writer->addStrip(TIFF_IFD_SUB1) != OK) {
-            ALOGE("%s: Could not main image strip tags.", __FUNCTION__);
+            ALOGE("%s: Could not thumbnail image strip tags.", __FUNCTION__);
             jniThrowException(env, "java/lang/IllegalStateException",
-                    "Failed to setup main image strip tags.");
+                    "Failed to setup thumbnail image strip tags.");
             return nullptr;
         }
     }
@@ -2548,19 +2488,15 @@ static void DngCreator_nativeWriteImage(JNIEnv* env, jobject thiz, jobject outSt
     Vector<StripSource*> sources;
     sp<DirectStripSource> thumbnailSource;
     uint32_t targetIfd = TIFF_IFD_0;
-
     bool hasThumbnail = writer->hasIfd(TIFF_IFD_SUB1);
-
     if (hasThumbnail) {
         ALOGV("%s: Adding thumbnail strip sources.", __FUNCTION__);
         uint32_t bytesPerPixel = SAMPLES_PER_RGB_PIXEL * BYTES_PER_RGB_SAMPLE;
         uint32_t thumbWidth = context->getThumbnailWidth();
-        thumbnailSource = new DirectStripSource(env, context->getThumbnail(), TIFF_IFD_0,
+        thumbnailSource = new DirectStripSource(env, context->getThumbnail(), TIFF_IFD_SUB1,
                 thumbWidth, context->getThumbnailHeight(), bytesPerPixel,
                 bytesPerPixel * thumbWidth, /*offset*/0, BYTES_PER_RGB_SAMPLE,
                 SAMPLES_PER_RGB_PIXEL);
-        sources.add(thumbnailSource.get());
-        targetIfd = TIFF_IFD_SUB1;
     }
 
     if (isDirect) {
@@ -2584,6 +2520,9 @@ static void DngCreator_nativeWriteImage(JNIEnv* env, jobject thiz, jobject outSt
         DirectStripSource stripSource(env, pixelBytes, targetIfd, uWidth, uHeight, pStride,
                 rStride, uOffset, BYTES_PER_SAMPLE, SAMPLES_PER_RAW_PIXEL);
         sources.add(&stripSource);
+        if (thumbnailSource.get() != nullptr) {
+            sources.add(thumbnailSource.get());
+        }
 
         status_t ret = OK;
         if ((ret = writer->write(out.get(), sources.editArray(), sources.size())) != OK) {
@@ -2601,6 +2540,9 @@ static void DngCreator_nativeWriteImage(JNIEnv* env, jobject thiz, jobject outSt
         InputStripSource stripSource(env, *inBuf, targetIfd, uWidth, uHeight, pStride,
                  rStride, uOffset, BYTES_PER_SAMPLE, SAMPLES_PER_RAW_PIXEL);
         sources.add(&stripSource);
+        if (thumbnailSource.get() != nullptr) {
+            sources.add(thumbnailSource.get());
+        }
 
         status_t ret = OK;
         if ((ret = writer->write(out.get(), sources.editArray(), sources.size())) != OK) {
@@ -2612,6 +2554,7 @@ static void DngCreator_nativeWriteImage(JNIEnv* env, jobject thiz, jobject outSt
             return;
         }
     }
+
 }
 
 static void DngCreator_nativeWriteInputStream(JNIEnv* env, jobject thiz, jobject outStream,
@@ -2654,20 +2597,8 @@ static void DngCreator_nativeWriteInputStream(JNIEnv* env, jobject thiz, jobject
 
     sp<DirectStripSource> thumbnailSource;
     uint32_t targetIfd = TIFF_IFD_0;
-    bool hasThumbnail = writer->hasIfd(TIFF_IFD_SUB1);
     Vector<StripSource*> sources;
 
-    if (hasThumbnail) {
-        ALOGV("%s: Adding thumbnail strip sources.", __FUNCTION__);
-        uint32_t bytesPerPixel = SAMPLES_PER_RGB_PIXEL * BYTES_PER_RGB_SAMPLE;
-        uint32_t width = context->getThumbnailWidth();
-        thumbnailSource = new DirectStripSource(env, context->getThumbnail(), TIFF_IFD_0,
-                width, context->getThumbnailHeight(), bytesPerPixel,
-                bytesPerPixel * width, /*offset*/0, BYTES_PER_RGB_SAMPLE,
-                SAMPLES_PER_RGB_PIXEL);
-        sources.add(thumbnailSource.get());
-        targetIfd = TIFF_IFD_SUB1;
-    }
 
     sp<JniInputStream> in = new JniInputStream(env, inStream);
 
@@ -2675,6 +2606,18 @@ static void DngCreator_nativeWriteInputStream(JNIEnv* env, jobject thiz, jobject
     InputStripSource stripSource(env, *in, targetIfd, uWidth, uHeight, pixStride,
              rowStride, uOffset, BYTES_PER_SAMPLE, SAMPLES_PER_RAW_PIXEL);
     sources.add(&stripSource);
+
+    bool hasThumbnail = writer->hasIfd(TIFF_IFD_SUB1);
+    if (hasThumbnail) {
+        ALOGV("%s: Adding thumbnail strip sources.", __FUNCTION__);
+        uint32_t bytesPerPixel = SAMPLES_PER_RGB_PIXEL * BYTES_PER_RGB_SAMPLE;
+        uint32_t width = context->getThumbnailWidth();
+        thumbnailSource = new DirectStripSource(env, context->getThumbnail(), TIFF_IFD_SUB1,
+                width, context->getThumbnailHeight(), bytesPerPixel,
+                bytesPerPixel * width, /*offset*/0, BYTES_PER_RGB_SAMPLE,
+                SAMPLES_PER_RGB_PIXEL);
+        sources.add(thumbnailSource.get());
+    }
 
     status_t ret = OK;
     if ((ret = writer->write(out.get(), sources.editArray(), sources.size())) != OK) {

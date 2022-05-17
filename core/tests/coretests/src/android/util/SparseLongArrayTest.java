@@ -154,4 +154,16 @@ public class SparseLongArrayTest {
         assertRemoved(startIndex, endIndex);
         assertTrue(isSame(sparseLongArray2, mSparseLongArray));
     }
+
+    @Test
+    public void testIncrementValue() {
+        final SparseLongArray sla = new SparseLongArray();
+
+        sla.put(4, 6);
+        sla.incrementValue(4, 4);
+        sla.incrementValue(2, 5);
+
+        assertEquals(6 + 4, sla.get(4));
+        assertEquals(5, sla.get(2));
+    }
 }

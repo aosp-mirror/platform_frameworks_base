@@ -212,6 +212,12 @@ message SystemSettingsProto {
         // DatabaseHelper.
         optional SettingProto in_silent = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto when_ringing = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+        optional SettingProto alarm_intensity = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto media_intensity = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto ring_intensity = 7 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        // notification_intensity is already logged at Notification.vibration_intensity
+        // haptic_feedback_intensity is already logged at HapticFeedback.intensity
     }
     optional Vibrate vibrate = 32;
 
@@ -242,7 +248,9 @@ message SystemSettingsProto {
 
     optional SettingProto when_to_make_wifi_calls = 34 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
+    optional SettingProto apply_ramping_ringer = 35 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 35;
+    // Next tag = 36;
 }

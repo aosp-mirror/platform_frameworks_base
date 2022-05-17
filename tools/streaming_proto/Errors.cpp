@@ -1,5 +1,6 @@
 #include "Errors.h"
 
+#include <stdarg.h>
 #include <stdlib.h>
 
 namespace android {

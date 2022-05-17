@@ -34,7 +34,7 @@ public final class RcsClientConfiguration implements Parcelable {
 
     /**@hide*/
     @StringDef(prefix = "RCS_PROFILE_",
-            value = {RCS_PROFILE_1_0, RCS_PROFILE_2_3})
+            value = {RCS_PROFILE_1_0, RCS_PROFILE_2_3, RCS_PROFILE_2_4})
     public @interface StringRcsProfile {}
 
     /**
@@ -45,11 +45,16 @@ public final class RcsClientConfiguration implements Parcelable {
      * RCS profile UP 2.3
      */
     public static final String RCS_PROFILE_2_3 = "UP_2.3";
+    /**
+     * RCS profile UP 2.4
+     */
+    public static final String RCS_PROFILE_2_4 = "UP_2.4";
 
     private String mRcsVersion;
     private String mRcsProfile;
     private String mClientVendor;
     private String mClientVersion;
+    private boolean mRcsEnabledByUser;
 
     /**
      * Create a RcsClientConfiguration object.
@@ -57,20 +62,47 @@ public final class RcsClientConfiguration implements Parcelable {
      * @param rcsVersion The parameter identifies the RCS version supported
      * by the client. Refer to GSMA RCC.07 "rcs_version" parameter.
      * @param rcsProfile Identifies a fixed set of RCS services that are
-     * supported by the client. See {@link #RCS_PROFILE_1_0 } or
-     * {@link #RCS_PROFILE_2_3 }
+     * supported by the client. See {@link #RCS_PROFILE_1_0 },
+     * {@link #RCS_PROFILE_2_3 } or {@link #RCS_PROFILE_2_4 }
      * @param clientVendor Identifies the vendor providing the RCS client.
      * @param clientVersion Identifies the RCS client version. Refer to GSMA
      * RCC.07 "client_version" parameter.
      * Example:client_version=RCSAndrd-1.0
+     * @deprecated Use {@link #RcsClientConfiguration(String, String, String, String, boolean)}
+     * instead. Deprecated prototype assumes that the user setting controlling RCS is enabled.
      */
+    @Deprecated
     public RcsClientConfiguration(@NonNull String rcsVersion,
             @NonNull @StringRcsProfile String rcsProfile,
             @NonNull String clientVendor, @NonNull String clientVersion) {
+        this(rcsVersion, rcsProfile, clientVendor, clientVersion, true);
+    }
+
+    /**
+     * Create a RcsClientConfiguration object.
+     * Default messaging application must pass a valid configuration object
+     * @param rcsVersion The parameter identifies the RCS version supported
+     * by the client. Refer to GSMA RCC.07 "rcs_version" parameter.
+     * @param rcsProfile Identifies a fixed set of RCS services that are
+     * supported by the client. See {@link #RCS_PROFILE_1_0 },
+     * {@link #RCS_PROFILE_2_3 } or {@link #RCS_PROFILE_2_4 }
+     * @param clientVendor Identifies the vendor providing the RCS client.
+     * @param clientVersion Identifies the RCS client version. Refer to GSMA
+     * RCC.07 "client_version" parameter.
+     * Example:client_version=RCSAndrd-1.0
+     * @param isRcsEnabledByUser The current user setting for whether or not the user has
+     * enabled or disabled RCS. Please refer to GSMA RCC.07 "rcs_state" parameter for how this
+     * can affect provisioning.
+     */
+    public RcsClientConfiguration(@NonNull String rcsVersion,
+            @NonNull @StringRcsProfile String rcsProfile,
+            @NonNull String clientVendor, @NonNull String clientVersion,
+            boolean isRcsEnabledByUser) {
         mRcsVersion = rcsVersion;
         mRcsProfile = rcsProfile;
         mClientVendor = clientVendor;
         mClientVersion = clientVersion;
+        mRcsEnabledByUser = isRcsEnabledByUser;
     }
 
     /**
@@ -102,6 +134,18 @@ public final class RcsClientConfiguration implements Parcelable {
     }
 
     /**
+     * The current user setting provided by the RCS messaging application that determines
+     * whether or not the user has enabled RCS.
+     * <p>
+     * See GSMA RCC.07 "rcs_state" parameter for more information about how this setting
+     * affects provisioning.
+     * @return true if RCS is enabled by the user, false if RCS is disabled by the user.
+     */
+    public boolean isRcsEnabledByUser() {
+        return mRcsEnabledByUser;
+    }
+
+    /**
      * {@link Parcelable#writeToParcel}
      */
     @Override
@@ -110,6 +154,7 @@ public final class RcsClientConfiguration implements Parcelable {
         out.writeString(mRcsProfile);
         out.writeString(mClientVendor);
         out.writeString(mClientVersion);
+        out.writeBoolean(mRcsEnabledByUser);
     }
 
     /**
@@ -124,8 +169,9 @@ public final class RcsClientConfiguration implements Parcelable {
                     String rcsProfile = in.readString();
                     String clientVendor = in.readString();
                     String clientVersion = in.readString();
+                    Boolean rcsEnabledByUser = in.readBoolean();
                     return new RcsClientConfiguration(rcsVersion, rcsProfile,
-                            clientVendor, clientVersion);
+                            clientVendor, clientVersion, rcsEnabledByUser);
                 }
 
                 @Override
@@ -152,11 +198,13 @@ public final class RcsClientConfiguration implements Parcelable {
 
         return mRcsVersion.equals(other.mRcsVersion) && mRcsProfile.equals(other.mRcsProfile)
                 && mClientVendor.equals(other.mClientVendor)
-                && mClientVersion.equals(other.mClientVersion);
+                && mClientVersion.equals(other.mClientVersion)
+                && (mRcsEnabledByUser == other.mRcsEnabledByUser);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mRcsVersion, mRcsProfile, mClientVendor, mClientVersion);
+        return Objects.hash(mRcsVersion, mRcsProfile, mClientVendor, mClientVersion,
+                mRcsEnabledByUser);
     }
 }

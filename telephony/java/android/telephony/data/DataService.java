@@ -31,6 +31,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.telephony.AccessNetworkConstants.RadioAccessNetworkType;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -40,6 +41,7 @@ import com.android.telephony.Rlog;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -166,7 +168,8 @@ public abstract class DataService extends Service {
          *        link properties of the existing data connection, otherwise null.
          * @param callback The result callback for this request.
          */
-        public void setupDataCall(int accessNetworkType, @NonNull DataProfile dataProfile,
+        public void setupDataCall(
+                @RadioAccessNetworkType int accessNetworkType, @NonNull DataProfile dataProfile,
                 boolean isRoaming, boolean allowRoaming,
                 @SetupDataReason int reason, @Nullable LinkProperties linkProperties,
                 @NonNull DataServiceCallback callback) {
@@ -214,7 +217,8 @@ public abstract class DataService extends Service {
          *        for example, a zero-rating slice.
          * @param callback The result callback for this request.
          */
-        public void setupDataCall(int accessNetworkType, @NonNull DataProfile dataProfile,
+        public void setupDataCall(
+                @RadioAccessNetworkType int accessNetworkType, @NonNull DataProfile dataProfile,
                 boolean isRoaming, boolean allowRoaming,
                 @SetupDataReason int reason,
                 @Nullable LinkProperties linkProperties,
@@ -294,6 +298,9 @@ public abstract class DataService extends Service {
          * with reason {@link DataService.REQUEST_REASON_HANDOVER}. The target transport now owns
          * the transferred resources and is responsible for releasing them.
          *
+         * <p/>
+         * Note that the callback will be executed on binder thread.
+         *
          * @param cid The identifier of the data call which is provided in {@link DataCallResponse}
          * @param callback The result callback for this request.
          *
@@ -322,6 +329,9 @@ public abstract class DataService extends Service {
          * </li>
          * </ul>
          *
+         * <p/>
+         * Note that the callback will be executed on binder thread.
+         *
          * @param cid The identifier of the data call which is provided in {@link DataCallResponse}
          * @param callback The result callback for this request.
          *
@@ -342,7 +352,7 @@ public abstract class DataService extends Service {
         public void requestDataCallList(@NonNull DataServiceCallback callback) {
             // The default implementation is to return unsupported.
             callback.onRequestDataCallListComplete(DataServiceCallback.RESULT_ERROR_UNSUPPORTED,
-                    null);
+                    Collections.EMPTY_LIST);
         }
 
         private void registerForDataCallListChanged(IDataServiceCallback callback) {
@@ -396,6 +406,21 @@ public abstract class DataService extends Service {
                 for (IDataServiceCallback callback : mApnUnthrottledCallbacks) {
                     mHandler.obtainMessage(DATA_SERVICE_INDICATION_APN_UNTHROTTLED,
                             mSlotIndex, 0, new ApnUnthrottledIndication(apn,
+                                    callback)).sendToTarget();
+                }
+            }
+        }
+
+        /**
+         * Notify the system that a given DataProfile was unthrottled.
+         *
+         * @param dataProfile DataProfile associated with an APN returned from the modem
+         */
+        public final void notifyDataProfileUnthrottled(@NonNull DataProfile dataProfile) {
+            synchronized (mApnUnthrottledCallbacks) {
+                for (IDataServiceCallback callback : mApnUnthrottledCallbacks) {
+                    mHandler.obtainMessage(DATA_SERVICE_INDICATION_APN_UNTHROTTLED,
+                            mSlotIndex, 0, new ApnUnthrottledIndication(dataProfile,
                                     callback)).sendToTarget();
                 }
             }
@@ -496,11 +521,18 @@ public abstract class DataService extends Service {
     }
 
     private static final class ApnUnthrottledIndication {
+        public final DataProfile dataProfile;
         public final String apn;
         public final IDataServiceCallback callback;
         ApnUnthrottledIndication(String apn,
                 IDataServiceCallback callback) {
+            this.dataProfile = null;
             this.apn = apn;
+            this.callback = callback;
+        }
+        ApnUnthrottledIndication(DataProfile dataProfile, IDataServiceCallback callback) {
+            this.dataProfile = dataProfile;
+            this.apn = null;
             this.callback = callback;
         }
     }
@@ -636,8 +668,13 @@ public abstract class DataService extends Service {
                     ApnUnthrottledIndication apnUnthrottledIndication =
                             (ApnUnthrottledIndication) message.obj;
                     try {
-                        apnUnthrottledIndication.callback
-                                .onApnUnthrottled(apnUnthrottledIndication.apn);
+                        if (apnUnthrottledIndication.dataProfile != null) {
+                            apnUnthrottledIndication.callback
+                                    .onDataProfileUnthrottled(apnUnthrottledIndication.dataProfile);
+                        } else {
+                            apnUnthrottledIndication.callback
+                                    .onApnUnthrottled(apnUnthrottledIndication.apn);
+                        }
                     } catch (RemoteException e) {
                         loge("Failed to call onApnUnthrottled. " + e);
                     }

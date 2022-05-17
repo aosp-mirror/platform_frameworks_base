@@ -17,22 +17,35 @@
 package com.android.server.wm;
 
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.STATE_OFF;
+import static android.view.Display.STATE_ON;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
+import static android.window.WindowProvider.KEY_IS_WINDOW_PROVIDER_SERVICE;
+
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 import android.app.IWindowToken;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
+import android.view.Display;
+import android.view.DisplayInfo;
 
 import androidx.test.filters.SmallTest;
 
@@ -55,12 +68,15 @@ public class WindowContextListenerControllerTests extends WindowTestsBase {
     private static final int ANOTHER_UID = 1000;
 
     private final IBinder mClientToken = new Binder();
-    private WindowContainer mContainer;
+    private WindowContainer<?> mContainer;
 
     @Before
     public void setUp() {
         mController = new WindowContextListenerController();
         mContainer = createTestWindowToken(TYPE_APPLICATION_OVERLAY, mDisplayContent);
+        // Make display on to verify configuration propagation.
+        mDefaultDisplay.getDisplayInfo().state = STATE_ON;
+        mDisplayContent.getDisplayInfo().state = STATE_ON;
     }
 
     @Test
@@ -76,7 +92,7 @@ public class WindowContextListenerControllerTests extends WindowTestsBase {
 
         assertEquals(2, mController.mListeners.size());
 
-        final WindowContainer container = createTestWindowToken(TYPE_APPLICATION_OVERLAY,
+        final WindowContainer<?> container = createTestWindowToken(TYPE_APPLICATION_OVERLAY,
                 mDefaultDisplay);
         mController.registerWindowContainerListener(mClientToken, container, -1,
                 TYPE_APPLICATION_OVERLAY, null /* options */);
@@ -89,6 +105,7 @@ public class WindowContextListenerControllerTests extends WindowTestsBase {
         assertEquals(container, listener.getWindowContainer());
     }
 
+    @UseTestDisplay
     @Test
     public void testRegisterWindowContextListenerClientConfigPropagation() {
         final TestWindowTokenClient clientToken = new TestWindowTokenClient();
@@ -107,7 +124,7 @@ public class WindowContextListenerControllerTests extends WindowTestsBase {
         assertEquals(mDisplayContent.mDisplayId, clientToken.mDisplayId);
 
         // Update the WindowContainer.
-        final WindowContainer container = createTestWindowToken(TYPE_APPLICATION_OVERLAY,
+        final WindowContainer<?> container = createTestWindowToken(TYPE_APPLICATION_OVERLAY,
                 mDefaultDisplay);
         final Configuration config2 = container.getConfiguration();
         final Rect bounds2 = new Rect(0, 0, 20, 20);
@@ -174,7 +191,7 @@ public class WindowContextListenerControllerTests extends WindowTestsBase {
                 .setDisplayContent(mDefaultDisplay)
                 .setFromClientToken(true)
                 .build();
-        final DisplayArea da = windowContextCreatedToken.getDisplayArea();
+        final DisplayArea<?> da = windowContextCreatedToken.getDisplayArea();
 
         mController.registerWindowContainerListener(mClientToken, windowContextCreatedToken,
                 TEST_UID, TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY, null /* options */);
@@ -192,11 +209,12 @@ public class WindowContextListenerControllerTests extends WindowTestsBase {
         // Let the Display to be created with the DualDisplay policy.
         final DisplayAreaPolicy.Provider policyProvider =
                 new DualDisplayAreaGroupPolicyTest.DualDisplayTestPolicyProvider();
-        Mockito.doReturn(policyProvider).when(mWm).getDisplayAreaPolicyProvider();
+        doReturn(policyProvider).when(mWm).getDisplayAreaPolicyProvider();
         // Create a DisplayContent with dual RootDisplayArea
         DualDisplayAreaGroupPolicyTest.DualDisplayContent dualDisplayContent =
                 new DualDisplayAreaGroupPolicyTest.DualDisplayContent
                  .Builder(mAtm, 1000, 1000).build();
+        dualDisplayContent.getDisplayInfo().state = STATE_ON;
         final DisplayArea.Tokens imeContainer = dualDisplayContent.getImeContainer();
         // Put the ImeContainer to the first sub-RootDisplayArea
         dualDisplayContent.mFirstRoot.placeImeContainer(imeContainer);
@@ -222,7 +240,62 @@ public class WindowContextListenerControllerTests extends WindowTestsBase {
         assertThat(mController.getContainer(mClientToken)).isEqualTo(imeContainer);
     }
 
-    private class TestWindowTokenClient extends IWindowToken.Stub {
+    @Test
+    public void testConfigUpdateForSuspendedWindowContext() {
+        final TestWindowTokenClient mockToken = new TestWindowTokenClient();
+        spyOn(mockToken);
+
+        mContainer.getDisplayContent().getDisplayInfo().state = STATE_OFF;
+
+        final Configuration config1 = mContainer.getConfiguration();
+        final Rect bounds1 = new Rect(0, 0, 10, 10);
+        config1.windowConfiguration.setBounds(bounds1);
+        config1.densityDpi = 100;
+        mContainer.onRequestedOverrideConfigurationChanged(config1);
+
+        mController.registerWindowContainerListener(mockToken, mContainer, -1,
+                TYPE_APPLICATION_OVERLAY, null /* options */);
+
+        verify(mockToken, never()).onConfigurationChanged(any(), anyInt());
+
+        // Turn on the display and verify if the client receive the callback
+        Display display = mContainer.getDisplayContent().getDisplay();
+        spyOn(display);
+        Mockito.doAnswer(invocation -> {
+            final DisplayInfo info = mContainer.getDisplayContent().getDisplayInfo();
+            info.state = STATE_ON;
+            ((DisplayInfo) invocation.getArgument(0)).copyFrom(info);
+            return null;
+        }).when(display).getDisplayInfo(any(DisplayInfo.class));
+
+        mContainer.getDisplayContent().onDisplayChanged();
+
+        assertThat(mockToken.mConfiguration).isEqualTo(config1);
+        assertThat(mockToken.mDisplayId).isEqualTo(mContainer.getDisplayContent().getDisplayId());
+    }
+
+    @Test
+    public void testReportConfigUpdateForSuspendedWindowProviderService() {
+        final TestWindowTokenClient clientToken = new TestWindowTokenClient();
+        final Bundle options = new Bundle();
+        options.putBoolean(KEY_IS_WINDOW_PROVIDER_SERVICE, true);
+
+        mContainer.getDisplayContent().getDisplayInfo().state = STATE_OFF;
+
+        final Configuration config1 = mContainer.getConfiguration();
+        final Rect bounds1 = new Rect(0, 0, 10, 10);
+        config1.windowConfiguration.setBounds(bounds1);
+        config1.densityDpi = 100;
+        mContainer.onRequestedOverrideConfigurationChanged(config1);
+
+        mController.registerWindowContainerListener(clientToken, mContainer, -1,
+                TYPE_APPLICATION_OVERLAY, options);
+
+        assertThat(clientToken.mConfiguration).isEqualTo(config1);
+        assertThat(clientToken.mDisplayId).isEqualTo(mDisplayContent.mDisplayId);
+    }
+
+    private static class TestWindowTokenClient extends IWindowToken.Stub {
         private Configuration mConfiguration;
         private int mDisplayId;
         private boolean mRemoved;

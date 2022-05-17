@@ -138,6 +138,14 @@ bool FileDescriptorAllowlist::IsAllowed(const std::string& path) const {
         return true;
     }
 
+    // Allow Runtime Resource Overlays inside APEXes.
+    static const char* kOverlayPathSuffix = "/overlay";
+    if (android::base::StartsWith(path, kApexPrefix) &&
+        android::base::EndsWith(android::base::Dirname(path), kOverlayPathSuffix) &&
+        android::base::EndsWith(path, kApkSuffix) && path.find("/../") == std::string::npos) {
+        return true;
+    }
+
     static const char* kOverlayIdmapPrefix = "/data/resource-cache/";
     static const char* kOverlayIdmapSuffix = ".apk@idmap";
     if (android::base::StartsWith(path, kOverlayIdmapPrefix) &&

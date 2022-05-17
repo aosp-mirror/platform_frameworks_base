@@ -26,7 +26,7 @@ import com.android.systemui.statusbar.notification.row.ActivatableNotificationVi
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRowController;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
-import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 
 import dagger.Binds;
 import dagger.BindsInstance;
@@ -37,8 +37,11 @@ import dagger.Subcomponent;
 /**
  * Dagger Component for a {@link ExpandableNotificationRow}.
  */
-@Subcomponent(modules = {ExpandableNotificationRowComponent.ExpandableNotificationRowModule.class,
-        ActivatableNotificationViewModule.class})
+@Subcomponent(modules = {
+        ActivatableNotificationViewModule.class,
+        ExpandableNotificationRowComponent.ExpandableNotificationRowModule.class,
+        RemoteInputViewModule.class
+})
 @NotificationRowScope
 public interface ExpandableNotificationRowComponent {
 
@@ -97,7 +100,7 @@ public interface ExpandableNotificationRowComponent {
             // but since this field is used in the guts, it must be accurate.
             // Therefore we will only show the application label, or, failing that, the
             // package name. No substitutions.
-            PackageManager pmUser = StatusBar.getPackageManagerForUser(
+            PackageManager pmUser = CentralSurfaces.getPackageManagerForUser(
                     context, statusBarNotification.getUser().getIdentifier());
             final String pkg = statusBarNotification.getPackageName();
             try {

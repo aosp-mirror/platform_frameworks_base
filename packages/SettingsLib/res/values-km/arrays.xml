@@ -249,7 +249,7 @@
   <string-array name="debug_hw_overdraw_entries">
     <item msgid="1968128556747588800">"បិទ"</item>
     <item msgid="3033215374382962216">"បង្ហាញ​តំបន់​​ដែល​លើស"</item>
-    <item msgid="3474333938380896988">"បង្ហាញ​តំបន់​សម្រាប់ Deuteranomaly"</item>
+    <item msgid="3474333938380896988">"បង្ហាញ​តំបន់​សម្រាប់បញ្ហាខ្វាក់ពណ៌បៃតង"</item>
   </string-array>
   <string-array name="app_process_limit_entries">
     <item msgid="794656271086646068">"ដែន​កំណត់​ស្តង់ដារ"</item>
@@ -266,5 +266,7 @@
     <item msgid="3825132913289380004">"RNDIS (អ៊ីសឺណិត​យូអេសប៊ី)"</item>
     <item msgid="8828567335701536560">"ប្រភព​អូឌីយ៉ូ"</item>
     <item msgid="8688681727755534982">"MIDI"</item>
+  </string-array>
+  <string-array name="avatar_image_descriptions">
   </string-array>
 </resources>

@@ -97,6 +97,14 @@ public class RootTaskDisplayAreaOrganizer extends DisplayAreaOrganizer {
         b.setParent(sc);
     }
 
+    public void setPosition(@NonNull SurfaceControl.Transaction tx, int displayId, int x, int y) {
+        final SurfaceControl sc = mLeashes.get(displayId);
+        if (sc == null) {
+            throw new IllegalArgumentException("can't find display" + displayId);
+        }
+        tx.setPosition(sc, x, y);
+    }
+
     @Override
     public void onDisplayAreaAppeared(@NonNull DisplayAreaInfo displayAreaInfo,
             @NonNull SurfaceControl leash) {

@@ -16,6 +16,9 @@
 
 package com.android.server;
 
+import static com.android.server.GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS;
+import static com.android.server.GestureLauncherService.EMERGENCY_GESTURE_TAP_DETECTION_MIN_TIME_MS;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -187,6 +190,30 @@ public class GestureLauncherServiceTest {
     }
 
     @Test
+    public void testGetEmergencyGesturePowerButtonCooldownPeriodMs_enabled() {
+        withEmergencyGesturePowerButtonCooldownPeriodMsValue(4000);
+        assertEquals(4000,
+                mGestureLauncherService.getEmergencyGesturePowerButtonCooldownPeriodMs(mContext,
+                        FAKE_USER_ID));
+    }
+
+    @Test
+    public void testGetEmergencyGesturePowerButtonCooldownPeriodMs_disabled() {
+        withEmergencyGesturePowerButtonCooldownPeriodMsValue(0);
+        assertEquals(0,
+                mGestureLauncherService.getEmergencyGesturePowerButtonCooldownPeriodMs(mContext,
+                        FAKE_USER_ID));
+    }
+
+    @Test
+    public void testGetEmergencyGesturePowerButtonCooldownPeriodMs_cappedAtMaximum() {
+        withEmergencyGesturePowerButtonCooldownPeriodMsValue(10000);
+        assertEquals(GestureLauncherService.EMERGENCY_GESTURE_POWER_BUTTON_COOLDOWN_PERIOD_MS_MAX,
+                mGestureLauncherService.getEmergencyGesturePowerButtonCooldownPeriodMs(mContext,
+                        FAKE_USER_ID));
+    }
+
+    @Test
     public void testHandleCameraLaunchGesture_userSetupComplete() {
         withUserSetupCompleteValue(true);
 
@@ -224,7 +251,7 @@ public class GestureLauncherServiceTest {
         mGestureLauncherService.updateCameraDoubleTapPowerEnabled();
 
         long eventTime = INITIAL_EVENT_TIME_MILLIS +
-                GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
+                CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
         KeyEvent keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
                 IGNORED_REPEAT);
         boolean interactive = true;
@@ -272,7 +299,7 @@ public class GestureLauncherServiceTest {
         assertFalse(intercepted);
         assertFalse(outLaunched.value);
 
-        final long interval = GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
+        final long interval = CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
         eventTime += interval;
         keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
                 IGNORED_REPEAT);
@@ -317,7 +344,7 @@ public class GestureLauncherServiceTest {
         assertFalse(intercepted);
         assertFalse(outLaunched.value);
 
-        final long interval = GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS;
+        final long interval = CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS;
         eventTime += interval;
         keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
                 IGNORED_REPEAT);
@@ -411,7 +438,7 @@ public class GestureLauncherServiceTest {
         assertFalse(intercepted);
         assertFalse(outLaunched.value);
 
-        final long interval = GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
+        final long interval = CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
         eventTime += interval;
         keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
                 IGNORED_REPEAT);
@@ -465,7 +492,7 @@ public class GestureLauncherServiceTest {
         assertFalse(intercepted);
         assertFalse(outLaunched.value);
 
-        final long interval = GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
+        final long interval = CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
 
         // 2nd button triggers camera
         eventTime += interval;
@@ -554,7 +581,7 @@ public class GestureLauncherServiceTest {
         assertFalse(intercepted);
         assertFalse(outLaunched.value);
 
-        final long interval = GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
+        final long interval = CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
         // 3 more button presses which should not trigger any gesture (camera gesture disabled)
         for (int i = 0; i < 3; i++) {
             eventTime += interval;
@@ -608,7 +635,7 @@ public class GestureLauncherServiceTest {
         assertFalse(intercepted);
         assertFalse(outLaunched.value);
 
-        final long interval = GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
+        final long interval = CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
         // 3 more button presses which should not trigger any gesture, but intercepts action.
         for (int i = 0; i < 3; i++) {
             eventTime += interval;
@@ -645,6 +672,232 @@ public class GestureLauncherServiceTest {
     }
 
     @Test
+    public void testInterceptPowerKeyDown_triggerEmergency_singleTaps_cooldownTriggered() {
+        // Enable power button cooldown
+        withEmergencyGesturePowerButtonCooldownPeriodMsValue(3000);
+        mGestureLauncherService.updateEmergencyGesturePowerButtonCooldownPeriodMs();
+
+        // Trigger emergency by tapping button 5 times
+        long eventTime = triggerEmergencyGesture();
+
+        // Add enough interval to reset consecutive tap count
+        long interval = GestureLauncherService.POWER_SHORT_TAP_SEQUENCE_MAX_INTERVAL_MS + 1;
+        eventTime += interval;
+
+        // Subsequent single tap is intercepted, but should not trigger any gesture
+        KeyEvent keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
+                IGNORED_REPEAT);
+        boolean interactive = true;
+        MutableBoolean outLaunched = new MutableBoolean(true);
+        boolean intercepted = mGestureLauncherService.interceptPowerKeyDown(keyEvent, interactive,
+                outLaunched);
+        assertTrue(intercepted);
+        assertFalse(outLaunched.value);
+
+        // Add enough interval to reset consecutive tap count
+        interval = GestureLauncherService.POWER_SHORT_TAP_SEQUENCE_MAX_INTERVAL_MS + 1;
+        eventTime += interval;
+
+        // Another single tap should be the same (intercepted but should not trigger gesture)
+        keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
+                IGNORED_REPEAT);
+        interactive = true;
+        outLaunched = new MutableBoolean(true);
+        intercepted = mGestureLauncherService.interceptPowerKeyDown(keyEvent, interactive,
+                outLaunched);
+        assertTrue(intercepted);
+        assertFalse(outLaunched.value);
+    }
+
+    @Test
+    public void
+    testInterceptPowerKeyDown_triggerEmergency_cameraGestureEnabled_doubleTap_cooldownTriggered() {
+        // Enable camera double tap gesture
+        withCameraDoubleTapPowerEnableConfigValue(true);
+        withCameraDoubleTapPowerDisableSettingValue(0);
+        mGestureLauncherService.updateCameraDoubleTapPowerEnabled();
+
+        // Enable power button cooldown
+        withEmergencyGesturePowerButtonCooldownPeriodMsValue(3000);
+        mGestureLauncherService.updateEmergencyGesturePowerButtonCooldownPeriodMs();
+
+        // Trigger emergency by tapping button 5 times
+        long eventTime = triggerEmergencyGesture();
+
+        // Add enough interval to reset consecutive tap count
+        long interval = GestureLauncherService.POWER_SHORT_TAP_SEQUENCE_MAX_INTERVAL_MS + 1;
+        eventTime += interval;
+
+        // Subsequent double tap is intercepted, but should not trigger any gesture
+        for (int i = 0; i < 2; i++) {
+            KeyEvent keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION,
+                    IGNORED_CODE, IGNORED_REPEAT);
+            boolean interactive = true;
+            MutableBoolean outLaunched = new MutableBoolean(true);
+            boolean intercepted = mGestureLauncherService.interceptPowerKeyDown(keyEvent,
+                    interactive, outLaunched);
+            assertTrue(intercepted);
+            assertFalse(outLaunched.value);
+            interval = CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
+            eventTime += interval;
+        }
+    }
+
+    @Test
+    public void testInterceptPowerKeyDown_triggerEmergency_fiveTaps_cooldownTriggered() {
+        // Enable power button cooldown
+        withEmergencyGesturePowerButtonCooldownPeriodMsValue(3000);
+        mGestureLauncherService.updateEmergencyGesturePowerButtonCooldownPeriodMs();
+
+        // Trigger emergency by tapping button 5 times
+        long eventTime = triggerEmergencyGesture();
+
+        // Add enough interval to reset consecutive tap count
+        long interval = GestureLauncherService.POWER_SHORT_TAP_SEQUENCE_MAX_INTERVAL_MS + 1;
+        eventTime += interval;
+
+        // Subsequent 5 taps are intercepted, but should not trigger any gesture
+        for (int i = 0; i < 5; i++) {
+            KeyEvent keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION,
+                    IGNORED_CODE, IGNORED_REPEAT);
+            boolean interactive = true;
+            MutableBoolean outLaunched = new MutableBoolean(true);
+            boolean intercepted = mGestureLauncherService.interceptPowerKeyDown(keyEvent,
+                    interactive, outLaunched);
+            assertTrue(intercepted);
+            assertFalse(outLaunched.value);
+            interval = CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
+            eventTime += interval;
+        }
+    }
+
+    @Test
+    public void testInterceptPowerKeyDown_triggerEmergency_fiveFastTaps_gestureIgnored() {
+        // Trigger emergency by tapping button 5 times
+        long eventTime = triggerEmergencyGesture(/* tapIntervalMs= */ 1);
+
+        // Add 1 more millisecond and send the event again.
+        eventTime += 1;
+
+        // Subsequent long press is intercepted, but should not trigger any gesture
+        KeyEvent keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
+                IGNORED_REPEAT, IGNORED_META_STATE, IGNORED_DEVICE_ID, IGNORED_SCANCODE,
+                KeyEvent.FLAG_LONG_PRESS);
+        MutableBoolean outLaunched = new MutableBoolean(true);
+        boolean intercepted = mGestureLauncherService.interceptPowerKeyDown(
+                keyEvent,
+                /* interactive= */ true,
+                outLaunched);
+        assertFalse(intercepted);
+        assertFalse(outLaunched.value);
+    }
+
+    @Test
+    public void testInterceptPowerKeyDown_triggerEmergency_longPress_cooldownTriggered() {
+        // Enable power button cooldown
+        withEmergencyGesturePowerButtonCooldownPeriodMsValue(3000);
+        mGestureLauncherService.updateEmergencyGesturePowerButtonCooldownPeriodMs();
+
+        // Trigger emergency by tapping button 5 times
+        long eventTime = triggerEmergencyGesture();
+
+        // Add enough interval to reset consecutive tap count
+        long interval = GestureLauncherService.POWER_SHORT_TAP_SEQUENCE_MAX_INTERVAL_MS + 1;
+        eventTime += interval;
+
+        // Subsequent long press is intercepted, but should not trigger any gesture
+        KeyEvent keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
+                IGNORED_REPEAT, IGNORED_META_STATE, IGNORED_DEVICE_ID, IGNORED_SCANCODE,
+                KeyEvent.FLAG_LONG_PRESS);
+
+        boolean interactive = true;
+        MutableBoolean outLaunched = new MutableBoolean(true);
+        boolean intercepted = mGestureLauncherService.interceptPowerKeyDown(keyEvent, interactive,
+                outLaunched);
+        assertTrue(intercepted);
+        assertFalse(outLaunched.value);
+    }
+
+    @Test
+    public void testInterceptPowerKeyDown_triggerEmergency_cooldownDisabled_cooldownNotTriggered() {
+        // Disable power button cooldown by setting cooldown period to 0
+        withEmergencyGesturePowerButtonCooldownPeriodMsValue(0);
+        mGestureLauncherService.updateEmergencyGesturePowerButtonCooldownPeriodMs();
+
+        // Trigger emergency by tapping button 5 times
+        long eventTime = triggerEmergencyGesture();
+
+        // Add enough interval to reset consecutive tap count
+        long interval = GestureLauncherService.POWER_SHORT_TAP_SEQUENCE_MAX_INTERVAL_MS + 1;
+        eventTime += interval;
+
+        // Subsequent single tap is NOT intercepted
+        KeyEvent keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
+                IGNORED_REPEAT);
+        boolean interactive = true;
+        MutableBoolean outLaunched = new MutableBoolean(true);
+        boolean intercepted = mGestureLauncherService.interceptPowerKeyDown(keyEvent, interactive,
+                outLaunched);
+        assertFalse(intercepted);
+        assertFalse(outLaunched.value);
+
+        // Add enough interval to reset consecutive tap count
+        interval = GestureLauncherService.POWER_SHORT_TAP_SEQUENCE_MAX_INTERVAL_MS + 1;
+        eventTime += interval;
+
+        // Long press also NOT intercepted
+        keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
+                IGNORED_REPEAT, IGNORED_META_STATE, IGNORED_DEVICE_ID, IGNORED_SCANCODE,
+                KeyEvent.FLAG_LONG_PRESS);
+        interactive = true;
+        outLaunched = new MutableBoolean(true);
+        intercepted = mGestureLauncherService.interceptPowerKeyDown(keyEvent, interactive,
+                outLaunched);
+        assertFalse(intercepted);
+        assertFalse(outLaunched.value);
+    }
+
+    @Test
+    public void
+    testInterceptPowerKeyDown_triggerEmergency_outsideCooldownPeriod_cooldownNotTriggered() {
+        // Enable power button cooldown
+        withEmergencyGesturePowerButtonCooldownPeriodMsValue(5000);
+        mGestureLauncherService.updateEmergencyGesturePowerButtonCooldownPeriodMs();
+
+        // Trigger emergency by tapping button 5 times
+        long eventTime = triggerEmergencyGesture();
+
+        // Add enough interval to be outside of cooldown period
+        long interval = 5001;
+        eventTime += interval;
+
+        // Subsequent single tap is NOT intercepted
+        KeyEvent keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
+                IGNORED_REPEAT);
+        boolean interactive = true;
+        MutableBoolean outLaunched = new MutableBoolean(true);
+        boolean intercepted = mGestureLauncherService.interceptPowerKeyDown(keyEvent, interactive,
+                outLaunched);
+        assertFalse(intercepted);
+        assertFalse(outLaunched.value);
+
+        // Add enough interval to reset consecutive tap count
+        interval = GestureLauncherService.POWER_SHORT_TAP_SEQUENCE_MAX_INTERVAL_MS + 1;
+        eventTime += interval;
+
+        // Long press also NOT intercepted
+        keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
+                IGNORED_REPEAT, IGNORED_META_STATE, IGNORED_DEVICE_ID, IGNORED_SCANCODE,
+                KeyEvent.FLAG_LONG_PRESS);
+        interactive = true;
+        outLaunched = new MutableBoolean(true);
+        intercepted = mGestureLauncherService.interceptPowerKeyDown(keyEvent, interactive,
+                outLaunched);
+        assertFalse(intercepted);
+        assertFalse(outLaunched.value);
+    }
+
+    @Test
     public void testInterceptPowerKeyDown_longpress() {
         withCameraDoubleTapPowerEnableConfigValue(true);
         withCameraDoubleTapPowerDisableSettingValue(0);
@@ -661,7 +914,7 @@ public class GestureLauncherServiceTest {
         assertFalse(intercepted);
         assertFalse(outLaunched.value);
 
-        final long interval = GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
+        final long interval = CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
         eventTime += interval;
         keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
                 IGNORED_REPEAT, IGNORED_META_STATE, IGNORED_DEVICE_ID, IGNORED_SCANCODE,
@@ -707,7 +960,7 @@ public class GestureLauncherServiceTest {
         assertFalse(intercepted);
         assertFalse(outLaunched.value);
 
-        final long interval = GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
+        final long interval = CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
         eventTime += interval;
         keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
                 IGNORED_REPEAT);
@@ -754,7 +1007,7 @@ public class GestureLauncherServiceTest {
         assertFalse(intercepted);
         assertFalse(outLaunched.value);
 
-        final long interval = GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS;
+        final long interval = CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS;
         eventTime += interval;
         keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
                 IGNORED_REPEAT);
@@ -846,7 +1099,7 @@ public class GestureLauncherServiceTest {
         assertFalse(intercepted);
         assertFalse(outLaunched.value);
 
-        final long interval = GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
+        final long interval = CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
         eventTime += interval;
         keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
                 IGNORED_REPEAT);
@@ -891,7 +1144,7 @@ public class GestureLauncherServiceTest {
         assertFalse(intercepted);
         assertFalse(outLaunched.value);
 
-        final long interval = GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS;
+        final long interval = CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS;
         eventTime += interval;
         keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
                 IGNORED_REPEAT);
@@ -983,7 +1236,7 @@ public class GestureLauncherServiceTest {
         assertFalse(intercepted);
         assertFalse(outLaunched.value);
 
-        final long interval = GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
+        final long interval = CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
         eventTime += interval;
         keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
                 IGNORED_REPEAT);
@@ -1032,7 +1285,7 @@ public class GestureLauncherServiceTest {
         assertFalse(intercepted);
         assertFalse(outLaunched.value);
 
-        final long interval = GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
+        final long interval = CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
         eventTime += interval;
         keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
                 IGNORED_REPEAT);
@@ -1077,7 +1330,7 @@ public class GestureLauncherServiceTest {
         assertFalse(intercepted);
         assertFalse(outLaunched.value);
 
-        final long interval = GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS;
+        final long interval = CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS;
         eventTime += interval;
         keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
                 IGNORED_REPEAT);
@@ -1153,6 +1406,65 @@ public class GestureLauncherServiceTest {
         assertEquals(1, tapCounts.get(1).intValue());
     }
 
+    /**
+     * Helper method to trigger emergency gesture by pressing button for 5 times.
+     *
+     * @return last event time.
+     */
+    private long triggerEmergencyGesture() {
+        return triggerEmergencyGesture(CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1);
+    }
+
+    /**
+     * Helper method to trigger emergency gesture by pressing button for 5 times with
+     * specified interval between each tap
+     *
+     * @return last event time.
+     */
+    private long triggerEmergencyGesture(long tapIntervalMs) {
+        // Enable emergency power gesture
+        withEmergencyGestureEnabledConfigValue(true);
+        withEmergencyGestureEnabledSettingValue(true);
+        mGestureLauncherService.updateEmergencyGestureEnabled();
+        withUserSetupCompleteValue(true);
+
+        // 4 button presses
+        long eventTime = INITIAL_EVENT_TIME_MILLIS;
+        boolean interactive = true;
+        KeyEvent keyEvent;
+        MutableBoolean outLaunched = new MutableBoolean(false);
+        for (int i = 0; i < 4; i++) {
+            keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
+                    IGNORED_REPEAT);
+            mGestureLauncherService.interceptPowerKeyDown(keyEvent, interactive, outLaunched);
+            eventTime += tapIntervalMs;
+        }
+
+        // 5th button press should trigger the emergency flow
+        keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
+                IGNORED_REPEAT);
+        outLaunched.value = false;
+        boolean intercepted = mGestureLauncherService.interceptPowerKeyDown(keyEvent, interactive,
+                outLaunched);
+        long emergencyGestureTapDetectionMinTimeMs = Settings.Global.getInt(
+                mContext.getContentResolver(),
+                Settings.Global.EMERGENCY_GESTURE_TAP_DETECTION_MIN_TIME_MS,
+                EMERGENCY_GESTURE_TAP_DETECTION_MIN_TIME_MS);
+        assertTrue(intercepted);
+        if (tapIntervalMs * 4 > emergencyGestureTapDetectionMinTimeMs) {
+            assertTrue(outLaunched.value);
+            verify(mUiEventLogger, times(1))
+                    .log(GestureLauncherService.GestureLauncherEvent.GESTURE_EMERGENCY_TAP_POWER);
+            verify(mStatusBarManagerInternal).onEmergencyActionLaunchGestureDetected();
+        } else {
+            assertFalse(outLaunched.value);
+            verify(mUiEventLogger, never())
+                    .log(GestureLauncherService.GestureLauncherEvent.GESTURE_EMERGENCY_TAP_POWER);
+            verify(mStatusBarManagerInternal, never()).onEmergencyActionLaunchGestureDetected();
+        }
+        return eventTime;
+    }
+
     private void withCameraDoubleTapPowerEnableConfigValue(boolean enableConfigValue) {
         when(mResources.getBoolean(
                 com.android.internal.R.bool.config_cameraDoubleTapPowerGestureEnabled))
@@ -1179,6 +1491,13 @@ public class GestureLauncherServiceTest {
                 Settings.Secure.EMERGENCY_GESTURE_ENABLED,
                 enable ? 1 : 0,
                 UserHandle.USER_CURRENT);
+    }
+
+    private void withEmergencyGesturePowerButtonCooldownPeriodMsValue(int period) {
+        Settings.Global.putInt(
+                mContentResolver,
+                Settings.Global.EMERGENCY_GESTURE_POWER_BUTTON_COOLDOWN_PERIOD_MS,
+                period);
     }
 
     private void withUserSetupCompleteValue(boolean userSetupComplete) {

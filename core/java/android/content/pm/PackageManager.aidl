@@ -18,3 +18,4 @@
 package android.content.pm;
 
 parcelable PackageManager.Property;
+parcelable PackageManager.ComponentEnabledSetting;

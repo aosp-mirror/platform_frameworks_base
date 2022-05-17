@@ -30,7 +30,7 @@ import org.junit.Test;
  * rm -fr out/*
  *
  * # Make booster
- * javac -cp lib/asm-6.0_BETA.jar:lib/asm-commons-6.0_BETA.jar:lib/asm-tree-6.0_BETA.jar:lib/asm-analysis-6.0_BETA.jar:lib/guava-21.0.jar src&#47;*&#47;*.java -d out/
+ * javac -cp lib/asm-7.0_BETA.jar:lib/asm-commons-7.0_BETA.jar:lib/asm-tree-7.0_BETA.jar:lib/asm-analysis-7.0_BETA.jar:lib/guava-21.0.jar src&#47;*&#47;*.java -d out/
  * pushd out
  * jar cfe lockedregioncodeinjection.jar lockedregioncodeinjection.Main *&#47;*.class
  * popd
@@ -43,7 +43,7 @@ import org.junit.Test;
  * popd
  *
  * # Run tool on unit tests.
- * java -ea -cp lib/asm-6.0_BETA.jar:lib/asm-commons-6.0_BETA.jar:lib/asm-tree-6.0_BETA.jar:lib/asm-analysis-6.0_BETA.jar:lib/guava-21.0.jar:out/lockedregioncodeinjection.jar \
+ * java -ea -cp lib/asm-7.0_BETA.jar:lib/asm-commons-7.0_BETA.jar:lib/asm-tree-7.0_BETA.jar:lib/asm-analysis-7.0_BETA.jar:lib/guava-21.0.jar:out/lockedregioncodeinjection.jar \
  *     lockedregioncodeinjection.Main \
  *     -i out/test_input.jar -o out/test_output.jar \
  *     --targets 'Llockedregioncodeinjection/TestTarget;' \

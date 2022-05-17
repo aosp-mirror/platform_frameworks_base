@@ -135,11 +135,12 @@ public class IkeSessionParamsUtilsTest {
     }
 
     @Test
-    public void testEncodeRecodeParamsWithIkeOptions() throws Exception {
+    public void testEncodeDecodeParamsWithIkeOptions() throws Exception {
         final IkeSessionParams params =
                 createBuilderMinimum()
                         .addIkeOption(IkeSessionParams.IKE_OPTION_ACCEPT_ANY_REMOTE_ID)
                         .addIkeOption(IkeSessionParams.IKE_OPTION_MOBIKE)
+                        .addIkeOption(IkeSessionParams.IKE_OPTION_INITIAL_CONTACT)
                         .build();
         verifyPersistableBundleEncodeDecodeIsLossless(params);
     }

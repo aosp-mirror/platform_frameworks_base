@@ -21,9 +21,9 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.media.IResourceManagerService;
 import android.media.tv.TvInputManager;
-import android.media.tv.tuner.TunerFrontendInfo;
 import android.media.tv.tunerresourcemanager.CasSessionRequest;
 import android.media.tv.tunerresourcemanager.IResourcesReclaimListener;
 import android.media.tv.tunerresourcemanager.ITunerResourceManager;
@@ -31,24 +31,33 @@ import android.media.tv.tunerresourcemanager.ResourceClientProfile;
 import android.media.tv.tunerresourcemanager.TunerCiCamRequest;
 import android.media.tv.tunerresourcemanager.TunerDemuxRequest;
 import android.media.tv.tunerresourcemanager.TunerDescramblerRequest;
+import android.media.tv.tunerresourcemanager.TunerFrontendInfo;
 import android.media.tv.tunerresourcemanager.TunerFrontendRequest;
 import android.media.tv.tunerresourcemanager.TunerLnbRequest;
 import android.media.tv.tunerresourcemanager.TunerResourceManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemClock;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
+import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.SystemService;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * This class provides a system service that manages the TV tuner resources.
@@ -61,6 +70,10 @@ public class TunerResourceManagerService extends SystemService implements IBinde
 
     public static final int INVALID_CLIENT_ID = -1;
     private static final int MAX_CLIENT_PRIORITY = 1000;
+    private static final long INVALID_THREAD_ID = -1;
+    private static final long TRMS_LOCK_TIMEOUT = 500;
+
+    private static final int INVALID_FE_COUNT = -1;
 
     // Map of the registered client profiles
     private Map<Integer, ClientProfile> mClientProfiles = new HashMap<>();
@@ -68,6 +81,20 @@ public class TunerResourceManagerService extends SystemService implements IBinde
 
     // Map of the current available frontend resources
     private Map<Integer, FrontendResource> mFrontendResources = new HashMap<>();
+    // SparseIntArray of the max usable number for each frontend resource type
+    private SparseIntArray mFrontendMaxUsableNums = new SparseIntArray();
+    // SparseIntArray of the currently used number for each frontend resource type
+    private SparseIntArray mFrontendUsedNums = new SparseIntArray();
+    // SparseIntArray of the existing number for each frontend resource type
+    private SparseIntArray mFrontendExistingNums = new SparseIntArray();
+
+    // Backups for the frontend resource maps for enabling testing with custom resource maps
+    // such as TunerTest.testHasUnusedFrontend1()
+    private Map<Integer, FrontendResource> mFrontendResourcesBackup = new HashMap<>();
+    private SparseIntArray mFrontendMaxUsableNumsBackup = new SparseIntArray();
+    private SparseIntArray mFrontendUsedNumsBackup = new SparseIntArray();
+    private SparseIntArray mFrontendExistingNumsBackup = new SparseIntArray();
+
     // Map of the current available lnb resources
     private Map<Integer, LnbResource> mLnbResources = new HashMap<>();
     // Map of the current available Cas resources
@@ -88,6 +115,12 @@ public class TunerResourceManagerService extends SystemService implements IBinde
 
     // Used to synchronize the access to the service.
     private final Object mLock = new Object();
+
+    private final ReentrantLock mLockForTRMSLock = new ReentrantLock();
+    private final Condition mTunerApiLockReleasedCV = mLockForTRMSLock.newCondition();
+    private int mTunerApiLockHolder = INVALID_CLIENT_ID;
+    private long mTunerApiLockHolderThreadId = INVALID_THREAD_ID;
+    private int mTunerApiLockNestedCount = 0;
 
     public TunerResourceManagerService(@Nullable Context context) {
         super(context);
@@ -174,6 +207,27 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         }
 
         @Override
+        public boolean hasUnusedFrontend(int frontendType) {
+            enforceTrmAccessPermission("hasUnusedFrontend");
+            synchronized (mLock) {
+                return hasUnusedFrontendInternal(frontendType);
+            }
+        }
+
+        @Override
+        public boolean isLowestPriority(int clientId, int frontendType)
+                throws RemoteException {
+            enforceTrmAccessPermission("isLowestPriority");
+            synchronized (mLock) {
+                if (!checkClientExists(clientId)) {
+                    throw new RemoteException("isLowestPriority called from unregistered client: "
+                            + clientId);
+                }
+                return isLowestPriorityInternal(clientId, frontendType);
+            }
+        }
+
+        @Override
         public void setFrontendInfoList(@NonNull TunerFrontendInfo[] infos) throws RemoteException {
             enforceTrmAccessPermission("setFrontendInfoList");
             if (infos == null) {
@@ -205,23 +259,49 @@ public class TunerResourceManagerService extends SystemService implements IBinde
 
         @Override
         public boolean requestFrontend(@NonNull TunerFrontendRequest request,
-                @NonNull int[] frontendHandle) throws RemoteException {
+                @NonNull int[] frontendHandle) {
             enforceTunerAccessPermission("requestFrontend");
             enforceTrmAccessPermission("requestFrontend");
             if (frontendHandle == null) {
-                throw new RemoteException("frontendHandle can't be null");
+                Slog.e(TAG, "frontendHandle can't be null");
+                return false;
             }
             synchronized (mLock) {
                 if (!checkClientExists(request.clientId)) {
-                    throw new RemoteException("Request frontend from unregistered client: "
+                    Slog.e(TAG, "Request frontend from unregistered client: "
                             + request.clientId);
+                    return false;
                 }
                 // If the request client is holding or sharing a frontend, throw an exception.
                 if (!getClientProfile(request.clientId).getInUseFrontendHandles().isEmpty()) {
-                    throw new RemoteException("Release frontend before requesting another one. "
-                            + "Client id: " + request.clientId);
+                    Slog.e(TAG, "Release frontend before requesting another one. Client id: "
+                            + request.clientId);
+                    return false;
                 }
                 return requestFrontendInternal(request, frontendHandle);
+            }
+        }
+
+        @Override
+        public boolean setMaxNumberOfFrontends(int frontendType, int maxUsableNum) {
+            enforceTunerAccessPermission("requestFrontend");
+            enforceTrmAccessPermission("requestFrontend");
+            if (maxUsableNum < 0) {
+                Slog.w(TAG, "setMaxNumberOfFrontends failed with maxUsableNum:" + maxUsableNum
+                        + " frontendType:" + frontendType);
+                return false;
+            }
+            synchronized (mLock) {
+                return setMaxNumberOfFrontendsInternal(frontendType, maxUsableNum);
+            }
+        }
+
+        @Override
+        public int getMaxNumberOfFrontends(int frontendType) {
+            enforceTunerAccessPermission("requestFrontend");
+            enforceTrmAccessPermission("requestFrontend");
+            synchronized (mLock) {
+                return getMaxNumberOfFrontendsInternal(frontendType);
             }
         }
 
@@ -243,6 +323,23 @@ public class TunerResourceManagerService extends SystemService implements IBinde
                             + "frontend resources. Target client id:" + targetClientId);
                 }
                 shareFrontendInternal(selfClientId, targetClientId);
+            }
+        }
+
+        @Override
+        public boolean transferOwner(int resourceType, int currentOwnerId, int newOwnerId) {
+            enforceTunerAccessPermission("transferOwner");
+            enforceTrmAccessPermission("transferOwner");
+            synchronized (mLock) {
+                if (!checkClientExists(currentOwnerId)) {
+                    Slog.e(TAG, "currentOwnerId:" + currentOwnerId + " does not exit");
+                    return false;
+                }
+                if (!checkClientExists(newOwnerId)) {
+                    Slog.e(TAG, "newOwnerId:" + newOwnerId + " does not exit");
+                    return false;
+                }
+                return transferOwnerInternal(resourceType, currentOwnerId, newOwnerId);
             }
         }
 
@@ -346,7 +443,11 @@ public class TunerResourceManagerService extends SystemService implements IBinde
                 if (fe == null) {
                     throw new RemoteException("Releasing frontend does not exist.");
                 }
-                if (fe.getOwnerClientId() != clientId) {
+                int ownerClientId = fe.getOwnerClientId();
+                ClientProfile ownerProfile = getClientProfile(ownerClientId);
+                if (ownerClientId != clientId
+                        && (ownerProfile != null
+                              && !ownerProfile.getShareFeClientIds().contains(clientId))) {
                     throw new RemoteException(
                             "Client is not the current owner of the releasing fe.");
                 }
@@ -431,17 +532,18 @@ public class TunerResourceManagerService extends SystemService implements IBinde
             if (!validateResourceHandle(TunerResourceManager.TUNER_RESOURCE_TYPE_LNB, lnbHandle)) {
                 throw new RemoteException("lnbHandle can't be invalid");
             }
-            if (!checkClientExists(clientId)) {
-                throw new RemoteException("Release lnb from unregistered client:" + clientId);
-            }
-            LnbResource lnb = getLnbResource(lnbHandle);
-            if (lnb == null) {
-                throw new RemoteException("Releasing lnb does not exist.");
-            }
-            if (lnb.getOwnerClientId() != clientId) {
-                throw new RemoteException("Client is not the current owner of the releasing lnb.");
-            }
             synchronized (mLock) {
+                if (!checkClientExists(clientId)) {
+                    throw new RemoteException("Release lnb from unregistered client:" + clientId);
+                }
+                LnbResource lnb = getLnbResource(lnbHandle);
+                if (lnb == null) {
+                    throw new RemoteException("Releasing lnb does not exist.");
+                }
+                if (lnb.getOwnerClientId() != clientId) {
+                    throw new RemoteException("Client is not the current owner "
+                            + "of the releasing lnb.");
+                }
                 releaseLnbInternal(lnb);
             }
         }
@@ -456,6 +558,87 @@ public class TunerResourceManagerService extends SystemService implements IBinde
             }
             synchronized (mLock) {
                 return isHigherPriorityInternal(challengerProfile, holderProfile);
+            }
+        }
+
+        @Override
+        public void storeResourceMap(int resourceType) {
+            enforceTrmAccessPermission("storeResourceMap");
+            synchronized (mLock) {
+                storeResourceMapInternal(resourceType);
+            }
+        }
+
+        @Override
+        public void clearResourceMap(int resourceType) {
+            enforceTrmAccessPermission("clearResourceMap");
+            synchronized (mLock) {
+                clearResourceMapInternal(resourceType);
+            }
+        }
+
+        @Override
+        public void restoreResourceMap(int resourceType) {
+            enforceTrmAccessPermission("restoreResourceMap");
+            synchronized (mLock) {
+                restoreResourceMapInternal(resourceType);
+            }
+        }
+
+        @Override
+        public boolean acquireLock(int clientId, long clientThreadId) {
+            enforceTrmAccessPermission("acquireLock");
+            // this must not be locked with mLock
+            return acquireLockInternal(clientId, clientThreadId, TRMS_LOCK_TIMEOUT);
+        }
+
+        @Override
+        public boolean releaseLock(int clientId) {
+            enforceTrmAccessPermission("releaseLock");
+            // this must not be locked with mLock
+            return releaseLockInternal(clientId, TRMS_LOCK_TIMEOUT, false, false);
+        }
+
+        @Override
+        protected void dump(FileDescriptor fd, final PrintWriter writer, String[] args) {
+            final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
+
+            if (getContext().checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
+                    != PackageManager.PERMISSION_GRANTED) {
+                pw.println("Permission Denial: can't dump!");
+                return;
+            }
+
+            synchronized (mLock) {
+                dumpMap(mClientProfiles, "ClientProfiles:", "\n", pw);
+                dumpMap(mFrontendResources, "FrontendResources:", "\n", pw);
+                dumpSIA(mFrontendExistingNums, "FrontendExistingNums:", ", ", pw);
+                dumpSIA(mFrontendUsedNums, "FrontendUsedNums:", ", ", pw);
+                dumpSIA(mFrontendMaxUsableNums, "FrontendMaxUsableNums:", ", ", pw);
+                dumpMap(mFrontendResourcesBackup, "FrontendResourcesBackUp:", "\n", pw);
+                dumpSIA(mFrontendExistingNumsBackup, "FrontendExistingNumsBackup:", ", ", pw);
+                dumpSIA(mFrontendUsedNumsBackup, "FrontendUsedNumsBackup:", ", ", pw);
+                dumpSIA(mFrontendMaxUsableNumsBackup, "FrontendUsedNumsBackup:", ", ", pw);
+                dumpMap(mLnbResources, "LnbResource:", "\n", pw);
+                dumpMap(mCasResources, "CasResource:", "\n", pw);
+                dumpMap(mCiCamResources, "CiCamResource:", "\n", pw);
+                dumpMap(mListeners, "Listners:", "\n", pw);
+            }
+        }
+
+        @Override
+        public int getClientPriority(int useCase, int pid) throws RemoteException {
+            enforceTrmAccessPermission("getClientPriority");
+            synchronized (mLock) {
+                return TunerResourceManagerService.this.getClientPriority(
+                        useCase, checkIsForeground(pid));
+            }
+        }
+        @Override
+        public int getConfigPriority(int useCase, boolean isForeground) throws RemoteException {
+            enforceTrmAccessPermission("getConfigPriority");
+            synchronized (mLock) {
+                return TunerResourceManagerService.this.getClientPriority(useCase, isForeground);
             }
         }
     }
@@ -507,9 +690,8 @@ public class TunerResourceManagerService extends SystemService implements IBinde
                                               .useCase(profile.useCase)
                                               .processId(pid)
                                               .build();
-        clientProfile.setForeground(checkIsForeground(pid));
         clientProfile.setPriority(
-                getClientPriority(profile.useCase, clientProfile.isForeground()));
+                getClientPriority(profile.useCase, checkIsForeground(pid)));
 
         addClientProfile(clientId[0], clientProfile, listener);
     }
@@ -547,11 +729,86 @@ public class TunerResourceManagerService extends SystemService implements IBinde
             return false;
         }
 
-        profile.setForeground(checkIsForeground(profile.getProcessId()));
-        profile.setPriority(priority);
+        profile.overwritePriority(priority);
         profile.setNiceValue(niceValue);
 
         return true;
+    }
+
+
+    protected boolean hasUnusedFrontendInternal(int frontendType) {
+        for (FrontendResource fr : getFrontendResources().values()) {
+            if (fr.getType() == frontendType && !fr.isInUse()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected boolean isLowestPriorityInternal(int clientId, int frontendType)
+            throws RemoteException {
+        // Update the client priority
+        ClientProfile requestClient = getClientProfile(clientId);
+        if (requestClient == null) {
+            return true;
+        }
+        clientPriorityUpdateOnRequest(requestClient);
+        int clientPriority = requestClient.getPriority();
+
+        // Check if there is another holder with lower priority
+        for (FrontendResource fr : getFrontendResources().values()) {
+            if (fr.getType() == frontendType && fr.isInUse()) {
+                int priority = updateAndGetOwnerClientPriority(fr.getOwnerClientId());
+                // Returns false only when the clientPriority is strictly greater
+                // because false means that there is another reclaimable resource
+                if (clientPriority > priority) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    protected void storeResourceMapInternal(int resourceType) {
+        switch (resourceType) {
+            case TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND:
+                replaceFeResourceMap(mFrontendResources, mFrontendResourcesBackup);
+                replaceFeCounts(mFrontendExistingNums, mFrontendExistingNumsBackup);
+                replaceFeCounts(mFrontendUsedNums, mFrontendUsedNumsBackup);
+                replaceFeCounts(mFrontendMaxUsableNums, mFrontendMaxUsableNumsBackup);
+                break;
+                // TODO: implement for other resource type when needed
+            default:
+                break;
+        }
+    }
+
+    protected void clearResourceMapInternal(int resourceType) {
+        switch (resourceType) {
+            case TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND:
+                replaceFeResourceMap(null, mFrontendResources);
+                replaceFeCounts(null, mFrontendExistingNums);
+                replaceFeCounts(null, mFrontendUsedNums);
+                replaceFeCounts(null, mFrontendMaxUsableNums);
+                break;
+                // TODO: implement for other resource type when needed
+            default:
+                break;
+        }
+    }
+
+    protected void restoreResourceMapInternal(int resourceType) {
+        switch (resourceType) {
+            case TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND:
+                replaceFeResourceMap(mFrontendResourcesBackup, mFrontendResources);
+                replaceFeCounts(mFrontendExistingNumsBackup, mFrontendExistingNums);
+                replaceFeCounts(mFrontendUsedNumsBackup, mFrontendUsedNums);
+                replaceFeCounts(mFrontendMaxUsableNumsBackup, mFrontendMaxUsableNums);
+                break;
+                // TODO: implement for other resource type when needed
+            default:
+                break;
+        }
     }
 
     @VisibleForTesting
@@ -670,6 +927,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
 
         frontendHandle[0] = TunerResourceManager.INVALID_RESOURCE_HANDLE;
         ClientProfile requestClient = getClientProfile(request.clientId);
+        // TODO: check if this is really needed
         if (requestClient == null) {
             return false;
         }
@@ -681,6 +939,11 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         for (FrontendResource fr : getFrontendResources().values()) {
             if (fr.getType() == request.frontendType) {
                 if (!fr.isInUse()) {
+                    // Unused resource cannot be acquired if the max is already reached, but
+                    // TRM still has to look for the reclaim candidate
+                    if (isFrontendMaxNumUseReached(request.frontendType)) {
+                        continue;
+                    }
                     // Grant unused frontend with no exclusive group members first.
                     if (fr.getExclusiveGroupMemberFeHandles().isEmpty()) {
                         grantingFrontendHandle = fr.getHandle();
@@ -694,7 +957,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
                 } else if (grantingFrontendHandle == TunerResourceManager.INVALID_RESOURCE_HANDLE) {
                     // Record the frontend id with the lowest client priority among all the
                     // in use frontends when no available frontend has been found.
-                    int priority = getOwnerClientPriority(fr.getOwnerClientId());
+                    int priority = getFrontendHighestClientPriority(fr.getOwnerClientId());
                     if (currentLowestPriority > priority) {
                         inUseLowestPriorityFrHandle = fr.getHandle();
                         currentLowestPriority = priority;
@@ -739,6 +1002,86 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         getClientProfile(targetClientId).shareFrontend(selfClientId);
     }
 
+    private boolean transferFeOwner(int currentOwnerId, int newOwnerId) {
+        ClientProfile currentOwnerProfile = getClientProfile(currentOwnerId);
+        ClientProfile newOwnerProfile = getClientProfile(newOwnerId);
+        // change the owner of all the inUse frontend
+        newOwnerProfile.shareFrontend(currentOwnerId);
+        currentOwnerProfile.stopSharingFrontend(newOwnerId);
+        for (int inUseHandle : newOwnerProfile.getInUseFrontendHandles()) {
+            getFrontendResource(inUseHandle).setOwner(newOwnerId);
+        }
+        // change the primary frontend
+        newOwnerProfile.setPrimaryFrontend(currentOwnerProfile.getPrimaryFrontend());
+        currentOwnerProfile.setPrimaryFrontend(TunerResourceManager.INVALID_RESOURCE_HANDLE);
+        // double check there is no other resources tied to the previous owner
+        for (int inUseHandle : currentOwnerProfile.getInUseFrontendHandles()) {
+            int ownerId = getFrontendResource(inUseHandle).getOwnerClientId();
+            if (ownerId != newOwnerId) {
+                Slog.e(TAG, "something is wrong in transferFeOwner:" + inUseHandle
+                        + ", " + ownerId + ", " + newOwnerId);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean transferFeCiCamOwner(int currentOwnerId, int newOwnerId) {
+        ClientProfile currentOwnerProfile = getClientProfile(currentOwnerId);
+        ClientProfile newOwnerProfile = getClientProfile(newOwnerId);
+
+        // link ciCamId to the new profile
+        int ciCamId = currentOwnerProfile.getInUseCiCamId();
+        newOwnerProfile.useCiCam(ciCamId);
+
+        // set the new owner Id
+        CiCamResource ciCam = getCiCamResource(ciCamId);
+        ciCam.setOwner(newOwnerId);
+
+        // unlink cicam resource from the original owner profile
+        currentOwnerProfile.releaseCiCam();
+        return true;
+    }
+
+    private boolean transferLnbOwner(int currentOwnerId, int newOwnerId) {
+        ClientProfile currentOwnerProfile = getClientProfile(currentOwnerId);
+        ClientProfile newOwnerProfile = getClientProfile(newOwnerId);
+
+        Set<Integer> inUseLnbHandles = new HashSet<>();
+        for (Integer lnbHandle : currentOwnerProfile.getInUseLnbHandles()) {
+            // link lnb handle to the new profile
+            newOwnerProfile.useLnb(lnbHandle);
+
+            // set new owner Id
+            LnbResource lnb = getLnbResource(lnbHandle);
+            lnb.setOwner(newOwnerId);
+
+            inUseLnbHandles.add(lnbHandle);
+        }
+
+        // unlink lnb handles from the original owner
+        for (Integer lnbHandle : inUseLnbHandles) {
+            currentOwnerProfile.releaseLnb(lnbHandle);
+        }
+
+        return true;
+    }
+
+    @VisibleForTesting
+    protected boolean transferOwnerInternal(int resourceType, int currentOwnerId, int newOwnerId) {
+        switch (resourceType) {
+            case TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND:
+                return transferFeOwner(currentOwnerId, newOwnerId);
+            case TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND_CICAM:
+                return transferFeCiCamOwner(currentOwnerId, newOwnerId);
+            case TunerResourceManager.TUNER_RESOURCE_TYPE_LNB:
+                return transferLnbOwner(currentOwnerId, newOwnerId);
+            default:
+                Slog.e(TAG, "transferOwnerInternal. unsupported resourceType: " + resourceType);
+                return false;
+        }
+    }
+
     @VisibleForTesting
     protected boolean requestLnbInternal(TunerLnbRequest request, int[] lnbHandle) {
         if (DEBUG) {
@@ -760,7 +1103,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
             } else {
                 // Record the lnb id with the lowest client priority among all the
                 // in use lnb when no available lnb has been found.
-                int priority = getOwnerClientPriority(lnb.getOwnerClientId());
+                int priority = updateAndGetOwnerClientPriority(lnb.getOwnerClientId());
                 if (currentLowestPriority > priority) {
                     inUseLowestPriorityLnbHandle = lnb.getHandle();
                     currentLowestPriority = priority;
@@ -818,7 +1161,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         }
         for (int ownerId : cas.getOwnerClientIds()) {
             // Record the client id with lowest priority that is using the current Cas system.
-            int priority = getOwnerClientPriority(ownerId);
+            int priority = updateAndGetOwnerClientPriority(ownerId);
             if (currentLowestPriority > priority) {
                 lowestPriorityOwnerId = ownerId;
                 currentLowestPriority = priority;
@@ -867,7 +1210,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         }
         for (int ownerId : ciCam.getOwnerClientIds()) {
             // Record the client id with lowest priority that is using the current Cas system.
-            int priority = getOwnerClientPriority(ownerId);
+            int priority = updateAndGetOwnerClientPriority(ownerId);
             if (currentLowestPriority > priority) {
                 lowestPriorityOwnerId = ownerId;
                 currentLowestPriority = priority;
@@ -924,8 +1267,11 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         }
         if (clientId == fe.getOwnerClientId()) {
             ClientProfile ownerClient = getClientProfile(fe.getOwnerClientId());
-            for (int shareOwnerId : ownerClient.getShareFeClientIds()) {
-                clearFrontendAndClientMapping(getClientProfile(shareOwnerId));
+            if (ownerClient != null) {
+                for (int shareOwnerId : ownerClient.getShareFeClientIds()) {
+                    reclaimResource(shareOwnerId,
+                            TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND);
+                }
             }
         }
         clearFrontendAndClientMapping(getClientProfile(clientId));
@@ -966,18 +1312,17 @@ public class TunerResourceManagerService extends SystemService implements IBinde
     }
 
     @VisibleForTesting
-    // This mothod is to sync up the request client's foreground/background status and update
-    // the client priority accordingly whenever new resource request comes in.
-    protected void clientPriorityUpdateOnRequest(ClientProfile requestProfile) {
-        int pid = requestProfile.getProcessId();
-        boolean currentIsForeground = checkIsForeground(pid);
-        if (requestProfile.isForeground() == currentIsForeground) {
+    // This mothod is to sync up the request/holder client's foreground/background status and update
+    // the client priority accordingly whenever a new resource request comes in.
+    protected void clientPriorityUpdateOnRequest(ClientProfile profile) {
+        if (profile.isPriorityOverwritten()) {
             // To avoid overriding the priority set through updateClientPriority API.
             return;
         }
-        requestProfile.setForeground(currentIsForeground);
-        requestProfile.setPriority(
-                getClientPriority(requestProfile.getUseCase(), currentIsForeground));
+        int pid = profile.getProcessId();
+        boolean currentIsForeground = checkIsForeground(pid);
+        profile.setPriority(
+                getClientPriority(profile.getUseCase(), currentIsForeground));
     }
 
     @VisibleForTesting
@@ -992,6 +1337,187 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         return true;
     }
 
+    // Return value is guaranteed to be positive
+    private long getElapsedTime(long begin) {
+        long now = SystemClock.uptimeMillis();
+        long elapsed;
+        if (now >= begin) {
+            elapsed = now - begin;
+        } else {
+            elapsed = Long.MAX_VALUE - begin + now;
+            if (elapsed < 0) {
+                elapsed = Long.MAX_VALUE;
+            }
+        }
+        return elapsed;
+    }
+
+    private boolean lockForTunerApiLock(int clientId, long timeoutMS, String callerFunction) {
+        try {
+            if (mLockForTRMSLock.tryLock(timeoutMS, TimeUnit.MILLISECONDS)) {
+                return true;
+            } else {
+                Slog.e(TAG, "FAILED to lock mLockForTRMSLock in " + callerFunction
+                        + ", clientId:" + clientId + ", timeoutMS:" + timeoutMS
+                        + ", mTunerApiLockHolder:" + mTunerApiLockHolder);
+                return false;
+            }
+        } catch (InterruptedException ie) {
+            Slog.e(TAG, "exception thrown in " + callerFunction + ":" + ie);
+            if (mLockForTRMSLock.isHeldByCurrentThread()) {
+                mLockForTRMSLock.unlock();
+            }
+            return false;
+        }
+    }
+
+    private boolean acquireLockInternal(int clientId, long clientThreadId, long timeoutMS) {
+        long begin = SystemClock.uptimeMillis();
+
+        // Grab lock
+        if (!lockForTunerApiLock(clientId, timeoutMS, "acquireLockInternal()")) {
+            return false;
+        }
+
+        try {
+            boolean available = mTunerApiLockHolder == INVALID_CLIENT_ID;
+            boolean nestedSelf = (clientId == mTunerApiLockHolder)
+                    && (clientThreadId == mTunerApiLockHolderThreadId);
+            boolean recovery = false;
+
+            // Allow same thread to grab the lock multiple times
+            while (!available && !nestedSelf) {
+                // calculate how much time is left before timeout
+                long leftOverMS = timeoutMS - getElapsedTime(begin);
+                if (leftOverMS <= 0) {
+                    Slog.e(TAG, "FAILED:acquireLockInternal(" + clientId + ", " + clientThreadId
+                            + ", " + timeoutMS + ") - timed out, but will grant the lock to "
+                            + "the callee by stealing it from the current holder:"
+                            + mTunerApiLockHolder + "(" + mTunerApiLockHolderThreadId + "), "
+                            + "who likely failed to call releaseLock(), "
+                            + "to prevent this from becoming an unrecoverable error");
+                    // This should not normally happen, but there sometimes are cases where
+                    // in-flight tuner API execution gets scheduled even after binderDied(),
+                    // which can leave the in-flight execution dissappear/stopped in between
+                    // acquireLock and releaseLock
+                    recovery = true;
+                    break;
+                }
+
+                // Cond wait for left over time
+                mTunerApiLockReleasedCV.await(leftOverMS, TimeUnit.MILLISECONDS);
+
+                // Check the availability for "spurious wakeup"
+                // The case that was confirmed is that someone else can acquire this in between
+                // signal() and wakup from the above await()
+                available = mTunerApiLockHolder == INVALID_CLIENT_ID;
+
+                if (!available) {
+                    Slog.w(TAG, "acquireLockInternal(" + clientId + ", " + clientThreadId + ", "
+                            + timeoutMS + ") - woken up from cond wait, but " + mTunerApiLockHolder
+                            + "(" + mTunerApiLockHolderThreadId + ") is already holding the lock. "
+                            + "Going to wait again if timeout hasn't reached yet");
+                }
+            }
+
+            // Will always grant unless exception is thrown (or lock is already held)
+            if (available || recovery) {
+                if (DEBUG) {
+                    Slog.d(TAG, "SUCCESS:acquireLockInternal(" + clientId + ", " + clientThreadId
+                            + ", " + timeoutMS + ")");
+                }
+
+                if (mTunerApiLockNestedCount != 0) {
+                    Slog.w(TAG, "Something is wrong as nestedCount(" + mTunerApiLockNestedCount
+                            + ") is not zero. Will overriding it to 1 anyways");
+                }
+
+                // set the caller to be the holder
+                mTunerApiLockHolder = clientId;
+                mTunerApiLockHolderThreadId = clientThreadId;
+                mTunerApiLockNestedCount = 1;
+            } else if (nestedSelf) {
+                // Increment the nested count so releaseLockInternal won't signal prematuredly
+                mTunerApiLockNestedCount++;
+                if (DEBUG) {
+                    Slog.d(TAG, "acquireLockInternal(" + clientId + ", " + clientThreadId
+                            + ", " + timeoutMS + ") - nested count incremented to "
+                            + mTunerApiLockNestedCount);
+                }
+            } else {
+                Slog.e(TAG, "acquireLockInternal(" + clientId + ", " + clientThreadId
+                        + ", " + timeoutMS + ") - should not reach here");
+            }
+            // return true in "recovery" so callee knows that the deadlock is possible
+            // only when the return value is false
+            return (available || nestedSelf || recovery);
+        } catch (InterruptedException ie) {
+            Slog.e(TAG, "exception thrown in acquireLockInternal(" + clientId + ", "
+                    + clientThreadId + ", " + timeoutMS + "):" + ie);
+            return false;
+        } finally {
+            if (mLockForTRMSLock.isHeldByCurrentThread()) {
+                mLockForTRMSLock.unlock();
+            }
+        }
+    }
+
+    private boolean releaseLockInternal(int clientId, long timeoutMS,
+            boolean ignoreNestedCount, boolean suppressError) {
+        // Grab lock first
+        if (!lockForTunerApiLock(clientId, timeoutMS, "releaseLockInternal()")) {
+            return false;
+        }
+
+        try {
+            if (mTunerApiLockHolder == clientId) {
+                // Should always reach here unless called from binderDied()
+                mTunerApiLockNestedCount--;
+                if (ignoreNestedCount || mTunerApiLockNestedCount <= 0) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "SUCCESS:releaseLockInternal(" + clientId + ", " + timeoutMS
+                                + ", " + ignoreNestedCount + ", " + suppressError
+                                + ") - signaling!");
+                    }
+                    // Reset the current holder and signal
+                    mTunerApiLockHolder = INVALID_CLIENT_ID;
+                    mTunerApiLockHolderThreadId = INVALID_THREAD_ID;
+                    mTunerApiLockNestedCount = 0;
+                    mTunerApiLockReleasedCV.signal();
+                } else {
+                    if (DEBUG) {
+                        Slog.d(TAG, "releaseLockInternal(" + clientId + ", " + timeoutMS
+                                + ", " + ignoreNestedCount + ", " + suppressError
+                                + ") - NOT signaling because nested count is not zero ("
+                                + mTunerApiLockNestedCount + ")");
+                    }
+                }
+                return true;
+            } else if (mTunerApiLockHolder == INVALID_CLIENT_ID) {
+                if (!suppressError) {
+                    Slog.w(TAG, "releaseLockInternal(" + clientId + ", " + timeoutMS
+                            + ") - called while there is no current holder");
+                }
+                // No need to do anything.
+                // Shouldn't reach here unless called from binderDied()
+                return false;
+            } else {
+                if (!suppressError) {
+                    Slog.e(TAG, "releaseLockInternal(" + clientId + ", " + timeoutMS
+                            + ") - called while someone else:" + mTunerApiLockHolder
+                            + "is the current holder");
+                }
+                // Cannot reset the holder Id because it reaches here when called
+                // from binderDied()
+                return false;
+            }
+        } finally {
+            if (mLockForTRMSLock.isHeldByCurrentThread()) {
+                mLockForTRMSLock.unlock();
+            }
+        }
+    }
+
     @VisibleForTesting
     protected class ResourcesReclaimListenerRecord implements IBinder.DeathRecipient {
         private final IResourcesReclaimListener mListener;
@@ -1004,8 +1530,15 @@ public class TunerResourceManagerService extends SystemService implements IBinde
 
         @Override
         public void binderDied() {
-            synchronized (mLock) {
-                removeClientProfile(mClientId);
+            try {
+                synchronized (mLock) {
+                    if (checkClientExists(mClientId)) {
+                        removeClientProfile(mClientId);
+                    }
+                }
+            } finally {
+                // reset the tuner API lock
+                releaseLockInternal(mClientId, TRMS_LOCK_TIMEOUT, true, true);
             }
         }
 
@@ -1042,20 +1575,21 @@ public class TunerResourceManagerService extends SystemService implements IBinde
     @VisibleForTesting
     protected boolean reclaimResource(int reclaimingClientId,
             @TunerResourceManager.TunerResourceType int resourceType) {
-        if (DEBUG) {
-            Slog.d(TAG, "Reclaiming resources because higher priority client request resource type "
-                    + resourceType);
-        }
-        try {
-            mListeners.get(reclaimingClientId).getListener().onReclaimResources();
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Failed to reclaim resources on client " + reclaimingClientId, e);
-            return false;
-        }
+
+        // Allowing this because:
+        // 1) serialization of resource reclaim is required in the current design
+        // 2) the outgoing transaction is handled by the system app (with
+        //    android.Manifest.permission.TUNER_RESOURCE_ACCESS), which goes through full
+        //    Google certification
+        Binder.allowBlockingForCurrentThread();
 
         // Reclaim all the resources of the share owners of the frontend that is used by the current
         // resource reclaimed client.
         ClientProfile profile = getClientProfile(reclaimingClientId);
+        // TODO: check if this check is really needed.
+        if (profile == null) {
+            return true;
+        }
         Set<Integer> shareFeClientIds = profile.getShareFeClientIds();
         for (int clientId : shareFeClientIds) {
             try {
@@ -1065,6 +1599,17 @@ public class TunerResourceManagerService extends SystemService implements IBinde
                 return false;
             }
             clearAllResourcesAndClientMapping(getClientProfile(clientId));
+        }
+
+        if (DEBUG) {
+            Slog.d(TAG, "Reclaiming resources because higher priority client request resource type "
+                    + resourceType + ", clientId:" + reclaimingClientId);
+        }
+        try {
+            mListeners.get(reclaimingClientId).getListener().onReclaimResources();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to reclaim resources on client " + reclaimingClientId, e);
+            return false;
         }
         clearAllResourcesAndClientMapping(profile);
         return true;
@@ -1105,11 +1650,13 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         FrontendResource grantingFrontend = getFrontendResource(grantingHandle);
         ClientProfile ownerProfile = getClientProfile(ownerClientId);
         grantingFrontend.setOwner(ownerClientId);
+        increFrontendNum(mFrontendUsedNums, grantingFrontend.getType());
         ownerProfile.useFrontend(grantingHandle);
         for (int exclusiveGroupMember : grantingFrontend.getExclusiveGroupMemberFeHandles()) {
             getFrontendResource(exclusiveGroupMember).setOwner(ownerClientId);
             ownerProfile.useFrontend(exclusiveGroupMember);
         }
+        ownerProfile.setPrimaryFrontend(grantingHandle);
     }
 
     private void updateLnbClientMappingOnNewGrant(int grantingHandle, int ownerClientId) {
@@ -1154,13 +1701,42 @@ public class TunerResourceManagerService extends SystemService implements IBinde
     }
 
     /**
-     * Get the owner client's priority.
+     * Update and get the owner client's priority.
      *
      * @param clientId the owner client id.
      * @return the priority of the owner client.
      */
-    private int getOwnerClientPriority(int clientId) {
-        return getClientProfile(clientId).getPriority();
+    private int updateAndGetOwnerClientPriority(int clientId) {
+        ClientProfile profile = getClientProfile(clientId);
+        clientPriorityUpdateOnRequest(profile);
+        return profile.getPriority();
+    }
+
+    /**
+     * Update the owner and sharee clients' priority and get the highest priority
+     * for frontend resource
+     *
+     * @param clientId the owner client id.
+     * @return the highest priority among all the clients holding the same frontend resource.
+     */
+    private int getFrontendHighestClientPriority(int clientId) {
+        // Check if the owner profile exists
+        ClientProfile ownerClient = getClientProfile(clientId);
+        if (ownerClient == null) {
+            return 0;
+        }
+
+        // Update and get the priority of the owner client
+        int highestPriority = updateAndGetOwnerClientPriority(clientId);
+
+        // Update and get all the client IDs of frontend resource holders
+        for (int shareeId : ownerClient.getShareFeClientIds()) {
+            int priority = updateAndGetOwnerClientPriority(shareeId);
+            if (priority > highestPriority) {
+                highestPriority = priority;
+            }
+        }
+        return highestPriority;
     }
 
     @VisibleForTesting
@@ -1172,6 +1748,109 @@ public class TunerResourceManagerService extends SystemService implements IBinde
     @VisibleForTesting
     protected Map<Integer, FrontendResource> getFrontendResources() {
         return mFrontendResources;
+    }
+
+    private boolean setMaxNumberOfFrontendsInternal(int frontendType, int maxUsableNum) {
+        int usedNum = mFrontendUsedNums.get(frontendType, INVALID_FE_COUNT);
+        if (usedNum == INVALID_FE_COUNT || usedNum <= maxUsableNum) {
+            mFrontendMaxUsableNums.put(frontendType, maxUsableNum);
+            return true;
+        } else {
+            Slog.e(TAG, "max number of frontend for frontendType: " + frontendType
+                    + " cannot be set to a value lower than the current usage count."
+                    + " (requested max num = " + maxUsableNum + ", current usage = " + usedNum);
+            return false;
+        }
+    }
+
+    private int getMaxNumberOfFrontendsInternal(int frontendType) {
+        int existingNum = mFrontendExistingNums.get(frontendType, INVALID_FE_COUNT);
+        if (existingNum == INVALID_FE_COUNT) {
+            Log.e(TAG, "existingNum is -1 for " + frontendType);
+            return -1;
+        }
+        int maxUsableNum = mFrontendMaxUsableNums.get(frontendType, INVALID_FE_COUNT);
+        if (maxUsableNum == INVALID_FE_COUNT) {
+            return existingNum;
+        } else {
+            return maxUsableNum;
+        }
+    }
+
+    private boolean isFrontendMaxNumUseReached(int frontendType) {
+        int maxUsableNum = mFrontendMaxUsableNums.get(frontendType, INVALID_FE_COUNT);
+        if (maxUsableNum == INVALID_FE_COUNT) {
+            return false;
+        }
+        int useNum = mFrontendUsedNums.get(frontendType, INVALID_FE_COUNT);
+        if (useNum == INVALID_FE_COUNT) {
+            useNum = 0;
+        }
+        return useNum >= maxUsableNum;
+    }
+
+    private void increFrontendNum(SparseIntArray targetNums, int frontendType) {
+        int num = targetNums.get(frontendType, INVALID_FE_COUNT);
+        if (num == INVALID_FE_COUNT) {
+            targetNums.put(frontendType, 1);
+        } else {
+            targetNums.put(frontendType, num + 1);
+        }
+    }
+
+    private void decreFrontendNum(SparseIntArray targetNums, int frontendType) {
+        int num = targetNums.get(frontendType, INVALID_FE_COUNT);
+        if (num != INVALID_FE_COUNT) {
+            targetNums.put(frontendType, num - 1);
+        }
+    }
+
+    private void replaceFeResourceMap(Map<Integer, FrontendResource> srcMap, Map<Integer,
+            FrontendResource> dstMap) {
+        if (dstMap != null) {
+            dstMap.clear();
+            if (srcMap != null && srcMap.size() > 0) {
+                dstMap.putAll(srcMap);
+            }
+        }
+    }
+
+    private void replaceFeCounts(SparseIntArray srcCounts, SparseIntArray dstCounts) {
+        if (dstCounts != null) {
+            dstCounts.clear();
+            if (srcCounts != null) {
+                for (int i = 0; i < srcCounts.size(); i++) {
+                    dstCounts.put(srcCounts.keyAt(i), srcCounts.valueAt(i));
+                }
+            }
+        }
+    }
+    private void dumpMap(Map<?, ?> targetMap, String headline, String delimiter,
+            IndentingPrintWriter pw) {
+        if (targetMap != null) {
+            pw.println(headline);
+            pw.increaseIndent();
+            for (Map.Entry<?, ?> entry : targetMap.entrySet()) {
+                pw.print(entry.getKey() + " : " + entry.getValue());
+                pw.print(delimiter);
+            }
+            pw.println();
+            pw.decreaseIndent();
+        }
+    }
+
+    private void dumpSIA(SparseIntArray array, String headline, String delimiter,
+            IndentingPrintWriter pw) {
+        if (array != null) {
+            pw.println(headline);
+            pw.increaseIndent();
+            for (int i = 0; i < array.size(); i++) {
+                pw.print(array.keyAt(i) + " : " + array.valueAt(i));
+                pw.print(delimiter);
+            }
+            pw.println();
+            pw.decreaseIndent();
+        }
     }
 
     private void addFrontendResource(FrontendResource newFe) {
@@ -1190,6 +1869,8 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         }
         // Update resource list and available id list
         mFrontendResources.put(newFe.getHandle(), newFe);
+        increFrontendNum(mFrontendExistingNums, newFe.getType());
+
     }
 
     private void removeFrontendResource(int removingHandle) {
@@ -1208,6 +1889,7 @@ public class TunerResourceManagerService extends SystemService implements IBinde
             getFrontendResource(excGroupmemberFeHandle)
                     .removeExclusiveGroupMemberFeId(fe.getHandle());
         }
+        decreFrontendNum(mFrontendExistingNums, fe.getType());
         mFrontendResources.remove(removingHandle);
     }
 
@@ -1320,18 +2002,40 @@ public class TunerResourceManagerService extends SystemService implements IBinde
     }
 
     private void clearFrontendAndClientMapping(ClientProfile profile) {
+        // TODO: check if this check is really needed
+        if (profile == null) {
+            return;
+        }
         for (Integer feId : profile.getInUseFrontendHandles()) {
             FrontendResource fe = getFrontendResource(feId);
-            if (fe.getOwnerClientId() == profile.getId()) {
+            int ownerClientId = fe.getOwnerClientId();
+            if (ownerClientId == profile.getId()) {
                 fe.removeOwner();
                 continue;
             }
-            getClientProfile(fe.getOwnerClientId()).stopSharingFrontend(profile.getId());
+            ClientProfile ownerClientProfile = getClientProfile(ownerClientId);
+            if (ownerClientProfile != null) {
+                ownerClientProfile.stopSharingFrontend(profile.getId());
+            }
+
         }
+
+        int primaryFeId = profile.getPrimaryFrontend();
+        if (primaryFeId != TunerResourceManager.INVALID_RESOURCE_HANDLE) {
+            FrontendResource primaryFe = getFrontendResource(primaryFeId);
+            if (primaryFe != null) {
+                decreFrontendNum(mFrontendUsedNums, primaryFe.getType());
+            }
+        }
+
         profile.releaseFrontend();
     }
 
     private void clearAllResourcesAndClientMapping(ClientProfile profile) {
+        // TODO: check if this check is really needed. Maybe needed for reclaimResource path.
+        if (profile == null) {
+            return;
+        }
         // Clear Lnb
         for (Integer lnbHandle : profile.getInUseLnbHandles()) {
             getLnbResource(lnbHandle).removeOwner();

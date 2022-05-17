@@ -1,1 +1,2 @@
-per-file location_time_zone_manager.proto, time_zone_detector.proto = nfuller@google.com, mingaleev@google.com
+per-file location_time_zone_manager.proto = file:platform/frameworks/base:/services/core/java/com/android/server/timezonedetector/OWNERS
+per-file time_zone_detector.proto = file:platform/frameworks/base:/services/core/java/com/android/server/timezonedetector/OWNERS

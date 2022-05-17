@@ -40,7 +40,7 @@ import java.io.PrintWriter;
  * applicable to the host.
  *
  * @deprecated Use the <a href="{@docRoot}tools/extras/support-library.html">Support Library</a>
- *      {@link android.support.v4.app.FragmentHostCallback}
+ *      {@link androidx.fragment.app.FragmentHostCallback}
  */
 @Deprecated
 public abstract class FragmentHostCallback<E> extends FragmentContainer {

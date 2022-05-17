@@ -31,11 +31,15 @@ import com.android.settingslib.R;
 public class UserCreatingDialog extends AlertDialog {
 
     public UserCreatingDialog(Context context) {
+        this(context, false);
+    }
+
+    public UserCreatingDialog(Context context, boolean isGuest) {
         // hardcoding theme to be consistent with UserSwitchingDialog's theme
         // todo replace both to adapt to the device's theme
         super(context, com.android.internal.R.style.Theme_DeviceDefault_Light_Dialog_Alert);
 
-        inflateContent();
+        inflateContent(isGuest);
         getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
 
         WindowManager.LayoutParams attrs = getWindow().getAttributes();
@@ -44,12 +48,14 @@ public class UserCreatingDialog extends AlertDialog {
         getWindow().setAttributes(attrs);
     }
 
-    private void inflateContent() {
+    private void inflateContent(boolean isGuest) {
         // using the same design as UserSwitchingDialog
         setCancelable(false);
         View view = LayoutInflater.from(getContext())
                 .inflate(R.layout.user_creation_progress_dialog, null);
-        String message = getContext().getString(R.string.creating_new_user_dialog_message);
+        String message = getContext().getString(isGuest
+                ? R.string.creating_new_guest_dialog_message
+                : R.string.creating_new_user_dialog_message);
         view.setAccessibilityPaneTitle(message);
         ((TextView) view.findViewById(R.id.message)).setText(message);
         setView(view);

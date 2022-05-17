@@ -109,6 +109,22 @@ public class GnssManagerService {
         return mGnssLocationProvider;
     }
 
+    /**
+     * Set whether the GnssLocationProvider is suspended on the device. This method was added to
+     * help support power management use cases on automotive devices.
+     */
+    public void setAutomotiveGnssSuspended(boolean suspended) {
+        mGnssLocationProvider.setAutomotiveGnssSuspended(suspended);
+    }
+
+    /**
+     * Return whether the GnssLocationProvider is suspended or not. This method was added to
+     * help support power management use cases on automotive devices.
+     */
+    public boolean isAutomotiveGnssSuspended() {
+        return mGnssLocationProvider.isAutomotiveGnssSuspended();
+    }
+
     /** Retrieve the IGpsGeofenceHardware. */
     public IGpsGeofenceHardware getGnssGeofenceProxy() {
         return mGnssGeofenceProxy;
@@ -303,7 +319,7 @@ public class GnssManagerService {
         }
 
         if (mGnssAntennaInfoProvider.isSupported()) {
-            ipw.println("Navigation Message Provider:");
+            ipw.println("Antenna Info Provider:");
             ipw.increaseIndent();
             ipw.println("Antenna Infos: " + mGnssAntennaInfoProvider.getAntennaInfos());
             mGnssAntennaInfoProvider.dump(fd, ipw, args);
@@ -331,7 +347,7 @@ public class GnssManagerService {
         @Override
         public void onCapabilitiesChanged(GnssCapabilities oldCapabilities,
                 GnssCapabilities newCapabilities) {
-            long ident = Binder.clearCallingIdentity();
+            final long ident = Binder.clearCallingIdentity();
             try {
                 Intent intent = new Intent(LocationManager.ACTION_GNSS_CAPABILITIES_CHANGED)
                         .putExtra(LocationManager.EXTRA_GNSS_CAPABILITIES, newCapabilities)

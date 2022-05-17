@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+@file:JvmName("FlickerExtensions")
 package com.android.server.wm.flicker.helpers
 
 import com.android.server.wm.flicker.Flicker

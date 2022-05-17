@@ -20,7 +20,9 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.UserHandle;
-import android.window.IRemoteTransition;
+import android.view.RemoteAnimationAdapter;
+import android.view.RemoteAnimationTarget;
+import android.window.RemoteTransition;
 
 import com.android.wm.shell.splitscreen.ISplitScreenListener;
 
@@ -40,19 +42,15 @@ interface ISplitScreen {
     oneway void unregisterSplitScreenListener(in ISplitScreenListener listener) = 2;
 
     /**
-     * Hides the side-stage if it is currently visible.
-     */
-    oneway void setSideStageVisibility(boolean visible) = 3;
-
-    /**
      * Removes a task from the side stage.
      */
     oneway void removeFromSideStage(int taskId) = 4;
 
     /**
-     * Removes the split-screen stages.
+     * Removes the split-screen stages and leaving indicated task to top. Passing INVALID_TASK_ID
+     * to indicate leaving no top task after leaving split-screen.
      */
-    oneway void exitSplitScreen() = 5;
+    oneway void exitSplitScreen(int toTopTaskId) = 5;
 
     /**
      * @param exitSplitScreenOnHide if to exit split-screen if both stages are not visible.
@@ -62,24 +60,52 @@ interface ISplitScreen {
     /**
      * Starts a task in a stage.
      */
-    oneway void startTask(int taskId, int stage, int position, in Bundle options) = 7;
+    oneway void startTask(int taskId, int position, in Bundle options) = 7;
 
     /**
      * Starts a shortcut in a stage.
      */
-    oneway void startShortcut(String packageName, String shortcutId, int stage, int position,
+    oneway void startShortcut(String packageName, String shortcutId, int position,
             in Bundle options, in UserHandle user) = 8;
 
     /**
      * Starts an activity in a stage.
      */
-    oneway void startIntent(in PendingIntent intent, in Intent fillInIntent, int stage,
-            int position, in Bundle options) = 9;
+    oneway void startIntent(in PendingIntent intent, in Intent fillInIntent, int position,
+            in Bundle options) = 9;
 
     /**
-     * Starts tasks simultaneously in one transition. The first task in the list will be in the
-     * main-stage and on the left/top.
+     * Starts tasks simultaneously in one transition.
      */
     oneway void startTasks(int mainTaskId, in Bundle mainOptions, int sideTaskId,
-            in Bundle sideOptions, int sidePosition, in IRemoteTransition remoteTransition) = 10;
+            in Bundle sideOptions, int sidePosition, float splitRatio,
+            in RemoteTransition remoteTransition) = 10;
+
+    /**
+     * Version of startTasks using legacy transition system.
+     */
+    oneway void startTasksWithLegacyTransition(int mainTaskId, in Bundle mainOptions,
+            int sideTaskId, in Bundle sideOptions, int sidePosition,
+            float splitRatio, in RemoteAnimationAdapter adapter) = 11;
+
+    /**
+     * Start a pair of intent and task using legacy transition system.
+     */
+    oneway void startIntentAndTaskWithLegacyTransition(in PendingIntent pendingIntent,
+            in Intent fillInIntent, int taskId, in Bundle mainOptions,in Bundle sideOptions,
+            int sidePosition, float splitRatio, in RemoteAnimationAdapter adapter) = 12;
+
+    /**
+     * Blocking call that notifies and gets additional split-screen targets when entering
+     * recents (for example: the dividerBar).
+     * @param appTargets apps that will be re-parented to display area
+     */
+    RemoteAnimationTarget[] onGoingToRecentsLegacy(in RemoteAnimationTarget[] appTargets) = 13;
+
+    /**
+     * Blocking call that notifies and gets additional split-screen targets when entering
+     * recents (for example: the dividerBar). Different than the method above in that this one
+     * does not expect split to currently be running.
+     */
+    RemoteAnimationTarget[] onStartingSplitLegacy(in RemoteAnimationTarget[] appTargets) = 14;
 }

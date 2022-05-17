@@ -20,6 +20,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * A test support class used for tracking a piece of state in test objects like fakes and mocks.
@@ -77,6 +78,11 @@ public class TestState<T> {
     /** Asserts the number of times {@link #set} has been called. */
     public void assertChangeCount(int expectedCount) {
         assertEquals(expectedCount, getChangeCount());
+    }
+
+    /** Asserts the value has been {@link #set} to the expected values in the order given. */
+    public void assertChanges(T... expected) {
+        assertEquals(Arrays.asList(expected), mValues);
     }
 
     /**

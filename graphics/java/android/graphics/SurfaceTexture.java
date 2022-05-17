@@ -17,7 +17,9 @@
 package android.graphics;
 
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.hardware.DataSpace.NamedDataSpace;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -288,7 +290,7 @@ public class SurfaceTexture {
      * context at a time.
      *
      * @param texName The name of the OpenGL ES texture that will be created.  This texture name
-     * must be unusued in the OpenGL ES context that is current on the calling thread.
+     * must be unused in the OpenGL ES context that is current on the calling thread.
      */
     public void attachToGLContext(int texName) {
         int err = nativeAttachToGLContext(texName);
@@ -345,6 +347,14 @@ public class SurfaceTexture {
 
     public long getTimestamp() {
         return nativeGetTimestamp();
+    }
+
+    /**
+     * Retrieve the dataspace associated with the texture image.
+     */
+    @SuppressLint("MethodNameUnits")
+    public @NamedDataSpace int getDataSpace() {
+        return nativeGetDataSpace();
     }
 
     /**
@@ -416,6 +426,7 @@ public class SurfaceTexture {
     private native void nativeFinalize();
     private native void nativeGetTransformMatrix(float[] mtx);
     private native long nativeGetTimestamp();
+    private native int nativeGetDataSpace();
     private native void nativeSetDefaultBufferSize(int width, int height);
     private native void nativeUpdateTexImage();
     private native void nativeReleaseTexImage();

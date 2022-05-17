@@ -17,12 +17,14 @@
 package com.android.server.devicepolicy;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.os.FileUtils;
 import android.os.PersistableBundle;
+import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
@@ -68,6 +70,7 @@ class DevicePolicyData {
     private static final String TAG_PASSWORD_VALIDITY = "password-validity";
     private static final String TAG_PASSWORD_TOKEN_HANDLE = "password-token";
     private static final String TAG_PROTECTED_PACKAGES = "protected-packages";
+    private static final String TAG_BYPASS_ROLE_QUALIFICATIONS = "bypass-role-qualifications";
     private static final String ATTR_VALUE = "value";
     private static final String ATTR_ALIAS = "alias";
     private static final String ATTR_ID = "id";
@@ -83,7 +86,7 @@ class DevicePolicyData {
     private static final String ATTR_NEW_USER_DISCLAIMER = "new-user-disclaimer";
 
     // Values of ATTR_NEW_USER_DISCLAIMER
-    static final String NEW_USER_DISCLAIMER_SHOWN = "shown";
+    static final String NEW_USER_DISCLAIMER_ACKNOWLEDGED = "acked";
     static final String NEW_USER_DISCLAIMER_NOT_NEEDED = "not_needed";
     static final String NEW_USER_DISCLAIMER_NEEDED = "needed";
 
@@ -106,6 +109,8 @@ class DevicePolicyData {
     int mPasswordOwner = -1;
     long mLastMaximumTimeToLock = -1;
     boolean mUserSetupComplete = false;
+    boolean mBypassDevicePolicyManagementRoleQualifications = false;
+    String mCurrentRoleHolder;
     boolean mPaired = false;
     int mUserProvisioningState;
     int mPermissionPolicy;
@@ -125,8 +130,10 @@ class DevicePolicyData {
     // This is the list of component allowed to start lock task mode.
     List<String> mLockTaskPackages = new ArrayList<>();
 
-    // List of packages protected by device owner
-    List<String> mUserControlDisabledPackages = new ArrayList<>();
+    /** @deprecated moved to {@link ActiveAdmin#protectedPackages}. */
+    @Deprecated
+    @Nullable
+    List<String> mUserControlDisabledPackages;
 
     // Bitfield of feature flags to be enabled during LockTask mode.
     // We default on the power button menu, in order to be consistent with pre-P behaviour.
@@ -360,17 +367,16 @@ class DevicePolicyData {
                 out.endTag(null, TAG_OWNER_INSTALLED_CA_CERT);
             }
 
-            for (int i = 0, size = policyData.mUserControlDisabledPackages.size(); i < size; i++) {
-                String packageName = policyData.mUserControlDisabledPackages.get(i);
-                out.startTag(null, TAG_PROTECTED_PACKAGES);
-                out.attribute(null, ATTR_NAME, packageName);
-                out.endTag(null, TAG_PROTECTED_PACKAGES);
-            }
-
             if (policyData.mAppsSuspended) {
                 out.startTag(null, TAG_APPS_SUSPENDED);
                 out.attributeBoolean(null, ATTR_VALUE, policyData.mAppsSuspended);
                 out.endTag(null, TAG_APPS_SUSPENDED);
+            }
+
+            if (policyData.mBypassDevicePolicyManagementRoleQualifications) {
+                out.startTag(null, TAG_BYPASS_ROLE_QUALIFICATIONS);
+                out.attribute(null, ATTR_VALUE, policyData.mCurrentRoleHolder);
+                out.endTag(null, TAG_BYPASS_ROLE_QUALIFICATIONS);
             }
 
             out.endTag(null, "policies");
@@ -463,7 +469,7 @@ class DevicePolicyData {
             policy.mAdminMap.clear();
             policy.mAffiliationIds.clear();
             policy.mOwnerInstalledCaCerts.clear();
-            policy.mUserControlDisabledPackages.clear();
+            policy.mUserControlDisabledPackages = null;
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
                    && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
                 if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
@@ -551,12 +557,19 @@ class DevicePolicyData {
                     policy.mCurrentInputMethodSet = true;
                 } else if (TAG_OWNER_INSTALLED_CA_CERT.equals(tag)) {
                     policy.mOwnerInstalledCaCerts.add(parser.getAttributeValue(null, ATTR_ALIAS));
-                } else if (TAG_PROTECTED_PACKAGES.equals(tag)) {
-                    policy.mUserControlDisabledPackages.add(
-                            parser.getAttributeValue(null, ATTR_NAME));
                 } else if (TAG_APPS_SUSPENDED.equals(tag)) {
                     policy.mAppsSuspended =
                             parser.getAttributeBoolean(null, ATTR_VALUE, false);
+                } else if (TAG_BYPASS_ROLE_QUALIFICATIONS.equals(tag)) {
+                    policy.mBypassDevicePolicyManagementRoleQualifications = true;
+                    policy.mCurrentRoleHolder =  parser.getAttributeValue(null, ATTR_VALUE);
+                // Deprecated tags below
+                } else if (TAG_PROTECTED_PACKAGES.equals(tag)) {
+                    if (policy.mUserControlDisabledPackages == null) {
+                        policy.mUserControlDisabledPackages = new ArrayList<>();
+                    }
+                    policy.mUserControlDisabledPackages.add(
+                            parser.getAttributeValue(null, ATTR_NAME));
                 } else {
                     Slogf.w(TAG, "Unknown tag: %s", tag);
                     XmlUtils.skipCurrentTag(parser);
@@ -613,6 +626,28 @@ class DevicePolicyData {
         }
     }
 
+    boolean isNewUserDisclaimerAcknowledged() {
+        if (mNewUserDisclaimer == null) {
+            if (mUserId == UserHandle.USER_SYSTEM) {
+                return true;
+            }
+            Slogf.w(TAG, "isNewUserDisclaimerAcknowledged(%d): mNewUserDisclaimer is null",
+                    mUserId);
+            return false;
+        }
+        switch (mNewUserDisclaimer) {
+            case NEW_USER_DISCLAIMER_ACKNOWLEDGED:
+            case NEW_USER_DISCLAIMER_NOT_NEEDED:
+                return true;
+            case NEW_USER_DISCLAIMER_NEEDED:
+                return false;
+            default:
+                Slogf.w(TAG, "isNewUserDisclaimerAcknowledged(%d): invalid value %d", mUserId,
+                        mNewUserDisclaimer);
+                return false;
+        }
+    }
+
     void dump(IndentingPrintWriter pw) {
         pw.println();
         pw.println("Enabled Device Admins (User " + mUserId + ", provisioningState: "
@@ -638,8 +673,7 @@ class DevicePolicyData {
         pw.println();
         pw.increaseIndent();
         pw.print("mPasswordOwner="); pw.println(mPasswordOwner);
-        pw.print("mUserControlDisabledPackages=");
-        pw.println(mUserControlDisabledPackages);
+        pw.print("mPasswordTokenHandle="); pw.println(Long.toHexString(mPasswordTokenHandle));
         pw.print("mAppsSuspended="); pw.println(mAppsSuspended);
         pw.print("mUserSetupComplete="); pw.println(mUserSetupComplete);
         pw.print("mAffiliationIds="); pw.println(mAffiliationIds);

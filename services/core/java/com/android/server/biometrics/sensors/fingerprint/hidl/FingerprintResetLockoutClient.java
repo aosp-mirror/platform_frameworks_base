@@ -18,10 +18,12 @@ package com.android.server.biometrics.sensors.fingerprint.hidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
-import android.hardware.biometrics.BiometricsProtoEnums;
 
 import com.android.server.biometrics.BiometricsProto;
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
+import com.android.server.biometrics.sensors.ClientMonitorCallback;
 
 /**
  * Clears lockout, which is handled in the framework (and not the HAL) for the
@@ -32,19 +34,24 @@ public class FingerprintResetLockoutClient extends BaseClientMonitor {
     @NonNull final LockoutFrameworkImpl mLockoutTracker;
 
     public FingerprintResetLockoutClient(@NonNull Context context, int userId,
-            @NonNull String owner, int sensorId, @NonNull LockoutFrameworkImpl lockoutTracker) {
+            @NonNull String owner, int sensorId,
+            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
+            @NonNull LockoutFrameworkImpl lockoutTracker) {
         super(context, null /* token */, null /* listener */, userId, owner, 0 /* cookie */,
-                sensorId, BiometricsProtoEnums.MODALITY_UNKNOWN,
-                BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN);
+                sensorId, logger, biometricContext);
         mLockoutTracker = lockoutTracker;
     }
 
     @Override
-    public void start(@NonNull Callback callback) {
+    public void start(@NonNull ClientMonitorCallback callback) {
         super.start(callback);
         mLockoutTracker.resetFailedAttemptsForUser(true /* clearAttemptCounter */,
                 getTargetUserId());
         callback.onClientFinished(this, true /* success */);
+    }
+
+    public boolean interruptsPrecedingClients() {
+        return true;
     }
 
     @Override

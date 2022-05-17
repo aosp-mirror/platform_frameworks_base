@@ -928,7 +928,7 @@ public class MediaMetadataRetriever implements AutoCloseable {
     private @NonNull List<Bitmap> getFramesAtIndexInternal(
             int frameIndex, int numFrames, @Nullable BitmapParams params) {
         if (!"yes".equals(extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_VIDEO))) {
-            throw new IllegalStateException("Does not contail video or image sequences");
+            throw new IllegalStateException("Does not contain video or image sequences");
         }
         int frameCount = Integer.parseInt(
                 extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_FRAME_COUNT));
@@ -1046,7 +1046,7 @@ public class MediaMetadataRetriever implements AutoCloseable {
 
     private Bitmap getImageAtIndexInternal(int imageIndex, @Nullable BitmapParams params) {
         if (!"yes".equals(extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_IMAGE))) {
-            throw new IllegalStateException("Does not contail still images");
+            throw new IllegalStateException("Does not contain still images");
         }
 
         String imageCount = extractMetadata(MediaMetadataRetriever.METADATA_KEY_IMAGE_COUNT);
@@ -1073,16 +1073,28 @@ public class MediaMetadataRetriever implements AutoCloseable {
     @UnsupportedAppUsage
     private native byte[] getEmbeddedPicture(int pictureType);
 
+    /**
+     * Releases any acquired resources. Call it when done with the object.
+     *
+     * @throws IOException When an {@link IOException} is thrown while closing a {@link
+     * MediaDataSource} passed to {@link #setDataSource(MediaDataSource)}. This throws clause exists
+     * since API {@link android.os.Build.VERSION_CODES#TIRAMISU}, but this method can throw in
+     * earlier API versions where the exception is not declared.
+     */
     @Override
-    public void close() {
+    public void close() throws IOException {
         release();
     }
 
     /**
-     * Call it when one is done with the object. This method releases the memory
-     * allocated internally.
+     * Releases any acquired resources. Call it when done with the object.
+     *
+     * @throws IOException When an {@link IOException} is thrown while closing a {@link
+     * MediaDataSource} passed to {@link #setDataSource(MediaDataSource)}. This throws clause exists
+     * since API {@link android.os.Build.VERSION_CODES#TIRAMISU}, but this method can throw in
+     * earlier API versions where the exception is not declared.
      */
-    public native void release();
+    public native void release() throws IOException;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private native void native_setup();
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)

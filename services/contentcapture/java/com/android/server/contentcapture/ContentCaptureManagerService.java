@@ -223,7 +223,7 @@ public final class ContentCaptureManagerService extends
     @Override // from AbstractMasterSystemService
     protected ContentCapturePerUserService newServiceLocked(@UserIdInt int resolvedUserId,
             boolean disabled) {
-        return new ContentCapturePerUserService(this, mLock, disabled, resolvedUserId);
+        return new ContentCapturePerUserService(this, mLock, disabled, resolvedUserId, mHandler);
     }
 
     @Override // from SystemService
@@ -730,7 +730,7 @@ public final class ContentCaptureManagerService extends
                         String serviceName = mServiceNameResolver.getServiceName(userId);
                         ContentCaptureMetricsLogger.writeServiceEvent(
                                 EVENT__DATA_SHARE_ERROR_CONCURRENT_REQUEST,
-                                serviceName, request.getPackageName());
+                                serviceName);
                         clientAdapter.error(
                                 ContentCaptureManager.DATA_SHARE_ERROR_CONCURRENT_REQUEST);
                     } catch (RemoteException e) {
@@ -1072,26 +1072,18 @@ public final class ContentCaptureManagerService extends
             ParcelFileDescriptor sourceOut = servicePipe.second;
             ParcelFileDescriptor sinkOut = servicePipe.first;
 
-            mParentService.mPackagesWithShareRequests.add(mDataShareRequest.getPackageName());
-
-            try {
-                mClientAdapter.write(sourceIn);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to call write() the client operation", e);
-                sendErrorSignal(mClientAdapter, serviceAdapter,
-                        ContentCaptureManager.DATA_SHARE_ERROR_UNKNOWN);
-                logServiceEvent(
-                        CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__DATA_SHARE_ERROR_CLIENT_PIPE_FAIL);
-                return;
+            synchronized (mParentService.mLock) {
+                mParentService.mPackagesWithShareRequests.add(mDataShareRequest.getPackageName());
             }
-            try {
-                serviceAdapter.start(sinkOut);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to call start() the service operation", e);
+
+            if (!setUpSharingPipeline(mClientAdapter, serviceAdapter, sourceIn, sinkOut)) {
                 sendErrorSignal(mClientAdapter, serviceAdapter,
                         ContentCaptureManager.DATA_SHARE_ERROR_UNKNOWN);
-                logServiceEvent(
-                        CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__DATA_SHARE_ERROR_SERVICE_PIPE_FAIL);
+                bestEffortCloseFileDescriptors(sourceIn, sinkIn, sourceOut, sinkOut);
+                synchronized (mParentService.mLock) {
+                    mParentService.mPackagesWithShareRequests
+                        .remove(mDataShareRequest.getPackageName());
+                }
                 return;
             }
 
@@ -1182,6 +1174,32 @@ public final class ContentCaptureManagerService extends
                     Slog.w(TAG, "Failed to call error() the client operation", e2);
                 }
             }
+        }
+
+        private boolean setUpSharingPipeline(
+                IDataShareWriteAdapter clientAdapter,
+                IDataShareReadAdapter serviceAdapter,
+                ParcelFileDescriptor sourceIn,
+                ParcelFileDescriptor sinkOut) {
+            try {
+                clientAdapter.write(sourceIn);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to call write() the client operation", e);
+                logServiceEvent(
+                        CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__DATA_SHARE_ERROR_CLIENT_PIPE_FAIL);
+                return false;
+            }
+
+            try {
+                serviceAdapter.start(sinkOut);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to call start() the service operation", e);
+                logServiceEvent(
+                        CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__DATA_SHARE_ERROR_SERVICE_PIPE_FAIL);
+                return false;
+            }
+
+            return true;
         }
 
         private void enforceDataSharingTtl(ParcelFileDescriptor sourceIn,
@@ -1285,8 +1303,7 @@ public final class ContentCaptureManagerService extends
         private void logServiceEvent(int eventType) {
             int userId = UserHandle.getCallingUserId();
             String serviceName = mParentService.mServiceNameResolver.getServiceName(userId);
-            ContentCaptureMetricsLogger.writeServiceEvent(eventType, serviceName,
-                    mDataShareRequest.getPackageName());
+            ContentCaptureMetricsLogger.writeServiceEvent(eventType, serviceName);
         }
     }
 }

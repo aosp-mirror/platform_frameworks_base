@@ -29,12 +29,6 @@ public interface BubbleViewProvider {
     @Nullable BubbleExpandedView getExpandedView();
 
     /**
-     * Sets the alpha of the expanded view content. This will be applied to both the expanded view
-     * container itself (the manage button, etc.) as well as the TaskView within it.
-     */
-    void setExpandedContentAlpha(float alpha);
-
-    /**
      * Sets whether the contents of the bubble's TaskView should be visible.
      */
     void setTaskViewVisibility(boolean visible);
@@ -48,6 +42,9 @@ public interface BubbleViewProvider {
 
     /** App badge drawable to draw above bubble icon. */
     @Nullable Bitmap getAppBadge();
+
+    /** Base app badge drawable without any markings. */
+    @Nullable Bitmap getRawAppBadge();
 
     /** Path of normalized bubble icon to draw dot on. */
     Path getDotPath();

@@ -1,6 +1,1 @@
-# Use this reviewer by default.
-platform-compat-eng+reviews@google.com
-
-andreionea@google.com
-mathewi@google.com
-satayev@google.com
+include tools/platform-compat:/OWNERS

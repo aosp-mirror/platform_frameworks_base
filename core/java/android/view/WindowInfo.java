@@ -16,6 +16,8 @@
 
 package android.view;
 
+import android.app.ActivityTaskManager;
+import android.graphics.Matrix;
 import android.graphics.Region;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -51,6 +53,12 @@ public class WindowInfo implements Parcelable {
     public boolean inPictureInPicture;
     public boolean hasFlagWatchOutsideTouch;
     public int displayId = Display.INVALID_DISPLAY;
+    public int taskId = ActivityTaskManager.INVALID_TASK_ID;
+    // The matrix applied to the bounds in window coordinate to get the corresponding values in
+    // screen coordinates.
+    public float[] mTransformMatrix = new float[9];
+
+    public MagnificationSpec mMagnificationSpec = new MagnificationSpec();
 
     private WindowInfo() {
         /* do nothing - hide constructor */
@@ -67,6 +75,7 @@ public class WindowInfo implements Parcelable {
     public static WindowInfo obtain(WindowInfo other) {
         WindowInfo window = obtain();
         window.displayId = other.displayId;
+        window.taskId = other.taskId;
         window.type = other.type;
         window.layer = other.layer;
         window.token = other.token;
@@ -78,6 +87,9 @@ public class WindowInfo implements Parcelable {
         window.accessibilityIdOfAnchor = other.accessibilityIdOfAnchor;
         window.inPictureInPicture = other.inPictureInPicture;
         window.hasFlagWatchOutsideTouch = other.hasFlagWatchOutsideTouch;
+        for (int i = 0; i < window.mTransformMatrix.length; i++) {
+            window.mTransformMatrix[i] = other.mTransformMatrix[i];
+        }
 
         if (other.childTokens != null && !other.childTokens.isEmpty()) {
             if (window.childTokens == null) {
@@ -86,7 +98,7 @@ public class WindowInfo implements Parcelable {
                 window.childTokens.addAll(other.childTokens);
             }
         }
-
+        window.mMagnificationSpec.setTo(other.mMagnificationSpec);
         return window;
     }
 
@@ -103,6 +115,7 @@ public class WindowInfo implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeInt(displayId);
+        parcel.writeInt(taskId);
         parcel.writeInt(type);
         parcel.writeInt(layer);
         parcel.writeStrongBinder(token);
@@ -114,6 +127,7 @@ public class WindowInfo implements Parcelable {
         parcel.writeLong(accessibilityIdOfAnchor);
         parcel.writeInt(inPictureInPicture ? 1 : 0);
         parcel.writeInt(hasFlagWatchOutsideTouch ? 1 : 0);
+        parcel.writeFloatArray(mTransformMatrix);
 
         if (childTokens != null && !childTokens.isEmpty()) {
             parcel.writeInt(1);
@@ -121,6 +135,7 @@ public class WindowInfo implements Parcelable {
         } else {
             parcel.writeInt(0);
         }
+        mMagnificationSpec.writeToParcel(parcel, flags);
     }
 
     @Override
@@ -129,6 +144,7 @@ public class WindowInfo implements Parcelable {
         builder.append("WindowInfo[");
         builder.append("title=").append(title);
         builder.append(", displayId=").append(displayId);
+        builder.append(", taskId=").append(taskId);
         builder.append(", type=").append(type);
         builder.append(", layer=").append(layer);
         builder.append(", token=").append(token);
@@ -140,12 +156,17 @@ public class WindowInfo implements Parcelable {
         builder.append(", accessibility anchor=").append(accessibilityIdOfAnchor);
         builder.append(", pictureInPicture=").append(inPictureInPicture);
         builder.append(", watchOutsideTouch=").append(hasFlagWatchOutsideTouch);
+        Matrix matrix = new Matrix();
+        matrix.setValues(mTransformMatrix);
+        builder.append(", mTransformMatrix=").append(matrix);
+        builder.append(", mMagnificationSpec=").append(mMagnificationSpec);
         builder.append(']');
         return builder.toString();
     }
 
     private void initFromParcel(Parcel parcel) {
         displayId = parcel.readInt();
+        taskId = parcel.readInt();
         type = parcel.readInt();
         layer = parcel.readInt();
         token = parcel.readStrongBinder();
@@ -157,7 +178,7 @@ public class WindowInfo implements Parcelable {
         accessibilityIdOfAnchor = parcel.readLong();
         inPictureInPicture = (parcel.readInt() == 1);
         hasFlagWatchOutsideTouch = (parcel.readInt() == 1);
-
+        parcel.readFloatArray(mTransformMatrix);
         final boolean hasChildren = (parcel.readInt() == 1);
         if (hasChildren) {
             if (childTokens == null) {
@@ -165,10 +186,12 @@ public class WindowInfo implements Parcelable {
             }
             parcel.readBinderList(childTokens);
         }
+        mMagnificationSpec = MagnificationSpec.CREATOR.createFromParcel(parcel);
     }
 
     private void clear() {
         displayId = Display.INVALID_DISPLAY;
+        taskId = ActivityTaskManager.INVALID_TASK_ID;
         type = 0;
         layer = 0;
         token = null;
@@ -181,6 +204,10 @@ public class WindowInfo implements Parcelable {
         }
         inPictureInPicture = false;
         hasFlagWatchOutsideTouch = false;
+        for (int i = 0; i < mTransformMatrix.length; i++) {
+            mTransformMatrix[i] = 0;
+        }
+        mMagnificationSpec.clear();
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<WindowInfo> CREATOR =

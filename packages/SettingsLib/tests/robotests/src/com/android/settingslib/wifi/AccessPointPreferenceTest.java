@@ -19,11 +19,15 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
+import android.net.wifi.WifiManager;
+
+import androidx.test.core.app.ApplicationProvider;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -36,7 +40,7 @@ import org.robolectric.RuntimeEnvironment;
 @RunWith(RobolectricTestRunner.class)
 public class AccessPointPreferenceTest {
 
-    private Context mContext = RuntimeEnvironment.application;
+    private Context mContext;
 
     @Mock
     private AccessPoint mockAccessPoint;
@@ -53,6 +57,8 @@ public class AccessPointPreferenceTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        mContext = spy(ApplicationProvider.getApplicationContext());
+        when(mContext.getSystemService(Context.WIFI_SERVICE)).thenReturn(mock(WifiManager.class));
 
         when(mockIconInjector.getIcon(anyInt())).thenReturn(new ColorDrawable());
     }

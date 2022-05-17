@@ -230,6 +230,13 @@ public class TileUtils {
     public static final String META_DATA_KEY_PROFILE = "com.android.settings.profile";
 
     /**
+     * Name of the meta-data item that should be set in the AndroidManifest.xml
+     * to specify whether the {@link android.app.Activity} should be launched in a separate task.
+     * This should be a boolean value {@code true} or {@code false}, set using {@code android:value}
+     */
+    public static final String META_DATA_NEW_TASK = "com.android.settings.new_task";
+
+    /**
      * Build a list of DashboardCategory.
      */
     public static List<DashboardCategory> getCategories(Context context,

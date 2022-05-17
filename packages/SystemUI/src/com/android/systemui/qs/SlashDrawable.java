@@ -60,7 +60,9 @@ public class SlashDrawable extends Drawable {
     private final RectF mSlashRect = new RectF(0, 0, 0, 0);
     private float mRotation;
     private boolean mSlashed;
+    @Nullable
     private Mode mTintMode;
+    @Nullable
     private ColorStateList mTintList;
     private boolean mAnimationEnabled = true;
 

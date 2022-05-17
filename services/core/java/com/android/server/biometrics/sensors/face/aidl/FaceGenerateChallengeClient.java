@@ -19,31 +19,36 @@ package com.android.server.biometrics.sensors.face.aidl;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.face.IFace;
-import android.hardware.biometrics.face.ISession;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.GenerateChallengeClient;
+
+import java.util.function.Supplier;
 
 /**
  * Face-specific generateChallenge client for the {@link IFace} AIDL HAL interface.
  */
-public class FaceGenerateChallengeClient extends GenerateChallengeClient<ISession> {
+public class FaceGenerateChallengeClient extends GenerateChallengeClient<AidlSession> {
     private static final String TAG = "FaceGenerateChallengeClient";
 
     FaceGenerateChallengeClient(@NonNull Context context,
-            @NonNull LazyDaemon<ISession> lazyDaemon, @NonNull IBinder token,
+            @NonNull Supplier<AidlSession> lazyDaemon, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, int userId, @NonNull String owner,
-            int sensorId) {
-        super(context, lazyDaemon, token, listener, userId, owner, sensorId);
+            int sensorId, @NonNull BiometricLogger logger,
+            @NonNull BiometricContext biometricContext) {
+        super(context, lazyDaemon, token, listener, userId, owner, sensorId, logger,
+                biometricContext);
     }
 
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon().generateChallenge();
+            getFreshDaemon().getSession().generateChallenge();
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to generateChallenge", e);
             mCallback.onClientFinished(this, false /* success */);

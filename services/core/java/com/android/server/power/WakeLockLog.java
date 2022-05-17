@@ -106,6 +106,7 @@ final class WakeLockLog {
      */
     private static final int FLAG_ON_AFTER_RELEASE = 0x8;
     private static final int FLAG_ACQUIRE_CAUSES_WAKEUP = 0x10;
+    private static final int FLAG_SYSTEM_WAKELOCK = 0x20;
 
     private static final int MASK_LOWER_6_BITS = 0x3F;
     private static final int MASK_LOWER_7_BITS = 0x7F;
@@ -296,6 +297,9 @@ final class WakeLockLog {
         if ((flags & PowerManager.ON_AFTER_RELEASE) != 0) {
             newFlags |= FLAG_ON_AFTER_RELEASE;
         }
+        if ((flags & PowerManager.SYSTEM_WAKELOCK) != 0) {
+            newFlags |= FLAG_SYSTEM_WAKELOCK;
+        }
         return newFlags;
     }
 
@@ -454,6 +458,9 @@ final class WakeLockLog {
             }
             if ((flags & FLAG_ACQUIRE_CAUSES_WAKEUP) == FLAG_ACQUIRE_CAUSES_WAKEUP) {
                 sb.append(",acq-causes-wake");
+            }
+            if ((flags & FLAG_SYSTEM_WAKELOCK) == FLAG_SYSTEM_WAKELOCK) {
+                sb.append(",system-wakelock");
             }
         }
     }

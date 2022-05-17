@@ -139,6 +139,33 @@ public class StatusBarNotification implements Parcelable {
         this.groupKey = groupKey();
     }
 
+    /**
+     * @hide
+     */
+    public static int getUidFromKey(@NonNull String key) {
+        String[] parts = key.split("\\|");
+        if (parts.length >= 5) {
+            try {
+                int uid = Integer.parseInt(parts[4]);
+                return uid;
+            } catch (NumberFormatException e) {
+                return -1;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * @hide
+     */
+    public static String getPkgFromKey(@NonNull String key) {
+        String[] parts = key.split("\\|");
+        if (parts.length >= 2) {
+            return parts[1];
+        }
+        return null;
+    }
+
     private String key() {
         String sbnKey = user.getIdentifier() + "|" + pkg + "|" + id + "|" + tag + "|" + uid;
         if (overrideGroupKey != null && getNotification().isGroupSummary()) {
@@ -436,7 +463,7 @@ public class StatusBarNotification implements Parcelable {
             try {
                 ApplicationInfo ai = context.getPackageManager()
                         .getApplicationInfoAsUser(pkg, PackageManager.MATCH_UNINSTALLED_PACKAGES,
-                                getUserId());
+                                getNormalizedUserId());
                 mContext = context.createApplicationContext(ai,
                         Context.CONTEXT_RESTRICTED);
             } catch (PackageManager.NameNotFoundException e) {

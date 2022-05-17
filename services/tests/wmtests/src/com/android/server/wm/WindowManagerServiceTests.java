@@ -46,6 +46,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.pm.PackageManager;
 import android.os.Binder;
@@ -56,6 +57,7 @@ import android.platform.test.annotations.Presubmit;
 import android.view.IWindowSessionCallback;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
+import android.view.InsetsVisibilities;
 import android.view.View;
 import android.view.WindowManager;
 
@@ -68,7 +70,7 @@ import org.junit.runner.RunWith;
 
 /**
  * Build/Install/Run:
- *  atest WmTests:WindowManagerServiceTests
+ * atest WmTests:WindowManagerServiceTests
  */
 @SmallTest
 @Presubmit
@@ -107,9 +109,9 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         Task tappedTask = createTaskInRootTask(tappedRootTask, 0 /* userId */);
         spyOn(mWm.mAtmService);
 
-        mWm.handleTaskFocusChange(tappedTask);
+        mWm.handleTaskFocusChange(tappedTask, null /* window */);
 
-        verify(mWm.mAtmService).setFocusedTask(tappedTask.mTaskId);
+        verify(mWm.mAtmService).setFocusedTask(tappedTask.mTaskId, null);
     }
 
     @Test
@@ -128,9 +130,9 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         Task tappedTask = createTaskInRootTask(tappedRootTask, 0 /* userId */);
         spyOn(mWm.mAtmService);
 
-        mWm.handleTaskFocusChange(tappedTask);
+        mWm.handleTaskFocusChange(tappedTask, null /* window */);
 
-        verify(mWm.mAtmService, never()).setFocusedTask(tappedTask.mTaskId);
+        verify(mWm.mAtmService, never()).setFocusedTask(tappedTask.mTaskId, null);
     }
 
     @Test
@@ -151,16 +153,15 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         Task tappedTask = createTaskInRootTask(tappedRootTask, 0 /* userId */);
         spyOn(mWm.mAtmService);
 
-        mWm.handleTaskFocusChange(tappedTask);
+        mWm.handleTaskFocusChange(tappedTask, null /* window */);
 
-        verify(mWm.mAtmService).setFocusedTask(tappedTask.mTaskId);
+        verify(mWm.mAtmService).setFocusedTask(tappedTask.mTaskId, null);
     }
 
     @Test
     public void testDismissKeyguardCanWakeUp() {
         doReturn(true).when(mWm).checkCallingPermission(anyString(), anyString());
-        spyOn(mWm.mAtmInternal);
-        doReturn(true).when(mWm.mAtmInternal).isDreaming();
+        doReturn(true).when(mWm.mAtmService.mKeyguardController).isShowingDream();
         doNothing().when(mWm.mAtmService.mTaskSupervisor).wakeUp(anyString());
         mWm.dismissKeyguard(null, "test-dismiss-keyguard");
         verify(mWm.mAtmService.mTaskSupervisor).wakeUp(anyString());
@@ -265,7 +266,8 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         final WindowToken windowToken = createTestWindowToken(TYPE_INPUT_METHOD, mDefaultDisplay);
         final Session session = new Session(mWm, new IWindowSessionCallback.Stub() {
             @Override
-            public void onAnimatorScaleChanged(float v) throws RemoteException {}
+            public void onAnimatorScaleChanged(float v) throws RemoteException {
+            }
         });
         final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                 TYPE_APPLICATION_ATTACHED_DIALOG);
@@ -278,10 +280,40 @@ public class WindowManagerServiceTests extends WindowTestsBase {
                 .getWindowType(eq(windowContextToken));
 
         mWm.addWindow(session, new TestIWindow(), params, View.VISIBLE, DEFAULT_DISPLAY,
-                UserHandle.USER_SYSTEM, new InsetsState(), null, new InsetsState(),
+                UserHandle.USER_SYSTEM, new InsetsVisibilities(), null, new InsetsState(),
                 new InsetsSourceControl[0]);
 
         verify(mWm.mWindowContextListenerController, never()).registerWindowContainerListener(any(),
                 any(), anyInt(), anyInt(), any());
+    }
+
+    @Test
+    public void testSetInTouchMode_instrumentedProcessGetPermissionToSwitchTouchMode() {
+        boolean currentTouchMode = mWm.getInTouchMode();
+        int callingPid = Binder.getCallingPid();
+        int callingUid = Binder.getCallingUid();
+        doReturn(false).when(mWm).checkCallingPermission(anyString(), anyString(), anyBoolean());
+        when(mWm.mAtmService.instrumentationSourceHasPermission(callingPid,
+                android.Manifest.permission.MODIFY_TOUCH_MODE_STATE)).thenReturn(true);
+
+        mWm.setInTouchMode(!currentTouchMode);
+
+        verify(mWm.mInputManager).setInTouchMode(
+                !currentTouchMode, callingPid, callingUid, /* hasPermission= */ true);
+    }
+
+    @Test
+    public void testSetInTouchMode_nonInstrumentedProcessDontGetPermissionToSwitchTouchMode() {
+        boolean currentTouchMode = mWm.getInTouchMode();
+        int callingPid = Binder.getCallingPid();
+        int callingUid = Binder.getCallingUid();
+        doReturn(false).when(mWm).checkCallingPermission(anyString(), anyString(), anyBoolean());
+        when(mWm.mAtmService.instrumentationSourceHasPermission(callingPid,
+                android.Manifest.permission.MODIFY_TOUCH_MODE_STATE)).thenReturn(false);
+
+        mWm.setInTouchMode(!currentTouchMode);
+
+        verify(mWm.mInputManager).setInTouchMode(
+                !currentTouchMode, callingPid, callingUid, /* hasPermission= */ false);
     }
 }

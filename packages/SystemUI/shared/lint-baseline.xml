@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<issues format="5" by="lint 4.1.0" client="cli" variant="all" version="4.1.0">
+<issues format="6" by="lint 7.1.0-dev" type="baseline" client="" name="" variant="all" version="7.1.0-dev">
 
     <issue
         id="NewApi"
@@ -300,12 +300,34 @@
 
     <issue
         id="NewApi"
+        message="Field requires API level 29 (current min is 26): `android.app.TaskInfo#taskId`"
+        errorLine1="        taskId = change.getTaskInfo() != null ? change.getTaskInfo().taskId : -1;"
+        errorLine2="                                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/shared/src/com/android/systemui/shared/system/RemoteAnimationTargetCompat.java"
+            line="192"
+            column="49"/>
+    </issue>
+
+    <issue
+        id="NewApi"
         message="Field requires API level 29 (current min is 26): `android.app.ActivityManager.RunningTaskInfo#isRunning`"
         errorLine1="            isNotInRecents = !change.getTaskInfo().isRunning;"
         errorLine2="                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="frameworks/base/packages/SystemUI/shared/src/com/android/systemui/shared/system/RemoteAnimationTargetCompat.java"
             line="116"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level 29 (current min is 26): `android.app.TaskInfo#isRunning`"
+        errorLine1="            isNotInRecents = !change.getTaskInfo().isRunning;"
+        errorLine2="                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/shared/src/com/android/systemui/shared/system/RemoteAnimationTargetCompat.java"
+            line="210"
             column="31"/>
     </issue>
 
@@ -565,6 +587,17 @@
     <issue
         id="NewApi"
         message="Field requires API level 29 (current min is 26): `android.app.ActivityManager.RunningTaskInfo#taskId`"
+        errorLine1="        onTaskMovedToFront(taskInfo.taskId);"
+        errorLine2="                           ~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/shared/src/com/android/systemui/shared/system/TaskStackChangeListener.java"
+            line="70"
+            column="28"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level 29 (current min is 26): `android.app.TaskInfo#taskId`"
         errorLine1="        onTaskMovedToFront(taskInfo.taskId);"
         errorLine2="                           ~~~~~~~~~~~~~~~">
         <location

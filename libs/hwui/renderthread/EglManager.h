@@ -89,6 +89,7 @@ private:
     static EGLConfig load8BitsConfig(EGLDisplay display, SwapBehavior swapBehavior);
     static EGLConfig loadFP16Config(EGLDisplay display, SwapBehavior swapBehavior);
     static EGLConfig load1010102Config(EGLDisplay display, SwapBehavior swapBehavior);
+    static EGLConfig loadA8Config(EGLDisplay display, SwapBehavior swapBehavior);
 
     void initExtensions();
     void createPBufferSurface();
@@ -100,6 +101,7 @@ private:
     EGLConfig mEglConfig;
     EGLConfig mEglConfigF16;
     EGLConfig mEglConfig1010102;
+    EGLConfig mEglConfigA8;
     EGLContext mEglContext;
     EGLSurface mPBufferSurface;
     EGLSurface mCurrentSurface;

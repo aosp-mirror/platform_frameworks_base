@@ -492,6 +492,13 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
         if (!isFocusable()) return false;
         // If it is not iconified, then give the focus to the text field
         if (!isIconified()) {
+            if (direction == FOCUS_BACKWARD) {
+                final View found = focusSearch(FOCUS_BACKWARD);
+                if (found != null) {
+                    return found.requestFocus(FOCUS_BACKWARD, previouslyFocusedRect);
+                }
+                return false;
+            }
             boolean result = mSearchSrcTextView.requestFocus(direction, previouslyFocusedRect);
             if (result) {
                 updateViewsVisibility(false);

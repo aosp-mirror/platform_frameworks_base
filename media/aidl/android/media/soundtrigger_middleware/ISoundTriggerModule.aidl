@@ -15,11 +15,11 @@
  */
 package android.media.soundtrigger_middleware;
 
-import android.media.soundtrigger_middleware.ModelParameter;
-import android.media.soundtrigger_middleware.ModelParameterRange;
-import android.media.soundtrigger_middleware.SoundModel;
-import android.media.soundtrigger_middleware.PhraseSoundModel;
-import android.media.soundtrigger_middleware.RecognitionConfig;
+import android.media.soundtrigger.ModelParameter;
+import android.media.soundtrigger.ModelParameterRange;
+import android.media.soundtrigger.SoundModel;
+import android.media.soundtrigger.PhraseSoundModel;
+import android.media.soundtrigger.RecognitionConfig;
 
 /**
  * A sound-trigger module.
@@ -75,6 +75,9 @@ interface ISoundTriggerModule {
      * Once a recognition event is passed to the client, the recognition automatically become
      * inactive, unless the event is of the RecognitionStatus.FORCED kind. Client can also shut down
      * the recognition explicitly, via stopRecognition.
+     *
+     * May throw a ServiceSpecificException with an RESOURCE_CONTENTION status to indicate that
+     * resources required for starting the model are currently consumed by other clients.
      */
     void startRecognition(int modelHandle, in RecognitionConfig config);
 

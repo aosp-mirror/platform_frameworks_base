@@ -18,6 +18,7 @@ package com.android.server.location;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.Manifest.permission.LOCATION_BYPASS;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import android.annotation.IntDef;
@@ -118,6 +119,25 @@ public final class LocationPermissions {
             throw new SecurityException("uid " + uid + " does not have " + ACCESS_FINE_LOCATION
                     + ".");
         }
+    }
+
+    /**
+     * Throws a security exception if the caller does not hold the required bypass permissions.
+     */
+    public static void enforceCallingOrSelfBypassPermission(Context context) {
+        enforceBypassPermission(context, Binder.getCallingUid(), Binder.getCallingPid());
+    }
+
+    /**
+     * Throws a security exception if the given uid/pid does not hold the required bypass
+     * perissions.
+     */
+    public static void enforceBypassPermission(Context context, int uid, int pid) {
+        if (context.checkPermission(LOCATION_BYPASS, pid, uid) == PERMISSION_GRANTED) {
+            return;
+        }
+        throw new SecurityException("uid" + uid + " does not have " + LOCATION_BYPASS
+                + ".");
     }
 
     /**

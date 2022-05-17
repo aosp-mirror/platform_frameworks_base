@@ -303,8 +303,8 @@ bool TableMerger::DoMerge(const Source& src, ResourceTablePackage* src_package, 
           dst_config_value->value = std::move(new_file_ref);
 
         } else {
-          Maybe<std::string> original_comment = (dst_config_value->value)
-              ? dst_config_value->value->GetComment() : Maybe<std::string>();
+          auto original_comment = (dst_config_value->value)
+              ? dst_config_value->value->GetComment() : std::optional<std::string>();
 
           dst_config_value->value = src_config_value->value->Transform(cloner);
 
@@ -349,7 +349,7 @@ bool TableMerger::MergeFile(const ResourceFile& file_desc, bool overlay, io::IFi
   file_ref->file = file;
 
   ResourceTablePackage* pkg = table.FindOrCreatePackage(file_desc.name.package);
-  pkg->FindOrCreateType(file_desc.name.type)
+  pkg->FindOrCreateType(file_desc.name.type.type)
       ->FindOrCreateEntry(file_desc.name.entry)
       ->FindOrCreateValue(file_desc.config, {})
       ->value = std::move(file_ref);

@@ -17,6 +17,7 @@
 package com.android.server.hdmi;
 
 
+import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 import static com.android.server.hdmi.Constants.ADDR_AUDIO_SYSTEM;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
 import static com.android.server.hdmi.SystemAudioAutoInitiationAction.RETRIES_ON_TIMEOUT;
@@ -24,18 +25,14 @@ import static com.android.server.hdmi.SystemAudioAutoInitiationAction.RETRIES_ON
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.media.AudioManager;
-import android.os.Handler;
-import android.os.IPowerManager;
-import android.os.IThermalService;
 import android.os.Looper;
-import android.os.PowerManager;
 import android.os.test.TestLooper;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -44,21 +41,22 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Test for {@link SystemAudioAutoInitiationAction}.
  */
 @SmallTest
+@Presubmit
 @RunWith(JUnit4.class)
 public class SystemAudioAutoInitiationActionTest {
 
     private Context mContextSpy;
     private HdmiControlService mHdmiControlService;
     private FakeNativeWrapper mNativeWrapper;
+    private FakePowerManagerWrapper mPowerManager;
 
     private HdmiCecLocalDeviceTv mHdmiCecLocalDeviceTv;
 
@@ -66,27 +64,14 @@ public class SystemAudioAutoInitiationActionTest {
     private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
     private int mPhysicalAddress;
 
-    @Mock
-    private IPowerManager mIPowerManagerMock;
-    @Mock
-    private IThermalService mIThermalServiceMock;
-
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
 
         Looper myLooper = mTestLooper.getLooper();
-        when(mContextSpy.getSystemService(Context.POWER_SERVICE)).thenAnswer(i ->
-                new PowerManager(mContextSpy, mIPowerManagerMock,
-                mIThermalServiceMock, new Handler(myLooper)));
-        when(mContextSpy.getSystemService(PowerManager.class)).thenAnswer(i ->
-                new PowerManager(mContextSpy, mIPowerManagerMock,
-                mIThermalServiceMock, new Handler(myLooper)));
-        when(mIPowerManagerMock.isInteractive()).thenReturn(true);
 
-        mHdmiControlService = new HdmiControlService(mContextSpy) {
+        mHdmiControlService = new HdmiControlService(mContextSpy, Collections.emptyList(),
+                new FakeAudioDeviceVolumeManagerWrapper()) {
             @Override
             AudioManager getAudioManager() {
                 return new AudioManager() {
@@ -99,18 +84,8 @@ public class SystemAudioAutoInitiationActionTest {
             }
 
             @Override
-            void wakeUp() {
-            }
-
-            @Override
             boolean isPowerStandby() {
                 return false;
-            }
-
-            @Override
-            protected PowerManager getPowerManager() {
-                return new PowerManager(mContextSpy, mIPowerManagerMock,
-                        mIThermalServiceMock, new Handler(myLooper));
             }
 
             @Override
@@ -127,7 +102,6 @@ public class SystemAudioAutoInitiationActionTest {
                 mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setCecController(hdmiCecController);
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
-        mHdmiControlService.setMessageValidator(new HdmiCecMessageValidator(mHdmiControlService));
         mLocalDevices.add(mHdmiCecLocalDeviceTv);
         HdmiPortInfo[] hdmiPortInfos = new HdmiPortInfo[2];
         hdmiPortInfos[0] =
@@ -136,6 +110,9 @@ public class SystemAudioAutoInitiationActionTest {
                 new HdmiPortInfo(2, HdmiPortInfo.PORT_INPUT, 0x2000, true, false, true);
         mNativeWrapper.setPortInfo(hdmiPortInfos);
         mHdmiControlService.initService();
+        mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
+        mPowerManager = new FakePowerManagerWrapper(mContextSpy);
+        mHdmiControlService.setPowerManager(mPowerManager);
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mPhysicalAddress = 0x0000;
         mNativeWrapper.setPhysicalAddress(mPhysicalAddress);
@@ -166,12 +143,16 @@ public class SystemAudioAutoInitiationActionTest {
 
         HdmiCecMessage giveSystemAudioModeStatus =
                 HdmiCecMessageBuilder.buildGiveSystemAudioModeStatus(
-                        mHdmiCecLocalDeviceTv.mAddress, ADDR_AUDIO_SYSTEM);
+                        mHdmiCecLocalDeviceTv.getDeviceInfo().getLogicalAddress(),
+                        ADDR_AUDIO_SYSTEM);
 
         assertThat(mNativeWrapper.getResultMessages()).contains(giveSystemAudioModeStatus);
 
-        HdmiCecMessage reportSystemAudioMode = HdmiCecMessageBuilder.buildReportSystemAudioMode(
-                ADDR_AUDIO_SYSTEM, mHdmiCecLocalDeviceTv.mAddress, true);
+        HdmiCecMessage reportSystemAudioMode =
+                HdmiCecMessageBuilder.buildReportSystemAudioMode(
+                        ADDR_AUDIO_SYSTEM,
+                        mHdmiCecLocalDeviceTv.getDeviceInfo().getLogicalAddress(),
+                        true);
         mHdmiControlService.handleCecCommand(reportSystemAudioMode);
         mTestLooper.dispatchAll();
 
@@ -192,12 +173,16 @@ public class SystemAudioAutoInitiationActionTest {
 
         HdmiCecMessage giveSystemAudioModeStatus =
                 HdmiCecMessageBuilder.buildGiveSystemAudioModeStatus(
-                        mHdmiCecLocalDeviceTv.mAddress, ADDR_AUDIO_SYSTEM);
+                        mHdmiCecLocalDeviceTv.getDeviceInfo().getLogicalAddress(),
+                        ADDR_AUDIO_SYSTEM);
 
         assertThat(mNativeWrapper.getResultMessages()).contains(giveSystemAudioModeStatus);
 
-        HdmiCecMessage reportSystemAudioMode = HdmiCecMessageBuilder.buildReportSystemAudioMode(
-                ADDR_AUDIO_SYSTEM, mHdmiCecLocalDeviceTv.mAddress, true);
+        HdmiCecMessage reportSystemAudioMode =
+                HdmiCecMessageBuilder.buildReportSystemAudioMode(
+                        ADDR_AUDIO_SYSTEM,
+                        mHdmiCecLocalDeviceTv.getDeviceInfo().getLogicalAddress(),
+                        true);
         mHdmiControlService.handleCecCommand(reportSystemAudioMode);
         mTestLooper.dispatchAll();
 
@@ -216,12 +201,16 @@ public class SystemAudioAutoInitiationActionTest {
 
         HdmiCecMessage giveSystemAudioModeStatus =
                 HdmiCecMessageBuilder.buildGiveSystemAudioModeStatus(
-                        mHdmiCecLocalDeviceTv.mAddress, ADDR_AUDIO_SYSTEM);
+                        mHdmiCecLocalDeviceTv.getDeviceInfo().getLogicalAddress(),
+                        ADDR_AUDIO_SYSTEM);
 
         assertThat(mNativeWrapper.getResultMessages()).contains(giveSystemAudioModeStatus);
 
-        HdmiCecMessage reportSystemAudioMode = HdmiCecMessageBuilder.buildReportSystemAudioMode(
-                ADDR_AUDIO_SYSTEM, mHdmiCecLocalDeviceTv.mAddress, false);
+        HdmiCecMessage reportSystemAudioMode =
+                HdmiCecMessageBuilder.buildReportSystemAudioMode(
+                        ADDR_AUDIO_SYSTEM,
+                        mHdmiCecLocalDeviceTv.getDeviceInfo().getLogicalAddress(),
+                        false);
         mHdmiControlService.handleCecCommand(reportSystemAudioMode);
         mTestLooper.dispatchAll();
 
@@ -243,12 +232,16 @@ public class SystemAudioAutoInitiationActionTest {
 
         HdmiCecMessage giveSystemAudioModeStatus =
                 HdmiCecMessageBuilder.buildGiveSystemAudioModeStatus(
-                        mHdmiCecLocalDeviceTv.mAddress, ADDR_AUDIO_SYSTEM);
+                        mHdmiCecLocalDeviceTv.getDeviceInfo().getLogicalAddress(),
+                        ADDR_AUDIO_SYSTEM);
 
         assertThat(mNativeWrapper.getResultMessages()).contains(giveSystemAudioModeStatus);
 
-        HdmiCecMessage reportSystemAudioMode = HdmiCecMessageBuilder.buildReportSystemAudioMode(
-                ADDR_AUDIO_SYSTEM, mHdmiCecLocalDeviceTv.mAddress, true);
+        HdmiCecMessage reportSystemAudioMode =
+                HdmiCecMessageBuilder.buildReportSystemAudioMode(
+                        ADDR_AUDIO_SYSTEM,
+                        mHdmiCecLocalDeviceTv.getDeviceInfo().getLogicalAddress(),
+                        true);
         mHdmiControlService.handleCecCommand(reportSystemAudioMode);
         mTestLooper.dispatchAll();
 
@@ -270,12 +263,16 @@ public class SystemAudioAutoInitiationActionTest {
 
         HdmiCecMessage giveSystemAudioModeStatus =
                 HdmiCecMessageBuilder.buildGiveSystemAudioModeStatus(
-                        mHdmiCecLocalDeviceTv.mAddress, ADDR_AUDIO_SYSTEM);
+                        mHdmiCecLocalDeviceTv.getDeviceInfo().getLogicalAddress(),
+                        ADDR_AUDIO_SYSTEM);
 
         assertThat(mNativeWrapper.getResultMessages()).contains(giveSystemAudioModeStatus);
 
-        HdmiCecMessage reportSystemAudioMode = HdmiCecMessageBuilder.buildReportSystemAudioMode(
-                ADDR_AUDIO_SYSTEM, mHdmiCecLocalDeviceTv.mAddress, false);
+        HdmiCecMessage reportSystemAudioMode =
+                HdmiCecMessageBuilder.buildReportSystemAudioMode(
+                        ADDR_AUDIO_SYSTEM,
+                        mHdmiCecLocalDeviceTv.getDeviceInfo().getLogicalAddress(),
+                        false);
         mHdmiControlService.handleCecCommand(reportSystemAudioMode);
         mTestLooper.dispatchAll();
 
@@ -295,7 +292,8 @@ public class SystemAudioAutoInitiationActionTest {
 
         HdmiCecMessage giveSystemAudioModeStatus =
                 HdmiCecMessageBuilder.buildGiveSystemAudioModeStatus(
-                        mHdmiCecLocalDeviceTv.mAddress, ADDR_AUDIO_SYSTEM);
+                        mHdmiCecLocalDeviceTv.getDeviceInfo().getLogicalAddress(),
+                        ADDR_AUDIO_SYSTEM);
 
         assertThat(mNativeWrapper.getResultMessages()).contains(giveSystemAudioModeStatus);
         mNativeWrapper.clearResultMessages();
@@ -320,7 +318,8 @@ public class SystemAudioAutoInitiationActionTest {
 
         HdmiCecMessage giveSystemAudioModeStatus =
                 HdmiCecMessageBuilder.buildGiveSystemAudioModeStatus(
-                        mHdmiCecLocalDeviceTv.mAddress, ADDR_AUDIO_SYSTEM);
+                        mHdmiCecLocalDeviceTv.getDeviceInfo().getLogicalAddress(),
+                        ADDR_AUDIO_SYSTEM);
         assertThat(mNativeWrapper.getResultMessages()).contains(giveSystemAudioModeStatus);
 
         for (int i = 0; i < RETRIES_ON_TIMEOUT; i++) {

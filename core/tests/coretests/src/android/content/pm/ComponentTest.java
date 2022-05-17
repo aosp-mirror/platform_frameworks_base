@@ -23,6 +23,7 @@ import static android.content.pm.PackageManager.GET_DISABLED_COMPONENTS;
 
 import android.content.ComponentName;
 import android.content.Intent;
+import android.platform.test.annotations.Presubmit;
 import android.test.AndroidTestCase;
 
 import androidx.test.filters.MediumTest;
@@ -48,6 +49,7 @@ import java.util.List;
  * would fix this.
  */
 @Suppress  // Failing.
+@Presubmit
 public class ComponentTest extends AndroidTestCase {
 
     private PackageManager mPackageManager;

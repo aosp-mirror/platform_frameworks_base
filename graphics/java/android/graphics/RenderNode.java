@@ -35,6 +35,7 @@ import libcore.util.NativeAllocationRegistry;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
 
 /**
  * <p>RenderNode is used to build hardware accelerated rendering hierarchies. Each RenderNode
@@ -263,13 +264,27 @@ public final class RenderNode {
      * @hide
      */
     public interface PositionUpdateListener {
-
         /**
          * Called by native by a Rendering Worker thread to update window position
          *
          * @hide
          */
         void positionChanged(long frameNumber, int left, int top, int right, int bottom);
+
+        /**
+         * Called by JNI
+         *
+         * @hide */
+        static boolean callPositionChanged(WeakReference<PositionUpdateListener> weakListener,
+                long frameNumber, int left, int top, int right, int bottom) {
+            final PositionUpdateListener listener = weakListener.get();
+            if (listener != null) {
+                listener.positionChanged(frameNumber, left, top, right, bottom);
+                return true;
+            } else {
+                return false;
+            }
+        }
 
         /**
          * Call to apply a stretch effect to any child SurfaceControl layers
@@ -286,12 +301,47 @@ public final class RenderNode {
                 float childRelativeTop, float childRelativeRight, float childRelativeBottom) { }
 
         /**
+         * Called by JNI
+         *
+         * @hide */
+        static boolean callApplyStretch(WeakReference<PositionUpdateListener> weakListener,
+                long frameNumber, float width, float height,
+                float vecX, float vecY,
+                float maxStretchX, float maxStretchY, float childRelativeLeft,
+                float childRelativeTop, float childRelativeRight, float childRelativeBottom) {
+            final PositionUpdateListener listener = weakListener.get();
+            if (listener != null) {
+                listener.applyStretch(frameNumber, width, height, vecX, vecY, maxStretchX,
+                        maxStretchY, childRelativeLeft, childRelativeTop, childRelativeRight,
+                        childRelativeBottom);
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        /**
          * Called by native on RenderThread to notify that the view is no longer in the
          * draw tree. UI thread is blocked at this point.
          *
          * @hide
          */
         void positionLost(long frameNumber);
+
+        /**
+         * Called by JNI
+         *
+         * @hide */
+        static boolean callPositionLost(WeakReference<PositionUpdateListener> weakListener,
+                long frameNumber) {
+            final PositionUpdateListener listener = weakListener.get();
+            if (listener != null) {
+                listener.positionLost(frameNumber);
+                return true;
+            } else {
+                return false;
+            }
+        }
 
     }
 
@@ -353,7 +403,7 @@ public final class RenderNode {
             comp = comp.with(listener);
         }
         mCompositePositionUpdateListener = comp;
-        nRequestPositionUpdates(mNativeRenderNode, comp);
+        nRequestPositionUpdates(mNativeRenderNode, new WeakReference<>(comp));
     }
 
     /**
@@ -368,7 +418,7 @@ public final class RenderNode {
         if (comp != null) {
             comp = comp.without(listener);
             mCompositePositionUpdateListener = comp;
-            nRequestPositionUpdates(mNativeRenderNode, comp);
+            nRequestPositionUpdates(mNativeRenderNode, new WeakReference<>(comp));
         }
     }
 
@@ -1561,6 +1611,11 @@ public final class RenderNode {
         nEndAllAnimators(mNativeRenderNode);
     }
 
+    /** @hide */
+    public void forceEndAnimators() {
+        nForceEndAnimators(mNativeRenderNode);
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // Regular JNI methods
     ///////////////////////////////////////////////////////////////////////////
@@ -1575,13 +1630,15 @@ public final class RenderNode {
     private static native int nGetAllocatedSize(long renderNode);
 
     private static native void nRequestPositionUpdates(long renderNode,
-            PositionUpdateListener callback);
+            WeakReference<PositionUpdateListener> callback);
 
     // Animations
 
     private static native void nAddAnimator(long renderNode, long animatorPtr);
 
     private static native void nEndAllAnimators(long renderNode);
+
+    private static native void nForceEndAnimators(long renderNode);
 
     ///////////////////////////////////////////////////////////////////////////
     // @CriticalNative methods

@@ -35,10 +35,12 @@ import androidx.annotation.VisibleForTesting;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.demomode.DemoModeCommandReceiver;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
-import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusBarMobileView;
 import com.android.systemui.statusbar.StatusBarWifiView;
@@ -46,9 +48,12 @@ import com.android.systemui.statusbar.StatusIconDisplayable;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.CallIndicatorIconState;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
+import com.android.systemui.util.Assert;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.inject.Inject;
 
 public interface StatusBarIconController {
 
@@ -62,6 +67,8 @@ public interface StatusBarIconController {
     void addIconGroup(IconManager iconManager);
     /** */
     void removeIconGroup(IconManager iconManager);
+    /** Refresh the state of an IconManager by recreating the views */
+    void refreshIconGroup(IconManager iconManager);
     /** */
     void setExternalIcon(String slot);
     /** */
@@ -213,6 +220,20 @@ public interface StatusBarIconController {
             icons.setColor(mColor);
             return icons;
         }
+
+        @SysUISingleton
+        public static class Factory {
+            private final FeatureFlags mFeatureFlags;
+
+            @Inject
+            public Factory(FeatureFlags featureFlags) {
+                mFeatureFlags = featureFlags;
+            }
+
+            public TintedIconManager create(ViewGroup group) {
+                return new TintedIconManager(group, mFeatureFlags);
+            }
+        }
     }
 
     /**
@@ -225,6 +246,7 @@ public interface StatusBarIconController {
         protected final int mIconSize;
         // Whether or not these icons show up in dumpsys
         protected boolean mShouldLog = false;
+        private StatusBarIconController mController;
 
         // Enables SystemUI demo mode to take effect in this group
         protected boolean mDemoable = true;
@@ -249,13 +271,17 @@ public interface StatusBarIconController {
             mDemoable = demoable;
         }
 
-        public void setBlockList(@Nullable List<String> blockList) {
-            mBlockList.clear();
-            if (blockList == null || blockList.isEmpty()) {
-                return;
-            }
+        void setController(StatusBarIconController controller) {
+            mController = controller;
+        }
 
+        public void setBlockList(@Nullable List<String> blockList) {
+            Assert.isMainThread();
+            mBlockList.clear();
             mBlockList.addAll(blockList);
+            if (mController != null) {
+                mController.refreshIconGroup(this);
+            }
         }
 
         public void setShouldLog(boolean should) {
@@ -336,7 +362,8 @@ public interface StatusBarIconController {
 
         private StatusBarMobileView onCreateStatusBarMobileView(String slot) {
             StatusBarMobileView view = StatusBarMobileView.fromContext(
-                            mContext, slot, mFeatureFlags.isCombinedStatusBarSignalIconsEnabled());
+                            mContext, slot,
+                    mFeatureFlags.isEnabled(Flags.COMBINED_STATUS_BAR_SIGNAL_ICONS));
             return view;
         }
 

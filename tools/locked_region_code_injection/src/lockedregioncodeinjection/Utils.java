@@ -13,13 +13,14 @@
  */
 package lockedregioncodeinjection;
 
+import org.objectweb.asm.Opcodes;
+
 import java.util.ArrayList;
 import java.util.List;
-import org.objectweb.asm.Opcodes;
 
 public class Utils {
 
-    public static final int ASM_VERSION = Opcodes.ASM6;
+    public static final int ASM_VERSION = Opcodes.ASM7;
 
     /**
      * Reads a comma separated configuration similar to the Jack definition.

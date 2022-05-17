@@ -116,10 +116,12 @@ public class GridLayoutAnimationController extends LayoutAnimationController {
                 com.android.internal.R.styleable.GridLayoutAnimation);
 
         Animation.Description d = Animation.Description.parseValue(
-                a.peekValue(com.android.internal.R.styleable.GridLayoutAnimation_columnDelay));
+                a.peekValue(com.android.internal.R.styleable.GridLayoutAnimation_columnDelay),
+                context);
         mColumnDelay = d.value;
         d = Animation.Description.parseValue(
-                a.peekValue(com.android.internal.R.styleable.GridLayoutAnimation_rowDelay));
+                a.peekValue(com.android.internal.R.styleable.GridLayoutAnimation_rowDelay),
+                context);
         mRowDelay = d.value;
         //noinspection PointlessBitwiseExpression
         mDirection = a.getInt(com.android.internal.R.styleable.GridLayoutAnimation_direction,

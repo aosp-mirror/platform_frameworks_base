@@ -71,9 +71,11 @@ public class RuleBinaryParserTest {
 
     private static final String PACKAGE_NAME = getBits(AtomicFormula.PACKAGE_NAME, KEY_BITS);
     private static final String APP_CERTIFICATE = getBits(AtomicFormula.APP_CERTIFICATE, KEY_BITS);
+    private static final String APP_CERTIFICATE_LINEAGE =
+            getBits(AtomicFormula.APP_CERTIFICATE_LINEAGE, KEY_BITS);
     private static final String VERSION_CODE = getBits(AtomicFormula.VERSION_CODE, KEY_BITS);
     private static final String PRE_INSTALLED = getBits(AtomicFormula.PRE_INSTALLED, KEY_BITS);
-    private static final int INVALID_KEY_VALUE = 8;
+    private static final int INVALID_KEY_VALUE = 9;
     private static final String INVALID_KEY = getBits(INVALID_KEY_VALUE, KEY_BITS);
 
     private static final String EQ = getBits(AtomicFormula.EQ, OPERATOR_BITS);
@@ -326,6 +328,40 @@ public class RuleBinaryParserTest {
                 new Rule(
                         new AtomicFormula.StringAtomicFormula(
                                 AtomicFormula.APP_CERTIFICATE,
+                                IntegrityUtils.getHexDigest(
+                                        appCertificate.getBytes(StandardCharsets.UTF_8)),
+                                /* isHashedValue= */ true),
+                        Rule.DENY);
+
+        List<Rule> rules = binaryParser.parse(rule.array());
+
+        assertThat(rules).isEqualTo(Collections.singletonList(expectedRule));
+    }
+
+    @Test
+    public void testBinaryString_validAtomicFormulaWithCertificateLineage() throws Exception {
+        String appCertificate = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+        String ruleBits =
+                START_BIT
+                        + ATOMIC_FORMULA_START_BITS
+                        + APP_CERTIFICATE_LINEAGE
+                        + EQ
+                        + IS_HASHED
+                        + getBits(appCertificate.length(), VALUE_SIZE_BITS)
+                        + getValueBits(appCertificate)
+                        + DENY
+                        + END_BIT;
+        byte[] ruleBytes = getBytes(ruleBits);
+        ByteBuffer rule =
+                ByteBuffer.allocate(DEFAULT_FORMAT_VERSION_BYTES.length + ruleBytes.length);
+        rule.put(DEFAULT_FORMAT_VERSION_BYTES);
+        rule.put(ruleBytes);
+
+        RuleParser binaryParser = new RuleBinaryParser();
+        Rule expectedRule =
+                new Rule(
+                        new AtomicFormula.StringAtomicFormula(
+                                AtomicFormula.APP_CERTIFICATE_LINEAGE,
                                 IntegrityUtils.getHexDigest(
                                         appCertificate.getBytes(StandardCharsets.UTF_8)),
                                 /* isHashedValue= */ true),

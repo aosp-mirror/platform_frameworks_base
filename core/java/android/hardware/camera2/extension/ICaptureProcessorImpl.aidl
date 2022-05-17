@@ -17,6 +17,7 @@ package android.hardware.camera2.extension;
 
 import android.view.Surface;
 import android.hardware.camera2.extension.CaptureBundle;
+import android.hardware.camera2.extension.IProcessResultImpl;
 import android.hardware.camera2.extension.Size;
 
 /** @hide */
@@ -25,5 +26,5 @@ interface ICaptureProcessorImpl
     void onOutputSurface(in Surface surface, int imageFormat);
     void onResolutionUpdate(in Size size);
     void onImageFormatUpdate(int imageFormat);
-    void process(in List<CaptureBundle> capturelist);
+    void process(in List<CaptureBundle> capturelist, in IProcessResultImpl resultCallback);
 }

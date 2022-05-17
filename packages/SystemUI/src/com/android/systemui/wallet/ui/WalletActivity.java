@@ -116,13 +116,13 @@ public class WalletActivity extends LifecycleActivity implements
         if (toolbar != null) {
             setActionBar(toolbar);
         }
-        setTitle("");
+        getActionBar().setDisplayShowTitleEnabled(false);
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeAsUpIndicator(getHomeIndicatorDrawable());
         getActionBar().setHomeActionContentDescription(R.string.accessibility_desc_close);
         WalletView walletView = requireViewById(R.id.wallet_view);
 
-        mWalletClient = QuickAccessWalletClient.create(this);
+        mWalletClient = QuickAccessWalletClient.create(this, mExecutor);
         mWalletScreenController = new WalletScreenController(
                 this,
                 walletView,
@@ -152,8 +152,7 @@ public class WalletActivity extends LifecycleActivity implements
                         Log.w(TAG, "Unable to create wallet app intent.");
                         return;
                     }
-                    if (!mKeyguardStateController.isUnlocked()
-                            && mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                    if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
                         return;
                     }
 
@@ -220,6 +219,12 @@ public class WalletActivity extends LifecycleActivity implements
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        finish();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.wallet_activity_options_menu, menu);
         return super.onCreateOptionsMenu(menu);
@@ -272,7 +277,7 @@ public class WalletActivity extends LifecycleActivity implements
 
     private Drawable getHomeIndicatorDrawable() {
         Drawable drawable = getDrawable(R.drawable.ic_close);
-        drawable.setTint(getColor(com.android.internal.R.color.system_neutral1_300));
+        drawable.setTint(getColor(R.color.material_dynamic_neutral70));
         return drawable;
     }
 }

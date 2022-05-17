@@ -40,7 +40,11 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
+$(call declare-license-metadata,$(full_classes_jar),\
+    SPDX-license-identifier-Apache-2.0 SPDX-license-identifier-MIT SPDX-license-identifier-Unicode-DFS,\
+    notice,$(LOCAL_PATH)/../NOTICE,Android,frameworks/base)
+
 # Archive a copy of the classes.jar in SDK build.
-$(call dist-for-goals,sdk win_sdk,$(full_classes_jar):android.test.legacy.jar)
+$(call dist-for-goals,sdk,$(full_classes_jar):android.test.legacy.jar)
 
 endif  # not TARGET_BUILD_APPS not TARGET_BUILD_PDK=true

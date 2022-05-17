@@ -16,19 +16,31 @@
 
 package android.media.midi;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.RequiresFeature;
 import android.annotation.SystemService;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Binder;
-import android.os.IBinder;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.ArraySet;
 import android.util.Log;
 
+import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.Collections;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+
+// BLE-MIDI
 
 /**
  * This class is the public application interface to the MIDI service.
@@ -37,6 +49,39 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiresFeature(PackageManager.FEATURE_MIDI)
 public final class MidiManager {
     private static final String TAG = "MidiManager";
+
+    /**
+     * Constant representing MIDI devices.
+     * These devices do NOT support Universal MIDI Packets by default.
+     * These support the original MIDI 1.0 byte stream.
+     * When communicating to a USB device, a raw byte stream will be padded for USB.
+     * Likewise, for a Bluetooth device, the raw bytes will be converted for Bluetooth.
+     * For virtual devices, the byte stream will be passed directly.
+     * If Universal MIDI Packets are needed, please use MIDI-CI.
+     * @see MidiManager#getDevicesForTransport
+     */
+    public static final int TRANSPORT_MIDI_BYTE_STREAM = 1;
+
+    /**
+     * Constant representing Universal MIDI devices.
+     * These devices do support Universal MIDI Packets (UMP) by default.
+     * When sending data to these devices, please send UMP.
+     * Packets should always be a multiple of 4 bytes.
+     * UMP is defined in the USB MIDI 2.0 spec. Please read the standard for more info.
+     * @see MidiManager#getDevicesForTransport
+     */
+    public static final int TRANSPORT_UNIVERSAL_MIDI_PACKETS = 2;
+
+    /**
+     * @see MidiManager#getDevicesForTransport
+     * @hide
+     */
+    @IntDef(prefix = { "TRANSPORT_" }, value = {
+            TRANSPORT_MIDI_BYTE_STREAM,
+            TRANSPORT_UNIVERSAL_MIDI_PACKETS
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Transport {}
 
     /**
      * Intent for starting BluetoothMidiService
@@ -67,52 +112,65 @@ public final class MidiManager {
     // Binder stub for receiving device notifications from MidiService
     private class DeviceListener extends IMidiDeviceListener.Stub {
         private final DeviceCallback mCallback;
-        private final Handler mHandler;
+        private final Executor mExecutor;
+        private final int mTransport;
 
-        public DeviceListener(DeviceCallback callback, Handler handler) {
+        DeviceListener(DeviceCallback callback, Executor executor, int transport) {
             mCallback = callback;
-            mHandler = handler;
+            mExecutor = executor;
+            mTransport = transport;
         }
 
         @Override
         public void onDeviceAdded(MidiDeviceInfo device) {
-            if (mHandler != null) {
-                final MidiDeviceInfo deviceF = device;
-                mHandler.post(new Runnable() {
-                        @Override public void run() {
-                            mCallback.onDeviceAdded(deviceF);
-                        }
-                    });
-            } else {
-                mCallback.onDeviceAdded(device);
+            if (shouldInvokeCallback(device)) {
+                if (mExecutor != null) {
+                    mExecutor.execute(() ->
+                            mCallback.onDeviceAdded(device));
+                } else {
+                    mCallback.onDeviceAdded(device);
+                }
             }
         }
 
         @Override
         public void onDeviceRemoved(MidiDeviceInfo device) {
-            if (mHandler != null) {
-                final MidiDeviceInfo deviceF = device;
-                mHandler.post(new Runnable() {
-                        @Override public void run() {
-                            mCallback.onDeviceRemoved(deviceF);
-                        }
-                    });
-            } else {
-                mCallback.onDeviceRemoved(device);
+            if (shouldInvokeCallback(device)) {
+                if (mExecutor != null) {
+                    mExecutor.execute(() ->
+                            mCallback.onDeviceRemoved(device));
+                } else {
+                    mCallback.onDeviceRemoved(device);
+                }
             }
         }
 
         @Override
         public void onDeviceStatusChanged(MidiDeviceStatus status) {
-            if (mHandler != null) {
-                final MidiDeviceStatus statusF = status;
-                mHandler.post(new Runnable() {
-                        @Override public void run() {
-                            mCallback.onDeviceStatusChanged(statusF);
-                        }
-                    });
+            if (mExecutor != null) {
+                mExecutor.execute(() ->
+                        mCallback.onDeviceStatusChanged(status));
             } else {
                 mCallback.onDeviceStatusChanged(status);
+            }
+        }
+
+        /**
+         * Used to figure out whether callbacks should be invoked. Only invoke callbacks of
+         * the correct type.
+         *
+         * @param MidiDeviceInfo the device to check
+         * @return whether to invoke a callback
+         */
+        private boolean shouldInvokeCallback(MidiDeviceInfo device) {
+            // UMP devices have protocols that are not PROTOCOL_UNKNOWN
+            if (mTransport == TRANSPORT_UNIVERSAL_MIDI_PACKETS) {
+                return (device.getDefaultProtocol() != MidiDeviceInfo.PROTOCOL_UNKNOWN);
+            } else if (mTransport == TRANSPORT_MIDI_BYTE_STREAM) {
+                return (device.getDefaultProtocol() == MidiDeviceInfo.PROTOCOL_UNKNOWN);
+            } else {
+                Log.e(TAG, "Invalid transport type: " + mTransport);
+                return false;
             }
         }
     }
@@ -167,8 +225,10 @@ public final class MidiManager {
     }
 
     /**
-     * Registers a callback to receive notifications when MIDI devices are added and removed.
-     *
+     * Registers a callback to receive notifications when MIDI 1.0 devices are added and removed.
+     * These are devices that do not default to Universal MIDI Packets. To register for a callback
+     * for those, call {@link #registerDeviceCallback} instead.
+
      * The {@link  DeviceCallback#onDeviceStatusChanged} method will be called immediately
      * for any devices that have open ports. This allows applications to know which input
      * ports are already in use and, therefore, unavailable.
@@ -180,9 +240,46 @@ public final class MidiManager {
      * @param handler The {@link android.os.Handler Handler} that will be used for delivering the
      *                device notifications. If handler is null, then the thread used for the
      *                callback is unspecified.
+     * @deprecated Use the {@link #registerDeviceCallback}
+     *             method with Executor and transport instead.
      */
+    @Deprecated
     public void registerDeviceCallback(DeviceCallback callback, Handler handler) {
-        DeviceListener deviceListener = new DeviceListener(callback, handler);
+        Executor executor = null;
+        if (handler != null) {
+            executor = handler::post;
+        }
+        DeviceListener deviceListener = new DeviceListener(callback, executor,
+                TRANSPORT_MIDI_BYTE_STREAM);
+        try {
+            mService.registerListener(mToken, deviceListener);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        mDeviceListeners.put(callback, deviceListener);
+    }
+
+    /**
+     * Registers a callback to receive notifications when MIDI devices are added and removed
+     * for a specific transport type.
+     *
+     * The {@link  DeviceCallback#onDeviceStatusChanged} method will be called immediately
+     * for any devices that have open ports. This allows applications to know which input
+     * ports are already in use and, therefore, unavailable.
+     *
+     * Applications should call {@link #getDevicesForTransport} before registering the callback
+     * to get a list of devices already added.
+     *
+     * @param transport The transport to be used. This is either TRANSPORT_MIDI_BYTE_STREAM or
+     *            TRANSPORT_UNIVERSAL_MIDI_PACKETS.
+     * @param executor The {@link Executor} that will be used for delivering the
+     *                device notifications.
+     * @param callback a {@link DeviceCallback} for MIDI device notifications
+     */
+    public void registerDeviceCallback(@Transport int transport,
+            @NonNull Executor executor, @NonNull DeviceCallback callback) {
+        Objects.requireNonNull(executor);
+        DeviceListener deviceListener = new DeviceListener(callback, executor, transport);
         try {
             mService.registerListener(mToken, deviceListener);
         } catch (RemoteException e) {
@@ -208,13 +305,39 @@ public final class MidiManager {
     }
 
     /**
-     * Gets the list of all connected MIDI devices.
+     * Gets a list of connected MIDI devices. This returns all devices that do
+     * not default to Universal MIDI Packets. To get those instead, please call
+     * {@link #getDevicesForTransport} instead.
      *
-     * @return an array of all MIDI devices
+     * @return an array of MIDI devices
+     * @deprecated Use {@link #getDevicesForTransport} instead.
      */
+    @Deprecated
     public MidiDeviceInfo[] getDevices() {
         try {
            return mService.getDevices();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets a list of connected MIDI devices by transport. TRANSPORT_MIDI_BYTE_STREAM
+     * is used for MIDI 1.0 and is the most common.
+     * For devices with built in Universal MIDI Packet support, use
+     * TRANSPORT_UNIVERSAL_MIDI_PACKETS instead.
+     *
+     * @param transport The transport to be used. This is either TRANSPORT_MIDI_BYTE_STREAM or
+     *                  TRANSPORT_UNIVERSAL_MIDI_PACKETS.
+     * @return a collection of MIDI devices
+     */
+    public @NonNull Set<MidiDeviceInfo> getDevicesForTransport(@Transport int transport) {
+        try {
+            MidiDeviceInfo[] devices = mService.getDevicesForTransport(transport);
+            if (devices == null) {
+                return Collections.emptySet();
+            }
+            return new ArraySet<>(devices);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -284,9 +407,11 @@ public final class MidiManager {
         final OnDeviceOpenedListener listenerF = listener;
         final Handler handlerF = handler;
 
+        Log.d(TAG, "openBluetoothDevice() " + bluetoothDevice);
         IMidiDeviceOpenCallback callback = new IMidiDeviceOpenCallback.Stub() {
             @Override
             public void onDeviceOpened(IMidiDeviceServer server, IBinder deviceToken) {
+                Log.d(TAG, "onDeviceOpened() server:" + server);
                 MidiDevice device = null;
                 if (server != null) {
                     try {
@@ -308,16 +433,26 @@ public final class MidiManager {
         }
     }
 
+    /** @hide */ // for now
+    public void closeBluetoothDevice(@NonNull MidiDevice midiDevice) {
+        try {
+            midiDevice.close();
+        } catch (IOException ex) {
+            Log.e(TAG, "Exception closing BLE-MIDI device" + ex);
+        }
+    }
+
     /** @hide */
     public MidiDeviceServer createDeviceServer(MidiReceiver[] inputPortReceivers,
             int numOutputPorts, String[] inputPortNames, String[] outputPortNames,
-            Bundle properties, int type, MidiDeviceServer.Callback callback) {
+            Bundle properties, int type, int defaultProtocol,
+            MidiDeviceServer.Callback callback) {
         try {
             MidiDeviceServer server = new MidiDeviceServer(mService, inputPortReceivers,
                     numOutputPorts, callback);
             MidiDeviceInfo deviceInfo = mService.registerDeviceServer(server.getBinderInterface(),
                     inputPortReceivers.length, numOutputPorts, inputPortNames, outputPortNames,
-                    properties, type);
+                    properties, type, defaultProtocol);
             if (deviceInfo == null) {
                 Log.e(TAG, "registerVirtualDevice failed");
                 return null;

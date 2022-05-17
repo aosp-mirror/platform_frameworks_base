@@ -32,13 +32,16 @@ import android.hardware.face.FaceSensorProperties;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.face.IFaceServiceReceiver;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
+import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 
@@ -68,7 +71,10 @@ public class Face10Test {
     private UserManager mUserManager;
     @Mock
     private BiometricScheduler mScheduler;
+    @Mock
+    private BiometricContext mBiometricContext;
 
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
     private LockoutResetDispatcher mLockoutResetDispatcher;
     private com.android.server.biometrics.sensors.face.hidl.Face10 mFace10;
     private IBinder mBinder;
@@ -97,7 +103,8 @@ public class Face10Test {
                 resetLockoutRequiresChallenge);
 
         Face10.sSystemClock = Clock.fixed(Instant.ofEpochMilli(100), ZoneId.of("PST"));
-        mFace10 = new Face10(mContext, sensorProps, mLockoutResetDispatcher, mScheduler);
+        mFace10 = new Face10(mContext, sensorProps, mLockoutResetDispatcher, mHandler, mScheduler,
+                mBiometricContext);
         mBinder = new Binder();
     }
 

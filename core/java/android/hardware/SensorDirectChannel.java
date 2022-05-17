@@ -64,7 +64,7 @@ public final class SensorDirectChannel implements Channel {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, prefix = { "RATE_" }, value = {
+    @IntDef(prefix = { "RATE_" }, value = {
             RATE_STOP,
             RATE_NORMAL,
             RATE_FAST,

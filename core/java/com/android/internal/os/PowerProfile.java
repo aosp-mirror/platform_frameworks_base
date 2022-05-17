@@ -17,20 +17,31 @@
 package com.android.internal.os;
 
 
+import android.annotation.LongDef;
+import android.annotation.StringDef;
+import android.annotation.XmlRes;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
+import android.util.IndentingPrintWriter;
+import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.power.ModemPowerProfile;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 /**
@@ -39,6 +50,8 @@ import java.util.HashMap;
  * [hidden]
  */
 public class PowerProfile {
+
+    public static final String TAG = "PowerProfile";
 
     /*
      * POWER_CPU_SUSPEND: Power consumption when CPU is in power collapse mode.
@@ -145,12 +158,18 @@ public class PowerProfile {
 
     /**
      * Power consumption when screen is in doze/ambient/always-on mode, including backlight power.
+     *
+     * @deprecated Use {@link #POWER_GROUP_DISPLAY_AMBIENT} instead.
      */
+    @Deprecated
     public static final String POWER_AMBIENT_DISPLAY = "ambient.on";
 
     /**
      * Power consumption when screen is on, not including the backlight power.
+     *
+     * @deprecated Use {@link #POWER_GROUP_DISPLAY_SCREEN_ON} instead.
      */
+    @Deprecated
     @UnsupportedAppUsage
     public static final String POWER_SCREEN_ON = "screen.on";
 
@@ -175,7 +194,10 @@ public class PowerProfile {
     /**
      * Power consumption at full backlight brightness. If the backlight is at
      * 50% brightness, then this should be multiplied by 0.5
+     *
+     * @deprecated Use {@link #POWER_GROUP_DISPLAY_SCREEN_FULL} instead.
      */
+    @Deprecated
     @UnsupportedAppUsage
     public static final String POWER_SCREEN_FULL = "screen.full";
 
@@ -221,6 +243,57 @@ public class PowerProfile {
     public static final String POWER_BATTERY_CAPACITY = "battery.capacity";
 
     /**
+     * Power consumption when a screen is in doze/ambient/always-on mode, including backlight power.
+     */
+    public static final String POWER_GROUP_DISPLAY_AMBIENT = "ambient.on.display";
+
+    /**
+     * Power consumption when a screen is on, not including the backlight power.
+     */
+    public static final String POWER_GROUP_DISPLAY_SCREEN_ON = "screen.on.display";
+
+    /**
+     * Power consumption of a screen at full backlight brightness.
+     */
+    public static final String POWER_GROUP_DISPLAY_SCREEN_FULL = "screen.full.display";
+
+    @StringDef(prefix = { "POWER_GROUP_" }, value = {
+            POWER_GROUP_DISPLAY_AMBIENT,
+            POWER_GROUP_DISPLAY_SCREEN_ON,
+            POWER_GROUP_DISPLAY_SCREEN_FULL,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PowerGroup {}
+
+    /**
+     * Constants for generating a 64bit power constant key.
+     *
+     * The bitfields of a key describes what its corresponding power constant represents:
+     * [63:40] - RESERVED
+     * [39:32] - {@link Subsystem} (max count = 16).
+     * [31:0] - per Subsystem fields, see {@link ModemPowerProfile}.
+     *
+     */
+    private static final long SUBSYSTEM_MASK = 0xF_0000_0000L;
+    /**
+     * Power constant not associated with a subsystem.
+     */
+    public static final long SUBSYSTEM_NONE = 0x0_0000_0000L;
+    /**
+     * Modem power constant.
+     */
+    public static final long SUBSYSTEM_MODEM = 0x1_0000_0000L;
+
+    @LongDef(prefix = { "SUBSYSTEM_" }, value = {
+            SUBSYSTEM_NONE,
+            SUBSYSTEM_MODEM,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Subsystem {}
+
+    private static final long SUBSYSTEM_FIELDS_MASK = 0xFFFF_FFFF;
+
+    /**
      * A map from Power Use Item to its power consumption.
      */
     static final HashMap<String, Double> sPowerItemMap = new HashMap<>();
@@ -230,11 +303,15 @@ public class PowerProfile {
      */
     static final HashMap<String, Double[]> sPowerArrayMap = new HashMap<>();
 
+    static final ModemPowerProfile sModemPowerProfile = new ModemPowerProfile();
+
     private static final String TAG_DEVICE = "device";
     private static final String TAG_ITEM = "item";
     private static final String TAG_ARRAY = "array";
     private static final String TAG_ARRAYITEM = "value";
     private static final String ATTR_NAME = "name";
+
+    private static final String TAG_MODEM = "modem";
 
     private static final Object sLock = new Object();
 
@@ -251,18 +328,40 @@ public class PowerProfile {
     public PowerProfile(Context context, boolean forTest) {
         // Read the XML file for the given profile (normally only one per device)
         synchronized (sLock) {
-            if (sPowerItemMap.size() == 0 && sPowerArrayMap.size() == 0) {
-                readPowerValuesFromXml(context, forTest);
-            }
-            initCpuClusters();
+            final int xmlId = forTest ? com.android.internal.R.xml.power_profile_test
+                    : com.android.internal.R.xml.power_profile;
+            initLocked(context, xmlId);
         }
     }
 
-    private void readPowerValuesFromXml(Context context, boolean forTest) {
-        final int id = forTest ? com.android.internal.R.xml.power_profile_test :
-                com.android.internal.R.xml.power_profile;
+    /**
+     * Reinitialize the PowerProfile with the provided XML.
+     * WARNING: use only for testing!
+     */
+    @VisibleForTesting
+    public void forceInitForTesting(Context context, @XmlRes int xmlId) {
+        synchronized (sLock) {
+            sPowerItemMap.clear();
+            sPowerArrayMap.clear();
+            sModemPowerProfile.clear();
+            initLocked(context, xmlId);
+        }
+
+    }
+
+    @GuardedBy("sLock")
+    private void initLocked(Context context, @XmlRes int xmlId) {
+        if (sPowerItemMap.size() == 0 && sPowerArrayMap.size() == 0) {
+            readPowerValuesFromXml(context, xmlId);
+        }
+        initCpuClusters();
+        initDisplays();
+        initModem();
+    }
+
+    private void readPowerValuesFromXml(Context context, @XmlRes int xmlId) {
         final Resources resources = context.getResources();
-        XmlResourceParser parser = resources.getXml(id);
+        XmlResourceParser parser = resources.getXml(xmlId);
         boolean parsingArray = false;
         ArrayList<Double> array = new ArrayList<>();
         String arrayName = null;
@@ -301,6 +400,8 @@ public class PowerProfile {
                             array.add(value);
                         }
                     }
+                } else if (element.equals(TAG_MODEM)) {
+                    sModemPowerProfile.parseFromXml(parser);
                 }
             }
             if (parsingArray) {
@@ -424,6 +525,91 @@ public class PowerProfile {
         return 0;
     }
 
+    private int mNumDisplays;
+
+    private void initDisplays() {
+        // Figure out how many displays are listed in the power profile.
+        mNumDisplays = 0;
+        while (!Double.isNaN(
+                getAveragePowerForOrdinal(POWER_GROUP_DISPLAY_AMBIENT, mNumDisplays, Double.NaN))
+                || !Double.isNaN(
+                getAveragePowerForOrdinal(POWER_GROUP_DISPLAY_SCREEN_ON, mNumDisplays, Double.NaN))
+                || !Double.isNaN(
+                getAveragePowerForOrdinal(POWER_GROUP_DISPLAY_SCREEN_FULL, mNumDisplays,
+                        Double.NaN))) {
+            mNumDisplays++;
+        }
+
+        // Handle legacy display power constants.
+        final Double deprecatedAmbientDisplay = sPowerItemMap.get(POWER_AMBIENT_DISPLAY);
+        boolean legacy = false;
+        if (deprecatedAmbientDisplay != null && mNumDisplays == 0) {
+            final String key = getOrdinalPowerType(POWER_GROUP_DISPLAY_AMBIENT, 0);
+            Slog.w(TAG, POWER_AMBIENT_DISPLAY + " is deprecated! Use " + key + " instead.");
+            sPowerItemMap.put(key, deprecatedAmbientDisplay);
+            legacy = true;
+        }
+
+        final Double deprecatedScreenOn = sPowerItemMap.get(POWER_SCREEN_ON);
+        if (deprecatedScreenOn != null && mNumDisplays == 0) {
+            final String key = getOrdinalPowerType(POWER_GROUP_DISPLAY_SCREEN_ON, 0);
+            Slog.w(TAG, POWER_SCREEN_ON + " is deprecated! Use " + key + " instead.");
+            sPowerItemMap.put(key, deprecatedScreenOn);
+            legacy = true;
+        }
+
+        final Double deprecatedScreenFull = sPowerItemMap.get(POWER_SCREEN_FULL);
+        if (deprecatedScreenFull != null && mNumDisplays == 0) {
+            final String key = getOrdinalPowerType(POWER_GROUP_DISPLAY_SCREEN_FULL, 0);
+            Slog.w(TAG, POWER_SCREEN_FULL + " is deprecated! Use " + key + " instead.");
+            sPowerItemMap.put(key, deprecatedScreenFull);
+            legacy = true;
+        }
+        if (legacy) {
+            mNumDisplays = 1;
+        }
+    }
+
+    /**
+     * Returns the number built in displays on the device as defined in the power_profile.xml.
+     */
+    public int getNumDisplays() {
+        return mNumDisplays;
+    }
+
+    private void initModem() {
+        handleDeprecatedModemConstant(ModemPowerProfile.MODEM_DRAIN_TYPE_SLEEP,
+                POWER_MODEM_CONTROLLER_SLEEP, 0);
+        handleDeprecatedModemConstant(ModemPowerProfile.MODEM_DRAIN_TYPE_IDLE,
+                POWER_MODEM_CONTROLLER_IDLE, 0);
+        handleDeprecatedModemConstant(
+                ModemPowerProfile.MODEM_RAT_TYPE_DEFAULT | ModemPowerProfile.MODEM_DRAIN_TYPE_RX,
+                POWER_MODEM_CONTROLLER_RX, 0);
+        handleDeprecatedModemConstant(
+                ModemPowerProfile.MODEM_RAT_TYPE_DEFAULT | ModemPowerProfile.MODEM_DRAIN_TYPE_TX
+                        | ModemPowerProfile.MODEM_TX_LEVEL_0, POWER_MODEM_CONTROLLER_TX, 0);
+        handleDeprecatedModemConstant(
+                ModemPowerProfile.MODEM_RAT_TYPE_DEFAULT | ModemPowerProfile.MODEM_DRAIN_TYPE_TX
+                        | ModemPowerProfile.MODEM_TX_LEVEL_1, POWER_MODEM_CONTROLLER_TX, 1);
+        handleDeprecatedModemConstant(
+                ModemPowerProfile.MODEM_RAT_TYPE_DEFAULT | ModemPowerProfile.MODEM_DRAIN_TYPE_TX
+                        | ModemPowerProfile.MODEM_TX_LEVEL_2, POWER_MODEM_CONTROLLER_TX, 2);
+        handleDeprecatedModemConstant(
+                ModemPowerProfile.MODEM_RAT_TYPE_DEFAULT | ModemPowerProfile.MODEM_DRAIN_TYPE_TX
+                        | ModemPowerProfile.MODEM_TX_LEVEL_3, POWER_MODEM_CONTROLLER_TX, 3);
+        handleDeprecatedModemConstant(
+                ModemPowerProfile.MODEM_RAT_TYPE_DEFAULT | ModemPowerProfile.MODEM_DRAIN_TYPE_TX
+                        | ModemPowerProfile.MODEM_TX_LEVEL_4, POWER_MODEM_CONTROLLER_TX, 4);
+    }
+
+    private void handleDeprecatedModemConstant(int key, String deprecatedKey, int level) {
+        final double drain = sModemPowerProfile.getAverageBatteryDrainMa(key);
+        if (!Double.isNaN(drain)) return; // Value already set, don't overwrite it.
+
+        final double deprecatedDrain = getAveragePower(deprecatedKey, level);
+        sModemPowerProfile.setPowerConstant(key, Double.toString(deprecatedDrain));
+    }
+
     /**
      * Returns the number of memory bandwidth buckets defined in power_profile.xml, or a
      * default value if the subsystem has no recorded value.
@@ -469,6 +655,43 @@ public class PowerProfile {
     }
 
     /**
+     * Returns the average current in mA consumed by a subsystem's specified operation, or the given
+     * default value if the subsystem has no recorded value.
+     *
+     * @param key that describes a subsystem's battery draining operation
+     *            The key is built from multiple constant, see {@link Subsystem} and
+     *            {@link ModemPowerProfile}.
+     * @param defaultValue the value to return if the subsystem has no recorded value.
+     * @return the average current in milliAmps.
+     */
+    public double getAverageBatteryDrainOrDefaultMa(long key, double defaultValue) {
+        final long subsystemType = key & SUBSYSTEM_MASK;
+        final int subsystemFields = (int) (key & SUBSYSTEM_FIELDS_MASK);
+
+        final double value;
+        if (subsystemType == SUBSYSTEM_MODEM) {
+            value = sModemPowerProfile.getAverageBatteryDrainMa(subsystemFields);
+        } else {
+            value = Double.NaN;
+        }
+
+        if (Double.isNaN(value)) return defaultValue;
+        return value;
+    }
+
+    /**
+     * Returns the average current in mA consumed by a subsystem's specified operation.
+     *
+     * @param key that describes a subsystem's battery draining operation
+     *            The key is built from multiple constant, see {@link Subsystem} and
+     *            {@link ModemPowerProfile}.
+     * @return the average current in milliAmps.
+     */
+    public double getAverageBatteryDrainMa(long key) {
+        return getAverageBatteryDrainOrDefaultMa(key, 0);
+    }
+
+    /**
      * Returns the average current in mA consumed by the subsystem for the given level.
      *
      * @param type  the subsystem type
@@ -493,6 +716,32 @@ public class PowerProfile {
         } else {
             return 0;
         }
+    }
+
+    /**
+     * Returns the average current in mA consumed by an ordinaled subsystem, or the given
+     * default value if the subsystem has no recorded value.
+     *
+     * @param group        the subsystem {@link PowerGroup}.
+     * @param ordinal      which entity in the {@link PowerGroup}.
+     * @param defaultValue the value to return if the subsystem has no recorded value.
+     * @return the average current in milliAmps.
+     */
+    public double getAveragePowerForOrdinal(@PowerGroup String group, int ordinal,
+            double defaultValue) {
+        final String type = getOrdinalPowerType(group, ordinal);
+        return getAveragePowerOrDefault(type, defaultValue);
+    }
+
+    /**
+     * Returns the average current in mA consumed by an ordinaled subsystem.
+     *
+     * @param group        the subsystem {@link PowerGroup}.
+     * @param ordinal      which entity in the {@link PowerGroup}.
+     * @return the average current in milliAmps.
+     */
+    public double getAveragePowerForOrdinal(@PowerGroup String group, int ordinal) {
+        return getAveragePowerForOrdinal(group, ordinal, 0);
     }
 
     /**
@@ -667,6 +916,25 @@ public class PowerProfile {
                 PowerProfileProto.BATTERY_CAPACITY);
     }
 
+    /**
+     * Dump the PowerProfile values.
+     */
+    public void dump(PrintWriter pw) {
+        final IndentingPrintWriter ipw = new IndentingPrintWriter(pw);
+        sPowerItemMap.forEach((key, value) -> {
+            ipw.print(key, value);
+            ipw.println();
+        });
+        sPowerArrayMap.forEach((key, value) -> {
+            ipw.print(key, Arrays.toString(value));
+            ipw.println();
+        });
+        ipw.println("Modem values:");
+        ipw.increaseIndent();
+        sModemPowerProfile.dump(ipw);
+        ipw.decreaseIndent();
+    }
+
     // Writes items in sPowerItemMap to proto if exists.
     private void writePowerConstantToProto(ProtoOutputStream proto, String key, long fieldId) {
         if (sPowerItemMap.containsKey(key)) {
@@ -681,5 +949,10 @@ public class PowerProfile {
                 proto.write(fieldId, d);
             }
         }
+    }
+
+    // Creates the key for an ordinaled power constant from the group and ordinal.
+    private static String getOrdinalPowerType(@PowerGroup String group, int ordinal) {
+        return group + ordinal;
     }
 }

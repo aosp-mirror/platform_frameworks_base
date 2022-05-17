@@ -25,7 +25,9 @@ import android.content.pm.PackageInfo;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.res.XmlResourceParser;
 import android.os.Looper;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.platform.test.annotations.Presubmit;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.server.LocalServices;
 
@@ -38,6 +40,7 @@ import java.util.Set;
  * All the tests here actually talks to the real IPackageManager, so we can't test complicated
  * cases.  Instead we just make sure they all work reasonably without at least crashing.
  */
+@Presubmit
 @SmallTest
 public class ShortcutManagerTest5 extends BaseShortcutManagerTest {
     private ShortcutService mShortcutService;

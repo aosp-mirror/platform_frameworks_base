@@ -16,8 +16,6 @@
 
 package com.android.systemui.util.sensors;
 
-import java.util.Locale;
-
 /**
  * A wrapper class for sensors that have a boolean state - above/below.
  */
@@ -77,6 +75,16 @@ public interface ThresholdSensor {
     void unregister(Listener listener);
 
     /**
+     * Name of the sensor.
+     */
+    String getName();
+
+    /**
+     * Type of the sensor.
+     */
+    String getType();
+
+    /**
      * Interface for listening to events on {@link ThresholdSensor}
      */
     interface Listener {
@@ -84,35 +92,5 @@ public interface ThresholdSensor {
          * Called whenever the threshold for the registered sensor is crossed.
          */
         void onThresholdCrossed(ThresholdSensorEvent event);
-    }
-
-    /**
-     * Returned when the below/above state of a {@link ThresholdSensor} changes.
-     */
-    class ThresholdSensorEvent {
-        private final boolean mBelow;
-        private final long mTimestampNs;
-
-        public ThresholdSensorEvent(boolean below, long timestampNs) {
-            mBelow = below;
-            mTimestampNs = timestampNs;
-        }
-
-        public boolean getBelow() {
-            return mBelow;
-        }
-
-        public long getTimestampNs() {
-            return mTimestampNs;
-        }
-
-        public long getTimestampMs() {
-            return mTimestampNs / 1000000;
-        }
-
-        @Override
-        public String toString() {
-            return String.format((Locale) null, "{near=%s, timestamp_ns=%d}", mBelow, mTimestampNs);
-        }
     }
 }

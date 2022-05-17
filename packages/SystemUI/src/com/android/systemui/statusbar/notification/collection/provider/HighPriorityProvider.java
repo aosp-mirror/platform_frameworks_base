@@ -99,7 +99,7 @@ public class HighPriorityProvider {
 
     private boolean hasHighPriorityCharacteristics(NotificationEntry entry) {
         return !hasUserSetImportance(entry)
-                && (entry.getSbn().getNotification().hasMediaSession()
+                && (entry.getSbn().getNotification().isMediaNotification()
                 || isPeopleNotification(entry)
                 || isMessagingStyle(entry));
     }

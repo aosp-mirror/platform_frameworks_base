@@ -18,8 +18,8 @@ package com.android.server.pm.test.verify.domain
 
 import android.content.Intent
 import android.content.pm.ApplicationInfo
-import android.content.pm.parsing.component.ParsedActivity
-import android.content.pm.parsing.component.ParsedIntentInfo
+import com.android.server.pm.pkg.component.ParsedActivityImpl
+import com.android.server.pm.pkg.component.ParsedIntentInfoImpl
 import android.os.Build
 import android.os.PatternMatcher
 import android.util.ArraySet
@@ -92,40 +92,46 @@ class DomainVerificationCollectorTest {
             whenever(targetSdkVersion) { Build.VERSION_CODES.R }
 
             val activityList = listOf(
-                    ParsedActivity().apply {
-                        addIntent(
-                                ParsedIntentInfo().apply {
-                                    addAction(Intent.ACTION_VIEW)
-                                    addCategory(Intent.CATEGORY_BROWSABLE)
-                                    addCategory(Intent.CATEGORY_DEFAULT)
-                                    addDataScheme("http")
-                                    addDataScheme("https")
-                                    addDataPath("/sub", PatternMatcher.PATTERN_LITERAL)
-                                    addDataAuthority("example1.com", null)
-                                    addDataAuthority("invalid1", null)
-                                }
-                        )
-                    },
-                    ParsedActivity().apply {
-                        addIntent(
-                                ParsedIntentInfo().apply {
-                                    setAutoVerify(true)
-                                    addAction(Intent.ACTION_VIEW)
-                                    addCategory(Intent.CATEGORY_BROWSABLE)
-                                    addCategory(Intent.CATEGORY_DEFAULT)
-                                    addDataScheme("http")
-                                    addDataScheme("https")
+                ParsedActivityImpl().apply {
+                    addIntent(
+                        ParsedIntentInfoImpl()
+                            .apply {
+                            intentFilter.apply {
+                                addAction(Intent.ACTION_VIEW)
+                                addCategory(Intent.CATEGORY_BROWSABLE)
+                                addCategory(Intent.CATEGORY_DEFAULT)
+                                addDataScheme("http")
+                                addDataScheme("https")
+                                addDataPath("/sub", PatternMatcher.PATTERN_LITERAL)
+                                addDataAuthority("example1.com", null)
+                                addDataAuthority("invalid1", null)
+                            }
+                        }
+                    )
+                },
+                ParsedActivityImpl().apply {
+                    addIntent(
+                        ParsedIntentInfoImpl()
+                            .apply {
+                            intentFilter.apply {
+                                setAutoVerify(true)
+                                addAction(Intent.ACTION_VIEW)
+                                addCategory(Intent.CATEGORY_BROWSABLE)
+                                addCategory(Intent.CATEGORY_DEFAULT)
+                                addDataScheme("http")
+                                addDataScheme("https")
 
-                                    // The presence of a non-web-scheme as the only autoVerify
-                                    // intent-filter, when non-forced, means that v1 will not pick
-                                    // up the package for verification.
-                                    addDataScheme("nonWebScheme")
-                                    addDataPath("/sub", PatternMatcher.PATTERN_LITERAL)
-                                    addDataAuthority("example2.com", null)
-                                    addDataAuthority("invalid2", null)
-                                }
-                        )
-                    },
+                                // The presence of a non-web-scheme as the only autoVerify
+                                // intent-filter, when non-forced, means that v1 will not pick
+                                // up the package for verification.
+                                addDataScheme("nonWebScheme")
+                                addDataPath("/sub", PatternMatcher.PATTERN_LITERAL)
+                                addDataAuthority("example2.com", null)
+                                addDataAuthority("invalid2", null)
+                            }
+                        }
+                    )
+                },
             )
 
             whenever(activities) { activityList }
@@ -264,9 +270,11 @@ class DomainVerificationCollectorTest {
 
             // The intents are split into separate Activities to test that multiple are collected
             val activityList = listOf(
-                    ParsedActivity().apply {
+                    ParsedActivityImpl().apply {
                         addIntent(
-                                ParsedIntentInfo().apply {
+                            ParsedIntentInfoImpl()
+                                .apply {
+                                intentFilter.apply {
                                     setAutoVerify(autoVerify)
                                     addAction(Intent.ACTION_VIEW)
                                     addCategory(Intent.CATEGORY_BROWSABLE)
@@ -277,9 +285,12 @@ class DomainVerificationCollectorTest {
                                     addDataAuthority("example1.com", null)
                                     addDataAuthority("invalid1", null)
                                 }
+                            }
                         )
                         addIntent(
-                                ParsedIntentInfo().apply {
+                            ParsedIntentInfoImpl()
+                                .apply {
+                                intentFilter.apply {
                                     addAction(Intent.ACTION_VIEW)
                                     addCategory(Intent.CATEGORY_BROWSABLE)
                                     addCategory(Intent.CATEGORY_DEFAULT)
@@ -288,11 +299,14 @@ class DomainVerificationCollectorTest {
                                     addDataAuthority("example2.com", null)
                                     addDataAuthority("invalid2", null)
                                 }
+                            }
                         )
                     },
-                    ParsedActivity().apply {
+                    ParsedActivityImpl().apply {
                         addIntent(
-                                ParsedIntentInfo().apply {
+                            ParsedIntentInfoImpl()
+                                .apply {
+                                intentFilter.apply {
                                     setAutoVerify(autoVerify)
                                     addAction(Intent.ACTION_VIEW)
                                     addCategory(Intent.CATEGORY_BROWSABLE)
@@ -302,11 +316,14 @@ class DomainVerificationCollectorTest {
                                     addDataAuthority("example3.com", null)
                                     addDataAuthority("invalid3", null)
                                 }
+                            }
                         )
                     },
-                    ParsedActivity().apply {
+                    ParsedActivityImpl().apply {
                         addIntent(
-                                ParsedIntentInfo().apply {
+                            ParsedIntentInfoImpl()
+                                .apply {
+                                intentFilter.apply {
                                     setAutoVerify(autoVerify)
                                     addAction(Intent.ACTION_VIEW)
                                     addCategory(Intent.CATEGORY_BROWSABLE)
@@ -315,9 +332,12 @@ class DomainVerificationCollectorTest {
                                     addDataAuthority("example4.com", null)
                                     addDataAuthority("invalid4", null)
                                 }
+                            }
                         )
                         addIntent(
-                                ParsedIntentInfo().apply {
+                            ParsedIntentInfoImpl()
+                                .apply {
+                                intentFilter.apply {
                                     setAutoVerify(autoVerify)
                                     addAction(Intent.ACTION_VIEW)
                                     addCategory(Intent.CATEGORY_DEFAULT)
@@ -326,9 +346,12 @@ class DomainVerificationCollectorTest {
                                     addDataAuthority("example5.com", null)
                                     addDataAuthority("invalid5", null)
                                 }
+                            }
                         )
                         addIntent(
-                                ParsedIntentInfo().apply {
+                            ParsedIntentInfoImpl()
+                                .apply {
+                                intentFilter.apply {
                                     setAutoVerify(autoVerify)
                                     addCategory(Intent.CATEGORY_BROWSABLE)
                                     addCategory(Intent.CATEGORY_DEFAULT)
@@ -337,30 +360,40 @@ class DomainVerificationCollectorTest {
                                     addDataAuthority("example6.com", null)
                                     addDataAuthority("invalid6", null)
                                 }
+                            }
                         )
                         addIntent(
-                                ParsedIntentInfo().apply {
+                            ParsedIntentInfoImpl()
+                                .apply {
+                                intentFilter.apply {
                                     setAutoVerify(autoVerify)
                                     addCategory(Intent.CATEGORY_BROWSABLE)
                                     addCategory(Intent.CATEGORY_DEFAULT)
                                     addDataAuthority("example7.com", null)
                                 }
+                            }
                         )
                         addIntent(
-                                ParsedIntentInfo().apply {
+                            ParsedIntentInfoImpl()
+                                .apply {
+                                intentFilter.apply {
                                     setAutoVerify(autoVerify)
                                     addCategory(Intent.CATEGORY_BROWSABLE)
                                     addCategory(Intent.CATEGORY_DEFAULT)
                                     addDataScheme("https")
                                 }
+                            }
                         )
                         addIntent(
-                                ParsedIntentInfo().apply {
+                            ParsedIntentInfoImpl()
+                                .apply {
+                                intentFilter.apply {
                                     setAutoVerify(autoVerify)
                                     addCategory(Intent.CATEGORY_BROWSABLE)
                                     addCategory(Intent.CATEGORY_DEFAULT)
                                     addDataPath("/sub7", PatternMatcher.PATTERN_LITERAL)
                                 }
+                            }
                         )
                     },
             )

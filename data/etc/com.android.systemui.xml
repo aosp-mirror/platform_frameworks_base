@@ -17,6 +17,7 @@
 <permissions>
     <privapp-permissions package="com.android.systemui">
         <permission name="android.permission.CAPTURE_AUDIO_OUTPUT"/>
+        <permission name="android.permission.ALLOW_SLIPPERY_TOUCHES"/>
         <permission name="android.permission.BATTERY_STATS"/>
         <permission name="android.permission.BIND_APPWIDGET"/>
         <permission name="android.permission.BLUETOOTH_PRIVILEGED"/>
@@ -30,6 +31,7 @@
         <permission name="android.permission.GET_APP_OPS_STATS"/>
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
         <permission name="android.permission.MANAGE_DEBUGGING"/>
+        <permission name="android.permission.MANAGE_GAME_MODE" />
         <permission name="android.permission.MANAGE_SENSOR_PRIVACY"/>
         <permission name="android.permission.MANAGE_USB"/>
         <permission name="android.permission.MANAGE_USERS"/>
@@ -50,6 +52,7 @@
         <permission name="android.permission.REAL_GET_TASKS"/>
         <permission name="android.permission.REQUEST_NETWORK_SCORES"/>
         <permission name="android.permission.RECEIVE_MEDIA_RESOURCE_USAGE"/>
+        <permission name="android.permission.SET_WALLPAPER_DIM_AMOUNT"/>
         <permission name="android.permission.START_ACTIVITIES_FROM_BACKGROUND" />
         <permission name="android.permission.START_ACTIVITY_AS_CALLER"/>
         <permission name="android.permission.START_TASKS_FROM_RECENTS"/>
@@ -71,5 +74,12 @@
         <permission name="android.permission.USE_BACKGROUND_BLUR" />
         <permission name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS" />
         <permission name="android.permission.FORCE_STOP_PACKAGES" />
+        <permission name="android.permission.ACCESS_FPS_COUNTER" />
+        <permission name="android.permission.CHANGE_CONFIGURATION" />
+        <permission name="android.permission.LOG_COMPAT_CHANGE" />
+        <permission name="android.permission.READ_COMPAT_CHANGE_CONFIG" />
+        <permission name="android.permission.READ_DEVICE_CONFIG" />
+        <permission name="android.permission.READ_SAFETY_CENTER_STATUS" />
+        <permission name="android.permission.SET_UNRESTRICTED_KEEP_CLEAR_AREAS" />
     </privapp-permissions>
 </permissions>

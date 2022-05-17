@@ -42,7 +42,8 @@ public class MediaPlayerDataTest : SysuiTestCase() {
     val mockito = MockitoJUnit.rule()
 
     companion object {
-        val LOCAL = true
+        val LOCAL = MediaData.PLAYBACK_LOCAL
+        val REMOTE = MediaData.PLAYBACK_CAST_LOCAL
         val RESUMPTION = true
         val PLAYING = true
         val UNDETERMINED = null
@@ -58,10 +59,12 @@ public class MediaPlayerDataTest : SysuiTestCase() {
         val dataIsPlaying = createMediaData("app1", PLAYING, LOCAL, !RESUMPTION)
 
         val playerIsRemote = mock(MediaControlPanel::class.java)
-        val dataIsRemote = createMediaData("app2", PLAYING, !LOCAL, !RESUMPTION)
+        val dataIsRemote = createMediaData("app2", PLAYING, REMOTE, !RESUMPTION)
 
-        MediaPlayerData.addMediaPlayer("2", dataIsRemote, playerIsRemote, systemClock)
-        MediaPlayerData.addMediaPlayer("1", dataIsPlaying, playerIsPlaying, systemClock)
+        MediaPlayerData.addMediaPlayer("2", dataIsRemote, playerIsRemote, systemClock,
+                isSsReactivated = false)
+        MediaPlayerData.addMediaPlayer("1", dataIsPlaying, playerIsPlaying, systemClock,
+                isSsReactivated = false)
 
         val players = MediaPlayerData.players()
         assertThat(players).hasSize(2)
@@ -76,18 +79,22 @@ public class MediaPlayerDataTest : SysuiTestCase() {
         val playerIsPlaying2 = mock(MediaControlPanel::class.java)
         var dataIsPlaying2 = createMediaData("app2", !PLAYING, LOCAL, !RESUMPTION)
 
-        MediaPlayerData.addMediaPlayer("1", dataIsPlaying1, playerIsPlaying1, systemClock)
+        MediaPlayerData.addMediaPlayer("1", dataIsPlaying1, playerIsPlaying1, systemClock,
+                isSsReactivated = false)
         systemClock.advanceTime(1)
-        MediaPlayerData.addMediaPlayer("2", dataIsPlaying2, playerIsPlaying2, systemClock)
+        MediaPlayerData.addMediaPlayer("2", dataIsPlaying2, playerIsPlaying2, systemClock,
+                isSsReactivated = false)
         systemClock.advanceTime(1)
 
         dataIsPlaying1 = createMediaData("app1", !PLAYING, LOCAL, !RESUMPTION)
         dataIsPlaying2 = createMediaData("app2", PLAYING, LOCAL, !RESUMPTION)
 
-        MediaPlayerData.addMediaPlayer("1", dataIsPlaying1, playerIsPlaying1, systemClock)
+        MediaPlayerData.addMediaPlayer("1", dataIsPlaying1, playerIsPlaying1, systemClock,
+                isSsReactivated = false)
         systemClock.advanceTime(1)
 
-        MediaPlayerData.addMediaPlayer("2", dataIsPlaying2, playerIsPlaying2, systemClock)
+        MediaPlayerData.addMediaPlayer("2", dataIsPlaying2, playerIsPlaying2, systemClock,
+                isSsReactivated = false)
         systemClock.advanceTime(1)
 
         val players = MediaPlayerData.players()
@@ -100,13 +107,13 @@ public class MediaPlayerDataTest : SysuiTestCase() {
         val dataIsPlaying = createMediaData("app1", PLAYING, LOCAL, !RESUMPTION)
 
         val playerIsPlayingAndRemote = mock(MediaControlPanel::class.java)
-        val dataIsPlayingAndRemote = createMediaData("app2", PLAYING, !LOCAL, !RESUMPTION)
+        val dataIsPlayingAndRemote = createMediaData("app2", PLAYING, REMOTE, !RESUMPTION)
 
         val playerIsStoppedAndLocal = mock(MediaControlPanel::class.java)
         val dataIsStoppedAndLocal = createMediaData("app3", !PLAYING, LOCAL, !RESUMPTION)
 
         val playerIsStoppedAndRemote = mock(MediaControlPanel::class.java)
-        val dataIsStoppedAndRemote = createMediaData("app4", !PLAYING, !LOCAL, !RESUMPTION)
+        val dataIsStoppedAndRemote = createMediaData("app4", !PLAYING, REMOTE, !RESUMPTION)
 
         val playerCanResume = mock(MediaControlPanel::class.java)
         val dataCanResume = createMediaData("app5", !PLAYING, LOCAL, RESUMPTION)
@@ -115,20 +122,26 @@ public class MediaPlayerDataTest : SysuiTestCase() {
         val dataUndetermined = createMediaData("app6", UNDETERMINED, LOCAL, RESUMPTION)
 
         MediaPlayerData.addMediaPlayer(
-                "3", dataIsStoppedAndLocal, playerIsStoppedAndLocal, systemClock)
+                "3", dataIsStoppedAndLocal, playerIsStoppedAndLocal, systemClock,
+                isSsReactivated = false)
         MediaPlayerData.addMediaPlayer(
-                "5", dataIsStoppedAndRemote, playerIsStoppedAndRemote, systemClock)
-        MediaPlayerData.addMediaPlayer("4", dataCanResume, playerCanResume, systemClock)
-        MediaPlayerData.addMediaPlayer("1", dataIsPlaying, playerIsPlaying, systemClock)
+                "5", dataIsStoppedAndRemote, playerIsStoppedAndRemote, systemClock,
+                isSsReactivated = false)
+        MediaPlayerData.addMediaPlayer("4", dataCanResume, playerCanResume, systemClock,
+                isSsReactivated = false)
+        MediaPlayerData.addMediaPlayer("1", dataIsPlaying, playerIsPlaying, systemClock,
+                isSsReactivated = false)
         MediaPlayerData.addMediaPlayer(
-                "2", dataIsPlayingAndRemote, playerIsPlayingAndRemote, systemClock)
-        MediaPlayerData.addMediaPlayer("6", dataUndetermined, playerUndetermined, systemClock)
+                "2", dataIsPlayingAndRemote, playerIsPlayingAndRemote, systemClock,
+                isSsReactivated = false)
+        MediaPlayerData.addMediaPlayer("6", dataUndetermined, playerUndetermined, systemClock,
+                isSsReactivated = false)
 
         val players = MediaPlayerData.players()
         assertThat(players).hasSize(6)
         assertThat(players).containsExactly(playerIsPlaying, playerIsPlayingAndRemote,
-            playerIsStoppedAndLocal, playerCanResume, playerIsStoppedAndRemote,
-            playerUndetermined).inOrder()
+            playerIsStoppedAndRemote, playerIsStoppedAndLocal, playerUndetermined,
+            playerCanResume).inOrder()
     }
 
     @Test
@@ -140,11 +153,13 @@ public class MediaPlayerDataTest : SysuiTestCase() {
 
         assertThat(MediaPlayerData.players()).hasSize(0)
 
-        MediaPlayerData.addMediaPlayer(keyA, data, playerIsPlaying, systemClock)
+        MediaPlayerData.addMediaPlayer(keyA, data, playerIsPlaying, systemClock,
+                isSsReactivated = false)
         systemClock.advanceTime(1)
 
         assertThat(MediaPlayerData.players()).hasSize(1)
-        MediaPlayerData.addMediaPlayer(keyB, data, playerIsPlaying, systemClock)
+        MediaPlayerData.addMediaPlayer(keyB, data, playerIsPlaying, systemClock,
+                isSsReactivated = false)
         systemClock.advanceTime(1)
 
         assertThat(MediaPlayerData.players()).hasSize(2)
@@ -160,9 +175,14 @@ public class MediaPlayerDataTest : SysuiTestCase() {
     private fun createMediaData(
         app: String,
         isPlaying: Boolean?,
-        isLocalSession: Boolean,
+        location: Int,
         resumption: Boolean
-    ) =
-        MediaData(0, false, 0, app, null, null, null, null, emptyList(), emptyList<Int>(), "",
-            null, null, null, true, null, isLocalSession, resumption, null, false, isPlaying)
+    ) = MediaTestUtils.emptyMediaData.copy(
+        app = app,
+        packageName = "package: $app",
+        playbackLocation = location,
+        resumption = resumption,
+        notificationKey = "key: $app",
+        isPlaying = isPlaying
+    )
 }

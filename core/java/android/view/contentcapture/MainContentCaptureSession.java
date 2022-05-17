@@ -26,6 +26,7 @@ import static android.view.contentcapture.ContentCaptureEvent.TYPE_VIEW_INSETS_C
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_VIEW_TEXT_CHANGED;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_VIEW_TREE_APPEARED;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_VIEW_TREE_APPEARING;
+import static android.view.contentcapture.ContentCaptureEvent.TYPE_WINDOW_BOUNDS_CHANGED;
 import static android.view.contentcapture.ContentCaptureHelper.getSanitizedString;
 import static android.view.contentcapture.ContentCaptureHelper.sDebug;
 import static android.view.contentcapture.ContentCaptureHelper.sVerbose;
@@ -38,6 +39,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Insets;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -774,6 +776,14 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     void notifyContextUpdated(int sessionId, @Nullable ContentCaptureContext context) {
         mHandler.post(() -> sendEvent(new ContentCaptureEvent(sessionId, TYPE_CONTEXT_UPDATED)
                 .setClientContext(context), FORCE_FLUSH));
+    }
+
+    /** public because is also used by ViewRootImpl */
+    public void notifyWindowBoundsChanged(int sessionId, @NonNull Rect bounds) {
+        mHandler.post(() -> sendEvent(
+                new ContentCaptureEvent(sessionId, TYPE_WINDOW_BOUNDS_CHANGED)
+                .setBounds(bounds)
+        ));
     }
 
     @Override

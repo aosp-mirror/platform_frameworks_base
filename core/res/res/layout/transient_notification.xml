@@ -40,6 +40,5 @@
         android:maxLines="2"
         android:paddingTop="12dp"
         android:paddingBottom="12dp"
-        android:lineHeight="20sp"
         android:textAppearance="@style/TextAppearance.Toast"/>
 </LinearLayout>

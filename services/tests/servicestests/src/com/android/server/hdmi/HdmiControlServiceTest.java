@@ -33,7 +33,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -41,11 +42,9 @@ import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.IHdmiCecVolumeControlFeatureListener;
 import android.hardware.hdmi.IHdmiControlStatusChangeListener;
+import android.hardware.hdmi.IHdmiVendorCommandListener;
 import android.os.Binder;
-import android.os.IPowerManager;
-import android.os.IThermalService;
 import android.os.Looper;
-import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
@@ -58,11 +57,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 
 /**
@@ -73,107 +72,6 @@ import java.util.Optional;
 @RunWith(JUnit4.class)
 public class HdmiControlServiceTest {
 
-    protected static class MockPlaybackDevice extends HdmiCecLocalDevicePlayback {
-
-        private boolean mCanGoToStandby;
-        private boolean mIsStandby;
-        private boolean mIsDisabled;
-
-        MockPlaybackDevice(HdmiControlService service) {
-            super(service);
-        }
-
-        @Override
-        protected void onAddressAllocated(int logicalAddress, int reason) {}
-
-        @Override
-        protected int getPreferredAddress() {
-            return 0;
-        }
-
-        @Override
-        protected void setPreferredAddress(int addr) {}
-
-        @Override
-        protected boolean canGoToStandby() {
-            return mCanGoToStandby;
-        }
-
-        @Override
-        protected void disableDevice(
-                boolean initiatedByCec, final PendingActionClearedCallback originalCallback) {
-            mIsDisabled = true;
-            originalCallback.onCleared(this);
-        }
-
-        @Override
-        protected void onStandby(boolean initiatedByCec, int standbyAction) {
-            mIsStandby = true;
-        }
-
-        protected boolean isStandby() {
-            return mIsStandby;
-        }
-
-        protected boolean isDisabled() {
-            return mIsDisabled;
-        }
-
-        protected void setCanGoToStandby(boolean canGoToStandby) {
-            mCanGoToStandby = canGoToStandby;
-        }
-    }
-    protected static class MockAudioSystemDevice extends HdmiCecLocalDeviceAudioSystem {
-
-        private boolean mCanGoToStandby;
-        private boolean mIsStandby;
-        private boolean mIsDisabled;
-
-        MockAudioSystemDevice(HdmiControlService service) {
-            super(service);
-        }
-
-        @Override
-        protected void onAddressAllocated(int logicalAddress, int reason) {}
-
-        @Override
-        protected int getPreferredAddress() {
-            return 0;
-        }
-
-        @Override
-        protected void setPreferredAddress(int addr) {}
-
-        @Override
-        protected boolean canGoToStandby() {
-            return mCanGoToStandby;
-        }
-
-        @Override
-        protected void disableDevice(
-                boolean initiatedByCec, final PendingActionClearedCallback originalCallback) {
-            mIsDisabled = true;
-            originalCallback.onCleared(this);
-        }
-
-        @Override
-        protected void onStandby(boolean initiatedByCec, int standbyAction) {
-            mIsStandby = true;
-        }
-
-        protected boolean isStandby() {
-            return mIsStandby;
-        }
-
-        protected boolean isDisabled() {
-            return mIsDisabled;
-        }
-
-        protected void setCanGoToStandby(boolean canGoToStandby) {
-            mCanGoToStandby = canGoToStandby;
-        }
-    }
-
     private static final String TAG = "HdmiControlServiceTest";
     private Context mContextSpy;
     private HdmiControlService mHdmiControlServiceSpy;
@@ -181,31 +79,20 @@ public class HdmiControlServiceTest {
     private MockAudioSystemDevice mAudioSystemDeviceSpy;
     private MockPlaybackDevice mPlaybackDeviceSpy;
     private FakeNativeWrapper mNativeWrapper;
+    private FakePowerManagerWrapper mPowerManager;
     private Looper mMyLooper;
     private TestLooper mTestLooper = new TestLooper();
     private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
     private HdmiPortInfo[] mHdmiPortInfo;
 
-    @Mock private IPowerManager mIPowerManagerMock;
-    @Mock private IThermalService mIThermalServiceMock;
-
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
-
-        when(mContextSpy.getSystemService(Context.POWER_SERVICE)).thenAnswer(i ->
-                new PowerManager(mContextSpy, mIPowerManagerMock,
-                mIThermalServiceMock, null));
-        when(mContextSpy.getSystemService(PowerManager.class)).thenAnswer(i ->
-                new PowerManager(mContextSpy, mIPowerManagerMock,
-                mIThermalServiceMock, null));
-        when(mIPowerManagerMock.isInteractive()).thenReturn(true);
 
         HdmiCecConfig hdmiCecConfig = new FakeHdmiCecConfig(mContextSpy);
 
-        mHdmiControlServiceSpy = spy(new HdmiControlService(mContextSpy));
+        mHdmiControlServiceSpy = spy(new HdmiControlService(mContextSpy, Collections.emptyList(),
+                new FakeAudioDeviceVolumeManagerWrapper()));
         doNothing().when(mHdmiControlServiceSpy)
                 .writeStringSystemProperty(anyString(), anyString());
 
@@ -226,22 +113,22 @@ public class HdmiControlServiceTest {
         mHdmiControlServiceSpy.setCecController(mHdmiCecController);
         mHdmiControlServiceSpy.setHdmiMhlController(HdmiMhlControllerStub.create(
                 mHdmiControlServiceSpy));
-        mHdmiControlServiceSpy.setMessageValidator(new HdmiCecMessageValidator(
-                mHdmiControlServiceSpy));
 
         mLocalDevices.add(mAudioSystemDeviceSpy);
         mLocalDevices.add(mPlaybackDeviceSpy);
         mHdmiPortInfo = new HdmiPortInfo[4];
         mHdmiPortInfo[0] =
-            new HdmiPortInfo(1, HdmiPortInfo.PORT_INPUT, 0x2100, true, false, false);
+                new HdmiPortInfo(1, HdmiPortInfo.PORT_INPUT, 0x2100, true, false, false);
         mHdmiPortInfo[1] =
-            new HdmiPortInfo(2, HdmiPortInfo.PORT_INPUT, 0x2200, true, false, false);
+                new HdmiPortInfo(2, HdmiPortInfo.PORT_INPUT, 0x2200, true, false, false);
         mHdmiPortInfo[2] =
-            new HdmiPortInfo(3, HdmiPortInfo.PORT_INPUT, 0x2000, true, false, false);
+                new HdmiPortInfo(3, HdmiPortInfo.PORT_INPUT, 0x2000, true, false, false);
         mHdmiPortInfo[3] =
-            new HdmiPortInfo(4, HdmiPortInfo.PORT_INPUT, 0x3000, true, false, false);
+                new HdmiPortInfo(4, HdmiPortInfo.PORT_INPUT, 0x3000, true, false, false);
         mNativeWrapper.setPortInfo(mHdmiPortInfo);
         mHdmiControlServiceSpy.initService();
+        mPowerManager = new FakePowerManagerWrapper(mContextSpy);
+        mHdmiControlServiceSpy.setPowerManager(mPowerManager);
         mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
 
         mTestLooper.dispatchAll();
@@ -279,7 +166,7 @@ public class HdmiControlServiceTest {
 
     @Test
     public void initialPowerStatus_quiescentBoot_isTransientToStandby() throws RemoteException {
-        when(mIPowerManagerMock.isInteractive()).thenReturn(false);
+        mPowerManager.setInteractive(false);
         assertThat(mHdmiControlServiceSpy.getInitialPowerStatus()).isEqualTo(
                 HdmiControlManager.POWER_STATUS_TRANSIENT_TO_STANDBY);
     }
@@ -294,7 +181,7 @@ public class HdmiControlServiceTest {
 
     @Test
     public void powerStatusAfterBootComplete_quiescentBoot_isStandby() throws RemoteException {
-        when(mIPowerManagerMock.isInteractive()).thenReturn(false);
+        mPowerManager.setInteractive(false);
         mHdmiControlServiceSpy.onBootPhase(PHASE_BOOT_COMPLETED);
         assertThat(mHdmiControlServiceSpy.getPowerStatus()).isEqualTo(
                 HdmiControlManager.POWER_STATUS_STANDBY);
@@ -318,6 +205,18 @@ public class HdmiControlServiceTest {
                 Constants.ADDR_PLAYBACK_1, Constants.ADDR_BROADCAST,
                 HdmiControlManager.POWER_STATUS_STANDBY);
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(reportPowerStatus);
+    }
+
+    @Test
+    public void normalBoot_queuedActionsStartedAfterBoot() {
+        Mockito.clearInvocations(mAudioSystemDeviceSpy);
+        Mockito.clearInvocations(mPlaybackDeviceSpy);
+
+        mHdmiControlServiceSpy.onBootPhase(PHASE_BOOT_COMPLETED);
+        mTestLooper.dispatchAll();
+
+        verify(mAudioSystemDeviceSpy, times(1)).startQueuedActions();
+        verify(mPlaybackDeviceSpy, times(1)).startQueuedActions();
     }
 
     @Test
@@ -588,7 +487,7 @@ public class HdmiControlServiceTest {
                 Constants.ADDR_PLAYBACK_1));
         mTestLooper.dispatchAll();
 
-        HdmiCecMessage reportFeatures = HdmiCecMessageBuilder.buildReportFeatures(
+        HdmiCecMessage reportFeatures = ReportFeaturesMessage.build(
                 Constants.ADDR_PLAYBACK_1, HdmiControlManager.HDMI_CEC_VERSION_2_0,
                 Arrays.asList(DEVICE_PLAYBACK, DEVICE_AUDIO_SYSTEM),
                 mPlaybackDeviceSpy.getRcProfile(), mPlaybackDeviceSpy.getRcFeatures(),
@@ -606,7 +505,7 @@ public class HdmiControlServiceTest {
         mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTestLooper.dispatchAll();
 
-        HdmiCecMessage reportFeatures = HdmiCecMessageBuilder.buildReportFeatures(
+        HdmiCecMessage reportFeatures = ReportFeaturesMessage.build(
                 Constants.ADDR_PLAYBACK_1, HdmiControlManager.HDMI_CEC_VERSION_2_0,
                 Arrays.asList(DEVICE_PLAYBACK, DEVICE_AUDIO_SYSTEM),
                 mPlaybackDeviceSpy.getRcProfile(), mPlaybackDeviceSpy.getRcFeatures(),
@@ -623,7 +522,7 @@ public class HdmiControlServiceTest {
         mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTestLooper.dispatchAll();
 
-        HdmiCecMessage reportFeatures = HdmiCecMessageBuilder.buildReportFeatures(
+        HdmiCecMessage reportFeatures = ReportFeaturesMessage.build(
                 Constants.ADDR_PLAYBACK_1, HdmiControlManager.HDMI_CEC_VERSION_2_0,
                 Arrays.asList(DEVICE_PLAYBACK, DEVICE_AUDIO_SYSTEM),
                 mPlaybackDeviceSpy.getRcProfile(), mPlaybackDeviceSpy.getRcFeatures(),
@@ -734,9 +633,11 @@ public class HdmiControlServiceTest {
         mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTestLooper.dispatchAll();
 
-        HdmiCecMessage reportPowerStatus = HdmiCecMessageBuilder.buildReportPowerStatus(
-                Constants.ADDR_TV,
-                mHdmiControlServiceSpy.playback().mAddress, HdmiControlManager.POWER_STATUS_ON);
+        HdmiCecMessage reportPowerStatus =
+                HdmiCecMessageBuilder.buildReportPowerStatus(
+                        Constants.ADDR_TV,
+                        mHdmiControlServiceSpy.playback().getDeviceInfo().getLogicalAddress(),
+                        HdmiControlManager.POWER_STATUS_ON);
         mNativeWrapper.onCecMessage(reportPowerStatus);
         mTestLooper.dispatchAll();
 
@@ -755,10 +656,11 @@ public class HdmiControlServiceTest {
         mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTestLooper.dispatchAll();
 
-        HdmiCecMessage reportPowerStatus = HdmiCecMessageBuilder.buildReportPowerStatus(
-                Constants.ADDR_TV,
-                mHdmiControlServiceSpy.playback().mAddress,
-                HdmiControlManager.POWER_STATUS_STANDBY);
+        HdmiCecMessage reportPowerStatus =
+                HdmiCecMessageBuilder.buildReportPowerStatus(
+                        Constants.ADDR_TV,
+                        mHdmiControlServiceSpy.playback().getDeviceInfo().getLogicalAddress(),
+                        HdmiControlManager.POWER_STATUS_STANDBY);
         mNativeWrapper.onCecMessage(reportPowerStatus);
         mTestLooper.dispatchAll();
 
@@ -766,34 +668,10 @@ public class HdmiControlServiceTest {
         assertThat(hdmiControlStatusCallback.mCecAvailable).isTrue();
     }
 
-    private static class HdmiControlStatusCallback extends IHdmiControlStatusChangeListener.Stub {
-        boolean mCecEnabled = false;
-        boolean mCecAvailable = false;
-
-        @Override
-        public void onStatusChange(int isCecEnabled, boolean isCecAvailable)
-                throws RemoteException {
-            mCecEnabled = isCecEnabled == HdmiControlManager.HDMI_CEC_CONTROL_ENABLED;
-            mCecAvailable = isCecAvailable;
-        }
-    }
-
-    private static class VolumeControlFeatureCallback extends
-            IHdmiCecVolumeControlFeatureListener.Stub {
-        boolean mCallbackReceived = false;
-        int mVolumeControlEnabled = -1;
-
-        @Override
-        public void onHdmiCecVolumeControlFeature(int enabled) throws RemoteException {
-            this.mCallbackReceived = true;
-            this.mVolumeControlEnabled = enabled;
-        }
-    }
-
     @Test
     public void handleCecCommand_errorParameter_returnsAbortInvalidOperand() {
         // Validity ERROR_PARAMETER. Taken from HdmiCecMessageValidatorTest#isValid_menuStatus
-        HdmiCecMessage message = HdmiUtils.buildMessage("40:8D:03");
+        HdmiCecMessage message = HdmiUtils.buildMessage("80:8D:03");
 
         assertThat(mHdmiControlServiceSpy.handleCecCommand(message))
                 .isEqualTo(Constants.ABORT_INVALID_OPERAND);
@@ -868,6 +746,117 @@ public class HdmiControlServiceTest {
 
         assertThat(mHdmiControlServiceSpy.handleCecCommand(message))
                 .isEqualTo(Constants.ABORT_REFUSED);
+    }
+
+    @Test
+    public void addVendorCommandListener_receiveCallback_VendorCmdNoIdTest() {
+        int destAddress = mHdmiControlServiceSpy.playback().getDeviceInfo().getLogicalAddress();
+        int sourceAddress = Constants.ADDR_TV;
+        byte[] params = {0x00, 0x01, 0x02, 0x03};
+        int vendorId = 0x123456;
+        mHdmiControlServiceSpy.setPowerStatus(HdmiControlManager.POWER_STATUS_ON);
+
+        VendorCommandListener vendorCmdListener =
+                new VendorCommandListener(sourceAddress, destAddress, params, vendorId);
+        mHdmiControlServiceSpy.addVendorCommandListener(vendorCmdListener, vendorId);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage vendorCommandNoId =
+                HdmiCecMessageBuilder.buildVendorCommand(sourceAddress, destAddress, params);
+        mNativeWrapper.onCecMessage(vendorCommandNoId);
+        mTestLooper.dispatchAll();
+        assertThat(vendorCmdListener.mVendorCommandCallbackReceived).isTrue();
+        assertThat(vendorCmdListener.mParamsCorrect).isTrue();
+        assertThat(vendorCmdListener.mHasVendorId).isFalse();
+    }
+
+    @Test
+    public void addVendorCommandListener_receiveCallback_VendorCmdWithIdTest() {
+        int destAddress = mHdmiControlServiceSpy.playback().getDeviceInfo().getLogicalAddress();
+        int sourceAddress = Constants.ADDR_TV;
+        byte[] params = {0x00, 0x01, 0x02, 0x03};
+        int vendorId = 0x123456;
+        mHdmiControlServiceSpy.setPowerStatus(HdmiControlManager.POWER_STATUS_ON);
+
+        VendorCommandListener vendorCmdListener =
+                new VendorCommandListener(sourceAddress, destAddress, params, vendorId);
+        mHdmiControlServiceSpy.addVendorCommandListener(vendorCmdListener, vendorId);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage vendorCommandWithId =
+                HdmiCecMessageBuilder.buildVendorCommandWithId(
+                        sourceAddress, destAddress, vendorId, params);
+        mNativeWrapper.onCecMessage(vendorCommandWithId);
+        mTestLooper.dispatchAll();
+        assertThat(vendorCmdListener.mVendorCommandCallbackReceived).isTrue();
+        assertThat(vendorCmdListener.mParamsCorrect).isTrue();
+        assertThat(vendorCmdListener.mHasVendorId).isTrue();
+    }
+
+    @Test
+    public void addVendorCommandListener_noCallback_VendorCmdDiffIdTest() {
+        int destAddress = mHdmiControlServiceSpy.playback().getDeviceInfo().getLogicalAddress();
+        int sourceAddress = Constants.ADDR_TV;
+        byte[] params = {0x00, 0x01, 0x02, 0x03};
+        int vendorId = 0x123456;
+        int diffVendorId = 0x345678;
+        mHdmiControlServiceSpy.setPowerStatus(HdmiControlManager.POWER_STATUS_ON);
+
+        VendorCommandListener vendorCmdListener =
+                new VendorCommandListener(sourceAddress, destAddress, params, vendorId);
+        mHdmiControlServiceSpy.addVendorCommandListener(vendorCmdListener, vendorId);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage vendorCommandWithDiffId =
+                HdmiCecMessageBuilder.buildVendorCommandWithId(
+                        sourceAddress, destAddress, diffVendorId, params);
+        mNativeWrapper.onCecMessage(vendorCommandWithDiffId);
+        mTestLooper.dispatchAll();
+        assertThat(vendorCmdListener.mVendorCommandCallbackReceived).isFalse();
+    }
+
+    private static class VendorCommandListener extends IHdmiVendorCommandListener.Stub {
+        boolean mVendorCommandCallbackReceived = false;
+        boolean mParamsCorrect = false;
+        boolean mHasVendorId = false;
+
+        int mSourceAddress;
+        int mDestAddress;
+        byte[] mParams;
+        int mVendorId;
+
+        VendorCommandListener(int sourceAddress, int destAddress, byte[] params, int vendorId) {
+            this.mSourceAddress = sourceAddress;
+            this.mDestAddress = destAddress;
+            this.mParams = params.clone();
+            this.mVendorId = vendorId;
+        }
+
+        @Override
+        public void onReceived(
+                int sourceAddress, int destAddress, byte[] params, boolean hasVendorId) {
+            mVendorCommandCallbackReceived = true;
+            if (mSourceAddress == sourceAddress && mDestAddress == destAddress) {
+                byte[] expectedParams;
+                if (hasVendorId) {
+                    // If the command has vendor ID, we have to add it to mParams.
+                    expectedParams = new byte[params.length];
+                    expectedParams[0] = (byte) ((mVendorId >> 16) & 0xFF);
+                    expectedParams[1] = (byte) ((mVendorId >> 8) & 0xFF);
+                    expectedParams[2] = (byte) (mVendorId & 0xFF);
+                    System.arraycopy(mParams, 0, expectedParams, 3, mParams.length);
+                } else {
+                    expectedParams = params.clone();
+                }
+                if (Arrays.equals(expectedParams, params)) {
+                    mParamsCorrect = true;
+                }
+            }
+            mHasVendorId = hasVendorId;
+        }
+
+        @Override
+        public void onControlStateChanged(boolean enabled, int reason) {}
     }
 
     @Test
@@ -990,6 +979,136 @@ public class HdmiControlServiceTest {
 
         assertThat(mHdmiControlServiceSpy.readDeviceTypes())
                 .containsExactly(DEVICE_PLAYBACK, DEVICE_AUDIO_SYSTEM);
+    }
+
+    protected static class MockPlaybackDevice extends HdmiCecLocalDevicePlayback {
+
+        private boolean mCanGoToStandby;
+        private boolean mIsStandby;
+        private boolean mIsDisabled;
+
+        MockPlaybackDevice(HdmiControlService service) {
+            super(service);
+        }
+
+        @Override
+        protected void onAddressAllocated(int logicalAddress, int reason) {
+        }
+
+        @Override
+        protected int getPreferredAddress() {
+            return 0;
+        }
+
+        @Override
+        protected void setPreferredAddress(int addr) {
+        }
+
+        @Override
+        protected boolean canGoToStandby() {
+            return mCanGoToStandby;
+        }
+
+        @Override
+        protected void disableDevice(
+                boolean initiatedByCec, final PendingActionClearedCallback originalCallback) {
+            mIsDisabled = true;
+            originalCallback.onCleared(this);
+        }
+
+        @Override
+        protected void onStandby(boolean initiatedByCec, int standbyAction) {
+            mIsStandby = true;
+        }
+
+        protected boolean isStandby() {
+            return mIsStandby;
+        }
+
+        protected boolean isDisabled() {
+            return mIsDisabled;
+        }
+
+        protected void setCanGoToStandby(boolean canGoToStandby) {
+            mCanGoToStandby = canGoToStandby;
+        }
+    }
+
+    protected static class MockAudioSystemDevice extends HdmiCecLocalDeviceAudioSystem {
+
+        private boolean mCanGoToStandby;
+        private boolean mIsStandby;
+        private boolean mIsDisabled;
+
+        MockAudioSystemDevice(HdmiControlService service) {
+            super(service);
+        }
+
+        @Override
+        protected void onAddressAllocated(int logicalAddress, int reason) {
+        }
+
+        @Override
+        protected int getPreferredAddress() {
+            return 0;
+        }
+
+        @Override
+        protected void setPreferredAddress(int addr) {
+        }
+
+        @Override
+        protected boolean canGoToStandby() {
+            return mCanGoToStandby;
+        }
+
+        @Override
+        protected void disableDevice(
+                boolean initiatedByCec, final PendingActionClearedCallback originalCallback) {
+            mIsDisabled = true;
+            originalCallback.onCleared(this);
+        }
+
+        @Override
+        protected void onStandby(boolean initiatedByCec, int standbyAction) {
+            mIsStandby = true;
+        }
+
+        protected boolean isStandby() {
+            return mIsStandby;
+        }
+
+        protected boolean isDisabled() {
+            return mIsDisabled;
+        }
+
+        protected void setCanGoToStandby(boolean canGoToStandby) {
+            mCanGoToStandby = canGoToStandby;
+        }
+    }
+
+    private static class HdmiControlStatusCallback extends IHdmiControlStatusChangeListener.Stub {
+        boolean mCecEnabled = false;
+        boolean mCecAvailable = false;
+
+        @Override
+        public void onStatusChange(int isCecEnabled, boolean isCecAvailable)
+                throws RemoteException {
+            mCecEnabled = isCecEnabled == HdmiControlManager.HDMI_CEC_CONTROL_ENABLED;
+            mCecAvailable = isCecAvailable;
+        }
+    }
+
+    private static class VolumeControlFeatureCallback extends
+            IHdmiCecVolumeControlFeatureListener.Stub {
+        boolean mCallbackReceived = false;
+        int mVolumeControlEnabled = -1;
+
+        @Override
+        public void onHdmiCecVolumeControlFeature(int enabled) throws RemoteException {
+            this.mCallbackReceived = true;
+            this.mVolumeControlEnabled = enabled;
+        }
     }
 
 }

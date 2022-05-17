@@ -22,10 +22,8 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricConstants;
-import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.IBiometricAuthenticator;
 import android.hardware.biometrics.IBiometricSensorReceiver;
-import android.hardware.biometrics.SensorPropertiesInternal;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -108,11 +106,11 @@ public abstract class BiometricSensor {
 
     void goToStateWaitingForCookie(boolean requireConfirmation, IBinder token, long sessionId,
             int userId, IBiometricSensorReceiver sensorReceiver, String opPackageName,
-            int cookie, boolean allowBackgroundAuthentication)
+            long requestId, int cookie, boolean allowBackgroundAuthentication)
             throws RemoteException {
         mCookie = cookie;
         impl.prepareForAuthentication(requireConfirmation, token,
-                sessionId, userId, sensorReceiver, opPackageName, mCookie,
+                sessionId, userId, sensorReceiver, opPackageName, requestId, mCookie,
                 allowBackgroundAuthentication);
         mSensorState = STATE_WAITING_FOR_COOKIE;
     }
@@ -129,9 +127,12 @@ public abstract class BiometricSensor {
         mSensorState = STATE_AUTHENTICATING;
     }
 
-    void goToStateCancelling(IBinder token, String opPackageName) throws RemoteException {
-        impl.cancelAuthenticationFromService(token, opPackageName);
-        mSensorState = STATE_CANCELING;
+    void goToStateCancelling(IBinder token, String opPackageName, long requestId)
+            throws RemoteException {
+        if (mSensorState != STATE_CANCELING) {
+            impl.cancelAuthenticationFromService(token, opPackageName, requestId);
+            mSensorState = STATE_CANCELING;
+        }
     }
 
     void goToStoppedStateIfCookieMatches(int cookie, int error) {
@@ -146,7 +147,7 @@ public abstract class BiometricSensor {
      * Returns the actual strength, taking any updated strengths into effect. Since more bits
      * means lower strength, the resulting strength is never stronger than the OEM's configured
      * strength.
-     * @return a bitfield, see {@link BiometricManager.Authenticators}
+     * @return a bitfield, see {@link android.hardware.biometrics.BiometricManager.Authenticators}
      */
     @Authenticators.Types int getCurrentStrength() {
         return oemStrength | mUpdatedStrength;
@@ -166,27 +167,19 @@ public abstract class BiometricSensor {
      * @param newStrength
      */
     void updateStrength(@Authenticators.Types int newStrength) {
-        String log = "updateStrength: Before(" + toString() + ")";
+        String log = "updateStrength: Before(" + this + ")";
         mUpdatedStrength = newStrength;
-        log += " After(" + toString() + ")";
+        log += " After(" + this + ")";
         Slog.d(TAG, log);
     }
 
     @Override
     public String toString() {
-        SensorPropertiesInternal properties = null;
-        try {
-            properties = impl.getSensorProperties(mContext.getOpPackageName());
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Remote exception", e);
-        }
-
         return "ID(" + id + ")"
                 + ", oemStrength: " + oemStrength
                 + ", updatedStrength: " + mUpdatedStrength
                 + ", modality " + modality
                 + ", state: " + mSensorState
-                + ", cookie: " + mCookie
-                + ", props: " + properties;
+                + ", cookie: " + mCookie;
     }
 }

@@ -27,6 +27,7 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -210,6 +211,8 @@ public class AlarmManager {
      * on how frequently it can be scheduled.  Only available (and automatically applied) to
      * system alarms.
      *
+     * <p>Note that alarms set with a {@link WorkSource} <b>do not</b> get this flag.
+     *
      * @hide
      */
     @UnsupportedAppUsage
@@ -267,6 +270,27 @@ public class AlarmManager {
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
     public static final long ENFORCE_MINIMUM_WINDOW_ON_INEXACT_ALARMS = 185199076L;
+
+    /**
+     * For apps targeting {@link Build.VERSION_CODES#TIRAMISU} or above, certain kinds of apps can
+     * use {@link Manifest.permission#USE_EXACT_ALARM} to schedule exact alarms.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    public static final long ENABLE_USE_EXACT_ALARM = 218533173L;
+
+    /**
+     * The permission {@link Manifest.permission#SCHEDULE_EXACT_ALARM} will be denied, unless the
+     * user explicitly allows it from Settings.
+     *
+     * TODO (b/226439802): Either enable it in the next SDK or replace it with a better alternative.
+     * @hide
+     */
+    @ChangeId
+    @Disabled
+    public static final long SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT = 226439802L;
 
     @UnsupportedAppUsage
     private final IAlarmManager mService;
@@ -1408,6 +1432,7 @@ public class AlarmManager {
          * Use the {@link #CREATOR}
          * @hide
          */
+        @SuppressWarnings("UnsafeParcelApi")
         AlarmClockInfo(Parcel in) {
             mTriggerTime = in.readLong();
             mShowIntent = in.readParcelable(PendingIntent.class.getClassLoader());

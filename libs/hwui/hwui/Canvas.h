@@ -162,7 +162,7 @@ public:
     virtual int save(SaveFlags::Flags flags) = 0;
     virtual void restore() = 0;
     virtual void restoreToCount(int saveCount) = 0;
-    virtual void restoreUnclippedLayer(int saveCount, const SkPaint& paint) = 0;
+    virtual void restoreUnclippedLayer(int saveCount, const Paint& paint) = 0;
 
     virtual int saveLayer(float left, float top, float right, float bottom, const SkPaint* paint) = 0;
     virtual int saveLayerAlpha(float left, float top, float right, float bottom, int alpha) = 0;
@@ -185,6 +185,12 @@ public:
 
     virtual bool clipRect(float left, float top, float right, float bottom, SkClipOp op) = 0;
     virtual bool clipPath(const SkPath* path, SkClipOp op) = 0;
+    // Resets clip to wide open, used to emulate the now-removed SkClipOp::kReplace on
+    // apps with compatibility < P. Canvases for version P and later are restricted to
+    // intersect and difference at the Java level, matching SkClipOp's definition.
+    // NOTE: These functions are deprecated and will be removed in a future release
+    virtual bool replaceClipRect_deprecated(float left, float top, float right, float bottom) = 0;
+    virtual bool replaceClipPath_deprecated(const SkPath* path) = 0;
 
     // filters
     virtual PaintFilter* getPaintFilter() = 0;
@@ -197,7 +203,7 @@ public:
     // Canvas draw operations
     // ----------------------------------------------------------------------------
     virtual void drawColor(int color, SkBlendMode mode) = 0;
-    virtual void drawPaint(const SkPaint& paint) = 0;
+    virtual void drawPaint(const Paint& paint) = 0;
 
     // Geometry
     virtual void drawPoint(float x, float y, const Paint& paint) = 0;

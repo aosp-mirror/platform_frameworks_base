@@ -17,12 +17,12 @@
 package com.android.systemui.util.leak;
 
 import android.os.Build;
+import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.systemui.Dumpable;
+import com.android.systemui.dump.DumpManager;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Collection;
 
@@ -38,12 +38,16 @@ public class LeakDetector implements Dumpable {
     private final TrackedObjects mTrackedObjects;
 
     @VisibleForTesting
-    public LeakDetector(TrackedCollections trackedCollections,
+    public LeakDetector(
+            TrackedCollections trackedCollections,
             TrackedGarbage trackedGarbage,
-            TrackedObjects trackedObjects) {
+            TrackedObjects trackedObjects,
+            DumpManager dumpManager) {
         mTrackedCollections = trackedCollections;
         mTrackedGarbage = trackedGarbage;
         mTrackedObjects = trackedObjects;
+
+        dumpManager.registerDumpable(getClass().getSimpleName(), this);
     }
 
     /**
@@ -100,7 +104,7 @@ public class LeakDetector implements Dumpable {
     }
 
     @Override
-    public void dump(FileDescriptor df, PrintWriter w, String[] args) {
+    public void dump(PrintWriter w, String[] args) {
         IndentingPrintWriter pw = new IndentingPrintWriter(w, "  ");
 
         pw.println("SYSUI LEAK DETECTOR");
@@ -128,15 +132,5 @@ public class LeakDetector implements Dumpable {
         }
         pw.decreaseIndent();
         pw.println();
-    }
-
-    public static LeakDetector create() {
-        if (ENABLED) {
-            TrackedCollections collections = new TrackedCollections();
-            return new LeakDetector(collections, new TrackedGarbage(collections),
-                    new TrackedObjects(collections));
-        } else {
-            return new LeakDetector(null, null, null);
-        }
     }
 }

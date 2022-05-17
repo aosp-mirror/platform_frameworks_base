@@ -23,12 +23,10 @@ import android.accounts.AccountManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.os.Bundle;
 import android.os.PersistableBundle;
-import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
 
@@ -43,6 +41,8 @@ public class ConfirmUserCreationActivity extends AlertActivity
         implements DialogInterface.OnClickListener {
 
     private static final String TAG = "CreateUser";
+
+    private static final String USER_TYPE = UserManager.USER_TYPE_FULL_SECONDARY;
 
     private String mUserName;
     private String mAccountName;
@@ -103,7 +103,7 @@ public class ConfirmUserCreationActivity extends AlertActivity
         boolean cantCreateUser = mUserManager.hasUserRestriction(UserManager.DISALLOW_ADD_USER)
                 || !mUserManager.isAdminUser();
         // Check the system state and user count
-        boolean cantCreateAnyMoreUsers = !mUserManager.canAddMoreUsers();
+        boolean cantCreateAnyMoreUsers = !mUserManager.canAddMoreUsers(USER_TYPE);
         // Check the account existence
         final Account account = new Account(mAccountName, mAccountType);
         boolean accountExists = mAccountName != null && mAccountType != null
@@ -130,7 +130,7 @@ public class ConfirmUserCreationActivity extends AlertActivity
         setResult(RESULT_CANCELED);
         if (which == BUTTON_POSITIVE && mCanProceed) {
             Log.i(TAG, "Ok, creating user");
-            UserInfo user = mUserManager.createUser(mUserName, 0);
+            UserInfo user = mUserManager.createUser(mUserName, USER_TYPE, 0);
             if (user == null) {
                 Log.e(TAG, "Couldn't create user");
                 finish();

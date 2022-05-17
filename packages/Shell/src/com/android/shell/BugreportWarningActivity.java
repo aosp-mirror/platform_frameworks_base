@@ -54,9 +54,11 @@ public class BugreportWarningActivity extends AlertActivity
 
         mSendIntent = getIntent().getParcelableExtra(Intent.EXTRA_INTENT);
 
-        // We need to touch the extras to unpack them so they get migrated to
-        // ClipData correctly.
-        mSendIntent.hasExtra(Intent.EXTRA_STREAM);
+        if (mSendIntent != null) {
+            // We need to touch the extras to unpack them so they get migrated to
+            // ClipData correctly.
+            mSendIntent.hasExtra(Intent.EXTRA_STREAM);
+        }
 
         final AlertController.AlertParams ap = mAlertParams;
         ap.mView = LayoutInflater.from(this).inflate(R.layout.confirm_repeat, null);
@@ -84,7 +86,9 @@ public class BugreportWarningActivity extends AlertActivity
         if (which == AlertDialog.BUTTON_POSITIVE) {
             // Remember confirm state, and launch target
             setWarningState(this, mConfirmRepeat.isChecked() ? STATE_HIDE : STATE_SHOW);
-            sendShareIntent(this, mSendIntent);
+            if (mSendIntent != null) {
+                sendShareIntent(this, mSendIntent);
+            }
         }
 
         finish();

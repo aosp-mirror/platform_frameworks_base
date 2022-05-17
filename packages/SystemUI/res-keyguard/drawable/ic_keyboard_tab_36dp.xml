@@ -19,7 +19,8 @@
      android:viewportHeight="36"
      android:viewportWidth="36"
      android:width="36sp">
-  <path android:fillColor="?android:attr/colorBackground"
+
+  <path android:fillColor="?android:attr/textColorPrimaryInverse"
         android:pathData="M17.59,13.41L21.17,17H7v2h14.17l-3.59,3.59L19,24l6,-6l-6,-6L17.59,
                           13.41zM26,12v12h2V12H26z"/>
 </vector>

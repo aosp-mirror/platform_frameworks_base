@@ -16,7 +16,9 @@
 
 package com.android.server.display;
 
+import android.annotation.Nullable;
 import android.content.Context;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.DisplayViewport;
 import android.os.IBinder;
@@ -35,6 +37,8 @@ import java.io.PrintWriter;
  * </p>
  */
 abstract class DisplayDevice {
+    private static final Display.Mode EMPTY_DISPLAY_MODE = new Display.Mode.Builder().build();
+
     private final DisplayAdapter mDisplayAdapter;
     private final IBinder mDisplayToken;
     private final String mUniqueId;
@@ -43,6 +47,7 @@ abstract class DisplayDevice {
     // The display device does not manage these properties itself, they are set by
     // the display manager service.  The display device shouldn't really be looking at these.
     private int mCurrentLayerStack = -1;
+    private int mCurrentFlags = 0;
     private int mCurrentOrientation = -1;
     private Rect mCurrentLayerStackRect;
     private Rect mCurrentDisplayRect;
@@ -101,6 +106,33 @@ abstract class DisplayDevice {
      */
     public int getDisplayIdToMirrorLocked() {
         return Display.DEFAULT_DISPLAY;
+    }
+
+    /**
+     * Returns the if WindowManager is responsible for mirroring on this display. If {@code false},
+     * then SurfaceFlinger performs no layer mirroring on this display.
+     * Only used for mirroring started from MediaProjection.
+     */
+    public boolean isWindowManagerMirroringLocked() {
+        return false;
+    }
+
+    /**
+     * Updates if WindowManager is responsible for mirroring on this display. If {@code false}, then
+     * SurfaceFlinger performs no layer mirroring to this display.
+     * Only used for mirroring started from MediaProjection.
+     */
+    public void setWindowManagerMirroringLocked(boolean isMirroring) {
+    }
+
+    /**
+     * Returns the default size of the surface associated with the display, or null if the surface
+     * is not provided for layer mirroring by SurfaceFlinger.
+     * Only used for mirroring started from MediaProjection.
+     */
+    @Nullable
+    public Point getDisplaySurfaceDefaultSizeLocked() {
+        return null;
     }
 
     /**
@@ -175,6 +207,36 @@ abstract class DisplayDevice {
             DisplayModeDirector.DesiredDisplayModeSpecs displayModeSpecs) {}
 
     /**
+     * Sets the user preferred display mode. Removes the user preferred display mode and sets
+     * default display mode as the mode chosen by HAL, if 'mode' is null
+     * Returns true if the mode set by user is supported by the display.
+     */
+    public void setUserPreferredDisplayModeLocked(Display.Mode mode) { }
+
+    /**
+     * Returns the user preferred display mode.
+     */
+    public Display.Mode getUserPreferredDisplayModeLocked() {
+        return EMPTY_DISPLAY_MODE;
+    }
+
+    /**
+     * Returns the system preferred display mode.
+     */
+    public Display.Mode getSystemPreferredDisplayModeLocked() {
+        return EMPTY_DISPLAY_MODE;
+    }
+
+    /**
+     * Returns the display mode that was being used when this display was first found by
+     * display manager.
+     * @hide
+     */
+    public Display.Mode getActiveDisplayModeAtStartLocked() {
+        return EMPTY_DISPLAY_MODE;
+    }
+
+    /**
      * Sets the requested color mode.
      */
     public void setRequestedColorModeLocked(int colorMode) {
@@ -208,6 +270,19 @@ abstract class DisplayDevice {
         if (mCurrentLayerStack != layerStack) {
             mCurrentLayerStack = layerStack;
             t.setDisplayLayerStack(mDisplayToken, layerStack);
+        }
+    }
+
+    /**
+     * Sets the display flags while in a transaction.
+     *
+     * Valid display flags:
+     *  {@link SurfaceControl#DISPLAY_RECEIVES_INPUT}
+     */
+    public final void setDisplayFlagsLocked(SurfaceControl.Transaction t, int flags) {
+        if (mCurrentFlags != flags) {
+            mCurrentFlags = flags;
+            t.setDisplayFlags(mDisplayToken, flags);
         }
     }
 
@@ -298,6 +373,7 @@ abstract class DisplayDevice {
         pw.println("mUniqueId=" + mUniqueId);
         pw.println("mDisplayToken=" + mDisplayToken);
         pw.println("mCurrentLayerStack=" + mCurrentLayerStack);
+        pw.println("mCurrentFlags=" + mCurrentFlags);
         pw.println("mCurrentOrientation=" + mCurrentOrientation);
         pw.println("mCurrentLayerStackRect=" + mCurrentLayerStackRect);
         pw.println("mCurrentDisplayRect=" + mCurrentDisplayRect);

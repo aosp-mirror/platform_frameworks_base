@@ -20,9 +20,8 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.robolectric.shadow.api.Shadow.extract;
 
-import android.net.ConnectivityManager;
 import android.os.UserManager;
-import android.util.SparseBooleanArray;
+import android.telephony.TelephonyManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -35,7 +34,7 @@ import org.robolectric.annotation.Implements;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(shadows = {SimStatusImeiInfoPreferenceControllerTest.ShadowUserManager.class,
-                SimStatusImeiInfoPreferenceControllerTest.ShadowConnectivityManager.class})
+                SimStatusImeiInfoPreferenceControllerTest.ShadowTelephonyManager.class})
 public class SimStatusImeiInfoPreferenceControllerTest {
 
     private AbstractSimStatusImeiInfoPreferenceController mController;
@@ -56,9 +55,9 @@ public class SimStatusImeiInfoPreferenceControllerTest {
         ShadowUserManager userManager =
                 extract(RuntimeEnvironment.application.getSystemService(UserManager.class));
         userManager.setIsAdminUser(true);
-        ShadowConnectivityManager connectivityManager =
-                extract(RuntimeEnvironment.application.getSystemService(ConnectivityManager.class));
-        connectivityManager.setNetworkSupported(ConnectivityManager.TYPE_MOBILE, true);
+        ShadowTelephonyManager telephonyManager =
+                extract(RuntimeEnvironment.application.getSystemService(TelephonyManager.class));
+        telephonyManager.setDataCapable(true);
 
         assertThat(mController.isAvailable()).isTrue();
     }
@@ -68,9 +67,9 @@ public class SimStatusImeiInfoPreferenceControllerTest {
         ShadowUserManager userManager =
                 extract(RuntimeEnvironment.application.getSystemService(UserManager.class));
         userManager.setIsAdminUser(true);
-        ShadowConnectivityManager connectivityManager =
-                extract(RuntimeEnvironment.application.getSystemService(ConnectivityManager.class));
-        connectivityManager.setNetworkSupported(ConnectivityManager.TYPE_MOBILE, false);
+        ShadowTelephonyManager telephonyManager =
+                extract(RuntimeEnvironment.application.getSystemService(TelephonyManager.class));
+        telephonyManager.setDataCapable(false);
 
         assertThat(mController.isAvailable()).isFalse();
     }
@@ -99,19 +98,17 @@ public class SimStatusImeiInfoPreferenceControllerTest {
         }
     }
 
-    @Implements(ConnectivityManager.class)
-    public static class ShadowConnectivityManager
-            extends org.robolectric.shadows.ShadowConnectivityManager {
-
-        private final SparseBooleanArray mSupportedNetworkTypes = new SparseBooleanArray();
-
-        private void setNetworkSupported(int networkType, boolean supported) {
-            mSupportedNetworkTypes.put(networkType, supported);
+    @Implements(TelephonyManager.class)
+    public static class ShadowTelephonyManager
+            extends org.robolectric.shadows.ShadowTelephonyManager {
+        private boolean mDataCapable = false;
+        private void setDataCapable(boolean capable) {
+            mDataCapable = capable;
         }
 
         @Implementation
-        public boolean isNetworkSupported(int networkType) {
-            return mSupportedNetworkTypes.get(networkType);
+        public boolean isDataCapable() {
+            return mDataCapable;
         }
     }
 }

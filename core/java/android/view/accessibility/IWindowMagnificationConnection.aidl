@@ -32,21 +32,26 @@ oneway interface IWindowMagnificationConnection {
     /**
      * Enables window magnification on specified display with given center and scale and animation.
      *
-     * @param displayId The logical display id.
+     * @param displayId the logical display id.
      * @param scale magnification scale.
      * @param centerX the screen-relative X coordinate around which to center,
      *                or {@link Float#NaN} to leave unchanged.
      * @param centerY the screen-relative Y coordinate around which to center,
      *                or {@link Float#NaN} to leave unchanged.
+     * @param magnificationFrameOffsetRatioX Indicate the X coordinate offset between
+     *                                       frame position X and centerX
+     * @param magnificationFrameOffsetRatioY Indicate the Y coordinate offset between
+     *                                       frame position Y and centerY
      * @param callback The callback called when the animation is completed or interrupted.
      */
     void enableWindowMagnification(int displayId, float scale, float centerX, float centerY,
+        float magnificationFrameOffsetRatioX, float magnificationFrameOffsetRatioY,
         in IRemoteMagnificationAnimationCallback callback);
 
     /**
      * Sets the scale of the window magnifier on specified display.
      *
-     * @param displayId The logical display id.
+     * @param displayId the logical display id.
      * @param scale magnification scale.
      */
     void setScale(int displayId, float scale);
@@ -54,7 +59,7 @@ oneway interface IWindowMagnificationConnection {
      /**
      * Disables window magnification on specified display with animation.
      *
-     * @param displayId The logical display id.
+     * @param displayId the logical display id.
      * @param callback The callback called when the animation is completed or interrupted.
      */
     void disableWindowMagnification(int displayId,
@@ -63,6 +68,7 @@ oneway interface IWindowMagnificationConnection {
     /**
      * Moves the window magnifier on the specified display. It has no effect while animating.
      *
+     * @param displayId the logical display id.
      * @param offsetX the amount in pixels to offset the window magnifier in the X direction, in
      *                current screen pixels.
      * @param offsetY the amount in pixels to offset the window magnifier in the Y direction, in
@@ -71,9 +77,20 @@ oneway interface IWindowMagnificationConnection {
     void moveWindowMagnifier(int displayId, float offsetX, float offsetY);
 
     /**
+     * Moves the window magnifier on the given display.
+     *
+     * @param displayId the logical display id.
+     * @param positionX the x-axis position of the center of the magnified source bounds.
+     * @param positionY the y-axis position of the center of the magnified source bounds.
+     * @param callback the callback called when the animation is completed or interrupted.
+     */
+    void moveWindowMagnifierToPosition(int displayId, float positionX, float positionY,
+        in IRemoteMagnificationAnimationCallback callback);
+
+    /**
      * Requests System UI show magnification mode button UI on the specified display.
      *
-     * @param displayId The logical display id.
+     * @param displayId the logical display id.
      * @param magnificationMode the current magnification mode.
      */
     void showMagnificationButton(int displayId, int magnificationMode);
@@ -81,7 +98,7 @@ oneway interface IWindowMagnificationConnection {
     /**
      * Requests System UI remove magnification mode button UI on the specified display.
      *
-     * @param displayId The logical display id.
+     * @param displayId the logical display id.
      */
     void removeMagnificationButton(int displayId);
 

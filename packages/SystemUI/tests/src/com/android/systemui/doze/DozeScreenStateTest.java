@@ -35,6 +35,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
@@ -192,7 +193,7 @@ public class DozeScreenStateTest extends SysuiTestCase {
     public void test_holdsWakeLockWhenGoingToLowPowerDelayed() {
         // Transition to low power mode will be delayed to let
         // animations play at 60 fps.
-        when(mDozeParameters.shouldControlScreenOff()).thenReturn(true);
+        when(mDozeParameters.shouldDelayDisplayDozeTransition()).thenReturn(true);
         mHandlerFake.setMode(QUEUEING);
 
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
@@ -209,7 +210,7 @@ public class DozeScreenStateTest extends SysuiTestCase {
     public void test_releasesWakeLock_abortingLowPowerDelayed() {
         // Transition to low power mode will be delayed to let
         // animations play at 60 fps.
-        when(mDozeParameters.shouldControlScreenOff()).thenReturn(true);
+        when(mDozeParameters.shouldDelayDisplayDozeTransition()).thenReturn(true);
         mHandlerFake.setMode(QUEUEING);
 
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
@@ -305,5 +306,12 @@ public class DozeScreenStateTest extends SysuiTestCase {
 
         // THEN the display screen state will change
         assertEquals(Display.STATE_DOZE_SUSPEND, mServiceFake.screenState);
+    }
+
+    @Test
+    public void authCallbackRemovedOnDestroy() {
+        mScreen.destroy();
+
+        verify(mAuthController).removeCallback(anyObject());
     }
 }

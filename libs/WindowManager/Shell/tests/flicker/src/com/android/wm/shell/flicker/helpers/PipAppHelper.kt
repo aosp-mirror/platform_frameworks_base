@@ -22,7 +22,11 @@ import android.media.session.MediaSessionManager
 import android.os.SystemClock
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.BySelector
+import androidx.test.uiautomator.Until
+import com.android.server.wm.flicker.helpers.FIND_TIMEOUT
 import com.android.server.wm.flicker.helpers.SYSTEMUI_PACKAGE
+import com.android.server.wm.traces.common.Rect
+import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import com.android.wm.shell.flicker.pip.tv.closeTvPipWindow
 import com.android.wm.shell.flicker.pip.tv.isFocusedOrHasFocusedChild
@@ -31,7 +35,7 @@ import com.android.wm.shell.flicker.testapp.Components
 class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
     instrumentation,
     Components.PipActivity.LABEL,
-    Components.PipActivity.COMPONENT
+    Components.PipActivity.COMPONENT.toFlickerComponent()
 ) {
     private val mediaSessionManager: MediaSessionManager
         get() = context.getSystemService(MediaSessionManager::class.java)
@@ -54,16 +58,26 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
         }
     }
 
-    /** {@inheritDoc}  */
-    override fun launchViaIntent(
+    /**
+     * Launches the app through an intent instead of interacting with the launcher and waits
+     * until the app window is in PIP mode
+     */
+    @JvmOverloads
+    fun launchViaIntentAndWaitForPip(
         wmHelper: WindowManagerStateHelper,
-        expectedWindowName: String,
-        action: String?,
+        expectedWindowName: String = "",
+        action: String? = null,
         stringExtras: Map<String, String>
     ) {
-        super.launchViaIntent(wmHelper, expectedWindowName, action, stringExtras)
-        wmHelper.waitFor { it.wmState.hasPipWindow() }
+        launchViaIntentAndWaitShown(wmHelper, expectedWindowName, action, stringExtras,
+            waitConditions = arrayOf(WindowManagerStateHelper.pipShownCondition))
     }
+
+    /**
+     * Expand the PIP window back to full screen via intent and wait until the app is visible
+     */
+    fun exitPipToFullScreenViaIntent(wmHelper: WindowManagerStateHelper) =
+        launchViaIntentAndWaitShown(wmHelper)
 
     private fun focusOnObject(selector: BySelector): Boolean {
         // We expect all the focusable UI elements to be arranged in a way so that it is possible
@@ -84,7 +98,11 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
         clickObject(ENTER_PIP_BUTTON_ID)
 
         // Wait on WMHelper or simply wait for 3 seconds
-        wmHelper?.waitFor { it.wmState.hasPipWindow() } ?: SystemClock.sleep(3_000)
+        wmHelper?.waitPipShown() ?: SystemClock.sleep(3_000)
+        // when entering pip, the dismiss button is visible at the start. to ensure the pip
+        // animation is complete, wait until the pip dismiss button is no longer visible. 
+        // b/176822698: dismiss-only state will be removed in the future
+        uiDevice.wait(Until.gone(By.res(SYSTEMUI_PACKAGE, "dismiss")), FIND_TIMEOUT)
     }
 
     fun clickStartMediaSessionButton() {
@@ -113,61 +131,61 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
         }
     }
 
+    private fun getWindowRect(wmHelper: WindowManagerStateHelper): Rect {
+        val windowRegion = wmHelper.getWindowRegion(component)
+        require(!windowRegion.isEmpty) {
+            "Unable to find a PIP window in the current state"
+        }
+        return windowRegion.bounds
+    }
+
     /**
-     * Expands the pip window and dismisses it by clicking on the X button.
-     *
-     * Note, currently the View coordinates reported by the accessibility are relative to
-     * the window, so the correct coordinates need to be calculated
-     *
-     * For example, in a PIP window located at Rect(508, 1444 - 1036, 1741), the
-     * dismiss button coordinates are shown as Rect(650, 0 - 782, 132), with center in
-     * Point(716, 66), instead of Point(970, 1403)
-     *
-     * See b/179337864
+     * Taps the pip window and dismisses it by clicking on the X button.
      */
     fun closePipWindow(wmHelper: WindowManagerStateHelper) {
         if (isTelevision) {
             uiDevice.closeTvPipWindow()
         } else {
-            expandPipWindow(wmHelper)
-            val exitPipObject = uiDevice.findObject(By.res(SYSTEMUI_PACKAGE, "dismiss"))
-            requireNotNull(exitPipObject) { "PIP window dismiss button not found" }
-            val dismissButtonBounds = exitPipObject.visibleBounds
+            val windowRect = getWindowRect(wmHelper)
+            uiDevice.click(windowRect.centerX(), windowRect.centerY())
+            // search and interact with the dismiss button
+            val dismissSelector = By.res(SYSTEMUI_PACKAGE, "dismiss")
+            uiDevice.wait(Until.hasObject(dismissSelector), FIND_TIMEOUT)
+            val dismissPipObject = uiDevice.findObject(dismissSelector)
+                    ?: error("PIP window dismiss button not found")
+            val dismissButtonBounds = dismissPipObject.visibleBounds
             uiDevice.click(dismissButtonBounds.centerX(), dismissButtonBounds.centerY())
         }
 
         // Wait for animation to complete.
-        wmHelper.waitFor { !it.wmState.hasPipWindow() }
+        wmHelper.waitPipGone()
         wmHelper.waitForHomeActivityVisible()
     }
 
     /**
-     * Click once on the PIP window to expand it
+     * Close the pip window by pressing the expand button
      */
-    fun expandPipWindow(wmHelper: WindowManagerStateHelper) {
-        val windowRegion = wmHelper.getWindowRegion(component)
-        require(!windowRegion.isEmpty) {
-            "Unable to find a PIP window in the current state"
-        }
-        val windowRect = windowRegion.bounds
+    fun expandPipWindowToApp(wmHelper: WindowManagerStateHelper) {
+        val windowRect = getWindowRect(wmHelper)
         uiDevice.click(windowRect.centerX(), windowRect.centerY())
-        // Ensure WindowManagerService wait until all animations have completed
+        // search and interact with the expand button
+        val expandSelector = By.res(SYSTEMUI_PACKAGE, "expand_button")
+        uiDevice.wait(Until.hasObject(expandSelector), FIND_TIMEOUT)
+        val expandPipObject = uiDevice.findObject(expandSelector)
+                ?: error("PIP window expand button not found")
+        val expandButtonBounds = expandPipObject.visibleBounds
+        uiDevice.click(expandButtonBounds.centerX(), expandButtonBounds.centerY())
+        wmHelper.waitPipGone()
         wmHelper.waitForAppTransitionIdle()
-        mInstrumentation.uiAutomation.syncInputTransactions()
     }
 
     /**
-     * Double click on the PIP window to reopen to app
+     * Double click on the PIP window to expand it
      */
-    fun expandPipWindowToApp(wmHelper: WindowManagerStateHelper) {
-        val windowRegion = wmHelper.getWindowRegion(component)
-        require(!windowRegion.isEmpty) {
-            "Unable to find a PIP window in the current state"
-        }
-        val windowRect = windowRegion.bounds
+    fun doubleClickPipWindow(wmHelper: WindowManagerStateHelper) {
+        val windowRect = getWindowRect(wmHelper)
         uiDevice.click(windowRect.centerX(), windowRect.centerY())
         uiDevice.click(windowRect.centerX(), windowRect.centerY())
-        wmHelper.waitFor { !it.wmState.hasPipWindow() }
         wmHelper.waitForAppTransitionIdle()
     }
 

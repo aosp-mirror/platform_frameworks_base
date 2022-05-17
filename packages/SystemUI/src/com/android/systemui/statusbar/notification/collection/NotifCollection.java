@@ -18,9 +18,12 @@ package com.android.systemui.statusbar.notification.collection;
 
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL_ALL;
+import static android.service.notification.NotificationListenerService.REASON_ASSISTANT_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL_ALL;
 import static android.service.notification.NotificationListenerService.REASON_CHANNEL_BANNED;
+import static android.service.notification.NotificationListenerService.REASON_CHANNEL_REMOVED;
+import static android.service.notification.NotificationListenerService.REASON_CLEAR_DATA;
 import static android.service.notification.NotificationListenerService.REASON_CLICK;
 import static android.service.notification.NotificationListenerService.REASON_ERROR;
 import static android.service.notification.NotificationListenerService.REASON_GROUP_OPTIMIZATION;
@@ -36,18 +39,22 @@ import static android.service.notification.NotificationListenerService.REASON_TI
 import static android.service.notification.NotificationListenerService.REASON_UNAUTOBUNDLED;
 import static android.service.notification.NotificationListenerService.REASON_USER_STOPPED;
 
+import static com.android.systemui.statusbar.notification.NotificationUtils.logKey;
 import static com.android.systemui.statusbar.notification.collection.NotificationEntry.DismissState.DISMISSED;
 import static com.android.systemui.statusbar.notification.collection.NotificationEntry.DismissState.NOT_DISMISSED;
 import static com.android.systemui.statusbar.notification.collection.NotificationEntry.DismissState.PARENT_DISMISSED;
+import static com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionLoggerKt.cancellationReasonDebugString;
 
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.IntDef;
 import android.annotation.MainThread;
-import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.os.Handler;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.Ranking;
@@ -57,17 +64,21 @@ import android.util.ArrayMap;
 import android.util.Pair;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.dump.LogBufferEulogizer;
-import com.android.systemui.statusbar.FeatureFlags;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.collection.coalescer.CoalescedEvent;
 import com.android.systemui.statusbar.notification.collection.coalescer.GroupCoalescer;
 import com.android.systemui.statusbar.notification.collection.coalescer.GroupCoalescer.BatchableNotificationHandler;
 import com.android.systemui.statusbar.notification.collection.notifcollection.BindEntryEvent;
+import com.android.systemui.statusbar.notification.collection.notifcollection.ChannelChangedEvent;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CleanUpEntryEvent;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CollectionReadyForBuildListener;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
@@ -75,6 +86,7 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.En
 import com.android.systemui.statusbar.notification.collection.notifcollection.EntryRemovedEvent;
 import com.android.systemui.statusbar.notification.collection.notifcollection.EntryUpdatedEvent;
 import com.android.systemui.statusbar.notification.collection.notifcollection.InitEntryEvent;
+import com.android.systemui.statusbar.notification.collection.notifcollection.InternalNotifUpdater;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionLogger;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifDismissInterceptor;
@@ -85,7 +97,6 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.Ra
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.time.SystemClock;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -93,6 +104,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -128,13 +140,16 @@ import javax.inject.Inject;
 public class NotifCollection implements Dumpable {
     private final IStatusBarService mStatusBarService;
     private final SystemClock mClock;
-    private final FeatureFlags mFeatureFlags;
+    private final NotifPipelineFlags mNotifPipelineFlags;
     private final NotifCollectionLogger mLogger;
+    private final Handler mMainHandler;
     private final LogBufferEulogizer mEulogizer;
+    private final DumpManager mDumpManager;
 
     private final Map<String, NotificationEntry> mNotificationSet = new ArrayMap<>();
     private final Collection<NotificationEntry> mReadOnlyNotificationSet =
             Collections.unmodifiableCollection(mNotificationSet.values());
+    private final HashMap<String, FutureDismissal> mFutureDismissals = new HashMap<>();
 
     @Nullable private CollectionReadyForBuildListener mBuildListener;
     private final List<NotifCollectionListener> mNotifCollectionListeners = new ArrayList<>();
@@ -151,18 +166,18 @@ public class NotifCollection implements Dumpable {
     public NotifCollection(
             IStatusBarService statusBarService,
             SystemClock clock,
-            FeatureFlags featureFlags,
+            NotifPipelineFlags notifPipelineFlags,
             NotifCollectionLogger logger,
+            @Main Handler mainHandler,
             LogBufferEulogizer logBufferEulogizer,
             DumpManager dumpManager) {
-        Assert.isMainThread();
         mStatusBarService = statusBarService;
         mClock = clock;
-        mFeatureFlags = featureFlags;
+        mNotifPipelineFlags = notifPipelineFlags;
         mLogger = logger;
+        mMainHandler = mainHandler;
         mEulogizer = logBufferEulogizer;
-
-        dumpManager.registerDumpable(TAG, this);
+        mDumpManager = dumpManager;
     }
 
     /** Initializes the NotifCollection and registers it to receive notification events. */
@@ -172,7 +187,7 @@ public class NotifCollection implements Dumpable {
             throw new RuntimeException("attach() called twice");
         }
         mAttached = true;
-
+        mDumpManager.registerDumpable(TAG, this);
         groupCoalescer.setNotificationHandler(mNotifHandler);
     }
 
@@ -186,7 +201,8 @@ public class NotifCollection implements Dumpable {
     }
 
     /** @see NotifPipeline#getEntry(String) () */
-    NotificationEntry getEntry(String key) {
+    @Nullable
+    NotificationEntry getEntry(@NonNull String key) {
         return mNotificationSet.get(key);
     }
 
@@ -200,6 +216,12 @@ public class NotifCollection implements Dumpable {
     void addCollectionListener(NotifCollectionListener listener) {
         Assert.isMainThread();
         mNotifCollectionListeners.add(listener);
+    }
+
+    /** @see NotifPipeline#removeCollectionListener(NotifCollectionListener) */
+    void removeCollectionListener(NotifCollectionListener listener) {
+        Assert.isMainThread();
+        mNotifCollectionListeners.remove(listener);
     }
 
     /** @see NotifPipeline#addNotificationLifetimeExtender(NotifLifetimeExtender) */
@@ -232,15 +254,25 @@ public class NotifCollection implements Dumpable {
         Assert.isMainThread();
         checkForReentrantCall();
 
+        // TODO (b/206842750): This method is called from (silent) clear all and non-clear all
+        // contexts and should be checking the NO_CLEAR flag, rather than depending on NSSL
+        // to pass in a properly filtered list of notifications
+
         final List<NotificationEntry> entriesToLocallyDismiss = new ArrayList<>();
         for (int i = 0; i < entriesToDismiss.size(); i++) {
             NotificationEntry entry = entriesToDismiss.get(i).first;
             DismissedByUserStats stats = entriesToDismiss.get(i).second;
 
             requireNonNull(stats);
-            if (entry != mNotificationSet.get(entry.getKey())) {
+            NotificationEntry storedEntry = mNotificationSet.get(entry.getKey());
+            if (storedEntry == null) {
+                mLogger.logNonExistentNotifDismissed(entry.getKey());
+                continue;
+            }
+            if (entry != storedEntry) {
                 throw mEulogizer.record(
-                        new IllegalStateException("Invalid entry: " + entry.getKey()));
+                        new IllegalStateException("Invalid entry: "
+                                + "different stored and dismissed entries for " + entry.getKey()));
             }
 
             if (entry.getDismissState() == DISMISSED) {
@@ -388,7 +420,7 @@ public class NotifCollection implements Dumpable {
         final NotificationEntry entry = mNotificationSet.get(sbn.getKey());
         if (entry == null) {
             // TODO (b/160008901): Throw an exception here
-            mLogger.logNoNotificationToRemoveWithKey(sbn.getKey());
+            mLogger.logNoNotificationToRemoveWithKey(sbn.getKey(), reason);
             return;
         }
 
@@ -402,6 +434,16 @@ public class NotifCollection implements Dumpable {
         Assert.isMainThread();
         mEventQueue.add(new RankingUpdatedEvent(rankingMap));
         applyRanking(rankingMap);
+        dispatchEventsAndRebuildList();
+    }
+
+    private void onNotificationChannelModified(
+            String pkgName,
+            UserHandle user,
+            NotificationChannel channel,
+            int modificationType) {
+        Assert.isMainThread();
+        mEventQueue.add(new ChannelChangedEvent(pkgName, user, channel, modificationType));
         dispatchEventsAndRebuildList();
     }
 
@@ -441,7 +483,7 @@ public class NotifCollection implements Dumpable {
             mEventQueue.add(new BindEntryEvent(entry, sbn));
 
             mLogger.logNotifUpdated(sbn.getKey());
-            mEventQueue.add(new EntryUpdatedEvent(entry));
+            mEventQueue.add(new EntryUpdatedEvent(entry, true /* fromSystem */));
         }
     }
 
@@ -476,10 +518,43 @@ public class NotifCollection implements Dumpable {
             cancelDismissInterception(entry);
             mEventQueue.add(new EntryRemovedEvent(entry, entry.mCancellationReason));
             mEventQueue.add(new CleanUpEntryEvent(entry));
+            handleFutureDismissal(entry);
             return true;
         } else {
             return false;
         }
+    }
+
+    /**
+     * Get the group summary entry
+     * @param groupKey
+     * @return
+     */
+    @Nullable
+    public NotificationEntry getGroupSummary(String groupKey) {
+        return mNotificationSet
+                .values()
+                .stream()
+                .filter(it -> Objects.equals(it.getSbn().getGroupKey(), groupKey))
+                .filter(it -> it.getSbn().getNotification().isGroupSummary())
+                .findFirst().orElse(null);
+    }
+
+    /**
+     * Checks if the entry is the only child in the logical group;
+     * it need not have a summary to qualify
+     *
+     * @param entry the entry to check
+     */
+    public boolean isOnlyChildInGroup(NotificationEntry entry) {
+        String groupKey = entry.getSbn().getGroupKey();
+        return mNotificationSet.get(entry.getKey()) == entry
+                && mNotificationSet
+                .values()
+                .stream()
+                .filter(it -> Objects.equals(it.getSbn().getGroupKey(), groupKey))
+                .filter(it -> !it.getSbn().getNotification().isGroupSummary())
+                .count() == 1;
     }
 
     private void applyRanking(@NonNull RankingMap rankingMap) {
@@ -496,7 +571,7 @@ public class NotifCollection implements Dumpable {
                     // TODO: (b/145659174) update the sbn's overrideGroupKey in
                     //  NotificationEntry.setRanking instead of here once we fully migrate to the
                     //  NewNotifPipeline
-                    if (mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
+                    if (mNotifPipelineFlags.isNewPipelineEnabled()) {
                         final String newOverrideGroupKey = ranking.getOverrideGroupKey();
                         if (!Objects.equals(entry.getSbn().getOverrideGroupKey(),
                                 newOverrideGroupKey)) {
@@ -512,6 +587,7 @@ public class NotifCollection implements Dumpable {
     }
 
     private void dispatchEventsAndRebuildList() {
+        Trace.beginSection("NotifCollection.dispatchEventsAndRebuildList");
         mAmDispatchingToOtherCode = true;
         while (!mEventQueue.isEmpty()) {
             mEventQueue.remove().dispatchTo(mNotifCollectionListeners);
@@ -521,9 +597,12 @@ public class NotifCollection implements Dumpable {
         if (mBuildListener != null) {
             mBuildListener.onBuildList(mReadOnlyNotificationSet);
         }
+        Trace.endSection();
     }
 
-    private void onEndLifetimeExtension(NotifLifetimeExtender extender, NotificationEntry entry) {
+    private void onEndLifetimeExtension(
+            @NonNull NotifLifetimeExtender extender,
+            @NonNull NotificationEntry entry) {
         Assert.isMainThread();
         if (!mAttached) {
             return;
@@ -567,7 +646,7 @@ public class NotifCollection implements Dumpable {
         entry.mLifetimeExtenders.clear();
         mAmDispatchingToOtherCode = true;
         for (NotifLifetimeExtender extender : mLifetimeExtenders) {
-            if (extender.shouldExtendLifetime(entry, entry.mCancellationReason)) {
+            if (extender.maybeExtendLifetime(entry, entry.mCancellationReason)) {
                 mLogger.logLifetimeExtended(entry.getKey(), extender);
                 entry.mLifetimeExtenders.add(extender);
             }
@@ -693,13 +772,15 @@ public class NotifCollection implements Dumpable {
      *
      * See NotificationManager.cancelGroupChildrenByListLocked() for corresponding code.
      */
-    private static boolean shouldAutoDismissChildren(
+    @VisibleForTesting
+    static boolean shouldAutoDismissChildren(
             NotificationEntry entry,
             String dismissedGroupKey) {
         return entry.getSbn().getGroupKey().equals(dismissedGroupKey)
                 && !entry.getSbn().getNotification().isGroupSummary()
-                && !hasFlag(entry, Notification.FLAG_FOREGROUND_SERVICE)
+                && !hasFlag(entry, Notification.FLAG_ONGOING_EVENT)
                 && !hasFlag(entry, Notification.FLAG_BUBBLE)
+                && !hasFlag(entry, Notification.FLAG_NO_CLEAR)
                 && entry.getDismissState() != DISMISSED;
     }
 
@@ -737,7 +818,7 @@ public class NotifCollection implements Dumpable {
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, PrintWriter pw, @NonNull String[] args) {
+    public void dump(PrintWriter pw, @NonNull String[] args) {
         final List<NotificationEntry> entries = new ArrayList<>(getAllNotifs());
 
         pw.println("\t" + TAG + " unsorted/unfiltered notifications:");
@@ -779,6 +860,19 @@ public class NotifCollection implements Dumpable {
         }
 
         @Override
+        public void onNotificationChannelModified(
+                String pkgName,
+                UserHandle user,
+                NotificationChannel channel,
+                int modificationType) {
+            NotifCollection.this.onNotificationChannelModified(
+                    pkgName,
+                    user,
+                    channel,
+                    modificationType);
+        }
+
+        @Override
         public void onNotificationsInitialized() {
             NotifCollection.this.onNotificationsInitialized();
         }
@@ -786,10 +880,184 @@ public class NotifCollection implements Dumpable {
 
     private static final String TAG = "NotifCollection";
 
+    /**
+     * Get an object which can be used to update a notification (internally to the pipeline)
+     * in response to a user action.
+     *
+     * @param name the name of the component that will update notifiations
+     * @return an updater
+     */
+    public InternalNotifUpdater getInternalNotifUpdater(String name) {
+        return (sbn, reason) -> mMainHandler.post(
+                () -> updateNotificationInternally(sbn, name, reason));
+    }
+
+    /**
+     * Provide an updated StatusBarNotification for an existing entry.  If no entry exists for the
+     * given notification key, this method does nothing.
+     *
+     * @param sbn the updated notification
+     * @param name the component which is updating the notification
+     * @param reason the reason the notification is being updated
+     */
+    private void updateNotificationInternally(StatusBarNotification sbn, String name,
+            String reason) {
+        Assert.isMainThread();
+        checkForReentrantCall();
+
+        // Make sure we have the notification to update
+        NotificationEntry entry = mNotificationSet.get(sbn.getKey());
+        if (entry == null) {
+            mLogger.logNotifInternalUpdateFailed(sbn.getKey(), name, reason);
+            return;
+        }
+        mLogger.logNotifInternalUpdate(sbn.getKey(), name, reason);
+
+        // First do the pieces of postNotification which are not about assuming the notification
+        // was sent by the app
+        entry.setSbn(sbn);
+        mEventQueue.add(new BindEntryEvent(entry, sbn));
+
+        mLogger.logNotifUpdated(sbn.getKey());
+        mEventQueue.add(new EntryUpdatedEvent(entry, false /* fromSystem */));
+
+        // Skip the applyRanking step and go straight to dispatching the events
+        dispatchEventsAndRebuildList();
+    }
+
+    /**
+     * A method to alert the collection that an async operation is happening, at the end of which a
+     * dismissal request will be made.  This method has the additional guarantee that if a parent
+     * notification exists for a single child, then that notification will also be dismissed.
+     *
+     * The runnable returned must be run at the end of the async operation to enact the cancellation
+     *
+     * @param entry the notification we want to dismiss
+     * @param cancellationReason the reason for the cancellation
+     * @param statsCreator the callback for generating the stats for an entry
+     * @return the runnable to be run when the dismissal is ready to happen
+     */
+    public Runnable registerFutureDismissal(NotificationEntry entry, int cancellationReason,
+            DismissedByUserStatsCreator statsCreator) {
+        FutureDismissal dismissal = mFutureDismissals.get(entry.getKey());
+        if (dismissal != null) {
+            mLogger.logFutureDismissalReused(dismissal);
+            return dismissal;
+        }
+        dismissal = new FutureDismissal(entry, cancellationReason, statsCreator);
+        mFutureDismissals.put(entry.getKey(), dismissal);
+        mLogger.logFutureDismissalRegistered(dismissal);
+        return dismissal;
+    }
+
+    private void handleFutureDismissal(NotificationEntry entry) {
+        final FutureDismissal futureDismissal = mFutureDismissals.remove(entry.getKey());
+        if (futureDismissal != null) {
+            futureDismissal.onSystemServerCancel(entry.mCancellationReason);
+        }
+    }
+
+    /** A single method interface that callers can pass in when registering future dismissals */
+    public interface DismissedByUserStatsCreator {
+        DismissedByUserStats createDismissedByUserStats(NotificationEntry entry);
+    }
+
+    /** A class which tracks the double dismissal events coming in from both the system server and
+     * the ui */
+    public class FutureDismissal implements Runnable {
+        private final NotificationEntry mEntry;
+        private final DismissedByUserStatsCreator mStatsCreator;
+        @Nullable
+        private final NotificationEntry mSummaryToDismiss;
+        private final String mLabel;
+
+        private boolean mDidRun;
+        private boolean mDidSystemServerCancel;
+
+        private FutureDismissal(NotificationEntry entry, @CancellationReason int cancellationReason,
+                DismissedByUserStatsCreator statsCreator) {
+            mEntry = entry;
+            mStatsCreator = statsCreator;
+            mSummaryToDismiss = fetchSummaryToDismiss(entry);
+            mLabel = "<FutureDismissal@" + Integer.toHexString(hashCode())
+                    + " entry=" + logKey(mEntry)
+                    + " reason=" + cancellationReasonDebugString(cancellationReason)
+                    + " summary=" + logKey(mSummaryToDismiss)
+                    + ">";
+        }
+
+        @Nullable
+        private NotificationEntry fetchSummaryToDismiss(NotificationEntry entry) {
+            if (isOnlyChildInGroup(entry)) {
+                String group = entry.getSbn().getGroupKey();
+                NotificationEntry summary = getGroupSummary(group);
+                if (summary != null && summary.isDismissable()) return summary;
+            }
+            return null;
+        }
+
+        /** called when the entry has been removed from the collection */
+        public void onSystemServerCancel(@CancellationReason int cancellationReason) {
+            Assert.isMainThread();
+            if (mDidSystemServerCancel) {
+                mLogger.logFutureDismissalDoubleCancelledByServer(this);
+                return;
+            }
+            mLogger.logFutureDismissalGotSystemServerCancel(this, cancellationReason);
+            mDidSystemServerCancel = true;
+            // TODO: Internally dismiss the summary now instead of waiting for onUiCancel
+        }
+
+        private void onUiCancel() {
+            mFutureDismissals.remove(mEntry.getKey());
+            final NotificationEntry currentEntry = getEntry(mEntry.getKey());
+            // generate stats for the entry before dismissing summary, which could affect state
+            final DismissedByUserStats stats = mStatsCreator.createDismissedByUserStats(mEntry);
+            // dismiss the summary (if it exists)
+            if (mSummaryToDismiss != null) {
+                final NotificationEntry currentSummary = getEntry(mSummaryToDismiss.getKey());
+                if (currentSummary == mSummaryToDismiss) {
+                    mLogger.logFutureDismissalDismissing(this, "summary");
+                    dismissNotification(mSummaryToDismiss,
+                            mStatsCreator.createDismissedByUserStats(mSummaryToDismiss));
+                } else {
+                    mLogger.logFutureDismissalMismatchedEntry(this, "summary", currentSummary);
+                }
+            }
+            // dismiss this entry (if it is still around)
+            if (mDidSystemServerCancel) {
+                mLogger.logFutureDismissalAlreadyCancelledByServer(this);
+            } else if (currentEntry == mEntry) {
+                mLogger.logFutureDismissalDismissing(this, "entry");
+                dismissNotification(mEntry, stats);
+            } else {
+                mLogger.logFutureDismissalMismatchedEntry(this, "entry", currentEntry);
+            }
+        }
+
+        /** called when the dismissal should be completed */
+        @Override
+        public void run() {
+            Assert.isMainThread();
+            if (mDidRun) {
+                mLogger.logFutureDismissalDoubleRun(this);
+                return;
+            }
+            mDidRun = true;
+            onUiCancel();
+        }
+
+        /** provides a debug label for this instance */
+        public String getLabel() {
+            return mLabel;
+        }
+    }
+
     @IntDef(prefix = { "REASON_" }, value = {
             REASON_NOT_CANCELED,
             REASON_UNKNOWN,
             REASON_CLICK,
+            REASON_CANCEL,
             REASON_CANCEL_ALL,
             REASON_ERROR,
             REASON_PACKAGE_CHANGED,
@@ -807,6 +1075,9 @@ public class NotifCollection implements Dumpable {
             REASON_CHANNEL_BANNED,
             REASON_SNOOZED,
             REASON_TIMEOUT,
+            REASON_CHANNEL_REMOVED,
+            REASON_CLEAR_DATA,
+            REASON_ASSISTANT_CANCEL,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CancellationReason {}

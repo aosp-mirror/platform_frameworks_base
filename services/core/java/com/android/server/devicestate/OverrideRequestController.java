@@ -1,0 +1,253 @@
+/*
+ * Copyright (C) 2021 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.server.devicestate;
+
+import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.hardware.devicestate.DeviceStateRequest;
+import android.os.IBinder;
+import android.util.Slog;
+
+import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+/**
+ * Manages the lifecycle of override requests.
+ * <p>
+ * New requests are added with {@link #addRequest(OverrideRequest)} and are kept active until
+ * either:
+ * <ul>
+ *     <li>A new request is added with {@link #addRequest(OverrideRequest)}, in which case the
+ *     request will become suspended.</li>
+ *     <li>The request is cancelled with {@link #cancelRequest} or as a side effect
+ *     of other methods calls, such as {@link #handleProcessDied(int)}.</li>
+ * </ul>
+ */
+final class OverrideRequestController {
+    private static final String TAG = "OverrideRequestController";
+
+    static final int STATUS_UNKNOWN = 0;
+    /**
+     * The request is the top-most request.
+     */
+    static final int STATUS_ACTIVE = 1;
+    /**
+     * The request is not longer valid.
+     */
+    static final int STATUS_CANCELED = 2;
+
+    @IntDef(prefix = {"STATUS_"}, value = {
+            STATUS_UNKNOWN,
+            STATUS_ACTIVE,
+            STATUS_CANCELED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface RequestStatus {}
+
+    static String statusToString(@RequestStatus int status) {
+        switch (status) {
+            case STATUS_ACTIVE:
+                return "ACTIVE";
+            case STATUS_CANCELED:
+                return "CANCELED";
+            case STATUS_UNKNOWN:
+                return "UNKNOWN";
+        }
+        throw new IllegalArgumentException("Unknown status: " + status);
+    }
+
+    private final StatusChangeListener mListener;
+
+    // Handle to the current override request, null if none.
+    private OverrideRequest mRequest;
+
+    private boolean mStickyRequestsAllowed;
+    // The current request has outlived their process.
+    private boolean mStickyRequest;
+
+    OverrideRequestController(@NonNull StatusChangeListener listener) {
+        mListener = listener;
+    }
+
+    /**
+     * Sets sticky requests as either allowed or disallowed. When sticky requests are allowed a call
+     * to {@link #handleProcessDied(int)} will not result in the request being cancelled
+     * immediately. Instead, the request will be marked sticky and must be cancelled with a call
+     * to {@link #cancelStickyRequest()}.
+     */
+    void setStickyRequestsAllowed(boolean stickyRequestsAllowed) {
+        mStickyRequestsAllowed = stickyRequestsAllowed;
+        if (!mStickyRequestsAllowed) {
+            cancelStickyRequest();
+        }
+    }
+
+    /**
+     * Sets the new request as active and cancels the previous override request, notifies the
+     * listener of all changes to request status as a result of this operation.
+     */
+    void addRequest(@NonNull OverrideRequest request) {
+        OverrideRequest previousRequest = mRequest;
+        mRequest = request;
+        mListener.onStatusChanged(request, STATUS_ACTIVE);
+
+        if (previousRequest != null) {
+            cancelRequestLocked(previousRequest);
+        }
+    }
+
+    /**
+     * Cancels the request with the specified {@code token} and notifies the listener of all changes
+     * to request status as a result of this operation.
+     */
+    void cancelRequest(@NonNull OverrideRequest request) {
+        // Either don't have a current request or attempting to cancel an already cancelled request
+        if (!hasRequest(request.getToken())) {
+            return;
+        }
+        cancelCurrentRequestLocked();
+    }
+
+    /**
+     * Cancels a request that is currently marked sticky and notifies the listener of all
+     * changes to request status as a result of this operation.
+     *
+     * @see #setStickyRequestsAllowed(boolean)
+     */
+    void cancelStickyRequest() {
+        if (mStickyRequest) {
+            cancelCurrentRequestLocked();
+        }
+    }
+
+    /**
+     * Cancels the current override request, this could be due to the device being put
+     * into a hardware state that declares the flag "FLAG_CANCEL_OVERRIDE_REQUESTS"
+     */
+    void cancelOverrideRequest() {
+        cancelCurrentRequestLocked();
+    }
+
+    /**
+     * Returns {@code true} if this controller is current managing a request with the specified
+     * {@code token}, {@code false} otherwise.
+     */
+    boolean hasRequest(@NonNull IBinder token) {
+        return mRequest != null && token == mRequest.getToken();
+    }
+
+    /**
+     * Notifies the controller that the process with the specified {@code pid} has died. The
+     * controller will notify the listener of all changes to request status as a result of this
+     * operation.
+     */
+    void handleProcessDied(int pid) {
+        if (mRequest == null) {
+            return;
+        }
+
+        if (mRequest.getPid() == pid) {
+            if (mStickyRequestsAllowed) {
+                // Do not cancel the requests now because sticky requests are allowed. These
+                // requests will be cancelled on a call to cancelStickyRequests().
+                mStickyRequest = true;
+                return;
+            }
+            cancelCurrentRequestLocked();
+        }
+    }
+
+    /**
+     * Notifies the controller that the base state has changed. The controller will notify the
+     * listener of all changes to request status as a result of this change.
+     */
+    void handleBaseStateChanged() {
+        if (mRequest == null) {
+            return;
+        }
+
+        if ((mRequest.getFlags()
+                & DeviceStateRequest.FLAG_CANCEL_WHEN_BASE_CHANGES) != 0) {
+            cancelCurrentRequestLocked();
+        }
+    }
+
+    /**
+     * Notifies the controller that the set of supported states has changed. The controller will
+     * notify the listener of all changes to request status as a result of this change.
+     */
+    void handleNewSupportedStates(int[] newSupportedStates) {
+        if (mRequest == null) {
+            return;
+        }
+
+        if (!contains(newSupportedStates, mRequest.getRequestedState())) {
+            cancelCurrentRequestLocked();
+        }
+    }
+
+    void dumpInternal(PrintWriter pw) {
+        OverrideRequest overrideRequest = mRequest;
+        final boolean requestActive = overrideRequest != null;
+        pw.println();
+        pw.println("Override Request active: " + requestActive);
+        if (requestActive) {
+            pw.println("Request: mPid=" + overrideRequest.getPid()
+                    + ", mRequestedState=" + overrideRequest.getRequestedState()
+                    + ", mFlags=" + overrideRequest.getFlags()
+                    + ", mStatus=" + statusToString(STATUS_ACTIVE));
+        }
+    }
+
+    private void cancelRequestLocked(@NonNull OverrideRequest requestToCancel) {
+        mListener.onStatusChanged(requestToCancel, STATUS_CANCELED);
+    }
+
+    /**
+     * Handles cancelling {@code mRequest}.
+     * Notifies the listener of the canceled status as well.
+     */
+    private void cancelCurrentRequestLocked() {
+        if (mRequest == null) {
+            Slog.w(TAG, "Attempted to cancel a null OverrideRequest");
+            return;
+        }
+        mStickyRequest = false;
+        mListener.onStatusChanged(mRequest, STATUS_CANCELED);
+        mRequest = null;
+    }
+
+    private static boolean contains(int[] array, int value) {
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] == value) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public interface StatusChangeListener {
+        /**
+         * Notifies the listener of a change in request status. If a change within the controller
+         * causes one request to become active and one to become either suspended or cancelled, this
+         * method is guaranteed to be called with the active request first before the suspended or
+         * cancelled request.
+         */
+        void onStatusChanged(@NonNull OverrideRequest request, @RequestStatus int newStatus);
+    }
+}

@@ -96,6 +96,7 @@ class MediaSessionBasedFilter @Inject constructor(
         oldKey: String?,
         data: MediaData,
         immediately: Boolean,
+        receivedSmartspaceCardLatency: Int,
         isSsReactivated: Boolean
     ) {
         backgroundExecutor.execute {

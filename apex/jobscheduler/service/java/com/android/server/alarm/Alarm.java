@@ -43,7 +43,7 @@ import java.util.Date;
  */
 class Alarm {
     @VisibleForTesting
-    public static final int NUM_POLICIES = 4;
+    public static final int NUM_POLICIES = 5;
     /**
      * Index used to store the time the alarm was requested to expire. To be used with
      * {@link #setPolicyElapsed(int, long)}.
@@ -65,6 +65,12 @@ class Alarm {
      * To be used with {@link #setPolicyElapsed(int, long)}.
      */
     public static final int BATTERY_SAVER_POLICY_INDEX = 3;
+
+    /**
+     * Index used to store the earliest time the alarm can expire based on TARE policy.
+     * To be used with {@link #setPolicyElapsed(int, long)}.
+     */
+    public static final int TARE_POLICY_INDEX = 4;
 
     /**
      * Reason to use for inexact alarms.
@@ -254,8 +260,10 @@ class Alarm {
                 return "device_idle";
             case BATTERY_SAVER_POLICY_INDEX:
                 return "battery_saver";
+            case TARE_POLICY_INDEX:
+                return "tare";
             default:
-                return "--unknown--";
+                return "--unknown(" + index + ")--";
         }
     }
 

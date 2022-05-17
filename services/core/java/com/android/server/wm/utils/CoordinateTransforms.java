@@ -152,10 +152,4 @@ public class CoordinateTransforms {
         transform.mapRect(tmp);
         inOutRect.set((int) tmp.left, (int) tmp.top, (int) tmp.right, (int) tmp.bottom);
     }
-
-    /** Scales the rect without changing its position. */
-    public static void scaleRectSize(Rect inOutRect, float scale) {
-        inOutRect.right = inOutRect.left + (int) (inOutRect.width() * scale + .5f);
-        inOutRect.bottom = inOutRect.top + (int) (inOutRect.height() * scale + .5f);
-    }
 }

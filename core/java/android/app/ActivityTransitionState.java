@@ -119,7 +119,7 @@ class ActivityTransitionState {
         for (int i = mExitTransitionCoordinators.size() - 1; i >= 0; i--) {
             WeakReference<ExitTransitionCoordinator> oldRef
                     = mExitTransitionCoordinators.valueAt(i);
-            if (oldRef.get() == null) {
+            if (oldRef.refersTo(null)) {
                 mExitTransitionCoordinators.removeAt(i);
             }
         }

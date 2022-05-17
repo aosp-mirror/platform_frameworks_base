@@ -16,7 +16,10 @@
 
 package android.os;
 
+import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
+
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 
 import dalvik.annotation.optimization.CriticalNative;
@@ -90,6 +93,7 @@ public final class Trace {
     /** @hide */
     public static final long TRACE_TAG_DATABASE = 1L << 20;
     /** @hide */
+    @SystemApi(client = MODULE_LIBRARIES)
     public static final long TRACE_TAG_NETWORK = 1L << 21;
     /** @hide */
     public static final long TRACE_TAG_ADB = 1L << 22;
@@ -102,7 +106,7 @@ public final class Trace {
     /** @hide */
     public static final long TRACE_TAG_RRO = 1L << 26;
     /** @hide */
-    public static final long TRACE_TAG_APEX_MANAGER = 1L << 18;
+    public static final long TRACE_TAG_THERMAL = 1L << 27;
 
     private static final long TRACE_TAG_NOT_READY = 1L << 63;
     private static final int MAX_SECTION_NAME_LEN = 127;
@@ -131,6 +135,16 @@ public final class Trace {
     private static native void nativeAsyncTraceBegin(long tag, String name, int cookie);
     @FastNative
     private static native void nativeAsyncTraceEnd(long tag, String name, int cookie);
+    @FastNative
+    private static native void nativeAsyncTraceForTrackBegin(long tag,
+            String trackName, String name, int cookie);
+    @FastNative
+    private static native void nativeAsyncTraceForTrackEnd(long tag,
+            String trackName, String name, int cookie);
+    @FastNative
+    private static native void nativeInstant(long tag, String name);
+    @FastNative
+    private static native void nativeInstantForTrack(long tag, String trackName, String name);
 
     private Trace() {
     }
@@ -144,6 +158,7 @@ public final class Trace {
      * @hide
      */
     @UnsupportedAppUsage
+    @SystemApi(client = MODULE_LIBRARIES)
     public static boolean isTagEnabled(long traceTag) {
         long tags = nativeGetEnabledTags();
         return (tags & traceTag) != 0;
@@ -159,7 +174,8 @@ public final class Trace {
      * @hide
      */
     @UnsupportedAppUsage
-    public static void traceCounter(long traceTag, String counterName, int counterValue) {
+    @SystemApi(client = MODULE_LIBRARIES)
+    public static void traceCounter(long traceTag, @NonNull String counterName, int counterValue) {
         if (isTagEnabled(traceTag)) {
             nativeTraceCounter(traceTag, counterName, counterValue);
         }
@@ -198,7 +214,8 @@ public final class Trace {
      * @hide
      */
     @UnsupportedAppUsage
-    public static void traceBegin(long traceTag, String methodName) {
+    @SystemApi(client = MODULE_LIBRARIES)
+    public static void traceBegin(long traceTag, @NonNull String methodName) {
         if (isTagEnabled(traceTag)) {
             nativeTraceBegin(traceTag, methodName);
         }
@@ -213,6 +230,7 @@ public final class Trace {
      * @hide
      */
     @UnsupportedAppUsage
+    @SystemApi(client = MODULE_LIBRARIES)
     public static void traceEnd(long traceTag) {
         if (isTagEnabled(traceTag)) {
             nativeTraceEnd(traceTag);
@@ -233,7 +251,8 @@ public final class Trace {
      * @hide
      */
     @UnsupportedAppUsage
-    public static void asyncTraceBegin(long traceTag, String methodName, int cookie) {
+    @SystemApi(client = MODULE_LIBRARIES)
+    public static void asyncTraceBegin(long traceTag, @NonNull String methodName, int cookie) {
         if (isTagEnabled(traceTag)) {
             nativeAsyncTraceBegin(traceTag, methodName, cookie);
         }
@@ -251,9 +270,87 @@ public final class Trace {
      * @hide
      */
     @UnsupportedAppUsage
-    public static void asyncTraceEnd(long traceTag, String methodName, int cookie) {
+    @SystemApi(client = MODULE_LIBRARIES)
+    public static void asyncTraceEnd(long traceTag, @NonNull String methodName, int cookie) {
         if (isTagEnabled(traceTag)) {
             nativeAsyncTraceEnd(traceTag, methodName, cookie);
+        }
+    }
+
+
+    /**
+     * Writes a trace message to indicate that a given section of code has
+     * begun. Must be followed by a call to {@link #asyncTraceForTrackEnd} using the same
+     * tag. This function operates exactly like {@link #asyncTraceBegin(long, String, int)},
+     * except with the inclusion of a track name argument for where this method should appear.
+     *
+     * @param traceTag The trace tag.
+     * @param trackName The track where the event should appear in the trace.
+     * @param methodName The method name to appear in the trace.
+     * @param cookie Unique identifier for distinguishing simultaneous events
+     *
+     * @hide
+     */
+    public static void asyncTraceForTrackBegin(long traceTag,
+            @NonNull String trackName, @NonNull String methodName, int cookie) {
+        if (isTagEnabled(traceTag)) {
+            nativeAsyncTraceForTrackBegin(traceTag, trackName, methodName, cookie);
+        }
+    }
+
+    /**
+     * Writes a trace message to indicate that the current method has ended.
+     * Must be called exactly once for each call to
+     * {@link #asyncTraceForTrackBegin(long, String, String, int)}
+     * using the same tag, track name, name and cookie.
+     *
+     * @param traceTag The trace tag.
+     * @param trackName The track where the event should appear in the trace.
+     * @param methodName The method name to appear in the trace.
+     * @param cookie Unique identifier for distinguishing simultaneous events
+     *
+     * @hide
+     */
+    public static void asyncTraceForTrackEnd(long traceTag,
+            @NonNull String trackName, @NonNull String methodName, int cookie) {
+        if (isTagEnabled(traceTag)) {
+            nativeAsyncTraceForTrackEnd(traceTag, trackName, methodName, cookie);
+        }
+    }
+
+    /**
+     * Writes a trace message to indicate that a given section of code was invoked.
+     *
+     * @param traceTag The trace tag.
+     * @param methodName The method name to appear in the trace.
+     * @hide
+     */
+    public static void instant(long traceTag, String methodName) {
+        if (methodName == null) {
+            throw new IllegalArgumentException("methodName cannot be null");
+        }
+        if (isTagEnabled(traceTag)) {
+            nativeInstant(traceTag, methodName);
+        }
+    }
+
+    /**
+     * Writes a trace message to indicate that a given section of code was invoked.
+     *
+     * @param traceTag The trace tag.
+     * @param trackName The track where the event should appear in the trace.
+     * @param methodName The method name to appear in the trace.
+     * @hide
+     */
+    public static void instantForTrack(long traceTag, String trackName, String methodName) {
+        if (trackName == null) {
+            throw new IllegalArgumentException("trackName cannot be null");
+        }
+        if (methodName == null) {
+            throw new IllegalArgumentException("methodName cannot be null");
+        }
+        if (isTagEnabled(traceTag)) {
+            nativeInstantForTrack(traceTag, trackName, methodName);
         }
     }
 

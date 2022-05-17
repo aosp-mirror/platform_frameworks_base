@@ -16,14 +16,21 @@
 
 package android.telephony.ims.stub;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.ims.internal.IImsEcbm;
 import com.android.ims.internal.IImsEcbmListener;
+import com.android.internal.telephony.util.TelephonyUtils;
 
 import java.util.Objects;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.Executor;
+
 
 /**
  * Base implementation of ImsEcbm, which implements stub versions of the methods
@@ -40,10 +47,12 @@ public class ImsEcbmImplBase {
 
     private final Object mLock = new Object();
     private IImsEcbmListener mListener;
+    private Executor mExecutor = Runnable::run;
+
     private final IImsEcbm mImsEcbm = new IImsEcbm.Stub() {
         @Override
         public void setListener(IImsEcbmListener listener) {
-            synchronized (mLock) {
+            executeMethodAsync(() -> {
                 if (mListener != null && !mListener.asBinder().isBinderAlive()) {
                     Log.w(TAG, "setListener: discarding dead Binder");
                     mListener = null;
@@ -62,12 +71,25 @@ public class ImsEcbmImplBase {
                             + "listener");
                     mListener = listener;
                 }
-            }
+            }, "setListener");
         }
 
         @Override
         public void exitEmergencyCallbackMode() {
-            ImsEcbmImplBase.this.exitEmergencyCallbackMode();
+            executeMethodAsync(() -> ImsEcbmImplBase.this.exitEmergencyCallbackMode(),
+                    "exitEmergencyCallbackMode");
+        }
+
+        // Call the methods with a clean calling identity on the executor and wait indefinitely for
+        // the future to return.
+        private void executeMethodAsync(Runnable r, String errorLogName) {
+            try {
+                CompletableFuture.runAsync(
+                        () -> TelephonyUtils.runWithCleanCallingIdentity(r), mExecutor).join();
+            } catch (CancellationException | CompletionException e) {
+                Log.w(TAG, "ImsEcbmImplBase Binder - " + errorLogName + " exception: "
+                        + e.getMessage());
+            }
         }
     };
 
@@ -122,5 +144,15 @@ public class ImsEcbmImplBase {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    /**
+     * Set default Executor from MmTelFeature.
+     * @param executor The default executor for the framework to use when executing the methods
+     * overridden by the implementation of ImsEcbm.
+     * @hide
+     */
+    public final void setDefaultExecutor(@NonNull Executor executor) {
+        mExecutor = executor;
     }
 }

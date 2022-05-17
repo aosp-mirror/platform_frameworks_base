@@ -20,9 +20,11 @@
 
 // TODO: Use public SurfaceTexture APIs once available and include public NDK header file instead.
 #include <surfacetexture/surface_texture_platform.h>
+
 #include "AutoBackendTextureRelease.h"
 #include "Matrix.h"
 #include "Properties.h"
+#include "android/hdr_metadata.h"
 #include "renderstate/RenderState.h"
 #include "renderthread/EglManager.h"
 #include "renderthread/RenderThread.h"
@@ -147,14 +149,20 @@ void DeferredLayerUpdater::apply() {
             mUpdateTexImage = false;
             float transformMatrix[16];
             android_dataspace dataspace;
+            AHdrMetadataType hdrMetadataType;
+            android_cta861_3_metadata cta861_3;
+            android_smpte2086_metadata smpte2086;
             int slot;
             bool newContent = false;
+            ARect currentCrop;
+            uint32_t outTransform;
             // Note: ASurfaceTexture_dequeueBuffer discards all but the last frame. This
             // is necessary if the SurfaceTexture queue is in synchronous mode, and we
             // cannot tell which mode it is in.
             AHardwareBuffer* hardwareBuffer = ASurfaceTexture_dequeueBuffer(
-                    mSurfaceTexture.get(), &slot, &dataspace, transformMatrix, &newContent,
-                    createReleaseFence, fenceWait, this);
+                    mSurfaceTexture.get(), &slot, &dataspace, &hdrMetadataType, &cta861_3,
+                    &smpte2086, transformMatrix, &outTransform, &newContent, createReleaseFence,
+                    fenceWait, this, &currentCrop);
 
             if (hardwareBuffer) {
                 mCurrentSlot = slot;
@@ -165,12 +173,24 @@ void DeferredLayerUpdater::apply() {
                 // (invoked by createIfNeeded) will add a ref to the AHardwareBuffer.
                 AHardwareBuffer_release(hardwareBuffer);
                 if (layerImage.get()) {
-                    SkMatrix textureTransform;
-                    mat4(transformMatrix).copyTo(textureTransform);
                     // force filtration if buffer size != layer size
                     bool forceFilter =
                             mWidth != layerImage->width() || mHeight != layerImage->height();
-                    updateLayer(forceFilter, textureTransform, layerImage);
+                    SkRect currentCropRect =
+                            SkRect::MakeLTRB(currentCrop.left, currentCrop.top, currentCrop.right,
+                                             currentCrop.bottom);
+
+                    float maxLuminanceNits = -1.f;
+                    if (hdrMetadataType & HDR10_SMPTE2086) {
+                        maxLuminanceNits = std::max(smpte2086.maxLuminance, maxLuminanceNits);
+                    }
+
+                    if (hdrMetadataType & HDR10_CTA861_3) {
+                        maxLuminanceNits =
+                                std::max(cta861_3.maxContentLightLevel, maxLuminanceNits);
+                    }
+                    updateLayer(forceFilter, layerImage, outTransform, currentCropRect,
+                                maxLuminanceNits);
                 }
             }
         }
@@ -182,13 +202,16 @@ void DeferredLayerUpdater::apply() {
     }
 }
 
-void DeferredLayerUpdater::updateLayer(bool forceFilter, const SkMatrix& textureTransform,
-                                       const sk_sp<SkImage>& layerImage) {
+void DeferredLayerUpdater::updateLayer(bool forceFilter, const sk_sp<SkImage>& layerImage,
+                                       const uint32_t transform, SkRect currentCrop,
+                                       float maxLuminanceNits) {
     mLayer->setBlend(mBlend);
     mLayer->setForceFilter(forceFilter);
     mLayer->setSize(mWidth, mHeight);
-    mLayer->getTexTransform() = textureTransform;
+    mLayer->setCurrentCropRect(currentCrop);
+    mLayer->setWindowTransform(transform);
     mLayer->setImage(layerImage);
+    mLayer->setMaxLuminanceNits(maxLuminanceNits);
 }
 
 void DeferredLayerUpdater::detachSurfaceTexture() {

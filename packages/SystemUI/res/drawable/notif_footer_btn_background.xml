@@ -14,19 +14,20 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
-
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
-    android:shape="rectangle">
-    <solid
-        android:color="?androidprv:attr/colorSurface"
-        />
-    <corners android:radius="20dp" />
-
-    <padding
-        android:left="20dp"
-        android:right="20dp">
-    </padding>
-
-</shape>
+    android:color="?android:attr/colorControlHighlight">
+    <item>
+        <inset
+            android:insetBottom="4dp"
+            android:insetTop="4dp">
+            <shape android:shape="rectangle">
+                <corners android:radius="20dp" />
+                <padding
+                    android:left="20dp"
+                    android:right="20dp" />
+                <solid android:color="?androidprv:attr/colorSurface" />
+            </shape>
+        </inset>
+    </item>
+</ripple>

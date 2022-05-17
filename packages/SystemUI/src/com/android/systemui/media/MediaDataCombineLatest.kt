@@ -32,6 +32,7 @@ class MediaDataCombineLatest @Inject constructor() : MediaDataManager.Listener,
         oldKey: String?,
         data: MediaData,
         immediately: Boolean,
+        receivedSmartspaceCardLatency: Int,
         isSsReactivated: Boolean
     ) {
         if (oldKey != null && oldKey != key && entries.contains(oldKey)) {

@@ -175,27 +175,6 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
         return mCredential;
     }
 
-    /**
-     *  Returns the credential type recognized by {@link StorageManager}. Can be one of
-     *  {@link StorageManager#CRYPT_TYPE_DEFAULT}, {@link StorageManager#CRYPT_TYPE_PATTERN},
-     *  {@link StorageManager#CRYPT_TYPE_PIN} or {@link StorageManager#CRYPT_TYPE_PASSWORD}.
-     */
-    public int getStorageCryptType() {
-        if (isNone()) {
-            return StorageManager.CRYPT_TYPE_DEFAULT;
-        }
-        if (isPattern()) {
-            return StorageManager.CRYPT_TYPE_PATTERN;
-        }
-        if (isPin()) {
-            return StorageManager.CRYPT_TYPE_PIN;
-        }
-        if (isPassword()) {
-            return StorageManager.CRYPT_TYPE_PASSWORD;
-        }
-        throw new IllegalStateException("Unhandled credential type");
-    }
-
     /** Returns whether this is an empty credential */
     public boolean isNone() {
         ensureNotZeroized();

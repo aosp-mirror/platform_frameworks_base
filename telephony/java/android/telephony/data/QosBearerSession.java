@@ -36,17 +36,19 @@ public final class QosBearerSession implements Parcelable{
     final Qos qos;
     final List<QosBearerFilter> qosBearerFilterList;
 
-    public QosBearerSession(int qosBearerSessionId, @NonNull Qos qos, @NonNull List<QosBearerFilter> qosBearerFilterList) {
+    public QosBearerSession(int qosBearerSessionId, @NonNull Qos qos,
+            @NonNull List<QosBearerFilter> qosBearerFilterList) {
         this.qosBearerSessionId = qosBearerSessionId;
         this.qos = qos;
-        this.qosBearerFilterList = qosBearerFilterList;
+        this.qosBearerFilterList = new ArrayList<>();
+        this.qosBearerFilterList.addAll(qosBearerFilterList);
     }
 
     private QosBearerSession(Parcel source) {
         qosBearerSessionId = source.readInt();
-        qos = source.readParcelable(Qos.class.getClassLoader());
+        qos = source.readParcelable(Qos.class.getClassLoader(), android.telephony.data.Qos.class);
         qosBearerFilterList = new ArrayList<>();
-        source.readList(qosBearerFilterList, QosBearerFilter.class.getClassLoader());
+        source.readList(qosBearerFilterList, QosBearerFilter.class.getClassLoader(), android.telephony.data.QosBearerFilter.class);
     }
 
     public int getQosBearerSessionId() {
@@ -70,22 +72,6 @@ public final class QosBearerSession implements Parcelable{
             dest.writeParcelable((NrQos)qos, flags);
         }
         dest.writeList(qosBearerFilterList);
-    }
-
-    public static @NonNull QosBearerSession create(
-            @NonNull android.hardware.radio.V1_6.QosSession qosSession) {
-        List<QosBearerFilter> qosBearerFilters = new ArrayList<>();
-
-        if (qosSession.qosFilters != null) {
-            for (android.hardware.radio.V1_6.QosFilter filter : qosSession.qosFilters) {
-                qosBearerFilters.add(QosBearerFilter.create(filter));
-            }
-        }
-
-        return new QosBearerSession(
-                        qosSession.qosSessionId,
-                        Qos.create(qosSession.qos),
-                        qosBearerFilters);
     }
 
     @Override

@@ -20,6 +20,8 @@ package com.android.systemui.log
  * Production version of [LogcatEchoTracker] that isn't configurable.
  */
 class LogcatEchoTrackerProd : LogcatEchoTracker {
+    override val logInBackgroundThread = false
+
     override fun isBufferLoggable(bufferName: String, level: LogLevel): Boolean {
         return level >= LogLevel.WARNING
     }

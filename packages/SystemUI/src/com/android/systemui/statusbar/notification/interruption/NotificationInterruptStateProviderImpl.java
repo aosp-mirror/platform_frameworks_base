@@ -36,6 +36,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -52,8 +53,6 @@ import javax.inject.Inject;
 @SysUISingleton
 public class NotificationInterruptStateProviderImpl implements NotificationInterruptStateProvider {
     private static final String TAG = "InterruptionStateProvider";
-    private static final boolean DEBUG = true; //false;
-    private static final boolean DEBUG_HEADS_UP = true;
     private static final boolean ENABLE_HEADS_UP = true;
     private static final String SETTING_HEADS_UP_TICKER = "ticker_gets_heads_up";
 
@@ -66,7 +65,10 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
     private final AmbientDisplayConfiguration mAmbientDisplayConfiguration;
     private final BatteryController mBatteryController;
     private final ContentObserver mHeadsUpObserver;
-    private HeadsUpManager mHeadsUpManager;
+    private final HeadsUpManager mHeadsUpManager;
+    private final NotificationInterruptLogger mLogger;
+    private final NotifPipelineFlags mFlags;
+    private final KeyguardNotificationVisibilityProvider mKeyguardNotificationVisibilityProvider;
 
     @VisibleForTesting
     protected boolean mUseHeadsUp = false;
@@ -81,7 +83,10 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
             BatteryController batteryController,
             StatusBarStateController statusBarStateController,
             HeadsUpManager headsUpManager,
-            @Main Handler mainHandler) {
+            NotificationInterruptLogger logger,
+            @Main Handler mainHandler,
+            NotifPipelineFlags flags,
+            KeyguardNotificationVisibilityProvider keyguardNotificationVisibilityProvider) {
         mContentResolver = contentResolver;
         mPowerManager = powerManager;
         mDreamManager = dreamManager;
@@ -90,6 +95,9 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         mNotificationFilter = notificationFilter;
         mStatusBarStateController = statusBarStateController;
         mHeadsUpManager = headsUpManager;
+        mLogger = logger;
+        mFlags = flags;
+        mKeyguardNotificationVisibilityProvider = keyguardNotificationVisibilityProvider;
         mHeadsUpObserver = new ContentObserver(mainHandler) {
             @Override
             public void onChange(boolean selfChange) {
@@ -99,11 +107,10 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
                         mContentResolver,
                         Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED,
                         Settings.Global.HEADS_UP_OFF);
-                Log.d(TAG, "heads up is " + (mUseHeadsUp ? "enabled" : "disabled"));
+                mLogger.logHeadsUpFeatureChanged(mUseHeadsUp);
                 if (wasUsing != mUseHeadsUp) {
                     if (!mUseHeadsUp) {
-                        Log.d(TAG, "dismissing any existing heads up notification on "
-                                + "disable event");
+                        mLogger.logWillDismissAll();
                         mHeadsUpManager.releaseAllImmediately();
                     }
                 }
@@ -140,19 +147,14 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         }
 
         if (!entry.canBubble()) {
-            if (DEBUG) {
-                Log.d(TAG, "No bubble up: not allowed to bubble: " + sbn.getKey());
-            }
+            mLogger.logNoBubbleNotAllowed(sbn);
             return false;
         }
 
         if (entry.getBubbleMetadata() == null
                 || (entry.getBubbleMetadata().getShortcutId() == null
                     && entry.getBubbleMetadata().getIntent() == null)) {
-            if (DEBUG) {
-                Log.d(TAG, "No bubble up: notification: " + sbn.getKey()
-                        + " doesn't have valid metadata");
-            }
+            mLogger.logNoBubbleNoMetadata(sbn);
             return false;
         }
 
@@ -184,9 +186,7 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         StatusBarNotification sbn = entry.getSbn();
 
         if (!mUseHeadsUp) {
-            if (DEBUG_HEADS_UP) {
-                Log.d(TAG, "No heads up: no huns");
-            }
+            mLogger.logNoHeadsUpFeatureDisabled();
             return false;
         }
 
@@ -199,32 +199,23 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         }
 
         if (isSnoozedPackage(sbn)) {
-            if (DEBUG_HEADS_UP) {
-                Log.d(TAG, "No alerting: snoozed package: " + sbn.getKey());
-            }
+            mLogger.logNoHeadsUpPackageSnoozed(sbn);
             return false;
         }
 
         boolean inShade = mStatusBarStateController.getState() == SHADE;
         if (entry.isBubble() && inShade) {
-            if (DEBUG_HEADS_UP) {
-                Log.d(TAG, "No heads up: in unlocked shade where notification is shown as a "
-                        + "bubble: " + sbn.getKey());
-            }
+            mLogger.logNoHeadsUpAlreadyBubbled(sbn);
             return false;
         }
 
         if (entry.shouldSuppressPeek()) {
-            if (DEBUG_HEADS_UP) {
-                Log.d(TAG, "No heads up: suppressed by DND: " + sbn.getKey());
-            }
+            mLogger.logNoHeadsUpSuppressedByDnd(sbn);
             return false;
         }
 
         if (entry.getImportance() < NotificationManager.IMPORTANCE_HIGH) {
-            if (DEBUG_HEADS_UP) {
-                Log.d(TAG, "No heads up: unimportant notification: " + sbn.getKey());
-            }
+            mLogger.logNoHeadsUpNotImportant(sbn);
             return false;
         }
 
@@ -237,21 +228,17 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         boolean inUse = mPowerManager.isScreenOn() && !isDreaming;
 
         if (!inUse) {
-            if (DEBUG_HEADS_UP) {
-                Log.d(TAG, "No heads up: not in use: " + sbn.getKey());
-            }
+            mLogger.logNoHeadsUpNotInUse(sbn);
             return false;
         }
 
         for (int i = 0; i < mSuppressors.size(); i++) {
             if (mSuppressors.get(i).suppressAwakeHeadsUp(entry)) {
-                if (DEBUG_HEADS_UP) {
-                    Log.d(TAG, "No heads up: aborted by suppressor: "
-                            + mSuppressors.get(i).getName() + " sbnKey=" + sbn.getKey());
-                }
+                mLogger.logNoHeadsUpSuppressedBy(sbn, mSuppressors.get(i));
                 return false;
             }
         }
+        mLogger.logHeadsUp(sbn);
         return true;
     }
 
@@ -266,39 +253,30 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         StatusBarNotification sbn = entry.getSbn();
 
         if (!mAmbientDisplayConfiguration.pulseOnNotificationEnabled(UserHandle.USER_CURRENT)) {
-            if (DEBUG_HEADS_UP) {
-                Log.d(TAG, "No pulsing: disabled by setting: " + sbn.getKey());
-            }
+            mLogger.logNoPulsingSettingDisabled(sbn);
             return false;
         }
 
         if (mBatteryController.isAodPowerSave()) {
-            if (DEBUG_HEADS_UP) {
-                Log.d(TAG, "No pulsing: disabled by battery saver: " + sbn.getKey());
-            }
+            mLogger.logNoPulsingBatteryDisabled(sbn);
             return false;
         }
 
         if (!canAlertCommon(entry)) {
-            if (DEBUG_HEADS_UP) {
-                Log.d(TAG, "No pulsing: notification shouldn't alert: " + sbn.getKey());
-            }
+            mLogger.logNoPulsingNoAlert(sbn);
             return false;
         }
 
         if (entry.shouldSuppressAmbient()) {
-            if (DEBUG_HEADS_UP) {
-                Log.d(TAG, "No pulsing: ambient effect suppressed: " + sbn.getKey());
-            }
+            mLogger.logNoPulsingNoAmbientEffect(sbn);
             return false;
         }
 
         if (entry.getImportance() < NotificationManager.IMPORTANCE_DEFAULT) {
-            if (DEBUG_HEADS_UP) {
-                Log.d(TAG, "No pulsing: not important enough: " + sbn.getKey());
-            }
+            mLogger.logNoPulsingNotImportant(sbn);
             return false;
         }
+        mLogger.logPulsing(sbn);
         return true;
     }
 
@@ -311,35 +289,31 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
     private boolean canAlertCommon(NotificationEntry entry) {
         StatusBarNotification sbn = entry.getSbn();
 
-        if (mNotificationFilter.shouldFilterOut(entry)) {
-            if (DEBUG || DEBUG_HEADS_UP) {
-                Log.d(TAG, "No alerting: filtered notification: " + sbn.getKey());
-            }
+        if (!mFlags.isNewPipelineEnabled() && mNotificationFilter.shouldFilterOut(entry)) {
+            mLogger.logNoAlertingFilteredOut(sbn);
             return false;
         }
 
         // Don't alert notifications that are suppressed due to group alert behavior
         if (sbn.isGroup() && sbn.getNotification().suppressAlertingDueToGrouping()) {
-            if (DEBUG || DEBUG_HEADS_UP) {
-                Log.d(TAG, "No alerting: suppressed due to group alert behavior");
-            }
+            mLogger.logNoAlertingGroupAlertBehavior(sbn);
             return false;
         }
 
         for (int i = 0; i < mSuppressors.size(); i++) {
             if (mSuppressors.get(i).suppressInterruptions(entry)) {
-                if (DEBUG_HEADS_UP) {
-                    Log.d(TAG, "No alerting: aborted by suppressor: "
-                            + mSuppressors.get(i).getName() + " sbnKey=" + sbn.getKey());
-                }
+                mLogger.logNoAlertingSuppressedBy(sbn, mSuppressors.get(i), /* awake */ false);
                 return false;
             }
         }
 
         if (entry.hasJustLaunchedFullScreenIntent()) {
-            if (DEBUG_HEADS_UP) {
-                Log.d(TAG, "No alerting: recent fullscreen: " + sbn.getKey());
-            }
+            mLogger.logNoAlertingRecentFullscreen(sbn);
+            return false;
+        }
+
+        if (mKeyguardNotificationVisibilityProvider.shouldHideNotification(entry)) {
+            mLogger.keyguardHideNotification(entry.getKey());
             return false;
         }
 
@@ -357,10 +331,7 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
 
         for (int i = 0; i < mSuppressors.size(); i++) {
             if (mSuppressors.get(i).suppressAwakeInterruptions(entry)) {
-                if (DEBUG_HEADS_UP) {
-                    Log.d(TAG, "No alerting: aborted by suppressor: "
-                            + mSuppressors.get(i).getName() + " sbnKey=" + sbn.getKey());
-                }
+                mLogger.logNoAlertingSuppressedBy(sbn, mSuppressors.get(i), /* awake */ true);
                 return false;
             }
         }

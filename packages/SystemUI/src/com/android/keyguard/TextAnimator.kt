@@ -161,6 +161,7 @@ class TextAnimator(
             // No animation is requested, thus set base and target state to the same state.
             textInterpolator.progress = 1f
             textInterpolator.rebase()
+            invalidateCallback()
         }
     }
 }

@@ -32,7 +32,6 @@ import android.graphics.drawable.Icon;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Pools;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -57,8 +56,8 @@ import java.util.List;
  */
 @RemoteViews.RemoteView
 public class MessagingGroup extends LinearLayout implements MessagingLinearLayout.MessagingChild {
-    private static Pools.SimplePool<MessagingGroup> sInstancePool
-            = new Pools.SynchronizedPool<>(10);
+    private static final MessagingPool<MessagingGroup> sInstancePool =
+            new MessagingPool<>(10);
 
     /**
      * Images are displayed inline.
@@ -263,7 +262,8 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
         return createdGroup;
     }
 
-    public void removeMessage(MessagingMessage messagingMessage) {
+    public void removeMessage(MessagingMessage messagingMessage,
+            ArrayList<MessagingLinearLayout.MessagingChild> toRecycle) {
         View view = messagingMessage.getView();
         boolean wasShown = view.isShown();
         ViewGroup messageParent = (ViewGroup) view.getParent();
@@ -271,15 +271,14 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
             return;
         }
         messageParent.removeView(view);
-        Runnable recycleRunnable = () -> {
-            messageParent.removeTransientView(view);
-            messagingMessage.recycle();
-        };
         if (wasShown && !MessagingLinearLayout.isGone(view)) {
             messageParent.addTransientView(view, 0);
-            performRemoveAnimation(view, recycleRunnable);
+            performRemoveAnimation(view, () -> {
+                messageParent.removeTransientView(view);
+                messagingMessage.recycle();
+            });
         } else {
-            recycleRunnable.run();
+            toRecycle.add(messagingMessage);
         }
     }
 
@@ -338,7 +337,7 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
     }
 
     public static void dropCache() {
-        sInstancePool = new Pools.SynchronizedPool<>(10);
+        sInstancePool.clear();
     }
 
     @Override

@@ -37,7 +37,6 @@ import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.DeviceConfigProxy
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.time.SystemClock
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.lang.ref.WeakReference
 import java.util.concurrent.Executor
@@ -59,7 +58,8 @@ class PrivacyItemController @Inject constructor(
     internal companion object {
         val OPS_MIC_CAMERA = intArrayOf(AppOpsManager.OP_CAMERA,
                 AppOpsManager.OP_PHONE_CALL_CAMERA, AppOpsManager.OP_RECORD_AUDIO,
-                AppOpsManager.OP_PHONE_CALL_MICROPHONE)
+                AppOpsManager.OP_PHONE_CALL_MICROPHONE,
+                AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO)
         val OPS_LOCATION = intArrayOf(
                 AppOpsManager.OP_COARSE_LOCATION,
                 AppOpsManager.OP_FINE_LOCATION)
@@ -316,6 +316,7 @@ class PrivacyItemController @Inject constructor(
             AppOpsManager.OP_COARSE_LOCATION,
             AppOpsManager.OP_FINE_LOCATION -> PrivacyType.TYPE_LOCATION
             AppOpsManager.OP_PHONE_CALL_MICROPHONE,
+            AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO,
             AppOpsManager.OP_RECORD_AUDIO -> PrivacyType.TYPE_MICROPHONE
             else -> return null
         }
@@ -348,7 +349,7 @@ class PrivacyItemController @Inject constructor(
         }
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("PrivacyItemController state:")
         pw.println("  Listening: $listening")
         pw.println("  Current user ids: $currentUserIds")

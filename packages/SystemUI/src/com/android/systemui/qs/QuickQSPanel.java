@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.LinearLayout;
 
 import com.android.internal.logging.UiEventLogger;
@@ -33,31 +34,22 @@ import com.android.systemui.plugins.qs.QSTile.State;
  */
 public class QuickQSPanel extends QSPanel {
 
-    public static final String NUM_QUICK_TILES = "sysui_qqs_count";
     private static final String TAG = "QuickQSPanel";
-    // A default value so that we never return 0.
-    public static final int DEFAULT_MAX_TILES = 6;
+    // A fallback value for max tiles number when setting via Tuner (parseNumTiles)
+    public static final int TUNER_MAX_TILES_FALLBACK = 6;
 
     private boolean mDisabledByPolicy;
     private int mMaxTiles;
 
     public QuickQSPanel(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mMaxTiles = Math.min(DEFAULT_MAX_TILES,
-                getResources().getInteger(R.integer.quick_qs_panel_max_columns));
+        mMaxTiles = getResources().getInteger(R.integer.quick_qs_panel_max_tiles);
     }
 
     @Override
-    public void setBrightnessView(View view) {
-        // Don't add brightness view
-    }
-
-    @Override
-    void initialize() {
-        super.initialize();
-        if (mHorizontalContentContainer != null) {
-            mHorizontalContentContainer.setClipChildren(false);
-        }
+    protected void setHorizontalContentContainerClipping() {
+        mHorizontalContentContainer.setClipToPadding(false);
+        mHorizontalContentContainer.setClipChildren(false);
     }
 
     @Override
@@ -79,7 +71,11 @@ public class QuickQSPanel extends QSPanel {
 
     @Override
     protected void updatePadding() {
-        // QS Panel is setting a top padding by default, which we don't need.
+        int bottomPadding = getResources().getDimensionPixelSize(R.dimen.qqs_layout_padding_bottom);
+        setPaddingRelative(getPaddingStart(),
+                getPaddingTop(),
+                getPaddingEnd(),
+                bottomPadding);
     }
 
     @Override
@@ -106,7 +102,7 @@ public class QuickQSPanel extends QSPanel {
     }
 
     public void setMaxTiles(int maxTiles) {
-        mMaxTiles = Math.min(maxTiles, DEFAULT_MAX_TILES);
+        mMaxTiles = maxTiles;
     }
 
     @Override
@@ -122,17 +118,18 @@ public class QuickQSPanel extends QSPanel {
     }
 
     /**
-     * Parses the String setting into the number of tiles. Defaults to {@code mDefaultMaxTiles}
+     * Parses the String setting into the number of tiles. Defaults to
+     * {@link #TUNER_MAX_TILES_FALLBACK}
      *
      * @param numTilesValue value of the setting to parse
-     * @return parsed value of numTilesValue OR {@code mDefaultMaxTiles} on error
+     * @return parsed value of numTilesValue OR {@link #TUNER_MAX_TILES_FALLBACK} on error
      */
     public static int parseNumTiles(String numTilesValue) {
         try {
             return Integer.parseInt(numTilesValue);
         } catch (NumberFormatException e) {
             // Couldn't read an int from the new setting value. Use default.
-            return DEFAULT_MAX_TILES;
+            return TUNER_MAX_TILES_FALLBACK;
         }
     }
 
@@ -175,6 +172,14 @@ public class QuickQSPanel extends QSPanel {
         return QSEvent.QQS_TILE_VISIBLE;
     }
 
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        // Remove the collapse action from QSPanel
+        info.removeAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_COLLAPSE);
+        info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_EXPAND);
+    }
+
     static class QQSSideLabelTileLayout extends SideLabelTileLayout {
 
         private boolean mLastSelected;
@@ -193,7 +198,7 @@ public class QuickQSPanel extends QSPanel {
         public boolean updateResources() {
             mCellHeightResId = R.dimen.qs_quick_tile_size;
             boolean b = super.updateResources();
-            mMaxAllowedRows = 2;
+            mMaxAllowedRows = getResources().getInteger(R.integer.quick_qs_panel_max_rows);
             return b;
         }
 

@@ -45,15 +45,12 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.keyguard.FaceAuthScreenBrightnessController;
 import com.android.systemui.statusbar.NotificationMediaManager;
 
 import libcore.io.IoUtils;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Objects;
-import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -70,7 +67,6 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
     private final WallpaperManager mWallpaperManager;
     private final KeyguardUpdateMonitor mUpdateMonitor;
     private final Handler mH;
-    private final Optional<FaceAuthScreenBrightnessController> mFaceAuthScreenBrightnessController;
 
     private boolean mCached;
     private Bitmap mCache;
@@ -86,14 +82,12 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             DumpManager dumpManager,
             NotificationMediaManager mediaManager,
-            Optional<FaceAuthScreenBrightnessController> faceAuthScreenBrightnessController,
             @Main Handler mainHandler) {
         dumpManager.registerDumpable(getClass().getSimpleName(), this);
         mWallpaperManager = wallpaperManager;
         mCurrentUserId = ActivityManager.getCurrentUser();
         mUpdateMonitor = keyguardUpdateMonitor;
         mMediaManager = mediaManager;
-        mFaceAuthScreenBrightnessController = faceAuthScreenBrightnessController;
         mH = mainHandler;
 
         if (iWallpaperManager != null) {
@@ -119,7 +113,6 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
         LoaderResult result = loadBitmap(mCurrentUserId, mSelectedUser);
         if (result.success) {
             mCached = true;
-            mUpdateMonitor.setHasLockscreenWallpaper(result.bitmap != null);
             mCache = result.bitmap;
         }
         return mCache;
@@ -131,14 +124,6 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
         if (!mWallpaperManager.isWallpaperSupported()) {
             // When wallpaper is not supported, show the system wallpaper
             return LoaderResult.success(null);
-        }
-
-        Bitmap faceAuthWallpaper = null;
-        if (mFaceAuthScreenBrightnessController.isPresent()) {
-            faceAuthWallpaper = mFaceAuthScreenBrightnessController.get().getFaceAuthWallpaper();
-            if (faceAuthWallpaper != null) {
-                return LoaderResult.success(faceAuthWallpaper);
-            }
         }
 
         // Prefer the selected user (when specified) over the current user for the FLAG_SET_LOCK
@@ -235,7 +220,6 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
                 if (result.success) {
                     mCached = true;
                     mCache = result.bitmap;
-                    mUpdateMonitor.setHasLockscreenWallpaper(result.bitmap != null);
                     mMediaManager.updateMediaMetaData(
                             true /* metaDataChanged */, true /* allowEnterAnimation */);
                 }
@@ -245,7 +229,7 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println(getClass().getSimpleName() + ":");
         IndentingPrintWriter iPw = new IndentingPrintWriter(pw, "  ").increaseIndent();
         iPw.println("mCached=" + mCached);

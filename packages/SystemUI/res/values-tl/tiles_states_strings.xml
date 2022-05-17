@@ -86,6 +86,11 @@
     <item msgid="5715725170633593906">"Naka-off"</item>
     <item msgid="2075645297847971154">"Naka-on"</item>
   </string-array>
+  <string-array name="tile_states_color_correction">
+    <item msgid="2840507878437297682">"Hindi available"</item>
+    <item msgid="1909756493418256167">"Naka-off"</item>
+    <item msgid="4531508423703413340">"Naka-on"</item>
+  </string-array>
   <string-array name="tile_states_inversion">
     <item msgid="3638187931191394628">"Hindi available"</item>
     <item msgid="9103697205127645916">"Naka-off"</item>
@@ -151,9 +156,19 @@
     <item msgid="7571394439974244289">"Naka-off"</item>
     <item msgid="6866424167599381915">"Naka-on"</item>
   </string-array>
+  <string-array name="tile_states_qr_code_scanner">
+    <item msgid="7435143266149257618">"Hindi Available"</item>
+    <item msgid="3301403109049256043">"Naka-off"</item>
+    <item msgid="8878684975184010135">"Naka-on"</item>
+  </string-array>
   <string-array name="tile_states_alarm">
     <item msgid="4936533380177298776">"Hindi available"</item>
     <item msgid="2710157085538036590">"Naka-off"</item>
     <item msgid="7809470840976856149">"Naka-on"</item>
+  </string-array>
+  <string-array name="tile_states_onehanded">
+    <item msgid="8189342855739930015">"Hindi available"</item>
+    <item msgid="146088982397753810">"Naka-off"</item>
+    <item msgid="460891964396502657">"Naka-on"</item>
   </string-array>
 </resources>

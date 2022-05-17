@@ -71,6 +71,7 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
     private WeakReference<BubbleController> mController;
     private WeakReference<BubbleStackView> mStackView;
     private BubbleIconFactory mIconFactory;
+    private BubbleBadgeIconFactory mBadgeIconFactory;
     private boolean mSkipInflation;
     private Callback mCallback;
     private Executor mMainExecutor;
@@ -84,6 +85,7 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
             BubbleController controller,
             BubbleStackView stackView,
             BubbleIconFactory factory,
+            BubbleBadgeIconFactory badgeFactory,
             boolean skipInflation,
             Callback c,
             Executor mainExecutor) {
@@ -92,6 +94,7 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
         mController = new WeakReference<>(controller);
         mStackView = new WeakReference<>(stackView);
         mIconFactory = factory;
+        mBadgeIconFactory = badgeFactory;
         mSkipInflation = skipInflation;
         mCallback = c;
         mMainExecutor = mainExecutor;
@@ -100,7 +103,7 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
     @Override
     protected BubbleViewInfo doInBackground(Void... voids) {
         return BubbleViewInfo.populate(mContext.get(), mController.get(), mStackView.get(),
-                mIconFactory, mBubble, mSkipInflation);
+                mIconFactory, mBadgeIconFactory, mBubble, mSkipInflation);
     }
 
     @Override
@@ -127,6 +130,7 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
         String appName;
         Bitmap bubbleBitmap;
         Bitmap badgeBitmap;
+        Bitmap mRawBadgeBitmap;
         int dotColor;
         Path dotPath;
         Bubble.FlyoutMessage flyoutMessage;
@@ -134,7 +138,8 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
         @VisibleForTesting
         @Nullable
         public static BubbleViewInfo populate(Context c, BubbleController controller,
-                BubbleStackView stackView, BubbleIconFactory iconFactory, Bubble b,
+                BubbleStackView stackView, BubbleIconFactory iconFactory,
+                BubbleBadgeIconFactory badgeIconFactory, Bubble b,
                 boolean skipInflation) {
             BubbleViewInfo info = new BubbleViewInfo();
 
@@ -186,12 +191,12 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
                 bubbleDrawable = appIcon;
             }
 
-            BitmapInfo badgeBitmapInfo = iconFactory.getBadgeBitmap(badgedIcon,
+            BitmapInfo badgeBitmapInfo = badgeIconFactory.getBadgeBitmap(badgedIcon,
                     b.isImportantConversation());
             info.badgeBitmap = badgeBitmapInfo.icon;
-            info.bubbleBitmap = iconFactory.createBadgedIconBitmap(bubbleDrawable,
-                    null /* user */,
-                    true /* shrinkNonAdaptiveIcons */).icon;
+            // Raw badge bitmap never includes the important conversation ring
+            info.mRawBadgeBitmap = badgeIconFactory.getBadgeBitmap(badgedIcon, false).icon;
+            info.bubbleBitmap = iconFactory.createBadgedIconBitmap(bubbleDrawable).icon;
 
             // Dot color & placement
             Path iconPath = PathParser.createPathFromPathData(

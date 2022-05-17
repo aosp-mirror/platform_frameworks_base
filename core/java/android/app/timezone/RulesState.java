@@ -195,12 +195,12 @@ public final class RulesState implements Parcelable {
 
     private static RulesState createFromParcel(Parcel in) {
         String baseRulesVersion = in.readString();
-        DistroFormatVersion distroFormatVersionSupported = in.readParcelable(null);
+        DistroFormatVersion distroFormatVersionSupported = in.readParcelable(null, android.app.timezone.DistroFormatVersion.class);
         boolean operationInProgress = in.readByte() == BYTE_TRUE;
         int distroStagedState = in.readByte();
-        DistroRulesVersion stagedDistroRulesVersion = in.readParcelable(null);
+        DistroRulesVersion stagedDistroRulesVersion = in.readParcelable(null, android.app.timezone.DistroRulesVersion.class);
         int installedDistroStatus = in.readByte();
-        DistroRulesVersion installedDistroRulesVersion = in.readParcelable(null);
+        DistroRulesVersion installedDistroRulesVersion = in.readParcelable(null, android.app.timezone.DistroRulesVersion.class);
         return new RulesState(baseRulesVersion, distroFormatVersionSupported, operationInProgress,
                 distroStagedState, stagedDistroRulesVersion,
                 installedDistroStatus, installedDistroRulesVersion);

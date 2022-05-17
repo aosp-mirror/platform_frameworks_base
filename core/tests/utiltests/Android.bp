@@ -33,6 +33,7 @@ android_test {
         "frameworks-base-testutils",
         "mockito-target-minus-junit4",
         "androidx.test.ext.junit",
+        "truth-prebuilt",
     ],
 
     libs: [

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="5" by="lint 7.2.0-dev">
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. ">
+        <location
+            file="frameworks/base/services/core/java/com/android/server/biometrics/BiometricService.java"
+            line="1122"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. ">
+        <location
+            file="frameworks/base/services/core/java/com/android/server/biometrics/BiometricService.java"
+            line="1127"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. ">
+        <location
+            file="packages/modules/Bluetooth/service/java/com/android/server/bluetooth/BluetoothManagerService.java"
+            line="670"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getString()` called from system process. Please call `android.provider.Settings.Secure#getStringForUser()` instead. ">
+        <location
+            file="packages/modules/Bluetooth/service/java/com/android/server/bluetooth/BluetoothManagerService.java"
+            line="678"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getString()` called from system process. Please call `android.provider.Settings.Secure#getStringForUser()` instead. ">
+        <location
+            file="packages/modules/Bluetooth/service/java/com/android/server/bluetooth/BluetoothManagerService.java"
+            line="679"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getString()` called from system process. Please call `android.provider.Settings.Secure#getStringForUser()` instead. ">
+        <location
+            file="packages/modules/Bluetooth/service/java/com/android/server/bluetooth/BluetoothManagerService.java"
+            line="696"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getString()` called from system process. Please call `android.provider.Settings.Secure#getStringForUser()` instead. ">
+        <location
+            file="packages/modules/Bluetooth/service/java/com/android/server/bluetooth/BluetoothManagerService.java"
+            line="705"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getString()` called from system process. Please call `android.provider.Settings.Secure#getStringForUser()` instead. ">
+        <location
+            file="frameworks/base/services/core/java/com/android/server/CertBlacklister.java"
+            line="73"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. ">
+        <location
+            file="frameworks/base/services/core/java/com/android/server/clipboard/ClipboardService.java"
+            line="1072"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. ">
+        <location
+            file="frameworks/base/services/core/java/com/android/server/DockObserver.java"
+            line="260"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getString()` called from system process. Please call `android.provider.Settings.Secure#getStringForUser()` instead. ">
+        <location
+            file="frameworks/base/services/core/java/com/android/server/media/MediaSessionService.java"
+            line="928"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. ">
+        <location
+            file="frameworks/base/services/core/java/com/android/server/pm/PackageInstallerSession.java"
+            line="1902"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getString()` called from system process. Please call `android.provider.Settings.Secure#getStringForUser()` instead. ">
+        <location
+            file="frameworks/base/services/core/java/com/android/server/connectivity/Vpn.java"
+            line="2069"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. ">
+        <location
+            file="frameworks/base/services/core/java/com/android/server/connectivity/Vpn.java"
+            line="2076"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. ">
+        <location
+            file="frameworks/base/services/core/java/com/android/server/notification/ZenModeHelper.java"
+            line="984"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. ">
+        <location
+            file="frameworks/base/services/core/java/com/android/server/notification/ZenModeHelper.java"
+            line="1446"/>
+    </issue>
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getInt()` called from system process. Please call `android.provider.Settings.Secure#getIntForUser()` instead. ">
+        <location
+            file="frameworks/base/services/core/java/com/android/server/notification/ZenModeHelper.java"
+            line="1448"/>
+    </issue>
+
+</issues>

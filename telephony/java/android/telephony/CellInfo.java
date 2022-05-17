@@ -20,7 +20,6 @@ import android.annotation.ElapsedRealtimeLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.hardware.radio.V1_4.CellInfo.Info;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -148,6 +147,13 @@ public abstract class CellInfo implements Parcelable {
 
     // Observation time stamped as type in nanoseconds since boot
     private long mTimeStamp;
+
+    /** @hide */
+    protected CellInfo(int cellConnectionStatus, boolean registered, long timestamp) {
+        mCellConnectionStatus = cellConnectionStatus;
+        mRegistered = registered;
+        mTimeStamp = timestamp;
+    }
 
     /** @hide */
     protected CellInfo() {
@@ -321,131 +327,4 @@ public abstract class CellInfo implements Parcelable {
             return new CellInfo[size];
         }
     };
-
-    /** @hide */
-    protected CellInfo(android.hardware.radio.V1_0.CellInfo ci) {
-        this.mRegistered = ci.registered;
-        this.mTimeStamp = ci.timeStamp;
-        this.mCellConnectionStatus = CONNECTION_UNKNOWN;
-    }
-
-    /** @hide */
-    protected CellInfo(android.hardware.radio.V1_2.CellInfo ci) {
-        this.mRegistered = ci.registered;
-        this.mTimeStamp = ci.timeStamp;
-        this.mCellConnectionStatus = ci.connectionStatus;
-    }
-
-    /** @hide */
-    protected CellInfo(android.hardware.radio.V1_4.CellInfo ci, long timeStamp) {
-        this.mRegistered = ci.isRegistered;
-        this.mTimeStamp = timeStamp;
-        this.mCellConnectionStatus = ci.connectionStatus;
-    }
-
-    /** @hide */
-    protected CellInfo(android.hardware.radio.V1_5.CellInfo ci, long timeStamp) {
-        this.mRegistered = ci.registered;
-        this.mTimeStamp = timeStamp;
-        this.mCellConnectionStatus = ci.connectionStatus;
-    }
-
-    /** @hide */
-    protected CellInfo(android.hardware.radio.V1_6.CellInfo ci, long timeStamp) {
-        this.mRegistered = ci.registered;
-        this.mTimeStamp = timeStamp;
-        this.mCellConnectionStatus = ci.connectionStatus;
-    }
-
-    /** @hide */
-    public static CellInfo create(android.hardware.radio.V1_0.CellInfo ci) {
-        if (ci == null) return null;
-        switch(ci.cellInfoType) {
-            case android.hardware.radio.V1_0.CellInfoType.GSM: return new CellInfoGsm(ci);
-            case android.hardware.radio.V1_0.CellInfoType.CDMA: return new CellInfoCdma(ci);
-            case android.hardware.radio.V1_0.CellInfoType.LTE: return new CellInfoLte(ci);
-            case android.hardware.radio.V1_0.CellInfoType.WCDMA: return new CellInfoWcdma(ci);
-            case android.hardware.radio.V1_0.CellInfoType.TD_SCDMA: return new CellInfoTdscdma(ci);
-            default: return null;
-        }
-    }
-
-    /** @hide */
-    public static CellInfo create(android.hardware.radio.V1_2.CellInfo ci) {
-        if (ci == null) return null;
-        switch(ci.cellInfoType) {
-            case android.hardware.radio.V1_0.CellInfoType.GSM: return new CellInfoGsm(ci);
-            case android.hardware.radio.V1_0.CellInfoType.CDMA: return new CellInfoCdma(ci);
-            case android.hardware.radio.V1_0.CellInfoType.LTE: return new CellInfoLte(ci);
-            case android.hardware.radio.V1_0.CellInfoType.WCDMA: return new CellInfoWcdma(ci);
-            case android.hardware.radio.V1_0.CellInfoType.TD_SCDMA: return new CellInfoTdscdma(ci);
-            default: return null;
-        }
-    }
-
-    /** @hide */
-    public static CellInfo create(android.hardware.radio.V1_4.CellInfo ci, long timeStamp) {
-        if (ci == null) return null;
-        switch (ci.info.getDiscriminator()) {
-            case Info.hidl_discriminator.gsm: return new CellInfoGsm(ci, timeStamp);
-            case Info.hidl_discriminator.cdma: return new CellInfoCdma(ci, timeStamp);
-            case Info.hidl_discriminator.lte: return new CellInfoLte(ci, timeStamp);
-            case Info.hidl_discriminator.wcdma: return new CellInfoWcdma(ci, timeStamp);
-            case Info.hidl_discriminator.tdscdma: return new CellInfoTdscdma(ci, timeStamp);
-            case Info.hidl_discriminator.nr: return new CellInfoNr(ci, timeStamp);
-            default: return null;
-        }
-    }
-
-    /** @hide */
-    public static CellInfo create(android.hardware.radio.V1_5.CellInfo ci, long timeStamp) {
-        if (ci == null) return null;
-        switch (ci.ratSpecificInfo.getDiscriminator()) {
-            case android.hardware.radio.V1_5.CellInfo
-                    .CellInfoRatSpecificInfo.hidl_discriminator.gsm:
-                return new CellInfoGsm(ci, timeStamp);
-            case android.hardware.radio.V1_5.CellInfo
-                    .CellInfoRatSpecificInfo.hidl_discriminator.cdma:
-                return new CellInfoCdma(ci, timeStamp);
-            case android.hardware.radio.V1_5.CellInfo
-                    .CellInfoRatSpecificInfo.hidl_discriminator.lte:
-                return new CellInfoLte(ci, timeStamp);
-            case android.hardware.radio.V1_5.CellInfo
-                    .CellInfoRatSpecificInfo.hidl_discriminator.wcdma:
-                return new CellInfoWcdma(ci, timeStamp);
-            case android.hardware.radio.V1_5.CellInfo
-                    .CellInfoRatSpecificInfo.hidl_discriminator.tdscdma:
-                return new CellInfoTdscdma(ci, timeStamp);
-            case android.hardware.radio.V1_5.CellInfo
-                    .CellInfoRatSpecificInfo.hidl_discriminator.nr:
-                return new CellInfoNr(ci, timeStamp);
-            default: return null;
-        }
-    }
-
-    /** @hide */
-    public static CellInfo create(android.hardware.radio.V1_6.CellInfo ci, long timeStamp) {
-        if (ci == null) return null;
-        switch (ci.ratSpecificInfo.getDiscriminator()) {
-            case android.hardware.radio.V1_6.CellInfo
-                    .CellInfoRatSpecificInfo.hidl_discriminator.gsm:
-                return new CellInfoGsm(ci, timeStamp);
-            case android.hardware.radio.V1_6.CellInfo
-                    .CellInfoRatSpecificInfo.hidl_discriminator.cdma:
-                return new CellInfoCdma(ci, timeStamp);
-            case android.hardware.radio.V1_6.CellInfo
-                    .CellInfoRatSpecificInfo.hidl_discriminator.lte:
-                return new CellInfoLte(ci, timeStamp);
-            case android.hardware.radio.V1_6.CellInfo
-                    .CellInfoRatSpecificInfo.hidl_discriminator.wcdma:
-                return new CellInfoWcdma(ci, timeStamp);
-            case android.hardware.radio.V1_6.CellInfo
-                    .CellInfoRatSpecificInfo.hidl_discriminator.tdscdma:
-                return new CellInfoTdscdma(ci, timeStamp);
-            case android.hardware.radio.V1_6.CellInfo
-                    .CellInfoRatSpecificInfo.hidl_discriminator.nr:
-                return new CellInfoNr(ci, timeStamp);
-            default: return null;
-        }
-    }
 }

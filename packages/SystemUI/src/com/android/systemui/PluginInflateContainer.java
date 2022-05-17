@@ -53,15 +53,16 @@ public class PluginInflateContainer extends AutoReinflateContainer
 
     private static final String TAG = "PluginInflateContainer";
 
-    private Class<?> mClass;
+    private Class<ViewProvider> mClass;
     private View mPluginView;
 
     public PluginInflateContainer(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.PluginInflateContainer);
         String viewType = a.getString(R.styleable.PluginInflateContainer_viewType);
+        a.recycle();
         try {
-            mClass = Class.forName(viewType);
+            mClass = (Class<ViewProvider>) Class.forName(viewType);
         } catch (Exception e) {
             Log.d(TAG, "Problem getting class info " + viewType, e);
             mClass = null;

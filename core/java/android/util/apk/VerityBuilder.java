@@ -90,7 +90,7 @@ public abstract class VerityBuilder {
             throws IOException, SecurityException, NoSuchAlgorithmException, DigestException {
         long signingBlockSize =
                 signatureInfo.centralDirOffset - signatureInfo.apkSigningBlockOffset;
-        long dataSize = apk.length() - signingBlockSize;
+        long dataSize = apk.getChannel().size() - signingBlockSize;
         int[] levelOffset = calculateVerityLevelOffset(dataSize);
         int merkleTreeSize = levelOffset[levelOffset.length - 1];
 
@@ -108,7 +108,7 @@ public abstract class VerityBuilder {
             @NonNull SignatureInfo signatureInfo, @NonNull ByteBuffer footerOutput)
             throws IOException {
         footerOutput.order(ByteOrder.LITTLE_ENDIAN);
-        generateApkVerityHeader(footerOutput, apk.length(), DEFAULT_SALT);
+        generateApkVerityHeader(footerOutput, apk.getChannel().size(), DEFAULT_SALT);
         long signingBlockSize =
                 signatureInfo.centralDirOffset - signatureInfo.apkSigningBlockOffset;
         generateApkVerityExtensions(footerOutput, signatureInfo.apkSigningBlockOffset,
@@ -142,25 +142,6 @@ public abstract class VerityBuilder {
             ByteBuffer tree = slice(output, 0, merkleTreeSize);
             return generateFsVerityTreeInternal(apk, salt, levelOffset, tree);
         }
-    }
-    /**
-     * Calculates the apk-verity root hash for integrity measurement.  This needs to be consistent
-     * to what kernel returns.
-     */
-    @NonNull
-    static byte[] generateApkVerityRootHash(@NonNull RandomAccessFile apk,
-            @NonNull ByteBuffer apkDigest, @NonNull SignatureInfo signatureInfo)
-            throws NoSuchAlgorithmException, DigestException, IOException {
-        assertSigningBlockAlignedAndHasFullPages(signatureInfo);
-
-        ByteBuffer footer = ByteBuffer.allocate(CHUNK_SIZE_BYTES).order(ByteOrder.LITTLE_ENDIAN);
-        generateApkVerityFooter(apk, signatureInfo, footer);
-        footer.flip();
-
-        MessageDigest md = MessageDigest.getInstance(JCA_DIGEST_ALGORITHM);
-        md.update(footer);
-        md.update(apkDigest);
-        return md.digest();
     }
 
     /**
@@ -339,11 +320,11 @@ public abstract class VerityBuilder {
                 eocdCdOffsetFieldPosition + ZIP_EOCD_CENTRAL_DIR_OFFSET_FIELD_SIZE;
         consumeByChunk(digester,
                 DataSource.create(apk.getFD(), offsetAfterEocdCdOffsetField,
-                    apk.length() - offsetAfterEocdCdOffsetField),
+                    apk.getChannel().size() - offsetAfterEocdCdOffsetField),
                 MMAP_REGION_SIZE_BYTES);
 
         // 5. Pad 0s up to the nearest 4096-byte block before hashing.
-        int lastIncompleteChunkSize = (int) (apk.length() % CHUNK_SIZE_BYTES);
+        int lastIncompleteChunkSize = (int) (apk.getChannel().size() % CHUNK_SIZE_BYTES);
         if (lastIncompleteChunkSize != 0) {
             digester.consume(ByteBuffer.allocate(CHUNK_SIZE_BYTES - lastIncompleteChunkSize));
         }

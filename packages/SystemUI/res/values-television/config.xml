@@ -24,28 +24,6 @@
     <string name="config_systemUIFactoryComponent" translatable="false">
         com.android.systemui.tv.TvSystemUIFactory
     </string>
-    <!-- SystemUI Services: The classes of the stuff to start. -->
-    <string-array name="config_systemUIServiceComponents" translatable="false">
-        <item>com.android.systemui.util.NotificationChannels</item>
-        <item>com.android.systemui.volume.VolumeUI</item>
-        <item>com.android.systemui.privacy.television.TvOngoingPrivacyChip</item>
-        <item>com.android.systemui.statusbar.tv.TvStatusBar</item>
-        <item>com.android.systemui.statusbar.tv.notifications.TvNotificationPanel</item>
-        <item>com.android.systemui.statusbar.tv.notifications.TvNotificationHandler</item>
-        <item>com.android.systemui.statusbar.tv.VpnStatusObserver</item>
-        <item>com.android.systemui.globalactions.GlobalActionsComponent</item>
-        <item>com.android.systemui.usb.StorageNotification</item>
-        <item>com.android.systemui.power.PowerUI</item>
-        <item>com.android.systemui.media.RingtonePlayer</item>
-        <item>com.android.systemui.keyboard.KeyboardUI</item>
-        <item>com.android.systemui.shortcut.ShortcutKeyDispatcher</item>
-        <item>@string/config_systemUIVendorServiceComponent</item>
-        <item>com.android.systemui.SliceBroadcastRelayHandler</item>
-        <item>com.android.systemui.statusbar.notification.InstantAppNotifier</item>
-        <item>com.android.systemui.toast.ToastUI</item>
-        <item>com.android.systemui.wmshell.WMShell</item>
-        <item>com.android.systemui.media.systemsounds.HomeSoundEffectController</item>
-    </string-array>
 
     <!-- Svelte specific logic, see RecentsConfiguration.SVELTE_* constants. -->
     <integer name="recents_svelte_level">3</integer>
@@ -64,4 +42,8 @@
 
     <!-- Whether to use window background blur for the volume dialog. -->
     <bool name="config_volumeDialogUseBackgroundBlur">true</bool>
+
+    <!-- Whether to tint the icon of the sensor hardware privacy toggle unblock dialog.
+        Set to false if using a custom icon. -->
+    <bool name="config_unblockHwSensorIconEnableTint">true</bool>
 </resources>

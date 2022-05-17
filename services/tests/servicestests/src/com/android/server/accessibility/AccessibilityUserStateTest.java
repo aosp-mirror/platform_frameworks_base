@@ -21,6 +21,7 @@ import static android.accessibilityservice.AccessibilityService.SHOW_MODE_HARD_K
 import static android.accessibilityservice.AccessibilityService.SHOW_MODE_HARD_KEYBOARD_OVERRIDDEN;
 import static android.accessibilityservice.AccessibilityService.SHOW_MODE_HIDDEN;
 import static android.accessibilityservice.AccessibilityService.SHOW_MODE_IGNORE_HARD_KEYBOARD;
+import static android.content.pm.PackageManager.FEATURE_WINDOW_MAGNIFICATION;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
 import static android.view.accessibility.AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED;
@@ -42,12 +43,14 @@ import static org.mockito.Mockito.when;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.provider.Settings;
 import android.test.mock.MockContentResolver;
 import android.testing.DexmakerShareClassLoaderRule;
 import android.util.ArraySet;
+import android.view.Display;
 
 import androidx.test.InstrumentationRegistry;
 
@@ -79,6 +82,8 @@ public class AccessibilityUserStateTest {
 
     private static final int USER_ID = 42;
 
+    private static final int TEST_DISPLAY = Display.DEFAULT_DISPLAY;
+
     // Mock package-private class AccessibilityServiceConnection
     @Rule public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
             new DexmakerShareClassLoaderRule();
@@ -88,6 +93,8 @@ public class AccessibilityUserStateTest {
     @Mock private AccessibilityServiceConnection mMockConnection;
 
     @Mock private AccessibilityUserState.ServiceInfoChangeListener mMockListener;
+
+    @Mock private PackageManager mMockPackageManager;
 
     @Mock private Context mMockContext;
 
@@ -110,6 +117,8 @@ public class AccessibilityUserStateTest {
         when(mMockServiceInfo.getComponentName()).thenReturn(COMPONENT_NAME);
         when(mMockConnection.getServiceInfo()).thenReturn(mMockServiceInfo);
         when(mMockContext.getResources()).thenReturn(resources);
+        when(mMockContext.getPackageManager()).thenReturn(mMockPackageManager);
+        when(mMockPackageManager.hasSystemFeature(FEATURE_WINDOW_MAGNIFICATION)).thenReturn(true);
 
         mFocusStrokeWidthDefaultValue =
                 resources.getDimensionPixelSize(R.dimen.accessibility_focus_highlight_stroke_width);
@@ -143,7 +152,8 @@ public class AccessibilityUserStateTest {
         mUserState.setAutoclickEnabledLocked(true);
         mUserState.setUserNonInteractiveUiTimeoutLocked(30);
         mUserState.setUserInteractiveUiTimeoutLocked(30);
-        mUserState.setMagnificationModeLocked(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        mUserState.setMagnificationModeLocked(TEST_DISPLAY,
+                ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
         mUserState.setFocusAppearanceLocked(20, Color.BLUE);
 
         mUserState.onSwitchToAnotherUserLocked();
@@ -165,9 +175,10 @@ public class AccessibilityUserStateTest {
         assertEquals(0, mUserState.getUserNonInteractiveUiTimeoutLocked());
         assertEquals(0, mUserState.getUserInteractiveUiTimeoutLocked());
         assertEquals(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN,
-                mUserState.getMagnificationModeLocked());
+                mUserState.getMagnificationModeLocked(TEST_DISPLAY));
         assertEquals(mFocusStrokeWidthDefaultValue, mUserState.getFocusStrokeWidthLocked());
         assertEquals(mFocusColorDefaultValue, mUserState.getFocusColorLocked());
+        assertTrue(mUserState.isMagnificationFollowTypingEnabled());
     }
 
     @Test
@@ -360,12 +371,22 @@ public class AccessibilityUserStateTest {
     @Test
     public void setWindowMagnificationMode_returnExpectedMagnificationMode() {
         assertEquals(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN,
-                mUserState.getMagnificationModeLocked());
+                mUserState.getMagnificationModeLocked(TEST_DISPLAY));
 
-        mUserState.setMagnificationModeLocked(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        mUserState.setMagnificationModeLocked(TEST_DISPLAY,
+                ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
 
         assertEquals(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW,
-                mUserState.getMagnificationModeLocked());
+                mUserState.getMagnificationModeLocked(TEST_DISPLAY));
+    }
+
+    @Test
+    public void setMagnificationFollowTypingEnabled_defaultTrueAndThenDisable_returnFalse() {
+        assertTrue(mUserState.isMagnificationFollowTypingEnabled());
+
+        mUserState.setMagnificationFollowTypingEnabled(false);
+
+        assertFalse(mUserState.isMagnificationFollowTypingEnabled());
     }
 
     @Test

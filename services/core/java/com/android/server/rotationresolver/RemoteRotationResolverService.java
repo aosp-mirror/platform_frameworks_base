@@ -53,17 +53,15 @@ class RemoteRotationResolverService extends ServiceConnector.Impl<IRotationResol
     private static final String TAG = RemoteRotationResolverService.class.getSimpleName();
 
     private final long mIdleUnbindTimeoutMs;
-    private final Object mLock;
 
     RemoteRotationResolverService(Context context, ComponentName serviceName,
-            int userId, long idleUnbindTimeoutMs, Object lock) {
+            int userId, long idleUnbindTimeoutMs) {
         super(context,
                 new Intent(RotationResolverService.SERVICE_INTERFACE).setComponent(serviceName),
                 BIND_FOREGROUND_SERVICE | BIND_INCLUDE_CAPABILITIES, userId,
                 IRotationResolverService.Stub::asInterface);
 
         mIdleUnbindTimeoutMs = idleUnbindTimeoutMs;
-        mLock = lock;
 
         // Bind right away.
         connect();
@@ -75,8 +73,7 @@ class RemoteRotationResolverService extends ServiceConnector.Impl<IRotationResol
         return -1;
     }
 
-    @GuardedBy("mLock")
-    public void resolveRotationLocked(RotationRequest request) {
+    public void resolveRotation(RotationRequest request) {
         final RotationResolutionRequest remoteRequest = request.mRemoteRequest;
         post(service -> service.resolveRotation(request.mIRotationResolverCallback, remoteRequest));
 
@@ -97,12 +94,14 @@ class RemoteRotationResolverService extends ServiceConnector.Impl<IRotationResol
         @NonNull
         private final IRotationResolverCallback mIRotationResolverCallback;
         @NonNull
-        private ICancellationSignal mCancellation;
-        @NonNull
         private final CancellationSignal mCancellationSignalInternal;
         @NonNull
         final RotationResolverInternal.RotationResolverCallbackInternal
                 mCallbackInternal;
+
+        @NonNull
+        @GuardedBy("mLock")
+        private ICancellationSignal mCancellation;
 
         @GuardedBy("mLock")
         boolean mIsFulfilled;
@@ -111,17 +110,19 @@ class RemoteRotationResolverService extends ServiceConnector.Impl<IRotationResol
         final RotationResolutionRequest mRemoteRequest;
 
         boolean mIsDispatched;
-        private final Object mLock = new Object();
+        private final Object mLock;
         private final long mRequestStartTimeMillis;
 
         RotationRequest(
                 @NonNull RotationResolverInternal.RotationResolverCallbackInternal callbackInternal,
-                RotationResolutionRequest request, @NonNull CancellationSignal cancellationSignal) {
+                RotationResolutionRequest request, @NonNull CancellationSignal cancellationSignal,
+                Object lock) {
             mCallbackInternal = callbackInternal;
             mRemoteRequest = request;
             mIRotationResolverCallback = new RotationResolverCallback(this);
             mCancellationSignalInternal = cancellationSignal;
             mRequestStartTimeMillis = SystemClock.elapsedRealtime();
+            mLock = lock;
         }
 
 
@@ -153,7 +154,7 @@ class RemoteRotationResolverService extends ServiceConnector.Impl<IRotationResol
         }
 
         private static class RotationResolverCallback extends IRotationResolverCallback.Stub {
-            private WeakReference<RotationRequest> mRequestWeakReference;
+            private final WeakReference<RotationRequest> mRequestWeakReference;
 
             RotationResolverCallback(RotationRequest request) {
                 this.mRequestWeakReference = new WeakReference<>(request);
@@ -215,7 +216,6 @@ class RemoteRotationResolverService extends ServiceConnector.Impl<IRotationResol
                         }
                     }
                 }
-
             }
         }
     }

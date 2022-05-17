@@ -28,6 +28,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
@@ -150,7 +151,7 @@ public class CrossProfileAppsServiceImplRoboTest {
             PackageInfo packageInfo, @UserIdInt int userId, int uid) {
         when(mPackageManagerInternal.getPackageInfo(
                         eq(CROSS_PROFILE_APP_PACKAGE_NAME),
-                        /* flags= */ anyInt(),
+                        /* flags= */ anyLong(),
                         /* filterCallingUid= */ anyInt(),
                         eq(userId)))
                 .thenReturn(packageInfo);
@@ -469,7 +470,7 @@ public class CrossProfileAppsServiceImplRoboTest {
     private void mockUninstallCrossProfileAppFromWorkProfile() {
         when(mPackageManagerInternal.getPackageInfo(
                         eq(CROSS_PROFILE_APP_PACKAGE_NAME),
-                        /* flags= */ anyInt(),
+                        /* flags= */ anyLong(),
                         /* filterCallingUid= */ anyInt(),
                         eq(WORK_PROFILE_USER_ID)))
                 .thenReturn(null);

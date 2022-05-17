@@ -20,6 +20,8 @@
 
     <application>
         <uses-library android:name="android.test.runner" />
+        <service android:name="com.android.internal.os.BatteryUsageStatsPerfTest$BatteryUsageStatsService"
+                 android:process=":BatteryUsageStatsService" />
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"

@@ -654,7 +654,7 @@ public final class Message implements Parcelable {
         arg1 = source.readInt();
         arg2 = source.readInt();
         if (source.readInt() != 0) {
-            obj = source.readParcelable(getClass().getClassLoader());
+            obj = source.readParcelable(getClass().getClassLoader(), java.lang.Object.class);
         }
         when = source.readLong();
         data = source.readBundle();

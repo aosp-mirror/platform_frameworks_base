@@ -17,6 +17,7 @@
 package android.view.inputmethod;
 
 import android.annotation.IntRange;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -30,8 +31,6 @@ import com.android.internal.util.Preconditions;
 public class InputConnectionWrapper implements InputConnection {
     private InputConnection mTarget;
     final boolean mMutable;
-    @InputConnectionInspector.MissingMethodFlags
-    private int mMissingMethodFlags;
 
     /**
      * Initializes a wrapper.
@@ -46,7 +45,6 @@ public class InputConnectionWrapper implements InputConnection {
     public InputConnectionWrapper(InputConnection target, boolean mutable) {
         mMutable = mutable;
         mTarget = target;
-        mMissingMethodFlags = InputConnectionInspector.getMissingMethodFlags(target);
     }
 
     /**
@@ -63,15 +61,6 @@ public class InputConnectionWrapper implements InputConnection {
             throw new SecurityException("not mutable");
         }
         mTarget = target;
-        mMissingMethodFlags = InputConnectionInspector.getMissingMethodFlags(target);
-    }
-
-    /**
-     * @hide
-     */
-    @InputConnectionInspector.MissingMethodFlags
-    public int getMissingMethodFlags() {
-        return mMissingMethodFlags;
     }
 
     /**
@@ -170,8 +159,27 @@ public class InputConnectionWrapper implements InputConnection {
      * @throws NullPointerException if the target is {@code null}.
      */
     @Override
+    public boolean setComposingText(@NonNull CharSequence text,
+            int newCursorPosition, @Nullable TextAttribute textAttribute) {
+        return mTarget.setComposingText(text, newCursorPosition, textAttribute);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @throws NullPointerException if the target is {@code null}.
+     */
+    @Override
     public boolean setComposingRegion(int start, int end) {
         return mTarget.setComposingRegion(start, end);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @throws NullPointerException if the target is {@code null}.
+     */
+    @Override
+    public boolean setComposingRegion(int start, int end, @Nullable TextAttribute textAttribute) {
+        return mTarget.setComposingRegion(start, end, textAttribute);
     }
 
     /**
@@ -190,6 +198,16 @@ public class InputConnectionWrapper implements InputConnection {
     @Override
     public boolean commitText(CharSequence text, int newCursorPosition) {
         return mTarget.commitText(text, newCursorPosition);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @throws NullPointerException if the target is {@code null}.
+     */
+    @Override
+    public boolean commitText(@NonNull CharSequence text, int newCursorPosition,
+            @Nullable TextAttribute textAttribute) {
+        return mTarget.commitText(text, newCursorPosition, textAttribute);
     }
 
     /**

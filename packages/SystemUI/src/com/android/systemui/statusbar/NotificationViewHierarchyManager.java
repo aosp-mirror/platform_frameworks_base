@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar;
 
+import static com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt.BUCKET_SILENT;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Handler;
@@ -25,27 +27,33 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.dagger.StatusBarModule;
+import com.android.systemui.statusbar.dagger.CentralSurfacesModule;
 import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.DynamicChildBindController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.inflation.LowPriorityInflationHelper;
+import com.android.systemui.statusbar.notification.collection.legacy.LowPriorityInflationHelper;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.collection.render.NotifStackController;
+import com.android.systemui.statusbar.notification.collection.render.NotifStats;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.statusbar.notification.stack.ForegroundServiceSectionController;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.Assert;
 import com.android.wm.shell.bubbles.Bubbles;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
@@ -72,6 +80,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
 
     // Dependencies:
     private final DynamicChildBindController mDynamicChildBindController;
+    private final FeatureFlags mFeatureFlags;
     protected final NotificationLockscreenUserManager mLockscreenUserManager;
     protected final NotificationGroupManagerLegacy mGroupManager;
     protected final VisualStabilityManager mVisualStabilityManager;
@@ -88,11 +97,14 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
     private final Optional<Bubbles> mBubblesOptional;
     private final DynamicPrivacyController mDynamicPrivacyController;
     private final KeyguardBypassController mBypassController;
-    private final ForegroundServiceSectionController mFgsSectionController;
+    private final NotifPipelineFlags mNotifPipelineFlags;
     private AssistantFeedbackController mAssistantFeedbackController;
+    private final KeyguardStateController mKeyguardStateController;
+    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final Context mContext;
 
     private NotificationPresenter mPresenter;
+    private NotifStackController mStackController;
     private NotificationListContainer mListContainer;
 
     // Used to help track down re-entrant calls to our update methods, which will cause bugs.
@@ -102,11 +114,12 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
     private boolean mIsHandleDynamicPrivacyChangeScheduled;
 
     /**
-     * Injected constructor. See {@link StatusBarModule}.
+     * Injected constructor. See {@link CentralSurfacesModule}.
      */
     public NotificationViewHierarchyManager(
             Context context,
             @Main Handler mainHandler,
+            FeatureFlags featureFlags,
             NotificationLockscreenUserManager notificationLockscreenUserManager,
             NotificationGroupManagerLegacy groupManager,
             VisualStabilityManager visualStabilityManager,
@@ -115,19 +128,22 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             KeyguardBypassController bypassController,
             Optional<Bubbles> bubblesOptional,
             DynamicPrivacyController privacyController,
-            ForegroundServiceSectionController fgsSectionController,
             DynamicChildBindController dynamicChildBindController,
             LowPriorityInflationHelper lowPriorityInflationHelper,
-            AssistantFeedbackController assistantFeedbackController) {
+            AssistantFeedbackController assistantFeedbackController,
+            NotifPipelineFlags notifPipelineFlags,
+            KeyguardUpdateMonitor keyguardUpdateMonitor,
+            KeyguardStateController keyguardStateController) {
         mContext = context;
         mHandler = mainHandler;
+        mFeatureFlags = featureFlags;
         mLockscreenUserManager = notificationLockscreenUserManager;
         mBypassController = bypassController;
         mGroupManager = groupManager;
         mVisualStabilityManager = visualStabilityManager;
         mStatusBarStateController = (SysuiStatusBarStateController) statusBarStateController;
         mEntryManager = notificationEntryManager;
-        mFgsSectionController = fgsSectionController;
+        mNotifPipelineFlags = notifPipelineFlags;
         Resources res = context.getResources();
         mAlwaysExpandNonGroupedNotification =
                 res.getBoolean(R.bool.config_alwaysExpandNonGroupedNotifications);
@@ -136,13 +152,19 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
         mDynamicChildBindController = dynamicChildBindController;
         mLowPriorityInflationHelper = lowPriorityInflationHelper;
         mAssistantFeedbackController = assistantFeedbackController;
+        mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+        mKeyguardStateController = keyguardStateController;
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
+            NotifStackController stackController,
             NotificationListContainer listContainer) {
         mPresenter = presenter;
+        mStackController = stackController;
         mListContainer = listContainer;
-        mDynamicPrivacyController.addListener(this);
+        if (!mNotifPipelineFlags.isNewPipelineEnabled()) {
+            mDynamicPrivacyController.addListener(this);
+        }
     }
 
     /**
@@ -151,8 +173,18 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
     //TODO: Rewrite this to focus on Entries, or some other data object instead of views
     public void updateNotificationViews() {
         Assert.isMainThread();
+        if (!mNotifPipelineFlags.checkLegacyPipelineEnabled()) {
+            return;
+        }
+        Trace.beginSection("NotificationViewHierarchyManager.updateNotificationViews");
+
         beginUpdate();
 
+        boolean dynamicallyUnlocked = mDynamicPrivacyController.isDynamicallyUnlocked()
+                && !(mStatusBarStateController.getState() == StatusBarState.KEYGUARD
+                && mKeyguardUpdateMonitor.getUserUnlockedWithBiometricAndIsBypassing(
+                KeyguardUpdateMonitor.getCurrentUser()))
+                && !mKeyguardStateController.isKeyguardGoingAway();
         List<NotificationEntry> activeNotifications = mEntryManager.getVisibleNotifications();
         ArrayList<ExpandableNotificationRow> toShow = new ArrayList<>(activeNotifications.size());
         final int N = activeNotifications.size();
@@ -171,17 +203,14 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             boolean devicePublic = mLockscreenUserManager.isLockscreenPublicMode(currentUserId);
             boolean userPublic = devicePublic
                     || mLockscreenUserManager.isLockscreenPublicMode(userId);
-            if (userPublic && mDynamicPrivacyController.isDynamicallyUnlocked()
+            if (userPublic && dynamicallyUnlocked
                     && (userId == currentUserId || userId == UserHandle.USER_ALL
                     || !mLockscreenUserManager.needsSeparateWorkChallenge(userId))) {
                 userPublic = false;
             }
-            boolean needsRedaction = mLockscreenUserManager.needsRedaction(ent);
+            boolean needsRedaction = mLockscreenUserManager.notifNeedsRedactionInPublic(ent);
             boolean sensitive = userPublic && needsRedaction;
-            boolean deviceSensitive = devicePublic
-                    && !mLockscreenUserManager.userAllowsPrivateNotificationsInPublic(
-                    currentUserId);
-            ent.setSensitive(sensitive, deviceSensitive);
+            ent.getRow().setSensitive(sensitive);
             ent.getRow().setNeedsRedaction(needsRedaction);
             mLowPriorityInflationHelper.recheckLowPriorityViewAndInflate(ent, ent.getRow());
             boolean isChildInGroup = mGroupManager.isChildInGroup(ent);
@@ -314,10 +343,78 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
         mTmpChildOrderMap.clear();
 
         updateRowStatesInternal();
+        updateNotifStats();
 
         mListContainer.onNotificationViewUpdateFinished();
 
         endUpdate();
+        Trace.endSection();
+    }
+
+    /**
+     * In the spirit of unidirectional data flow, calculate this information when the notification
+     * views are updated, and set it once, speeding up lookups later.
+     * This is analogous to logic in the
+     * {@link com.android.systemui.statusbar.notification.collection.coordinator.StackCoordinator}
+     */
+    private void updateNotifStats() {
+        Trace.beginSection("NotificationViewHierarchyManager.updateNotifStats");
+        boolean hasNonClearableAlertingNotifs = false;
+        boolean hasClearableAlertingNotifs = false;
+        boolean hasNonClearableSilentNotifs = false;
+        boolean hasClearableSilentNotifs = false;
+        HashSet<Integer> clearableAlertingSensitiveNotifUsers = new HashSet<>();
+        HashSet<Integer> clearableSilentSensitiveNotifUsers = new HashSet<>();
+        final int childCount = mListContainer.getContainerChildCount();
+        int visibleTopLevelEntries = 0;
+        for (int i = 0; i < childCount; i++) {
+            View child = mListContainer.getContainerChildAt(i);
+            if (child == null || child.getVisibility() == View.GONE) {
+                continue;
+            }
+            if (!(child instanceof ExpandableNotificationRow)) {
+                continue;
+            }
+            final ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+            NotificationEntry entry = row.getEntry();
+            boolean isSilent = entry.getBucket() == BUCKET_SILENT;
+            // NOTE: NotificationEntry.isClearable() will internally check group children to ensure
+            //  the group itself definitively clearable.
+            boolean isClearable = entry.isClearable();
+            visibleTopLevelEntries++;
+            if (isSilent) {
+                if (isClearable) {
+                    hasClearableSilentNotifs = true;
+                } else {  // !isClearable
+                    hasNonClearableSilentNotifs = true;
+                }
+            } else {  // !isSilent
+                if (isClearable) {
+                    hasClearableAlertingNotifs = true;
+                } else {  // !isClearable
+                    hasNonClearableAlertingNotifs = true;
+                }
+            }
+            if (isClearable && entry.hasSensitiveContents()) {
+                int userId = entry.getSbn().getUserId();
+                if (isSilent) {
+                    clearableSilentSensitiveNotifUsers.add(userId);
+                } else {
+                    clearableAlertingSensitiveNotifUsers.add(userId);
+                }
+            }
+        }
+        mStackController.setNotifStats(new NotifStats(
+                visibleTopLevelEntries /* numActiveNotifs */,
+                hasNonClearableAlertingNotifs /* hasNonClearableAlertingNotifs */,
+                hasClearableAlertingNotifs /* hasClearableAlertingNotifs */,
+                hasNonClearableSilentNotifs /* hasNonClearableSilentNotifs */,
+                hasClearableSilentNotifs /* hasClearableSilentNotifs */,
+                clearableAlertingSensitiveNotifUsers /* clearableAlertingSensitiveNotifUsers */,
+                clearableSilentSensitiveNotifUsers /* clearableSilentSensitiveNotifUsers */
+
+        ));
+        Trace.endSection();
     }
 
     /**
@@ -328,8 +425,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
                 && mBubblesOptional.get().isBubbleNotificationSuppressedFromShade(
                         ent.getKey(), ent.getSbn().getGroupKey());
         if (ent.isRowDismissed() || ent.isRowRemoved()
-                || isBubbleNotificationSuppressedFromShade
-                || mFgsSectionController.hasEntry(ent)) {
+                || isBubbleNotificationSuppressedFromShade) {
             // we want to suppress removed notifications because they could
             // temporarily become children if they were isolated before.
             return true;
@@ -425,13 +521,17 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
      */
     public void updateRowStates() {
         Assert.isMainThread();
+        if (!mNotifPipelineFlags.checkLegacyPipelineEnabled()) {
+            return;
+        }
+
         beginUpdate();
         updateRowStatesInternal();
         endUpdate();
     }
 
     private void updateRowStatesInternal() {
-        Trace.beginSection("NotificationViewHierarchyManager#updateRowStates");
+        Trace.beginSection("NotificationViewHierarchyManager.updateRowStates");
         final int N = mListContainer.getContainerChildCount();
 
         int visibleNotifications = 0;
@@ -497,8 +597,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
                     stack.push(notificationChildren.get(i));
                 }
             }
-            row.showFeedbackIcon(mAssistantFeedbackController.showFeedbackIndicator(entry),
-                    mAssistantFeedbackController.getFeedbackResources(entry));
+            row.setFeedbackIcon(mAssistantFeedbackController.getFeedbackIcon(entry));
             row.setLastAudiblyAlertedMs(entry.getLastAudiblyAlertedMs());
         }
 
@@ -510,6 +609,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
 
     @Override
     public void onDynamicPrivacyChanged() {
+        mNotifPipelineFlags.assertLegacyPipelineEnabled();
         if (mPerformingUpdate) {
             Log.w(TAG, "onDynamicPrivacyChanged made a re-entrant call");
         }

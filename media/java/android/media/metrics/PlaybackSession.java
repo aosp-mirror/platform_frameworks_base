@@ -100,5 +100,6 @@ public final class PlaybackSession implements AutoCloseable {
     @Override
     public void close() {
         mClosed = true;
+        mManager.releaseSessionId(mLogSessionId.getStringId());
     }
 }

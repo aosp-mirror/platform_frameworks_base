@@ -574,6 +574,12 @@ message GlobalSettingsProto {
 
     optional SettingProto lte_service_forced = 71 [ (android.privacy).dest = DEST_AUTOMATIC ];
     repeated SettingProto max_error_bytes = 151;
+
+    message ManagedDeviceProvisioning {
+        optional SettingProto managed_provisioning_defer_provisioning_to_role_holder = 1;
+    }
+    optional ManagedDeviceProvisioning managed_device_provisioning = 156;
+
     optional SettingProto mdc_initial_max_retry = 72 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     message Mhl {
@@ -601,7 +607,7 @@ message GlobalSettingsProto {
     // ringer mode.
     optional SettingProto mode_ringer = 75 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
-    optional SettingProto apply_ramping_ringer = 147 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    reserved 147; // Used to be apply_ramping_ringer
 
     message MultiSim {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
@@ -672,18 +678,31 @@ message GlobalSettingsProto {
     optional SettingProto new_contact_aggregator = 79 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto night_display_forced_auto_mode_available = 80 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
-    message NitzUpdate {
+    message Nitz {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
 
-        // If the NITZ_UPDATE_DIFF time is exceeded then an automatic adjustment to
-        // SystemClock will be allowed even if NITZ_UPDATE_SPACING has not been
-        // exceeded.
-        optional SettingProto diff = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        // The length of time in milli-seconds that automatic small adjustments to
-        // SystemClock are ignored if NITZ_UPDATE_DIFF is not exceeded.
-        optional SettingProto spacing = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        // If UTC time between two NITZ signals is greater than this value then the second signal
+        // cannot be ignored.
+        //
+        // This value is in milliseconds. It is used for telephony-based time and time zone
+        // detection.
+        optional SettingProto update_diff = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+        // If the elapsed realtime between two NITZ signals is greater than this value then the
+        // second signal cannot be ignored.
+        //
+        // This value is in milliseconds. It is used for telephony-based time and time zone
+        // detection.
+        optional SettingProto update_spacing = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+        // If the device connects to a telephony network and was disconnected from a telephony
+        // network for less than this time, a previously received NITZ signal can be restored.
+        //
+        // This value is in milliseconds. It is used for telephony-based time and time zone
+        // detection.
+        optional SettingProto network_disconnect_retention = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
-    optional NitzUpdate nitz_update = 81;
+    optional Nitz nitz = 81;
 
     message Notification {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
@@ -702,8 +721,6 @@ message GlobalSettingsProto {
     optional Notification notification = 82;
 
     optional SettingProto nr_nsa_tracking_screen_off_mode = 153 [ (android.privacy).dest = DEST_AUTOMATIC ];
-
-    optional SettingProto nsd_on = 83 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     message Ntp {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
@@ -770,6 +787,8 @@ message GlobalSettingsProto {
     optional SettingProto policy_control = 92;
     optional SettingProto power_manager_constants = 93;
     reserved 94; // Used to be priv_app_oob_enabled
+
+    optional SettingProto power_button_long_press_duration_ms = 154 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     message PrepaidSetup {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
@@ -970,6 +989,7 @@ message GlobalSettingsProto {
     optional SettingProto usb_mass_storage_enabled = 127 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto use_google_mail = 128 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto use_open_wifi_package = 129 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto uwb_enabled = 155 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto vt_ims_enabled = 130 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto wait_for_debugger = 131 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
@@ -1063,5 +1083,5 @@ message GlobalSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 154;
+    // Next tag = 157;
 }

@@ -32,12 +32,10 @@ public interface NotificationRowBinder {
     /**
      * Called when a notification has been added or updated. The binder must asynchronously inflate
      * and bind the views associated with the notification.
-     *
-     * TODO: The caller is notified when the inflation completes, but this is currently a very
-     * roundabout business. Add an explicit completion/failure callback to this method.
      */
     void inflateViews(
             NotificationEntry entry,
+            NotifInflater.Params params,
             NotificationRowContentBinder.InflationCallback callback)
             throws InflationException;
 

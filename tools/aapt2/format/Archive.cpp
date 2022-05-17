@@ -43,7 +43,7 @@ class DirectoryWriter : public IArchiveWriter {
   bool Open(const StringPiece& out_dir) {
     dir_ = out_dir.to_string();
     file::FileType type = file::GetFileType(dir_);
-    if (type == file::FileType::kNonexistant) {
+    if (type == file::FileType::kNonExistant) {
       error_ = "directory does not exist";
       return false;
     } else if (type != file::FileType::kDirectory) {

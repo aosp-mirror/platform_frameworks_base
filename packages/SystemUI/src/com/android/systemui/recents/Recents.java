@@ -21,16 +21,15 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.provider.Settings;
 
-import com.android.systemui.SystemUI;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.statusbar.CommandQueue;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 /**
  * A proxy to a Recents implementation.
  */
-public class Recents extends SystemUI implements CommandQueue.Callbacks {
+public class Recents extends CoreStartable implements CommandQueue.Callbacks {
 
     private final RecentsImplementation mImpl;
     private final CommandQueue mCommandQueue;
@@ -129,7 +128,7 @@ public class Recents extends SystemUI implements CommandQueue.Callbacks {
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         mImpl.dump(pw);
     }
 }

@@ -1,3 +1,9 @@
+# Generic
+etalvala@google.com
+jreck@google.com
+michaelwr@google.com
+sumir@google.com
+
 # Camera
 per-file *Camera*=cychen@google.com,epeev@google.com,etalvala@google.com,shuzhenwang@google.com,yinchiayeh@google.com,zhijunhe@google.com,jchowdhary@google.com
 
@@ -6,3 +12,7 @@ per-file *SensorPrivacy* = file:platform/frameworks/native:/libs/sensorprivacy/O
 
 # Sensors framework
 per-file *Sensor*,*Trigger* = file:platform/frameworks/native:/services/sensorservice/OWNERS
+
+# Buffers
+per-file HardwareBuffer* = file:/graphics/java/android/graphics/OWNERS
+per-file DataSpace* = file:/graphics/java/android/graphics/OWNERS

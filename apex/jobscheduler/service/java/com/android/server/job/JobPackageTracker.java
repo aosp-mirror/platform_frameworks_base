@@ -481,7 +481,7 @@ public final class JobPackageTracker {
         final long now = sUptimeMillisClock.millis();
         job.madeActive = now;
         rebatchIfNeeded(now);
-        if (job.lastEvaluatedPriority >= JobInfo.PRIORITY_TOP_APP) {
+        if (job.lastEvaluatedBias >= JobInfo.BIAS_TOP_APP) {
             mCurDataSet.incActiveTop(job.getSourceUid(), job.getSourcePackageName(), now);
         } else {
             mCurDataSet.incActive(job.getSourceUid(), job.getSourcePackageName(), now);
@@ -492,14 +492,14 @@ public final class JobPackageTracker {
 
     public void noteInactive(JobStatus job, int stopReason, String debugReason) {
         final long now = sUptimeMillisClock.millis();
-        if (job.lastEvaluatedPriority >= JobInfo.PRIORITY_TOP_APP) {
+        if (job.lastEvaluatedBias >= JobInfo.BIAS_TOP_APP) {
             mCurDataSet.decActiveTop(job.getSourceUid(), job.getSourcePackageName(), now,
                     stopReason);
         } else {
             mCurDataSet.decActive(job.getSourceUid(), job.getSourcePackageName(), now, stopReason);
         }
         rebatchIfNeeded(now);
-        addEvent(job.getJob().isPeriodic() ? EVENT_STOP_JOB :  EVENT_STOP_PERIODIC_JOB,
+        addEvent(job.getJob().isPeriodic() ? EVENT_STOP_PERIODIC_JOB : EVENT_STOP_JOB,
                 job.getSourceUid(), job.getBatteryName(), job.getJobId(), stopReason, debugReason);
     }
 

@@ -28,6 +28,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHearingAid;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
+import android.os.Parcel;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -48,7 +49,7 @@ public class HearingAidDeviceManagerTest {
     private final static String DEVICE_ADDRESS_1 = "AA:BB:CC:DD:EE:11";
     private final static String DEVICE_ADDRESS_2 = "AA:BB:CC:DD:EE:22";
     private final BluetoothClass DEVICE_CLASS =
-            new BluetoothClass(BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE);
+            createBtClass(BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE);
     @Mock
     private LocalBluetoothProfileManager mLocalProfileManager;
     @Mock
@@ -66,6 +67,16 @@ public class HearingAidDeviceManagerTest {
     private CachedBluetoothDeviceManager mCachedDeviceManager;
     private HearingAidDeviceManager mHearingAidDeviceManager;
     private Context mContext;
+
+    private BluetoothClass createBtClass(int deviceClass) {
+        Parcel p = Parcel.obtain();
+        p.writeInt(deviceClass);
+        p.setDataPosition(0); // reset position of parcel before passing to constructor
+
+        BluetoothClass bluetoothClass = BluetoothClass.CREATOR.createFromParcel(p);
+        p.recycle();
+        return bluetoothClass;
+    }
 
     @Before
     public void setUp() {

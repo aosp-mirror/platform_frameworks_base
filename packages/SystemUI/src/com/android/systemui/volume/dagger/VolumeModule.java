@@ -16,11 +16,24 @@
 
 package com.android.systemui.volume.dagger;
 
+import android.content.Context;
+import android.media.AudioManager;
+
+import com.android.internal.jank.InteractionJankMonitor;
+import com.android.systemui.media.dialog.MediaOutputDialogFactory;
+import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.VolumeDialog;
+import com.android.systemui.plugins.VolumeDialogController;
+import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
+import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.volume.VolumeDialogComponent;
+import com.android.systemui.volume.VolumeDialogImpl;
 
 import dagger.Binds;
 import dagger.Module;
+import dagger.Provides;
 
 
 /** Dagger Module for code in the volume package. */
@@ -29,4 +42,30 @@ public interface VolumeModule {
     /** */
     @Binds
     VolumeComponent provideVolumeComponent(VolumeDialogComponent volumeDialogComponent);
+
+    /** */
+    @Provides
+    static VolumeDialog provideVolumeDialog(
+            Context context,
+            VolumeDialogController volumeDialogController,
+            AccessibilityManagerWrapper accessibilityManagerWrapper,
+            DeviceProvisionedController deviceProvisionedController,
+            ConfigurationController configurationController,
+            MediaOutputDialogFactory mediaOutputDialogFactory,
+            ActivityStarter activityStarter,
+            InteractionJankMonitor interactionJankMonitor) {
+        VolumeDialogImpl impl = new VolumeDialogImpl(
+                context,
+                volumeDialogController,
+                accessibilityManagerWrapper,
+                deviceProvisionedController,
+                configurationController,
+                mediaOutputDialogFactory,
+                activityStarter,
+                interactionJankMonitor);
+        impl.setStreamImportant(AudioManager.STREAM_SYSTEM, false);
+        impl.setAutomute(true);
+        impl.setSilentMode(false);
+        return impl;
+    }
 }

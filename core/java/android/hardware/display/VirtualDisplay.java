@@ -15,6 +15,8 @@
  */
 package android.hardware.display;
 
+import android.annotation.Nullable;
+import android.content.Context;
 import android.view.Display;
 import android.view.Surface;
 
@@ -36,13 +38,19 @@ public final class VirtualDisplay {
     private final Display mDisplay;
     private IVirtualDisplayCallback mToken;
     private Surface mSurface;
+    /**
+     * Store the WindowContext in a field. If it is a local variable, and it is garbage collected
+     * during a MediaProjection session, the WindowContainer listener no longer exists.
+     */
+    @Nullable private final Context mWindowContext;
 
     VirtualDisplay(DisplayManagerGlobal global, Display display,
-            IVirtualDisplayCallback token, Surface surface) {
+            IVirtualDisplayCallback token, Surface surface, Context windowContext) {
         mGlobal = global;
         mDisplay = display;
         mToken = token;
         mSurface = surface;
+        mWindowContext = windowContext;
     }
 
     /**

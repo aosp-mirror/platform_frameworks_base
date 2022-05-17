@@ -100,7 +100,8 @@ public class NotificationHistoryDatabase {
 
         IntentFilter deletionFilter = new IntentFilter(ACTION_HISTORY_DELETION);
         deletionFilter.addDataScheme(SCHEME_DELETION);
-        mContext.registerReceiver(mFileCleanupReceiver, deletionFilter);
+        mContext.registerReceiver(mFileCleanupReceiver, deletionFilter,
+                Context.RECEIVER_EXPORTED_UNAUDITED);
     }
 
     public void init() {
@@ -351,6 +352,12 @@ public class NotificationHistoryDatabase {
             if (in != null) {
                 in.close();
             }
+        }
+    }
+
+    public void unregisterFileCleanupReceiver() {
+        if(mContext != null) {
+            mContext.unregisterReceiver(mFileCleanupReceiver);
         }
     }
 

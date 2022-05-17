@@ -22,12 +22,17 @@ import android.net.Ikev2VpnProfile;
 import android.net.PlatformVpnProfile;
 import android.net.ProxyInfo;
 import android.net.Uri;
+import android.net.ipsec.ike.IkeTunnelConnectionParams;
+import android.net.vcn.persistablebundleutils.TunnelConnectionParamsUtils;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.PersistableBundle;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.HexDump;
 import com.android.net.module.util.ProxyUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -69,7 +74,8 @@ public final class VpnProfile implements Cloneable, Parcelable {
     public static final int TYPE_IKEV2_IPSEC_USER_PASS = 6;
     public static final int TYPE_IKEV2_IPSEC_PSK = 7;
     public static final int TYPE_IKEV2_IPSEC_RSA = 8;
-    public static final int TYPE_MAX = 8;
+    public static final int TYPE_IKEV2_FROM_IKE_TUN_CONN_PARAMS = 9;
+    public static final int TYPE_MAX = 9;
 
     // Match these constants with R.array.vpn_proxy_settings.
     public static final int PROXY_NONE = 0;
@@ -143,17 +149,29 @@ public final class VpnProfile implements Cloneable, Parcelable {
     public boolean areAuthParamsInline = false;                  // 23
     public final boolean isRestrictedToTestNetworks;             // 24
 
+    public final boolean excludeLocalRoutes;                     // 25
+    public final boolean requiresInternetValidation;             // 26
+    public final IkeTunnelConnectionParams ikeTunConnParams;     // 27
+
     // Helper fields.
     @UnsupportedAppUsage
     public transient boolean saveLogin = false;
 
     public VpnProfile(String key) {
-        this(key, false);
+        this(key, false, false, false, null);
     }
 
     public VpnProfile(String key, boolean isRestrictedToTestNetworks) {
+        this(key, isRestrictedToTestNetworks, false, false, null);
+    }
+
+    public VpnProfile(String key, boolean isRestrictedToTestNetworks, boolean excludeLocalRoutes,
+            boolean requiresInternetValidation, IkeTunnelConnectionParams ikeTunConnParams) {
         this.key = key;
         this.isRestrictedToTestNetworks = isRestrictedToTestNetworks;
+        this.excludeLocalRoutes = excludeLocalRoutes;
+        this.requiresInternetValidation = requiresInternetValidation;
+        this.ikeTunConnParams = ikeTunConnParams;
     }
 
     @UnsupportedAppUsage
@@ -175,14 +193,20 @@ public final class VpnProfile implements Cloneable, Parcelable {
         ipsecCaCert = in.readString();
         ipsecServerCert = in.readString();
         saveLogin = in.readInt() != 0;
-        proxy = in.readParcelable(null);
+        proxy = in.readParcelable(null, android.net.ProxyInfo.class);
         mAllowedAlgorithms = new ArrayList<>();
-        in.readList(mAllowedAlgorithms, null);
+        in.readList(mAllowedAlgorithms, null, java.lang.String.class);
         isBypassable = in.readBoolean();
         isMetered = in.readBoolean();
         maxMtu = in.readInt();
         areAuthParamsInline = in.readBoolean();
         isRestrictedToTestNetworks = in.readBoolean();
+        excludeLocalRoutes = in.readBoolean();
+        requiresInternetValidation = in.readBoolean();
+        final PersistableBundle bundle =
+                in.readParcelable(PersistableBundle.class.getClassLoader());
+        ikeTunConnParams = (bundle == null) ? null
+                : TunnelConnectionParamsUtils.fromPersistableBundle(bundle);
     }
 
     /**
@@ -230,6 +254,10 @@ public final class VpnProfile implements Cloneable, Parcelable {
         out.writeInt(maxMtu);
         out.writeBoolean(areAuthParamsInline);
         out.writeBoolean(isRestrictedToTestNetworks);
+        out.writeBoolean(excludeLocalRoutes);
+        out.writeBoolean(requiresInternetValidation);
+        out.writeParcelable(ikeTunConnParams == null ? null
+                : TunnelConnectionParamsUtils.toPersistableBundle(ikeTunConnParams), flags);
     }
 
     /**
@@ -245,12 +273,17 @@ public final class VpnProfile implements Cloneable, Parcelable {
             }
 
             String[] values = new String(value, StandardCharsets.UTF_8).split(VALUE_DELIMITER, -1);
+
             // Acceptable numbers of values are:
             // 14-19: Standard profile, with option for serverCert, proxy
             // 24: Standard profile with serverCert, proxy and platform-VPN parameters
             // 25: Standard profile with platform-VPN parameters and isRestrictedToTestNetworks
-            if ((values.length < 14 || values.length > 19)
-                    && values.length != 24 && values.length != 25) {
+            // 26:                                            ...and excludeLocalRoutes
+            // 27:                                            ...and requiresInternetValidation
+            //     (26,27 can only be found on dogfood devices)
+            // 28:                                            ...and ikeTunConnParams
+            if ((values.length < 14 || (values.length > 19 && values.length < 24)
+                    || values.length > 28)) {
                 return null;
             }
 
@@ -261,7 +294,36 @@ public final class VpnProfile implements Cloneable, Parcelable {
                 isRestrictedToTestNetworks = false;
             }
 
-            VpnProfile profile = new VpnProfile(key, isRestrictedToTestNetworks);
+            final boolean excludeLocalRoutes;
+            if (values.length >= 26) {
+                excludeLocalRoutes = Boolean.parseBoolean(values[25]);
+            } else {
+                excludeLocalRoutes = false;
+            }
+
+            final boolean requiresInternetValidation;
+            if (values.length >= 27) {
+                requiresInternetValidation = Boolean.parseBoolean(values[26]);
+            } else {
+                requiresInternetValidation = false;
+            }
+
+            final IkeTunnelConnectionParams tempIkeTunConnParams;
+            // Assign null directly if the ikeTunConParams field is empty.
+            if (values.length >= 28 && values[27].length() != 0) {
+                final Parcel parcel = Parcel.obtain();
+                final byte[] bytes = HexDump.hexStringToByteArray(values[27]);
+                parcel.unmarshall(bytes, 0, bytes.length);
+                parcel.setDataPosition(0);
+                final PersistableBundle bundle = (PersistableBundle) parcel.readValue(
+                        PersistableBundle.class.getClassLoader());
+                tempIkeTunConnParams = TunnelConnectionParamsUtils.fromPersistableBundle(bundle);
+            } else {
+                tempIkeTunConnParams = null;
+            }
+
+            VpnProfile profile = new VpnProfile(key, isRestrictedToTestNetworks,
+                    excludeLocalRoutes, requiresInternetValidation, tempIkeTunConnParams);
             profile.name = values[0];
             profile.type = Integer.parseInt(values[1]);
             if (profile.type < 0 || profile.type > TYPE_MAX) {
@@ -313,6 +375,7 @@ public final class VpnProfile implements Cloneable, Parcelable {
             profile.saveLogin = !profile.username.isEmpty() || !profile.password.isEmpty();
             return profile;
         } catch (Exception e) {
+            Log.d(TAG, "Got exception in decode.", e);
             // ignore
         }
         return null;
@@ -370,6 +433,20 @@ public final class VpnProfile implements Cloneable, Parcelable {
         builder.append(VALUE_DELIMITER).append(maxMtu);
         builder.append(VALUE_DELIMITER).append(areAuthParamsInline);
         builder.append(VALUE_DELIMITER).append(isRestrictedToTestNetworks);
+
+        builder.append(VALUE_DELIMITER).append(excludeLocalRoutes);
+        builder.append(VALUE_DELIMITER).append(requiresInternetValidation);
+
+        if (ikeTunConnParams != null) {
+            final PersistableBundle bundle =
+                    TunnelConnectionParamsUtils.toPersistableBundle(ikeTunConnParams);
+            final Parcel parcel = Parcel.obtain();
+            parcel.writeValue(bundle);
+            final byte[] bytes = parcel.marshall();
+            builder.append(VALUE_DELIMITER).append(HexDump.toHexString(bytes));
+        } else {
+            builder.append(VALUE_DELIMITER).append("");
+        }
 
         return builder.toString().getBytes(StandardCharsets.UTF_8);
     }
@@ -451,7 +528,8 @@ public final class VpnProfile implements Cloneable, Parcelable {
             key, type, server, username, password, dnsServers, searchDomains, routes, mppe,
             l2tpSecret, ipsecIdentifier, ipsecSecret, ipsecUserCert, ipsecCaCert, ipsecServerCert,
             proxy, mAllowedAlgorithms, isBypassable, isMetered, maxMtu, areAuthParamsInline,
-            isRestrictedToTestNetworks);
+            isRestrictedToTestNetworks, excludeLocalRoutes, requiresInternetValidation,
+            ikeTunConnParams);
     }
 
     /** Checks VPN profiles for interior equality. */
@@ -484,11 +562,14 @@ public final class VpnProfile implements Cloneable, Parcelable {
                 && isMetered == other.isMetered
                 && maxMtu == other.maxMtu
                 && areAuthParamsInline == other.areAuthParamsInline
-                && isRestrictedToTestNetworks == other.isRestrictedToTestNetworks;
+                && isRestrictedToTestNetworks == other.isRestrictedToTestNetworks
+                && excludeLocalRoutes == other.excludeLocalRoutes
+                && requiresInternetValidation == other.requiresInternetValidation
+                && Objects.equals(ikeTunConnParams, other.ikeTunConnParams);
     }
 
     @NonNull
-    public static final Creator<VpnProfile> CREATOR = new Creator<VpnProfile>() {
+    public static final Creator<VpnProfile> CREATOR = new Creator<>() {
         @Override
         public VpnProfile createFromParcel(Parcel in) {
             return new VpnProfile(in);

@@ -68,7 +68,6 @@ import java.util.stream.Collectors;
 public final class SmsApplication {
     static final String LOG_TAG = "SmsApplication";
     public static final String PHONE_PACKAGE_NAME = "com.android.phone";
-    public static final String BLUETOOTH_PACKAGE_NAME = "com.android.bluetooth";
     public static final String MMS_SERVICE_PACKAGE_NAME = "com.android.mms.service";
     public static final String TELEPHONY_PROVIDER_PACKAGE_NAME = "com.android.providers.telephony";
 
@@ -541,11 +540,13 @@ public final class SmsApplication {
         PackageManager packageManager = context.getPackageManager();
         AppOpsManager appOps = context.getSystemService(AppOpsManager.class);
 
+        final String bluetoothPackageName = context.getResources()
+                .getString(com.android.internal.R.string.config_systemBluetoothStack);
         // Assign permission to special system apps
         assignExclusiveSmsPermissionsToSystemApp(context, packageManager, appOps,
                 PHONE_PACKAGE_NAME, true);
         assignExclusiveSmsPermissionsToSystemApp(context, packageManager, appOps,
-                BLUETOOTH_PACKAGE_NAME, true);
+                bluetoothPackageName, false);
         assignExclusiveSmsPermissionsToSystemApp(context, packageManager, appOps,
                 MMS_SERVICE_PACKAGE_NAME, true);
         assignExclusiveSmsPermissionsToSystemApp(context, packageManager, appOps,
@@ -1128,8 +1129,11 @@ public final class SmsApplication {
             return false;
         }
         final String defaultSmsPackage = getDefaultSmsApplicationPackageName(context);
+        final String bluetoothPackageName = context.getResources()
+                .getString(com.android.internal.R.string.config_systemBluetoothStack);
+
         if ((defaultSmsPackage != null && defaultSmsPackage.equals(packageName))
-                || BLUETOOTH_PACKAGE_NAME.equals(packageName)) {
+                || bluetoothPackageName.equals(packageName)) {
             return true;
         }
         return false;

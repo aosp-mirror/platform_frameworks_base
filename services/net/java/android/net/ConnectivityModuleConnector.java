@@ -278,7 +278,10 @@ public class ConnectivityModuleConnector {
             // This code path is only run by the system server: only the system server binds
             // to the NetworkStack as a service. Other processes get the NetworkStack from
             // the ServiceManager.
-            maybeCrashWithTerribleFailure("Lost network stack", mPackageName);
+            maybeCrashWithTerribleFailure(
+                "Lost network stack. This is not the root cause of any issue, it is a side "
+                + "effect of a crash that happened earlier. Earlier logs should point to the "
+                + "actual issue.", mPackageName);
         }
     }
 

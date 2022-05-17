@@ -26,4 +26,11 @@
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. Override from base which says "Body Sensors". [CHAR_LIMIT=25] -->
     <string name="permgrouplab_sensors">Sensors</string>
+
+
+    <!-- label for item that opens emergency features in the power menu on Wear [CHAR LIMIT=24] -->
+    <string name="global_action_emergency">Emergency SOS</string>
+
+   <!-- Reboot to Recovery Progress Dialog. This is shown before it reboots to recovery. -->
+    <string name="reboot_to_update_title">Wear OS system update</string>
 </resources>

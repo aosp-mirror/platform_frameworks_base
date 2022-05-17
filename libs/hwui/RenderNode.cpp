@@ -341,6 +341,7 @@ std::optional<RenderNode::SnapshotResult> RenderNode::updateSnapshotIfRequired(
     sk_sp<SkImage> snapshot = layerSurface->makeImageSnapshot();
     const auto subset = SkIRect::MakeWH(properties().getWidth(),
                                         properties().getHeight());
+    uint32_t layerSurfaceGenerationId = layerSurface->generationID();
     // If we don't have an ImageFilter just return the snapshot
     if (imageFilter == nullptr) {
         mSnapshotResult.snapshot = snapshot;
@@ -348,9 +349,10 @@ std::optional<RenderNode::SnapshotResult> RenderNode::updateSnapshotIfRequired(
         mSnapshotResult.outOffset = SkIPoint::Make(0.0f, 0.0f);
         mImageFilterClipBounds = clipBounds;
         mTargetImageFilter = nullptr;
-    } else if (mSnapshotResult.snapshot == nullptr ||
-        imageFilter != mTargetImageFilter.get() ||
-        mImageFilterClipBounds != clipBounds) {
+        mTargetImageFilterLayerSurfaceGenerationId = 0;
+    } else if (mSnapshotResult.snapshot == nullptr || imageFilter != mTargetImageFilter.get() ||
+               mImageFilterClipBounds != clipBounds ||
+               mTargetImageFilterLayerSurfaceGenerationId != layerSurfaceGenerationId) {
         // Otherwise create a new snapshot with the given filter and snapshot
         mSnapshotResult.snapshot =
                 snapshot->makeWithFilter(context,
@@ -361,6 +363,7 @@ std::optional<RenderNode::SnapshotResult> RenderNode::updateSnapshotIfRequired(
                                          &mSnapshotResult.outOffset);
         mTargetImageFilter = sk_ref_sp(imageFilter);
         mImageFilterClipBounds = clipBounds;
+        mTargetImageFilterLayerSurfaceGenerationId = layerSurfaceGenerationId;
     }
 
     return mSnapshotResult;

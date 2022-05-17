@@ -24,18 +24,16 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
-
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
-
+import java.io.File;
+import java.util.Random;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.util.Random;
 
 /**
  * Performance tests for typical CRUD operations and loading rows into the Cursor
@@ -58,18 +56,34 @@ public class SQLiteDatabasePerfTest {
     public void setUp() {
         mContext = InstrumentationRegistry.getTargetContext();
         mContext.deleteDatabase(DB_NAME);
-        mDatabase = mContext.openOrCreateDatabase(DB_NAME, Context.MODE_PRIVATE, null);
-        mDatabase.execSQL("CREATE TABLE T1 "
-                + "(_ID INTEGER PRIMARY KEY, COL_A INTEGER, COL_B VARCHAR(100), COL_C REAL)");
-        mDatabase.execSQL("CREATE TABLE T2 ("
-                + "_ID INTEGER PRIMARY KEY, COL_A VARCHAR(100), T1_ID INTEGER,"
-                + "FOREIGN KEY(T1_ID) REFERENCES T1 (_ID))");
+
+        createOrOpenTestDatabase(
+                SQLiteDatabase.JOURNAL_MODE_TRUNCATE, SQLiteDatabase.SYNC_MODE_FULL);
     }
 
     @After
     public void tearDown() {
         mDatabase.close();
         mContext.deleteDatabase(DB_NAME);
+    }
+
+    private void createOrOpenTestDatabase(String journalMode, String syncMode) {
+        SQLiteDatabase.OpenParams.Builder paramsBuilder = new SQLiteDatabase.OpenParams.Builder();
+        File dbFile = mContext.getDatabasePath(DB_NAME);
+        if (journalMode != null) {
+            paramsBuilder.setJournalMode(journalMode);
+        }
+        if (syncMode != null) {
+            paramsBuilder.setSynchronousMode(syncMode);
+        }
+        paramsBuilder.addOpenFlags(SQLiteDatabase.CREATE_IF_NECESSARY);
+
+        mDatabase = SQLiteDatabase.openDatabase(dbFile, paramsBuilder.build());
+        mDatabase.execSQL("CREATE TABLE T1 "
+                + "(_ID INTEGER PRIMARY KEY, COL_A INTEGER, COL_B VARCHAR(100), COL_C REAL)");
+        mDatabase.execSQL("CREATE TABLE T2 ("
+                + "_ID INTEGER PRIMARY KEY, COL_A VARCHAR(100), T1_ID INTEGER,"
+                + "FOREIGN KEY(T1_ID) REFERENCES T1 (_ID))");
     }
 
     @Test
@@ -192,21 +206,113 @@ public class SQLiteDatabasePerfTest {
         }
     }
 
+    /**
+     * This test measures the insertion of a single row into a database using DELETE journal and
+     * synchronous modes.
+     */
     @Test
     public void testInsert() {
         insertT1TestDataSet();
 
+        testInsertInternal("testInsert");
+    }
+
+    @Test
+    public void testInsertWithPersistFull() {
+        recreateTestDatabase(SQLiteDatabase.JOURNAL_MODE_PERSIST, SQLiteDatabase.SYNC_MODE_FULL);
+        insertT1TestDataSet();
+        testInsertInternal("testInsertWithPersistFull");
+    }
+
+    private void testInsertInternal(String traceTag) {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
 
         ContentValues cv = new ContentValues();
         cv.put("_ID", DEFAULT_DATASET_SIZE);
         cv.put("COL_B", "NewValue");
         cv.put("COL_C", 1.1);
-        String[] deleteArgs = new String[]{String.valueOf(DEFAULT_DATASET_SIZE)};
+        String[] deleteArgs = new String[] {String.valueOf(DEFAULT_DATASET_SIZE)};
+
         while (state.keepRunning()) {
+            android.os.Trace.beginSection(traceTag);
             assertEquals(DEFAULT_DATASET_SIZE, mDatabase.insert("T1", null, cv));
             state.pauseTiming();
             assertEquals(1, mDatabase.delete("T1", "_ID=?", deleteArgs));
+            state.resumeTiming();
+            android.os.Trace.endSection();
+        }
+    }
+
+    /**
+     * This test measures the insertion of a single row into a database using WAL journal mode and
+     * NORMAL synchronous mode.
+     */
+    @Test
+    public void testInsertWithWalNormalMode() {
+        recreateTestDatabase(SQLiteDatabase.JOURNAL_MODE_WAL, SQLiteDatabase.SYNC_MODE_NORMAL);
+        insertT1TestDataSet();
+
+        testInsertInternal("testInsertWithWalNormalMode");
+    }
+
+    /**
+     * This test measures the insertion of a single row into a database using WAL journal mode and
+     * FULL synchronous mode. The goal is to see the difference between NORMAL vs FULL sync modes.
+     */
+    @Test
+    public void testInsertWithWalFullMode() {
+        recreateTestDatabase(SQLiteDatabase.JOURNAL_MODE_WAL, SQLiteDatabase.SYNC_MODE_FULL);
+
+        insertT1TestDataSet();
+
+        testInsertInternal("testInsertWithWalFullMode");
+    }
+
+    /**
+     * This test measures the insertion of a multiple rows in a single transaction using WAL journal
+     * mode and NORMAL synchronous mode.
+     */
+    @Test
+    public void testBulkInsertWithWalNormalMode() {
+        recreateTestDatabase(SQLiteDatabase.JOURNAL_MODE_WAL, SQLiteDatabase.SYNC_MODE_NORMAL);
+        testBulkInsertInternal("testBulkInsertWithWalNormalMode");
+    }
+
+    @Test
+    public void testBulkInsertWithPersistFull() {
+        recreateTestDatabase(SQLiteDatabase.JOURNAL_MODE_PERSIST, SQLiteDatabase.SYNC_MODE_FULL);
+        testBulkInsertInternal("testBulkInsertWithPersistFull");
+    }
+
+    /**
+     * This test measures the insertion of a multiple rows in a single transaction using TRUNCATE
+     * journal mode and FULL synchronous mode.
+     */
+    @Test
+    public void testBulkInsert() {
+        testBulkInsertInternal("testBulkInsert");
+    }
+
+    private void testBulkInsertInternal(String traceTag) {
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+
+        String[] statements = new String[DEFAULT_DATASET_SIZE];
+        for (int i = 0; i < DEFAULT_DATASET_SIZE; ++i) {
+            statements[i] = "INSERT INTO T1 VALUES (?,?,?,?)";
+        }
+
+        while (state.keepRunning()) {
+            android.os.Trace.beginSection(traceTag);
+            mDatabase.beginTransaction();
+            for (int i = 0; i < DEFAULT_DATASET_SIZE; ++i) {
+                mDatabase.execSQL(statements[i], new Object[] {i, i, "T1Value" + i, i * 1.1});
+            }
+            mDatabase.setTransactionSuccessful();
+            mDatabase.endTransaction();
+            android.os.Trace.endSection();
+
+            state.pauseTiming();
+            mDatabase.execSQL("DELETE FROM T1");
             state.resumeTiming();
         }
     }
@@ -227,9 +333,30 @@ public class SQLiteDatabasePerfTest {
         }
     }
 
+    /**
+     * This test measures the update of a random row in a database.
+     */
+    @Test
+    public void testUpdateWithWalNormalMode() {
+        recreateTestDatabase(SQLiteDatabase.JOURNAL_MODE_WAL, SQLiteDatabase.SYNC_MODE_NORMAL);
+        insertT1TestDataSet();
+        testUpdateInternal("testUpdateWithWalNormalMode");
+    }
+
+    @Test
+    public void testUpdateWithPersistFull() {
+        recreateTestDatabase(SQLiteDatabase.JOURNAL_MODE_PERSIST, SQLiteDatabase.SYNC_MODE_FULL);
+        insertT1TestDataSet();
+        testUpdateInternal("testUpdateWithPersistFull");
+    }
+
     @Test
     public void testUpdate() {
         insertT1TestDataSet();
+        testUpdateInternal("testUpdate");
+    }
+
+    private void testUpdateInternal(String traceTag) {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
 
         Random rnd = new Random(0);
@@ -237,6 +364,7 @@ public class SQLiteDatabasePerfTest {
         ContentValues cv = new ContentValues();
         String[] argArray = new String[1];
         while (state.keepRunning()) {
+            android.os.Trace.beginSection(traceTag);
             int id = rnd.nextInt(DEFAULT_DATASET_SIZE);
             cv.put("COL_A", i);
             cv.put("COL_B", "UpdatedValue");
@@ -244,6 +372,109 @@ public class SQLiteDatabasePerfTest {
             argArray[0] = String.valueOf(id);
             assertEquals(1, mDatabase.update("T1", cv, "_ID=?", argArray));
             i++;
+            android.os.Trace.endSection();
+        }
+    }
+
+    /**
+     * This test measures a multi-threaded read-write environment where there are 2 readers and
+     * 1 writer in the database using TRUNCATE journal mode and FULL syncMode.
+     */
+    @Test
+    public void testMultithreadedReadWrite() {
+        insertT1TestDataSet();
+        performMultithreadedReadWriteTest();
+    }
+
+    private void doReadLoop(int totalIterations) {
+        Random rnd = new Random(0);
+        int currentIteration = 0;
+        while (currentIteration < totalIterations) {
+            android.os.Trace.beginSection("ReadDatabase");
+            int index = rnd.nextInt(DEFAULT_DATASET_SIZE);
+            try (Cursor cursor = mDatabase.rawQuery("SELECT _ID, COL_A, COL_B, COL_C FROM T1 "
+                                 + "WHERE _ID=?",
+                         new String[] {String.valueOf(index)})) {
+                cursor.moveToNext();
+                cursor.getInt(0);
+                cursor.getInt(1);
+                cursor.getString(2);
+                cursor.getDouble(3);
+            }
+            ++currentIteration;
+            android.os.Trace.endSection();
+        }
+    }
+
+    private void doReadLoop(BenchmarkState state) {
+        Random rnd = new Random(0);
+        while (state.keepRunning()) {
+            android.os.Trace.beginSection("ReadDatabase");
+            int index = rnd.nextInt(DEFAULT_DATASET_SIZE);
+            try (Cursor cursor = mDatabase.rawQuery("SELECT _ID, COL_A, COL_B, COL_C FROM T1 "
+                                 + "WHERE _ID=?",
+                         new String[] {String.valueOf(index)})) {
+                cursor.moveToNext();
+                cursor.getInt(0);
+                cursor.getInt(1);
+                cursor.getString(2);
+                cursor.getDouble(3);
+            }
+            android.os.Trace.endSection();
+        }
+    }
+
+    private void doUpdateLoop(int totalIterations) {
+        SQLiteDatabase db = mContext.openOrCreateDatabase(DB_NAME, Context.MODE_PRIVATE, null);
+        Random rnd = new Random(0);
+        int i = 0;
+        ContentValues cv = new ContentValues();
+        String[] argArray = new String[1];
+
+        while (i < totalIterations) {
+            android.os.Trace.beginSection("UpdateDatabase");
+            int id = rnd.nextInt(DEFAULT_DATASET_SIZE);
+            cv.put("COL_A", i);
+            cv.put("COL_B", "UpdatedValue");
+            cv.put("COL_C", i);
+            argArray[0] = String.valueOf(id);
+            db.update("T1", cv, "_ID=?", argArray);
+            i++;
+            android.os.Trace.endSection();
+        }
+    }
+
+    /**
+     * This test measures a multi-threaded read-write environment where there are 2 readers and
+     * 1 writer in the database using WAL journal mode and NORMAL syncMode.
+     */
+    @Test
+    public void testMultithreadedReadWriteWithWalNormal() {
+        recreateTestDatabase(SQLiteDatabase.JOURNAL_MODE_WAL, SQLiteDatabase.SYNC_MODE_NORMAL);
+        insertT1TestDataSet();
+
+        performMultithreadedReadWriteTest();
+    }
+
+    private void performMultithreadedReadWriteTest() {
+        int totalBGIterations = 10000;
+        // Writer - Fixed iterations to avoid consuming cycles from mainloop benchmark iterations
+        Thread updateThread = new Thread(() -> { doUpdateLoop(totalBGIterations); });
+
+        // Reader 1 - Fixed iterations to avoid consuming cycles from mainloop benchmark iterations
+        Thread readerThread = new Thread(() -> { doReadLoop(totalBGIterations); });
+
+        updateThread.start();
+        readerThread.start();
+
+        // Reader 2
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        doReadLoop(state);
+
+        try {
+            updateThread.join();
+            readerThread.join();
+        } catch (Exception e) {
         }
     }
 
@@ -269,6 +500,12 @@ public class SQLiteDatabasePerfTest {
         }
         mDatabase.setTransactionSuccessful();
         mDatabase.endTransaction();
+    }
+
+    private void recreateTestDatabase(String journalMode, String syncMode) {
+        mDatabase.close();
+        mContext.deleteDatabase(DB_NAME);
+        createOrOpenTestDatabase(journalMode, syncMode);
     }
 }
 

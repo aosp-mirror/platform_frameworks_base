@@ -673,6 +673,12 @@ public class PersistentDataBlockService extends SystemService {
                 throw new UnsupportedOperationException("cannot read frp credential");
             }
         }
+
+        @Override
+        public String getPersistentDataPackageName() {
+            enforcePersistentDataBlockAccess();
+            return mContext.getString(R.string.config_persistentDataPackageName);
+        }
     };
 
     private PersistentDataBlockManagerInternal mInternalService =

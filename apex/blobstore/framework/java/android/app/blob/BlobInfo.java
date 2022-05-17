@@ -48,6 +48,7 @@ public final class BlobInfo implements Parcelable {
         mLeaseInfos = leaseInfos;
     }
 
+    @SuppressWarnings("UnsafeParcelApi")
     private BlobInfo(Parcel in) {
         mId = in.readLong();
         mExpiryTimeMs = in.readLong();

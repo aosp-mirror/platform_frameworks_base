@@ -16,6 +16,7 @@
 
 package com.android.systemui.util.settings;
 
+import android.annotation.UserIdInt;
 import android.content.ContentResolver;
 import android.database.ContentObserver;
 import android.net.Uri;
@@ -31,8 +32,11 @@ public class FakeSettings implements SecureSettings, GlobalSettings, SystemSetti
     private final Map<SettingsKey, String> mValues = new HashMap<>();
     private final Map<SettingsKey, List<ContentObserver>> mContentObservers =
             new HashMap<>();
+    private final Map<String, List<ContentObserver>> mContentObserversAllUsers = new HashMap<>();
 
     public static final Uri CONTENT_URI = Uri.parse("content://settings/fake");
+    @UserIdInt
+    private int mUserId = UserHandle.USER_CURRENT;
 
     public FakeSettings() {
     }
@@ -55,9 +59,15 @@ public class FakeSettings implements SecureSettings, GlobalSettings, SystemSetti
     @Override
     public void registerContentObserverForUser(Uri uri, boolean notifyDescendents,
             ContentObserver settingsObserver, int userHandle) {
-        SettingsKey key = new SettingsKey(userHandle, uri.toString());
-        mContentObservers.putIfAbsent(key, new ArrayList<>());
-        List<ContentObserver> observers = mContentObservers.get(key);
+        List<ContentObserver> observers;
+        if (userHandle == UserHandle.USER_ALL) {
+            mContentObserversAllUsers.putIfAbsent(uri.toString(), new ArrayList<>());
+            observers = mContentObserversAllUsers.get(uri.toString());
+        } else {
+            SettingsKey key = new SettingsKey(userHandle, uri.toString());
+            mContentObservers.putIfAbsent(key, new ArrayList<>());
+            observers = mContentObservers.get(key);
+        }
         observers.add(settingsObserver);
     }
 
@@ -67,6 +77,10 @@ public class FakeSettings implements SecureSettings, GlobalSettings, SystemSetti
             List<ContentObserver> observers = mContentObservers.get(key);
             observers.remove(settingsObserver);
         }
+        for (String key : mContentObserversAllUsers.keySet()) {
+            List<ContentObserver> observers = mContentObserversAllUsers.get(key);
+            observers.remove(settingsObserver);
+        }
     }
 
     @Override
@@ -74,9 +88,13 @@ public class FakeSettings implements SecureSettings, GlobalSettings, SystemSetti
         return Uri.withAppendedPath(CONTENT_URI, name);
     }
 
+    public void setUserId(@UserIdInt int userId) {
+        mUserId = userId;
+    }
+
     @Override
     public int getUserId() {
-        return UserHandle.USER_CURRENT;
+        return mUserId;
     }
 
     @Override
@@ -112,7 +130,11 @@ public class FakeSettings implements SecureSettings, GlobalSettings, SystemSetti
 
         Uri uri = getUriFor(name);
         for (ContentObserver observer : mContentObservers.getOrDefault(key, new ArrayList<>())) {
-            observer.dispatchChange(false, List.of(uri), userHandle);
+            observer.dispatchChange(false, List.of(uri), 0, userHandle);
+        }
+        for (ContentObserver observer :
+                mContentObserversAllUsers.getOrDefault(uri.toString(), new ArrayList<>())) {
+            observer.dispatchChange(false, List.of(uri), 0, userHandle);
         }
         return true;
     }

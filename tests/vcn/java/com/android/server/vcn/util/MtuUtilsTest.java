@@ -46,34 +46,85 @@ import java.util.List;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class MtuUtilsTest {
-    @Test
-    public void testUnderlyingMtuZero() {
+    private void verifyUnderlyingMtuZero(boolean isIpv4) {
         assertEquals(
-                IPV6_MIN_MTU, getMtu(emptyList(), ETHER_MTU /* maxMtu */, 0 /* underlyingMtu */));
+                IPV6_MIN_MTU,
+                getMtu(emptyList(), ETHER_MTU /* maxMtu */, 0 /* underlyingMtu */, isIpv4));
     }
 
     @Test
-    public void testClampsToMaxMtu() {
-        assertEquals(0, getMtu(emptyList(), 0 /* maxMtu */, IPV6_MIN_MTU /* underlyingMtu */));
+    public void testUnderlyingMtuZeroV4() {
+        verifyUnderlyingMtuZero(true /* isIpv4 */);
     }
 
     @Test
-    public void testNormalModeAlgorithmLessThanUnderlyingMtu() {
-        final List<ChildSaProposal> saProposals =
-                Arrays.asList(
-                        new ChildSaProposal.Builder()
-                                .addEncryptionAlgorithm(
-                                        ENCRYPTION_ALGORITHM_AES_CBC, KEY_LEN_AES_256)
-                                .addIntegrityAlgorithm(INTEGRITY_ALGORITHM_HMAC_SHA2_256_128)
-                                .build());
+    public void testUnderlyingMtuZeroV6() {
+        verifyUnderlyingMtuZero(false /* isIpv4 */);
+    }
 
+    private void verifyClampsToMaxMtu(boolean isIpv4) {
+        assertEquals(
+                0, getMtu(emptyList(), 0 /* maxMtu */, IPV6_MIN_MTU /* underlyingMtu */, isIpv4));
+    }
+
+    @Test
+    public void testClampsToMaxMtuV4() {
+        verifyClampsToMaxMtu(true /* isIpv4 */);
+    }
+
+    @Test
+    public void testClampsToMaxMtuV6() {
+        verifyClampsToMaxMtu(false /* isIpv4 */);
+    }
+
+    private List<ChildSaProposal> buildChildSaProposalsWithNormalModeAlgo() {
+        return Arrays.asList(
+                new ChildSaProposal.Builder()
+                        .addEncryptionAlgorithm(ENCRYPTION_ALGORITHM_AES_CBC, KEY_LEN_AES_256)
+                        .addIntegrityAlgorithm(INTEGRITY_ALGORITHM_HMAC_SHA2_256_128)
+                        .build());
+    }
+
+    private void verifyNormalModeAlgorithmLessThanUnderlyingMtu(boolean isIpv4) {
         final int actualMtu =
-                getMtu(saProposals, ETHER_MTU /* maxMtu */, ETHER_MTU /* underlyingMtu */);
+                getMtu(
+                        buildChildSaProposalsWithNormalModeAlgo(),
+                        ETHER_MTU /* maxMtu */,
+                        ETHER_MTU /* underlyingMtu */,
+                        isIpv4);
         assertTrue(ETHER_MTU > actualMtu);
     }
 
     @Test
-    public void testCombinedModeAlgorithmLessThanUnderlyingMtu() {
+    public void testNormalModeAlgorithmLessThanUnderlyingMtuV4() {
+        verifyNormalModeAlgorithmLessThanUnderlyingMtu(true /* isIpv4 */);
+    }
+
+    @Test
+    public void testNormalModeAlgorithmLessThanUnderlyingMtuV6() {
+        verifyNormalModeAlgorithmLessThanUnderlyingMtu(false /* isIpv4 */);
+    }
+
+    @Test
+    public void testMtuIpv4LessThanMtuIpv6() {
+        final int actualMtuV4 =
+                getMtu(
+                        buildChildSaProposalsWithNormalModeAlgo(),
+                        ETHER_MTU /* maxMtu */,
+                        ETHER_MTU /* underlyingMtu */,
+                        true /* isIpv4 */);
+
+        final int actualMtuV6 =
+                getMtu(
+                        buildChildSaProposalsWithNormalModeAlgo(),
+                        ETHER_MTU /* maxMtu */,
+                        ETHER_MTU /* underlyingMtu */,
+                        false /* isIpv4 */);
+
+        assertTrue(actualMtuV4 < actualMtuV6);
+    }
+
+    private void verifyCombinedModeAlgorithmLessThanUnderlyingMtu(boolean isIpv4) {
         final List<ChildSaProposal> saProposals =
                 Arrays.asList(
                         new ChildSaProposal.Builder()
@@ -86,7 +137,17 @@ public class MtuUtilsTest {
                                 .build());
 
         final int actualMtu =
-                getMtu(saProposals, ETHER_MTU /* maxMtu */, ETHER_MTU /* underlyingMtu */);
+                getMtu(saProposals, ETHER_MTU /* maxMtu */, ETHER_MTU /* underlyingMtu */, isIpv4);
         assertTrue(ETHER_MTU > actualMtu);
+    }
+
+    @Test
+    public void testCombinedModeAlgorithmLessThanUnderlyingMtuV4() {
+        verifyCombinedModeAlgorithmLessThanUnderlyingMtu(true /* isIpv4 */);
+    }
+
+    @Test
+    public void testCombinedModeAlgorithmLessThanUnderlyingMtuV6() {
+        verifyCombinedModeAlgorithmLessThanUnderlyingMtu(false /* isIpv4 */);
     }
 }

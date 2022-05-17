@@ -202,29 +202,12 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
     }
 
     /**
-     * @hide
-     * @param ss signal strength from modem.
-     */
-    public CellSignalStrengthNr(android.hardware.radio.V1_4.NrSignalStrength ss) {
-        this(flip(ss.csiRsrp), flip(ss.csiRsrq), ss.csiSinr, flip(ss.ssRsrp), flip(ss.ssRsrq),
-                ss.ssSinr);
-    }
-
-    /**
-     * @hide
-     * @param ss signal strength from modem.
-     */
-    public CellSignalStrengthNr(android.hardware.radio.V1_6.NrSignalStrength ss) {
-        this(flip(ss.base.csiRsrp), flip(ss.base.csiRsrq), ss.base.csiSinr, ss.csiCqiTableIndex,
-                ss.csiCqiReport, flip(ss.base.ssRsrp), flip(ss.base.ssRsrq), ss.base.ssSinr);
-    }
-
-    /**
      * Flip sign cell strength value when taking in the value from hal
      * @param val cell strength value
      * @return flipped value
+     * @hide
      */
-    private static int flip(int val) {
+    public static int flip(int val) {
         return val != CellInfo.UNAVAILABLE ? -val : val;
     }
 
@@ -343,7 +326,7 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
         mCsiRsrq = in.readInt();
         mCsiSinr = in.readInt();
         mCsiCqiTableIndex = in.readInt();
-        mCsiCqiReport = in.readArrayList(Integer.class.getClassLoader());
+        mCsiCqiReport = in.readArrayList(Integer.class.getClassLoader(), java.lang.Integer.class);
         mSsRsrp = in.readInt();
         mSsRsrq = in.readInt();
         mSsSinr = in.readInt();
@@ -455,13 +438,13 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
         int level;
         if (measure == CellInfo.UNAVAILABLE) {
             level = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
-        } else if (measure > thresholds[3]) {
+        } else if (measure >= thresholds[3]) {
             level = SIGNAL_STRENGTH_GREAT;
-        } else if (measure > thresholds[2]) {
+        } else if (measure >= thresholds[2]) {
             level = SIGNAL_STRENGTH_GOOD;
-        } else if (measure > thresholds[1]) {
+        } else if (measure >= thresholds[1]) {
             level = SIGNAL_STRENGTH_MODERATE;
-        }  else if (measure > thresholds[0]) {
+        }  else if (measure >= thresholds[0]) {
             level = SIGNAL_STRENGTH_POOR;
         } else {
             level = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;

@@ -62,6 +62,14 @@ public class SparseArrayMap<K, V> {
     }
 
     /**
+     * Removes all the data for the keyIndex, if there was any.
+     * @hide
+     */
+    public void deleteAt(int keyIndex) {
+        mData.removeAt(keyIndex);
+    }
+
+    /**
      * Removes the data for the key and mapKey, if there was any.
      *
      * @return Returns the value that was stored under the keys, or null if there was none.
@@ -142,6 +150,15 @@ public class SparseArrayMap<K, V> {
         return data == null ? 0 : data.size();
     }
 
+    /**
+     * Returns the number of elements in the map of the given keyIndex.
+     * @hide
+     */
+    public int numElementsForKeyAt(int keyIndex) {
+        ArrayMap<K, V> data = mData.valueAt(keyIndex);
+        return data == null ? 0 : data.size();
+    }
+
     /** Returns the value V at the given key and map index. */
     @Nullable
     public V valueAt(int keyIndex, int mapIndex) {
@@ -154,6 +171,30 @@ public class SparseArrayMap<K, V> {
             ArrayMap<K, V> data = mData.valueAt(i);
             for (int j = data.size() - 1; j >= 0; --j) {
                 consumer.accept(data.valueAt(j));
+            }
+        }
+    }
+
+    /**
+     * @param <K> Any class
+     * @param <V> Any class
+     * @hide
+     */
+    public interface TriConsumer<K, V> {
+        /** Consume the int-K-V tuple. */
+        void accept(int key, K mapKey, V value);
+    }
+
+    /**
+     * Iterate through all int-K pairs and operate on all of the values.
+     * @hide
+     */
+    public void forEach(@NonNull TriConsumer<K, V> consumer) {
+        for (int iIdx = numMaps() - 1; iIdx >= 0; --iIdx) {
+            final int i = mData.keyAt(iIdx);
+            final ArrayMap<K, V> data = mData.valueAt(iIdx);
+            for (int kIdx = data.size() - 1; kIdx >= 0; --kIdx) {
+                consumer.accept(i, data.keyAt(kIdx), data.valueAt(kIdx));
             }
         }
     }

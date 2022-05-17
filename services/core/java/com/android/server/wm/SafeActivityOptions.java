@@ -78,6 +78,18 @@ public class SafeActivityOptions {
     }
 
     /**
+     * Constructs a new instance from a bundle and provided pid/uid.
+     *
+     * @param bOptions The {@link ActivityOptions} as {@link Bundle}.
+     */
+    static SafeActivityOptions fromBundle(Bundle bOptions, int callingPid, int callingUid) {
+        return bOptions != null
+                ? new SafeActivityOptions(ActivityOptions.fromBundle(bOptions),
+                        callingPid, callingUid)
+                : null;
+    }
+
+    /**
      * Constructs a new instance and records {@link Binder#getCallingPid}/
      * {@link Binder#getCallingUid}. Thus, calling identity MUST NOT be cleared when constructing
      * this object.
@@ -87,6 +99,17 @@ public class SafeActivityOptions {
     public SafeActivityOptions(@Nullable ActivityOptions options) {
         mOriginalCallingPid = Binder.getCallingPid();
         mOriginalCallingUid = Binder.getCallingUid();
+        mOriginalOptions = options;
+    }
+
+    /**
+     * Constructs a new instance.
+     *
+     * @param options The options to wrap.
+     */
+    private SafeActivityOptions(@Nullable ActivityOptions options, int callingPid, int callingUid) {
+        mOriginalCallingPid = callingPid;
+        mOriginalCallingUid = callingUid;
         mOriginalOptions = options;
     }
 

@@ -33,6 +33,25 @@ if [ "x$1" == "xdata" ]; then
     exit 1
 fi
 
+# `svc bluetooth` has been migrated to BluetoothShellCommand,
+# simply perform translation to `cmd bluetooth set-bluetooth-enabled` here.
+if [ "x$1" == "xbluetooth" ]; then
+    # `cmd wifi` by convention uses enabled/disabled
+    # instead of enable/disable
+    if [ "x$2" == "xenable" ]; then
+        exec cmd bluetooth_manager enable
+    elif [ "x$2" == "xdisable" ]; then
+        exec cmd bluetooth_manager disable
+    else
+        echo "Control the Bluetooth manager"
+        echo ""
+        echo "usage: svc bluetooth [enable|disable]"
+        echo "         Turn Bluetooth on or off."
+        echo ""
+    fi
+    exit 1
+fi
+
 export CLASSPATH=/system/framework/svc.jar
 exec app_process /system/bin com.android.commands.svc.Svc "$@"
 

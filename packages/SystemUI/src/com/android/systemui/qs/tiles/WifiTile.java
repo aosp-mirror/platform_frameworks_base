@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -27,39 +28,31 @@ import android.service.quicksettings.Tile;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Switch;
 
 import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.settingslib.wifi.AccessPoint;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
-import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.SignalState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.AlphaControlledSignalTileView;
-import com.android.systemui.qs.QSDetailItems;
-import com.android.systemui.qs.QSDetailItems.Item;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSIconViewImpl;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
-import com.android.systemui.statusbar.policy.NetworkController;
-import com.android.systemui.statusbar.policy.NetworkController.AccessPointController;
-import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
-import com.android.systemui.statusbar.policy.NetworkController.WifiIndicators;
-import com.android.systemui.statusbar.policy.WifiIcons;
-import com.android.wifitrackerlib.WifiEntry;
-
-import java.util.List;
+import com.android.systemui.statusbar.connectivity.AccessPointController;
+import com.android.systemui.statusbar.connectivity.NetworkController;
+import com.android.systemui.statusbar.connectivity.SignalCallback;
+import com.android.systemui.statusbar.connectivity.WifiIcons;
+import com.android.systemui.statusbar.connectivity.WifiIndicators;
 
 import javax.inject.Inject;
 
@@ -69,7 +62,6 @@ public class WifiTile extends QSTileImpl<SignalState> {
 
     protected final NetworkController mController;
     private final AccessPointController mWifiController;
-    private final WifiDetailAdapter mDetailAdapter;
     private final QSTile.SignalState mStateBeforeClick = newTileState();
 
     protected final WifiSignalCallback mSignalCallback = new WifiSignalCallback();
@@ -92,7 +84,6 @@ public class WifiTile extends QSTileImpl<SignalState> {
                 statusBarStateController, activityStarter, qsLogger);
         mController = networkController;
         mWifiController = accessPointController;
-        mDetailAdapter = (WifiDetailAdapter) createDetailAdapter();
         mController.observe(getLifecycle(), mSignalCallback);
         mStateBeforeClick.spec = "wifi";
     }
@@ -100,25 +91,6 @@ public class WifiTile extends QSTileImpl<SignalState> {
     @Override
     public SignalState newTileState() {
         return new SignalState();
-    }
-
-    @Override
-    public void setDetailListening(boolean listening) {
-        if (listening) {
-            mWifiController.addAccessPointCallback(mDetailAdapter);
-        } else {
-            mWifiController.removeAccessPointCallback(mDetailAdapter);
-        }
-    }
-
-    @Override
-    public DetailAdapter getDetailAdapter() {
-        return mDetailAdapter;
-    }
-
-    @Override
-    protected DetailAdapter createDetailAdapter() {
-        return new WifiDetailAdapter();
     }
 
     @Override
@@ -157,7 +129,6 @@ public class WifiTile extends QSTileImpl<SignalState> {
                     new Intent(Settings.ACTION_WIFI_SETTINGS), 0);
             return;
         }
-        showDetail(true);
         if (!mState.value) {
             mController.setWifiEnabled(true);
         }
@@ -184,11 +155,6 @@ public class WifiTile extends QSTileImpl<SignalState> {
                 && (cb.ssid != null || cb.wifiSignalIconId != WifiIcons.QS_WIFI_NO_NETWORK);
         boolean wifiNotConnected = (cb.ssid == null)
                 && (cb.wifiSignalIconId == WifiIcons.QS_WIFI_NO_NETWORK);
-        boolean enabledChanging = state.value != cb.enabled;
-        if (enabledChanging) {
-            mDetailAdapter.setItemsVisible(cb.enabled);
-            fireToggleStateChanged(cb.enabled);
-        }
         if (state.slash == null) {
             state.slash = new SlashState();
             state.slash.rotation = 6;
@@ -253,24 +219,11 @@ public class WifiTile extends QSTileImpl<SignalState> {
     }
 
     @Override
-    protected boolean shouldAnnouncementBeDelayed() {
-        return mStateBeforeClick.value == mState.value;
-    }
-
-    @Override
-    protected String composeChangeAnnouncement() {
-        if (mState.value) {
-            return mContext.getString(R.string.accessibility_quick_settings_wifi_changed_on);
-        } else {
-            return mContext.getString(R.string.accessibility_quick_settings_wifi_changed_off);
-        }
-    }
-
-    @Override
     public boolean isAvailable() {
         return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI);
     }
 
+    @Nullable
     private static String removeDoubleQuotes(String string) {
         if (string == null) return null;
         final int length = string.length();
@@ -284,11 +237,14 @@ public class WifiTile extends QSTileImpl<SignalState> {
         boolean enabled;
         boolean connected;
         int wifiSignalIconId;
+        @Nullable
         String ssid;
         boolean activityIn;
         boolean activityOut;
+        @Nullable
         String wifiSignalContentDescription;
         boolean isTransient;
+        @Nullable
         public String statusLabel;
 
         @Override
@@ -310,7 +266,7 @@ public class WifiTile extends QSTileImpl<SignalState> {
         final CallbackInfo mInfo = new CallbackInfo();
 
         @Override
-        public void setWifiIndicators(WifiIndicators indicators) {
+        public void setWifiIndicators(@NonNull WifiIndicators indicators) {
             if (DEBUG) Log.d(TAG, "onWifiSignalChanged enabled=" + indicators.enabled);
             if (indicators.qsIcon == null) {
                 return;
@@ -324,151 +280,7 @@ public class WifiTile extends QSTileImpl<SignalState> {
             mInfo.wifiSignalContentDescription = indicators.qsIcon.contentDescription;
             mInfo.isTransient = indicators.isTransient;
             mInfo.statusLabel = indicators.statusLabel;
-            if (isShowingDetail()) {
-                mDetailAdapter.updateItems();
-            }
             refreshState();
         }
-    }
-
-    protected class WifiDetailAdapter implements DetailAdapter,
-            NetworkController.AccessPointController.AccessPointCallback, QSDetailItems.Callback {
-
-        private QSDetailItems mItems;
-        private WifiEntry[] mAccessPoints;
-
-        @Override
-        public CharSequence getTitle() {
-            return mContext.getString(R.string.quick_settings_wifi_label);
-        }
-
-        public Intent getSettingsIntent() {
-            return WIFI_SETTINGS;
-        }
-
-        @Override
-        public Boolean getToggleState() {
-            return mState.value;
-        }
-
-        @Override
-        public void setToggleState(boolean state) {
-            if (DEBUG) Log.d(TAG, "setToggleState " + state);
-            MetricsLogger.action(mContext, MetricsEvent.QS_WIFI_TOGGLE, state);
-            mController.setWifiEnabled(state);
-        }
-
-        @Override
-        public int getMetricsCategory() {
-            return MetricsEvent.QS_WIFI_DETAILS;
-        }
-
-        @Override
-        public View createDetailView(Context context, View convertView, ViewGroup parent) {
-            if (DEBUG) Log.d(TAG, "createDetailView convertView=" + (convertView != null));
-            mAccessPoints = null;
-            mItems = QSDetailItems.convertOrInflate(context, convertView, parent);
-            mItems.setTagSuffix("Wifi");
-            mItems.setCallback(this);
-            mWifiController.scanForAccessPoints(); // updates APs and items
-            setItemsVisible(mState.value);
-            return mItems;
-        }
-
-        @Override
-        public void onAccessPointsChanged(final List<WifiEntry> accessPoints) {
-            mAccessPoints = accessPoints.toArray(new WifiEntry[accessPoints.size()]);
-            filterUnreachableAPs();
-
-            updateItems();
-        }
-
-        /** Filter unreachable APs from mAccessPoints */
-        private void filterUnreachableAPs() {
-            int numReachable = 0;
-            for (WifiEntry ap : mAccessPoints) {
-                if (isWifiEntryReachable(ap)) numReachable++;
-            }
-            if (numReachable != mAccessPoints.length) {
-                WifiEntry[] unfiltered = mAccessPoints;
-                mAccessPoints = new WifiEntry[numReachable];
-                int i = 0;
-                for (WifiEntry ap : unfiltered) {
-                    if (isWifiEntryReachable(ap)) mAccessPoints[i++] = ap;
-                }
-            }
-        }
-
-        @Override
-        public void onSettingsActivityTriggered(Intent settingsIntent) {
-            mActivityStarter.postStartActivityDismissingKeyguard(settingsIntent, 0);
-        }
-
-        @Override
-        public void onDetailItemClick(Item item) {
-            if (item == null || item.tag == null) return;
-            final WifiEntry ap = (WifiEntry) item.tag;
-            if (ap.getConnectedState() == WifiEntry.CONNECTED_STATE_DISCONNECTED) {
-                if (mWifiController.connect(ap)) {
-                    mHost.collapsePanels();
-                }
-            }
-            showDetail(false);
-        }
-
-        @Override
-        public void onDetailItemDisconnect(Item item) {
-            // noop
-        }
-
-        public void setItemsVisible(boolean visible) {
-            if (mItems == null) return;
-            mItems.setItemsVisible(visible);
-        }
-
-        private void updateItems() {
-            if (mItems == null) return;
-            if ((mAccessPoints != null && mAccessPoints.length > 0)
-                    || !mSignalCallback.mInfo.enabled) {
-                fireScanStateChanged(false);
-            } else {
-                fireScanStateChanged(true);
-            }
-
-            // Wi-Fi is off
-            if (!mSignalCallback.mInfo.enabled) {
-                mItems.setEmptyState(WifiIcons.QS_WIFI_NO_NETWORK,
-                        R.string.wifi_is_off);
-                mItems.setItems(null);
-                return;
-            }
-
-            // No available access points
-            mItems.setEmptyState(WifiIcons.QS_WIFI_NO_NETWORK,
-                    R.string.quick_settings_wifi_detail_empty_text);
-
-            // Build the list
-            Item[] items = null;
-            if (mAccessPoints != null) {
-                items = new Item[mAccessPoints.length];
-                for (int i = 0; i < mAccessPoints.length; i++) {
-                    final WifiEntry ap = mAccessPoints[i];
-                    final Item item = new Item();
-                    item.tag = ap;
-                    item.iconResId = mWifiController.getIcon(ap);
-                    item.line1 = ap.getSsid();
-                    item.line2 = ap.getSummary();
-                    item.icon2 = ap.getSecurity() != AccessPoint.SECURITY_NONE
-                            ? R.drawable.qs_ic_wifi_lock
-                            : -1;
-                    items[i] = item;
-                }
-            }
-            mItems.setItems(items);
-        }
-    }
-
-    private static boolean isWifiEntryReachable(WifiEntry ap) {
-        return ap.getLevel() != WifiEntry.WIFI_LEVEL_UNREACHABLE;
     }
 }

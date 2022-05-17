@@ -19,18 +19,24 @@ package com.android.systemui.media
 import android.media.session.MediaController
 import android.media.session.PlaybackState
 import android.os.SystemProperties
-import android.util.Log
+import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.NotificationMediaManager.isPlayingState
+import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.time.SystemClock
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-private const val DEBUG = true
-private const val TAG = "MediaTimeout"
-private val PAUSED_MEDIA_TIMEOUT = SystemProperties
+@VisibleForTesting
+val PAUSED_MEDIA_TIMEOUT = SystemProperties
         .getLong("debug.sysui.media_timeout", TimeUnit.MINUTES.toMillis(10))
+
+@VisibleForTesting
+val RESUME_MEDIA_TIMEOUT = SystemProperties
+        .getLong("debug.sysui.media_timeout_resume", TimeUnit.DAYS.toMillis(3))
 
 /**
  * Controller responsible for keeping track of playback states and expiring inactive streams.
@@ -38,23 +44,53 @@ private val PAUSED_MEDIA_TIMEOUT = SystemProperties
 @SysUISingleton
 class MediaTimeoutListener @Inject constructor(
     private val mediaControllerFactory: MediaControllerFactory,
-    @Main private val mainExecutor: DelayableExecutor
+    @Main private val mainExecutor: DelayableExecutor,
+    private val logger: MediaTimeoutLogger,
+    statusBarStateController: SysuiStatusBarStateController,
+    private val systemClock: SystemClock
 ) : MediaDataManager.Listener {
 
     private val mediaListeners: MutableMap<String, PlaybackStateListener> = mutableMapOf()
 
     /**
      * Callback representing that a media object is now expired:
-     * @param token Media session unique identifier
-     * @param pauseTimeout True when expired for {@code PAUSED_MEDIA_TIMEOUT}
+     * @param key Media control unique identifier
+     * @param timedOut True when expired for {@code PAUSED_MEDIA_TIMEOUT} for active media,
+     *                 or {@code RESUME_MEDIA_TIMEOUT} for resume media
      */
     lateinit var timeoutCallback: (String, Boolean) -> Unit
+
+    /**
+     * Callback representing that a media object [PlaybackState] has changed.
+     * @param key Media control unique identifier
+     * @param state The new [PlaybackState]
+     */
+    lateinit var stateCallback: (String, PlaybackState) -> Unit
+
+    init {
+        statusBarStateController.addCallback(object : StatusBarStateController.StateListener {
+            override fun onDozingChanged(isDozing: Boolean) {
+                if (!isDozing) {
+                    // Check whether any timeouts should have expired
+                    mediaListeners.forEach { (key, listener) ->
+                        if (listener.cancellation != null &&
+                                listener.expiration <= systemClock.elapsedRealtime()) {
+                            // We dozed too long - timeout now, and cancel the pending one
+                            listener.expireMediaTimeout(key, "timeout happened while dozing")
+                            listener.doTimeout()
+                        }
+                    }
+                }
+            }
+        })
+    }
 
     override fun onMediaDataLoaded(
         key: String,
         oldKey: String?,
         data: MediaData,
         immediately: Boolean,
+        receivedSmartspaceCardLatency: Int,
         isSsReactivated: Boolean
     ) {
         var reusedListener: PlaybackStateListener? = null
@@ -66,9 +102,7 @@ class MediaTimeoutListener @Inject constructor(
             }
 
             // If listener was destroyed previously, we'll need to re-register it
-            if (DEBUG) {
-                Log.d(TAG, "Reusing destroyed listener $key")
-            }
+            logger.logReuseListener(key)
             reusedListener = it
         }
 
@@ -77,26 +111,22 @@ class MediaTimeoutListener @Inject constructor(
         val migrating = oldKey != null && key != oldKey
         if (migrating) {
             reusedListener = mediaListeners.remove(oldKey)
-            if (reusedListener != null) {
-                if (DEBUG) Log.d(TAG, "migrating key $oldKey to $key, for resumption")
-            } else {
-                Log.w(TAG, "Old key $oldKey for player $key doesn't exist. Continuing...")
-            }
+            logger.logMigrateListener(oldKey, key, reusedListener != null)
         }
 
         reusedListener?.let {
-            val wasPlaying = it.playing ?: false
-            if (DEBUG) Log.d(TAG, "updating listener for $key, was playing? $wasPlaying")
+            val wasPlaying = it.isPlaying()
+            logger.logUpdateListener(key, wasPlaying)
             it.mediaData = data
             it.key = key
             mediaListeners[key] = it
-            if (wasPlaying != it.playing) {
+            if (wasPlaying != it.isPlaying()) {
                 // If a player becomes active because of a migration, we'll need to broadcast
                 // its state. Doing it now would lead to reentrant callbacks, so let's wait
                 // until we're done.
                 mainExecutor.execute {
-                    if (mediaListeners[key]?.playing == true) {
-                        if (DEBUG) Log.d(TAG, "deliver delayed playback state for $key")
+                    if (mediaListeners[key]?.isPlaying() == true) {
+                        logger.logDelayedUpdate(key)
                         timeoutCallback.invoke(key, false /* timedOut */)
                     }
                 }
@@ -121,8 +151,10 @@ class MediaTimeoutListener @Inject constructor(
     ) : MediaController.Callback() {
 
         var timedOut = false
-        var playing: Boolean? = null
+        var lastState: PlaybackState? = null
+        var resumption: Boolean? = null
         var destroyed = false
+        var expiration = Long.MAX_VALUE
 
         var mediaData: MediaData = data
             set(value) {
@@ -142,7 +174,11 @@ class MediaTimeoutListener @Inject constructor(
 
         // Resume controls may have null token
         private var mediaController: MediaController? = null
-        private var cancellation: Runnable? = null
+        var cancellation: Runnable? = null
+            private set
+
+        fun Int.isPlaying() = isPlayingState(this)
+        fun isPlaying() = lastState?.state?.isPlaying() ?: false
 
         init {
             mediaData = data
@@ -159,43 +195,56 @@ class MediaTimeoutListener @Inject constructor(
         }
 
         override fun onSessionDestroyed() {
-            // If the session is destroyed, the controller is no longer valid, and we will need to
-            // recreate it if this key is updated later
-            if (DEBUG) {
-                Log.d(TAG, "Session destroyed for $key")
+            logger.logSessionDestroyed(key)
+            if (resumption == true) {
+                // Some apps create a session when MBS is queried. We should unregister the
+                // controller since it will no longer be valid, but don't cancel the timeout
+                mediaController?.unregisterCallback(this)
+            } else {
+                // For active controls, if the session is destroyed, clean up everything since we
+                // will need to recreate it if this key is updated later
+                destroy()
             }
-            destroy()
         }
 
         private fun processState(state: PlaybackState?, dispatchEvents: Boolean) {
-            if (DEBUG) {
-                Log.v(TAG, "processState $key: $state")
+            logger.logPlaybackState(key, state)
+
+            val playingStateSame = (state?.state?.isPlaying() == isPlaying())
+            val actionsSame = (lastState?.actions == state?.actions) &&
+                    areCustomActionListsEqual(lastState?.customActions, state?.customActions)
+            val resumptionChanged = resumption != mediaData.resumption
+
+            lastState = state
+
+            if ((!actionsSame || !playingStateSame) && state != null && dispatchEvents) {
+                logger.logStateCallback(key)
+                stateCallback.invoke(key, state)
             }
 
-            val isPlaying = state != null && isPlayingState(state.state)
-            if (playing == isPlaying && playing != null) {
+            if (playingStateSame && !resumptionChanged) {
                 return
             }
-            playing = isPlaying
+            resumption = mediaData.resumption
 
-            if (!isPlaying) {
-                if (DEBUG) {
-                    Log.v(TAG, "schedule timeout for $key")
-                }
-                if (cancellation != null) {
-                    if (DEBUG) Log.d(TAG, "cancellation already exists, continuing.")
+            val playing = isPlaying()
+            if (!playing) {
+                logger.logScheduleTimeout(key, playing, resumption!!)
+                if (cancellation != null && !resumptionChanged) {
+                    // if the media changed resume state, we'll need to adjust the timeout length
+                    logger.logCancelIgnored(key)
                     return
                 }
-                expireMediaTimeout(key, "PLAYBACK STATE CHANGED - $state")
+                expireMediaTimeout(key, "PLAYBACK STATE CHANGED - $state, $resumption")
+                val timeout = if (mediaData.resumption) {
+                    RESUME_MEDIA_TIMEOUT
+                } else {
+                    PAUSED_MEDIA_TIMEOUT
+                }
+                expiration = systemClock.elapsedRealtime() + timeout
                 cancellation = mainExecutor.executeDelayed({
-                    cancellation = null
-                    if (DEBUG) {
-                        Log.v(TAG, "Execute timeout for $key")
-                    }
-                    timedOut = true
-                    // this event is async, so it's safe even when `dispatchEvents` is false
-                    timeoutCallback(key, timedOut)
-                }, PAUSED_MEDIA_TIMEOUT)
+                    doTimeout()
+                }, timeout)
             } else {
                 expireMediaTimeout(key, "playback started - $state, $key")
                 timedOut = false
@@ -205,14 +254,68 @@ class MediaTimeoutListener @Inject constructor(
             }
         }
 
-        private fun expireMediaTimeout(mediaKey: String, reason: String) {
+        fun doTimeout() {
+            cancellation = null
+            logger.logTimeout(key)
+            timedOut = true
+            expiration = Long.MAX_VALUE
+            // this event is async, so it's safe even when `dispatchEvents` is false
+            timeoutCallback(key, timedOut)
+        }
+
+        fun expireMediaTimeout(mediaKey: String, reason: String) {
             cancellation?.apply {
-                if (DEBUG) {
-                    Log.v(TAG, "media timeout cancelled for  $mediaKey, reason: $reason")
-                }
+                logger.logTimeoutCancelled(mediaKey, reason)
                 run()
             }
+            expiration = Long.MAX_VALUE
             cancellation = null
         }
+    }
+
+    private fun areCustomActionListsEqual(
+        first: List<PlaybackState.CustomAction>?,
+        second: List<PlaybackState.CustomAction>?
+    ): Boolean {
+        // Same object, or both null
+        if (first === second) {
+            return true
+        }
+
+        // Only one null, or different number of actions
+        if ((first == null || second == null) || (first.size != second.size)) {
+            return false
+        }
+
+        // Compare individual actions
+        first.asSequence().zip(second.asSequence()).forEach { (firstAction, secondAction) ->
+            if (!areCustomActionsEqual(firstAction, secondAction)) {
+                return false
+            }
+        }
+        return true
+    }
+
+    private fun areCustomActionsEqual(
+        firstAction: PlaybackState.CustomAction,
+        secondAction: PlaybackState.CustomAction
+    ): Boolean {
+        if (firstAction.action != secondAction.action ||
+                firstAction.name != secondAction.name ||
+                firstAction.icon != secondAction.icon) {
+            return false
+        }
+
+        if ((firstAction.extras == null) != (secondAction.extras == null)) {
+            return false
+        }
+        if (firstAction.extras != null) {
+            firstAction.extras.keySet().forEach { key ->
+                if (firstAction.extras.get(key) != secondAction.extras.get(key)) {
+                    return false
+                }
+            }
+        }
+        return true
     }
 }

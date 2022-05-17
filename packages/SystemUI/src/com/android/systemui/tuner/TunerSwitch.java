@@ -23,6 +23,7 @@ public class TunerSwitch extends SwitchPreference implements Tunable {
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.TunerSwitch);
         mDefault = a.getBoolean(R.styleable.TunerSwitch_defValue, false);
         mAction = a.getInt(R.styleable.TunerSwitch_metricsAction, -1);
+        a.recycle();
     }
 
     @Override

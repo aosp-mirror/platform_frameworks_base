@@ -19,14 +19,16 @@ package com.android.systemui.dump
 import android.content.Context
 import android.os.SystemClock
 import android.os.Trace
+import com.android.systemui.CoreStartable
 import com.android.systemui.R
 import com.android.systemui.dump.DumpHandler.Companion.PRIORITY_ARG_CRITICAL
 import com.android.systemui.dump.DumpHandler.Companion.PRIORITY_ARG_HIGH
 import com.android.systemui.dump.DumpHandler.Companion.PRIORITY_ARG_NORMAL
 import com.android.systemui.log.LogBuffer
-import java.io.FileDescriptor
+import com.android.systemui.shared.system.UncaughtExceptionPreHandlerManager
 import java.io.PrintWriter
 import javax.inject.Inject
+import javax.inject.Provider
 
 /**
  * Oversees SystemUI's output during bug reports (and dumpsys in general)
@@ -80,12 +82,25 @@ import javax.inject.Inject
 class DumpHandler @Inject constructor(
     private val context: Context,
     private val dumpManager: DumpManager,
-    private val logBufferEulogizer: LogBufferEulogizer
+    private val logBufferEulogizer: LogBufferEulogizer,
+    private val startables: MutableMap<Class<*>, Provider<CoreStartable>>,
+    private val uncaughtExceptionPreHandlerManager: UncaughtExceptionPreHandlerManager
 ) {
+    /**
+     * Registers an uncaught exception handler
+     */
+    fun init() {
+        uncaughtExceptionPreHandlerManager.registerHandler { _, e ->
+            if (e is Exception) {
+                logBufferEulogizer.record(e)
+            }
+        }
+    }
+
     /**
      * Dump the diagnostics! Behavior can be controlled via [args].
      */
-    fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<String>) {
+    fun dump(pw: PrintWriter, args: Array<String>) {
         Trace.beginSection("DumpManager#dump()")
         val start = SystemClock.uptimeMillis()
 
@@ -97,9 +112,9 @@ class DumpHandler @Inject constructor(
         }
 
         when (parsedArgs.dumpPriority) {
-            PRIORITY_ARG_CRITICAL -> dumpCritical(fd, pw, parsedArgs)
+            PRIORITY_ARG_CRITICAL -> dumpCritical(pw, parsedArgs)
             PRIORITY_ARG_NORMAL -> dumpNormal(pw, parsedArgs)
-            else -> dumpParameterized(fd, pw, parsedArgs)
+            else -> dumpParameterized(pw, parsedArgs)
         }
 
         pw.println()
@@ -107,20 +122,20 @@ class DumpHandler @Inject constructor(
         Trace.endSection()
     }
 
-    private fun dumpParameterized(fd: FileDescriptor, pw: PrintWriter, args: ParsedArgs) {
+    private fun dumpParameterized(pw: PrintWriter, args: ParsedArgs) {
         when (args.command) {
-            "bugreport-critical" -> dumpCritical(fd, pw, args)
+            "bugreport-critical" -> dumpCritical(pw, args)
             "bugreport-normal" -> dumpNormal(pw, args)
-            "dumpables" -> dumpDumpables(fd, pw, args)
+            "dumpables" -> dumpDumpables(pw, args)
             "buffers" -> dumpBuffers(pw, args)
             "config" -> dumpConfig(pw)
             "help" -> dumpHelp(pw)
-            else -> dumpTargets(args.nonFlagArgs, fd, pw, args)
+            else -> dumpTargets(args.nonFlagArgs, pw, args)
         }
     }
 
-    private fun dumpCritical(fd: FileDescriptor, pw: PrintWriter, args: ParsedArgs) {
-        dumpManager.dumpDumpables(fd, pw, args.rawArgs)
+    private fun dumpCritical(pw: PrintWriter, args: ParsedArgs) {
+        dumpManager.dumpDumpables(pw, args.rawArgs)
         dumpConfig(pw)
     }
 
@@ -129,11 +144,11 @@ class DumpHandler @Inject constructor(
         logBufferEulogizer.readEulogyIfPresent(pw)
     }
 
-    private fun dumpDumpables(fw: FileDescriptor, pw: PrintWriter, args: ParsedArgs) {
+    private fun dumpDumpables(pw: PrintWriter, args: ParsedArgs) {
         if (args.listOnly) {
             dumpManager.listDumpables(pw)
         } else {
-            dumpManager.dumpDumpables(fw, pw, args.rawArgs)
+            dumpManager.dumpDumpables(pw, args.rawArgs)
         }
     }
 
@@ -147,13 +162,12 @@ class DumpHandler @Inject constructor(
 
     private fun dumpTargets(
         targets: List<String>,
-        fd: FileDescriptor,
         pw: PrintWriter,
         args: ParsedArgs
     ) {
         if (targets.isNotEmpty()) {
             for (target in targets) {
-                dumpManager.dumpTarget(target, fd, pw, args.rawArgs, args.tailLength)
+                dumpManager.dumpTarget(target, pw, args.rawArgs, args.tailLength)
             }
         } else {
             if (args.listOnly) {
@@ -173,12 +187,21 @@ class DumpHandler @Inject constructor(
         pw.println("SystemUiServiceComponents configuration:")
         pw.print("vendor component: ")
         pw.println(context.resources.getString(R.string.config_systemUIVendorServiceComponent))
-        dumpServiceList(pw, "global", R.array.config_systemUIServiceComponents)
+        val services: MutableList<String> = startables.keys
+                .map({ cls: Class<*> -> cls.simpleName })
+                .toMutableList()
+
+        services.add(context.resources.getString(R.string.config_systemUIVendorServiceComponent))
+        dumpServiceList(pw, "global", services.toTypedArray())
         dumpServiceList(pw, "per-user", R.array.config_systemUIServiceComponentsPerUser)
     }
 
     private fun dumpServiceList(pw: PrintWriter, type: String, resId: Int) {
-        val services: Array<String>? = context.resources.getStringArray(resId)
+        val services: Array<String> = context.resources.getStringArray(resId)
+        dumpServiceList(pw, type, services)
+    }
+
+    private fun dumpServiceList(pw: PrintWriter, type: String, services: Array<String>?) {
         pw.print(type)
         pw.print(": ")
         if (services == null) {

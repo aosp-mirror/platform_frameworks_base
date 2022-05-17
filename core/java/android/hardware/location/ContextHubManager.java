@@ -47,9 +47,7 @@ import java.util.concurrent.Executor;
  * A class that exposes the Context hubs on a device to applications.
  *
  * Please note that this class is not expected to be used by unbundled applications. Also, calling
- * applications are expected to have LOCATION_HARDWARE or ACCESS_CONTEXT_HUB permissions to use this
- * class. Use of LOCATION_HARDWARE to enable access to these APIs is deprecated and may be removed
- * in the future - all applications are recommended to move to the ACCESS_CONTEXT_HUB permission.
+ * applications are expected to have the ACCESS_CONTEXT_HUB permission to use this class.
  *
  * @hide
  */
@@ -253,10 +251,7 @@ public final class ContextHubManager {
      *             new APIs.
      */
     @Deprecated
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.LOCATION_HARDWARE,
-            android.Manifest.permission.ACCESS_CONTEXT_HUB
-    })
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     public int[] getContextHubHandles() {
         try {
             return mService.getContextHubHandles();
@@ -277,10 +272,7 @@ public final class ContextHubManager {
      *             new APIs.
      */
     @Deprecated
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.LOCATION_HARDWARE,
-            android.Manifest.permission.ACCESS_CONTEXT_HUB
-    })
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     public ContextHubInfo getContextHubInfo(int hubHandle) {
         try {
             return mService.getContextHubInfo(hubHandle);
@@ -311,10 +303,7 @@ public final class ContextHubManager {
      * @deprecated Use {@link #loadNanoApp(ContextHubInfo, NanoAppBinary)} instead.
      */
     @Deprecated
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.LOCATION_HARDWARE,
-            android.Manifest.permission.ACCESS_CONTEXT_HUB
-    })
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     public int loadNanoApp(int hubHandle, @NonNull NanoApp app) {
         try {
             return mService.loadNanoApp(hubHandle, app);
@@ -341,10 +330,7 @@ public final class ContextHubManager {
      * @deprecated Use {@link #unloadNanoApp(ContextHubInfo, long)} instead.
      */
     @Deprecated
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.LOCATION_HARDWARE,
-            android.Manifest.permission.ACCESS_CONTEXT_HUB
-    })
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     public int unloadNanoApp(int nanoAppHandle) {
         try {
             return mService.unloadNanoApp(nanoAppHandle);
@@ -384,10 +370,7 @@ public final class ContextHubManager {
      *             for loaded nanoapps.
      */
     @Deprecated
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.LOCATION_HARDWARE,
-            android.Manifest.permission.ACCESS_CONTEXT_HUB
-    })
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @Nullable public NanoAppInstanceInfo getNanoAppInstanceInfo(int nanoAppHandle) {
         try {
             return mService.getNanoAppInstanceInfo(nanoAppHandle);
@@ -410,10 +393,7 @@ public final class ContextHubManager {
      *             for loaded nanoapps.
      */
     @Deprecated
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.LOCATION_HARDWARE,
-            android.Manifest.permission.ACCESS_CONTEXT_HUB
-    })
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @NonNull public int[] findNanoAppOnHub(int hubHandle, @NonNull NanoAppFilter filter) {
         try {
             return mService.findNanoAppOnHub(hubHandle, filter);
@@ -448,10 +428,7 @@ public final class ContextHubManager {
      *             or {@link #createClient(ContextHubInfo, ContextHubClientCallback)}.
      */
     @Deprecated
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.LOCATION_HARDWARE,
-            android.Manifest.permission.ACCESS_CONTEXT_HUB
-    })
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     public int sendMessage(int hubHandle, int nanoAppHandle, @NonNull ContextHubMessage message) {
         try {
             return mService.sendMessage(hubHandle, nanoAppHandle, message);
@@ -467,10 +444,7 @@ public final class ContextHubManager {
      *
      * @see ContextHubInfo
      */
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.LOCATION_HARDWARE,
-            android.Manifest.permission.ACCESS_CONTEXT_HUB
-    })
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @NonNull public List<ContextHubInfo> getContextHubs() {
         try {
             return mService.getContextHubs();
@@ -547,10 +521,7 @@ public final class ContextHubManager {
      *
      * @see NanoAppBinary
      */
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.LOCATION_HARDWARE,
-            android.Manifest.permission.ACCESS_CONTEXT_HUB
-    })
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @NonNull public ContextHubTransaction<Void> loadNanoApp(
             @NonNull ContextHubInfo hubInfo, @NonNull NanoAppBinary appBinary) {
         Objects.requireNonNull(hubInfo, "ContextHubInfo cannot be null");
@@ -579,10 +550,7 @@ public final class ContextHubManager {
      *
      * @throws NullPointerException if hubInfo is null
      */
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.LOCATION_HARDWARE,
-            android.Manifest.permission.ACCESS_CONTEXT_HUB
-    })
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @NonNull public ContextHubTransaction<Void> unloadNanoApp(
             @NonNull ContextHubInfo hubInfo, long nanoAppId) {
         Objects.requireNonNull(hubInfo, "ContextHubInfo cannot be null");
@@ -610,10 +578,7 @@ public final class ContextHubManager {
      *
      * @throws NullPointerException if hubInfo is null
      */
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.LOCATION_HARDWARE,
-            android.Manifest.permission.ACCESS_CONTEXT_HUB
-    })
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @NonNull public ContextHubTransaction<Void> enableNanoApp(
             @NonNull ContextHubInfo hubInfo, long nanoAppId) {
         Objects.requireNonNull(hubInfo, "ContextHubInfo cannot be null");
@@ -641,10 +606,7 @@ public final class ContextHubManager {
      *
      * @throws NullPointerException if hubInfo is null
      */
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.LOCATION_HARDWARE,
-            android.Manifest.permission.ACCESS_CONTEXT_HUB
-    })
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @NonNull public ContextHubTransaction<Void> disableNanoApp(
             @NonNull ContextHubInfo hubInfo, long nanoAppId) {
         Objects.requireNonNull(hubInfo, "ContextHubInfo cannot be null");
@@ -671,10 +633,7 @@ public final class ContextHubManager {
      *
      * @throws NullPointerException if hubInfo is null
      */
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.LOCATION_HARDWARE,
-            android.Manifest.permission.ACCESS_CONTEXT_HUB
-    })
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @NonNull public ContextHubTransaction<List<NanoAppState>> queryNanoApps(
             @NonNull ContextHubInfo hubInfo) {
         Objects.requireNonNull(hubInfo, "ContextHubInfo cannot be null");
@@ -829,10 +788,7 @@ public final class ContextHubManager {
      *
      * @see ContextHubClientCallback
      */
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.LOCATION_HARDWARE,
-            android.Manifest.permission.ACCESS_CONTEXT_HUB
-    })
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @NonNull public ContextHubClient createClient(
             @Nullable Context context, @NonNull ContextHubInfo hubInfo,
             @NonNull @CallbackExecutor Executor executor,
@@ -876,10 +832,7 @@ public final class ContextHubManager {
      * {@link #createClient(ContextHubInfo, Executor, String, ContextHubClientCallback)}
      * with the {@link Context} being set to null.
      */
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.LOCATION_HARDWARE,
-            android.Manifest.permission.ACCESS_CONTEXT_HUB
-    })
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @NonNull public ContextHubClient createClient(
             @NonNull ContextHubInfo hubInfo, @NonNull ContextHubClientCallback callback,
             @NonNull @CallbackExecutor Executor executor) {
@@ -890,10 +843,7 @@ public final class ContextHubManager {
      * Equivalent to {@link #createClient(ContextHubInfo, ContextHubClientCallback, Executor)}
      * with the executor using the main thread's Looper.
      */
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.LOCATION_HARDWARE,
-            android.Manifest.permission.ACCESS_CONTEXT_HUB
-    })
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @NonNull public ContextHubClient createClient(
             @NonNull ContextHubInfo hubInfo, @NonNull ContextHubClientCallback callback) {
         return createClient(null /* context */, hubInfo, new HandlerExecutor(Handler.getMain()),
@@ -931,6 +881,9 @@ public final class ContextHubManager {
      * on the provided PendingIntent, then the client will be automatically unregistered by the
      * service.
      *
+     * Note that the {@link PendingIntent} supplied to this API must be mutable for Intent
+     * notifications to work.
+     *
      * @param context       the context of the application. If a PendingIntent client is recreated,
      * the latest state in the context will be used and old state will be discarded
      * @param hubInfo       the hub to attach this client to
@@ -938,19 +891,20 @@ public final class ContextHubManager {
      * @param nanoAppId     the ID of the nanoapp that Intent events will be generated for
      * @return the registered client object
      *
-     * @throws IllegalArgumentException if hubInfo does not represent a valid hub
+     * @throws IllegalArgumentException if hubInfo does not represent a valid hub, or an immutable
+     *                                  PendingIntent was supplied
      * @throws IllegalStateException    if there were too many registered clients at the service
      * @throws NullPointerException     if pendingIntent or hubInfo is null
      */
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.LOCATION_HARDWARE,
-            android.Manifest.permission.ACCESS_CONTEXT_HUB
-    })
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @NonNull public ContextHubClient createClient(
             @Nullable Context context, @NonNull ContextHubInfo hubInfo,
             @NonNull PendingIntent pendingIntent, long nanoAppId) {
         Objects.requireNonNull(pendingIntent);
         Objects.requireNonNull(hubInfo);
+        if (pendingIntent.isImmutable()) {
+            throw new IllegalArgumentException("PendingIntent must be mutable");
+        }
 
         ContextHubClient client = new ContextHubClient(hubInfo, true /* persistent */);
 
@@ -975,10 +929,7 @@ public final class ContextHubManager {
      * Equivalent to {@link #createClient(ContextHubInfo, PendingIntent, long, String)}
      * with {@link Context} being set to null.
      */
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.LOCATION_HARDWARE,
-            android.Manifest.permission.ACCESS_CONTEXT_HUB
-    })
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @NonNull public ContextHubClient createClient(
             @NonNull ContextHubInfo hubInfo, @NonNull PendingIntent pendingIntent, long nanoAppId) {
         return createClient(null /* context */, hubInfo, pendingIntent, nanoAppId);

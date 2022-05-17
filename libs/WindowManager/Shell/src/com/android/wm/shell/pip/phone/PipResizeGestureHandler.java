@@ -625,6 +625,7 @@ public class PipResizeGestureHandler {
 
     class PipResizeInputEventReceiver extends BatchedInputEventReceiver {
         PipResizeInputEventReceiver(InputChannel channel, Looper looper) {
+            // TODO(b/222697646): remove getSfInstance usage and use vsyncId for transactions
             super(channel, looper, Choreographer.getSfInstance());
         }
 

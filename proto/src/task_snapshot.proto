@@ -41,4 +41,8 @@
      // The task height when the snapshot was taken
      int32 task_height = 15;
      int32 appearance = 16;
+     int32 letterbox_inset_left = 17;
+     int32 letterbox_inset_top = 18;
+     int32 letterbox_inset_right = 19;
+     int32 letterbox_inset_bottom = 20;
  }

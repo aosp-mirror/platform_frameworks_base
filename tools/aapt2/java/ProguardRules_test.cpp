@@ -44,6 +44,9 @@ TEST(ProguardRulesTest, ManifestRuleDefaultConstructorOnly) {
             android:name="com.foo.BarApplication"
             android:zygotePreloadName="com.foo.BarZygotePreload"
             >
+          <processes>
+            <process android:process=":sub" android:name="com.foo.BazApplication" />
+          </processes>
           <activity android:name="com.foo.BarActivity"/>
           <service android:name="com.foo.BarService"/>
           <receiver android:name="com.foo.BarReceiver"/>
@@ -59,6 +62,7 @@ TEST(ProguardRulesTest, ManifestRuleDefaultConstructorOnly) {
   EXPECT_THAT(actual, HasSubstr("-keep class com.foo.BarAppComponentFactory { <init>(); }"));
   EXPECT_THAT(actual, HasSubstr("-keep class com.foo.BarBackupAgent { <init>(); }"));
   EXPECT_THAT(actual, HasSubstr("-keep class com.foo.BarApplication { <init>(); }"));
+  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.BazApplication { <init>(); }"));
   EXPECT_THAT(actual, HasSubstr("-keep class com.foo.BarActivity { <init>(); }"));
   EXPECT_THAT(actual, HasSubstr("-keep class com.foo.BarService { <init>(); }"));
   EXPECT_THAT(actual, HasSubstr("-keep class com.foo.BarReceiver { <init>(); }"));

@@ -23,6 +23,7 @@ import static com.google.common.truth.Truth.assertThat;
 import android.app.AppGlobals;
 import android.content.pm.IPackageManager;
 import android.content.pm.ProviderInfo;
+import android.os.Process;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -43,8 +44,20 @@ public class AppEnumerationInternalTests {
     private static final String TEST_DATA_PATH = "/data/local/tmp/appenumerationtests/";
     private static final String SYNC_PROVIDER_APK_PATH =
             TEST_DATA_PATH + "AppEnumerationSyncProviderTestApp.apk";
-    private static final String SYNC_PROVIDER_PKG_NAME = "com.android.appenumeration.syncprovider";
-    private static final String SYNC_PROVIDER_AUTHORITY = SYNC_PROVIDER_PKG_NAME;
+    private static final String HAS_APPOP_PERMISSION_APK_PATH =
+            TEST_DATA_PATH + "AppEnumerationHasAppOpPermissionTestApp.apk";
+    private static final String SHARED_USER_APK_PATH =
+            TEST_DATA_PATH + "AppEnumerationSharedUserTestApp.apk";
+
+    private static final String TARGET_SYNC_PROVIDER = "com.android.appenumeration.syncprovider";
+    private static final String TARGET_HAS_APPOP_PERMISSION =
+            "com.android.appenumeration.hasappoppermission";
+    private static final String TARGET_SHARED_USER = "com.android.appenumeration.shareduid";
+
+    private static final String SYNC_PROVIDER_AUTHORITY = TARGET_SYNC_PROVIDER;
+    private static final String PERMISSION_REQUEST_INSTALL_PACKAGES =
+            "android.permission.REQUEST_INSTALL_PACKAGES";
+    private static final String SHARED_USER_NAME = "com.android.appenumeration.shareduid";
 
     private IPackageManager mIPackageManager;
 
@@ -55,7 +68,9 @@ public class AppEnumerationInternalTests {
 
     @After
     public void tearDown() throws Exception {
-        uninstallPackage(SYNC_PROVIDER_PKG_NAME);
+        uninstallPackage(TARGET_SYNC_PROVIDER);
+        uninstallPackage(TARGET_HAS_APPOP_PERMISSION);
+        uninstallPackage(TARGET_SHARED_USER);
     }
 
     @Test
@@ -67,7 +82,7 @@ public class AppEnumerationInternalTests {
 
         assertThat(names).contains(SYNC_PROVIDER_AUTHORITY);
         assertThat(infos.stream().map(info -> info.packageName).collect(Collectors.toList()))
-                .contains(SYNC_PROVIDER_PKG_NAME);
+                .contains(TARGET_SYNC_PROVIDER);
     }
 
     @Test
@@ -79,7 +94,43 @@ public class AppEnumerationInternalTests {
 
         assertThat(names).doesNotContain(SYNC_PROVIDER_AUTHORITY);
         assertThat(infos.stream().map(info -> info.packageName).collect(Collectors.toList()))
-                .doesNotContain(SYNC_PROVIDER_PKG_NAME);
+                .doesNotContain(TARGET_SYNC_PROVIDER);
+    }
+
+    @Test
+    public void getAppOpPermissionPackages_canSeeForceQueryable() throws Exception {
+        installPackage(HAS_APPOP_PERMISSION_APK_PATH, true /* forceQueryable */);
+
+        final String[] packageNames = mIPackageManager.getAppOpPermissionPackages(
+                PERMISSION_REQUEST_INSTALL_PACKAGES);
+
+        assertThat(packageNames).asList().contains(TARGET_HAS_APPOP_PERMISSION);
+    }
+
+    @Test
+    public void getAppOpPermissionPackages_cannotSeeHasAppOpPermission() throws Exception {
+        installPackage(HAS_APPOP_PERMISSION_APK_PATH, false /* forceQueryable */);
+
+        final String[] packageNames = mIPackageManager.getAppOpPermissionPackages(
+                PERMISSION_REQUEST_INSTALL_PACKAGES);
+
+        assertThat(packageNames).asList().doesNotContain(TARGET_HAS_APPOP_PERMISSION);
+    }
+
+    @Test
+    public void getUidForSharedUser_canSeeForceQueryable() throws Exception {
+        installPackage(SHARED_USER_APK_PATH, true /* forceQueryable */);
+
+        final int uid = mIPackageManager.getUidForSharedUser(SHARED_USER_NAME);
+        assertThat(uid).isGreaterThan(Process.FIRST_APPLICATION_UID);
+    }
+
+    @Test
+    public void getUidForSharedUser_cannotSeeSharedUser() throws Exception {
+        installPackage(SHARED_USER_APK_PATH, false /* forceQueryable */);
+
+        final int uid = mIPackageManager.getUidForSharedUser(SHARED_USER_NAME);
+        assertThat(uid).isEqualTo(Process.INVALID_UID);
     }
 
     private static void installPackage(String apkPath, boolean forceQueryable) {

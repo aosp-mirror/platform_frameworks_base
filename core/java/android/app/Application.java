@@ -53,6 +53,7 @@ import java.util.ArrayList;
  */
 public class Application extends ContextWrapper implements ComponentCallbacks2 {
     private static final String TAG = "Application";
+
     @UnsupportedAppUsage
     private ArrayList<ActivityLifecycleCallbacks> mActivityLifecycleCallbacks =
             new ArrayList<ActivityLifecycleCallbacks>();
@@ -205,6 +206,13 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
          */
         default void onActivityPostDestroyed(@NonNull Activity activity) {
         }
+
+        /**
+         * Called when the Activity configuration was changed.
+         * @hide
+         */
+        default void onActivityConfigurationChanged(@NonNull Activity activity) {
+        }
     }
 
     /**
@@ -224,6 +232,13 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
 
     public Application() {
         super(null);
+    }
+
+    private String getLoadedApkInfo() {
+        if (mLoadedApk == null) {
+            return "null";
+        }
+        return mLoadedApk + "/pkg=" + mLoadedApk.mPackageName;
     }
 
     /**
@@ -554,6 +569,16 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
+    /* package */ void dispatchActivityConfigurationChanged(@NonNull Activity activity) {
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i = 0; i < callbacks.length; i++) {
+                ((ActivityLifecycleCallbacks) callbacks[i]).onActivityConfigurationChanged(
+                        activity);
+            }
+        }
+    }
+
     @UnsupportedAppUsage
     private Object[] collectActivityLifecycleCallbacks() {
         Object[] callbacks = null;
@@ -613,7 +638,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
                 if (android.view.autofill.Helper.sVerbose) {
                     Log.v(TAG, "getAutofillClient(): found activity for " + this + ": " + activity);
                 }
-                return activity;
+                return activity.getAutofillClient();
             }
         }
         if (android.view.autofill.Helper.sVerbose) {

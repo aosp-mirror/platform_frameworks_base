@@ -31,6 +31,8 @@ import androidx.test.filters.SmallTest;
 import com.android.server.hdmi.HdmiUtils.CodecSad;
 import com.android.server.hdmi.HdmiUtils.DeviceConfig;
 
+import com.google.common.testing.EqualsTester;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -113,6 +115,51 @@ public class HdmiUtilsTest {
         assertThat(HdmiUtils.getLocalPortFromPhysicalAddress(
                 targetPhysicalAddress, myPhysicalAddress)).isEqualTo(
                         HdmiUtils.TARGET_NOT_UNDER_LOCAL_DEVICE);
+    }
+
+    @Test
+    public void testEqualsCodecSad() {
+        byte[] sad = {0x0a, 0x1b, 0x2c};
+        String sadString = "0a1b2c";
+        new EqualsTester()
+                .addEqualityGroup(
+                        new HdmiUtils.CodecSad(Constants.AUDIO_CODEC_LPCM, sad),
+                        new HdmiUtils.CodecSad(Constants.AUDIO_CODEC_LPCM, sadString))
+                .addEqualityGroup(
+                        new HdmiUtils.CodecSad(Constants.AUDIO_CODEC_LPCM, sadString + "01"))
+                .addEqualityGroup(new HdmiUtils.CodecSad(Constants.AUDIO_CODEC_DD, sadString))
+                .addEqualityGroup(
+                        new HdmiUtils.CodecSad(Constants.AUDIO_CODEC_DD, sadString + "01"))
+                .testEquals();
+    }
+
+    @Test
+    public void testEqualsDeviceConfig() {
+        String name = "Name";
+
+        CodecSad expectedCodec1 = new CodecSad(Constants.AUDIO_CODEC_LPCM, "011a03");
+        CodecSad expectedCodec2 = new CodecSad(Constants.AUDIO_CODEC_DD, "0d0506");
+        CodecSad expectedCodec3 = new CodecSad(Constants.AUDIO_CODEC_LPCM, "010203");
+        CodecSad expectedCodec4 = new CodecSad(Constants.AUDIO_CODEC_DD, "040506");
+
+        List<CodecSad> list1 = new ArrayList();
+        list1.add(expectedCodec1);
+        list1.add(expectedCodec2);
+        list1.add(expectedCodec3);
+
+        List<CodecSad> list1Duplicate = new ArrayList(list1);
+
+        List<CodecSad> list2 = new ArrayList(list1);
+        list2.add(expectedCodec4);
+
+        new EqualsTester()
+                .addEqualityGroup(
+                        new HdmiUtils.DeviceConfig(name, list1),
+                        new HdmiUtils.DeviceConfig(name, list1Duplicate))
+                .addEqualityGroup(new HdmiUtils.DeviceConfig(name, list2))
+                .addEqualityGroup(new HdmiUtils.DeviceConfig("my" + name, list1))
+                .addEqualityGroup(new HdmiUtils.DeviceConfig("my" + name, list2))
+                .testEquals();
     }
 
     @Test

@@ -21,6 +21,12 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.hardware.tv.tuner.FrontendDtmbBandwidth;
+import android.hardware.tv.tuner.FrontendDtmbCodeRate;
+import android.hardware.tv.tuner.FrontendDtmbGuardInterval;
+import android.hardware.tv.tuner.FrontendDtmbModulation;
+import android.hardware.tv.tuner.FrontendDtmbTimeInterleaveMode;
+import android.hardware.tv.tuner.FrontendDtmbTransmissionMode;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -37,8 +43,7 @@ import java.lang.annotation.RetentionPolicy;
 public final class DtmbFrontendSettings extends FrontendSettings {
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "BANDWIDTH_",
+    @IntDef(prefix = "BANDWIDTH_",
             value = {BANDWIDTH_UNDEFINED, BANDWIDTH_AUTO, BANDWIDTH_6MHZ, BANDWIDTH_8MHZ})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Bandwidth {}
@@ -46,28 +51,23 @@ public final class DtmbFrontendSettings extends FrontendSettings {
     /**
      * Bandwidth not defined.
      */
-    public static final int BANDWIDTH_UNDEFINED =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDtmbBandwidth.UNDEFINED;
+    public static final int BANDWIDTH_UNDEFINED = FrontendDtmbBandwidth.UNDEFINED;
     /**
      * Hardware is able to detect and set bandwidth automatically
      */
-    public static final int BANDWIDTH_AUTO =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDtmbBandwidth.AUTO;
+    public static final int BANDWIDTH_AUTO = FrontendDtmbBandwidth.AUTO;
     /**
      * 6 MHz bandwidth.
      */
-    public static final int BANDWIDTH_6MHZ =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDtmbBandwidth.BANDWIDTH_6MHZ;
+    public static final int BANDWIDTH_6MHZ = FrontendDtmbBandwidth.BANDWIDTH_6MHZ;
     /**
      * 8 MHz bandwidth.
      */
-    public static final int BANDWIDTH_8MHZ =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDtmbBandwidth.BANDWIDTH_8MHZ;
+    public static final int BANDWIDTH_8MHZ = FrontendDtmbBandwidth.BANDWIDTH_8MHZ;
 
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "TIME_INTERLEAVE_MODE_",
+    @IntDef(prefix = "TIME_INTERLEAVE_MODE_",
             value = {TIME_INTERLEAVE_MODE_UNDEFINED, TIME_INTERLEAVE_MODE_AUTO,
                     TIME_INTERLEAVE_MODE_TIMER_INT_240, TIME_INTERLEAVE_MODE_TIMER_INT_720})
     @Retention(RetentionPolicy.SOURCE)
@@ -77,27 +77,25 @@ public final class DtmbFrontendSettings extends FrontendSettings {
      * Time Interleave Mode undefined.
      */
     public static final int TIME_INTERLEAVE_MODE_UNDEFINED =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDtmbTimeInterleaveMode.UNDEFINED;
+            FrontendDtmbTimeInterleaveMode.UNDEFINED;
     /**
      * Hardware is able to detect and set time interleave mode automatically
      */
-    public static final int TIME_INTERLEAVE_MODE_AUTO =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDtmbTimeInterleaveMode.AUTO;
+    public static final int TIME_INTERLEAVE_MODE_AUTO = FrontendDtmbTimeInterleaveMode.AUTO;
     /**
      * Time Interleave Mode timer int 240.
      */
     public static final int TIME_INTERLEAVE_MODE_TIMER_INT_240 =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDtmbTimeInterleaveMode.TIMER_INT_240;
+            FrontendDtmbTimeInterleaveMode.TIMER_INT_240;
     /**
      * Time Interleave Mode timer int 720.
      */
     public static final int TIME_INTERLEAVE_MODE_TIMER_INT_720 =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDtmbTimeInterleaveMode.TIMER_INT_720;
+            FrontendDtmbTimeInterleaveMode.TIMER_INT_720;
 
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "GUARD_INTERVAL_",
+    @IntDef(prefix = "GUARD_INTERVAL_",
             value = {GUARD_INTERVAL_UNDEFINED, GUARD_INTERVAL_AUTO,
             GUARD_INTERVAL_PN_420_VARIOUS, GUARD_INTERVAL_PN_595_CONST,
             GUARD_INTERVAL_PN_945_VARIOUS, GUARD_INTERVAL_PN_420_CONST,
@@ -108,48 +106,41 @@ public final class DtmbFrontendSettings extends FrontendSettings {
     /**
      * Guard Interval undefined.
      */
-    public static final int GUARD_INTERVAL_UNDEFINED =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDtmbGuardInterval.UNDEFINED;
+    public static final int GUARD_INTERVAL_UNDEFINED = FrontendDtmbGuardInterval.UNDEFINED;
     /**
      * Hardware is able to detect and set Guard Interval automatically.
      */
-    public static final int GUARD_INTERVAL_AUTO =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDtmbGuardInterval.AUTO;
+    public static final int GUARD_INTERVAL_AUTO = FrontendDtmbGuardInterval.AUTO;
     /**
      * PN_420_VARIOUS Guard Interval.
      */
     public static final int GUARD_INTERVAL_PN_420_VARIOUS =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDtmbGuardInterval.PN_420_VARIOUS;
+            FrontendDtmbGuardInterval.PN_420_VARIOUS;
     /**
      * PN_595_CONST Guard Interval.
      */
-    public static final int GUARD_INTERVAL_PN_595_CONST =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDtmbGuardInterval.PN_595_CONST;
+    public static final int GUARD_INTERVAL_PN_595_CONST = FrontendDtmbGuardInterval.PN_595_CONST;
     /**
      * PN_945_VARIOUS Guard Interval.
      */
     public static final int GUARD_INTERVAL_PN_945_VARIOUS =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDtmbGuardInterval.PN_945_VARIOUS;
+            FrontendDtmbGuardInterval.PN_945_VARIOUS;
     /**
      * PN_420_CONST Guard Interval.
      */
-    public static final int GUARD_INTERVAL_PN_420_CONST =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDtmbGuardInterval.PN_420_CONST;
+    public static final int GUARD_INTERVAL_PN_420_CONST = FrontendDtmbGuardInterval.PN_420_CONST;
     /**
      * PN_945_CONST Guard Interval.
      */
-    public static final int GUARD_INTERVAL_PN_945_CONST =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDtmbGuardInterval.PN_945_CONST;
+    public static final int GUARD_INTERVAL_PN_945_CONST = FrontendDtmbGuardInterval.PN_945_CONST;
     /**
      * PN_RESERVED Guard Interval.
      */
-    public static final int GUARD_INTERVAL_PN_RESERVED =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDtmbGuardInterval.PN_RESERVED;
+    public static final int GUARD_INTERVAL_PN_RESERVED = FrontendDtmbGuardInterval.PN_RESERVED;
 
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "MODULATION_",
+    @IntDef(prefix = "MODULATION_",
             value = {MODULATION_CONSTELLATION_UNDEFINED, MODULATION_CONSTELLATION_AUTO,
                     MODULATION_CONSTELLATION_4QAM, MODULATION_CONSTELLATION_4QAM_NR,
                     MODULATION_CONSTELLATION_16QAM, MODULATION_CONSTELLATION_32QAM,
@@ -160,42 +151,39 @@ public final class DtmbFrontendSettings extends FrontendSettings {
     /**
      * Constellation not defined.
      */
-    public static final int MODULATION_CONSTELLATION_UNDEFINED =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDtmbModulation.UNDEFINED;
+    public static final int MODULATION_CONSTELLATION_UNDEFINED = FrontendDtmbModulation.UNDEFINED;
     /**
      * Hardware is able to detect and set Constellation automatically.
      */
-    public static final int MODULATION_CONSTELLATION_AUTO =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDtmbModulation.AUTO;
+    public static final int MODULATION_CONSTELLATION_AUTO = FrontendDtmbModulation.AUTO;
     /**
      * 4QAM Constellation.
      */
     public static final int MODULATION_CONSTELLATION_4QAM =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDtmbModulation.CONSTELLATION_4QAM;
+            FrontendDtmbModulation.CONSTELLATION_4QAM;
     /**
      * 4QAM_NR Constellation.
      */
     public static final int MODULATION_CONSTELLATION_4QAM_NR =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDtmbModulation.CONSTELLATION_4QAM_NR;
+            FrontendDtmbModulation.CONSTELLATION_4QAM_NR;
     /**
      * 16QAM Constellation.
      */
     public static final int MODULATION_CONSTELLATION_16QAM =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDtmbModulation.CONSTELLATION_16QAM;
+            FrontendDtmbModulation.CONSTELLATION_16QAM;
     /**
      * 32QAM Constellation.
      */
     public static final int MODULATION_CONSTELLATION_32QAM =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDtmbModulation.CONSTELLATION_32QAM;
+            FrontendDtmbModulation.CONSTELLATION_32QAM;
     /**
      * 64QAM Constellation.
      */
     public static final int MODULATION_CONSTELLATION_64QAM =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDtmbModulation.CONSTELLATION_64QAM;
+            FrontendDtmbModulation.CONSTELLATION_64QAM;
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "CODERATE_",
+    @IntDef(prefix = "CODERATE_",
             value = {CODERATE_UNDEFINED, CODERATE_AUTO, CODERATE_2_5, CODERATE_3_5, CODERATE_4_5})
     @Retention(RetentionPolicy.SOURCE)
     public @interface CodeRate {}
@@ -203,32 +191,26 @@ public final class DtmbFrontendSettings extends FrontendSettings {
     /**
      * Code rate undefined.
      */
-    public static final int CODERATE_UNDEFINED =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDtmbCodeRate.UNDEFINED;
+    public static final int CODERATE_UNDEFINED = FrontendDtmbCodeRate.UNDEFINED;
     /**
      * Hardware is able to detect and set code rate automatically.
      */
-    public static final int CODERATE_AUTO =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDtmbCodeRate.AUTO;
+    public static final int CODERATE_AUTO = FrontendDtmbCodeRate.AUTO;
     /**
      * 2/5 code rate.
      */
-    public static final int CODERATE_2_5 =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDtmbCodeRate.CODERATE_2_5;
+    public static final int CODERATE_2_5 = FrontendDtmbCodeRate.CODERATE_2_5;
     /**
      * 3/5 code rate.
      */
-    public static final int CODERATE_3_5 =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDtmbCodeRate.CODERATE_3_5;
+    public static final int CODERATE_3_5 = FrontendDtmbCodeRate.CODERATE_3_5;
     /**
      * 4/5 code rate.
      */
-    public static final int CODERATE_4_5 =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDtmbCodeRate.CODERATE_4_5;
+    public static final int CODERATE_4_5 = FrontendDtmbCodeRate.CODERATE_4_5;
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "TRANSMISSION_MODE_",
+    @IntDef(prefix = "TRANSMISSION_MODE_",
             value = {TRANSMISSION_MODE_UNDEFINED, TRANSMISSION_MODE_AUTO,
                     TRANSMISSION_MODE_C1, TRANSMISSION_MODE_C3780})
     @Retention(RetentionPolicy.SOURCE)
@@ -237,23 +219,19 @@ public final class DtmbFrontendSettings extends FrontendSettings {
     /**
      * Transmission Mode undefined.
      */
-    public static final int TRANSMISSION_MODE_UNDEFINED =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDtmbTransmissionMode.UNDEFINED;
+    public static final int TRANSMISSION_MODE_UNDEFINED = FrontendDtmbTransmissionMode.UNDEFINED;
     /**
      * Hardware is able to detect and set Transmission Mode automatically
      */
-    public static final int TRANSMISSION_MODE_AUTO =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDtmbTransmissionMode.AUTO;
+    public static final int TRANSMISSION_MODE_AUTO = FrontendDtmbTransmissionMode.AUTO;
     /**
      * C1 Transmission Mode.
      */
-    public static final int TRANSMISSION_MODE_C1 =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDtmbTransmissionMode.C1;
+    public static final int TRANSMISSION_MODE_C1 = FrontendDtmbTransmissionMode.C1;
     /**
      * C3780 Transmission Mode.
      */
-    public static final int TRANSMISSION_MODE_C3780 =
-            android.hardware.tv.tuner.V1_1.Constants.FrontendDtmbTransmissionMode.C3780;
+    public static final int TRANSMISSION_MODE_C3780 = FrontendDtmbTransmissionMode.C3780;
 
 
     private final int mModulation;
@@ -263,7 +241,7 @@ public final class DtmbFrontendSettings extends FrontendSettings {
     private final int mGuardInterval;
     private final int mTimeInterleaveMode;
 
-    private DtmbFrontendSettings(int frequency, int modulation, int codeRate, int transmissionMode,
+    private DtmbFrontendSettings(long frequency, int modulation, int codeRate, int transmissionMode,
             int guardInterval, int timeInterleaveMode, int bandwidth) {
         super(frequency);
         mModulation = modulation;
@@ -285,7 +263,7 @@ public final class DtmbFrontendSettings extends FrontendSettings {
     /**
      * Gets Code Rate.
      */
-    @Modulation
+    @CodeRate
     public int getCodeRate() {
         return mCodeRate;
     }
@@ -293,7 +271,7 @@ public final class DtmbFrontendSettings extends FrontendSettings {
     /**
      * Gets Transmission Mode.
      */
-    @Modulation
+    @TransmissionMode
     public int getTransmissionMode() {
         return mTransmissionMode;
     }
@@ -301,7 +279,7 @@ public final class DtmbFrontendSettings extends FrontendSettings {
     /**
      * Gets Bandwidth.
      */
-    @Modulation
+    @Bandwidth
     public int getBandwidth() {
         return mBandwidth;
     }
@@ -309,16 +287,15 @@ public final class DtmbFrontendSettings extends FrontendSettings {
     /**
      * Gets Time Interleave Mode.
      */
-    @Modulation
+    @TimeInterleaveMode
     public int getTimeInterleaveMode() {
         return mTimeInterleaveMode;
     }
 
-
     /**
      * Gets Guard Interval.
      */
-    @Modulation
+    @GuardInterval
     public int getGuardInterval() {
         return mGuardInterval;
     }
@@ -335,7 +312,7 @@ public final class DtmbFrontendSettings extends FrontendSettings {
      * Builder for {@link AtscFrontendSettings}.
      */
     public static final class Builder {
-        private int mFrequency = 0;
+        private long mFrequency = 0;
         private int mModulation = MODULATION_CONSTELLATION_UNDEFINED;
         private int mCodeRate = CODERATE_UNDEFINED;
         private int mTransmissionMode = TRANSMISSION_MODE_UNDEFINED;
@@ -350,11 +327,24 @@ public final class DtmbFrontendSettings extends FrontendSettings {
          * Sets frequency in Hz.
          *
          * <p>Default value is 0.
+         * @deprecated Use {@link #setFrequencyLong(long)}
+         */
+        @NonNull
+        @IntRange(from = 1)
+        @Deprecated
+        public Builder setFrequency(int frequency) {
+            return setFrequencyLong((long) frequency);
+        }
+
+        /**
+         * Sets frequency in Hz.
+         *
+         * <p>Default value is 0.
          */
         @NonNull
         @IntRange(from = 1)
         @SuppressLint("MissingGetterMatchingBuilder")
-        public Builder setFrequency(int frequency) {
+        public Builder setFrequencyLong(long frequency) {
             mFrequency = frequency;
             return this;
         }

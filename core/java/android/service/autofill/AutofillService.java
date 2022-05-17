@@ -465,7 +465,7 @@ import com.android.internal.os.IResultReceiver;
  * <p>Prior to Android {@link android.os.Build.VERSION_CODES#P}, the metrics covered just the
  * scenarios where the service knew how to autofill an activity, but Android
  * {@link android.os.Build.VERSION_CODES#P} introduced a new mechanism called field classification,
- * which allows the service to dinamically classify the meaning of fields based on the existing user
+ * which allows the service to dynamically classify the meaning of fields based on the existing user
  * data known by the service.
  *
  * <p>Typically, field classification can be used to detect fields that can be autofilled with
@@ -576,6 +576,14 @@ public abstract class AutofillService extends Service {
      * /&gt;</pre>
      */
     public static final String SERVICE_META_DATA = "android.autofill";
+
+    /**
+     * Name of the {@link FillResponse} extra used to return a delayed fill response.
+     *
+     * <p>Please see {@link FillRequest#getDelayedFillIntentSender()} on how to send a delayed
+     * fill response to framework.</p>
+     */
+    public static final String EXTRA_FILL_RESPONSE = "android.service.autofill.extra.FILL_RESPONSE";
 
     /**
      * Name of the {@link IResultReceiver} extra used to return the primary result of a request.

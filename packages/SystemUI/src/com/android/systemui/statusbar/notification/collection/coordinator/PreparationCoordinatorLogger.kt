@@ -41,11 +41,19 @@ class PreparationCoordinatorLogger @Inject constructor(
         })
     }
 
+    fun logDoneWaitingForGroupInflation(groupKey: String) {
+        buffer.log(TAG, LogLevel.DEBUG, {
+            str1 = groupKey
+        }, {
+            "Finished inflating all members of group $str1, releasing group"
+        })
+    }
+
     fun logGroupInflationTookTooLong(groupKey: String) {
         buffer.log(TAG, LogLevel.WARNING, {
             str1 = groupKey
         }, {
-            "Group inflation took too long far $str1, releasing children early"
+            "Group inflation took too long for $str1, releasing children early"
         })
     }
 

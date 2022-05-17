@@ -18,16 +18,12 @@ package com.android.systemui.biometrics
 
 import android.media.AudioAttributes
 import android.os.VibrationEffect
-import android.os.Vibrator
-
 import com.android.keyguard.KeyguardUpdateMonitor
-
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
-
 import java.io.PrintWriter
-
 import javax.inject.Inject
 
 /**
@@ -36,7 +32,7 @@ import javax.inject.Inject
 @SysUISingleton
 class UdfpsHapticsSimulator @Inject constructor(
     commandRegistry: CommandRegistry,
-    val vibrator: Vibrator?,
+    val vibrator: VibratorHelper,
     val keyguardUpdateMonitor: KeyguardUpdateMonitor
 ) : Command {
     val sonificationEffects =
@@ -58,18 +54,15 @@ class UdfpsHapticsSimulator @Inject constructor(
                 "start" -> {
                     udfpsController?.playStartHaptic()
                 }
-                "acquired" -> {
-                    keyguardUpdateMonitor.playAcquiredHaptic()
-                }
                 "success" -> {
                     // needs to be kept up to date with AcquisitionClient#SUCCESS_VIBRATION_EFFECT
-                    vibrator?.vibrate(
+                    vibrator.vibrate(
                         VibrationEffect.get(VibrationEffect.EFFECT_CLICK),
                         sonificationEffects)
                 }
                 "error" -> {
                     // needs to be kept up to date with AcquisitionClient#ERROR_VIBRATION_EFFECT
-                    vibrator?.vibrate(
+                    vibrator.vibrate(
                         VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK),
                         sonificationEffects)
                 }
@@ -82,7 +75,6 @@ class UdfpsHapticsSimulator @Inject constructor(
         pw.println("Usage: adb shell cmd statusbar udfps-haptic <haptic>")
         pw.println("Available commands:")
         pw.println("  start")
-        pw.println("  acquired")
         pw.println("  success, always plays CLICK haptic")
         pw.println("  error, always plays DOUBLE_CLICK haptic")
     }

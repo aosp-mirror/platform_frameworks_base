@@ -18,6 +18,7 @@ package android.os.storage;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.os.IVold;
 
 import java.util.List;
@@ -113,7 +114,6 @@ public abstract class StorageManagerInternal {
      */
     public abstract void prepareAppDataAfterInstall(@NonNull String packageName, int uid);
 
-
     /**
      * Return true if uid is external storage service.
      */
@@ -135,4 +135,38 @@ public abstract class StorageManagerInternal {
      * {@link VolumeInfo#isPrimary()}
      */
     public abstract List<String> getPrimaryVolumeIds();
+
+    /**
+     * Tells StorageManager that CE storage for this user has been prepared.
+     *
+     * @param userId userId for which CE storage has been prepared
+     */
+    public abstract void markCeStoragePrepared(@UserIdInt int userId);
+
+    /**
+     * Returns true when CE storage for this user has been prepared.
+     *
+     * When the user key is unlocked and CE storage has been prepared,
+     * it's ok to access and modify CE directories on volumes for this user.
+     */
+    public abstract boolean isCeStoragePrepared(@UserIdInt int userId);
+
+    /**
+     * A listener for changes to the cloud provider.
+     */
+    public interface CloudProviderChangeListener {
+        /**
+         * Triggered when the cloud provider changes. A {@code null} value means there's currently
+         * no cloud provider.
+         */
+        void onCloudProviderChanged(int userId, @Nullable String authority);
+    }
+
+    /**
+     * Register a {@link CloudProviderChangeListener} to be notified when a cloud media provider
+     * changes. The listener will be called after registration with any currently set cloud media
+     * providers.
+     */
+    public abstract void registerCloudProviderChangeListener(
+            @NonNull CloudProviderChangeListener listener);
 }

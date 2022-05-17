@@ -17,14 +17,10 @@
 package com.android.systemui.shared.system;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 
 import android.app.ActivityOptions;
 import android.content.Context;
 import android.os.Handler;
-
-import com.android.systemui.shared.recents.model.Task;
 
 /**
  * Wrapper around internal ActivityOptions creation.
@@ -32,21 +28,11 @@ import com.android.systemui.shared.recents.model.Task;
 public abstract class ActivityOptionsCompat {
 
     /**
+     * @Deprecated
      * @return ActivityOptions for starting a task in split screen as the primary window.
      */
     public static ActivityOptions makeSplitScreenOptions(boolean dockTopLeft) {
-        return makeSplitScreenOptions(dockTopLeft, true);
-    }
-
-    /**
-     * @return ActivityOptions for starting a task in split screen.
-     */
-    public static ActivityOptions makeSplitScreenOptions(boolean dockTopLeft, boolean isPrimary) {
-        final ActivityOptions options = ActivityOptions.makeBasic();
-        options.setLaunchWindowingMode(isPrimary
-                ? WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
-                : WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
-        return options;
+        return ActivityOptions.makeBasic();
     }
 
     /**
@@ -81,7 +67,7 @@ public abstract class ActivityOptionsCompat {
                 callbackHandler,
                 new ActivityOptions.OnAnimationStartedListener() {
                     @Override
-                    public void onAnimationStarted() {
+                    public void onAnimationStarted(long elapsedRealTime) {
                         if (callback != null) {
                             callbackHandler.post(callback);
                         }
@@ -103,16 +89,5 @@ public abstract class ActivityOptionsCompat {
     public static ActivityOptions setLauncherSourceInfo(ActivityOptions opts, long uptimeMillis) {
         opts.setSourceInfo(ActivityOptions.SourceInfo.TYPE_LAUNCHER, uptimeMillis);
         return opts;
-    }
-
-    /**
-     * Sets Task specific information to the activity options
-     */
-    public static void addTaskInfo(ActivityOptions opts, Task.TaskKey taskKey) {
-        if (taskKey.windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-            // We show non-visible docked tasks in Recents, but we always want to launch
-            // them in the fullscreen stack.
-            opts.setLaunchWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
-        }
     }
 }

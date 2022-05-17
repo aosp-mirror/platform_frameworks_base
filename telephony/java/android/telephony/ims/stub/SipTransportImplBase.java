@@ -86,8 +86,19 @@ public class SipTransportImplBase {
         }
     };
 
-    private final Executor mBinderExecutor;
+    private Executor mBinderExecutor;
     private final ArrayList<SipDelegateAidlWrapper> mDelegates = new ArrayList<>();
+
+    /**
+     * Create a new SipTransport.
+     * <p>
+     * Method stubs called from the framework will be called asynchronously. To specify the
+     * {@link Executor} that the methods stubs will be called, use
+     * {@link SipTransportImplBase#SipTransportImplBase(Executor)} instead.
+     */
+    public SipTransportImplBase() {
+        super();
+    }
 
     /**
      * Create an implementation of SipTransportImplBase.
@@ -211,5 +222,17 @@ public class SipTransportImplBase {
      */
     public ISipTransport getBinder() {
         return mSipTransportImpl;
+    }
+
+    /**
+     * Set default Executor from ImsService.
+     * @param executor The default executor for the framework to use when executing the methods
+     * overridden by the implementation of SipTransport.
+     * @hide
+     */
+    public final void setDefaultExecutor(@NonNull Executor executor) {
+        if (mBinderExecutor == null) {
+            mBinderExecutor = executor;
+        }
     }
 }

@@ -32,15 +32,9 @@ public final class EpsQos extends Qos implements Parcelable {
 
     int qosClassId;
 
-    public EpsQos() {
-        super(Qos.QOS_TYPE_EPS,
-                new android.hardware.radio.V1_6.QosBandwidth(),
-                new android.hardware.radio.V1_6.QosBandwidth());
-    }
-
-    public EpsQos(@NonNull android.hardware.radio.V1_6.EpsQos qos) {
-        super(Qos.QOS_TYPE_EPS, qos.downlink, qos.uplink);
-        qosClassId = qos.qci;
+    public EpsQos(QosBandwidth downlink, QosBandwidth uplink, int qosClassId) {
+        super(Qos.QOS_TYPE_EPS, downlink, uplink);
+        this.qosClassId = qosClassId;
     }
 
     private EpsQos(Parcel source) {

@@ -34,7 +34,15 @@ license {
 android_app {
     name: "CompanionDeviceManager",
     defaults: ["platform_app_defaults"],
+    certificate: "platform",
     srcs: ["src/**/*.java"],
+
+    static_libs: [
+        "androidx.lifecycle_lifecycle-livedata",
+        "androidx.lifecycle_lifecycle-extensions",
+        "androidx.recyclerview_recyclerview",
+        "androidx.appcompat_appcompat",
+    ],
 
     platform_apis: true,
 }

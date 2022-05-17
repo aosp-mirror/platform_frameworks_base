@@ -132,7 +132,7 @@ public class MtpDatabaseTest {
 
         StorageVolume mainStorage = new StorageVolume(MAIN_STORAGE_ID_STR,
                 mMainStorageDir, mMainStorageDir, "Primary Storage",
-                true, false, true, false, -1, UserHandle.CURRENT, null /* uuid */, "", "");
+                true, false, true, false, false, -1, UserHandle.CURRENT, null /* uuid */, "", "");
 
         final StorageVolume primary = mainStorage;
 

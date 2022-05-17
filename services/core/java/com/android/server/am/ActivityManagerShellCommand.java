@@ -29,8 +29,12 @@ import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_CRI
 import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_LOW;
 import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_MODERATE;
 import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_NORMAL;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.AppBatteryTracker.BatteryUsage.BATTERY_USAGE_COUNT;
 import static com.android.server.am.LowMemDetector.ADJ_MEM_FACTOR_NOTHING;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
@@ -44,6 +48,7 @@ import android.app.IStopUserCallback;
 import android.app.IUidObserver;
 import android.app.KeyguardManager;
 import android.app.ProfilerInfo;
+import android.app.RemoteServiceException.CrashedByAdbException;
 import android.app.UserSwitchObserver;
 import android.app.WaitResult;
 import android.app.usage.AppStandbyInfo;
@@ -85,6 +90,7 @@ import android.os.ShellCommand;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.TextUtils;
@@ -94,12 +100,15 @@ import android.util.DebugUtils;
 import android.util.DisplayMetrics;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
+import android.window.SplashScreen;
 
 import com.android.internal.compat.CompatibilityChangeConfig;
-import com.android.internal.util.HexDump;
 import com.android.internal.util.MemInfoReader;
 import com.android.server.am.LowMemDetector.MemFactor;
 import com.android.server.compat.PlatformCompat;
+import com.android.server.utils.Slogf;
+
+import dalvik.annotation.optimization.NeverCompile;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -128,6 +137,10 @@ import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.egl.EGLSurface;
 
 final class ActivityManagerShellCommand extends ShellCommand {
+
+    static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityManagerShellCommand" : TAG_AM;
+
+
     public static final String NO_CLASS_ERROR_CODE = "Error type 3";
 
     private static final String SHELL_PACKAGE_NAME = "com.android.shell";
@@ -169,6 +182,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
     private boolean mIsLockTask;
     private boolean mAsync;
     private BroadcastOptions mBroadcastOptions;
+    private boolean mShowSplashScreen;
+    private boolean mDismissKeyguardIfInsecure;
 
     final boolean mDumping;
 
@@ -204,6 +219,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runStopService(pw);
                 case "broadcast":
                     return runSendBroadcast(pw);
+                case "compact":
+                    return runCompact(pw);
                 case "instrument":
                     getOutPrintWriter().println("Error: must be invoked through 'am instrument'.");
                     return -1;
@@ -229,6 +246,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runBugReport(pw);
                 case "force-stop":
                     return runForceStop(pw);
+                case "stop-app":
+                    return runStopApp(pw);
                 case "fgs-notification-rate-limit":
                     return runFgsNotificationRateLimit(pw);
                 case "crash":
@@ -323,6 +342,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runServiceRestartBackoff(pw);
                 case "get-isolated-pids":
                     return runGetIsolatedProcesses(pw);
+                case "set-stop-user-on-switch":
+                    return runSetStopUserOnSwitch(pw);
+                case "set-bg-abusive-uids":
+                    return runSetBgAbusiveUids(pw);
+                case "list-bg-exemptions-config":
+                    return runListBgExemptionsConfig(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -415,6 +440,10 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     mBroadcastOptions.setBackgroundActivityStartsAllowed(true);
                 } else if (opt.equals("--async")) {
                     mAsync = true;
+                } else if (opt.equals("--splashscreen-show-icon")) {
+                    mShowSplashScreen = true;
+                } else if (opt.equals("--dismiss-keyguard-if-insecure")) {
+                    mDismissKeyguardIfInsecure = true;
                 } else {
                     return false;
                 }
@@ -552,6 +581,18 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     options = ActivityOptions.makeBasic();
                 }
                 options.setLockTaskEnabled(true);
+            }
+            if (mShowSplashScreen) {
+                if (options == null) {
+                    options = ActivityOptions.makeBasic();
+                }
+                options.setSplashScreenStyle(SplashScreen.SPLASH_SCREEN_STYLE_ICON);
+            }
+            if (mDismissKeyguardIfInsecure) {
+                if (options == null) {
+                    options = ActivityOptions.makeBasic();
+                }
+                options.setDismissKeyguardIfInsecure();
             }
             if (mWaitOption) {
                 result = mInternal.startActivityAndWait(null, SHELL_PACKAGE_NAME, null, intent,
@@ -763,8 +804,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
         pw.flush();
         Bundle bundle = mBroadcastOptions == null ? null : mBroadcastOptions.toBundle();
         mInterface.broadcastIntentWithFeature(null, null, intent, null, receiver, 0, null, null,
-                requiredPermissions, null, android.app.AppOpsManager.OP_NONE, bundle, true, false,
-                mUserId);
+                requiredPermissions, null, null, android.app.AppOpsManager.OP_NONE, bundle, true,
+                false, mUserId);
         if (!mAsync) {
             receiver.waitForFinish();
         }
@@ -924,6 +965,36 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 //removeWallOption();
             }
         }
+        return 0;
+    }
+
+    @NeverCompile
+    int runCompact(PrintWriter pw) {
+        String processName = getNextArgRequired();
+        String uid = getNextArgRequired();
+        String op = getNextArgRequired();
+        ProcessRecord app;
+        synchronized (mInternal.mProcLock) {
+            app = mInternal.getProcessRecordLocked(processName, Integer.parseInt(uid));
+        }
+        pw.println("Process record found pid: " + app.mPid);
+        if (op.equals("full")) {
+            pw.println("Executing full compaction for " + app.mPid);
+            synchronized (mInternal.mProcLock) {
+                mInternal.mOomAdjuster.mCachedAppOptimizer.compactAppFull(app, true);
+            }
+            pw.println("Finished full compaction for " + app.mPid);
+        } else if (op.equals("some")) {
+            pw.println("Executing some compaction for " + app.mPid);
+            synchronized (mInternal.mProcLock) {
+                mInternal.mOomAdjuster.mCachedAppOptimizer.compactAppSome(app, true);
+            }
+            pw.println("Finished some compaction for " + app.mPid);
+        } else {
+            getErrPrintWriter().println("Error: unknown compact command '" + op + "'");
+            return -1;
+        }
+
         return 0;
     }
 
@@ -1105,6 +1176,22 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    int runStopApp(PrintWriter pw) throws RemoteException {
+        int userId = UserHandle.USER_SYSTEM;
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = UserHandle.parseUserArg(getNextArgRequired());
+            } else {
+                getErrPrintWriter().println("Error: Unknown option: " + opt);
+                return -1;
+            }
+        }
+        mInterface.stopAppForUser(getNextArgRequired(), userId);
+        return 0;
+    }
+
     int runFgsNotificationRateLimit(PrintWriter pw) throws RemoteException {
         final String toggleValue = getNextArgRequired();
         final boolean enable;
@@ -1145,7 +1232,19 @@ final class ActivityManagerShellCommand extends ShellCommand {
         } catch (NumberFormatException e) {
             packageName = arg;
         }
-        mInterface.crashApplication(-1, pid, packageName, userId, "shell-induced crash", false);
+
+        int[] userIds = (userId == UserHandle.USER_ALL) ? mInternal.mUserController.getUserIds()
+                : new int[]{userId};
+        for (int id : userIds) {
+            if (mInternal.mUserController.hasUserRestriction(
+                    UserManager.DISALLOW_DEBUGGING_FEATURES, id)) {
+                getOutPrintWriter().println(
+                        "Shell does not have permission to crash packages for user " + id);
+                continue;
+            }
+            mInterface.crashApplicationWithType(-1, pid, packageName, id, "shell-induced crash",
+                    false, CrashedByAdbException.TYPE_ID);
+        }
         return 0;
     }
 
@@ -1624,6 +1723,10 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
 
         @Override
+        public void onUidProcAdjChanged(int uid) throws RemoteException {
+        }
+
+        @Override
         public void onOomAdjMessage(String msg) {
             synchronized (this) {
                 final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
@@ -1862,16 +1965,21 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
         int userId = Integer.parseInt(getNextArgRequired());
         boolean switched;
-        if (wait) {
-            switched = switchUserAndWaitForComplete(userId);
-        } else {
-            switched = mInterface.switchUser(userId);
-        }
-        if (switched) {
-            return 0;
-        } else {
-            pw.printf("Error: Failed to switch to user %d\n", userId);
-            return 1;
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "shell_runSwitchUser");
+        try {
+            if (wait) {
+                switched = switchUserAndWaitForComplete(userId);
+            } else {
+                switched = mInterface.switchUser(userId);
+            }
+            if (switched) {
+                return 0;
+            } else {
+                pw.printf("Error: Failed to switch to user %d\n", userId);
+                return 1;
+            }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
     }
 
@@ -1911,22 +2019,42 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    private static byte[] argToBytes(String arg) {
-        if (arg.equals("!")) {
-            return null;
-        } else {
-            return HexDump.hexStringToByteArray(arg);
-        }
-    }
-
     int runUnlockUser(PrintWriter pw) throws RemoteException {
         int userId = Integer.parseInt(getNextArgRequired());
-        byte[] token = argToBytes(getNextArgRequired());
-        byte[] secret = argToBytes(getNextArgRequired());
-        boolean success = mInterface.unlockUser(userId, token, secret, null);
+
+        /*
+         * Originally this command required two more parameters: the hardware
+         * authentication token and secret needed to unlock the user.  However,
+         * unlockUser() no longer takes a token parameter at all, and there
+         * isn't really any way for callers of this shell command to get the
+         * secret if one is needed (i.e., when the user has an LSKF), given that
+         * the secret must be a cryptographic key derived from the user's
+         * synthetic password.  I.e. the secret is *not* the LSKF here, but
+         * rather an intermediate value several steps down the chain.
+         *
+         * As such, the only supported use for this command is unlocking a user
+         * who doesn't have an LSKF, with empty or unspecified token and secret.
+         *
+         * To preserve previous behavior, an exclamation mark ("!") is also
+         * accepted for these values; it means the same as an empty string.
+         */
+        String token = getNextArg();
+        if (!TextUtils.isEmpty(token) && !"!".equals(token)) {
+            getErrPrintWriter().println("Error: token parameter not supported");
+            return -1;
+        }
+        String secret = getNextArg();
+        if (!TextUtils.isEmpty(secret) && !"!".equals(secret)) {
+            getErrPrintWriter().println("Error: secret parameter not supported");
+            return -1;
+        }
+
+        boolean success = mInterface.unlockUser(userId, null, null, null);
         if (success) {
             pw.println("Success: user unlocked");
         } else {
+            // TODO(b/218389026): we can reach here even if the user's storage
+            // was successfully unlocked.
             getErrPrintWriter().println("Error: could not unlock user");
         }
         return 0;
@@ -3157,6 +3285,84 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runSetStopUserOnSwitch(PrintWriter pw) throws RemoteException {
+        mInternal.enforceCallingPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                "setStopUserOnSwitch()");
+        String arg = getNextArg();
+        if (arg == null) {
+            Slogf.i(TAG, "setStopUserOnSwitch(): resetting to default value");
+            mInternal.setStopUserOnSwitch(ActivityManager.STOP_USER_ON_SWITCH_DEFAULT);
+            pw.println("Reset to default value");
+            return 0;
+        }
+
+        boolean stop = Boolean.parseBoolean(arg);
+        int value = stop
+                ? ActivityManager.STOP_USER_ON_SWITCH_TRUE
+                : ActivityManager.STOP_USER_ON_SWITCH_FALSE;
+
+        Slogf.i(TAG, "runSetStopUserOnSwitch(): setting to %d (%b)", value, stop);
+        mInternal.setStopUserOnSwitch(value);
+        pw.println("Set to " + stop);
+
+        return 0;
+    }
+
+    // TODO(b/203105544) STOPSHIP - For debugging only, to be removed before shipping.
+    private int runSetBgAbusiveUids(PrintWriter pw) throws RemoteException {
+        final String arg = getNextArg();
+        final AppBatteryTracker batteryTracker =
+                mInternal.mAppRestrictionController.getAppStateTracker(AppBatteryTracker.class);
+        if (batteryTracker == null) {
+            getErrPrintWriter().println("Unable to get bg battery tracker");
+            return -1;
+        }
+        if (arg == null) {
+            batteryTracker.clearDebugUidPercentage();
+            return 0;
+        }
+        String[] pairs = arg.split(",");
+        int[] uids = new int[pairs.length];
+        double[][] values = new double[pairs.length][];
+        try {
+            for (int i = 0; i < pairs.length; i++) {
+                String[] pair = pairs[i].split("=");
+                if (pair.length != 2) {
+                    getErrPrintWriter().println("Malformed input");
+                    return -1;
+                }
+                uids[i] = Integer.parseInt(pair[0]);
+                final String[] vals = pair[1].split(":");
+                if (vals.length != BATTERY_USAGE_COUNT) {
+                    getErrPrintWriter().println("Malformed input");
+                    return -1;
+                }
+                values[i] = new double[vals.length];
+                for (int j = 0; j < vals.length; j++) {
+                    values[i][j] = Double.parseDouble(vals[j]);
+                }
+            }
+        } catch (NumberFormatException e) {
+            getErrPrintWriter().println("Malformed input");
+            return -1;
+        }
+        batteryTracker.setDebugUidPercentage(uids, values);
+        return 0;
+    }
+
+    private int runListBgExemptionsConfig(PrintWriter pw) throws RemoteException {
+        final ArraySet<String> sysConfigs = mInternal.mAppRestrictionController
+                .mBgRestrictionExemptioFromSysConfig;
+        if (sysConfigs != null) {
+            for (int i = 0, size = sysConfigs.size(); i < size; i++) {
+                pw.print(sysConfigs.valueAt(i));
+                pw.print(' ');
+            }
+            pw.println();
+        }
+        return 0;
+    }
+
     private Resources getResources(PrintWriter pw) throws RemoteException {
         // system resources does not contain all the device configuration, construct it manually.
         Configuration config = mInterface.getConfiguration();
@@ -3177,6 +3383,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         dumpHelp(pw, mDumping);
     }
 
+    @NeverCompile // Avoid size overhead of debugging code.
     static void dumpHelp(PrintWriter pw, boolean dumping) {
         if (dumping) {
             pw.println("Activity manager dump options:");
@@ -3214,7 +3421,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("  --checkin: output checkin format, resetting data.");
             pw.println("  --C: output checkin format, not resetting data.");
             pw.println("  --proto: output dump in protocol buffer format.");
-            pw.println("  --autofill: dump just the autofill-related state of an activity");
+            pw.printf("  %s: dump just the DUMPABLE-related state of an activity. Use the %s "
+                    + "option to list the supported DUMPABLEs\n", Activity.DUMP_ARG_DUMP_DUMPABLE,
+                    Activity.DUMP_ARG_LIST_DUMPABLES);
+            pw.printf("  %s: show the available dumpables in an activity\n",
+                    Activity.DUMP_ARG_LIST_DUMPABLES);
         } else {
             pw.println("Activity manager (activity) commands:");
             pw.println("  help");
@@ -3243,6 +3454,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --windowingMode <WINDOWING_MODE>: The windowing mode to launch the activity into.");
             pw.println("      --activityType <ACTIVITY_TYPE>: The activity type to launch the activity as.");
             pw.println("      --display <DISPLAY_ID>: The display to launch the activity into.");
+            pw.println("      --splashscreen-icon: Show the splash screen icon on launch.");
             pw.println("  start-service [--user <USER_ID> | current] <INTENT>");
             pw.println("      Start a Service.  Options are:");
             pw.println("      --user <USER_ID> | current: Specify which user to run as; if not");
@@ -3266,6 +3478,10 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --allow-background-activity-starts: The receiver may start activities");
             pw.println("          even if in the background.");
             pw.println("      --async: Send without waiting for the completion of the receiver.");
+            pw.println("  compact <process_name> <Package UID> [some|full]");
+            pw.println("      Force process compaction.");
+            pw.println("      some: execute file compaction.");
+            pw.println("      full: execute anon + file compaction.");
             pw.println("  instrument [-r] [-e <NAME> <VALUE>] [-p <FILE>] [-w]");
             pw.println("          [--user <USER_ID> | current]");
             pw.println("          [--no-hidden-api-checks [--no-test-api-access]]");
@@ -3386,8 +3602,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      Start USER_ID in background if it is currently stopped;");
             pw.println("      use switch-user if you want to start the user in foreground.");
             pw.println("      -w: wait for start-user to complete and the user to be unlocked.");
-            pw.println("  unlock-user <USER_ID> [TOKEN_HEX]");
-            pw.println("      Attempt to unlock the given user using the given authorization token.");
+            pw.println("  unlock-user <USER_ID>");
+            pw.println("      Unlock the given user.  This will only work if the user doesn't");
+            pw.println("      have an LSKF (PIN/pattern/password).");
             pw.println("  stop-user [-w] [-f] <USER_ID>");
             pw.println("      Stop execution of USER_ID, not allowing it to run any");
             pw.println("      code until a later explicit start or switch to it.");
@@ -3489,6 +3706,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("            Shows the restart backoff policy state for <PACKAGE_NAME>.");
             pw.println("  get-isolated-pids <UID>");
             pw.println("         Get the PIDs of isolated processes with packages in this <UID>");
+            pw.println("  set-stop-user-on-switch [true|false]");
+            pw.println("         Sets whether the current user (and its profiles) should be stopped"
+                    + " when switching to a different user.");
+            pw.println("         Without arguments, it resets to the value defined by platform.");
+            pw.println("  set-bg-abusive-uids [uid=percentage][,uid=percentage...]");
+            pw.println("         Force setting the battery usage of the given UID.");
             pw.println();
             Intent.printIntentArgsHelp(pw, "");
         }

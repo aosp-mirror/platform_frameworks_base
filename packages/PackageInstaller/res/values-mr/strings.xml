@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"तुम्हाला हे अ‍ॅप अनइंस्टॉल करायचे आहे का?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"तुम्हाला हे अ‍ॅप "<b>"सर्व"</b>" वापरकर्त्यांसाठी अनइंस्टॉल करायचे आहे का? अ‍ॅप्लिकेशन आणि त्याचा डेटा डिव्हाइसवरील "<b>"सर्व"</b>" वापरकर्त्यांकडून काढला जाईल."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"तुम्हाला <xliff:g id="USERNAME">%1$s</xliff:g> वापरकर्त्यासाठी हे अ‍ॅप अनइंस्टॉल करायचे आहे का?"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"तुम्हाला तुमच्या कार्य प्रोफाइलमधून हे ॲप अनइंस्टॉल करायचे आहे का?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"फॅक्टरी आवृत्तीसह हे अ‍ॅप बदलायचे का? सर्व डेटा काढला जाईल."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"फॅक्टरी आवृत्तीसह हे अ‍ॅप बदलायचे? सर्व डेटा काढला जाईल. हे कार्य प्रोफाइल असलेल्यांसह या डिव्हाइसच्या सर्व वापरकर्त्यांना प्रभावित करते."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"ॲप डेटा पैकी <xliff:g id="SIZE">%1$s</xliff:g> ठेवा."</string>

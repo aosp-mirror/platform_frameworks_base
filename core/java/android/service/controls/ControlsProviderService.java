@@ -116,6 +116,9 @@ public abstract class ControlsProviderService extends Service {
      * Calls to {@link Subscriber#onComplete} will not be expected. Instead, wait for the call from
      * {@link Subscription#cancel} to indicate that updates are no longer required. It is expected
      * that controls provided by this publisher were created using {@link Control.StatefulBuilder}.
+     *
+     * By default, all controls require the device to be unlocked in order for the user to interact
+     * with it. This can be modified per Control by {@link Control.StatefulBuilder#setAuthRequired}.
      */
     @NonNull
     public abstract Publisher<Control> createPublisherFor(@NonNull List<String> controlIds);
@@ -127,6 +130,9 @@ public abstract class ControlsProviderService extends Service {
      * {@link ControlAction.ResponseResult}. The Integer should indicate whether the action
      * was received successfully, or if additional prompts should be presented to
      * the user. Any visual control updates should be sent via the Publisher.
+
+     * By default, all invocations of this method will require the device be unlocked. This can
+     * be modified per Control by {@link Control.StatefulBuilder#setAuthRequired}.
      */
     public abstract void performControlAction(@NonNull String controlId,
             @NonNull ControlAction action, @NonNull Consumer<Integer> consumer);

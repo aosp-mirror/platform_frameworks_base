@@ -20,6 +20,8 @@ import static android.view.PointerIcon.TYPE_HORIZONTAL_DOUBLE_ARROW;
 import static android.view.PointerIcon.TYPE_VERTICAL_DOUBLE_ARROW;
 import static android.view.WindowManager.DOCKED_RIGHT;
 
+import static com.android.wm.shell.animation.Interpolators.DIM_INTERPOLATOR;
+import static com.android.wm.shell.animation.Interpolators.SLOWDOWN_INTERPOLATOR;
 import static com.android.wm.shell.common.split.DividerView.TOUCH_ANIMATION_DURATION;
 import static com.android.wm.shell.common.split.DividerView.TOUCH_RELEASE_ANIMATION_DURATION;
 
@@ -36,7 +38,6 @@ import android.graphics.Region;
 import android.graphics.Region.Op;
 import android.hardware.display.DisplayManager;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.util.Slog;
 import android.view.Choreographer;
@@ -100,10 +101,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private static final float MINIMIZE_DOCK_SCALE = 0f;
     private static final float ADJUSTED_FOR_IME_SCALE = 0.5f;
 
-    private static final PathInterpolator SLOWDOWN_INTERPOLATOR =
-            new PathInterpolator(0.5f, 1f, 0.5f, 1f);
-    private static final PathInterpolator DIM_INTERPOLATOR =
-            new PathInterpolator(.23f, .87f, .52f, -0.11f);
     private static final Interpolator IME_ADJUST_INTERPOLATOR =
             new PathInterpolator(0.2f, 0f, 0.1f, 1f);
 
@@ -242,22 +239,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         @Override
         public void run() {
             resetBackground();
-        }
-    };
-
-    private Runnable mUpdateEmbeddedMatrix = () -> {
-        if (getViewRootImpl() == null) {
-            return;
-        }
-        if (isHorizontalDivision()) {
-            mTmpMatrix.setTranslate(0, mDividerPositionY - mDividerInsets);
-        } else {
-            mTmpMatrix.setTranslate(mDividerPositionX - mDividerInsets, 0);
-        }
-        mTmpMatrix.getValues(mTmpValues);
-        try {
-            getViewRootImpl().getAccessibilityEmbeddedConnection().setScreenMatrix(mTmpValues);
-        } catch (RemoteException e) {
         }
     };
 
@@ -460,6 +441,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private void stopDragging() {
         mHandle.setTouching(false, true /* animate */);
         mWindowManager.setSlippery(true);
+        mWindowManagerProxy.setResizing(false);
         releaseBackground();
     }
 
@@ -1052,10 +1034,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             } else {
                 t.setPosition(dividerCtrl, mDividerPositionX - mDividerInsets, 0);
             }
-        }
-        if (getViewRootImpl() != null) {
-            getHandler().removeCallbacks(mUpdateEmbeddedMatrix);
-            getHandler().post(mUpdateEmbeddedMatrix);
         }
     }
 

@@ -87,4 +87,16 @@ public class Components {
         public static final ComponentName COMPONENT = new ComponentName(PACKAGE_NAME,
                 PACKAGE_NAME + ".SplitScreenSecondaryActivity");
     }
+
+    public static class LaunchBubbleActivity {
+        public static final String LABEL = "LaunchBubbleApp";
+        public static final ComponentName COMPONENT = new ComponentName(PACKAGE_NAME,
+                PACKAGE_NAME + ".LaunchBubbleActivity");
+    }
+
+    public static class BubbleActivity {
+        public static final String LABEL = "BubbleApp";
+        public static final ComponentName COMPONENT = new ComponentName(PACKAGE_NAME,
+                PACKAGE_NAME + ".BubbleActivity");
+    }
 }

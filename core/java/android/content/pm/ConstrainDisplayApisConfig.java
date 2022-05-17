@@ -19,10 +19,15 @@ package android.content.pm;
 import static android.provider.DeviceConfig.NAMESPACE_CONSTRAIN_DISPLAY_APIS;
 
 import android.provider.DeviceConfig;
+import android.util.ArrayMap;
+import android.util.Pair;
 import android.util.Slog;
+
+import com.android.internal.os.BackgroundThread;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Class for processing flags in the Device Config namespace 'constrain_display_apis'.
@@ -55,19 +60,45 @@ public final class ConstrainDisplayApisConfig {
             "always_constrain_display_apis";
 
     /**
+     * Indicates that display APIs should never be constrained to the activity window bounds for all
+     * packages.
+     */
+    private boolean mNeverConstrainDisplayApisAllPackages;
+
+    /**
+     * Indicates that display APIs should never be constrained to the activity window bounds for
+     * a set of defined packages. Map keys are package names, and entries are a
+     * 'Pair(<min-version-code>, <max-version-code>)'.
+     */
+    private ArrayMap<String, Pair<Long, Long>> mNeverConstrainConfigMap;
+
+    /**
+     * Indicates that display APIs should always be constrained to the activity window bounds for
+     * a set of defined packages. Map keys are package names, and entries are a
+     * 'Pair(<min-version-code>, <max-version-code>)'.
+     */
+    private ArrayMap<String, Pair<Long, Long>> mAlwaysConstrainConfigMap;
+
+    public ConstrainDisplayApisConfig() {
+        updateCache();
+
+        DeviceConfig.addOnPropertiesChangedListener(NAMESPACE_CONSTRAIN_DISPLAY_APIS,
+                BackgroundThread.getExecutor(), properties -> updateCache());
+    }
+
+    /**
      * Returns true if either the flag 'never_constrain_display_apis_all_packages' is true or the
      * flag 'never_constrain_display_apis' contains a package entry that matches the given {@code
      * applicationInfo}.
      *
      * @param applicationInfo Information about the application/package.
      */
-    public static boolean neverConstrainDisplayApis(ApplicationInfo applicationInfo) {
-        if (DeviceConfig.getBoolean(NAMESPACE_CONSTRAIN_DISPLAY_APIS,
-                FLAG_NEVER_CONSTRAIN_DISPLAY_APIS_ALL_PACKAGES, /* defaultValue= */ false)) {
+    public boolean getNeverConstrainDisplayApis(ApplicationInfo applicationInfo) {
+        if (mNeverConstrainDisplayApisAllPackages) {
             return true;
         }
 
-        return flagHasMatchingPackageEntry(FLAG_NEVER_CONSTRAIN_DISPLAY_APIS, applicationInfo);
+        return flagHasMatchingPackageEntry(mNeverConstrainConfigMap, applicationInfo);
     }
 
     /**
@@ -76,73 +107,106 @@ public final class ConstrainDisplayApisConfig {
      *
      * @param applicationInfo Information about the application/package.
      */
-    public static boolean alwaysConstrainDisplayApis(ApplicationInfo applicationInfo) {
-        return flagHasMatchingPackageEntry(FLAG_ALWAYS_CONSTRAIN_DISPLAY_APIS, applicationInfo);
+    public boolean getAlwaysConstrainDisplayApis(ApplicationInfo applicationInfo) {
+        return flagHasMatchingPackageEntry(mAlwaysConstrainConfigMap, applicationInfo);
+    }
+
+
+    /**
+     * Updates {@link #mNeverConstrainDisplayApisAllPackages}, {@link #mNeverConstrainConfigMap},
+     * and {@link #mAlwaysConstrainConfigMap} from the {@link DeviceConfig}.
+     */
+    private void updateCache() {
+        mNeverConstrainDisplayApisAllPackages = DeviceConfig.getBoolean(
+                NAMESPACE_CONSTRAIN_DISPLAY_APIS,
+                FLAG_NEVER_CONSTRAIN_DISPLAY_APIS_ALL_PACKAGES, /* defaultValue= */ false);
+
+        final String neverConstrainConfigStr = DeviceConfig.getString(
+                NAMESPACE_CONSTRAIN_DISPLAY_APIS,
+                FLAG_NEVER_CONSTRAIN_DISPLAY_APIS, /* defaultValue= */ "");
+        mNeverConstrainConfigMap = buildConfigMap(neverConstrainConfigStr);
+
+        final String alwaysConstrainConfigStr = DeviceConfig.getString(
+                NAMESPACE_CONSTRAIN_DISPLAY_APIS,
+                FLAG_ALWAYS_CONSTRAIN_DISPLAY_APIS, /* defaultValue= */ "");
+        mAlwaysConstrainConfigMap = buildConfigMap(alwaysConstrainConfigStr);
+    }
+
+    /**
+     * Processes the configuration string into a map of version codes, for the given
+     * configuration to be applied to the specified packages. If the given package
+     * entry string is invalid, then the map will not contain an entry for the package.
+     *
+     * @param configStr A configuration string expected to be in the format of a list of package
+     *                  entries separated by ','. A package entry expected to be in the format
+     *                  '<package-name>:<min-version-code>?:<max-version-code>?'.
+     * @return a map of configuration entries, where each key is a package name. Each value is
+     * a pair of version codes, in the format 'Pair(<min-version-code>, <max-version-code>)'.
+     */
+    private static ArrayMap<String, Pair<Long, Long>> buildConfigMap(String configStr) {
+        ArrayMap<String, Pair<Long, Long>> configMap = new ArrayMap<>();
+        // String#split returns a non-empty array given an empty string.
+        if (configStr.isEmpty()) {
+            return configMap;
+        }
+        for (String packageEntryString : configStr.split(",")) {
+            List<String> packageAndVersions = Arrays.asList(packageEntryString.split(":", 3));
+            if (packageAndVersions.size() != 3) {
+                Slog.w(TAG, "Invalid package entry in flag 'never/always_constrain_display_apis': "
+                        + packageEntryString);
+                // Skip this entry.
+                continue;
+            }
+            String packageName = packageAndVersions.get(0);
+            String minVersionCodeStr = packageAndVersions.get(1);
+            String maxVersionCodeStr = packageAndVersions.get(2);
+            try {
+                final long minVersion =
+                        minVersionCodeStr.isEmpty() ? Long.MIN_VALUE : Long.parseLong(
+                                minVersionCodeStr);
+                final long maxVersion =
+                        maxVersionCodeStr.isEmpty() ? Long.MAX_VALUE : Long.parseLong(
+                                maxVersionCodeStr);
+                Pair<Long, Long> minMaxVersionCodes = new Pair<>(minVersion, maxVersion);
+                configMap.put(packageName, minMaxVersionCodes);
+            } catch (NumberFormatException e) {
+                Slog.w(TAG, "Invalid APK version code in package entry: " + packageEntryString);
+                // Skip this entry.
+            }
+        }
+        return configMap;
     }
 
     /**
      * Returns true if the flag with the given {@code flagName} contains a package entry that
      * matches the given {@code applicationInfo}.
      *
+     * @param configMap the map representing the current configuration value to examine
      * @param applicationInfo Information about the application/package.
      */
-    private static boolean flagHasMatchingPackageEntry(String flagName,
+    private static boolean flagHasMatchingPackageEntry(Map<String, Pair<Long, Long>> configMap,
             ApplicationInfo applicationInfo) {
-        String configStr = DeviceConfig.getString(NAMESPACE_CONSTRAIN_DISPLAY_APIS,
-                flagName, /* defaultValue= */ "");
-
-        // String#split returns a non-empty array given an empty string.
-        if (configStr.isEmpty()) {
+        if (configMap.isEmpty()) {
             return false;
         }
-
-        for (String packageEntryString : configStr.split(",")) {
-            if (matchesApplicationInfo(packageEntryString, applicationInfo)) {
-                return true;
-            }
+        if (!configMap.containsKey(applicationInfo.packageName)) {
+            return false;
         }
-
-        return false;
+        return matchesApplicationInfo(configMap.get(applicationInfo.packageName), applicationInfo);
     }
 
     /**
-     * Parses the given {@code packageEntryString} and returns true if {@code
-     * applicationInfo.packageName} matches the package name in the config and {@code
-     * applicationInfo.longVersionCode} is within the version range in the config.
+     * Parses the given {@code minMaxVersionCodes} and returns true if {@code
+     * applicationInfo.longVersionCode} is within the version range in the pair.
+     * Returns false otherwise.
      *
-     * <p>Logs a warning and returns false in case the given {@code packageEntryString} is invalid.
-     *
-     * @param packageEntryStr A package entry expected to be in the format
-     *                        '<package-name>:<min-version-code>?:<max-version-code>?'.
+     * @param minMaxVersionCodes A pair expected to be in the format
+     *                        'Pair(<min-version-code>, <max-version-code>)'.
      * @param applicationInfo Information about the application/package.
      */
-    private static boolean matchesApplicationInfo(String packageEntryStr,
+    private static boolean matchesApplicationInfo(Pair<Long, Long> minMaxVersionCodes,
             ApplicationInfo applicationInfo) {
-        List<String> packageAndVersions = Arrays.asList(packageEntryStr.split(":", 3));
-        if (packageAndVersions.size() != 3) {
-            Slog.w(TAG, "Invalid package entry in flag 'never_constrain_display_apis': "
-                    + packageEntryStr);
-            return false;
-        }
-        String packageName = packageAndVersions.get(0);
-        String minVersionCodeStr = packageAndVersions.get(1);
-        String maxVersionCodeStr = packageAndVersions.get(2);
-
-        if (!packageName.equals(applicationInfo.packageName)) {
-            return false;
-        }
-        long version = applicationInfo.longVersionCode;
-        try {
-            if (!minVersionCodeStr.isEmpty() && version < Long.parseLong(minVersionCodeStr)) {
-                return false;
-            }
-            if (!maxVersionCodeStr.isEmpty() && version > Long.parseLong(maxVersionCodeStr)) {
-                return false;
-            }
-        } catch (NumberFormatException e) {
-            Slog.w(TAG, "Invalid APK version code in package entry: " + packageEntryStr);
-            return false;
-        }
-        return true;
+        return applicationInfo.longVersionCode >= minMaxVersionCodes.first
+                && applicationInfo.longVersionCode <= minMaxVersionCodes.second;
     }
 }

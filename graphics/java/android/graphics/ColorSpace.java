@@ -22,6 +22,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
 import android.annotation.SuppressAutoDoc;
+import android.annotation.SuppressLint;
+import android.hardware.DataSpace;
+import android.hardware.DataSpace.NamedDataSpace;
+import android.util.SparseIntArray;
 
 import libcore.util.NativeAllocationRegistry;
 
@@ -207,6 +211,7 @@ public abstract class ColorSpace {
 
     // See static initialization block next to #get(Named)
     private static final ColorSpace[] sNamedColorSpaces = new ColorSpace[Named.values().length];
+    private static final SparseIntArray sDataToColorSpaces = new SparseIntArray();
 
     @NonNull private final String mName;
     @NonNull private final Model mModel;
@@ -1389,6 +1394,47 @@ public abstract class ColorSpace {
     }
 
     /**
+     * Create a {@link ColorSpace} object using a {@link android.hardware.DataSpace DataSpace}
+     * value.
+     *
+     * <p>This function maps from a dataspace to a {@link Named} ColorSpace.
+     * If no {@link Named} ColorSpace object matching the {@code dataSpace} value can be created,
+     * {@code null} will return.</p>
+     *
+     * @param dataSpace The dataspace value
+     * @return the ColorSpace object or {@code null} if no matching colorspace can be found.
+     */
+    @SuppressLint("MethodNameUnits")
+    @Nullable
+    public static ColorSpace getFromDataSpace(@NamedDataSpace int dataSpace) {
+        int index = sDataToColorSpaces.get(dataSpace, -1);
+        if (index != -1) {
+            return ColorSpace.get(index);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Retrieve the {@link android.hardware.DataSpace DataSpace} value from a {@link ColorSpace}
+     * object.
+     *
+     * <p>If this {@link ColorSpace} object has no matching {@code dataSpace} value,
+     * {@link android.hardware.DataSpace#DATASPACE_UNKNOWN DATASPACE_UNKNOWN} will return.</p>
+     *
+     * @return the dataspace value.
+     */
+    @SuppressLint("MethodNameUnits")
+    public @NamedDataSpace int getDataSpace() {
+        int index = sDataToColorSpaces.indexOfValue(getId());
+        if (index != -1) {
+            return sDataToColorSpaces.keyAt(index);
+        } else {
+            return DataSpace.DATASPACE_UNKNOWN;
+        }
+    }
+
+    /**
      * <p>Returns an instance of {@link ColorSpace} identified by the specified
      * name. The list of names provided in the {@link Named} enum gives access
      * to a variety of common RGB color spaces.</p>
@@ -1445,6 +1491,7 @@ public abstract class ColorSpace {
                 SRGB_TRANSFER_PARAMETERS,
                 Named.SRGB.ordinal()
         );
+        sDataToColorSpaces.put(DataSpace.DATASPACE_SRGB, Named.SRGB.ordinal());
         sNamedColorSpaces[Named.LINEAR_SRGB.ordinal()] = new ColorSpace.Rgb(
                 "sRGB IEC61966-2.1 (Linear)",
                 SRGB_PRIMARIES,
@@ -1453,6 +1500,7 @@ public abstract class ColorSpace {
                 0.0f, 1.0f,
                 Named.LINEAR_SRGB.ordinal()
         );
+        sDataToColorSpaces.put(DataSpace.DATASPACE_SRGB_LINEAR, Named.LINEAR_SRGB.ordinal());
         sNamedColorSpaces[Named.EXTENDED_SRGB.ordinal()] = new ColorSpace.Rgb(
                 "scRGB-nl IEC 61966-2-2:2003",
                 SRGB_PRIMARIES,
@@ -1464,6 +1512,7 @@ public abstract class ColorSpace {
                 SRGB_TRANSFER_PARAMETERS,
                 Named.EXTENDED_SRGB.ordinal()
         );
+        sDataToColorSpaces.put(DataSpace.DATASPACE_SCRGB, Named.EXTENDED_SRGB.ordinal());
         sNamedColorSpaces[Named.LINEAR_EXTENDED_SRGB.ordinal()] = new ColorSpace.Rgb(
                 "scRGB IEC 61966-2-2:2003",
                 SRGB_PRIMARIES,
@@ -1472,6 +1521,8 @@ public abstract class ColorSpace {
                 -0.5f, 7.499f,
                 Named.LINEAR_EXTENDED_SRGB.ordinal()
         );
+        sDataToColorSpaces.put(
+                DataSpace.DATASPACE_SCRGB_LINEAR, Named.LINEAR_EXTENDED_SRGB.ordinal());
         sNamedColorSpaces[Named.BT709.ordinal()] = new ColorSpace.Rgb(
                 "Rec. ITU-R BT.709-5",
                 new float[] { 0.640f, 0.330f, 0.300f, 0.600f, 0.150f, 0.060f },
@@ -1480,6 +1531,7 @@ public abstract class ColorSpace {
                 new Rgb.TransferParameters(1 / 1.099, 0.099 / 1.099, 1 / 4.5, 0.081, 1 / 0.45),
                 Named.BT709.ordinal()
         );
+        sDataToColorSpaces.put(DataSpace.DATASPACE_BT709, Named.BT709.ordinal());
         sNamedColorSpaces[Named.BT2020.ordinal()] = new ColorSpace.Rgb(
                 "Rec. ITU-R BT.2020-1",
                 new float[] { 0.708f, 0.292f, 0.170f, 0.797f, 0.131f, 0.046f },
@@ -1488,6 +1540,7 @@ public abstract class ColorSpace {
                 new Rgb.TransferParameters(1 / 1.0993, 0.0993 / 1.0993, 1 / 4.5, 0.08145, 1 / 0.45),
                 Named.BT2020.ordinal()
         );
+        sDataToColorSpaces.put(DataSpace.DATASPACE_BT2020, Named.BT2020.ordinal());
         sNamedColorSpaces[Named.DCI_P3.ordinal()] = new ColorSpace.Rgb(
                 "SMPTE RP 431-2-2007 DCI (P3)",
                 new float[] { 0.680f, 0.320f, 0.265f, 0.690f, 0.150f, 0.060f },
@@ -1496,6 +1549,7 @@ public abstract class ColorSpace {
                 0.0f, 1.0f,
                 Named.DCI_P3.ordinal()
         );
+        sDataToColorSpaces.put(DataSpace.DATASPACE_DCI_P3, Named.DCI_P3.ordinal());
         sNamedColorSpaces[Named.DISPLAY_P3.ordinal()] = new ColorSpace.Rgb(
                 "Display P3",
                 new float[] { 0.680f, 0.320f, 0.265f, 0.690f, 0.150f, 0.060f },
@@ -1504,6 +1558,7 @@ public abstract class ColorSpace {
                 SRGB_TRANSFER_PARAMETERS,
                 Named.DISPLAY_P3.ordinal()
         );
+        sDataToColorSpaces.put(DataSpace.DATASPACE_DISPLAY_P3, Named.DISPLAY_P3.ordinal());
         sNamedColorSpaces[Named.NTSC_1953.ordinal()] = new ColorSpace.Rgb(
                 "NTSC (1953)",
                 NTSC_1953_PRIMARIES,
@@ -1528,6 +1583,7 @@ public abstract class ColorSpace {
                 0.0f, 1.0f,
                 Named.ADOBE_RGB.ordinal()
         );
+        sDataToColorSpaces.put(DataSpace.DATASPACE_ADOBE_RGB, Named.ADOBE_RGB.ordinal());
         sNamedColorSpaces[Named.PRO_PHOTO_RGB.ordinal()] = new ColorSpace.Rgb(
                 "ROMM RGB ISO 22028-2:2013",
                 new float[] { 0.7347f, 0.2653f, 0.1596f, 0.8404f, 0.0366f, 0.0001f },

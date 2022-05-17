@@ -120,7 +120,7 @@ public final class MediaCoordinatorTest extends SysuiTestCase {
     private NotifFilter captureFilter(MediaCoordinator coordinator) {
         ArgumentCaptor<NotifFilter> filterCaptor = ArgumentCaptor.forClass(NotifFilter.class);
         coordinator.attach(mNotifPipeline);
-        verify(mNotifPipeline).addFinalizeFilter(filterCaptor.capture());
+        verify(mNotifPipeline).addPreGroupFilter(filterCaptor.capture());
         return filterCaptor.getValue();
     }
 }

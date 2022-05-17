@@ -23,6 +23,8 @@ import android.content.res.Resources.NotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Build;
+import android.telephony.UiccPortInfo;
+import android.text.TextUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.GsmAlphabet;
@@ -42,6 +44,9 @@ public class IccUtils {
     // Spec reference TS 31.102 section 4.2.16
     @VisibleForTesting
     static final int FPLMN_BYTE_SIZE = 3;
+
+    // ICCID used for tests by some OEMs
+    public static final String TEST_ICCID = UiccPortInfo.ICCID_REDACTED;
 
     // A table mapping from a number to a hex character for fast encoding hex strings.
     private static final char[] HEX_CHARS = {
@@ -923,7 +928,17 @@ public class IccUtils {
      * Strip all the trailing 'F' characters of a string, e.g., an ICCID.
      */
     public static String stripTrailingFs(String s) {
+        if (TEST_ICCID.equals(s)) {
+            return s;
+        }
         return s == null ? null : s.replaceAll("(?i)f*$", "");
+    }
+
+    /**
+     * Strip all the trailing 'F' characters of a string if exists and compare.
+     */
+    public static boolean compareIgnoreTrailingFs(String a, String b) {
+        return TextUtils.equals(a, b) || TextUtils.equals(stripTrailingFs(a), stripTrailingFs(b));
     }
 
     /**

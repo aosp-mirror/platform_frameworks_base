@@ -20,7 +20,12 @@ import static android.testing.DexmakerShareClassLoaderRule.runWithDexmakerShareC
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -42,6 +47,7 @@ import org.junit.Test;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -51,6 +57,7 @@ import java.util.concurrent.TimeUnit;
 @SmallTest
 @Presubmit
 public class AnrHelperTest {
+    private static final long TIMEOUT_MS = TimeUnit.SECONDS.toMillis(5);
     private AnrHelper mAnrHelper;
 
     private ProcessRecord mAnrApp;
@@ -63,6 +70,7 @@ public class AnrHelperTest {
         final Context context = getInstrumentation().getTargetContext();
         runWithDexmakerShareClassLoader(() -> {
             mAnrApp = mock(ProcessRecord.class);
+            mAnrApp.mPid = 12345;
             final ProcessErrorStateRecord errorState = mock(ProcessErrorStateRecord.class);
             setFieldValue(ProcessErrorStateRecord.class, errorState, "mProcLock",
                     new ActivityManagerProcLock());
@@ -106,8 +114,41 @@ public class AnrHelperTest {
         mAnrHelper.appNotResponding(mAnrApp, activityShortComponentName, appInfo,
                 parentShortComponentName, parentProcess, aboveSystem, annotation);
 
-        verify(mAnrApp.mErrorState, timeout(TimeUnit.SECONDS.toMillis(5))).appNotResponding(
+        verify(mAnrApp.mErrorState, timeout(TIMEOUT_MS)).appNotResponding(
                 eq(activityShortComponentName), eq(appInfo), eq(parentShortComponentName),
                 eq(parentProcess), eq(aboveSystem), eq(annotation), eq(false) /* onlyDumpSelf */);
+    }
+
+    @Test
+    public void testSkipDuplicatedAnr() {
+        final CountDownLatch consumerLatch = new CountDownLatch(1);
+        final CountDownLatch processingLatch = new CountDownLatch(1);
+        doAnswer(invocation -> {
+            consumerLatch.countDown();
+            // Simulate that it is dumping to block the consumer thread.
+            processingLatch.await();
+            return null;
+        }).when(mAnrApp.mErrorState).appNotResponding(anyString(), any(), any(), any(),
+                anyBoolean(), anyString(), anyBoolean());
+        final ApplicationInfo appInfo = new ApplicationInfo();
+        final Runnable reportAnr = () -> mAnrHelper.appNotResponding(mAnrApp,
+                "activityShortComponentName", appInfo, "parentShortComponentName",
+                null /* parentProcess */, false /* aboveSystem */, "annotation");
+        reportAnr.run();
+        // This should be skipped because the pid is pending in queue.
+        reportAnr.run();
+        // The first reported ANR must be processed.
+        try {
+            assertTrue(consumerLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        } catch (InterruptedException ignored) {
+        }
+        // This should be skipped because the pid is under processing.
+        reportAnr.run();
+
+        // Assume that the first one finishes after all incoming ANRs.
+        processingLatch.countDown();
+        // There is only one ANR reported.
+        verify(mAnrApp.mErrorState, timeout(TIMEOUT_MS).only()).appNotResponding(
+                anyString(), any(), any(), any(), anyBoolean(), anyString(), anyBoolean());
     }
 }

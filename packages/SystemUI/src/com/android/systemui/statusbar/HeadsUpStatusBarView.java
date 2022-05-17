@@ -29,7 +29,8 @@ import com.android.keyguard.AlphaOptimizedLinearLayout;
 import com.android.systemui.R;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.NotificationEntry.OnSensitivityChangedListener;
+
+import java.util.ArrayList;
 
 
 /**
@@ -47,6 +48,7 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
     private TextView mTextView;
     private NotificationEntry mShowingEntry;
     private Runnable mOnDrawingRectChangedListener;
+    private boolean mRedactSensitiveContent;
 
     public HeadsUpStatusBarView(Context context) {
         this(context, null);
@@ -109,29 +111,28 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
     }
 
     public void setEntry(NotificationEntry entry) {
-        if (mShowingEntry != null) {
-            mShowingEntry.removeOnSensitivityChangedListener(mOnSensitivityChangedListener);
-        }
         mShowingEntry = entry;
-
         if (mShowingEntry != null) {
             CharSequence text = entry.headsUpStatusBarText;
-            if (entry.isSensitive()) {
+            if (mRedactSensitiveContent && entry.hasSensitiveContents()) {
                 text = entry.headsUpStatusBarTextPublic;
             }
             mTextView.setText(text);
-            mShowingEntry.addOnSensitivityChangedListener(mOnSensitivityChangedListener);
         }
     }
 
-    private final OnSensitivityChangedListener mOnSensitivityChangedListener = entry -> {
-        if (entry != mShowingEntry) {
-            throw new IllegalStateException("Got a sensitivity change for " + entry
-                    + " but mShowingEntry is " + mShowingEntry);
+    public void setRedactSensitiveContent(boolean redactSensitiveContent) {
+        if (mRedactSensitiveContent == redactSensitiveContent) {
+            return;
         }
-        // Update the text
-        setEntry(entry);
-    };
+        mRedactSensitiveContent = redactSensitiveContent;
+        if (mShowingEntry != null && mShowingEntry.hasSensitiveContents()) {
+            mTextView.setText(
+                    mRedactSensitiveContent
+                            ? mShowingEntry.headsUpStatusBarTextPublic
+                            : mShowingEntry.headsUpStatusBarText);
+        }
+    }
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
@@ -161,8 +162,8 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
         return mIconDrawingRect;
     }
 
-    public void onDarkChanged(Rect area, float darkIntensity, int tint) {
-        mTextView.setTextColor(DarkIconDispatcher.getTint(area, this, tint));
+    public void onDarkChanged(ArrayList<Rect> areas, float darkIntensity, int tint) {
+        mTextView.setTextColor(DarkIconDispatcher.getTint(areas, this, tint));
     }
 
     public void setOnDrawingRectChangedListener(Runnable onDrawingRectChangedListener) {

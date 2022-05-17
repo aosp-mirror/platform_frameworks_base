@@ -35,8 +35,11 @@ cc_defaults {
     tidy_checks_as_errors: [
         "modernize-*",
         "-modernize-avoid-c-arrays",
+        "-modernize-concat-nested-namespaces",
         "-modernize-pass-by-value",
         "-modernize-replace-disallow-copy-and-assign-macro",
+        "-modernize-return-braced-init-list",
+        "-modernize-use-default-member-init",
         "-modernize-use-equals-default",
         "-modernize-use-nodiscard",
         "-modernize-use-override",
@@ -49,13 +52,12 @@ cc_defaults {
         "-readability-braces-around-statements",
         "-readability-const-return-type",
         "-readability-convert-member-functions-to-static",
+        "-readability-duplicate-include",
         "-readability-else-after-return",
+        "-readability-identifier-length",
         "-readability-named-parameter",
         "-readability-redundant-access-specifiers",
         "-readability-uppercase-literal-suffix",
-    ],
-    tidy_flags: [
-        "-system-headers",
     ],
 }
 

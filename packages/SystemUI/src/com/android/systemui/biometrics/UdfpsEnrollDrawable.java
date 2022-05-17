@@ -20,9 +20,7 @@ import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -30,15 +28,11 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.TypedValue;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.LinearInterpolator;
 
-import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.android.internal.graphics.ColorUtils;
 import com.android.systemui.R;
 
 /**
@@ -47,17 +41,10 @@ import com.android.systemui.R;
 public class UdfpsEnrollDrawable extends UdfpsDrawable {
     private static final String TAG = "UdfpsAnimationEnroll";
 
-    private static final long HINT_COLOR_ANIM_DELAY_MS = 233L;
-    private static final long HINT_COLOR_ANIM_DURATION_MS = 517L;
-    private static final long HINT_WIDTH_ANIM_DURATION_MS = 233L;
     private static final long TARGET_ANIM_DURATION_LONG = 800L;
     private static final long TARGET_ANIM_DURATION_SHORT = 600L;
     // 1 + SCALE_MAX is the maximum that the moving target will animate to
     private static final float SCALE_MAX = 0.25f;
-
-    private static final float HINT_PADDING_DP = 10f;
-    private static final float HINT_MAX_WIDTH_DP = 6f;
-    private static final float HINT_ANGLE = 40f;
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
 
@@ -76,55 +63,30 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
     // Moving target size
     float mCurrentScale = 1.f;
 
-    @ColorInt private final int mHintColorFaded;
-    @ColorInt private final int mHintColorHighlight;
-    private final float mHintMaxWidthPx;
-    private final float mHintPaddingPx;
-
     @NonNull private final Animator.AnimatorListener mTargetAnimListener;
 
     private boolean mShouldShowTipHint = false;
-    @NonNull private final Paint mTipHintPaint;
-    @Nullable private AnimatorSet mTipHintAnimatorSet;
-    @Nullable private ValueAnimator mTipHintColorAnimator;
-    @Nullable private ValueAnimator mTipHintWidthAnimator;
-    @NonNull private final ValueAnimator.AnimatorUpdateListener mTipHintColorUpdateListener;
-    @NonNull private final ValueAnimator.AnimatorUpdateListener mTipHintWidthUpdateListener;
-    @NonNull private final Animator.AnimatorListener mTipHintPulseListener;
-
     private boolean mShouldShowEdgeHint = false;
-    @NonNull private final Paint mEdgeHintPaint;
-    @Nullable private AnimatorSet mEdgeHintAnimatorSet;
-    @Nullable private ValueAnimator mEdgeHintColorAnimator;
-    @Nullable private ValueAnimator mEdgeHintWidthAnimator;
-    @NonNull private final ValueAnimator.AnimatorUpdateListener mEdgeHintColorUpdateListener;
-    @NonNull private final ValueAnimator.AnimatorUpdateListener mEdgeHintWidthUpdateListener;
-    @NonNull private final Animator.AnimatorListener mEdgeHintPulseListener;
 
     UdfpsEnrollDrawable(@NonNull Context context) {
         super(context);
 
         mSensorOutlinePaint = new Paint(0 /* flags */);
         mSensorOutlinePaint.setAntiAlias(true);
-        mSensorOutlinePaint.setColor(mContext.getColor(R.color.udfps_enroll_icon));
-        mSensorOutlinePaint.setStyle(Paint.Style.STROKE);
-        mSensorOutlinePaint.setStrokeWidth(2.f);
+        mSensorOutlinePaint.setColor(context.getColor(R.color.udfps_moving_target_fill));
+        mSensorOutlinePaint.setStyle(Paint.Style.FILL);
 
         mBlueFill = new Paint(0 /* flags */);
         mBlueFill.setAntiAlias(true);
         mBlueFill.setColor(context.getColor(R.color.udfps_moving_target_fill));
         mBlueFill.setStyle(Paint.Style.FILL);
 
-        mMovingTargetFpIcon = context.getResources().getDrawable(R.drawable.ic_fingerprint, null);
-        mMovingTargetFpIcon.setTint(Color.WHITE);
+        mMovingTargetFpIcon = context.getResources()
+                .getDrawable(R.drawable.ic_kg_fingerprint, null);
+        mMovingTargetFpIcon.setTint(context.getColor(R.color.udfps_enroll_icon));
         mMovingTargetFpIcon.mutate();
 
-        mFingerprintDrawable.setTint(mContext.getColor(R.color.udfps_enroll_icon));
-
-        mHintColorFaded = getHintColorFaded(context);
-        mHintColorHighlight = context.getColor(R.color.udfps_enroll_progress);
-        mHintMaxWidthPx = Utils.dpToPixels(context, HINT_MAX_WIDTH_DP);
-        mHintPaddingPx = Utils.dpToPixels(context, HINT_PADDING_DP);
+        getFingerprintDrawable().setTint(context.getColor(R.color.udfps_enroll_icon));
 
         mTargetAnimListener = new Animator.AnimatorListener() {
             @Override
@@ -141,96 +103,6 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
             @Override
             public void onAnimationRepeat(Animator animation) {}
         };
-
-        mTipHintPaint = new Paint(0 /* flags */);
-        mTipHintPaint.setAntiAlias(true);
-        mTipHintPaint.setColor(mHintColorFaded);
-        mTipHintPaint.setStyle(Paint.Style.STROKE);
-        mTipHintPaint.setStrokeCap(Paint.Cap.ROUND);
-        mTipHintPaint.setStrokeWidth(0f);
-        mTipHintColorUpdateListener = animation -> {
-            mTipHintPaint.setColor((int) animation.getAnimatedValue());
-            invalidateSelf();
-        };
-        mTipHintWidthUpdateListener = animation -> {
-            mTipHintPaint.setStrokeWidth((float) animation.getAnimatedValue());
-            invalidateSelf();
-        };
-        mTipHintPulseListener = new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {}
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mHandler.postDelayed(() -> {
-                    mTipHintColorAnimator =
-                            ValueAnimator.ofArgb(mTipHintPaint.getColor(), mHintColorFaded);
-                    mTipHintColorAnimator.setInterpolator(new LinearInterpolator());
-                    mTipHintColorAnimator.setDuration(HINT_COLOR_ANIM_DURATION_MS);
-                    mTipHintColorAnimator.addUpdateListener(mTipHintColorUpdateListener);
-                    mTipHintColorAnimator.start();
-                }, HINT_COLOR_ANIM_DELAY_MS);
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {}
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {}
-        };
-
-        mEdgeHintPaint = new Paint(0 /* flags */);
-        mEdgeHintPaint.setAntiAlias(true);
-        mEdgeHintPaint.setColor(mHintColorFaded);
-        mEdgeHintPaint.setStyle(Paint.Style.STROKE);
-        mEdgeHintPaint.setStrokeCap(Paint.Cap.ROUND);
-        mEdgeHintPaint.setStrokeWidth(0f);
-        mEdgeHintColorUpdateListener = animation -> {
-            mEdgeHintPaint.setColor((int) animation.getAnimatedValue());
-            invalidateSelf();
-        };
-        mEdgeHintWidthUpdateListener = animation -> {
-            mEdgeHintPaint.setStrokeWidth((float) animation.getAnimatedValue());
-            invalidateSelf();
-        };
-        mEdgeHintPulseListener = new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {}
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mHandler.postDelayed(() -> {
-                    mEdgeHintColorAnimator =
-                            ValueAnimator.ofArgb(mEdgeHintPaint.getColor(), mHintColorFaded);
-                    mEdgeHintColorAnimator.setInterpolator(new LinearInterpolator());
-                    mEdgeHintColorAnimator.setDuration(HINT_COLOR_ANIM_DURATION_MS);
-                    mEdgeHintColorAnimator.addUpdateListener(mEdgeHintColorUpdateListener);
-                    mEdgeHintColorAnimator.start();
-                }, HINT_COLOR_ANIM_DELAY_MS);
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {}
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {}
-        };
-    }
-
-    @ColorInt
-    private static int getHintColorFaded(@NonNull Context context) {
-        final TypedValue tv = new TypedValue();
-        context.getTheme().resolveAttribute(android.R.attr.disabledAlpha, tv, true);
-        final int alpha = (int) (tv.getFloat() * 255f);
-
-        final int[] attrs = new int[] {android.R.attr.colorControlNormal};
-        final TypedArray ta = context.obtainStyledAttributes(attrs);
-        try {
-            @ColorInt final int color = ta.getColor(0, context.getColor(R.color.white_disabled));
-            return ColorUtils.setAlphaComponent(color, alpha);
-        } finally {
-            ta.recycle();
-        }
     }
 
     void setEnrollHelper(@NonNull UdfpsEnrollHelper helper) {
@@ -307,25 +179,12 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
 
     private void updateTipHintVisibility() {
         final boolean shouldShow = mEnrollHelper != null && mEnrollHelper.isTipEnrollmentStage();
+        // With the new update, we will git rid of most of this code, and instead
+        // we will change the fingerprint icon.
         if (mShouldShowTipHint == shouldShow) {
             return;
         }
         mShouldShowTipHint = shouldShow;
-
-        if (mTipHintWidthAnimator != null && mTipHintWidthAnimator.isRunning()) {
-            mTipHintWidthAnimator.cancel();
-        }
-
-        final float targetWidth = shouldShow ? mHintMaxWidthPx : 0f;
-        mTipHintWidthAnimator = ValueAnimator.ofFloat(mTipHintPaint.getStrokeWidth(), targetWidth);
-        mTipHintWidthAnimator.setDuration(HINT_WIDTH_ANIM_DURATION_MS);
-        mTipHintWidthAnimator.addUpdateListener(mTipHintWidthUpdateListener);
-
-        if (shouldShow) {
-            startTipHintPulseAnimation();
-        } else {
-            mTipHintWidthAnimator.start();
-        }
     }
 
     private void updateEdgeHintVisibility() {
@@ -334,71 +193,6 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
             return;
         }
         mShouldShowEdgeHint = shouldShow;
-
-        if (mEdgeHintWidthAnimator != null && mEdgeHintWidthAnimator.isRunning()) {
-            mEdgeHintWidthAnimator.cancel();
-        }
-
-        final float targetWidth = shouldShow ? mHintMaxWidthPx : 0f;
-        mEdgeHintWidthAnimator =
-                ValueAnimator.ofFloat(mEdgeHintPaint.getStrokeWidth(), targetWidth);
-        mEdgeHintWidthAnimator.setDuration(HINT_WIDTH_ANIM_DURATION_MS);
-        mEdgeHintWidthAnimator.addUpdateListener(mEdgeHintWidthUpdateListener);
-
-        if (shouldShow) {
-            startEdgeHintPulseAnimation();
-        } else {
-            mEdgeHintWidthAnimator.start();
-        }
-    }
-
-    private void startTipHintPulseAnimation() {
-        mHandler.removeCallbacksAndMessages(null);
-        if (mTipHintAnimatorSet != null && mTipHintAnimatorSet.isRunning()) {
-            mTipHintAnimatorSet.cancel();
-        }
-        if (mTipHintColorAnimator != null && mTipHintColorAnimator.isRunning()) {
-            mTipHintColorAnimator.cancel();
-        }
-
-        mTipHintColorAnimator = ValueAnimator.ofArgb(mTipHintPaint.getColor(), mHintColorHighlight);
-        mTipHintColorAnimator.setDuration(HINT_WIDTH_ANIM_DURATION_MS);
-        mTipHintColorAnimator.addUpdateListener(mTipHintColorUpdateListener);
-        mTipHintColorAnimator.addListener(mTipHintPulseListener);
-
-        mTipHintAnimatorSet = new AnimatorSet();
-        mTipHintAnimatorSet.setInterpolator(new AccelerateDecelerateInterpolator());
-        mTipHintAnimatorSet.playTogether(mTipHintColorAnimator, mTipHintWidthAnimator);
-        mTipHintAnimatorSet.start();
-    }
-
-    private void startEdgeHintPulseAnimation() {
-        mHandler.removeCallbacksAndMessages(null);
-        if (mEdgeHintAnimatorSet != null && mEdgeHintAnimatorSet.isRunning()) {
-            mEdgeHintAnimatorSet.cancel();
-        }
-        if (mEdgeHintColorAnimator != null && mEdgeHintColorAnimator.isRunning()) {
-            mEdgeHintColorAnimator.cancel();
-        }
-
-        mEdgeHintColorAnimator =
-                ValueAnimator.ofArgb(mEdgeHintPaint.getColor(), mHintColorHighlight);
-        mEdgeHintColorAnimator.setDuration(HINT_WIDTH_ANIM_DURATION_MS);
-        mEdgeHintColorAnimator.addUpdateListener(mEdgeHintColorUpdateListener);
-        mEdgeHintColorAnimator.addListener(mEdgeHintPulseListener);
-
-        mEdgeHintAnimatorSet = new AnimatorSet();
-        mEdgeHintAnimatorSet.setInterpolator(new AccelerateDecelerateInterpolator());
-        mEdgeHintAnimatorSet.playTogether(mEdgeHintColorAnimator, mEdgeHintWidthAnimator);
-        mEdgeHintAnimatorSet.start();
-    }
-
-    private boolean isTipHintVisible() {
-        return mTipHintPaint.getStrokeWidth() > 0f;
-    }
-
-    private boolean isEdgeHintVisible() {
-        return mEdgeHintPaint.getStrokeWidth() > 0f;
     }
 
     @Override
@@ -424,63 +218,11 @@ public class UdfpsEnrollDrawable extends UdfpsDrawable {
             if (mSensorRect != null) {
                 canvas.drawOval(mSensorRect, mSensorOutlinePaint);
             }
-            mFingerprintDrawable.draw(canvas);
-            mFingerprintDrawable.setAlpha(mAlpha);
-            mSensorOutlinePaint.setAlpha(mAlpha);
+            getFingerprintDrawable().draw(canvas);
+            getFingerprintDrawable().setAlpha(getAlpha());
+            mSensorOutlinePaint.setAlpha(getAlpha());
         }
 
-        // Draw the finger tip or edges hint.
-        if (isTipHintVisible() || isEdgeHintVisible()) {
-            canvas.save();
-
-            // Make arcs start from the top, rather than the right.
-            canvas.rotate(-90f, mSensorRect.centerX(), mSensorRect.centerY());
-
-            final float halfSensorHeight = Math.abs(mSensorRect.bottom - mSensorRect.top) / 2f;
-            final float halfSensorWidth = Math.abs(mSensorRect.right - mSensorRect.left) / 2f;
-            final float hintXOffset = halfSensorWidth + mHintPaddingPx;
-            final float hintYOffset = halfSensorHeight + mHintPaddingPx;
-
-            if (isTipHintVisible()) {
-                canvas.drawArc(
-                        mSensorRect.centerX() - hintXOffset,
-                        mSensorRect.centerY() - hintYOffset,
-                        mSensorRect.centerX() + hintXOffset,
-                        mSensorRect.centerY() + hintYOffset,
-                        -HINT_ANGLE / 2f,
-                        HINT_ANGLE,
-                        false /* useCenter */,
-                        mTipHintPaint);
-            }
-
-            if (isEdgeHintVisible()) {
-                // Draw right edge hint.
-                canvas.rotate(-90f, mSensorRect.centerX(), mSensorRect.centerY());
-                canvas.drawArc(
-                        mSensorRect.centerX() - hintXOffset,
-                        mSensorRect.centerY() - hintYOffset,
-                        mSensorRect.centerX() + hintXOffset,
-                        mSensorRect.centerY() + hintYOffset,
-                        -HINT_ANGLE / 2f,
-                        HINT_ANGLE,
-                        false /* useCenter */,
-                        mEdgeHintPaint);
-
-                // Draw left edge hint.
-                canvas.rotate(180f, mSensorRect.centerX(), mSensorRect.centerY());
-                canvas.drawArc(
-                        mSensorRect.centerX() - hintXOffset,
-                        mSensorRect.centerY() - hintYOffset,
-                        mSensorRect.centerX() + hintXOffset,
-                        mSensorRect.centerY() + hintYOffset,
-                        -HINT_ANGLE / 2f,
-                        HINT_ANGLE,
-                        false /* useCenter */,
-                        mEdgeHintPaint);
-            }
-
-            canvas.restore();
-        }
     }
 
     @Override

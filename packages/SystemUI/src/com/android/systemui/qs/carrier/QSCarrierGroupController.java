@@ -19,6 +19,8 @@ package com.android.systemui.qs.carrier;
 import static android.view.View.IMPORTANT_FOR_ACCESSIBILITY_YES;
 
 import android.annotation.MainThread;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
@@ -40,10 +42,13 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.statusbar.FeatureFlags;
-import com.android.systemui.statusbar.policy.NetworkController;
-import com.android.systemui.statusbar.policy.NetworkController.MobileDataIndicators;
+import com.android.systemui.statusbar.connectivity.IconState;
+import com.android.systemui.statusbar.connectivity.MobileDataIndicators;
+import com.android.systemui.statusbar.connectivity.NetworkController;
+import com.android.systemui.statusbar.connectivity.SignalCallback;
 import com.android.systemui.util.CarrierConfigTracker;
 
 import java.util.function.Consumer;
@@ -77,14 +82,14 @@ public class QSCarrierGroupController {
     private final CarrierConfigTracker mCarrierConfigTracker;
 
     private boolean mIsSingleCarrier;
+    @Nullable
     private OnSingleCarrierChangedListener mOnSingleCarrierChangedListener;
 
     private final SlotIndexResolver mSlotIndexResolver;
 
-    private final NetworkController.SignalCallback mSignalCallback =
-            new NetworkController.SignalCallback() {
+    private final SignalCallback mSignalCallback = new SignalCallback() {
                 @Override
-                public void setMobileDataIndicators(MobileDataIndicators indicators) {
+                public void setMobileDataIndicators(@NonNull MobileDataIndicators indicators) {
                     if (mProviderModel) {
                         return;
                     }
@@ -109,7 +114,7 @@ public class QSCarrierGroupController {
                 }
 
                 @Override
-                public void setCallIndicator(NetworkController.IconState statusIcon, int subId) {
+                public void setCallIndicator(@NonNull IconState statusIcon, int subId) {
                     if (!mProviderModel) {
                         return;
                     }
@@ -217,7 +222,7 @@ public class QSCarrierGroupController {
             CarrierConfigTracker carrierConfigTracker, FeatureFlags featureFlags,
             SlotIndexResolver slotIndexResolver) {
 
-        if (featureFlags.isCombinedStatusBarSignalIconsEnabled()) {
+        if (featureFlags.isEnabled(Flags.COMBINED_STATUS_BAR_SIGNAL_ICONS)) {
             mProviderModel = true;
         } else {
             mProviderModel = false;
@@ -291,7 +296,8 @@ public class QSCarrierGroupController {
      * This will get notified when the number of carriers changes between 1 and "not one".
      * @param listener
      */
-    public void setOnSingleCarrierChangedListener(OnSingleCarrierChangedListener listener) {
+    public void setOnSingleCarrierChangedListener(
+            @Nullable OnSingleCarrierChangedListener listener) {
         mOnSingleCarrierChangedListener = listener;
     }
 

@@ -112,7 +112,10 @@ public class UsbEndpointDescriptor extends UsbDescriptor {
         return mEndpointAddress & UsbEndpointDescriptor.MASK_ENDPOINT_DIRECTION;
     }
 
-    /* package */ UsbEndpoint toAndroid(UsbDescriptorParser parser) {
+    /**
+    * Returns a UsbEndpoint that this UsbEndpointDescriptor is describing.
+    */
+    public UsbEndpoint toAndroid(UsbDescriptorParser parser) {
         if (UsbDescriptorParser.DEBUG) {
             Log.d(TAG, "toAndroid() type:"
                     + Integer.toHexString(mAttributes & MASK_ATTRIBS_TRANSTYPE)

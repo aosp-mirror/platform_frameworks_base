@@ -93,7 +93,7 @@ public final class StorageController extends StateController {
         } else if (reportChange) {
             // Let the scheduler know that state has changed. This may or may not result in an
             // execution.
-            mStateChangedListener.onControllerStateChanged();
+            mStateChangedListener.onControllerStateChanged(mTrackedTasks);
         }
     }
 

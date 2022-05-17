@@ -41,7 +41,7 @@ import java.util.List;
  * The methods provided by {@link FragmentController} are for that purpose.
  *
  * @deprecated Use the <a href="{@docRoot}tools/extras/support-library.html">Support Library</a>
- *      {@link android.support.v4.app.FragmentController}
+ *      {@link androidx.fragment.app.FragmentController}
  */
 @Deprecated
 public class FragmentController {

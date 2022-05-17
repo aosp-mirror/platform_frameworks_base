@@ -22,8 +22,10 @@ import android.os.ParcelFileDescriptor;
 interface ISerialManager
 {
     /* Returns a list of all available serial ports */
+    @EnforcePermission("SERIAL_PORT")
     String[] getSerialPorts();
 
     /* Returns a file descriptor for the serial port. */
+    @EnforcePermission("SERIAL_PORT")
     ParcelFileDescriptor openSerialPort(String name);
 }

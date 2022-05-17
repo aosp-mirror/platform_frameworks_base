@@ -15,11 +15,16 @@
  */
 package com.android.server.infra;
 
+import android.annotation.ArrayRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.UserIdInt;
+import android.app.AppGlobals;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.content.pm.ServiceInfo;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -33,6 +38,9 @@ import android.util.TimeUtils;
 import com.android.internal.annotations.GuardedBy;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Gets the service name using a framework resources, temporarily changing the service if necessary
@@ -47,20 +55,24 @@ public final class FrameworkResourcesServiceNameResolver implements ServiceNameR
     /** Handler message to {@link #resetTemporaryService(int)} */
     private static final int MSG_RESET_TEMPORARY_SERVICE = 0;
 
-    private final @NonNull Context mContext;
-    private final @NonNull Object mLock = new Object();
-    private final @StringRes int mResourceId;
-    private @Nullable NameResolverListener mOnSetCallback;
-
+    @NonNull
+    private final Context mContext;
+    @NonNull
+    private final Object mLock = new Object();
+    @StringRes
+    private final int mStringResourceId;
+    @ArrayRes
+    private final int mArrayResourceId;
+    private final boolean mIsMultiple;
     /**
-     * Map of temporary service name set by {@link #setTemporaryService(int, String, int)},
+     * Map of temporary service name list set by {@link #setTemporaryServices(int, String[], int)},
      * keyed by {@code userId}.
      *
-     * <p>Typically used by Shell command and/or CTS tests.
+     * <p>Typically used by Shell command and/or CTS tests to configure temporary services if
+     * mIsMultiple is true.
      */
     @GuardedBy("mLock")
-    private final SparseArray<String> mTemporaryServiceNames = new SparseArray<>();
-
+    private final SparseArray<String[]> mTemporaryServiceNamesList = new SparseArray<>();
     /**
      * Map of default services that have been disabled by
      * {@link #setDefaultServiceEnabled(int, boolean)},keyed by {@code userId}.
@@ -69,7 +81,8 @@ public final class FrameworkResourcesServiceNameResolver implements ServiceNameR
      */
     @GuardedBy("mLock")
     private final SparseBooleanArray mDefaultServicesDisabled = new SparseBooleanArray();
-
+    @Nullable
+    private NameResolverListener mOnSetCallback;
     /**
      * When the temporary service will expire (and reset back to the default).
      */
@@ -85,7 +98,22 @@ public final class FrameworkResourcesServiceNameResolver implements ServiceNameR
     public FrameworkResourcesServiceNameResolver(@NonNull Context context,
             @StringRes int resourceId) {
         mContext = context;
-        mResourceId = resourceId;
+        mStringResourceId = resourceId;
+        mArrayResourceId = -1;
+        mIsMultiple = false;
+    }
+
+    public FrameworkResourcesServiceNameResolver(@NonNull Context context,
+            @ArrayRes int resourceId, boolean isMultiple) {
+        if (!isMultiple) {
+            throw new UnsupportedOperationException("Please use "
+                    + "FrameworkResourcesServiceNameResolver(context, @StringRes int) constructor "
+                    + "if single service mode is requested.");
+        }
+        mContext = context;
+        mStringResourceId = -1;
+        mArrayResourceId = resourceId;
+        mIsMultiple = true;
     }
 
     @Override
@@ -96,22 +124,31 @@ public final class FrameworkResourcesServiceNameResolver implements ServiceNameR
     }
 
     @Override
-    public String getDefaultServiceName(@UserIdInt int userId) {
-        synchronized (mLock) {
-            final String name = mContext.getString(mResourceId);
-            return TextUtils.isEmpty(name) ? null : name;
-        }
+    public String getServiceName(@UserIdInt int userId) {
+        String[] serviceNames = getServiceNameList(userId);
+        return (serviceNames == null || serviceNames.length == 0) ? null : serviceNames[0];
     }
 
     @Override
-    public String getServiceName(@UserIdInt int userId) {
+    public String getDefaultServiceName(@UserIdInt int userId) {
+        String[] serviceNames = getDefaultServiceNameList(userId);
+        return (serviceNames == null || serviceNames.length == 0) ? null : serviceNames[0];
+    }
+
+    /**
+     * Gets the default list of the service names for the given user.
+     *
+     * <p>Typically implemented by services which want to provide multiple backends.
+     */
+    @Override
+    public String[] getServiceNameList(int userId) {
         synchronized (mLock) {
-            final String temporaryName = mTemporaryServiceNames.get(userId);
-            if (temporaryName != null) {
+            String[] temporaryNames = mTemporaryServiceNamesList.get(userId);
+            if (temporaryNames != null) {
                 // Always log it, as it should only be used on CTS or during development
-                Slog.w(TAG, "getServiceName(): using temporary name " + temporaryName
-                        + " for user " + userId);
-                return temporaryName;
+                Slog.w(TAG, "getServiceName(): using temporary name "
+                        + Arrays.toString(temporaryNames) + " for user " + userId);
+                return temporaryNames;
             }
             final boolean disabled = mDefaultServicesDisabled.get(userId);
             if (disabled) {
@@ -120,22 +157,73 @@ public final class FrameworkResourcesServiceNameResolver implements ServiceNameR
                         + "user " + userId);
                 return null;
             }
-            return getDefaultServiceName(userId);
+            return getDefaultServiceNameList(userId);
+
         }
+    }
+
+    /**
+     * Gets the default list of the service names for the given user.
+     *
+     * <p>Typically implemented by services which want to provide multiple backends.
+     */
+    @Override
+    public String[] getDefaultServiceNameList(int userId) {
+        synchronized (mLock) {
+            if (mIsMultiple) {
+                String[] serviceNameList = mContext.getResources().getStringArray(mArrayResourceId);
+                // Filter out unimplemented services
+                // Initialize the validated array as null because we do not know the final size.
+                List<String> validatedServiceNameList = new ArrayList<>();
+                try {
+                    for (int i = 0; i < serviceNameList.length; i++) {
+                        if (TextUtils.isEmpty(serviceNameList[i])) {
+                            continue;
+                        }
+                        ComponentName serviceComponent = ComponentName.unflattenFromString(
+                                serviceNameList[i]);
+                        ServiceInfo serviceInfo = AppGlobals.getPackageManager().getServiceInfo(
+                                serviceComponent,
+                                PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userId);
+                        if (serviceInfo != null) {
+                            validatedServiceNameList.add(serviceNameList[i]);
+                        }
+                    }
+                } catch (Exception e) {
+                    Slog.e(TAG, "Could not validate provided services.", e);
+                }
+                String[] validatedServiceNameArray = new String[validatedServiceNameList.size()];
+                return validatedServiceNameList.toArray(validatedServiceNameArray);
+            } else {
+                final String name = mContext.getString(mStringResourceId);
+                return TextUtils.isEmpty(name) ? new String[0] : new String[]{name};
+            }
+        }
+    }
+
+    @Override
+    public boolean isConfiguredInMultipleMode() {
+        return mIsMultiple;
     }
 
     @Override
     public boolean isTemporary(@UserIdInt int userId) {
         synchronized (mLock) {
-            return mTemporaryServiceNames.get(userId) != null;
+            return mTemporaryServiceNamesList.get(userId) != null;
         }
     }
 
     @Override
     public void setTemporaryService(@UserIdInt int userId, @NonNull String componentName,
             int durationMs) {
+        setTemporaryServices(userId, new String[]{componentName}, durationMs);
+    }
+
+    @Override
+    public void setTemporaryServices(int userId, @NonNull String[] componentNames, int durationMs) {
         synchronized (mLock) {
-            mTemporaryServiceNames.put(userId, componentName);
+            mTemporaryServiceNamesList.put(userId, componentNames);
 
             if (mTemporaryHandler == null) {
                 mTemporaryHandler = new Handler(Looper.getMainLooper(), null, true) {
@@ -155,8 +243,10 @@ public final class FrameworkResourcesServiceNameResolver implements ServiceNameR
             }
             mTemporaryServiceExpiration = SystemClock.elapsedRealtime() + durationMs;
             mTemporaryHandler.sendEmptyMessageDelayed(MSG_RESET_TEMPORARY_SERVICE, durationMs);
-            notifyTemporaryServiceNameChangedLocked(userId, componentName,
-                    /* isTemporary= */ true);
+            for (int i = 0; i < componentNames.length; i++) {
+                notifyTemporaryServiceNameChangedLocked(userId, componentNames[i],
+                        /* isTemporary= */ true);
+            }
         }
     }
 
@@ -164,8 +254,8 @@ public final class FrameworkResourcesServiceNameResolver implements ServiceNameR
     public void resetTemporaryService(@UserIdInt int userId) {
         synchronized (mLock) {
             Slog.i(TAG, "resetting temporary service for user " + userId + " from "
-                    + mTemporaryServiceNames.get(userId));
-            mTemporaryServiceNames.remove(userId);
+                    + Arrays.toString(mTemporaryServiceNamesList.get(userId)));
+            mTemporaryServiceNamesList.remove(userId);
             if (mTemporaryHandler != null) {
                 mTemporaryHandler.removeMessages(MSG_RESET_TEMPORARY_SERVICE);
                 mTemporaryHandler = null;
@@ -207,16 +297,21 @@ public final class FrameworkResourcesServiceNameResolver implements ServiceNameR
 
     @Override
     public String toString() {
-        return "FrameworkResourcesServiceNamer[temps=" + mTemporaryServiceNames + "]";
+        synchronized (mLock) {
+            return "FrameworkResourcesServiceNamer[temps=" + mTemporaryServiceNamesList + "]";
+        }
     }
 
     // TODO(b/117779333): support proto
     @Override
     public void dumpShort(@NonNull PrintWriter pw) {
         synchronized (mLock) {
-            pw.print("FrameworkResourcesServiceNamer: resId="); pw.print(mResourceId);
-            pw.print(", numberTemps="); pw.print(mTemporaryServiceNames.size());
-            pw.print(", enabledDefaults="); pw.print(mDefaultServicesDisabled.size());
+            pw.print("FrameworkResourcesServiceNamer: resId=");
+            pw.print(mStringResourceId);
+            pw.print(", numberTemps=");
+            pw.print(mTemporaryServiceNamesList.size());
+            pw.print(", enabledDefaults=");
+            pw.print(mDefaultServicesDisabled.size());
         }
     }
 
@@ -224,13 +319,17 @@ public final class FrameworkResourcesServiceNameResolver implements ServiceNameR
     @Override
     public void dumpShort(@NonNull PrintWriter pw, @UserIdInt int userId) {
         synchronized (mLock) {
-            final String temporaryName = mTemporaryServiceNames.get(userId);
-            if (temporaryName != null) {
-                pw.print("tmpName="); pw.print(temporaryName);
+            final String[] temporaryNames = mTemporaryServiceNamesList.get(userId);
+            if (temporaryNames != null) {
+                pw.print("tmpName=");
+                pw.print(Arrays.toString(temporaryNames));
                 final long ttl = mTemporaryServiceExpiration - SystemClock.elapsedRealtime();
-                pw.print(" (expires in "); TimeUtils.formatDuration(ttl, pw); pw.print("), ");
+                pw.print(" (expires in ");
+                TimeUtils.formatDuration(ttl, pw);
+                pw.print("), ");
             }
-            pw.print("defaultName="); pw.print(getDefaultServiceName(userId));
+            pw.print("defaultName=");
+            pw.print(getDefaultServiceName(userId));
             final boolean disabled = mDefaultServicesDisabled.get(userId);
             pw.println(disabled ? " (disabled)" : " (enabled)");
         }

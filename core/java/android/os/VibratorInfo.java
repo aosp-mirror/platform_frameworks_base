@@ -16,16 +16,16 @@
 
 package android.os;
 
-import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.vibrator.Braking;
 import android.hardware.vibrator.IVibrator;
-import android.util.Log;
 import android.util.MathUtils;
 import android.util.Range;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
+
+import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,7 +35,8 @@ import java.util.Objects;
 /**
  * A VibratorInfo describes the capabilities of a {@link Vibrator}.
  *
- * This description includes its capabilities, list of supported effects and composition primitives.
+ * <p>This description includes its capabilities, list of supported effects and composition
+ * primitives.
  *
  * @hide
  */
@@ -57,7 +58,7 @@ public class VibratorInfo implements Parcelable {
     private final int mPwlePrimitiveDurationMax;
     private final int mPwleSizeMax;
     private final float mQFactor;
-    private final FrequencyMapping mFrequencyMapping;
+    private final FrequencyProfile mFrequencyProfile;
 
     VibratorInfo(Parcel in) {
         mId = in.readInt();
@@ -70,7 +71,15 @@ public class VibratorInfo implements Parcelable {
         mPwlePrimitiveDurationMax = in.readInt();
         mPwleSizeMax = in.readInt();
         mQFactor = in.readFloat();
-        mFrequencyMapping = in.readParcelable(VibratorInfo.class.getClassLoader());
+        mFrequencyProfile = FrequencyProfile.CREATOR.createFromParcel(in);
+    }
+
+    public VibratorInfo(int id, @NonNull VibratorInfo baseVibratorInfo) {
+        this(id, baseVibratorInfo.mCapabilities, baseVibratorInfo.mSupportedEffects,
+                baseVibratorInfo.mSupportedBraking, baseVibratorInfo.mSupportedPrimitives,
+                baseVibratorInfo.mPrimitiveDelayMax, baseVibratorInfo.mCompositionSizeMax,
+                baseVibratorInfo.mPwlePrimitiveDurationMax, baseVibratorInfo.mPwleSizeMax,
+                baseVibratorInfo.mQFactor, baseVibratorInfo.mFrequencyProfile);
     }
 
     /**
@@ -93,7 +102,7 @@ public class VibratorInfo implements Parcelable {
      * @param pwleSizeMax              The maximum number of primitives supported by a PWLE
      *                                 composition.
      * @param qFactor                  The vibrator quality factor.
-     * @param frequencyMapping         The description of the vibrator supported frequencies and max
+     * @param frequencyProfile         The description of the vibrator supported frequencies and max
      *                                 amplitude mappings.
      * @hide
      */
@@ -101,7 +110,9 @@ public class VibratorInfo implements Parcelable {
             @Nullable SparseBooleanArray supportedBraking,
             @NonNull SparseIntArray supportedPrimitives, int primitiveDelayMax,
             int compositionSizeMax, int pwlePrimitiveDurationMax, int pwleSizeMax,
-            float qFactor, @NonNull FrequencyMapping frequencyMapping) {
+            float qFactor, @NonNull FrequencyProfile frequencyProfile) {
+        Preconditions.checkNotNull(supportedPrimitives);
+        Preconditions.checkNotNull(frequencyProfile);
         mId = id;
         mCapabilities = capabilities;
         mSupportedEffects = supportedEffects == null ? null : supportedEffects.clone();
@@ -112,14 +123,7 @@ public class VibratorInfo implements Parcelable {
         mPwlePrimitiveDurationMax = pwlePrimitiveDurationMax;
         mPwleSizeMax = pwleSizeMax;
         mQFactor = qFactor;
-        mFrequencyMapping = frequencyMapping;
-    }
-
-    protected VibratorInfo(int id, int capabilities, VibratorInfo baseVibrator) {
-        this(id, capabilities, baseVibrator.mSupportedEffects, baseVibrator.mSupportedBraking,
-                baseVibrator.mSupportedPrimitives, baseVibrator.mPrimitiveDelayMax,
-                baseVibrator.mCompositionSizeMax, baseVibrator.mPwlePrimitiveDurationMax,
-                baseVibrator.mPwleSizeMax, baseVibrator.mQFactor, baseVibrator.mFrequencyMapping);
+        mFrequencyProfile = frequencyProfile;
     }
 
     @Override
@@ -134,7 +138,7 @@ public class VibratorInfo implements Parcelable {
         dest.writeInt(mPwlePrimitiveDurationMax);
         dest.writeInt(mPwleSizeMax);
         dest.writeFloat(mQFactor);
-        dest.writeParcelable(mFrequencyMapping, flags);
+        mFrequencyProfile.writeToParcel(dest, flags);
     }
 
     @Override
@@ -171,13 +175,13 @@ public class VibratorInfo implements Parcelable {
                 && Objects.equals(mSupportedEffects, that.mSupportedEffects)
                 && Objects.equals(mSupportedBraking, that.mSupportedBraking)
                 && Objects.equals(mQFactor, that.mQFactor)
-                && Objects.equals(mFrequencyMapping, that.mFrequencyMapping);
+                && Objects.equals(mFrequencyProfile, that.mFrequencyProfile);
     }
 
     @Override
     public int hashCode() {
         int hashCode = Objects.hash(mId, mCapabilities, mSupportedEffects, mSupportedBraking,
-                mQFactor, mFrequencyMapping);
+                mQFactor, mFrequencyProfile);
         for (int i = 0; i < mSupportedPrimitives.size(); i++) {
             hashCode = 31 * hashCode + mSupportedPrimitives.keyAt(i);
             hashCode = 31 * hashCode + mSupportedPrimitives.valueAt(i);
@@ -199,7 +203,7 @@ public class VibratorInfo implements Parcelable {
                 + ", mPwlePrimitiveDurationMax=" + mPwlePrimitiveDurationMax
                 + ", mPwleSizeMax=" + mPwleSizeMax
                 + ", mQFactor=" + mQFactor
-                + ", mFrequencyMapping=" + mFrequencyMapping
+                + ", mFrequencyProfile=" + mFrequencyProfile
                 + '}';
     }
 
@@ -235,6 +239,30 @@ public class VibratorInfo implements Parcelable {
         return Braking.NONE;
     }
 
+    /** @hide */
+    @Nullable
+    public SparseBooleanArray getSupportedBraking() {
+        if (mSupportedBraking == null) {
+            return null;
+        }
+        return mSupportedBraking.clone();
+    }
+
+    /** @hide */
+    public boolean isBrakingSupportKnown() {
+        return mSupportedBraking != null;
+    }
+
+    /** @hide */
+    public boolean hasBrakingSupport(@Braking int braking) {
+        return (mSupportedBraking != null) && mSupportedBraking.get(braking);
+    }
+
+    /** @hide */
+    public boolean isEffectSupportKnown() {
+        return mSupportedEffects != null;
+    }
+
     /**
      * Query whether the vibrator supports the given effect.
      *
@@ -251,6 +279,15 @@ public class VibratorInfo implements Parcelable {
         }
         return mSupportedEffects.get(effectId) ? Vibrator.VIBRATION_EFFECT_SUPPORT_YES
                 : Vibrator.VIBRATION_EFFECT_SUPPORT_NO;
+    }
+
+    /** @hide */
+    @Nullable
+    public SparseBooleanArray getSupportedEffects() {
+        if (mSupportedEffects == null) {
+            return null;
+        }
+        return mSupportedEffects.clone();
     }
 
     /**
@@ -275,6 +312,11 @@ public class VibratorInfo implements Parcelable {
     public int getPrimitiveDuration(
             @VibrationEffect.Composition.PrimitiveType int primitiveId) {
         return mSupportedPrimitives.get(primitiveId);
+    }
+
+    /** @hide */
+    public SparseIntArray getSupportedPrimitives() {
+        return mSupportedPrimitives.clone();
     }
 
     /**
@@ -330,8 +372,8 @@ public class VibratorInfo implements Parcelable {
      * @return the resonant frequency of the vibrator, or {@link Float#NaN NaN} if it's unknown or
      *         this vibrator is a composite of multiple physical devices.
      */
-    public float getResonantFrequency() {
-        return mFrequencyMapping.mResonantFrequencyHz;
+    public float getResonantFrequencyHz() {
+        return mFrequencyProfile.mResonantFrequencyHz;
     }
 
     /**
@@ -345,49 +387,14 @@ public class VibratorInfo implements Parcelable {
     }
 
     /**
-     * Return a range of relative frequency values supported by the vibrator.
+     * Gets the profile of supported frequencies, including the measurements of maximum relative
+     * output acceleration for supported vibration frequencies.
      *
-     * @return A range of relative frequency values supported. The range will always contain the
-     * value 0, representing the device resonant frequency. Devices without frequency control will
-     * return the range [0,0]. Devices with frequency control will always return a range containing
-     * the safe range [-1, 1].
-     * @hide
+     * <p>If the devices does not have frequency control then the profile should be empty.
      */
-    public Range<Float> getFrequencyRange() {
-        return mFrequencyMapping.mRelativeFrequencyRange;
-    }
-
-    /**
-     * Return the maximum amplitude the vibrator can play at given relative frequency.
-     *
-     * @return a value in [0,1] representing the maximum amplitude the device can play at given
-     * relative frequency. Devices without frequency control will return 1 for the input zero
-     * (resonant frequency), and 0 to any other input. Devices with frequency control will return
-     * the supported value, for input in {@code #getFrequencyRange()}, and 0 for any other input.
-     * @hide
-     */
-    @FloatRange(from = 0, to = 1)
-    public float getMaxAmplitude(float relativeFrequency) {
-        if (mFrequencyMapping.isEmpty()) {
-            // The vibrator has not provided values for frequency mapping.
-            // Return the expected behavior for devices without frequency control.
-            return Float.compare(relativeFrequency, 0) == 0 ? 1 : 0;
-        }
-        return mFrequencyMapping.getMaxAmplitude(relativeFrequency);
-    }
-
-    /**
-     * Return absolute frequency value for this vibrator, in hertz, that corresponds to given
-     * relative frequency.
-     *
-     * @retur a value in hertz that corresponds to given relative frequency. Input values outside
-     * {@link #getFrequencyRange()} will return {@link Float#NaN}. Devices without frequency control
-     * will return {@link Float#NaN} for any input.
-     * @hide
-     */
-    @FloatRange(from = 0)
-    public float getAbsoluteFrequency(float relativeFrequency) {
-        return mFrequencyMapping.toHertz(relativeFrequency);
+    @NonNull
+    public FrequencyProfile getFrequencyProfile() {
+        return mFrequencyProfile;
     }
 
     protected long getCapabilities() {
@@ -461,169 +468,153 @@ public class VibratorInfo implements Parcelable {
         int supportedPrimitivesCount = mSupportedPrimitives.size();
         String[] names = new String[supportedPrimitivesCount];
         for (int i = 0; i < supportedPrimitivesCount; i++) {
-            names[i] = VibrationEffect.Composition.primitiveToString(mSupportedPrimitives.keyAt(i));
+            names[i] = VibrationEffect.Composition.primitiveToString(mSupportedPrimitives.keyAt(i))
+                    + "(" + mSupportedPrimitives.valueAt(i) + "ms)";
         }
         return names;
     }
 
     /**
-     * Describes how frequency should be mapped to absolute values for a specific {@link Vibrator}.
+     * Describes the maximum relative output acceleration that can be achieved for each supported
+     * frequency in a specific vibrator.
      *
-     * <p>This mapping is defined by the following parameters:
+     * <p>This profile is defined by the following parameters:
      *
      * <ol>
-     *     <li>{@code minFrequency}, {@code resonantFrequency} and {@code frequencyResolution}, in
-     *         hertz, provided by the vibrator.
+     *     <li>{@code minFrequencyHz}, {@code resonantFrequencyHz} and {@code frequencyResolutionHz}
+     *         provided by the vibrator in hertz.
      *     <li>{@code maxAmplitudes} a list of values in [0,1] provided by the vibrator, where
      *         {@code maxAmplitudes[i]} represents max supported amplitude at frequency
-     *         {@code minFrequency + frequencyResolution * i}.
-     *     <li>{@code maxFrequency = minFrequency + frequencyResolution * (maxAmplitudes.length-1)}
-     *     <li>{@code suggestedSafeRangeHz} is the suggested frequency range in hertz that should be
-     *         mapped to relative values -1 and 1, where 0 maps to {@code resonantFrequency}.
-     * </ol>
-     *
-     * <p>The mapping is defined linearly by the following points:
-     *
-     * <ol>
-     *     <li>{@code toHertz(relativeMinFrequency) = minFrequency}
-     *     <li>{@code                   toHertz(-1) = resonantFrequency - safeRange / 2}
-     *     <li>{@code                    toHertz(0) = resonantFrequency}
-     *     <li>{@code                    toHertz(1) = resonantFrequency + safeRange / 2}
-     *     <li>{@code toHertz(relativeMaxFrequency) = maxFrequency}
+     *         {@code minFrequencyHz + frequencyResolutionHz * i}.
+     *     <li>{@code maxFrequencyHz = minFrequencyHz
+     *                                     + frequencyResolutionHz * (maxAmplitudes.length-1)}
      * </ol>
      *
      * @hide
      */
-    public static final class FrequencyMapping implements Parcelable {
+    public static final class FrequencyProfile implements Parcelable {
+        @Nullable
+        private final Range<Float> mFrequencyRangeHz;
         private final float mMinFrequencyHz;
         private final float mResonantFrequencyHz;
         private final float mFrequencyResolutionHz;
-        private final float mSuggestedSafeRangeHz;
         private final float[] mMaxAmplitudes;
 
-        // Relative fields calculated from input values:
-        private final Range<Float> mRelativeFrequencyRange;
-
-        FrequencyMapping(Parcel in) {
-            this(in.readFloat(), in.readFloat(), in.readFloat(), in.readFloat(),
-                    in.createFloatArray());
+        FrequencyProfile(Parcel in) {
+            this(in.readFloat(), in.readFloat(), in.readFloat(), in.createFloatArray());
         }
 
         /**
          * Default constructor.
          *
-         * @param minFrequencyHz        Minimum supported frequency, in hertz.
          * @param resonantFrequencyHz   The vibrator resonant frequency, in hertz.
+         * @param minFrequencyHz        Minimum supported frequency, in hertz.
          * @param frequencyResolutionHz The frequency resolution, in hertz, used by the max
-         *                              amplitudes mapping.
-         * @param suggestedSafeRangeHz  The suggested range, in hertz, for the safe relative
-         *                              frequency range represented by [-1, 1].
+         *                              amplitude measurements.
          * @param maxAmplitudes         The max amplitude supported by each supported frequency,
          *                              starting at minimum frequency with jumps of frequency
          *                              resolution.
          * @hide
          */
-        public FrequencyMapping(float minFrequencyHz, float resonantFrequencyHz,
-                float frequencyResolutionHz, float suggestedSafeRangeHz, float[] maxAmplitudes) {
+        public FrequencyProfile(float resonantFrequencyHz, float minFrequencyHz,
+                float frequencyResolutionHz, float[] maxAmplitudes) {
             mMinFrequencyHz = minFrequencyHz;
             mResonantFrequencyHz = resonantFrequencyHz;
             mFrequencyResolutionHz = frequencyResolutionHz;
-            mSuggestedSafeRangeHz = suggestedSafeRangeHz;
             mMaxAmplitudes = new float[maxAmplitudes == null ? 0 : maxAmplitudes.length];
             if (maxAmplitudes != null) {
                 System.arraycopy(maxAmplitudes, 0, mMaxAmplitudes, 0, maxAmplitudes.length);
             }
 
-            float maxFrequencyHz =
-                    minFrequencyHz + frequencyResolutionHz * (mMaxAmplitudes.length - 1);
-            if (Float.isNaN(resonantFrequencyHz) || Float.isNaN(minFrequencyHz)
-                    || Float.isNaN(frequencyResolutionHz) || Float.isNaN(suggestedSafeRangeHz)
-                    || resonantFrequencyHz < minFrequencyHz
-                    || resonantFrequencyHz > maxFrequencyHz) {
-                // Some required fields are undefined or have bad values.
-                // Leave this mapping empty.
-                mRelativeFrequencyRange = Range.create(0f, 0f);
-                return;
+            // If any required field is undefined or has a bad value then this profile is invalid.
+            boolean isValid = !Float.isNaN(resonantFrequencyHz)
+                    && (resonantFrequencyHz > 0)
+                    && !Float.isNaN(minFrequencyHz)
+                    && (minFrequencyHz > 0)
+                    && !Float.isNaN(frequencyResolutionHz)
+                    && (frequencyResolutionHz > 0)
+                    && (mMaxAmplitudes.length > 0);
+
+            // If any max amplitude is outside the allowed range then this profile is invalid.
+            for (int i = 0; i < mMaxAmplitudes.length; i++) {
+                isValid &= (mMaxAmplitudes[i] >= 0) && (mMaxAmplitudes[i] <= 1);
             }
 
-            // Calculate actual safe range, limiting the suggested one by the device supported range
-            float safeDelta = MathUtils.min(
-                    suggestedSafeRangeHz / 2,
-                    resonantFrequencyHz - minFrequencyHz,
-                    maxFrequencyHz - resonantFrequencyHz);
-            mRelativeFrequencyRange = Range.create(
-                    (minFrequencyHz - resonantFrequencyHz) / safeDelta,
-                    (maxFrequencyHz - resonantFrequencyHz) / safeDelta);
+            float maxFrequencyHz = isValid
+                    ? minFrequencyHz + frequencyResolutionHz * (mMaxAmplitudes.length - 1)
+                    : Float.NaN;
+
+            // If the constraint min < resonant < max is not met then it is invalid.
+            isValid &= !Float.isNaN(maxFrequencyHz)
+                    && (resonantFrequencyHz >= minFrequencyHz)
+                    && (resonantFrequencyHz <= maxFrequencyHz)
+                    && (minFrequencyHz < maxFrequencyHz);
+
+            mFrequencyRangeHz = isValid ? Range.create(minFrequencyHz, maxFrequencyHz) : null;
         }
 
-        /**
-         * Returns true if this frequency mapping is empty, i.e. the only supported relative
-         * frequency is 0 (resonant frequency).
-         */
+        /** Returns true if the supported frequency range is empty. */
         public boolean isEmpty() {
-            return Float.compare(mRelativeFrequencyRange.getLower(),
-                    mRelativeFrequencyRange.getUpper()) == 0;
+            return mFrequencyRangeHz == null;
+        }
+
+        /** Returns the supported frequency range, in hertz. */
+        @Nullable
+        public Range<Float> getFrequencyRangeHz() {
+            return mFrequencyRangeHz;
         }
 
         /**
-         * Returns the frequency value in hertz that is mapped to the given relative frequency.
+         * Returns the maximum relative amplitude the vibrator can reach while playing at the
+         * given frequency.
          *
-         * @return The mapped frequency, in hertz, or {@link Float#NaN} is value outside the device
-         * supported range.
+         * @param frequencyHz frequency, in hertz, for query.
+         * @return A value in [0,1] representing the max relative amplitude supported at the given
+         * frequency. This will return 0 if the frequency is outside the supported range, or if the
+         * supported frequency range is empty.
          */
-        public float toHertz(float relativeFrequency) {
-            if (!mRelativeFrequencyRange.contains(relativeFrequency)) {
-                return Float.NaN;
-            }
-            float relativeMinFrequency = mRelativeFrequencyRange.getLower();
-            if (Float.compare(relativeMinFrequency, 0) == 0) {
-                // relative supported range is [0,0], so toHertz(0) should be the resonant frequency
-                return mResonantFrequencyHz;
-            }
-            float shift = (mMinFrequencyHz - mResonantFrequencyHz) / relativeMinFrequency;
-            return mResonantFrequencyHz + relativeFrequency * shift;
-        }
-
-        /**
-         * Returns the maximum amplitude the vibrator can reach while playing at given relative
-         * frequency.
-         *
-         * @return A value in [0,1] representing the max amplitude supported at given relative
-         * frequency. This will return 0 if frequency is outside supported range, or if max
-         * amplitude mapping is empty.
-         */
-        public float getMaxAmplitude(float relativeFrequency) {
-            float frequencyHz = toHertz(relativeFrequency);
-            if (Float.isNaN(frequencyHz)) {
+        public float getMaxAmplitude(float frequencyHz) {
+            if (isEmpty() || Float.isNaN(frequencyHz) || !mFrequencyRangeHz.contains(frequencyHz)) {
                 // Unsupported frequency requested, vibrator cannot play at this frequency.
                 return 0;
             }
-            float position = (frequencyHz - mMinFrequencyHz) / mFrequencyResolutionHz;
-            int floorIndex = (int) Math.floor(position);
-            int ceilIndex = (int) Math.ceil(position);
-            if (floorIndex < 0 || floorIndex >= mMaxAmplitudes.length) {
-                if (mMaxAmplitudes.length > 0) {
-                    // This should never happen if the setup of relative frequencies was correct.
-                    Log.w(TAG, "Max amplitudes has " + mMaxAmplitudes.length
-                            + " entries and was expected to cover the frequency " + frequencyHz
-                            + " Hz when starting at min frequency of " + mMinFrequencyHz
-                            + " Hz with resolution of " + mFrequencyResolutionHz + " Hz.");
-                }
-                return 0;
-            }
-            if (floorIndex != ceilIndex && ceilIndex < mMaxAmplitudes.length) {
-                // Value in between two mapped frequency values, use the lowest supported one.
-                return MathUtils.min(mMaxAmplitudes[floorIndex], mMaxAmplitudes[ceilIndex]);
-            }
-            return mMaxAmplitudes[floorIndex];
+
+            // Subtract minFrequencyHz to simplify offset calculations.
+            float mappingFreq = frequencyHz - mMinFrequencyHz;
+
+            // Find the bucket to interpolate within.
+            // Any calculated index should be safe, except exactly equal to max amplitude can be
+            // one step too high, so constrain it to guarantee safety.
+            int startIdx = MathUtils.constrain(
+                    /* amount= */ (int) Math.floor(mappingFreq / mFrequencyResolutionHz),
+                    /* low= */ 0, /* high= */ mMaxAmplitudes.length - 1);
+            int nextIdx = MathUtils.constrain(
+                    /* amount= */ startIdx + 1,
+                    /* low= */ 0, /* high= */ mMaxAmplitudes.length - 1);
+
+            // Linearly interpolate the amplitudes based on the frequency range of the bucket.
+            return MathUtils.constrainedMap(
+                    mMaxAmplitudes[startIdx], mMaxAmplitudes[nextIdx],
+                    startIdx * mFrequencyResolutionHz, nextIdx * mFrequencyResolutionHz,
+                    mappingFreq);
+        }
+
+        /** Returns the raw list of maximum relative output accelerations from the vibrator. */
+        @NonNull
+        public float[] getMaxAmplitudes() {
+            return Arrays.copyOf(mMaxAmplitudes, mMaxAmplitudes.length);
+        }
+
+        /** Returns the raw frequency resolution used for max amplitude measurements, in hertz. */
+        public float getFrequencyResolutionHz() {
+            return mFrequencyResolutionHz;
         }
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeFloat(mMinFrequencyHz);
             dest.writeFloat(mResonantFrequencyHz);
+            dest.writeFloat(mMinFrequencyHz);
             dest.writeFloat(mFrequencyResolutionHz);
-            dest.writeFloat(mSuggestedSafeRangeHz);
             dest.writeFloatArray(mMaxAmplitudes);
         }
 
@@ -637,50 +628,46 @@ public class VibratorInfo implements Parcelable {
             if (this == o) {
                 return true;
             }
-            if (!(o instanceof FrequencyMapping)) {
+            if (!(o instanceof FrequencyProfile)) {
                 return false;
             }
-            FrequencyMapping that = (FrequencyMapping) o;
+            FrequencyProfile that = (FrequencyProfile) o;
             return Float.compare(mMinFrequencyHz, that.mMinFrequencyHz) == 0
                     && Float.compare(mResonantFrequencyHz, that.mResonantFrequencyHz) == 0
                     && Float.compare(mFrequencyResolutionHz, that.mFrequencyResolutionHz) == 0
-                    && Float.compare(mSuggestedSafeRangeHz, that.mSuggestedSafeRangeHz) == 0
                     && Arrays.equals(mMaxAmplitudes, that.mMaxAmplitudes);
         }
 
         @Override
         public int hashCode() {
             int hashCode = Objects.hash(mMinFrequencyHz, mFrequencyResolutionHz,
-                    mFrequencyResolutionHz, mSuggestedSafeRangeHz);
+                    mFrequencyResolutionHz);
             hashCode = 31 * hashCode + Arrays.hashCode(mMaxAmplitudes);
             return hashCode;
         }
 
         @Override
         public String toString() {
-            return "FrequencyMapping{"
-                    + "mRelativeFrequencyRange=" + mRelativeFrequencyRange
+            return "FrequencyProfile{"
+                    + "mFrequencyRange=" + mFrequencyRangeHz
                     + ", mMinFrequency=" + mMinFrequencyHz
                     + ", mResonantFrequency=" + mResonantFrequencyHz
-                    + ", mMaxFrequency="
-                    + (mMinFrequencyHz + mFrequencyResolutionHz * (mMaxAmplitudes.length - 1))
                     + ", mFrequencyResolution=" + mFrequencyResolutionHz
-                    + ", mSuggestedSafeRange=" + mSuggestedSafeRangeHz
                     + ", mMaxAmplitudes count=" + mMaxAmplitudes.length
                     + '}';
         }
 
         @NonNull
-        public static final Creator<FrequencyMapping> CREATOR =
-                new Creator<FrequencyMapping>() {
+        public static final Creator<FrequencyProfile> CREATOR =
+                new Creator<FrequencyProfile>() {
                     @Override
-                    public FrequencyMapping createFromParcel(Parcel in) {
-                        return new FrequencyMapping(in);
+                    public FrequencyProfile createFromParcel(Parcel in) {
+                        return new FrequencyProfile(in);
                     }
 
                     @Override
-                    public FrequencyMapping[] newArray(int size) {
-                        return new FrequencyMapping[size];
+                    public FrequencyProfile[] newArray(int size) {
+                        return new FrequencyProfile[size];
                     }
                 };
     }
@@ -697,8 +684,8 @@ public class VibratorInfo implements Parcelable {
         private int mPwlePrimitiveDurationMax;
         private int mPwleSizeMax;
         private float mQFactor = Float.NaN;
-        private FrequencyMapping mFrequencyMapping =
-                new FrequencyMapping(Float.NaN, Float.NaN, Float.NaN, Float.NaN, null);
+        private FrequencyProfile mFrequencyProfile =
+                new FrequencyProfile(Float.NaN, Float.NaN, Float.NaN, null);
 
         /** A builder class for a {@link VibratorInfo}. */
         public Builder(int id) {
@@ -770,8 +757,8 @@ public class VibratorInfo implements Parcelable {
 
         /** Configure the vibrator frequency information like resonant frequency and bandwidth. */
         @NonNull
-        public Builder setFrequencyMapping(FrequencyMapping frequencyMapping) {
-            mFrequencyMapping = frequencyMapping;
+        public Builder setFrequencyProfile(@NonNull FrequencyProfile frequencyProfile) {
+            mFrequencyProfile = frequencyProfile;
             return this;
         }
 
@@ -780,7 +767,7 @@ public class VibratorInfo implements Parcelable {
         public VibratorInfo build() {
             return new VibratorInfo(mId, mCapabilities, mSupportedEffects, mSupportedBraking,
                     mSupportedPrimitives, mPrimitiveDelayMax, mCompositionSizeMax,
-                    mPwlePrimitiveDurationMax, mPwleSizeMax, mQFactor, mFrequencyMapping);
+                    mPwlePrimitiveDurationMax, mPwleSizeMax, mQFactor, mFrequencyProfile);
         }
 
         /**

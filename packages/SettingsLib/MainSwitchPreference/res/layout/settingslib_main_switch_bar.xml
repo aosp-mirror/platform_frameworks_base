@@ -42,7 +42,7 @@
         android:theme="@android:style/Theme.Material"
         android:layout_gravity="center_vertical"
         android:layout_marginEnd="@dimen/settingslib_restricted_icon_margin_end"
-        android:src="@android:drawable/ic_info"
+        android:src="@drawable/settingslib_ic_info"
         android:visibility="gone"/>
 
     <Switch
@@ -51,6 +51,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:layout_marginEnd="@dimen/settingslib_switchbar_subsettings_margin_end"
+        android:focusable="false"
+        android:clickable="false"
         android:theme="@style/SwitchBar.Switch.Settingslib"/>
 </LinearLayout>
 

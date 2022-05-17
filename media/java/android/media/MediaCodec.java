@@ -16,9 +16,12 @@
 
 package android.media;
 
+import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
@@ -60,10 +63,10 @@ import java.util.concurrent.locks.ReentrantLock;
  with {@link MediaExtractor}, {@link MediaSync}, {@link MediaMuxer}, {@link MediaCrypto},
  {@link MediaDrm}, {@link Image}, {@link Surface}, and {@link AudioTrack}.)
  <p>
- <center><object style="width: 540px; height: 205px;" type="image/svg+xml"
-   data="../../../images/media/mediacodec_buffers.svg"><img
-   src="../../../images/media/mediacodec_buffers.png" style="width: 540px; height: 205px"
-   alt="MediaCodec buffer flow diagram"></object></center>
+ <center>
+   <img src="../../../images/media/mediacodec_buffers.svg" style="width: 540px; height: 205px"
+       alt="MediaCodec buffer flow diagram">
+ </center>
  <p>
  In broad terms, a codec processes input data to generate output data. It processes data
  asynchronously and uses a set of input and output buffers. At a simplistic level, you request
@@ -220,19 +223,19 @@ import java.util.concurrent.locks.ReentrantLock;
   </thead>
   <tbody>
    <tr>
-    <td>{@code "crop-left"}</td>
+    <td>{@link MediaFormat#KEY_CROP_LEFT}</td>
     <td>Integer</td>
     <td>The left-coordinate (x) of the crop rectangle</td>
    </tr><tr>
-    <td>{@code "crop-top"}</td>
+    <td>{@link MediaFormat#KEY_CROP_TOP}</td>
     <td>Integer</td>
     <td>The top-coordinate (y) of the crop rectangle</td>
    </tr><tr>
-    <td>{@code "crop-right"}</td>
+    <td>{@link MediaFormat#KEY_CROP_RIGHT}</td>
     <td>Integer</td>
     <td>The right-coordinate (x) <strong>MINUS 1</strong> of the crop rectangle</td>
    </tr><tr>
-    <td>{@code "crop-bottom"}</td>
+    <td>{@link MediaFormat#KEY_CROP_BOTTOM}</td>
     <td>Integer</td>
     <td>The bottom-coordinate (y) <strong>MINUS 1</strong> of the crop rectangle</td>
    </tr><tr>
@@ -248,12 +251,16 @@ import java.util.concurrent.locks.ReentrantLock;
  <pre class=prettyprint>
  MediaFormat format = decoder.getOutputFormat(&hellip;);
  int width = format.getInteger(MediaFormat.KEY_WIDTH);
- if (format.containsKey("crop-left") && format.containsKey("crop-right")) {
-     width = format.getInteger("crop-right") + 1 - format.getInteger("crop-left");
+ if (format.containsKey(MediaFormat.KEY_CROP_LEFT)
+         && format.containsKey(MediaFormat.KEY_CROP_RIGHT)) {
+     width = format.getInteger(MediaFormat.KEY_CROP_RIGHT) + 1
+                 - format.getInteger(MediaFormat.KEY_CROP_LEFT);
  }
  int height = format.getInteger(MediaFormat.KEY_HEIGHT);
- if (format.containsKey("crop-top") && format.containsKey("crop-bottom")) {
-     height = format.getInteger("crop-bottom") + 1 - format.getInteger("crop-top");
+ if (format.containsKey(MediaFormat.KEY_CROP_TOP)
+         && format.containsKey(MediaFormat.KEY_CROP_BOTTOM)) {
+     height = format.getInteger(MediaFormat.KEY_CROP_BOTTOM) + 1
+                  - format.getInteger(MediaFormat.KEY_CROP_TOP);
  }
  </pre>
  <p class=note>
@@ -268,10 +275,10 @@ import java.util.concurrent.locks.ReentrantLock;
  Uninitialized, Configured and Error, whereas the Executing state conceptually progresses through
  three sub-states: Flushed, Running and End-of-Stream.
  <p>
- <center><object style="width: 516px; height: 353px;" type="image/svg+xml"
-   data="../../../images/media/mediacodec_states.svg"><img
-   src="../../../images/media/mediacodec_states.png" style="width: 519px; height: 356px"
-   alt="MediaCodec state diagram"></object></center>
+ <center>
+   <img src="../../../images/media/mediacodec_states.svg" style="width: 519px; height: 356px"
+       alt="MediaCodec state diagram">
+ </center>
  <p>
  When you create a codec using one of the factory methods, the codec is in the Uninitialized
  state. First, you need to configure it via {@link #configure configure(&hellip;)}, which brings
@@ -513,10 +520,10 @@ import java.util.concurrent.locks.ReentrantLock;
  Similarly, upon an initial call to {@code start} the codec will move directly to the Running
  sub-state and start passing available input buffers via the callback.
  <p>
- <center><object style="width: 516px; height: 353px;" type="image/svg+xml"
-   data="../../../images/media/mediacodec_async_states.svg"><img
-   src="../../../images/media/mediacodec_async_states.png" style="width: 516px; height: 353px"
-   alt="MediaCodec state diagram for asynchronous operation"></object></center>
+ <center>
+   <img src="../../../images/media/mediacodec_async_states.svg" style="width: 516px; height: 353px"
+       alt="MediaCodec state diagram for asynchronous operation">
+ </center>
  <p>
  MediaCodec is typically used like this in asynchronous mode:
  <pre class=prettyprint>
@@ -1726,7 +1733,6 @@ final public class MediaCodec {
     private static final int CB_ERROR = 3;
     private static final int CB_OUTPUT_FORMAT_CHANGE = 4;
 
-
     private class EventHandler extends Handler {
         private MediaCodec mCodec;
 
@@ -1935,12 +1941,41 @@ final public class MediaCodec {
     @NonNull
     public static MediaCodec createByCodecName(@NonNull String name)
             throws IOException {
-        return new MediaCodec(
-                name, false /* nameIsType */, false /* unused */);
+        return new MediaCodec(name, false /* nameIsType */, false /* encoder */);
     }
 
-    private MediaCodec(
-            @NonNull String name, boolean nameIsType, boolean encoder) {
+    /**
+     * This is the same as createByCodecName, but allows for instantiating a codec on behalf of a
+     * client process. This is used for system apps or system services that create MediaCodecs on
+     * behalf of other processes and will reclaim resources as necessary from processes with lower
+     * priority than the client process, rather than processes with lower priority than the system
+     * app or system service. Likely to be used with information obtained from
+     * {@link android.media.MediaCodecList}.
+     * @param name
+     * @param clientPid
+     * @param clientUid
+     * @throws IOException if the codec cannot be created.
+     * @throws IllegalArgumentException if name is not valid.
+     * @throws NullPointerException if name is null.
+     * @throws SecurityException if the MEDIA_RESOURCE_OVERRIDE_PID permission is not granted.
+     *
+     * @hide
+     */
+    @NonNull
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MEDIA_RESOURCE_OVERRIDE_PID)
+    public static MediaCodec createByCodecNameForClient(@NonNull String name, int clientPid,
+            int clientUid) throws IOException {
+        return new MediaCodec(name, false /* nameIsType */, false /* encoder */, clientPid,
+                clientUid);
+    }
+
+    private MediaCodec(@NonNull String name, boolean nameIsType, boolean encoder) {
+        this(name, nameIsType, encoder, -1 /* pid */, -1 /* uid */);
+    }
+
+    private MediaCodec(@NonNull String name, boolean nameIsType, boolean encoder, int pid,
+            int uid) {
         Looper looper;
         if ((looper = Looper.myLooper()) != null) {
             mEventHandler = new EventHandler(this, looper);
@@ -1958,7 +1993,7 @@ final public class MediaCodec {
         // save name used at creation
         mNameAtCreation = nameIsType ? null : name;
 
-        native_setup(name, nameIsType, encoder);
+        native_setup(name, nameIsType, encoder, pid, uid);
     }
 
     private String mNameAtCreation;
@@ -4992,7 +5027,7 @@ final public class MediaCodec {
     private static native final void native_init();
 
     private native final void native_setup(
-            @NonNull String name, boolean nameIsType, boolean encoder);
+            @NonNull String name, boolean nameIsType, boolean encoder, int pid, int uid);
 
     private native final void native_finalize();
 
@@ -5107,7 +5142,6 @@ final public class MediaCodec {
         public MediaImage(
                 @NonNull ByteBuffer buffer, @NonNull ByteBuffer info, boolean readOnly,
                 long timestamp, int xOffset, int yOffset, @Nullable Rect cropRect) {
-            mFormat = ImageFormat.YUV_420_888;
             mTimestamp = timestamp;
             mIsImageValid = true;
             mIsReadOnly = buffer.isReadOnly();
@@ -5119,6 +5153,11 @@ final public class MediaCodec {
             mInfo = info;
 
             mBufferContext = 0;
+
+            int cbPlaneOffset = -1;
+            int crPlaneOffset = -1;
+            int planeOffsetInc = -1;
+            int pixelStride = -1;
 
             // read media-info.  See MediaImage2
             if (info.remaining() == 104) {
@@ -5137,14 +5176,27 @@ final public class MediaCodec {
                             "unsupported size: " + mWidth + "x" + mHeight);
                 }
                 int bitDepth = info.getInt();
-                if (bitDepth != 8) {
+                if (bitDepth != 8 && bitDepth != 10) {
                     throw new UnsupportedOperationException("unsupported bit depth: " + bitDepth);
                 }
                 int bitDepthAllocated = info.getInt();
-                if (bitDepthAllocated != 8) {
+                if (bitDepthAllocated != 8 && bitDepthAllocated != 16) {
                     throw new UnsupportedOperationException(
                             "unsupported allocated bit depth: " + bitDepthAllocated);
                 }
+                if (bitDepth == 8 && bitDepthAllocated == 8) {
+                    mFormat = ImageFormat.YUV_420_888;
+                    planeOffsetInc = 1;
+                    pixelStride = 2;
+                } else if (bitDepth == 10 && bitDepthAllocated == 16) {
+                    mFormat = ImageFormat.YCBCR_P010;
+                    planeOffsetInc = 2;
+                    pixelStride = 4;
+                } else {
+                    throw new UnsupportedOperationException("couldn't infer ImageFormat"
+                      + " bitDepth: " + bitDepth + " bitDepthAllocated: " + bitDepthAllocated);
+                }
+
                 mPlanes = new MediaPlane[numPlanes];
                 for (int ix = 0; ix < numPlanes; ix++) {
                     int planeOffset = info.getInt();
@@ -5166,10 +5218,29 @@ final public class MediaCodec {
                     buffer.limit(buffer.position() + Utils.divUp(bitDepth, 8)
                             + (mHeight / vert - 1) * rowInc + (mWidth / horiz - 1) * colInc);
                     mPlanes[ix] = new MediaPlane(buffer.slice(), rowInc, colInc);
+                    if ((mFormat == ImageFormat.YUV_420_888 || mFormat == ImageFormat.YCBCR_P010)
+                            && ix == 1) {
+                        cbPlaneOffset = planeOffset;
+                    } else if ((mFormat == ImageFormat.YUV_420_888
+                            || mFormat == ImageFormat.YCBCR_P010) && ix == 2) {
+                        crPlaneOffset = planeOffset;
+                    }
                 }
             } else {
                 throw new UnsupportedOperationException(
                         "unsupported info length: " + info.remaining());
+            }
+
+            // Validate chroma semiplanerness.
+            if (mFormat == ImageFormat.YCBCR_P010) {
+                if (crPlaneOffset != cbPlaneOffset + planeOffsetInc) {
+                    throw new UnsupportedOperationException("Invalid plane offsets"
+                    + " cbPlaneOffset: " + cbPlaneOffset + " crPlaneOffset: " + crPlaneOffset);
+                }
+                if (mPlanes[1].getPixelStride() != pixelStride
+                        || mPlanes[2].getPixelStride() != pixelStride) {
+                    throw new UnsupportedOperationException("Invalid pixelStride");
+                }
             }
 
             if (cropRect == null) {

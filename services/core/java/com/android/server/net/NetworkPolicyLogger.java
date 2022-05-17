@@ -15,13 +15,17 @@
  */
 package com.android.server.net;
 
-import static android.net.INetd.FIREWALL_CHAIN_DOZABLE;
-import static android.net.INetd.FIREWALL_CHAIN_POWERSAVE;
-import static android.net.INetd.FIREWALL_CHAIN_RESTRICTED;
-import static android.net.INetd.FIREWALL_CHAIN_STANDBY;
+import static android.net.ConnectivityManager.BLOCKED_REASON_NONE;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_DOZABLE;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_LOW_POWER_STANDBY;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_POWERSAVE;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_RESTRICTED;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_STANDBY;
 import static android.net.INetd.FIREWALL_RULE_ALLOW;
 import static android.net.INetd.FIREWALL_RULE_DENY;
+import static android.net.NetworkPolicyManager.ALLOWED_REASON_NONE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_DOZABLE;
+import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_LOW_POWER_STANDBY;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_POWERSAVE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_RESTRICTED;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_STANDBY;
@@ -29,6 +33,7 @@ import static android.net.NetworkPolicyManager.FIREWALL_RULE_DEFAULT;
 import static android.os.PowerExemptionManager.reasonCodeToString;
 import static android.os.Process.INVALID_UID;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.ProcessCapability;
 import android.net.NetworkPolicyManager;
@@ -39,6 +44,7 @@ import android.util.Slog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.RingBuffer;
 import com.android.server.am.ProcessList;
+import com.android.server.net.NetworkPolicyManagerService.UidBlockedState;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -71,16 +77,8 @@ public class NetworkPolicyLogger {
     private static final int EVENT_FIREWALL_CHAIN_ENABLED = 12;
     private static final int EVENT_UPDATE_METERED_RESTRICTED_PKGS = 13;
     private static final int EVENT_APP_IDLE_WL_CHANGED = 14;
-
-    static final int NTWK_BLOCKED_POWER = 0;
-    static final int NTWK_ALLOWED_NON_METERED = 1;
-    static final int NTWK_BLOCKED_DENYLIST = 2;
-    static final int NTWK_ALLOWED_ALLOWLIST = 3;
-    static final int NTWK_ALLOWED_TMP_ALLOWLIST = 4;
-    static final int NTWK_BLOCKED_BG_RESTRICT = 5;
-    static final int NTWK_ALLOWED_DEFAULT = 6;
-    static final int NTWK_ALLOWED_SYSTEM = 7;
-    static final int NTWK_BLOCKED_RESTRICTED_MODE = 8;
+    private static final int EVENT_METERED_ALLOWLIST_CHANGED = 15;
+    private static final int EVENT_METERED_DENYLIST_CHANGED = 16;
 
     private final LogBuffer mNetworkBlockedBuffer = new LogBuffer(MAX_NETWORK_BLOCKED_LOG_SIZE);
     private final LogBuffer mUidStateChangeBuffer = new LogBuffer(MAX_LOG_SIZE);
@@ -90,12 +88,18 @@ public class NetworkPolicyLogger {
 
     private final Object mLock = new Object();
 
-    void networkBlocked(int uid, int reason) {
+    void networkBlocked(int uid, @Nullable UidBlockedState uidBlockedState) {
         synchronized (mLock) {
             if (LOGD || uid == mDebugUid) {
-                Slog.d(TAG, uid + " is " + getBlockedReason(reason));
+                Slog.d(TAG, "Blocked state of " + uid + ": " + uidBlockedState.toString());
             }
-            mNetworkBlockedBuffer.networkBlocked(uid, reason);
+            if (uidBlockedState == null) {
+                mNetworkBlockedBuffer.networkBlocked(uid, BLOCKED_REASON_NONE, ALLOWED_REASON_NONE,
+                        BLOCKED_REASON_NONE);
+            } else {
+                mNetworkBlockedBuffer.networkBlocked(uid, uidBlockedState.blockedReasons,
+                        uidBlockedState.allowedReasons, uidBlockedState.effectiveBlockedReasons);
+            }
         }
     }
 
@@ -243,6 +247,24 @@ public class NetworkPolicyLogger {
         }
     }
 
+    void meteredAllowlistChanged(int uid, boolean added) {
+        synchronized (mLock) {
+            if (LOGD || mDebugUid == uid) {
+                Slog.d(TAG, getMeteredAllowlistChangedLog(uid, added));
+            }
+            mEventsBuffer.meteredAllowlistChanged(uid, added);
+        }
+    }
+
+    void meteredDenylistChanged(int uid, boolean added) {
+        synchronized (mLock) {
+            if (LOGD || mDebugUid == uid) {
+                Slog.d(TAG, getMeteredDenylistChangedLog(uid, added));
+            }
+            mEventsBuffer.meteredDenylistChanged(uid, added);
+        }
+    }
+
     void setDebugUid(int uid) {
         mDebugUid = uid;
     }
@@ -266,29 +288,6 @@ public class NetworkPolicyLogger {
             pw.increaseIndent();
             mUidStateChangeBuffer.reverseDump(pw);
             pw.decreaseIndent();
-        }
-    }
-
-    private static String getBlockedReason(int reason) {
-        switch (reason) {
-            case NTWK_BLOCKED_POWER:
-                return "blocked by power restrictions";
-            case NTWK_ALLOWED_NON_METERED:
-                return "allowed on unmetered network";
-            case NTWK_BLOCKED_DENYLIST:
-                return "denylisted on metered network";
-            case NTWK_ALLOWED_ALLOWLIST:
-                return "allowlisted on metered network";
-            case NTWK_ALLOWED_TMP_ALLOWLIST:
-                return "temporary allowlisted on metered network";
-            case NTWK_BLOCKED_BG_RESTRICT:
-                return "blocked when background is restricted";
-            case NTWK_ALLOWED_DEFAULT:
-                return "allowed by default";
-            case NTWK_BLOCKED_RESTRICTED_MODE:
-                return "blocked by restricted networking mode";
-            default:
-                return String.valueOf(reason);
         }
     }
 
@@ -341,6 +340,14 @@ public class NetworkPolicyLogger {
         return "Firewall chain " + getFirewallChainName(chain) + " state: " + enabled;
     }
 
+    private static String getMeteredAllowlistChangedLog(int uid, boolean added) {
+        return "metered-allowlist for " + uid + " changed to " + added;
+    }
+
+    private static String getMeteredDenylistChangedLog(int uid, boolean added) {
+        return "metered-denylist for " + uid + " changed to " + added;
+    }
+
     private static String getFirewallChainName(int chain) {
         switch (chain) {
             case FIREWALL_CHAIN_DOZABLE:
@@ -351,6 +358,8 @@ public class NetworkPolicyLogger {
                 return FIREWALL_CHAIN_NAME_POWERSAVE;
             case FIREWALL_CHAIN_RESTRICTED:
                 return FIREWALL_CHAIN_NAME_RESTRICTED;
+            case FIREWALL_CHAIN_LOW_POWER_STANDBY:
+                return FIREWALL_CHAIN_NAME_LOW_POWER_STANDBY;
             default:
                 return String.valueOf(chain);
         }
@@ -402,14 +411,17 @@ public class NetworkPolicyLogger {
             data.timeStamp = System.currentTimeMillis();
         }
 
-        public void networkBlocked(int uid, int reason) {
+        public void networkBlocked(int uid, int blockedReasons, int allowedReasons,
+                int effectiveBlockedReasons) {
             final Data data = getNextSlot();
             if (data == null) return;
 
             data.reset();
             data.type = EVENT_NETWORK_BLOCKED;
             data.ifield1 = uid;
-            data.ifield2 = reason;
+            data.ifield2 = blockedReasons;
+            data.ifield3 = allowedReasons;
+            data.ifield4 = effectiveBlockedReasons;
             data.timeStamp = System.currentTimeMillis();
         }
 
@@ -536,6 +548,28 @@ public class NetworkPolicyLogger {
             data.timeStamp = System.currentTimeMillis();
         }
 
+        public void meteredAllowlistChanged(int uid, boolean added) {
+            final Data data = getNextSlot();
+            if (data == null) return;
+
+            data.reset();
+            data.type = EVENT_METERED_ALLOWLIST_CHANGED;
+            data.ifield1 = uid;
+            data.bfield1 = added;
+            data.timeStamp = System.currentTimeMillis();
+        }
+
+        public void meteredDenylistChanged(int uid, boolean added) {
+            final Data data = getNextSlot();
+            if (data == null) return;
+
+            data.reset();
+            data.type = EVENT_METERED_DENYLIST_CHANGED;
+            data.ifield1 = uid;
+            data.bfield1 = added;
+            data.timeStamp = System.currentTimeMillis();
+        }
+
         public void reverseDump(IndentingPrintWriter pw) {
             final Data[] allData = toArray();
             for (int i = allData.length - 1; i >= 0; --i) {
@@ -554,7 +588,8 @@ public class NetworkPolicyLogger {
                 case EVENT_TYPE_GENERIC:
                     return data.sfield1;
                 case EVENT_NETWORK_BLOCKED:
-                    return data.ifield1 + "-" + getBlockedReason(data.ifield2);
+                    return data.ifield1 + "-" + UidBlockedState.toString(
+                            data.ifield2, data.ifield3, data.ifield4);
                 case EVENT_UID_STATE_CHANGED:
                     return data.ifield1 + ":" + ProcessList.makeProcStateString(data.ifield2)
                             + ":" + ActivityManager.getCapabilitiesSummary(data.ifield3)
@@ -582,6 +617,10 @@ public class NetworkPolicyLogger {
                     return getUidFirewallRuleChangedLog(data.ifield1, data.ifield2, data.ifield3);
                 case EVENT_FIREWALL_CHAIN_ENABLED:
                     return getFirewallChainEnabledLog(data.ifield1, data.bfield1);
+                case EVENT_METERED_ALLOWLIST_CHANGED:
+                    return getMeteredAllowlistChangedLog(data.ifield1, data.bfield1);
+                case EVENT_METERED_DENYLIST_CHANGED:
+                    return getMeteredDenylistChangedLog(data.ifield1, data.bfield1);
                 default:
                     return String.valueOf(data.type);
             }
@@ -593,17 +632,24 @@ public class NetworkPolicyLogger {
         }
     }
 
-    public final static class Data {
-        int type;
-        long timeStamp;
+    /**
+     * Container class for all networkpolicy events data.
+     *
+     * Note: This class needs to be public for RingBuffer class to be able to create
+     * new instances of this.
+     */
+    public static final class Data {
+        public int type;
+        public long timeStamp;
 
-        int ifield1;
-        int ifield2;
-        int ifield3;
-        long lfield1;
-        boolean bfield1;
-        boolean bfield2;
-        String sfield1;
+        public int ifield1;
+        public int ifield2;
+        public int ifield3;
+        public int ifield4;
+        public long lfield1;
+        public boolean bfield1;
+        public boolean bfield2;
+        public String sfield1;
 
         public void reset(){
             sfield1 = null;

@@ -29,7 +29,6 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
@@ -39,23 +38,22 @@ import android.app.ActivityOptions;
 import android.app.ActivityOptions.SourceInfo;
 import android.app.WaitResult;
 import android.app.WindowConfiguration;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
+import android.util.Log;
+import android.window.WindowContainerToken;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.server.wm.ActivityMetricsLaunchObserver.ActivityRecordProto;
-
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatcher;
+import org.mockito.ArgumentCaptor;
 
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import java.util.function.ToIntFunction;
 
@@ -69,16 +67,18 @@ import java.util.function.ToIntFunction;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
+    private static final long TIMEOUT_MS = TimeUnit.SECONDS.toMillis(5);
     private ActivityMetricsLogger mActivityMetricsLogger;
     private ActivityMetricsLogger.LaunchingState mLaunchingState;
     private ActivityMetricsLaunchObserver mLaunchObserver;
-    private ActivityMetricsLaunchObserverRegistry mLaunchObserverRegistry;
 
     private ActivityRecord mTrampolineActivity;
     private ActivityRecord mTopActivity;
     private ActivityOptions mActivityOptions;
     private boolean mLaunchTopByTrampoline;
     private boolean mNewActivityCreated = true;
+    private long mExpectedStartedId;
+    private final ArrayMap<ComponentName, Long> mLastLaunchedIds = new ArrayMap<>();
 
     @Before
     public void setUpAMLO() {
@@ -86,9 +86,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
 
         // ActivityTaskSupervisor always creates its own instance of ActivityMetricsLogger.
         mActivityMetricsLogger = mSupervisor.getActivityMetricsLogger();
-
-        mLaunchObserverRegistry = mActivityMetricsLogger.getLaunchObserverRegistry();
-        mLaunchObserverRegistry.registerLaunchObserver(mLaunchObserver);
+        mActivityMetricsLogger.getLaunchObserverRegistry().registerLaunchObserver(mLaunchObserver);
 
         // Sometimes we need an ActivityRecord for ActivityMetricsLogger to do anything useful.
         // This seems to be the easiest way to create an ActivityRecord.
@@ -104,65 +102,70 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
         mTrampolineActivity.mVisibleRequested = false;
     }
 
-    @After
-    public void tearDownAMLO() {
-        if (mLaunchObserverRegistry != null) {  // Don't NPE if setUp failed.
-            mLaunchObserverRegistry.unregisterLaunchObserver(mLaunchObserver);
-        }
-    }
-
-    static class ActivityRecordMatcher implements ArgumentMatcher</*@ActivityRecordProto*/ byte[]> {
-        private final @ActivityRecordProto byte[] mExpected;
-
-        public ActivityRecordMatcher(ActivityRecord activityRecord) {
-            mExpected = activityRecordToProto(activityRecord);
-        }
-
-        public boolean matches(@ActivityRecordProto byte[] actual) {
-            return Arrays.equals(mExpected, actual);
-        }
-    }
-
-    static @ActivityRecordProto byte[] activityRecordToProto(ActivityRecord record) {
-        return ActivityMetricsLogger.convertActivityRecordToProto(record);
-    }
-
-    static @ActivityRecordProto byte[] eqProto(ActivityRecord record) {
-        return argThat(new ActivityRecordMatcher(record));
-    }
-
     private <T> T verifyAsync(T mock) {
         // With WindowTestRunner, all test methods are inside WM lock, so we have to unblock any
         // messages that are waiting for the lock.
         waitHandlerIdle(mAtm.mH);
         // AMLO callbacks happen on a separate thread than AML calls, so we need to use a timeout.
-        return verify(mock, timeout(TimeUnit.SECONDS.toMillis(5)));
+        return verify(mock, timeout(TIMEOUT_MS));
+    }
+
+    private void verifyOnActivityLaunched(ActivityRecord activity) {
+        final ArgumentCaptor<Long> idCaptor = ArgumentCaptor.forClass(Long.class);
+        verifyAsync(mLaunchObserver).onActivityLaunched(idCaptor.capture(),
+                eq(activity.mActivityComponent), anyInt());
+        final long id = idCaptor.getValue();
+        setExpectedStartedId(id, activity);
+        mLastLaunchedIds.put(activity.mActivityComponent, id);
     }
 
     private void verifyOnActivityLaunchFinished(ActivityRecord activity) {
-        verifyAsync(mLaunchObserver).onActivityLaunchFinished(eqProto(activity), anyLong());
+        verifyAsync(mLaunchObserver).onActivityLaunchFinished(eq(mExpectedStartedId),
+                eq(activity.mActivityComponent), anyLong());
     }
 
-    private void onIntentStarted(Intent intent) {
+    private void setExpectedStartedId(long id, Object reason) {
+        mExpectedStartedId = id;
+        Log.i("AMLTest", "setExpectedStartedId=" + id + " from " + reason);
+    }
+
+    private void setLastExpectedStartedId(ActivityRecord r) {
+        setExpectedStartedId(getLastStartedId(r), r);
+    }
+
+    private long getLastStartedId(ActivityRecord r) {
+        final Long id = mLastLaunchedIds.get(r.mActivityComponent);
+        return id != null ? id : -1;
+    }
+
+    private long eqLastStartedId(ActivityRecord r) {
+        return eq(getLastStartedId(r));
+    }
+
+    private long onIntentStarted(Intent intent) {
         notifyActivityLaunching(intent);
 
+        long timestamp = -1;
         // If it is launching top activity from trampoline activity, the observer shouldn't receive
         // onActivityLaunched because the activities should belong to the same transition.
         if (!mLaunchTopByTrampoline) {
-            verifyAsync(mLaunchObserver).onIntentStarted(eq(intent), anyLong());
+            final ArgumentCaptor<Long> captor = ArgumentCaptor.forClass(Long.class);
+            verifyAsync(mLaunchObserver).onIntentStarted(eq(intent), captor.capture());
+            timestamp = captor.getValue();
         }
         verifyNoMoreInteractions(mLaunchObserver);
+        return timestamp;
     }
 
     @Test
     public void testOnIntentFailed() {
-        onIntentStarted(new Intent("testOnIntentFailed"));
+        final long id = onIntentStarted(new Intent("testOnIntentFailed"));
 
         // Bringing an intent that's already running 'to front' is not considered
         // as an ACTIVITY_LAUNCHED state transition.
         notifyActivityLaunched(START_TASK_TO_FRONT, null /* launchedActivity */);
 
-        verifyAsync(mLaunchObserver).onIntentFailed();
+        verifyAsync(mLaunchObserver).onIntentFailed(eq(id));
         verifyNoMoreInteractions(mLaunchObserver);
     }
 
@@ -205,9 +208,8 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
 
     private void onActivityLaunched(ActivityRecord activity) {
         onIntentStarted(activity.intent);
-        notifyActivityLaunched(START_SUCCESS, activity);
+        notifyAndVerifyActivityLaunched(activity);
 
-        verifyAsync(mLaunchObserver).onActivityLaunched(eqProto(activity), anyInt());
         verifyNoMoreInteractions(mLaunchObserver);
     }
 
@@ -232,7 +234,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
         // Cannot time already-visible activities.
         notifyActivityLaunched(START_TASK_TO_FRONT, mTopActivity);
 
-        verifyAsync(mLaunchObserver).onActivityLaunchCancelled(eqProto(mTopActivity));
+        verifyAsync(mLaunchObserver).onActivityLaunchCancelled(eqLastStartedId(mTopActivity));
         verifyNoMoreInteractions(mLaunchObserver);
     }
 
@@ -247,39 +249,71 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
                 .build();
 
         notifyActivityLaunching(noDrawnActivity.intent);
-        notifyActivityLaunched(START_SUCCESS, noDrawnActivity);
+        notifyAndVerifyActivityLaunched(noDrawnActivity);
 
         noDrawnActivity.mVisibleRequested = false;
         mActivityMetricsLogger.notifyVisibilityChanged(noDrawnActivity);
 
-        verifyAsync(mLaunchObserver).onActivityLaunchCancelled(eqProto(noDrawnActivity));
+        verifyAsync(mLaunchObserver).onActivityLaunchCancelled(eqLastStartedId(noDrawnActivity));
+
+        // If an activity is removed immediately before visibility update, it should cancel too.
+        final ActivityRecord removedImm = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        clearInvocations(mLaunchObserver);
+        onActivityLaunched(removedImm);
+        removedImm.removeImmediately();
+        verifyAsync(mLaunchObserver).onActivityLaunchCancelled(eqLastStartedId(removedImm));
     }
 
     @Test
     public void testOnActivityLaunchWhileSleeping() {
-        notifyActivityLaunching(mTopActivity.intent);
-        notifyActivityLaunched(START_SUCCESS, mTopActivity);
-        doReturn(true).when(mTopActivity.mDisplayContent).isSleeping();
-        mTopActivity.setState(Task.ActivityState.RESUMED, "test");
-        mTopActivity.setVisibility(false);
+        notifyActivityLaunching(mTrampolineActivity.intent);
+        notifyAndVerifyActivityLaunched(mTrampolineActivity);
+        doReturn(true).when(mTrampolineActivity.mDisplayContent).isSleeping();
+        mTrampolineActivity.setState(ActivityRecord.State.RESUMED, "test");
+        mTrampolineActivity.setVisibility(false);
         waitHandlerIdle(mAtm.mH);
         // Not cancel immediately because in one of real cases, the keyguard may be going away or
         // occluded later, then the activity can be drawn.
-        verify(mLaunchObserver, never()).onActivityLaunchCancelled(eqProto(mTopActivity));
+        verify(mLaunchObserver, never()).onActivityLaunchCancelled(
+                eqLastStartedId(mTrampolineActivity));
+
+        clearInvocations(mLaunchObserver);
+        mLaunchTopByTrampoline = true;
+        mTopActivity.mVisibleRequested = false;
+        notifyActivityLaunching(mTopActivity.intent);
+        // It should schedule a message with UNKNOWN_VISIBILITY_CHECK_DELAY_MS to check whether
+        // the launch event is still valid.
+        notifyActivityLaunched(START_SUCCESS, mTopActivity);
+
+        // The posted message will acquire wm lock, so the test needs to release the lock to verify.
+        final Throwable error = awaitInWmLock(() -> {
+            try {
+                verify(mLaunchObserver, timeout(TIMEOUT_MS)).onActivityLaunchCancelled(
+                        mExpectedStartedId);
+            } catch (Throwable e) {
+                // Catch any errors including assertion because this runs in another thread.
+                return e;
+            }
+            return null;
+        });
+        // The launch event must be cancelled because the activity keeps invisible.
+        if (error != null) {
+            throw new AssertionError(error);
+        }
     }
 
     @Test
     public void testOnReportFullyDrawn() {
         // Create an invisible event that should be cancelled after the next event starts.
-        onActivityLaunched(mTrampolineActivity);
-        mTrampolineActivity.mVisibleRequested = false;
+        final ActivityRecord prev = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        onActivityLaunched(prev);
+        prev.mVisibleRequested = false;
 
         mActivityOptions = ActivityOptions.makeBasic();
         mActivityOptions.setSourceInfo(SourceInfo.TYPE_LAUNCHER, SystemClock.uptimeMillis() - 10);
         onIntentStarted(mTopActivity.intent);
-        notifyActivityLaunched(START_SUCCESS, mTopActivity);
-        verifyAsync(mLaunchObserver).onActivityLaunched(eqProto(mTopActivity), anyInt());
-        verifyAsync(mLaunchObserver).onActivityLaunchCancelled(eqProto(mTrampolineActivity));
+        notifyAndVerifyActivityLaunched(mTopActivity);
+        verifyAsync(mLaunchObserver).onActivityLaunchCancelled(eq(getLastStartedId(prev)));
 
         // The activity reports fully drawn before windows drawn, then the fully drawn event will
         // be pending (see {@link WindowingModeTransitionInfo#pendingFullyDrawn}).
@@ -291,7 +325,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
                 .isEqualTo(SourceInfo.TYPE_LAUNCHER);
         assertWithMessage("Record event time").that(info.sourceEventDelayMs).isAtLeast(10);
 
-        verifyAsync(mLaunchObserver).onReportFullyDrawn(eqProto(mTopActivity), anyLong());
+        verifyAsync(mLaunchObserver).onReportFullyDrawn(eq(mExpectedStartedId), anyLong());
         verifyOnActivityLaunchFinished(mTopActivity);
         verifyNoMoreInteractions(mLaunchObserver);
 
@@ -302,9 +336,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
 
     private void onActivityLaunchedTrampoline() {
         onIntentStarted(mTrampolineActivity.intent);
-        notifyActivityLaunched(START_SUCCESS, mTrampolineActivity);
-
-        verifyAsync(mLaunchObserver).onActivityLaunched(eqProto(mTrampolineActivity), anyInt());
+        notifyAndVerifyActivityLaunched(mTrampolineActivity);
 
         // A second, distinct, activity launch is coalesced into the current app launch sequence.
         mLaunchTopByTrampoline = true;
@@ -331,6 +363,11 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
     private void notifyActivityLaunched(int resultCode, ActivityRecord activity) {
         mActivityMetricsLogger.notifyActivityLaunched(mLaunchingState, resultCode,
                 mNewActivityCreated, activity, mActivityOptions);
+    }
+
+    private void notifyAndVerifyActivityLaunched(ActivityRecord activity) {
+        notifyActivityLaunched(START_SUCCESS, activity);
+        verifyOnActivityLaunched(activity);
     }
 
     private void notifyTransitionStarting(ActivityRecord activity) {
@@ -376,6 +413,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
 
         // Another round without setting visibility of the trampoline activity.
         onActivityLaunchedTrampoline();
+        mTrampolineActivity.setState(ActivityRecord.State.PAUSING, "test");
         notifyWindowsDrawn(mTopActivity);
         // If the transition can start, the invisible activities should be discarded and the launch
         // event be reported successfully.
@@ -392,7 +430,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
         // Cannot time already-visible activities.
         notifyActivityLaunched(START_TASK_TO_FRONT, mTopActivity);
 
-        verifyAsync(mLaunchObserver).onActivityLaunchCancelled(eqProto(mTopActivity));
+        verifyAsync(mLaunchObserver).onActivityLaunchCancelled(mExpectedStartedId);
         verifyNoMoreInteractions(mLaunchObserver);
     }
 
@@ -409,25 +447,14 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
         // be reported successfully.
         notifyTransitionStarting(mTopActivity);
 
+        verifyOnActivityLaunched(mTopActivity);
         verifyOnActivityLaunchFinished(mTopActivity);
-    }
-
-    @Test
-    public void testActivityRecordProtoIsNotTooBig() {
-        // The ActivityRecordProto must not be too big, otherwise converting it at runtime
-        // will become prohibitively expensive.
-        assertWithMessage("mTopActivity: %s", mTopActivity)
-                .that(activityRecordToProto(mTopActivity).length)
-                .isAtMost(ActivityMetricsLogger.LAUNCH_OBSERVER_ACTIVITY_RECORD_PROTO_CHUNK_SIZE);
-
-        assertWithMessage("mTrampolineActivity: %s", mTrampolineActivity)
-                .that(activityRecordToProto(mTrampolineActivity).length)
-                .isAtMost(ActivityMetricsLogger.LAUNCH_OBSERVER_ACTIVITY_RECORD_PROTO_CHUNK_SIZE);
     }
 
     @Test
     public void testConcurrentLaunches() {
         onActivityLaunched(mTopActivity);
+        clearInvocations(mLaunchObserver);
         final ActivityMetricsLogger.LaunchingState previousState = mLaunchingState;
 
         final ActivityRecord otherActivity = new ActivityBuilder(mAtm)
@@ -438,19 +465,32 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
         // state should be created here.
         onActivityLaunched(otherActivity);
 
-        assertWithMessage("Different callers should get 2 indepedent launching states")
+        assertWithMessage("Different callers should get 2 independent launching states")
                 .that(previousState).isNotEqualTo(mLaunchingState);
+        setLastExpectedStartedId(otherActivity);
         transitToDrawnAndVerifyOnLaunchFinished(otherActivity);
 
         // The first transition should still be valid.
+        setLastExpectedStartedId(mTopActivity);
+        transitToDrawnAndVerifyOnLaunchFinished(mTopActivity);
+    }
+
+    @Test
+    public void testConsecutiveLaunch() {
+        onActivityLaunched(mTrampolineActivity);
+        mActivityMetricsLogger.notifyActivityLaunching(mTopActivity.intent,
+                mTrampolineActivity /* caller */, mTrampolineActivity.getUid());
+        notifyActivityLaunched(START_SUCCESS, mTopActivity);
         transitToDrawnAndVerifyOnLaunchFinished(mTopActivity);
     }
 
     @Test
     public void testConsecutiveLaunchNewTask() {
         final IBinder launchCookie = mock(IBinder.class);
+        final WindowContainerToken launchRootTask = mock(WindowContainerToken.class);
         mTrampolineActivity.noDisplay = true;
         mTrampolineActivity.mLaunchCookie = launchCookie;
+        mTrampolineActivity.mLaunchRootTask = launchRootTask;
         onActivityLaunched(mTrampolineActivity);
         final ActivityRecord activityOnNewTask = new ActivityBuilder(mAtm)
                 .setCreateTask(true)
@@ -464,6 +504,10 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
                 mTrampolineActivity.mLaunchCookie).isNull();
         assertWithMessage("The last launch task has the transferred cookie").that(
                 activityOnNewTask.mLaunchCookie).isEqualTo(launchCookie);
+        assertWithMessage("Trampoline's launch root task must be transferred").that(
+                mTrampolineActivity.mLaunchRootTask).isNull();
+        assertWithMessage("The last launch task has the transferred launch root task").that(
+                activityOnNewTask.mLaunchRootTask).isEqualTo(launchRootTask);
     }
 
     @Test
@@ -481,10 +525,12 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
         // Before TopActivity is drawn, it launches another activity on a different display.
         mActivityMetricsLogger.notifyActivityLaunching(activityOnNewDisplay.intent,
                 mTopActivity /* caller */, mTopActivity.getUid());
-        notifyActivityLaunched(START_SUCCESS, activityOnNewDisplay);
+        notifyAndVerifyActivityLaunched(activityOnNewDisplay);
 
         // There should be 2 events instead of coalescing as one event.
+        setLastExpectedStartedId(mTopActivity);
         transitToDrawnAndVerifyOnLaunchFinished(mTopActivity);
+        setLastExpectedStartedId(activityOnNewDisplay);
         transitToDrawnAndVerifyOnLaunchFinished(activityOnNewDisplay);
     }
 
@@ -495,9 +541,11 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
         onActivityLaunched(mTrampolineActivity);
         mActivityMetricsLogger.notifyActivityLaunching(mTopActivity.intent,
                 mTrampolineActivity /* caller */, mTrampolineActivity.getUid());
-        notifyActivityLaunched(START_SUCCESS, mTopActivity);
+        notifyAndVerifyActivityLaunched(mTopActivity);
         // Different windowing modes should be independent launch events.
+        setLastExpectedStartedId(mTrampolineActivity);
         transitToDrawnAndVerifyOnLaunchFinished(mTrampolineActivity);
+        setLastExpectedStartedId(mTopActivity);
         transitToDrawnAndVerifyOnLaunchFinished(mTopActivity);
     }
 

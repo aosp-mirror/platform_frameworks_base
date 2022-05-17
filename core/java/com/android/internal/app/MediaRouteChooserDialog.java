@@ -16,24 +16,25 @@
 
 package com.android.internal.app;
 
-import com.android.internal.R;
-
-import android.app.Dialog;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.media.MediaRouter;
 import android.media.MediaRouter.RouteInfo;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.android.internal.R;
 
 import java.util.Comparator;
 
@@ -48,9 +49,10 @@ import java.util.Comparator;
  *
  * TODO: Move this back into the API, as in the support library media router.
  */
-public class MediaRouteChooserDialog extends Dialog {
+public class MediaRouteChooserDialog extends AlertDialog {
     private final MediaRouter mRouter;
     private final MediaRouterCallback mCallback;
+    private final boolean mShowProgressBarWhenEmpty;
 
     private int mRouteTypes;
     private View.OnClickListener mExtendedSettingsClickListener;
@@ -60,10 +62,15 @@ public class MediaRouteChooserDialog extends Dialog {
     private boolean mAttachedToWindow;
 
     public MediaRouteChooserDialog(Context context, int theme) {
+        this(context, theme, true);
+    }
+
+    public MediaRouteChooserDialog(Context context, int theme, boolean showProgressBarWhenEmpty) {
         super(context, theme);
 
         mRouter = (MediaRouter) context.getSystemService(Context.MEDIA_ROUTER_SERVICE);
         mCallback = new MediaRouterCallback();
+        mShowProgressBarWhenEmpty = showProgressBarWhenEmpty;
     }
 
     /**
@@ -120,28 +127,38 @@ public class MediaRouteChooserDialog extends Dialog {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        // Note: setView must be called before super.onCreate().
+        setView(LayoutInflater.from(getContext()).inflate(R.layout.media_route_chooser_dialog,
+                null));
 
-        getWindow().requestFeature(Window.FEATURE_LEFT_ICON);
-
-        setContentView(R.layout.media_route_chooser_dialog);
         setTitle(mRouteTypes == MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY
                 ? R.string.media_route_chooser_title_for_remote_display
                 : R.string.media_route_chooser_title);
 
-        // Must be called after setContentView.
-        getWindow().setFeatureDrawableResource(Window.FEATURE_LEFT_ICON,
-                isLightTheme(getContext()) ? R.drawable.ic_media_route_off_holo_light
-                    : R.drawable.ic_media_route_off_holo_dark);
+        setIcon(isLightTheme(getContext()) ? R.drawable.ic_media_route_off_holo_light
+                : R.drawable.ic_media_route_off_holo_dark);
 
+        super.onCreate(savedInstanceState);
+
+        View emptyView = findViewById(android.R.id.empty);
         mAdapter = new RouteAdapter(getContext());
-        mListView = (ListView)findViewById(R.id.media_route_list);
+        mListView = (ListView) findViewById(R.id.media_route_list);
         mListView.setAdapter(mAdapter);
         mListView.setOnItemClickListener(mAdapter);
-        mListView.setEmptyView(findViewById(android.R.id.empty));
+        mListView.setEmptyView(emptyView);
 
-        mExtendedSettingsButton = (Button)findViewById(R.id.media_route_extended_settings_button);
+        mExtendedSettingsButton = (Button) findViewById(R.id.media_route_extended_settings_button);
         updateExtendedSettingsButton();
+
+        if (!mShowProgressBarWhenEmpty) {
+            findViewById(R.id.media_route_progress_bar).setVisibility(View.GONE);
+
+            // Center the empty view when the progress bar is not shown.
+            LinearLayout.LayoutParams params =
+                    (LinearLayout.LayoutParams) emptyView.getLayoutParams();
+            params.gravity = Gravity.CENTER;
+            emptyView.setLayoutParams(params);
+        }
     }
 
     private void updateExtendedSettingsButton() {

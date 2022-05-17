@@ -34,14 +34,16 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.shared.system.smartspace.SmartspaceTransitionController;
+import com.android.systemui.dump.DumpManager;
+import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Objects;
 
 import javax.inject.Inject;
+
+import dagger.Lazy;
 
 /**
  */
@@ -57,10 +59,11 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     private final LockPatternUtils mLockPatternUtils;
     private final KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback =
             new UpdateMonitorCallback();
-    private final SmartspaceTransitionController mSmartspaceTransitionController;
+    private final Lazy<KeyguardUnlockAnimationController> mUnlockAnimationControllerLazy;
 
     private boolean mCanDismissLockScreen;
     private boolean mShowing;
+    private boolean mBouncerShowing;
     private boolean mSecure;
     private boolean mOccluded;
 
@@ -100,14 +103,19 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     /**
      */
     @Inject
-    public KeyguardStateControllerImpl(Context context,
-            KeyguardUpdateMonitor keyguardUpdateMonitor, LockPatternUtils lockPatternUtils,
-            SmartspaceTransitionController smartspaceTransitionController) {
+    public KeyguardStateControllerImpl(
+            Context context,
+            KeyguardUpdateMonitor keyguardUpdateMonitor,
+            LockPatternUtils lockPatternUtils,
+            Lazy<KeyguardUnlockAnimationController> keyguardUnlockAnimationController,
+            DumpManager dumpManager) {
         mContext = context;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLockPatternUtils = lockPatternUtils;
         mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
-        mSmartspaceTransitionController = smartspaceTransitionController;
+        mUnlockAnimationControllerLazy = keyguardUnlockAnimationController;
+
+        dumpManager.registerDumpable(getClass().getSimpleName(), this);
 
         update(true /* updateAlways */);
         if (Build.IS_DEBUGGABLE && DEBUG_AUTH_WITH_ADB) {
@@ -122,7 +130,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
                         update(true /* updateAlways */);
                     }
                 }
-            }, filter, null, null);
+            }, filter, null, null, Context.RECEIVER_EXPORTED_UNAUDITED);
         }
     }
 
@@ -146,6 +154,11 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     }
 
     @Override
+    public boolean isBouncerShowing() {
+        return mBouncerShowing;
+    }
+
+    @Override
     public boolean isMethodSecure() {
         return mSecure;
     }
@@ -165,6 +178,8 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
         if (mShowing == showing && mOccluded == occluded) return;
         mShowing = showing;
         mOccluded = occluded;
+        Trace.instantForTrack(Trace.TRACE_TAG_APP, "UI Events",
+                "Keyguard showing: " + showing + " occluded: " + occluded);
         notifyKeyguardChanged();
 
         // Update the dismiss amount to the full 0f/1f if we explicitly show or hide the keyguard.
@@ -197,6 +212,8 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
 
     private void setKeyguardFadingAway(boolean keyguardFadingAway) {
         if (mKeyguardFadingAway != keyguardFadingAway) {
+            Trace.traceCounter(Trace.TRACE_TAG_APP, "keyguardFadingAway",
+                    keyguardFadingAway ? 1 : 0);
             mKeyguardFadingAway = keyguardFadingAway;
             ArrayList<Callback> callbacks = new ArrayList<>(mCallbacks);
             for (int i = 0; i < callbacks.size(); i++) {
@@ -207,7 +224,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
 
     @Override
     public void notifyKeyguardDoneFading() {
-        mKeyguardGoingAway = false;
+        notifyKeyguardGoingAway(false);
         setKeyguardFadingAway(false);
     }
 
@@ -241,12 +258,6 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     }
 
     @Override
-    public boolean canPerformSmartSpaceTransition() {
-        return canDismissLockScreen()
-                && mSmartspaceTransitionController.isSmartspaceTransitionPossible();
-    }
-
-    @Override
     public boolean isKeyguardScreenRotationAllowed() {
         return SystemProperties.getBoolean("lockscreen.rot_override", false)
                 || mContext.getResources().getBoolean(R.bool.config_enableLockScreenRotation);
@@ -265,6 +276,11 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     @Override
     public boolean isKeyguardGoingAway() {
         return mKeyguardGoingAway;
+    }
+
+    @Override
+    public boolean isAnimatingBetweenKeyguardAndSurfaceBehind() {
+        return mUnlockAnimationControllerLazy.get().isAnimatingBetweenKeyguardAndSurfaceBehind();
     }
 
     @Override
@@ -314,7 +330,21 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
 
     @Override
     public void notifyKeyguardGoingAway(boolean keyguardGoingAway) {
-        mKeyguardGoingAway = keyguardGoingAway;
+        if (mKeyguardGoingAway != keyguardGoingAway) {
+            Trace.traceCounter(Trace.TRACE_TAG_APP, "keyguardGoingAway",
+                    keyguardGoingAway ? 1 : 0);
+            mKeyguardGoingAway = keyguardGoingAway;
+            new ArrayList<>(mCallbacks).forEach(Callback::onKeyguardGoingAwayChanged);
+        }
+    }
+
+    @Override
+    public void notifyBouncerShowing(boolean showing) {
+        if (mBouncerShowing != showing) {
+            mBouncerShowing = showing;
+
+            new ArrayList<>(mCallbacks).forEach(Callback::onBouncerShowingChanged);
+        }
     }
 
     @Override
@@ -356,7 +386,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
      * @param pw Where to dump.
      */
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("KeyguardStateController:");
         pw.println("  mSecure: " + mSecure);
         pw.println("  mCanDismissLockScreen: " + mCanDismissLockScreen);
@@ -364,6 +394,8 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
         pw.println("  mTrusted: " + mTrusted);
         pw.println("  mDebugUnlocked: " + mDebugUnlocked);
         pw.println("  mFaceAuthEnabled: " + mFaceAuthEnabled);
+        pw.println("  isKeyguardFadingAway: " + isKeyguardFadingAway());
+        pw.println("  isKeyguardGoingAway: " + isKeyguardGoingAway());
     }
 
     private class UpdateMonitorCallback extends KeyguardUpdateMonitorCallback {

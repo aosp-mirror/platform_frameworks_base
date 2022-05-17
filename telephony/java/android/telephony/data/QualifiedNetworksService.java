@@ -26,6 +26,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.telephony.AccessNetworkConstants;
 import android.telephony.AccessNetworkConstants.AccessNetworkType;
 import android.telephony.Annotation.ApnType;
 import android.util.Log;
@@ -129,17 +130,36 @@ public abstract class QualifiedNetworksService extends Service {
         }
 
         /**
-         * Update the qualified networks list. Network availability provider must invoke this method
-         * whenever the qualified networks changes. If this method is never invoked for certain
-         * APN types, then frameworks will always use the default (i.e. cellular) data and network
-         * service.
+         * Update the suggested qualified networks list. Network availability provider must invoke
+         * this method whenever the suggested qualified networks changes. If this method is never
+         * invoked for certain APN types, then frameworks uses its own logic to determine the
+         * transport to setup the data network.
          *
-         * @param apnTypes APN types of the qualified networks. This must be a bitmask combination
-         * of {@link ApnType}.
-         * @param qualifiedNetworkTypes List of network types which are qualified for data
-         * connection setup for {@link @apnType} in the preferred order. Each element in the list
-         * is a {@link AccessNetworkType}. An empty list indicates no networks are qualified
-         * for data setup.
+         * For example, QNS can suggest frameworks setting up IMS data network on IWLAN by
+         * specifying {@link ApnSetting#TYPE_IMS} with a list containing
+         * {@link AccessNetworkType#IWLAN}.
+         *
+         * If QNS considers multiple access networks qualified for certain APN type, it can
+         * suggest frameworks by specifying the APN type with multiple access networks in the list,
+         * for example {{@link AccessNetworkType#EUTRAN}, {@link AccessNetworkType#IWLAN}}.
+         * Frameworks will then first attempt to setup data on LTE network, and If the device moves
+         * from LTE to UMTS, then frameworks will perform handover the data network to the second
+         * preferred access network if available.
+         *
+         * If the {@code qualifiedNetworkTypes} list is empty, it means QNS has no suggestion to the
+         * frameworks, and for that APN type frameworks will route the corresponding network
+         * requests to {@link AccessNetworkConstants#TRANSPORT_TYPE_WWAN}.
+         *
+         * @param apnTypes APN type(s) of the qualified networks. This must be a bitmask combination
+         * of {@link ApnType}. The same qualified networks will be applicable to all APN types
+         * specified here.
+         * @param qualifiedNetworkTypes List of access network types which are qualified for data
+         * connection setup for {@code apnTypes} in the preferred order. Empty list means QNS has no
+         * suggestion to the frameworks, and for that APN type frameworks will route the
+         * corresponding network requests to {@link AccessNetworkConstants#TRANSPORT_TYPE_WWAN}.
+         *
+         * If one of the element is invalid, for example, {@link AccessNetworkType#UNKNOWN}, then
+         * this operation becomes a no-op.
          */
         public final void updateQualifiedNetworkTypes(
                 @ApnType int apnTypes, @NonNull List<Integer> qualifiedNetworkTypes) {

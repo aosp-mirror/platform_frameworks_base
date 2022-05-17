@@ -44,6 +44,7 @@
     <dimen name="privacy_chip_icon_margin_in_between">9dp</dimen>
     <dimen name="privacy_chip_padding_horizontal">9dp</dimen>
     <dimen name="privacy_chip_icon_size">12dp</dimen>
+    <dimen name="privacy_chip_max_width">51dp</dimen>
     <dimen name="privacy_chip_height">24dp</dimen>
     <dimen name="privacy_chip_min_width">30dp</dimen>
     <dimen name="privacy_chip_radius">12dp</dimen>
@@ -55,5 +56,8 @@
     <dimen name="privacy_chip_dot_bg_width">24dp</dimen>
     <dimen name="privacy_chip_dot_bg_height">18dp</dimen>
     <dimen name="privacy_chip_dot_bg_radius">9dp</dimen>
+
+    <dimen name="unblock_hw_sensor_icon_width">@dimen/bottom_sheet_icon_size</dimen>
+    <dimen name="unblock_hw_sensor_icon_height">@dimen/bottom_sheet_icon_size</dimen>
 
 </resources>

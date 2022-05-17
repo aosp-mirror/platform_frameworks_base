@@ -3,27 +3,27 @@ hackbod@google.com
 jsharkey@android.com
 jsharkey@google.com
 narayan@google.com
-patb@google.com
 svetoslavganov@android.com
 svetoslavganov@google.com
-toddke@android.com
-toddke@google.com
+include /PACKAGE_MANAGER_OWNERS
 
 # apex support
 per-file ApexManager.java = dariofreni@google.com, ioffe@google.com, olilan@google.com
 per-file StagingManager.java = dariofreni@google.com, ioffe@google.com, olilan@google.com
 
 # dex
-per-file AbstractStatsBase.java = calin@google.com, ngeoffray@google.com
-per-file BackgroundDexOptService.java = calin@google.com, ngeoffray@google.com
-per-file CompilerStats.java = calin@google.com, ngeoffray@google.com
-per-file DynamicCodeLoggingService.java = alanstokes@google.com, calin@google.com, ngeoffray@google.com
-per-file InstructionSets.java = calin@google.com, ngeoffray@google.com
-per-file OtaDexoptService.java = calin@google.com, ngeoffray@google.com
-per-file OtaDexoptShellCommand.java = calin@google.com, ngeoffray@google.com
-per-file PackageDexOptimizer.java = calin@google.com, ngeoffray@google.com
-per-file PackageManagerServiceCompilerMapping.java = calin@google.com, ngeoffray@google.com
-per-file PackageUsage.java = calin@google.com, ngeoffray@google.com
+per-file AbstractStatsBase.java = file:dex/OWNERS
+per-file BackgroundDexOptService.java = file:dex/OWNERS
+per-file CompilerStats.java = file:dex/OWNERS
+per-file DexOptHelper.java = file:dex/OWNERS
+per-file DynamicCodeLoggingService.java = file:dex/OWNERS
+per-file Installer.java = file:dex/OWNERS
+per-file InstructionSets.java = file:dex/OWNERS
+per-file OtaDexoptService.java = file:dex/OWNERS
+per-file OtaDexoptShellCommand.java = file:dex/OWNERS
+per-file PackageDexOptimizer.java = file:dex/OWNERS
+per-file PackageManagerServiceCompilerMapping.java = file:dex/OWNERS
+per-file PackageUsage.java = file:dex/OWNERS
 
 # multi user / cross profile
 per-file CrossProfileAppsServiceImpl.java = omakoto@google.com, yamasani@google.com
@@ -42,7 +42,7 @@ per-file KeySetHandle.java = cbrubaker@google.com, nnk@google.com
 per-file KeySetManagerService.java = cbrubaker@google.com, nnk@google.com
 per-file PackageKeySetData.java = cbrubaker@google.com, nnk@google.com
 per-file PackageSignatures.java = cbrubaker@google.com, nnk@google.com
-per-file SELinuxMMAC.java = cbrubaker@google.com, jeffv@google.com, jgalenson@google.com, nnk@google.com
+per-file SELinuxMMAC* = alanstokes@google.com, cbrubaker@google.com, jeffv@google.com
 
 # shortcuts
 per-file LauncherAppsService.java = omakoto@google.com, yamasani@google.com, sunnygoyal@google.com, mett@google.com, pinyaoting@google.com

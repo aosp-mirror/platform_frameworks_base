@@ -16,6 +16,8 @@
 
 package android.util;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -255,6 +257,16 @@ public class AtomicFileTest {
         } else {
             assertThrows(FileNotFoundException.class, atomicFile::openRead);
         }
+    }
+
+    @Test
+    public void testToString() throws Exception {
+        AtomicFile atomicFile = new AtomicFile(mBaseFile);
+
+        String toString = atomicFile.toString();
+
+        assertThat(toString).contains("AtomicFile");
+        assertThat(toString).contains(mBaseFile.getAbsolutePath());
     }
 
     private static void writeBytes(@NonNull File file, @NonNull byte[] bytes) throws IOException {

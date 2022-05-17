@@ -197,11 +197,11 @@ public class ClientTransaction implements Parcelable, ObjectPoolItem {
         if (readActivityToken) {
             mActivityToken = in.readStrongBinder();
         }
-        mLifecycleStateRequest = in.readParcelable(getClass().getClassLoader());
+        mLifecycleStateRequest = in.readParcelable(getClass().getClassLoader(), android.app.servertransaction.ActivityLifecycleItem.class);
         final boolean readActivityCallbacks = in.readBoolean();
         if (readActivityCallbacks) {
             mActivityCallbacks = new ArrayList<>();
-            in.readParcelableList(mActivityCallbacks, getClass().getClassLoader());
+            in.readParcelableList(mActivityCallbacks, getClass().getClassLoader(), android.app.servertransaction.ClientTransactionItem.class);
         }
     }
 

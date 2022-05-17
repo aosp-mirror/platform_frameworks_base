@@ -28,6 +28,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.UiEventLogger
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.classifier.FalsingManagerFake
@@ -41,6 +42,7 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.logging.QSLogger
+import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
@@ -52,13 +54,11 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.doNothing
-import org.mockito.Mockito.never
 import org.mockito.Mockito.nullable
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
@@ -153,6 +153,9 @@ class DeviceControlsTileTest : SysuiTestCase() {
                 Optional.empty()
             }
         }
+
+        `when`(controlsComponent.getTileTitleId()).thenReturn(R.string.quick_controls_title)
+        `when`(controlsComponent.getTileTitleId()).thenReturn(R.drawable.controls_icon)
     }
 
     @Test
@@ -272,28 +275,7 @@ class DeviceControlsTileTest : SysuiTestCase() {
     }
 
     @Test
-    fun handleClick_availableAndLocked_activityStarted() {
-        verify(controlsListingController).observe(
-                any(LifecycleOwner::class.java),
-                capture(listingCallbackCaptor)
-        )
-        `when`(controlsComponent.getVisibility()).thenReturn(ControlsComponent.Visibility.AVAILABLE)
-        `when`(keyguardStateController.isUnlocked).thenReturn(false)
-
-        listingCallbackCaptor.value.onServicesUpdated(listOf(serviceInfo))
-        testableLooper.processAllMessages()
-
-        tile.click(null /* view */)
-        testableLooper.processAllMessages()
-
-        // The activity should be started right away and not require a keyguard dismiss.
-        verifyZeroInteractions(activityStarter)
-        verify(spiedContext).startActivity(intentCaptor.capture())
-        assertThat(intentCaptor.value.component?.className).isEqualTo(CONTROLS_ACTIVITY_CLASS_NAME)
-    }
-
-    @Test
-    fun handleClick_availableAndUnlocked_activityStarted() {
+    fun handleClick_available_shownOverLockscreenWhenLocked() {
         verify(controlsListingController).observe(
                 any(LifecycleOwner::class.java),
                 capture(listingCallbackCaptor)
@@ -307,16 +289,16 @@ class DeviceControlsTileTest : SysuiTestCase() {
         tile.click(null /* view */)
         testableLooper.processAllMessages()
 
-        verify(activityStarter, never()).postStartActivityDismissingKeyguard(any(), anyInt())
         verify(activityStarter).startActivity(
                 intentCaptor.capture(),
                 eq(true) /* dismissShade */,
-                nullable(ActivityLaunchAnimator.Controller::class.java))
+                nullable(ActivityLaunchAnimator.Controller::class.java),
+                eq(true) /* showOverLockscreenWhenLocked */)
         assertThat(intentCaptor.value.component?.className).isEqualTo(CONTROLS_ACTIVITY_CLASS_NAME)
     }
 
     @Test
-    fun handleClick_availableAfterUnlockAndIsLocked_keyguardDismissRequired() {
+    fun handleClick_availableAfterUnlock_notShownOverLockscreenWhenLocked() {
         verify(controlsListingController).observe(
             any(LifecycleOwner::class.java),
             capture(listingCallbackCaptor)
@@ -331,39 +313,26 @@ class DeviceControlsTileTest : SysuiTestCase() {
         tile.click(null /* view */)
         testableLooper.processAllMessages()
 
-        verify(activityStarter, never()).startActivity(
-                any(),
-                anyBoolean() /* dismissShade */,
-                nullable(ActivityLaunchAnimator.Controller::class.java))
-        verify(activityStarter).postStartActivityDismissingKeyguard(
+        verify(activityStarter).startActivity(
                 intentCaptor.capture(),
-                anyInt(),
-                nullable(ActivityLaunchAnimator.Controller::class.java))
+                anyBoolean() /* dismissShade */,
+                nullable(ActivityLaunchAnimator.Controller::class.java),
+                eq(false) /* showOverLockscreenWhenLocked */)
         assertThat(intentCaptor.value.component?.className).isEqualTo(CONTROLS_ACTIVITY_CLASS_NAME)
     }
 
     @Test
-    fun handleClick_availableAfterUnlockAndIsUnlocked_activityStarted() {
-        verify(controlsListingController).observe(
-                any(LifecycleOwner::class.java),
-                capture(listingCallbackCaptor)
-        )
-        `when`(controlsComponent.getVisibility())
-                .thenReturn(ControlsComponent.Visibility.AVAILABLE_AFTER_UNLOCK)
-        `when`(keyguardStateController.isUnlocked).thenReturn(true)
+    fun verifyTileEqualsResourceFromComponent() {
+        assertThat(tile.tileLabel)
+            .isEqualTo(
+                context.getText(
+                    controlsComponent.getTileTitleId()))
+    }
 
-        listingCallbackCaptor.value.onServicesUpdated(listOf(serviceInfo))
-        testableLooper.processAllMessages()
-
-        tile.click(null /* view */)
-        testableLooper.processAllMessages()
-
-        verify(activityStarter, never()).postStartActivityDismissingKeyguard(any(), anyInt())
-        verify(activityStarter).startActivity(
-                intentCaptor.capture(),
-                eq(true) /* dismissShade */,
-                nullable(ActivityLaunchAnimator.Controller::class.java))
-        assertThat(intentCaptor.value.component?.className).isEqualTo(CONTROLS_ACTIVITY_CLASS_NAME)
+    @Test
+    fun verifyTileImageEqualsResourceFromComponent() {
+        assertThat(tile.icon)
+            .isEqualTo(QSTileImpl.ResourceIcon.get(controlsComponent.getTileImageId()))
     }
 
     private fun createTile(): DeviceControlsTile {

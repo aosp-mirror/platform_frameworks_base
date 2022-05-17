@@ -40,12 +40,12 @@ public class PhotoCapabilityUtils {
 
     /**
      * Check if the current user can perform any activity for
-     * android.intent.action.GET_CONTENT action for images.
+     * ACTION_PICK_IMAGES action for images.
      * Returns false if the device is currently locked and
      * requires a PIN, pattern or password to unlock.
      */
     public static boolean canChoosePhoto(Context context) {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        Intent intent = new Intent(MediaStore.ACTION_PICK_IMAGES);
         intent.setType("image/*");
         boolean canPerformActivityForGetImage =
                 context.getPackageManager().queryIntentActivities(intent, 0).size() > 0;

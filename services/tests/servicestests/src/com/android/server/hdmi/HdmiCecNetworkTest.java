@@ -17,9 +17,12 @@
 package com.android.server.hdmi;
 
 
+import static android.hardware.hdmi.DeviceFeatures.FEATURE_SUPPORTED;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
+import android.hardware.hdmi.DeviceFeatures;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
@@ -64,7 +67,8 @@ public class HdmiCecNetworkTest {
     @Before
     public void setUp() throws Exception {
         mContext = InstrumentationRegistry.getTargetContext();
-        mHdmiControlService = new HdmiControlService(mContext) {
+        mHdmiControlService = new HdmiControlService(mContext, Collections.emptyList(),
+                new FakeAudioDeviceVolumeManagerWrapper()) {
             @Override
             void invokeDeviceEventListeners(HdmiDeviceInfo device, int status) {
                 mDeviceEventListenerStatuses.add(status);
@@ -80,7 +84,6 @@ public class HdmiCecNetworkTest {
         mHdmiMhlControllerStub = HdmiMhlControllerStub.create(mHdmiControlService);
         mHdmiControlService.setCecController(mHdmiCecController);
         mHdmiControlService.setHdmiMhlController(mHdmiMhlControllerStub);
-        mHdmiControlService.setMessageValidator(new HdmiCecMessageValidator(mHdmiControlService));
 
         mHdmiCecNetwork = new HdmiCecNetwork(mHdmiControlService,
                 mHdmiCecController, mHdmiMhlControllerStub);
@@ -100,6 +103,8 @@ public class HdmiCecNetworkTest {
                 new HdmiPortInfo(5, HdmiPortInfo.PORT_OUTPUT, 0x0000, true, false, false);
         mNativeWrapper.setPortInfo(mHdmiPortInfo);
         mHdmiCecNetwork.initPortInfo();
+
+        mHdmiCecNetwork = mHdmiControlService.getHdmiCecNetwork();
     }
 
     @Test
@@ -140,7 +145,24 @@ public class HdmiCecNetworkTest {
     }
 
     @Test
+    public void physicalAddressToPort_localDevice_weAreSourceDevice() {
+        mNativeWrapper.setPhysicalAddress(0x2000);
+        mHdmiCecNetwork.initPortInfo();
+        assertThat(mHdmiCecNetwork.physicalAddressToPortId(0x2000))
+                .isEqualTo(Constants.CEC_SWITCH_HOME);
+    }
+
+    @Test
+    public void physicalAddressToPort_localDevice_weAreTv() {
+        mNativeWrapper.setPhysicalAddress(0x0000);
+        mHdmiCecNetwork.initPortInfo();
+        assertThat(mHdmiCecNetwork.physicalAddressToPortId(0x0000))
+                .isEqualTo(Constants.CEC_SWITCH_HOME);
+    }
+
+    @Test
     public void localDevices_verifyOne_tv() {
+        mHdmiCecNetwork.clearLocalDevices();
         mHdmiCecNetwork.addLocalDevice(HdmiDeviceInfo.DEVICE_TV,
                 new HdmiCecLocalDeviceTv(mHdmiControlService));
 
@@ -153,6 +175,7 @@ public class HdmiCecNetworkTest {
 
     @Test
     public void localDevices_verifyOne_playback() {
+        mHdmiCecNetwork.clearLocalDevices();
         mHdmiCecNetwork.addLocalDevice(HdmiDeviceInfo.DEVICE_PLAYBACK,
                 new HdmiCecLocalDevicePlayback(mHdmiControlService));
 
@@ -175,27 +198,26 @@ public class HdmiCecNetworkTest {
         assertThat(cecDeviceInfo.getLogicalAddress()).isEqualTo(logicalAddress);
         assertThat(cecDeviceInfo.getPhysicalAddress()).isEqualTo(
                 Constants.INVALID_PHYSICAL_ADDRESS);
-        assertThat(cecDeviceInfo.getDeviceType()).isEqualTo(HdmiDeviceInfo.DEVICE_RESERVED);
+        assertThat(cecDeviceInfo.getDeviceType()).isEqualTo(HdmiDeviceInfo.DEVICE_PLAYBACK);
         assertThat(cecDeviceInfo.getDisplayName()).isEqualTo(
                 HdmiUtils.getDefaultDeviceName(logicalAddress));
-        assertThat(cecDeviceInfo.getVendorId()).isEqualTo(Constants.UNKNOWN_VENDOR_ID);
+        assertThat(cecDeviceInfo.getVendorId()).isEqualTo(Constants.VENDOR_ID_UNKNOWN);
         assertThat(cecDeviceInfo.getDevicePowerStatus()).isEqualTo(
                 HdmiControlManager.POWER_STATUS_UNKNOWN);
 
-        assertThat(mDeviceEventListenerStatuses).containsExactly(
-                HdmiControlManager.DEVICE_EVENT_ADD_DEVICE);
+        assertThat(mDeviceEventListenerStatuses).isEmpty();
     }
 
     @Test
     public void cecDevices_tracking_logicalAddressOnly_doesntNotifyAgain() throws Exception {
         int logicalAddress = Constants.ADDR_PLAYBACK_1;
+        int physicalAddress = 0x1000;
         mHdmiCecNetwork.handleCecMessage(
-                HdmiCecMessageBuilder.buildActiveSource(logicalAddress, 0x1000));
+                HdmiCecMessageBuilder.buildActiveSource(logicalAddress, physicalAddress));
         mHdmiCecNetwork.handleCecMessage(
-                HdmiCecMessageBuilder.buildActiveSource(logicalAddress, 0x1000));
+                HdmiCecMessageBuilder.buildActiveSource(logicalAddress, physicalAddress));
 
-        assertThat(mDeviceEventListenerStatuses).containsExactly(
-                HdmiControlManager.DEVICE_EVENT_ADD_DEVICE);
+        assertThat(mDeviceEventListenerStatuses).isEmpty();
     }
 
     @Test
@@ -216,9 +238,12 @@ public class HdmiCecNetworkTest {
         assertThat(cecDeviceInfo.getDeviceType()).isEqualTo(type);
         assertThat(cecDeviceInfo.getDisplayName()).isEqualTo(
                 HdmiUtils.getDefaultDeviceName(logicalAddress));
-        assertThat(cecDeviceInfo.getVendorId()).isEqualTo(Constants.UNKNOWN_VENDOR_ID);
+        assertThat(cecDeviceInfo.getVendorId()).isEqualTo(Constants.VENDOR_ID_UNKNOWN);
         assertThat(cecDeviceInfo.getDevicePowerStatus()).isEqualTo(
                 HdmiControlManager.POWER_STATUS_UNKNOWN);
+
+        assertThat(mDeviceEventListenerStatuses).containsExactly(
+                HdmiControlManager.DEVICE_EVENT_ADD_DEVICE);
     }
 
     @Test
@@ -236,11 +261,10 @@ public class HdmiCecNetworkTest {
                         physicalAddress, type));
 
 
-        // ADD for logical address first detected
-        // UPDATE for updating device with physical address
+        // ADD for physical address first detected
+        // no UPDATE, since physical address didn't change
         assertThat(mDeviceEventListenerStatuses).containsExactly(
-                HdmiControlManager.DEVICE_EVENT_ADD_DEVICE,
-                HdmiControlManager.DEVICE_EVENT_UPDATE_DEVICE);
+                HdmiControlManager.DEVICE_EVENT_ADD_DEVICE);
     }
 
     @Test
@@ -257,11 +281,13 @@ public class HdmiCecNetworkTest {
         assertThat(cecDeviceInfo.getLogicalAddress()).isEqualTo(logicalAddress);
         assertThat(cecDeviceInfo.getPhysicalAddress()).isEqualTo(
                 Constants.INVALID_PHYSICAL_ADDRESS);
-        assertThat(cecDeviceInfo.getDeviceType()).isEqualTo(HdmiDeviceInfo.DEVICE_RESERVED);
-        assertThat(cecDeviceInfo.getVendorId()).isEqualTo(Constants.UNKNOWN_VENDOR_ID);
+        assertThat(cecDeviceInfo.getDeviceType()).isEqualTo(HdmiDeviceInfo.DEVICE_PLAYBACK);
+        assertThat(cecDeviceInfo.getVendorId()).isEqualTo(Constants.VENDOR_ID_UNKNOWN);
         assertThat(cecDeviceInfo.getDisplayName()).isEqualTo(
                 HdmiUtils.getDefaultDeviceName(logicalAddress));
         assertThat(cecDeviceInfo.getDevicePowerStatus()).isEqualTo(powerStatus);
+
+        assertThat(mDeviceEventListenerStatuses).isEmpty();
     }
 
     @Test
@@ -278,11 +304,13 @@ public class HdmiCecNetworkTest {
         assertThat(cecDeviceInfo.getLogicalAddress()).isEqualTo(logicalAddress);
         assertThat(cecDeviceInfo.getPhysicalAddress()).isEqualTo(
                 Constants.INVALID_PHYSICAL_ADDRESS);
-        assertThat(cecDeviceInfo.getDeviceType()).isEqualTo(HdmiDeviceInfo.DEVICE_RESERVED);
-        assertThat(cecDeviceInfo.getVendorId()).isEqualTo(Constants.UNKNOWN_VENDOR_ID);
+        assertThat(cecDeviceInfo.getDeviceType()).isEqualTo(HdmiDeviceInfo.DEVICE_PLAYBACK);
+        assertThat(cecDeviceInfo.getVendorId()).isEqualTo(Constants.VENDOR_ID_UNKNOWN);
         assertThat(cecDeviceInfo.getDisplayName()).isEqualTo(osdName);
         assertThat(cecDeviceInfo.getDevicePowerStatus()).isEqualTo(
                 HdmiControlManager.POWER_STATUS_UNKNOWN);
+
+        assertThat(mDeviceEventListenerStatuses).isEmpty();
     }
 
     @Test
@@ -298,12 +326,14 @@ public class HdmiCecNetworkTest {
         assertThat(cecDeviceInfo.getLogicalAddress()).isEqualTo(logicalAddress);
         assertThat(cecDeviceInfo.getPhysicalAddress()).isEqualTo(
                 Constants.INVALID_PHYSICAL_ADDRESS);
-        assertThat(cecDeviceInfo.getDeviceType()).isEqualTo(HdmiDeviceInfo.DEVICE_RESERVED);
+        assertThat(cecDeviceInfo.getDeviceType()).isEqualTo(HdmiDeviceInfo.DEVICE_PLAYBACK);
         assertThat(cecDeviceInfo.getDisplayName()).isEqualTo(
                 HdmiUtils.getDefaultDeviceName(logicalAddress));
         assertThat(cecDeviceInfo.getVendorId()).isEqualTo(vendorId);
         assertThat(cecDeviceInfo.getDevicePowerStatus()).isEqualTo(
                 HdmiControlManager.POWER_STATUS_UNKNOWN);
+
+        assertThat(mDeviceEventListenerStatuses).isEmpty();
     }
 
     @Test
@@ -362,12 +392,10 @@ public class HdmiCecNetworkTest {
         assertThat(cecDeviceInfo.getPhysicalAddress()).isEqualTo(updatedPhysicalAddress);
         assertThat(cecDeviceInfo.getDeviceType()).isEqualTo(type);
 
-        // ADD for logical address first detected
-        // UPDATE for updating device with physical address
+        // ADD for physical address first detected
         // UPDATE for updating device with new physical address
         assertThat(mDeviceEventListenerStatuses).containsExactly(
                 HdmiControlManager.DEVICE_EVENT_ADD_DEVICE,
-                HdmiControlManager.DEVICE_EVENT_UPDATE_DEVICE,
                 HdmiControlManager.DEVICE_EVENT_UPDATE_DEVICE);
     }
 
@@ -429,7 +457,7 @@ public class HdmiCecNetworkTest {
         assertThat(cecDeviceInfo.getLogicalAddress()).isEqualTo(logicalAddress);
         assertThat(cecDeviceInfo.getPhysicalAddress()).isEqualTo(
                 Constants.INVALID_PHYSICAL_ADDRESS);
-        assertThat(cecDeviceInfo.getDeviceType()).isEqualTo(HdmiDeviceInfo.DEVICE_RESERVED);
+        assertThat(cecDeviceInfo.getDeviceType()).isEqualTo(HdmiDeviceInfo.DEVICE_PLAYBACK);
         assertThat(cecDeviceInfo.getDisplayName()).isEqualTo(
                 HdmiUtils.getDefaultDeviceName(logicalAddress));
         assertThat(cecDeviceInfo.getVendorId()).isEqualTo(updatedVendorId);
@@ -451,9 +479,8 @@ public class HdmiCecNetworkTest {
 
         assertThat(mHdmiCecNetwork.getSafeCecDevicesLocked()).isEmpty();
 
-        assertThat(mDeviceEventListenerStatuses).containsExactly(
-                HdmiControlManager.DEVICE_EVENT_ADD_DEVICE,
-                HdmiControlManager.DEVICE_EVENT_REMOVE_DEVICE);
+        // Physical address never got reported, so no listeners are triggered
+        assertThat(mDeviceEventListenerStatuses).isEmpty();
     }
 
     @Test
@@ -470,8 +497,8 @@ public class HdmiCecNetworkTest {
         assertThat(cecDeviceInfo.getLogicalAddress()).isEqualTo(logicalAddress);
         assertThat(cecDeviceInfo.getPhysicalAddress()).isEqualTo(
                 Constants.INVALID_PHYSICAL_ADDRESS);
-        assertThat(cecDeviceInfo.getDeviceType()).isEqualTo(HdmiDeviceInfo.DEVICE_RESERVED);
-        assertThat(cecDeviceInfo.getVendorId()).isEqualTo(Constants.UNKNOWN_VENDOR_ID);
+        assertThat(cecDeviceInfo.getDeviceType()).isEqualTo(HdmiDeviceInfo.DEVICE_PLAYBACK);
+        assertThat(cecDeviceInfo.getVendorId()).isEqualTo(Constants.VENDOR_ID_UNKNOWN);
         assertThat(cecDeviceInfo.getDisplayName()).isEqualTo(
                 HdmiUtils.getDefaultDeviceName(logicalAddress));
         assertThat(cecDeviceInfo.getDevicePowerStatus()).isEqualTo(powerStatus);
@@ -514,12 +541,14 @@ public class HdmiCecNetworkTest {
         int logicalAddress = Constants.ADDR_PLAYBACK_1;
         int cecVersion = HdmiControlManager.HDMI_CEC_VERSION_1_4_B;
         mHdmiCecNetwork.handleCecMessage(
-                HdmiCecMessageBuilder.buildReportFeatures(logicalAddress,
+                ReportFeaturesMessage.build(logicalAddress,
                         cecVersion, Collections.emptyList(),
                         Constants.RC_PROFILE_SOURCE, Collections.emptyList(),
-                        Collections.emptyList()));
+                        DeviceFeatures.NO_FEATURES_SUPPORTED));
 
-        assertThat(mHdmiCecNetwork.getSafeCecDevicesLocked()).hasSize(1);
+        synchronized (mHdmiCecNetwork.mLock) {
+            assertThat(mHdmiCecNetwork.getSafeCecDevicesLocked()).hasSize(1);
+        }
 
         HdmiDeviceInfo cecDeviceInfo = mHdmiCecNetwork.getCecDeviceInfo(logicalAddress);
         assertThat(cecDeviceInfo.getLogicalAddress()).isEqualTo(logicalAddress);
@@ -531,15 +560,49 @@ public class HdmiCecNetworkTest {
         int logicalAddress = Constants.ADDR_PLAYBACK_1;
         int cecVersion = HdmiControlManager.HDMI_CEC_VERSION_2_0;
         mHdmiCecNetwork.handleCecMessage(
-                HdmiCecMessageBuilder.buildReportFeatures(logicalAddress,
+                ReportFeaturesMessage.build(logicalAddress,
                         cecVersion, Collections.emptyList(),
                         Constants.RC_PROFILE_SOURCE, Collections.emptyList(),
-                        Collections.emptyList()));
+                        DeviceFeatures.NO_FEATURES_SUPPORTED));
 
-        assertThat(mHdmiCecNetwork.getSafeCecDevicesLocked()).hasSize(1);
+        synchronized (mHdmiCecNetwork.mLock) {
+            assertThat(mHdmiCecNetwork.getSafeCecDevicesLocked()).hasSize(1);
+        }
 
         HdmiDeviceInfo cecDeviceInfo = mHdmiCecNetwork.getCecDeviceInfo(logicalAddress);
         assertThat(cecDeviceInfo.getLogicalAddress()).isEqualTo(logicalAddress);
         assertThat(cecDeviceInfo.getCecVersion()).isEqualTo(cecVersion);
+    }
+
+    @Test
+    public void cecDevices_tracking_reportFeatures_updatesDeviceFeatures() {
+        // Features should be set correctly with the initial <Report Features>
+        int logicalAddress = Constants.ADDR_PLAYBACK_1;
+        int cecVersion = HdmiControlManager.HDMI_CEC_VERSION_2_0;
+        DeviceFeatures deviceFeatures = DeviceFeatures.NO_FEATURES_SUPPORTED;
+        mHdmiCecNetwork.handleCecMessage(
+                ReportFeaturesMessage.build(logicalAddress,
+                        cecVersion, Collections.emptyList(),
+                        Constants.RC_PROFILE_SOURCE, Collections.emptyList(), deviceFeatures));
+
+        HdmiDeviceInfo cecDeviceInfo = mHdmiCecNetwork.getCecDeviceInfo(logicalAddress);
+        assertThat(cecDeviceInfo.getDeviceFeatures()).isEqualTo(deviceFeatures);
+
+        // New information from <Report Features> should override old information
+        DeviceFeatures updatedFeatures = DeviceFeatures.NO_FEATURES_SUPPORTED.toBuilder()
+                .setSetAudioVolumeLevelSupport(FEATURE_SUPPORTED).build();
+        mHdmiCecNetwork.handleCecMessage(
+                ReportFeaturesMessage.build(logicalAddress,
+                        cecVersion, Collections.emptyList(),
+                        Constants.RC_PROFILE_SOURCE, Collections.emptyList(), updatedFeatures));
+        cecDeviceInfo = mHdmiCecNetwork.getCecDeviceInfo(logicalAddress);
+        assertThat(cecDeviceInfo.getDeviceFeatures()).isEqualTo(updatedFeatures);
+    }
+
+    @Test
+    public void getSafeCecDevicesLocked_addDevice_sizeOne() {
+        mHdmiCecNetwork.addCecDevice(HdmiDeviceInfo.INACTIVE_DEVICE);
+
+        assertThat(mHdmiCecNetwork.getSafeCecDevicesLocked()).hasSize(1);
     }
 }

@@ -92,7 +92,6 @@ enum {
 };
 
 const std::string& kAndroidNamespace = "http://schemas.android.com/apk/res/android";
-constexpr int kCurrentDevelopmentVersion = 10000;
 constexpr int kNeverForLocation = 0x00010000;
 
 /** Retrieves the attribute of the element with the specified attribute resource id. */
@@ -331,7 +330,7 @@ class ManifestExtractor {
     ConfigDescription config;
     config.orientation = android::ResTable_config::ORIENTATION_PORT;
     config.density = android::ResTable_config::DENSITY_MEDIUM;
-    config.sdkVersion = kCurrentDevelopmentVersion; // Very high.
+    config.sdkVersion = SDK_CUR_DEVELOPMENT;  // Very high.
     config.screenWidthDp = 320;
     config.screenHeightDp = 480;
     config.smallestScreenWidthDp = 320;
@@ -621,7 +620,7 @@ class UsesSdkBadging : public ManifestExtractor::Element {
     // Detect the target sdk of the element
     if  ((min_sdk_name && *min_sdk_name == "Donut")
         || (target_sdk_name && *target_sdk_name == "Donut")) {
-      extractor()->RaiseTargetSdk(4);
+      extractor()->RaiseTargetSdk(SDK_DONUT);
     }
     if (min_sdk) {
       extractor()->RaiseTargetSdk(*min_sdk);
@@ -629,7 +628,7 @@ class UsesSdkBadging : public ManifestExtractor::Element {
     if (target_sdk) {
       extractor()->RaiseTargetSdk(*target_sdk);
     } else if (target_sdk_name) {
-      extractor()->RaiseTargetSdk(kCurrentDevelopmentVersion);
+      extractor()->RaiseTargetSdk(SDK_CUR_DEVELOPMENT);
     }
   }
 
@@ -746,21 +745,23 @@ class SupportsScreen : public ManifestExtractor::Element {
     // the screen size support was introduced, so all default to
     // enabled.
     if (small_screen_temp  > 0) {
-      small_screen_temp  = target_sdk >= 4 ? -1 : 0;
+      small_screen_temp = target_sdk >= SDK_DONUT ? -1 : 0;
     }
     if (normal_screen_temp  > 0) {
       normal_screen_temp  = -1;
     }
     if (large_screen_temp  > 0) {
-      large_screen_temp  = target_sdk >= 4 ? -1 : 0;
+      large_screen_temp = target_sdk >= SDK_DONUT ? -1 : 0;
     }
     if (xlarge_screen_temp  > 0) {
       // Introduced in Gingerbread.
-      xlarge_screen_temp  = target_sdk >= 9 ? -1 : 0;
+      xlarge_screen_temp = target_sdk >= SDK_GINGERBREAD ? -1 : 0;
     }
     if (any_density_temp  > 0) {
-      any_density_temp  = (target_sdk >= 4 || requires_smallest_width_dp > 0
-          || compatible_width_limit_dp > 0) ? -1 : 0;
+      any_density_temp = (target_sdk >= SDK_DONUT || requires_smallest_width_dp > 0 ||
+                          compatible_width_limit_dp > 0)
+                             ? -1
+                             : 0;
     }
 
     // Print the formatted screen info
@@ -1460,6 +1461,64 @@ class UsesStaticLibrary : public ManifestExtractor::Element {
   }
 };
 
+/** Represents <sdk-library> elements. **/
+class SdkLibrary : public ManifestExtractor::Element {
+ public:
+  SdkLibrary() = default;
+  std::string name;
+  int versionMajor;
+
+  void Extract(xml::Element* element) override {
+    auto parent_stack = extractor()->parent_stack();
+    if (parent_stack.size() > 0 && ElementCast<Application>(parent_stack[0])) {
+      name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
+      versionMajor = GetAttributeIntegerDefault(FindAttribute(element, VERSION_MAJOR_ATTR), 0);
+    }
+  }
+
+  void Print(text::Printer* printer) override {
+    printer->Print(
+        StringPrintf("sdk-library: name='%s' versionMajor='%d'\n", name.data(), versionMajor));
+  }
+};
+
+/** Represents <uses-sdk-library> elements. **/
+class UsesSdkLibrary : public ManifestExtractor::Element {
+ public:
+  UsesSdkLibrary() = default;
+  std::string name;
+  int versionMajor;
+  std::vector<std::string> certDigests;
+
+  void Extract(xml::Element* element) override {
+    auto parent_stack = extractor()->parent_stack();
+    if (parent_stack.size() > 0 && ElementCast<Application>(parent_stack[0])) {
+      name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
+      versionMajor = GetAttributeIntegerDefault(FindAttribute(element, VERSION_MAJOR_ATTR), 0);
+      AddCertDigest(element);
+    }
+  }
+
+  void AddCertDigest(xml::Element* element) {
+    std::string digest = GetAttributeStringDefault(FindAttribute(element, CERT_DIGEST_ATTR), "");
+    // We allow ":" delimiters in the SHA declaration as this is the format
+    // emitted by the certtool making it easy for developers to copy/paste.
+    digest.erase(std::remove(digest.begin(), digest.end(), ':'), digest.end());
+    if (!digest.empty()) {
+      certDigests.push_back(digest);
+    }
+  }
+
+  void Print(text::Printer* printer) override {
+    printer->Print(
+        StringPrintf("uses-sdk-library: name='%s' versionMajor='%d'", name.data(), versionMajor));
+    for (size_t i = 0; i < certDigests.size(); i++) {
+      printer->Print(StringPrintf(" certDigest='%s'", certDigests[i].data()));
+    }
+    printer->Print("\n");
+  }
+};
+
 /** Represents <uses-native-library> elements. **/
 class UsesNativeLibrary : public ManifestExtractor::Element {
  public:
@@ -2030,7 +2089,7 @@ bool ManifestExtractor::Dump(text::Printer* printer, IDiagnostics* diag) {
   auto write_external_permission = ElementCast<UsesPermission>(
       FindPermission(root.get(), "android.permission.WRITE_EXTERNAL_STORAGE"));
 
-  if (target_sdk() < 4) {
+  if (target_sdk() < SDK_DONUT) {
     if (!write_external_permission) {
       PrintPermission("android.permission.WRITE_EXTERNAL_STORAGE", "targetSdkVersion < 4", -1);
       insert_write_external = true;
@@ -2053,7 +2112,7 @@ bool ManifestExtractor::Dump(text::Printer* printer, IDiagnostics* diag) {
   }
 
   // Pre-JellyBean call log permission compatibility.
-  if (target_sdk() < 16) {
+  if (target_sdk() < SDK_JELLY_BEAN) {
     if (!FindPermission(root.get(), "android.permission.READ_CALL_LOG")
         && FindPermission(root.get(), "android.permission.READ_CONTACTS")) {
       PrintPermission("android.permission.READ_CALL_LOG",
@@ -2366,6 +2425,7 @@ T* ElementCast(ManifestExtractor::Element* element) {
       {"required-not-feature", std::is_base_of<RequiredNotFeature, T>::value},
       {"screen", std::is_base_of<Screen, T>::value},
       {"service", std::is_base_of<Service, T>::value},
+      {"sdk-library", std::is_base_of<SdkLibrary, T>::value},
       {"static-library", std::is_base_of<StaticLibrary, T>::value},
       {"supports-gl-texture", std::is_base_of<SupportsGlTexture, T>::value},
       {"supports-input", std::is_base_of<SupportsInput, T>::value},
@@ -2378,6 +2438,7 @@ T* ElementCast(ManifestExtractor::Element* element) {
       {"uses-permission", std::is_base_of<UsesPermission, T>::value},
       {"uses-permission-sdk-23", std::is_base_of<UsesPermissionSdk23, T>::value},
       {"uses-sdk", std::is_base_of<UsesSdkBadging, T>::value},
+      {"uses-sdk-library", std::is_base_of<UsesSdkLibrary, T>::value},
       {"uses-static-library", std::is_base_of<UsesStaticLibrary, T>::value},
   };
 
@@ -2420,6 +2481,7 @@ std::unique_ptr<ManifestExtractor::Element> ManifestExtractor::Element::Inflate(
           {"required-not-feature", &CreateType<RequiredNotFeature>},
           {"screen", &CreateType<Screen>},
           {"service", &CreateType<Service>},
+          {"sdk-library", &CreateType<SdkLibrary>},
           {"static-library", &CreateType<StaticLibrary>},
           {"supports-gl-texture", &CreateType<SupportsGlTexture>},
           {"supports-input", &CreateType<SupportsInput>},
@@ -2432,6 +2494,7 @@ std::unique_ptr<ManifestExtractor::Element> ManifestExtractor::Element::Inflate(
           {"uses-permission", &CreateType<UsesPermission>},
           {"uses-permission-sdk-23", &CreateType<UsesPermissionSdk23>},
           {"uses-sdk", &CreateType<UsesSdkBadging>},
+          {"uses-sdk-library", &CreateType<UsesSdkLibrary>},
           {"uses-static-library", &CreateType<UsesStaticLibrary>},
       };
 

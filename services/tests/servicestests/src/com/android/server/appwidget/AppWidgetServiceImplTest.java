@@ -28,6 +28,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.app.AppOpsManagerInternal;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetManagerInternal;
@@ -39,11 +42,16 @@ import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.LauncherApps;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ShortcutServiceInternal;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.util.AtomicFile;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
+import android.util.Xml;
 import android.widget.RemoteViews;
 
 import com.android.frameworks.servicestests.R;
@@ -51,9 +59,16 @@ import com.android.internal.appwidget.IAppWidgetHost;
 import com.android.server.LocalServices;
 
 import org.mockito.ArgumentCaptor;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
@@ -77,6 +92,8 @@ public class AppWidgetServiceImplTest extends InstrumentationTestCase {
     private AppWidgetManager mManager;
 
     private ShortcutServiceInternal mMockShortcutService;
+    private PackageManagerInternal mMockPackageManager;
+    private AppOpsManagerInternal mMockAppOpsManagerInternal;
     private IAppWidgetHost mMockHost;
 
     @Override
@@ -85,6 +102,8 @@ public class AppWidgetServiceImplTest extends InstrumentationTestCase {
         LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
         LocalServices.removeServiceForTest(ShortcutServiceInternal.class);
         LocalServices.removeServiceForTest(AppWidgetManagerInternal.class);
+        LocalServices.removeServiceForTest(PackageManagerInternal.class);
+        LocalServices.removeServiceForTest(AppOpsManagerInternal.class);
 
         mTestContext = new TestContext();
         mPkgName = mTestContext.getOpPackageName();
@@ -92,9 +111,16 @@ public class AppWidgetServiceImplTest extends InstrumentationTestCase {
         mManager = new AppWidgetManager(mTestContext, mService);
 
         mMockShortcutService = mock(ShortcutServiceInternal.class);
+        mMockPackageManager = mock(PackageManagerInternal.class);
+        mMockAppOpsManagerInternal = mock(AppOpsManagerInternal.class);
         mMockHost = mock(IAppWidgetHost.class);
         LocalServices.addService(ShortcutServiceInternal.class, mMockShortcutService);
+        LocalServices.addService(PackageManagerInternal.class, mMockPackageManager);
+        LocalServices.addService(AppOpsManagerInternal.class, mMockAppOpsManagerInternal);
+        when(mMockPackageManager.filterAppAccess(anyString(), anyInt(), anyInt()))
+                .thenReturn(false);
         mService.onStart();
+        mService.systemServicesReady();
     }
 
     public void testLoadDescription() {
@@ -323,6 +349,34 @@ public class AppWidgetServiceImplTest extends InstrumentationTestCase {
         assertThat(info.previewLayout).isEqualTo(R.layout.widget_preview);
     }
 
+    public void testWidgetProviderInfoPersistence() throws IOException {
+        final AppWidgetProviderInfo original = new AppWidgetProviderInfo();
+        original.minWidth = 40;
+        original.minHeight = 40;
+        original.maxResizeWidth = 250;
+        original.maxResizeHeight = 120;
+        original.targetCellWidth = 1;
+        original.targetCellHeight = 1;
+        original.updatePeriodMillis = 86400000;
+        original.previewLayout = R.layout.widget_preview;
+        original.label = "test";
+
+        final File file = new File(mTestContext.getDataDir(), "appwidget_provider_info.xml");
+        saveWidgetProviderInfoLocked(file, original);
+        final AppWidgetProviderInfo target = loadAppWidgetProviderInfoLocked(file);
+
+        assertThat(target.minWidth).isEqualTo(original.minWidth);
+        assertThat(target.minHeight).isEqualTo(original.minHeight);
+        assertThat(target.minResizeWidth).isEqualTo(original.minResizeWidth);
+        assertThat(target.minResizeHeight).isEqualTo(original.minResizeHeight);
+        assertThat(target.maxResizeWidth).isEqualTo(original.maxResizeWidth);
+        assertThat(target.maxResizeHeight).isEqualTo(original.maxResizeHeight);
+        assertThat(target.targetCellWidth).isEqualTo(original.targetCellWidth);
+        assertThat(target.targetCellHeight).isEqualTo(original.targetCellHeight);
+        assertThat(target.updatePeriodMillis).isEqualTo(original.updatePeriodMillis);
+        assertThat(target.previewLayout).isEqualTo(original.previewLayout);
+    }
+
     private int setupHostAndWidget() {
         List<PendingHostUpdate> updates = mService.startListening(
                 mMockHost, mPkgName, HOST_ID, new int[0]).getList();
@@ -351,6 +405,44 @@ public class AppWidgetServiceImplTest extends InstrumentationTestCase {
 
     private int getIntegerResource(int resId) {
         return mTestContext.getResources().getInteger(resId);
+    }
+
+    private static void saveWidgetProviderInfoLocked(@NonNull final File dst,
+            @Nullable final AppWidgetProviderInfo info)
+            throws IOException {
+        Objects.requireNonNull(dst);
+        if (info == null) {
+            return;
+        }
+        final AtomicFile file = new AtomicFile(dst);
+        final FileOutputStream stream = file.startWrite();
+        final TypedXmlSerializer out = Xml.resolveSerializer(stream);
+        out.startDocument(null, true);
+        out.startTag(null, "p");
+        AppWidgetXmlUtil.writeAppWidgetProviderInfoLocked(out, info);
+        out.endTag(null, "p");
+        out.endDocument();
+        file.finishWrite(stream);
+    }
+
+    public static AppWidgetProviderInfo loadAppWidgetProviderInfoLocked(@NonNull final File dst) {
+        Objects.requireNonNull(dst);
+        final AtomicFile file = new AtomicFile(dst);
+        try (FileInputStream stream = file.openRead()) {
+            final TypedXmlPullParser parser = Xml.resolvePullParser(stream);
+            int type;
+            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                    && type != XmlPullParser.START_TAG) {
+                // drain whitespace, comments, etc.
+            }
+            final String nodeName = parser.getName();
+            if (!"p".equals(nodeName)) {
+                return null;
+            }
+            return AppWidgetXmlUtil.readAppWidgetProviderInfoLocked(parser);
+        } catch (IOException | XmlPullParserException e) {
+            return null;
+        }
     }
 
     private class TestContext extends ContextWrapper {

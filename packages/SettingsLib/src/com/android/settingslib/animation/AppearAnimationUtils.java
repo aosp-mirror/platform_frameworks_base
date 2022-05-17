@@ -181,10 +181,12 @@ public class AppearAnimationUtils implements AppearAnimationCreator<View> {
     public void createAnimation(final View view, long delay, long duration, float translationY,
             boolean appearing, Interpolator interpolator, final Runnable endRunnable) {
         if (view != null) {
-            view.setAlpha(appearing ? 0f : 1.0f);
-            view.setTranslationY(appearing ? translationY : 0);
+            float targetAlpha = appearing ? 1f : 0f;
+            float targetTranslationY = appearing ? 0 : translationY;
+            view.setAlpha(1.0f - targetAlpha);
+            view.setTranslationY(translationY - targetTranslationY);
             Animator alphaAnim;
-            float targetAlpha =  appearing ? 1f : 0f;
+
             if (view.isHardwareAccelerated()) {
                 RenderNodeAnimator alphaAnimRt = new RenderNodeAnimator(RenderNodeAnimator.ALPHA,
                         targetAlpha);
@@ -205,14 +207,21 @@ public class AppearAnimationUtils implements AppearAnimationCreator<View> {
                     }
                 });
             }
-            if (endRunnable != null) {
-                alphaAnim.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
+            alphaAnim.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationCancel(Animator animation) {
+                    // If Animation is canceled, we want to ensure UI is reset.
+                    view.setAlpha(targetAlpha);
+                    view.setTranslationY(targetTranslationY);
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    if (endRunnable != null) {
                         endRunnable.run();
                     }
-                });
-            }
+                }
+            });
             alphaAnim.start();
             startTranslationYAnimation(view, delay, duration, appearing ? 0 : translationY,
                     interpolator);

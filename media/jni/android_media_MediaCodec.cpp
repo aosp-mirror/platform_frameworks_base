@@ -202,7 +202,7 @@ static const void *sRefBaseOwner;
 
 JMediaCodec::JMediaCodec(
         JNIEnv *env, jobject thiz,
-        const char *name, bool nameIsType, bool encoder)
+        const char *name, bool nameIsType, bool encoder, int pid, int uid)
     : mClass(NULL),
       mObject(NULL) {
     jclass clazz = env->GetObjectClass(thiz);
@@ -220,12 +220,12 @@ JMediaCodec::JMediaCodec(
             ANDROID_PRIORITY_VIDEO);
 
     if (nameIsType) {
-        mCodec = MediaCodec::CreateByType(mLooper, name, encoder, &mInitStatus);
+        mCodec = MediaCodec::CreateByType(mLooper, name, encoder, &mInitStatus, pid, uid);
         if (mCodec == nullptr || mCodec->getName(&mNameAtCreation) != OK) {
             mNameAtCreation = "(null)";
         }
     } else {
-        mCodec = MediaCodec::CreateByComponentName(mLooper, name, &mInitStatus);
+        mCodec = MediaCodec::CreateByComponentName(mLooper, name, &mInitStatus, pid, uid);
         mNameAtCreation = name;
     }
     CHECK((mCodec != NULL) != (mInitStatus != OK));
@@ -1294,45 +1294,46 @@ static void throwCryptoException(JNIEnv *env, status_t err, const char *msg,
     std::string defaultMsg = "Unknown Error";
 
     /* translate OS errors to Java API CryptoException errorCodes (which are positive) */
+    jint jerr = 0;
     switch (err) {
         case ERROR_DRM_NO_LICENSE:
-            err = gCryptoErrorCodes.cryptoErrorNoKey;
+            jerr = gCryptoErrorCodes.cryptoErrorNoKey;
             defaultMsg = "Crypto key not available";
             break;
         case ERROR_DRM_LICENSE_EXPIRED:
-            err = gCryptoErrorCodes.cryptoErrorKeyExpired;
+            jerr = gCryptoErrorCodes.cryptoErrorKeyExpired;
             defaultMsg = "License expired";
             break;
         case ERROR_DRM_RESOURCE_BUSY:
-            err = gCryptoErrorCodes.cryptoErrorResourceBusy;
+            jerr = gCryptoErrorCodes.cryptoErrorResourceBusy;
             defaultMsg = "Resource busy or unavailable";
             break;
         case ERROR_DRM_INSUFFICIENT_OUTPUT_PROTECTION:
-            err = gCryptoErrorCodes.cryptoErrorInsufficientOutputProtection;
+            jerr = gCryptoErrorCodes.cryptoErrorInsufficientOutputProtection;
             defaultMsg = "Required output protections are not active";
             break;
         case ERROR_DRM_SESSION_NOT_OPENED:
-            err = gCryptoErrorCodes.cryptoErrorSessionNotOpened;
+            jerr = gCryptoErrorCodes.cryptoErrorSessionNotOpened;
             defaultMsg = "Attempted to use a closed session";
             break;
         case ERROR_DRM_INSUFFICIENT_SECURITY:
-            err = gCryptoErrorCodes.cryptoErrorInsufficientSecurity;
+            jerr = gCryptoErrorCodes.cryptoErrorInsufficientSecurity;
             defaultMsg = "Required security level is not met";
             break;
         case ERROR_DRM_CANNOT_HANDLE:
-            err = gCryptoErrorCodes.cryptoErrorUnsupportedOperation;
+            jerr = gCryptoErrorCodes.cryptoErrorUnsupportedOperation;
             defaultMsg = "Operation not supported in this configuration";
             break;
         case ERROR_DRM_FRAME_TOO_LARGE:
-            err = gCryptoErrorCodes.cryptoErrorFrameTooLarge;
+            jerr = gCryptoErrorCodes.cryptoErrorFrameTooLarge;
             defaultMsg = "Decrytped frame exceeds size of output buffer";
             break;
         case ERROR_DRM_SESSION_LOST_STATE:
-            err = gCryptoErrorCodes.cryptoErrorLostState;
+            jerr = gCryptoErrorCodes.cryptoErrorLostState;
             defaultMsg = "Session state was lost, open a new session and retry";
             break;
         default:  /* Other negative DRM error codes go out best-effort. */
-            err = MediaErrorToJavaError(err);
+            jerr = MediaErrorToJavaError(err);
             defaultMsg = StrCryptoError(err);
             break;
     }
@@ -1344,7 +1345,7 @@ static void throwCryptoException(JNIEnv *env, status_t err, const char *msg,
     jstring msgObj = env->NewStringUTF(msgStr.c_str());
 
     jthrowable exception =
-        (jthrowable)env->NewObject(clazz.get(), constructID, err, msgObj);
+        (jthrowable)env->NewObject(clazz.get(), constructID, jerr, msgObj);
 
     env->Throw(exception);
 }
@@ -3136,7 +3137,7 @@ static void android_media_MediaCodec_native_init(JNIEnv *env, jclass) {
 
 static void android_media_MediaCodec_native_setup(
         JNIEnv *env, jobject thiz,
-        jstring name, jboolean nameIsType, jboolean encoder) {
+        jstring name, jboolean nameIsType, jboolean encoder, int pid, int uid) {
     if (name == NULL) {
         jniThrowException(env, "java/lang/NullPointerException", NULL);
         return;
@@ -3148,24 +3149,33 @@ static void android_media_MediaCodec_native_setup(
         return;
     }
 
-    sp<JMediaCodec> codec = new JMediaCodec(env, thiz, tmp, nameIsType, encoder);
+    sp<JMediaCodec> codec = new JMediaCodec(env, thiz, tmp, nameIsType, encoder, pid, uid);
 
     const status_t err = codec->initCheck();
     if (err == NAME_NOT_FOUND) {
         // fail and do not try again.
         jniThrowException(env, "java/lang/IllegalArgumentException",
-                String8::format("Failed to initialize %s, error %#x", tmp, err));
+                String8::format("Failed to initialize %s, error %#x (NAME_NOT_FOUND)", tmp, err));
         env->ReleaseStringUTFChars(name, tmp);
         return;
-    } if (err == NO_MEMORY) {
+    }
+    if (err == NO_MEMORY) {
         throwCodecException(env, err, ACTION_CODE_TRANSIENT,
-                String8::format("Failed to initialize %s, error %#x", tmp, err));
+                String8::format("Failed to initialize %s, error %#x (NO_MEMORY)", tmp, err));
         env->ReleaseStringUTFChars(name, tmp);
         return;
-    } else if (err != OK) {
+    }
+    if (err == PERMISSION_DENIED) {
+        jniThrowException(env, "java/lang/SecurityException",
+                String8::format("Failed to initialize %s, error %#x (PERMISSION_DENIED)", tmp,
+                err));
+        env->ReleaseStringUTFChars(name, tmp);
+        return;
+    }
+    if (err != OK) {
         // believed possible to try again
         jniThrowException(env, "java/io/IOException",
-                String8::format("Failed to find matching codec %s, error %#x", tmp, err));
+                String8::format("Failed to find matching codec %s, error %#x (?)", tmp, err));
         env->ReleaseStringUTFChars(name, tmp);
         return;
     }
@@ -3174,7 +3184,7 @@ static void android_media_MediaCodec_native_setup(
 
     codec->registerSelf();
 
-    setMediaCodec(env,thiz, codec);
+    setMediaCodec(env, thiz, codec);
 }
 
 static void android_media_MediaCodec_native_finalize(
@@ -3478,7 +3488,7 @@ static const JNINativeMethod gMethods[] = {
 
     { "native_init", "()V", (void *)android_media_MediaCodec_native_init },
 
-    { "native_setup", "(Ljava/lang/String;ZZ)V",
+    { "native_setup", "(Ljava/lang/String;ZZII)V",
       (void *)android_media_MediaCodec_native_setup },
 
     { "native_finalize", "()V",

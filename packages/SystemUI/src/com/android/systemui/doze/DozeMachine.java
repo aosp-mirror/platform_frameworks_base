@@ -118,9 +118,11 @@ public class DozeMachine {
             switch (this) {
                 case UNINITIALIZED:
                 case INITIALIZED:
-                case DOZE_REQUEST_PULSE:
                     return parameters.shouldControlScreenOff() ? Display.STATE_ON
                             : Display.STATE_OFF;
+                case DOZE_REQUEST_PULSE:
+                    return parameters.getDisplayNeedsBlanking() ? Display.STATE_OFF
+                            : Display.STATE_ON;
                 case DOZE_AOD_PAUSED:
                 case DOZE:
                     return Display.STATE_OFF;
@@ -355,9 +357,14 @@ public class DozeMachine {
         if (mState == State.FINISH) {
             return State.FINISH;
         }
-        if (mDozeHost.isDozeSuppressed() && requestedState.isAlwaysOn()) {
-            Log.i(TAG, "Doze is suppressed. Suppressing state: " + requestedState);
-            mDozeLog.traceDozeSuppressed(requestedState);
+        if (mDozeHost.isAlwaysOnSuppressed() && requestedState.isAlwaysOn()) {
+            Log.i(TAG, "Doze is suppressed by an app. Suppressing state: " + requestedState);
+            mDozeLog.traceAlwaysOnSuppressed(requestedState, "app");
+            return State.DOZE;
+        }
+        if (mDozeHost.isPowerSaveActive() && requestedState.isAlwaysOn()) {
+            Log.i(TAG, "Doze is suppressed by battery saver. Suppressing state: " + requestedState);
+            mDozeLog.traceAlwaysOnSuppressed(requestedState, "batterySaver");
             return State.DOZE;
         }
         if ((mState == State.DOZE_AOD_PAUSED || mState == State.DOZE_AOD_PAUSING
@@ -413,7 +420,6 @@ public class DozeMachine {
         pw.print(" state="); pw.println(mState);
         pw.print(" wakeLockHeldForCurrentState="); pw.println(mWakeLockHeldForCurrentState);
         pw.print(" wakeLock="); pw.println(mWakeLock);
-        pw.print(" isDozeSuppressed="); pw.println(mDozeHost.isDozeSuppressed());
         pw.println("Parts:");
         for (Part p : mParts) {
             p.dump(pw);

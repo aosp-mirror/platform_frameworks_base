@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"Dëshiron ta çinstalosh këtë aplikacion?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Dëshiron ta çinstalosh këtë aplikacion për "<b>"të gjithë"</b>" përdoruesit? Aplikacioni dhe të dhënat e tij do të hiqen nga "<b>"të gjithë"</b>" përdoruesit e pajisjes."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Dëshiron ta çinstalosh këtë aplikacion për përdoruesin <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Dëshiron ta çinstalosh këtë aplikacion nga profili yt i punës?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Të zëvendësohet ky aplikacion me versionin e fabrikës? Të gjitha të dhënat do të hiqen."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Të zëvendësohet ky aplikacion me versionin e fabrikës? Të gjitha të dhënat do të hiqen. Kjo ndikon te të gjithë përdoruesit e kësaj pajisjeje, duke përfshirë ata me profile të punës."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Mbaj <xliff:g id="SIZE">%1$s</xliff:g> nga të dhënat e aplikacionit."</string>

@@ -21,7 +21,6 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.StrictMode;
-import android.os.SystemClock;
 import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -60,6 +59,7 @@ public abstract class KernelCpuUidTimeReader<T> {
     final boolean mThrottle;
     protected boolean mBpfTimesAvailable;
     final KernelCpuUidBpfMapReader mBpfReader;
+    private final Clock mClock;
     private long mMinTimeBetweenRead = DEFAULT_MIN_TIME_BETWEEN_READ;
     private long mLastReadTimeMs = 0;
 
@@ -76,15 +76,17 @@ public abstract class KernelCpuUidTimeReader<T> {
         void onUidCpuTime(int uid, T time);
     }
 
-    KernelCpuUidTimeReader(KernelCpuProcStringReader reader, @Nullable KernelCpuUidBpfMapReader bpfReader, boolean throttle) {
+    KernelCpuUidTimeReader(KernelCpuProcStringReader reader,
+            @Nullable KernelCpuUidBpfMapReader bpfReader, boolean throttle, Clock clock) {
         mReader = reader;
         mThrottle = throttle;
         mBpfReader = bpfReader;
+        mClock = clock;
         mBpfTimesAvailable = (mBpfReader != null);
     }
 
-    KernelCpuUidTimeReader(KernelCpuProcStringReader reader, boolean throttle) {
-        this(reader, null, throttle);
+    KernelCpuUidTimeReader(KernelCpuProcStringReader reader, boolean throttle, Clock clock) {
+        this(reader, null, throttle, clock);
     }
 
     /**
@@ -104,17 +106,17 @@ public abstract class KernelCpuUidTimeReader<T> {
      */
     public void readDelta(boolean force, @Nullable Callback<T> cb) {
         if (!mThrottle) {
-            readDeltaImpl(cb);
+            readDeltaImpl(cb, force);
             return;
         }
-        final long currTimeMs = SystemClock.elapsedRealtime();
+        final long currTimeMs = mClock.elapsedRealtime();
         if (!force && currTimeMs < mLastReadTimeMs + mMinTimeBetweenRead) {
             if (DEBUG) {
                 Slog.d(mTag, "Throttle readDelta");
             }
             return;
         }
-        readDeltaImpl(cb);
+        readDeltaImpl(cb, force);
         mLastReadTimeMs = currTimeMs;
     }
 
@@ -128,7 +130,7 @@ public abstract class KernelCpuUidTimeReader<T> {
             readAbsoluteImpl(cb);
             return;
         }
-        final long currTimeMs = SystemClock.elapsedRealtime();
+        final long currTimeMs = mClock.elapsedRealtime();
         if (currTimeMs < mLastReadTimeMs + mMinTimeBetweenRead) {
             if (DEBUG) {
                 Slog.d(mTag, "Throttle readAbsolute");
@@ -139,7 +141,7 @@ public abstract class KernelCpuUidTimeReader<T> {
         mLastReadTimeMs = currTimeMs;
     }
 
-    abstract void readDeltaImpl(@Nullable Callback<T> cb);
+    abstract void readDeltaImpl(@Nullable Callback<T> cb, boolean forceRead);
 
     abstract void readAbsoluteImpl(Callback<T> callback);
 
@@ -216,17 +218,22 @@ public abstract class KernelCpuUidTimeReader<T> {
         private final long[] mUsrSysTime = new long[2];
 
         public KernelCpuUidUserSysTimeReader(boolean throttle) {
-            super(KernelCpuProcStringReader.getUserSysTimeReaderInstance(), throttle);
+            this(throttle, Clock.SYSTEM_CLOCK);
+        }
+
+        public KernelCpuUidUserSysTimeReader(boolean throttle, Clock clock) {
+            super(KernelCpuProcStringReader.getUserSysTimeReaderInstance(), throttle, clock);
         }
 
         @VisibleForTesting
-        public KernelCpuUidUserSysTimeReader(KernelCpuProcStringReader reader, boolean throttle) {
-            super(reader, throttle);
+        public KernelCpuUidUserSysTimeReader(KernelCpuProcStringReader reader, boolean throttle,
+                Clock clock) {
+            super(reader, throttle, clock);
         }
 
         @Override
-        void readDeltaImpl(@Nullable Callback<long[]> cb) {
-            try (ProcFileIterator iter = mReader.open(!mThrottle)) {
+        void readDeltaImpl(@Nullable Callback<long[]> cb, boolean forceRead) {
+            try (ProcFileIterator iter = mReader.open(!mThrottle || forceRead)) {
                 if (iter == null) {
                     return;
                 }
@@ -348,14 +355,23 @@ public abstract class KernelCpuUidTimeReader<T> {
         private boolean mAllUidTimesAvailable = true;
 
         public KernelCpuUidFreqTimeReader(boolean throttle) {
+            this(throttle, Clock.SYSTEM_CLOCK);
+        }
+
+        public KernelCpuUidFreqTimeReader(boolean throttle, Clock clock) {
             this(UID_TIMES_PROC_FILE, KernelCpuProcStringReader.getFreqTimeReaderInstance(),
-                 KernelCpuUidBpfMapReader.getFreqTimeReaderInstance(), throttle);
+                    KernelCpuUidBpfMapReader.getFreqTimeReaderInstance(), throttle, clock);
         }
 
         @VisibleForTesting
         public KernelCpuUidFreqTimeReader(String procFile, KernelCpuProcStringReader reader,
                 KernelCpuUidBpfMapReader bpfReader, boolean throttle) {
-            super(reader, bpfReader, throttle);
+            this(procFile, reader, bpfReader, throttle, Clock.SYSTEM_CLOCK);
+        }
+
+        private KernelCpuUidFreqTimeReader(String procFile, KernelCpuProcStringReader reader,
+                KernelCpuUidBpfMapReader bpfReader, boolean throttle, Clock clock) {
+            super(reader, bpfReader, throttle, clock);
             mProcFilePath = Paths.get(procFile);
         }
 
@@ -496,7 +512,7 @@ public abstract class KernelCpuUidTimeReader<T> {
         }
 
         @Override
-        void readDeltaImpl(@Nullable Callback<long[]> cb) {
+        void readDeltaImpl(@Nullable Callback<long[]> cb, boolean forceRead) {
             if (mBpfTimesAvailable) {
                 try (BpfMapIterator iter = mBpfReader.open(!mThrottle)) {
                     if (checkPrecondition(iter)) {
@@ -604,6 +620,10 @@ public abstract class KernelCpuUidTimeReader<T> {
             }
             return numClusterFreqs;
         }
+
+        public boolean isFastCpuTimesReader() {
+            return mBpfTimesAvailable;
+        }
     }
 
     /**
@@ -628,13 +648,18 @@ public abstract class KernelCpuUidTimeReader<T> {
         private long[] mBuffer;
 
         public KernelCpuUidActiveTimeReader(boolean throttle) {
+            this(throttle, Clock.SYSTEM_CLOCK);
+        }
+
+        public KernelCpuUidActiveTimeReader(boolean throttle, Clock clock) {
             super(KernelCpuProcStringReader.getActiveTimeReaderInstance(),
-                  KernelCpuUidBpfMapReader.getActiveTimeReaderInstance(), throttle);
+                    KernelCpuUidBpfMapReader.getActiveTimeReaderInstance(), throttle, clock);
         }
 
         @VisibleForTesting
-        public KernelCpuUidActiveTimeReader(KernelCpuProcStringReader reader, KernelCpuUidBpfMapReader bpfReader, boolean throttle) {
-            super(reader, bpfReader, throttle);
+        public KernelCpuUidActiveTimeReader(KernelCpuProcStringReader reader,
+                KernelCpuUidBpfMapReader bpfReader, boolean throttle) {
+            super(reader, bpfReader, throttle, Clock.SYSTEM_CLOCK);
         }
 
         private void processUidDelta(@Nullable Callback<Long> cb) {
@@ -655,7 +680,7 @@ public abstract class KernelCpuUidTimeReader<T> {
         }
 
         @Override
-        void readDeltaImpl(@Nullable Callback<Long> cb) {
+        void readDeltaImpl(@Nullable Callback<Long> cb, boolean forceRead) {
             if (mBpfTimesAvailable) {
                 try (BpfMapIterator iter = mBpfReader.open(!mThrottle)) {
                     if (checkPrecondition(iter)) {
@@ -800,14 +825,18 @@ public abstract class KernelCpuUidTimeReader<T> {
         private long[] mDeltaTime;
 
         public KernelCpuUidClusterTimeReader(boolean throttle) {
+            this(throttle, Clock.SYSTEM_CLOCK);
+        }
+
+        public KernelCpuUidClusterTimeReader(boolean throttle, Clock clock) {
             super(KernelCpuProcStringReader.getClusterTimeReaderInstance(),
-                  KernelCpuUidBpfMapReader.getClusterTimeReaderInstance(), throttle);
+                    KernelCpuUidBpfMapReader.getClusterTimeReaderInstance(), throttle, clock);
         }
 
         @VisibleForTesting
         public KernelCpuUidClusterTimeReader(KernelCpuProcStringReader reader,
-                                             KernelCpuUidBpfMapReader bpfReader, boolean throttle) {
-            super(reader, bpfReader, throttle);
+                KernelCpuUidBpfMapReader bpfReader, boolean throttle) {
+            super(reader, bpfReader, throttle, Clock.SYSTEM_CLOCK);
         }
 
         void processUidDelta(@Nullable Callback<long[]> cb) {
@@ -838,7 +867,7 @@ public abstract class KernelCpuUidTimeReader<T> {
         }
 
         @Override
-        void readDeltaImpl(@Nullable Callback<long[]> cb) {
+        void readDeltaImpl(@Nullable Callback<long[]> cb, boolean forceRead) {
             if (mBpfTimesAvailable) {
                 try (BpfMapIterator iter = mBpfReader.open(!mThrottle)) {
                     if (checkPrecondition(iter)) {

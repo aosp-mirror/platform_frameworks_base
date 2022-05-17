@@ -95,6 +95,7 @@ public class PhoneConstants {
     public static final int PRESENTATION_UNKNOWN = 3;    // no specified or unknown by network
     @UnsupportedAppUsage
     public static final int PRESENTATION_PAYPHONE = 4;   // show pay phone info
+    public static final int PRESENTATION_UNAVAILABLE = 5;   // show unavailable
 
     public static final String PHONE_NAME_KEY = "phoneName";
     public static final String DATA_NETWORK_TYPE_KEY = "networkType";
@@ -170,6 +171,8 @@ public class PhoneConstants {
     public static final String PHONE_KEY = "phone";
 
     public static final String SLOT_KEY  = "slot";
+
+    public static final String PORT_KEY = "port";
 
     // FIXME: This is used to pass a subId via intents, we need to look at its usage, which is
     // FIXME: extensive, and see if this should be an array of all active subId's or ...?

@@ -1,0 +1,20 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+java_library {
+    name: "FakeApexSystemServices",
+    srcs: ["**/*.java"],
+    sdk_version: "system_server_current",
+    libs: [
+        "framework-annotations-lib",
+        "androidx.annotation_annotation",
+    ],
+    visibility: ["//frameworks/base/services/tests/apexsystemservices:__subpackages__"],
+    apex_available: ["//apex_available:anyapex"],
+}

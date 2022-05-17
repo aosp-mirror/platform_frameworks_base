@@ -19,11 +19,14 @@ package com.android.server.biometrics.sensors;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.IBinder;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.biometrics.BiometricsProto;
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
+
+import java.util.function.Supplier;
 
 /**
  * Abstract class for starting a new user.
@@ -37,18 +40,18 @@ public abstract class StartUserClient<T, U>  extends HalClientMonitor<T> {
      * @param <U> New user object.
      */
     public interface UserStartedCallback<U> {
-        void onUserStarted(int newUserId, U newUser);
+        void onUserStarted(int newUserId, U newUser, int halInterfaceVersion);
     }
 
     @NonNull @VisibleForTesting
     protected final UserStartedCallback<U> mUserStartedCallback;
 
-    public StartUserClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
+    public StartUserClient(@NonNull Context context, @NonNull Supplier<T> lazyDaemon,
             @Nullable IBinder token, int userId, int sensorId,
+            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
             @NonNull UserStartedCallback<U> callback) {
         super(context, lazyDaemon, token, null /* listener */, userId, context.getOpPackageName(),
-                0 /* cookie */, sensorId, BiometricsProtoEnums.MODALITY_UNKNOWN,
-                BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN);
+                0 /* cookie */, sensorId, logger, biometricContext);
         mUserStartedCallback = callback;
     }
 

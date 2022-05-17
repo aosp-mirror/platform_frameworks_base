@@ -21,12 +21,14 @@ The dispatcher supports `BroadcastReceiver` dynamic subscriptions in the followi
 * The `IntentFilter` may or may not contain categories.
 * The `IntentFilter` **does not** contain data types, data schemes, data authorities or data paths.
 * The broadcast **is not** gated behind a permission.
+* The broadcast **is not** ordered and doesn't need to set result data.
 
 Additionally, the dispatcher supports the following:
 
 * Subscriptions can be done in any thread.
 * Broadcasts will be dispatched on the main thread (same as `system_server`) by default but a `Handler` can be specified for dispatching
 * A `UserHandle` can be provided to filter the broadcasts by user.
+* Flags (see [`Context#RegisterReceiverFlags`](/core/java/android/content/Context.java)) can be passed for the registration. By default, this will be `Context#RECEIVER_EXPORTED`.
 
 If introducing a new `BroadcastReceiver` (not declared in `AndroidManifest`) that satisfies the constraints above, use the dispatcher to reduce the load on `system_server`.
 
@@ -63,6 +65,8 @@ Acquire the dispatcher by using `@Inject` to obtain a `BroadcastDispatcher`. The
  *                 executor in the main thread (default).
  * @param user A user handle to determine which broadcast should be dispatched to this receiver.
  *             Pass `null` to use the user of the context (system user in SystemUI).
+ * @param flags Flags to use when registering the receiver. [Context.RECEIVER_EXPORTED] by
+ *              default.             
  * @throws IllegalArgumentException if the filter has other constraints that are not actions or
  *                                  categories or the filter has no actions.
  */
@@ -71,7 +75,8 @@ open fun registerReceiver(
     receiver: BroadcastReceiver,
     filter: IntentFilter,
     executor: Executor? = null,
-    user: UserHandle? = null
+    user: UserHandle? = null,
+    @Context.RegisterReceiverFlags flags: Int = Context.RECEIVER_EXPORTED
 )
 ```
 
@@ -103,3 +108,8 @@ fun unregisterReceiverForUser(BroadcastReceiver, UserHandle)
 ```
 
 Unregistering can be done even if the `BroadcastReceiver` has never been registered with `BroadcastDispatcher`. In that case, it is a No-Op.
+
+### A note on goAsync()
+
+If you're processing a broadcast in a background thread, you shouldn't call `goAsync()` and
+`finish()`. The system will keep sysui alive regardless, so it isn't needed.

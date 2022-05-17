@@ -138,6 +138,21 @@ public class StaticLayoutPerfTest {
     }
 
     @Test
+    public void testCreate_RandomText_NoStyled_Balanced_Hyphenation_Fast() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            state.pauseTiming();
+            final CharSequence text = mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT);
+            state.resumeTiming();
+
+            StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH)
+                    .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NORMAL_FAST)
+                    .setBreakStrategy(Layout.BREAK_STRATEGY_BALANCED)
+                    .build();
+        }
+    }
+
+    @Test
     public void testCreate_RandomText_Styled_Greedy_NoHyphenation() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {

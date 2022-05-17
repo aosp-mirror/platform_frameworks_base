@@ -18,13 +18,14 @@ package com.android.server.testutils;
 
 import android.annotation.NonNull;
 import android.provider.DeviceConfig;
+import android.provider.DeviceConfigInterface;
 import android.util.ArrayMap;
 import android.util.Pair;
 
 import com.android.internal.util.Preconditions;
-import com.android.server.utils.DeviceConfigInterface;
 
 import java.lang.reflect.Constructor;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -33,9 +34,16 @@ import java.util.concurrent.TimeUnit;
 
 public class FakeDeviceConfigInterface implements DeviceConfigInterface {
 
+    private static final String COMPOSITE_DELIMITER = "/";
     private Map<String, String> mProperties = new HashMap<>();
     private ArrayMap<DeviceConfig.OnPropertiesChangedListener, Pair<String, Executor>> mListeners =
             new ArrayMap<>();
+
+    private static String createCompositeName(@NonNull String namespace, @NonNull String name) {
+        Preconditions.checkNotNull(namespace);
+        Preconditions.checkNotNull(name);
+        return namespace + COMPOSITE_DELIMITER + name;
+    }
 
     public void clearProperties() {
         mProperties.clear();
@@ -88,6 +96,59 @@ public class FakeDeviceConfigInterface implements DeviceConfigInterface {
     @Override
     public String getProperty(String namespace, String name) {
         return mProperties.get(createCompositeName(namespace, name));
+    }
+
+    @Override
+    public DeviceConfig.Properties getProperties(String namespace, String... names) {
+        if (!mProperties.keySet().contains(namespace)) {
+            return new DeviceConfig.Properties(namespace, null);
+        }
+        DeviceConfig.Properties.Builder propertiesBuilder = new DeviceConfig.Properties.Builder(
+                namespace);
+
+        for (String compositeName : mProperties.keySet()) {
+            if (compositeName.split(COMPOSITE_DELIMITER).length != 2) {
+                continue;
+            }
+
+            String existingPropertyNamespace = compositeName.split(COMPOSITE_DELIMITER)[0];
+            String existingPropertyName = compositeName.split(COMPOSITE_DELIMITER)[1];
+
+            if ((names.length == 0 && existingPropertyNamespace.equals(namespace)) || Arrays.asList(
+                    names).contains(compositeName)) {
+                propertiesBuilder.setString(existingPropertyName, mProperties.get(compositeName));
+            }
+        }
+
+        return propertiesBuilder.build();
+    }
+
+    @Override
+    public boolean setProperty(String namespace, String name, String value, boolean makeDefault) {
+        putPropertyAndNotify(namespace, name, value);
+        return true;
+    }
+
+    @Override
+    public boolean setProperties(DeviceConfig.Properties properties)
+            throws DeviceConfig.BadConfigException {
+        for (String property : properties.getKeyset()) {
+            String compositeName = createCompositeName(properties.getNamespace(), property);
+            putPropertyAndNotify(properties.getNamespace(), compositeName,
+                    properties.getString(property, ""));
+        }
+        return true;
+    }
+
+    @Override
+    public boolean deleteProperty(String namespace, String name) {
+        mProperties.remove(createCompositeName(namespace, name));
+        return true;
+    }
+
+    @Override
+    public void resetToDefaults(int resetMode, String namespace) {
+        clearProperties();
     }
 
     @Override
@@ -165,11 +226,5 @@ public class FakeDeviceConfigInterface implements DeviceConfigInterface {
     public void removeOnPropertiesChangedListener(
             DeviceConfig.OnPropertiesChangedListener listener) {
         mListeners.remove(listener);
-    }
-
-    private static String createCompositeName(@NonNull String namespace, @NonNull String name) {
-        Preconditions.checkNotNull(namespace);
-        Preconditions.checkNotNull(name);
-        return namespace + "/" + name;
     }
 }

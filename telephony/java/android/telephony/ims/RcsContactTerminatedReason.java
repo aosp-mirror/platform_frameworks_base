@@ -37,7 +37,7 @@ public final class RcsContactTerminatedReason implements Parcelable {
     }
 
     private RcsContactTerminatedReason(Parcel in) {
-        mContactUri = in.readParcelable(Uri.class.getClassLoader());
+        mContactUri = in.readParcelable(Uri.class.getClassLoader(), android.net.Uri.class);
         mReason = in.readString();
     }
 

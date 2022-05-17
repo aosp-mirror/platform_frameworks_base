@@ -125,6 +125,9 @@ interface ILocationManager
     boolean isAdasGnssLocationEnabledForUser(int userId);
     void setAdasGnssLocationEnabledForUser(boolean enabled, int userId);
 
+    boolean isAutomotiveGnssSuspended();
+    void setAutomotiveGnssSuspended(boolean suspended);
+
     void addTestProvider(String name, in ProviderProperties properties,
         in List<String> locationTags, String packageName, @nullable String attributionTag);
     void removeTestProvider(String provider, String packageName, @nullable String attributionTag);

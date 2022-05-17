@@ -113,31 +113,6 @@ public final class CellIdentityTdscdma extends CellIdentity {
     }
 
     /** @hide */
-    public CellIdentityTdscdma(@NonNull android.hardware.radio.V1_0.CellIdentityTdscdma cid) {
-        this(cid.mcc, cid.mnc, cid.lac, cid.cid, cid.cpid, CellInfo.UNAVAILABLE, "", "",
-                Collections.emptyList(), null);
-    }
-
-    /** @hide */
-    public CellIdentityTdscdma(@NonNull android.hardware.radio.V1_2.CellIdentityTdscdma cid) {
-        this(cid.base.mcc, cid.base.mnc, cid.base.lac, cid.base.cid, cid.base.cpid,
-                cid.uarfcn, cid.operatorNames.alphaLong, cid.operatorNames.alphaShort,
-                Collections.emptyList(), null);
-    }
-
-    /** @hide */
-    public CellIdentityTdscdma(@NonNull android.hardware.radio.V1_5.CellIdentityTdscdma cid) {
-        this(cid.base.base.mcc, cid.base.base.mnc, cid.base.base.lac, cid.base.base.cid,
-                cid.base.base.cpid, cid.base.uarfcn, cid.base.operatorNames.alphaLong,
-                cid.base.operatorNames.alphaShort,
-                cid.additionalPlmns,
-                cid.optionalCsgInfo.getDiscriminator()
-                        == android.hardware.radio.V1_5.OptionalCsgInfo.hidl_discriminator.csgInfo
-                                ? new ClosedSubscriberGroupInfo(cid.optionalCsgInfo.csgInfo())
-                                        : null);
-    }
-
-    /** @hide */
     @Override
     public @NonNull CellIdentityTdscdma sanitizeLocationInfo() {
         return new CellIdentityTdscdma(mMccStr, mMncStr, CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
@@ -322,7 +297,7 @@ public final class CellIdentityTdscdma extends CellIdentity {
         mCpid = in.readInt();
         mUarfcn = in.readInt();
         mAdditionalPlmns = (ArraySet<String>) in.readArraySet(null);
-        mCsgInfo = in.readParcelable(null);
+        mCsgInfo = in.readParcelable(null, android.telephony.ClosedSubscriberGroupInfo.class);
 
         updateGlobalCellId();
         if (DBG) log(toString());

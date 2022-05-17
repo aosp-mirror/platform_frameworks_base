@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"کیا آپ اس ایپ کو اَن انسٹال کرنا چاہتے ہیں؟"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"کیا آپ "<b>"سبھی"</b>" صارفین کیلئے اس ایپ کو اَن انسٹال کرنا چاہتے ہیں؟ ایپلیکیشن اور اس کا ڈیٹا آلہ پر موجود "<b>"سبھی"</b>" صارفین سے ہٹا دیا جائے گا۔"</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"کیا آپ اس ایپ کو صارف <xliff:g id="USERNAME">%1$s</xliff:g> کیلئے اَن انسٹال کرنا چاہتے ہیں؟"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"کیا آپ اپنے دفتری پروفائل سے یہ ایپ اَن انسٹال کرنا چاہتے ہیں؟"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"اس ایپ کو فیکٹری ورژن سے تبدیل کریں؟ تمام ڈیٹا ہٹا دیا جائے گا۔"</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"اس ایپ کو فیکٹری ورژن سے تبدیل کریں؟ تمام ڈیٹا ہٹا دیا جائے گا۔ اس سے دفتری پروفائلز کے حاملین سمیت اس آلہ کے تمام صارفین متاثر ہوں گے۔"</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"ایپ ڈیٹا کا <xliff:g id="SIZE">%1$s</xliff:g> رکھیں۔"</string>

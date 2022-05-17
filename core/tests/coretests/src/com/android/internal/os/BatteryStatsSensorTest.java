@@ -30,11 +30,12 @@ import junit.framework.TestCase;
 public class BatteryStatsSensorTest extends TestCase {
 
     private static final int UID = 10500;
+    private static final int UID_2 = 10501; // second uid for testing pool usage
     private static final int SENSOR_ID = -10000;
 
     @SmallTest
     public void testSensorStartStop() throws Exception {
-        final MockClocks clocks = new MockClocks();
+        final MockClock clocks = new MockClock();
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
         bi.mForceOnBattery = true;
         clocks.realtime = 100;
@@ -71,7 +72,7 @@ public class BatteryStatsSensorTest extends TestCase {
 
     @SmallTest
     public void testCountingWhileOffBattery() throws Exception {
-        final MockClocks clocks = new MockClocks();
+        final MockClock clocks = new MockClock();
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
         long curr = 0; // realtime in us
 
@@ -107,7 +108,7 @@ public class BatteryStatsSensorTest extends TestCase {
 
     @SmallTest
     public void testCountingWhileOnBattery() throws Exception {
-        final MockClocks clocks = new MockClocks();
+        final MockClock clocks = new MockClock();
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
         long curr = 0; // realtime in us
 
@@ -142,7 +143,7 @@ public class BatteryStatsSensorTest extends TestCase {
 
     @SmallTest
     public void testBatteryStatusOnToOff() throws Exception {
-        final MockClocks clocks = new MockClocks();
+        final MockClock clocks = new MockClock();
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
         long curr = 0; // realtime in us
 
@@ -188,7 +189,7 @@ public class BatteryStatsSensorTest extends TestCase {
 
     @SmallTest
     public void testBatteryStatusOffToOn() throws Exception {
-        final MockClocks clocks = new MockClocks();
+        final MockClock clocks = new MockClock();
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
         long curr = 0; // realtime in us
 
@@ -239,8 +240,7 @@ public class BatteryStatsSensorTest extends TestCase {
 
     @SmallTest
     public void testPooledBackgroundUsage() throws Exception {
-        final int UID_2 = 20000; // second uid for testing pool usage
-        final MockClocks clocks = new MockClocks();
+        final MockClock clocks = new MockClock();
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
         bi.mForceOnBattery = true;
         long curr = 0; // realtime in us
@@ -377,7 +377,7 @@ public class BatteryStatsSensorTest extends TestCase {
 
     @SmallTest
     public void testSensorReset() throws Exception {
-        final MockClocks clocks = new MockClocks();
+        final MockClock clocks = new MockClock();
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
         bi.mForceOnBattery = true;
         clocks.realtime = 100;
@@ -403,7 +403,7 @@ public class BatteryStatsSensorTest extends TestCase {
         assertNotNull(sensor.getSensorBackgroundTime());
 
         // Reset the stats. Since the sensor is still running, we should still see the timer
-        bi.getUidStatsLocked(UID).reset(clocks.uptime * 1000, clocks.realtime * 1000);
+        bi.getUidStatsLocked(UID).reset(clocks.uptime * 1000, clocks.realtime * 1000, 0);
 
         sensor = uid.getSensorStats().get(SENSOR_ID);
         assertNotNull(sensor);
@@ -413,7 +413,7 @@ public class BatteryStatsSensorTest extends TestCase {
         bi.noteStopSensorLocked(UID, SENSOR_ID);
 
         // Now the sensor timer has stopped so this reset should also take out the sensor.
-        bi.getUidStatsLocked(UID).reset(clocks.uptime * 1000, clocks.realtime * 1000);
+        bi.getUidStatsLocked(UID).reset(clocks.uptime * 1000, clocks.realtime * 1000, 0);
 
         sensor = uid.getSensorStats().get(SENSOR_ID);
         assertNull(sensor);
@@ -421,7 +421,7 @@ public class BatteryStatsSensorTest extends TestCase {
 
     @SmallTest
     public void testSensorResetTimes() throws Exception {
-        final MockClocks clocks = new MockClocks();
+        final MockClock clocks = new MockClock();
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
         final int which = BatteryStats.STATS_SINCE_CHARGED;
         bi.mForceOnBattery = true;
@@ -465,7 +465,7 @@ public class BatteryStatsSensorTest extends TestCase {
 
         // Reset the stats. Since the sensor is still running, we should still see the timer
         // but still with 0 times.
-        bi.getUidStatsLocked(UID).reset(clocks.uptime * 1000, clocks.realtime * 1000);
+        bi.getUidStatsLocked(UID).reset(clocks.uptime * 1000, clocks.realtime * 1000, 0);
         assertEquals(0, timer.getTotalTimeLocked(1000*clocks.realtime, which));
         assertEquals(0, timer.getTotalDurationMsLocked(clocks.realtime));
         assertEquals(0, bgTimer.getTotalTimeLocked(1000*clocks.realtime, which));
@@ -504,7 +504,7 @@ public class BatteryStatsSensorTest extends TestCase {
 
         // Reset the stats. Since the sensor is still running, we should still see the timer
         // but with 0 times.
-        bi.getUidStatsLocked(UID).reset(clocks.uptime * 1000, clocks.realtime * 1000);
+        bi.getUidStatsLocked(UID).reset(clocks.uptime * 1000, clocks.realtime * 1000, 0);
         assertEquals(0, timer.getTotalTimeLocked(1000*clocks.realtime, which));
         assertEquals(0, timer.getTotalDurationMsLocked(clocks.realtime));
         assertEquals(0, bgTimer.getTotalTimeLocked(1000*clocks.realtime, which));

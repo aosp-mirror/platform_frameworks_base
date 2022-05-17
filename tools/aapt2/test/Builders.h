@@ -29,7 +29,6 @@
 #include "configuration/ConfigurationParser.internal.h"
 #include "process/IResourceTableConsumer.h"
 #include "test/Common.h"
-#include "util/Maybe.h"
 #include "xml/XmlDom.h"
 
 namespace aapt {
@@ -86,7 +85,7 @@ class ResourceTableBuilder {
 };
 
 std::unique_ptr<Reference> BuildReference(const android::StringPiece& ref,
-                                          const Maybe<ResourceId>& id = {});
+                                          const std::optional<ResourceId>& id = {});
 std::unique_ptr<BinaryPrimitive> BuildPrimitive(uint8_t type, uint32_t data);
 
 template <typename T>
@@ -149,7 +148,8 @@ class StyleBuilder {
 class StyleableBuilder {
  public:
   StyleableBuilder() = default;
-  StyleableBuilder& AddItem(const android::StringPiece& str, const Maybe<ResourceId>& id = {});
+  StyleableBuilder& AddItem(const android::StringPiece& str,
+                            const std::optional<ResourceId>& id = {});
   std::unique_ptr<Styleable> Build();
 
  private:

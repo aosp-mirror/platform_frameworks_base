@@ -22,6 +22,7 @@ import static android.content.Context.BIND_INCLUDE_CAPABILITIES;
 import static android.provider.DeviceConfig.NAMESPACE_ATTENTION_MANAGER_SERVICE;
 import static android.service.attention.AttentionService.ATTENTION_FAILURE_CANCELLED;
 import static android.service.attention.AttentionService.ATTENTION_FAILURE_UNKNOWN;
+import static android.service.attention.AttentionService.PROXIMITY_UNKNOWN;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -29,6 +30,7 @@ import android.annotation.Nullable;
 import android.app.ActivityThread;
 import android.attention.AttentionManagerInternal;
 import android.attention.AttentionManagerInternal.AttentionCallbackInternal;
+import android.attention.AttentionManagerInternal.ProximityUpdateCallbackInternal;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -57,6 +59,7 @@ import android.service.attention.AttentionService.AttentionFailureCodes;
 import android.service.attention.AttentionService.AttentionSuccessCodes;
 import android.service.attention.IAttentionCallback;
 import android.service.attention.IAttentionService;
+import android.service.attention.IProximityUpdateCallback;
 import android.text.TextUtils;
 import android.util.Slog;
 
@@ -71,6 +74,8 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * An attention service implementation that runs in System Server process.
@@ -83,6 +88,9 @@ public class AttentionManagerService extends SystemService {
 
     /** Service will unbind if connection is not used for that amount of time. */
     private static final long CONNECTION_TTL_MILLIS = 60_000;
+
+    /** How long AttentionManagerService will wait for service binding after lazy binding. */
+    private static final long SERVICE_BINDING_WAIT_MILLIS = 1000;
 
     /** DeviceConfig flag name, if {@code true}, enables AttentionManagerService features. */
     @VisibleForTesting
@@ -126,6 +134,7 @@ public class AttentionManagerService extends SystemService {
     @GuardedBy("mLock")
     private boolean mBinding;
     private AttentionHandler mAttentionHandler;
+    private CountDownLatch mServiceBindingLatch;
 
     @VisibleForTesting
     ComponentName mComponentName;
@@ -133,6 +142,15 @@ public class AttentionManagerService extends SystemService {
     @VisibleForTesting
     @GuardedBy("mLock")
     AttentionCheck mCurrentAttentionCheck;
+
+    /**
+     * A proxy for relaying proximity information between the Attention Service and the client.
+     * The proxy will be initialized when the client calls onStartProximityUpdates and will be
+     * disabled only when the client calls onStopProximityUpdates.
+     */
+    @VisibleForTesting
+    @GuardedBy("mLock")
+    ProximityUpdate mCurrentProximityUpdate;
 
     public AttentionManagerService(Context context) {
         this(context, (PowerManager) context.getSystemService(Context.POWER_SERVICE),
@@ -149,6 +167,7 @@ public class AttentionManagerService extends SystemService {
         mLock = lock;
         mAttentionHandler = handler;
         mPrivacyManager = SensorPrivacyManager.getInstance(context);
+        mServiceBindingLatch = new CountDownLatch(1);
     }
 
     @Override
@@ -263,13 +282,16 @@ public class AttentionManagerService extends SystemService {
         }
 
         synchronized (mLock) {
-            final long now = SystemClock.uptimeMillis();
             // schedule shutting down the connection if no one resets this timer
             freeIfInactiveLocked();
 
             // lazily start the service, which should be very lightweight to start
             bindLocked();
-
+        }
+        final long now = SystemClock.uptimeMillis();
+        // Proceed when the service binding is complete.
+        awaitServiceBinding(Math.min(SERVICE_BINDING_WAIT_MILLIS, timeout));
+        synchronized (mLock) {
             // throttle frequent requests
             final AttentionCheckCache cache = mAttentionCheckCacheBuffer == null ? null
                     : mAttentionCheckCacheBuffer.getLast();
@@ -315,6 +337,80 @@ public class AttentionManagerService extends SystemService {
         }
     }
 
+    /**
+     * Requests the continuous updates of proximity signal via the provided callback,
+     * until the given callback is stopped.
+     *
+     * Calling this multiple times for duplicate requests will be no-ops, returning true.
+     *
+     * @return {@code true} if the framework was able to dispatch the request
+     */
+    @VisibleForTesting
+    boolean onStartProximityUpdates(ProximityUpdateCallbackInternal callbackInternal) {
+        Objects.requireNonNull(callbackInternal);
+        if (!mIsServiceEnabled) {
+            Slog.w(LOG_TAG, "Trying to call onProximityUpdate() on an unsupported device.");
+            return false;
+        }
+
+        if (!isServiceAvailable()) {
+            Slog.w(LOG_TAG, "Service is not available at this moment.");
+            return false;
+        }
+
+        // don't allow proximity request in screen off state.
+        // This behavior might change in the future.
+        if (!mPowerManager.isInteractive()) {
+            Slog.w(LOG_TAG, "Proximity Service is unavailable during screen off at this moment.");
+            return false;
+        }
+
+        synchronized (mLock) {
+            // schedule shutting down the connection if no one resets this timer
+            freeIfInactiveLocked();
+
+            // lazily start the service, which should be very lightweight to start
+            bindLocked();
+        }
+        // Proceed when the service binding is complete.
+        awaitServiceBinding(SERVICE_BINDING_WAIT_MILLIS);
+        synchronized (mLock) {
+            /*
+            Prevent spamming with multiple requests, only one at a time is allowed.
+            If there are use-cases for keeping track of multiple requests, we
+            can refactor ProximityUpdate object to keep track of multiple internal callbacks.
+             */
+            if (mCurrentProximityUpdate != null && mCurrentProximityUpdate.mStartedUpdates) {
+                if (mCurrentProximityUpdate.mCallbackInternal == callbackInternal) {
+                    Slog.w(LOG_TAG, "Provided callback is already registered. Skipping.");
+                    return true;
+                } else {
+                    // reject the new request since the old request is still alive.
+                    Slog.w(LOG_TAG, "New proximity update cannot be processed because there is "
+                            + "already an ongoing update");
+                    return false;
+                }
+            }
+            mCurrentProximityUpdate = new ProximityUpdate(callbackInternal);
+            return mCurrentProximityUpdate.startUpdates();
+        }
+    }
+
+    /** Cancels the specified proximity registration. */
+    @VisibleForTesting
+    void onStopProximityUpdates(ProximityUpdateCallbackInternal callbackInternal) {
+        synchronized (mLock) {
+            if (mCurrentProximityUpdate == null
+                    || !mCurrentProximityUpdate.mCallbackInternal.equals(callbackInternal)
+                    || !mCurrentProximityUpdate.mStartedUpdates) {
+                Slog.w(LOG_TAG, "Cannot stop a non-current callback");
+                return;
+            }
+            mCurrentProximityUpdate.cancelUpdates();
+            mCurrentProximityUpdate = null;
+        }
+    }
+
     @GuardedBy("mLock")
     @VisibleForTesting
     protected void freeIfInactiveLocked() {
@@ -334,6 +430,14 @@ public class AttentionManagerService extends SystemService {
 
     private static String getServiceConfigPackage(Context context) {
         return context.getPackageManager().getAttentionServicePackageName();
+    }
+
+    private void awaitServiceBinding(long millis) {
+        try {
+            mServiceBindingLatch.await(millis, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            Slog.e(LOG_TAG, "Interrupted while waiting to bind Attention Service.", e);
+        }
     }
 
     /**
@@ -390,14 +494,17 @@ public class AttentionManagerService extends SystemService {
             ipw.println("Class=" + mComponentName.getClassName());
             ipw.decreaseIndent();
         }
-        ipw.println("binding=" + mBinding);
-        ipw.println("current attention check:");
         synchronized (mLock) {
+            ipw.println("binding=" + mBinding);
+            ipw.println("current attention check:");
             if (mCurrentAttentionCheck != null) {
                 mCurrentAttentionCheck.dump(ipw);
             }
             if (mAttentionCheckCacheBuffer != null) {
                 mAttentionCheckCacheBuffer.dump(ipw);
+            }
+            if (mCurrentProximityUpdate != null) {
+                mCurrentProximityUpdate.dump(ipw);
             }
         }
     }
@@ -416,6 +523,17 @@ public class AttentionManagerService extends SystemService {
         @Override
         public void cancelAttentionCheck(AttentionCallbackInternal callbackInternal) {
             AttentionManagerService.this.cancelAttentionCheck(callbackInternal);
+        }
+
+        @Override
+        public boolean onStartProximityUpdates(
+                ProximityUpdateCallbackInternal callback) {
+            return AttentionManagerService.this.onStartProximityUpdates(callback);
+        }
+
+        @Override
+        public void onStopProximityUpdates(ProximityUpdateCallbackInternal callback) {
+            AttentionManagerService.this.onStopProximityUpdates(callback);
         }
     }
 
@@ -536,6 +654,71 @@ public class AttentionManagerService extends SystemService {
         }
     }
 
+    @VisibleForTesting
+    final class ProximityUpdate {
+        private final ProximityUpdateCallbackInternal mCallbackInternal;
+        private final IProximityUpdateCallback mIProximityUpdateCallback;
+        private boolean mStartedUpdates;
+
+        ProximityUpdate(ProximityUpdateCallbackInternal callbackInternal) {
+            mCallbackInternal = callbackInternal;
+            mIProximityUpdateCallback = new IProximityUpdateCallback.Stub() {
+                @Override
+                public void onProximityUpdate(double distance) {
+                    synchronized (mLock) {
+                        mCallbackInternal.onProximityUpdate(distance);
+                        freeIfInactiveLocked();
+                    }
+                }
+            };
+        }
+
+        boolean startUpdates() {
+            synchronized (mLock) {
+                if (mStartedUpdates) {
+                    Slog.w(LOG_TAG, "Already registered to a proximity service.");
+                    return false;
+                }
+                if (mService == null) {
+                    Slog.w(LOG_TAG,
+                            "There is no service bound. Proximity update request rejected.");
+                    return false;
+                }
+                try {
+                    mService.onStartProximityUpdates(mIProximityUpdateCallback);
+                    mStartedUpdates = true;
+                } catch (RemoteException e) {
+                    Slog.e(LOG_TAG, "Cannot call into the AttentionService", e);
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        void cancelUpdates() {
+            synchronized (mLock) {
+                if (mStartedUpdates) {
+                    if (mService == null) {
+                        mStartedUpdates = false;
+                        return;
+                    }
+                    try {
+                        mService.onStopProximityUpdates();
+                        mStartedUpdates = false;
+                    } catch (RemoteException e) {
+                        Slog.e(LOG_TAG, "Cannot call into the AttentionService", e);
+                    }
+                }
+            }
+        }
+
+        void dump(IndentingPrintWriter ipw) {
+            ipw.increaseIndent();
+            ipw.println("is StartedUpdates=" + mStartedUpdates);
+            ipw.decreaseIndent();
+        }
+    }
+
     private void appendResultToAttentionCacheBuffer(AttentionCheckCache cache) {
         synchronized (mLock) {
             if (mAttentionCheckCacheBuffer == null) {
@@ -549,6 +732,7 @@ public class AttentionManagerService extends SystemService {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             init(IAttentionService.Stub.asInterface(service));
+            mServiceBindingLatch.countDown();
         }
 
         @Override
@@ -568,6 +752,7 @@ public class AttentionManagerService extends SystemService {
 
         void cleanupService() {
             init(null);
+            mServiceBindingLatch = new CountDownLatch(1);
         }
 
         private void init(@Nullable IAttentionService service) {
@@ -593,6 +778,19 @@ public class AttentionManagerService extends SystemService {
                 mCurrentAttentionCheck.mCallbackInternal.onFailure(ATTENTION_FAILURE_UNKNOWN);
             }
         }
+        if (mCurrentProximityUpdate != null && mCurrentProximityUpdate.mStartedUpdates) {
+            if (mService != null) {
+                try {
+                    mService.onStartProximityUpdates(
+                            mCurrentProximityUpdate.mIProximityUpdateCallback);
+                } catch (RemoteException e) {
+                    Slog.e(LOG_TAG, "Cannot call into the AttentionService", e);
+                }
+            } else {
+                mCurrentProximityUpdate.cancelUpdates();
+                mCurrentProximityUpdate = null;
+            }
+        }
     }
 
     @VisibleForTesting
@@ -609,7 +807,9 @@ public class AttentionManagerService extends SystemService {
             switch (msg.what) {
                 // Do not occupy resources when not in use - unbind proactively.
                 case CHECK_CONNECTION_EXPIRATION: {
-                    cancelAndUnbindLocked();
+                    synchronized (mLock) {
+                        cancelAndUnbindLocked();
+                    }
                 }
                 break;
 
@@ -653,10 +853,15 @@ public class AttentionManagerService extends SystemService {
     @GuardedBy("mLock")
     private void cancelAndUnbindLocked() {
         synchronized (mLock) {
-            if (mCurrentAttentionCheck == null) {
+            if (mCurrentAttentionCheck == null && mCurrentProximityUpdate == null) {
                 return;
             }
-            cancel();
+            if (mCurrentAttentionCheck != null) {
+                cancel();
+            }
+            if (mCurrentProximityUpdate != null) {
+                mCurrentProximityUpdate.cancelUpdates();
+            }
             if (mService == null) {
                 return;
             }
@@ -702,7 +907,9 @@ public class AttentionManagerService extends SystemService {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
-                cancelAndUnbindLocked();
+                synchronized (mLock) {
+                    cancelAndUnbindLocked();
+                }
             }
         }
     }
@@ -730,8 +937,27 @@ public class AttentionManagerService extends SystemService {
             }
         }
 
+        class TestableProximityUpdateCallbackInternal extends ProximityUpdateCallbackInternal {
+            private double mLastCallbackCode = PROXIMITY_UNKNOWN;
+
+            @Override
+            public void onProximityUpdate(double distance) {
+                mLastCallbackCode = distance;
+            }
+
+            public void reset() {
+                mLastCallbackCode = PROXIMITY_UNKNOWN;
+            }
+
+            public double getLastCallbackCode() {
+                return mLastCallbackCode;
+            }
+        }
+
         final TestableAttentionCallbackInternal mTestableAttentionCallback =
                 new TestableAttentionCallbackInternal();
+        final TestableProximityUpdateCallbackInternal mTestableProximityUpdateCallback =
+                new TestableProximityUpdateCallbackInternal();
 
         @Override
         public int onCommand(@Nullable final String cmd) {
@@ -749,6 +975,10 @@ public class AttentionManagerService extends SystemService {
                                 return cmdCallCheckAttention();
                             case "cancelCheckAttention":
                                 return cmdCallCancelAttention();
+                            case "onStartProximityUpdates":
+                                return cmdCallOnStartProximityUpdates();
+                            case "onStopProximityUpdates":
+                                return cmdCallOnStopProximityUpdates();
                             default:
                                 throw new IllegalArgumentException("Invalid argument");
                         }
@@ -758,6 +988,8 @@ public class AttentionManagerService extends SystemService {
                         return cmdClearTestableAttentionService();
                     case "getLastTestCallbackCode":
                         return cmdGetLastTestCallbackCode();
+                    case "getLastTestProximityUpdateCallbackCode":
+                        return cmdGetLastTestProximityUpdateCallbackCode();
                     default:
                         return handleDefaultCommands(cmd);
                 }
@@ -782,6 +1014,7 @@ public class AttentionManagerService extends SystemService {
         private int cmdClearTestableAttentionService() {
             sTestAttentionServicePackage = "";
             mTestableAttentionCallback.reset();
+            mTestableProximityUpdateCallback.reset();
             resetStates();
             return 0;
         }
@@ -800,6 +1033,20 @@ public class AttentionManagerService extends SystemService {
             return 0;
         }
 
+        private int cmdCallOnStartProximityUpdates() {
+            final PrintWriter out = getOutPrintWriter();
+            boolean calledSuccessfully = onStartProximityUpdates(mTestableProximityUpdateCallback);
+            out.println(calledSuccessfully ? "true" : "false");
+            return 0;
+        }
+
+        private int cmdCallOnStopProximityUpdates() {
+            final PrintWriter out = getOutPrintWriter();
+            onStopProximityUpdates(mTestableProximityUpdateCallback);
+            out.println("true");
+            return 0;
+        }
+
         private int cmdResolveAttentionServiceComponent() {
             final PrintWriter out = getOutPrintWriter();
             ComponentName resolvedComponent = resolveAttentionService(mContext);
@@ -813,7 +1060,16 @@ public class AttentionManagerService extends SystemService {
             return 0;
         }
 
+        private int cmdGetLastTestProximityUpdateCallbackCode() {
+            final PrintWriter out = getOutPrintWriter();
+            out.println(mTestableProximityUpdateCallback.getLastCallbackCode());
+            return 0;
+        }
+
         private void resetStates() {
+            synchronized (mLock) {
+                mCurrentProximityUpdate = null;
+            }
             mComponentName = resolveAttentionService(mContext);
         }
 
@@ -844,11 +1100,24 @@ public class AttentionManagerService extends SystemService {
                             + " (to see the result, call getLastTestCallbackCode)");
             out.println("       := false, otherwise");
             out.println("  call cancelCheckAttention: Cancels check attention");
+            out.println("  call onStartProximityUpdates: Calls onStartProximityUpdates");
+            out.println("  ---returns:");
+            out.println(
+                    "       := true, if the request was successfully dispatched to the service "
+                            + "implementation."
+                            + " (to see the result, call getLastTestProximityUpdateCallbackCode)");
+            out.println("       := false, otherwise");
+            out.println("  call onStopProximityUpdates: Cancels proximity updates");
             out.println("  getLastTestCallbackCode");
             out.println("  ---returns:");
             out.println(
                     "       := An integer, representing the last callback code received from the "
                             + "bounded implementation. If none, it will return -1");
+            out.println("  getLastTestProximityUpdateCallbackCode");
+            out.println("  ---returns:");
+            out.println(
+                    "       := A double, representing the last proximity value received from the "
+                            + "bounded implementation. If none, it will return -1.0");
         }
     }
 

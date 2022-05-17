@@ -28,8 +28,16 @@ import android.annotation.SystemApi;
 @SystemApi
 public interface ScanCallback {
 
-    /** Scan locked the signal. */
+    /**
+     * Scan locked the signal.
+     *
+     * It can also be notified after signal is locked if the signal attributes transmission
+     * parameter of the signal is changed (e.g., Modulation).
+     */
     void onLocked();
+
+    /** Scan unlocked the signal. */
+    default void onUnlocked() {}
 
     /** Scan stopped. */
     void onScanStopped();
@@ -37,8 +45,19 @@ public interface ScanCallback {
     /** scan progress percent (0..100) */
     void onProgress(@IntRange(from = 0, to = 100) int percent);
 
+    /**
+     * @deprecated Use {@link #onFrequenciesLongReported(long[])}
+     */
+    @Deprecated void onFrequenciesReported(@NonNull int[] frequencies);
+
     /** Signal frequencies in Hertz */
-    void onFrequenciesReported(@NonNull int[] frequency);
+    default void onFrequenciesLongReported(@NonNull long[] frequencies) {
+        final int[] intFrequencies = new int[frequencies.length];
+        for (int i = 0; i < frequencies.length; i++) {
+              intFrequencies[i] = (int) frequencies[i];
+        }
+        onFrequenciesReported(intFrequencies);
+    }
 
     /** Symbols per second */
     void onSymbolRatesReported(@NonNull int[] rate);
@@ -78,4 +97,7 @@ public interface ScanCallback {
 
     /** DVBC Frontend Annex reported. */
     default void onDvbcAnnexReported(@DvbcFrontendSettings.Annex int dvbcAnnex) {}
+
+    /** DVBT Frontend Cell Ids reported. */
+    default void onDvbtCellIdsReported(@NonNull int[] dvbtCellIds) {}
 }

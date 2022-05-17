@@ -14,7 +14,6 @@ xsd_config {
     package_name: "com.android.server.pm.permission.configfile",
 }
 
-
 xsd_config {
     name: "platform-compat-config",
     srcs: ["platform-compat/config/platform-compat-config.xsd"],
@@ -42,6 +41,7 @@ xsd_config {
     srcs: ["display-layout-config/display-layout-config.xsd"],
     api_dir: "display-layout-config/schema",
     package_name: "com.android.server.display.config.layout",
+    boolean_getter: true,
 }
 
 xsd_config {

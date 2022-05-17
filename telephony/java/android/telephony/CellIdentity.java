@@ -20,7 +20,6 @@ import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.hardware.radio.V1_0.CellInfoType;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -358,105 +357,5 @@ public abstract class CellIdentity implements Parcelable {
         }
 
         return true;
-    }
-
-    /** @hide */
-    public static CellIdentity create(android.hardware.radio.V1_0.CellIdentity cellIdentity) {
-        if (cellIdentity == null)  return null;
-        switch(cellIdentity.cellInfoType) {
-            case CellInfoType.GSM: {
-                if (cellIdentity.cellIdentityGsm.size() == 1) {
-                    return new CellIdentityGsm(cellIdentity.cellIdentityGsm.get(0));
-                }
-                break;
-            }
-            case CellInfoType.WCDMA: {
-                if (cellIdentity.cellIdentityWcdma.size() == 1) {
-                    return new CellIdentityWcdma(cellIdentity.cellIdentityWcdma.get(0));
-                }
-                break;
-            }
-            case CellInfoType.TD_SCDMA: {
-                if (cellIdentity.cellIdentityTdscdma.size() == 1) {
-                    return new  CellIdentityTdscdma(cellIdentity.cellIdentityTdscdma.get(0));
-                }
-                break;
-            }
-            case CellInfoType.LTE: {
-                if (cellIdentity.cellIdentityLte.size() == 1) {
-                    return new CellIdentityLte(cellIdentity.cellIdentityLte.get(0));
-                }
-                break;
-            }
-            case CellInfoType.CDMA: {
-                if (cellIdentity.cellIdentityCdma.size() == 1) {
-                    return new CellIdentityCdma(cellIdentity.cellIdentityCdma.get(0));
-                }
-                break;
-            }
-            case CellInfoType.NONE: break;
-            default: break;
-        }
-        return null;
-    }
-
-    /** @hide */
-    public static CellIdentity create(android.hardware.radio.V1_2.CellIdentity cellIdentity) {
-        if (cellIdentity == null)  return null;
-        switch(cellIdentity.cellInfoType) {
-            case CellInfoType.GSM: {
-                if (cellIdentity.cellIdentityGsm.size() == 1) {
-                    return new CellIdentityGsm(cellIdentity.cellIdentityGsm.get(0));
-                }
-                break;
-            }
-            case CellInfoType.WCDMA: {
-                if (cellIdentity.cellIdentityWcdma.size() == 1) {
-                    return new CellIdentityWcdma(cellIdentity.cellIdentityWcdma.get(0));
-                }
-                break;
-            }
-            case CellInfoType.TD_SCDMA: {
-                if (cellIdentity.cellIdentityTdscdma.size() == 1) {
-                    return new  CellIdentityTdscdma(cellIdentity.cellIdentityTdscdma.get(0));
-                }
-                break;
-            }
-            case CellInfoType.LTE: {
-                if (cellIdentity.cellIdentityLte.size() == 1) {
-                    return new CellIdentityLte(cellIdentity.cellIdentityLte.get(0));
-                }
-                break;
-            }
-            case CellInfoType.CDMA: {
-                if (cellIdentity.cellIdentityCdma.size() == 1) {
-                    return new CellIdentityCdma(cellIdentity.cellIdentityCdma.get(0));
-                }
-                break;
-            }
-            case CellInfoType.NONE: break;
-            default: break;
-        }
-        return null;
-    }
-
-    /** @hide */
-    public static CellIdentity create(android.hardware.radio.V1_5.CellIdentity ci) {
-        if (ci == null) return null;
-        switch (ci.getDiscriminator()) {
-            case android.hardware.radio.V1_5.CellIdentity.hidl_discriminator.gsm:
-                return new CellIdentityGsm(ci.gsm());
-            case android.hardware.radio.V1_5.CellIdentity.hidl_discriminator.cdma:
-                return new CellIdentityCdma(ci.cdma());
-            case android.hardware.radio.V1_5.CellIdentity.hidl_discriminator.lte:
-                return new CellIdentityLte(ci.lte());
-            case android.hardware.radio.V1_5.CellIdentity.hidl_discriminator.wcdma:
-                return new CellIdentityWcdma(ci.wcdma());
-            case android.hardware.radio.V1_5.CellIdentity.hidl_discriminator.tdscdma:
-                return new CellIdentityTdscdma(ci.tdscdma());
-            case android.hardware.radio.V1_5.CellIdentity.hidl_discriminator.nr:
-                return new CellIdentityNr(ci.nr());
-            default: return null;
-        }
     }
 }

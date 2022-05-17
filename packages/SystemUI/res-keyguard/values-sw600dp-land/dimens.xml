@@ -21,4 +21,5 @@
 
     <!-- Overload default clock widget parameters -->
     <dimen name="widget_big_font_size">88dp</dimen>
+
 </resources>

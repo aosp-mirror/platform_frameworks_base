@@ -2475,11 +2475,10 @@ void ResourceTable::reportError(void* accessorCookie, const char* fmt, ...)
 {
     if (accessorCookie != NULL && fmt != NULL) {
         AccessorCookie* ac = (AccessorCookie*)accessorCookie;
-        int retval=0;
         char buf[1024];
         va_list ap;
         va_start(ap, fmt);
-        retval = vsnprintf(buf, sizeof(buf), fmt, ap);
+        vsnprintf(buf, sizeof(buf), fmt, ap);
         va_end(ap);
         ac->sourcePos.error("Error: %s (at '%s' with value '%s').\n",
                             buf, ac->attr.string(), ac->value.string());

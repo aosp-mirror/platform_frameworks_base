@@ -39,8 +39,12 @@ import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 
+import com.android.internal.accessibility.dialog.AccessibilityTarget;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Prefs;
+import com.android.systemui.shared.system.SysUiStatsLog;
+
+import java.util.List;
 
 /**
  * Contains logic for an accessibility floating menu view.
@@ -119,9 +123,13 @@ public class AccessibilityFloatingMenu implements IAccessibilityFloatingMenu {
         if (isShowing()) {
             return;
         }
+        final List<AccessibilityTarget> targetList = getTargets(mContext, ACCESSIBILITY_BUTTON);
+        if (targetList.isEmpty()) {
+            return;
+        }
 
         mMenuView.show();
-        mMenuView.onTargetsChanged(getTargets(mContext, ACCESSIBILITY_BUTTON));
+        mMenuView.onTargetsChanged(targetList);
         mMenuView.updateOpacityWith(isFadeEffectEnabled(mContext),
                 getOpacityValue(mContext));
         mMenuView.setSizeType(getSizeType(mContext));
@@ -177,6 +185,9 @@ public class AccessibilityFloatingMenu implements IAccessibilityFloatingMenu {
     }
 
     private void onDragEnd(Position position) {
+        SysUiStatsLog.write(SysUiStatsLog.ACCESSIBILITY_FLOATING_MENU_UI_CHANGED,
+                position.getPercentageX(), position.getPercentageY(),
+                mContext.getResources().getConfiguration().orientation);
         savePosition(mContext, position);
         showDockTooltipIfNecessary(mContext);
     }

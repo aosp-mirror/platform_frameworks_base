@@ -643,6 +643,8 @@ static bool checkInternalFormat(int32_t bitmapFormat, int internalformat, int ty
             return (type == GL_UNSIGNED_SHORT_5_6_5 && internalformat == GL_RGB);
         case ANDROID_BITMAP_FORMAT_RGBA_F16:
             return (type == GL_HALF_FLOAT && internalformat == GL_RGBA16F);
+        case ANDROID_BITMAP_FORMAT_RGBA_1010102:
+            return (type == GL_UNSIGNED_INT_2_10_10_10_REV && internalformat == GL_RGB10_A2);
         default:
             break;
     }
@@ -676,6 +678,8 @@ static int getInternalFormat(int32_t bitmapFormat) {
             return GL_RGB;
         case ANDROID_BITMAP_FORMAT_RGBA_F16:
             return GL_RGBA16F;
+        case ANDROID_BITMAP_FORMAT_RGBA_1010102:
+            return GL_RGB10_A2;
         default:
             return -1;
     }
@@ -693,6 +697,8 @@ static int getType(int32_t bitmapFormat) {
             return GL_UNSIGNED_SHORT_5_6_5;
         case ANDROID_BITMAP_FORMAT_RGBA_F16:
             return GL_HALF_FLOAT;
+        case ANDROID_BITMAP_FORMAT_RGBA_1010102:
+            return GL_UNSIGNED_INT_2_10_10_10_REV;
         default:
             return -1;
     }

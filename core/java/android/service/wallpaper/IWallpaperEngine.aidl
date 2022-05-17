@@ -46,4 +46,5 @@ interface IWallpaperEngine {
     oneway void removeLocalColorsAreas(in List<RectF> regions);
     oneway void addLocalColorsAreas(in List<RectF> regions);
     SurfaceControl mirrorSurfaceControl();
+    oneway void applyDimming(float dimAmount);
 }

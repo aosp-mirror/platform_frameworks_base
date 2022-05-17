@@ -20,39 +20,50 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityTaskManager;
+import android.app.PictureInPictureParams;
 import android.app.PictureInPictureUiState;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.RemoteException;
-import android.util.Log;
+import android.util.ArraySet;
 import android.util.Size;
 import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.function.TriConsumer;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
  * Singleton source of truth for the current state of PIP bounds.
  */
-public final class PipBoundsState {
+public class PipBoundsState {
     public static final int STASH_TYPE_NONE = 0;
     public static final int STASH_TYPE_LEFT = 1;
     public static final int STASH_TYPE_RIGHT = 2;
+    public static final int STASH_TYPE_BOTTOM = 3;
+    public static final int STASH_TYPE_TOP = 4;
 
     @IntDef(prefix = { "STASH_TYPE_" }, value =  {
             STASH_TYPE_NONE,
             STASH_TYPE_LEFT,
-            STASH_TYPE_RIGHT
+            STASH_TYPE_RIGHT,
+            STASH_TYPE_BOTTOM,
+            STASH_TYPE_TOP
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface StashType {}
@@ -86,10 +97,28 @@ public final class PipBoundsState {
     private int mShelfHeight;
     /** Whether the user has resized the PIP manually. */
     private boolean mHasUserResizedPip;
+    /**
+     * Areas defined by currently visible apps that they prefer to keep clear from overlays such as
+     * the PiP. Restricted areas may only move the PiP a limited amount from its anchor position.
+     * The system will try to respect these areas, but when not possible will ignore them.
+     *
+     * @see android.view.View#setPreferKeepClearRects
+     */
+    private final Set<Rect> mRestrictedKeepClearAreas = new ArraySet<>();
+    /**
+     * Areas defined by currently visible apps holding
+     * {@link android.Manifest.permission#SET_UNRESTRICTED_KEEP_CLEAR_AREAS} that they prefer to
+     * keep clear from overlays such as the PiP.
+     * Unrestricted areas can move the PiP farther than restricted areas, and the system will try
+     * harder to respect these areas.
+     *
+     * @see android.view.View#setPreferKeepClearRects
+     */
+    private final Set<Rect> mUnrestrictedKeepClearAreas = new ArraySet<>();
 
     private @Nullable Runnable mOnMinimalSizeChangeCallback;
     private @Nullable TriConsumer<Boolean, Integer, Boolean> mOnShelfVisibilityChangeCallback;
-    private @Nullable Consumer<Rect> mOnPipExclusionBoundsChangeCallback;
+    private List<Consumer<Rect>> mOnPipExclusionBoundsChangeCallbacks = new ArrayList<>();
 
     public PipBoundsState(@NonNull Context context) {
         mContext = context;
@@ -108,8 +137,8 @@ public final class PipBoundsState {
     /** Set the current PIP bounds. */
     public void setBounds(@NonNull Rect bounds) {
         mBounds.set(bounds);
-        if (mOnPipExclusionBoundsChangeCallback != null) {
-            mOnPipExclusionBoundsChangeCallback.accept(bounds);
+        for (Consumer<Rect> callback : mOnPipExclusionBoundsChangeCallbacks) {
+            callback.accept(bounds);
         }
     }
 
@@ -199,7 +228,8 @@ public final class PipBoundsState {
                     new PictureInPictureUiState(stashedState != STASH_TYPE_NONE /* isStashed */)
             );
         } catch (RemoteException e) {
-            Log.e(TAG, "Unable to set alert PiP state change.");
+            ProtoLog.e(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Unable to set alert PiP state change.", TAG);
         }
     }
 
@@ -363,14 +393,33 @@ public final class PipBoundsState {
         }
     }
 
+    /** Set the keep clear areas onscreen. The PiP should ideally not cover them. */
+    public void setKeepClearAreas(@NonNull Set<Rect> restrictedAreas,
+            @NonNull Set<Rect> unrestrictedAreas) {
+        mRestrictedKeepClearAreas.clear();
+        mRestrictedKeepClearAreas.addAll(restrictedAreas);
+        mUnrestrictedKeepClearAreas.clear();
+        mUnrestrictedKeepClearAreas.addAll(unrestrictedAreas);
+    }
+
+    @NonNull
+    public Set<Rect> getRestrictedKeepClearAreas() {
+        return mRestrictedKeepClearAreas;
+    }
+
+    @NonNull
+    public Set<Rect> getUnrestrictedKeepClearAreas() {
+        return mUnrestrictedKeepClearAreas;
+    }
+
     /**
      * Initialize states when first entering PiP.
      */
-    public void setBoundsStateForEntry(ComponentName componentName, float aspectRatio,
-            Size overrideMinSize) {
+    public void setBoundsStateForEntry(ComponentName componentName, ActivityInfo activityInfo,
+            PictureInPictureParams params, PipBoundsAlgorithm pipBoundsAlgorithm) {
         setLastPipComponentName(componentName);
-        setAspectRatio(aspectRatio);
-        setOverrideMinSize(overrideMinSize);
+        setAspectRatio(pipBoundsAlgorithm.getAspectRatioOrDefault(params));
+        setOverrideMinSize(pipBoundsAlgorithm.getMinimalSize(activityInfo));
     }
 
     /** Returns whether the shelf is currently showing. */
@@ -407,15 +456,23 @@ public final class PipBoundsState {
     }
 
     /**
-     * Set a callback to watch out for PiP bounds. This is mostly used by SystemUI's
+     * Add a callback to watch out for PiP bounds. This is mostly used by SystemUI's
      * Back-gesture handler, to avoid conflicting with PiP when it's stashed.
      */
-    public void setPipExclusionBoundsChangeCallback(
+    public void addPipExclusionBoundsChangeCallback(
             @Nullable Consumer<Rect> onPipExclusionBoundsChangeCallback) {
-        mOnPipExclusionBoundsChangeCallback = onPipExclusionBoundsChangeCallback;
-        if (mOnPipExclusionBoundsChangeCallback != null) {
-            mOnPipExclusionBoundsChangeCallback.accept(getBounds());
+        mOnPipExclusionBoundsChangeCallbacks.add(onPipExclusionBoundsChangeCallback);
+        for (Consumer<Rect> callback : mOnPipExclusionBoundsChangeCallbacks) {
+            callback.accept(getBounds());
         }
+    }
+
+    /**
+     * Remove a callback that was previously added.
+     */
+    public void removePipExclusionBoundsChangeCallback(
+            @Nullable Consumer<Rect> onPipExclusionBoundsChangeCallback) {
+        mOnPipExclusionBoundsChangeCallbacks.remove(onPipExclusionBoundsChangeCallback);
     }
 
     /** Source of truth for the current bounds of PIP that may be in motion. */

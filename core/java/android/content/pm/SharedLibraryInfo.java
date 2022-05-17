@@ -34,9 +34,10 @@ import java.util.Objects;
 
 /**
  * This class provides information for a shared library. There are
- * three types of shared libraries: builtin - non-updatable part of
+ * four types of shared libraries: builtin - non-updatable part of
  * the OS; dynamic - updatable backwards-compatible dynamically linked;
- * static - non backwards-compatible emulating static linking.
+ * static - non backwards-compatible emulating static linking;
+ * SDK - updatable backwards-incompatible dynamically loaded.
  */
 public final class SharedLibraryInfo implements Parcelable {
 
@@ -45,6 +46,7 @@ public final class SharedLibraryInfo implements Parcelable {
             TYPE_BUILTIN,
             TYPE_DYNAMIC,
             TYPE_STATIC,
+            TYPE_SDK_PACKAGE,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface Type{}
@@ -66,8 +68,21 @@ public final class SharedLibraryInfo implements Parcelable {
      * Shared library type: this library is <strong>not</strong> backwards
      * -compatible, can be updated and updates can be uninstalled. Clients
      * link against a specific version of the library.
+     *
+     * Static shared libraries simulate static linking while allowing for
+     * multiple clients to reuse the same instance of the library.
      */
     public static final int TYPE_STATIC = 2;
+
+    /**
+     * SDK package shared library type: this library is <strong>not</strong>
+     * compatible between versions, can be updated and updates can be
+     * uninstalled. Clients depend on a specific version of the library.
+     *
+     * SDK packages are not loaded automatically by the OS and rely
+     * e.g. on 3P libraries to make them available for the clients.
+     */
+    public static final int TYPE_SDK_PACKAGE = 3;
 
     /**
      * Constant for referring to an undefined version.
@@ -127,8 +142,8 @@ public final class SharedLibraryInfo implements Parcelable {
         mName = parcel.readString8();
         mVersion = parcel.readLong();
         mType = parcel.readInt();
-        mDeclaringPackage = parcel.readParcelable(null);
-        mDependentPackages = parcel.readArrayList(null);
+        mDeclaringPackage = parcel.readParcelable(null, android.content.pm.VersionedPackage.class);
+        mDependentPackages = parcel.readArrayList(null, android.content.pm.VersionedPackage.class);
         mDependencies = parcel.createTypedArrayList(SharedLibraryInfo.CREATOR);
         mIsNative = parcel.readBoolean();
     }
@@ -289,6 +304,13 @@ public final class SharedLibraryInfo implements Parcelable {
     }
 
     /**
+     * @hide
+     */
+    public boolean isSdk() {
+        return mType == TYPE_SDK_PACKAGE;
+    }
+
+    /**
      * Gets the package that declares the library.
      *
      * @return The package declaring the library.
@@ -350,6 +372,9 @@ public final class SharedLibraryInfo implements Parcelable {
             }
             case TYPE_STATIC: {
                 return "static";
+            }
+            case TYPE_SDK_PACKAGE: {
+                return "sdk";
             }
             default: {
                 return "unknown";

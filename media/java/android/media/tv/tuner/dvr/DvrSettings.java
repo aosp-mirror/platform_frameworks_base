@@ -20,7 +20,7 @@ import android.annotation.BytesLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.hardware.tv.tuner.V1_0.Constants;
+import android.hardware.tv.tuner.DataFormat;
 import android.media.tv.tuner.filter.Filter;
 
 import java.lang.annotation.Retention;
@@ -43,19 +43,19 @@ public class DvrSettings {
     /**
      * Transport Stream.
      */
-    public static final int DATA_FORMAT_TS = Constants.DataFormat.TS;
+    public static final int DATA_FORMAT_TS = android.hardware.tv.tuner.DataFormat.TS;
     /**
      * Packetized Elementary Stream.
      */
-    public static final int DATA_FORMAT_PES = Constants.DataFormat.PES;
+    public static final int DATA_FORMAT_PES = android.hardware.tv.tuner.DataFormat.PES;
     /**
      * Elementary Stream.
      */
-    public static final int DATA_FORMAT_ES = Constants.DataFormat.ES;
+    public static final int DATA_FORMAT_ES = android.hardware.tv.tuner.DataFormat.ES;
     /**
      * TLV (type-length-value) Stream for SHV
      */
-    public static final int DATA_FORMAT_SHV_TLV = Constants.DataFormat.SHV_TLV;
+    public static final int DATA_FORMAT_SHV_TLV = android.hardware.tv.tuner.DataFormat.SHV_TLV;
 
 
     @Filter.Status

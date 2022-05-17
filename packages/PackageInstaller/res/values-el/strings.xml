@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"Θέλετε να απεγκαταστήσετε αυτήν την εφαρμογή;"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Θέλετε να απεγκαταστήσετε αυτήν την εφαρμογή για "<b>"όλους"</b>" τους χρήστες; Η εφαρμογή και τα δεδομένα της θα καταργηθούν από "<b>"όλους"</b>" τους χρήστες στη συσκευή."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Θέλετε να απεγκαταστήσετε αυτήν την εφαρμογή για τον χρήστη <xliff:g id="USERNAME">%1$s</xliff:g>;"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Θέλετε να καταργήσετε την εγκατάσταση αυτής της εφαρμογής από το προφίλ εργασίας σας;"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Να αντικατασταθεί αυτή η εφαρμογή με την εργοστασιακή έκδοση; Όλα τα δεδομένα θα καταργηθούν."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Να αντικατασταθεί αυτή η εφαρμογή με την εργοστασιακή έκδοση; Όλα τα δεδομένα θα καταργηθούν. Αυτό επηρεάζει όλους τους χρήστες της συσκευής, συμπεριλαμβανομένων και των κατόχων προφίλ εργασίας."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Διατήρηση <xliff:g id="SIZE">%1$s</xliff:g> δεδομένων εφαρμογών."</string>

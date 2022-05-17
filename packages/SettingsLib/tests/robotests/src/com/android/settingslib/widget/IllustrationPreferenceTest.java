@@ -55,6 +55,7 @@ public class IllustrationPreferenceTest {
     @Mock
     private ViewGroup mRootView;
     private Uri mImageUri;
+    private ImageView mBackgroundView;
     private LottieAnimationView mAnimationView;
     private IllustrationPreference mPreference;
     private PreferenceViewHolder mViewHolder;
@@ -66,6 +67,7 @@ public class IllustrationPreferenceTest {
         MockitoAnnotations.initMocks(this);
 
         mImageUri = new Uri.Builder().build();
+        mBackgroundView = new ImageView(mContext);
         mAnimationView = spy(new LottieAnimationView(mContext));
         mMiddleGroundLayout = new FrameLayout(mContext);
         final FrameLayout illustrationFrame = new FrameLayout(mContext);
@@ -73,6 +75,7 @@ public class IllustrationPreferenceTest {
                 new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT));
         doReturn(mMiddleGroundLayout).when(mRootView).findViewById(R.id.middleground_layout);
+        doReturn(mBackgroundView).when(mRootView).findViewById(R.id.background_view);
         doReturn(mAnimationView).when(mRootView).findViewById(R.id.lottie_view);
         doReturn(illustrationFrame).when(mRootView).findViewById(R.id.illustration_frame);
         mViewHolder = spy(PreferenceViewHolder.createInstanceForTests(mRootView));
@@ -154,5 +157,33 @@ public class IllustrationPreferenceTest {
         mPreference.onBindViewHolder(mViewHolder);
 
         verify(mAnimationView).setFailureListener(any());
+    }
+
+    @Test
+    public void setMaxHeight_smallerThanRestrictedHeight_matchResult() {
+        final int restrictedHeight =
+                mContext.getResources().getDimensionPixelSize(
+                        R.dimen.settingslib_illustration_height);
+        final int maxHeight = restrictedHeight - 200;
+
+        mPreference.setMaxHeight(maxHeight);
+        mPreference.onBindViewHolder(mViewHolder);
+
+        assertThat(mBackgroundView.getMaxHeight()).isEqualTo(maxHeight);
+        assertThat(mAnimationView.getMaxHeight()).isEqualTo(maxHeight);
+    }
+
+    @Test
+    public void setMaxHeight_largerThanRestrictedHeight_specificHeight() {
+        final int restrictedHeight =
+                mContext.getResources().getDimensionPixelSize(
+                        R.dimen.settingslib_illustration_height);
+        final int maxHeight = restrictedHeight + 200;
+
+        mPreference.setMaxHeight(maxHeight);
+        mPreference.onBindViewHolder(mViewHolder);
+
+        assertThat(mBackgroundView.getMaxHeight()).isEqualTo(restrictedHeight);
+        assertThat(mAnimationView.getMaxHeight()).isEqualTo(restrictedHeight);
     }
 }

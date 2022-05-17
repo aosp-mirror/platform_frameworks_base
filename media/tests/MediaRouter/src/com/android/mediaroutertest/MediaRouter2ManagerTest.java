@@ -71,6 +71,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -115,7 +116,8 @@ public class MediaRouter2ManagerTest {
     public void setUp() throws Exception {
         mContext = InstrumentationRegistry.getTargetContext();
         mUiAutomation = InstrumentationRegistry.getInstrumentation().getUiAutomation();
-        mUiAutomation.adoptShellPermissionIdentity(Manifest.permission.MEDIA_CONTENT_CONTROL);
+        mUiAutomation.adoptShellPermissionIdentity(Manifest.permission.MEDIA_CONTENT_CONTROL,
+                Manifest.permission.MODIFY_AUDIO_ROUTING);
         MediaRouter2ManagerTestActivity.startActivity(mContext);
 
         mManager = MediaRouter2Manager.getInstance(mContext);
@@ -275,6 +277,42 @@ public class MediaRouter2ManagerTest {
         assertNotNull(routes.get(ROUTE_ID_SPECIAL_FEATURE));
     }
 
+    @Test
+    public void testNoAllowedPackages_returnsZeroRoutes() throws Exception {
+        RouteDiscoveryPreference preference =
+                new RouteDiscoveryPreference.Builder(FEATURES_ALL, true)
+                        .setAllowedPackages(List.of("random package name"))
+                        .build();
+        Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(preference);
+
+        int remoteRouteCount = 0;
+        for (MediaRoute2Info route : routes.values()) {
+            if (!route.isSystemRoute()) {
+                remoteRouteCount++;
+            }
+        }
+
+        assertEquals(0, remoteRouteCount);
+    }
+
+    @Test
+    public void testAllowedPackages() throws Exception {
+        RouteDiscoveryPreference preference =
+                new RouteDiscoveryPreference.Builder(FEATURES_ALL, true)
+                        .setAllowedPackages(List.of("com.android.mediaroutertest"))
+                        .build();
+        Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(preference);
+
+        int remoteRouteCount = 0;
+        for (MediaRoute2Info route : routes.values()) {
+            if (!route.isSystemRoute()) {
+                remoteRouteCount++;
+            }
+        }
+
+        assertTrue(remoteRouteCount > 0);
+    }
+
     /**
      * Tests if MR2.SessionCallback.onSessionCreated is called
      * when a route is selected from MR2Manager.
@@ -305,7 +343,7 @@ public class MediaRouter2ManagerTest {
 
         mManager.selectRoute(mPackageName, routeToSelect);
         assertTrue(latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
-        assertEquals(2, mManager.getActiveSessions().size());
+        assertEquals(1, mManager.getRemoteSessions().size());
     }
 
     @Test
@@ -368,7 +406,7 @@ public class MediaRouter2ManagerTest {
                 .addFeature(FEATURE_REMOTE_PLAYBACK)
                 .build();
 
-        mManager.transfer(mManager.getSystemRoutingSession(), unknownRoute);
+        mManager.transfer(mManager.getSystemRoutingSession(null), unknownRoute);
         assertFalse(onSessionCreatedLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS));
         assertTrue(onTransferFailedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
     }
@@ -512,12 +550,12 @@ public class MediaRouter2ManagerTest {
         assertFalse(managerOnSessionReleasedLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS));
 
         assertEquals(2, sessions.size());
-        List<String> activeSessionIds = mManager.getActiveSessions().stream()
+        List<String> remoteSessionIds = mManager.getRemoteSessions().stream()
                 .map(RoutingSessionInfo::getId)
                 .collect(Collectors.toList());
-        // The old session shouldn't appear on the active session list.
-        assertFalse(activeSessionIds.contains(sessions.get(0).getId()));
-        assertTrue(activeSessionIds.contains(sessions.get(1).getId()));
+        // The old session shouldn't appear on the session list.
+        assertFalse(remoteSessionIds.contains(sessions.get(0).getId()));
+        assertTrue(remoteSessionIds.contains(sessions.get(1).getId()));
 
         assertFalse(serviceOnReleaseSessionLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS));
         mManager.releaseSession(sessions.get(0));
@@ -554,13 +592,14 @@ public class MediaRouter2ManagerTest {
         assertTrue(onFailedLatch.await(MediaRouter2Manager.TRANSFER_TIMEOUT_MS,
                 TimeUnit.MILLISECONDS));
     }
+
     @Test
     public void testSetSystemRouteVolume() throws Exception {
         // ensure client
         addManagerCallback(new MediaRouter2Manager.Callback() {});
         String selectedSystemRouteId =
                 MediaRouter2Utils.getOriginalId(
-                mManager.getActiveSessions().get(0).getSelectedRoutes().get(0));
+                mManager.getSystemRoutingSession(mPackageName).getSelectedRoutes().get(0));
         Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(FEATURES_ALL);
         MediaRoute2Info volRoute = routes.get(selectedSystemRouteId);
         assertNotNull(volRoute);
@@ -814,15 +853,16 @@ public class MediaRouter2ManagerTest {
         assertTrue(onSessionCreatedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
     }
 
-    @Test
-    public void testGetActiveSessions_returnsNonEmptyList() {
-        assertFalse(mManager.getActiveSessions().isEmpty());
-    }
-
     Map<String, MediaRoute2Info> waitAndGetRoutesWithManager(List<String> routeFeatures)
             throws Exception {
+        return waitAndGetRoutesWithManager(
+                new RouteDiscoveryPreference.Builder(routeFeatures, true).build());
+    }
+
+    Map<String, MediaRoute2Info> waitAndGetRoutesWithManager(RouteDiscoveryPreference preference)
+            throws Exception {
         CountDownLatch addedLatch = new CountDownLatch(1);
-        CountDownLatch featuresLatch = new CountDownLatch(1);
+        CountDownLatch preferenceLatch = new CountDownLatch(1);
 
         // A dummy callback is required to send route feature info.
         RouteCallback routeCallback = new RouteCallback() {};
@@ -831,7 +871,8 @@ public class MediaRouter2ManagerTest {
             public void onRoutesAdded(List<MediaRoute2Info> routes) {
                 for (MediaRoute2Info route : routes) {
                     if (!route.isSystemRoute()
-                            && hasMatchingFeature(route.getFeatures(), routeFeatures)) {
+                            && hasMatchingFeature(route.getFeatures(), preference
+                            .getPreferredFeatures())) {
                         addedLatch.countDown();
                         break;
                     }
@@ -839,20 +880,19 @@ public class MediaRouter2ManagerTest {
             }
 
             @Override
-            public void onPreferredFeaturesChanged(String packageName,
-                    List<String> preferredFeatures) {
+            public void onDiscoveryPreferenceChanged(String packageName,
+                    RouteDiscoveryPreference discoveryPreference) {
                 if (TextUtils.equals(mPackageName, packageName)
-                        && preferredFeatures.size() == routeFeatures.size()
-                        && preferredFeatures.containsAll(routeFeatures)) {
-                    featuresLatch.countDown();
+                        && Objects.equals(preference, discoveryPreference)) {
+                    preferenceLatch.countDown();
                 }
             }
         };
         mManager.registerCallback(mExecutor, managerCallback);
-        mRouter2.registerRouteCallback(mExecutor, routeCallback,
-                new RouteDiscoveryPreference.Builder(routeFeatures, true).build());
+        mRouter2.registerRouteCallback(mExecutor, routeCallback, preference);
+
         try {
-            featuresLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+            preferenceLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
             if (mManager.getAvailableRoutes(mPackageName).isEmpty()) {
                 addedLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
             }
@@ -938,7 +978,7 @@ public class MediaRouter2ManagerTest {
         // ensure ManagerRecord in MediaRouter2ServiceImpl
         addManagerCallback(new MediaRouter2Manager.Callback() {});
 
-        for (RoutingSessionInfo session : mManager.getActiveSessions()) {
+        for (RoutingSessionInfo session : mManager.getRemoteSessions()) {
             mManager.releaseSession(session);
         }
     }

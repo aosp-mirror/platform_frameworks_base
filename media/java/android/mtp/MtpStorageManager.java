@@ -18,7 +18,11 @@ package android.mtp;
 
 import android.media.MediaFile;
 import android.os.FileObserver;
+import android.os.SystemProperties;
 import android.os.storage.StorageVolume;
+import android.system.ErrnoException;
+import android.system.Os;
+import android.system.StructStat;
 import android.util.Log;
 
 import com.android.internal.util.Preconditions;
@@ -35,6 +39,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * MtpStorageManager provides functionality for listing, tracking, and notifying MtpServer of
@@ -199,7 +204,38 @@ public class MtpStorageManager {
         }
 
         public long getSize() {
-            return mIsDir ? 0 : getPath().toFile().length();
+            return mIsDir ? 0 : maybeApplyTranscodeLengthWorkaround(getPath().toFile().length());
+        }
+
+        private long maybeApplyTranscodeLengthWorkaround(long length) {
+            // Windows truncates transferred files to the size advertised in the object property.
+            if (mStorage.isHostWindows() && isTranscodeMtpEnabled() && isFileTranscodeSupported()) {
+                // If the file supports transcoding, we double the returned size to accommodate
+                // the increase in size from transcoding to AVC. This is the same heuristic
+                // applied in the FUSE daemon (MediaProvider).
+                return length * 2;
+            }
+            return length;
+        }
+
+        private boolean isTranscodeMtpEnabled() {
+            return SystemProperties.getBoolean("sys.fuse.transcode_mtp", false);
+        }
+
+        private boolean isFileTranscodeSupported() {
+            // Check if the file supports transcoding by reading the |st_nlinks| struct stat
+            // field. This will be > 1 if the file supports transcoding. The FUSE daemon
+            // sets the field accordingly to enable the MTP stack workaround some Windows OS
+            // MTP client bug where they ignore the size returned as part of getting the MTP
+            // object, see MtpServer#doGetObject.
+            final Path path = getPath();
+            try {
+                StructStat stat = Os.stat(path.toString());
+                return stat.st_nlink > 1;
+            } catch (ErrnoException e) {
+                Log.w(TAG, "Failed to stat path: " + getPath() + ". Ignoring transcoding.");
+                return false;
+            }
         }
 
         public Path getPath() {
@@ -420,10 +456,12 @@ public class MtpStorageManager {
      * @param volume Storage to add.
      * @return the associated MtpStorage
      */
-    public synchronized MtpStorage addMtpStorage(StorageVolume volume) {
+    public synchronized MtpStorage addMtpStorage(StorageVolume volume,
+                                                 Supplier<Boolean> isHostWindows) {
         int storageId = ((getNextStorageId() & 0x0000FFFF) << 16) + 1;
-        MtpStorage storage = new MtpStorage(volume, storageId);
-        MtpObject root = new MtpObject(storage.getPath(), storageId, storage, null, true);
+        MtpStorage storage = new MtpStorage(volume, storageId, isHostWindows);
+        MtpObject root = new MtpObject(storage.getPath(), storageId, storage, /* parent= */ null,
+                                       /* isDir= */ true);
         mRoots.put(storageId, root);
         return storage;
     }

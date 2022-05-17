@@ -23,16 +23,20 @@ import android.os.PersistableBundle;
 
 import com.android.internal.util.HexDump;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.TreeSet;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -46,6 +50,7 @@ public class PersistableBundleUtils {
     private static final String PARCEL_UUID_KEY = "PARCEL_UUID";
     private static final String BYTE_ARRAY_KEY = "BYTE_ARRAY_KEY";
     private static final String INTEGER_KEY = "INTEGER_KEY";
+    private static final String STRING_KEY = "STRING_KEY";
 
     /**
      * Functional interface to convert an object of the specified type to a PersistableBundle.
@@ -89,6 +94,21 @@ public class PersistableBundleUtils {
             (bundle) -> {
                 Objects.requireNonNull(bundle, "PersistableBundle is null");
                 return bundle.getInt(INTEGER_KEY);
+            };
+
+    /** Serializer to convert s String to a PersistableBundle. */
+    public static final Serializer<String> STRING_SERIALIZER =
+            (i) -> {
+                final PersistableBundle result = new PersistableBundle();
+                result.putString(STRING_KEY, i);
+                return result;
+            };
+
+    /** Deserializer to convert a PersistableBundle to a String. */
+    public static final Deserializer<String> STRING_DESERIALIZER =
+            (bundle) -> {
+                Objects.requireNonNull(bundle, "PersistableBundle is null");
+                return bundle.getString(STRING_KEY);
             };
 
     /**
@@ -278,6 +298,30 @@ public class PersistableBundleUtils {
     }
 
     /**
+     * Converts a PersistableBundle into a disk-stable byte array format
+     *
+     * @param bundle the PersistableBundle to be converted to a disk-stable format
+     * @return the byte array representation of the PersistableBundle
+     */
+    @Nullable
+    public static byte[] toDiskStableBytes(@NonNull PersistableBundle bundle) throws IOException {
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        bundle.writeToStream(outputStream);
+        return outputStream.toByteArray();
+    }
+
+    /**
+     * Converts from a disk-stable byte array format to a PersistableBundle
+     *
+     * @param bytes the disk-stable byte array
+     * @return the PersistableBundle parsed from this byte array.
+     */
+    public static PersistableBundle fromDiskStableBytes(@NonNull byte[] bytes) throws IOException {
+        final ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
+        return PersistableBundle.readFromStream(inputStream);
+    }
+
+    /**
      * Ensures safe reading and writing of {@link PersistableBundle}s to and from disk.
      *
      * <p>This class will enforce exclusion between reads and writes using the standard semantics of
@@ -336,6 +380,184 @@ public class PersistableBundleUtils {
             } finally {
                 mDiskLock.writeLock().unlock();
             }
+        }
+    }
+
+    /**
+     * Returns a copy of the persistable bundle with only the specified keys
+     *
+     * <p>This allows for holding minimized copies for memory-saving purposes.
+     */
+    @NonNull
+    public static PersistableBundle minimizeBundle(
+            @NonNull PersistableBundle bundle, String... keys) {
+        final PersistableBundle minimized = new PersistableBundle();
+
+        if (bundle == null) {
+            return minimized;
+        }
+
+        for (String key : keys) {
+            if (bundle.containsKey(key)) {
+                final Object value = bundle.get(key);
+                if (value == null) {
+                    continue;
+                }
+
+                if (value instanceof Boolean) {
+                    minimized.putBoolean(key, (Boolean) value);
+                } else if (value instanceof boolean[]) {
+                    minimized.putBooleanArray(key, (boolean[]) value);
+                } else if (value instanceof Double) {
+                    minimized.putDouble(key, (Double) value);
+                } else if (value instanceof double[]) {
+                    minimized.putDoubleArray(key, (double[]) value);
+                } else if (value instanceof Integer) {
+                    minimized.putInt(key, (Integer) value);
+                } else if (value instanceof int[]) {
+                    minimized.putIntArray(key, (int[]) value);
+                } else if (value instanceof Long) {
+                    minimized.putLong(key, (Long) value);
+                } else if (value instanceof long[]) {
+                    minimized.putLongArray(key, (long[]) value);
+                } else if (value instanceof String) {
+                    minimized.putString(key, (String) value);
+                } else if (value instanceof String[]) {
+                    minimized.putStringArray(key, (String[]) value);
+                } else if (value instanceof PersistableBundle) {
+                    minimized.putPersistableBundle(key, (PersistableBundle) value);
+                } else {
+                    continue;
+                }
+            }
+        }
+
+        return minimized;
+    }
+
+    /** Builds a stable hashcode */
+    public static int getHashCode(@Nullable PersistableBundle bundle) {
+        if (bundle == null) {
+            return -1;
+        }
+
+        int iterativeHashcode = 0;
+        TreeSet<String> treeSet = new TreeSet<>(bundle.keySet());
+        for (String key : treeSet) {
+            Object val = bundle.get(key);
+            if (val instanceof PersistableBundle) {
+                iterativeHashcode =
+                        Objects.hash(iterativeHashcode, key, getHashCode((PersistableBundle) val));
+            } else {
+                iterativeHashcode = Objects.hash(iterativeHashcode, key, val);
+            }
+        }
+
+        return iterativeHashcode;
+    }
+
+    /** Checks for persistable bundle equality */
+    public static boolean isEqual(
+            @Nullable PersistableBundle left, @Nullable PersistableBundle right) {
+        // Check for pointer equality & null equality
+        if (Objects.equals(left, right)) {
+            return true;
+        }
+
+        // If only one of the two is null, but not the other, not equal by definition.
+        if (Objects.isNull(left) != Objects.isNull(right)) {
+            return false;
+        }
+
+        if (!left.keySet().equals(right.keySet())) {
+            return false;
+        }
+
+        for (String key : left.keySet()) {
+            Object leftVal = left.get(key);
+            Object rightVal = right.get(key);
+
+            // Check for equality
+            if (Objects.equals(leftVal, rightVal)) {
+                continue;
+            } else if (Objects.isNull(leftVal) != Objects.isNull(rightVal)) {
+                // If only one of the two is null, but not the other, not equal by definition.
+                return false;
+            } else if (!Objects.equals(leftVal.getClass(), rightVal.getClass())) {
+                // If classes are different, not equal by definition.
+                return false;
+            }
+            if (leftVal instanceof PersistableBundle) {
+                if (!isEqual((PersistableBundle) leftVal, (PersistableBundle) rightVal)) {
+                    return false;
+                }
+            } else if (leftVal.getClass().isArray()) {
+                if (leftVal instanceof boolean[]) {
+                    if (!Arrays.equals((boolean[]) leftVal, (boolean[]) rightVal)) {
+                        return false;
+                    }
+                } else if (leftVal instanceof double[]) {
+                    if (!Arrays.equals((double[]) leftVal, (double[]) rightVal)) {
+                        return false;
+                    }
+                } else if (leftVal instanceof int[]) {
+                    if (!Arrays.equals((int[]) leftVal, (int[]) rightVal)) {
+                        return false;
+                    }
+                } else if (leftVal instanceof long[]) {
+                    if (!Arrays.equals((long[]) leftVal, (long[]) rightVal)) {
+                        return false;
+                    }
+                } else if (!Arrays.equals((Object[]) leftVal, (Object[]) rightVal)) {
+                    return false;
+                }
+            } else {
+                if (!Objects.equals(leftVal, rightVal)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Wrapper class around PersistableBundles to allow equality comparisons
+     *
+     * <p>This class exposes the minimal getters to retrieve values.
+     */
+    public static class PersistableBundleWrapper {
+        @NonNull private final PersistableBundle mBundle;
+
+        public PersistableBundleWrapper(@NonNull PersistableBundle bundle) {
+            mBundle = Objects.requireNonNull(bundle, "Bundle was null");
+        }
+
+        /**
+         * Retrieves the integer associated with the provided key.
+         *
+         * @param key the string key to query
+         * @param defaultValue the value to return if key does not exist
+         * @return the int value, or the default
+         */
+        public int getInt(String key, int defaultValue) {
+            return mBundle.getInt(key, defaultValue);
+        }
+
+        @Override
+        public int hashCode() {
+            return getHashCode(mBundle);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof PersistableBundleWrapper)) {
+                return false;
+            }
+
+            final PersistableBundleWrapper other = (PersistableBundleWrapper) obj;
+
+            return isEqual(mBundle, other.mBundle);
         }
     }
 }

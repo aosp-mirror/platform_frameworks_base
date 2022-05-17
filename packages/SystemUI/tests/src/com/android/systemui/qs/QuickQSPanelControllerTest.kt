@@ -16,23 +16,27 @@
 
 package com.android.systemui.qs
 
+import android.content.res.Configuration
+import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
-import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.MediaHost
+import com.android.systemui.media.MediaHostState
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.qs.QSTileView
 import com.android.systemui.qs.customize.QSCustomizerController
 import com.android.systemui.qs.logging.QSLogger
-import com.android.systemui.statusbar.FeatureFlags
+import com.android.systemui.util.leak.RotationUtils
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyBoolean
+import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.any
@@ -64,30 +68,32 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
     private lateinit var tileLayout: TileLayout
     @Mock
     private lateinit var tileView: QSTileView
-    @Mock
-    private lateinit var featureFlags: FeatureFlags
+    @Captor
+    private lateinit var captor: ArgumentCaptor<QSPanel.OnConfigurationChangedListener>
 
-    private lateinit var controller: QuickQSPanelController
+    private lateinit var controller: TestQuickQSPanelController
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
         `when`(quickQSPanel.tileLayout).thenReturn(tileLayout)
+        `when`(quickQSPanel.isAttachedToWindow).thenReturn(true)
         `when`(quickQSPanel.dumpableTag).thenReturn("")
+        `when`(quickQSPanel.resources).thenReturn(mContext.resources)
         `when`(qsTileHost.createTileView(any(), any(), anyBoolean())).thenReturn(tileView)
 
-        controller = QuickQSPanelController(
+        controller = TestQuickQSPanelController(
                 quickQSPanel,
                 qsTileHost,
                 qsCustomizerController,
                 false,
                 mediaHost,
+                true,
                 metricsLogger,
                 uiEventLogger,
                 qsLogger,
-                dumpManager,
-                featureFlags
+                dumpManager
         )
 
         controller.init()
@@ -116,5 +122,45 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
         controller.setTiles()
 
         verify(quickQSPanel, times(limit)).addTile(any())
+    }
+
+    @Test
+    fun testMediaExpansionUpdatedWhenConfigurationChanged() {
+        // times(2) because both controller and base controller are registering their listeners
+        verify(quickQSPanel, times(2)).addOnConfigurationChangedListener(captor.capture())
+
+        // verify that media starts in the expanded state by default
+        verify(mediaHost).expansion = MediaHostState.EXPANDED
+
+        // Rotate device, verify media size updated
+        controller.setRotation(RotationUtils.ROTATION_LANDSCAPE)
+        captor.allValues.forEach { it.onConfigurationChange(Configuration.EMPTY) }
+
+        verify(mediaHost).expansion = MediaHostState.COLLAPSED
+    }
+
+    class TestQuickQSPanelController(
+        view: QuickQSPanel,
+        qsTileHost: QSTileHost,
+        qsCustomizerController: QSCustomizerController,
+        usingMediaPlayer: Boolean,
+        mediaHost: MediaHost,
+        usingCollapsedLandscapeMedia: Boolean,
+        metricsLogger: MetricsLogger,
+        uiEventLogger: UiEventLoggerFake,
+        qsLogger: QSLogger,
+        dumpManager: DumpManager
+    ) : QuickQSPanelController(view, qsTileHost, qsCustomizerController, usingMediaPlayer,
+        mediaHost, usingCollapsedLandscapeMedia, metricsLogger, uiEventLogger, qsLogger,
+        dumpManager) {
+
+        private var rotation = RotationUtils.ROTATION_NONE
+
+        @Override
+        override fun getRotation(): Int = rotation
+
+        fun setRotation(newRotation: Int) {
+            rotation = newRotation
+        }
     }
 }

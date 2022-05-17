@@ -29,6 +29,7 @@ import android.graphics.Canvas;
 import android.graphics.ColorSpace;
 import android.graphics.HardwareRenderer;
 import android.graphics.Matrix;
+import android.graphics.Point;
 import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.graphics.RenderNode;
@@ -340,10 +341,12 @@ public class Surface implements Parcelable {
      */
     @UnsupportedAppUsage
     public void destroy() {
-        if (mNativeObject != 0) {
-            nativeDestroy(mNativeObject);
+        synchronized (mLock) {
+            if (mNativeObject != 0) {
+                nativeDestroy(mNativeObject);
+            }
+            release();
         }
-        release();
     }
 
     /**
@@ -408,6 +411,20 @@ public class Surface implements Parcelable {
         synchronized (mLock) {
             checkNotReleasedLocked();
             return nativeIsConsumerRunningBehind(mNativeObject);
+        }
+    }
+
+    /**
+     * Returns the default size of this Surface provided by the consumer of the surface.
+     * Should only be used by the producer of the surface.
+     *
+     * @hide
+     */
+    @NonNull
+    public Point getDefaultSize() {
+        synchronized (mLock) {
+            checkNotReleasedLocked();
+            return new Point(nativeGetWidth(mNativeObject), nativeGetHeight(mNativeObject));
         }
     }
 
@@ -740,7 +757,7 @@ public class Surface implements Parcelable {
     private void setNativeObjectLocked(long ptr) {
         if (mNativeObject != ptr) {
             if (mNativeObject == 0 && ptr != 0) {
-                mCloseGuard.open("release");
+                mCloseGuard.open("Surface.release");
             } else if (mNativeObject != 0 && ptr == 0) {
                 mCloseGuard.close();
             }

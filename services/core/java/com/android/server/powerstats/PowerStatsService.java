@@ -28,6 +28,7 @@ import android.os.Binder;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.os.UserHandle;
 import android.power.PowerStatsInternal;
 import android.util.Slog;
@@ -79,6 +80,9 @@ public class PowerStatsService extends SystemService {
     private StatsPullAtomCallbackImpl mPullAtomCallback;
     @Nullable
     private PowerStatsInternal mPowerStatsInternal;
+    @Nullable
+    @GuardedBy("this")
+    private Looper mLooper;
 
     @VisibleForTesting
     static class Injector {
@@ -127,12 +131,12 @@ public class PowerStatsService extends SystemService {
             }
         }
 
-        PowerStatsLogger createPowerStatsLogger(Context context, File dataStoragePath,
-                String meterFilename, String meterCacheFilename,
+        PowerStatsLogger createPowerStatsLogger(Context context, Looper looper,
+                File dataStoragePath, String meterFilename, String meterCacheFilename,
                 String modelFilename, String modelCacheFilename,
                 String residencyFilename, String residencyCacheFilename,
                 IPowerStatsHALWrapper powerStatsHALWrapper) {
-            return new PowerStatsLogger(context, dataStoragePath,
+            return new PowerStatsLogger(context, looper, dataStoragePath,
                 meterFilename, meterCacheFilename,
                 modelFilename, modelCacheFilename,
                 residencyFilename, residencyCacheFilename,
@@ -229,11 +233,11 @@ public class PowerStatsService extends SystemService {
             mDataStoragePath = mInjector.createDataStoragePath();
 
             // Only start logger and triggers if initialization is successful.
-            mPowerStatsLogger = mInjector.createPowerStatsLogger(mContext, mDataStoragePath,
-                mInjector.createMeterFilename(), mInjector.createMeterCacheFilename(),
-                mInjector.createModelFilename(), mInjector.createModelCacheFilename(),
-                mInjector.createResidencyFilename(), mInjector.createResidencyCacheFilename(),
-                getPowerStatsHal());
+            mPowerStatsLogger = mInjector.createPowerStatsLogger(mContext, getLooper(),
+                    mDataStoragePath, mInjector.createMeterFilename(),
+                    mInjector.createMeterCacheFilename(), mInjector.createModelFilename(),
+                    mInjector.createModelCacheFilename(), mInjector.createResidencyFilename(),
+                    mInjector.createResidencyCacheFilename(), getPowerStatsHal());
             mBatteryTrigger = mInjector.createBatteryTrigger(mContext, mPowerStatsLogger);
             mTimerTrigger = mInjector.createTimerTrigger(mContext, mPowerStatsLogger);
         } else {
@@ -243,6 +247,17 @@ public class PowerStatsService extends SystemService {
 
     private IPowerStatsHALWrapper getPowerStatsHal() {
         return mInjector.getPowerStatsHALWrapperImpl();
+    }
+
+    private Looper getLooper() {
+        synchronized (this) {
+            if (mLooper == null) {
+                HandlerThread thread = new HandlerThread(TAG);
+                thread.start();
+                return thread.getLooper();
+            }
+            return mLooper;
+        }
     }
 
     public PowerStatsService(Context context) {
@@ -260,9 +275,7 @@ public class PowerStatsService extends SystemService {
         private final Handler mHandler;
 
         LocalService() {
-            HandlerThread thread = new HandlerThread(TAG);
-            thread.start();
-            mHandler = new Handler(thread.getLooper());
+            mHandler = new Handler(getLooper());
         }
 
 

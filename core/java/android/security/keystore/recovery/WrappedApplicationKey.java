@@ -167,10 +167,7 @@ public final class WrappedApplicationKey implements Parcelable {
     protected WrappedApplicationKey(Parcel in) {
         mAlias = in.readString();
         mEncryptedKeyMaterial = in.createByteArray();
-        // Check if there is still data to be read.
-        if (in.dataAvail() > 0) {
-            mMetadata = in.createByteArray();
-        }
+        mMetadata = in.createByteArray();
     }
 
     @Override

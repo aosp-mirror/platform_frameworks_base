@@ -17,6 +17,8 @@ package android.window;
 
 import static android.view.WindowManagerImpl.createWindowContextWindowManager;
 
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiContext;
@@ -26,7 +28,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.os.IBinder;
+import android.view.Display;
 import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -43,23 +45,33 @@ import java.lang.ref.Reference;
  * @hide
  */
 @UiContext
-public class WindowContext extends ContextWrapper {
+public class WindowContext extends ContextWrapper implements WindowProvider {
     private final WindowManager mWindowManager;
-    private final @WindowManager.LayoutParams.WindowType int mType;
-    private final @Nullable Bundle mOptions;
+    @WindowManager.LayoutParams.WindowType
+    private final int mType;
+    @Nullable
+    private final Bundle mOptions;
     private final ComponentCallbacksController mCallbacksController =
             new ComponentCallbacksController();
     private final WindowContextController mController;
 
     /**
-     * Default constructor. Will generate a {@link WindowTokenClient} and attach this context to
-     * the token.
+     * Default implementation of {@link WindowContext}
+     * <p>
+     * Note that the users should call {@link Context#createWindowContext(Display, int, Bundle)}
+     * to create a {@link WindowContext} instead of using this constructor
+     * </p><p>
+     * Example usage:
+     * <pre class="prettyprint">
+     * Bundle options = new Bundle();
+     * options.put(KEY_ROOT_DISPLAY_AREA_ID, displayAreaInfo.rootDisplayAreaId);
+     * Context windowContext = context.createWindowContext(display, windowType, options);
+     * </pre></p>
      *
-     * @param base Base {@link Context} for this new instance.
-     * @param type Window type to be used with this context.
+     * @param base    Base {@link Context} for this new instance.
+     * @param type    Window type to be used with this context.
      * @param options A bundle used to pass window-related options.
-     *
-     * @hide
+     * @see DisplayAreaInfo#rootDisplayAreaId
      */
     public WindowContext(@NonNull Context base, int type, @Nullable Bundle options) {
         super(base);
@@ -67,7 +79,7 @@ public class WindowContext extends ContextWrapper {
         mType = type;
         mOptions = options;
         mWindowManager = createWindowContextWindowManager(this);
-        IBinder token = getWindowContextToken();
+        WindowTokenClient token = (WindowTokenClient) getWindowContextToken();
         mController = new WindowContextController(token);
 
         Reference.reachabilityFence(this);
@@ -105,10 +117,13 @@ public class WindowContext extends ContextWrapper {
 
     @Override
     public void destroy() {
-        mCallbacksController.clearCallbacks();
-        // Called to the base ContextImpl to do final clean-up.
-        getBaseContext().destroy();
-        Reference.reachabilityFence(this);
+        try {
+            mCallbacksController.clearCallbacks();
+            // Called to the base ContextImpl to do final clean-up.
+            getBaseContext().destroy();
+        } finally {
+            Reference.reachabilityFence(this);
+        }
     }
 
     @Override
@@ -122,7 +137,19 @@ public class WindowContext extends ContextWrapper {
     }
 
     /** Dispatch {@link Configuration} to each {@link ComponentCallbacks}. */
-    void dispatchConfigurationChanged(@NonNull Configuration newConfig) {
+    @VisibleForTesting(visibility = PACKAGE)
+    public void dispatchConfigurationChanged(@NonNull Configuration newConfig) {
         mCallbacksController.dispatchConfigurationChanged(newConfig);
+    }
+
+    @Override
+    public int getWindowType() {
+        return mType;
+    }
+
+    @Nullable
+    @Override
+    public Bundle getWindowContextOptions() {
+        return mOptions;
     }
 }

@@ -22,7 +22,6 @@ import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTI
 import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_LEFT;
 import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_NONE;
 import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_RIGHT;
-import static com.android.wm.shell.pip.phone.PhonePipMenuController.MENU_STATE_CLOSE;
 import static com.android.wm.shell.pip.phone.PhonePipMenuController.MENU_STATE_FULL;
 import static com.android.wm.shell.pip.phone.PhonePipMenuController.MENU_STATE_NONE;
 import static com.android.wm.shell.pip.phone.PipMenuView.ANIM_TYPE_NONE;
@@ -36,8 +35,8 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.provider.DeviceConfig;
-import android.util.Log;
 import android.util.Size;
+import android.view.DisplayCutout;
 import android.view.InputEvent;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
@@ -47,6 +46,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
@@ -55,6 +55,7 @@ import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipUiEventLogger;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.io.PrintWriter;
 
@@ -81,7 +82,6 @@ public class PipTouchHandler {
 
     private final PhonePipMenuController mMenuController;
     private final AccessibilityManager mAccessibilityManager;
-    private boolean mShowPipMenuOnAnimationEnd = false;
 
     /**
      * Whether PIP stash is enabled or not. When enabled, if the user flings toward the edge of the
@@ -141,12 +141,16 @@ public class PipTouchHandler {
 
         @Override
         public void onPipExpand() {
-            mMotionHelper.expandLeavePip();
+            mMotionHelper.expandLeavePip(false /* skipAnimation */);
+        }
+
+        @Override
+        public void onEnterSplit() {
+            mMotionHelper.expandIntoSplit();
         }
 
         @Override
         public void onPipDismiss() {
-            mPipUiEventLogger.log(PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_TAP_TO_REMOVE);
             mTouchState.removeDoubleTapTimeoutCallback();
             mMotionHelper.dismissPip();
         }
@@ -256,6 +260,11 @@ public class PipTouchHandler {
         mPipDismissTargetHandler.updateMagneticTargetSize();
     }
 
+    public void onOverlayChanged() {
+        // onOverlayChanged is triggered upon theme change, update the dismiss target accordingly.
+        mPipDismissTargetHandler.init();
+    }
+
     private boolean shouldShowResizeHandle() {
         return false;
     }
@@ -280,7 +289,6 @@ public class PipTouchHandler {
     public void onActivityPinned() {
         mPipDismissTargetHandler.createOrUpdateDismissTarget();
 
-        mShowPipMenuOnAnimationEnd = true;
         mPipResizeGestureHandler.onActivityPinned();
         mFloatingContentCoordinator.onContentAdded(mMotionHelper);
     }
@@ -303,13 +311,6 @@ public class PipTouchHandler {
         if (direction == TRANSITION_DIRECTION_TO_PIP) {
             // Set the initial bounds as the user resize bounds.
             mPipResizeGestureHandler.setUserResizeBounds(mPipBoundsState.getBounds());
-        }
-
-        if (mShowPipMenuOnAnimationEnd) {
-            mMenuController.showMenu(MENU_STATE_CLOSE, mPipBoundsState.getBounds(),
-                    true /* allowMenuTimeout */, false /* willResizeMenu */,
-                    shouldShowResizeHandle());
-            mShowPipMenuOnAnimationEnd = false;
         }
     }
 
@@ -909,7 +910,7 @@ public class PipTouchHandler {
                     // Expand to fullscreen if this is a double tap
                     // the PiP should be frozen until the transition ends
                     setTouchEnabled(false);
-                    mMotionHelper.expandLeavePip();
+                    mMotionHelper.expandLeavePip(false /* skipAnimation */);
                 }
             } else if (mMenuState != MENU_STATE_FULL) {
                 if (mPipBoundsState.isStashed()) {
@@ -959,21 +960,38 @@ public class PipTouchHandler {
         }
 
         private boolean shouldStash(PointF vel, Rect motionBounds) {
+            final boolean flingToLeft = vel.x < -mStashVelocityThreshold;
+            final boolean flingToRight = vel.x > mStashVelocityThreshold;
+            final int offset = motionBounds.width() / 2;
+            final boolean droppingOnLeft =
+                    motionBounds.left < mPipBoundsState.getDisplayBounds().left - offset;
+            final boolean droppingOnRight =
+                    motionBounds.right > mPipBoundsState.getDisplayBounds().right + offset;
+
+            // Do not allow stash if the destination edge contains display cutout. We only
+            // compare the left and right edges since we do not allow stash on top / bottom.
+            final DisplayCutout displayCutout =
+                    mPipBoundsState.getDisplayLayout().getDisplayCutout();
+            if (displayCutout != null) {
+                if ((flingToLeft || droppingOnLeft)
+                        && !displayCutout.getBoundingRectLeft().isEmpty()) {
+                    return false;
+                } else if ((flingToRight || droppingOnRight)
+                        && !displayCutout.getBoundingRectRight().isEmpty()) {
+                    return false;
+                }
+            }
+
             // If user flings the PIP window above the minimum velocity, stash PIP.
             // Only allow stashing to the edge if PIP wasn't previously stashed on the opposite
             // edge.
-            final boolean stashFromFlingToEdge = ((vel.x < -mStashVelocityThreshold
-                    && mPipBoundsState.getStashedState() != STASH_TYPE_RIGHT)
-                    || (vel.x > mStashVelocityThreshold
-                    && mPipBoundsState.getStashedState() != STASH_TYPE_LEFT));
+            final boolean stashFromFlingToEdge =
+                    (flingToLeft && mPipBoundsState.getStashedState() != STASH_TYPE_RIGHT)
+                    || (flingToRight && mPipBoundsState.getStashedState() != STASH_TYPE_LEFT);
 
             // If User releases the PIP window while it's out of the display bounds, put
             // PIP into stashed mode.
-            final int offset = motionBounds.width() / 2;
-            final boolean stashFromDroppingOnEdge =
-                    (motionBounds.right > mPipBoundsState.getDisplayBounds().right + offset
-                            || motionBounds.left
-                            < mPipBoundsState.getDisplayBounds().left - offset);
+            final boolean stashFromDroppingOnEdge = droppingOnLeft || droppingOnRight;
 
             return stashFromFlingToEdge || stashFromDroppingOnEdge;
         }
@@ -1011,7 +1029,8 @@ public class PipTouchHandler {
         }
         final Size estimatedMinMenuSize = mMenuController.getEstimatedMinMenuSize();
         if (estimatedMinMenuSize == null) {
-            Log.wtf(TAG, "Failed to get estimated menu size");
+            ProtoLog.wtf(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Failed to get estimated menu size", TAG);
             return false;
         }
         final Rect currentBounds = mPipBoundsState.getBounds();

@@ -37,11 +37,13 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
+import androidx.annotation.NonNull;
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaFeatureFlag;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -49,6 +51,7 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager.Keyg
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
+import com.android.systemui.statusbar.notification.collection.provider.DebugModeFilterProvider;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
@@ -76,6 +79,8 @@ public class NotificationFilterTest extends SysuiTestCase {
     private final StatusBarNotification mMockStatusBarNotification =
             mock(StatusBarNotification.class);
 
+    @Mock
+    DebugModeFilterProvider mDebugModeFilterProvider;
     @Mock
     StatusBarStateController mStatusBarStateController;
     @Mock
@@ -119,7 +124,8 @@ public class NotificationFilterTest extends SysuiTestCase {
                 new NotificationGroupManagerLegacy(
                         mock(StatusBarStateController.class),
                         () -> mock(PeopleNotificationIdentifier.class),
-                        Optional.of(mock(Bubbles.class))));
+                        Optional.of(mock(Bubbles.class)),
+                        mock(DumpManager.class)));
         mDependency.injectMockDependency(ShadeController.class);
         mDependency.injectMockDependency(NotificationLockscreenUserManager.class);
         mDependency.injectTestDependency(KeyguardEnvironment.class, mEnvironment);
@@ -130,7 +136,13 @@ public class NotificationFilterTest extends SysuiTestCase {
                 mDependency,
                 TestableLooper.get(this));
         mRow = testHelper.createRow();
-        mNotificationFilter = new NotificationFilter(
+        mNotificationFilter = newNotificationFilter();
+    }
+
+    @NonNull
+    private NotificationFilter newNotificationFilter() {
+        return new NotificationFilter(
+                mDebugModeFilterProvider,
                 mStatusBarStateController,
                 mEnvironment,
                 mFsc,
@@ -203,12 +215,7 @@ public class NotificationFilterTest extends SysuiTestCase {
     public void shouldFilterOtherNotificationWhenDisabled() {
         // GIVEN that the media feature is disabled
         when(mMediaFeatureFlag.getEnabled()).thenReturn(false);
-        NotificationFilter filter = new NotificationFilter(
-                mStatusBarStateController,
-                mEnvironment,
-                mFsc,
-                mUserManager,
-                mMediaFeatureFlag);
+        NotificationFilter filter = newNotificationFilter();
         // WHEN the media filter is asked about an entry
         NotificationEntry otherEntry = new NotificationEntryBuilder().build();
         final boolean shouldFilter = filter.shouldFilterOut(otherEntry);
@@ -220,12 +227,7 @@ public class NotificationFilterTest extends SysuiTestCase {
     public void shouldFilterOtherNotificationWhenEnabled() {
         // GIVEN that the media feature is enabled
         when(mMediaFeatureFlag.getEnabled()).thenReturn(true);
-        NotificationFilter filter = new NotificationFilter(
-                mStatusBarStateController,
-                mEnvironment,
-                mFsc,
-                mUserManager,
-                mMediaFeatureFlag);
+        NotificationFilter filter = newNotificationFilter();
         // WHEN the media filter is asked about an entry
         NotificationEntry otherEntry = new NotificationEntryBuilder().build();
         final boolean shouldFilter = filter.shouldFilterOut(otherEntry);
@@ -237,12 +239,7 @@ public class NotificationFilterTest extends SysuiTestCase {
     public void shouldFilterMediaNotificationWhenDisabled() {
         // GIVEN that the media feature is disabled
         when(mMediaFeatureFlag.getEnabled()).thenReturn(false);
-        NotificationFilter filter = new NotificationFilter(
-                mStatusBarStateController,
-                mEnvironment,
-                mFsc,
-                mUserManager,
-                mMediaFeatureFlag);
+        NotificationFilter filter = newNotificationFilter();
         // WHEN the media filter is asked about a media entry
         final boolean shouldFilter = filter.shouldFilterOut(mMediaEntry);
         // THEN it shouldn't be filtered
@@ -253,12 +250,7 @@ public class NotificationFilterTest extends SysuiTestCase {
     public void shouldFilterMediaNotificationWhenEnabled() {
         // GIVEN that the media feature is enabled
         when(mMediaFeatureFlag.getEnabled()).thenReturn(true);
-        NotificationFilter filter = new NotificationFilter(
-                mStatusBarStateController,
-                mEnvironment,
-                mFsc,
-                mUserManager,
-                mMediaFeatureFlag);
+        NotificationFilter filter = newNotificationFilter();
         // WHEN the media filter is asked about a media entry
         final boolean shouldFilter = filter.shouldFilterOut(mMediaEntry);
         // THEN it should be filtered

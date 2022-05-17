@@ -28,6 +28,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.UserHandle;
+import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
@@ -112,7 +113,6 @@ public class ComponentController extends StateController {
         userFilter.addAction(Intent.ACTION_USER_STOPPED);
         mContext.registerReceiverAsUser(
                 mBroadcastReceiver, UserHandle.ALL, userFilter, null, null);
-
     }
 
     @Override
@@ -220,24 +220,27 @@ public class ComponentController extends StateController {
     private void updateComponentStatesLocked(@NonNull Predicate<JobStatus> filter) {
         mComponentStateUpdateFunctor.reset();
         mService.getJobStore().forEachJob(filter, mComponentStateUpdateFunctor);
-        if (mComponentStateUpdateFunctor.mChanged) {
-            mStateChangedListener.onControllerStateChanged();
+        if (mComponentStateUpdateFunctor.mChangedJobs.size() > 0) {
+            mStateChangedListener.onControllerStateChanged(
+                    mComponentStateUpdateFunctor.mChangedJobs);
         }
     }
 
     final class ComponentStateUpdateFunctor implements Consumer<JobStatus> {
         @GuardedBy("mLock")
-        boolean mChanged;
+        final ArraySet<JobStatus> mChangedJobs = new ArraySet<>();
 
         @Override
         @GuardedBy("mLock")
         public void accept(JobStatus jobStatus) {
-            mChanged |= updateComponentEnabledStateLocked(jobStatus);
+            if (updateComponentEnabledStateLocked(jobStatus)) {
+                mChangedJobs.add(jobStatus);
+            }
         }
 
         @GuardedBy("mLock")
         private void reset() {
-            mChanged = false;
+            mChangedJobs.clear();
         }
     }
 

@@ -19,6 +19,7 @@ package android.service.trust;
 import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.app.Service;
@@ -39,9 +40,12 @@ import android.os.UserManager;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.infra.AndroidFuture;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * A service that notifies the system about whether it believes the environment of the device
@@ -114,14 +118,42 @@ public class TrustAgentService extends Service {
      */
     public static final int FLAG_GRANT_TRUST_DISMISS_KEYGUARD = 1 << 1;
 
+    /**
+     * Flag for {@link #grantTrust(CharSequence, long, int)} indicating the platform should
+     * automatically remove trust after some conditions are met (detailed below) with the option for
+     * the agent to renew the trust again later.
+     *
+     * <p>After this is called, the agent will grant trust until the platform thinks an active
+     * user is no longer using that trust. This can happen for any reason as determined by the
+     * platform. For example, if the user dismisses keyguard, the platform will remove trust;
+     * since this does not automatically lock the device, this results in the device locking the
+     * next time the screen turns off.
+     *
+     * <p>When the platform internally removes the agent's trust in this manner, an agent can
+     * re-grant it (via a call to grantTrust) without the user having to unlock the device through
+     * another method (e.g. PIN). This renewable state only persists for a limited time.
+     */
+    public static final int FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE = 1 << 2;
+
+    /**
+     * Flag for {@link #grantTrust(CharSequence, long, int)} indicating that the message should
+     * be displayed to the user.
+     *
+     * Without this flag, the message passed to {@code grantTrust} is only used for debugging
+     * purposes. With the flag, it may be displayed to the user as the reason why the device is
+     * unlocked.
+     */
+    public static final int FLAG_GRANT_TRUST_DISPLAY_MESSAGE = 1 << 3;
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, prefix = { "FLAG_GRANT_TRUST_" }, value = {
             FLAG_GRANT_TRUST_INITIATED_BY_USER,
             FLAG_GRANT_TRUST_DISMISS_KEYGUARD,
+            FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE,
+            FLAG_GRANT_TRUST_DISPLAY_MESSAGE,
     })
     public @interface GrantTrustFlags {}
-
 
     /**
      * Int enum indicating that escrow token is active.
@@ -154,6 +186,8 @@ public class TrustAgentService extends Service {
     private static final int MSG_ESCROW_TOKEN_ADDED = 7;
     private static final int MSG_ESCROW_TOKEN_STATE_RECEIVED = 8;
     private static final int MSG_ESCROW_TOKEN_REMOVED = 9;
+    private static final int MSG_USER_REQUESTED_UNLOCK = 10;
+    private static final int MSG_USER_MAY_REQUEST_UNLOCK = 11;
 
     private static final String EXTRA_TOKEN = "token";
     private static final String EXTRA_TOKEN_HANDLE = "token_handle";
@@ -186,6 +220,12 @@ public class TrustAgentService extends Service {
             switch (msg.what) {
                 case MSG_UNLOCK_ATTEMPT:
                     onUnlockAttempt(msg.arg1 != 0);
+                    break;
+                case MSG_USER_REQUESTED_UNLOCK:
+                    onUserRequestedUnlock(msg.arg1 != 0);
+                    break;
+                case MSG_USER_MAY_REQUEST_UNLOCK:
+                    onUserMayRequestUnlock();
                     break;
                 case MSG_UNLOCK_LOCKOUT:
                     onDeviceUnlockLockout(msg.arg1);
@@ -262,6 +302,40 @@ public class TrustAgentService extends Service {
      * @param successful true if the user successfully completed the challenge.
      */
     public void onUnlockAttempt(boolean successful) {
+    }
+
+    /**
+     * Called when the user has interacted with the locked device such that they are likely to want
+     * it to be unlocked soon. This approximates the timing when, for example, the platform would
+     * check for face authentication to unlock the device.
+     *
+     * This signal can be used for the agent to make preparations to quickly unlock the device
+     * with {@link #onUserRequestedUnlock}. Agents should not unlock the device based solely on this
+     * signal. There is no guarantee that this method will be called before
+     * {@link #onUserRequestedUnlock(boolean)}.
+     */
+    public void onUserMayRequestUnlock() {
+    }
+
+    /**
+     * Called when the user has interacted with the locked device such that they likely want it
+     * to be unlocked.
+     *
+     * When this is called, there is a high probability that the user wants to unlock the device and
+     * that a biometric method is either not available or not the optimal method at this time. For
+     * example, this may be called after some kinds of biometric authentication failure.
+     *
+     * A call to this method may be preceded by a call to {@link #onUserMayRequestUnlock} which
+     * the agent can use as a signal to prepare for a subsequent call to this method.
+     *
+     * To attempt to unlock the device, the agent needs to call
+     * {@link #grantTrust(CharSequence, long, int)}.
+     *
+     * @param dismissKeyguard true when the user wants keyguard dismissed
+     *
+     * @see #FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE
+     */
+    public void onUserRequestedUnlock(boolean dismissKeyguard) {
     }
 
     /**
@@ -354,26 +428,10 @@ public class TrustAgentService extends Service {
     }
 
     /**
-     * Call to grant trust on the device.
+     * Attempts to grant trust on the device.
      *
-     * @param message describes why the device is trusted, e.g. "Trusted by location".
-     * @param durationMs amount of time in milliseconds to keep the device in a trusted state.
-     *    Trust for this agent will automatically be revoked when the timeout expires unless
-     *    extended by a subsequent call to this function. The timeout is measured from the
-     *    invocation of this function as dictated by {@link SystemClock#elapsedRealtime())}.
-     *    For security reasons, the value should be no larger than necessary.
-     *    The value may be adjusted by the system as necessary to comply with a policy controlled
-     *    by the system or {@link DevicePolicyManager} restrictions. See {@link #onTrustTimeout()}
-     *    for determining when trust expires.
-     * @param initiatedByUser this is a hint to the system that trust is being granted as the
-     *    direct result of user action - such as solving a security challenge. The hint is used
-     *    by the system to optimize the experience. Behavior may vary by device and release, so
-     *    one should only set this parameter if it meets the above criteria rather than relying on
-     *    the behavior of any particular device or release. Corresponds to
-     *    {@link #FLAG_GRANT_TRUST_INITIATED_BY_USER}.
-     * @throws IllegalStateException if the agent is not currently managing trust.
-     *
-     * @deprecated use {@link #grantTrust(CharSequence, long, int)} instead.
+     * @param initiatedByUser see {@link #FLAG_GRANT_TRUST_INITIATED_BY_USER}
+     * @deprecated use {@link #grantTrust(CharSequence, long, int, Consumer)} instead.
      */
     @Deprecated
     public final void grantTrust(
@@ -382,7 +440,17 @@ public class TrustAgentService extends Service {
     }
 
     /**
-     * Call to grant trust on the device.
+     * Attempts to grant trust on the device.
+     * @deprecated use {@link #grantTrust(CharSequence, long, int, Consumer)} instead.
+     */
+    @Deprecated
+    public final void grantTrust(
+            final CharSequence message, final long durationMs, @GrantTrustFlags final int flags) {
+        grantTrust(message, durationMs, flags, null);
+    }
+
+    /**
+     * Attempts to grant trust on the device.
      *
      * @param message describes why the device is trusted, e.g. "Trusted by location".
      * @param durationMs amount of time in milliseconds to keep the device in a trusted state.
@@ -393,19 +461,36 @@ public class TrustAgentService extends Service {
      *    The value may be adjusted by the system as necessary to comply with a policy controlled
      *    by the system or {@link DevicePolicyManager} restrictions. See {@link #onTrustTimeout()}
      *    for determining when trust expires.
-     * @param flags TBDocumented
+     * @param flags flags to control call: see constants prefixed by {@code FLAG_GRANT_TRUST_}.
+     * @param resultCallback may be called with the results of the grant
      * @throws IllegalStateException if the agent is not currently managing trust.
+     *
+     * See {@link GrantTrustResult} for the cases where {@code resultCallback} will be called.
      */
     public final void grantTrust(
-            final CharSequence message, final long durationMs, @GrantTrustFlags final int flags) {
+            @NonNull final CharSequence message,
+            final long durationMs,
+            @GrantTrustFlags final int flags,
+            @Nullable final Consumer<GrantTrustResult> resultCallback) {
         synchronized (mLock) {
             if (!mManagingTrust) {
                 throw new IllegalStateException("Cannot grant trust if agent is not managing trust."
                         + " Call setManagingTrust(true) first.");
             }
+
+            // Prepare future for the IPC
+            AndroidFuture<GrantTrustResult> future = new AndroidFuture<>();
+            future.thenAccept(result -> {
+                if (resultCallback != null) {
+                    // Instead of taking an explicit executor, we post this to mHandler to be
+                    // consistent with the other event methods in this class.
+                    mHandler.post(() -> resultCallback.accept(result));
+                }
+            });
+
             if (mCallback != null) {
                 try {
-                    mCallback.grantTrust(message.toString(), durationMs, flags);
+                    mCallback.grantTrust(message.toString(), durationMs, flags, future);
                 } catch (RemoteException e) {
                     onError("calling enableTrust()");
                 }
@@ -415,7 +500,7 @@ public class TrustAgentService extends Service {
                 mPendingGrantTrustTask = new Runnable() {
                     @Override
                     public void run() {
-                        grantTrust(message, durationMs, flags);
+                        grantTrust(message, durationMs, flags, resultCallback);
                     }
                 };
             }
@@ -564,6 +649,26 @@ public class TrustAgentService extends Service {
     }
 
     /**
+     * Locks the user.
+     *
+     * This revokes any trust granted by this agent and shows keyguard for the user if it is not
+     * currently shown for them. Other users are not affected. Note that this is in contrast to
+     * {@link #revokeTrust()} which does not show keyguard if it is not already shown.
+     *
+     * If the user has no auth method specified, then keyguard will still be shown but can be
+     * dismissed normally.
+     */
+    public final void lockUser() {
+        if (mCallback != null) {
+            try {
+                mCallback.lockUser();
+            } catch (RemoteException e) {
+                onError("calling lockUser");
+            }
+        }
+    }
+
+    /**
      * Request showing a transient error message on the keyguard.
      * The message will be visible on the lock screen or always on display if possible but can be
      * overridden by other keyguard events of higher priority - eg. fingerprint auth error.
@@ -598,6 +703,17 @@ public class TrustAgentService extends Service {
         @Override /* Binder API */
         public void onUnlockAttempt(boolean successful) {
             mHandler.obtainMessage(MSG_UNLOCK_ATTEMPT, successful ? 1 : 0, 0).sendToTarget();
+        }
+
+        @Override
+        public void onUserRequestedUnlock(boolean dismissKeyguard) {
+            mHandler.obtainMessage(MSG_USER_REQUESTED_UNLOCK, dismissKeyguard ? 1 : 0, 0)
+                    .sendToTarget();
+        }
+
+        @Override
+        public void onUserMayRequestUnlock() {
+            mHandler.obtainMessage(MSG_USER_MAY_REQUEST_UNLOCK).sendToTarget();
         }
 
         @Override

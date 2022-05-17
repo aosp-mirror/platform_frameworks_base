@@ -18,12 +18,15 @@ package android.telephony.ims;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -39,9 +42,13 @@ import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.util.Log;
 
 import com.android.internal.telephony.IIntegerConsumer;
+import com.android.internal.telephony.ITelephony;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
@@ -51,6 +58,7 @@ import java.util.function.Consumer;
  *
  * Use {@link ImsManager#getImsRcsManager(int)} to create an instance of this manager.
  */
+@RequiresFeature(PackageManager.FEATURE_TELEPHONY_IMS)
 public class ImsRcsManager {
     private static final String TAG = "ImsRcsManager";
 
@@ -82,6 +90,46 @@ public class ImsRcsManager {
             "android.telephony.ims.action.SHOW_CAPABILITY_DISCOVERY_OPT_IN";
 
     /**
+     * This carrier supports User Capability Exchange as, defined by the framework using a
+     * presence server. If set, the RcsFeature should support capability exchange. If not set, this
+     * RcsFeature should not publish capabilities or service capability requests.
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "CAPABILITY_TYPE_", flag = true, value = {
+            CAPABILITY_TYPE_NONE,
+            CAPABILITY_TYPE_OPTIONS_UCE,
+            CAPABILITY_TYPE_PRESENCE_UCE
+    })
+    public @interface RcsImsCapabilityFlag {}
+
+    /**
+     * Undefined capability type for initialization
+     */
+    public static final int CAPABILITY_TYPE_NONE = 0;
+
+    /**
+     * This carrier supports User Capability Exchange using SIP OPTIONS as defined by the
+     * framework. If set, the RcsFeature should support capability exchange using SIP OPTIONS.
+     * If not set, this RcsFeature should not service capability requests.
+     */
+    public static final int CAPABILITY_TYPE_OPTIONS_UCE = 1 << 0;
+
+    /**
+     * This carrier supports User Capability Exchange using a presence server as defined by the
+     * framework. If set, the RcsFeature should support capability exchange using a presence
+     * server. If not set, this RcsFeature should not publish capabilities or service capability
+     * requests using presence.
+     */
+    public static final int CAPABILITY_TYPE_PRESENCE_UCE = 1 << 1;
+
+    /**
+     * This is used to check the upper range of RCS capability
+     * @hide
+     */
+    public static final int CAPABILITY_TYPE_MAX = CAPABILITY_TYPE_PRESENCE_UCE + 1;
+
+    /**
      * An application can use {@link #addOnAvailabilityChangedListener} to register a
      * {@link OnAvailabilityChangedListener}, which will notify the user when the RCS feature
      * availability status updates from the ImsService.
@@ -99,7 +147,7 @@ public class ImsRcsManager {
          *
          * @param capabilities The new availability of the capabilities.
          */
-        void onAvailabilityChanged(@RcsUceAdapter.RcsImsCapabilityFlag int capabilities);
+        void onAvailabilityChanged(@RcsImsCapabilityFlag int capabilities);
     }
 
     /**
@@ -159,6 +207,7 @@ public class ImsRcsManager {
     private final int mSubId;
     private final Context mContext;
     private final BinderCacheManager<IImsRcsController> mBinderCache;
+    private final BinderCacheManager<ITelephony> mTelephonyBinderCache;
     private final Map<OnAvailabilityChangedListener, AvailabilityCallbackAdapter>
             mAvailabilityChangedCallbacks;
 
@@ -167,11 +216,13 @@ public class ImsRcsManager {
      * @hide
      */
     public ImsRcsManager(Context context, int subId,
-            BinderCacheManager<IImsRcsController> binderCache) {
+            BinderCacheManager<IImsRcsController> binderCache,
+            BinderCacheManager<ITelephony> telephonyBinderCache) {
         mSubId = subId;
         mContext = context;
         mBinderCache = binderCache;
         mAvailabilityChangedCallbacks = new HashMap<>();
+        mTelephonyBinderCache = telephonyBinderCache;
     }
 
     /**
@@ -478,7 +529,7 @@ public class ImsRcsManager {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public boolean isCapable(@RcsUceAdapter.RcsImsCapabilityFlag int capability,
+    public boolean isCapable(@RcsImsCapabilityFlag int capability,
             @ImsRegistrationImplBase.ImsRegistrationTech int radioTech) throws ImsException {
         IImsRcsController imsRcsController = getIImsRcsController();
         if (imsRcsController == null) {
@@ -514,7 +565,7 @@ public class ImsRcsManager {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public boolean isAvailable(@RcsUceAdapter.RcsImsCapabilityFlag int capability,
+    public boolean isAvailable(@RcsImsCapabilityFlag int capability,
             @ImsRegistrationImplBase.ImsRegistrationTech int radioTech)
             throws ImsException {
         IImsRcsController imsRcsController = getIImsRcsController();
@@ -530,6 +581,67 @@ public class ImsRcsManager {
             Log.w(TAG, "Error calling IImsRcsController#isAvailable", e);
             throw new ImsException("Remote IMS Service is not available",
                     ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+        }
+    }
+
+    /**
+     * Register a new callback, which is used to notify the registrant of changes to
+     * the state of the underlying IMS service that is attached to telephony to
+     * implement IMS functionality. If the manager is created for
+     * the {@link android.telephony.SubscriptionManager#DEFAULT_SUBSCRIPTION_ID},
+     * this throws an {@link ImsException}.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE READ_PRECISE_PHONE_STATE}
+     * or that the calling app has carrier privileges
+     * (see {@link android.telephony.TelephonyManager#hasCarrierPrivileges}).
+     *
+     * @param executor the Executor that will be used to call the {@link ImsStateCallback}.
+     * @param callback The callback instance being registered.
+     * @throws ImsException in the case that the callback can not be registered.
+     * See {@link ImsException#getCode} for more information on when this is called.
+     */
+    @RequiresPermission(anyOf = {Manifest.permission.READ_PRECISE_PHONE_STATE,
+            Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            Manifest.permission.ACCESS_RCS_USER_CAPABILITY_EXCHANGE})
+    public void registerImsStateCallback(@NonNull Executor executor,
+            @NonNull ImsStateCallback callback) throws ImsException {
+        Objects.requireNonNull(callback, "Must include a non-null ImsStateCallback.");
+        Objects.requireNonNull(executor, "Must include a non-null Executor.");
+
+        callback.init(executor);
+        ITelephony telephony = mTelephonyBinderCache.listenOnBinder(callback, callback::binderDied);
+        if (telephony == null) {
+            throw new ImsException("Telephony server is down",
+                    ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+        }
+
+        try {
+            telephony.registerImsStateCallback(
+                    mSubId, ImsFeature.FEATURE_RCS,
+                    callback.getCallbackBinder(), mContext.getOpPackageName());
+        } catch (ServiceSpecificException e) {
+            throw new ImsException(e.getMessage(), e.errorCode);
+        } catch (RemoteException | IllegalStateException e) {
+            throw new ImsException(e.getMessage(), ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+        }
+    }
+
+    /**
+     * Unregisters a previously registered callback.
+     *
+     * @param callback The callback instance to be unregistered.
+     */
+    public void unregisterImsStateCallback(@NonNull ImsStateCallback callback) {
+        Objects.requireNonNull(callback, "Must include a non-null ImsStateCallback.");
+
+        ITelephony telephony = mTelephonyBinderCache.removeRunnable(callback);
+        try {
+            if (telephony != null) {
+                telephony.unregisterImsStateCallback(callback.getCallbackBinder());
+            }
+        } catch (RemoteException ignore) {
+            // ignore it
         }
     }
 

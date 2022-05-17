@@ -24,18 +24,4 @@ public interface Dumpable {
 
     /** Dump internal state. */
     void dump(@NonNull IndentingPrintWriter pw, @Nullable String[] args);
-
-    /**
-     * An interface that can be used expose when one component allows another to be registered so
-     * that it is dumped at the same time.
-     */
-    interface Container {
-
-        /**
-         * Registers the supplied {@link Dumpable}. When the implementation is dumped
-         * {@link Dumpable#dump(IndentingPrintWriter, String[])} should be called on the
-         * {@code dumpable}.
-         */
-        void addDumpable(@NonNull Dumpable dumpable);
-    }
 }

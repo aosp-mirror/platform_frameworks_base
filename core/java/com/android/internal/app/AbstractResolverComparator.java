@@ -161,6 +161,11 @@ public abstract class AbstractResolverComparator implements Comparator<ResolvedC
         final ResolveInfo lhs = lhsp.getResolveInfoAt(0);
         final ResolveInfo rhs = rhsp.getResolveInfoAt(0);
 
+        final boolean lFixedAtTop = lhsp.isFixedAtTop();
+        final boolean rFixedAtTop = rhsp.isFixedAtTop();
+        if (lFixedAtTop && !rFixedAtTop) return -1;
+        if (!lFixedAtTop && rFixedAtTop) return 1;
+
         // We want to put the one targeted to another user at the end of the dialog.
         if (lhs.targetUserId != UserHandle.USER_CURRENT) {
             return rhs.targetUserId != UserHandle.USER_CURRENT ? 0 : 1;
@@ -222,12 +227,6 @@ public abstract class AbstractResolverComparator implements Comparator<ResolvedC
      * when {@link #compute(List)} was called before this.
      */
     abstract float getScore(ComponentName name);
-
-    /**
-     * Returns the list of top K component names which have highest
-     * {@link #getScore(ComponentName)}
-     */
-    abstract List<ComponentName> getTopComponentNames(int topK);
 
     /** Handles result message sent to mHandler. */
     abstract void handleResultMessage(Message message);

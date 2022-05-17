@@ -74,15 +74,20 @@ public class BatteryExternalStatsWorkerTest {
     @Test
     public void testTargetedEnergyConsumerQuerying() {
         final int numCpuClusters = 4;
+        final int numDisplays = 5;
         final int numOther = 3;
 
         // Add some energy consumers used by BatteryExternalStatsWorker.
         final IntArray tempAllIds = new IntArray();
 
-        final int displayId = mPowerStatsInternal.addEnergyConsumer(EnergyConsumerType.DISPLAY, 0,
-                "display");
-        tempAllIds.add(displayId);
-        mPowerStatsInternal.incrementEnergyConsumption(displayId, 12345);
+        final int[] displayIds = new int[numDisplays];
+        for (int i = 0; i < numDisplays; i++) {
+            displayIds[i] = mPowerStatsInternal.addEnergyConsumer(
+                    EnergyConsumerType.DISPLAY, i, "display" + i);
+            tempAllIds.add(displayIds[i]);
+            mPowerStatsInternal.incrementEnergyConsumption(displayIds[i], 12345 + i);
+        }
+        Arrays.sort(displayIds);
 
         final int wifiId = mPowerStatsInternal.addEnergyConsumer(EnergyConsumerType.WIFI, 0,
                 "wifi");
@@ -130,9 +135,13 @@ public class BatteryExternalStatsWorkerTest {
 
         final EnergyConsumerResult[] displayResults =
                 mBatteryExternalStatsWorker.getMeasuredEnergyLocked(UPDATE_DISPLAY).getNow(null);
-        // Results should only have the display energy consumer
-        assertEquals(1, displayResults.length);
-        assertEquals(displayId, displayResults[0].id);
+        // Results should only have the cpu cluster energy consumers
+        final int[] receivedDisplayIds = new int[displayResults.length];
+        for (int i = 0; i < displayResults.length; i++) {
+            receivedDisplayIds[i] = displayResults[i].id;
+        }
+        Arrays.sort(receivedDisplayIds);
+        assertArrayEquals(displayIds, receivedDisplayIds);
 
         final EnergyConsumerResult[] wifiResults =
                 mBatteryExternalStatsWorker.getMeasuredEnergyLocked(UPDATE_WIFI).getNow(null);
@@ -193,6 +202,7 @@ public class BatteryExternalStatsWorkerTest {
     public class TestBatteryStatsImpl extends BatteryStatsImpl {
         public TestBatteryStatsImpl(Context context) {
             mPowerProfile = new PowerProfile(context, true /* forTest */);
+            initTimersAndCounters();
         }
     }
 

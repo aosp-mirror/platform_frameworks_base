@@ -35,6 +35,7 @@ import android.os.Messenger;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AttributeSet;
@@ -319,23 +320,11 @@ public class SettingsInjector {
 
         @Override
         public boolean onPreferenceClick(Preference preference) {
-            // Activity to start if they click on the preference. Must start in new task to ensure
-            // that "android.settings.LOCATION_SOURCE_SETTINGS" brings user back to
-            // Settings > Location.
+            // Activity to start if they click on the preference.
             Intent settingIntent = new Intent();
             settingIntent.setClassName(mInfo.packageName, mInfo.settingsActivity);
+            // No flags set to ensure the activity is launched within the same settings task.
             logPreferenceClick(settingIntent);
-            // Sometimes the user may navigate back to "Settings" and launch another different
-            // injected setting after one injected setting has been launched.
-            //
-            // FLAG_ACTIVITY_CLEAR_TOP allows multiple Activities to stack on each other. When
-            // "back" button is clicked, the user will navigate through all the injected settings
-            // launched before. Such behavior could be quite confusing sometimes.
-            //
-            // In order to avoid such confusion, we use FLAG_ACTIVITY_CLEAR_TASK, which always clear
-            // up all existing injected settings and make sure that "back" button always brings the
-            // user back to "Settings" directly.
-            settingIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             mContext.startActivityAsUser(settingIntent, mInfo.mUserHandle);
             return true;
         }
@@ -461,17 +450,22 @@ public class SettingsInjector {
             if (setting == null) {
                 return;
             }
-            final Preference preference = setting.preference;
             Bundle bundle = msg.getData();
-            boolean enabled = bundle.getBoolean(SettingInjectorService.ENABLED_KEY, true);
-            String summary = bundle.getString(SettingInjectorService.SUMMARY_KEY, null);
             if (Log.isLoggable(TAG, Log.DEBUG)) {
                 Log.d(TAG, setting + ": received " + msg + ", bundle: " + bundle);
             }
-            preference.setSummary(summary);
+            boolean enabled = bundle.getBoolean(SettingInjectorService.ENABLED_KEY, true);
+            String summary = bundle.getString(SettingInjectorService.SUMMARY_KEY);
+            final Preference preference = setting.preference;
+            if (TextUtils.isEmpty(summary)) {
+                // Set a placeholder summary when received empty summary from injected service.
+                // This is necessary to avoid preference height change.
+                preference.setSummary(R.string.summary_placeholder);
+            } else {
+                preference.setSummary(summary);
+            }
             preference.setEnabled(enabled);
-            mHandler.sendMessage(
-                    mHandler.obtainMessage(WHAT_RECEIVED_STATUS, setting));
+            mHandler.sendMessage(mHandler.obtainMessage(WHAT_RECEIVED_STATUS, setting));
         }
     }
 
