@@ -59,6 +59,13 @@ public interface AppStandbyInternal {
         public void onUserInteractionStarted(String packageName, @UserIdInt int userId) {
             // No-op by default
         }
+
+        /**
+         * Optional callback to inform the listener to give the app a temporary quota bump.
+         */
+        public void triggerTemporaryQuotaBump(String packageName, @UserIdInt int userId) {
+            // No-op by default
+        }
     }
 
     void onBootPhase(int phase);
@@ -245,6 +252,28 @@ public interface AppStandbyInternal {
      */
     @ProcessState
     int getBroadcastResponseFgThresholdState();
+
+    /**
+     * Returns the duration within which any broadcasts occurred will be treated as one broadcast
+     * session.
+     */
+    long getBroadcastSessionsDurationMs();
+
+    /**
+     * Returns the duration within which any broadcasts occurred (with a corresponding response
+     * event) will be treated as one broadcast session. This similar to
+     * {@link #getBroadcastSessionsDurationMs()}, except that this duration will be used to group
+     * only broadcasts that have a corresponding response event into sessions.
+     */
+    long getBroadcastSessionsWithResponseDurationMs();
+
+    /**
+     * Returns {@code true} if the response event should be attributed to all the broadcast
+     * sessions that occurred within the broadcast response window and {@code false} if the
+     * response event should be attributed to only the earliest broadcast session within the
+     * broadcast response window.
+     */
+    boolean shouldNoteResponseEventForAllBroadcastSessions();
 
     /**
      * Return the last known value corresponding to the {@code key} from

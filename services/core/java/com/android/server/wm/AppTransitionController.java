@@ -663,11 +663,16 @@ public class AppTransitionController {
                 "Override with TaskFragment remote animation for transit=%s",
                 AppTransition.appTransitionOldToString(transit));
 
+        final int organizerUid = mDisplayContent.mAtmService.mTaskFragmentOrganizerController
+                .getTaskFragmentOrganizerUid(organizer);
+        final boolean shouldDisableInputForRemoteAnimation = !task.isFullyTrustedEmbedding(
+                organizerUid);
         final RemoteAnimationController remoteAnimationController =
                 mDisplayContent.mAppTransition.getRemoteAnimationController();
-        if (remoteAnimationController != null) {
+        if (shouldDisableInputForRemoteAnimation && remoteAnimationController != null) {
             // We are going to use client-driven animation, Disable all input on activity windows
-            // during the animation to ensure it is safe to allow client to animate the surfaces.
+            // during the animation (unless it is fully trusted) to ensure it is safe to allow
+            // client to animate the surfaces.
             // This is needed for all activity windows in the animation Task.
             remoteAnimationController.setOnRemoteAnimationReady(() -> {
                 final Consumer<ActivityRecord> updateActivities =
@@ -894,7 +899,11 @@ public class AppTransitionController {
                     // We cannot promote the animation on Task's parent when the task is in
                     // clearing task in case the animating get stuck when performing the opening
                     // task that behind it.
-                    || (current.asTask() != null && current.asTask().mInRemoveTask)) {
+                    || (current.asTask() != null && current.asTask().mInRemoveTask)
+                    // We cannot promote the animation to changing window. This may happen when an
+                    // activity is open in a TaskFragment that is resizing, while the existing
+                    // activity in the TaskFragment is reparented to another TaskFragment.
+                    || parent.isChangingAppTransition()) {
                 canPromote = false;
             } else {
                 // In case a descendant of the parent belongs to the other group, we cannot promote

@@ -21,7 +21,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
-import android.app.ActivityThread;
 import android.app.WindowConfiguration.WindowingMode;
 import android.graphics.Rect;
 import android.os.Binder;
@@ -122,21 +121,24 @@ class TaskFragmentContainer {
     /** List of activities that belong to this container and live in this process. */
     @NonNull
     List<Activity> collectActivities() {
+        final List<Activity> allActivities = new ArrayList<>();
+        if (mInfo != null) {
+            // Add activities reported from the server.
+            for (IBinder token : mInfo.getActivities()) {
+                final Activity activity = mController.getActivity(token);
+                if (activity != null && !activity.isFinishing()) {
+                    allActivities.add(activity);
+                }
+            }
+        }
+
         // Add the re-parenting activity, in case the server has not yet reported the task
         // fragment info update with it placed in this container. We still want to apply rules
         // in this intermediate state.
-        List<Activity> allActivities = new ArrayList<>();
-        if (!mPendingAppearedActivities.isEmpty()) {
-            allActivities.addAll(mPendingAppearedActivities);
-        }
-        // Add activities reported from the server.
-        if (mInfo == null) {
-            return allActivities;
-        }
-        ActivityThread activityThread = ActivityThread.currentActivityThread();
-        for (IBinder token : mInfo.getActivities()) {
-            Activity activity = activityThread.getActivity(token);
-            if (activity != null && !activity.isFinishing() && !allActivities.contains(activity)) {
+        // Place those on top of the list since they will be on the top after reported from the
+        // server.
+        for (Activity activity : mPendingAppearedActivities) {
+            if (!activity.isFinishing()) {
                 allActivities.add(activity);
             }
         }
@@ -241,6 +243,12 @@ class TaskFragmentContainer {
             i--;
         }
         return i >= 0 ? activities.get(i) : null;
+    }
+
+    @Nullable
+    Activity getBottomMostActivity() {
+        final List<Activity> activities = collectActivities();
+        return activities.isEmpty() ? null : activities.get(0);
     }
 
     boolean isEmpty() {

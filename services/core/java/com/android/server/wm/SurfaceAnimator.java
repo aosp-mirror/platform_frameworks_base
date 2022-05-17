@@ -128,7 +128,7 @@ class SurfaceAnimator {
                     }
                     final OnAnimationFinishedCallback animationFinishCallback =
                             mSurfaceAnimationFinishedCallback;
-                    reset(mAnimatable.getPendingTransaction(), true /* destroyLeash */);
+                    reset(mAnimatable.getSyncTransaction(), true /* destroyLeash */);
                     if (staticAnimationFinishedCallback != null) {
                         staticAnimationFinishedCallback.onAnimationFinished(type, anim);
                     }
@@ -234,7 +234,7 @@ class SurfaceAnimator {
         final boolean delayed = mAnimationStartDelayed;
         mAnimationStartDelayed = false;
         if (delayed && mAnimation != null) {
-            mAnimation.startAnimation(mLeash, mAnimatable.getPendingTransaction(),
+            mAnimation.startAnimation(mLeash, mAnimatable.getSyncTransaction(),
                     mAnimationType, mInnerAnimationFinishedCallback);
             mAnimatable.commitPendingTransaction();
         }
@@ -264,7 +264,7 @@ class SurfaceAnimator {
      * Cancels any currently running animation.
      */
     void cancelAnimation() {
-        cancelAnimation(mAnimatable.getPendingTransaction(), false /* restarting */,
+        cancelAnimation(mAnimatable.getSyncTransaction(), false /* restarting */,
                 true /* forwardCancel */);
         mAnimatable.commitPendingTransaction();
     }
@@ -319,7 +319,7 @@ class SurfaceAnimator {
             return;
         }
         endDelayingAnimationStart();
-        final Transaction t = mAnimatable.getPendingTransaction();
+        final Transaction t = mAnimatable.getSyncTransaction();
         cancelAnimation(t, true /* restarting */, true /* forwardCancel */);
         mLeash = from.mLeash;
         mAnimation = from.mAnimation;
@@ -618,6 +618,12 @@ class SurfaceAnimator {
      * Interface to be animated by {@link SurfaceAnimator}.
      */
     interface Animatable {
+
+        /**
+         * Use this method instead of {@link #getPendingTransaction()} if the transaction should be
+         * synchronized with the client.
+         */
+        @NonNull Transaction getSyncTransaction();
 
         /**
          * @return The pending transaction that will be committed in the next frame.

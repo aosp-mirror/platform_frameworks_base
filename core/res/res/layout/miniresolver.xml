@@ -24,12 +24,11 @@
     android:id="@id/contentPanel">
 
     <RelativeLayout
-        android:id="@+id/title_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alwaysShow="true"
         android:elevation="@dimen/resolver_elevation"
-        android:paddingTop="@dimen/resolver_small_margin"
+        android:paddingTop="24dp"
         android:paddingStart="@dimen/resolver_edge_margin"
         android:paddingEnd="@dimen/resolver_edge_margin"
         android:paddingBottom="@dimen/resolver_title_padding_bottom"
@@ -47,8 +46,12 @@
             android:id="@+id/open_cross_profile"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:paddingTop="16dp"
             android:layout_below="@id/icon"
             android:layout_centerHorizontal="true"
+            android:textSize="24sp"
+            android:lineHeight="32sp"
+            android:gravity="center"
             android:textColor="?android:textColorPrimary"
         />
     </RelativeLayout>
@@ -58,15 +61,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alwaysShow="true"
+        android:paddingTop="32dp"
+        android:paddingBottom="@dimen/resolver_button_bar_spacing"
         android:orientation="vertical"
         android:background="?attr/colorBackground"
         android:layout_ignoreOffset="true">
-        <View
-            android:id="@+id/resolver_button_bar_divider"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="?attr/colorBackground"
-            android:foreground="?attr/dividerVertical" />
         <RelativeLayout
             style="?attr/buttonBarStyle"
             android:layout_width="match_parent"
@@ -77,7 +76,6 @@
             android:orientation="horizontal"
             android:layoutDirection="locale"
             android:measureWithLargestChild="true"
-            android:paddingTop="@dimen/resolver_button_bar_spacing"
             android:paddingBottom="@dimen/resolver_button_bar_spacing"
             android:paddingStart="@dimen/resolver_edge_margin"
             android:paddingEnd="@dimen/resolver_small_margin"
