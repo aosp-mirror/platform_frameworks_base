@@ -133,18 +133,6 @@
             android:background="?androidprv:attr/colorAccentSecondary"
             android:layout_width="@dimen/clipboard_preview_size"
             android:layout_height="@dimen/clipboard_preview_size"/>
-        <TextView
-            android:id="@+id/hidden_image_preview"
-            android:visibility="gone"
-            android:textFontWeight="500"
-            android:padding="8dp"
-            android:gravity="center"
-            android:textSize="14sp"
-            android:text="@string/clipboard_text_hidden"
-            android:textColor="#ffffff"
-            android:background="#000000"
-            android:layout_width="@dimen/clipboard_preview_size"
-            android:layout_height="@dimen/clipboard_preview_size"/>
     </FrameLayout>
     <FrameLayout
         android:id="@+id/dismiss_button"
