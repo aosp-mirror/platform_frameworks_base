@@ -267,8 +267,8 @@ class IdmapDaemon {
         try {
             SystemService.start(IDMAP_DAEMON);
         } catch (RuntimeException e) {
+            Slog.wtf(TAG, "Failed to enable idmap2 daemon", e);
             if (e.getMessage().contains("failed to set system property")) {
-                Slog.w(TAG, "Failed to enable idmap2 daemon", e);
                 return null;
             }
         }
