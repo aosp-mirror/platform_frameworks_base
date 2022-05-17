@@ -1176,6 +1176,19 @@ public class ChooserActivity extends ResolverActivity implements
         final Intent resolveIntent = new Intent(originalIntent);
         resolveIntent.setComponent(cn);
         resolveIntent.setAction(Intent.ACTION_EDIT);
+        String originalAction = originalIntent.getAction();
+        if (Intent.ACTION_SEND.equals(originalAction)) {
+            if (resolveIntent.getData() == null) {
+                Uri uri = resolveIntent.getParcelableExtra(Intent.EXTRA_STREAM);
+                if (uri != null) {
+                    String mimeType = getContentResolver().getType(uri);
+                    resolveIntent.setDataAndType(uri, mimeType);
+                }
+            }
+        } else {
+            Log.e(TAG, originalAction + " is not supported.");
+            return null;
+        }
         final ResolveInfo ri = getPackageManager().resolveActivity(
                 resolveIntent, PackageManager.GET_META_DATA);
         if (ri == null || ri.activityInfo == null) {

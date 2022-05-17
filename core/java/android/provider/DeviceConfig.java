@@ -306,6 +306,13 @@ public final class DeviceConfig {
     public static final String NAMESPACE_MEDIA_NATIVE = "media_native";
 
     /**
+     * Namespace for all Kernel Multi-Gen LRU feature.
+     *
+     * @hide
+     */
+    public static final String NAMESPACE_MGLRU_NATIVE = "mglru_native";
+
+    /**
      * Namespace for all netd related features.
      *
      * @hide

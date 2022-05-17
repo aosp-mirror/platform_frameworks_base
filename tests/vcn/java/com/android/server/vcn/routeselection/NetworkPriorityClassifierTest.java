@@ -30,6 +30,7 @@ import static com.android.server.vcn.routeselection.NetworkPriorityClassifier.ch
 import static com.android.server.vcn.routeselection.NetworkPriorityClassifier.checkMatchesPriorityRule;
 import static com.android.server.vcn.routeselection.NetworkPriorityClassifier.checkMatchesWifiPriorityRule;
 import static com.android.server.vcn.routeselection.UnderlyingNetworkControllerTest.getLinkPropertiesWithName;
+import static com.android.server.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -309,7 +310,9 @@ public class NetworkPriorityClassifierTest {
                         wifiNetworkPriority,
                         mWifiNetworkRecord,
                         selectedNetworkRecord,
-                        carrierConfig));
+                        carrierConfig == null
+                                ? null
+                                : new PersistableBundleWrapper(carrierConfig)));
     }
 
     @Test

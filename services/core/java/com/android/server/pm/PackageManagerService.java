@@ -13257,7 +13257,8 @@ public class PackageManagerService extends IPackageManager.Stub
             // Don't use profiles since that may cause compilation to be skipped.
             final int res = performDexOptInternalWithDependenciesLI(pkg, pkgSetting,
                     new DexoptOptions(packageName,
-                            getDefaultCompilerFilter(),
+                            REASON_CMDLINE,
+                            getDefaultCompilerFilter(), null /* splitName */,
                             DexoptOptions.DEXOPT_FORCE | DexoptOptions.DEXOPT_BOOT_COMPLETE));
 
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);

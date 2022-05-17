@@ -3059,14 +3059,32 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, subId);
         intent.putExtra(PHONE_CONSTANTS_SLOT_KEY, phoneId);
         intent.putExtra(SubscriptionManager.EXTRA_SLOT_INDEX, phoneId);
+
         // Send the broadcast twice -- once for all apps with READ_PHONE_STATE, then again
-        // for all apps with READ_PRIV but not READ_PHONE_STATE. This ensures that any app holding
-        // either READ_PRIV or READ_PHONE get this broadcast exactly once.
-        mContext.sendBroadcastAsUser(intent, UserHandle.ALL, Manifest.permission.READ_PHONE_STATE);
-        mContext.createContextAsUser(UserHandle.ALL, 0)
-                .sendBroadcastMultiplePermissions(intent,
-                        new String[] { Manifest.permission.READ_PRIVILEGED_PHONE_STATE },
-                        new String[] { Manifest.permission.READ_PHONE_STATE });
+        // for all apps with READ_PRIVILEGED_PHONE_STATE but not READ_PHONE_STATE.
+        // Do this again twice, the first time for apps with ACCESS_FINE_LOCATION, then again with
+        // the location-sanitized service state for all apps without ACCESS_FINE_LOCATION.
+        // This ensures that any app holding either READ_PRIVILEGED_PHONE_STATE or READ_PHONE_STATE
+        // get this broadcast exactly once, and we are not exposing location without permission.
+        mContext.createContextAsUser(UserHandle.ALL, 0).sendBroadcastMultiplePermissions(intent,
+                new String[] {Manifest.permission.READ_PHONE_STATE,
+                        Manifest.permission.ACCESS_FINE_LOCATION});
+        mContext.createContextAsUser(UserHandle.ALL, 0).sendBroadcastMultiplePermissions(intent,
+                new String[] {Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+                        Manifest.permission.ACCESS_FINE_LOCATION},
+                new String[] {Manifest.permission.READ_PHONE_STATE});
+
+        // Replace bundle with location-sanitized ServiceState
+        data = new Bundle();
+        state.createLocationInfoSanitizedCopy(true).fillInNotifierBundle(data);
+        intent.putExtras(data);
+        mContext.createContextAsUser(UserHandle.ALL, 0).sendBroadcastMultiplePermissions(intent,
+                new String[] {Manifest.permission.READ_PHONE_STATE},
+                new String[] {Manifest.permission.ACCESS_FINE_LOCATION});
+        mContext.createContextAsUser(UserHandle.ALL, 0).sendBroadcastMultiplePermissions(intent,
+                new String[] {Manifest.permission.READ_PRIVILEGED_PHONE_STATE},
+                new String[] {Manifest.permission.READ_PHONE_STATE,
+                        Manifest.permission.ACCESS_FINE_LOCATION});
     }
 
     private void broadcastSignalStrengthChanged(SignalStrength signalStrength, int phoneId,

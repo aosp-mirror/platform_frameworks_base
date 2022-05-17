@@ -11473,7 +11473,7 @@ package android.content.pm {
     field public static final String FEATURE_CAMERA_LEVEL_FULL = "android.hardware.camera.level.full";
     field public static final String FEATURE_CANT_SAVE_STATE = "android.software.cant_save_state";
     field public static final String FEATURE_COMPANION_DEVICE_SETUP = "android.software.companion_device_setup";
-    field public static final String FEATURE_CONNECTION_SERVICE = "android.software.connectionservice";
+    field @Deprecated public static final String FEATURE_CONNECTION_SERVICE = "android.software.connectionservice";
     field public static final String FEATURE_CONSUMER_IR = "android.hardware.consumerir";
     field public static final String FEATURE_CONTROLS = "android.software.controls";
     field public static final String FEATURE_DEVICE_ADMIN = "android.software.device_admin";
@@ -11544,12 +11544,18 @@ package android.content.pm {
     field public static final String FEATURE_SIP = "android.software.sip";
     field public static final String FEATURE_SIP_VOIP = "android.software.sip.voip";
     field public static final String FEATURE_STRONGBOX_KEYSTORE = "android.hardware.strongbox_keystore";
+    field public static final String FEATURE_TELECOM = "android.software.telecom";
     field public static final String FEATURE_TELEPHONY = "android.hardware.telephony";
+    field public static final String FEATURE_TELEPHONY_CALLING = "android.hardware.telephony.calling";
     field public static final String FEATURE_TELEPHONY_CDMA = "android.hardware.telephony.cdma";
+    field public static final String FEATURE_TELEPHONY_DATA = "android.hardware.telephony.data";
     field public static final String FEATURE_TELEPHONY_EUICC = "android.hardware.telephony.euicc";
     field public static final String FEATURE_TELEPHONY_GSM = "android.hardware.telephony.gsm";
     field public static final String FEATURE_TELEPHONY_IMS = "android.hardware.telephony.ims";
     field public static final String FEATURE_TELEPHONY_MBMS = "android.hardware.telephony.mbms";
+    field public static final String FEATURE_TELEPHONY_MESSAGING = "android.hardware.telephony.messaging";
+    field public static final String FEATURE_TELEPHONY_RADIO_ACCESS = "android.hardware.telephony.radio";
+    field public static final String FEATURE_TELEPHONY_SUBSCRIPTION = "android.hardware.telephony.subscription";
     field @Deprecated public static final String FEATURE_TELEVISION = "android.hardware.type.television";
     field public static final String FEATURE_TOUCHSCREEN = "android.hardware.touchscreen";
     field public static final String FEATURE_TOUCHSCREEN_MULTITOUCH = "android.hardware.touchscreen.multitouch";
@@ -21438,6 +21444,7 @@ package android.media {
     field public static final String KEY_VIDEO_QP_P_MAX = "video-qp-p-max";
     field public static final String KEY_VIDEO_QP_P_MIN = "video-qp-p-min";
     field public static final String KEY_WIDTH = "width";
+    field public static final String LOG_SESSION_ID = "log-session-id";
     field public static final String MIMETYPE_AUDIO_AAC = "audio/mp4a-latm";
     field public static final String MIMETYPE_AUDIO_AC3 = "audio/ac3";
     field public static final String MIMETYPE_AUDIO_AC4 = "audio/ac4";
@@ -29612,6 +29619,7 @@ package android.os {
     field public static final int S = 31; // 0x1f
     field public static final int S_V2 = 32; // 0x20
     field public static final int TIRAMISU = 10000; // 0x2710
+    field public static final int UPSIDE_DOWN_CAKE = 10000; // 0x2710
   }
 
   public final class Bundle extends android.os.BaseBundle implements java.lang.Cloneable android.os.Parcelable {
@@ -41214,8 +41222,11 @@ package android.telephony {
     field public static final String MMS_CONFIG_UA_PROF_URL = "uaProfUrl";
     field public static final String MMS_CONFIG_USER_AGENT = "userAgent";
     field public static final int MMS_ERROR_CONFIGURATION_ERROR = 7; // 0x7
+    field public static final int MMS_ERROR_DATA_DISABLED = 11; // 0xb
     field public static final int MMS_ERROR_HTTP_FAILURE = 4; // 0x4
+    field public static final int MMS_ERROR_INACTIVE_SUBSCRIPTION = 10; // 0xa
     field public static final int MMS_ERROR_INVALID_APN = 2; // 0x2
+    field public static final int MMS_ERROR_INVALID_SUBSCRIPTION_ID = 9; // 0x9
     field public static final int MMS_ERROR_IO_ERROR = 5; // 0x5
     field public static final int MMS_ERROR_NO_DATA_NETWORK = 8; // 0x8
     field public static final int MMS_ERROR_RETRY = 6; // 0x6

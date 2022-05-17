@@ -406,7 +406,7 @@ public class Build {
         public static final String CODENAME = getString("ro.build.version.codename");
 
         /**
-         * All known codenames starting from {@link VERSION_CODES.Q}.
+         * All known codenames that are present in {@link VERSION_CODES}.
          *
          * <p>This includes in development codenames as well, i.e. if {@link #CODENAME} is not "REL"
          * then the value of that is present in this set.
@@ -1167,6 +1167,11 @@ public class Build {
          * Tiramisu.
          */
         public static final int TIRAMISU = CUR_DEVELOPMENT;
+
+        /**
+         * Upside Down Cake.
+         */
+        public static final int UPSIDE_DOWN_CAKE = CUR_DEVELOPMENT;
     }
 
     /** The type of build, like "user" or "eng". */

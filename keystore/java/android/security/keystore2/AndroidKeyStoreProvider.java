@@ -104,6 +104,7 @@ public class AndroidKeyStoreProvider extends Provider {
 
         // javax.crypto.KeyAgreement
         put("KeyAgreement.ECDH", PACKAGE_NAME + ".AndroidKeyStoreKeyAgreementSpi$ECDH");
+        put("KeyAgreement.XDH", PACKAGE_NAME + ".AndroidKeyStoreKeyAgreementSpi$XDH");
 
         // java.security.SecretKeyFactory
         putSecretKeyFactoryImpl("AES");
@@ -224,7 +225,6 @@ public class AndroidKeyStoreProvider extends Provider {
 
         String jcaKeyAlgorithm = publicKey.getAlgorithm();
 
-        KeyStoreSecurityLevel securityLevel = iSecurityLevel;
         if (KeyProperties.KEY_ALGORITHM_EC.equalsIgnoreCase(jcaKeyAlgorithm)) {
             return new AndroidKeyStoreECPublicKey(descriptor, metadata,
                     iSecurityLevel, (ECPublicKey) publicKey);
@@ -232,11 +232,12 @@ public class AndroidKeyStoreProvider extends Provider {
             return new AndroidKeyStoreRSAPublicKey(descriptor, metadata,
                     iSecurityLevel, (RSAPublicKey) publicKey);
         } else if (ED25519_OID.equalsIgnoreCase(jcaKeyAlgorithm)) {
-            //TODO(b/214203951) missing classes in conscrypt
-            throw new ProviderException("Curve " + ED25519_OID + " not supported yet");
+            final byte[] publicKeyEncoded = publicKey.getEncoded();
+            return new AndroidKeyStoreEdECPublicKey(descriptor, metadata, ED25519_OID,
+                    iSecurityLevel, publicKeyEncoded);
         } else if (X25519_ALIAS.equalsIgnoreCase(jcaKeyAlgorithm)) {
-            //TODO(b/214203951) missing classes in conscrypt
-            throw new ProviderException("Curve " + X25519_ALIAS + " not supported yet");
+            return new AndroidKeyStoreXDHPublicKey(descriptor, metadata, X25519_ALIAS,
+                    iSecurityLevel, publicKey.getEncoded());
         } else {
             throw new ProviderException("Unsupported Android Keystore public key algorithm: "
                     + jcaKeyAlgorithm);

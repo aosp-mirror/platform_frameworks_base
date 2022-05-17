@@ -17,11 +17,13 @@
 package android.telephony.ims;
 
 import android.annotation.NonNull;
+import android.annotation.RequiresFeature;
 import android.annotation.SdkConstant;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.telephony.BinderCacheManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyFrameworkInitializer;
@@ -33,6 +35,7 @@ import com.android.internal.telephony.ITelephony;
  * Provides access to information about Telephony IMS services on the device.
  */
 @SystemService(Context.TELEPHONY_IMS_SERVICE)
+@RequiresFeature(PackageManager.FEATURE_TELEPHONY_IMS)
 public class ImsManager {
 
     /**

@@ -174,6 +174,7 @@ import android.net.ConnectivityManager.NetworkCallback;
 import android.net.INetworkManagementEventObserver;
 import android.net.INetworkPolicyListener;
 import android.net.INetworkPolicyManager;
+import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkIdentity;
@@ -236,6 +237,7 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.SparseLongArray;
+import android.util.SparseSetArray;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 import android.util.Xml;
@@ -624,6 +626,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     /** Map from network ID to last observed roaming state */
     @GuardedBy("mNetworkPoliciesSecondLock")
     private final SparseBooleanArray mNetworkRoaming = new SparseBooleanArray();
+    /** Map from network ID to the last ifaces on it */
+    @GuardedBy("mNetworkPoliciesSecondLock")
+    private SparseSetArray<String> mNetworkToIfaces = new SparseSetArray<>();
 
     /** Map from netId to subId as of last update */
     @GuardedBy("mNetworkPoliciesSecondLock")
@@ -1343,11 +1348,28 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         return changed;
     }
 
+    @GuardedBy("mNetworkPoliciesSecondLock")
+    private boolean updateNetworkToIfacesNL(int netId, @NonNull ArraySet<String> newIfaces) {
+        // TODO: Add a facility SparseSetArray.contains(key) to return whether the key exists.
+        final ArraySet<String> lastIfaces = mNetworkToIfaces.get(netId);
+        final boolean changed = lastIfaces == null ? true : !lastIfaces.equals(newIfaces);
+
+        if (changed) {
+            // Changed on the same network should remove last ifaces and add new ifaces.
+            // TODO: Add a facility SparseSetArray.put(key, value) for replacing the
+            //       value for a given key.
+            mNetworkToIfaces.remove(netId);
+            for (String iface : newIfaces) {
+                mNetworkToIfaces.add(netId, iface);
+            }
+        }
+        return changed;
+    }
+
     private final NetworkCallback mNetworkCallback = new NetworkCallback() {
         @Override
-        public void onCapabilitiesChanged(Network network,
-                NetworkCapabilities networkCapabilities) {
-            if (network == null || networkCapabilities == null) return;
+        public void onCapabilitiesChanged(@NonNull Network network,
+                @NonNull NetworkCapabilities networkCapabilities) {
 
             synchronized (mNetworkPoliciesSecondLock) {
                 final boolean newMetered = !networkCapabilities
@@ -1364,6 +1386,25 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     mLogger.meterednessChanged(network.getNetId(), newMetered);
                     updateNetworkRulesNL();
                 }
+            }
+        }
+
+        @Override
+        public void onLinkPropertiesChanged(@NonNull Network network, @NonNull LinkProperties lp) {
+            synchronized (mNetworkPoliciesSecondLock) {
+                final ArraySet<String> newIfaces = new ArraySet<>(lp.getAllInterfaceNames());
+                final boolean ifacesChanged = updateNetworkToIfacesNL(network.getNetId(),
+                        newIfaces);
+                if (ifacesChanged) {
+                    updateNetworkRulesNL();
+                }
+            }
+        }
+
+        @Override
+        public void onLost(@NonNull Network network) {
+            synchronized (mNetworkPoliciesSecondLock) {
+                mNetworkToIfaces.remove(network.getNetId());
             }
         }
     };

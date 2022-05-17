@@ -4169,8 +4169,14 @@ package android.hardware.usb {
   }
 
   public final class UsbPort {
+    method @CheckResult @RequiresPermission(android.Manifest.permission.MANAGE_USB) public int enableUsbData(boolean);
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_USB) public android.hardware.usb.UsbPortStatus getStatus();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public void setRoles(int, int);
+    field public static final int ENABLE_USB_DATA_ERROR_INTERNAL = 1; // 0x1
+    field public static final int ENABLE_USB_DATA_ERROR_NOT_SUPPORTED = 2; // 0x2
+    field public static final int ENABLE_USB_DATA_ERROR_OTHER = 4; // 0x4
+    field public static final int ENABLE_USB_DATA_ERROR_PORT_MISMATCH = 3; // 0x3
+    field public static final int ENABLE_USB_DATA_SUCCESS = 0; // 0x0
   }
 
   public final class UsbPortStatus implements android.os.Parcelable {

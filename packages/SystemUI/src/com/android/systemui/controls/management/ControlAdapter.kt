@@ -320,7 +320,7 @@ private class ControlHolderAccessibilityDelegate(
         info.className = Switch::class.java.name
     }
 
-    override fun performAccessibilityAction(host: View?, action: Int, args: Bundle?): Boolean {
+    override fun performAccessibilityAction(host: View, action: Int, args: Bundle?): Boolean {
         if (super.performAccessibilityAction(host, action, args)) {
             return true
         }

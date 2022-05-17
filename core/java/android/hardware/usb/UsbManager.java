@@ -36,6 +36,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.hardware.usb.gadget.V1_0.GadgetFunction;
 import android.hardware.usb.gadget.V1_2.UsbSpeed;
+import android.hardware.usb.IUsbOperationInternal;
+import android.hardware.usb.UsbPort;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
@@ -48,6 +50,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
@@ -516,6 +519,14 @@ public class UsbManager {
     public static final int USB_DATA_TRANSFER_RATE_40G = 40 * 1024;
 
     /**
+     * Returned when the client has to retry querying the version.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int USB_HAL_RETRY = -2;
+
+    /**
      * The Value for USB hal is not presented.
      *
      * {@hide}
@@ -554,6 +565,14 @@ public class UsbManager {
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int USB_HAL_V1_3 = 13;
+
+    /**
+     * Value for USB Hal Version v2.0.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int USB_HAL_V2_0 = 20;
 
     /**
      * Code for the charging usb function. Passed into {@link #setCurrentFunctions(long)}
@@ -664,6 +683,7 @@ public class UsbManager {
             USB_HAL_V1_1,
             USB_HAL_V1_2,
             USB_HAL_V1_3,
+            USB_HAL_V2_0,
     })
     public @interface UsbHalVersion {}
 
@@ -1168,8 +1188,9 @@ public class UsbManager {
     /**
      * Enable/Disable the USB data signaling.
      * <p>
-     * Enables/Disables USB data path in all the USB ports.
+     * Enables/Disables USB data path of the first port..
      * It will force to stop or restore USB data signaling.
+     * Call UsbPort API if the device has more than one UsbPort.
      * </p>
      *
      * @param enable enable or disable USB data signaling
@@ -1180,11 +1201,11 @@ public class UsbManager {
      */
     @RequiresPermission(Manifest.permission.MANAGE_USB)
     public boolean enableUsbDataSignal(boolean enable) {
-        try {
-            return mService.enableUsbDataSignal(enable);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        List<UsbPort> usbPorts = getPorts();
+        if (usbPorts.size() == 1) {
+            return usbPorts.get(0).enableUsbData(enable) == UsbPort.ENABLE_USB_DATA_SUCCESS;
         }
+        return false;
     }
 
     /**
@@ -1265,6 +1286,41 @@ public class UsbManager {
         try {
             mService.enableContaminantDetection(port.getId(), enable);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Should only be called by {@link UsbPort#enableUsbData}.
+     * <p>
+     * Enables or disables USB data on the specific port.
+     *
+     * @param port USB port for which USB data needs to be enabled or disabled.
+     * @param enable Enable USB data when true.
+     *               Disable USB data when false.
+     * @param operationId operationId for the request.
+     * @param callback callback object to be invoked when the operation is complete.
+     * @return True when the operation is asynchronous. The caller must therefore call
+     *         {@link UsbOperationInternal#waitForOperationComplete} for processing
+     *         the result.
+     *         False when the operation is synchronous. Caller can proceed reading the result
+     *         through {@link UsbOperationInternal#getStatus}
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    boolean enableUsbData(@NonNull UsbPort port, boolean enable, int operationId,
+            IUsbOperationInternal callback) {
+        Objects.requireNonNull(port, "enableUsbData: port must not be null. opId:" + operationId);
+        try {
+            return mService.enableUsbData(port.getId(), enable, operationId, callback);
+        } catch (RemoteException e) {
+            Log.e(TAG, "enableUsbData: failed. opId:" + operationId, e);
+            try {
+                callback.onOperationComplete(UsbOperationInternal.USB_OPERATION_ERROR_INTERNAL);
+            } catch (RemoteException r) {
+                Log.e(TAG, "enableUsbData: failed to call onOperationComplete. opId:"
+                        + operationId, r);
+            }
             throw e.rethrowFromSystemServer();
         }
     }
