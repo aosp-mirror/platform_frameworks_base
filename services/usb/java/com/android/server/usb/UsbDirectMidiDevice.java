@@ -89,38 +89,36 @@ public final class UsbDirectMidiDevice implements Closeable {
 
     private final Object mLock = new Object();
     private boolean mIsOpen;
+    private boolean mServerAvailable;
 
     private UsbMidiPacketConverter mUsbMidiPacketConverter;
 
     private final MidiDeviceServer.Callback mCallback = new MidiDeviceServer.Callback() {
-
         @Override
         public void onDeviceStatusChanged(MidiDeviceServer server, MidiDeviceStatus status) {
             MidiDeviceInfo deviceInfo = status.getDeviceInfo();
             int numInputPorts = deviceInfo.getInputPortCount();
             int numOutputPorts = deviceInfo.getOutputPortCount();
-            boolean hasOpenPorts = false;
+            int numOpenPorts = 0;
 
             for (int i = 0; i < numInputPorts; i++) {
                 if (status.isInputPortOpen(i)) {
-                    hasOpenPorts = true;
-                    break;
+                    numOpenPorts++;
                 }
             }
 
-            if (!hasOpenPorts) {
-                for (int i = 0; i < numOutputPorts; i++) {
-                    if (status.getOutputPortOpenCount(i) > 0) {
-                        hasOpenPorts = true;
-                        break;
-                    }
+            for (int i = 0; i < numOutputPorts; i++) {
+                if (status.getOutputPortOpenCount(i) > 0) {
+                    numOpenPorts += status.getOutputPortOpenCount(i);
                 }
             }
 
             synchronized (mLock) {
-                if (hasOpenPorts && !mIsOpen) {
+                Log.d(TAG, "numOpenPorts: " + numOpenPorts + " isOpen: " + mIsOpen
+                        + " mServerAvailable: " + mServerAvailable);
+                if ((numOpenPorts > 0) && !mIsOpen && mServerAvailable) {
                     openLocked();
-                } else if (!hasOpenPorts && mIsOpen) {
+                } else if ((numOpenPorts == 0) && mIsOpen) {
                     closeLocked();
                 }
             }
@@ -348,7 +346,7 @@ public final class UsbDirectMidiDevice implements Closeable {
                                 final UsbRequest response = connectionFinal.requestWait();
                                 if (response != request) {
                                     Log.w(TAG, "Unexpected response");
-                                    continue;
+                                    break;
                                 }
                                 int bytesRead = byteBuffer.position();
 
@@ -462,7 +460,7 @@ public final class UsbDirectMidiDevice implements Closeable {
         mContext = context;
         MidiManager midiManager = context.getSystemService(MidiManager.class);
         if (midiManager == null) {
-            Log.e(TAG, "No MidiManager in UsbDirectMidiDevice.create()");
+            Log.e(TAG, "No MidiManager in UsbDirectMidiDevice.register()");
             return false;
         }
 
@@ -499,6 +497,7 @@ public final class UsbDirectMidiDevice implements Closeable {
                 mUsbDevice.getSerialNumber());
         properties.putParcelable(MidiDeviceInfo.PROPERTY_USB_DEVICE, mUsbDevice);
 
+        mServerAvailable = true;
         mServer = midiManager.createDeviceServer(mMidiInputPortReceivers, mNumInputs,
                 null, null, properties, MidiDeviceInfo.TYPE_USB, mDefaultMidiProtocol, mCallback);
         if (mServer == null) {
@@ -514,6 +513,7 @@ public final class UsbDirectMidiDevice implements Closeable {
             if (mIsOpen) {
                 closeLocked();
             }
+            mServerAvailable = false;
         }
 
         if (mServer != null) {

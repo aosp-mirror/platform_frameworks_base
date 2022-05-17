@@ -40,6 +40,7 @@ import android.media.Spatializer;
 import android.media.SpatializerHeadTrackingMode;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseIntArray;
@@ -48,6 +49,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -275,18 +277,17 @@ public class SpatializerHelper {
             // for both transaural / binaural, we are not forcing enablement as the init() method
             // could have been called another time after boot in case of audioserver restart
             if (mTransauralSupported) {
-                // TODO deal with persisted values
+                // not force-enabling as this device might already be in the device list
                 addCompatibleAudioDevice(
                         new AudioDeviceAttributes(AudioSystem.DEVICE_OUT_SPEAKER, ""),
                                 false /*forceEnable*/);
             }
             if (mBinauralSupported) {
-                // TODO deal with persisted values
+                // not force-enabling as this device might already be in the device list
                 addCompatibleAudioDevice(
                         new AudioDeviceAttributes(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE, ""),
                                 false /*forceEnable*/);
             }
-            // TODO read persisted states
         } catch (RemoteException e) {
             resetCapabilities();
         } finally {
@@ -533,11 +534,12 @@ public class SpatializerHelper {
         }
         if (!isInList) {
             final SADeviceState dev = new SADeviceState(deviceType,
-                    wireless ? ada.getAddress() : null);
+                    wireless ? ada.getAddress() : "");
             dev.mEnabled = true;
             mSADevices.add(dev);
         }
         onRoutingUpdated();
+        mAudioService.persistSpatialAudioDeviceSettings();
     }
 
     synchronized void removeCompatibleAudioDevice(@NonNull AudioDeviceAttributes ada) {
@@ -553,6 +555,7 @@ public class SpatializerHelper {
             }
         }
         onRoutingUpdated();
+        mAudioService.persistSpatialAudioDeviceSettings();
     }
 
     /**
@@ -625,7 +628,7 @@ public class SpatializerHelper {
         }
         if (!knownDevice) {
             mSADevices.add(new SADeviceState(ada.getType(), ada.getAddress()));
-            //### TODO persist list
+            mAudioService.persistSpatialAudioDeviceSettings();
         }
     }
 
@@ -1059,6 +1062,7 @@ public class SpatializerHelper {
                 }
                 Log.i(TAG, "setHeadTrackerEnabled enabled:" + enabled + " device:" + ada);
                 deviceState.mHeadTrackerEnabled = enabled;
+                mAudioService.persistSpatialAudioDeviceSettings();
                 break;
             }
         }
@@ -1097,7 +1101,10 @@ public class SpatializerHelper {
             if (deviceType == deviceState.mDeviceType
                     && (wireless && ada.getAddress().equals(deviceState.mDeviceAddress))
                     || !wireless) {
-                deviceState.mHasHeadTracker = true;
+                if (!deviceState.mHasHeadTracker) {
+                    deviceState.mHasHeadTracker = true;
+                    mAudioService.persistSpatialAudioDeviceSettings();
+                }
                 return deviceState.mHeadTrackerEnabled;
             }
         }
@@ -1457,22 +1464,109 @@ public class SpatializerHelper {
         }
     }
 
-    private static final class SADeviceState {
+    /*package*/ static final class SADeviceState {
         final @AudioDeviceInfo.AudioDeviceType int mDeviceType;
-        final @Nullable String mDeviceAddress; // non-null for wireless devices
+        final @NonNull String mDeviceAddress;
         boolean mEnabled = true;               // by default, SA is enabled on any device
         boolean mHasHeadTracker = false;
         boolean mHeadTrackerEnabled = true;    // by default, if head tracker is present, use it
+        static final String SETTING_FIELD_SEPARATOR = ",";
+        static final String SETTING_DEVICE_SEPARATOR_CHAR = "|";
+        static final String SETTING_DEVICE_SEPARATOR = "\\|";
 
-        SADeviceState(@AudioDeviceInfo.AudioDeviceType int deviceType, @Nullable String address) {
+        SADeviceState(@AudioDeviceInfo.AudioDeviceType int deviceType, @NonNull String address) {
             mDeviceType = deviceType;
-            mDeviceAddress = address;
+            mDeviceAddress = Objects.requireNonNull(address);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            // type check and cast
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final SADeviceState sads = (SADeviceState) obj;
+            return mDeviceType == sads.mDeviceType
+                    && mDeviceAddress.equals(sads.mDeviceAddress)
+                    && mEnabled == sads.mEnabled
+                    && mHasHeadTracker == sads.mHasHeadTracker
+                    && mHeadTrackerEnabled == sads.mHeadTrackerEnabled;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mDeviceType, mDeviceAddress, mEnabled, mHasHeadTracker,
+                    mHeadTrackerEnabled);
         }
 
         @Override
         public String toString() {
             return "type:" + mDeviceType + " addr:" + mDeviceAddress + " enabled:" + mEnabled
                     + " HT:" + mHasHeadTracker + " HTenabled:" + mHeadTrackerEnabled;
+        }
+
+        String toPersistableString() {
+            return (new StringBuilder().append(mDeviceType)
+                    .append(SETTING_FIELD_SEPARATOR).append(mDeviceAddress)
+                    .append(SETTING_FIELD_SEPARATOR).append(mEnabled ? "1" : "0")
+                    .append(SETTING_FIELD_SEPARATOR).append(mHasHeadTracker ? "1" : "0")
+                    .append(SETTING_FIELD_SEPARATOR).append(mHeadTrackerEnabled ? "1" : "0")
+                    .toString());
+        }
+
+        static @Nullable SADeviceState fromPersistedString(@Nullable String persistedString) {
+            if (persistedString == null) {
+                return null;
+            }
+            if (persistedString.isEmpty()) {
+                return null;
+            }
+            String[] fields = TextUtils.split(persistedString, SETTING_FIELD_SEPARATOR);
+            if (fields.length != 5) {
+                // expecting all fields, fewer may mean corruption, ignore those settings
+                return null;
+            }
+            try {
+                final int deviceType = Integer.parseInt(fields[0]);
+                final SADeviceState deviceState = new SADeviceState(deviceType, fields[1]);
+                deviceState.mEnabled = Integer.parseInt(fields[2]) == 1;
+                deviceState.mHasHeadTracker = Integer.parseInt(fields[3]) == 1;
+                deviceState.mHeadTrackerEnabled = Integer.parseInt(fields[4]) == 1;
+                return deviceState;
+            } catch (NumberFormatException e) {
+                Log.e(TAG, "unable to parse setting for SADeviceState: " + persistedString, e);
+                return null;
+            }
+        }
+    }
+
+    /*package*/ synchronized String getSADeviceSettings() {
+        // expected max size of each String for each SADeviceState is 25 (accounting for separator)
+        final StringBuilder settingsBuilder = new StringBuilder(mSADevices.size() * 25);
+        for (int i = 0; i < mSADevices.size(); i++) {
+            settingsBuilder.append(mSADevices.get(i).toPersistableString());
+            if (i != mSADevices.size() - 1) {
+                settingsBuilder.append(SADeviceState.SETTING_DEVICE_SEPARATOR_CHAR);
+            }
+        }
+        return settingsBuilder.toString();
+    }
+
+    /*package*/ synchronized void setSADeviceSettings(@NonNull String persistedSettings) {
+        String[] devSettings = TextUtils.split(Objects.requireNonNull(persistedSettings),
+                SADeviceState.SETTING_DEVICE_SEPARATOR);
+        // small list, not worth overhead of Arrays.stream(devSettings)
+        for (String setting : devSettings) {
+            SADeviceState devState = SADeviceState.fromPersistedString(setting);
+            if (devState != null) {
+                mSADevices.add(devState);
+            }
         }
     }
 
@@ -1556,5 +1650,12 @@ public class SpatializerHelper {
     private static String logloge(String msg) {
         AudioService.sSpatialLogger.loglog(msg, AudioEventLogger.Event.ALOGE, TAG);
         return msg;
+    }
+
+    //------------------------------------------------
+    // for testing purposes only
+
+    /*package*/ void clearSADevices() {
+        mSADevices.clear();
     }
 }

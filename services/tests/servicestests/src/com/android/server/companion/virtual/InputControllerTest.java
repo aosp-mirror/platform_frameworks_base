@@ -34,6 +34,9 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.Display;
 import android.view.DisplayInfo;
+import android.view.WindowManager;
+
+import androidx.test.InstrumentationRegistry;
 
 import com.android.server.LocalServices;
 
@@ -79,7 +82,9 @@ public class InputControllerTest {
         // Allow virtual devices to be created on the looper thread for testing.
         final InputController.DeviceCreationThreadVerifier threadVerifier = () -> true;
         mInputController = new InputController(new Object(), mNativeWrapperMock,
-                new Handler(TestableLooper.get(this).getLooper()), threadVerifier);
+                new Handler(TestableLooper.get(this).getLooper()),
+                InstrumentationRegistry.getTargetContext().getSystemService(WindowManager.class),
+                threadVerifier);
     }
 
     @Test
