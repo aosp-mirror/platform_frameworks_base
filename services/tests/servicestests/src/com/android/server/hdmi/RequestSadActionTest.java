@@ -139,11 +139,12 @@ public class RequestSadActionTest {
     }
 
     @Test
-    public void noResponse_queryAgain_emptyResult() {
+    public void noResponse_queryAgainOnce_emptyResult() {
         RequestSadAction action = new RequestSadAction(mHdmiCecLocalDeviceTv, ADDR_AUDIO_SYSTEM,
                 mCallback);
         action.start();
         mTestLooper.dispatchAll();
+        assertThat(mSupportedSads).isNull();
 
         HdmiCecMessage expected1 = HdmiCecMessageBuilder.buildRequestShortAudioDescriptor(
                 mTvLogicalAddress, Constants.ADDR_AUDIO_SYSTEM,
@@ -153,45 +154,90 @@ public class RequestSadActionTest {
         mTestLooper.moveTimeForward(TIMEOUT_MS);
         mTestLooper.dispatchAll();
         assertThat(mNativeWrapper.getResultMessages()).contains(expected1);
-        mNativeWrapper.clearResultMessages();
         mTestLooper.moveTimeForward(TIMEOUT_MS);
         mTestLooper.dispatchAll();
+
+        assertThat(mSupportedSads).isNotNull();
+        assertThat(mSupportedSads.size()).isEqualTo(0);
 
         HdmiCecMessage expected2 = HdmiCecMessageBuilder.buildRequestShortAudioDescriptor(
                 mTvLogicalAddress, Constants.ADDR_AUDIO_SYSTEM,
                 CODECS_TO_QUERY_2.stream().mapToInt(i -> i).toArray());
-        assertThat(mNativeWrapper.getResultMessages()).contains(expected2);
-        mNativeWrapper.clearResultMessages();
-        mTestLooper.moveTimeForward(TIMEOUT_MS);
-        mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(expected2);
-        mNativeWrapper.clearResultMessages();
-        mTestLooper.moveTimeForward(TIMEOUT_MS);
-        mTestLooper.dispatchAll();
-
         HdmiCecMessage expected3 = HdmiCecMessageBuilder.buildRequestShortAudioDescriptor(
                 mTvLogicalAddress, Constants.ADDR_AUDIO_SYSTEM,
                 CODECS_TO_QUERY_3.stream().mapToInt(i -> i).toArray());
-        assertThat(mNativeWrapper.getResultMessages()).contains(expected3);
-        mNativeWrapper.clearResultMessages();
-        mTestLooper.moveTimeForward(TIMEOUT_MS);
-        mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(expected3);
-        mNativeWrapper.clearResultMessages();
-        mTestLooper.moveTimeForward(TIMEOUT_MS);
-        mTestLooper.dispatchAll();
-
         HdmiCecMessage expected4 = HdmiCecMessageBuilder.buildRequestShortAudioDescriptor(
                 mTvLogicalAddress, Constants.ADDR_AUDIO_SYSTEM,
                 CODECS_TO_QUERY_4.stream().mapToInt(i -> i).toArray());
-        assertThat(mNativeWrapper.getResultMessages()).contains(expected4);
-        mNativeWrapper.clearResultMessages();
+
         mTestLooper.moveTimeForward(TIMEOUT_MS);
         mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(expected4);
+        mTestLooper.moveTimeForward(TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+        mTestLooper.moveTimeForward(TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+        mTestLooper.moveTimeForward(TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+        mTestLooper.moveTimeForward(TIMEOUT_MS);
+        mTestLooper.dispatchAll();
         mTestLooper.moveTimeForward(TIMEOUT_MS);
         mTestLooper.dispatchAll();
 
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(expected2);
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(expected3);
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(expected4);
+        assertThat(mSupportedSads.size()).isEqualTo(0);
+    }
+
+    @Test
+    public void unrecognizedOpcode_dontQueryAgain_emptyResult() {
+        RequestSadAction action = new RequestSadAction(mHdmiCecLocalDeviceTv, ADDR_AUDIO_SYSTEM,
+                mCallback);
+        action.start();
+        mTestLooper.dispatchAll();
+        assertThat(mSupportedSads).isNull();
+
+        HdmiCecMessage unrecognizedOpcode = HdmiCecMessageBuilder.buildFeatureAbortCommand(
+                Constants.ADDR_AUDIO_SYSTEM, mTvLogicalAddress,
+                Constants.MESSAGE_REQUEST_SHORT_AUDIO_DESCRIPTOR,
+                Constants.ABORT_UNRECOGNIZED_OPCODE);
+
+        HdmiCecMessage expected1 = HdmiCecMessageBuilder.buildRequestShortAudioDescriptor(
+                mTvLogicalAddress, Constants.ADDR_AUDIO_SYSTEM,
+                CODECS_TO_QUERY_1.stream().mapToInt(i -> i).toArray());
+        assertThat(mNativeWrapper.getResultMessages()).contains(expected1);
+        action.processCommand(unrecognizedOpcode);
+        mTestLooper.dispatchAll();
+
+        assertThat(mSupportedSads).isNotNull();
+        assertThat(mSupportedSads.size()).isEqualTo(0);
+
+        HdmiCecMessage expected2 = HdmiCecMessageBuilder.buildRequestShortAudioDescriptor(
+                mTvLogicalAddress, Constants.ADDR_AUDIO_SYSTEM,
+                CODECS_TO_QUERY_2.stream().mapToInt(i -> i).toArray());
+        HdmiCecMessage expected3 = HdmiCecMessageBuilder.buildRequestShortAudioDescriptor(
+                mTvLogicalAddress, Constants.ADDR_AUDIO_SYSTEM,
+                CODECS_TO_QUERY_3.stream().mapToInt(i -> i).toArray());
+        HdmiCecMessage expected4 = HdmiCecMessageBuilder.buildRequestShortAudioDescriptor(
+                mTvLogicalAddress, Constants.ADDR_AUDIO_SYSTEM,
+                CODECS_TO_QUERY_4.stream().mapToInt(i -> i).toArray());
+
+        mTestLooper.moveTimeForward(TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+        mTestLooper.moveTimeForward(TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+        mTestLooper.moveTimeForward(TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+        mTestLooper.moveTimeForward(TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+        mTestLooper.moveTimeForward(TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+        mTestLooper.moveTimeForward(TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(expected2);
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(expected3);
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(expected4);
         assertThat(mSupportedSads.size()).isEqualTo(0);
     }
 
@@ -455,11 +501,12 @@ public class RequestSadActionTest {
     }
 
     @Test
-    public void invalidMessageLength_queryAgain() {
+    public void invalidMessageLength_queryAgainOnce() {
         RequestSadAction action = new RequestSadAction(mHdmiCecLocalDeviceTv, ADDR_AUDIO_SYSTEM,
                 mCallback);
         action.start();
         mTestLooper.dispatchAll();
+        assertThat(mSupportedSads).isNull();
 
         HdmiCecMessage expected1 = HdmiCecMessageBuilder.buildRequestShortAudioDescriptor(
                 mTvLogicalAddress, Constants.ADDR_AUDIO_SYSTEM,
@@ -482,63 +529,35 @@ public class RequestSadActionTest {
         mTestLooper.moveTimeForward(TIMEOUT_MS);
         mTestLooper.dispatchAll();
 
+        assertThat(mSupportedSads).isNotNull();
+        assertThat(mSupportedSads.size()).isEqualTo(0);
+
         HdmiCecMessage expected2 = HdmiCecMessageBuilder.buildRequestShortAudioDescriptor(
                 mTvLogicalAddress, Constants.ADDR_AUDIO_SYSTEM,
                 CODECS_TO_QUERY_2.stream().mapToInt(i -> i).toArray());
-        byte[] sadsToRespond_2 = new byte[]{
-                0x05, 0x18, 0x4A,
-                0x06, 0x64, 0x5A,
-                0x07,
-                0x08, 0x20, 0x0A};
-        HdmiCecMessage response2 = HdmiCecMessageBuilder.buildReportShortAudioDescriptor(
-                Constants.ADDR_AUDIO_SYSTEM, mTvLogicalAddress, sadsToRespond_2);
-        assertThat(mNativeWrapper.getResultMessages()).contains(expected2);
-        mNativeWrapper.clearResultMessages();
-        action.processCommand(response2);
-        mTestLooper.dispatchAll();
-        mTestLooper.moveTimeForward(TIMEOUT_MS);
-        mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(expected2);
-        mNativeWrapper.clearResultMessages();
-        mTestLooper.moveTimeForward(TIMEOUT_MS);
-        mTestLooper.dispatchAll();
-
         HdmiCecMessage expected3 = HdmiCecMessageBuilder.buildRequestShortAudioDescriptor(
                 mTvLogicalAddress, Constants.ADDR_AUDIO_SYSTEM,
                 CODECS_TO_QUERY_3.stream().mapToInt(i -> i).toArray());
-        byte[] sadsToRespond_3 = new byte[0];
-        HdmiCecMessage response3 = HdmiCecMessageBuilder.buildReportShortAudioDescriptor(
-                Constants.ADDR_AUDIO_SYSTEM, mTvLogicalAddress, sadsToRespond_3);
-        assertThat(mNativeWrapper.getResultMessages()).contains(expected3);
-        mNativeWrapper.clearResultMessages();
-        action.processCommand(response3);
-        mTestLooper.dispatchAll();
-        mTestLooper.moveTimeForward(TIMEOUT_MS);
-        mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(expected3);
-        mNativeWrapper.clearResultMessages();
-        mTestLooper.moveTimeForward(TIMEOUT_MS);
-        mTestLooper.dispatchAll();
-
         HdmiCecMessage expected4 = HdmiCecMessageBuilder.buildRequestShortAudioDescriptor(
                 mTvLogicalAddress, Constants.ADDR_AUDIO_SYSTEM,
                 CODECS_TO_QUERY_4.stream().mapToInt(i -> i).toArray());
-        byte[] sadsToRespond_4 = new byte[]{
-                0x0D, 0x18, 0x4A,
-                0x0E, 0x64, 0x5A,
-                0x0F, 0x4B};
-        HdmiCecMessage response4 = HdmiCecMessageBuilder.buildReportShortAudioDescriptor(
-                Constants.ADDR_AUDIO_SYSTEM, mTvLogicalAddress, sadsToRespond_4);
-        assertThat(mNativeWrapper.getResultMessages()).contains(expected4);
-        mNativeWrapper.clearResultMessages();
-        action.processCommand(response4);
+
+        mTestLooper.moveTimeForward(TIMEOUT_MS);
         mTestLooper.dispatchAll();
         mTestLooper.moveTimeForward(TIMEOUT_MS);
         mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(expected4);
+        mTestLooper.moveTimeForward(TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+        mTestLooper.moveTimeForward(TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+        mTestLooper.moveTimeForward(TIMEOUT_MS);
+        mTestLooper.dispatchAll();
         mTestLooper.moveTimeForward(TIMEOUT_MS);
         mTestLooper.dispatchAll();
 
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(expected2);
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(expected3);
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(expected4);
         assertThat(mSupportedSads.size()).isEqualTo(0);
     }
 

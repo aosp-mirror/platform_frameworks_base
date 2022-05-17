@@ -19,6 +19,8 @@ package com.android.systemui.clipboardoverlay;
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.CLIPBOARD_OVERLAY_ENABLED;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -26,7 +28,9 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.ClipboardManager;
+import android.os.PersistableBundle;
 import android.provider.DeviceConfig;
 
 import androidx.test.filters.SmallTest;
@@ -138,5 +142,31 @@ public class ClipboardListenerTest extends SysuiTestCase {
         listener.onPrimaryClipChanged();
 
         verify(mClipboardOverlayControllerFactory, times(2)).create(any());
+    }
+
+    @Test
+    public void test_shouldSuppressOverlay() {
+        // Regardless of the package or emulator, nothing should be suppressed without the flag
+        assertFalse(ClipboardListener.shouldSuppressOverlay(mSampleClipData, mSampleSource,
+                false));
+        assertFalse(ClipboardListener.shouldSuppressOverlay(mSampleClipData,
+                ClipboardListener.SHELL_PACKAGE, false));
+        assertFalse(ClipboardListener.shouldSuppressOverlay(mSampleClipData, mSampleSource,
+                true));
+
+        ClipDescription desc = new ClipDescription("Test", new String[]{"text/plain"});
+        PersistableBundle bundle = new PersistableBundle();
+        bundle.putBoolean(ClipboardListener.EXTRA_SUPPRESS_OVERLAY, true);
+        desc.setExtras(bundle);
+        ClipData suppressableClipData = new ClipData(desc, new ClipData.Item("Test Item"));
+
+        // Clip data with the suppression extra is only honored in the emulator or with the shell
+        // package.
+        assertFalse(ClipboardListener.shouldSuppressOverlay(suppressableClipData, mSampleSource,
+                false));
+        assertTrue(ClipboardListener.shouldSuppressOverlay(suppressableClipData, mSampleSource,
+                true));
+        assertTrue(ClipboardListener.shouldSuppressOverlay(suppressableClipData,
+                ClipboardListener.SHELL_PACKAGE, false));
     }
 }

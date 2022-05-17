@@ -57,7 +57,6 @@ import android.provider.Telephony.Sms.Intents;
 import android.security.Credentials;
 import android.speech.RecognitionService;
 import android.telephony.TelephonyManager;
-import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -618,6 +617,10 @@ final class DefaultPermissionGrantPolicy {
         grantPermissionsToSystemPackage(pm, getDefaultSearchSelectorPackage(), userId,
                 NOTIFICATION_PERMISSIONS);
 
+        // Captive Portal Login
+        grantPermissionsToSystemPackage(pm, getDefaultCaptivePortalLoginPackage(), userId,
+                NOTIFICATION_PERMISSIONS);
+
         // Camera
         grantPermissionsToSystemPackage(pm,
                 getDefaultSystemHandlerActivityPackage(pm, MediaStore.ACTION_IMAGE_CAPTURE, userId),
@@ -909,14 +912,6 @@ final class DefaultPermissionGrantPolicy {
         grantSystemFixedPermissionsToSystemPackage(pm, "com.android.sharedstoragebackup", userId,
                 STORAGE_PERMISSIONS);
 
-        // System Captions Service
-        String systemCaptionsServicePackageName =
-                mContext.getPackageManager().getSystemCaptionsServicePackageName();
-        if (!TextUtils.isEmpty(systemCaptionsServicePackageName)) {
-            grantPermissionsToSystemPackage(pm, systemCaptionsServicePackageName, userId,
-                    MICROPHONE_PERMISSIONS);
-        }
-
         // Bluetooth MIDI Service
         grantSystemFixedPermissionsToSystemPackage(pm,
                 MidiManager.BLUETOOTH_MIDI_SERVICE_PACKAGE, userId,
@@ -931,6 +926,10 @@ final class DefaultPermissionGrantPolicy {
 
     private String getDefaultSearchSelectorPackage() {
         return mContext.getString(R.string.config_defaultSearchSelectorPackageName);
+    }
+
+    private String getDefaultCaptivePortalLoginPackage() {
+        return mContext.getString(R.string.config_defaultCaptivePortalLoginPackageName);
     }
 
     @SafeVarargs
@@ -1018,8 +1017,6 @@ final class DefaultPermissionGrantPolicy {
         for (String packageName : packageNames) {
             grantPermissionsToSystemPackage(NO_PM_CACHE, packageName, userId,
                     PHONE_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS, SMS_PERMISSIONS);
-            grantPermissionsToPackage(NO_PM_CACHE, packageName, userId, false, false,
-                    NOTIFICATION_PERMISSIONS);
         }
     }
 
