@@ -54,6 +54,7 @@ import android.content.Intent;
 import android.content.pm.PackageManagerInternal;
 import android.media.AudioManager;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.Process;
@@ -146,6 +147,8 @@ public class VibrationSettingsTest {
         mVibrationSettings = new VibrationSettings(mContextSpy,
                 new Handler(mTestLooper.getLooper()), mVibrationConfigMock);
 
+        mockGoToSleep(/* goToSleepTime= */ 0, PowerManager.GO_TO_SLEEP_REASON_TIMEOUT);
+
         // Simulate System defaults.
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_ENABLED, 1);
         setUserSetting(Settings.System.VIBRATE_INPUT_DEVICES, 0);
@@ -164,18 +167,10 @@ public class VibrationSettingsTest {
     public void addListener_settingsChangeTriggerListener() {
         mVibrationSettings.addListener(mListenerMock);
 
-        setUserSetting(Settings.System.VIBRATE_INPUT_DEVICES, 1);
-        setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 0);
-        setUserSetting(Settings.System.APPLY_RAMPING_RINGER, 0);
-        setUserSetting(Settings.System.ALARM_VIBRATION_INTENSITY, VIBRATION_INTENSITY_OFF);
-        setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY, VIBRATION_INTENSITY_OFF);
-        setUserSetting(Settings.System.MEDIA_VIBRATION_INTENSITY, VIBRATION_INTENSITY_OFF);
-        setUserSetting(Settings.System.RING_VIBRATION_INTENSITY, VIBRATION_INTENSITY_OFF);
-        setUserSetting(Settings.System.HAPTIC_FEEDBACK_ENABLED, 0);
-        setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_OFF);
-        setUserSetting(Settings.System.HARDWARE_HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_OFF);
+        mVibrationSettings.mSettingObserver.onChange(false);
+        mVibrationSettings.mSettingObserver.onChange(false);
 
-        verify(mListenerMock, times(10)).onChange();
+        verify(mListenerMock, times(2)).onChange();
     }
 
     @Test
@@ -479,50 +474,112 @@ public class VibrationSettingsTest {
     }
 
     @Test
-    public void shouldCancelVibrationOnScreenOff_withNonSystemPackageAndUid_returnsAlwaysTrue() {
+    public void shouldCancelVibrationOnScreenOff_withEventBeforeVibration_returnsAlwaysFalse() {
+        long vibrateStartTime = 100;
+        mockGoToSleep(vibrateStartTime - 10, PowerManager.GO_TO_SLEEP_REASON_APPLICATION);
+
         for (int usage : ALL_USAGES) {
-            assertTrue(mVibrationSettings.shouldCancelVibrationOnScreenOff(UID, "some.app", usage));
+            // Non-system vibration
+            assertFalse(mVibrationSettings.shouldCancelVibrationOnScreenOff(
+                    UID, "some.app", usage, vibrateStartTime));
+            // Vibration with UID zero
+            assertFalse(mVibrationSettings.shouldCancelVibrationOnScreenOff(
+                    /* uid= */ 0, "", usage, vibrateStartTime));
+            // System vibration
+            assertFalse(mVibrationSettings.shouldCancelVibrationOnScreenOff(
+                    Process.SYSTEM_UID, "", usage, vibrateStartTime));
+            // SysUI vibration
+            assertFalse(mVibrationSettings.shouldCancelVibrationOnScreenOff(
+                    UID, SYSUI_PACKAGE_NAME, usage, vibrateStartTime));
+        }
+    }
+
+    @Test
+    public void shouldCancelVibrationOnScreenOff_withSleepReasonInAllowlist_returnsAlwaysFalse() {
+        long vibrateStartTime = 100;
+        int[] allowedSleepReasons = new int[] {
+                PowerManager.GO_TO_SLEEP_REASON_TIMEOUT,
+                PowerManager.GO_TO_SLEEP_REASON_INATTENTIVE,
+        };
+
+        for (int sleepReason : allowedSleepReasons) {
+            mockGoToSleep(vibrateStartTime + 10, sleepReason);
+
+            for (int usage : ALL_USAGES) {
+                // Non-system vibration
+                assertFalse(mVibrationSettings.shouldCancelVibrationOnScreenOff(
+                        UID, "some.app", usage, vibrateStartTime));
+                // Vibration with UID zero
+                assertFalse(mVibrationSettings.shouldCancelVibrationOnScreenOff(
+                        /* uid= */ 0, "", usage, vibrateStartTime));
+                // System vibration
+                assertFalse(mVibrationSettings.shouldCancelVibrationOnScreenOff(
+                        Process.SYSTEM_UID, "", usage, vibrateStartTime));
+                // SysUI vibration
+                assertFalse(mVibrationSettings.shouldCancelVibrationOnScreenOff(
+                        UID, SYSUI_PACKAGE_NAME, usage, vibrateStartTime));
+            }
+        }
+    }
+
+    @Test
+    public void shouldCancelVibrationOnScreenOff_withNonSystem_returnsTrueIfReasonNotInAllowlist() {
+        long vibrateStartTime = 100;
+        mockGoToSleep(vibrateStartTime + 10, PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON);
+
+        for (int usage : ALL_USAGES) {
+            assertTrue(mVibrationSettings.shouldCancelVibrationOnScreenOff(
+                    UID, "some.app", usage, vibrateStartTime));
         }
     }
 
     @Test
     public void shouldCancelVibrationOnScreenOff_withUidZero_returnsFalseForTouchAndHardware() {
+        long vibrateStartTime = 100;
+        mockGoToSleep(vibrateStartTime + 10, PowerManager.GO_TO_SLEEP_REASON_DEVICE_ADMIN);
+
         for (int usage : ALL_USAGES) {
             if (usage == USAGE_TOUCH || usage == USAGE_HARDWARE_FEEDBACK
                     || usage == USAGE_PHYSICAL_EMULATION) {
                 assertFalse(mVibrationSettings.shouldCancelVibrationOnScreenOff(
-                        /* uid= */ 0, "", usage));
+                        /* uid= */ 0, "", usage, vibrateStartTime));
             } else {
                 assertTrue(mVibrationSettings.shouldCancelVibrationOnScreenOff(
-                        /* uid= */ 0, "", usage));
+                        /* uid= */ 0, "", usage, vibrateStartTime));
             }
         }
     }
 
     @Test
     public void shouldCancelVibrationOnScreenOff_withSystemUid_returnsFalseForTouchAndHardware() {
+        long vibrateStartTime = 100;
+        mockGoToSleep(vibrateStartTime + 10, PowerManager.GO_TO_SLEEP_REASON_DEVICE_FOLD);
+
         for (int usage : ALL_USAGES) {
             if (usage == USAGE_TOUCH || usage == USAGE_HARDWARE_FEEDBACK
                     || usage == USAGE_PHYSICAL_EMULATION) {
                 assertFalse(mVibrationSettings.shouldCancelVibrationOnScreenOff(
-                        Process.SYSTEM_UID, "", usage));
+                        Process.SYSTEM_UID, "", usage, vibrateStartTime));
             } else {
                 assertTrue(mVibrationSettings.shouldCancelVibrationOnScreenOff(
-                        Process.SYSTEM_UID, "", usage));
+                        Process.SYSTEM_UID, "", usage, vibrateStartTime));
             }
         }
     }
 
     @Test
-    public void shouldCancelVibrationOnScreenOff_withSysUi_returnsFalseForTouchAndHardware() {
+    public void shouldCancelVibrationOnScreenOff_withSysUiPkg_returnsFalseForTouchAndHardware() {
+        long vibrateStartTime = 100;
+        mockGoToSleep(vibrateStartTime + 10, PowerManager.GO_TO_SLEEP_REASON_HDMI);
+
         for (int usage : ALL_USAGES) {
             if (usage == USAGE_TOUCH || usage == USAGE_HARDWARE_FEEDBACK
                     || usage == USAGE_PHYSICAL_EMULATION) {
                 assertFalse(mVibrationSettings.shouldCancelVibrationOnScreenOff(
-                        UID, SYSUI_PACKAGE_NAME, usage));
+                        UID, SYSUI_PACKAGE_NAME, usage, vibrateStartTime));
             } else {
                 assertTrue(mVibrationSettings.shouldCancelVibrationOnScreenOff(
-                        UID, SYSUI_PACKAGE_NAME, usage));
+                        UID, SYSUI_PACKAGE_NAME, usage, vibrateStartTime));
             }
         }
     }
@@ -581,7 +638,6 @@ public class VibrationSettingsTest {
     public void getCurrentIntensity_noHardwareFeedbackValueUsesHapticFeedbackValue() {
         setDefaultIntensity(USAGE_HARDWARE_FEEDBACK, VIBRATION_INTENSITY_MEDIUM);
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_OFF);
-        mVibrationSettings.update();
         assertEquals(VIBRATION_INTENSITY_OFF, mVibrationSettings.getCurrentIntensity(USAGE_TOUCH));
         // If haptic feedback is off, fallback to default value.
         assertEquals(VIBRATION_INTENSITY_MEDIUM,
@@ -590,7 +646,6 @@ public class VibrationSettingsTest {
                 mVibrationSettings.getCurrentIntensity(USAGE_PHYSICAL_EMULATION));
 
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_HIGH);
-        mVibrationSettings.update();
         assertEquals(VIBRATION_INTENSITY_HIGH,
                 mVibrationSettings.getCurrentIntensity(USAGE_TOUCH));
         // If haptic feedback is on, fallback to that value.
@@ -648,19 +703,25 @@ public class VibrationSettingsTest {
         Settings.System.putStringForUser(
                 mContextSpy.getContentResolver(), settingName, null, UserHandle.USER_CURRENT);
         // FakeSettingsProvider doesn't support testing triggering ContentObserver yet.
-        mVibrationSettings.update();
+        mVibrationSettings.mSettingObserver.onChange(false);
     }
 
     private void setUserSetting(String settingName, int value) {
         Settings.System.putIntForUser(
                 mContextSpy.getContentResolver(), settingName, value, UserHandle.USER_CURRENT);
         // FakeSettingsProvider doesn't support testing triggering ContentObserver yet.
-        mVibrationSettings.update();
+        mVibrationSettings.mSettingObserver.onChange(false);
     }
 
     private void setRingerMode(int ringerMode) {
         mAudioManager.setRingerModeInternal(ringerMode);
         assertEquals(ringerMode, mAudioManager.getRingerModeInternal());
-        mVibrationSettings.update();
+        mVibrationSettings.mSettingChangeReceiver.onReceive(mContextSpy,
+                new Intent(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION));
+    }
+
+    private void mockGoToSleep(long sleepTime, int reason) {
+        when(mPowerManagerInternalMock.getLastGoToSleep()).thenReturn(
+                new PowerManager.SleepData(sleepTime, reason));
     }
 }
