@@ -411,8 +411,8 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
         if (nowExpanded) {
             if (mStatusBarStateController.getState() == StatusBarState.KEYGUARD) {
                 mShadeTransitionController.goToLockedShade(clickedEntry.getRow());
-            } else if (mDynamicPrivacyController.isInLockedDownShade()
-                    && mLockscreenUserManager.notifNeedsRedactionInPublic(clickedEntry)) {
+            } else if (clickedEntry.isSensitive()
+                    && mDynamicPrivacyController.isInLockedDownShade()) {
                 mStatusBarStateController.setLeaveOpenOnKeyguardHide(true);
                 mActivityStarter.dismissKeyguardThenExecute(() -> false /* dismissAction */
                         , null /* cancelRunnable */, false /* afterKeyguardGone */);
@@ -480,7 +480,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
                         .isLockscreenPublicMode(mLockscreenUserManager.getCurrentUserId());
                 boolean userPublic = devicePublic
                         || mLockscreenUserManager.isLockscreenPublicMode(sbn.getUserId());
-                boolean needsRedaction = mLockscreenUserManager.notifNeedsRedactionInPublic(entry);
+                boolean needsRedaction = mLockscreenUserManager.needsRedaction(entry);
                 if (userPublic && needsRedaction) {
                     // TODO(b/135046837): we can probably relax this with dynamic privacy
                     return true;

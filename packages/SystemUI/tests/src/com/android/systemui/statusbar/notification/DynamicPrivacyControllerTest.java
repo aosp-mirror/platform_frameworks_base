@@ -124,8 +124,8 @@ public class DynamicPrivacyControllerTest extends SysuiTestCase {
     }
 
     private void allowPrivateNotificationsInPublic(boolean allow) {
-        when(mLockScreenUserManager.sensitiveNotifsNeedRedactionInPublic(anyInt())).thenReturn(
-                !allow);
+        when(mLockScreenUserManager.userAllowsPrivateNotificationsInPublic(anyInt())).thenReturn(
+                allow);
     }
 
     @Test

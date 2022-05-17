@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification.icon
+package com.android.systemui.statusbar.notification.icon;
 
-import android.app.ActivityManager
-import android.app.Notification
+import android.app.ActivityManager;
+import android.app.Notification;
 import android.app.NotificationChannel
 import android.app.NotificationManager.IMPORTANCE_DEFAULT
 import android.app.Person
@@ -27,12 +27,11 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.os.SystemClock
 import android.os.UserHandle
-import android.testing.AndroidTestingRunner
+import android.testing.AndroidTestingRunner;
 import androidx.test.InstrumentationRegistry
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.controller.AuxiliaryPersistenceWrapperTest.Companion.any
-import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
@@ -41,7 +40,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 
-import org.junit.runner.RunWith
+import org.junit.runner.RunWith;
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.anyInt
@@ -49,14 +48,15 @@ import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
-class IconManagerTest : SysuiTestCase() {
+class IconManagerTest: SysuiTestCase() {
     companion object {
-        private const val TEST_PACKAGE_NAME = "test"
-        private const val TEST_UID = 0
+        private const val TEST_PACKAGE_NAME = "test";
+        private const val TEST_UID = 0;
     }
 
+
     private var id = 0
-    private val context = InstrumentationRegistry.getTargetContext()
+    private val context = InstrumentationRegistry.getTargetContext();
     @Mock private lateinit var shortcut: ShortcutInfo
     @Mock private lateinit var shortcutIc: Icon
     @Mock private lateinit var messageIc: Icon
@@ -65,7 +65,6 @@ class IconManagerTest : SysuiTestCase() {
     @Mock private lateinit var drawable: Drawable
     @Mock private lateinit var row: ExpandableNotificationRow
 
-    @Mock private lateinit var notifLockscreenUserManager: NotificationLockscreenUserManager
     @Mock private lateinit var notifCollection: CommonNotifCollection
     @Mock private lateinit var launcherApps: LauncherApps
 
@@ -84,16 +83,13 @@ class IconManagerTest : SysuiTestCase() {
 
         `when`(shortcut.icon).thenReturn(shortcutIc)
         `when`(launcherApps.getShortcutIcon(shortcut)).thenReturn(shortcutIc)
-        `when`(notifLockscreenUserManager.sensitiveNotifsNeedRedactionInPublic(TEST_UID))
-                .thenReturn(true)
 
-        iconManager =
-                IconManager(notifCollection, launcherApps, iconBuilder, notifLockscreenUserManager)
+        iconManager = IconManager(notifCollection, launcherApps, iconBuilder)
     }
 
     @Test
     fun testCreateIcons_importantConversation_shortcutIcon() {
-        val entry = notificationEntry()
+        val entry = notificationEntry(true, true, true)
         entry?.channel?.isImportantConversation = true
         entry?.let {
             iconManager.createIcons(it)
@@ -103,7 +99,7 @@ class IconManagerTest : SysuiTestCase() {
 
     @Test
     fun testCreateIcons_importantConversation_messageIcon() {
-        val entry = notificationEntry(hasShortcut = false)
+        val entry = notificationEntry(false, true, true)
         entry?.channel?.isImportantConversation = true
         entry?.let {
             iconManager.createIcons(it)
@@ -113,7 +109,7 @@ class IconManagerTest : SysuiTestCase() {
 
     @Test
     fun testCreateIcons_importantConversation_largeIcon() {
-        val entry = notificationEntry(hasShortcut = false, hasMessage = false)
+        val entry = notificationEntry(false, false, true)
         entry?.channel?.isImportantConversation = true
         entry?.let {
             iconManager.createIcons(it)
@@ -123,7 +119,7 @@ class IconManagerTest : SysuiTestCase() {
 
     @Test
     fun testCreateIcons_importantConversation_smallIcon() {
-        val entry = notificationEntry(hasShortcut = false, hasMessage = false, hasLargeIcon = false)
+        val entry = notificationEntry(false, false, false)
         entry?.channel?.isImportantConversation = true
         entry?.let {
             iconManager.createIcons(it)
@@ -133,7 +129,7 @@ class IconManagerTest : SysuiTestCase() {
 
     @Test
     fun testCreateIcons_notImportantConversation() {
-        val entry = notificationEntry()
+        val entry = notificationEntry(true, true, true)
         entry?.let {
             iconManager.createIcons(it)
         }
@@ -142,10 +138,8 @@ class IconManagerTest : SysuiTestCase() {
 
     @Test
     fun testCreateIcons_sensitiveImportantConversation() {
-        val entry = notificationEntry(
-                hasMessage = false,
-                hasLargeIcon = false,
-                hasSensitiveContent = true)
+        val entry = notificationEntry(true, false, false)
+        entry?.setSensitive(true, true);
         entry?.channel?.isImportantConversation = true
         entry?.let {
             iconManager.createIcons(it)
@@ -157,17 +151,14 @@ class IconManagerTest : SysuiTestCase() {
 
     @Test
     fun testUpdateIcons_sensitivityChange() {
-        val entry = notificationEntry(
-                hasMessage = false,
-                hasLargeIcon = false,
-                hasSensitiveContent = true)
+        val entry = notificationEntry(true, false, false)
         entry?.channel?.isImportantConversation = true
+        entry?.setSensitive(true, true);
         entry?.let {
             iconManager.createIcons(it)
         }
         assertEquals(entry?.icons?.aodIcon?.sourceIcon, smallIc)
-        `when`(notifLockscreenUserManager.sensitiveNotifsNeedRedactionInPublic(TEST_UID))
-                .thenReturn(false)
+        entry?.setSensitive(false, false);
         entry?.let {
             iconManager.updateIcons(it)
         }
@@ -175,19 +166,14 @@ class IconManagerTest : SysuiTestCase() {
     }
 
     private fun notificationEntry(
-        hasShortcut: Boolean = true,
-        hasMessage: Boolean = true,
-        hasLargeIcon: Boolean = true,
-        hasSensitiveContent: Boolean = false
+            hasShortcut: Boolean,
+            hasMessage: Boolean,
+            hasLargeIcon: Boolean
     ): NotificationEntry? {
         val n = Notification.Builder(mContext, "id")
                 .setSmallIcon(smallIc)
                 .setContentTitle("Title")
                 .setContentText("Text")
-                .setVisibility(
-                        if (hasSensitiveContent)
-                            Notification.VISIBILITY_PRIVATE
-                        else Notification.VISIBILITY_PUBLIC)
 
         if (hasMessage) {
             n.style = Notification.MessagingStyle("")
@@ -217,6 +203,7 @@ class IconManagerTest : SysuiTestCase() {
 
         val entry = builder.build()
         entry.row = row
+        entry.setSensitive(false, true);
         return entry
     }
 }
