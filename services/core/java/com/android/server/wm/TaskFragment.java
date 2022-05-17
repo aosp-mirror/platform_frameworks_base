@@ -1533,7 +1533,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         if (prev.attachedToProcess()) {
             if (shouldAutoPip) {
                 boolean didAutoPip = mAtmService.enterPictureInPictureMode(
-                        prev, prev.pictureInPictureArgs);
+                        prev, prev.pictureInPictureArgs, false /* fromClient */);
                 ProtoLog.d(WM_DEBUG_STATES, "Auto-PIP allowed, entering PIP mode "
                         + "directly: %s, didAutoPip: %b", prev, didAutoPip);
             } else {
