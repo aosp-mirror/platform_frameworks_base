@@ -200,9 +200,13 @@ public final class WMShell extends CoreStartable
         mPipKeyguardCallback = new KeyguardUpdateMonitorCallback() {
             @Override
             public void onKeyguardVisibilityChanged(boolean showing) {
-                if (showing) {
-                    pip.hidePipMenu(null, null);
-                }
+                pip.onKeyguardVisibilityChanged(showing,
+                        mKeyguardStateController.isAnimatingBetweenKeyguardAndSurfaceBehind());
+            }
+
+            @Override
+            public void onKeyguardDismissAnimationFinished() {
+                pip.onKeyguardDismissAnimationFinished();
             }
         };
         mKeyguardUpdateMonitor.registerCallback(mPipKeyguardCallback);

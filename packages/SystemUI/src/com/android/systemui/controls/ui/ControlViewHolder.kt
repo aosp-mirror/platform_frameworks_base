@@ -472,7 +472,6 @@ class ControlViewHolder(
         updateContentDescription()
 
         status.setTextColor(color)
-        chevronIcon.imageTintList = color
 
         control?.getCustomIcon()?.let {
             icon.setImageIcon(it)
@@ -495,10 +494,13 @@ class ControlViewHolder(
                 icon.imageTintList = color
             }
         }
+
+        chevronIcon.imageTintList = icon.imageTintList
     }
 
     private fun setEnabled(enabled: Boolean) {
-        status.setEnabled(enabled)
-        icon.setEnabled(enabled)
+        status.isEnabled = enabled
+        icon.isEnabled = enabled
+        chevronIcon.isEnabled = enabled
     }
 }

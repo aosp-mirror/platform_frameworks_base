@@ -965,6 +965,17 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mDeferredAnimEndTransaction = null;
     }
 
+    /** Explicitly set the visibility of PiP window. */
+    public void setPipVisibility(boolean visible) {
+        if (!isInPip()) {
+            return;
+        }
+        final SurfaceControl.Transaction tx =
+                mSurfaceControlTransactionFactory.getTransaction();
+        mSurfaceTransactionHelper.alpha(tx, mLeash, visible ? 1f : 0f);
+        tx.apply();
+    }
+
     @Override
     public void onDisplayConfigurationChanged(int displayId, Configuration newConfig) {
         mCurrentRotation = newConfig.windowConfiguration.getRotation();
@@ -1281,7 +1292,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      */
     public void scheduleOffsetPip(Rect originalBounds, int offset, int duration,
             Consumer<Rect> updateBoundsCallback) {
-        if (mPipTransitionState.shouldBlockResizeRequest()) {
+        if (mPipTransitionState.shouldBlockResizeRequest()
+                || mPipTransitionState.getInSwipePipToHomeTransition()) {
             return;
         }
         if (mWaitForFixedRotation) {

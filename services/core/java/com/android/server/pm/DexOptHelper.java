@@ -26,6 +26,7 @@ import static com.android.server.pm.PackageManagerService.REASON_CMDLINE;
 import static com.android.server.pm.PackageManagerService.REASON_FIRST_BOOT;
 import static com.android.server.pm.PackageManagerService.STUB_SUFFIX;
 import static com.android.server.pm.PackageManagerService.TAG;
+import static com.android.server.pm.PackageManagerServiceCompilerMapping.getCompilerFilterForReason;
 import static com.android.server.pm.PackageManagerServiceCompilerMapping.getDefaultCompilerFilter;
 import static com.android.server.pm.PackageManagerServiceUtils.REMOVE_IF_NULL_PKG;
 
@@ -57,6 +58,8 @@ import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.pkg.PackageStateInternal;
+
+import dalvik.system.DexFile;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -267,31 +270,42 @@ final class DexOptHelper {
             return;
         }
 
-        boolean useProfileForDexopt = false;
-        File profileFile = new File(getPrebuildProfilePath(pkg));
-        // Copy the profile to the reference profile path if it exists. Installd can only use a
-        // profile at the reference profile path for dexopt.
-        if (profileFile.exists()) {
-            try {
-                synchronized (mPm.mInstallLock) {
-                    if (mPm.mInstaller.copySystemProfile(profileFile.getAbsolutePath(),
-                                pkg.getUid(), pkg.getPackageName(),
-                                ArtManager.getProfileName(null))) {
-                        useProfileForDexopt = true;
-                    } else {
-                        Log.e(TAG, "Failed to copy profile " + profileFile.getAbsolutePath());
-                    }
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Failed to copy profile " + profileFile.getAbsolutePath(), e);
-            }
-        }
-
         // It could also be after mainline update, but we're not introducing a new reason just for
         // this special case.
+        int reason = REASON_BOOT_AFTER_OTA;
+
+        String defaultCompilerFilter = getCompilerFilterForReason(reason);
+        String targetCompilerFilter =
+                SystemProperties.get("dalvik.vm.systemuicompilerfilter", defaultCompilerFilter);
+        String compilerFilter;
+
+        if (DexFile.isProfileGuidedCompilerFilter(targetCompilerFilter)) {
+            compilerFilter = defaultCompilerFilter;
+            File profileFile = new File(getPrebuildProfilePath(pkg));
+
+            // Copy the profile to the reference profile path if it exists. Installd can only use a
+            // profile at the reference profile path for dexopt.
+            if (profileFile.exists()) {
+                try {
+                    synchronized (mPm.mInstallLock) {
+                        if (mPm.mInstaller.copySystemProfile(profileFile.getAbsolutePath(),
+                                    pkg.getUid(), pkg.getPackageName(),
+                                    ArtManager.getProfileName(null))) {
+                            compilerFilter = targetCompilerFilter;
+                        } else {
+                            Log.e(TAG, "Failed to copy profile " + profileFile.getAbsolutePath());
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Failed to copy profile " + profileFile.getAbsolutePath(), e);
+                }
+            }
+        } else {
+            compilerFilter = targetCompilerFilter;
+        }
+
         performDexOptTraced(new DexoptOptions(pkg.getPackageName(), REASON_BOOT_AFTER_OTA,
-                useProfileForDexopt ? "speed-profile" : "speed", null /* splitName */,
-                0 /* dexoptFlags */));
+                compilerFilter, null /* splitName */, 0 /* dexoptFlags */));
     }
 
     @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)

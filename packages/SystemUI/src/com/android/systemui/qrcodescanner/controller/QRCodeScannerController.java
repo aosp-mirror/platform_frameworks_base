@@ -29,7 +29,6 @@ import android.provider.Settings;
 import android.util.Log;
 
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
-import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.settings.UserTracker;
@@ -119,7 +118,6 @@ public class QRCodeScannerController implements
         mSecureSettings = secureSettings;
         mDeviceConfigProxy = proxy;
         mUserTracker = userTracker;
-
         mConfigEnableLockScreenButton = mContext.getResources().getBoolean(
             android.R.bool.config_enableQrCodeScannerOnLockScreen);
     }
@@ -258,16 +256,20 @@ public class QRCodeScannerController implements
         }
     }
 
+    private String getDefaultScannerActivity() {
+        return mContext.getResources().getString(
+            com.android.internal.R.string.config_defaultQrCodeComponent);
+    }
+
     private void updateQRCodeScannerActivityDetails() {
         String qrCodeScannerActivity = mDeviceConfigProxy.getString(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 SystemUiDeviceConfigFlags.DEFAULT_QR_CODE_SCANNER, "");
 
         // "" means either the flags is not available or is set to "", and in both the cases we
-        // want to use R.string.def_qr_code_component
+        // want to use R.string.config_defaultQrCodeComponent
         if (Objects.equals(qrCodeScannerActivity, "")) {
-            qrCodeScannerActivity =
-                    mContext.getResources().getString(R.string.def_qr_code_component);
+            qrCodeScannerActivity = getDefaultScannerActivity();
         }
 
         String prevQrCodeScannerActivity = mQRCodeScannerActivity;
