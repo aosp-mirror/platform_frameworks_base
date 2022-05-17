@@ -6628,7 +6628,7 @@ public class AudioManager {
 
     /**
      * The message sent to apps when the contents of the device list changes if they provide
-     * a {@link Handler} object to addOnAudioDeviceConnectionListener().
+     * a {@link Handler} object to {@link registerAudioDeviceCallback}.
      */
     private final static int MSG_DEVICES_CALLBACK_REGISTERED = 0;
     private final static int MSG_DEVICES_DEVICES_ADDED = 1;
