@@ -35,7 +35,6 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.plugins.PluginManager;
-import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.notification.FeedbackIcon;
@@ -70,7 +69,6 @@ import javax.inject.Named;
 public class ExpandableNotificationRowController implements NotifViewController {
     private static final String TAG = "NotifRowController";
     private final ExpandableNotificationRow mView;
-    private final NotificationLockscreenUserManager mLockscreenUserManager;
     private final NotificationListContainer mListContainer;
     private final RemoteInputViewSubcomponent.Factory mRemoteInputViewSubcomponentFactory;
     private final ActivatableNotificationViewController mActivatableNotificationViewController;
@@ -88,6 +86,7 @@ public class ExpandableNotificationRowController implements NotifViewController 
     private final ExpandableNotificationRow.OnExpandClickListener mOnExpandClickListener;
     private final StatusBarStateController mStatusBarStateController;
     private final MetricsLogger mMetricsLogger;
+
     private final ExpandableNotificationRow.ExpansionLogger mExpansionLogger =
             this::logNotificationExpansion;
     private final ExpandableNotificationRow.CoordinateOnClickListener mOnFeedbackClickListener;
@@ -101,12 +100,12 @@ public class ExpandableNotificationRowController implements NotifViewController 
     private final Optional<BubblesManager> mBubblesManagerOptional;
     private final SmartReplyConstants mSmartReplyConstants;
     private final SmartReplyController mSmartReplyController;
+
     private final ExpandableNotificationRowDragController mDragController;
 
     @Inject
     public ExpandableNotificationRowController(
             ExpandableNotificationRow view,
-            NotificationLockscreenUserManager lockscreenUserManager,
             ActivatableNotificationViewController activatableNotificationViewController,
             RemoteInputViewSubcomponent.Factory rivSubcomponentFactory,
             MetricsLogger metricsLogger,
@@ -136,7 +135,6 @@ public class ExpandableNotificationRowController implements NotifViewController 
             Optional<BubblesManager> bubblesManagerOptional,
             ExpandableNotificationRowDragController dragController) {
         mView = view;
-        mLockscreenUserManager = lockscreenUserManager;
         mListContainer = listContainer;
         mRemoteInputViewSubcomponentFactory = rivSubcomponentFactory;
         mActivatableNotificationViewController = activatableNotificationViewController;
@@ -216,10 +214,6 @@ public class ExpandableNotificationRowController implements NotifViewController 
             mView.setDescendantFocusability(ViewGroup.FOCUS_BEFORE_DESCENDANTS);
         }
 
-        mLockscreenUserManager
-                .addOnNeedsRedactionInPublicChangedListener(mNeedsRedactionListener);
-        mNeedsRedactionListener.run();
-
         mView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override
             public void onViewAttachedToWindow(View v) {
@@ -237,14 +231,6 @@ public class ExpandableNotificationRowController implements NotifViewController 
             }
         });
     }
-
-    private final Runnable mNeedsRedactionListener = new Runnable() {
-        @Override
-        public void run() {
-            mView.setSensitive(
-                    mLockscreenUserManager.notifNeedsRedactionInPublic(mView.getEntry()));
-        }
-    };
 
     private final StatusBarStateController.StateListener mStatusBarStateListener =
             new StatusBarStateController.StateListener() {
@@ -347,5 +333,4 @@ public class ExpandableNotificationRowController implements NotifViewController 
     public void setFeedbackIcon(@Nullable FeedbackIcon icon) {
         mView.setFeedbackIcon(icon);
     }
-
 }
