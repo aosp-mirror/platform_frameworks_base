@@ -212,7 +212,12 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         return flags;
     }
 
-    private class DummyExternalStatsSync implements ExternalStatsSync {
+    public void setDummyExternalStatsSync(DummyExternalStatsSync externalStatsSync) {
+        mExternalStatsSync = externalStatsSync;
+        setExternalStatsSyncLocked(mExternalStatsSync);
+    }
+
+    public static class DummyExternalStatsSync implements ExternalStatsSync {
         public int flags = 0;
 
         @Override
@@ -257,8 +262,7 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         }
 
         @Override
-        public Future<?> scheduleSyncDueToProcessStateChange(long delayMillis) {
-            return null;
+        public void scheduleSyncDueToProcessStateChange(int flags, long delayMillis) {
         }
     }
 }

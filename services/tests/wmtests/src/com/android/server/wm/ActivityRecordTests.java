@@ -2630,7 +2630,11 @@ public class ActivityRecordTests extends WindowTestsBase {
             DeviceConfig.setProperty(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
                     "splash_screen_exception_list", DEFAULT_COMPONENT_PACKAGE_NAME, false);
             testLegacySplashScreen(Build.VERSION_CODES.R, TYPE_PARAMETER_LEGACY_SPLASH_SCREEN);
-            testLegacySplashScreen(Build.VERSION_CODES.S, 0);
+            testLegacySplashScreen(Build.VERSION_CODES.S, TYPE_PARAMETER_LEGACY_SPLASH_SCREEN);
+            testLegacySplashScreen(Build.VERSION_CODES.TIRAMISU,
+                    TYPE_PARAMETER_LEGACY_SPLASH_SCREEN);
+            // Above T
+            testLegacySplashScreen(Build.VERSION_CODES.TIRAMISU + 1, 0);
         } finally {
             try {
                 DeviceConfig.setProperties(properties);
@@ -2852,6 +2856,11 @@ public class ActivityRecordTests extends WindowTestsBase {
         taskFragment2.addChild(activity2);
         assertTrue(activity2.isResizeable());
         activity1.reparent(taskFragment1, POSITION_TOP);
+
+        // Adds an Activity which doesn't have shared starting data, and verify if it blocks
+        // starting window removal.
+        final ActivityRecord activity3 = new ActivityBuilder(mAtm).build();
+        taskFragment2.addChild(activity3, POSITION_TOP);
 
         verify(activity1.getSyncTransaction()).reparent(eq(startingWindow.mSurfaceControl),
                 eq(task.mSurfaceControl));

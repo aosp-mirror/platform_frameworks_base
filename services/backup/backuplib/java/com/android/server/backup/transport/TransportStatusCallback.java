@@ -26,7 +26,7 @@ import com.android.internal.backup.ITransportStatusCallback;
 
 public class TransportStatusCallback extends ITransportStatusCallback.Stub {
     private static final String TAG = "TransportStatusCallback";
-    private static final int TIMEOUT_MILLIS = 600 * 1000; // 10 minutes.
+    private static final int TIMEOUT_MILLIS = 300 * 1000; // 5 minutes.
     private static final int OPERATION_STATUS_DEFAULT = 0;
 
     private final int mOperationTimeout;

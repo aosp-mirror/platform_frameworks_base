@@ -21,7 +21,6 @@ import android.app.WallpaperColors
 import android.graphics.Color
 import com.android.internal.graphics.ColorUtils
 import com.android.internal.graphics.cam.Cam
-import com.android.internal.graphics.cam.CamUtils.lstarFromInt
 import kotlin.math.absoluteValue
 import kotlin.math.max
 import kotlin.math.roundToInt
@@ -50,7 +49,7 @@ internal interface Hue {
             val previousHue = hueAndRotations[previousIndex].first
             if (ColorScheme.angleIsBetween(sourceHue, thisHue, previousHue)) {
                 return ColorScheme.wrapDegreesDouble(sourceHue.toDouble() +
-                        hueAndRotations[previousIndex].first)
+                        hueAndRotations[previousIndex].second)
             }
         }
 
@@ -143,9 +142,21 @@ internal class ChromaMinimum(val chroma: Double) : Chroma {
     }
 }
 
+internal class ChromaMultiple(val multiple: Double) : Chroma {
+    override fun get(sourceColor: Cam): Double {
+        return sourceColor.chroma * multiple
+    }
+}
+
 internal class ChromaConstant(val chroma: Double) : Chroma {
     override fun get(sourceColor: Cam): Double {
         return chroma
+    }
+}
+
+internal class ChromaSource : Chroma {
+    override fun get(sourceColor: Cam): Double {
+        return sourceColor.chroma.toDouble()
     }
 }
 
@@ -184,8 +195,8 @@ enum class Style(internal val coreSpec: CoreSpec) {
             a1 = TonalSpec(HueSource(), ChromaMinimum(48.0)),
             a2 = TonalSpec(HueVibrantSecondary(), ChromaConstant(24.0)),
             a3 = TonalSpec(HueVibrantTertiary(), ChromaConstant(32.0)),
-            n1 = TonalSpec(HueSource(), ChromaConstant(10.0)),
-            n2 = TonalSpec(HueSource(), ChromaConstant(12.0))
+            n1 = TonalSpec(HueSource(), ChromaConstant(12.0)),
+            n2 = TonalSpec(HueSource(), ChromaConstant(14.0))
     )),
     EXPRESSIVE(CoreSpec(
             a1 = TonalSpec(HueAdd(240.0), ChromaConstant(40.0)),
@@ -207,6 +218,13 @@ enum class Style(internal val coreSpec: CoreSpec) {
             a3 = TonalSpec(HueSource(), ChromaConstant(36.0)),
             n1 = TonalSpec(HueSource(), ChromaConstant(10.0)),
             n2 = TonalSpec(HueSource(), ChromaConstant(16.0))
+    )),
+    CONTENT(CoreSpec(
+            a1 = TonalSpec(HueSource(), ChromaSource()),
+            a2 = TonalSpec(HueSource(), ChromaMultiple(0.33)),
+            a3 = TonalSpec(HueSource(), ChromaMultiple(0.66)),
+            n1 = TonalSpec(HueSource(), ChromaMultiple(0.0833)),
+            n2 = TonalSpec(HueSource(), ChromaMultiple(0.1666))
     )),
 }
 
@@ -231,7 +249,7 @@ class ColorScheme(
         darkTheme: Boolean,
         style: Style = Style.TONAL_SPOT
     ):
-            this(getSeedColor(wallpaperColors), darkTheme, style)
+            this(getSeedColor(wallpaperColors, style != Style.CONTENT), darkTheme, style)
 
     val allAccentColors: List<Int>
         get() {
@@ -260,7 +278,7 @@ class ColorScheme(
         val proposedSeedCam = Cam.fromInt(seed)
         val seedArgb = if (seed == Color.TRANSPARENT) {
             GOOGLE_BLUE
-        } else if (proposedSeedCam.chroma < 5) {
+        } else if (style != Style.CONTENT && proposedSeedCam.chroma < 5) {
             GOOGLE_BLUE
         } else {
             seed
@@ -289,22 +307,26 @@ class ColorScheme(
          * Identifies a color to create a color scheme from.
          *
          * @param wallpaperColors Colors extracted from an image via quantization.
+         * @param filter If false, allow colors that have low chroma, creating grayscale themes.
          * @return ARGB int representing the color
          */
         @JvmStatic
+        @JvmOverloads
         @ColorInt
-        fun getSeedColor(wallpaperColors: WallpaperColors): Int {
-            return getSeedColors(wallpaperColors).first()
+        fun getSeedColor(wallpaperColors: WallpaperColors, filter: Boolean = true): Int {
+            return getSeedColors(wallpaperColors, filter).first()
         }
 
         /**
          * Filters and ranks colors from WallpaperColors.
          *
          * @param wallpaperColors Colors extracted from an image via quantization.
+         * @param filter If false, allow colors that have low chroma, creating grayscale themes.
          * @return List of ARGB ints, ordered from highest scoring to lowest.
          */
         @JvmStatic
-        fun getSeedColors(wallpaperColors: WallpaperColors): List<Int> {
+        @JvmOverloads
+        fun getSeedColors(wallpaperColors: WallpaperColors, filter: Boolean = true): List<Int> {
             val totalPopulation = wallpaperColors.allColors.values.reduce { a, b -> a + b }
                     .toDouble()
             val totalPopulationMeaningless = (totalPopulation == 0.0)
@@ -317,9 +339,12 @@ class ColorScheme(
                 val distinctColors = wallpaperColors.mainColors.map {
                     it.toArgb()
                 }.distinct().filter {
-                    Cam.fromInt(it).chroma >= MIN_CHROMA
+                    if (!filter) {
+                        true
+                    } else {
+                        Cam.fromInt(it).chroma >= MIN_CHROMA
+                    }
                 }.toList()
-
                 if (distinctColors.isEmpty()) {
                     return listOf(GOOGLE_BLUE)
                 }
@@ -332,7 +357,7 @@ class ColorScheme(
             val intToCam = wallpaperColors.allColors.mapValues { Cam.fromInt(it.key) }
 
             // Get an array with 360 slots. A slot contains the percentage of colors with that hue.
-            val hueProportions = huePopulations(intToCam, intToProportion)
+            val hueProportions = huePopulations(intToCam, intToProportion, filter)
             // Map each color to the percentage of the image with its hue.
             val intToHueProportion = wallpaperColors.allColors.mapValues {
                 val cam = intToCam[it.key]!!
@@ -346,13 +371,12 @@ class ColorScheme(
             // Remove any inappropriate seed colors. For example, low chroma colors look grayscale
             // raising their chroma will turn them to a much louder color that may not have been
             // in the image.
-            val filteredIntToCam = intToCam.filter {
+            val filteredIntToCam = if (!filter) intToCam else (intToCam.filter {
                 val cam = it.value
-                val lstar = lstarFromInt(it.key)
                 val proportion = intToHueProportion[it.key]!!
                 cam.chroma >= MIN_CHROMA &&
                         (totalPopulationMeaningless || proportion > 0.01)
-            }
+            })
             // Sort the colors by score, from high to low.
             val intToScoreIntermediate = filteredIntToCam.mapValues {
                 score(it.value, intToHueProportion[it.key]!!)
@@ -444,7 +468,8 @@ class ColorScheme(
 
         private fun huePopulations(
             camByColor: Map<Int, Cam>,
-            populationByColor: Map<Int, Double>
+            populationByColor: Map<Int, Double>,
+            filter: Boolean = true
         ): List<Double> {
             val huePopulation = List(size = 360, init = { 0.0 }).toMutableList()
 
@@ -452,7 +477,7 @@ class ColorScheme(
                 val population = populationByColor[entry.key]!!
                 val cam = camByColor[entry.key]!!
                 val hue = cam.hue.roundToInt() % 360
-                if (cam.chroma <= MIN_CHROMA) {
+                if (filter && cam.chroma <= MIN_CHROMA) {
                     continue
                 }
                 huePopulation[hue] = huePopulation[hue] + population

@@ -70,12 +70,6 @@ public class SpatializerHelper {
     private @Nullable SensorManager mSensorManager;
 
     //------------------------------------------------------------
-    /** head tracker sensor name */
-    // TODO: replace with generic head tracker sensor name.
-    //       the current implementation refers to the "google" namespace but will be replaced
-    //       by an android name at the next API level revision, it is not Google-specific.
-    private static final String HEADTRACKER_SENSOR =
-            "com.google.hardware.sensor.hid_dynamic.headtracker";
 
     private static final SparseIntArray SPAT_MODE_FOR_DEVICE_TYPE = new SparseIntArray(15) {
         {
@@ -1522,24 +1516,24 @@ public class SpatializerHelper {
     private int getHeadSensorHandleUpdateTracker() {
         int headHandle = -1;
         UUID routingDeviceUuid = mAudioService.getDeviceSensorUuid(ROUTING_DEVICES[0]);
-        List<Sensor> sensors = new ArrayList<Sensor>(0);
-        sensors.addAll(mSensorManager.getDynamicSensorList(Sensor.TYPE_HEAD_TRACKER));
-        sensors.addAll(mSensorManager.getDynamicSensorList(Sensor.TYPE_DEVICE_PRIVATE_BASE));
+        // We limit only to Sensor.TYPE_HEAD_TRACKER here to avoid confusion
+        // with gaming sensors. (Note that Sensor.TYPE_ROTATION_VECTOR
+        // and Sensor.TYPE_GAME_ROTATION_VECTOR are supported internally by
+        // SensorPoseProvider).
+        // Note: this is a dynamic sensor list right now.
+        List<Sensor> sensors = mSensorManager.getDynamicSensorList(Sensor.TYPE_HEAD_TRACKER);
         for (Sensor sensor : sensors) {
-            if (sensor.getType() == Sensor.TYPE_HEAD_TRACKER
-                    || sensor.getStringType().equals(HEADTRACKER_SENSOR)) {
-                UUID uuid = sensor.getUuid();
-                if (uuid.equals(routingDeviceUuid)) {
-                    headHandle = sensor.getHandle();
-                    if (!setHasHeadTracker(ROUTING_DEVICES[0])) {
-                        headHandle = -1;
-                    }
-                    break;
+            final UUID uuid = sensor.getUuid();
+            if (uuid.equals(routingDeviceUuid)) {
+                headHandle = sensor.getHandle();
+                if (!setHasHeadTracker(ROUTING_DEVICES[0])) {
+                    headHandle = -1;
                 }
-                if (uuid.equals(UuidUtils.STANDALONE_UUID)) {
-                    headHandle = sensor.getHandle();
-                    break;
-                }
+                break;
+            }
+            if (uuid.equals(UuidUtils.STANDALONE_UUID)) {
+                headHandle = sensor.getHandle();
+                // we do not break, perhaps we find a head tracker on device.
             }
         }
         return headHandle;
