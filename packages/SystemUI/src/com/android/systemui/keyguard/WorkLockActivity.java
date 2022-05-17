@@ -17,23 +17,22 @@
 package com.android.systemui.keyguard;
 
 import static android.app.ActivityManager.TaskDescription;
-import static android.app.admin.DevicePolicyResources.Strings.SystemUi.WORK_LOCK_ACCESSIBILITY;
 
-import android.annotation.ColorInt;
 import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
-import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Color;
+import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.UserHandle;
-import android.view.View;
+import android.os.UserManager;
+import android.widget.ImageView;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
@@ -52,12 +51,6 @@ import javax.inject.Inject;
 public class WorkLockActivity extends Activity {
     private static final String TAG = "WorkLockActivity";
 
-    /**
-     * Contains a {@link TaskDescription} for the activity being covered.
-     */
-    static final String EXTRA_TASK_DESCRIPTION =
-            "com.android.systemui.keyguard.extra.TASK_DESCRIPTION";
-
     private static final int REQUEST_CODE_CONFIRM_CREDENTIALS = 1;
 
     /**
@@ -65,12 +58,17 @@ public class WorkLockActivity extends Activity {
      * @see KeyguardManager
      */
     private KeyguardManager mKgm;
+    private UserManager mUserManager;
+    private PackageManager mPackageManager;
     private final BroadcastDispatcher mBroadcastDispatcher;
 
     @Inject
-    public WorkLockActivity(BroadcastDispatcher broadcastDispatcher) {
+    public WorkLockActivity(BroadcastDispatcher broadcastDispatcher, UserManager userManager,
+            PackageManager packageManager) {
         super();
         mBroadcastDispatcher = broadcastDispatcher;
+        mUserManager = userManager;
+        mPackageManager = packageManager;
     }
 
     @Override
@@ -91,15 +89,28 @@ public class WorkLockActivity extends Activity {
         // Draw captions overlaid on the content view, so the whole window is one solid color.
         setOverlayWithDecorCaptionEnabled(true);
 
-        // Blank out the activity. When it is on-screen it will look like a Recents thumbnail with
-        // redaction switched on.
-        final DevicePolicyManager dpm = getSystemService(DevicePolicyManager.class);
-        String contentDescription = dpm.getResources().getString(
-                WORK_LOCK_ACCESSIBILITY, () -> getString(R.string.accessibility_desc_work_lock));
-        final View blankView = new View(this);
-        blankView.setContentDescription(contentDescription);
-        blankView.setBackgroundColor(getPrimaryColor());
-        setContentView(blankView);
+        // Add background protection that contains a badged icon of the app being opened.
+        setContentView(R.layout.auth_biometric_background);
+        Drawable badgedIcon = getBadgedIcon();
+        if (badgedIcon != null) {
+            ((ImageView) findViewById(R.id.icon)).setImageDrawable(badgedIcon);
+        }
+    }
+
+    @VisibleForTesting
+    protected Drawable getBadgedIcon() {
+        String packageName = getIntent().getStringExtra(Intent.EXTRA_PACKAGE_NAME);
+        if (!packageName.isEmpty()) {
+            try {
+                return mUserManager.getBadgedIconForUser(mPackageManager.getApplicationIcon(
+                        mPackageManager.getApplicationInfoAsUser(packageName,
+                                PackageManager.ApplicationInfoFlags.of(0), getTargetUserId())),
+                        UserHandle.of(getTargetUserId()));
+            } catch (PackageManager.NameNotFoundException e) {
+                // Unable to set the badged icon, show the background protection without an icon.
+            }
+        }
+        return null;
     }
 
     /**
@@ -207,20 +218,5 @@ public class WorkLockActivity extends Activity {
     @UserIdInt
     final int getTargetUserId() {
         return getIntent().getIntExtra(Intent.EXTRA_USER_ID, UserHandle.myUserId());
-    }
-
-    @VisibleForTesting
-    @ColorInt
-    final int getPrimaryColor() {
-        final TaskDescription taskDescription = (TaskDescription)
-                getIntent().getExtra(EXTRA_TASK_DESCRIPTION);
-        if (taskDescription != null && Color.alpha(taskDescription.getPrimaryColor()) == 255) {
-            return taskDescription.getPrimaryColor();
-        } else {
-            // No task description. Use an organization color set by the policy controller.
-            final DevicePolicyManager devicePolicyManager = (DevicePolicyManager)
-                    getSystemService(Context.DEVICE_POLICY_SERVICE);
-            return devicePolicyManager.getOrganizationColorForUser(getTargetUserId());
-        }
     }
 }

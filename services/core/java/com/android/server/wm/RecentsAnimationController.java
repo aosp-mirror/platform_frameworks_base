@@ -1197,7 +1197,10 @@ public class RecentsAnimationController implements DeathRecipient {
          *                     this is the target task, CLOSING otherwise).
          */
         RemoteAnimationTarget createRemoteAnimationTarget(int overrideTaskId, int overrideMode) {
-            final ActivityRecord topApp = mTask.getTopVisibleActivity();
+            ActivityRecord topApp = mTask.getTopRealVisibleActivity();
+            if (topApp == null) {
+                topApp = mTask.getTopVisibleActivity();
+            }
             final WindowState mainWindow = topApp != null
                     ? topApp.findMainWindow()
                     : null;

@@ -607,6 +607,14 @@ public final class DeviceConfig {
     public static final String NAMESPACE_VOICE_INTERACTION = "voice_interaction";
 
     /**
+     * Namespace for DevicePolicyManager related features.
+     *
+     * @hide
+     */
+    public static final String NAMESPACE_DEVICE_POLICY_MANAGER =
+            "device_policy_manager";
+
+    /**
      * List of namespaces which can be read without READ_DEVICE_CONFIG permission
      *
      * @hide
@@ -614,7 +622,8 @@ public final class DeviceConfig {
     @NonNull
     private static final List<String> PUBLIC_NAMESPACES =
             Arrays.asList(NAMESPACE_TEXTCLASSIFIER, NAMESPACE_RUNTIME, NAMESPACE_STATSD_JAVA,
-                    NAMESPACE_STATSD_JAVA_BOOT, NAMESPACE_SELECTION_TOOLBAR, NAMESPACE_AUTOFILL);
+                    NAMESPACE_STATSD_JAVA_BOOT, NAMESPACE_SELECTION_TOOLBAR, NAMESPACE_AUTOFILL,
+                    NAMESPACE_DEVICE_POLICY_MANAGER);
     /**
      * Privacy related properties definitions.
      *
@@ -737,14 +746,6 @@ public final class DeviceConfig {
      * @hide
      */
     public static final String NAMESPACE_VENDOR_SYSTEM_NATIVE = "vendor_system_native";
-
-    /**
-     * Namespace for DevicePolicyManager related features.
-     *
-     * @hide
-     */
-    public static final String NAMESPACE_DEVICE_POLICY_MANAGER =
-            "device_policy_manager";
 
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
