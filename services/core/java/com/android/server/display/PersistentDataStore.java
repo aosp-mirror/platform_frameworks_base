@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.graphics.Point;
 import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.WifiDisplay;
+import android.os.Handler;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -31,12 +32,14 @@ import android.util.Xml;
 import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.XmlUtils;
 
 import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -141,13 +144,22 @@ final class PersistentDataStore {
     // The interface for methods which should be replaced by the test harness.
     private Injector mInjector;
 
+    private final Handler mHandler;
+    private final Object mFileAccessLock = new Object();
+
     public PersistentDataStore() {
         this(new Injector());
     }
 
     @VisibleForTesting
     PersistentDataStore(Injector injector) {
+        this(injector, BackgroundThread.getHandler());
+    }
+
+    @VisibleForTesting
+    PersistentDataStore(Injector injector, Handler handler) {
         mInjector = injector;
+        mHandler = handler;
     }
 
     public void saveIfNeeded() {
@@ -418,45 +430,61 @@ final class PersistentDataStore {
     }
 
     private void load() {
-        clearState();
-
-        final InputStream is;
-        try {
-            is = mInjector.openRead();
-        } catch (FileNotFoundException ex) {
-            return;
-        }
-
-        TypedXmlPullParser parser;
-        try {
-            parser = Xml.resolvePullParser(is);
-            loadFromXml(parser);
-        } catch (IOException ex) {
-            Slog.w(TAG, "Failed to load display manager persistent store data.", ex);
+        synchronized (mFileAccessLock) {
             clearState();
-        } catch (XmlPullParserException ex) {
-            Slog.w(TAG, "Failed to load display manager persistent store data.", ex);
-            clearState();
-        } finally {
-            IoUtils.closeQuietly(is);
+
+            final InputStream is;
+            try {
+                is = mInjector.openRead();
+            } catch (FileNotFoundException ex) {
+                return;
+            }
+
+            TypedXmlPullParser parser;
+            try {
+                parser = Xml.resolvePullParser(is);
+                loadFromXml(parser);
+            } catch (IOException ex) {
+                Slog.w(TAG, "Failed to load display manager persistent store data.", ex);
+                clearState();
+            } catch (XmlPullParserException ex) {
+                Slog.w(TAG, "Failed to load display manager persistent store data.", ex);
+                clearState();
+            } finally {
+                IoUtils.closeQuietly(is);
+            }
         }
     }
 
     private void save() {
-        final OutputStream os;
+        final ByteArrayOutputStream os;
         try {
-            os = mInjector.startWrite();
-            boolean success = false;
-            try {
-                TypedXmlSerializer serializer = Xml.resolveSerializer(os);
-                saveToXml(serializer);
-                serializer.flush();
-                success = true;
-            } finally {
-                mInjector.finishWrite(os, success);
-            }
+            os = new ByteArrayOutputStream();
+
+            TypedXmlSerializer serializer = Xml.resolveSerializer(os);
+            saveToXml(serializer);
+
+            mHandler.removeCallbacksAndMessages(/* token */ null);
+            mHandler.post(() -> {
+                synchronized (mFileAccessLock) {
+                    OutputStream fileOutput = null;
+                    try {
+                        fileOutput = mInjector.startWrite();
+                        os.writeTo(fileOutput);
+                        fileOutput.flush();
+                    } catch (IOException ex) {
+                        Slog.w(TAG, "Failed to save display manager persistent store data.", ex);
+                    } finally {
+                        if (fileOutput != null) {
+                            mInjector.finishWrite(fileOutput, true);
+                        }
+                    }
+                }
+            });
+
+            serializer.flush();
         } catch (IOException ex) {
-            Slog.w(TAG, "Failed to save display manager persistent store data.", ex);
+            Slog.w(TAG, "Failed to process the XML serializer.", ex);
         }
     }
 
