@@ -622,10 +622,11 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         if (mLastQSExpansion == 1.0f) {
             // Fully expanded, let's set the layout bounds as clip bounds. This is necessary because
             // it's a scrollview and otherwise wouldn't be clipped. However, we set the horizontal
-            // bounds so the pages go to the ends of QSContainerImpl
-            ViewGroup.MarginLayoutParams lp =
-                    (ViewGroup.MarginLayoutParams) mQSPanelScrollView.getLayoutParams();
-            mQsBounds.set(-lp.leftMargin, 0, mQSPanelScrollView.getWidth() + lp.rightMargin,
+            // bounds so the pages go to the ends of QSContainerImpl (most cases) or its parent
+            // (large screen portrait)
+            int sideMargin = getResources().getDimensionPixelSize(
+                    R.dimen.qs_tiles_page_horizontal_margin) * 2;
+            mQsBounds.set(-sideMargin, 0, mQSPanelScrollView.getWidth() + sideMargin,
                     mQSPanelScrollView.getHeight());
         }
         mQSPanelScrollView.setClipBounds(mQsBounds);

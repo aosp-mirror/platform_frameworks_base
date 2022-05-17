@@ -667,17 +667,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Activa la pantalla"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Permet que activi la pantalla"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Permet que una aplicació activi la pantalla. Si concedeixes aquest permís, pot ser que l\'aplicació activi la pantalla en qualsevol moment sense la teva intenció explícita."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Escaneja un codi QR"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Per començar a escoltar, centra el codi QR més avall"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"El codi QR no té un format vàlid"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Vols deixar d\'emetre <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Si emets <xliff:g id="SWITCHAPP">%1$s</xliff:g> o canvies la sortida, l\'emissió actual s\'aturarà"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Emet <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Canvia la sortida"</string>
-    <!-- no translation found for back_navigation_animation (8105467568421689484) -->
-    <skip />
-    <!-- no translation found for back_navigation_animation_summary (741292224121599456) -->
-    <skip />
-    <!-- no translation found for back_navigation_animation_dialog (8696966520944625596) -->
-    <skip />
+    <string name="back_navigation_animation" msgid="8105467568421689484">"Animacions per a les accions de tornada predictives"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Activa animacions del sistema per a la tornada predictiva."</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Aquesta configuració activa animacions del sistema per a accions gestuals predictives. Requereix definir enableOnBackInvokedCallback com a \"true\" en cada aplicació al fitxer de manifest."</string>
 </resources>

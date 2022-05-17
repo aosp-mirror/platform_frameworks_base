@@ -568,7 +568,7 @@
     <string name="user_add_profile_item_summary" msgid="5418602404308968028">"你可以限制他人透過你的帳戶存取應用程式和內容"</string>
     <string name="user_add_user_item_title" msgid="2394272381086965029">"使用者"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"設有限制的個人資料"</string>
-    <string name="user_add_user_title" msgid="5457079143694924885">"新增使用者？"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"要新增使用者嗎？"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"你可以建立其他使用者，藉此與他人共用這個裝置。每位使用者都有自己的專屬空間，並可使用應用程式、桌布等項目自訂個人空間。此外，使用者也可以調整會影響所有人的裝置設定，例如 Wi‑Fi 設定。\n\n新增的使用者需要自行設定個人空間。\n\n任何使用者都可以為所有其他使用者更新應用程式。無障礙設定和服務可能無法轉移到新的使用者。"</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"新增的使用者需要自行設定個人空間。\n\n任何使用者皆可為其他所有使用者更新應用程式。"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"立即設定使用者？"</string>
@@ -667,17 +667,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"開啟螢幕"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"允許開啟螢幕"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"允許應用程式開啟螢幕。如果授予這項權限，即使你未明確指示，應用程式也隨時可能會開啟螢幕。"</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"掃描 QR 圖碼"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"如要開始收聽，請將掃描器對準下方的 QR 圖碼"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR 圖碼格式無效"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"要停止播送「<xliff:g id="APP_NAME">%1$s</xliff:g>」的內容嗎？"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"如果播送「<xliff:g id="SWITCHAPP">%1$s</xliff:g>」的內容或變更輸出來源，系統就會停止播送目前的內容"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"播送「<xliff:g id="SWITCHAPP">%1$s</xliff:g>」的內容"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"變更輸出來源"</string>
-    <!-- no translation found for back_navigation_animation (8105467568421689484) -->
-    <skip />
-    <!-- no translation found for back_navigation_animation_summary (741292224121599456) -->
-    <skip />
-    <!-- no translation found for back_navigation_animation_dialog (8696966520944625596) -->
-    <skip />
+    <string name="back_navigation_animation" msgid="8105467568421689484">"預測返回操作動畫"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"為預測返回操作啟用系統動畫。"</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"這項設定會啟用系統動畫做為預測手勢動畫。這必須在資訊清單檔案中將個別應用程式的 enableOnBackInvokedCallback 設為 true。"</string>
 </resources>

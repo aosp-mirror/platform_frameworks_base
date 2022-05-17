@@ -306,8 +306,10 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"acceseze calendarul"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"trimită și să vadă mesajele SMS"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"Fișiere și documente"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"să acceseze fișiere și documente de pe dispozitiv"</string>
+    <!-- no translation found for permgrouplab_storage (17339216290379241) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_storage (5378659041354582769) -->
+    <skip />
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Muzică și conținut audio"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"să acceseze muzică și conținut audio pe dispozitiv"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotografii și videoclipuri"</string>
@@ -2287,5 +2289,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Verificați aplicațiile active"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Nu se poate accesa camera foto a telefonului de pe <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Nu se poate accesa camera foto a tabletei de pe <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"Limba sistemului"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Prestabilit de sistem"</string>
 </resources>

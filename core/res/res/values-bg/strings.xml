@@ -305,8 +305,10 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"има достъп до календара ви"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"да изпраща и преглежда SMS съобщения"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"Файлове и документи"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"достъп до файловете и документите на устройството ви"</string>
+    <!-- no translation found for permgrouplab_storage (17339216290379241) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_storage (5378659041354582769) -->
+    <skip />
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Музика и аудио"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"достъп до музиката и аудиото на устройството ви"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Снимки и видеоклипове"</string>
@@ -2286,5 +2288,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Проверете активните приложения"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Няма достъп до камерата на телефона от вашия <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Няма достъп до камерата на таблета от вашия <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"Системен език"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Стандартно за системата"</string>
 </resources>

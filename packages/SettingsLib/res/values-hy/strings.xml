@@ -570,7 +570,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Սահմանափակված պրոֆիլ"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Ավելացնե՞լ նոր օգտատեր"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Այս սարքից կարող եք օգտվել մի քանի հոգով: Դրա համար անհրաժեշտ է ստեղծել լրացուցիչ պրոֆիլներ: Յուրաքանչյուր օգտատեր կարող է կարգավորել իր պրոֆիլը ըստ իր հայեցողության և ճաշակի (օր.՝ ընտրել իր ուզած պաստառը, տեղադրել անհրաժեշտ հավելվածները և այլն): Բացի այդ, օգտատերերը կարող են կարգավորել սարքի որոշ պարամետրեր (օր.՝ Wi-Fi-ը), որոնք կգործեն նաև մյուս պրոֆիլների համար:\n\nԵրբ նոր պրոֆիլ ավելացնեք, տվյալ օգտատերը պետք է կարգավորի այն:\n\nՅուրաքանչյուր օգտատեր կարող է թարմացնել մյուս օգտատերերի հավելվածները: Հատուկ գործառույթների և ծառայությունների կարգավորումները կարող են չփոխանցվել նոր օգտատերերին:"</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Երբ նոր օգտատեր եք ավելացնում, նա պետք է կարգավորի իր պրոֆիլը:\n\nՑանկացած օգտատեր կարող է թարմացնել հավելվածները մյուս բոլոր հաշիվների համար:"</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Երբ նոր օգտատեր եք ավելացնում, նա պետք է կարգավորի իր պրոֆիլը:\n\nՑանկացած օգտատեր կարող է թարմացնել հավելվածները բոլոր օգտատերերի համար:"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Կարգավորե՞լ պրոֆիլը"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Համոզվեք, որ անձը կարող է վերցնել սարքը և կարգավորել իր տարածքը"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Կարգավորե՞լ պրոֆիլը հիմա:"</string>
@@ -592,7 +592,7 @@
     <string name="user_add_user" msgid="7876449291500212468">"Ավելացնել օգտատեր"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Ավելացնել հյուր"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Հեռացնել հյուրին"</string>
-    <string name="guest_reset_guest" msgid="6110013010356013758">"Վերակայել հյուրի աշխատաշրջանը"</string>
+    <string name="guest_reset_guest" msgid="6110013010356013758">"Զրոյացնել հյուրի աշխատաշրջանը"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Զրոյացնե՞լ հյուրի աշխատաշրջանը"</string>
     <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Հեռացնե՞լ հյուրին"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Զրոյացնել"</string>
@@ -608,9 +608,9 @@
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Ջնջել"</string>
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Պահել"</string>
     <string name="guest_exit_button" msgid="5774985819191803960">"Դուրս գալ հյուրի ռեժիմից"</string>
-    <string name="guest_reset_button" msgid="2515069346223503479">"Վերակայել հյուրի աշխատաշրջանը"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Զրոյացնել հյուրի աշխատաշրջանը"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Դուրս գալ հյուրի ռեժիմից"</string>
-    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Դուրս գալու դեպքում ամբողջ պատմությունը կջնջվի"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Եթե դուրս գաք, ամբողջ պատմությունը կջնջվի"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Դուրս գալիս կարող եք պահել կամ ջնջել ձեր պատմությունը"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Վերակայեք աշխատաշրջանի պատմությունը հիմա կամ պահեք/ջնջեք այն դուրս գալիս"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Լուսանկարել"</string>
@@ -667,17 +667,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Էկրանի միացում"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Թույլատրել հավելվածին միացնել էկրանը"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Եթե թույլ տաք, հավելվածը ցանկացած ժամանակ կկարողանա միացնել էկրանը՝ առանց ձեր բացահայտ համաձայնության։"</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR կոդի սկանավորում"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Լսելու համար տեսախցիկը պահեք QR կոդի վրա"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR կոդի ձևաչափն անվավեր է"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Կանգնեցնել <xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածի հեռարձակումը"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Եթե հեռարձակեք <xliff:g id="SWITCHAPP">%1$s</xliff:g> հավելվածը կամ փոխեք աուդիո ելքը, ձեր ընթացիկ հեռարձակումը կկանգնեցվի։"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Հեռարձակել <xliff:g id="SWITCHAPP">%1$s</xliff:g> հավելվածը"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Փոխել աուդիո ելքը"</string>
-    <!-- no translation found for back_navigation_animation (8105467568421689484) -->
-    <skip />
-    <!-- no translation found for back_navigation_animation_summary (741292224121599456) -->
-    <skip />
-    <!-- no translation found for back_navigation_animation_dialog (8696966520944625596) -->
-    <skip />
+    <string name="back_navigation_animation" msgid="8105467568421689484">"«Հետ» ժեստի հուշման շարժանկարներ"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Միացնել համակարգի անիմացիաները «Հետ» ժեստի հուշման համար"</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Այս կարգավորման միջոցով կարելի է միացնել համակարգային շարժանկարները ժեստի հուշման համար։ Կարգավորումը պահանջում է մանիֆեստի ֆայլում սահմանել true արժեքը per-app enableOnBackInvokedCallback հատկության համար։"</string>
 </resources>

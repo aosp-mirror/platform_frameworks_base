@@ -1900,15 +1900,12 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
                 task.remove(false /* withTransition */, "removeTaskDisplayArea");
             } else {
                 // Reparent task to corresponding launch root or display area.
-                final WindowContainer launchRoot =
-                        task.supportsSplitScreenWindowingModeInDisplayArea(toDisplayArea)
-                                ? toDisplayArea.getLaunchRootTask(
+                final WindowContainer launchRoot = toDisplayArea.getLaunchRootTask(
                                         task.getWindowingMode(),
                                         task.getActivityType(),
                                         null /* options */,
                                         null /* sourceTask */,
-                                        0 /* launchFlags */)
-                                : null;
+                                        0 /* launchFlags */);
                 task.reparent(launchRoot == null ? toDisplayArea : launchRoot, POSITION_TOP);
 
                 // Set the windowing mode to undefined by default to let the root task inherited the
