@@ -71,13 +71,16 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
                 public void onTrustGrantedWithFlags(int flags, int userId) {
                     if (userId != KeyguardUpdateMonitor.getCurrentUser()) return;
                     boolean bouncerVisible = mView.isVisibleToUser();
+                    boolean temporaryAndRenewable =
+                            (flags & TrustAgentService.FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE)
+                            != 0;
                     boolean initiatedByUser =
                             (flags & TrustAgentService.FLAG_GRANT_TRUST_INITIATED_BY_USER) != 0;
                     boolean dismissKeyguard =
                             (flags & TrustAgentService.FLAG_GRANT_TRUST_DISMISS_KEYGUARD) != 0;
 
                     if (initiatedByUser || dismissKeyguard) {
-                        if (mViewMediatorCallback.isScreenOn()
+                        if ((mViewMediatorCallback.isScreenOn() || temporaryAndRenewable)
                                 && (bouncerVisible || dismissKeyguard)) {
                             if (!bouncerVisible) {
                                 // The trust agent dismissed the keyguard without the user proving

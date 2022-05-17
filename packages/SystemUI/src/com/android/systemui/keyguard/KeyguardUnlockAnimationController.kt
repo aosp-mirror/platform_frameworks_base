@@ -44,6 +44,7 @@ import com.android.systemui.shared.system.QuickStepContract
 import com.android.systemui.shared.system.smartspace.ILauncherUnlockAnimationController
 import com.android.systemui.shared.system.smartspace.ISysuiUnlockAnimationController
 import com.android.systemui.shared.system.smartspace.SmartspaceState
+import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -142,7 +143,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
     private val keyguardViewController: KeyguardViewController,
     private val featureFlags: FeatureFlags,
     private val biometricUnlockControllerLazy: Lazy<BiometricUnlockController>,
-    private val statusBarStateController: SysuiStatusBarStateController
+    private val statusBarStateController: SysuiStatusBarStateController,
+    private val notificationShadeWindowController: NotificationShadeWindowController
 ) : KeyguardStateController.Callback, ISysuiUnlockAnimationController.Stub() {
 
     interface KeyguardUnlockAnimationListener {
@@ -362,6 +364,9 @@ class KeyguardUnlockAnimationController @Inject constructor(
      */
     fun canPerformInWindowLauncherAnimations(): Boolean {
         return isNexusLauncherUnderneath() &&
+                // If the launcher is underneath, but we're about to launch an activity, don't do
+                // the animations since they won't be visible.
+                !notificationShadeWindowController.isLaunchingActivity &&
                 launcherUnlockController != null &&
                 !keyguardStateController.isDismissingFromSwipe &&
                 // Temporarily disable for foldables since foldable launcher has two first pages,
@@ -413,7 +418,6 @@ class KeyguardUnlockAnimationController @Inject constructor(
             (lockscreenSmartspace as BcSmartspaceDataPlugin.SmartspaceView?)?.selectedPage ?: -1
 
         try {
-
             // Let the launcher know to prepare for this animation.
             launcherUnlockController?.prepareForUnlock(
                 willUnlockWithSmartspaceTransition, /* willAnimateSmartspace */
@@ -854,6 +858,13 @@ class KeyguardUnlockAnimationController @Inject constructor(
      */
     fun willHandleUnlockAnimation(): Boolean {
         return KeyguardService.sEnableRemoteKeyguardGoingAwayAnimation
+    }
+
+    /**
+     * Whether the RemoteAnimation on the app/launcher surface behind the keyguard is 'running'.
+     */
+    fun isAnimatingBetweenKeyguardAndSurfaceBehind(): Boolean {
+        return keyguardViewMediator.get().isAnimatingBetweenKeyguardAndSurfaceBehind
     }
 
     /**

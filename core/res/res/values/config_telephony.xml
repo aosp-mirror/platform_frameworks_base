@@ -35,7 +35,7 @@
          rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max
          If this is configured as an empty string, the system default will be applied.
     -->
-    <string name="config_tcp_buffers" translatable="false"></string>
+    <string name="config_tcp_buffers" translatable="false">2097152,6291456,16777216,512000,2097152,8388608</string>
     <java-symbol type="string"  name="config_tcp_buffers" />
 
     <!-- What source to use to estimate link upstream and downstream bandwidth capacities.

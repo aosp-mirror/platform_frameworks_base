@@ -16,12 +16,17 @@
 
 package com.android.wm.shell.kidsmode;
 
+import android.annotation.NonNull;
+import android.app.ActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.Settings;
+
+import java.util.Collection;
 
 /**
  * A ContentObserver for listening kids mode relative setting keys:
@@ -64,7 +69,11 @@ public class KidsModeSettingsObserver extends ContentObserver {
     }
 
     @Override
-    public void onChange(boolean selfChange) {
+    public void onChange(boolean selfChange, @NonNull Collection<Uri> uris, int flags, int userId) {
+        if (userId != ActivityManager.getCurrentUser()) {
+            return;
+        }
+
         if (mOnChangeRunnable != null) {
             mOnChangeRunnable.run();
         }
