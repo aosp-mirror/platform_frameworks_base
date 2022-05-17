@@ -96,4 +96,19 @@ public interface OnBackInvokedDispatcher {
      * @hide
      */
     default void registerSystemOnBackInvokedCallback(@NonNull OnBackInvokedCallback callback) { }
+
+
+    /**
+     * Sets an {@link ImeOnBackInvokedDispatcher} to forward {@link OnBackInvokedCallback}s
+     * from IME to the app process to be registered on the app window.
+     *
+     * Only call this on the IME window. Create the {@link ImeOnBackInvokedDispatcher} from
+     * the application process and override
+     * {@link ImeOnBackInvokedDispatcher#getReceivingDispatcher()} to point to the app
+     * window's {@link WindowOnBackInvokedDispatcher}.
+     *
+     * @hide
+     */
+    default void setImeOnBackInvokedDispatcher(
+            @NonNull ImeOnBackInvokedDispatcher imeDispatcher) { }
 }

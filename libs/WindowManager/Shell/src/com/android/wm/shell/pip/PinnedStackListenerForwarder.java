@@ -16,9 +16,7 @@
 
 package com.android.wm.shell.pip;
 
-import android.app.RemoteAction;
 import android.content.ComponentName;
-import android.content.pm.ParceledListSlice;
 import android.os.RemoteException;
 import android.view.IPinnedTaskListener;
 import android.view.WindowManagerGlobal;
@@ -72,28 +70,9 @@ public class PinnedStackListenerForwarder {
         }
     }
 
-    private void onActionsChanged(ParceledListSlice<RemoteAction> actions,
-            RemoteAction closeAction) {
-        for (PinnedTaskListener listener : mListeners) {
-            listener.onActionsChanged(actions, closeAction);
-        }
-    }
-
     private void onActivityHidden(ComponentName componentName) {
         for (PinnedTaskListener listener : mListeners) {
             listener.onActivityHidden(componentName);
-        }
-    }
-
-    private void onAspectRatioChanged(float aspectRatio) {
-        for (PinnedTaskListener listener : mListeners) {
-            listener.onAspectRatioChanged(aspectRatio);
-        }
-    }
-
-    private void onExpandedAspectRatioChanged(float aspectRatio) {
-        for (PinnedTaskListener listener : mListeners) {
-            listener.onExpandedAspectRatioChanged(aspectRatio);
         }
     }
 
@@ -114,35 +93,11 @@ public class PinnedStackListenerForwarder {
         }
 
         @Override
-        public void onActionsChanged(ParceledListSlice<RemoteAction> actions,
-                RemoteAction closeAction) {
-            mMainExecutor.execute(() -> {
-                PinnedStackListenerForwarder.this.onActionsChanged(actions, closeAction);
-            });
-        }
-
-        @Override
         public void onActivityHidden(ComponentName componentName) {
             mMainExecutor.execute(() -> {
                 PinnedStackListenerForwarder.this.onActivityHidden(componentName);
             });
         }
-
-        @Override
-        public void onAspectRatioChanged(float aspectRatio) {
-            mMainExecutor.execute(() -> {
-                PinnedStackListenerForwarder.this.onAspectRatioChanged(aspectRatio);
-            });
-        }
-
-        @Override
-        public void onExpandedAspectRatioChanged(float aspectRatio) {
-            mMainExecutor.execute(() -> {
-                PinnedStackListenerForwarder.this.onExpandedAspectRatioChanged(aspectRatio);
-            });
-        }
-
-
     }
 
     /**
@@ -154,13 +109,6 @@ public class PinnedStackListenerForwarder {
 
         public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {}
 
-        public void onActionsChanged(ParceledListSlice<RemoteAction> actions,
-                RemoteAction closeAction) {}
-
         public void onActivityHidden(ComponentName componentName) {}
-
-        public void onAspectRatioChanged(float aspectRatio) {}
-
-        public void onExpandedAspectRatioChanged(float aspectRatio) {}
     }
 }

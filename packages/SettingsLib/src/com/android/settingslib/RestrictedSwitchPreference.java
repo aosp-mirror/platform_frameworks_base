@@ -16,10 +16,14 @@
 
 package com.android.settingslib;
 
+import static android.app.admin.DevicePolicyResources.Strings.Settings.DISABLED_BY_ADMIN_SWITCH_SUMMARY;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ENABLED_BY_ADMIN_SWITCH_SUMMARY;
+
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
 import android.annotation.NonNull;
 import android.app.AppOpsManager;
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Process;
@@ -36,6 +40,8 @@ import androidx.core.content.res.TypedArrayUtils;
 import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceViewHolder;
 import androidx.preference.SwitchPreference;
+
+import com.android.settingslib.utils.BuildCompatUtils;
 
 /**
  * Version of SwitchPreference that can be disabled by a device admin
@@ -117,8 +123,13 @@ public class RestrictedSwitchPreference extends SwitchPreference {
 
         CharSequence switchSummary;
         if (mRestrictedSwitchSummary == null) {
-            switchSummary = getContext().getText(isChecked()
-                    ? R.string.enabled_by_admin : R.string.disabled_by_admin);
+            switchSummary = isChecked()
+                    ? getUpdatableEnterpriseString(
+                            getContext(), ENABLED_BY_ADMIN_SWITCH_SUMMARY,
+                            R.string.enabled_by_admin)
+                    : getUpdatableEnterpriseString(
+                            getContext(), DISABLED_BY_ADMIN_SWITCH_SUMMARY,
+                            R.string.disabled_by_admin);
         } else {
             switchSummary = mRestrictedSwitchSummary;
         }
@@ -151,6 +162,16 @@ public class RestrictedSwitchPreference extends SwitchPreference {
                 // class would have already changed it if there is no summary to display.
             }
         }
+    }
+
+    private static String getUpdatableEnterpriseString(
+            Context context, String updatableStringId, int resId) {
+        if (!BuildCompatUtils.isAtLeastT()) {
+            return context.getString(resId);
+        }
+        return context.getSystemService(DevicePolicyManager.class).getResources().getString(
+                updatableStringId,
+                () -> context.getString(resId));
     }
 
     @Override

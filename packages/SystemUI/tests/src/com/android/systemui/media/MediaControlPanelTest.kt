@@ -25,11 +25,16 @@ import org.mockito.Mockito.`when` as whenever
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.drawable.Animatable2
 import android.graphics.drawable.AnimatedVectorDrawable
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.Icon
 import android.graphics.drawable.RippleDrawable
+import android.graphics.drawable.TransitionDrawable
 import android.media.MediaMetadata
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
@@ -54,6 +59,7 @@ import com.android.systemui.ActivityIntentHelper
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastSender
+import com.android.systemui.media.MediaControlPanel.KEY_SMARTSPACE_APP_NAME
 import com.android.systemui.media.dialog.MediaOutputDialogFactory
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
@@ -70,6 +76,7 @@ import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import dagger.Lazy
+import junit.framework.Assert.assertTrue
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -96,6 +103,7 @@ private const val SESSION_KEY = "SESSION_KEY"
 private const val SESSION_ARTIST = "SESSION_ARTIST"
 private const val SESSION_TITLE = "SESSION_TITLE"
 private const val DISABLED_DEVICE_NAME = "DISABLED_DEVICE_NAME"
+private const val REC_APP_NAME = "REC APP NAME"
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -120,11 +128,10 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var collapsedSet: ConstraintSet
     @Mock private lateinit var mediaOutputDialogFactory: MediaOutputDialogFactory
     @Mock private lateinit var mediaCarouselController: MediaCarouselController
-    @Mock private lateinit var mediaCarouselScrollHandler: MediaCarouselScrollHandler
     @Mock private lateinit var falsingManager: FalsingManager
     @Mock private lateinit var transitionParent: ViewGroup
     private lateinit var appIcon: ImageView
-    private lateinit var albumView: ImageView
+    @Mock private lateinit var albumView: ImageView
     private lateinit var titleText: TextView
     private lateinit var artistText: TextView
     private lateinit var seamless: ViewGroup
@@ -257,6 +264,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         // Set valid recommendation data
         val extras = Bundle()
+        extras.putString(KEY_SMARTSPACE_APP_NAME, REC_APP_NAME)
         val intent = Intent().apply {
             putExtras(extras)
             setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -266,7 +274,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         smartspaceData = EMPTY_SMARTSPACE_MEDIA_DATA.copy(
             packageName = PACKAGE,
             instanceId = instanceId,
-            recommendations = listOf(smartspaceAction),
+            recommendations = listOf(smartspaceAction, smartspaceAction, smartspaceAction),
             cardAction = smartspaceAction
         )
     }
@@ -290,13 +298,9 @@ public class MediaControlPanelTest : SysuiTestCase() {
      */
     private fun initMediaViewHolderMocks() {
         whenever(seekBarViewModel.progress).thenReturn(seekBarData)
-        whenever(mediaCarouselController.mediaCarouselScrollHandler)
-            .thenReturn(mediaCarouselScrollHandler)
-        whenever(mediaCarouselScrollHandler.qsExpanded).thenReturn(false)
 
         // Set up mock views for the players
         appIcon = ImageView(context)
-        albumView = ImageView(context)
         titleText = TextView(context)
         artistText = TextView(context)
         seamless = FrameLayout(context)
@@ -416,7 +420,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(coverContainer1.context).thenReturn(mockContext)
         whenever(coverContainer2.context).thenReturn(mockContext)
         whenever(coverContainer3.context).thenReturn(mockContext)
-
     }
 
     @After
@@ -534,6 +537,69 @@ public class MediaControlPanelTest : SysuiTestCase() {
         assertThat(actionNext.isEnabled()).isFalse()
         assertThat(actionNext.drawable).isNull()
         verify(expandedSet).setVisibility(R.id.actionNext, ConstraintSet.INVISIBLE)
+    }
+
+    @Test
+    fun bindAlbumView_testHardwareAfterAttach() {
+        player.attachPlayer(viewHolder)
+
+        verify(albumView).setLayerType(View.LAYER_TYPE_HARDWARE, null)
+    }
+
+    @Test
+    fun bindAlbumView_setAfterExecutors() {
+        val bmp = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bmp)
+        canvas.drawColor(Color.RED)
+        val albumArt = Icon.createWithBitmap(bmp)
+        val state = mediaData.copy(artwork = albumArt)
+
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(state, PACKAGE)
+        bgExecutor.runAllReady()
+        mainExecutor.runAllReady()
+
+        verify(albumView).setImageDrawable(any(Drawable::class.java))
+    }
+
+    @Test
+    fun bindAlbumView_bitmapInLaterStates_setAfterExecutors() {
+        val bmp = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bmp)
+        canvas.drawColor(Color.RED)
+        val albumArt = Icon.createWithBitmap(bmp)
+
+        val state0 = mediaData.copy(artwork = null)
+        val state1 = mediaData.copy(artwork = albumArt)
+        val state2 = mediaData.copy(artwork = albumArt)
+        player.attachPlayer(viewHolder)
+
+        // First binding sets (empty) drawable
+        player.bindPlayer(state0, PACKAGE)
+        bgExecutor.runAllReady()
+        mainExecutor.runAllReady()
+        verify(albumView).setImageDrawable(any(Drawable::class.java))
+
+        // Run Metadata update so that later states don't update
+        val captor = argumentCaptor<Animator.AnimatorListener>()
+        verify(mockAnimator, times(2)).addListener(captor.capture())
+        captor.value.onAnimationEnd(mockAnimator)
+        assertThat(titleText.getText()).isEqualTo(TITLE)
+        assertThat(artistText.getText()).isEqualTo(ARTIST)
+
+        // Second binding sets transition drawable
+        player.bindPlayer(state1, PACKAGE)
+        bgExecutor.runAllReady()
+        mainExecutor.runAllReady()
+        val drawableCaptor = argumentCaptor<Drawable>()
+        verify(albumView, times(2)).setImageDrawable(drawableCaptor.capture())
+        assertTrue(drawableCaptor.allValues[1] is TransitionDrawable)
+
+        // Third binding doesn't run transition or update background
+        player.bindPlayer(state2, PACKAGE)
+        bgExecutor.runAllReady()
+        mainExecutor.runAllReady()
+        verify(albumView, times(2)).setImageDrawable(any(Drawable::class.java))
     }
 
     @Test
@@ -895,7 +961,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         // Rebinding should not trigger animation
         player.bindPlayer(mediaData, PACKAGE)
-        verify(mockAnimator, times(1)).start()
+        verify(mockAnimator, times(2)).start()
     }
 
     @Test
@@ -917,7 +983,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         // Bind trigges new animation
         player.bindPlayer(data1, PACKAGE)
-        verify(mockAnimator, times(2)).start()
+        verify(mockAnimator, times(3)).start()
         whenever(mockAnimator.isRunning()).thenReturn(true)
 
         // Rebind before animation end binds corrct data
@@ -1058,6 +1124,91 @@ public class MediaControlPanelTest : SysuiTestCase() {
         verify(mediaCarouselController).removePlayer(eq(mediaKey), eq(false), eq(false))
     }
 
+    @Test
+    fun player_gutsOpen_contentDescriptionIsForGuts() {
+        whenever(mediaViewController.isGutsVisible).thenReturn(true)
+        player.attachPlayer(viewHolder)
+
+        val gutsTextString = "gutsText"
+        whenever(gutsText.text).thenReturn(gutsTextString)
+        player.bindPlayer(mediaData, KEY)
+
+        val descriptionCaptor = ArgumentCaptor.forClass(CharSequence::class.java)
+        verify(viewHolder.player).contentDescription = descriptionCaptor.capture()
+        val description = descriptionCaptor.value.toString()
+
+        assertThat(description).isEqualTo(gutsTextString)
+    }
+
+    @Test
+    fun player_gutsClosed_contentDescriptionIsForPlayer() {
+        whenever(mediaViewController.isGutsVisible).thenReturn(false)
+        player.attachPlayer(viewHolder)
+
+        val app = "appName"
+        player.bindPlayer(mediaData.copy(app = app), KEY)
+
+        val descriptionCaptor = ArgumentCaptor.forClass(CharSequence::class.java)
+        verify(viewHolder.player).contentDescription = descriptionCaptor.capture()
+        val description = descriptionCaptor.value.toString()
+
+        assertThat(description).contains(mediaData.song!!)
+        assertThat(description).contains(mediaData.artist!!)
+        assertThat(description).contains(app)
+    }
+
+    @Test
+    fun player_gutsChangesFromOpenToClosed_contentDescriptionUpdated() {
+        // Start out open
+        whenever(mediaViewController.isGutsVisible).thenReturn(true)
+        whenever(gutsText.text).thenReturn("gutsText")
+        player.attachPlayer(viewHolder)
+        val app = "appName"
+        player.bindPlayer(mediaData.copy(app = app), KEY)
+
+        // Update to closed by long pressing
+        val captor = ArgumentCaptor.forClass(View.OnLongClickListener::class.java)
+        verify(viewHolder.player).onLongClickListener = captor.capture()
+        reset(viewHolder.player)
+
+        whenever(mediaViewController.isGutsVisible).thenReturn(false)
+        captor.value.onLongClick(viewHolder.player)
+
+        // Then content description is now the player content description
+        val descriptionCaptor = ArgumentCaptor.forClass(CharSequence::class.java)
+        verify(viewHolder.player).contentDescription = descriptionCaptor.capture()
+        val description = descriptionCaptor.value.toString()
+
+        assertThat(description).contains(mediaData.song!!)
+        assertThat(description).contains(mediaData.artist!!)
+        assertThat(description).contains(app)
+    }
+
+    @Test
+    fun player_gutsChangesFromClosedToOpen_contentDescriptionUpdated() {
+        // Start out closed
+        whenever(mediaViewController.isGutsVisible).thenReturn(false)
+        val gutsTextString = "gutsText"
+        whenever(gutsText.text).thenReturn(gutsTextString)
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(mediaData.copy(app = "appName"), KEY)
+
+        // Update to open by long pressing
+        val captor = ArgumentCaptor.forClass(View.OnLongClickListener::class.java)
+        verify(viewHolder.player).onLongClickListener = captor.capture()
+        reset(viewHolder.player)
+
+        whenever(mediaViewController.isGutsVisible).thenReturn(true)
+        captor.value.onLongClick(viewHolder.player)
+
+        // Then content description is now the guts content description
+        val descriptionCaptor = ArgumentCaptor.forClass(CharSequence::class.java)
+        verify(viewHolder.player).contentDescription = descriptionCaptor.capture()
+        val description = descriptionCaptor.value.toString()
+
+        assertThat(description).isEqualTo(gutsTextString)
+    }
+
     /* ***** END guts tests for the player ***** */
 
     /* ***** Guts tests for the recommendations ***** */
@@ -1124,6 +1275,85 @@ public class MediaControlPanelTest : SysuiTestCase() {
         dismiss.callOnClick()
         verify(logger).logLongPressDismiss(anyInt(), eq(PACKAGE), eq(instanceId))
         verify(mediaDataManager).dismissSmartspaceRecommendation(eq(mediaKey), anyLong())
+    }
+
+    @Test
+    fun recommendation_gutsOpen_contentDescriptionIsForGuts() {
+        whenever(mediaViewController.isGutsVisible).thenReturn(true)
+        player.attachRecommendation(recommendationViewHolder)
+
+        val gutsTextString = "gutsText"
+        whenever(gutsText.text).thenReturn(gutsTextString)
+        player.bindRecommendation(smartspaceData)
+
+        val descriptionCaptor = ArgumentCaptor.forClass(CharSequence::class.java)
+        verify(viewHolder.player).contentDescription = descriptionCaptor.capture()
+        val description = descriptionCaptor.value.toString()
+
+        assertThat(description).isEqualTo(gutsTextString)
+    }
+
+    @Test
+    fun recommendation_gutsClosed_contentDescriptionIsForPlayer() {
+        whenever(mediaViewController.isGutsVisible).thenReturn(false)
+        player.attachRecommendation(recommendationViewHolder)
+
+        player.bindRecommendation(smartspaceData)
+
+        val descriptionCaptor = ArgumentCaptor.forClass(CharSequence::class.java)
+        verify(viewHolder.player).contentDescription = descriptionCaptor.capture()
+        val description = descriptionCaptor.value.toString()
+
+        assertThat(description).contains(REC_APP_NAME)
+    }
+
+    @Test
+    fun recommendation_gutsChangesFromOpenToClosed_contentDescriptionUpdated() {
+        // Start out open
+        whenever(mediaViewController.isGutsVisible).thenReturn(true)
+        whenever(gutsText.text).thenReturn("gutsText")
+        player.attachRecommendation(recommendationViewHolder)
+        player.bindRecommendation(smartspaceData)
+
+        // Update to closed by long pressing
+        val captor = ArgumentCaptor.forClass(View.OnLongClickListener::class.java)
+        verify(viewHolder.player).onLongClickListener = captor.capture()
+        reset(viewHolder.player)
+
+        whenever(mediaViewController.isGutsVisible).thenReturn(false)
+        captor.value.onLongClick(viewHolder.player)
+
+        // Then content description is now the player content description
+        val descriptionCaptor = ArgumentCaptor.forClass(CharSequence::class.java)
+        verify(viewHolder.player).contentDescription = descriptionCaptor.capture()
+        val description = descriptionCaptor.value.toString()
+
+        assertThat(description).contains(REC_APP_NAME)
+    }
+
+    @Test
+    fun recommendation_gutsChangesFromClosedToOpen_contentDescriptionUpdated() {
+        // Start out closed
+        whenever(mediaViewController.isGutsVisible).thenReturn(false)
+        val gutsTextString = "gutsText"
+        whenever(gutsText.text).thenReturn(gutsTextString)
+        player.attachRecommendation(recommendationViewHolder)
+        player.bindRecommendation(smartspaceData)
+
+        // Update to open by long pressing
+        val captor = ArgumentCaptor.forClass(View.OnLongClickListener::class.java)
+        verify(viewHolder.player).onLongClickListener = captor.capture()
+        reset(viewHolder.player)
+
+        whenever(mediaViewController.isGutsVisible).thenReturn(true)
+        captor.value.onLongClick(viewHolder.player)
+
+        // Then content description is now the guts content description
+        val descriptionCaptor = ArgumentCaptor.forClass(CharSequence::class.java)
+        verify(viewHolder.player).contentDescription = descriptionCaptor.capture()
+        val description = descriptionCaptor.value.toString()
+
+        assertThat(description).isEqualTo(gutsTextString)
     }
 
     /* ***** END guts tests for the recommendations ***** */
@@ -1389,6 +1619,66 @@ public class MediaControlPanelTest : SysuiTestCase() {
         captor.value.onClick(recommendationViewHolder.recommendations)
 
         verify(logger).logRecommendationItemTap(eq(PACKAGE), eq(instanceId), eq(0))
+    }
+
+    @Test
+    fun bindRecommendation_listHasTooFewRecs_notDisplayed() {
+        player.attachRecommendation(recommendationViewHolder)
+        val icon = Icon.createWithResource(context, R.drawable.ic_1x_mobiledata)
+        val data = smartspaceData.copy(
+            recommendations = listOf(
+                SmartspaceAction.Builder("id1", "title1")
+                    .setSubtitle("subtitle1")
+                    .setIcon(icon)
+                    .setExtras(Bundle.EMPTY)
+                    .build(),
+                SmartspaceAction.Builder("id2", "title2")
+                    .setSubtitle("subtitle2")
+                    .setIcon(icon)
+                    .setExtras(Bundle.EMPTY)
+                    .build(),
+            )
+        )
+
+        player.bindRecommendation(data)
+
+        assertThat(recTitle1.text).isEqualTo("")
+        verify(mediaViewController, never()).refreshState()
+    }
+
+    @Test
+    fun bindRecommendation_listHasTooFewRecsWithIcons_notDisplayed() {
+        player.attachRecommendation(recommendationViewHolder)
+        val icon = Icon.createWithResource(context, R.drawable.ic_1x_mobiledata)
+        val data = smartspaceData.copy(
+            recommendations = listOf(
+                SmartspaceAction.Builder("id1", "title1")
+                    .setSubtitle("subtitle1")
+                    .setIcon(icon)
+                    .setExtras(Bundle.EMPTY)
+                    .build(),
+                SmartspaceAction.Builder("id2", "title2")
+                    .setSubtitle("subtitle2")
+                    .setIcon(icon)
+                    .setExtras(Bundle.EMPTY)
+                    .build(),
+                SmartspaceAction.Builder("id2", "empty icon 1")
+                    .setSubtitle("subtitle2")
+                    .setIcon(null)
+                    .setExtras(Bundle.EMPTY)
+                    .build(),
+                SmartspaceAction.Builder("id2", "empty icon 2")
+                    .setSubtitle("subtitle2")
+                    .setIcon(null)
+                    .setExtras(Bundle.EMPTY)
+                    .build(),
+            )
+        )
+
+        player.bindRecommendation(data)
+
+        assertThat(recTitle1.text).isEqualTo("")
+        verify(mediaViewController, never()).refreshState()
     }
 
     @Test

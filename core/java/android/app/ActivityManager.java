@@ -3710,10 +3710,16 @@ public class ActivityManager {
     /**
      * Returns the process state of this uid.
      *
+     * If the caller does not hold {@link Manifest.permission#INTERACT_ACROSS_USERS_FULL}
+     * permission, they can only query process state of UIDs running in the same user as the caller.
+     *
      * @hide
      */
     @TestApi
-    @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
+    @RequiresPermission(allOf = {
+            Manifest.permission.PACKAGE_USAGE_STATS,
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL
+    }, conditional = true)
     public int getUidProcessState(int uid) {
         try {
             return getService().getUidProcessState(uid, mContext.getOpPackageName());
@@ -3725,10 +3731,17 @@ public class ActivityManager {
     /**
      * Returns the process capability of this uid.
      *
+     * If the caller does not hold {@link Manifest.permission#INTERACT_ACROSS_USERS_FULL}
+     * permission, they can only query process capabilities of UIDs running in the same user
+     * as the caller.
+     *
      * @hide
      */
     @TestApi
-    @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
+    @RequiresPermission(allOf = {
+            Manifest.permission.PACKAGE_USAGE_STATS,
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL
+    }, conditional = true)
     public @ProcessCapability int getUidProcessCapabilities(int uid) {
         try {
             return getService().getUidProcessCapabilities(uid, mContext.getOpPackageName());
@@ -4604,8 +4617,8 @@ public class ActivityManager {
         try {
             getService().broadcastIntentWithFeature(
                     null, null, intent, null, null, Activity.RESULT_OK, null, null,
-                    null /*requiredPermissions*/, null /*excludedPermissions*/, appOp, null, false,
-                    true, userId);
+                    null /*requiredPermissions*/, null /*excludedPermissions*/,
+                    null /*excludedPackages*/, appOp, null, false, true, userId);
         } catch (RemoteException ex) {
         }
     }

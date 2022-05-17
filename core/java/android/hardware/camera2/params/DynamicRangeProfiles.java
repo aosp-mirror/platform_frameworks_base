@@ -277,7 +277,7 @@ public final class DynamicRangeProfiles {
      * profile.</p>
      *
      * @return non-modifiable set of dynamic range profiles
-     * @throws IllegalArgumentException - If the profile argument is not
+     * @throws IllegalArgumentException   If the profile argument is not
      *                                    within the list returned by
      *                                    getSupportedProfiles()
      *
@@ -303,7 +303,7 @@ public final class DynamicRangeProfiles {
      *
      * @return true if the given profile is not suitable for latency sensitive use cases, false
      *         otherwise
-     * @throws IllegalArgumentException - If the profile argument is not
+     * @throws IllegalArgumentException   If the profile argument is not
      *                                    within the list returned by
      *                                    getSupportedProfiles()
      *

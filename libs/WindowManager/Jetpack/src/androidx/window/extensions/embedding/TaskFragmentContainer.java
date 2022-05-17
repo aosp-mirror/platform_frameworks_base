@@ -16,17 +16,19 @@
 
 package androidx.window.extensions.embedding;
 
-import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
-import android.app.ActivityThread;
+import android.app.WindowConfiguration.WindowingMode;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
 import android.window.TaskFragmentInfo;
 import android.window.WindowContainerTransaction;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -37,19 +39,26 @@ import java.util.List;
  * on the server side.
  */
 class TaskFragmentContainer {
+    private static final int APPEAR_EMPTY_TIMEOUT_MS = 3000;
+
+    @NonNull
+    private final SplitController mController;
+
     /**
      * Client-created token that uniquely identifies the task fragment container instance.
      */
     @NonNull
     private final IBinder mToken;
 
-    /** Parent leaf Task id. */
-    private final int mTaskId;
+    /** Parent leaf Task. */
+    @NonNull
+    private final TaskContainer mTaskContainer;
 
     /**
      * Server-provided task fragment information.
      */
-    private TaskFragmentInfo mInfo;
+    @VisibleForTesting
+    TaskFragmentInfo mInfo;
 
     /**
      * Activities that are being reparented or being started to this container, but haven't been
@@ -73,15 +82,29 @@ class TaskFragmentContainer {
     private final Rect mLastRequestedBounds = new Rect();
 
     /**
+     * Windowing mode that was requested last via {@link android.window.WindowContainerTransaction}.
+     */
+    @WindowingMode
+    private int mLastRequestedWindowingMode = WINDOWING_MODE_UNDEFINED;
+
+    /**
+     * When the TaskFragment has appeared in server, but is empty, we should remove the TaskFragment
+     * if it is still empty after the timeout.
+     */
+    @VisibleForTesting
+    @Nullable
+    Runnable mAppearEmptyTimeout;
+
+    /**
      * Creates a container with an existing activity that will be re-parented to it in a window
      * container transaction.
      */
-    TaskFragmentContainer(@Nullable Activity activity, int taskId) {
+    TaskFragmentContainer(@Nullable Activity activity, @NonNull TaskContainer taskContainer,
+            @NonNull SplitController controller) {
+        mController = controller;
         mToken = new Binder("TaskFragmentContainer");
-        if (taskId == INVALID_TASK_ID) {
-            throw new IllegalArgumentException("Invalid Task id");
-        }
-        mTaskId = taskId;
+        mTaskContainer = taskContainer;
+        taskContainer.mContainers.add(this);
         if (activity != null) {
             addPendingAppearedActivity(activity);
         }
@@ -98,25 +121,40 @@ class TaskFragmentContainer {
     /** List of activities that belong to this container and live in this process. */
     @NonNull
     List<Activity> collectActivities() {
+        final List<Activity> allActivities = new ArrayList<>();
+        if (mInfo != null) {
+            // Add activities reported from the server.
+            for (IBinder token : mInfo.getActivities()) {
+                final Activity activity = mController.getActivity(token);
+                if (activity != null && !activity.isFinishing()) {
+                    allActivities.add(activity);
+                }
+            }
+        }
+
         // Add the re-parenting activity, in case the server has not yet reported the task
         // fragment info update with it placed in this container. We still want to apply rules
         // in this intermediate state.
-        List<Activity> allActivities = new ArrayList<>();
-        if (!mPendingAppearedActivities.isEmpty()) {
-            allActivities.addAll(mPendingAppearedActivities);
-        }
-        // Add activities reported from the server.
-        if (mInfo == null) {
-            return allActivities;
-        }
-        ActivityThread activityThread = ActivityThread.currentActivityThread();
-        for (IBinder token : mInfo.getActivities()) {
-            Activity activity = activityThread.getActivity(token);
-            if (activity != null && !activity.isFinishing() && !allActivities.contains(activity)) {
+        // Place those on top of the list since they will be on the top after reported from the
+        // server.
+        for (Activity activity : mPendingAppearedActivities) {
+            if (!activity.isFinishing()) {
                 allActivities.add(activity);
             }
         }
         return allActivities;
+    }
+
+    /**
+     * Checks if the count of activities from the same process in task fragment info corresponds to
+     * the ones created and available on the client side.
+     */
+    boolean taskInfoActivityCountMatchesCreated() {
+        if (mInfo == null) {
+            return false;
+        }
+        return mPendingAppearedActivities.isEmpty()
+                && mInfo.getActivities().size() == collectActivities().size();
     }
 
     ActivityStack toActivityStack() {
@@ -124,7 +162,16 @@ class TaskFragmentContainer {
     }
 
     void addPendingAppearedActivity(@NonNull Activity pendingAppearedActivity) {
+        if (hasActivity(pendingAppearedActivity.getActivityToken())) {
+            return;
+        }
+        // Remove the pending activity from other TaskFragments.
+        mTaskContainer.cleanupPendingAppearedActivity(pendingAppearedActivity);
         mPendingAppearedActivities.add(pendingAppearedActivity);
+    }
+
+    void removePendingAppearedActivity(@NonNull Activity pendingAppearedActivity) {
+        mPendingAppearedActivities.remove(pendingAppearedActivity);
     }
 
     boolean hasActivity(@NonNull IBinder token) {
@@ -147,12 +194,30 @@ class TaskFragmentContainer {
         return count;
     }
 
+    /** Whether we are waiting for the TaskFragment to appear and become non-empty. */
+    boolean isWaitingActivityAppear() {
+        return !mIsFinished && (mInfo == null || mAppearEmptyTimeout != null);
+    }
+
     @Nullable
     TaskFragmentInfo getInfo() {
         return mInfo;
     }
 
     void setInfo(@NonNull TaskFragmentInfo info) {
+        if (!mIsFinished && mInfo == null && info.isEmpty()) {
+            // onTaskFragmentAppeared with empty info. We will remove the TaskFragment if it is
+            // still empty after timeout.
+            mAppearEmptyTimeout = () -> {
+                mAppearEmptyTimeout = null;
+                mController.onTaskFragmentAppearEmptyTimeout(this);
+            };
+            mController.getHandler().postDelayed(mAppearEmptyTimeout, APPEAR_EMPTY_TIMEOUT_MS);
+        } else if (mAppearEmptyTimeout != null && !info.isEmpty()) {
+            mController.getHandler().removeCallbacks(mAppearEmptyTimeout);
+            mAppearEmptyTimeout = null;
+        }
+
         mInfo = info;
         if (mInfo == null || mPendingAppearedActivities.isEmpty()) {
             return;
@@ -178,6 +243,12 @@ class TaskFragmentContainer {
             i--;
         }
         return i >= 0 ? activities.get(i) : null;
+    }
+
+    @Nullable
+    Activity getBottomMostActivity() {
+        final List<Activity> activities = collectActivities();
+        return activities.isEmpty() ? null : activities.get(0);
     }
 
     boolean isEmpty() {
@@ -226,6 +297,10 @@ class TaskFragmentContainer {
             @NonNull WindowContainerTransaction wct, @NonNull SplitController controller) {
         if (!mIsFinished) {
             mIsFinished = true;
+            if (mAppearEmptyTimeout != null) {
+                mController.getHandler().removeCallbacks(mAppearEmptyTimeout);
+                mAppearEmptyTimeout = null;
+            }
             finishActivities(shouldFinishDependent, presenter, wct, controller);
         }
 
@@ -300,9 +375,29 @@ class TaskFragmentContainer {
         }
     }
 
+    /**
+     * Checks if last requested windowing mode is equal to the provided value.
+     */
+    boolean isLastRequestedWindowingModeEqual(@WindowingMode int windowingMode) {
+        return mLastRequestedWindowingMode == windowingMode;
+    }
+
+    /**
+     * Updates the last requested windowing mode.
+     */
+    void setLastRequestedWindowingMode(@WindowingMode int windowingModes) {
+        mLastRequestedWindowingMode = windowingModes;
+    }
+
     /** Gets the parent leaf Task id. */
     int getTaskId() {
-        return mTaskId;
+        return mTaskContainer.getTaskId();
+    }
+
+    /** Gets the parent Task. */
+    @NonNull
+    TaskContainer getTaskContainer() {
+        return mTaskContainer;
     }
 
     @Override
@@ -318,15 +413,17 @@ class TaskFragmentContainer {
      */
     private String toString(boolean includeContainersToFinishOnExit) {
         return "TaskFragmentContainer{"
+                + " parentTaskId=" + getTaskId()
                 + " token=" + mToken
-                + " info=" + mInfo
                 + " topNonFinishingActivity=" + getTopNonFinishingActivity()
+                + " runningActivityCount=" + getRunningActivityCount()
+                + " isFinished=" + mIsFinished
+                + " lastRequestedBounds=" + mLastRequestedBounds
                 + " pendingAppearedActivities=" + mPendingAppearedActivities
                 + (includeContainersToFinishOnExit ? " containersToFinishOnExit="
                 + containersToFinishOnExitToString() : "")
                 + " activitiesToFinishOnExit=" + mActivitiesToFinishOnExit
-                + " isFinished=" + mIsFinished
-                + " lastRequestedBounds=" + mLastRequestedBounds
+                + " info=" + mInfo
                 + "}";
     }
 

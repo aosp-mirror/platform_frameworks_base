@@ -39,6 +39,7 @@ import static android.app.ActivityManager.PROCESS_STATE_PERSISTENT_UI;
 import static android.app.ActivityManager.PROCESS_STATE_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.app.ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND;
+import static android.content.Context.BIND_TREAT_LIKE_VISIBLE_FOREGROUND_SERVICE;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE;
@@ -1478,7 +1479,6 @@ public class OomAdjuster {
         state.setAdjTarget(null);
         state.setEmpty(false);
         state.setCached(false);
-        state.resetAllowStartFgsState();
         if (!cycleReEval) {
             // Don't reset this flag when doing cycles re-evaluation.
             state.setNoKillOnBgRestrictedAndIdle(false);
@@ -1537,7 +1537,6 @@ public class OomAdjuster {
             state.setCurRawProcState(state.getCurProcState());
             state.setCurAdj(state.getMaxAdj());
             state.setCompletedAdjSeq(state.getAdjSeq());
-            state.bumpAllowStartFgsState(state.getCurProcState());
             // if curAdj is less than prevAppAdj, then this process was promoted
             return state.getCurAdj() < prevAppAdj || state.getCurProcState() < prevProcState;
         }
@@ -1563,7 +1562,6 @@ public class OomAdjuster {
             foregroundActivities = true;
             hasVisibleActivities = true;
             procState = PROCESS_STATE_CUR_TOP;
-            state.bumpAllowStartFgsState(PROCESS_STATE_TOP);
             if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
                 reportOomAdjMessageLocked(TAG_OOM_ADJ, "Making top: " + app);
             }
@@ -1661,7 +1659,6 @@ public class OomAdjuster {
                 // The user is aware of this app, so make it visible.
                 adj = ProcessList.PERCEPTIBLE_APP_ADJ;
                 procState = PROCESS_STATE_FOREGROUND_SERVICE;
-                state.bumpAllowStartFgsState(PROCESS_STATE_FOREGROUND_SERVICE);
                 state.setAdjType("fg-service");
                 state.setCached(false);
                 schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
@@ -2065,6 +2062,10 @@ public class OomAdjuster {
                                     newAdj = ProcessList.PERCEPTIBLE_APP_ADJ;
                                 } else if (clientAdj >= ProcessList.PERCEPTIBLE_APP_ADJ) {
                                     newAdj = clientAdj;
+                                } else if (cr.hasFlag(BIND_TREAT_LIKE_VISIBLE_FOREGROUND_SERVICE)
+                                        && clientAdj <= ProcessList.VISIBLE_APP_ADJ
+                                        && adj > ProcessList.VISIBLE_APP_ADJ) {
+                                    newAdj = ProcessList.VISIBLE_APP_ADJ;
                                 } else {
                                     if (adj > ProcessList.VISIBLE_APP_ADJ) {
                                         // TODO: Is this too limiting for apps bound from TOP?
@@ -2101,10 +2102,10 @@ public class OomAdjuster {
                                 // processes).  These should not bring the current process
                                 // into the top state, since they are not on top.  Instead
                                 // give them the best bound state after that.
-                                if (cr.hasFlag(Context.BIND_FOREGROUND_SERVICE)) {
+                                if (cr.hasFlag(BIND_TREAT_LIKE_VISIBLE_FOREGROUND_SERVICE)) {
+                                    clientProcState = PROCESS_STATE_FOREGROUND_SERVICE;
+                                } else if (cr.hasFlag(Context.BIND_FOREGROUND_SERVICE)) {
                                     clientProcState = PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
-                                    state.bumpAllowStartFgsState(
-                                            PROCESS_STATE_BOUND_FOREGROUND_SERVICE);
                                 } else if (mService.mWakefulness.get()
                                         == PowerManagerInternal.WAKEFULNESS_AWAKE
                                         && (cr.flags & Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE)
@@ -2118,7 +2119,6 @@ public class OomAdjuster {
                                 // Go at most to BOUND_TOP, unless requested to elevate
                                 // to client's state.
                                 clientProcState = PROCESS_STATE_BOUND_TOP;
-                                state.bumpAllowStartFgsState(PROCESS_STATE_BOUND_TOP);
                                 final boolean enabled = cstate.getCachedCompatChange(
                                         CACHED_COMPAT_CHANGE_PROCESS_CAPABILITY);
                                 if (enabled) {
@@ -2563,20 +2563,21 @@ public class OomAdjuster {
             // reminder: here, setAdj is previous state, curAdj is upcoming state
             if (state.getCurAdj() != state.getSetAdj()) {
                 mCachedAppOptimizer.onOomAdjustChanged(state.getSetAdj(), state.getCurAdj(), app);
-            } else if (mService.mWakefulness.get() != PowerManagerInternal.WAKEFULNESS_AWAKE
-                    && state.getSetAdj() < ProcessList.FOREGROUND_APP_ADJ
-                    && !state.isRunningRemoteAnimation()
-                    // Because these can fire independent of oom_adj/procstate changes, we need
-                    // to throttle the actual dispatch of these requests in addition to the
-                    // processing of the requests. As a result, there is throttling both here
-                    // and in CachedAppOptimizer.
-                    && mCachedAppOptimizer.shouldCompactPersistent(app, now)) {
-                mCachedAppOptimizer.compactAppPersistent(app);
-            } else if (mService.mWakefulness.get() != PowerManagerInternal.WAKEFULNESS_AWAKE
-                    && state.getCurProcState()
-                        == ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
-                    && mCachedAppOptimizer.shouldCompactBFGS(app, now)) {
-                mCachedAppOptimizer.compactAppBfgs(app);
+            } else if (mService.mWakefulness.get() != PowerManagerInternal.WAKEFULNESS_AWAKE) {
+                // See if we can compact persistent and bfgs services now that screen is off
+                if (state.getSetAdj() < ProcessList.FOREGROUND_APP_ADJ
+                        && !state.isRunningRemoteAnimation()
+                        // Because these can fire independent of oom_adj/procstate changes, we need
+                        // to throttle the actual dispatch of these requests in addition to the
+                        // processing of the requests. As a result, there is throttling both here
+                        // and in CachedAppOptimizer.
+                        && mCachedAppOptimizer.shouldCompactPersistent(app, now)) {
+                    mCachedAppOptimizer.compactAppPersistent(app);
+                } else if (state.getCurProcState()
+                                == ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
+                        && mCachedAppOptimizer.shouldCompactBFGS(app, now)) {
+                    mCachedAppOptimizer.compactAppBfgs(app);
+                }
             }
         }
 

@@ -16,7 +16,6 @@
 
 package androidx.window.extensions.embedding;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import android.app.Activity;
@@ -49,7 +48,8 @@ import java.util.concurrent.Executor;
 class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
 
     /** Mapping from the client assigned unique token to the {@link TaskFragmentInfo}. */
-    private final Map<IBinder, TaskFragmentInfo> mFragmentInfos = new ArrayMap<>();
+    @VisibleForTesting
+    final Map<IBinder, TaskFragmentInfo> mFragmentInfos = new ArrayMap<>();
 
     /**
      * Mapping from the client assigned unique token to the TaskFragment parent
@@ -120,25 +120,28 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
      * @param secondaryFragmentBounds   the initial bounds for the secondary TaskFragment
      * @param activityIntent    Intent to start the secondary Activity with.
      * @param activityOptions   ActivityOptions to start the secondary Activity with.
+     * @param windowingMode     the windowing mode to set for the TaskFragments.
      */
     void startActivityToSide(@NonNull WindowContainerTransaction wct,
             @NonNull IBinder launchingFragmentToken, @NonNull Rect launchingFragmentBounds,
             @NonNull Activity launchingActivity, @NonNull IBinder secondaryFragmentToken,
             @NonNull Rect secondaryFragmentBounds, @NonNull Intent activityIntent,
-            @Nullable Bundle activityOptions, @NonNull SplitRule rule) {
+            @Nullable Bundle activityOptions, @NonNull SplitRule rule,
+            @WindowingMode int windowingMode) {
         final IBinder ownerToken = launchingActivity.getActivityToken();
 
         // Create or resize the launching TaskFragment.
         if (mFragmentInfos.containsKey(launchingFragmentToken)) {
             resizeTaskFragment(wct, launchingFragmentToken, launchingFragmentBounds);
+            updateWindowingMode(wct, launchingFragmentToken, windowingMode);
         } else {
             createTaskFragmentAndReparentActivity(wct, launchingFragmentToken, ownerToken,
-                    launchingFragmentBounds, WINDOWING_MODE_MULTI_WINDOW, launchingActivity);
+                    launchingFragmentBounds, windowingMode, launchingActivity);
         }
 
         // Create a TaskFragment for the secondary activity.
         createTaskFragmentAndStartActivity(wct, secondaryFragmentToken, ownerToken,
-                secondaryFragmentBounds, WINDOWING_MODE_MULTI_WINDOW, activityIntent,
+                secondaryFragmentBounds, windowingMode, activityIntent,
                 activityOptions);
 
         // Set adjacent to each other so that the containers below will be invisible.
@@ -153,6 +156,7 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
     void expandTaskFragment(WindowContainerTransaction wct, IBinder fragmentToken) {
         resizeTaskFragment(wct, fragmentToken, new Rect());
         setAdjacentTaskFragments(wct, fragmentToken, null /* secondary */, null /* splitRule */);
+        updateWindowingMode(wct, fragmentToken, WINDOWING_MODE_UNDEFINED);
     }
 
     /**
@@ -253,6 +257,15 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
             bounds = new Rect();
         }
         wct.setBounds(mFragmentInfos.get(fragmentToken).getToken(), bounds);
+    }
+
+    void updateWindowingMode(WindowContainerTransaction wct, IBinder fragmentToken,
+            @WindowingMode int windowingMode) {
+        if (!mFragmentInfos.containsKey(fragmentToken)) {
+            throw new IllegalArgumentException(
+                    "Can't find an existing TaskFragment with fragmentToken=" + fragmentToken);
+        }
+        wct.setWindowingMode(mFragmentInfos.get(fragmentToken).getToken(), windowingMode);
     }
 
     void deleteTaskFragment(WindowContainerTransaction wct, IBinder fragmentToken) {

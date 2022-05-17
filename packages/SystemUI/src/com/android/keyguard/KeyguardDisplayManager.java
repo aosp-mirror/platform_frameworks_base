@@ -16,7 +16,6 @@
 package com.android.keyguard;
 
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.Display.DEFAULT_DISPLAY_GROUP;
 
 import android.app.Presentation;
 import android.content.Context;
@@ -119,10 +118,9 @@ public class KeyguardDisplayManager {
             if (DEBUG) Log.i(TAG, "Do not show KeyguardPresentation on a private display");
             return false;
         }
-        if (mTmpDisplayInfo.displayGroupId != DEFAULT_DISPLAY_GROUP) {
+        if ((mTmpDisplayInfo.flags & Display.FLAG_ALWAYS_UNLOCKED) != 0) {
             if (DEBUG) {
-                Log.i(TAG,
-                        "Do not show KeyguardPresentation on a non-default group display");
+                Log.i(TAG, "Do not show KeyguardPresentation on an unlocked display");
             }
             return false;
         }

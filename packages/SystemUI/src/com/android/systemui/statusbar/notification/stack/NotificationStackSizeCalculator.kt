@@ -207,9 +207,7 @@ constructor(
         visibleIndex: Int
     ): Float {
         var height = stack.calculateGapHeight(previous, current, visibleIndex)
-        if (visibleIndex != 0) {
-            height += dividerHeight
-        }
+        height += dividerHeight
         return height
     }
 

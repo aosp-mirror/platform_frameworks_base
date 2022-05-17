@@ -76,6 +76,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     private static final String PREF_NAME = "MediaOutputDialog";
     private static final String PREF_IS_LE_BROADCAST_FIRST_LAUNCH = "PrefIsLeBroadcastFirstLaunch";
     private static final boolean DEBUG = true;
+    private static final int HANDLE_BROADCAST_FAILED_DELAY = 3000;
 
     private final Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
     private final RecyclerView.LayoutManager mLayoutManager;
@@ -119,7 +120,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
                         Log.d(TAG, "onBroadcastStarted(), reason = " + reason
                                 + ", broadcastId = " + broadcastId);
                     }
-                    mMainThreadHandler.post(() -> startLeBroadcastDialog());
+                    mMainThreadHandler.post(() -> handleLeBroadcastStarted());
                 }
 
                 @Override
@@ -127,7 +128,8 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
                     if (DEBUG) {
                         Log.d(TAG, "onBroadcastStartFailed(), reason = " + reason);
                     }
-                    handleLeBroadcastStartFailed();
+                    mMainThreadHandler.postDelayed(() -> handleLeBroadcastStartFailed(),
+                            HANDLE_BROADCAST_FAILED_DELAY);
                 }
 
                 @Override
@@ -137,7 +139,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
                         Log.d(TAG, "onBroadcastMetadataChanged(), broadcastId = " + broadcastId
                                 + ", metadata = " + metadata);
                     }
-                    mMainThreadHandler.post(() -> refresh());
+                    mMainThreadHandler.post(() -> handleLeBroadcastMetadataChanged());
                 }
 
                 @Override
@@ -146,7 +148,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
                         Log.d(TAG, "onBroadcastStopped(), reason = " + reason
                                 + ", broadcastId = " + broadcastId);
                     }
-                    mMainThreadHandler.post(() -> refresh());
+                    mMainThreadHandler.post(() -> handleLeBroadcastStopped());
                 }
 
                 @Override
@@ -154,7 +156,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
                     if (DEBUG) {
                         Log.d(TAG, "onBroadcastStopFailed(), reason = " + reason);
                     }
-                    mMainThreadHandler.post(() -> refresh());
+                    mMainThreadHandler.post(() -> handleLeBroadcastStopFailed());
                 }
 
                 @Override
@@ -163,7 +165,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
                         Log.d(TAG, "onBroadcastUpdated(), reason = " + reason
                                 + ", broadcastId = " + broadcastId);
                     }
-                    mMainThreadHandler.post(() -> refresh());
+                    mMainThreadHandler.post(() -> handleLeBroadcastUpdated());
                 }
 
                 @Override
@@ -172,7 +174,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
                         Log.d(TAG, "onBroadcastUpdateFailed(), reason = " + reason
                                 + ", broadcastId = " + broadcastId);
                     }
-                    mMainThreadHandler.post(() -> refresh());
+                    mMainThreadHandler.post(() -> handleLeBroadcastUpdateFailed());
                 }
 
                 @Override
@@ -184,6 +186,19 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
                 }
             };
 
+    private class LayoutManagerWrapper extends LinearLayoutManager {
+        LayoutManagerWrapper(Context context) {
+            super(context);
+        }
+
+        @Override
+        public void onLayoutCompleted(RecyclerView.State state) {
+            super.onLayoutCompleted(state);
+            mMediaOutputController.setRefreshing(false);
+            mMediaOutputController.refreshDataSetIfNeeded();
+        }
+    }
+
     public MediaOutputBaseDialog(Context context, BroadcastSender broadcastSender,
             MediaOutputController mediaOutputController) {
         super(context, R.style.Theme_SystemUI_Dialog_Media);
@@ -192,7 +207,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         mContext = getContext();
         mBroadcastSender = broadcastSender;
         mMediaOutputController = mediaOutputController;
-        mLayoutManager = new LinearLayoutManager(mContext);
+        mLayoutManager = new LayoutManagerWrapper(mContext);
         mListMaxHeight = context.getResources().getDimensionPixelSize(
                 R.dimen.media_output_dialog_list_max_height);
         mExecutor = Executors.newSingleThreadExecutor();
@@ -212,9 +227,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         lp.setFitInsetsIgnoringVisibility(true);
         window.setAttributes(lp);
         window.setContentView(mDialogView);
-        // Sets window to a blank string to avoid talkback announce app label first when pop up,
-        // which doesn't make sense.
-        window.setTitle(EMPTY_TITLE);
+        window.setTitle(mContext.getString(R.string.media_output_dialog_accessibility_title));
 
         mHeaderTitle = mDialogView.requireViewById(R.id.header_title);
         mHeaderSubtitle = mDialogView.requireViewById(R.id.header_subtitle);
@@ -274,6 +287,10 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     }
 
     void refresh(boolean deviceSetChanged) {
+        if (mMediaOutputController.isRefreshing()) {
+            return;
+        }
+        mMediaOutputController.setRefreshing(true);
         // Update header icon
         final int iconRes = getHeaderIconRes();
         final IconCompat iconCompat = getHeaderIcon();
@@ -334,7 +351,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
             mHeaderSubtitle.setText(subTitle);
             mHeaderTitle.setGravity(Gravity.NO_GRAVITY);
         }
-        if (!mAdapter.isDragging() && !mAdapter.isAnimating()) {
+        if (!mAdapter.isDragging()) {
             int currentActivePosition = mAdapter.getCurrentActivePosition();
             if (!colorSetUpdated && !deviceSetChanged && currentActivePosition >= 0
                     && currentActivePosition < mAdapter.getItemCount()) {
@@ -367,10 +384,34 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
                 Bitmap.createScaledBitmap(bitmap, size, size, false));
     }
 
-    protected void handleLeBroadcastStartFailed() {
+    public void handleLeBroadcastStarted() {
+        startLeBroadcastDialog();
+    }
+
+    public void handleLeBroadcastStartFailed() {
         mStopButton.setText(R.string.media_output_broadcast_start_failed);
         mStopButton.setEnabled(false);
-        mMainThreadHandler.postDelayed(() -> refresh(), 3000);
+        refresh();
+    }
+
+    public void handleLeBroadcastMetadataChanged() {
+        refresh();
+    }
+
+    public void handleLeBroadcastStopped() {
+        refresh();
+    }
+
+    public void handleLeBroadcastStopFailed() {
+        refresh();
+    }
+
+    public void handleLeBroadcastUpdated() {
+        refresh();
+    }
+
+    public void handleLeBroadcastUpdateFailed() {
+        refresh();
     }
 
     protected void startLeBroadcast() {
@@ -432,7 +473,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     abstract int getStopButtonVisibility();
 
     public CharSequence getStopButtonText() {
-        return mContext.getText(R.string.keyboard_key_media_stop);
+        return mContext.getText(R.string.media_output_dialog_button_stop_casting);
     }
 
     public void onStopButtonClick() {

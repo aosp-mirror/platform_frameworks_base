@@ -16,6 +16,8 @@ package com.android.systemui.statusbar.policy;
 
 import static android.view.ContentInfo.SOURCE_CLIPBOARD;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
@@ -174,12 +176,15 @@ public class RemoteInputViewTest extends SysuiTestCase {
                 toUser);
         RemoteInputView view = RemoteInputView.inflate(mContext, null, row.getEntry(), mController);
         RemoteInputViewController controller = bindController(view, row.getEntry());
+        EditText editText = view.findViewById(R.id.remote_input_text);
 
         setTestPendingIntent(controller);
+        assertThat(editText.isEnabled()).isFalse();
+        view.onVisibilityAggregated(true);
+        assertThat(editText.isEnabled()).isTrue();
 
         view.focus();
 
-        EditText editText = view.findViewById(R.id.remote_input_text);
         EditorInfo editorInfo = new EditorInfo();
         editorInfo.packageName = DUMMY_MESSAGE_APP_PKG;
         editorInfo.fieldId = editText.getId();

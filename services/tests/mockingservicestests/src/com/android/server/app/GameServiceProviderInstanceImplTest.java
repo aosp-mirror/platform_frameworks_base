@@ -32,7 +32,9 @@ import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 
 import android.Manifest;
 import android.annotation.Nullable;
@@ -80,6 +82,7 @@ import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.FunctionalUtils.ThrowingConsumer;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.ScreenshotHelper;
+import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 import com.android.server.wm.WindowManagerInternal.TaskSystemBarsListener;
 import com.android.server.wm.WindowManagerService;
@@ -125,6 +128,7 @@ public final class GameServiceProviderInstanceImplTest {
 
 
     private static final Bitmap TEST_BITMAP;
+
     static {
         Picture picture = new Picture();
         Canvas canvas = picture.beginRecording(200, 100);
@@ -145,6 +149,8 @@ public final class GameServiceProviderInstanceImplTest {
     private WindowManagerService mMockWindowManagerService;
     @Mock
     private WindowManagerInternal mMockWindowManagerInternal;
+    @Mock
+    private ActivityTaskManagerInternal mActivityTaskManagerInternal;
     @Mock
     private IActivityManager mMockActivityManager;
     @Mock
@@ -216,16 +222,18 @@ public final class GameServiceProviderInstanceImplTest {
                 mRunningTaskInfos);
 
 
+        final UserHandle userHandle = new UserHandle(USER_ID);
         mGameServiceProviderInstance = new GameServiceProviderInstanceImpl(
-                new UserHandle(USER_ID),
+                userHandle,
                 ConcurrentUtils.DIRECT_EXECUTOR,
                 mMockContext,
-                mFakeGameClassifier,
+                new GameTaskInfoProvider(userHandle, mMockActivityTaskManager, mFakeGameClassifier),
                 mMockActivityManager,
                 mMockActivityManagerInternal,
                 mMockActivityTaskManager,
                 mMockWindowManagerService,
                 mMockWindowManagerInternal,
+                mActivityTaskManagerInternal,
                 mFakeGameServiceConnector,
                 mFakeGameSessionServiceConnector,
                 mMockScreenshotHelper);
@@ -788,6 +796,36 @@ public final class GameServiceProviderInstanceImplTest {
     }
 
     @Test
+    public void gameTaskFocusedWithCreateAfterRemoved_gameSessionRecreated() throws Exception {
+        mGameServiceProviderInstance.start();
+
+        startTask(10, GAME_A_MAIN_ACTIVITY);
+        mockPermissionGranted(Manifest.permission.MANAGE_GAME_ACTIVITY);
+        mFakeGameService.requestCreateGameSession(10);
+
+        FakeGameSession gameSession10 = new FakeGameSession();
+        SurfacePackage mockSurfacePackage10 = Mockito.mock(SurfacePackage.class);
+        mFakeGameSessionService.removePendingFutureForTaskId(10)
+                .complete(new CreateGameSessionResult(gameSession10, mockSurfacePackage10));
+
+        stopTask(10);
+
+        assertThat(gameSession10.mIsDestroyed).isTrue();
+
+        // If the game task is restored via the Recents UI, the task will be running again but
+        // we would not expect any call to TaskStackListener#onTaskCreated.
+        addRunningTaskInfo(10, GAME_A_MAIN_ACTIVITY);
+
+        // We now receive a task focused event for the task. This will occur if the game task is
+        // restored via the Recents UI.
+        dispatchTaskFocused(10, /*focused=*/ true);
+        mFakeGameService.requestCreateGameSession(10);
+
+        // Verify that a new pending game session is created for the game's taskId.
+        assertNotNull(mFakeGameSessionService.removePendingFutureForTaskId(10));
+    }
+
+    @Test
     public void gameTaskRemoved_removesTaskOverlay() throws Exception {
         mGameServiceProviderInstance.start();
 
@@ -1103,8 +1141,9 @@ public final class GameServiceProviderInstanceImplTest {
         mFakeGameSessionService.getCapturedCreateInvocations().get(0)
                 .mGameSessionController.restartGame(10);
 
-        verify(mMockActivityManager).forceStopPackage(GAME_A_PACKAGE, UserHandle.USER_CURRENT);
-        assertThat(mMockContext.getLastStartedIntent()).isEqualTo(launchIntent);
+        verify(mActivityTaskManagerInternal).restartTaskActivityProcessIfVisible(
+                10,
+                GAME_A_PACKAGE);
     }
 
     @Test
@@ -1127,7 +1166,8 @@ public final class GameServiceProviderInstanceImplTest {
 
         verify(mMockActivityManager).registerProcessObserver(any());
         verifyNoMoreInteractions(mMockActivityManager);
-        assertThat(mMockContext.getLastStartedIntent()).isNull();
+        verify(mActivityTaskManagerInternal, never())
+                .restartTaskActivityProcessIfVisible(anyInt(), anyString());
     }
 
     @Test
@@ -1141,16 +1181,23 @@ public final class GameServiceProviderInstanceImplTest {
         mockPermissionDenied(Manifest.permission.MANAGE_GAME_ACTIVITY);
         assertThrows(SecurityException.class,
                 () -> gameSessionController.restartGame(10));
+        verify(mActivityTaskManagerInternal, never())
+                .restartTaskActivityProcessIfVisible(anyInt(), anyString());
     }
 
     private void startTask(int taskId, ComponentName componentName) {
+        addRunningTaskInfo(taskId, componentName);
+
+        dispatchTaskCreated(taskId, componentName);
+    }
+
+    private void addRunningTaskInfo(int taskId, ComponentName componentName) {
         RunningTaskInfo runningTaskInfo = new RunningTaskInfo();
         runningTaskInfo.taskId = taskId;
+        runningTaskInfo.baseActivity = componentName;
         runningTaskInfo.displayId = 1;
         runningTaskInfo.configuration.windowConfiguration.setBounds(new Rect(0, 0, 500, 800));
         mRunningTaskInfos.add(runningTaskInfo);
-
-        dispatchTaskCreated(taskId, componentName);
     }
 
     private void stopTask(int taskId) {
@@ -1362,7 +1409,6 @@ public final class GameServiceProviderInstanceImplTest {
     }
 
     private final class MockContext extends ContextWrapper {
-        private Intent mLastStartedIntent;
         // Map of permission name -> PermissionManager.Permission_{GRANTED|DENIED} constant
         private final HashMap<String, Integer> mMockedPermissions = new HashMap<>();
 
@@ -1389,11 +1435,6 @@ public final class GameServiceProviderInstanceImplTest {
         }
 
         @Override
-        public void startActivity(Intent intent) {
-            mLastStartedIntent = intent;
-        }
-
-        @Override
         public void enforceCallingPermission(String permission, @Nullable String message) {
             final Integer granted = mMockedPermissions.get(permission);
             if (granted == null) {
@@ -1404,10 +1445,6 @@ public final class GameServiceProviderInstanceImplTest {
             if (!granted.equals(PackageManager.PERMISSION_GRANTED)) {
                 throw new SecurityException("[Test] permission denied: " + permission);
             }
-        }
-
-        Intent getLastStartedIntent() {
-            return mLastStartedIntent;
         }
     }
 }

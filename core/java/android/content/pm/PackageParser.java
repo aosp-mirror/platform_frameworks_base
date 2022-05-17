@@ -1414,11 +1414,9 @@ public class PackageParser {
         final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
         final ParseResult<android.content.pm.SigningDetails> result;
         if (skipVerify) {
-            // systemDir APKs are already trusted, save time by not verifying; since the signature
-            // is not verified and some system apps can have their V2+ signatures stripped allow
-            // pulling the certs from the jar signature.
+            // systemDir APKs are already trusted, save time by not verifying
             result = ApkSignatureVerifier.unsafeGetCertsWithoutVerification(
-                    input, apkPath, SigningDetails.SignatureSchemeVersion.JAR);
+                    input, apkPath, minSignatureScheme);
         } else {
             result = ApkSignatureVerifier.verify(input, apkPath, minSignatureScheme);
         }
@@ -2620,6 +2618,15 @@ public class PackageParser {
             return Build.VERSION_CODES.CUR_DEVELOPMENT;
         }
 
+        // STOPSHIP: hack for the pre-release SDK
+        if (platformSdkCodenames.length == 0
+                && Build.VERSION.KNOWN_CODENAMES.stream().max(String::compareTo).orElse("").equals(
+                targetCode)) {
+            Slog.w(TAG, "Package requires development platform " + targetCode
+                    + ", returning current version " + Build.VERSION.SDK_INT);
+            return Build.VERSION.SDK_INT;
+        }
+
         // Otherwise, we're looking at an incompatible pre-release SDK.
         if (platformSdkCodenames.length > 0) {
             outError[0] = "Requires development platform " + targetCode
@@ -2689,6 +2696,15 @@ public class PackageParser {
         // definitely meet the minimum SDK requirement.
         if (matchTargetCode(platformSdkCodenames, minCode)) {
             return Build.VERSION_CODES.CUR_DEVELOPMENT;
+        }
+
+        // STOPSHIP: hack for the pre-release SDK
+        if (platformSdkCodenames.length == 0
+                && Build.VERSION.KNOWN_CODENAMES.stream().max(String::compareTo).orElse("").equals(
+                minCode)) {
+            Slog.w(TAG, "Package requires min development platform " + minCode
+                    + ", returning current version " + Build.VERSION.SDK_INT);
+            return Build.VERSION.SDK_INT;
         }
 
         // Otherwise, we're looking at an incompatible pre-release SDK.

@@ -3055,19 +3055,7 @@ class StorageManagerService extends IStorageManager.Stub
             return true;
         }
 
-        if (packageName == null) {
-            return false;
-        }
-
-        final int packageUid = mPmInternal.getPackageUid(packageName,
-                PackageManager.MATCH_DEBUG_TRIAGED_MISSING, UserHandle.getUserId(callerUid));
-
-        if (DEBUG_OBB) {
-            Slog.d(TAG, "packageName = " + packageName + ", packageUid = " +
-                    packageUid + ", callerUid = " + callerUid);
-        }
-
-        return callerUid == packageUid;
+        return mPmInternal.isSameApp(packageName, callerUid, UserHandle.getUserId(callerUid));
     }
 
     @Override
@@ -3892,9 +3880,12 @@ class StorageManagerService extends IStorageManager.Stub
                     match = vol.isVisibleForWrite(userId)
                             || (includeSharedProfile && vol.isVisibleForWrite(userIdSharingMedia));
                 } else {
+                    // Return both read only and write only volumes. When includeSharedProfile is
+                    // true, all the volumes of userIdSharingMedia should be returned when queried
+                    // from the user it shares media with
                     match = vol.isVisibleForUser(userId)
                             || (!vol.isVisible() && includeInvisible && vol.getPath() != null)
-                            || (includeSharedProfile && vol.isVisibleForRead(userIdSharingMedia));
+                            || (includeSharedProfile && vol.isVisibleForUser(userIdSharingMedia));
                 }
                 if (!match) continue;
 

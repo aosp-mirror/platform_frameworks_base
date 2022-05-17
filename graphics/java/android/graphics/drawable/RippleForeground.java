@@ -252,7 +252,7 @@ class RippleForeground extends RippleComponent {
         mPropX = CanvasProperty.createFloat(getCurrentX());
         mPropY = CanvasProperty.createFloat(getCurrentY());
         mPropRadius = CanvasProperty.createFloat(getCurrentRadius());
-        final Paint paint = mOwner.getRipplePaint();
+        final Paint paint = mOwner.updateRipplePaint();
         mPropPaint = CanvasProperty.createPaint(paint);
 
         final RenderNodeAnimator radius = new RenderNodeAnimator(mPropRadius, mTargetRadius);
@@ -290,7 +290,7 @@ class RippleForeground extends RippleComponent {
         opacity.setInterpolator(LINEAR_INTERPOLATOR);
         opacity.addListener(mAnimationListener);
         opacity.setStartDelay(computeFadeOutDelay());
-        opacity.setStartValue(mOwner.getRipplePaint().getAlpha());
+        opacity.setStartValue(mOwner.updateRipplePaint().getAlpha());
         mPendingHwAnimators.add(opacity);
         invalidateSelf();
     }

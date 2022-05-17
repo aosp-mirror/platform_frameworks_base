@@ -268,9 +268,17 @@ final class SpeechRecognitionManagerServiceImpl extends
     }
 
     private boolean componentMapsToRecognitionService(@NonNull ComponentName serviceComponent) {
-        List<ResolveInfo> resolveInfos =
-                getContext().getPackageManager().queryIntentServicesAsUser(
-                        new Intent(RecognitionService.SERVICE_INTERFACE), 0, getUserId());
+        List<ResolveInfo> resolveInfos;
+
+        final long identityToken = Binder.clearCallingIdentity();
+        try {
+            resolveInfos =
+                    getContext().getPackageManager().queryIntentServicesAsUser(
+                            new Intent(RecognitionService.SERVICE_INTERFACE), 0, getUserId());
+        } finally {
+            Binder.restoreCallingIdentity(identityToken);
+        }
+
         if (resolveInfos == null) {
             return false;
         }

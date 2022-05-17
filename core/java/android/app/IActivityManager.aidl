@@ -100,6 +100,8 @@ interface IActivityManager {
             String callingPackage);
     void unregisterUidObserver(in IUidObserver observer);
     boolean isUidActive(int uid, String callingPackage);
+    @JavaPassthrough(annotation=
+            "@android.annotation.RequiresPermission(allOf = {android.Manifest.permission.PACKAGE_USAGE_STATS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}, conditional = true)")
     int getUidProcessState(int uid, in String callingPackage);
     @UnsupportedAppUsage
     int checkPermission(in String permission, int pid, int uid);
@@ -139,7 +141,7 @@ interface IActivityManager {
     int broadcastIntentWithFeature(in IApplicationThread caller, in String callingFeatureId,
             in Intent intent, in String resolvedType, in IIntentReceiver resultTo, int resultCode,
             in String resultData, in Bundle map, in String[] requiredPermissions, in String[] excludePermissions,
-            int appOp, in Bundle options, boolean serialized, boolean sticky, int userId);
+            in String[] excludePackages, int appOp, in Bundle options, boolean serialized, boolean sticky, int userId);
     void unbroadcastIntent(in IApplicationThread caller, in Intent intent, int userId);
     @UnsupportedAppUsage
     oneway void finishReceiver(in IBinder who, int resultCode, in String resultData, in Bundle map,
@@ -742,6 +744,8 @@ interface IActivityManager {
     /** Called by PendingIntent.queryIntentComponents() */
     ParceledListSlice queryIntentComponentsForIntentSender(in IIntentSender sender, int matchFlags);
 
+    @JavaPassthrough(annotation=
+            "@android.annotation.RequiresPermission(allOf = {android.Manifest.permission.PACKAGE_USAGE_STATS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}, conditional = true)")
     int getUidProcessCapabilities(int uid, in String callingPackage);
 
     /** Blocks until all broadcast queues become idle. */

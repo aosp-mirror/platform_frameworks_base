@@ -42,31 +42,4 @@ oneway interface ILogcatManagerService {
      * @param fd  The FD (Socket) of client who makes the request.
      */
     void finishThread(in int uid, in int gid, in int pid, in int fd);
-
-
-    /**
-     * The function is called by UX component to notify
-     * LogcatManagerService that the user approved
-     * the privileged log data access.
-     *
-     * @param uid The UID of client who makes the request.
-     * @param gid The GID of client who makes the request.
-     * @param pid The PID of client who makes the request.
-     * @param fd  The FD (Socket) of client who makes the request.
-     */
-    void approve(in int uid, in int gid, in int pid, in int fd);
-
-
-    /**
-     * The function is called by UX component to notify
-     * LogcatManagerService that the user declined
-     * the privileged log data access.
-     *
-     * @param uid The UID of client who makes the request.
-     * @param gid The GID of client who makes the request.
-     * @param pid The PID of client who makes the request.
-     * @param fd  The FD (Socket) of client who makes the request.
-     */
-    void decline(in int uid, in int gid, in int pid, in int fd);
 }
-

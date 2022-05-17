@@ -42,6 +42,7 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM
 import static android.content.pm.PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE;
 import static android.content.pm.PackageManager.MASK_PERMISSION_FLAGS_ALL;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.INVALID_UID;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.permission.PermissionManager.KILL_APP_REASON_GIDS_CHANGED;
@@ -97,6 +98,7 @@ import android.os.storage.StorageManager;
 import android.permission.IOnPermissionsChangeListener;
 import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -195,6 +197,11 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
     /** All storage permissions */
     private static final List<String> STORAGE_PERMISSIONS = new ArrayList<>();
+
+    private static final Set<String> READ_MEDIA_AURAL_PERMISSIONS = new ArraySet<>();
+
+    private static final Set<String> READ_MEDIA_VISUAL_PERMISSIONS = new ArraySet<>();
+
     /** All nearby devices permissions */
     private static final List<String> NEARBY_DEVICES_PERMISSIONS = new ArrayList<>();
 
@@ -222,10 +229,10 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                 Manifest.permission.INTERACT_ACROSS_USERS_FULL);
         STORAGE_PERMISSIONS.add(Manifest.permission.READ_EXTERNAL_STORAGE);
         STORAGE_PERMISSIONS.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        STORAGE_PERMISSIONS.add(Manifest.permission.ACCESS_MEDIA_LOCATION);
-        STORAGE_PERMISSIONS.add(Manifest.permission.READ_MEDIA_AUDIO);
-        STORAGE_PERMISSIONS.add(Manifest.permission.READ_MEDIA_IMAGES);
-        STORAGE_PERMISSIONS.add(Manifest.permission.READ_MEDIA_VIDEO);
+        READ_MEDIA_AURAL_PERMISSIONS.add(Manifest.permission.READ_MEDIA_AUDIO);
+        READ_MEDIA_VISUAL_PERMISSIONS.add(Manifest.permission.READ_MEDIA_VIDEO);
+        READ_MEDIA_VISUAL_PERMISSIONS.add(Manifest.permission.READ_MEDIA_IMAGES);
+        READ_MEDIA_VISUAL_PERMISSIONS.add(Manifest.permission.ACCESS_MEDIA_LOCATION);
         NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_ADVERTISE);
         NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_CONNECT);
         NEARBY_DEVICES_PERMISSIONS.add(Manifest.permission.BLUETOOTH_SCAN);
@@ -328,7 +335,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             mPackageManagerInt.writeSettings(true);
         }
         @Override
-        public void onPermissionRevoked(int uid, int userId, String reason, boolean overrideKill) {
+        public void onPermissionRevoked(int uid, int userId, String reason, boolean overrideKill,
+                @Nullable String permissionName) {
             mOnPermissionChangeListeners.onPermissionsChanged(uid);
 
             // Critical; after this call the application should never have the permission
@@ -337,13 +345,41 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                 return;
             }
 
-            final int appId = UserHandle.getAppId(uid);
-            if (reason == null) {
-                mHandler.post(() -> killUid(appId, userId, KILL_APP_REASON_PERMISSIONS_REVOKED));
-            } else {
-                mHandler.post(() -> killUid(appId, userId, reason));
+            mHandler.post(() -> {
+                if (POST_NOTIFICATIONS.equals(permissionName)
+                        && isAppBackupAndRestoreRunning(uid)) {
+                    return;
+                }
+
+                final int appId = UserHandle.getAppId(uid);
+                if (reason == null) {
+                    killUid(appId, userId, KILL_APP_REASON_PERMISSIONS_REVOKED);
+                } else {
+                    killUid(appId, userId, reason);
+                }
+            });
+        }
+
+        private boolean isAppBackupAndRestoreRunning(int uid) {
+            if (checkUidPermission(uid, Manifest.permission.BACKUP) != PERMISSION_GRANTED) {
+                return false;
+            }
+
+            try {
+                int userId = UserHandle.getUserId(uid);
+                boolean isInSetup = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.USER_SETUP_COMPLETE, userId) == 0;
+                boolean isInDeferredSetup = Settings.Secure.getIntForUser(
+                        mContext.getContentResolver(),
+                        Settings.Secure.USER_SETUP_PERSONALIZATION_STATE, userId)
+                        == Settings.Secure.USER_SETUP_PERSONALIZATION_STARTED;
+                return isInSetup || isInDeferredSetup;
+            } catch (Settings.SettingNotFoundException e) {
+                Slog.w(LOG_TAG, "Failed to check if the user is in restore: " + e);
+                return false;
             }
         }
+
         @Override
         public void onInstallPermissionRevoked() {
             mPackageManagerInt.writeSettings(true);
@@ -767,8 +803,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             flagValues &= ~FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT;
             flagValues &= ~FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT;
             flagValues &= ~PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION;
-            // REVIEW_REQUIRED can only be set by non-system apps for POST_NOTIFICATIONS, or by the
-            // shell or root UID.
+            // REVIEW_REQUIRED can be set on any permission by the shell or the root uid, or by
+            // any app for the POST_NOTIFICATIONS permission specifically.
             if (!POST_NOTIFICATIONS.equals(permName) && callingUid != Process.SHELL_UID
                     && callingUid != Process.ROOT_UID) {
                 flagValues &= ~PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
@@ -1595,7 +1631,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         if (callback != null) {
             if (isRuntimePermission) {
                 callback.onPermissionRevoked(UserHandle.getUid(userId, pkg.getUid()), userId,
-                        reason, overrideKill);
+                        reason, overrideKill, permName);
             } else {
                 mDefaultPermissionCallback.onInstallPermissionRevoked();
             }
@@ -2070,7 +2106,13 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                 PermissionInfo permInfo = getPermissionInfo(
                         newPackage.getRequestedPermissions().get(i),
                         newPackage.getPackageName(), 0);
-                if (permInfo == null || !STORAGE_PERMISSIONS.contains(permInfo.name)) {
+                if (permInfo == null) {
+                    continue;
+                }
+                boolean isStorageOrMedia = STORAGE_PERMISSIONS.contains(permInfo.name)
+                        || READ_MEDIA_AURAL_PERMISSIONS.contains(permInfo.name)
+                        || READ_MEDIA_VISUAL_PERMISSIONS.contains(permInfo.name);
+                if (!isStorageOrMedia) {
                     continue;
                 }
 
@@ -2805,14 +2847,12 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                             }
 
                             // Remove review flag as it is not necessary anymore
-                            // TODO(b/227186603) re-enable check for notification permission once
-                            // droidfood state has been cleared
-                            //if (!NOTIFICATION_PERMISSIONS.contains(perm)) {
+                            if (!NOTIFICATION_PERMISSIONS.contains(perm)) {
                                 if ((flags & FLAG_PERMISSION_REVIEW_REQUIRED) != 0) {
                                     flags &= ~FLAG_PERMISSION_REVIEW_REQUIRED;
                                     wasChanged = true;
                                 }
-                            //}
+                            }
 
                             if ((flags & FLAG_PERMISSION_REVOKED_COMPAT) != 0
                                     && !isPermissionSplitFromNonRuntime(permName,
@@ -3144,7 +3184,9 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                 }
                 if (bp.isRuntime()) {
 
-                    if (!newPerm.equals(Manifest.permission.ACTIVITY_RECOGNITION)) {
+                    if (!(newPerm.equals(Manifest.permission.ACTIVITY_RECOGNITION)
+                            || READ_MEDIA_AURAL_PERMISSIONS.contains(newPerm)
+                            || READ_MEDIA_VISUAL_PERMISSIONS.contains(newPerm))) {
                         ps.updatePermissionFlags(bp,
                                 FLAG_PERMISSION_REVOKE_WHEN_REQUESTED,
                                 FLAG_PERMISSION_REVOKE_WHEN_REQUESTED);
@@ -5235,7 +5277,11 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             onPermissionRevoked(uid, userId, reason, false);
         }
         public void onPermissionRevoked(int uid, @UserIdInt int userId, String reason,
-                boolean overrideKill) {}
+                boolean overrideKill) {
+            onPermissionRevoked(uid, userId, reason, false, null);
+        }
+        public void onPermissionRevoked(int uid, @UserIdInt int userId, String reason,
+                boolean overrideKill, @Nullable String permissionName) {}
         public void onInstallPermissionRevoked() {}
         public void onPermissionUpdated(@UserIdInt int[] updatedUserIds, boolean sync) {}
         public void onPermissionUpdatedNotifyListener(@UserIdInt int[] updatedUserIds, boolean sync,

@@ -62,6 +62,16 @@ public class ColorSchemeTest extends SysuiTestCase {
         Assert.assertEquals(rankedSeedColors, List.of(0xffaec00a));
     }
 
+    @Test
+    public void testStyleApplied() {
+        WallpaperColors wallpaperColors = new WallpaperColors(Color.valueOf(0xffaec00a),
+                null, null);
+        // Expressive applies hue rotations to the theme color. The input theme color has hue
+        // 117, ensuring the hue changed significantly is a strong signal styles are being applied.
+        ColorScheme colorScheme = new ColorScheme(wallpaperColors, false, Style.EXPRESSIVE);
+        Assert.assertEquals(Cam.fromInt(colorScheme.getAccent1().get(6)).getHue(), 357.46, 0.1);
+    }
+
 
     @Test
     public void testFiltersInvalidColors() {
@@ -123,7 +133,7 @@ public class ColorSchemeTest extends SysuiTestCase {
                 Style.VIBRANT /* style */);
         int neutralMid = colorScheme.getNeutral1().get(colorScheme.getNeutral1().size() / 2);
         Cam cam = Cam.fromInt(neutralMid);
-        Assert.assertTrue(cam.getChroma() <= 8.0);
+        Assert.assertTrue("chroma was " + cam.getChroma(), Math.floor(cam.getChroma()) <= 12.0);
     }
 
     @Test

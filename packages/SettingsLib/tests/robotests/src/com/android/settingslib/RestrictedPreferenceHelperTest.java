@@ -16,12 +16,16 @@
 
 package com.android.settingslib;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.admin.DevicePolicyManager;
+import android.app.admin.DevicePolicyResourcesManager;
 import android.content.Context;
 import android.view.View;
 import android.widget.TextView;
@@ -30,7 +34,6 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -45,6 +48,10 @@ public class RestrictedPreferenceHelperTest {
     @Mock
     private Preference mPreference;
     @Mock
+    private DevicePolicyManager mDevicePolicyManager;
+    @Mock
+    private DevicePolicyResourcesManager mDevicePolicyResourcesManager;
+    @Mock
     private RestrictedTopLevelPreference mRestrictedTopLevelPreference;
 
     private PreferenceViewHolder mViewHolder;
@@ -53,18 +60,22 @@ public class RestrictedPreferenceHelperTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        doReturn(mDevicePolicyResourcesManager).when(mDevicePolicyManager)
+                .getResources();
+        doReturn(mDevicePolicyManager).when(mContext)
+                .getSystemService(DevicePolicyManager.class);
         mViewHolder = PreferenceViewHolder.createInstanceForTests(mock(View.class));
         mHelper = new RestrictedPreferenceHelper(mContext, mPreference, null);
     }
 
     @Test
-    @Ignore
     public void bindPreference_disabled_shouldDisplayDisabledSummary() {
         final TextView summaryView = mock(TextView.class, RETURNS_DEEP_STUBS);
         when(mViewHolder.itemView.findViewById(android.R.id.summary))
                 .thenReturn(summaryView);
         when(summaryView.getContext().getText(R.string.disabled_by_admin_summary_text))
                 .thenReturn("test");
+        when(mDevicePolicyResourcesManager.getString(any(), any())).thenReturn("test");
 
         mHelper.useAdminDisabledSummary(true);
         mHelper.setDisabledByAdmin(new RestrictedLockUtils.EnforcedAdmin());
@@ -75,13 +86,13 @@ public class RestrictedPreferenceHelperTest {
     }
 
     @Test
-    @Ignore
     public void bindPreference_notDisabled_shouldNotHideSummary() {
         final TextView summaryView = mock(TextView.class, RETURNS_DEEP_STUBS);
         when(mViewHolder.itemView.findViewById(android.R.id.summary))
                 .thenReturn(summaryView);
         when(summaryView.getContext().getText(R.string.disabled_by_admin_summary_text))
                 .thenReturn("test");
+        when(mDevicePolicyResourcesManager.getString(any(), any())).thenReturn("test");
         when(summaryView.getText()).thenReturn("test");
 
         mHelper.useAdminDisabledSummary(true);

@@ -74,6 +74,7 @@ import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ShadeController;
+import com.android.systemui.statusbar.phone.shade.transition.ShadeTransitionController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -135,6 +136,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private StackStateLogger mStackLogger;
     @Mock private NotificationStackScrollLogger mLogger;
     @Mock private NotificationStackSizeCalculator mNotificationStackSizeCalculator;
+    @Mock private ShadeTransitionController mShadeTransitionController;
 
     @Captor
     private ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerArgumentCaptor;
@@ -179,6 +181,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mNotifCollection,
                 mEntryManager,
                 mLockscreenShadeTransitionController,
+                mShadeTransitionController,
                 mIStatusBarService,
                 mUiEventLogger,
                 mLayoutInflater,
@@ -228,19 +231,15 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     public void testUpdateEmptyShadeView_notificationsVisible_zenHiding() {
         when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(true);
         mController.attach(mNotificationStackScrollLayout);
-        verify(mSysuiStatusBarStateController).addCallback(
-                mStateListenerArgumentCaptor.capture(), anyInt());
-        StatusBarStateController.StateListener stateListener =
-                mStateListenerArgumentCaptor.getValue();
 
-        setupShowEmptyShadeViewState(stateListener, true);
+        setupShowEmptyShadeViewState(true);
         reset(mNotificationStackScrollLayout);
         mController.updateShowEmptyShadeView();
         verify(mNotificationStackScrollLayout).updateEmptyShadeView(
                 /* visible= */ true,
                 /* notifVisibleInShade= */ true);
 
-        setupShowEmptyShadeViewState(stateListener, false);
+        setupShowEmptyShadeViewState(false);
         reset(mNotificationStackScrollLayout);
         mController.updateShowEmptyShadeView();
         verify(mNotificationStackScrollLayout).updateEmptyShadeView(
@@ -252,19 +251,15 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     public void testUpdateEmptyShadeView_notificationsHidden_zenNotHiding() {
         when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(false);
         mController.attach(mNotificationStackScrollLayout);
-        verify(mSysuiStatusBarStateController).addCallback(
-                mStateListenerArgumentCaptor.capture(), anyInt());
-        StatusBarStateController.StateListener stateListener =
-                mStateListenerArgumentCaptor.getValue();
 
-        setupShowEmptyShadeViewState(stateListener, true);
+        setupShowEmptyShadeViewState(true);
         reset(mNotificationStackScrollLayout);
         mController.updateShowEmptyShadeView();
         verify(mNotificationStackScrollLayout).updateEmptyShadeView(
                 /* visible= */ true,
                 /* notifVisibleInShade= */ false);
 
-        setupShowEmptyShadeViewState(stateListener, false);
+        setupShowEmptyShadeViewState(false);
         reset(mNotificationStackScrollLayout);
         mController.updateShowEmptyShadeView();
         verify(mNotificationStackScrollLayout).updateEmptyShadeView(
@@ -407,15 +402,13 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
         return argThat(new LogMatcher(category, type));
     }
 
-    private void setupShowEmptyShadeViewState(
-            StatusBarStateController.StateListener statusBarStateListener,
-            boolean toShow) {
+    private void setupShowEmptyShadeViewState(boolean toShow) {
         if (toShow) {
-            statusBarStateListener.onStateChanged(SHADE);
+            when(mSysuiStatusBarStateController.getCurrentOrUpcomingState()).thenReturn(SHADE);
             mController.setQsFullScreen(false);
             mController.getView().removeAllViews();
         } else {
-            statusBarStateListener.onStateChanged(KEYGUARD);
+            when(mSysuiStatusBarStateController.getCurrentOrUpcomingState()).thenReturn(KEYGUARD);
             mController.setQsFullScreen(true);
             mController.getView().addContainerView(mock(ExpandableNotificationRow.class));
         }

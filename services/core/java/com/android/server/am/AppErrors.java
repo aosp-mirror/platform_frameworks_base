@@ -33,6 +33,7 @@ import android.app.ActivityOptions;
 import android.app.AnrController;
 import android.app.ApplicationErrorReport;
 import android.app.ApplicationExitInfo;
+import android.app.RemoteServiceException.CrashedByAdbException;
 import android.app.usage.UsageStatsManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -521,6 +522,16 @@ class AppErrors {
                     + " packageName=" + packageName
                     + " userId=" + userId);
             return;
+        }
+
+        if (exceptionTypeId == CrashedByAdbException.TYPE_ID) {
+            String[] packages = proc.getPackageList();
+            for (int i = 0; i < packages.length; i++) {
+                if (mService.mPackageManagerInt.isPackageStateProtected(packages[i], proc.userId)) {
+                    Slog.w(TAG, "crashApplication: Can not crash protected package " + packages[i]);
+                    return;
+                }
+            }
         }
 
         proc.scheduleCrashLocked(message, exceptionTypeId, extras);

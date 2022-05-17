@@ -239,8 +239,12 @@ static jboolean setFileCon(JNIEnv *env, jobject, jstring pathStr, jstring contex
     char *tmp = const_cast<char *>(context.c_str());
     int ret = setfilecon(path.c_str(), tmp);
 
-    ALOGV("setFileCon(%s, %s) => %d", path.c_str(), context.c_str(), ret);
-    return (ret == 0) ? true : false;
+    if (ret == 0) {
+        ALOGV("setFileCon(%s, %s) => %d", path.c_str(), context.c_str(), ret);
+        return true;
+    }
+    ALOGE("setFileCon(%s, %s) => %d, err: %s", path.c_str(), context.c_str(), ret, strerror(errno));
+    return false;
 }
 
 /*

@@ -95,6 +95,8 @@ public final class NotificationTest {
         PackageManager pm = mContext.getPackageManager();
         // Do not run on Automotive.
         assumeFalse(pm.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE));
+        // Do not run on TV. Direct Reply isn't supported on TV.
+        assumeFalse(pm.hasSystemFeature(PackageManager.FEATURE_LEANBACK_ONLY));
     }
 
     @After

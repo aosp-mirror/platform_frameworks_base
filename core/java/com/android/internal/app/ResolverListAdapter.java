@@ -233,8 +233,14 @@ public class ResolverListAdapter extends BaseAdapter {
         // copied the original unfiltered items to a separate List instance and can now filter
         // the remainder in-place without any further bookkeeping.
         boolean needsCopyOfUnfiltered = (mUnfilteredResolveList == currentResolveList);
-        mUnfilteredResolveList = performSecondaryResolveListFiltering(
+        List<ResolvedComponentInfo> originalList = performSecondaryResolveListFiltering(
                 currentResolveList, needsCopyOfUnfiltered);
+        if (originalList != null) {
+            // Only need the originalList value if there was a modification (otherwise it's null
+            // and shouldn't overwrite mUnfilteredResolveList).
+            mUnfilteredResolveList = originalList;
+        }
+
 
         return finishRebuildingListWithFilteredResults(currentResolveList, doPostProcessing);
     }
@@ -293,7 +299,7 @@ public class ResolverListAdapter extends BaseAdapter {
      * appearing in the rebuilt-list results, while still considering those items for the "other
      * profile" special-treatment described in {@code rebuildList()}.
      *
-     * @return the same (possibly null) List reference as {@code currentResolveList}, if the list is
+     * @return the same (possibly null) List reference as {@code currentResolveList} if the list is
      * unmodified as a result of filtering; or, if some item(s) were removed, then either a copy of
      * the original {@code currentResolveList} (if {@code returnCopyOfOriginalListIfModified} is
      * true), or null (otherwise).

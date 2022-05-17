@@ -75,6 +75,73 @@ public class LongMultiStateCounterTest {
     }
 
     @Test
+    public void updateThenSetState_timestampOutOfOrder() {
+        LongMultiStateCounter counter = new LongMultiStateCounter(2);
+        counter.setState(0, 1000);
+        counter.updateValue(0, 1000);
+        counter.updateValue(100, 3000);
+        counter.setState(0, 2000);  // Note out-of-order timestamp
+        counter.updateValue(200, 4000);
+
+        // If we did not explicitly handle this out-of-order update scenario, we would get
+        // this result:
+        //  1. Time in state-0 at this point is (4000-2000) = 2000
+        //  2. Time since last update is (4000-3000) = 1000.
+        //  3. Counter delta: 100
+        //  4. Proportion of count-0
+        //          = prevValue + delta * time-in-state / time-since-last-update
+        //          = 100 + 100 * 2000 / 1000
+        //          = 300
+        // This would be problematic, because the part (300) would exceed the total (200)
+        assertThat(counter.getCount(0)).isEqualTo(200);
+    }
+
+    @Test
+    public void disableThenUpdate_timestampOutOfOrder() {
+        LongMultiStateCounter counter = new LongMultiStateCounter(2);
+        counter.setState(0, 1000);
+        counter.updateValue(0, 1000);
+        counter.setEnabled(false, 2000);
+        counter.updateValue(123, 1001);  // Note out-of-order timestamp
+
+        // If we did not explicitly handle this out-of-order update scenario, we would get
+        // this result:
+        //  1. Time in state-0 at this point is (2000-1000) = 1000
+        //  2. Time since last update is (1001-1000) = 1.
+        //  3. Counter delta: 100
+        //  4. Proportion of count-0
+        //          = delta * time-in-state / time-since-last-update
+        //          = 123 * 1000 / 1
+        //          = 123,000
+        // This would be very very wrong, because the part (123,000) would exceed the total (123)
+        assertThat(counter.getCount(0)).isEqualTo(123);
+    }
+
+    @Test
+    public void updateThenEnable_timestampOutOfOrder() {
+        LongMultiStateCounter counter = new LongMultiStateCounter(2);
+        counter.setState(0, 1000);
+        counter.updateValue(0, 1000);
+        counter.setEnabled(false, 3000);
+        counter.updateValue(100, 5000);
+        // At this point the counter is 50, because it was disabled for half of the time
+        counter.setEnabled(true, 4000); // Note out-of-order timestamp
+        counter.updateValue(200, 6000);
+
+        // If we did not explicitly handle this out-of-order update scenario, we would get
+        // this result:
+        //  1. Time in state-0 at this point is (6000-4000) = 2000
+        //  2. Time since last update is (6000-5000) = 1000.
+        //  3. Counter delta: 100
+        //  4. Proportion of count-0
+        //          = prevValue + delta * time-in-state / time-since-last-update
+        //          = 50 + 100 * 2000 / 1000
+        //          = 250
+        // This would not be great, because the part (250) would exceed the total (200)
+        assertThat(counter.getCount(0)).isEqualTo(150);
+    }
+
+    @Test
     public void reset() {
         LongMultiStateCounter counter = new LongMultiStateCounter(2);
         counter.setState(0, 1000);

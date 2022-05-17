@@ -2464,7 +2464,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             dc.setImeLayeringTarget(null);
             dc.computeImeTarget(true /* updateImeTarget */);
         }
-        if (dc.getImeInputTarget() == this) {
+        if (dc.getImeInputTarget() == this
+                && (mActivityRecord == null || !mActivityRecord.isRelaunching())) {
             dc.updateImeInputAndControlTarget(null);
         }
 
@@ -3638,13 +3639,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final int requested = mLastRequestedExclusionHeight[side];
         final int granted = mLastGrantedExclusionHeight[side];
 
-        final boolean inSplitScreen = getTask() != null && getTask().inSplitScreen();
-
         FrameworkStatsLog.write(FrameworkStatsLog.EXCLUSION_RECT_STATE_CHANGED,
                 mAttrs.packageName, requested, requested - granted /* rejected */,
                 side + 1 /* Sides are 1-indexed in atoms.proto */,
                 (getConfiguration().orientation == ORIENTATION_LANDSCAPE),
-                inSplitScreen, (int) duration);
+                false /* (deprecated param) inSplitscreen */, (int) duration);
     }
 
     private void initExclusionRestrictions() {

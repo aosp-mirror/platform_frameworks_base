@@ -21,6 +21,7 @@ import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.TriggerEvent
 import android.hardware.TriggerEventListener
+import com.android.keyguard.ActiveUnlockConfig
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.CoreStartable
@@ -71,13 +72,9 @@ class KeyguardLiftController @Inject constructor(
             isListening = false
             updateListeningState()
             keyguardUpdateMonitor.requestFaceAuth(true)
-            if (keyguardUpdateMonitor.mRequestActiveUnlockOnWakeup) {
-                keyguardUpdateMonitor.requestActiveUnlock("wake-unlock," +
-                        " extra=KeyguardLiftController")
-            } else if (keyguardUpdateMonitor.mInitiateActiveUnlockOnWakeup) {
-                keyguardUpdateMonitor.initiateActiveUnlock("wake-initiate," +
-                        " extra=KeyguardLiftController")
-            }
+            keyguardUpdateMonitor.requestActiveUnlock(
+                ActiveUnlockConfig.ACTIVE_UNLOCK_REQUEST_ORIGIN.WAKE,
+                "KeyguardLiftController")
         }
     }
 

@@ -18,17 +18,19 @@ package com.android.server.wm;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
+import android.content.ComponentName;
 import android.content.Intent;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Observe activity manager launch sequences.
+ * Observe activity launch sequences.
  *
- * The activity manager can have at most 1 concurrent launch sequences. Calls to this interface
- * are ordered by a happens-before relation for each defined state transition (see below).
+ * Multiple calls to the callback methods can occur without first terminating the current launch
+ * sequence because activity can be launched concurrently. So the implementation should associate
+ * the corresponding event according to the timestamp from {@link #onIntentStarted} which is also
+ * used as the identifier to indicate which launch sequence it belongs to.
  *
  * When a new launch sequence is made, that sequence is in the {@code INTENT_STARTED} state which
  * is communicated by the {@link #onIntentStarted} callback. This is a transient state.
@@ -47,7 +49,7 @@ import java.lang.annotation.RetentionPolicy;
  * Note this transition may not happen if the reportFullyDrawn event is not receivied,
  * in which case {@code FINISHED} is terminal.
  *
- * Note that the {@code ActivityRecordProto} provided as a parameter to some state transitions isn't
+ * Note that the {@code ComponentName} provided as a parameter to some state transitions isn't
  * necessarily the same within a single launch sequence: it is only the top-most activity at the
  * time (if any). Trampoline activities coalesce several activity starts into a single launch
  * sequence.
@@ -67,7 +69,7 @@ import java.lang.annotation.RetentionPolicy;
  *        ╚════════════════╝     ╚═══════════════════════════╝     ╚═══════════════════════════╝
  * </pre>
  */
-public interface ActivityMetricsLaunchObserver {
+public class ActivityMetricsLaunchObserver {
     /**
      * The 'temperature' at which a launch sequence had started.
      *
@@ -99,40 +101,31 @@ public interface ActivityMetricsLaunchObserver {
     public static final int TEMPERATURE_HOT = 3;
 
     /**
-     * Typedef marker that a {@code byte[]} actually contains an
-     * <a href="proto/android/server/activitymanagerservice.proto">ActivityRecordProto</a>
-     * in the protobuf format.
-     */
-    @Retention(RetentionPolicy.SOURCE)
-    @interface ActivityRecordProto {}
-
-    /**
      * Notifies the observer that a new launch sequence has begun as a result of a new intent.
      *
      * Once a launch sequence begins, the resolved activity will either subsequently start with
      * {@link #onActivityLaunched} or abort early (for example due to a resolution error or due to
      * a security error) with {@link #onIntentFailed}.
      *
-     * Multiple calls to this method cannot occur without first terminating the current
-     * launch sequence.
+     * @param timestampNanos The timestamp when receiving the intent. It is also use as an
+     *                       identifier for other callback methods to known which launch sequence
+     *                       it is associated with.
      */
-    public void onIntentStarted(@NonNull Intent intent, long timestampNanos);
+    public void onIntentStarted(@NonNull Intent intent, long timestampNanos) {
+    }
 
     /**
      * Notifies the observer that the current launch sequence has failed to launch an activity.
      *
-     * This function call terminates the current launch sequence. The next method call, if any,
-     * must be {@link #onIntentStarted}.
+     * This function call terminates the current launch sequence.
      *
      * Examples of this happening:
      *  - Failure to resolve to an activity
      *  - Calling package did not have the security permissions to call the requested activity
      *  - Resolved activity was already running and only needed to be brought to the top
-     *
-     * Multiple calls to this method cannot occur without first terminating the current
-     * launch sequence.
      */
-    public void onIntentFailed();
+    public void onIntentFailed(long id) {
+    }
 
     /**
      * Notifies the observer that the current launch sequence had begun starting an activity.
@@ -145,62 +138,58 @@ public interface ActivityMetricsLaunchObserver {
      * necessarily the activity which will be considered as displayed when the activity
      * finishes launching (e.g. {@code activity} in {@link #onActivityLaunchFinished}).
      *
-     * Multiple calls to this method cannot occur without first terminating the current
-     * launch sequence.
+     * @param id The timestamp as an identifier from {@link #onIntentStarted}. It may be a new id
+     *           if the launching activity is started from an existing launch sequence (trampoline)
+     *           but cannot coalesce to the existing one, e.g. to a different display.
+     * @param name The launching activity name.
      */
-    public void onActivityLaunched(@NonNull @ActivityRecordProto byte[] activity,
-                                   @Temperature int temperature);
+    public void onActivityLaunched(long id, ComponentName name, @Temperature int temperature) {
+    }
 
     /**
      * Notifies the observer that the current launch sequence has been aborted.
      *
-     * This function call terminates the current launch sequence. The next method call, if any,
-     * must be {@link #onIntentStarted}.
+     * This function call terminates the current launch sequence.
      *
      * This can happen for many reasons, for example the user switches away to another app
      * prior to the launch sequence completing, or the application being killed.
      *
-     * Multiple calls to this method cannot occur without first terminating the current
-     * launch sequence.
-     *
-     * @param abortingActivity the last activity that had the top-most window during abort
-     *                         (this can be {@code null} in rare situations its unknown).
+     * @param id The timestamp as an identifier from {@link #onIntentStarted}.
      *
      * @apiNote The aborting activity isn't necessarily the same as the starting activity;
      *          in the case of a trampoline, multiple activities could've been started
      *          and only the latest activity is reported here.
      */
-    public void onActivityLaunchCancelled(@Nullable @ActivityRecordProto byte[] abortingActivity);
+    public void onActivityLaunchCancelled(long id) {
+    }
 
     /**
      * Notifies the observer that the current launch sequence has been successfully finished.
      *
-     * This function call terminates the current launch sequence. The next method call, if any,
-     * must be {@link #onIntentStarted}.
+     * This function call terminates the current launch sequence.
      *
      * A launch sequence is considered to be successfully finished when a frame is fully
      * drawn for the first time: the top-most activity at the time is what's reported here.
      *
-     * @param finalActivity the top-most activity whose windows were first to fully draw
+     * @param id The timestamp as an identifier from {@link #onIntentStarted}.
+     * @param name The name of drawn activity. It can be different from {@link #onActivityLaunched}
+     *             if the transition contains multiple launching activities (e.g. trampoline).
      * @param timestampNanos the timestamp of ActivityLaunchFinished event in nanoseconds.
      *        To compute the TotalTime duration, deduct the timestamp {@link #onIntentStarted}
      *        from {@code timestampNanos}.
-     *
-     * Multiple calls to this method cannot occur without first terminating the current
-     * launch sequence.
      *
      * @apiNote The finishing activity isn't necessarily the same as the starting activity;
      *          in the case of a trampoline, multiple activities could've been started
      *          and only the latest activity that was top-most during first-frame drawn
      *          is reported here.
      */
-    public void onActivityLaunchFinished(@NonNull @ActivityRecordProto byte[] finalActivity,
-                                         long timestampNanos);
+    public void onActivityLaunchFinished(long id, ComponentName name, long timestampNanos) {
+    }
 
     /**
      * Notifies the observer that the application self-reported itself as being fully drawn.
      *
-     * @param activity the activity that triggers the ReportFullyDrawn event.
+     * @param id The timestamp as an identifier from {@link #onIntentStarted}.
      * @param timestampNanos the timestamp of ReportFullyDrawn event in nanoseconds.
      *        To compute the duration, deduct the deduct the timestamp {@link #onIntentStarted}
      *        from {@code timestampNanos}.
@@ -209,7 +198,7 @@ public interface ActivityMetricsLaunchObserver {
      *          It is used as an accurate estimate of meanfully app startup time.
      *          This event may be missing for many apps.
      */
-    public void onReportFullyDrawn(@NonNull @ActivityRecordProto byte[] activity,
-        long timestampNanos);
+    public void onReportFullyDrawn(long id, long timestampNanos) {
+    }
 
 }

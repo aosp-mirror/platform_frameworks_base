@@ -21,7 +21,6 @@ import static android.Manifest.permission.REQUEST_COMPANION_START_FOREGROUND_SER
 import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND;
 import static android.app.ActivityManager.PROCESS_STATE_HEAVY_WEIGHT;
-import static android.app.ActivityManager.PROCESS_STATE_PERSISTENT_UI;
 import static android.app.ActivityManager.PROCESS_STATE_RECEIVER;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -6350,8 +6349,8 @@ public final class ActiveServices {
                 r.mAllowWhileInUsePermissionInFgs = (allowWhileInUse != REASON_DENIED);
             }
             if (r.mAllowStartForeground == REASON_DENIED) {
-                r.mAllowStartForeground = shouldAllowFgsStartForegroundLocked(allowWhileInUse,
-                        callingPackage, callingPid, callingUid, intent, r,
+                r.mAllowStartForeground = shouldAllowFgsStartForegroundWithBindingCheckLocked(
+                        allowWhileInUse, callingPackage, callingPid, callingUid, intent, r,
                         userId);
             }
         }
@@ -6373,8 +6372,14 @@ public final class ActiveServices {
         final @ReasonCode int allowWhileInUse = shouldAllowFgsWhileInUsePermissionLocked(
                 callingPackage, callingPid, callingUid, null /* serviceRecord */,
                 false /* allowBackgroundActivityStarts */);
-        final @ReasonCode int allowStartFgs = shouldAllowFgsStartForegroundLocked(
+        @ReasonCode int allowStartFgs = shouldAllowFgsStartForegroundNoBindingCheckLocked(
                 allowWhileInUse, callingPid, callingUid, callingPackage, null /* targetService */);
+
+        if (allowStartFgs == REASON_DENIED) {
+            if (canBindingClientStartFgsLocked(callingUid) != null) {
+                allowStartFgs = REASON_FGS_BINDING;
+            }
+        }
         return allowStartFgs != REASON_DENIED;
     }
 
@@ -6471,10 +6476,16 @@ public final class ActiveServices {
         }
 
         if (ret == REASON_DENIED) {
-            final boolean isAllowedPackage =
-                    mAllowListWhileInUsePermissionInFgs.contains(callingPackage);
-            if (isAllowedPackage) {
-                ret = REASON_ALLOWLISTED_PACKAGE;
+            if (verifyPackage(callingPackage, callingUid)) {
+                final boolean isAllowedPackage =
+                        mAllowListWhileInUsePermissionInFgs.contains(callingPackage);
+                if (isAllowedPackage) {
+                    ret = REASON_ALLOWLISTED_PACKAGE;
+                }
+            } else {
+                EventLog.writeEvent(0x534e4554, "215003903", callingUid,
+                        "callingPackage:" + callingPackage + " does not belong to callingUid:"
+                                + callingUid);
             }
         }
 
@@ -6489,33 +6500,19 @@ public final class ActiveServices {
     }
 
     /**
-     * Should allow the FGS to start (AKA startForeground()) or not.
-     * The check in this method is in addition to check in
-     * {@link #shouldAllowFgsWhileInUsePermissionLocked}
-     * @param allowWhileInUse the return code from {@link #shouldAllowFgsWhileInUsePermissionLocked}
-     * @param callingPackage caller app's package name.
-     * @param callingUid caller app's uid.
-     * @param intent intent to start/bind service.
-     * @param r the service to start.
-     * @return {@link ReasonCode}
+     * The uid is not allowed to start FGS, but the uid has a service that is bound
+     * by a clientUid, if the clientUid can start FGS, then the clientUid can propagate its
+     * BG-FGS-start capability down to the callingUid.
+     * @param uid
+     * @return The first binding client's packageName that can start FGS. Return null if no client
+     *         can start FGS.
      */
-    private @ReasonCode int shouldAllowFgsStartForegroundLocked(
-            @ReasonCode int allowWhileInUse, String callingPackage, int callingPid,
-            int callingUid, Intent intent, ServiceRecord r, int userId) {
-        ActivityManagerService.FgsTempAllowListItem tempAllowListReason =
-                r.mInfoTempFgsAllowListReason = mAm.isAllowlistedForFgsStartLOSP(callingUid);
-        int ret = shouldAllowFgsStartForegroundLocked(allowWhileInUse, callingPid, callingUid,
-                callingPackage, r);
-
+    private String canBindingClientStartFgsLocked(int uid) {
         String bindFromPackage = null;
-        if (ret == REASON_DENIED) {
-            // If the callingUid is not allowed to start FGS, check if the callingUid has any
-            // service that is bound by a clientUid, the clientUid can propagate its BG-FGS-start
-            // capability down to the callingUid.
-            final ArraySet<Integer> checkedClientUids = new ArraySet<>();
-            final Pair<Integer, String> isAllowed = mAm.mProcessList.searchEachLruProcessesLOSP(
-                    false, pr -> {
-                if (pr.uid == callingUid) {
+        final ArraySet<Integer> checkedClientUids = new ArraySet<>();
+        final Pair<Integer, String> isAllowed = mAm.mProcessList.searchEachLruProcessesLOSP(
+                false, pr -> {
+                if (pr.uid == uid) {
                     final ProcessServiceRecord psr = pr.mServices;
                     final int serviceCount = psr.mServices.size();
                     for (int svc = 0; svc < serviceCount; svc++) {
@@ -6527,28 +6524,35 @@ public final class ActiveServices {
                             for (int con = 0; con < crs.size(); con++) {
                                 final ConnectionRecord cr = crs.get(con);
                                 final ProcessRecord clientPr = cr.binding.client;
-                                // Persistent process does not propagate BG-FGS-start capability
-                                // down to service over binding.
-                                if (clientPr.mState.getCurProcState()
-                                        <= PROCESS_STATE_PERSISTENT_UI) {
+                                // If a binding is from a persistent process, we don't automatically
+                                // always allow the bindee to allow FGS BG starts. In this case,
+                                // the binder will have to explicitly make sure the bindee's
+                                // procstate will be BFGS or above. Otherwise, for example, even if
+                                // the system server binds to an app with BIND_NOT_FOREGROUND,
+                                // the binder would have to be able to start FGS, which is not what
+                                // we want. (e.g. job services shouldn't be allowed BG-FGS.)
+                                if (clientPr.isPersistent()) {
                                     continue;
                                 }
                                 final int clientPid = clientPr.mPid;
                                 final int clientUid = clientPr.uid;
                                 // An UID can bind to itself, do not check on itself again.
                                 // Also skip already checked clientUid.
-                                if (clientUid == callingUid
+                                if (clientUid == uid
                                         || checkedClientUids.contains(clientUid)) {
                                     continue;
                                 }
                                 final String clientPackageName = cr.clientPackageName;
                                 final @ReasonCode int allowWhileInUse2 =
-                                        shouldAllowFgsWhileInUsePermissionLocked(clientPackageName,
+                                        shouldAllowFgsWhileInUsePermissionLocked(
+                                                clientPackageName,
                                                 clientPid, clientUid, null /* serviceRecord */,
                                                 false /* allowBackgroundActivityStarts */);
                                 final @ReasonCode int allowStartFgs =
-                                        shouldAllowFgsStartForegroundLocked(allowWhileInUse2,
-                                                clientPid, clientUid, clientPackageName, null /* targetService */);
+                                        shouldAllowFgsStartForegroundNoBindingCheckLocked(
+                                                allowWhileInUse2,
+                                                clientPid, clientUid, clientPackageName,
+                                                null /* targetService */);
                                 if (allowStartFgs != REASON_DENIED) {
                                     return new Pair<>(allowStartFgs, clientPackageName);
                                 } else {
@@ -6561,19 +6565,45 @@ public final class ActiveServices {
                 }
                 return null;
             });
-            if (isAllowed != null) {
+        if (isAllowed != null) {
+            bindFromPackage = isAllowed.second;
+        }
+        return bindFromPackage;
+    }
+
+    /**
+     * Should allow the FGS to start (AKA startForeground()) or not.
+     * The check in this method is in addition to check in
+     * {@link #shouldAllowFgsWhileInUsePermissionLocked}
+     * @param allowWhileInUse the return code from {@link #shouldAllowFgsWhileInUsePermissionLocked}
+     * @param callingPackage caller app's package name.
+     * @param callingUid caller app's uid.
+     * @param intent intent to start/bind service.
+     * @param r the service to start.
+     * @return {@link ReasonCode}
+     */
+    private @ReasonCode int shouldAllowFgsStartForegroundWithBindingCheckLocked(
+            @ReasonCode int allowWhileInUse, String callingPackage, int callingPid,
+            int callingUid, Intent intent, ServiceRecord r, int userId) {
+        ActivityManagerService.FgsTempAllowListItem tempAllowListReason =
+                r.mInfoTempFgsAllowListReason = mAm.isAllowlistedForFgsStartLOSP(callingUid);
+        int ret = shouldAllowFgsStartForegroundNoBindingCheckLocked(allowWhileInUse, callingPid,
+                callingUid, callingPackage, r);
+
+        String bindFromPackage = null;
+        if (ret == REASON_DENIED) {
+            bindFromPackage = canBindingClientStartFgsLocked(callingUid);
+            if (bindFromPackage != null) {
                 ret = REASON_FGS_BINDING;
-                bindFromPackage = isAllowed.second;
             }
         }
 
         final int uidState = mAm.getUidStateLocked(callingUid);
-        int callerTargetSdkVersion = INVALID_UID;
+        int callerTargetSdkVersion = -1;
         try {
-            ApplicationInfo ai = mAm.mContext.getPackageManager().getApplicationInfoAsUser(
-                    callingPackage, PackageManager.MATCH_KNOWN_PACKAGES, userId);
-            callerTargetSdkVersion = ai.targetSdkVersion;
-        } catch (PackageManager.NameNotFoundException e) {
+            callerTargetSdkVersion = mAm.mContext.getPackageManager()
+                    .getTargetSdkVersion(callingPackage);
+        } catch (PackageManager.NameNotFoundException ignored) {
         }
         final String debugInfo =
                 "[callingPackage: " + callingPackage
@@ -6601,8 +6631,8 @@ public final class ActiveServices {
         return ret;
     }
 
-    private @ReasonCode int shouldAllowFgsStartForegroundLocked(@ReasonCode int allowWhileInUse,
-            int callingPid, int callingUid, String callingPackage,
+    private @ReasonCode int shouldAllowFgsStartForegroundNoBindingCheckLocked(
+            @ReasonCode int allowWhileInUse, int callingPid, int callingUid, String callingPackage,
             @Nullable ServiceRecord targetService) {
         int ret = allowWhileInUse;
 
@@ -6618,8 +6648,8 @@ public final class ActiveServices {
             final Integer allowedType = mAm.mProcessList.searchEachLruProcessesLOSP(false, app -> {
                 if (app.uid == callingUid) {
                     final ProcessStateRecord state = app.mState;
-                    if (state.isAllowedStartFgsState()) {
-                        return getReasonCodeFromProcState(state.getAllowStartFgsState());
+                    if (state.isAllowedStartFgs()) {
+                        return getReasonCodeFromProcState(state.getCurProcState());
                     } else {
                         final ActiveInstrumentation instr = app.getActiveInstrumentation();
                         if (instr != null
@@ -6857,5 +6887,20 @@ public final class ActiveServices {
                 /* targetService */ null,
                 /* allowBackgroundActivityStarts */ false)
                 != REASON_DENIED;
+    }
+
+    /**
+     * Checks if a given packageName belongs to a given uid.
+     * @param packageName the package of the caller
+     * @param uid the uid of the caller
+     * @return true or false
+     */
+    private boolean verifyPackage(String packageName, int uid) {
+        if (uid == ROOT_UID || uid == SYSTEM_UID) {
+            //System and Root are always allowed
+            return true;
+        }
+        return mAm.getPackageManagerInternal().isSameApp(packageName, uid,
+                UserHandle.getUserId(uid));
     }
 }

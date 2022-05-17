@@ -164,6 +164,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -633,8 +634,8 @@ public final class Settings implements Watchable, Snappable {
                 runtimePermissionsPersistence, new Consumer<Integer>() {
             @Override
             public void accept(Integer userId) {
-                mRuntimePermissionsPersistence.writeStateForUser(userId,
-                        mPermissionDataProvider, mPackages, mSharedUsers, mHandler, mLock);
+                mRuntimePermissionsPersistence.writeStateForUser(userId, mPermissionDataProvider,
+                        mPackages, mSharedUsers, mHandler, mLock, /*sync=*/false);
             }
         });
         mPermissionDataProvider = permissionDataProvider;
@@ -4578,7 +4579,7 @@ public final class Settings implements Watchable, Snappable {
                 pw.print(" (override=true)");
             }
             pw.println();
-            if (ps.getPkg().getQueriesPackages().isEmpty()) {
+            if (!ps.getPkg().getQueriesPackages().isEmpty()) {
                 pw.append(prefix).append("  queriesPackages=")
                         .println(ps.getPkg().getQueriesPackages());
             }
@@ -5292,7 +5293,7 @@ public final class Settings implements Watchable, Snappable {
     public void writePermissionStateForUserLPr(int userId, boolean sync) {
         if (sync) {
             mRuntimePermissionsPersistence.writeStateForUser(userId, mPermissionDataProvider,
-                    mPackages, mSharedUsers, /*handler=*/null, mLock);
+                    mPackages, mSharedUsers, /*handler=*/null, mLock, /*sync=*/true);
         } else {
             mRuntimePermissionsPersistence.writeStateForUserAsync(userId);
         }
@@ -5370,11 +5371,16 @@ public final class Settings implements Watchable, Snappable {
     }
 
     private static final class RuntimePermissionPersistence {
-        private static final long WRITE_PERMISSIONS_DELAY_MILLIS = 200;
+        // 200-400ms delay to avoid monopolizing PMS lock when written for multiple users.
+        private static final long WRITE_PERMISSIONS_DELAY_MILLIS = 300;
+        private static final double WRITE_PERMISSIONS_DELAY_JITTER = 0.3;
+
         private static final long MAX_WRITE_PERMISSIONS_DELAY_MILLIS = 2000;
 
         private static final int UPGRADE_VERSION = -1;
         private static final int INITIAL_VERSION = 0;
+
+        private static final Random sRandom = new Random();
 
         private String mExtendedFingerprint;
 
@@ -5395,6 +5401,11 @@ public final class Settings implements Watchable, Snappable {
         @GuardedBy("mLock")
         // The mapping keys are user ids.
         private final SparseLongArray mLastNotWrittenMutationTimesMillis = new SparseLongArray();
+
+        @GuardedBy("mLock")
+        // Tracking the mutations that haven't yet been written to legacy state.
+        // This avoids unnecessary work when writing settings for multiple users.
+        private boolean mIsLegacyPermissionStateStale = false;
 
         @GuardedBy("mLock")
         // The mapping keys are user ids.
@@ -5472,9 +5483,22 @@ public final class Settings implements Watchable, Snappable {
             return PackagePartitions.FINGERPRINT + "?pc_version=" + version;
         }
 
+        private static long uniformRandom(double low, double high) {
+            double mag = high - low;
+            return (long) (sRandom.nextDouble() * mag + low);
+        }
+
+        private static long nextWritePermissionDelayMillis() {
+            final long delay = WRITE_PERMISSIONS_DELAY_MILLIS;
+            final double jitter = WRITE_PERMISSIONS_DELAY_JITTER;
+            return delay + uniformRandom(-jitter * delay, jitter * delay);
+        }
+
         public void writeStateForUserAsync(int userId) {
             synchronized (mLock) {
+                mIsLegacyPermissionStateStale = true;
                 final long currentTimeMillis = SystemClock.uptimeMillis();
+                final long writePermissionDelayMillis = nextWritePermissionDelayMillis();
 
                 if (mWriteScheduled.get(userId)) {
                     mAsyncHandler.removeMessages(userId);
@@ -5493,7 +5517,7 @@ public final class Settings implements Watchable, Snappable {
                     // Hold off a bit more as settings are frequently changing.
                     final long maxDelayMillis = Math.max(lastNotWrittenMutationTimeMillis
                             + MAX_WRITE_PERMISSIONS_DELAY_MILLIS - currentTimeMillis, 0);
-                    final long writeDelayMillis = Math.min(WRITE_PERMISSIONS_DELAY_MILLIS,
+                    final long writeDelayMillis = Math.min(writePermissionDelayMillis,
                             maxDelayMillis);
 
                     Message message = mAsyncHandler.obtainMessage(userId);
@@ -5501,7 +5525,7 @@ public final class Settings implements Watchable, Snappable {
                 } else {
                     mLastNotWrittenMutationTimesMillis.put(userId, currentTimeMillis);
                     Message message = mAsyncHandler.obtainMessage(userId);
-                    mAsyncHandler.sendMessageDelayed(message, WRITE_PERMISSIONS_DELAY_MILLIS);
+                    mAsyncHandler.sendMessageDelayed(message, writePermissionDelayMillis);
                     mWriteScheduled.put(userId, true);
                 }
             }
@@ -5511,21 +5535,27 @@ public final class Settings implements Watchable, Snappable {
                 legacyPermissionDataProvider,
                 @NonNull WatchedArrayMap<String, ? extends PackageStateInternal> packageStates,
                 @NonNull WatchedArrayMap<String, SharedUserSetting> sharedUsers,
-                @Nullable Handler pmHandler, @NonNull Object pmLock) {
+                @Nullable Handler pmHandler, @NonNull Object pmLock,
+                boolean sync) {
             final int version;
             final String fingerprint;
+            final boolean isLegacyPermissionStateStale;
             synchronized (mLock) {
                 mAsyncHandler.removeMessages(userId);
                 mWriteScheduled.delete(userId);
 
                 version = mVersions.get(userId, INITIAL_VERSION);
                 fingerprint = mFingerprints.get(userId);
+                isLegacyPermissionStateStale = mIsLegacyPermissionStateStale;
+                mIsLegacyPermissionStateStale = false;
             }
 
             Runnable writer = () -> {
                 final RuntimePermissionsState runtimePermissions;
                 synchronized (pmLock) {
-                    legacyPermissionDataProvider.writeLegacyPermissionStateTEMP();
+                    if (sync || isLegacyPermissionStateStale) {
+                        legacyPermissionDataProvider.writeLegacyPermissionStateTEMP();
+                    }
 
                     Map<String, List<RuntimePermissionsState.PermissionState>> packagePermissions =
                             new ArrayMap<>();

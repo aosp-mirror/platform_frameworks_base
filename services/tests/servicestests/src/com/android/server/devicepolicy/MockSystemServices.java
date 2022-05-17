@@ -33,6 +33,7 @@ import android.app.IActivityTaskManager;
 import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.backup.IBackupManager;
+import android.app.role.RoleManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -131,10 +132,12 @@ public class MockSystemServices {
     public final VpnManager vpnManager;
     public final DevicePolicyManager devicePolicyManager;
     public final LocationManager locationManager;
+    public final RoleManager roleManager;
     /** Note this is a partial mock, not a real mock. */
     public final PackageManager packageManager;
     public final BuildMock buildMock = new BuildMock();
     public final File dataDir;
+    public final PolicyPathProvider pathProvider;
 
     public MockSystemServices(Context realContext, String name) {
         dataDir = new File(realContext.getCacheDir(), name);
@@ -181,6 +184,7 @@ public class MockSystemServices {
         vpnManager = mock(VpnManager.class);
         devicePolicyManager = mock(DevicePolicyManager.class);
         locationManager = mock(LocationManager.class);
+        roleManager = realContext.getSystemService(RoleManager.class);
 
         // Package manager is huge, so we use a partial mock instead.
         packageManager = spy(realContext.getPackageManager());
@@ -214,6 +218,17 @@ public class MockSystemServices {
 
         // System user is always running.
         setUserRunning(UserHandle.USER_SYSTEM, true);
+        pathProvider = new PolicyPathProvider() {
+            @Override
+            public File getDataSystemDirectory() {
+                return new File(systemUserDataDir.getAbsolutePath());
+            }
+
+            @Override
+            public File getUserSystemDirectory(int userId) {
+                return environment.getUserSystemDirectory(userId);
+            }
+        };
     }
 
     /** Optional mapping of other user contexts for {@link #createPackageContextAsUser} to return */

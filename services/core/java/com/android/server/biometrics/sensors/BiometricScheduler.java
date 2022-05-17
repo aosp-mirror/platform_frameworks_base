@@ -46,6 +46,7 @@ import java.util.Date;
 import java.util.Deque;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Consumer;
 
 /**
  * A scheduler for biometric HAL operations. Maintains a queue of {@link BaseClientMonitor}
@@ -457,22 +458,33 @@ public class BiometricScheduler {
     }
 
     /**
+     * Get current operation <code>BaseClientMonitor</code>
+     * @deprecated TODO: b/229994966, encapsulate client monitors
      * @return the current operation
      */
+    @Deprecated
+    @Nullable
     public BaseClientMonitor getCurrentClient() {
         return mCurrentOperation != null ? mCurrentOperation.getClientMonitor() : null;
     }
 
-    /** The current operation if the requestId is set and matches. */
+    /**
+     * The current operation if the requestId is set and matches.
+     * @deprecated TODO: b/229994966, encapsulate client monitors
+     */
     @Deprecated
     @Nullable
-    public BaseClientMonitor getCurrentClientIfMatches(long requestId) {
-        if (mCurrentOperation != null) {
-            if (mCurrentOperation.isMatchingRequestId(requestId)) {
-                return mCurrentOperation.getClientMonitor();
+    public void getCurrentClientIfMatches(long requestId,
+            @NonNull Consumer<BaseClientMonitor> clientMonitorConsumer) {
+        mHandler.post(() -> {
+            if (mCurrentOperation != null) {
+                if (mCurrentOperation.isMatchingRequestId(requestId)) {
+                    clientMonitorConsumer.accept(mCurrentOperation.getClientMonitor());
+                    return;
+                }
             }
-        }
-        return null;
+            clientMonitorConsumer.accept(null);
+        });
     }
 
     public int getCurrentPendingCount() {

@@ -17,6 +17,7 @@
 package com.android.server.pm;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.SigningDetails;
 import android.service.pm.PackageServiceDumpProto;
@@ -33,7 +34,9 @@ import com.android.server.pm.pkg.component.ComponentMutateUtils;
 import com.android.server.pm.pkg.component.ParsedProcess;
 import com.android.server.pm.pkg.component.ParsedProcessImpl;
 import com.android.server.utils.SnapshotCache;
+import com.android.server.utils.Watchable;
 import com.android.server.utils.WatchedArraySet;
+import com.android.server.utils.Watcher;
 
 import libcore.util.EmptyArray;
 
@@ -66,6 +69,16 @@ public final class SharedUserSetting extends SettingBase implements SharedUserAp
     final WatchedArraySet<PackageSetting> mDisabledPackages;
     private final SnapshotCache<WatchedArraySet<PackageSetting>> mDisabledPackagesSnapshot;
 
+    /**
+     * The observer that watches for changes from array members
+     */
+    private final Watcher mObserver = new Watcher() {
+        @Override
+        public void onChange(@Nullable Watchable what) {
+            SharedUserSetting.this.onChanged();
+        }
+    };
+
     final PackageSignatures signatures = new PackageSignatures();
     Boolean signaturesChanged;
 
@@ -97,6 +110,7 @@ public final class SharedUserSetting extends SettingBase implements SharedUserAp
         mDisabledPackagesSnapshot = new SnapshotCache.Auto<>(mDisabledPackages, mDisabledPackages,
                 "SharedUserSetting.mDisabledPackages");
         processes = new ArrayMap<>();
+        registerObservers();
         mSnapshot = makeCache();
     }
 
@@ -117,6 +131,11 @@ public final class SharedUserSetting extends SettingBase implements SharedUserAp
         signaturesChanged = orig.signaturesChanged;
         processes = new ArrayMap<>(orig.processes);
         mSnapshot = new SnapshotCache.Sealed<>();
+    }
+
+    private void registerObservers() {
+        mPackages.registerObserver(mObserver);
+        mDisabledPackages.registerObserver(mObserver);
     }
 
     /**

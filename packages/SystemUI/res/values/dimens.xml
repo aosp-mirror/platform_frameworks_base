@@ -30,10 +30,10 @@
     <dimen name="navigation_bar_deadzone_size_max">32dp</dimen>
 
     <!-- dimensions for the navigation bar handle -->
-    <dimen name="navigation_handle_radius">1dp</dimen>
-    <dimen name="navigation_handle_bottom">6dp</dimen>
+    <dimen name="navigation_handle_radius">2dp</dimen>
+    <dimen name="navigation_handle_bottom">8dp</dimen>
     <dimen name="navigation_handle_sample_horizontal_margin">10dp</dimen>
-    <dimen name="navigation_home_handle_width">72dp</dimen>
+    <dimen name="navigation_home_handle_width">108dp</dimen>
 
     <!-- Size of the nav bar edge panels, should be greater to the
          edge sensitivity + the drag threshold -->
@@ -282,15 +282,12 @@
     <!-- Spacing between chip icon and chip text -->
     <dimen name="overlay_action_chip_spacing">8dp</dimen>
     <dimen name="overlay_action_chip_text_size">14sp</dimen>
-    <dimen name="overlay_offset_y">8dp</dimen>
     <dimen name="overlay_offset_x">16dp</dimen>
-    <dimen name="overlay_preview_elevation">4dp</dimen>
     <dimen name="overlay_action_container_margin_horizontal">8dp</dimen>
     <dimen name="overlay_bg_protection_height">242dp</dimen>
     <dimen name="overlay_action_container_corner_radius">18dp</dimen>
     <dimen name="overlay_action_container_padding_vertical">4dp</dimen>
     <dimen name="overlay_action_container_padding_right">8dp</dimen>
-    <dimen name="overlay_dismiss_button_elevation">7dp</dimen>
     <dimen name="overlay_dismiss_button_tappable_size">48dp</dimen>
     <dimen name="overlay_dismiss_button_margin">8dp</dimen>
     <dimen name="overlay_border_width">4dp</dimen>
@@ -388,6 +385,8 @@
 
     <dimen name="split_shade_notifications_scrim_margin_bottom">0dp</dimen>
 
+    <dimen name="shelf_and_lock_icon_overlap">5dp</dimen>
+
     <dimen name="notification_panel_margin_horizontal">0dp</dimen>
 
     <dimen name="brightness_mirror_height">48dp</dimen>
@@ -475,6 +474,22 @@
     <dimen name="qs_brightness_margin_bottom">24dp</dimen>
     <dimen name="qqs_layout_margin_top">16dp</dimen>
     <dimen name="qqs_layout_padding_bottom">24dp</dimen>
+
+    <!-- Most of the time it should be the same as notification_side_paddings as it's vertically
+         aligned with notifications. The exception is split shade when this value becomes
+         independent  -->
+    <dimen name="qs_horizontal_margin">@dimen/notification_side_paddings</dimen>
+
+    <!-- Most of the time it should be the same as notification_shade_content_margin_horizontal as
+         it's vertically aligned with notifications. The exception is split shade when this value
+         becomes independent  -->
+    <dimen name="qs_content_horizontal_padding">@dimen/notification_shade_content_margin_horizontal</dimen>
+
+    <!-- Most of the time it should be the same as notification_side_paddings as it's vertically
+        aligned with notifications. That's not the case on large screen when we have either split
+        shade and QS is not above notifications or in portrait shade when notification scrim is no
+        longer full width and next page of tiles should be at the edge of the screen -->
+    <dimen name="qs_tiles_page_horizontal_margin">@dimen/notification_side_paddings</dimen>
 
     <dimen name="qs_customize_internal_side_paddings">8dp</dimen>
     <dimen name="qs_icon_size">20dp</dimen>
@@ -1116,13 +1131,15 @@
 
     <!-- Output switcher panel related dimensions -->
     <dimen name="media_output_dialog_list_margin">12dp</dimen>
-    <dimen name="media_output_dialog_list_max_height">364dp</dimen>
+    <dimen name="media_output_dialog_list_max_height">355dp</dimen>
     <dimen name="media_output_dialog_header_album_icon_size">72dp</dimen>
     <dimen name="media_output_dialog_header_back_icon_size">32dp</dimen>
     <dimen name="media_output_dialog_header_icon_padding">16dp</dimen>
     <dimen name="media_output_dialog_icon_corner_radius">16dp</dimen>
     <dimen name="media_output_dialog_title_anim_y_delta">12.5dp</dimen>
     <dimen name="media_output_dialog_app_tier_icon_size">20dp</dimen>
+    <dimen name="media_output_dialog_background_radius">16dp</dimen>
+    <dimen name="media_output_dialog_active_background_radius">28dp</dimen>
 
     <!-- Distance that the full shade transition takes in order to complete by tapping on a button
          like "expand". -->
@@ -1178,6 +1195,10 @@
 
     <!-- Maximum over scroll amount for the shade when transition to the full shade. -->
     <dimen name="lockscreen_shade_max_over_scroll_amount">24dp</dimen>
+
+    <!-- Maximum over scroll amount for the shade when transition to the full shade.
+         Only used for split-shade. -->
+    <dimen name="shade_max_over_scroll_amount">@dimen/lockscreen_shade_max_over_scroll_amount</dimen>
 
     <!-- Maximum overshoot for the pulse expansion -->
     <dimen name="pulse_expansion_max_top_overshoot">32dp</dimen>

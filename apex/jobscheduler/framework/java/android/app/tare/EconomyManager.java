@@ -16,8 +16,10 @@
 
 package android.app.tare;
 
+import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.content.Context;
+import android.util.Log;
 
 /**
  * Provides access to the resource economy service.
@@ -26,6 +28,69 @@ import android.content.Context;
  */
 @SystemService(Context.RESOURCE_ECONOMY_SERVICE)
 public class EconomyManager {
+    private static final String TAG = "TARE-" + EconomyManager.class.getSimpleName();
+
+    /**
+     * 1 ARC = 1 GIGA-CAKE!
+     *
+     * @hide
+     */
+    public static final long CAKE_IN_ARC = 1_000_000_000L;
+
+    /** @hide */
+    public static long arcToCake(int arcs) {
+        return arcs * CAKE_IN_ARC;
+    }
+
+    /**
+     * Parses a configuration string to get the value in cakes.
+     *
+     * @hide
+     */
+    public static long parseCreditValue(@Nullable final String val, final long defaultValCakes) {
+        String trunc;
+        if (val == null || (trunc = val.trim()).isEmpty()) {
+            return defaultValCakes;
+        }
+        long multiplier;
+        if (trunc.endsWith("c")) {
+            trunc = trunc.substring(0, trunc.length() - 1);
+            multiplier = 1;
+        } else if (trunc.endsWith("ck")) {
+            trunc = trunc.substring(0, trunc.length() - 2);
+            multiplier = 1;
+        } else if (trunc.endsWith("A")) {
+            trunc = trunc.substring(0, trunc.length() - 1);
+            multiplier = CAKE_IN_ARC;
+        } else if (trunc.endsWith("ARC")) {
+            trunc = trunc.substring(0, trunc.length() - 3);
+            multiplier = CAKE_IN_ARC;
+        } else {
+            // Don't risk using the wrong units
+            Log.e(TAG, "Couldn't determine units of credit value: " + val);
+            return defaultValCakes;
+        }
+
+        // Allow people to shorten notation (eg. Mc for Megacake).
+        if (trunc.endsWith("k")) {
+            trunc = trunc.substring(0, trunc.length() - 1);
+            multiplier *= 1_000;
+        } else if (trunc.endsWith("M")) {
+            trunc = trunc.substring(0, trunc.length() - 1);
+            multiplier *= 1_000_000;
+        } else if (trunc.endsWith("G")) {
+            trunc = trunc.substring(0, trunc.length() - 1);
+            multiplier *= 1_000_000_000;
+        }
+
+        try {
+            return Long.parseLong(trunc) * multiplier;
+        } catch (NumberFormatException e) {
+            Log.e(TAG, "Malformed config string: " + val + " to " + trunc, e);
+            return defaultValCakes;
+        }
+    }
+
     // Keys for AlarmManager TARE factors
     /** @hide */
     public static final String KEY_AM_MIN_SATIATED_BALANCE_EXEMPTED =
@@ -276,179 +341,201 @@ public class EconomyManager {
 
     // Default values AlarmManager factors
     /** @hide */
-    public static final int DEFAULT_AM_MIN_SATIATED_BALANCE_EXEMPTED = 500;
+    public static final long DEFAULT_AM_MIN_SATIATED_BALANCE_EXEMPTED_CAKES = arcToCake(500);
     /** @hide */
-    public static final int DEFAULT_AM_MIN_SATIATED_BALANCE_HEADLESS_SYSTEM_APP = 200;
+    public static final long DEFAULT_AM_MIN_SATIATED_BALANCE_HEADLESS_SYSTEM_APP_CAKES =
+            arcToCake(256);
     /** @hide */
-    public static final int DEFAULT_AM_MIN_SATIATED_BALANCE_OTHER_APP = 160;
+    public static final long DEFAULT_AM_MIN_SATIATED_BALANCE_OTHER_APP_CAKES = arcToCake(160);
     /** @hide */
-    public static final int DEFAULT_AM_MAX_SATIATED_BALANCE = 1440;
+    public static final long DEFAULT_AM_MAX_SATIATED_BALANCE_CAKES = arcToCake(960);
     /** @hide */
-    public static final int DEFAULT_AM_INITIAL_CONSUMPTION_LIMIT = 4000;
+    public static final long DEFAULT_AM_INITIAL_CONSUMPTION_LIMIT_CAKES = arcToCake(2880);
     /** @hide */
-    public static final int DEFAULT_AM_HARD_CONSUMPTION_LIMIT = 28_800;
+    public static final long DEFAULT_AM_HARD_CONSUMPTION_LIMIT_CAKES = arcToCake(15_000);
     // TODO: add AlarmManager modifier default values
     /** @hide */
-    public static final int DEFAULT_AM_REWARD_TOP_ACTIVITY_INSTANT = 0;
+    public static final long DEFAULT_AM_REWARD_TOP_ACTIVITY_INSTANT_CAKES = arcToCake(0);
     /** @hide */
-    public static final float DEFAULT_AM_REWARD_TOP_ACTIVITY_ONGOING = 0.01f;
+    // 10 megacakes = .01 ARC
+    public static final long DEFAULT_AM_REWARD_TOP_ACTIVITY_ONGOING_CAKES = 10_000_000;
     /** @hide */
-    public static final int DEFAULT_AM_REWARD_TOP_ACTIVITY_MAX = 500;
+    public static final long DEFAULT_AM_REWARD_TOP_ACTIVITY_MAX_CAKES = arcToCake(500);
     /** @hide */
-    public static final int DEFAULT_AM_REWARD_NOTIFICATION_SEEN_INSTANT = 3;
+    public static final long DEFAULT_AM_REWARD_NOTIFICATION_SEEN_INSTANT_CAKES = arcToCake(3);
     /** @hide */
-    public static final int DEFAULT_AM_REWARD_NOTIFICATION_SEEN_ONGOING = 0;
+    public static final long DEFAULT_AM_REWARD_NOTIFICATION_SEEN_ONGOING_CAKES = arcToCake(0);
     /** @hide */
-    public static final int DEFAULT_AM_REWARD_NOTIFICATION_SEEN_MAX = 60;
+    public static final long DEFAULT_AM_REWARD_NOTIFICATION_SEEN_MAX_CAKES = arcToCake(60);
     /** @hide */
-    public static final int DEFAULT_AM_REWARD_NOTIFICATION_SEEN_WITHIN_15_INSTANT = 5;
+    public static final long DEFAULT_AM_REWARD_NOTIFICATION_SEEN_WITHIN_15_INSTANT_CAKES =
+            arcToCake(5);
     /** @hide */
-    public static final int DEFAULT_AM_REWARD_NOTIFICATION_SEEN_WITHIN_15_ONGOING = 0;
+    public static final long DEFAULT_AM_REWARD_NOTIFICATION_SEEN_WITHIN_15_ONGOING_CAKES =
+            arcToCake(0);
     /** @hide */
-    public static final int DEFAULT_AM_REWARD_NOTIFICATION_SEEN_WITHIN_15_MAX = 500;
+    public static final long DEFAULT_AM_REWARD_NOTIFICATION_SEEN_WITHIN_15_MAX_CAKES =
+            arcToCake(500);
     /** @hide */
-    public static final int DEFAULT_AM_REWARD_NOTIFICATION_INTERACTION_INSTANT = 5;
+    public static final long DEFAULT_AM_REWARD_NOTIFICATION_INTERACTION_INSTANT_CAKES =
+            arcToCake(5);
     /** @hide */
-    public static final int DEFAULT_AM_REWARD_NOTIFICATION_INTERACTION_ONGOING = 0;
+    public static final long DEFAULT_AM_REWARD_NOTIFICATION_INTERACTION_ONGOING_CAKES =
+            arcToCake(0);
     /** @hide */
-    public static final int DEFAULT_AM_REWARD_NOTIFICATION_INTERACTION_MAX = 500;
+    public static final long DEFAULT_AM_REWARD_NOTIFICATION_INTERACTION_MAX_CAKES = arcToCake(500);
     /** @hide */
-    public static final int DEFAULT_AM_REWARD_WIDGET_INTERACTION_INSTANT = 10;
+    public static final long DEFAULT_AM_REWARD_WIDGET_INTERACTION_INSTANT_CAKES = arcToCake(10);
     /** @hide */
-    public static final int DEFAULT_AM_REWARD_WIDGET_INTERACTION_ONGOING = 0;
+    public static final long DEFAULT_AM_REWARD_WIDGET_INTERACTION_ONGOING_CAKES = arcToCake(0);
     /** @hide */
-    public static final int DEFAULT_AM_REWARD_WIDGET_INTERACTION_MAX = 500;
+    public static final long DEFAULT_AM_REWARD_WIDGET_INTERACTION_MAX_CAKES = arcToCake(500);
     /** @hide */
-    public static final int DEFAULT_AM_REWARD_OTHER_USER_INTERACTION_INSTANT = 10;
+    public static final long DEFAULT_AM_REWARD_OTHER_USER_INTERACTION_INSTANT_CAKES = arcToCake(10);
     /** @hide */
-    public static final int DEFAULT_AM_REWARD_OTHER_USER_INTERACTION_ONGOING = 0;
+    public static final long DEFAULT_AM_REWARD_OTHER_USER_INTERACTION_ONGOING_CAKES = arcToCake(0);
     /** @hide */
-    public static final int DEFAULT_AM_REWARD_OTHER_USER_INTERACTION_MAX = 500;
+    public static final long DEFAULT_AM_REWARD_OTHER_USER_INTERACTION_MAX_CAKES = arcToCake(500);
     /** @hide */
-    public static final int DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_CTP = 3;
+    public static final long DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_CTP_CAKES =
+            arcToCake(3);
     /** @hide */
-    public static final int DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_WAKEUP_CTP = 3;
+    public static final long DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_WAKEUP_CTP_CAKES =
+            arcToCake(3);
     /** @hide */
-    public static final int DEFAULT_AM_ACTION_ALARM_EXACT_WAKEUP_CTP = 3;
+    public static final long DEFAULT_AM_ACTION_ALARM_EXACT_WAKEUP_CTP_CAKES = arcToCake(3);
     /** @hide */
-    public static final int DEFAULT_AM_ACTION_ALARM_INEXACT_WAKEUP_CTP = 3;
+    public static final long DEFAULT_AM_ACTION_ALARM_INEXACT_WAKEUP_CTP_CAKES = arcToCake(3);
     /** @hide */
-    public static final int DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_NONWAKEUP_CTP = 1;
+    public static final long DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_NONWAKEUP_CTP_CAKES =
+            arcToCake(1);
     /** @hide */
-    public static final int DEFAULT_AM_ACTION_ALARM_EXACT_NONWAKEUP_CTP = 1;
+    public static final long DEFAULT_AM_ACTION_ALARM_EXACT_NONWAKEUP_CTP_CAKES = arcToCake(1);
     /** @hide */
-    public static final int DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_CTP = 1;
+    public static final long DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_CTP_CAKES =
+            arcToCake(1);
     /** @hide */
-    public static final int DEFAULT_AM_ACTION_ALARM_INEXACT_NONWAKEUP_CTP = 1;
+    public static final long DEFAULT_AM_ACTION_ALARM_INEXACT_NONWAKEUP_CTP_CAKES = arcToCake(1);
     /** @hide */
-    public static final int DEFAULT_AM_ACTION_ALARM_ALARMCLOCK_CTP = 5;
+    public static final long DEFAULT_AM_ACTION_ALARM_ALARMCLOCK_CTP_CAKES = arcToCake(5);
     /** @hide */
-    public static final int DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_BASE_PRICE = 5;
+    public static final long
+            DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_BASE_PRICE_CAKES = arcToCake(5);
     /** @hide */
-    public static final int DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_WAKEUP_BASE_PRICE = 4;
+    public static final long
+            DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_WAKEUP_BASE_PRICE_CAKES = arcToCake(4);
     /** @hide */
-    public static final int DEFAULT_AM_ACTION_ALARM_EXACT_WAKEUP_BASE_PRICE = 4;
+    public static final long DEFAULT_AM_ACTION_ALARM_EXACT_WAKEUP_BASE_PRICE_CAKES = arcToCake(4);
     /** @hide */
-    public static final int DEFAULT_AM_ACTION_ALARM_INEXACT_WAKEUP_BASE_PRICE = 3;
+    public static final long DEFAULT_AM_ACTION_ALARM_INEXACT_WAKEUP_BASE_PRICE_CAKES = arcToCake(3);
     /** @hide */
-    public static final int DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_NONWAKEUP_BASE_PRICE = 3;
+    public static final long
+            DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_NONWAKEUP_BASE_PRICE_CAKES =
+            arcToCake(3);
     /** @hide */
-    public static final int DEFAULT_AM_ACTION_ALARM_EXACT_NONWAKEUP_BASE_PRICE = 2;
+    public static final long DEFAULT_AM_ACTION_ALARM_EXACT_NONWAKEUP_BASE_PRICE_CAKES =
+            arcToCake(2);
     /** @hide */
-    public static final int DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_BASE_PRICE =
-            2;
+    public static final long
+            DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_BASE_PRICE_CAKES =
+            arcToCake(2);
     /** @hide */
-    public static final int DEFAULT_AM_ACTION_ALARM_INEXACT_NONWAKEUP_BASE_PRICE = 1;
+    public static final long DEFAULT_AM_ACTION_ALARM_INEXACT_NONWAKEUP_BASE_PRICE_CAKES =
+            arcToCake(1);
     /** @hide */
-    public static final int DEFAULT_AM_ACTION_ALARM_ALARMCLOCK_BASE_PRICE = 10;
+    public static final long DEFAULT_AM_ACTION_ALARM_ALARMCLOCK_BASE_PRICE_CAKES = arcToCake(10);
 
     // Default values JobScheduler factors
     // TODO: add time_since_usage variable to min satiated balance factors
     /** @hide */
-    public static final int DEFAULT_JS_MIN_SATIATED_BALANCE_EXEMPTED = 20000;
+    public static final long DEFAULT_JS_MIN_SATIATED_BALANCE_EXEMPTED_CAKES = arcToCake(15000);
     /** @hide */
-    public static final int DEFAULT_JS_MIN_SATIATED_BALANCE_HEADLESS_SYSTEM_APP = 10000;
+    public static final long DEFAULT_JS_MIN_SATIATED_BALANCE_HEADLESS_SYSTEM_APP_CAKES =
+            arcToCake(7500);
     /** @hide */
-    public static final int DEFAULT_JS_MIN_SATIATED_BALANCE_OTHER_APP = 2000;
+    public static final long DEFAULT_JS_MIN_SATIATED_BALANCE_OTHER_APP_CAKES = arcToCake(2000);
     /** @hide */
-    public static final int DEFAULT_JS_MAX_SATIATED_BALANCE = 60000;
+    public static final long DEFAULT_JS_MAX_SATIATED_BALANCE_CAKES = arcToCake(60000);
     /** @hide */
-    public static final int DEFAULT_JS_INITIAL_CONSUMPTION_LIMIT = 100_000;
+    public static final long DEFAULT_JS_INITIAL_CONSUMPTION_LIMIT_CAKES = arcToCake(29_000);
     /** @hide */
-    public static final int DEFAULT_JS_HARD_CONSUMPTION_LIMIT = 460_000;
+    // TODO: set hard limit based on device type (phone vs tablet vs etc) + battery size
+    public static final long DEFAULT_JS_HARD_CONSUMPTION_LIMIT_CAKES = arcToCake(250_000);
     // TODO: add JobScheduler modifier default values
     /** @hide */
-    public static final int DEFAULT_JS_REWARD_TOP_ACTIVITY_INSTANT = 0;
+    public static final long DEFAULT_JS_REWARD_TOP_ACTIVITY_INSTANT_CAKES = arcToCake(0);
     /** @hide */
-    public static final float DEFAULT_JS_REWARD_TOP_ACTIVITY_ONGOING = 0.5f;
+    public static final long DEFAULT_JS_REWARD_TOP_ACTIVITY_ONGOING_CAKES = CAKE_IN_ARC / 2;
     /** @hide */
-    public static final int DEFAULT_JS_REWARD_TOP_ACTIVITY_MAX = 15000;
+    public static final long DEFAULT_JS_REWARD_TOP_ACTIVITY_MAX_CAKES = arcToCake(15000);
     /** @hide */
-    public static final int DEFAULT_JS_REWARD_NOTIFICATION_SEEN_INSTANT = 1;
+    public static final long DEFAULT_JS_REWARD_NOTIFICATION_SEEN_INSTANT_CAKES = arcToCake(1);
     /** @hide */
-    public static final int DEFAULT_JS_REWARD_NOTIFICATION_SEEN_ONGOING = 0;
+    public static final long DEFAULT_JS_REWARD_NOTIFICATION_SEEN_ONGOING_CAKES = arcToCake(0);
     /** @hide */
-    public static final int DEFAULT_JS_REWARD_NOTIFICATION_SEEN_MAX = 10;
+    public static final long DEFAULT_JS_REWARD_NOTIFICATION_SEEN_MAX_CAKES = arcToCake(10);
     /** @hide */
-    public static final int DEFAULT_JS_REWARD_NOTIFICATION_INTERACTION_INSTANT = 5;
+    public static final long DEFAULT_JS_REWARD_NOTIFICATION_INTERACTION_INSTANT_CAKES =
+            arcToCake(5);
     /** @hide */
-    public static final int DEFAULT_JS_REWARD_NOTIFICATION_INTERACTION_ONGOING = 0;
+    public static final long DEFAULT_JS_REWARD_NOTIFICATION_INTERACTION_ONGOING_CAKES =
+            arcToCake(0);
     /** @hide */
-    public static final int DEFAULT_JS_REWARD_NOTIFICATION_INTERACTION_MAX = 5000;
+    public static final long DEFAULT_JS_REWARD_NOTIFICATION_INTERACTION_MAX_CAKES = arcToCake(5000);
     /** @hide */
-    public static final int DEFAULT_JS_REWARD_WIDGET_INTERACTION_INSTANT = 10;
+    public static final long DEFAULT_JS_REWARD_WIDGET_INTERACTION_INSTANT_CAKES = arcToCake(10);
     /** @hide */
-    public static final int DEFAULT_JS_REWARD_WIDGET_INTERACTION_ONGOING = 0;
+    public static final long DEFAULT_JS_REWARD_WIDGET_INTERACTION_ONGOING_CAKES = arcToCake(0);
     /** @hide */
-    public static final int DEFAULT_JS_REWARD_WIDGET_INTERACTION_MAX = 5000;
+    public static final long DEFAULT_JS_REWARD_WIDGET_INTERACTION_MAX_CAKES = arcToCake(5000);
     /** @hide */
-    public static final int DEFAULT_JS_REWARD_OTHER_USER_INTERACTION_INSTANT = 10;
+    public static final long DEFAULT_JS_REWARD_OTHER_USER_INTERACTION_INSTANT_CAKES = arcToCake(10);
     /** @hide */
-    public static final int DEFAULT_JS_REWARD_OTHER_USER_INTERACTION_ONGOING = 0;
+    public static final long DEFAULT_JS_REWARD_OTHER_USER_INTERACTION_ONGOING_CAKES = arcToCake(0);
     /** @hide */
-    public static final int DEFAULT_JS_REWARD_OTHER_USER_INTERACTION_MAX = 5000;
+    public static final long DEFAULT_JS_REWARD_OTHER_USER_INTERACTION_MAX_CAKES = arcToCake(5000);
     /** @hide */
-    public static final int DEFAULT_JS_ACTION_JOB_MAX_START_CTP = 3;
+    public static final long DEFAULT_JS_ACTION_JOB_MAX_START_CTP_CAKES = arcToCake(3);
     /** @hide */
-    public static final int DEFAULT_JS_ACTION_JOB_MAX_RUNNING_CTP = 2;
+    public static final long DEFAULT_JS_ACTION_JOB_MAX_RUNNING_CTP_CAKES = arcToCake(2);
     /** @hide */
-    public static final int DEFAULT_JS_ACTION_JOB_HIGH_START_CTP = 3;
+    public static final long DEFAULT_JS_ACTION_JOB_HIGH_START_CTP_CAKES = arcToCake(3);
     /** @hide */
-    public static final int DEFAULT_JS_ACTION_JOB_HIGH_RUNNING_CTP = 2;
+    public static final long DEFAULT_JS_ACTION_JOB_HIGH_RUNNING_CTP_CAKES = arcToCake(2);
     /** @hide */
-    public static final int DEFAULT_JS_ACTION_JOB_DEFAULT_START_CTP = 3;
+    public static final long DEFAULT_JS_ACTION_JOB_DEFAULT_START_CTP_CAKES = arcToCake(3);
     /** @hide */
-    public static final int DEFAULT_JS_ACTION_JOB_DEFAULT_RUNNING_CTP = 2;
+    public static final long DEFAULT_JS_ACTION_JOB_DEFAULT_RUNNING_CTP_CAKES = arcToCake(2);
     /** @hide */
-    public static final int DEFAULT_JS_ACTION_JOB_LOW_START_CTP = 3;
+    public static final long DEFAULT_JS_ACTION_JOB_LOW_START_CTP_CAKES = arcToCake(3);
     /** @hide */
-    public static final int DEFAULT_JS_ACTION_JOB_LOW_RUNNING_CTP = 2;
+    public static final long DEFAULT_JS_ACTION_JOB_LOW_RUNNING_CTP_CAKES = arcToCake(2);
     /** @hide */
-    public static final int DEFAULT_JS_ACTION_JOB_MIN_START_CTP = 3;
+    public static final long DEFAULT_JS_ACTION_JOB_MIN_START_CTP_CAKES = arcToCake(3);
     /** @hide */
-    public static final int DEFAULT_JS_ACTION_JOB_MIN_RUNNING_CTP = 2;
+    public static final long DEFAULT_JS_ACTION_JOB_MIN_RUNNING_CTP_CAKES = arcToCake(2);
     /** @hide */
-    public static final int DEFAULT_JS_ACTION_JOB_TIMEOUT_PENALTY_CTP = 30;
+    public static final long DEFAULT_JS_ACTION_JOB_TIMEOUT_PENALTY_CTP_CAKES = arcToCake(30);
     /** @hide */
-    public static final int DEFAULT_JS_ACTION_JOB_MAX_START_BASE_PRICE = 10;
+    public static final long DEFAULT_JS_ACTION_JOB_MAX_START_BASE_PRICE_CAKES = arcToCake(10);
     /** @hide */
-    public static final int DEFAULT_JS_ACTION_JOB_MAX_RUNNING_BASE_PRICE = 5;
+    public static final long DEFAULT_JS_ACTION_JOB_MAX_RUNNING_BASE_PRICE_CAKES = arcToCake(5);
     /** @hide */
-    public static final int DEFAULT_JS_ACTION_JOB_HIGH_START_BASE_PRICE = 8;
+    public static final long DEFAULT_JS_ACTION_JOB_HIGH_START_BASE_PRICE_CAKES = arcToCake(8);
     /** @hide */
-    public static final int DEFAULT_JS_ACTION_JOB_HIGH_RUNNING_BASE_PRICE = 4;
+    public static final long DEFAULT_JS_ACTION_JOB_HIGH_RUNNING_BASE_PRICE_CAKES = arcToCake(4);
     /** @hide */
-    public static final int DEFAULT_JS_ACTION_JOB_DEFAULT_START_BASE_PRICE = 6;
+    public static final long DEFAULT_JS_ACTION_JOB_DEFAULT_START_BASE_PRICE_CAKES = arcToCake(6);
     /** @hide */
-    public static final int DEFAULT_JS_ACTION_JOB_DEFAULT_RUNNING_BASE_PRICE = 3;
+    public static final long DEFAULT_JS_ACTION_JOB_DEFAULT_RUNNING_BASE_PRICE_CAKES = arcToCake(3);
     /** @hide */
-    public static final int DEFAULT_JS_ACTION_JOB_LOW_START_BASE_PRICE = 4;
+    public static final long DEFAULT_JS_ACTION_JOB_LOW_START_BASE_PRICE_CAKES = arcToCake(4);
     /** @hide */
-    public static final int DEFAULT_JS_ACTION_JOB_LOW_RUNNING_BASE_PRICE = 2;
+    public static final long DEFAULT_JS_ACTION_JOB_LOW_RUNNING_BASE_PRICE_CAKES = arcToCake(2);
     /** @hide */
-    public static final int DEFAULT_JS_ACTION_JOB_MIN_START_BASE_PRICE = 2;
+    public static final long DEFAULT_JS_ACTION_JOB_MIN_START_BASE_PRICE_CAKES = arcToCake(2);
     /** @hide */
-    public static final int DEFAULT_JS_ACTION_JOB_MIN_RUNNING_BASE_PRICE = 1;
+    public static final long DEFAULT_JS_ACTION_JOB_MIN_RUNNING_BASE_PRICE_CAKES = arcToCake(1);
     /** @hide */
-    public static final int DEFAULT_JS_ACTION_JOB_TIMEOUT_PENALTY_BASE_PRICE = 60;
+    public static final long DEFAULT_JS_ACTION_JOB_TIMEOUT_PENALTY_BASE_PRICE_CAKES = arcToCake(60);
 }

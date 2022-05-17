@@ -3925,15 +3925,32 @@ public class Activity extends ContextThemeWrapper
      *         task will be moved to the back of the activity stack instead of being finished.
      *         Other activities will simply be finished.
      *
-     *         <p>If you target version {@link android.os.Build.VERSION_CODES#S} or later and
-     *         override this method, it is strongly recommended to call through to the superclass
+     *      <li><p>If you target version {@link android.os.Build.VERSION_CODES#S} and
+     *         override this method, we strongly recommend to call through to the superclass
      *         implementation after you finish handling navigation within the app.
+     *
+     *      <li><p>If you target version {@link android.os.Build.VERSION_CODES#TIRAMISU} or later,
+     *          you should not use this method but register an {@link OnBackInvokedCallback} on an
+     *          {@link OnBackInvokedDispatcher} that you can retrieve using
+     *          {@link #getOnBackInvokedDispatcher()}. You should also set
+     *          {@code android:enableOnBackInvokedCallback="true"} in the application manifest.
+     *          <p>Alternatively, you can use
+     *          {@code  androidx.activity.ComponentActivity#getOnBackPressedDispatcher()}
+     *          for backward compatibility.
      * </ul>
      *
      * @see #moveTaskToBack(boolean)
      *
      * @deprecated Use {@link OnBackInvokedCallback} or
      * {@code androidx.activity.OnBackPressedCallback} to handle back navigation instead.
+     * <p>
+     * Starting from Android 13 (API level 33), back event handling is
+     * moving to an ahead-of-time model and {@link Activity#onBackPressed()} and
+     * {@link KeyEvent#KEYCODE_BACK} should not be used to handle back events (back gesture or
+     * back button click). Instead, an {@link OnBackInvokedCallback} should be registered using
+     * {@link Activity#getOnBackInvokedDispatcher()}
+     * {@link OnBackInvokedDispatcher#registerOnBackInvokedCallback(int, OnBackInvokedCallback)
+     * .registerOnBackInvokedCallback(priority, callback)}.
      */
     @Deprecated
     public void onBackPressed() {

@@ -76,6 +76,11 @@ public class Log {
     private static boolean sIsUserExtendedLoggingEnabled = false;
 
     /**
+     *  Enabled in telecom testing to help gate log statements causing log spew.
+     */
+    private static boolean sIsUnitTestingEnabled = false;
+
+    /**
      * The time when user-activated extended logging should be ended.  Used to determine when
      * extended logging should automatically be disabled.
      */
@@ -328,6 +333,20 @@ public class Log {
         } else {
             sUserExtendedLoggingStopTime = 0;
         }
+    }
+
+    /**
+     * Enabled when tests are running to help gate log statements causing log spew.
+     *
+     *  @param isEnabled {@code true} if running unit tests. false otherwise.
+     *
+     */
+    public static void setUnitTestingEnabled(boolean isEnabled) {
+        sIsUnitTestingEnabled = isEnabled;
+    }
+
+    public static boolean isUnitTestingEnabled() {
+        return sIsUnitTestingEnabled;
     }
 
     private static EventManager getEventManager() {

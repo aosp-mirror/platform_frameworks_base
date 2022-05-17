@@ -20,6 +20,7 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.os.Build;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -29,6 +30,7 @@ import android.widget.Toolbar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 
@@ -41,6 +43,7 @@ import com.google.android.material.appbar.CollapsingToolbarLayout;
  * This widget is wrapping the collapsing toolbar and can be directly used by the
  * {@link AppCompatActivity}.
  */
+@RequiresApi(Build.VERSION_CODES.S)
 public class CollapsingCoordinatorLayout extends CoordinatorLayout {
     private static final String TAG = "CollapsingCoordinatorLayout";
     private static final float TOOLBAR_LINE_SPACING_MULTIPLIER = 1.1f;

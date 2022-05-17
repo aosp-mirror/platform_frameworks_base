@@ -363,7 +363,6 @@ public class ShortcutService extends IShortcutService.Stub {
     private final RoleManager mRoleManager;
 
     private final ShortcutRequestPinProcessor mShortcutRequestPinProcessor;
-    private final ShortcutBitmapSaver mShortcutBitmapSaver;
     private final ShortcutDumpFiles mShortcutDumpFiles;
 
     @GuardedBy("mLock")
@@ -490,7 +489,6 @@ public class ShortcutService extends IShortcutService.Stub {
         mRoleManager = Objects.requireNonNull(mContext.getSystemService(RoleManager.class));
 
         mShortcutRequestPinProcessor = new ShortcutRequestPinProcessor(this, mLock);
-        mShortcutBitmapSaver = new ShortcutBitmapSaver(this);
         mShortcutDumpFiles = new ShortcutDumpFiles(this);
         mIsAppSearchEnabled = DeviceConfig.getBoolean(NAMESPACE_SYSTEMUI,
                 SystemUiDeviceConfigFlags.SHORTCUT_APPSEARCH_INTEGRATION, true)
@@ -748,7 +746,7 @@ public class ShortcutService extends IShortcutService.Stub {
         getUserShortcutsLocked(userId).cancelAllInFlightTasks();
 
         // Save all dirty information.
-        saveDirtyInfo(false);
+        saveDirtyInfo();
 
         // Unload
         mUsers.delete(userId);
@@ -1063,8 +1061,6 @@ public class ShortcutService extends IShortcutService.Stub {
             Slog.d(TAG, "Saving to " + path);
         }
 
-        mShortcutBitmapSaver.waitForAllSavesLocked();
-
         path.getParentFile().mkdirs();
         final AtomicFile file = new AtomicFile(path);
         FileOutputStream os = null;
@@ -1203,10 +1199,6 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @VisibleForTesting
     void saveDirtyInfo() {
-        saveDirtyInfo(true);
-    }
-
-    private void saveDirtyInfo(boolean saveShortcutsInAppSearch) {
         if (DEBUG || DEBUG_REBOOT) {
             Slog.d(TAG, "saveDirtyInfo");
         }
@@ -1221,10 +1213,6 @@ public class ShortcutService extends IShortcutService.Stub {
                     if (userId == UserHandle.USER_NULL) { // USER_NULL for base state.
                         saveBaseStateLocked();
                     } else {
-                        if (saveShortcutsInAppSearch) {
-                            getUserShortcutsLocked(userId).forAllPackages(
-                                    ShortcutPackage::persistsAllShortcutsAsync);
-                        }
                         saveUserLocked(userId);
                     }
                 }
@@ -1396,15 +1384,12 @@ public class ShortcutService extends IShortcutService.Stub {
 
     // === Caller validation ===
 
-    void removeIconLocked(ShortcutInfo shortcut) {
-        mShortcutBitmapSaver.removeIcon(shortcut);
-    }
-
     public void cleanupBitmapsForPackage(@UserIdInt int userId, String packageName) {
         final File packagePath = new File(getUserBitmapFilePath(userId), packageName);
         if (!packagePath.isDirectory()) {
             return;
         }
+        // ShortcutPackage is already removed at this point, we can safely remove the folder.
         if (!(FileUtils.deleteContents(packagePath) && packagePath.delete())) {
             Slog.w(TAG, "Unable to remove directory " + packagePath);
         }
@@ -1445,36 +1430,10 @@ public class ShortcutService extends IShortcutService.Stub {
                 }
                 cleanupBitmapsForPackage(userId, packageName);
             } else {
-                cleanupDanglingBitmapFilesLocked(userId, user, packageName, child);
+                user.getPackageShortcuts(packageName).cleanupDanglingBitmapFiles(child);
             }
         }
         logDurationStat(Stats.CLEANUP_DANGLING_BITMAPS, start);
-    }
-
-    /**
-     * Remove dangling bitmap files for a package.
-     *
-     * Note this method must be called with the lock held after calling
-     * {@link ShortcutBitmapSaver#waitForAllSavesLocked()} to make sure there's no pending bitmap
-     * saves are going on.
-     */
-    private void cleanupDanglingBitmapFilesLocked(@UserIdInt int userId, @NonNull ShortcutUser user,
-            @NonNull String packageName, @NonNull File path) {
-        final ArraySet<String> usedFiles =
-                user.getPackageShortcuts(packageName).getUsedBitmapFiles();
-
-        for (File child : path.listFiles()) {
-            if (!child.isFile()) {
-                continue;
-            }
-            final String name = child.getName();
-            if (!usedFiles.contains(name)) {
-                if (DEBUG) {
-                    Slog.d(TAG, "Removing dangling bitmap file: " + child.getAbsolutePath());
-                }
-                child.delete();
-            }
-        }
     }
 
     @VisibleForTesting
@@ -1521,7 +1480,7 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
-    void saveIconAndFixUpShortcutLocked(ShortcutInfo shortcut) {
+    void saveIconAndFixUpShortcutLocked(ShortcutPackage p, ShortcutInfo shortcut) {
         if (shortcut.hasIconFile() || shortcut.hasIconResource() || shortcut.hasIconUri()) {
             return;
         }
@@ -1529,7 +1488,7 @@ public class ShortcutService extends IShortcutService.Stub {
         final long token = injectClearCallingIdentity();
         try {
             // Clear icon info on the shortcut.
-            removeIconLocked(shortcut);
+            p.removeIcon(shortcut);
 
             final Icon icon = shortcut.getIcon();
             if (icon == null) {
@@ -1568,8 +1527,7 @@ public class ShortcutService extends IShortcutService.Stub {
                         // just in case.
                         throw ShortcutInfo.getInvalidIconException();
                 }
-                mShortcutBitmapSaver.saveBitmapLocked(shortcut,
-                        maxIconDimension, mIconPersistFormat, mIconPersistQuality);
+                p.saveBitmap(shortcut, maxIconDimension, mIconPersistFormat, mIconPersistQuality);
             } finally {
                 // Once saved, we won't use the original icon information, so null it out.
                 shortcut.clearIcon();
@@ -1816,7 +1774,7 @@ public class ShortcutService extends IShortcutService.Stub {
         }
         injectPostToHandlerDebounced(sp, notifyListenerRunnable(packageName, userId));
         notifyShortcutChangeCallbacks(packageName, userId, changedShortcuts, removedShortcuts);
-        scheduleSaveUser(userId);
+        sp.scheduleSave();
     }
 
     private void notifyListeners(@NonNull final String packageName, @UserIdInt final int userId) {
@@ -2118,7 +2076,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
                     final boolean replacingIcon = (source.getIcon() != null);
                     if (replacingIcon) {
-                        removeIconLocked(target);
+                        ps.removeIcon(target);
                     }
 
                     // Note copyNonNullFieldsFrom() does the "updatable with?" check too.
@@ -2126,7 +2084,7 @@ public class ShortcutService extends IShortcutService.Stub {
                     target.setTimestamp(injectCurrentTimeMillis());
 
                     if (replacingIcon) {
-                        saveIconAndFixUpShortcutLocked(target);
+                        saveIconAndFixUpShortcutLocked(ps, target);
                     }
 
                     // When we're updating any resource related fields, re-extract the res
@@ -2878,12 +2836,11 @@ public class ShortcutService extends IShortcutService.Stub {
 
         final ShortcutUser user = getUserShortcutsLocked(owningUserId);
         boolean doNotify = false;
-
         // First, remove the package from the package list (if the package is a publisher).
-        if (packageUserId == owningUserId) {
-            if (user.removePackage(packageName) != null) {
-                doNotify = true;
-            }
+        final ShortcutPackage sp = (packageUserId == owningUserId)
+                ? user.removePackage(packageName) : null;
+        if (sp != null) {
+            doNotify = true;
         }
 
         // Also remove from the launcher list (if the package is a launcher).
@@ -2905,6 +2862,10 @@ public class ShortcutService extends IShortcutService.Stub {
             // This will do the notification and save when needed, so do it after the above
             // notifyListeners.
             user.rescanPackageIfNeeded(packageName, /* forceRescan=*/ true);
+        }
+        if (!appStillExists && (packageUserId == owningUserId) && sp != null) {
+            // If the app is removed altogether, we can get rid of the xml as well
+            injectPostToHandler(() -> sp.removeShortcutPackageItem());
         }
 
         if (!wasUserLoaded) {
@@ -3468,7 +3429,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 if (shortcutInfo == null) {
                     return null;
                 }
-                return getShortcutIconParcelFileDescriptor(shortcutInfo);
+                return getShortcutIconParcelFileDescriptor(p, shortcutInfo);
             }
         }
 
@@ -3481,6 +3442,7 @@ public class ShortcutService extends IShortcutService.Stub {
             Objects.requireNonNull(shortcutId, "shortcutId");
 
             // Checks shortcuts in memory first
+            final ShortcutPackage p;
             synchronized (mLock) {
                 throwIfUserLockedL(userId);
                 throwIfUserLockedL(launcherUserId);
@@ -3488,8 +3450,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 getLauncherShortcutsLocked(callingPackage, userId, launcherUserId)
                         .attemptToRestoreIfNeededAndSave();
 
-                final ShortcutPackage p = getUserShortcutsLocked(userId)
-                        .getPackageShortcutsIfExists(packageName);
+                p = getUserShortcutsLocked(userId).getPackageShortcutsIfExists(packageName);
                 if (p == null) {
                     cb.complete(null);
                     return;
@@ -3497,24 +3458,23 @@ public class ShortcutService extends IShortcutService.Stub {
 
                 final ShortcutInfo shortcutInfo = p.findShortcutById(shortcutId);
                 if (shortcutInfo != null) {
-                    cb.complete(getShortcutIconParcelFileDescriptor(shortcutInfo));
+                    cb.complete(getShortcutIconParcelFileDescriptor(p, shortcutInfo));
                     return;
                 }
             }
 
             // Otherwise check persisted shortcuts
-            getShortcutInfoAsync(launcherUserId, packageName, shortcutId, userId, si -> {
-                cb.complete(getShortcutIconParcelFileDescriptor(si));
-            });
+            getShortcutInfoAsync(launcherUserId, packageName, shortcutId, userId, si ->
+                    cb.complete(getShortcutIconParcelFileDescriptor(p, si)));
         }
 
         @Nullable
         private ParcelFileDescriptor getShortcutIconParcelFileDescriptor(
-                @Nullable final ShortcutInfo shortcutInfo) {
-            if (shortcutInfo == null || !shortcutInfo.hasIconFile()) {
+                @Nullable final ShortcutPackage p, @Nullable final ShortcutInfo shortcutInfo) {
+            if (p == null || shortcutInfo == null || !shortcutInfo.hasIconFile()) {
                 return null;
             }
-            final String path = mShortcutBitmapSaver.getBitmapPathMayWaitLocked(shortcutInfo);
+            final String path = p.getBitmapPathMayWait(shortcutInfo);
             if (path == null) {
                 Slog.w(TAG, "null bitmap detected in getShortcutIconFd()");
                 return null;
@@ -3788,7 +3748,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 if (mHandler.hasCallbacks(mSaveDirtyInfoRunner)) {
                     mHandler.removeCallbacks(mSaveDirtyInfoRunner);
                     forEachLoadedUserLocked(ShortcutUser::cancelAllInFlightTasks);
-                    saveDirtyInfo(false);
+                    saveDirtyInfo();
                 }
                 mShutdown.set(true);
             }
@@ -4457,7 +4417,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
             // Save to the filesystem.
             scheduleSaveUser(userId);
-            saveDirtyInfo(false);
+            saveDirtyInfo();
 
             // Note, in case of backup, we don't have to wait on bitmap saving, because we don't
             // back up bitmaps anyway.
@@ -4775,9 +4735,6 @@ public class ShortcutService extends IShortcutService.Stub {
                     pw.print("  Last failure stack trace: ");
                     pw.println(Log.getStackTraceString(mLastWtfStacktrace));
                 }
-
-                pw.println();
-                mShortcutBitmapSaver.dumpLocked(pw, "  ");
 
                 pw.println();
             }
@@ -5355,7 +5312,8 @@ public class ShortcutService extends IShortcutService.Stub {
     @VisibleForTesting
     void waitForBitmapSavesForTest() {
         synchronized (mLock) {
-            mShortcutBitmapSaver.waitForAllSavesLocked();
+            forEachLoadedUserLocked(u ->
+                    u.forAllPackageItems(ShortcutPackageItem::waitForBitmapSaves));
         }
     }
 

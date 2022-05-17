@@ -78,7 +78,6 @@ import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
-import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
 import android.window.WindowContext;
@@ -484,6 +483,7 @@ public class ScreenshotController {
                 setWindowFocusable(false);
             }
         });
+        mScreenshotView.setDefaultTimeoutMillis(mScreenshotHandler.getDefaultTimeoutMillis());
 
         mScreenshotView.setOnKeyListener((v, keyCode, event) -> {
             if (keyCode == KeyEvent.KEYCODE_BACK) {
@@ -558,14 +558,9 @@ public class ScreenshotController {
 
     private void saveScreenshot(Bitmap screenshot, Consumer<Uri> finisher, Rect screenRect,
             Insets screenInsets, ComponentName topComponent, boolean showFlash) {
-        if (mAccessibilityManager.isEnabled()) {
-            AccessibilityEvent event =
-                    new AccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
-            event.setContentDescription(
-                    mContext.getResources().getString(R.string.screenshot_saving_title));
-            mAccessibilityManager.sendAccessibilityEvent(event);
-        }
-
+        withWindowAttached(() ->
+                mScreenshotView.announceForAccessibility(
+                        mContext.getResources().getString(R.string.screenshot_saving_title)));
 
         if (mScreenshotView.isAttachedToWindow()) {
             // if we didn't already dismiss for another reason
@@ -632,6 +627,7 @@ public class ScreenshotController {
                                 }
                             }
                         }
+
                         @Override
                         public void requestCompatCameraControl(boolean showControl,
                                 boolean transformationApplied,
@@ -674,15 +670,21 @@ public class ScreenshotController {
         if (mLastScrollCaptureRequest != null) {
             mLastScrollCaptureRequest.cancel(true);
         }
-        mLastScrollCaptureRequest = mScrollCaptureClient.request(DEFAULT_DISPLAY);
+        final ListenableFuture<ScrollCaptureResponse> future =
+                mScrollCaptureClient.request(DEFAULT_DISPLAY);
+        mLastScrollCaptureRequest = future;
         mLastScrollCaptureRequest.addListener(() ->
-                onScrollCaptureResponseReady(mLastScrollCaptureRequest), mMainExecutor);
+                onScrollCaptureResponseReady(future), mMainExecutor);
     }
 
     private void onScrollCaptureResponseReady(Future<ScrollCaptureResponse> responseFuture) {
         try {
             if (mLastScrollCaptureResponse != null) {
                 mLastScrollCaptureResponse.close();
+                mLastScrollCaptureResponse = null;
+            }
+            if (responseFuture.isCancelled()) {
+                return;
             }
             mLastScrollCaptureResponse = responseFuture.get();
             if (!mLastScrollCaptureResponse.isConnected()) {
@@ -707,12 +709,11 @@ public class ScreenshotController {
                 // delay starting scroll capture to make sure the scrim is up before the app moves
                 mScreenshotView.post(() -> runBatchScrollCapture(response));
             });
-        } catch (CancellationException e) {
-            // Ignore
         } catch (InterruptedException | ExecutionException e) {
             Log.e(TAG, "requestScrollCapture failed", e);
         }
     }
+
     ListenableFuture<ScrollCaptureController.LongScreenshot> mLongScreenshotFuture;
 
     private void runBatchScrollCapture(ScrollCaptureResponse response) {

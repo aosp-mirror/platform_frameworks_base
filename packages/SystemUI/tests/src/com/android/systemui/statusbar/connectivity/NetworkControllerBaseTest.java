@@ -127,6 +127,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
     protected Handler mMainHandler;
     protected FeatureFlags mFeatureFlags;
+    protected WifiStatusTrackerFactory mWifiStatusTrackerFactory;
 
     protected int mSubId;
 
@@ -220,12 +221,14 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
             return null;
         }).when(mMockProvisionController).addCallback(any());
 
+        mWifiStatusTrackerFactory = new WifiStatusTrackerFactory(
+                mContext, mMockWm, mMockNsm, mMockCm, mMainHandler);
+
         mNetworkController = new NetworkControllerImpl(mContext,
                 mMockCm,
                 mMockTm,
                 mTelephonyListenerManager,
                 mMockWm,
-                mMockNsm,
                 mMockSm,
                 mConfig,
                 TestableLooper.get(this).getLooper(),
@@ -238,6 +241,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                 mMockBd,
                 mDemoModeController,
                 mCarrierConfigTracker,
+                mWifiStatusTrackerFactory,
                 mMainHandler,
                 mFeatureFlags,
                 mock(DumpManager.class)

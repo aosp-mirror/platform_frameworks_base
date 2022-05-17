@@ -35,15 +35,19 @@ import android.animation.AnimatorSet;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.annotation.MainThread;
+import android.app.ICompatCameraControlCallback;
 import android.app.RemoteAction;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Insets;
 import android.graphics.Rect;
@@ -67,6 +71,7 @@ import android.view.InputMonitor;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewRootImpl;
 import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -84,6 +89,7 @@ import android.widget.TextView;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.policy.PhoneWindow;
+import com.android.settingslib.applications.InterestingConfigChanges;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.broadcast.BroadcastSender;
@@ -107,6 +113,8 @@ public class ClipboardOverlayController {
     public static final String SELF_PERMISSION = "com.android.systemui.permission.SELF";
     public static final String COPY_OVERLAY_ACTION = "com.android.systemui.COPY";
 
+    private static final String EXTRA_EDIT_SOURCE_CLIPBOARD = "edit_source_clipboard";
+
     private static final int CLIPBOARD_DEFAULT_TIMEOUT_MILLIS = 6000;
     private static final int SWIPE_PADDING_DP = 12; // extra padding around views to allow swipe
 
@@ -122,11 +130,12 @@ public class ClipboardOverlayController {
     private final AccessibilityManager mAccessibilityManager;
     private final TextClassifier mTextClassifier;
 
-    private final FrameLayout mContainer;
     private final DraggableConstraintLayout mView;
     private final View mClipboardPreview;
     private final ImageView mImagePreview;
     private final TextView mTextPreview;
+    private final TextView mHiddenTextPreview;
+    private final TextView mHiddenImagePreview;
     private final View mPreviewBorder;
     private final OverlayActionChip mEditChip;
     private final OverlayActionChip mRemoteCopyChip;
@@ -145,6 +154,10 @@ public class ClipboardOverlayController {
 
     private boolean mBlockAttach = false;
     private Animator mExitAnimator;
+
+    /** Tracks config changes that require updating insets */
+    private final InterestingConfigChanges mConfigChanges = new InterestingConfigChanges(
+                    ActivityInfo.CONFIG_KEYBOARD_HIDDEN);
 
     public ClipboardOverlayController(Context context,
             BroadcastDispatcher broadcastDispatcher,
@@ -177,15 +190,16 @@ public class ClipboardOverlayController {
 
         setWindowFocusable(false);
 
-        mContainer = (FrameLayout)
+        mView = (DraggableConstraintLayout)
                 LayoutInflater.from(mContext).inflate(R.layout.clipboard_overlay, null);
-        mView = requireNonNull(mContainer.findViewById(R.id.clipboard_ui));
         mActionContainerBackground =
                 requireNonNull(mView.findViewById(R.id.actions_container_background));
         mActionContainer = requireNonNull(mView.findViewById(R.id.actions));
         mClipboardPreview = requireNonNull(mView.findViewById(R.id.clipboard_preview));
         mImagePreview = requireNonNull(mView.findViewById(R.id.image_preview));
         mTextPreview = requireNonNull(mView.findViewById(R.id.text_preview));
+        mHiddenTextPreview = requireNonNull(mView.findViewById(R.id.hidden_text_preview));
+        mHiddenImagePreview = requireNonNull(mView.findViewById(R.id.hidden_image_preview));
         mPreviewBorder = requireNonNull(mView.findViewById(R.id.preview_border));
         mEditChip = requireNonNull(mView.findViewById(R.id.edit_chip));
         mRemoteCopyChip = requireNonNull(mView.findViewById(R.id.remote_copy_chip));
@@ -201,13 +215,6 @@ public class ClipboardOverlayController {
             public void onSwipeDismissInitiated(Animator animator) {
                 mUiEventLogger.log(CLIPBOARD_OVERLAY_SWIPE_DISMISSED);
                 mExitAnimator = animator;
-                animator.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationStart(Animator animation) {
-                        super.onAnimationStart(animation);
-                        mContainer.animate().alpha(0).setDuration(animation.getDuration()).start();
-                    }
-                });
             }
 
             @Override
@@ -231,9 +238,27 @@ public class ClipboardOverlayController {
 
         attachWindow();
         withWindowAttached(() -> {
-            mWindow.setContentView(mContainer);
+            mWindow.setContentView(mView);
             updateInsets(mWindowManager.getCurrentWindowMetrics().getWindowInsets());
             mView.requestLayout();
+            mWindow.peekDecorView().getViewRootImpl().setActivityConfigCallback(
+                    new ViewRootImpl.ActivityConfigCallback() {
+                        @Override
+                        public void onConfigurationChanged(Configuration overrideConfig,
+                                int newDisplayId) {
+                            if (mConfigChanges.applyNewConfig(mContext.getResources())) {
+                                updateInsets(
+                                        mWindowManager.getCurrentWindowMetrics().getWindowInsets());
+                            }
+                        }
+
+                        @Override
+                        public void requestCompatCameraControl(
+                                boolean showControl, boolean transformationApplied,
+                                ICompatCameraControlCallback callback) {
+                            Log.w(TAG, "unexpected requestCompatCameraControl call");
+                        }
+                    });
         });
 
         mTimeoutHandler.setOnTimeoutRunnable(() -> {
@@ -277,21 +302,39 @@ public class ClipboardOverlayController {
             mExitAnimator.cancel();
         }
         reset();
+        String accessibilityAnnouncement;
+
+        boolean isSensitive = clipData != null && clipData.getDescription().getExtras() != null
+                && clipData.getDescription().getExtras()
+                .getBoolean(ClipDescription.EXTRA_IS_SENSITIVE);
         if (clipData == null || clipData.getItemCount() == 0) {
-            showTextPreview(mContext.getResources().getString(
-                    R.string.clipboard_overlay_text_copied));
+            showTextPreview(
+                    mContext.getResources().getString(R.string.clipboard_overlay_text_copied),
+                    mTextPreview);
+            accessibilityAnnouncement = mContext.getString(R.string.clipboard_content_copied);
         } else if (!TextUtils.isEmpty(clipData.getItemAt(0).getText())) {
             ClipData.Item item = clipData.getItemAt(0);
             if (item.getTextLinks() != null) {
                 AsyncTask.execute(() -> classifyText(clipData.getItemAt(0), clipSource));
             }
-            showEditableText(item.getText());
+            if (isSensitive) {
+                showEditableText(
+                        mContext.getResources().getString(R.string.clipboard_text_hidden), true);
+            } else {
+                showEditableText(item.getText(), false);
+            }
+            accessibilityAnnouncement = mContext.getString(R.string.clipboard_text_copied);
         } else if (clipData.getItemAt(0).getUri() != null) {
-            // How to handle non-image URIs?
-            showEditableImage(clipData.getItemAt(0).getUri());
+            if (tryShowEditableImage(clipData.getItemAt(0).getUri(), isSensitive)) {
+                accessibilityAnnouncement = mContext.getString(R.string.clipboard_image_copied);
+            } else {
+                accessibilityAnnouncement = mContext.getString(R.string.clipboard_content_copied);
+            }
         } else {
             showTextPreview(
-                    mContext.getResources().getString(R.string.clipboard_overlay_text_copied));
+                    mContext.getResources().getString(R.string.clipboard_overlay_text_copied),
+                    mTextPreview);
+            accessibilityAnnouncement = mContext.getString(R.string.clipboard_content_copied);
         }
         Intent remoteCopyIntent = getRemoteCopyIntent(clipData);
         // Only show remote copy if it's available.
@@ -308,7 +351,12 @@ public class ClipboardOverlayController {
         } else {
             mRemoteCopyChip.setVisibility(View.GONE);
         }
-        withWindowAttached(() -> mContainer.post(this::animateIn));
+        withWindowAttached(() -> {
+            updateInsets(
+                    mWindowManager.getCurrentWindowMetrics().getWindowInsets());
+            mView.post(this::animateIn);
+            mView.announceForAccessibility(accessibilityAnnouncement);
+        });
         mTimeoutHandler.resetTimeout();
     }
 
@@ -400,6 +448,7 @@ public class ClipboardOverlayController {
         editIntent.setDataAndType(uri, "image/*");
         editIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         editIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        editIntent.putExtra(EXTRA_EDIT_SOURCE_CLIPBOARD, true);
         mContext.startActivity(editIntent);
         animateOut();
     }
@@ -412,15 +461,23 @@ public class ClipboardOverlayController {
         animateOut();
     }
 
-    private void showTextPreview(CharSequence text) {
-        mTextPreview.setVisibility(View.VISIBLE);
+    private void showSinglePreview(View v) {
+        mTextPreview.setVisibility(View.GONE);
         mImagePreview.setVisibility(View.GONE);
-        mTextPreview.setText(text.subSequence(0, Math.min(500, text.length())));
+        mHiddenTextPreview.setVisibility(View.GONE);
+        mHiddenImagePreview.setVisibility(View.GONE);
+        v.setVisibility(View.VISIBLE);
+    }
+
+    private void showTextPreview(CharSequence text, TextView textView) {
+        showSinglePreview(textView);
+        textView.setText(text.subSequence(0, Math.min(500, text.length())));
         mEditChip.setVisibility(View.GONE);
     }
 
-    private void showEditableText(CharSequence text) {
-        showTextPreview(text);
+    private void showEditableText(CharSequence text, boolean hidden) {
+        TextView textView = hidden ? mHiddenTextPreview : mTextPreview;
+        showTextPreview(text, textView);
         mEditChip.setVisibility(View.VISIBLE);
         mActionContainerBackground.setVisibility(View.VISIBLE);
         mEditChip.setAlpha(1f);
@@ -428,32 +485,49 @@ public class ClipboardOverlayController {
                 mContext.getString(R.string.clipboard_edit_text_description));
         View.OnClickListener listener = v -> editText();
         mEditChip.setOnClickListener(listener);
-        mTextPreview.setOnClickListener(listener);
+        textView.setOnClickListener(listener);
     }
 
-    private void showEditableImage(Uri uri) {
-        ContentResolver resolver = mContext.getContentResolver();
-        try {
-            int size = mContext.getResources().getDimensionPixelSize(R.dimen.overlay_x_scale);
-            // The width of the view is capped, height maintains aspect ratio, so allow it to be
-            // taller if needed.
-            Bitmap thumbnail = resolver.loadThumbnail(uri, new Size(size, size * 4), null);
-            mImagePreview.setImageBitmap(thumbnail);
-        } catch (IOException e) {
-            Log.e(TAG, "Thumbnail loading failed", e);
-            showTextPreview(
-                    mContext.getResources().getString(R.string.clipboard_overlay_text_copied));
-            return;
-        }
-        mTextPreview.setVisibility(View.GONE);
-        mImagePreview.setVisibility(View.VISIBLE);
-        mEditChip.setAlpha(1f);
-        mActionContainerBackground.setVisibility(View.VISIBLE);
+    private boolean tryShowEditableImage(Uri uri, boolean isSensitive) {
         View.OnClickListener listener = v -> editImage(uri);
-        mEditChip.setOnClickListener(listener);
-        mEditChip.setContentDescription(
-                mContext.getString(R.string.clipboard_edit_image_description));
-        mImagePreview.setOnClickListener(listener);
+        ContentResolver resolver = mContext.getContentResolver();
+        String mimeType = resolver.getType(uri);
+        boolean isEditableImage = mimeType != null && mimeType.startsWith("image");
+        if (isSensitive) {
+            showSinglePreview(mHiddenImagePreview);
+            if (isEditableImage) {
+                mHiddenImagePreview.setOnClickListener(listener);
+            }
+        } else if (isEditableImage) { // if the MIMEtype is image, try to load
+            try {
+                int size = mContext.getResources().getDimensionPixelSize(R.dimen.overlay_x_scale);
+                // The width of the view is capped, height maintains aspect ratio, so allow it to be
+                // taller if needed.
+                Bitmap thumbnail = resolver.loadThumbnail(uri, new Size(size, size * 4), null);
+                showSinglePreview(mImagePreview);
+                mImagePreview.setImageBitmap(thumbnail);
+                mImagePreview.setOnClickListener(listener);
+            } catch (IOException e) {
+                Log.e(TAG, "Thumbnail loading failed", e);
+                showTextPreview(
+                        mContext.getResources().getString(R.string.clipboard_overlay_text_copied),
+                        mTextPreview);
+                isEditableImage = false;
+            }
+        } else {
+            showTextPreview(
+                    mContext.getResources().getString(R.string.clipboard_overlay_text_copied),
+                    mTextPreview);
+        }
+        if (isEditableImage) {
+            mEditChip.setVisibility(View.VISIBLE);
+            mEditChip.setAlpha(1f);
+            mActionContainerBackground.setVisibility(View.VISIBLE);
+            mEditChip.setOnClickListener(listener);
+            mEditChip.setContentDescription(
+                    mContext.getString(R.string.clipboard_edit_image_description));
+        }
+        return isEditableImage;
     }
 
     private Intent getRemoteCopyIntent(ClipData clipData) {
@@ -477,6 +551,9 @@ public class ClipboardOverlayController {
     }
 
     private void animateOut() {
+        if (mExitAnimator != null && mExitAnimator.isRunning()) {
+            return;
+        }
         Animator anim = getExitAnimation();
         anim.addListener(new AnimatorListenerAdapter() {
             private boolean mCancelled;
@@ -508,7 +585,7 @@ public class ClipboardOverlayController {
         rootAnim.setInterpolator(linearInterpolator);
         rootAnim.setDuration(66);
         rootAnim.addUpdateListener(animation -> {
-            mContainer.setAlpha(animation.getAnimatedFraction());
+            mView.setAlpha(animation.getAnimatedFraction());
         });
 
         ValueAnimator scaleAnim = ValueAnimator.ofFloat(0, 1);
@@ -553,7 +630,7 @@ public class ClipboardOverlayController {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
-                mContainer.setAlpha(1);
+                mView.setAlpha(1);
                 mTimeoutHandler.resetTimeout();
             }
         });
@@ -568,9 +645,7 @@ public class ClipboardOverlayController {
         ValueAnimator rootAnim = ValueAnimator.ofFloat(0, 1);
         rootAnim.setInterpolator(linearInterpolator);
         rootAnim.setDuration(100);
-        rootAnim.addUpdateListener(animation -> {
-            mContainer.setAlpha(1 - animation.getAnimatedFraction());
-        });
+        rootAnim.addUpdateListener(anim -> mView.setAlpha(1 - anim.getAnimatedFraction()));
 
         ValueAnimator scaleAnim = ValueAnimator.ofFloat(0, 1);
         scaleAnim.setInterpolator(scaleInterpolator);
@@ -647,7 +722,7 @@ public class ClipboardOverlayController {
 
     private void reset() {
         mView.setTranslationX(0);
-        mContainer.setAlpha(0);
+        mView.setAlpha(0);
         mActionContainerBackground.setVisibility(View.GONE);
         resetActionChips();
         mTimeoutHandler.cancelTimeout();
@@ -706,8 +781,9 @@ public class ClipboardOverlayController {
         }
         DisplayCutout cutout = insets.getDisplayCutout();
         Insets navBarInsets = insets.getInsets(WindowInsets.Type.navigationBars());
+        Insets imeInsets = insets.getInsets(WindowInsets.Type.ime());
         if (cutout == null) {
-            p.setMargins(0, 0, 0, navBarInsets.bottom);
+            p.setMargins(0, 0, 0, Math.max(imeInsets.bottom, navBarInsets.bottom));
         } else {
             Insets waterfall = cutout.getWaterfallInsets();
             if (orientation == ORIENTATION_PORTRAIT) {
@@ -715,14 +791,16 @@ public class ClipboardOverlayController {
                         waterfall.left,
                         Math.max(cutout.getSafeInsetTop(), waterfall.top),
                         waterfall.right,
-                        Math.max(cutout.getSafeInsetBottom(),
-                                Math.max(navBarInsets.bottom, waterfall.bottom)));
+                        Math.max(imeInsets.bottom,
+                                Math.max(cutout.getSafeInsetBottom(),
+                                        Math.max(navBarInsets.bottom, waterfall.bottom))));
             } else {
                 p.setMargins(
-                        Math.max(cutout.getSafeInsetLeft(), waterfall.left),
+                        waterfall.left,
                         waterfall.top,
-                        Math.max(cutout.getSafeInsetRight(), waterfall.right),
-                        Math.max(navBarInsets.bottom, waterfall.bottom));
+                        waterfall.right,
+                        Math.max(imeInsets.bottom,
+                                Math.max(navBarInsets.bottom, waterfall.bottom)));
             }
         }
         mView.setLayoutParams(p);

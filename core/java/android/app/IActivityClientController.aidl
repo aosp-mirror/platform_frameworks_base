@@ -53,6 +53,7 @@ interface IActivityClientController {
     oneway void activityStopped(in IBinder token, in Bundle state,
             in PersistableBundle persistentState, in CharSequence description);
     oneway void activityDestroyed(in IBinder token);
+    oneway void activityLocalRelaunch(in IBinder token);
     oneway void activityRelaunched(in IBinder token);
 
     oneway void reportSizeConfigurations(in IBinder token,

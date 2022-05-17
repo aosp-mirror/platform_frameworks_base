@@ -498,6 +498,11 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 dispatchVisibilityChanged(mDisplayId, isShowing);
             }
         }
+
+        @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+        public InsetsSourceControl getImeSourceControl() {
+            return mImeSourceControl;
+        }
     }
 
     void removeImeSurface() {
