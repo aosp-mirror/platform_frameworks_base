@@ -117,6 +117,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private UdfpsController mUdfpsController;
 
     // Dependencies
+    private FakeExecutor mBiometricsExecutor;
     private Execution mExecution;
     @Mock
     private LayoutInflater mLayoutInflater;
@@ -234,6 +235,10 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 true /* resetLockoutRequiresHardwareAuthToken */));
         when(mFingerprintManager.getSensorPropertiesInternal()).thenReturn(props);
         mFgExecutor = new FakeExecutor(new FakeSystemClock());
+
+        // Create a fake background executor.
+        mBiometricsExecutor = new FakeExecutor(new FakeSystemClock());
+
         mUdfpsController = new UdfpsController(
                 mContext,
                 mExecution,
@@ -265,7 +270,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mLatencyTracker,
                 mActivityLaunchAnimator,
                 Optional.of(mAlternateTouchProvider),
-                mBroadcastSender);
+                mBroadcastSender,
+                mBiometricsExecutor);
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
         verify(mScreenLifecycle).addObserver(mScreenObserverCaptor.capture());
@@ -298,6 +304,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
         verify(mUdfpsView).setOnTouchListener(mTouchListenerCaptor.capture());
         MotionEvent downEvent = MotionEvent.obtain(0, 0, ACTION_DOWN, 0, 0, 0);
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, downEvent);
+        mBiometricsExecutor.runAllReady();
         downEvent.recycle();
 
         // THEN notify keyguard authenticate to dismiss the keyguard
@@ -336,6 +343,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
             mFgExecutor.runAllReady();
         }
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, moveEvent);
+        mBiometricsExecutor.runAllReady();
         moveEvent.recycle();
 
         // THEN notify keyguard authenticate to dismiss the keyguard
@@ -359,10 +367,12 @@ public class UdfpsControllerTest extends SysuiTestCase {
         verify(mUdfpsView).setOnTouchListener(mTouchListenerCaptor.capture());
         MotionEvent downEvent = MotionEvent.obtain(0, 0, ACTION_DOWN, 0, 0, 0);
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, downEvent);
+        mBiometricsExecutor.runAllReady();
         downEvent.recycle();
         MotionEvent moveEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 0, 0, 0);
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, moveEvent);
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, moveEvent);
+        mBiometricsExecutor.runAllReady();
         moveEvent.recycle();
 
         // THEN notify keyguard authenticate to dismiss the keyguard
@@ -516,9 +526,11 @@ public class UdfpsControllerTest extends SysuiTestCase {
         MotionEvent event = obtainMotionEvent(ACTION_DOWN, displayWidth, displayHeight, touchMinor,
                 touchMajor);
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, event);
+        mBiometricsExecutor.runAllReady();
         event.recycle();
         event = obtainMotionEvent(ACTION_MOVE, displayWidth, displayHeight, touchMinor, touchMajor);
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, event);
+        mBiometricsExecutor.runAllReady();
         event.recycle();
         verify(mAlternateTouchProvider).onPointerDown(eq(TEST_REQUEST_ID), eq(expectedX),
                 eq(expectedY), eq(expectedMinor), eq(expectedMajor));
@@ -530,9 +542,11 @@ public class UdfpsControllerTest extends SysuiTestCase {
                         Surface.ROTATION_90));
         event = obtainMotionEvent(ACTION_DOWN, displayHeight, 0, touchMinor, touchMajor);
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, event);
+        mBiometricsExecutor.runAllReady();
         event.recycle();
         event = obtainMotionEvent(ACTION_MOVE, displayHeight, 0, touchMinor, touchMajor);
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, event);
+        mBiometricsExecutor.runAllReady();
         event.recycle();
         verify(mAlternateTouchProvider).onPointerDown(eq(TEST_REQUEST_ID), eq(expectedX),
                 eq(expectedY), eq(expectedMinor), eq(expectedMajor));
@@ -544,9 +558,11 @@ public class UdfpsControllerTest extends SysuiTestCase {
                         Surface.ROTATION_270));
         event = obtainMotionEvent(ACTION_DOWN, 0, displayWidth, touchMinor, touchMajor);
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, event);
+        mBiometricsExecutor.runAllReady();
         event.recycle();
         event = obtainMotionEvent(ACTION_MOVE, 0, displayWidth, touchMinor, touchMajor);
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, event);
+        mBiometricsExecutor.runAllReady();
         event.recycle();
         verify(mAlternateTouchProvider).onPointerDown(eq(TEST_REQUEST_ID), eq(expectedX),
                 eq(expectedY), eq(expectedMinor), eq(expectedMajor));
@@ -559,9 +575,11 @@ public class UdfpsControllerTest extends SysuiTestCase {
         // ROTATION_180 is not supported. It should be treated like ROTATION_0.
         event = obtainMotionEvent(ACTION_DOWN, displayWidth, displayHeight, touchMinor, touchMajor);
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, event);
+        mBiometricsExecutor.runAllReady();
         event.recycle();
         event = obtainMotionEvent(ACTION_MOVE, displayWidth, displayHeight, touchMinor, touchMajor);
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, event);
+        mBiometricsExecutor.runAllReady();
         event.recycle();
         verify(mAlternateTouchProvider).onPointerDown(eq(TEST_REQUEST_ID), eq(expectedX),
                 eq(expectedY), eq(expectedMinor), eq(expectedMajor));
@@ -582,11 +600,13 @@ public class UdfpsControllerTest extends SysuiTestCase {
         verify(mUdfpsView).setOnTouchListener(mTouchListenerCaptor.capture());
         MotionEvent downEvent = MotionEvent.obtain(0, 0, ACTION_DOWN, 0, 0, 0);
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, downEvent);
+        mBiometricsExecutor.runAllReady();
         downEvent.recycle();
         MotionEvent moveEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 0, 0, 0);
 
         // FIX THIS TEST
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, moveEvent);
+        mBiometricsExecutor.runAllReady();
         moveEvent.recycle();
         mFgExecutor.runAllReady();
         // THEN FingerprintManager is notified about onPointerDown
@@ -601,6 +621,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
         verify(mKeyguardUpdateMonitor).onUdfpsPointerDown(eq((int) TEST_REQUEST_ID));
         // AND onIlluminatedRunnable notifies FingerprintManager about onUiReady
         mOnIlluminatedRunnableCaptor.getValue().run();
+        mBiometricsExecutor.runAllReady();
         InOrder inOrder = inOrder(mAlternateTouchProvider, mLatencyTracker);
         inOrder.verify(mAlternateTouchProvider).onUiReady();
         inOrder.verify(mLatencyTracker).onActionEnd(eq(LatencyTracker.ACTION_UDFPS_ILLUMINATE));
@@ -621,6 +642,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
         // AND onIlluminatedRunnable that notifies FingerprintManager is set
         verify(mUdfpsView).startIllumination(mOnIlluminatedRunnableCaptor.capture());
         mOnIlluminatedRunnableCaptor.getValue().run();
+        mBiometricsExecutor.runAllReady();
         verify(mAlternateTouchProvider).onPointerDown(eq(TEST_REQUEST_ID),
                 eq(0), eq(0), eq(3f) /* minor */, eq(2f) /* major */);
         verify(mFingerprintManager, never()).onPointerDown(anyLong(), anyInt(), anyInt(), anyInt(),
@@ -746,9 +768,11 @@ public class UdfpsControllerTest extends SysuiTestCase {
         verify(mUdfpsView).setOnTouchListener(mTouchListenerCaptor.capture());
         MotionEvent downEvent = MotionEvent.obtain(0, 0, ACTION_DOWN, 0, 0, 0);
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, downEvent);
+        mBiometricsExecutor.runAllReady();
         downEvent.recycle();
         MotionEvent moveEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 0, 0, 0);
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, moveEvent);
+        mBiometricsExecutor.runAllReady();
         moveEvent.recycle();
 
         // THEN NO haptic played

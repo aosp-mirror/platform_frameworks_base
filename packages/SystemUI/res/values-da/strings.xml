@@ -226,8 +226,7 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Roter automatisk"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Roter skærmen automatisk"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Lokation"</string>
-    <!-- no translation found for quick_settings_screensaver_label (1495003469366524120) -->
-    <skip />
+    <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Pauseskærm"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"Kameraadgang"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Mikrofonadgang"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Tilgængelig"</string>
@@ -321,6 +320,10 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Låst op ved hjælp af ansigt. Tryk for at åbne."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Ansigt genkendt. Tryk for at åbne."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Ansigt genkendt. Tryk på oplåsningsikonet for at åbne."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"Stryg opad for at prøve igen"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Lås op for at bruge NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Denne enhed tilhører din organisation"</string>
@@ -470,8 +473,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Bliv klar til at foretage hurtigere og mere sikre køb med din telefon"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Vis alle"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (8488069304491125713) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Tryk for at åbne"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Opdaterer"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Lås op for at bruge"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Dine kort kunne ikke hentes. Prøv igen senere."</string>
@@ -697,7 +699,10 @@
     <string name="notification_channel_alerts" msgid="3385787053375150046">"Underretninger"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"Batteri"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"Screenshots"</string>
-    <string name="notification_channel_general" msgid="4384774889645929705">"Generelle meddelelser"</string>
+    <!-- no translation found for notification_channel_instant (7556135423486752680) -->
+    <skip />
+    <!-- no translation found for notification_channel_setup (7660580986090760350) -->
+    <skip />
     <string name="notification_channel_storage" msgid="2720725707628094977">"Lagerplads"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Tips"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
@@ -849,6 +854,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Åbn appen for at caste denne session."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Ukendt app"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Stop med at caste"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Sådan fungerer udsendelser"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Udsendelse"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Personer i nærheden, som har kompatible Bluetooth-enheder, kan lytte til det medie, du udsender"</string>
@@ -910,7 +917,7 @@
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobildata"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Forbundet"</string>
-    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Der oprettes ikke automatisk mobildataforbindelse"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Ingen automatisk mobildataforbindelse"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Der er ingen forbindelse"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Der er ingen andre tilgængelige netværk"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Der er ingen tilgængelige netværk"</string>
@@ -944,7 +951,12 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Rediger kopieret tekst"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Rediger kopieret billede"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Send til enhed i nærheden"</string>
-    <!-- no translation found for clipboard_text_hidden (7926899867471812305) -->
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"Tryk for at se"</string>
+    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
+    <skip />
+    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
+    <skip />
+    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
     <skip />
     <string name="add" msgid="81036585205287996">"Tilføj"</string>
     <string name="manage_users" msgid="1823875311934643849">"Administrer brugere"</string>
@@ -954,4 +966,12 @@
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Alarmen er indstillet"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Kamera og mikrofon er slået fra"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# notifikation}one{# notifikation}other{# notifikationer}}"</string>
+    <!-- no translation found for broadcasting_description_is_broadcasting (765627502786404290) -->
+    <skip />
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Stop udsendelsen <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Hvis du udsender <xliff:g id="SWITCHAPP">%1$s</xliff:g> eller skifter output, stopper din aktuelle udsendelse"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"Udsend <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"Skift output"</string>
+    <!-- no translation found for bt_le_audio_broadcast_dialog_unknown_name (3791472237793443044) -->
+    <skip />
 </resources>

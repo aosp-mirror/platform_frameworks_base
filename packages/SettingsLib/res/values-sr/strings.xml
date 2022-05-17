@@ -667,9 +667,6 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Укључите екран"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Дозволи укључивање екрана"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Дозвољава апликацији да укључи екран. Ако се омогући, апликација може да укључи екран у било ком тренутку без ваше експлицитне намере."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Скенирајте QR кôд"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Да бисте почели да слушате, центрирајте QR кôд испод"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR кôд није у важећем формату"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Желите да зауставите емитовање апликације <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Ако емитујете апликацију <xliff:g id="SWITCHAPP">%1$s</xliff:g> или промените излаз, актуелно емитовање ће се зауставити"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Емитујте апликацију <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>

@@ -667,9 +667,6 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"স্ক্রিন চালু করুন"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"স্ক্রিন চালু করার অনুমতি দিন"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"অ্যাপকে স্ক্রিন চালু করার অনুমতি দিন। অনুমতি দেওয়া হলে, অ্যাপ আপনার এক্সপ্লিসিট ইনটেন্ট ছাড়াই যেকোনও সময় স্ক্রিন চালু করতে পারবে।"</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR কোড স্ক্যান করুন"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"শোনা শুরু করতে, নিচের QR কোডটি মাঝখানে রাখুন"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR কোডের ফর্ম্যাট সঠিক নয়"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> সম্প্রচার বন্ধ করবেন?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"আপনি <xliff:g id="SWITCHAPP">%1$s</xliff:g> সম্প্রচার করলে বা আউটপুট পরিবর্তন করলে, আপনার বর্তমান সম্প্রচার বন্ধ হয়ে যাবে"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> সম্প্রচার করুন"</string>

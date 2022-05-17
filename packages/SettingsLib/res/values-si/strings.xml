@@ -284,7 +284,7 @@
     <string name="mobile_data_always_on" msgid="8275958101875563572">"ජංගම දත්ත සැමවිට ක්‍රියාකාරීය"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"ටෙදරින් දෘඪාංග ත්වරණය"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"නම් නොමැති බ්ලූටූත් උපාංග පෙන්වන්න"</string>
-    <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"නිරපේක්ෂ හඩ පරිමාව අබල කරන්න"</string>
+    <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"නිරපේක්ෂ හඩ අබල කරන්න"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorsche සබල කරන්න"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"බ්ලූටූත් AVRCP අනුවාදය"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"බ්ලූටූත් AVRCP අනුවාදය තෝරන්න"</string>
@@ -338,7 +338,7 @@
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"USB ඔස්සේ යෙදුම් සත්‍යාපනය කරගන්න"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"ADB/ADT හරහා ස්ථාපනය වූ යෙදුම්, විනාශකාරී ක්‍රියාවන් ඇත්දැයි පරික්ෂාකර බලන්න."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"නම් නොමැති බ්ලූටූත් උපාංග (MAC ලිපින පමණි) සංදර්ශනය කරනු ඇත"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"පිළිගත නොහැකි ලෙස වැඩි හඩ පරිමාව හෝ පාලනය නොමැති වීම යනාදී දුරස්ථ උපාංග සමගින් වන හඬ පරිමා ගැටලුවලදී බ්ලූටූත් නිරපේක්ෂ හඬ පරිමා විශේෂාංගය අබල කරයි."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"පිළිගත නොහැකි ලෙස වැඩි හඩ හෝ පාලනය නොමැති වීම යනාදී දුරස්ථ උපාංග සමගින් වන හඬ පරිමා ගැටලුවලදී බ්ලූටූත් නිරපේක්ෂ හඬ පරිමා විශේෂාංගය අබල කරයි."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Bluetooth Gabeldorsche විශේෂාංග අට්ටිය සබල කරයි."</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"වැඩිදියුණු කළ සබැඳුම් හැකියා විශේෂාංගය සබල කරයි."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"අභ්‍යන්තර අන්තය"</string>
@@ -667,17 +667,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"තිරය ක්‍රියාත්මක කරන්න"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"තිරය ක්‍රියාත්මක කිරීමට ඉඩ දෙන්න"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"යෙදුමකට තිරය ක්‍රියාත්මක කිරීමට ඉඩ දෙන්න. ඉඩ දුනහොත්, යෙදුම ඔබගේ පැහැදිලි අභිප්‍රායෙන් තොරව ඕනෑම වේලාවක තිරය ක්‍රියාත්මක කළ හැකිය."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR කේතය ස්කෑන් කරන්න"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"සවන් දීම ආරම්භ කිරීමට, පහත QR කේතය මධ්‍යගත කරන්න"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR කේතය වලංගු ආකෘතියක් නොවේ"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> විකාශනය කිරීම නවත්වන්නද?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"ඔබ <xliff:g id="SWITCHAPP">%1$s</xliff:g> විකාශනය කළහොත් හෝ ප්‍රතිදානය වෙනස් කළහොත්, ඔබගේ වත්මන් විකාශනය නවතිනු ඇත."</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> විකාශනය"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"ප්‍රතිදානය වෙනස් කරන්න"</string>
-    <!-- no translation found for back_navigation_animation (8105467568421689484) -->
-    <skip />
-    <!-- no translation found for back_navigation_animation_summary (741292224121599456) -->
-    <skip />
-    <!-- no translation found for back_navigation_animation_dialog (8696966520944625596) -->
-    <skip />
+    <string name="back_navigation_animation" msgid="8105467568421689484">"පුරෝකථනමය පසු සජීවිකරණ"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"පුරෝකථනමය ආපසු සඳහා පද්ධති සජීවිකරණ සබල කරන්න."</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"මෙම සැකසීම පුරෝකථනමය ඉංගිත සජීවිකරණය සඳහා පද්ධති සජීවිකරණ සබල කරයි. එයට මැනිෆෙස්ට් ගොනුව තුළ එක් යෙදුමකට enableOnBackInvokedCallback සත්‍ය ලෙස සැකසීම අවශ්‍ය වේ."</string>
 </resources>

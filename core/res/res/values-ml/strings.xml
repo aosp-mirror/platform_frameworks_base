@@ -305,8 +305,10 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"നിങ്ങളുടെ കലണ്ടർ ആക്‌സസ്സ് ചെയ്യുക"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS സന്ദേശങ്ങൾ അയയ്‌ക്കുകയും കാണുകയും ചെയ്യുക"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"ഫയലുകളും ഡോക്യുമെന്റുകളും"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"നിങ്ങളുടെ ഉപകരണത്തിലെ ഫയലുകളും ഡോക്യുമെന്റുകളും ആക്സസ് ചെയ്യുക"</string>
+    <!-- no translation found for permgrouplab_storage (17339216290379241) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_storage (5378659041354582769) -->
+    <skip />
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"സംഗീതവും ഓഡിയോയും"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"നിങ്ങളുടെ ഉപകരണത്തിൽ സംഗീതവും ഓഡിയോയും ആക്‌സസ് ചെയ്യുക"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ഫോട്ടോകളും വീഡിയോകളും"</string>
@@ -1386,7 +1388,7 @@
     <string name="show_ime" msgid="6406112007347443383">"ഫിസിക്കൽ കീബോർഡ് സജീവമായിരിക്കുമ്പോൾ സ്ക്രീനിൽ നിലനിർത്തുക"</string>
     <string name="hardware" msgid="1800597768237606953">"വെർച്വൽ കീബോർഡ് കാണിക്കുക"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"ഫിസിക്കൽ കീബോർഡ് കോൺഫിഗർ ചെയ്യുക"</string>
-    <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"ഭാഷയും ലേഔട്ടും തിരഞ്ഞെടുക്കുന്നതിന് ടാപ്പുചെയ്യുക"</string>
+    <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"ഭാഷയും ലേഔട്ടും തിരഞ്ഞെടുക്കുന്നതിന് ടാപ്പ് ചെയ്യുക"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"മറ്റ് ആപ്‌സിന് മുകളിൽ പ്രദർശിപ്പിക്കുക"</string>
@@ -2286,5 +2288,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"സജീവമായ ആപ്പുകൾ പരിശോധിക്കുക"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"നിങ്ങളുടെ <xliff:g id="DEVICE">%1$s</xliff:g> എന്നതിൽ നിന്ന് ഫോണിന്റെ ക്യാമറ ആക്‌സസ് ചെയ്യാനാകില്ല"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"നിങ്ങളുടെ <xliff:g id="DEVICE">%1$s</xliff:g> എന്നതിൽ നിന്ന് ടാബ്‌ലെറ്റിന്റെ ക്യാമറ ആക്‌സസ് ചെയ്യാനാകില്ല"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"സിസ്റ്റത്തിന്റെ ഭാഷ"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"സിസ്‌റ്റം ഡിഫോൾട്ട്"</string>
 </resources>
