@@ -219,8 +219,9 @@ public class SystemDataTransferProcessor {
     private void processPermissionSyncMessage(CompanionMessageInfo messageInfo) {
         Slog.i(LOG_TAG, "Applying permissions.");
         // Start applying permissions
-        BackupHelper backupHelper = new BackupHelper(mContext, mContext.getUser());
+        final long callingIdentityToken = Binder.clearCallingIdentity();
         try {
+            BackupHelper backupHelper = new BackupHelper(mContext, mContext.getUser());
             XmlPullParser parser = Xml.newPullParser();
             ByteArrayInputStream stream = new ByteArrayInputStream(
                     messageInfo.getData());
@@ -233,6 +234,9 @@ public class SystemDataTransferProcessor {
         } catch (XmlPullParserException e) {
             Slog.e(LOG_TAG, "Error parsing message: "
                     + new String(messageInfo.getData()));
+        } finally {
+            Slog.i(LOG_TAG, "Permissions applied.");
+            Binder.restoreCallingIdentity(callingIdentityToken);
         }
     }
 
