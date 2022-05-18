@@ -4409,6 +4409,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                     + " but does not exist in that user");
             return;
         }
+
+        // Policy: certain classes of app are not subject to user-invoked stop
+        if (getPackageManagerInternal().isPackageStateProtected(packageName, userId)) {
+            Slog.w(TAG, "Asked to stop " + packageName + "/u" + userId
+                    + " but it is protected");
+            return;
+        }
+
         Slog.i(TAG, "Stopping app for user: " + packageName + "/" + userId);
 
         // A specific subset of the work done in forceStopPackageLocked(), because we are
@@ -4851,7 +4859,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 thread.runIsolatedEntryPoint(
                         app.getIsolatedEntryPoint(), app.getIsolatedEntryPointArgs());
             } else if (instr2 != null) {
-                thread.bindApplication(processName, appInfo, app.sdkSandboxClientAppPackage,
+                thread.bindApplication(processName, appInfo,
+                        app.sdkSandboxClientAppVolumeUuid, app.sdkSandboxClientAppPackage,
                         providerList,
                         instr2.mClass,
                         profilerInfo, instr2.mArguments,
@@ -4866,7 +4875,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         app.getDisabledCompatChanges(), serializedSystemFontMap,
                         app.getStartElapsedTime(), app.getStartUptime());
             } else {
-                thread.bindApplication(processName, appInfo, app.sdkSandboxClientAppPackage,
+                thread.bindApplication(processName, appInfo,
+                        app.sdkSandboxClientAppVolumeUuid, app.sdkSandboxClientAppPackage,
                         providerList, null, profilerInfo, null, null, null, testMode,
                         mBinderTransactionTrackingEnabled, enableTrackAllocation,
                         isRestrictedBackupMode || !normalMode, app.isPersistent(),
@@ -13598,13 +13608,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             if (brOptions.getIdForResponseEvent() > 0) {
-                // STOPSHIP (206518114): Temporarily check for PACKAGE_USAGE_STATS permission as
-                // well until the clients switch to using the new permission.
-                if (checkPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS,
-                        callingPid, callingUid) != PERMISSION_GRANTED) {
-                    enforceUsageStatsPermission(callerPackage, callingUid, callingPid,
-                            "recordResponseEventWhileInBackground()");
-                }
+                enforcePermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS,
+                        callingPid, callingUid, "recordResponseEventWhileInBackground");
             }
         }
 

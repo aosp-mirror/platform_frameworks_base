@@ -21,9 +21,12 @@ import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
 
+import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.CLIPBOARD_OVERLAY_SHOW_ACTIONS;
+import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.CLIPBOARD_OVERLAY_SHOW_EDIT_BUTTON;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_ACTION_TAPPED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_EDIT_TAPPED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_REMOTE_COPY_TAPPED;
+import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_SHARE_TAPPED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_SWIPE_DISMISSED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_TIMED_OUT;
 
@@ -58,6 +61,7 @@ import android.hardware.input.InputManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Looper;
+import android.provider.DeviceConfig;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -135,9 +139,9 @@ public class ClipboardOverlayController {
     private final ImageView mImagePreview;
     private final TextView mTextPreview;
     private final TextView mHiddenTextPreview;
-    private final TextView mHiddenImagePreview;
     private final View mPreviewBorder;
     private final OverlayActionChip mEditChip;
+    private final OverlayActionChip mShareChip;
     private final OverlayActionChip mRemoteCopyChip;
     private final View mActionContainerBackground;
     private final View mDismissButton;
@@ -157,7 +161,7 @@ public class ClipboardOverlayController {
 
     /** Tracks config changes that require updating insets */
     private final InterestingConfigChanges mConfigChanges = new InterestingConfigChanges(
-                    ActivityInfo.CONFIG_KEYBOARD_HIDDEN);
+            ActivityInfo.CONFIG_KEYBOARD_HIDDEN);
 
     public ClipboardOverlayController(Context context,
             BroadcastDispatcher broadcastDispatcher,
@@ -185,6 +189,7 @@ public class ClipboardOverlayController {
         // Setup the window that we are going to use
         mWindowLayoutParams = FloatingWindowUtil.getFloatingWindowParams();
         mWindowLayoutParams.setTitle("ClipboardOverlay");
+
         mWindow = FloatingWindowUtil.getFloatingWindow(mContext);
         mWindow.setWindowManager(mWindowManager, null, null);
 
@@ -199,9 +204,9 @@ public class ClipboardOverlayController {
         mImagePreview = requireNonNull(mView.findViewById(R.id.image_preview));
         mTextPreview = requireNonNull(mView.findViewById(R.id.text_preview));
         mHiddenTextPreview = requireNonNull(mView.findViewById(R.id.hidden_text_preview));
-        mHiddenImagePreview = requireNonNull(mView.findViewById(R.id.hidden_image_preview));
         mPreviewBorder = requireNonNull(mView.findViewById(R.id.preview_border));
         mEditChip = requireNonNull(mView.findViewById(R.id.edit_chip));
+        mShareChip = requireNonNull(mView.findViewById(R.id.share_chip));
         mRemoteCopyChip = requireNonNull(mView.findViewById(R.id.remote_copy_chip));
         mDismissButton = requireNonNull(mView.findViewById(R.id.dismiss_button));
 
@@ -235,6 +240,7 @@ public class ClipboardOverlayController {
         mEditChip.setIcon(Icon.createWithResource(mContext, R.drawable.ic_screenshot_edit), true);
         mRemoteCopyChip.setIcon(
                 Icon.createWithResource(mContext, R.drawable.ic_baseline_devices_24), true);
+        mShareChip.setIcon(Icon.createWithResource(mContext, R.drawable.ic_screenshot_share), true);
 
         attachWindow();
         withWindowAttached(() -> {
@@ -314,8 +320,11 @@ public class ClipboardOverlayController {
             accessibilityAnnouncement = mContext.getString(R.string.clipboard_content_copied);
         } else if (!TextUtils.isEmpty(clipData.getItemAt(0).getText())) {
             ClipData.Item item = clipData.getItemAt(0);
-            if (item.getTextLinks() != null) {
-                AsyncTask.execute(() -> classifyText(clipData.getItemAt(0), clipSource));
+            if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
+                    CLIPBOARD_OVERLAY_SHOW_ACTIONS, false)) {
+                if (item.getTextLinks() != null) {
+                    AsyncTask.execute(() -> classifyText(clipData.getItemAt(0), clipSource));
+                }
             }
             if (isSensitive) {
                 showEditableText(
@@ -323,9 +332,11 @@ public class ClipboardOverlayController {
             } else {
                 showEditableText(item.getText(), false);
             }
+            showShareChip(clipData);
             accessibilityAnnouncement = mContext.getString(R.string.clipboard_text_copied);
         } else if (clipData.getItemAt(0).getUri() != null) {
             if (tryShowEditableImage(clipData.getItemAt(0).getUri(), isSensitive)) {
+                showShareChip(clipData);
                 accessibilityAnnouncement = mContext.getString(R.string.clipboard_image_copied);
             } else {
                 accessibilityAnnouncement = mContext.getString(R.string.clipboard_content_copied);
@@ -373,17 +384,27 @@ public class ClipboardOverlayController {
         }
         mView.post(() -> {
             resetActionChips();
-            for (RemoteAction action : actions) {
-                Intent targetIntent = action.getActionIntent().getIntent();
-                ComponentName component = targetIntent.getComponent();
-                if (component != null && !TextUtils.equals(source, component.getPackageName())) {
-                    OverlayActionChip chip = constructActionChip(action);
-                    mActionContainer.addView(chip);
-                    mActionChips.add(chip);
-                    break; // only show at most one action chip
+            if (actions.size() > 0) {
+                mActionContainerBackground.setVisibility(View.VISIBLE);
+                for (RemoteAction action : actions) {
+                    Intent targetIntent = action.getActionIntent().getIntent();
+                    ComponentName component = targetIntent.getComponent();
+                    if (component != null && !TextUtils.equals(source,
+                            component.getPackageName())) {
+                        OverlayActionChip chip = constructActionChip(action);
+                        mActionContainer.addView(chip);
+                        mActionChips.add(chip);
+                        break; // only show at most one action chip
+                    }
                 }
             }
         });
+    }
+
+    private void showShareChip(ClipData clip) {
+        mShareChip.setVisibility(View.VISIBLE);
+        mShareChip.setAlpha(1f);
+        mShareChip.setOnClickListener((v) -> shareContent(clip));
     }
 
     private OverlayActionChip constructActionChip(RemoteAction action) {
@@ -461,11 +482,25 @@ public class ClipboardOverlayController {
         animateOut();
     }
 
+    private void shareContent(ClipData clip) {
+        mUiEventLogger.log(CLIPBOARD_OVERLAY_SHARE_TAPPED);
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.putExtra(Intent.EXTRA_TEXT, clip.getItemAt(0).getText());
+        shareIntent.setDataAndType(
+                clip.getItemAt(0).getUri(), clip.getDescription().getMimeType(0));
+        shareIntent.putExtra(Intent.EXTRA_STREAM, clip.getItemAt(0).getUri());
+        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        Intent chooserIntent = Intent.createChooser(shareIntent, null)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK)
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        mContext.startActivity(chooserIntent);
+        animateOut();
+    }
+
     private void showSinglePreview(View v) {
         mTextPreview.setVisibility(View.GONE);
         mImagePreview.setVisibility(View.GONE);
         mHiddenTextPreview.setVisibility(View.GONE);
-        mHiddenImagePreview.setVisibility(View.GONE);
         v.setVisibility(View.VISIBLE);
     }
 
@@ -478,13 +513,16 @@ public class ClipboardOverlayController {
     private void showEditableText(CharSequence text, boolean hidden) {
         TextView textView = hidden ? mHiddenTextPreview : mTextPreview;
         showTextPreview(text, textView);
-        mEditChip.setVisibility(View.VISIBLE);
-        mActionContainerBackground.setVisibility(View.VISIBLE);
-        mEditChip.setAlpha(1f);
-        mEditChip.setContentDescription(
-                mContext.getString(R.string.clipboard_edit_text_description));
         View.OnClickListener listener = v -> editText();
-        mEditChip.setOnClickListener(listener);
+        if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
+                CLIPBOARD_OVERLAY_SHOW_EDIT_BUTTON, false)) {
+            mEditChip.setVisibility(View.VISIBLE);
+            mActionContainerBackground.setVisibility(View.VISIBLE);
+            mEditChip.setAlpha(1f);
+            mEditChip.setContentDescription(
+                    mContext.getString(R.string.clipboard_edit_text_description));
+            mEditChip.setOnClickListener(listener);
+        }
         textView.setOnClickListener(listener);
     }
 
@@ -494,9 +532,9 @@ public class ClipboardOverlayController {
         String mimeType = resolver.getType(uri);
         boolean isEditableImage = mimeType != null && mimeType.startsWith("image");
         if (isSensitive) {
-            showSinglePreview(mHiddenImagePreview);
+            showSinglePreview(mHiddenTextPreview);
             if (isEditableImage) {
-                mHiddenImagePreview.setOnClickListener(listener);
+                mHiddenTextPreview.setOnClickListener(listener);
             }
         } else if (isEditableImage) { // if the MIMEtype is image, try to load
             try {
@@ -519,7 +557,8 @@ public class ClipboardOverlayController {
                     mContext.getResources().getString(R.string.clipboard_overlay_text_copied),
                     mTextPreview);
         }
-        if (isEditableImage) {
+        if (isEditableImage && DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_SYSTEMUI, CLIPBOARD_OVERLAY_SHOW_EDIT_BUTTON, false)) {
             mEditChip.setVisibility(View.VISIBLE);
             mEditChip.setAlpha(1f);
             mActionContainerBackground.setVisibility(View.VISIBLE);
@@ -724,6 +763,7 @@ public class ClipboardOverlayController {
         mView.setTranslationX(0);
         mView.setAlpha(0);
         mActionContainerBackground.setVisibility(View.GONE);
+        mShareChip.setVisibility(View.GONE);
         resetActionChips();
         mTimeoutHandler.cancelTimeout();
     }
