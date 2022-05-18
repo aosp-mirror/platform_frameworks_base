@@ -377,6 +377,32 @@ public class AppStandbyController
             ConstantsObserver.DEFAULT_BROADCAST_RESPONSE_FG_THRESHOLD_STATE;
 
     /**
+     * Duration (in millis) for the window within which any broadcasts occurred will be
+     * treated as one broadcast session.
+     */
+    volatile long mBroadcastSessionsDurationMs =
+            ConstantsObserver.DEFAULT_BROADCAST_SESSIONS_DURATION_MS;
+
+    /**
+     * Duration (in millis) for the window within which any broadcasts occurred ((with a
+     * corresponding response event) will be treated as one broadcast session. This similar to
+     * {@link #mBroadcastSessionsDurationMs}, except that this duration will be used to group only
+     * broadcasts that have a corresponding response event into sessions.
+     */
+    volatile long mBroadcastSessionsWithResponseDurationMs =
+            ConstantsObserver.DEFAULT_BROADCAST_SESSIONS_WITH_RESPONSE_DURATION_MS;
+
+    /**
+     * Denotes whether the response event should be attributed to all broadcast sessions or not.
+     * If this is {@code true}, then the response event should be attributed to all the broadcast
+     * sessions that occurred within the broadcast response window. Otherwise, the
+     * response event should be attributed to only the earliest broadcast session within the
+     * broadcast response window.
+     */
+    volatile boolean mNoteResponseEventForAllBroadcastSessions =
+            ConstantsObserver.DEFAULT_NOTE_RESPONSE_EVENT_FOR_ALL_BROADCAST_SESSIONS;
+
+    /**
      * Map of last known values of keys in {@link DeviceConfig#NAMESPACE_APP_STANDBY}.
      *
      * Note: We are intentionally not guarding this by any lock since this is only updated on
@@ -1869,6 +1895,21 @@ public class AppStandbyController
     }
 
     @Override
+    public long getBroadcastSessionsDurationMs() {
+        return mBroadcastSessionsDurationMs;
+    }
+
+    @Override
+    public long getBroadcastSessionsWithResponseDurationMs() {
+        return mBroadcastSessionsWithResponseDurationMs;
+    }
+
+    @Override
+    public boolean shouldNoteResponseEventForAllBroadcastSessions() {
+        return mNoteResponseEventForAllBroadcastSessions;
+    }
+
+    @Override
     @Nullable
     public String getAppStandbyConstant(@NonNull String key) {
         return mAppStandbyProperties.get(key);
@@ -2200,6 +2241,18 @@ public class AppStandbyController
 
         pw.print("  mBroadcastResponseFgThresholdState=");
         pw.print(ActivityManager.procStateToString(mBroadcastResponseFgThresholdState));
+        pw.println();
+
+        pw.print("  mBroadcastSessionsDurationMs=");
+        TimeUtils.formatDuration(mBroadcastSessionsDurationMs, pw);
+        pw.println();
+
+        pw.print("  mBroadcastSessionsWithResponseDurationMs=");
+        TimeUtils.formatDuration(mBroadcastSessionsWithResponseDurationMs, pw);
+        pw.println();
+
+        pw.print("  mNoteResponseEventForAllBroadcastSessions=");
+        pw.print(mNoteResponseEventForAllBroadcastSessions);
         pw.println();
 
         pw.println();
@@ -2672,6 +2725,13 @@ public class AppStandbyController
                 "broadcast_response_window_timeout_ms";
         private static final String KEY_BROADCAST_RESPONSE_FG_THRESHOLD_STATE =
                 "broadcast_response_fg_threshold_state";
+        private static final String KEY_BROADCAST_SESSIONS_DURATION_MS =
+                "broadcast_sessions_duration_ms";
+        private static final String KEY_BROADCAST_SESSIONS_WITH_RESPONSE_DURATION_MS =
+                "broadcast_sessions_with_response_duration_ms";
+        private static final String KEY_NOTE_RESPONSE_EVENT_FOR_ALL_BROADCAST_SESSIONS =
+                "note_response_event_for_all_broadcast_sessions";
+
         public static final long DEFAULT_CHECK_IDLE_INTERVAL_MS =
                 COMPRESS_TIME ? ONE_MINUTE : 4 * ONE_HOUR;
         public static final long DEFAULT_STRONG_USAGE_TIMEOUT =
@@ -2705,6 +2765,12 @@ public class AppStandbyController
                 2 * ONE_MINUTE;
         public static final int DEFAULT_BROADCAST_RESPONSE_FG_THRESHOLD_STATE =
                 ActivityManager.PROCESS_STATE_TOP;
+        public static final long DEFAULT_BROADCAST_SESSIONS_DURATION_MS =
+                2 * ONE_MINUTE;
+        public static final long DEFAULT_BROADCAST_SESSIONS_WITH_RESPONSE_DURATION_MS =
+                2 * ONE_MINUTE;
+        public static final boolean DEFAULT_NOTE_RESPONSE_EVENT_FOR_ALL_BROADCAST_SESSIONS =
+                true;
 
         ConstantsObserver(Handler handler) {
             super(handler);
@@ -2831,6 +2897,21 @@ public class AppStandbyController
                             mBroadcastResponseFgThresholdState = properties.getInt(
                                     KEY_BROADCAST_RESPONSE_FG_THRESHOLD_STATE,
                                     DEFAULT_BROADCAST_RESPONSE_FG_THRESHOLD_STATE);
+                            break;
+                        case KEY_BROADCAST_SESSIONS_DURATION_MS:
+                            mBroadcastSessionsDurationMs = properties.getLong(
+                                    KEY_BROADCAST_SESSIONS_DURATION_MS,
+                                    DEFAULT_BROADCAST_SESSIONS_DURATION_MS);
+                            break;
+                        case KEY_BROADCAST_SESSIONS_WITH_RESPONSE_DURATION_MS:
+                            mBroadcastSessionsWithResponseDurationMs = properties.getLong(
+                                    KEY_BROADCAST_SESSIONS_WITH_RESPONSE_DURATION_MS,
+                                    DEFAULT_BROADCAST_SESSIONS_WITH_RESPONSE_DURATION_MS);
+                            break;
+                        case KEY_NOTE_RESPONSE_EVENT_FOR_ALL_BROADCAST_SESSIONS:
+                            mNoteResponseEventForAllBroadcastSessions = properties.getBoolean(
+                                    KEY_NOTE_RESPONSE_EVENT_FOR_ALL_BROADCAST_SESSIONS,
+                                    DEFAULT_NOTE_RESPONSE_EVENT_FOR_ALL_BROADCAST_SESSIONS);
                             break;
                         default:
                             if (!timeThresholdsUpdated
