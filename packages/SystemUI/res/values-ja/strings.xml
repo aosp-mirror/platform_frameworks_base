@@ -952,12 +952,9 @@
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"コピーした画像を編集"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"付近のデバイスに送信"</string>
     <string name="clipboard_text_hidden" msgid="7926899867471812305">"タップして表示"</string>
-    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
-    <skip />
-    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
-    <skip />
-    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
-    <skip />
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"テキストをコピーしました"</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"画像をコピーしました"</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"コンテンツをコピーしました"</string>
     <string name="add" msgid="81036585205287996">"追加"</string>
     <string name="manage_users" msgid="1823875311934643849">"ユーザーの管理"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"この通知は、分割画面へのドラッグがサポートされていません。"</string>
@@ -966,12 +963,10 @@
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"アラームを設定しました"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"カメラとマイクが OFF です"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# 件の通知}other{# 件の通知}}"</string>
-    <!-- no translation found for broadcasting_description_is_broadcasting (765627502786404290) -->
-    <skip />
+    <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"ブロードキャスト"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> のブロードキャストを停止しますか？"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> をブロードキャストしたり、出力を変更したりすると、現在のブロードキャストが停止します。"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> をブロードキャスト"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"出力を変更"</string>
-    <!-- no translation found for bt_le_audio_broadcast_dialog_unknown_name (3791472237793443044) -->
-    <skip />
+    <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"不明"</string>
 </resources>

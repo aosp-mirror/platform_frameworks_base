@@ -320,10 +320,12 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‏‏‎‏‎‏‎‎‎‏‎‏‏‎‎‏‎‏‏‎‎‏‎‏‏‏‏‎‎‏‏‎‏‎‎‏‎‎‏‏‎‎‏‏‏‏‎‎‏‏‎‏‏‏‎‎‏‎‎Unlocked by face. Press to open.‎‏‎‎‏‎"</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‏‎‏‎‏‎‏‎‏‏‏‎‏‏‎‎‏‏‎‎‏‏‎‏‎‏‏‎‏‎‎‏‎‎‎‏‏‎‏‏‎‏‏‎‏‏‏‎‏‏‎‎‏‎‏‏‎‎Face recognized. Press to open.‎‏‎‎‏‎"</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‎‎‎‎‏‎‏‏‏‏‎‎‏‎‎‏‎‏‏‏‏‏‏‎‎‏‏‎‎‎‎‎‎‏‏‏‏‏‎‏‎‎‏‎‏‎‏‎‎‏‏‏‎‎‏‎‏‎‎Face recognized. Press the unlock icon to open.‎‏‎‎‏‎"</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1901953991150295169">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‏‎‎‏‏‎‎‏‎‏‎‎‎‏‏‎‎‏‎‎‎‏‎‎‏‏‏‏‏‏‎‏‎‏‏‎‏‎‎‏‏‎‎‏‎‏‏‎‎‎‏‎‎‎‎‎‎‏‎Move left‎‏‎‎‏‎"</item>
+    <item msgid="5558598599408514296">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‎‏‎‎‏‎‎‏‎‎‎‎‎‏‏‎‏‏‏‏‏‏‏‎‎‏‏‎‏‏‎‏‏‎‏‎‏‏‏‎‏‎‎‏‏‏‎‏‎‎‏‏‏‏‏‎‎‎‎Move down‎‏‎‎‏‎"</item>
+    <item msgid="4844142668312841831">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‏‎‎‏‏‏‎‎‏‏‏‎‏‏‎‏‎‎‎‎‏‎‏‏‏‎‏‏‎‏‎‏‎‎‎‎‏‏‎‎‏‏‎‎‎‏‏‏‎‎‏‏‎‎‏‏‏‎Move right‎‏‎‎‏‎"</item>
+    <item msgid="5640521437931460125">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‏‎‎‏‎‎‎‏‏‏‎‎‏‎‏‎‎‎‎‏‎‏‏‏‎‎‏‏‏‎‏‏‏‏‏‏‏‎‎‎‎‏‎‏‎‏‎‏‏‎‎‎‎‏‏‏‎‏‎Move up‎‏‎‎‏‎"</item>
+  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‎‎‎‏‎‎‏‏‏‎‏‎‎‎‏‏‏‎‎‎‏‏‎‎‏‎‎‎‏‎‎‎‎‎‏‎‎‎‏‎‏‎‏‏‏‏‎‏‏‏‎‎‎‏‎‎‏‏‎Swipe up to try again‎‏‎‎‏‎"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‏‎‎‎‎‏‏‏‏‎‏‎‏‏‏‎‏‎‏‏‏‎‏‎‎‏‏‎‏‎‏‏‏‏‏‏‎‎‎‎‏‏‏‏‏‎‎‎‎‏‎‏‎‎‏‏‏‏‎Unlock to use NFC‎‏‎‎‏‎"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‏‏‏‏‏‎‎‏‏‏‏‎‎‏‏‎‏‎‎‏‎‏‏‏‏‎‎‎‏‎‏‎‎‏‎‎‏‏‎‏‎‏‏‎‎‏‎‏‏‏‏‎‏‏‏‏‏‎This device belongs to your organization‎‏‎‎‏‎"</string>
@@ -699,10 +701,8 @@
     <string name="notification_channel_alerts" msgid="3385787053375150046">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‏‎‏‏‏‏‏‏‎‎‏‎‏‏‏‎‏‏‎‏‏‎‎‎‏‎‏‏‏‎‏‎‎‏‏‎‎‎‏‎‏‎‏‏‎‏‎‏‏‏‏‏‎‏‏‏‏‎‎Alerts‎‏‎‎‏‎"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‎‏‎‎‎‎‎‎‎‎‎‏‎‎‏‎‏‏‏‎‏‏‏‎‎‏‎‎‎‏‏‎‏‏‎‎‏‎‎‏‏‏‏‎‏‏‎‎‎‎‏‎‎Battery‎‏‎‎‏‎"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‏‎‎‏‏‎‎‎‏‎‎‏‏‏‎‎‏‎‎‎‏‎‎‎‎‎‎‏‎‏‎‏‎‏‎‎‏‏‎‏‏‏‎‏‎‎‏‎‎‏‎‎‎‏‏‏‎‏‎Screenshots‎‏‎‎‏‎"</string>
-    <!-- no translation found for notification_channel_instant (7556135423486752680) -->
-    <skip />
-    <!-- no translation found for notification_channel_setup (7660580986090760350) -->
-    <skip />
+    <string name="notification_channel_instant" msgid="7556135423486752680">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‎‎‏‏‎‏‏‏‎‎‏‏‎‎‏‎‎‏‎‎‏‎‎‎‏‎‎‎‏‎‏‏‏‏‏‎‏‎‏‏‎‎‎‏‏‏‎‏‏‏‏‎‏‎‏‎‎‎‎Instant Apps‎‏‎‎‏‎"</string>
+    <string name="notification_channel_setup" msgid="7660580986090760350">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‏‎‎‏‎‎‏‏‏‏‏‏‎‏‏‎‎‏‏‏‎‏‎‎‎‏‏‏‎‎‎‎‎‏‎‎‎‎‏‏‎‏‎‎‏‎‏‎‎‎‏‎‎‏‏‏‏‎‎Setup‎‏‎‎‏‎"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‎‏‏‏‎‎‎‎‎‏‏‏‏‏‎‏‎‏‏‎‎‏‏‏‎‏‏‎‏‏‎‏‏‎‎‏‏‏‎‎‏‎‎‎‏‎‎‏‏‎‎‎‎‎‎‎‎‏‎Storage‎‏‎‎‏‎"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‏‎‏‏‏‎‏‎‎‏‎‏‎‏‎‏‏‎‎‎‎‎‎‎‏‎‎‏‏‎‏‏‎‎‎‏‎‎‎‏‎‏‎‏‎‎‎‏‏‎‏‏‏‏‏‏‎‎‎Hints‎‏‎‎‏‎"</string>
     <string name="instant_apps" msgid="8337185853050247304">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‏‏‎‏‏‎‎‏‏‏‎‏‎‎‎‏‎‎‏‎‏‏‏‎‎‎‏‏‎‏‏‎‏‎‏‏‏‏‎‎‎‏‏‎‏‏‎‎‎‏‎‎‎‏‎‎‎‎Instant Apps‎‏‎‎‏‎"</string>
@@ -854,8 +854,7 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‎‏‎‎‏‏‎‎‏‎‎‏‏‏‎‏‏‎‎‏‎‏‎‎‏‎‎‏‎‏‎‏‎‏‏‏‏‎‎‏‏‎‏‎‎‎‎‏‏‎‎‎‎‏‎‎‏‏‎To cast this session, please open the app.‎‏‎‎‏‎"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‏‎‎‎‎‏‏‏‎‎‏‎‏‎‏‏‎‎‎‏‏‎‎‎‏‎‏‎‎‎‎‏‏‏‎‎‎‏‎‎‏‏‏‏‏‏‏‎‏‏‏‎‎‏‎‎‎‎Unknown app‎‏‎‎‏‎"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‏‏‎‏‎‏‎‏‎‏‏‏‎‎‎‎‎‏‏‏‎‏‎‎‎‏‏‏‏‏‎‎‏‎‎‏‎‏‏‎‏‎‏‎‏‎‎‎‎‎‏‎‎‏‎‏‎‏‎Stop casting‎‏‎‎‏‎"</string>
-    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‎‎‏‏‏‏‏‎‎‎‏‏‏‎‎‎‏‎‏‎‏‏‎‎‎‏‎‏‏‎‎‏‎‏‎‏‏‎‏‎‏‎‎‎‎‎‏‎‏‏‎‏‎‏‎‎‎‎‎Available devices for audio output.‎‏‎‎‏‎"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‏‏‎‏‎‏‎‎‏‎‏‎‎‎‎‏‎‎‏‏‏‎‏‏‏‎‏‎‏‎‎‎‏‎‏‏‏‏‎‎‎‎‎‏‏‎‏‏‏‎‎‏‏‏‏‏‏‎‎How broadcasting works‎‏‎‎‏‎"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‏‎‏‎‏‎‏‏‏‏‏‏‏‎‏‏‎‎‎‎‎‏‎‎‎‎‎‏‏‎‎‎‏‎‎‏‏‎‏‎‏‏‎‏‏‏‎‎‎‏‏‏‏‎‏‏‏‎Broadcast‎‏‎‎‏‎"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‎‎‎‏‎‏‏‎‏‎‏‏‎‏‏‏‏‏‏‏‎‏‏‏‏‏‎‎‏‏‎‎‎‏‎‎‎‎‏‎‏‏‎‎‏‏‏‏‎‏‎‎‏‏‏‏‎‎People near you with compatible Bluetooth devices can listen to the media you\'re broadcasting‎‏‎‎‏‎"</string>
