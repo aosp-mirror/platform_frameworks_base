@@ -31,6 +31,7 @@
 #include <linux/errno.h>
 #include <log/log.h>
 #include <meminfo/procmeminfo.h>
+#include <meminfo/sysmeminfo.h>
 #include <nativehelper/JNIHelp.h>
 #include <processgroup/processgroup.h>
 #include <stddef.h>
@@ -467,6 +468,16 @@ static jdouble com_android_server_am_CachedAppOptimizer_getFreeSwapPercent(JNIEn
     return (double)memoryInfo.freeswap / (double)memoryInfo.totalswap;
 }
 
+static jlong com_android_server_am_CachedAppOptimizer_getUsedZramMemory() {
+    android::meminfo::SysMemInfo sysmeminfo;
+    return sysmeminfo.mem_zram_kb();
+}
+
+static jlong com_android_server_am_CachedAppOptimizer_getMemoryFreedCompaction() {
+    android::meminfo::SysMemInfo sysmeminfo;
+    return sysmeminfo.mem_compacted_kb("/sys/block/zram0/");
+}
+
 static void com_android_server_am_CachedAppOptimizer_compactProcess(JNIEnv*, jobject, jint pid,
                                                                     jint compactionFlags) {
     compactProcessOrFallback(pid, compactionFlags);
@@ -522,6 +533,10 @@ static const JNINativeMethod sMethods[] = {
          (void*)com_android_server_am_CachedAppOptimizer_cancelCompaction},
         {"getFreeSwapPercent", "()D",
          (void*)com_android_server_am_CachedAppOptimizer_getFreeSwapPercent},
+        {"getUsedZramMemory", "()J",
+         (void*)com_android_server_am_CachedAppOptimizer_getUsedZramMemory},
+        {"getMemoryFreedCompaction", "()J",
+         (void*)com_android_server_am_CachedAppOptimizer_getMemoryFreedCompaction},
         {"compactSystem", "()V", (void*)com_android_server_am_CachedAppOptimizer_compactSystem},
         {"compactProcess", "(II)V", (void*)com_android_server_am_CachedAppOptimizer_compactProcess},
         {"freezeBinder", "(IZ)I", (void*)com_android_server_am_CachedAppOptimizer_freezeBinder},
