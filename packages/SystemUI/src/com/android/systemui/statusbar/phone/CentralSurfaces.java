@@ -396,8 +396,7 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     void keyguardGoingAway();
 
-    void setKeyguardFadingAway(long startTime, long delay, long fadeoutDuration,
-            boolean isBypassFading);
+    void setKeyguardFadingAway(long startTime, long delay, long fadeoutDuration);
 
     void finishKeyguardFadingAway();
 

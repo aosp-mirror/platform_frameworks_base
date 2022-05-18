@@ -197,20 +197,6 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
         return false
     }
 
-    /**
-     * If shorter animations should be played when unlocking.
-     */
-    fun canPlaySubtleWindowAnimations(): Boolean {
-        if (bypassEnabled) {
-            return when {
-                statusBarStateController.state != StatusBarState.KEYGUARD -> false
-                qSExpanded -> false
-                else -> true
-            }
-        }
-        return false
-    }
-
     fun onStartedGoingToSleep() {
         pendingUnlock = null
     }
