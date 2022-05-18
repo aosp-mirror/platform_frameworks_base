@@ -1249,6 +1249,36 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
+    @EnableCompatChanges({ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO,
+            ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_LARGE})
+    public void testOverrideMinAspectRatioLargeForResizableAppInSplitScreen() {
+        setUpDisplaySizeWithApp(/* dw= */ 1000, /* dh= */ 2800);
+
+        // Create a size compat activity on the same task.
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setTask(mTask)
+                .setScreenOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+                .setComponent(ComponentName.createRelative(mContext,
+                        SizeCompatTests.class.getName()))
+                .setUid(android.os.Process.myUid())
+                .build();
+
+        final TestSplitOrganizer organizer =
+                new TestSplitOrganizer(mAtm, activity.getDisplayContent());
+
+        // Move activity to split screen which takes half of the screen.
+        mTask.reparent(organizer.mPrimary, POSITION_TOP, /* moveParents= */ false , "test");
+        organizer.mPrimary.setBounds(0, 0, 1000, 1400);
+        assertEquals(WINDOWING_MODE_MULTI_WINDOW, mTask.getWindowingMode());
+        assertEquals(WINDOWING_MODE_MULTI_WINDOW, activity.getWindowingMode());
+
+        // The per-package override forces the activity into a 16:9 aspect ratio
+        assertEquals(1400, activity.getBounds().height());
+        assertEquals(1400 / ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_LARGE_VALUE,
+                activity.getBounds().width(), 0.5);
+    }
+
+    @Test
     public void testLaunchWithFixedRotationTransform() {
         final int dw = 1000;
         final int dh = 2500;
