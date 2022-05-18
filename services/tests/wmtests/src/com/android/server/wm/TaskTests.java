@@ -496,34 +496,6 @@ public class TaskTests extends WindowTestsBase {
         assertEquals(reqBounds.height(), task.getBounds().height());
     }
 
-    /** Tests that the task bounds adjust properly to changes between FULLSCREEN and FREEFORM */
-    @Test
-    public void testBoundsOnModeChangeFreeformToFullscreen() {
-        DisplayContent display = mAtm.mRootWindowContainer.getDefaultDisplay();
-        Task rootTask = new TaskBuilder(mSupervisor).setDisplay(display).setCreateActivity(true)
-                .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
-        Task task = rootTask.getBottomMostTask();
-        task.getRootActivity().setOrientation(SCREEN_ORIENTATION_UNSPECIFIED);
-        DisplayInfo info = new DisplayInfo();
-        display.mDisplay.getDisplayInfo(info);
-        final Rect fullScreenBounds = new Rect(0, 0, info.logicalWidth, info.logicalHeight);
-        final Rect freeformBounds = new Rect(fullScreenBounds);
-        freeformBounds.inset((int) (freeformBounds.width() * 0.2),
-                (int) (freeformBounds.height() * 0.2));
-        task.setBounds(freeformBounds);
-
-        assertEquals(freeformBounds, task.getBounds());
-
-        // FULLSCREEN inherits bounds
-        rootTask.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
-        assertEquals(fullScreenBounds, task.getBounds());
-        assertEquals(freeformBounds, task.mLastNonFullscreenBounds);
-
-        // FREEFORM restores bounds
-        rootTask.setWindowingMode(WINDOWING_MODE_FREEFORM);
-        assertEquals(freeformBounds, task.getBounds());
-    }
-
     /**
      * Tests that a task with forced orientation has orientation-consistent bounds within the
      * parent.
@@ -589,6 +561,7 @@ public class TaskTests extends WindowTestsBase {
 
         // FULLSCREEN letterboxes bounds on activity level, no constraint on task level.
         rootTask.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        rootTask.setBounds(null);
         assertThat(task.getBounds().height()).isGreaterThan(task.getBounds().width());
         assertThat(top.getBounds().width()).isGreaterThan(top.getBounds().height());
         assertEquals(fullScreenBoundsPort, task.getBounds());
