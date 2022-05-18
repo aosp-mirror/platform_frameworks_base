@@ -21,6 +21,8 @@ import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
 
+import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.CLIPBOARD_OVERLAY_SHOW_ACTIONS;
+import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.CLIPBOARD_OVERLAY_SHOW_EDIT_BUTTON;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_ACTION_TAPPED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_EDIT_TAPPED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_REMOTE_COPY_TAPPED;
@@ -58,6 +60,7 @@ import android.hardware.input.InputManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Looper;
+import android.provider.DeviceConfig;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -314,8 +317,11 @@ public class ClipboardOverlayController {
             accessibilityAnnouncement = mContext.getString(R.string.clipboard_content_copied);
         } else if (!TextUtils.isEmpty(clipData.getItemAt(0).getText())) {
             ClipData.Item item = clipData.getItemAt(0);
-            if (item.getTextLinks() != null) {
-                AsyncTask.execute(() -> classifyText(clipData.getItemAt(0), clipSource));
+            if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
+                    CLIPBOARD_OVERLAY_SHOW_ACTIONS, false)) {
+                if (item.getTextLinks() != null) {
+                    AsyncTask.execute(() -> classifyText(clipData.getItemAt(0), clipSource));
+                }
             }
             if (isSensitive) {
                 showEditableText(
@@ -373,14 +379,18 @@ public class ClipboardOverlayController {
         }
         mView.post(() -> {
             resetActionChips();
-            for (RemoteAction action : actions) {
-                Intent targetIntent = action.getActionIntent().getIntent();
-                ComponentName component = targetIntent.getComponent();
-                if (component != null && !TextUtils.equals(source, component.getPackageName())) {
-                    OverlayActionChip chip = constructActionChip(action);
-                    mActionContainer.addView(chip);
-                    mActionChips.add(chip);
-                    break; // only show at most one action chip
+            if (actions.size() > 0) {
+                mActionContainerBackground.setVisibility(View.VISIBLE);
+                for (RemoteAction action : actions) {
+                    Intent targetIntent = action.getActionIntent().getIntent();
+                    ComponentName component = targetIntent.getComponent();
+                    if (component != null && !TextUtils.equals(source,
+                            component.getPackageName())) {
+                        OverlayActionChip chip = constructActionChip(action);
+                        mActionContainer.addView(chip);
+                        mActionChips.add(chip);
+                        break; // only show at most one action chip
+                    }
                 }
             }
         });
@@ -478,13 +488,16 @@ public class ClipboardOverlayController {
     private void showEditableText(CharSequence text, boolean hidden) {
         TextView textView = hidden ? mHiddenTextPreview : mTextPreview;
         showTextPreview(text, textView);
-        mEditChip.setVisibility(View.VISIBLE);
-        mActionContainerBackground.setVisibility(View.VISIBLE);
-        mEditChip.setAlpha(1f);
-        mEditChip.setContentDescription(
-                mContext.getString(R.string.clipboard_edit_text_description));
         View.OnClickListener listener = v -> editText();
-        mEditChip.setOnClickListener(listener);
+        if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
+                CLIPBOARD_OVERLAY_SHOW_EDIT_BUTTON, false)) {
+            mEditChip.setVisibility(View.VISIBLE);
+            mActionContainerBackground.setVisibility(View.VISIBLE);
+            mEditChip.setAlpha(1f);
+            mEditChip.setContentDescription(
+                    mContext.getString(R.string.clipboard_edit_text_description));
+            mEditChip.setOnClickListener(listener);
+        }
         textView.setOnClickListener(listener);
     }
 
@@ -519,7 +532,8 @@ public class ClipboardOverlayController {
                     mContext.getResources().getString(R.string.clipboard_overlay_text_copied),
                     mTextPreview);
         }
-        if (isEditableImage) {
+        if (isEditableImage && DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_SYSTEMUI, CLIPBOARD_OVERLAY_SHOW_EDIT_BUTTON, false)) {
             mEditChip.setVisibility(View.VISIBLE);
             mEditChip.setAlpha(1f);
             mActionContainerBackground.setVisibility(View.VISIBLE);
