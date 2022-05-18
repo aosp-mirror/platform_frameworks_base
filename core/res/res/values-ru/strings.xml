@@ -2283,5 +2283,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Проверить активные приложения"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"У устройства \"<xliff:g id="DEVICE">%1$s</xliff:g>\" нет доступа к камере телефона."</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"У устройства \"<xliff:g id="DEVICE">%1$s</xliff:g>\" нет доступа к камере планшета."</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"Язык системы"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Системные настройки по умолчанию"</string>
 </resources>
