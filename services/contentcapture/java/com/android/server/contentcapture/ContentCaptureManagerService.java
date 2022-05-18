@@ -228,7 +228,7 @@ public final class ContentCaptureManagerService extends
 
     @Override // from SystemService
     public boolean isUserSupported(TargetUser user) {
-        return user.isFull() || user.isManagedProfile();
+        return user.isFull() || user.isProfile();
     }
 
     @Override // from SystemService
