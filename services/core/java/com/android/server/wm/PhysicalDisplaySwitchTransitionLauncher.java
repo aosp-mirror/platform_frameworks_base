@@ -120,7 +120,7 @@ public class PhysicalDisplaySwitchTransitionLauncher {
 
         final boolean started = mDisplayContent.mRemoteDisplayChangeController
                 .performRemoteDisplayChange(fromRotation, toRotation, newDisplayAreaInfo,
-                        (appliedChange, transaction) -> continueDisplayUpdate(transaction));
+                        this::continueDisplayUpdate);
 
         if (!started) {
             markTransitionAsReady();
