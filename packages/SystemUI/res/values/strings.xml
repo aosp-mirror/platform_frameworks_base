@@ -2494,6 +2494,8 @@
     <string name="clipboard_send_nearby_description">Send to nearby device</string>
     <!-- Text informing user that copied content is hidden [CHAR LIMIT=NONE] -->
     <string name="clipboard_text_hidden">Tap to view</string>
+    <!-- Asterisks replacing sensitive text content -->
+    <string name="clipboard_asterisks" translatable="false">••••••</string>
     <!-- Accessibility announcement informing user that text has been copied [CHAR LIMIT=NONE] -->
     <string name="clipboard_text_copied">Text copied</string>
     <!-- Accessibility announcement informing user that text has been copied [CHAR LIMIT=NONE] -->
