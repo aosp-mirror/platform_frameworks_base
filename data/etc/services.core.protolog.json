@@ -769,6 +769,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-1383884640": {
+      "message": " allReady query: used=%b override=%b defer=%d states=[%s]",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
+    },
     "-1376035390": {
       "message": "No task found",
       "level": "DEBUG",
@@ -2550,12 +2556,6 @@
       "level": "INFO",
       "group": "WM_DEBUG_ADD_REMOVE",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
-    "352982444": {
-      "message": " allReady query: used=%b override=%b states=[%s]",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
-      "at": "com\/android\/server\/wm\/Transition.java"
     },
     "355720268": {
       "message": "stopFreezingDisplayLocked: Unfreezing now",
