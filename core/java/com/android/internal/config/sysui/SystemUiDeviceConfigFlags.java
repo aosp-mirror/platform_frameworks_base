@@ -549,6 +549,18 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String PERSISTS_WIDGET_PROVIDER_INFO = "persists_widget_provider_info";
 
+    /**
+     * (boolean) Whether the clipboard overlay shows an edit button (as opposed to requiring tapping
+     * the preview to send an edit intent).
+     */
+    public static final String CLIPBOARD_OVERLAY_SHOW_EDIT_BUTTON =
+            "clipboard_overlay_show_edit_button";
+
+    /**
+     * (boolean) Whether to show smart chips (based on TextClassifier) in the clipboard overlay.
+     */
+    public static final String CLIPBOARD_OVERLAY_SHOW_ACTIONS = "clipboard_overlay_show_actions";
+
     private SystemUiDeviceConfigFlags() {
     }
 }

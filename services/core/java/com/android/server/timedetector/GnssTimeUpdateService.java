@@ -116,6 +116,11 @@ public final class GnssTimeUpdateService extends Binder {
             Log.d(TAG, "requestGnssTimeUpdates()");
         }
 
+        if (!mLocationManager.hasProvider(LocationManager.GPS_PROVIDER)) {
+            Log.e(TAG, "GPS provider does not exist on this device");
+            return;
+        }
+
         // Location Listener triggers onLocationChanged() when GNSS data is available, so
         // that the getGnssTimeMillis() function doesn't need to be continuously polled.
         mLocationListener = new LocationListener() {
