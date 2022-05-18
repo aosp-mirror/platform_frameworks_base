@@ -19,6 +19,7 @@ package com.android.server.usage;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.util.LongArrayQueue;
 
 import java.util.Objects;
 
@@ -30,6 +31,7 @@ class BroadcastEvent {
     private String mTargetPackage;
     private int mTargetUserId;
     private long mIdForResponseEvent;
+    private final LongArrayQueue mTimestampsMs;
 
     BroadcastEvent(int sourceUid, @NonNull String targetPackage, @UserIdInt int targetUserId,
             long idForResponseEvent) {
@@ -37,6 +39,7 @@ class BroadcastEvent {
         mTargetPackage = targetPackage;
         mTargetUserId = targetUserId;
         mIdForResponseEvent = idForResponseEvent;
+        mTimestampsMs = new LongArrayQueue();
     }
 
     public int getSourceUid() {
@@ -53,6 +56,14 @@ class BroadcastEvent {
 
     public long getIdForResponseEvent() {
         return mIdForResponseEvent;
+    }
+
+    public LongArrayQueue getTimestampsMs() {
+        return mTimestampsMs;
+    }
+
+    public void addTimestampMs(long timestampMs) {
+        mTimestampsMs.addLast(timestampMs);
     }
 
     @Override

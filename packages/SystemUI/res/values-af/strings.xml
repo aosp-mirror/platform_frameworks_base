@@ -78,8 +78,7 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Probeer weer skermkiekie neem"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Kan nie skermkiekie stoor nie"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Die program of jou organisasie laat nie toe dat skermkiekies geneem word nie"</string>
-    <!-- no translation found for screenshot_blocked_by_admin (5486757604822795797) -->
-    <skip />
+    <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Die neem van skermskote word deur jou IT-admin geblokkeer"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Wysig"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Wysig skermkiekie"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Deel skermskoot"</string>
@@ -314,6 +313,10 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Swiep op om oop te maak"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Druk die onsluitikoon om oop te maak"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Ontsluit met gesig. Druk die ontsluitikoon om oop te maak."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"Swiep op om weer te probeer"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Ontsluit om NFC te gebruik"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Hierdie toestel behoort aan jou organisasie"</string>
@@ -419,7 +422,7 @@
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Dit hou dit in sig totdat jy dit ontspeld. Raak en hou Oorsig om dit te ontspeld."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Dit hou dit in sig totdat jy dit ontspeld. Raak en hou Tuis om dit te ontspeld."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Persoonlike data (soos kontakte en e-posinhoud) kan toeganklik wees."</string>
-    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Kan vasgespelde program ander programme oopmaak."</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Vasgespelde program kan ander programme oopmaak."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Raak en hou die terug- en oorsigknoppie om hierdie program te ontspeld"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Raak en hou die terug- en tuisknoppie om hierdie program te ontspeld"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Swiep op en hou om hierdie program te ontspeld"</string>
@@ -460,7 +463,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"Beursie"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Stel op om vinniger, veiliger aankope met jou foon te doen"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Wys alles"</string>
-    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Voeg \'n kaart by"</string>
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Tik om oop te maak"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Dateer tans op"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Ontsluit om te gebruik"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Kon nie jou kaarte kry nie; probeer later weer"</string>
@@ -720,8 +723,7 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"Skakel aan wanneer battery waarskynlik sal leegloop"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Nee, dankie"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Stort SysUI-hoop"</string>
-    <!-- no translation found for ongoing_privacy_dialog_a11y_title (2205794093673327974) -->
-    <skip />
+    <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"In gebruik"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Programme gebruik tans jou <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" en "</string>
@@ -819,7 +821,6 @@
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Beweeg nader om op <xliff:g id="DEVICENAME">%1$s</xliff:g> te speel"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Beweeg nader aan <xliff:g id="DEVICENAME">%1$s</xliff:g> om hier te speel"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Speel tans op <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
-    <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Speel tans op hierdie foon"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Iets is fout. Probeer weer."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Onaktief, gaan program na"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nie gekry nie"</string>
@@ -840,6 +841,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Maak die program oop om hierdie sessie uit te saai."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Onbekende program"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Hou op uitsaai"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Hoe uitsaai werk"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Saai uit"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Mense in jou omtrek met versoenbare Bluetooth-toestelle kan na die media luister wat jy uitsaai"</string>
@@ -849,10 +852,8 @@
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Stoor"</string>
     <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Begin tans …"</string>
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Kan nie uitsaai nie"</string>
-    <!-- no translation found for media_output_broadcast_update_error (1420868236079122521) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_last_update_error (5484328807296895491) -->
-    <skip />
+    <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Kan nie stoor nie. Probeer weer."</string>
+    <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Kan nie stoor nie."</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Bounommer"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Bounommer is na knipbord gekopieer."</string>
     <string name="basic_status" msgid="2315371112182658176">"Maak gesprek oop"</string>
@@ -915,7 +916,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wi-fi sal vir nou nie outomaties koppel nie"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Sien alles"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Ontkoppel Ethernet om netwerke te wissel"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Om toestelervaring te verbeter, kan programme en dienste steeds enige tyd na wi‑fi-netwerke soek, selfs wanneer wi‑fi af is. Jy kan dit in Wi-fi-opsporing-instellings verander. "<annotation id="link">"Verander"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Om toestelervaring te verbeter, kan programme en dienste steeds enige tyd na wi‑fi-netwerke soek, selfs wanneer wi‑fi af is. Jy kan dit in Wi-fi-opsporinginstellings verander. "<annotation id="link">"Verander"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Skakel vliegtuigmodus af"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> wil die volgende teël by Kitsinstellings voeg"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Voeg teël by"</string>
@@ -937,6 +938,13 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Wysig gekopieerde teks"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Wysig gekopieerde prent"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Stuur na toestel in die omtrek"</string>
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"Tik om te bekyk"</string>
+    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
+    <skip />
+    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
+    <skip />
+    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
+    <skip />
     <string name="add" msgid="81036585205287996">"Voeg by"</string>
     <string name="manage_users" msgid="1823875311934643849">"Bestuur gebruikers"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Sleep na verdeelde skerm word nie vir hierdie kennisgewing gesteun nie."</string>
