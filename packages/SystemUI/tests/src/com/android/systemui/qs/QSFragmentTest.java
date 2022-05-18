@@ -20,6 +20,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -161,6 +163,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         QSFragment qs = (QSFragment) mFragment;
         qs.setListening(true);
         qs.setExpanded(true);
+        qs.setQsVisible(true);
         processAllMessages();
         recreateFragment();
         processAllMessages();
@@ -169,6 +172,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         qs = (QSFragment) mFragment;
         assertTrue(qs.isListening());
         assertTrue(qs.isExpanded());
+        assertTrue(qs.isQsVisible());
     }
 
     @Test
@@ -331,6 +335,54 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         fragment.setOverScrollAmount(123);
 
         assertThat(mQsFragmentView.getTranslationY()).isEqualTo(0);
+    }
+
+    @Test
+    public void setListeningFalse_notVisible() {
+        QSFragment fragment = resumeAndGetFragment();
+        fragment.setQsVisible(false);
+        clearInvocations(mQSContainerImplController, mQSPanelController, mQSFooterActionController);
+
+        fragment.setListening(false);
+        verify(mQSContainerImplController).setListening(false);
+        verify(mQSFooterActionController).setListening(false);
+        verify(mQSPanelController).setListening(eq(false), anyBoolean());
+    }
+
+    @Test
+    public void setListeningTrue_notVisible() {
+        QSFragment fragment = resumeAndGetFragment();
+        fragment.setQsVisible(false);
+        clearInvocations(mQSContainerImplController, mQSPanelController, mQSFooterActionController);
+
+        fragment.setListening(true);
+        verify(mQSContainerImplController).setListening(false);
+        verify(mQSFooterActionController).setListening(false);
+        verify(mQSPanelController).setListening(eq(false), anyBoolean());
+    }
+
+    @Test
+    public void setListeningFalse_visible() {
+        QSFragment fragment = resumeAndGetFragment();
+        fragment.setQsVisible(true);
+        clearInvocations(mQSContainerImplController, mQSPanelController, mQSFooterActionController);
+
+        fragment.setListening(false);
+        verify(mQSContainerImplController).setListening(false);
+        verify(mQSFooterActionController).setListening(false);
+        verify(mQSPanelController).setListening(eq(false), anyBoolean());
+    }
+
+    @Test
+    public void setListeningTrue_visible() {
+        QSFragment fragment = resumeAndGetFragment();
+        fragment.setQsVisible(true);
+        clearInvocations(mQSContainerImplController, mQSPanelController, mQSFooterActionController);
+
+        fragment.setListening(true);
+        verify(mQSContainerImplController).setListening(true);
+        verify(mQSFooterActionController).setListening(true);
+        verify(mQSPanelController).setListening(eq(true), anyBoolean());
     }
 
     @Override
