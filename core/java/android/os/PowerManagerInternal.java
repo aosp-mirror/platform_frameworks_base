@@ -330,6 +330,9 @@ public abstract class PowerManagerInternal {
     /** Returns information about the last wakeup event. */
     public abstract PowerManager.WakeData getLastWakeup();
 
+    /** Returns information about the last event to go to sleep. */
+    public abstract PowerManager.SleepData getLastGoToSleep();
+
     /** Allows power button to intercept a power key button press. */
     public abstract boolean interceptPowerKeyDown(KeyEvent event);
 }
