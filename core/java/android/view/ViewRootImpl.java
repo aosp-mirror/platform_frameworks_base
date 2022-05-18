@@ -90,6 +90,7 @@ import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodCl
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.INSETS_CONTROLLER;
 
 import android.Manifest;
+import android.animation.AnimationHandler;
 import android.animation.LayoutTransition;
 import android.annotation.AnyThread;
 import android.annotation.NonNull;
@@ -1369,6 +1370,8 @@ public final class ViewRootImpl implements ViewParent,
                 mFirstInputStage = nativePreImeStage;
                 mFirstPostImeInputStage = earlyPostImeStage;
                 mPendingInputEventQueueLengthCounterName = "aq:pending:" + counterSuffix;
+
+                AnimationHandler.requestAnimatorsEnabled(mAppVisible, this);
             }
         }
     }
@@ -1714,6 +1717,7 @@ public final class ViewRootImpl implements ViewParent,
             if (!mAppVisible) {
                 WindowManagerGlobal.trimForeground();
             }
+            AnimationHandler.requestAnimatorsEnabled(mAppVisible, this);
         }
     }
 
@@ -1773,7 +1777,7 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
-        mForceNextWindowRelayout = forceNextWindowRelayout;
+        mForceNextWindowRelayout |= forceNextWindowRelayout;
         mPendingAlwaysConsumeSystemBars = args.argi2 != 0;
         mSyncSeqId = args.argi4 > mSyncSeqId ? args.argi4 : mSyncSeqId;
 
@@ -5234,6 +5238,9 @@ public final class ViewRootImpl implements ViewParent,
             // the buffers may still have content in previous rotation. And the next draw may
             // not update all regions, that causes some afterimages to flicker.
             mUpdateSurfaceNeeded = true;
+            if (!mIsInTraversal) {
+                mForceNextWindowRelayout = true;
+            }
         }
 
         Configuration globalConfig = mergedConfiguration.getGlobalConfiguration();
@@ -8501,6 +8508,7 @@ public final class ViewRootImpl implements ViewParent,
             mInsetsController.onControlsChanged(null);
 
             mAdded = false;
+            AnimationHandler.removeRequestor(this);
         }
         WindowManagerGlobal.getInstance().doRemoveView(this);
     }

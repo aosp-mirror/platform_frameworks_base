@@ -282,7 +282,7 @@ public class PipMenuView extends FrameLayout {
                 && mSplitScreenControllerOptional.get().isTaskInSplitScreen(taskInfo.taskId);
         mFocusedTaskAllowSplitScreen = isSplitScreen
                 || (taskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
-                && taskInfo.supportsSplitScreenMultiWindow
+                && taskInfo.supportsMultiWindow
                 && taskInfo.topActivityType != WindowConfiguration.ACTIVITY_TYPE_HOME);
     }
 

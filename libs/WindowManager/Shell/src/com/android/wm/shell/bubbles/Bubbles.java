@@ -57,7 +57,7 @@ public interface Bubbles {
             DISMISS_NOTIF_CANCEL, DISMISS_ACCESSIBILITY_ACTION, DISMISS_NO_LONGER_BUBBLE,
             DISMISS_USER_CHANGED, DISMISS_GROUP_CANCELLED, DISMISS_INVALID_INTENT,
             DISMISS_OVERFLOW_MAX_REACHED, DISMISS_SHORTCUT_REMOVED, DISMISS_PACKAGE_REMOVED,
-            DISMISS_NO_BUBBLE_UP, DISMISS_RELOAD_FROM_DISK})
+            DISMISS_NO_BUBBLE_UP, DISMISS_RELOAD_FROM_DISK, DISMISS_USER_REMOVED})
     @Target({FIELD, LOCAL_VARIABLE, PARAMETER})
     @interface DismissReason {}
 
@@ -76,6 +76,7 @@ public interface Bubbles {
     int DISMISS_PACKAGE_REMOVED = 13;
     int DISMISS_NO_BUBBLE_UP = 14;
     int DISMISS_RELOAD_FROM_DISK = 15;
+    int DISMISS_USER_REMOVED = 16;
 
     /**
      * @return {@code true} if there is a bubble associated with the provided key and if its
@@ -213,6 +214,11 @@ public interface Bubbles {
             int modificationType);
 
     /**
+     * Called when notification panel is expanded or collapsed
+     */
+    void onNotificationPanelExpandedChanged(boolean expanded);
+
+    /**
      * Called when the status bar has become visible or invisible (either permanently or
      * temporarily).
      */
@@ -241,6 +247,13 @@ public interface Bubbles {
      * @param currentProfiles the user infos for the current profile.
      */
     void onCurrentProfilesChanged(SparseArray<UserInfo> currentProfiles);
+
+    /**
+     * Called when a user is removed.
+     *
+     * @param removedUserId the id of the removed user.
+     */
+    void onUserRemoved(int removedUserId);
 
     /**
      * Called when config changed.
@@ -277,7 +290,7 @@ public interface Bubbles {
 
     /** Callback to tell SysUi components execute some methods. */
     interface SysuiProxy {
-        void isNotificationShadeExpand(Consumer<Boolean> callback);
+        void isNotificationPanelExpand(Consumer<Boolean> callback);
 
         void getPendingOrActiveEntry(String key, Consumer<BubbleEntry> callback);
 

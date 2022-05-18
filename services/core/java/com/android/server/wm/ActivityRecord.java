@@ -3000,25 +3000,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 && info.supportsPictureInPicture();
     }
 
-    /**
-     * @return whether this activity supports split-screen multi-window and can be put in
-     *         split-screen.
-     */
-    @Override
-    public boolean supportsSplitScreenWindowingMode() {
-        return supportsSplitScreenWindowingModeInDisplayArea(getDisplayArea());
-    }
-
-    /**
-     * @return whether this activity supports split-screen multi-window and can be put in
-     *         split-screen if it is in the given {@link TaskDisplayArea}.
-     */
-    boolean supportsSplitScreenWindowingModeInDisplayArea(@Nullable TaskDisplayArea tda) {
-        return super.supportsSplitScreenWindowingMode()
-                && mAtmService.mSupportsSplitScreenMultiWindow
-                && supportsMultiWindowInDisplayArea(tda);
-    }
-
     boolean supportsFreeform() {
         return supportsFreeformInDisplayArea(getDisplayArea());
     }

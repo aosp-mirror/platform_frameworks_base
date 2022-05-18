@@ -2593,7 +2593,8 @@ class ContextImpl extends Context {
         try {
             return createPackageContextAsUser(getPackageName(), flags, user);
         } catch (NameNotFoundException e) {
-            throw new IllegalStateException("Own package not found: package=" + getPackageName());
+            throw new IllegalStateException("Own package not found for user "
+                    + user.getIdentifier() + ": package=" + getPackageName());
         }
     }
 
