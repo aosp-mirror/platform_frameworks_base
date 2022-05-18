@@ -530,13 +530,7 @@ public class DisplayRotation {
     private void startRemoteRotation(int fromRotation, int toRotation) {
         mDisplayContent.mRemoteDisplayChangeController.performRemoteDisplayChange(
                 fromRotation, toRotation, null /* newDisplayAreaInfo */,
-                (appliedChange, transaction) -> {
-                    final int newRotation = appliedChange != null
-                            ? appliedChange.toRotation
-                            // Timeout occurred, use old rotation
-                            : fromRotation;
-                    continueRotation(newRotation, transaction);
-                }
+                (transaction) -> continueRotation(toRotation, transaction)
         );
     }
 
