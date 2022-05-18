@@ -110,4 +110,24 @@ public class IconMarginSpan implements LeadingMarginSpan, LineHeightSpan {
         }
     }
 
+    @Override
+    public String toString() {
+        return "IconMarginSpan{bitmap=" + getBitmap() + ", padding=" + getPadding() + '}';
+    }
+
+    /**
+     * Returns the bitmap to be used at the beginning of the text
+     * @return a bitmap
+     */
+    @NonNull public Bitmap getBitmap() {
+        return mBitmap;
+    }
+
+    /**
+     * Returns the padding width between the bitmap and the text.
+     * @return a padding width in pixels
+     */
+    @Px public int getPadding() {
+        return mPad;
+    }
 }

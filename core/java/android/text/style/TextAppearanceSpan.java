@@ -442,6 +442,14 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
         return mElegantTextHeight;
     }
 
+    /**
+     * Returns the value of letter spacing to be added in em unit.
+     * @return a letter spacing amount
+     */
+    public float getLetterSpacing() {
+        return mLetterSpacing;
+    }
+
     @Override
     public void updateDrawState(TextPaint ds) {
         updateMeasureState(ds);
@@ -533,5 +541,27 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
         if (mFontVariationSettings != null) {
             ds.setFontVariationSettings(mFontVariationSettings);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "TextAppearanceSpan{"
+                + "familyName='" + getFamily() + '\''
+                + ", style=" + getTextStyle()
+                + ", textSize=" + getTextSize()
+                + ", textColor=" + getTextColor()
+                + ", textColorLink=" + getLinkTextColor()
+                + ", typeface=" + getTypeface()
+                + ", textFontWeight=" + getTextFontWeight()
+                + ", textLocales=" + getTextLocales()
+                + ", shadowRadius=" + getShadowRadius()
+                + ", shadowDx=" + getShadowDx()
+                + ", shadowDy=" + getShadowDy()
+                + ", shadowColor=" + String.format("#%08X", getShadowColor())
+                + ", elegantTextHeight=" + isElegantTextHeight()
+                + ", letterSpacing=" + getLetterSpacing()
+                + ", fontFeatureSettings='" + getFontFeatureSettings() + '\''
+                + ", fontVariationSettings='" + getFontVariationSettings() + '\''
+                + '}';
     }
 }

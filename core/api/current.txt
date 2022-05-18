@@ -45941,7 +45941,9 @@ package android.text.style {
     ctor public DrawableMarginSpan(@NonNull android.graphics.drawable.Drawable, int);
     method public void chooseHeight(@NonNull CharSequence, int, int, int, int, @NonNull android.graphics.Paint.FontMetricsInt);
     method public void drawLeadingMargin(@NonNull android.graphics.Canvas, @NonNull android.graphics.Paint, int, int, int, int, int, @NonNull CharSequence, int, int, boolean, @NonNull android.text.Layout);
+    method @NonNull public android.graphics.drawable.Drawable getDrawable();
     method public int getLeadingMargin(boolean);
+    method @Px public int getPadding();
   }
 
   public abstract class DynamicDrawableSpan extends android.text.style.ReplacementSpan {
@@ -45984,7 +45986,9 @@ package android.text.style {
     ctor public IconMarginSpan(@NonNull android.graphics.Bitmap, @IntRange(from=0) int);
     method public void chooseHeight(CharSequence, int, int, int, int, android.graphics.Paint.FontMetricsInt);
     method public void drawLeadingMargin(android.graphics.Canvas, android.graphics.Paint, int, int, int, int, int, CharSequence, int, int, boolean, android.text.Layout);
+    method @NonNull public android.graphics.Bitmap getBitmap();
     method public int getLeadingMargin(boolean);
+    method @Px public int getPadding();
   }
 
   public class ImageSpan extends android.text.style.DynamicDrawableSpan {
@@ -46232,6 +46236,7 @@ package android.text.style {
     method public String getFamily();
     method @Nullable public String getFontFeatureSettings();
     method @Nullable public String getFontVariationSettings();
+    method public float getLetterSpacing();
     method public android.content.res.ColorStateList getLinkTextColor();
     method public int getShadowColor();
     method public float getShadowDx();
