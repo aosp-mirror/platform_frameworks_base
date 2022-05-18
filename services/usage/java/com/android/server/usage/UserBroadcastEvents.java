@@ -19,7 +19,8 @@ package com.android.server.usage;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.ArrayMap;
-import android.util.LongSparseArray;
+import android.util.ArraySet;
+import android.util.LongArrayQueue;
 import android.util.TimeUtils;
 
 import com.android.internal.util.IndentingPrintWriter;
@@ -30,17 +31,17 @@ class UserBroadcastEvents {
      * Here targetPackage refers to the package receiving the broadcast and BroadcastEvent objects
      * corresponding to each broadcast it is receiving.
      */
-    private ArrayMap<String, LongSparseArray<BroadcastEvent>> mBroadcastEvents = new ArrayMap();
+    private ArrayMap<String, ArraySet<BroadcastEvent>> mBroadcastEvents = new ArrayMap();
 
-    @Nullable LongSparseArray<BroadcastEvent> getBroadcastEvents(@NonNull String packageName) {
+    @Nullable ArraySet<BroadcastEvent> getBroadcastEvents(@NonNull String packageName) {
         return mBroadcastEvents.get(packageName);
     }
 
-    @NonNull LongSparseArray<BroadcastEvent> getOrCreateBroadcastEvents(
+    @NonNull ArraySet<BroadcastEvent> getOrCreateBroadcastEvents(
             @NonNull String packageName) {
-        LongSparseArray<BroadcastEvent> broadcastEvents = mBroadcastEvents.get(packageName);
+        ArraySet<BroadcastEvent> broadcastEvents = mBroadcastEvents.get(packageName);
         if (broadcastEvents == null) {
-            broadcastEvents = new LongSparseArray<>();
+            broadcastEvents = new ArraySet<>();
             mBroadcastEvents.put(packageName, broadcastEvents);
         }
         return broadcastEvents;
@@ -56,7 +57,7 @@ class UserBroadcastEvents {
 
     void clear(int uid) {
         for (int i = mBroadcastEvents.size() - 1; i >= 0; --i) {
-            final LongSparseArray<BroadcastEvent> broadcastEvents = mBroadcastEvents.valueAt(i);
+            final ArraySet<BroadcastEvent> broadcastEvents = mBroadcastEvents.valueAt(i);
             for (int j = broadcastEvents.size() - 1; j >= 0; --j) {
                 if (broadcastEvents.valueAt(j).getSourceUid() == uid) {
                     broadcastEvents.removeAt(j);
@@ -68,18 +69,26 @@ class UserBroadcastEvents {
     void dump(@NonNull IndentingPrintWriter ipw) {
         for (int i = 0; i < mBroadcastEvents.size(); ++i) {
             final String packageName = mBroadcastEvents.keyAt(i);
-            final LongSparseArray<BroadcastEvent> broadcastEvents = mBroadcastEvents.valueAt(i);
+            final ArraySet<BroadcastEvent> broadcastEvents = mBroadcastEvents.valueAt(i);
             ipw.println(packageName + ":");
             ipw.increaseIndent();
             if (broadcastEvents.size() == 0) {
                 ipw.println("<empty>");
             } else {
                 for (int j = 0; j < broadcastEvents.size(); ++j) {
-                    final long timestampMs = broadcastEvents.keyAt(j);
                     final BroadcastEvent broadcastEvent = broadcastEvents.valueAt(j);
-                    TimeUtils.formatDuration(timestampMs, ipw);
-                    ipw.print(": ");
                     ipw.println(broadcastEvent);
+                    ipw.increaseIndent();
+                    final LongArrayQueue timestampsMs = broadcastEvent.getTimestampsMs();
+                    for (int timestampIdx = 0; timestampIdx < timestampsMs.size(); ++timestampIdx) {
+                        if (timestampIdx > 0) {
+                            ipw.print(',');
+                        }
+                        final long timestampMs = timestampsMs.get(timestampIdx);
+                        TimeUtils.formatDuration(timestampMs, ipw);
+                    }
+                    ipw.println();
+                    ipw.decreaseIndent();
                 }
             }
             ipw.decreaseIndent();
