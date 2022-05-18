@@ -72,6 +72,7 @@ public class Scribe {
     private static final String XML_TAG_TARE = "tare";
     private static final String XML_TAG_TRANSACTION = "transaction";
     private static final String XML_TAG_USER = "user";
+    private static final String XML_TAG_PERIOD_REPORT = "report";
 
     private static final String XML_ATTR_CTP = "ctp";
     private static final String XML_ATTR_DELTA = "delta";
@@ -86,6 +87,18 @@ public class Scribe {
     private static final String XML_ATTR_LAST_RECLAMATION_TIME = "lastReclamationTime";
     private static final String XML_ATTR_REMAINING_CONSUMABLE_CAKES = "remainingConsumableCakes";
     private static final String XML_ATTR_CONSUMPTION_LIMIT = "consumptionLimit";
+    private static final String XML_ATTR_PR_DISCHARGE = "discharge";
+    private static final String XML_ATTR_PR_BATTERY_LEVEL = "batteryLevel";
+    private static final String XML_ATTR_PR_PROFIT = "profit";
+    private static final String XML_ATTR_PR_NUM_PROFIT = "numProfits";
+    private static final String XML_ATTR_PR_LOSS = "loss";
+    private static final String XML_ATTR_PR_NUM_LOSS = "numLoss";
+    private static final String XML_ATTR_PR_REWARDS = "rewards";
+    private static final String XML_ATTR_PR_NUM_REWARDS = "numRewards";
+    private static final String XML_ATTR_PR_POS_REGULATIONS = "posRegulations";
+    private static final String XML_ATTR_PR_NUM_POS_REGULATIONS = "numPosRegulations";
+    private static final String XML_ATTR_PR_NEG_REGULATIONS = "negRegulations";
+    private static final String XML_ATTR_PR_NUM_NEG_REGULATIONS = "numNegRegulations";
 
     /** Version of the file schema. */
     private static final int STATE_FILE_VERSION = 0;
@@ -94,6 +107,7 @@ public class Scribe {
 
     private final AtomicFile mStateFile;
     private final InternalResourceService mIrs;
+    private final Analyst mAnalyst;
 
     @GuardedBy("mIrs.getLock()")
     private long mLastReclamationTime;
@@ -107,13 +121,14 @@ public class Scribe {
     private final Runnable mCleanRunnable = this::cleanupLedgers;
     private final Runnable mWriteRunnable = this::writeState;
 
-    Scribe(InternalResourceService irs) {
-        this(irs, Environment.getDataSystemDirectory());
+    Scribe(InternalResourceService irs, Analyst analyst) {
+        this(irs, analyst, Environment.getDataSystemDirectory());
     }
 
     @VisibleForTesting
-    Scribe(InternalResourceService irs, File dataDir) {
+    Scribe(InternalResourceService irs, Analyst analyst, File dataDir) {
         mIrs = irs;
+        mAnalyst = analyst;
 
         final File tareDir = new File(dataDir, "tare");
         //noinspection ResultOfMethodCallIgnored
@@ -210,6 +225,7 @@ public class Scribe {
             }
         }
 
+        final List<Analyst.Report> reports = new ArrayList<>();
         try (FileInputStream fis = mStateFile.openRead()) {
             TypedXmlPullParser parser = Xml.resolvePullParser(fis);
 
@@ -263,11 +279,15 @@ public class Scribe {
                                 readUserFromXmlLocked(
                                         parser, installedPackagesPerUser, endTimeCutoff));
                         break;
+                    case XML_TAG_PERIOD_REPORT:
+                        reports.add(readReportFromXml(parser));
+                        break;
                     default:
                         Slog.e(TAG, "Unexpected tag: " + tagName);
                         break;
                 }
             }
+            mAnalyst.loadReports(reports);
             scheduleCleanup(earliestEndTime);
         } catch (IOException | XmlPullParserException e) {
             Slog.wtf(TAG, "Error reading state from disk", e);
@@ -457,6 +477,37 @@ public class Scribe {
         return earliestEndTime;
     }
 
+
+    /**
+     * @param parser Xml parser at the beginning of a {@link #XML_TAG_PERIOD_REPORT} tag. The next
+     *               "parser.next()" call will take the parser into the body of the report tag.
+     * @return Newly instantiated Report holding all the information we just read out of the xml tag
+     */
+    @NonNull
+    private static Analyst.Report readReportFromXml(TypedXmlPullParser parser)
+            throws XmlPullParserException, IOException {
+        final Analyst.Report report = new Analyst.Report();
+
+        report.cumulativeBatteryDischarge = parser.getAttributeInt(null, XML_ATTR_PR_DISCHARGE);
+        report.currentBatteryLevel = parser.getAttributeInt(null, XML_ATTR_PR_BATTERY_LEVEL);
+        report.cumulativeProfit = parser.getAttributeLong(null, XML_ATTR_PR_PROFIT);
+        report.numProfitableActions = parser.getAttributeInt(null, XML_ATTR_PR_NUM_PROFIT);
+        report.cumulativeLoss = parser.getAttributeLong(null, XML_ATTR_PR_LOSS);
+        report.numUnprofitableActions = parser.getAttributeInt(null, XML_ATTR_PR_NUM_LOSS);
+        report.cumulativeRewards = parser.getAttributeLong(null, XML_ATTR_PR_REWARDS);
+        report.numRewards = parser.getAttributeInt(null, XML_ATTR_PR_NUM_REWARDS);
+        report.cumulativePositiveRegulations =
+                parser.getAttributeLong(null, XML_ATTR_PR_POS_REGULATIONS);
+        report.numPositiveRegulations =
+                parser.getAttributeInt(null, XML_ATTR_PR_NUM_POS_REGULATIONS);
+        report.cumulativeNegativeRegulations =
+                parser.getAttributeLong(null, XML_ATTR_PR_NEG_REGULATIONS);
+        report.numNegativeRegulations =
+                parser.getAttributeInt(null, XML_ATTR_PR_NUM_NEG_REGULATIONS);
+
+        return report;
+    }
+
     private void scheduleCleanup(long earliestEndTime) {
         if (earliestEndTime == Long.MAX_VALUE) {
             return;
@@ -499,6 +550,11 @@ public class Scribe {
                     final int userId = mLedgers.keyAt(uIdx);
                     earliestStoredEndTime = Math.min(earliestStoredEndTime,
                             writeUserLocked(out, userId));
+                }
+
+                List<Analyst.Report> reports = mAnalyst.getReports();
+                for (int i = 0, size = reports.size(); i < size; ++i) {
+                    writeReport(out, reports.get(i));
                 }
 
                 out.endTag(null, XML_TAG_TARE);
@@ -558,6 +614,24 @@ public class Scribe {
         out.attributeLong(null, XML_ATTR_DELTA, transaction.delta);
         out.attributeLong(null, XML_ATTR_CTP, transaction.ctp);
         out.endTag(null, XML_TAG_TRANSACTION);
+    }
+
+    private static void writeReport(@NonNull TypedXmlSerializer out,
+            @NonNull Analyst.Report report) throws IOException {
+        out.startTag(null, XML_TAG_PERIOD_REPORT);
+        out.attributeInt(null, XML_ATTR_PR_DISCHARGE, report.cumulativeBatteryDischarge);
+        out.attributeInt(null, XML_ATTR_PR_BATTERY_LEVEL, report.currentBatteryLevel);
+        out.attributeLong(null, XML_ATTR_PR_PROFIT, report.cumulativeProfit);
+        out.attributeInt(null, XML_ATTR_PR_NUM_PROFIT, report.numProfitableActions);
+        out.attributeLong(null, XML_ATTR_PR_LOSS, report.cumulativeLoss);
+        out.attributeInt(null, XML_ATTR_PR_NUM_LOSS, report.numUnprofitableActions);
+        out.attributeLong(null, XML_ATTR_PR_REWARDS, report.cumulativeRewards);
+        out.attributeInt(null, XML_ATTR_PR_NUM_REWARDS, report.numRewards);
+        out.attributeLong(null, XML_ATTR_PR_POS_REGULATIONS, report.cumulativePositiveRegulations);
+        out.attributeInt(null, XML_ATTR_PR_NUM_POS_REGULATIONS, report.numPositiveRegulations);
+        out.attributeLong(null, XML_ATTR_PR_NEG_REGULATIONS, report.cumulativeNegativeRegulations);
+        out.attributeInt(null, XML_ATTR_PR_NUM_NEG_REGULATIONS, report.numNegativeRegulations);
+        out.endTag(null, XML_TAG_PERIOD_REPORT);
     }
 
     @GuardedBy("mIrs.getLock()")
