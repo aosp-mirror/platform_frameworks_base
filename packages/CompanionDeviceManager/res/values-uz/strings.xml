@@ -17,11 +17,12 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"Companion Device Manager"</string>
-    <string name="confirmation_title" msgid="8455544820286920304">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; qurilmasini boshqarish uchun &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ilovasiga ruxsat bering"</string>
+    <!-- no translation found for confirmation_title (3785000297483688997) -->
+    <skip />
     <string name="profile_name_watch" msgid="576290739483672360">"soat"</string>
     <string name="chooser_title" msgid="2262294130493605839">"&lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt; boshqaradigan <xliff:g id="PROFILE_NAME">%1$s</xliff:g> qurilmasini tanlang"</string>
-    <string name="summary_watch" product="default" msgid="7113724443198337683">"<xliff:g id="APP_NAME">%1$s</xliff:g> ilovasiga bildirishnomalar bilan ishlash va telefon, SMS, kontaktlar va taqvimga kirishga ruxsat beriladi"</string>
-    <string name="summary_watch" product="tablet" msgid="7113724443198337683">"<xliff:g id="APP_NAME">%1$s</xliff:g> ilovasiga bildirishnomalar bilan ishlash va telefon, SMS, kontaktlar va taqvimga kirishga ruxsat beriladi"</string>
+    <!-- no translation found for summary_watch (3002344206574997652) -->
+    <skip />
     <string name="permission_apps" msgid="6142133265286656158">"Ilovalar"</string>
     <string name="permission_apps_summary" msgid="798718816711515431">"Telefondagi ilovalarni translatsiya qilish"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ilovasiga telefondagi ushbu maʼlumot uchun ruxsat bering"</string>
@@ -44,4 +45,8 @@
     <string name="consent_back" msgid="2560683030046918882">"Orqaga"</string>
     <string name="permission_sync_confirmation_title" msgid="667074294393493186">"Ilova uchun ruxsatlarni soatingizga uzating"</string>
     <string name="permission_sync_summary" msgid="8873391306499120778">"Soatingizni sozlashni qulaylashtirish maqsadida sozlash paytida soatingizga oʻrnatilgan ilovalar telefoningiz bilan bir xil ruxsatlardan foydalanadi.\n\n Bunday ruxsatlarga soatingiz mikrofoni va joylashuv axborotiga ruxsatlar kirishi mumkin."</string>
+    <!-- no translation found for vendor_icon_description (4445875290032225965) -->
+    <skip />
+    <!-- no translation found for vendor_header_button_description (6566660389500630608) -->
+    <skip />
 </resources>

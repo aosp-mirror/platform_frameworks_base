@@ -137,6 +137,10 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         when(mMediaHost.getDisappearParameters()).thenReturn(new DisappearParameters());
         when(mQSPanel.getResources()).thenReturn(mResources);
         when(mResources.getConfiguration()).thenReturn(mConfiguration);
+        doAnswer(invocation -> {
+            when(mQSPanel.isListening()).thenReturn(invocation.getArgument(0));
+            return null;
+        }).when(mQSPanel).setListening(anyBoolean());
 
         mController = new TestableQSPanelControllerBase(mQSPanel, mQSTileHost,
                 mQSCustomizerController, mMediaHost,
