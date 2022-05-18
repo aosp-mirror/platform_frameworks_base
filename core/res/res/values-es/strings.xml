@@ -2281,5 +2281,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Consultar aplicaciones activas"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"No se puede acceder a la cámara del teléfono desde tu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"No se puede acceder a la cámara del tablet desde tu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"Idioma del sistema"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Predeterminado del sistema"</string>
 </resources>

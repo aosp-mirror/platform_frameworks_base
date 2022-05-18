@@ -72,6 +72,7 @@ import static com.android.server.pm.PackageManagerService.SCAN_AS_VENDOR;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_VIRTUAL_PRELOAD;
 import static com.android.server.pm.PackageManagerService.SCAN_BOOTING;
 import static com.android.server.pm.PackageManagerService.SCAN_DONT_KILL_APP;
+import static com.android.server.pm.PackageManagerService.SCAN_DROP_CACHE;
 import static com.android.server.pm.PackageManagerService.SCAN_FIRST_BOOT_OR_UPGRADE;
 import static com.android.server.pm.PackageManagerService.SCAN_IGNORE_FROZEN;
 import static com.android.server.pm.PackageManagerService.SCAN_INITIAL;
@@ -152,6 +153,7 @@ import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.dex.ViewCompiler;
+import com.android.server.pm.parsing.PackageCacher;
 import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
@@ -646,6 +648,10 @@ final class InstallPackageHelper {
             int userId, PackageInstalledInfo res, @Nullable PostInstallData data) {
         if (DEBUG_INSTALL) {
             Log.v(TAG, "restoreAndPostInstall userId=" + userId + " package=" + res.mPkg);
+        }
+
+        if (res.mPkg != null) {
+            PackageManagerServiceUtils.verifySelinuxLabels(res.mPkg.getPath());
         }
 
         // A restore should be requested at this point if (a) the install
@@ -3414,6 +3420,11 @@ final class InstallPackageHelper {
                 // Ignore entries which are not packages
                 continue;
             }
+            if ((scanFlags & SCAN_DROP_CACHE) != 0) {
+                final PackageCacher cacher = new PackageCacher(mPm.getCacheDir());
+                Log.w(TAG, "Dropping cache of " + file.getAbsolutePath());
+                cacher.cleanCachedResult(file);
+            }
             parallelPackageParser.submit(file, parseFlags);
             fileCount++;
         }
@@ -3566,6 +3577,7 @@ final class InstallPackageHelper {
             @ParsingPackageUtils.ParseFlags int parseFlags,
             @PackageManagerService.ScanFlags int scanFlags,
             @Nullable UserHandle user) throws PackageManagerException {
+        PackageManagerServiceUtils.verifySelinuxLabels(parsedPackage.getPath());
 
         final Pair<ScanResult, Boolean> scanResultPair = scanSystemPackageLI(
                 parsedPackage, parseFlags, scanFlags, user);

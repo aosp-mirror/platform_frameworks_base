@@ -78,8 +78,7 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Riprova ad acquisire lo screenshot"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Impossibile salvare lo screenshot"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"L\'acquisizione di screenshot non è consentita dall\'app o dall\'organizzazione"</string>
-    <!-- no translation found for screenshot_blocked_by_admin (5486757604822795797) -->
-    <skip />
+    <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"L\'acquisizione di screenshot è stata bloccata dall\'amministratore IT"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Modifica"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Modifica screenshot"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Condividi screenshot"</string>
@@ -314,6 +313,10 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Scorri verso l\'alto per aprire"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Premi l\'icona Sblocca per aprire"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Sbloccato con il volto. Premi l\'icona Sblocca per aprire."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"Scorri verso l\'alto per riprovare"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Sblocca per usare NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Questo dispositivo appartiene alla tua organizzazione"</string>
@@ -460,7 +463,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"Portafoglio"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Imposta un metodo di pagamento per effettuare acquisti in modo più rapido e sicuro con il telefono"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Espandi"</string>
-    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Aggiungi una carta"</string>
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Tocca per aprire"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Aggiornamento in corso…"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Sblocca per usare"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Si è verificato un problema durante il recupero delle tue carte. Riprova più tardi."</string>
@@ -720,8 +723,7 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"Attiva questa funzionalità se è probabile che la batteria si scarichi"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"No grazie"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump heap SysUI"</string>
-    <!-- no translation found for ongoing_privacy_dialog_a11y_title (2205794093673327974) -->
-    <skip />
+    <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"In uso"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Le app stanno usando <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" e "</string>
@@ -819,7 +821,6 @@
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Avvicinati per riprodurre su <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Avvicinati a <xliff:g id="DEVICENAME">%1$s</xliff:g> per riprodurre i contenuti qui"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"In riproduzione su <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
-    <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"In riproduzione su questo telefono"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Si è verificato un errore. Riprova."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inattivo, controlla l\'app"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Controllo non trovato"</string>
@@ -840,6 +841,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Per trasmettere questa sessione devi aprire l\'app."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"App sconosciuta"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Interrompi trasmissione"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Come funziona la trasmissione"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Annuncio"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Le persone vicine a te che hanno dispositivi Bluetooth compatibili possono ascoltare i contenuti multimediali che stai trasmettendo"</string>
@@ -847,12 +850,10 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Nome annuncio"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Password"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Salva"</string>
-    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Avvio in corso…"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"In fase di avvio"</string>
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Impossibile trasmettere"</string>
-    <!-- no translation found for media_output_broadcast_update_error (1420868236079122521) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_last_update_error (5484328807296895491) -->
-    <skip />
+    <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Impossibile salvare. Riprova."</string>
+    <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Impossibile salvare."</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Numero build"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Numero build copiato negli appunti."</string>
     <string name="basic_status" msgid="2315371112182658176">"Apri conversazione"</string>
@@ -922,8 +923,8 @@
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Non aggiungerlo"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Seleziona utente"</string>
     <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
-      <item quantity="other">Ci sono <xliff:g id="COUNT_1">%s</xliff:g> app attive</item>
-      <item quantity="one">C\'è <xliff:g id="COUNT_0">%s</xliff:g> app attiva</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> app attive</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> app attiva</item>
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nuove informazioni"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"App attive"</string>
@@ -937,6 +938,13 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Modifica testo copiato"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Modifica immagine copiata"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Invia a dispositivo nelle vicinanze"</string>
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"Tocca per visualizzare"</string>
+    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
+    <skip />
+    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
+    <skip />
+    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
+    <skip />
     <string name="add" msgid="81036585205287996">"Aggiungi"</string>
     <string name="manage_users" msgid="1823875311934643849">"Gestisci utenti"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Non è possibile trascinare questa notifica tra le due parti dello schermo diviso."</string>

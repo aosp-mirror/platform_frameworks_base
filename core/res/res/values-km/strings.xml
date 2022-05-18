@@ -2281,5 +2281,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ពិនិត្យមើលកម្មវិធីសកម្ម"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"មិនអាច​ចូលប្រើ​កាមេរ៉ាទូរសព្ទ​ពី <xliff:g id="DEVICE">%1$s</xliff:g> របស់អ្នក​បានទេ"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"មិនអាច​ចូលប្រើ​កាមេរ៉ា​ថេប្លេតពី <xliff:g id="DEVICE">%1$s</xliff:g> របស់អ្នក​បានទេ"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"ភាសាប្រព័ន្ធ"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"លំនាំ​ដើម​ប្រព័ន្ធ"</string>
 </resources>

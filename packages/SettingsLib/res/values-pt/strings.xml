@@ -594,7 +594,7 @@
     <string name="guest_exit_guest" msgid="5908239569510734136">"Remover convidado"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Redefinir sessão de visitante"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Redefinir visitante?"</string>
-    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Remover convidado?"</string>
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Remover visitante?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Redefinir"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Remover"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Redefinindo visitante…"</string>
@@ -652,17 +652,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Ligar tela"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Permitir que a tela seja ligada"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Permitir que um app ligue a tela. Se permitido, o app vai poder ligar a tela a qualquer momento sem uma intent explícita."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Ler o código QR"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Para começar a ouvir, centralize o código QR abaixo"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"O código QR não está em um formato válido"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Interromper a transmissão do app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Se você transmitir o app <xliff:g id="SWITCHAPP">%1$s</xliff:g> ou mudar a saída, a transmissão atual será interrompida"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Transmitir <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Mudar saída"</string>
-    <!-- no translation found for back_navigation_animation (8105467568421689484) -->
-    <skip />
-    <!-- no translation found for back_navigation_animation_summary (741292224121599456) -->
-    <skip />
-    <!-- no translation found for back_navigation_animation_dialog (8696966520944625596) -->
-    <skip />
+    <string name="back_navigation_animation" msgid="8105467568421689484">"Animações de gestos \"Voltar\" preditivos"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Ativar animações do sistema para gestos \"Voltar\" preditivos."</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Esta configuração ativa animações do sistema para gestos preditivos. Ela requer que a política enableOnBackInvokedCallback por app seja definida como verdadeira no arquivo de manifesto."</string>
 </resources>

@@ -124,8 +124,10 @@ public final class DreamManagerService extends SystemService {
                     final boolean activityAllowed = activityType == ACTIVITY_TYPE_HOME
                             || activityType == ACTIVITY_TYPE_DREAM
                             || activityType == ACTIVITY_TYPE_ASSISTANT;
-                    if (mCurrentDreamToken != null && !mCurrentDreamIsWaking && !activityAllowed) {
-                        stopDreamInternal(false, "activity starting: " + activityInfo.name);
+                    if (mCurrentDreamToken != null && !mCurrentDreamIsWaking
+                            && !mCurrentDreamIsDozing && !activityAllowed) {
+                        requestAwakenInternal(
+                                "stopping dream due to activity start: " + activityInfo.name);
                     }
                 }
             };
@@ -229,13 +231,13 @@ public final class DreamManagerService extends SystemService {
         mPowerManager.nap(time);
     }
 
-    private void requestAwakenInternal() {
+    private void requestAwakenInternal(String reason) {
         // Treat an explicit request to awaken as user activity so that the
         // device doesn't immediately go to sleep if the timeout expired,
         // for example when being undocked.
         long time = SystemClock.uptimeMillis();
         mPowerManager.userActivity(time, false /*noChangeLights*/);
-        stopDreamInternal(false /*immediate*/, "request awaken");
+        stopDreamInternal(false /*immediate*/, reason);
     }
 
     private void finishSelfInternal(IBinder token, boolean immediate) {
@@ -715,7 +717,7 @@ public final class DreamManagerService extends SystemService {
 
             final long ident = Binder.clearCallingIdentity();
             try {
-                requestAwakenInternal();
+                requestAwakenInternal("request awaken");
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

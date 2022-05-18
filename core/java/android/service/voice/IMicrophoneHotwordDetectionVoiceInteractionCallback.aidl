@@ -33,4 +33,9 @@ oneway interface IMicrophoneHotwordDetectionVoiceInteractionCallback {
         in HotwordDetectedResult hotwordDetectedResult,
         in AudioFormat audioFormat,
         in ParcelFileDescriptor audioStream);
+
+    /**
+     * Called when the detection fails due to an error.
+     */
+    void onError();
 }

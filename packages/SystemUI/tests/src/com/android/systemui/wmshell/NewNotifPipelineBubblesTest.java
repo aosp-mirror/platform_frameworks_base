@@ -55,6 +55,7 @@ import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.service.dreams.IDreamManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.ZenModeConfig;
@@ -330,6 +331,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
                 mStatusBarService,
                 mWindowManager,
                 mWindowManagerShellWrapper,
+                mock(UserManager.class),
                 mLauncherApps,
                 mBubbleLogger,
                 mTaskStackListener,
