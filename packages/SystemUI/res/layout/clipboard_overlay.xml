@@ -57,6 +57,8 @@
             android:layout_height="wrap_content"
             android:animateLayoutChanges="true">
             <include layout="@layout/overlay_action_chip"
+                     android:id="@+id/share_chip"/>
+            <include layout="@layout/overlay_action_chip"
                      android:id="@+id/remote_copy_chip"/>
             <include layout="@layout/overlay_action_chip"
                      android:id="@+id/edit_chip"/>
