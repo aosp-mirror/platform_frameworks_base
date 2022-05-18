@@ -1690,7 +1690,7 @@ public class RadioManager {
             if (!(obj instanceof ProgramInfo)) return false;
             ProgramInfo other = (ProgramInfo) obj;
 
-            if (!Objects.equals(mSelector, other.mSelector)) return false;
+            if (!mSelector.strictEquals(other.mSelector)) return false;
             if (!Objects.equals(mLogicallyTunedTo, other.mLogicallyTunedTo)) return false;
             if (!Objects.equals(mPhysicallyTunedTo, other.mPhysicallyTunedTo)) return false;
             if (!Objects.equals(mRelatedContent, other.mRelatedContent)) return false;
