@@ -1141,6 +1141,8 @@ public class WindowManagerShellCommand extends ShellCommand {
                     + mLetterboxConfiguration.getLetterboxActivityCornersRadius());
             pw.println("Horizontal position multiplier: "
                     + mLetterboxConfiguration.getLetterboxHorizontalPositionMultiplier());
+            pw.println("Vertical position multiplier: "
+                    + mLetterboxConfiguration.getLetterboxVerticalPositionMultiplier());
             pw.println("Aspect ratio: "
                     + mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio());
             pw.println("Is horizontal reachability enabled: "
