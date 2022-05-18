@@ -2963,9 +2963,6 @@
         <item>com.android.inputmethod.latin</item>
     </string-array>
 
-    <!-- Make the IME killable by the lowmemorykiller by raising its oom_score_adj. -->
-    <bool name="config_killableInputMethods">false</bool>
-
     <!-- Prevent the InputMethodManagerService from starting up the IME unless
      the currently focused view is a text editor. -->
     <bool name="config_preventImeStartupUnlessTextEditor">false</bool>

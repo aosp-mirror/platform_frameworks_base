@@ -341,10 +341,24 @@ public final class CachedAppOptimizer {
                 }
     };
 
+    // Compaction Stats
     private int mSomeCompactionCount;
     private int mFullCompactionCount;
     private int mPersistentCompactionCount;
     private int mBfgsCompactionCount;
+    private long mSomeCompactRequest;
+    private long mFullCompactRequest;
+    private long mPersistentCompactRequest;
+    private long mBfgsCompactRequest;
+    private long mProcCompactionsRequested;
+    private long mProcCompactionsPerformed;
+    private long mProcCompactionsNoPidThrottled;
+    private long mProcCompactionsOomAdjThrottled;
+    private long mProcCompactionsTimeThrottled;
+    private long mProcCompactionsRSSThrottled;
+    private long mProcCompactionsMiscThrottled;
+    private long mSystemCompactionsPerformed;
+
     private final ProcessDependencies mProcessDependencies;
     private final ProcLocksReader mProcLocksReader;
 
@@ -436,9 +450,31 @@ public final class CachedAppOptimizer {
             pw.println("  "  + KEY_COMPACT_PROC_STATE_THROTTLE + "="
                     + Arrays.toString(mProcStateThrottle.toArray(new Integer[0])));
 
-            pw.println("  " + mSomeCompactionCount + " some, " + mFullCompactionCount
+            pw.println(" Requested:  " + mSomeCompactRequest + " some, " + mFullCompactRequest
+                    + " full, " + mPersistentCompactRequest + " persistent, "
+                    + mBfgsCompactRequest + " BFGS compactions.");
+            pw.println(" Performed: " + mSomeCompactionCount + " some, " + mFullCompactionCount
                     + " full, " + mPersistentCompactionCount + " persistent, "
                     + mBfgsCompactionCount + " BFGS compactions.");
+            pw.println(" Process Compactions Requested: " + mProcCompactionsRequested);
+            pw.println(" Process Compactions Performed: " + mProcCompactionsPerformed);
+            long compactionsThrottled = mProcCompactionsRequested - mProcCompactionsPerformed;
+            pw.println(" Process Compactions Throttled: " + compactionsThrottled);
+            double compactThrottlePercentage =
+                    (compactionsThrottled / (double) mProcCompactionsRequested) * 100.0;
+            pw.println(" Process Compactions Throttle Percentage: " + compactThrottlePercentage);
+            pw.println("        NoPid Throttled: " + mProcCompactionsNoPidThrottled);
+            pw.println("        OomAdj Throttled: " + mProcCompactionsOomAdjThrottled);
+            pw.println("        Time Throttled: " + mProcCompactionsTimeThrottled);
+            pw.println("        RSS Throttled: " + mProcCompactionsRSSThrottled);
+            pw.println("        Misc Throttled: " + mProcCompactionsMiscThrottled);
+            long unaccountedThrottled = compactionsThrottled - mProcCompactionsNoPidThrottled
+                    - mProcCompactionsOomAdjThrottled - mProcCompactionsTimeThrottled
+                    - mProcCompactionsRSSThrottled - mProcCompactionsMiscThrottled;
+            // Any throttle that was not part of the previous categories
+            pw.println("        Unaccounted Throttled: " + unaccountedThrottled);
+
+            pw.println(" System Compactions Performed: " + mSystemCompactionsPerformed);
 
             pw.println("  Tracking last compaction stats for " + mLastCompactionStats.size()
                     + " processes.");
@@ -479,6 +515,7 @@ public final class CachedAppOptimizer {
     @GuardedBy("mProcLock")
     void compactAppSome(ProcessRecord app, boolean force) {
         app.mOptRecord.setReqCompactAction(COMPACT_PROCESS_SOME);
+        ++mSomeCompactRequest;
         compactApp(app, force, "some");
     }
 
@@ -519,6 +556,7 @@ public final class CachedAppOptimizer {
                     " compactAppFull requested for " + app.processName + " force: " + force
                             + " oomAdjEnteredCached: " + oomAdjEnteredCached);
         }
+        ++mFullCompactRequest;
         // Apply OOM adj score throttle for Full App Compaction.
         if (force || oomAdjEnteredCached) {
             app.mOptRecord.setReqCompactAction(COMPACT_PROCESS_FULL);
@@ -535,6 +573,7 @@ public final class CachedAppOptimizer {
     @GuardedBy("mProcLock")
     void compactAppPersistent(ProcessRecord app) {
         app.mOptRecord.setReqCompactAction(COMPACT_PROCESS_PERSISTENT);
+        ++mPersistentCompactRequest;
         compactApp(app, false, "Persistent");
     }
 
@@ -573,6 +612,7 @@ public final class CachedAppOptimizer {
 
     @GuardedBy("mProcLock")
     void compactAppBfgs(ProcessRecord app) {
+        ++mBfgsCompactRequest;
         app.mOptRecord.setReqCompactAction(COMPACT_PROCESS_BFGS);
         compactApp(app, false, " Bfgs");
     }
@@ -1195,7 +1235,8 @@ public final class CachedAppOptimizer {
                 && (newAdj == ProcessList.PREVIOUS_APP_ADJ || newAdj == ProcessList.HOME_APP_ADJ)) {
             // Perform a minor compaction when a perceptible app becomes the prev/home app
             compactAppSome(app, false);
-        } else if (newAdj >= ProcessList.CACHED_APP_MIN_ADJ
+        } else if (oldAdj < ProcessList.CACHED_APP_MIN_ADJ
+                && newAdj >= ProcessList.CACHED_APP_MIN_ADJ
                 && newAdj <= ProcessList.CACHED_APP_MAX_ADJ) {
             // Perform a major compaction when any app enters cached
             compactAppFull(app, false);
@@ -1223,14 +1264,16 @@ public final class CachedAppOptimizer {
                 break;
         }
 
-        // Downgrade compaction if facing swap memory pressure
+        // Downgrade compaction under swap memory pressure
         if (resolvedAction == COMPACT_ACTION_FULL) {
-            double swapUsagePercent = getFreeSwapPercent();
-            if (swapUsagePercent < COMPACT_DOWNGRADE_FREE_SWAP_THRESHOLD) {
-                Slog.d(TAG_AM,
-                        "Downgraded compaction to file only due to low swap."
-                                + " Swap Free% " + swapUsagePercent);
+            double swapFreePercent = getFreeSwapPercent();
+            if (swapFreePercent < COMPACT_DOWNGRADE_FREE_SWAP_THRESHOLD) {
                 resolvedAction = COMPACT_ACTION_FILE;
+                if (DEBUG_COMPACTION) {
+                    Slog.d(TAG_AM,
+                            "Downgraded compaction to file only due to low swap."
+                                    + " Swap Free% " + swapFreePercent);
+                }
             }
         }
 
@@ -1445,28 +1488,33 @@ public final class CachedAppOptimizer {
                         lastCompactTime = opt.getLastCompactTime();
                     }
 
-                    int resolvedAction = resolveCompactionAction(requestedAction);
+                    ++mProcCompactionsRequested;
                     long[] rssBefore;
                     if (pid == 0) {
                         // not a real process, either one being launched or one being killed
                         if (DEBUG_COMPACTION) {
                             Slog.d(TAG_AM, "Compaction failed, pid is 0");
                         }
+                        ++mProcCompactionsNoPidThrottled;
                         return;
                     }
 
                     if (!forceCompaction) {
-                        if (shouldOomAdjThrottleCompaction(proc, resolvedAction)) {
+                        if (shouldOomAdjThrottleCompaction(proc, requestedAction)) {
+                            ++mProcCompactionsOomAdjThrottled;
                             return;
                         }
                         if (shouldTimeThrottleCompaction(proc, start, requestedAction)) {
+                            ++mProcCompactionsTimeThrottled;
                             return;
                         }
-                        if (shouldThrottleMiscCompaction(proc, procState, resolvedAction)) {
+                        if (shouldThrottleMiscCompaction(proc, procState, requestedAction)) {
+                            ++mProcCompactionsMiscThrottled;
                             return;
                         }
                         rssBefore = mProcessDependencies.getRss(pid);
-                        if (shouldRssThrottleCompaction(resolvedAction, pid, name, rssBefore)) {
+                        if (shouldRssThrottleCompaction(requestedAction, pid, name, rssBefore)) {
+                            ++mProcCompactionsRSSThrottled;
                             return;
                         }
                     } else {
@@ -1494,11 +1542,14 @@ public final class CachedAppOptimizer {
                         default:
                             break;
                     }
+
+                    int resolvedAction = resolveCompactionAction(requestedAction);
                     action = compactActionIntToString(resolvedAction);
 
                     try {
                         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
                                 "Compact " + action + ": " + name);
+                        ++mProcCompactionsPerformed;
                         long zramFreeKbBefore = Debug.getZramFreeKb();
                         mProcessDependencies.performCompaction(action, pid);
                         long[] rssAfter = mProcessDependencies.getRss(pid);
@@ -1550,6 +1601,7 @@ public final class CachedAppOptimizer {
                     break;
                 }
                 case COMPACT_SYSTEM_MSG: {
+                    ++mSystemCompactionsPerformed;
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "compactSystem");
                     compactSystem();
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
