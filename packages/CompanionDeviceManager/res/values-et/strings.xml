@@ -17,16 +17,17 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"Kaasseadme haldur"</string>
-    <string name="confirmation_title" msgid="8455544820286920304">"Lubage rakendusel &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; hallata teie seadet &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
+    <!-- no translation found for confirmation_title (3785000297483688997) -->
+    <skip />
     <string name="profile_name_watch" msgid="576290739483672360">"käekell"</string>
     <string name="chooser_title" msgid="2262294130493605839">"Valige seade <xliff:g id="PROFILE_NAME">%1$s</xliff:g>, mida haldab rakendus &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
-    <string name="summary_watch" product="default" msgid="7113724443198337683">"<xliff:g id="APP_NAME">%1$s</xliff:g> saab kasutada teie märguandeid ning pääseda juurde teie telefoni, SMS-ide, kontaktide ja kalendri lubadele."</string>
-    <string name="summary_watch" product="tablet" msgid="7113724443198337683">"<xliff:g id="APP_NAME">%1$s</xliff:g> saab kasutada teie märguandeid ning pääseda juurde teie telefoni, SMS-ide, kontaktide ja kalendri lubadele."</string>
+    <!-- no translation found for summary_watch (3002344206574997652) -->
+    <skip />
     <string name="permission_apps" msgid="6142133265286656158">"Rakendused"</string>
     <string name="permission_apps_summary" msgid="798718816711515431">"Telefoni rakenduste voogesitamine"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"Lubage rakendusel &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; pääseda teie telefonis juurde sellele teabele"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Seadmeülesed teenused"</string>
-    <string name="helper_summary_app_streaming" msgid="7380294597268573523">"<xliff:g id="APP_NAME">%1$s</xliff:g> taotleb teie seadme <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> nimel luba pääseda juurde telefoni fotodele, meediale ja märguannetele"</string>
+    <string name="helper_summary_app_streaming" msgid="7380294597268573523">"<xliff:g id="APP_NAME">%1$s</xliff:g> taotlevad teie seadme <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> nimel luba pääseda juurde telefoni fotodele, meediale ja märguannetele"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"Lubage rakendusel &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; pääseda teie telefonis juurde sellele teabele"</string>
@@ -44,4 +45,8 @@
     <string name="consent_back" msgid="2560683030046918882">"Tagasi"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"Kas anda rakendustele seadmes &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; samad load, mis seadmes &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
     <string name="permission_sync_summary" msgid="4866838188678457084">"&lt;p&gt;See võib hõlmata mikrofoni, kaamerat ja juurdepääsu asukohale ning muid tundlikke lube seadmes &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt; &lt;p&gt;Võite neid lube seadme &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt; seadetes igal ajal muuta.&lt;/p&gt;"</string>
+    <!-- no translation found for vendor_icon_description (4445875290032225965) -->
+    <skip />
+    <!-- no translation found for vendor_header_button_description (6566660389500630608) -->
+    <skip />
 </resources>
