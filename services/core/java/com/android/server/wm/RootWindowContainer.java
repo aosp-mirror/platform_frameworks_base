@@ -3231,7 +3231,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             if (task.getActivity(activity -> !activity.finishing && activity.mUserId == userId)
                     != null) {
                 mService.getTaskChangeNotificationController().notifyTaskProfileLocked(
-                        task.mTaskId, userId);
+                        task.getTaskInfo());
             }
         }, true /* traverseTopToBottom */);
     }

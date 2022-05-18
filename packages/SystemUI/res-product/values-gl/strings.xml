@@ -43,4 +43,6 @@
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"Desbloquea o teléfono para ver máis opcións"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"Desbloquea a tableta para ver máis opcións"</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Desbloquea o dispositivo para ver máis opcións"</string>
+    <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"Reproducindo contido neste teléfono"</string>
+    <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"Reproducindo contido nesta tableta"</string>
 </resources>

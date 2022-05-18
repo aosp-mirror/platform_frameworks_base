@@ -1657,6 +1657,12 @@
       "group": "WM_DEBUG_ADD_REMOVE",
       "at": "com\/android\/server\/wm\/Task.java"
     },
+    "-451552570": {
+      "message": "Current focused window being animated by recents. Overriding back callback to recents controller callback.",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/BackNavigationController.java"
+    },
     "-449118559": {
       "message": "Trying to update display configuration for invalid process, pid=%d",
       "level": "WARN",
@@ -2916,12 +2922,6 @@
       "level": "WARN",
       "group": "WM_DEBUG_LOCKTASK",
       "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
-    },
-    "716528224": {
-      "message": "Focused window found using wmService.getFocusedWindowLocked()",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_BACK_PREVIEW",
-      "at": "com\/android\/server\/wm\/BackNavigationController.java"
     },
     "726205185": {
       "message": "Moving to DESTROYED: %s (destroy skipped)",

@@ -254,6 +254,7 @@ public class BackAnimationControllerTest {
         verify(mIOnBackInvokedCallback, never()).onBackInvoked();
     }
 
+    @Test
     public void ignoresGesture_transitionInProgress() throws RemoteException {
         mController.setBackToLauncherCallback(mIOnBackInvokedCallback);
         RemoteAnimationTarget animationTarget = createAnimationTarget();
