@@ -61,6 +61,7 @@ import android.os.Bundle;
 import android.os.PatternMatcher;
 import android.os.RemoteException;
 import android.os.StrictMode;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.MediaStore;
@@ -98,6 +99,7 @@ import com.android.internal.app.chooser.TargetInfo;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
+import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.ResolverDrawerLayout;
 import com.android.internal.widget.ViewPager;
 
@@ -214,7 +216,11 @@ public class ResolverActivity extends Activity implements
 
     private UserHandle mWorkProfileUserHandle;
 
+    protected final LatencyTracker mLatencyTracker = getLatencyTracker();
 
+    private LatencyTracker getLatencyTracker() {
+        return LatencyTracker.getInstance(this);
+    }
 
     /**
      * Get the string resource to be used as a label for the link to the resolver activity for an
@@ -642,7 +648,8 @@ public class ResolverActivity extends Activity implements
 
         if (shouldUseMiniResolver()) {
             View buttonContainer = findViewById(R.id.button_bar_container);
-            buttonContainer.setPadding(0, 0, 0, mSystemWindowInsets.bottom);
+            buttonContainer.setPadding(0, 0, 0, mSystemWindowInsets.bottom
+                    + getResources().getDimensionPixelOffset(R.dimen.resolver_button_bar_spacing));
         }
 
         // Need extra padding so the list can fully scroll up
@@ -1432,6 +1439,7 @@ public class ResolverActivity extends Activity implements
             throw new IllegalStateException("mMultiProfilePagerAdapter.getCurrentListAdapter() "
                     + "cannot be null.");
         }
+        Trace.beginSection("configureContentView");
         // We partially rebuild the inactive adapter to determine if we should auto launch
         // isTabLoaded will be true here if the empty state screen is shown instead of the list.
         boolean rebuildCompleted = mMultiProfilePagerAdapter.rebuildActiveTab(true)
@@ -1444,6 +1452,7 @@ public class ResolverActivity extends Activity implements
 
         if (shouldUseMiniResolver()) {
             configureMiniResolverContent();
+            Trace.endSection();
             return false;
         }
 
@@ -1454,7 +1463,9 @@ public class ResolverActivity extends Activity implements
         }
         setContentView(mLayoutId);
         mMultiProfilePagerAdapter.setupViewPager(findViewById(R.id.profile_pager));
-        return postRebuildList(rebuildCompleted);
+        boolean result = postRebuildList(rebuildCompleted);
+        Trace.endSection();
+        return result;
     }
 
     /**

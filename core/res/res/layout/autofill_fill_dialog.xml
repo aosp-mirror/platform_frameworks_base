@@ -20,8 +20,6 @@
     android:id="@+id/autofill_dialog_picker"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="@dimen/autofill_save_outer_top_margin"
-    android:padding="@dimen/autofill_save_outer_top_padding"
     android:background="@drawable/bottomsheet_background"
     android:orientation="vertical">
 
@@ -29,8 +27,9 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
-        android:paddingStart="@dimen/autofill_save_inner_padding"
-        android:paddingEnd="@dimen/autofill_save_inner_padding"
+        android:paddingTop="24dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
         android:orientation="vertical">
 
         <ImageView
@@ -59,6 +58,8 @@
         android:paddingStart="@dimen/autofill_save_inner_padding"
         android:paddingEnd="@dimen/autofill_save_inner_padding"
         android:visibility="gone"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
         android:background="@drawable/autofill_dataset_picker_background"/>
 
     <ListView
@@ -69,22 +70,30 @@
         android:drawSelectorOnTop="true"
         android:clickable="true"
         android:divider="?android:attr/listDivider"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
         android:background="@drawable/autofill_dataset_picker_background"
         android:visibility="gone"/>
 
     <com.android.internal.widget.ButtonBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="48dp"
         android:layout_gravity="end"
-        android:padding="@dimen/autofill_save_button_bar_padding"
         android:clipToPadding="false"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="18dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:theme="@style/Theme.DeviceDefault.AutofillHalfScreenDialogButton"
         android:orientation="horizontal">
 
         <Button
             android:id="@+id/autofill_dialog_no"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="?android:attr/buttonBarButtonStyle"
+            android:layout_height="36dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="6dp"
+            style="@style/AutofillHalfSheetOutlinedButton"
             android:text="@string/autofill_save_no">
         </Button>
 
@@ -98,8 +107,10 @@
         <Button
             android:id="@+id/autofill_dialog_yes"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@style/Widget.DeviceDefault.Button.Colored"
+            android:layout_height="36dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="6dp"
+            style="@style/AutofillHalfSheetTonalButton"
             android:text="@string/autofill_save_yes"
             android:visibility="gone" >
         </Button>

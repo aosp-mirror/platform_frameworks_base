@@ -2281,5 +2281,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Белсенді қолданбаларды тексеру"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"<xliff:g id="DEVICE">%1$s</xliff:g> құрылғысынан телефон камерасын пайдалану мүмкін емес."</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"<xliff:g id="DEVICE">%1$s</xliff:g> құрылғысынан планшет камерасын пайдалану мүмкін емес."</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"Жүйе тілі"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Жүйенің әдепкі параметрі"</string>
 </resources>

@@ -2282,5 +2282,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Provjera aktivnih aplikacija"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"S vašeg uređaja <xliff:g id="DEVICE">%1$s</xliff:g> nije moguće pristupiti fotoaparatu telefona"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"S vašeg uređaja <xliff:g id="DEVICE">%1$s</xliff:g> nije moguće pristupiti fotoaparatu tableta"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"Jezik sustava"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Zadane postavke sustava"</string>
 </resources>
