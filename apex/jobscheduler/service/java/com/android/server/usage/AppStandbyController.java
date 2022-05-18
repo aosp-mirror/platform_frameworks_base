@@ -225,6 +225,11 @@ public class AppStandbyController
                     | PackageManager.MATCH_DISABLED_COMPONENTS
                     | PackageManager.MATCH_SYSTEM_ONLY;
 
+    private static final int NOTIFICATION_SEEN_PROMOTED_BUCKET_FOR_PRE_T_APPS =
+            STANDBY_BUCKET_WORKING_SET;
+    private static final long NOTIFICATION_SEEN_HOLD_DURATION_FOR_PRE_T_APPS =
+            COMPRESS_TIME ? 12 * ONE_MINUTE : 12 * ONE_HOUR;
+
     // To name the lock for stack traces
     static class Lock {}
 
@@ -320,11 +325,17 @@ public class AppStandbyController
     int mNotificationSeenPromotedBucket =
             ConstantsObserver.DEFAULT_NOTIFICATION_SEEN_PROMOTED_BUCKET;
     /**
-     * If true, tell each {@link AppIdleStateChangeListener} to give quota bump for each
+     * If {@code true}, tell each {@link AppIdleStateChangeListener} to give quota bump for each
      * notification seen event.
      */
     private boolean mTriggerQuotaBumpOnNotificationSeen =
             ConstantsObserver.DEFAULT_TRIGGER_QUOTA_BUMP_ON_NOTIFICATION_SEEN;
+    /**
+     * If {@code true}, we will retain the pre-T impact of notification signal on apps targeting
+     * pre-T sdk levels regardless of other flag changes.
+     */
+    boolean mRetainNotificationSeenImpactForPreTApps =
+            ConstantsObserver.DEFAULT_RETAIN_NOTIFICATION_SEEN_IMPACT_FOR_PRE_T_APPS;
     /** Minimum time a system update event should keep the buckets elevated. */
     long mSystemUpdateUsageTimeoutMillis = ConstantsObserver.DEFAULT_SYSTEM_UPDATE_TIMEOUT;
     /** Maximum time to wait for a prediction before using simple timeouts to downgrade buckets. */
@@ -1098,17 +1109,29 @@ public class AppStandbyController
         final int subReason = usageEventToSubReason(eventType);
         final int reason = REASON_MAIN_USAGE | subReason;
         if (eventType == UsageEvents.Event.NOTIFICATION_SEEN) {
-            if (mTriggerQuotaBumpOnNotificationSeen) {
-                mHandler.obtainMessage(MSG_TRIGGER_LISTENER_QUOTA_BUMP, userId, -1, pkg)
-                        .sendToTarget();
+            final int notificationSeenPromotedBucket;
+            final long notificationSeenTimeoutMillis;
+            if (mRetainNotificationSeenImpactForPreTApps
+                    && getTargetSdkVersion(pkg) < Build.VERSION_CODES.TIRAMISU) {
+                notificationSeenPromotedBucket =
+                        NOTIFICATION_SEEN_PROMOTED_BUCKET_FOR_PRE_T_APPS;
+                notificationSeenTimeoutMillis =
+                        NOTIFICATION_SEEN_HOLD_DURATION_FOR_PRE_T_APPS;
+            } else {
+                if (mTriggerQuotaBumpOnNotificationSeen) {
+                    mHandler.obtainMessage(MSG_TRIGGER_LISTENER_QUOTA_BUMP, userId, -1, pkg)
+                            .sendToTarget();
+                }
+                notificationSeenPromotedBucket = mNotificationSeenPromotedBucket;
+                notificationSeenTimeoutMillis = mNotificationSeenTimeoutMillis;
             }
             // Notification-seen elevates to a higher bucket (depending on
             // {@link ConstantsObserver#KEY_NOTIFICATION_SEEN_PROMOTED_BUCKET}) but doesn't
             // change usage time.
             mAppIdleHistory.reportUsage(appHistory, pkg, userId,
-                    mNotificationSeenPromotedBucket, subReason,
-                    0, elapsedRealtime + mNotificationSeenTimeoutMillis);
-            nextCheckDelay = mNotificationSeenTimeoutMillis;
+                    notificationSeenPromotedBucket, subReason,
+                    0, elapsedRealtime + notificationSeenTimeoutMillis);
+            nextCheckDelay = notificationSeenTimeoutMillis;
         } else if (eventType == UsageEvents.Event.SLICE_PINNED) {
             // Mild usage elevates to WORKING_SET but doesn't change usage time.
             mAppIdleHistory.reportUsage(appHistory, pkg, userId,
@@ -1147,6 +1170,10 @@ public class AppStandbyController
         if (previouslyIdle) {
             notifyBatteryStats(pkg, userId, false);
         }
+    }
+
+    private int getTargetSdkVersion(String packageName) {
+        return mInjector.getPackageManagerInternal().getPackageTargetSdkVersion(packageName);
     }
 
     /**
@@ -2226,6 +2253,9 @@ public class AppStandbyController
         pw.print("  mTriggerQuotaBumpOnNotificationSeen=");
         pw.print(mTriggerQuotaBumpOnNotificationSeen);
         pw.println();
+        pw.print("  mRetainNotificationSeenImpactForPreTApps=");
+        pw.print(mRetainNotificationSeenImpactForPreTApps);
+        pw.println();
         pw.print("  mSlicePinnedTimeoutMillis=");
         TimeUtils.formatDuration(mSlicePinnedTimeoutMillis, pw);
         pw.println();
@@ -2712,6 +2742,8 @@ public class AppStandbyController
                 "notification_seen_duration";
         private static final String KEY_NOTIFICATION_SEEN_PROMOTED_BUCKET =
                 "notification_seen_promoted_bucket";
+        private static final String KEY_RETAIN_NOTIFICATION_SEEN_IMPACT_FOR_PRE_T_APPS =
+                "retain_notification_seen_impact_for_pre_t_apps";
         private static final String KEY_TRIGGER_QUOTA_BUMP_ON_NOTIFICATION_SEEN =
                 "trigger_quota_bump_on_notification_seen";
         private static final String KEY_SLICE_PINNED_HOLD_DURATION =
@@ -2773,6 +2805,7 @@ public class AppStandbyController
                 COMPRESS_TIME ? 12 * ONE_MINUTE : 12 * ONE_HOUR;
         public static final int DEFAULT_NOTIFICATION_SEEN_PROMOTED_BUCKET =
                 STANDBY_BUCKET_WORKING_SET;
+        public static final boolean DEFAULT_RETAIN_NOTIFICATION_SEEN_IMPACT_FOR_PRE_T_APPS = false;
         public static final boolean DEFAULT_TRIGGER_QUOTA_BUMP_ON_NOTIFICATION_SEEN = false;
         public static final long DEFAULT_SYSTEM_UPDATE_TIMEOUT =
                 COMPRESS_TIME ? 2 * ONE_MINUTE : 2 * ONE_HOUR;
@@ -2873,6 +2906,11 @@ public class AppStandbyController
                             mNotificationSeenPromotedBucket = properties.getInt(
                                     KEY_NOTIFICATION_SEEN_PROMOTED_BUCKET,
                                     DEFAULT_NOTIFICATION_SEEN_PROMOTED_BUCKET);
+                            break;
+                        case KEY_RETAIN_NOTIFICATION_SEEN_IMPACT_FOR_PRE_T_APPS:
+                            mRetainNotificationSeenImpactForPreTApps = properties.getBoolean(
+                                    KEY_RETAIN_NOTIFICATION_SEEN_IMPACT_FOR_PRE_T_APPS,
+                                    DEFAULT_RETAIN_NOTIFICATION_SEEN_IMPACT_FOR_PRE_T_APPS);
                             break;
                         case KEY_TRIGGER_QUOTA_BUMP_ON_NOTIFICATION_SEEN:
                             mTriggerQuotaBumpOnNotificationSeen = properties.getBoolean(
