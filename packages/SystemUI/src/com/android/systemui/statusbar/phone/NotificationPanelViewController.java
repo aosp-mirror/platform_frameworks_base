@@ -2315,8 +2315,9 @@ public class NotificationPanelViewController extends PanelViewController {
     void setQsExpansion(float height) {
         height = Math.min(Math.max(height, mQsMinExpansionHeight), mQsMaxExpansionHeight);
         mQsFullyExpanded = height == mQsMaxExpansionHeight && mQsMaxExpansionHeight != 0;
+        boolean qsAnimatingAway = !mQsAnimatorExpand && mAnimatingQS;
         if (height > mQsMinExpansionHeight && !mQsExpanded && !mStackScrollerOverscrolling
-                && !mDozing) {
+                && !mDozing && !qsAnimatingAway) {
             setQsExpanded(true);
         } else if (height <= mQsMinExpansionHeight && mQsExpanded) {
             setQsExpanded(false);
@@ -2570,6 +2571,7 @@ public class NotificationPanelViewController extends PanelViewController {
             mQsClipTop = (int) (top - currentTranslation - mQsFrame.getTop());
             mQsClipBottom = (int) (bottom - currentTranslation - mQsFrame.getTop());
             mQsVisible = qsVisible;
+            mQs.setQsVisible(mQsVisible);
             mQs.setFancyClipping(
                     mQsClipTop,
                     mQsClipBottom,
@@ -3037,15 +3039,20 @@ public class NotificationPanelViewController extends PanelViewController {
     private void updatePanelExpanded() {
         boolean isExpanded = !isFullyCollapsed() || mExpectingSynthesizedDown;
         if (mPanelExpanded != isExpanded) {
+            mPanelExpanded = isExpanded;
+
             mHeadsUpManager.setIsPanelExpanded(isExpanded);
             mStatusBarTouchableRegionManager.setPanelExpanded(isExpanded);
             mCentralSurfaces.setPanelExpanded(isExpanded);
-            mPanelExpanded = isExpanded;
 
             if (!isExpanded && mQs != null && mQs.isCustomizing()) {
                 mQs.closeCustomizer();
             }
         }
+    }
+
+    boolean isPanelExpanded() {
+        return mPanelExpanded;
     }
 
     private int calculatePanelHeightShade() {
