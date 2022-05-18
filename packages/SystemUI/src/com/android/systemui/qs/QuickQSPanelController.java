@@ -104,15 +104,6 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
         mView.removeOnConfigurationChangedListener(mOnConfigurationChangedListener);
     }
 
-    @Override
-    void setListening(boolean listening) {
-        super.setListening(listening);
-    }
-
-    public boolean isListening() {
-        return mView.isListening();
-    }
-
     private void setMaxTiles(int parseNumTiles) {
         mView.setMaxTiles(parseNumTiles);
         setTiles();

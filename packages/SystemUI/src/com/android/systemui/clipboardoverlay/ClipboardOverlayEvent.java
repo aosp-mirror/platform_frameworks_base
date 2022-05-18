@@ -26,6 +26,8 @@ public enum ClipboardOverlayEvent implements UiEventLogger.UiEventEnum {
     CLIPBOARD_OVERLAY_UPDATED(950),
     @UiEvent(doc = "clipboard edit tapped")
     CLIPBOARD_OVERLAY_EDIT_TAPPED(951),
+    @UiEvent(doc = "clipboard share tapped")
+    CLIPBOARD_OVERLAY_SHARE_TAPPED(RESERVE_NEW_UI_EVENT_ID),
     @UiEvent(doc = "clipboard action tapped")
     CLIPBOARD_OVERLAY_ACTION_TAPPED(952),
     @UiEvent(doc = "clipboard remote copy tapped")
