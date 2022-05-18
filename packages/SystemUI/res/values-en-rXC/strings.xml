@@ -320,6 +320,12 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‏‏‎‏‎‏‎‎‎‏‎‏‏‎‎‏‎‏‏‎‎‏‎‏‏‏‏‎‎‏‏‎‏‎‎‏‎‎‏‏‎‎‏‏‏‏‎‎‏‏‎‏‏‏‎‎‏‎‎Unlocked by face. Press to open.‎‏‎‎‏‎"</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‏‎‏‎‏‎‏‎‏‏‏‎‏‏‎‎‏‏‎‎‏‏‎‏‎‏‏‎‏‎‎‏‎‎‎‏‏‎‏‏‎‏‏‎‏‏‏‎‏‏‎‎‏‎‏‏‎‎Face recognized. Press to open.‎‏‎‎‏‎"</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‎‎‎‎‏‎‏‏‏‏‎‎‏‎‎‏‎‏‏‏‏‏‏‎‎‏‏‎‎‎‎‎‎‏‏‏‏‏‎‏‎‎‏‎‏‎‏‎‎‏‏‏‎‎‏‎‏‎‎Face recognized. Press the unlock icon to open.‎‏‎‎‏‎"</string>
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1901953991150295169">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‏‎‎‏‏‎‎‏‎‏‎‎‎‏‏‎‎‏‎‎‎‏‎‎‏‏‏‏‏‏‎‏‎‏‏‎‏‎‎‏‏‎‎‏‎‏‏‎‎‎‏‎‎‎‎‎‎‏‎Move left‎‏‎‎‏‎"</item>
+    <item msgid="5558598599408514296">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‎‏‎‎‏‎‎‏‎‎‎‎‎‏‏‎‏‏‏‏‏‏‏‎‎‏‏‎‏‏‎‏‏‎‏‎‏‏‏‎‏‎‎‏‏‏‎‏‎‎‏‏‏‏‏‎‎‎‎Move down‎‏‎‎‏‎"</item>
+    <item msgid="4844142668312841831">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‏‎‎‏‏‏‎‎‏‏‏‎‏‏‎‏‎‎‎‎‏‎‏‏‏‎‏‏‎‏‎‏‎‎‎‎‏‏‎‎‏‏‎‎‎‏‏‏‎‎‏‏‎‎‏‏‏‎Move right‎‏‎‎‏‎"</item>
+    <item msgid="5640521437931460125">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‏‎‎‏‎‎‎‏‏‏‎‎‏‎‏‎‎‎‎‏‎‏‏‏‎‎‏‏‏‎‏‏‏‏‏‏‏‎‎‎‎‏‎‏‎‏‎‏‏‎‎‎‎‏‏‏‎‏‎Move up‎‏‎‎‏‎"</item>
+  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‎‎‎‏‎‎‏‏‏‎‏‎‎‎‏‏‏‎‎‎‏‏‎‎‏‎‎‎‏‎‎‎‎‎‏‎‎‎‏‎‏‎‏‏‏‏‎‏‏‏‎‎‎‏‎‎‏‏‎Swipe up to try again‎‏‎‎‏‎"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‏‎‎‎‎‏‏‏‏‎‏‎‏‏‏‎‏‎‏‏‏‎‏‎‎‏‏‎‏‎‏‏‏‏‏‏‎‎‎‎‏‏‏‏‏‎‎‎‎‏‎‏‎‎‏‏‏‏‎Unlock to use NFC‎‏‎‎‏‎"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‏‏‏‏‏‎‎‏‏‏‏‎‎‏‏‎‏‎‎‏‎‏‏‏‏‎‎‎‏‎‏‎‎‏‎‎‏‏‎‏‎‏‏‎‎‏‎‏‏‏‏‎‏‏‏‏‏‎This device belongs to your organization‎‏‎‎‏‎"</string>
@@ -695,7 +701,8 @@
     <string name="notification_channel_alerts" msgid="3385787053375150046">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‏‎‏‏‏‏‏‏‎‎‏‎‏‏‏‎‏‏‎‏‏‎‎‎‏‎‏‏‏‎‏‎‎‏‏‎‎‎‏‎‏‎‏‏‎‏‎‏‏‏‏‏‎‏‏‏‏‎‎Alerts‎‏‎‎‏‎"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‎‏‎‎‎‎‎‎‎‎‎‏‎‎‏‎‏‏‏‎‏‏‏‎‎‏‎‎‎‏‏‎‏‏‎‎‏‎‎‏‏‏‏‎‏‏‎‎‎‎‏‎‎Battery‎‏‎‎‏‎"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‏‎‎‏‏‎‎‎‏‎‎‏‏‏‎‎‏‎‎‎‏‎‎‎‎‎‎‏‎‏‎‏‎‏‎‎‏‏‎‏‏‏‎‏‎‎‏‎‎‏‎‎‎‏‏‏‎‏‎Screenshots‎‏‎‎‏‎"</string>
-    <string name="notification_channel_general" msgid="4384774889645929705">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‎‎‏‏‎‏‏‎‎‏‏‏‎‏‏‎‎‏‏‎‎‎‎‏‏‏‏‏‎‏‎‏‎‏‎‏‏‎‎‏‎‏‏‏‏‏‎‏‎‎‏‏‏‎‏‎‎‏‎General Messages‎‏‎‎‏‎"</string>
+    <string name="notification_channel_instant" msgid="7556135423486752680">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‎‎‏‏‎‏‏‏‎‎‏‏‎‎‏‎‎‏‎‎‏‎‎‎‏‎‎‎‏‎‏‏‏‏‏‎‏‎‏‏‎‎‎‏‏‏‎‏‏‏‏‎‏‎‏‎‎‎‎Instant Apps‎‏‎‎‏‎"</string>
+    <string name="notification_channel_setup" msgid="7660580986090760350">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‏‎‎‏‎‎‏‏‏‏‏‏‎‏‏‎‎‏‏‏‎‏‎‎‎‏‏‏‎‎‎‎‎‏‎‎‎‎‏‏‎‏‎‎‏‎‏‎‎‎‏‎‎‏‏‏‏‎‎Setup‎‏‎‎‏‎"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‎‏‏‏‎‎‎‎‎‏‏‏‏‏‎‏‎‏‏‎‎‏‏‏‎‏‏‎‏‏‎‏‏‎‎‏‏‏‎‎‏‎‎‎‏‎‎‏‏‎‎‎‎‎‎‎‎‏‎Storage‎‏‎‎‏‎"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‏‎‏‏‏‎‏‎‎‏‎‏‎‏‎‏‏‎‎‎‎‎‎‎‏‎‎‏‏‎‏‏‎‎‎‏‎‎‎‏‎‏‎‏‎‎‎‏‏‎‏‏‏‏‏‏‎‎‎Hints‎‏‎‎‏‎"</string>
     <string name="instant_apps" msgid="8337185853050247304">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‏‏‎‏‏‎‎‏‏‏‎‏‎‎‎‏‎‎‏‎‏‏‏‎‎‎‏‏‎‏‏‎‏‎‏‏‏‏‎‎‎‏‏‎‏‏‎‎‎‏‎‎‎‏‎‎‎‎Instant Apps‎‏‎‎‏‎"</string>
@@ -941,8 +948,10 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‏‏‎‎‏‎‏‏‎‎‏‏‎‏‎‏‏‎‏‎‎‏‏‎‎‎‏‎‎‎‎‎‏‎‏‏‏‏‎‏‎‏‎‏‎‎‏‎‎‎‎‎‏‏‎‏‏‏‎Edit copied text‎‏‎‎‏‎"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‏‏‏‎‎‏‎‏‎‎‎‏‏‎‏‎‎‏‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‎‎‎‎‎‎‏‏‏‏‏‎‎‏‏‎‏‎‏‎‏‏‎‏‎‎Edit copied image‎‏‎‎‏‎"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‎‎‎‏‎‎‎‎‎‎‎‎‏‏‏‏‏‎‏‏‏‏‎‏‎‎‏‎‏‏‏‏‏‏‏‎‏‏‏‏‏‎‎‎‎‏‎‏‎‎‏‏‎‏‎‎‏‎‎Send to nearby device‎‏‎‎‏‎"</string>
-    <!-- no translation found for clipboard_text_hidden (7926899867471812305) -->
-    <skip />
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‏‎‎‎‎‎‎‎‏‎‎‎‎‎‎‎‎‏‎‏‏‎‏‏‏‎‎‏‎‏‎‎‏‎‏‎‏‏‏‏‏‏‏‎‎‏‎‏‏‎‏‏‎‏‎‎‎‏‎Tap to view‎‏‎‎‏‎"</string>
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‏‎‏‏‎‎‏‎‎‏‏‏‎‏‎‎‎‎‎‎‎‏‎‎‏‏‎‏‎‎‏‏‎‎‎‏‏‎‏‏‎‏‎‎‏‎‏‏‎‎‏‎‏‎‎‏‏‏‎Text copied‎‏‎‎‏‎"</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‎‎‏‎‏‎‎‏‎‎‏‎‏‏‏‏‎‏‏‎‏‏‎‎‏‎‎‏‏‎‏‏‎‎‎‏‏‏‎‏‏‎‎‏‏‎‏‎‏‏‏‎‎‏‎‎‏‎‎Image copied‎‏‎‎‏‎"</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‎‏‎‎‎‎‎‎‎‎‏‎‎‏‏‎‎‏‎‏‎‏‏‎‎‎‎‏‏‏‎‏‏‏‏‏‎‎‏‎‏‏‎‏‎‏‎‏‎‏‎‏‎‏‏‎‎‎‏‎Content copied‎‏‎‎‏‎"</string>
     <string name="add" msgid="81036585205287996">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‎‏‏‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‎‎‏‎‏‏‎‎‎‎‏‎‎‏‎‏‎‏‏‏‏‏‎‎‎‏‏‎‎‏‏‎‎‎‎‏‏‏‏‎‎‎Add‎‏‎‎‏‎"</string>
     <string name="manage_users" msgid="1823875311934643849">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‎‏‎‏‎‎‏‏‏‏‏‎‏‏‎‏‎‎‏‏‏‎‏‏‏‎‏‏‎‏‎‎‏‎‎‏‏‏‏‎‎‎‎‎‎‏‏‏‏‎‏‎‎‎‏‎‎‏‎Manage users‎‏‎‎‏‎"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‎‎‎‎‎‎‏‏‎‎‎‎‎‎‏‏‎‎‏‏‎‏‎‏‎‎‎‎‏‏‏‏‎‏‎‏‏‏‎‎‏‎‏‎‏‎‏‏‎‏‎‎‏‏‏‎‏‎‎This notification does not support dragging to Splitscreen.‎‏‎‎‏‎"</string>
@@ -951,4 +960,10 @@
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‏‏‏‏‎‏‏‏‎‏‎‏‎‏‏‎‎‏‎‏‎‏‎‎‎‎‎‎‎‎‎‏‏‎‎‏‎‎‏‏‏‎‎‎‏‎‎‏‎‏‎‎‏‎‎‏‏‎‎Alarm set‎‏‎‎‏‎"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‎‎‎‏‏‎‎‏‏‎‏‎‏‎‎‏‎‎‎‏‎‏‎‎‏‎‎‎‎‏‏‎‏‎‏‎‎‏‏‎‎‎‎‎‏‏‏‎‏‎‎‎‎‎‎‎‎‏‎Camera and mic are off‎‏‎‎‏‎"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‎‎‎‏‎‎‏‎‏‎‎‏‏‎‎‎‏‏‏‎‏‎‏‎‎‎‎‏‏‏‎‏‎‎‏‏‏‎‎‎‎‏‎‎‎‏‎‏‏‏‏‏‏‎‏‏‏‏‎# notification‎‏‎‎‏‎}other{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‎‎‎‏‎‎‏‎‏‎‎‏‏‎‎‎‏‏‏‎‏‎‏‎‎‎‎‏‏‏‎‏‎‎‏‏‏‎‎‎‎‏‎‎‎‏‎‏‏‏‏‏‏‎‏‏‏‏‎# notifications‎‏‎‎‏‎}}"</string>
+    <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‏‎‏‎‏‎‎‎‎‎‎‎‎‎‏‏‏‎‎‎‏‎‏‎‎‎‎‏‎‎‎‏‎‏‏‏‎‏‏‎‏‎‎‏‎‏‏‏‏‏‏‏‎‎‎‎‏‎‎Broadcasting‎‏‎‎‏‎"</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‎‎‎‎‏‏‏‎‏‏‏‎‏‎‎‎‏‏‏‎‏‎‏‎‏‏‎‏‏‏‎‎‎‏‏‏‏‎‎‏‏‎Stop broadcasting ‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎?‎‏‎‎‏‎"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‎‏‎‏‏‏‏‏‎‏‏‏‎‎‏‎‏‎‎‏‎‎‏‏‎‎‎‏‎‎‎‏‏‏‏‏‎‏‎‎‎‏‏‎‏‎‏‏‎‎‏‎‎‎‎‎‎‏‎If you broadcast ‎‏‎‎‏‏‎<xliff:g id="SWITCHAPP">%1$s</xliff:g>‎‏‎‎‏‏‏‎ or change the output, your current broadcast will stop‎‏‎‎‏‎"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‎‎‏‎‏‎‎‎‏‏‎‎‏‎‏‏‎‏‎‏‏‎‏‏‎‏‏‎‏‎‏‎‎‎‏‏‎‏‎‏‏‎‏‎‎‏‏‏‎‎‎‏‎‎‎‏‎‏‎Broadcast ‎‏‎‎‏‏‎<xliff:g id="SWITCHAPP">%1$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‎‏‎‏‏‎‏‏‎‏‏‎‎‎‎‎‏‎‏‎‎‏‎‏‎‎‏‎‎‏‎‏‏‏‎‏‏‎‏‎‎‎‎‎‏‎‎‏‏‏‎‏‏‏‎‎‏‎‎Change output‎‏‎‎‏‎"</string>
+    <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‎‎‏‎‎‏‏‏‏‎‎‎‎‎‎‎‏‏‏‏‏‎‏‎‎‏‏‎‎‎‎‏‎‏‎‏‏‎‏‏‏‎‏‏‏‏‏‏‎‎‏‏‏‎‎‏‎‎‎Unknown‎‏‎‎‏‎"</string>
 </resources>
