@@ -5488,22 +5488,18 @@ public class ComputerEngine implements Computer {
                 false /*checkShell*/, "may package query");
         final PackageStateInternal sourceSetting = getPackageStateInternal(sourcePackageName);
         final PackageStateInternal targetSetting = getPackageStateInternal(targetPackageName);
-        if (sourceSetting == null || targetSetting == null) {
-            throw new ParcelableException(new PackageManager.NameNotFoundException("Package(s) "
-                    + (sourceSetting == null ? sourcePackageName + " " : "")
-                    + (targetSetting == null ? targetPackageName + " " : "")
-                    + "not found."));
+        boolean throwException = sourceSetting == null || targetSetting == null;
+        if (!throwException) {
+            final boolean filterSource =
+                    shouldFilterApplication(sourceSetting, callingUid, userId);
+            final boolean filterTarget =
+                    shouldFilterApplication(targetSetting, callingUid, userId);
+            // The caller must have visibility of the both packages
+            throwException = filterSource || filterTarget;
         }
-        final boolean filterSource =
-                shouldFilterApplication(sourceSetting, callingUid, userId);
-        final boolean filterTarget =
-                shouldFilterApplication(targetSetting, callingUid, userId);
-        // The caller must have visibility of the both packages
-        if (filterSource || filterTarget) {
+        if (throwException) {
             throw new ParcelableException(new PackageManager.NameNotFoundException("Package(s) "
-                    + (filterSource ? sourcePackageName + " " : "")
-                    + (filterTarget ? targetPackageName + " " : "")
-                    + "not found."));
+                    + sourcePackageName + " and/or " + targetPackageName + " not found."));
         }
         final int sourcePackageUid = UserHandle.getUid(userId, sourceSetting.getAppId());
         return !shouldFilterApplication(targetSetting, sourcePackageUid, userId);
