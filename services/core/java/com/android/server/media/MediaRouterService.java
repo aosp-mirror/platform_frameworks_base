@@ -566,7 +566,9 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         boolean setDeviceRouteSelected = false;
         synchronized (mLock) {
             UserRecord userRecord = mUserRecords.get(userId);
-            for (ClientRecord clientRecord : userRecord.mClientRecords) {
+            List<ClientRecord> userClientRecords =
+                    userRecord != null ? userRecord.mClientRecords : Collections.emptyList();
+            for (ClientRecord clientRecord : userClientRecords) {
                 if (TextUtils.equals(clientRecord.mPackageName, packageName)) {
                     if (mDefaultAudioRouteId.equals(clientRecord.mSelectedRouteId)) {
                         setDeviceRouteSelected = true;
