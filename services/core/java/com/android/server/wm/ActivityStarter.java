@@ -1797,7 +1797,8 @@ class ActivityStarter {
         }
 
         // Get top task at beginning because the order may be changed when reusing existing task.
-        final Task prevTopTask = mPreferredTaskDisplayArea.getFocusedRootTask();
+        final Task prevTopRootTask = mPreferredTaskDisplayArea.getFocusedRootTask();
+        final Task prevTopTask = prevTopRootTask != null ? prevTopRootTask.getTopLeafTask() : null;
         final Task reusedTask = getReusableTask();
 
         // If requested, freeze the task list
