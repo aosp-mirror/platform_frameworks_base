@@ -168,7 +168,7 @@
   </string-array>
   <string-array name="tile_states_onehanded">
     <item msgid="8189342855739930015">"No disponible"</item>
-    <item msgid="146088982397753810">"No"</item>
+    <item msgid="146088982397753810">"Desactivado"</item>
     <item msgid="460891964396502657">"Sí"</item>
   </string-array>
   <string-array name="tile_states_dream">
