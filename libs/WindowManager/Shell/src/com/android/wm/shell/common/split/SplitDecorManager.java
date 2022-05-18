@@ -160,6 +160,15 @@ public class SplitDecorManager extends WindowlessWindowManager {
             mBounds.set(newBounds);
         }
 
+        final boolean show =
+                newBounds.width() > mBounds.width() || newBounds.height() > mBounds.height();
+        final boolean animate = show != mShown;
+        if (animate && mFadeAnimator != null && mFadeAnimator.isRunning()) {
+            // If we need to animate and animator still running, cancel it before we ensure both
+            // background and icon surfaces are non null for next animation.
+            mFadeAnimator.cancel();
+        }
+
         if (mBackgroundLeash == null) {
             mBackgroundLeash = SurfaceUtils.makeColorLayer(mHostLeash,
                     RESIZING_BACKGROUND_SURFACE_NAME, mSurfaceSession);
@@ -183,11 +192,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
                 newBounds.width() / 2 - mIconSize / 2,
                 newBounds.height() / 2 - mIconSize / 2);
 
-        boolean show = newBounds.width() > mBounds.width() || newBounds.height() > mBounds.height();
-        if (show != mShown) {
-            if (mFadeAnimator != null && mFadeAnimator.isRunning()) {
-                mFadeAnimator.cancel();
-            }
+        if (animate) {
             startFadeAnimation(show, false /* isResized */);
             mShown = show;
         }
