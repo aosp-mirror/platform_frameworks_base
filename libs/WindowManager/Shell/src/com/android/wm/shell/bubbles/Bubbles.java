@@ -213,6 +213,11 @@ public interface Bubbles {
             int modificationType);
 
     /**
+     * Called when notification panel is expanded or collapsed
+     */
+    void onNotificationPanelExpandedChanged(boolean expanded);
+
+    /**
      * Called when the status bar has become visible or invisible (either permanently or
      * temporarily).
      */
@@ -277,7 +282,7 @@ public interface Bubbles {
 
     /** Callback to tell SysUi components execute some methods. */
     interface SysuiProxy {
-        void isNotificationShadeExpand(Consumer<Boolean> callback);
+        void isNotificationPanelExpand(Consumer<Boolean> callback);
 
         void getPendingOrActiveEntry(String key, Consumer<BubbleEntry> callback);
 
