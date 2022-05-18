@@ -48,8 +48,10 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Insets;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.drawable.Icon;
@@ -63,8 +65,10 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Size;
+import android.util.TypedValue;
 import android.view.Display;
 import android.view.DisplayCutout;
+import android.view.Gravity;
 import android.view.InputEvent;
 import android.view.InputEventReceiver;
 import android.view.InputMonitor;
@@ -117,6 +121,7 @@ public class ClipboardOverlayController {
 
     private static final int CLIPBOARD_DEFAULT_TIMEOUT_MILLIS = 6000;
     private static final int SWIPE_PADDING_DP = 12; // extra padding around views to allow swipe
+    private static final int FONT_SEARCH_STEP_PX = 4;
 
     private final Context mContext;
     private final UiEventLogger mUiEventLogger;
@@ -471,8 +476,57 @@ public class ClipboardOverlayController {
 
     private void showTextPreview(CharSequence text, TextView textView) {
         showSinglePreview(textView);
-        textView.setText(text.subSequence(0, Math.min(500, text.length())));
+        final CharSequence truncatedText = text.subSequence(0, Math.min(500, text.length()));
+        textView.setText(truncatedText);
+        updateTextSize(truncatedText, textView);
+
+        textView.addOnLayoutChangeListener(
+                (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                    if (right - left != oldRight - oldLeft) {
+                        updateTextSize(truncatedText, textView);
+                    }
+                });
         mEditChip.setVisibility(View.GONE);
+    }
+
+    private void updateTextSize(CharSequence text, TextView textView) {
+        Paint paint = new Paint(textView.getPaint());
+        Resources res = textView.getResources();
+        float minFontSize = res.getDimensionPixelSize(R.dimen.clipboard_overlay_min_font);
+        float maxFontSize = res.getDimensionPixelSize(R.dimen.clipboard_overlay_max_font);
+        if (isOneWord(text) && fitsInView(text, textView, paint, minFontSize)) {
+            // If the text is a single word and would fit within the TextView at the min font size,
+            // find the biggest font size that will fit.
+            float fontSizePx = minFontSize;
+            while (fontSizePx + FONT_SEARCH_STEP_PX < maxFontSize
+                    && fitsInView(text, textView, paint, fontSizePx + FONT_SEARCH_STEP_PX)) {
+                fontSizePx += FONT_SEARCH_STEP_PX;
+            }
+            // Need to turn off autosizing, otherwise setTextSize is a no-op.
+            textView.setAutoSizeTextTypeWithDefaults(TextView.AUTO_SIZE_TEXT_TYPE_NONE);
+            // It's possible to hit the max font size and not fill the width, so centering
+            // horizontally looks better in this case.
+            textView.setGravity(Gravity.CENTER);
+            textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, (int) fontSizePx);
+        } else {
+            // Otherwise just stick with autosize.
+            textView.setAutoSizeTextTypeUniformWithConfiguration((int) minFontSize,
+                    (int) maxFontSize, FONT_SEARCH_STEP_PX, TypedValue.COMPLEX_UNIT_PX);
+            textView.setGravity(Gravity.CENTER_VERTICAL | Gravity.START);
+        }
+    }
+
+    private static boolean fitsInView(CharSequence text, TextView textView, Paint paint,
+            float fontSizePx) {
+        paint.setTextSize(fontSizePx);
+        float size = paint.measureText(text.toString());
+        float availableWidth = textView.getWidth() - textView.getPaddingLeft()
+                - textView.getPaddingRight();
+        return size < availableWidth;
+    }
+
+    private static boolean isOneWord(CharSequence text) {
+        return text.toString().split("\\s+", 2).length == 1;
     }
 
     private void showEditableText(CharSequence text, boolean hidden) {
