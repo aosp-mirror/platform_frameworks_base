@@ -642,7 +642,8 @@ public class ResolverActivity extends Activity implements
 
         if (shouldUseMiniResolver()) {
             View buttonContainer = findViewById(R.id.button_bar_container);
-            buttonContainer.setPadding(0, 0, 0, mSystemWindowInsets.bottom);
+            buttonContainer.setPadding(0, 0, 0, mSystemWindowInsets.bottom
+                    + getResources().getDimensionPixelOffset(R.dimen.resolver_button_bar_spacing));
         }
 
         // Need extra padding so the list can fully scroll up
