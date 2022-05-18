@@ -652,9 +652,6 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Vula isikrini"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Vumela ukuvula isikrini"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Vumela i-app ivule isikrini. Uma kuvunyiwe, i-app ingavula isikrini noma nini ngaphandle kwenhloso yakho esobala."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Skena ikhodi ye-QR"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Ukuze uqale ukulalela, beka ikhodi ye-QR ngezansi"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Ikhodi ye-QR ayiyona ifomethi evumelekile"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Misa ukusakaza i-<xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Uma usakaza i-<xliff:g id="SWITCHAPP">%1$s</xliff:g> noma ushintsha okuphumayo, ukusakaza kwakho kwamanje kuzoma"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Sakaza i-<xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
