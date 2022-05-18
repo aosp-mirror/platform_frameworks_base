@@ -32,6 +32,7 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_N
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_QUICK_SETTINGS_EXPANDED;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
+import static com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
 import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_FOLD_TO_AOD;
 import static com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManagerKt.STATE_CLOSED;
@@ -2672,8 +2673,8 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     private float calculateNotificationsTopPadding() {
-        if (mSplitShadeEnabled && !mKeyguardShowing) {
-            return 0;
+        if (mSplitShadeEnabled) {
+            return mKeyguardShowing ? getKeyguardNotificationStaticPadding() : 0;
         }
         if (mKeyguardShowing && (mQsExpandImmediate
                 || mIsExpanding && mQsExpandedWhenExpandingStarted)) {
@@ -2747,6 +2748,9 @@ public class NotificationPanelViewController extends PanelViewController {
             mIsQsTranslationResetAnimator = mQsTranslationForFullShadeTransition > 0.0f;
         }
 
+        if (mSplitShadeEnabled) {
+            updateQsExpansionForLockscreenToShadeTransition(pxAmount);
+        }
         float endPosition = 0;
         if (pxAmount > 0.0f) {
             if (mNotificationStackScrollLayoutController.getVisibleNotificationCount() == 0
@@ -2784,6 +2788,18 @@ public class NotificationPanelViewController extends PanelViewController {
         }
         mTransitionToFullShadeQSPosition = position;
         updateQsExpansion();
+    }
+
+    private void updateQsExpansionForLockscreenToShadeTransition(float pxAmount) {
+        float qsExpansion = 0;
+        if (pxAmount > 0.0f) {
+            qsExpansion = MathUtils.lerp(mQsMinExpansionHeight, mQsMaxExpansionHeight,
+                    mLockscreenShadeTransitionController.getQSDragProgress());
+        }
+        // SHADE_LOCKED means transition is over and we don't want further updates
+        if (mBarState != SHADE_LOCKED) {
+            setQsExpansion(qsExpansion);
+        }
     }
 
     /**
@@ -2989,7 +3005,7 @@ public class NotificationPanelViewController extends PanelViewController {
         }
         int maxHeight;
         if (mQsExpandImmediate || mQsExpanded || mIsExpanding && mQsExpandedWhenExpandingStarted
-                || mPulsing) {
+                || mPulsing || mSplitShadeEnabled) {
             maxHeight = calculatePanelHeightQsExpanded();
         } else {
             maxHeight = calculatePanelHeightShade();
@@ -4737,11 +4753,6 @@ public class NotificationPanelViewController extends PanelViewController {
                     duration = StackStateAnimator.ANIMATION_DURATION_STANDARD;
                 }
                 mKeyguardStatusBarViewController.animateKeyguardStatusBarOut(startDelay, duration);
-                if (mSplitShadeEnabled) {
-                    // temporary workaround for QS height not being updated during lockscreen to
-                    // shade transition
-                    setQsExpanded(true);
-                }
                 updateQSMinHeight();
             } else if (oldState == StatusBarState.SHADE_LOCKED
                     && statusBarState == KEYGUARD) {
