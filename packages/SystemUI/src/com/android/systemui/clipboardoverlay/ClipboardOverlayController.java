@@ -139,7 +139,6 @@ public class ClipboardOverlayController {
     private final ImageView mImagePreview;
     private final TextView mTextPreview;
     private final TextView mHiddenTextPreview;
-    private final TextView mHiddenImagePreview;
     private final View mPreviewBorder;
     private final OverlayActionChip mEditChip;
     private final OverlayActionChip mShareChip;
@@ -190,6 +189,7 @@ public class ClipboardOverlayController {
         // Setup the window that we are going to use
         mWindowLayoutParams = FloatingWindowUtil.getFloatingWindowParams();
         mWindowLayoutParams.setTitle("ClipboardOverlay");
+
         mWindow = FloatingWindowUtil.getFloatingWindow(mContext);
         mWindow.setWindowManager(mWindowManager, null, null);
 
@@ -204,7 +204,6 @@ public class ClipboardOverlayController {
         mImagePreview = requireNonNull(mView.findViewById(R.id.image_preview));
         mTextPreview = requireNonNull(mView.findViewById(R.id.text_preview));
         mHiddenTextPreview = requireNonNull(mView.findViewById(R.id.hidden_text_preview));
-        mHiddenImagePreview = requireNonNull(mView.findViewById(R.id.hidden_image_preview));
         mPreviewBorder = requireNonNull(mView.findViewById(R.id.preview_border));
         mEditChip = requireNonNull(mView.findViewById(R.id.edit_chip));
         mShareChip = requireNonNull(mView.findViewById(R.id.share_chip));
@@ -502,7 +501,6 @@ public class ClipboardOverlayController {
         mTextPreview.setVisibility(View.GONE);
         mImagePreview.setVisibility(View.GONE);
         mHiddenTextPreview.setVisibility(View.GONE);
-        mHiddenImagePreview.setVisibility(View.GONE);
         v.setVisibility(View.VISIBLE);
     }
 
@@ -534,9 +532,9 @@ public class ClipboardOverlayController {
         String mimeType = resolver.getType(uri);
         boolean isEditableImage = mimeType != null && mimeType.startsWith("image");
         if (isSensitive) {
-            showSinglePreview(mHiddenImagePreview);
+            showSinglePreview(mHiddenTextPreview);
             if (isEditableImage) {
-                mHiddenImagePreview.setOnClickListener(listener);
+                mHiddenTextPreview.setOnClickListener(listener);
             }
         } else if (isEditableImage) { // if the MIMEtype is image, try to load
             try {
