@@ -161,13 +161,13 @@ static jint android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject w
         return (jint) AUDIO_JAVA_ERROR;
     }
 
-    jint* nSession = (jint *) env->GetPrimitiveArrayCritical(jSession, NULL);
+    jint* nSession = env->GetIntArrayElements(jSession, nullptr /* isCopy */);
     if (nSession == NULL) {
         ALOGE("Error creating AudioRecord: Error retrieving session id pointer");
         return (jint) AUDIO_JAVA_ERROR;
     }
     audio_session_t sessionId = (audio_session_t) nSession[0];
-    env->ReleasePrimitiveArrayCritical(jSession, nSession, 0);
+    env->ReleaseIntArrayElements(jSession, nSession, 0 /* mode */);
     nSession = NULL;
 
     sp<AudioRecord> lpRecorder;
@@ -288,14 +288,14 @@ static jint android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject w
         // callbackData = sp<AudioRecordJNIStorage>::make(clazz, weak_this);
     }
 
-    nSession = (jint *) env->GetPrimitiveArrayCritical(jSession, NULL);
+    nSession = env->GetIntArrayElements(jSession, nullptr /* isCopy */);
     if (nSession == NULL) {
         ALOGE("Error creating AudioRecord: Error retrieving session id pointer");
         goto native_init_failure;
     }
     // read the audio session ID back from AudioRecord in case a new session was created during set()
     nSession[0] = lpRecorder->getSessionId();
-    env->ReleasePrimitiveArrayCritical(jSession, nSession, 0);
+    env->ReleaseIntArrayElements(jSession, nSession, 0 /* mode */);
     nSession = NULL;
 
     {

@@ -72,7 +72,7 @@ static jint android_media_StreamDefaultEffect_native_setup(JNIEnv *env,
         goto setup_exit;
     }
 
-    nId = reinterpret_cast<jint *>(env->GetPrimitiveArrayCritical(jId, NULL));
+    nId = env->GetIntArrayElements(jId, nullptr /* isCopy */);
     if (nId == NULL) {
         ALOGE("setup: Error retrieving id pointer");
         lStatus = BAD_VALUE;
@@ -98,7 +98,7 @@ setup_exit:
     // Final cleanup and return.
 
     if (nId != NULL) {
-        env->ReleasePrimitiveArrayCritical(jId, nId, 0);
+        env->ReleaseIntArrayElements(jId, nId, 0 /* mode */);
         nId = NULL;
     }
 
@@ -115,7 +115,7 @@ setup_exit:
     return AudioEffectJni::translateNativeErrorToJava(lStatus);
 }
 
-static void android_media_StreamDefaultEffect_native_release(JNIEnv */*env*/,
+static void android_media_StreamDefaultEffect_native_release(JNIEnv* /*env*/,
                                                              jobject /*thiz*/,
                                                              jint id) {
     status_t lStatus = AudioEffect::removeStreamDefaultEffect(id);

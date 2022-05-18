@@ -260,13 +260,13 @@ static jint android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject we
 
     const TunerConfigurationHelper tunerHelper(env, tunerConfiguration);
 
-    jint* nSession = (jint *) env->GetPrimitiveArrayCritical(jSession, NULL);
+    jint* nSession = env->GetIntArrayElements(jSession, nullptr /* isCopy */);
     if (nSession == NULL) {
         ALOGE("Error creating AudioTrack: Error retrieving session id pointer");
         return (jint) AUDIO_JAVA_ERROR;
     }
     audio_session_t sessionId = (audio_session_t) nSession[0];
-    env->ReleasePrimitiveArrayCritical(jSession, nSession, 0);
+    env->ReleaseIntArrayElements(jSession, nSession, 0 /* mode */);
     nSession = NULL;
 
 
@@ -458,14 +458,14 @@ static jint android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject we
                                             javaAudioTrackFields.postNativeEventInJava);
     lpTrack->setAudioTrackCallback(lpJniStorage->mAudioTrackCallback);
 
-    nSession = (jint *) env->GetPrimitiveArrayCritical(jSession, NULL);
+    nSession = env->GetIntArrayElements(jSession, nullptr /* isCopy */);
     if (nSession == NULL) {
         ALOGE("Error creating AudioTrack: Error retrieving session id pointer");
         goto native_init_failure;
     }
     // read the audio session ID back from AudioTrack in case we create a new session
     nSession[0] = lpTrack->getSessionId();
-    env->ReleasePrimitiveArrayCritical(jSession, nSession, 0);
+    env->ReleaseIntArrayElements(jSession, nSession, 0 /* mode */);
     nSession = NULL;
 
     {
@@ -490,7 +490,7 @@ static jint android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject we
     // failures:
 native_init_failure:
     if (nSession != NULL) {
-        env->ReleasePrimitiveArrayCritical(jSession, nSession, 0);
+        env->ReleaseIntArrayElements(jSession, nSession, 0 /* mode */);
     }
 
     setFieldSp(env, thiz, sp<AudioTrack>{}, javaAudioTrackFields.nativeTrackInJavaObj);
@@ -1022,14 +1022,15 @@ static jint android_media_AudioTrack_get_timestamp(JNIEnv *env,  jobject thiz, j
     AudioTimestamp timestamp;
     status_t status = lpTrack->getTimestamp(timestamp);
     if (status == OK) {
-        jlong* nTimestamp = (jlong *) env->GetPrimitiveArrayCritical(jTimestamp, NULL);
+        jlong* nTimestamp = env->GetLongArrayElements(jTimestamp, nullptr /* isCopy */);
         if (nTimestamp == NULL) {
             ALOGE("Unable to get array for getTimestamp()");
             return (jint)AUDIO_JAVA_ERROR;
         }
-        nTimestamp[0] = (jlong) timestamp.mPosition;
-        nTimestamp[1] = (jlong) ((timestamp.mTime.tv_sec * 1000000000LL) + timestamp.mTime.tv_nsec);
-        env->ReleasePrimitiveArrayCritical(jTimestamp, nTimestamp, 0);
+        nTimestamp[0] = static_cast<jlong>(timestamp.mPosition);
+        nTimestamp[1] = static_cast<jlong>((timestamp.mTime.tv_sec * 1000000000LL) +
+                                           timestamp.mTime.tv_nsec);
+        env->ReleaseLongArrayElements(jTimestamp, nTimestamp, 0 /* mode */);
     }
     return (jint) nativeToJavaStatus(status);
 }
@@ -1338,14 +1339,14 @@ static jint android_media_AudioTrack_getAudioDescriptionMixLeveldB(JNIEnv *env, 
         ALOGE("%s: AudioTrack not initialized", __func__);
         return (jint)AUDIO_JAVA_ERROR;
     }
-    jfloat *nativeLevel = (jfloat *)env->GetPrimitiveArrayCritical(level, NULL);
+    jfloat *nativeLevel = env->GetFloatArrayElements(level, nullptr /* isCopy */);
     if (nativeLevel == nullptr) {
         ALOGE("%s: Cannot retrieve level pointer", __func__);
         return (jint)AUDIO_JAVA_ERROR;
     }
 
     status_t status = lpTrack->getAudioDescriptionMixLevel(reinterpret_cast<float *>(nativeLevel));
-    env->ReleasePrimitiveArrayCritical(level, nativeLevel, 0 /* mode */);
+    env->ReleaseFloatArrayElements(level, nativeLevel, 0 /* mode */);
 
     return nativeToJavaStatus(status);
 }
@@ -1368,7 +1369,7 @@ static jint android_media_AudioTrack_getDualMonoMode(JNIEnv *env, jobject thiz,
         ALOGE("%s: AudioTrack not initialized", __func__);
         return (jint)AUDIO_JAVA_ERROR;
     }
-    jint *nativeDualMonoMode = (jint *)env->GetPrimitiveArrayCritical(dualMonoMode, NULL);
+    jint *nativeDualMonoMode = env->GetIntArrayElements(dualMonoMode, nullptr /* isCopy */);
     if (nativeDualMonoMode == nullptr) {
         ALOGE("%s: Cannot retrieve dualMonoMode pointer", __func__);
         return (jint)AUDIO_JAVA_ERROR;
@@ -1376,7 +1377,7 @@ static jint android_media_AudioTrack_getDualMonoMode(JNIEnv *env, jobject thiz,
 
     status_t status = lpTrack->getDualMonoMode(
             reinterpret_cast<audio_dual_mono_mode_t *>(nativeDualMonoMode));
-    env->ReleasePrimitiveArrayCritical(dualMonoMode, nativeDualMonoMode, 0 /* mode */);
+    env->ReleaseIntArrayElements(dualMonoMode, nativeDualMonoMode, 0 /* mode */);
 
     return nativeToJavaStatus(status);
 }

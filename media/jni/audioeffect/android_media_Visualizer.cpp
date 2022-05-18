@@ -443,14 +443,14 @@ android_media_visualizer_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
         goto setup_failure;
     }
 
-    nId = (jint *) env->GetPrimitiveArrayCritical(jId, NULL);
+    nId = env->GetIntArrayElements(jId, nullptr /* isCopy */);
     if (nId == NULL) {
         ALOGE("setup: Error retrieving id pointer");
         lStatus = VISUALIZER_ERROR_BAD_VALUE;
         goto setup_failure;
     }
     nId[0] = lpVisualizer->id();
-    env->ReleasePrimitiveArrayCritical(jId, nId, 0);
+    env->ReleaseIntArrayElements(jId, nId, 0 /* mode */);
     nId = NULL;
 
     setVisualizer(env, thiz, lpVisualizer);
@@ -467,7 +467,7 @@ android_media_visualizer_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
 setup_failure:
 
     if (nId != NULL) {
-        env->ReleasePrimitiveArrayCritical(jId, nId, 0);
+        env->ReleaseIntArrayElements(jId, nId, 0 /* mode */);
     }
 
     if (lpJniStorage) {
@@ -660,13 +660,13 @@ android_media_visualizer_native_getWaveForm(JNIEnv *env, jobject thiz, jbyteArra
         return VISUALIZER_ERROR_NO_INIT;
     }
 
-    jbyte* nWaveform = (jbyte *) env->GetPrimitiveArrayCritical(jWaveform, NULL);
+    jbyte* nWaveform = env->GetByteArrayElements(jWaveform, nullptr /* isCopy */);
     if (nWaveform == NULL) {
         return VISUALIZER_ERROR_NO_MEMORY;
     }
     jint status = translateError(lpVisualizer->getWaveForm((uint8_t *)nWaveform));
 
-    env->ReleasePrimitiveArrayCritical(jWaveform, nWaveform, 0);
+    env->ReleaseByteArrayElements(jWaveform, nWaveform, 0 /* mode */);
     return status;
 }
 
@@ -678,13 +678,13 @@ android_media_visualizer_native_getFft(JNIEnv *env, jobject thiz, jbyteArray jFf
         return VISUALIZER_ERROR_NO_INIT;
     }
 
-    jbyte* nFft = (jbyte *) env->GetPrimitiveArrayCritical(jFft, NULL);
+    jbyte* nFft = env->GetByteArrayElements(jFft, nullptr /* isCopy */);
     if (nFft == NULL) {
         return VISUALIZER_ERROR_NO_MEMORY;
     }
     jint status = translateError(lpVisualizer->getFft((uint8_t *)nFft));
 
-    env->ReleasePrimitiveArrayCritical(jFft, nFft, 0);
+    env->ReleaseByteArrayElements(jFft, nFft, 0 /* mode */);
 
     return status;
 }
