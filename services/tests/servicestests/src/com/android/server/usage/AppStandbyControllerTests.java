@@ -179,7 +179,9 @@ public class AppStandbyControllerTests {
     private AppStandbyController mController;
 
     private CountDownLatch mStateChangedLatch = new CountDownLatch(1);
+    private CountDownLatch mQuotaBumpLatch = new CountDownLatch(1);
     private String mLatchPkgName = null;
+    private int mLatchUserId = -1;
     private AppIdleStateChangeListener mListener = new AppIdleStateChangeListener() {
         @Override
         public void onAppIdleStateChanged(String packageName, int userId,
@@ -187,6 +189,16 @@ public class AppStandbyControllerTests {
             // Ignore events not related to mLatchPkgName, if set.
             if (mLatchPkgName != null && !mLatchPkgName.equals(packageName)) return;
             mStateChangedLatch.countDown();
+        }
+
+        @Override
+        public void triggerTemporaryQuotaBump(String packageName, int userId) {
+            // Ignore events not related to mLatchPkgName, if set.
+            if ((mLatchPkgName != null && !mLatchPkgName.equals(packageName))
+                    || (mLatchUserId != -1 && mLatchUserId != userId)) {
+                return;
+            }
+            mQuotaBumpLatch.countDown();
         }
     };
 
@@ -880,20 +892,27 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    public void testNotificationEvent() throws Exception {
+    public void testNotificationEvent_bucketPromotion() throws Exception {
+        mInjector.mPropertiesChangedListener
+                .onPropertiesChanged(mInjector.getDeviceConfigProperties());
+
         reportEvent(mController, USER_INTERACTION, 0, PACKAGE_1);
         assertEquals(STANDBY_BUCKET_ACTIVE, getStandbyBucket(mController, PACKAGE_1));
         mInjector.mElapsedRealtime = 1;
+        rearmQuotaBumpLatch(PACKAGE_1, USER_ID);
         reportEvent(mController, NOTIFICATION_SEEN, mInjector.mElapsedRealtime, PACKAGE_1);
         assertEquals(STANDBY_BUCKET_ACTIVE, getStandbyBucket(mController, PACKAGE_1));
 
         mController.forceIdleState(PACKAGE_1, USER_ID, true);
         reportEvent(mController, NOTIFICATION_SEEN, mInjector.mElapsedRealtime, PACKAGE_1);
         assertEquals(STANDBY_BUCKET_WORKING_SET, getStandbyBucket(mController, PACKAGE_1));
+        assertFalse(mQuotaBumpLatch.await(1, TimeUnit.SECONDS));
     }
 
     @Test
-    public void testNotificationEvent_changePromotedBucket() throws Exception {
+    public void testNotificationEvent_bucketPromotion_changePromotedBucket() throws Exception {
+        mInjector.mPropertiesChangedListener
+                .onPropertiesChanged(mInjector.getDeviceConfigProperties());
         mController.forceIdleState(PACKAGE_1, USER_ID, true);
         reportEvent(mController, NOTIFICATION_SEEN, mInjector.mElapsedRealtime, PACKAGE_1);
         assertEquals(STANDBY_BUCKET_WORKING_SET, getStandbyBucket(mController, PACKAGE_1));
@@ -906,6 +925,28 @@ public class AppStandbyControllerTests {
         mController.forceIdleState(PACKAGE_1, USER_ID, true);
         reportEvent(mController, NOTIFICATION_SEEN, mInjector.mElapsedRealtime, PACKAGE_1);
         assertEquals(STANDBY_BUCKET_FREQUENT, getStandbyBucket(mController, PACKAGE_1));
+    }
+
+    @Test
+    public void testNotificationEvent_quotaBump() throws Exception {
+        mInjector.mSettingsBuilder
+                .setBoolean("trigger_quota_bump_on_notification_seen", true);
+        mInjector.mSettingsBuilder
+                .setInt("notification_seen_promoted_bucket", STANDBY_BUCKET_NEVER);
+        mInjector.mPropertiesChangedListener
+                .onPropertiesChanged(mInjector.getDeviceConfigProperties());
+
+        reportEvent(mController, USER_INTERACTION, 0, PACKAGE_1);
+        assertEquals(STANDBY_BUCKET_ACTIVE, getStandbyBucket(mController, PACKAGE_1));
+        mInjector.mElapsedRealtime = RARE_THRESHOLD * 2;
+        setAndAssertBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE, REASON_MAIN_FORCED_BY_SYSTEM);
+
+        rearmQuotaBumpLatch(PACKAGE_1, USER_ID);
+        mInjector.mElapsedRealtime += 1;
+
+        reportEvent(mController, NOTIFICATION_SEEN, mInjector.mElapsedRealtime, PACKAGE_1);
+        assertTrue(mQuotaBumpLatch.await(1, TimeUnit.SECONDS));
+        assertEquals(STANDBY_BUCKET_RARE, getStandbyBucket(mController, PACKAGE_1));
     }
 
     @Test
@@ -1384,6 +1425,9 @@ public class AppStandbyControllerTests {
     @Test
     @FlakyTest(bugId = 185169504)
     public void testCascadingTimeouts() throws Exception {
+        mInjector.mPropertiesChangedListener
+                .onPropertiesChanged(mInjector.getDeviceConfigProperties());
+
         reportEvent(mController, USER_INTERACTION, 0, PACKAGE_1);
         assertBucket(STANDBY_BUCKET_ACTIVE);
 
@@ -1408,6 +1452,9 @@ public class AppStandbyControllerTests {
     @Test
     @FlakyTest(bugId = 185169504)
     public void testOverlappingTimeouts() throws Exception {
+        mInjector.mPropertiesChangedListener
+                .onPropertiesChanged(mInjector.getDeviceConfigProperties());
+
         reportEvent(mController, USER_INTERACTION, 0, PACKAGE_1);
         assertBucket(STANDBY_BUCKET_ACTIVE);
 
@@ -1498,6 +1545,9 @@ public class AppStandbyControllerTests {
     @Test
     @FlakyTest(bugId = 185169504)
     public void testPredictionNotOverridden() throws Exception {
+        mInjector.mPropertiesChangedListener
+                .onPropertiesChanged(mInjector.getDeviceConfigProperties());
+
         reportEvent(mController, USER_INTERACTION, 0, PACKAGE_1);
         assertBucket(STANDBY_BUCKET_ACTIVE);
 
@@ -2096,7 +2146,7 @@ public class AppStandbyControllerTests {
     private void setAndAssertBucket(String pkg, int user, int bucket, int reason) throws Exception {
         rearmLatch(pkg);
         mController.setAppStandbyBucket(pkg, user, bucket, reason);
-        mStateChangedLatch.await(100, TimeUnit.MILLISECONDS);
+        mStateChangedLatch.await(1, TimeUnit.SECONDS);
         assertEquals("Failed to set package bucket", bucket,
                 getStandbyBucket(mController, PACKAGE_1));
     }
@@ -2108,5 +2158,11 @@ public class AppStandbyControllerTests {
 
     private void rearmLatch() {
         rearmLatch(null);
+    }
+
+    private void rearmQuotaBumpLatch(String pkgName, int userId) {
+        mLatchPkgName = pkgName;
+        mLatchUserId = userId;
+        mQuotaBumpLatch = new CountDownLatch(1);
     }
 }
