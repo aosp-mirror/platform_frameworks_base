@@ -1708,8 +1708,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             logExitToStage(dismissReason, toStage == STAGE_TYPE_MAIN);
         }
 
-        addDividerBarToTransition(info, t, false /* show */);
-
         // Hide divider and dim layer on transition finished.
         setDividerVisibility(false, finishT);
         finishT.hide(mMainStage.mDimLayer);
@@ -1731,6 +1729,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             return false;
         }
 
+        addDividerBarToTransition(info, t, false /* show */);
         return true;
     }
 
