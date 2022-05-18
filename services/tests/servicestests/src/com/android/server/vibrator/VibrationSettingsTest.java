@@ -81,6 +81,10 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Tests for {@link VibrationSettings}.
  *
@@ -199,35 +203,24 @@ public class VibrationSettingsTest {
 
     @Test
     public void shouldIgnoreVibration_fromBackground_doesNotIgnoreUsagesFromAllowlist() {
-        int[] expectedAllowedVibrations = new int[] {
+        Set<Integer> expectedAllowedVibrations = new HashSet<>(Arrays.asList(
                 USAGE_RINGTONE,
                 USAGE_ALARM,
                 USAGE_NOTIFICATION,
                 USAGE_COMMUNICATION_REQUEST,
                 USAGE_HARDWARE_FEEDBACK,
-                USAGE_PHYSICAL_EMULATION,
-        };
+                USAGE_PHYSICAL_EMULATION
+        ));
 
         mVibrationSettings.mUidObserver.onUidStateChanged(
                 UID, ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND, 0, 0);
 
-        for (int usage : expectedAllowedVibrations) {
-            assertVibrationNotIgnoredForUsage(usage);
-        }
-    }
-
-    @Test
-    public void shouldIgnoreVibration_fromBackground_ignoresUsagesNotInAllowlist() {
-        int[] expectedIgnoredVibrations = new int[] {
-                USAGE_TOUCH,
-                USAGE_UNKNOWN,
-        };
-
-        mVibrationSettings.mUidObserver.onUidStateChanged(
-                UID, ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND, 0, 0);
-
-        for (int usage : expectedIgnoredVibrations) {
-            assertVibrationIgnoredForUsage(usage, Vibration.Status.IGNORED_BACKGROUND);
+        for (int usage : ALL_USAGES) {
+            if (expectedAllowedVibrations.contains(usage)) {
+                assertVibrationNotIgnoredForUsage(usage);
+            } else {
+                assertVibrationIgnoredForUsage(usage, Vibration.Status.IGNORED_BACKGROUND);
+            }
         }
     }
 
@@ -243,33 +236,22 @@ public class VibrationSettingsTest {
 
     @Test
     public void shouldIgnoreVibration_inBatterySaverMode_doesNotIgnoreUsagesFromAllowlist() {
-        int[] expectedAllowedVibrations = new int[] {
+        Set<Integer> expectedAllowedVibrations = new HashSet<>(Arrays.asList(
                 USAGE_RINGTONE,
                 USAGE_ALARM,
                 USAGE_COMMUNICATION_REQUEST,
-        };
-
-        mRegisteredPowerModeListener.onLowPowerModeChanged(LOW_POWER_STATE);
-
-        for (int usage : expectedAllowedVibrations) {
-            assertVibrationNotIgnoredForUsage(usage);
-        }
-    }
-
-    @Test
-    public void shouldIgnoreVibration_inBatterySaverMode_ignoresUsagesNotInAllowlist() {
-        int[] expectedIgnoredVibrations = new int[] {
-                USAGE_NOTIFICATION,
-                USAGE_HARDWARE_FEEDBACK,
                 USAGE_PHYSICAL_EMULATION,
-                USAGE_TOUCH,
-                USAGE_UNKNOWN,
-        };
+                USAGE_HARDWARE_FEEDBACK
+        ));
 
         mRegisteredPowerModeListener.onLowPowerModeChanged(LOW_POWER_STATE);
 
-        for (int usage : expectedIgnoredVibrations) {
-            assertVibrationIgnoredForUsage(usage, Vibration.Status.IGNORED_FOR_POWER);
+        for (int usage : ALL_USAGES) {
+            if (expectedAllowedVibrations.contains(usage)) {
+                assertVibrationNotIgnoredForUsage(usage);
+            } else {
+                assertVibrationIgnoredForUsage(usage, Vibration.Status.IGNORED_FOR_POWER);
+            }
         }
     }
 

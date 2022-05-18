@@ -243,6 +243,9 @@ public class SpatializerHelper {
                 }
                 mActualHeadTrackingMode =
                         headTrackingModeTypeToSpatializerInt(spat.getActualHeadTrackingMode());
+            } else {
+                mDesiredHeadTrackingModeWhenEnabled = Spatializer.HEAD_TRACKING_MODE_UNSUPPORTED;
+                mDesiredHeadTrackingMode = Spatializer.HEAD_TRACKING_MODE_UNSUPPORTED;
             }
 
             byte[] spatModes = spat.getSupportedModes();
@@ -1048,6 +1051,10 @@ public class SpatializerHelper {
     }
 
     synchronized void setHeadTrackerEnabled(boolean enabled, @NonNull AudioDeviceAttributes ada) {
+        if (!mIsHeadTrackingSupported) {
+            Log.v(TAG, "no headtracking support, ignoring setHeadTrackerEnabled to " + enabled
+                    + " for " + ada);
+        }
         final int deviceType = ada.getType();
         final boolean wireless = isWireless(deviceType);
 
@@ -1075,6 +1082,10 @@ public class SpatializerHelper {
     }
 
     synchronized boolean hasHeadTracker(@NonNull AudioDeviceAttributes ada) {
+        if (!mIsHeadTrackingSupported) {
+            Log.v(TAG, "no headtracking support, hasHeadTracker always false for " + ada);
+            return false;
+        }
         final int deviceType = ada.getType();
         final boolean wireless = isWireless(deviceType);
 
@@ -1094,6 +1105,10 @@ public class SpatializerHelper {
      * @return true if the head tracker is enabled, false otherwise or if device not found
      */
     synchronized boolean setHasHeadTracker(@NonNull AudioDeviceAttributes ada) {
+        if (!mIsHeadTrackingSupported) {
+            Log.v(TAG, "no headtracking support, setHasHeadTracker always false for " + ada);
+            return false;
+        }
         final int deviceType = ada.getType();
         final boolean wireless = isWireless(deviceType);
 
@@ -1113,6 +1128,10 @@ public class SpatializerHelper {
     }
 
     synchronized boolean isHeadTrackerEnabled(@NonNull AudioDeviceAttributes ada) {
+        if (!mIsHeadTrackingSupported) {
+            Log.v(TAG, "no headtracking support, isHeadTrackerEnabled always false for " + ada);
+            return false;
+        }
         final int deviceType = ada.getType();
         final boolean wireless = isWireless(deviceType);
 
