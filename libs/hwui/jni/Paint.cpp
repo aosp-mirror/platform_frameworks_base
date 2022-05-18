@@ -598,6 +598,20 @@ namespace PaintGlue {
         return result;
     }
 
+    // Required for API O and O_MR1
+    static jfloat getRunAdvance___JCIIIIZI_F(JNIEnv* env, jclass, jlong paintHandle,
+                                             jlong typefaceHandle, jcharArray text, jint start,
+                                             jint end, jint contextStart, jint contextEnd,
+                                             jboolean isRtl, jint offset) {
+        const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        const Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
+        ScopedCharArrayRO textArray(env, text);
+        jfloat result =
+                doRunAdvance(paint, typeface, textArray.get() + contextStart, start - contextStart,
+                             end - start, contextEnd - contextStart, isRtl, offset - contextStart);
+        return result;
+    }
+
     static jint doOffsetForAdvance(const Paint* paint, const Typeface* typeface, const jchar buf[],
             jint start, jint count, jint bufSize, jboolean isRtl, jfloat advance) {
         minikin::Bidi bidiFlags = isRtl ? minikin::Bidi::FORCE_RTL : minikin::Bidi::FORCE_LTR;
@@ -1106,6 +1120,7 @@ static const JNINativeMethod methods[] = {
          (void*)PaintGlue::getCharArrayBounds},
         {"nHasGlyph", "(JILjava/lang/String;)Z", (void*)PaintGlue::hasGlyph},
         {"nGetRunAdvance", "(J[CIIIIZI)F", (void*)PaintGlue::getRunAdvance___CIIIIZI_F},
+        {"nGetRunAdvance", "(JJ[CIIIIZI)F", (void*)PaintGlue::getRunAdvance___JCIIIIZI_F},
         {"nGetOffsetForAdvance", "(J[CIIIIZF)I", (void*)PaintGlue::getOffsetForAdvance___CIIIIZF_I},
 
         // --------------- @FastNative ----------------------
