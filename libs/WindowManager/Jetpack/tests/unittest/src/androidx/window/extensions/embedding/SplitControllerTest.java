@@ -43,6 +43,7 @@ import static org.mockito.Mockito.never;
 
 import android.annotation.NonNull;
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -50,6 +51,7 @@ import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
@@ -219,7 +221,8 @@ public class SplitControllerTest {
         spyOn(tf);
         doReturn(mActivity).when(tf).getTopNonFinishingActivity();
         doReturn(true).when(tf).isEmpty();
-        doReturn(true).when(mSplitController).launchPlaceholderIfNecessary(mActivity);
+        doReturn(true).when(mSplitController).launchPlaceholderIfNecessary(mActivity,
+                false /* isOnCreated */);
         doNothing().when(mSplitPresenter).updateSplitContainer(any(), any(), any());
 
         mSplitController.updateContainer(mTransaction, tf);
@@ -287,8 +290,7 @@ public class SplitControllerTest {
         mSplitController.onActivityCreated(mActivity);
 
         // Disallow to split as primary because we want the new launch to be always on top.
-        verify(mSplitController).resolveActivityToContainer(mActivity,
-                false /* canSplitAsPrimary */);
+        verify(mSplitController).resolveActivityToContainer(mActivity, false /* isOnReparent */);
     }
 
     @Test
@@ -297,8 +299,7 @@ public class SplitControllerTest {
                 mActivity.getActivityToken());
 
         // Treated as on activity created, but allow to split as primary.
-        verify(mSplitController).resolveActivityToContainer(mActivity,
-                true /* canSplitAsPrimary */);
+        verify(mSplitController).resolveActivityToContainer(mActivity, true /* isOnReparent */);
         // Try to place the activity to the top TaskFragment when there is no matched rule.
         verify(mSplitController).placeActivityInTopContainer(mActivity);
     }
@@ -432,7 +433,7 @@ public class SplitControllerTest {
     @Test
     public void testResolveActivityToContainer_noRuleMatched() {
         final boolean result = mSplitController.resolveActivityToContainer(mActivity,
-                false /* canSplitAsPrimary */);
+                false /* isOnReparent */);
 
         assertFalse(result);
         verify(mSplitController, never()).newContainer(any(), any(), anyInt());
@@ -444,7 +445,7 @@ public class SplitControllerTest {
 
         // When the activity is not in any TaskFragment, create a new expanded TaskFragment for it.
         final boolean result = mSplitController.resolveActivityToContainer(mActivity,
-                false /* canSplitAsPrimary */);
+                false /* isOnReparent */);
         final TaskFragmentContainer container = mSplitController.getContainerWithActivity(
                 mActivity);
 
@@ -461,7 +462,7 @@ public class SplitControllerTest {
         // When the activity is not in any TaskFragment, create a new expanded TaskFragment for it.
         final TaskFragmentContainer container = mSplitController.newContainer(mActivity, TASK_ID);
         final boolean result = mSplitController.resolveActivityToContainer(mActivity,
-                false /* canSplitAsPrimary */);
+                false /* isOnReparent */);
 
         assertTrue(result);
         verify(mSplitPresenter).expandTaskFragment(container.getTaskFragmentToken());
@@ -475,7 +476,7 @@ public class SplitControllerTest {
         final Activity activity = createMockActivity();
         addSplitTaskFragments(activity, mActivity);
         final boolean result = mSplitController.resolveActivityToContainer(mActivity,
-                false /* canSplitAsPrimary */);
+                false /* isOnReparent */);
         final TaskFragmentContainer container = mSplitController.getContainerWithActivity(
                 mActivity);
 
@@ -492,11 +493,12 @@ public class SplitControllerTest {
 
         // Launch placeholder if the activity is not in any TaskFragment.
         final boolean result = mSplitController.resolveActivityToContainer(mActivity,
-                false /* canSplitAsPrimary */);
+                false /* isOnReparent */);
 
         assertTrue(result);
         verify(mSplitPresenter).startActivityToSide(mActivity, PLACEHOLDER_INTENT,
-                null /* activityOptions */, placeholderRule, true /* isPlaceholder */);
+                mSplitController.getPlaceholderOptions(mActivity, true /* isOnCreated */),
+                placeholderRule, true /* isPlaceholder */);
     }
 
     @Test
@@ -508,7 +510,7 @@ public class SplitControllerTest {
         mSplitController.newContainer(mActivity, TASK_ID);
         mSplitController.newContainer(activity, TASK_ID);
         final boolean result = mSplitController.resolveActivityToContainer(mActivity,
-                false /* canSplitAsPrimary */);
+                false /* isOnReparent */);
 
         assertFalse(result);
         verify(mSplitPresenter, never()).startActivityToSide(any(), any(), any(), any(),
@@ -524,11 +526,12 @@ public class SplitControllerTest {
         // Launch placeholder if the activity is in the topmost expanded TaskFragment.
         mSplitController.newContainer(mActivity, TASK_ID);
         final boolean result = mSplitController.resolveActivityToContainer(mActivity,
-                false /* canSplitAsPrimary */);
+                false /* isOnReparent */);
 
         assertTrue(result);
         verify(mSplitPresenter).startActivityToSide(mActivity, PLACEHOLDER_INTENT,
-                null /* activityOptions */, placeholderRule, true /* isPlaceholder */);
+                mSplitController.getPlaceholderOptions(mActivity, true /* isOnCreated */),
+                placeholderRule, true /* isPlaceholder */);
     }
 
     @Test
@@ -539,7 +542,7 @@ public class SplitControllerTest {
         final Activity secondaryActivity = createMockActivity();
         addSplitTaskFragments(mActivity, secondaryActivity);
         final boolean result = mSplitController.resolveActivityToContainer(mActivity,
-                false /* canSplitAsPrimary */);
+                false /* isOnReparent */);
 
         assertFalse(result);
         verify(mSplitPresenter, never()).startActivityToSide(any(), any(), any(), any(),
@@ -556,11 +559,12 @@ public class SplitControllerTest {
         final Activity primaryActivity = createMockActivity();
         addSplitTaskFragments(primaryActivity, mActivity);
         final boolean result = mSplitController.resolveActivityToContainer(mActivity,
-                false /* canSplitAsPrimary */);
+                false /* isOnReparent */);
 
         assertTrue(result);
         verify(mSplitPresenter).startActivityToSide(mActivity, PLACEHOLDER_INTENT,
-                null /* activityOptions */, placeholderRule, true /* isPlaceholder */);
+                mSplitController.getPlaceholderOptions(mActivity, true /* isOnCreated */),
+                placeholderRule, true /* isPlaceholder */);
     }
 
     @Test
@@ -582,7 +586,7 @@ public class SplitControllerTest {
                 splitRule);
         clearInvocations(mSplitController);
         final boolean result = mSplitController.resolveActivityToContainer(mActivity,
-                false /* canSplitAsPrimary */);
+                false /* isOnReparent */);
 
         assertTrue(result);
         verify(mSplitController, never()).newContainer(any(), any(), anyInt());
@@ -598,7 +602,7 @@ public class SplitControllerTest {
         addSplitTaskFragments(primaryActivity, mActivity);
         clearInvocations(mSplitController);
         final boolean result = mSplitController.resolveActivityToContainer(mActivity,
-                false /* canSplitAsPrimary */);
+                false /* isOnReparent */);
 
         assertTrue(result);
         verify(mSplitController, never()).newContainer(any(), any(), anyInt());
@@ -616,7 +620,7 @@ public class SplitControllerTest {
         mSplitController.getContainerWithActivity(secondaryActivity)
                 .addPendingAppearedActivity(mActivity);
         final boolean result = mSplitController.resolveActivityToContainer(mActivity,
-                false /* canSplitAsPrimary */);
+                false /* isOnReparent */);
 
         assertFalse(result);
     }
@@ -641,7 +645,7 @@ public class SplitControllerTest {
                 secondaryContainer,
                 placeholderRule);
         final boolean result = mSplitController.resolveActivityToContainer(mActivity,
-                false /* canSplitAsPrimary */);
+                false /* isOnReparent */);
 
         assertTrue(result);
     }
@@ -655,7 +659,7 @@ public class SplitControllerTest {
                 TASK_ID);
         container.addPendingAppearedActivity(mActivity);
         final boolean result = mSplitController.resolveActivityToContainer(mActivity,
-                false /* canSplitAsPrimary */);
+                false /* isOnReparent */);
 
         assertTrue(result);
         assertSplitPair(activityBelow, mActivity);
@@ -671,14 +675,13 @@ public class SplitControllerTest {
                 TASK_ID);
         container.addPendingAppearedActivity(mActivity);
         boolean result = mSplitController.resolveActivityToContainer(mActivity,
-                false /* canSplitAsPrimary */);
+                false /* isOnReparent */);
 
         assertFalse(result);
         assertEquals(container, mSplitController.getContainerWithActivity(mActivity));
 
         // Allow to split as primary.
-        result = mSplitController.resolveActivityToContainer(mActivity,
-                true /* canSplitAsPrimary */);
+        result = mSplitController.resolveActivityToContainer(mActivity, true /* isOnReparent */);
 
         assertTrue(result);
         assertSplitPair(mActivity, activityBelow);
@@ -697,7 +700,7 @@ public class SplitControllerTest {
                 activityBelow);
         secondaryContainer.addPendingAppearedActivity(mActivity);
         final boolean result = mSplitController.resolveActivityToContainer(mActivity,
-                false /* canSplitAsPrimary */);
+                false /* isOnReparent */);
         final TaskFragmentContainer container = mSplitController.getContainerWithActivity(
                 mActivity);
 
@@ -718,17 +721,36 @@ public class SplitControllerTest {
                 primaryActivity);
         primaryContainer.addPendingAppearedActivity(mActivity);
         boolean result = mSplitController.resolveActivityToContainer(mActivity,
-                false /* canSplitAsPrimary */);
+                false /* isOnReparent */);
 
         assertFalse(result);
         assertEquals(primaryContainer, mSplitController.getContainerWithActivity(mActivity));
 
 
-        result = mSplitController.resolveActivityToContainer(mActivity,
-                true /* canSplitAsPrimary */);
+        result = mSplitController.resolveActivityToContainer(mActivity, true /* isOnReparent */);
 
         assertTrue(result);
         assertSplitPair(mActivity, primaryActivity);
+    }
+
+    @Test
+    public void testGetPlaceholderOptions() {
+        doReturn(true).when(mActivity).isResumed();
+
+        assertNull(mSplitController.getPlaceholderOptions(mActivity, false /* isOnCreated */));
+
+        doReturn(false).when(mActivity).isResumed();
+
+        assertNull(mSplitController.getPlaceholderOptions(mActivity, true /* isOnCreated */));
+
+        // Launch placeholder without moving the Task to front if the Task is now in background (not
+        // resumed or onCreated).
+        final Bundle options = mSplitController.getPlaceholderOptions(mActivity,
+                false /* isOnCreated */);
+
+        assertNotNull(options);
+        final ActivityOptions activityOptions = new ActivityOptions(options);
+        assertTrue(activityOptions.getAvoidMoveToFront());
     }
 
     /** Creates a mock activity in the organizer process. */
