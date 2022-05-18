@@ -20,6 +20,9 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
@@ -427,5 +430,50 @@ public class TaskFragmentTest extends WindowTestsBase {
         doReturn(false).when(taskFragment).isAllowedToEmbedActivityInTrustedMode(activity1);
 
         assertFalse(taskFragment.isAllowedToBeEmbeddedInTrustedMode());
+    }
+
+    @Test
+    public void testIgnoreRequestedOrientationForActivityEmbeddingSplit() {
+        // Setup two activities in ActivityEmbedding split.
+        final Task task = createTask(mDisplayContent);
+        final TaskFragment tf0 = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .createActivityCount(1)
+                .setOrganizer(mOrganizer)
+                .setFragmentToken(new Binder())
+                .build();
+        final TaskFragment tf1 = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .createActivityCount(1)
+                .setOrganizer(mOrganizer)
+                .setFragmentToken(new Binder())
+                .build();
+        tf0.setAdjacentTaskFragment(tf1, false /* moveAdjacentTogether */);
+        tf0.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        tf1.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        task.setBounds(0, 0, 1200, 1000);
+        tf0.setBounds(0, 0, 600, 1000);
+        tf1.setBounds(600, 0, 1200, 1000);
+        final ActivityRecord activity0 = tf0.getTopMostActivity();
+        final ActivityRecord activity1 = tf1.getTopMostActivity();
+
+        // Assert fixed orientation request is ignored for activity in ActivityEmbedding split.
+        activity0.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+
+        assertFalse(activity0.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertEquals(SCREEN_ORIENTATION_UNSET, task.getOrientation());
+
+        activity1.setRequestedOrientation(SCREEN_ORIENTATION_PORTRAIT);
+
+        assertFalse(activity1.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertEquals(SCREEN_ORIENTATION_UNSET, task.getOrientation());
+
+        // Also verify the behavior on device that ignore orientation request.
+        mDisplayContent.setIgnoreOrientationRequest(true);
+        task.onConfigurationChanged(task.getParent().getConfiguration());
+
+        assertFalse(activity0.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertFalse(activity1.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertEquals(SCREEN_ORIENTATION_UNSET, task.getOrientation());
     }
 }
