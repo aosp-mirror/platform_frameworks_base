@@ -341,6 +341,15 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         }
     }
 
+    void evictInvisibleChildren(WindowContainerTransaction wct) {
+        for (int i = mChildrenTaskInfo.size() - 1; i >= 0; i--) {
+            final ActivityManager.RunningTaskInfo taskInfo = mChildrenTaskInfo.valueAt(i);
+            if (!taskInfo.isVisible) {
+                wct.reparent(taskInfo.token, null /* parent */, false /* onTop */);
+            }
+        }
+    }
+
     void onSplitScreenListenerRegistered(SplitScreen.SplitScreenListener listener,
             @StageType int stage) {
         for (int i = mChildrenTaskInfo.size() - 1; i >= 0; --i) {
