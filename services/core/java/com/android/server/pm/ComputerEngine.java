@@ -5011,7 +5011,7 @@ public class ComputerEngine implements Computer {
             if (ps == null) {
                 return true;
             }
-            if (shouldFilterApplication(ps, callingUid, userId)) {
+            if (shouldFilterApplicationIncludingUninstalled(ps, callingUid, userId)) {
                 return true;
             }
             return ps.getUserStateOrDefault(userId).isHidden();
@@ -5075,11 +5075,12 @@ public class ComputerEngine implements Computer {
 
     @Override
     public boolean getBlockUninstallForUser(@NonNull String packageName, @UserIdInt int userId) {
-            final PackageStateInternal ps = mSettings.getPackage(packageName);
-            if (ps == null || shouldFilterApplication(ps, Binder.getCallingUid(), userId)) {
-                return false;
-            }
-            return mSettings.getBlockUninstall(userId, packageName);
+        final PackageStateInternal ps = mSettings.getPackage(packageName);
+        final int callingUid = Binder.getCallingUid();
+        if (ps == null || shouldFilterApplicationIncludingUninstalled(ps, callingUid, userId)) {
+            return false;
+        }
+        return mSettings.getBlockUninstall(userId, packageName);
     }
 
     @Nullable
@@ -5471,13 +5472,10 @@ public class ComputerEngine implements Computer {
         enforceCrossUserPermission(callingUid, userId, true /* requireFullPermission */,
                 false /* checkShell */, "get install reason");
         final PackageStateInternal ps = mSettings.getPackage(packageName);
-        if (shouldFilterApplication(ps, callingUid, userId)) {
+        if (ps == null || shouldFilterApplicationIncludingUninstalled(ps, callingUid, userId)) {
             return PackageManager.INSTALL_REASON_UNKNOWN;
         }
-        if (ps != null) {
-            return ps.getUserStateOrDefault(userId).getInstallReason();
-        }
-        return PackageManager.INSTALL_REASON_UNKNOWN;
+        return ps.getUserStateOrDefault(userId).getInstallReason();
     }
 
     @Override

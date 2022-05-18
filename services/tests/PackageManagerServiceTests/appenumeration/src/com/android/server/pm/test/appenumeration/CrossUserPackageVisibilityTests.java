@@ -17,6 +17,10 @@
 package com.android.server.pm.test.appenumeration;
 
 import static android.Manifest.permission.CLEAR_APP_USER_DATA;
+import static android.Manifest.permission.DELETE_PACKAGES;
+import static android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS;
+import static android.Manifest.permission.MOVE_PACKAGE;
+import static android.content.pm.PackageManager.MOVE_FAILED_DOESNT_EXIST;
 
 import static com.android.compatibility.common.util.ShellUtils.runShellCommand;
 
@@ -41,6 +45,7 @@ import com.android.bedstead.harrier.BedsteadJUnit4;
 import com.android.bedstead.harrier.DeviceState;
 import com.android.bedstead.harrier.annotations.EnsureHasSecondaryUser;
 import com.android.bedstead.nene.users.UserReference;
+import com.android.compatibility.common.util.PollingCheck;
 import com.android.compatibility.common.util.TestUtils;
 
 import org.junit.After;
@@ -203,6 +208,38 @@ public class CrossUserPackageVisibilityTests {
         assertThat(clearApplicationUserData(CROSS_USER_TEST_PACKAGE_NAME)).isFalse();
     }
 
+    @Test
+    public void testGetBlockUninstallForUser_cannotDetectStubPkg() throws Exception {
+        mInstrumentation.getUiAutomation().adoptShellPermissionIdentity(DELETE_PACKAGES);
+        assertThat(mIPackageManager.setBlockUninstallForUser(
+                CROSS_USER_TEST_PACKAGE_NAME, true, mCurrentUser.id())).isTrue();
+        try {
+            assertThat(mIPackageManager.getBlockUninstallForUser(
+                    CROSS_USER_TEST_PACKAGE_NAME, mCurrentUser.id())).isFalse();
+
+            installPackageForUser(CROSS_USER_TEST_APK_FILE, mOtherUser);
+
+            assertThat(mIPackageManager.getBlockUninstallForUser(
+                    CROSS_USER_TEST_PACKAGE_NAME, mCurrentUser.id())).isFalse();
+        } finally {
+            assertThat(mIPackageManager.setBlockUninstallForUser(
+                    CROSS_USER_TEST_PACKAGE_NAME, false, mCurrentUser.id())).isTrue();
+        }
+    }
+
+    @Test
+    public void testMovePackage_cannotDetectStubPkg() throws Exception {
+        mInstrumentation.getUiAutomation().adoptShellPermissionIdentity(
+                MOVE_PACKAGE, MOUNT_UNMOUNT_FILESYSTEMS);
+        assertThat(movePackage(CROSS_USER_TEST_PACKAGE_NAME, null /* volumeUuid */))
+                .isEqualTo(MOVE_FAILED_DOESNT_EXIST);
+
+        installPackageForUser(CROSS_USER_TEST_APK_FILE, mOtherUser);
+
+        assertThat(movePackage(CROSS_USER_TEST_PACKAGE_NAME, null /* volumeUuid */))
+                .isEqualTo(MOVE_FAILED_DOESNT_EXIST);
+    }
+
     private boolean clearApplicationUserData(String packageName) throws Exception {
         final AtomicInteger result = new AtomicInteger(-1);
         final IPackageDataObserver localObserver = new IPackageDataObserver.Stub() {
@@ -219,6 +256,15 @@ public class CrossUserPackageVisibilityTests {
         TestUtils.waitOn(result, () -> result.get() != -1, DEFAULT_TIMEOUT_MS,
                 "clearApplicationUserData: " + packageName);
         return result.get() == 1;
+    }
+
+    private int movePackage(String packageName, String volumeUuid) throws Exception {
+        final int moveId = mIPackageManager.movePackage(packageName, volumeUuid);
+        PollingCheck.check(
+                "Waiting for the package " + packageName + " moving timeout",
+                DEFAULT_TIMEOUT_MS,
+                () -> PackageManager.isMoveStatusFinished(mIPackageManager.getMoveStatus(moveId)));
+        return mIPackageManager.getMoveStatus(moveId);
     }
 
     private static void installPackage(File apk) {

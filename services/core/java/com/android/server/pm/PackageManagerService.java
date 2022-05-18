@@ -4378,12 +4378,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     true /* requireFullPermission */, true /* checkShell */, "stop package");
 
             final PackageStateInternal packageState =
-                    snapshot.getPackageStateInternal(packageName);
+                    snapshot.getPackageStateForInstalledAndFiltered(
+                            packageName, callingUid, userId);
             final PackageUserState packageUserState = packageState == null
                     ? null : packageState.getUserStateOrDefault(userId);
-            if (packageState != null
-                    && !snapshot.shouldFilterApplication(packageState, callingUid, userId)
-                    && packageUserState.isStopped() != stopped) {
+            if (packageState != null && packageUserState.isStopped() != stopped) {
                 boolean wasNotLaunched = packageUserState.isNotLaunched();
                 commitPackageStateMutation(null, packageName, state -> {
                     PackageUserStateWrite userState = state.userState(userId);
@@ -5237,11 +5236,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             final int callingUserId = UserHandle.getCallingUserId();
             final Computer snapshot = snapshotComputer();
             final List<PackageManager.Property> result =
-                    mPackageProperty.queryProperty(propertyName, componentType, packageName -> {
-                        final PackageStateInternal ps =
-                                snapshot.getPackageStateInternal(packageName);
-                        return snapshot.shouldFilterApplication(ps, callingUid, callingUserId);
-                    });
+                    mPackageProperty.queryProperty(propertyName, componentType,
+                            packageName -> snapshot.getPackageStateForInstalledAndFiltered(
+                                    packageName, callingUid, callingUserId) == null
+                    );
             if (result == null) {
                 return ParceledListSlice.emptyList();
             }
@@ -5600,19 +5598,17 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 }
 
                 PackageStateInternal targetPackageState =
-                        snapshot.getPackageStateInternal(targetPackage);
-                if (targetPackageState == null
-                        || snapshot.shouldFilterApplication(targetPackageState, callingUid,
-                        callingUserId)) {
+                        snapshot.getPackageStateForInstalledAndFiltered(
+                                targetPackage, callingUid, callingUserId);
+                if (targetPackageState == null) {
                     throw new IllegalArgumentException("Unknown target package: " + targetPackage);
                 }
 
                 PackageStateInternal installerPackageState = null;
                 if (installerPackageName != null) {
-                    installerPackageState = snapshot.getPackageStateInternal(installerPackageName);
-                    if (installerPackageState == null
-                            || snapshot.shouldFilterApplication(
-                            installerPackageState, callingUid, callingUserId)) {
+                    installerPackageState = snapshot.getPackageStateForInstalledAndFiltered(
+                            installerPackageName, callingUid, callingUserId);
+                    if (installerPackageState == null) {
                         throw new IllegalArgumentException("Unknown installer package: "
                                 + installerPackageName);
                     }

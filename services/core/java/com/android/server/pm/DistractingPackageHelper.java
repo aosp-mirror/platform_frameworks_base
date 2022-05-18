@@ -93,9 +93,9 @@ public final class DistractingPackageHelper {
         for (int i = 0; i < packageNames.length; i++) {
             final String packageName = packageNames[i];
             final PackageStateInternal packageState =
-                    snapshot.getPackageStateInternal(packageName);
-            if (packageState == null
-                    || snapshot.shouldFilterApplication(packageState, callingUid, userId)) {
+                    snapshot.getPackageStateForInstalledAndFiltered(
+                            packageName, callingUid, userId);
+            if (packageState == null) {
                 Slog.w(PackageManagerService.TAG,
                         "Could not find package setting for package: " + packageName
                                 + ". Skipping...");
