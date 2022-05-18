@@ -126,7 +126,11 @@ class BubbleVolatileRepository(private val launcherApps: LauncherApps) {
         @UserIdInt userId: Int,
         @UserIdInt parentUserId: Int
     ): Boolean {
-        return entitiesByUser.get(parentUserId).removeIf { b: BubbleEntity -> b.userId == userId }
+        if (entitiesByUser.get(parentUserId) != null) {
+            return entitiesByUser.get(parentUserId).removeIf {
+                b: BubbleEntity -> b.userId == userId }
+        }
+        return false
     }
 
     /**
@@ -141,8 +145,9 @@ class BubbleVolatileRepository(private val launcherApps: LauncherApps) {
             // First check if the user is a parent / top-level user
             val parentUserId = entitiesByUser.keyAt(i)
             if (!activeUsers.contains(parentUserId)) {
-                return removeBubblesForUser(parentUserId, -1)
-            } else {
+                entitiesByUser.remove(parentUserId)
+                return true
+            } else if (entitiesByUser.get(parentUserId) != null) {
                 // Then check if each of the bubbles in the top-level user, still has a valid user
                 // as it could belong to a profile and have a different id from the parent.
                 return entitiesByUser.get(parentUserId).removeIf { b: BubbleEntity ->
