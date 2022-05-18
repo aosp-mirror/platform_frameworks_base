@@ -72,8 +72,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelDuration;
 import android.os.PowerManager;
+import android.os.PowerManager.GoToSleepReason;
 import android.os.PowerManager.ServiceType;
-import android.os.PowerManager.WakeData;
 import android.os.PowerManager.WakeReason;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
@@ -352,7 +352,7 @@ public final class PowerManagerService extends SystemService
 
     // Last reason the device went to sleep.
     private @WakeReason int mLastGlobalWakeReason;
-    private int mLastGlobalSleepReason;
+    private @GoToSleepReason int mLastGlobalSleepReason;
 
     // Timestamp of last time power boost interaction was sent.
     private long mLastInteractivePowerHintTime;
@@ -6350,17 +6350,23 @@ public final class PowerManagerService extends SystemService
         }
     }
 
+    @GoToSleepReason
     private int getLastSleepReasonInternal() {
         synchronized (mLock) {
             return mLastGlobalSleepReason;
         }
     }
 
-    @VisibleForTesting
     private PowerManager.WakeData getLastWakeupInternal() {
         synchronized (mLock) {
-            return new WakeData(mLastGlobalWakeTime, mLastGlobalWakeReason,
+            return new PowerManager.WakeData(mLastGlobalWakeTime, mLastGlobalWakeReason,
                     mLastGlobalWakeTime - mLastGlobalSleepTime);
+        }
+    }
+
+    private PowerManager.SleepData getLastGoToSleepInternal() {
+        synchronized (mLock) {
+            return new PowerManager.SleepData(mLastGlobalSleepTime, mLastGlobalSleepReason);
         }
     }
 
@@ -6528,8 +6534,13 @@ public final class PowerManagerService extends SystemService
         }
 
         @Override
-        public WakeData getLastWakeup() {
+        public PowerManager.WakeData getLastWakeup() {
             return getLastWakeupInternal();
+        }
+
+        @Override
+        public PowerManager.SleepData getLastGoToSleep() {
+            return getLastGoToSleepInternal();
         }
 
         @Override
