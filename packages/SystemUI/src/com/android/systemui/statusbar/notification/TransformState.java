@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification;
 
+import android.util.MathUtils;
 import android.util.Pools;
 import android.view.View;
 import android.view.animation.Interpolator;
@@ -98,7 +99,10 @@ public class TransformState {
         if (sameAs(otherState)) {
             ensureVisible();
         } else {
-            CrossFadeHelper.fadeIn(mTransformedView, transformationAmount, true /* remap */);
+            CrossFadeHelper.fadeIn(
+                    mTransformedView,
+                    MathUtils.constrainedMap(0, 1, 0.45f, 1, transformationAmount),
+                    false /* remap */);
         }
         transformViewFullyFrom(otherState, transformationAmount);
     }
@@ -294,7 +298,10 @@ public class TransformState {
             }
             return false;
         } else {
-            CrossFadeHelper.fadeOut(mTransformedView, transformationAmount);
+            CrossFadeHelper.fadeOut(
+                    mTransformedView,
+                    MathUtils.constrainedMap(0, 1, 0, 0.55f, transformationAmount),
+                    false /* remap */);
         }
         transformViewFullyTo(otherState, transformationAmount);
         return true;

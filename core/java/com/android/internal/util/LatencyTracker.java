@@ -137,6 +137,11 @@ public class LatencyTracker {
      */
     public static final int ACTION_SHOW_BACK_ARROW = 15;
 
+    /**
+     * Time it takes for loading share sheet.
+     */
+    public static final int ACTION_LOAD_SHARE_SHEET = 16;
+
     private static final int[] ACTIONS_ALL = {
         ACTION_EXPAND_PANEL,
         ACTION_TOGGLE_RECENTS,
@@ -154,6 +159,7 @@ public class LatencyTracker {
         ACTION_SWITCH_DISPLAY_UNFOLD,
         ACTION_UDFPS_ILLUMINATE,
         ACTION_SHOW_BACK_ARROW,
+        ACTION_LOAD_SHARE_SHEET,
     };
 
     /** @hide */
@@ -173,7 +179,8 @@ public class LatencyTracker {
         ACTION_USER_SWITCH,
         ACTION_SWITCH_DISPLAY_UNFOLD,
         ACTION_UDFPS_ILLUMINATE,
-        ACTION_SHOW_BACK_ARROW
+        ACTION_SHOW_BACK_ARROW,
+        ACTION_LOAD_SHARE_SHEET,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Action {
@@ -196,6 +203,7 @@ public class LatencyTracker {
             FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_SWITCH_DISPLAY_UNFOLD,
             FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_UDFPS_ILLUMINATE,
             FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_SHOW_BACK_ARROW,
+            FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_LOAD_SHARE_SHEET,
     };
 
     private static LatencyTracker sLatencyTracker;
@@ -287,6 +295,8 @@ public class LatencyTracker {
                 return "ACTION_UDFPS_ILLUMINATE";
             case 16:
                 return "ACTION_SHOW_BACK_ARROW";
+            case 17:
+                return "ACTION_LOAD_SHARE_SHEET";
             default:
                 throw new IllegalArgumentException("Invalid action");
         }

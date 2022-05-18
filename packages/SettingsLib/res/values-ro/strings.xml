@@ -652,17 +652,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Activați ecranul"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Permiteți activarea ecranului"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Permiteți unei aplicații să activeze ecranul. Dacă acordați permisiunea, aplicația poate să activeze oricând ecranul, fără intenția dvs. explicită."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Scanați codul QR"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Pentru a începe să ascultați, centrați codul QR de mai jos"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Codul QR nu are un format valid"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Opriți difuzarea <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Dacă difuzați <xliff:g id="SWITCHAPP">%1$s</xliff:g> sau schimbați rezultatul, difuzarea actuală se va opri"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Difuzați <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Schimbați rezultatul"</string>
-    <!-- no translation found for back_navigation_animation (8105467568421689484) -->
-    <skip />
-    <!-- no translation found for back_navigation_animation_summary (741292224121599456) -->
-    <skip />
-    <!-- no translation found for back_navigation_animation_dialog (8696966520944625596) -->
-    <skip />
+    <string name="back_navigation_animation" msgid="8105467568421689484">"Animații pentru gestul înapoi predictiv"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Activați animațiile de sistem pentru gestul înapoi predictiv."</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Această setare activează animațiile de sistem pentru animația gesturilor predictive. Necesită setarea valorii true în cazul atributului enableOnBackInvokedCallback pentru fiecare aplicație în fișierul manifest."</string>
 </resources>

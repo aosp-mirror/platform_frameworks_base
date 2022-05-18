@@ -78,8 +78,7 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Poskusite znova ustvariti posnetek zaslona"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Posnetka zaslona ni mogoče shraniti"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Aplikacija ali vaša organizacija ne dovoljuje posnetkov zaslona"</string>
-    <!-- no translation found for screenshot_blocked_by_admin (5486757604822795797) -->
-    <skip />
+    <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Skrbnik za IT je onemogočil zajemanje posnetkov zaslona."</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Uredi"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Urejanje posnetka zaslona"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Deljenje posnetka zaslona"</string>
@@ -318,6 +317,10 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Povlecite navzgor, da odprete"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Za odpiranje pritisnite ikono za odklepanje."</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Odklenjeno z obrazom. Za odpiranje pritisnite ikono za odklepanje."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"Povlecite navzgor za vnovičen poskus"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Odklenite napravo, če želite uporabljati NFC."</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Ta naprava pripada vaši organizaciji"</string>
@@ -466,7 +469,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"Denarnica"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Nastavite možnost hitrejšega in varnejšega plačevanja s telefonom."</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Prikaži vse"</string>
-    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Dodajte kartico"</string>
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Dotaknite se za odpiranje"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Posodabljanje"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Odklenite za uporabo"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Pri pridobivanju kartic je prišlo do težave. Poskusite znova pozneje."</string>
@@ -730,8 +733,7 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"Vklop, če je verjetno, da se bo baterija izpraznila"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Ne, hvala"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Izvoz kopice SysUI"</string>
-    <!-- no translation found for ongoing_privacy_dialog_a11y_title (2205794093673327974) -->
-    <skip />
+    <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"V uporabi"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Aplikacije uporabljajo <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" in "</string>
@@ -811,7 +813,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Če si želite ogledati več, povlecite"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Nalaganje priporočil"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Predstavnost"</string>
-    <string name="controls_media_close_session" msgid="4780485355795635052">"Želite skriti ta nadzor predstavnosti za apl. <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Želite skriti ta nadzor predstavnosti za <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Trenutne seje predstavnosti ni mogoče skriti."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Skrij"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Nadaljuj"</string>
@@ -831,7 +833,6 @@
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Za predvajanje v napravi <xliff:g id="DEVICENAME">%1$s</xliff:g> bolj približajte telefon."</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Približajte napravi <xliff:g id="DEVICENAME">%1$s</xliff:g> za predvajanje v tej napravi"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Predvajanje v napravi <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
-    <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Predvajanje v tem telefonu"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Prišlo je do napake. Poskusite znova."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktivno, poglejte aplikacijo"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Ni mogoče najti"</string>
@@ -852,6 +853,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Če želite predvajati to sejo, odprite aplikacijo."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Neznana aplikacija"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Ustavi predvajanje"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Kako deluje oddajanje"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Oddajanje"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Osebe v bližini z združljivo napravo Bluetooth lahko poslušajo predstavnost, ki jo oddajate."</string>
@@ -861,10 +864,8 @@
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Shrani"</string>
     <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Začenjanje …"</string>
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Oddajanje ni mogoče"</string>
-    <!-- no translation found for media_output_broadcast_update_error (1420868236079122521) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_last_update_error (5484328807296895491) -->
-    <skip />
+    <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Ni mogoče shraniti. Poskusite znova."</string>
+    <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Ni mogoče shraniti."</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Delovna različica"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Delovna različica je bila kopirana v odložišče."</string>
     <string name="basic_status" msgid="2315371112182658176">"Odprt pogovor"</string>
@@ -951,6 +952,13 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Uredi kopirano besedilo"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Uredi kopirano sliko"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Pošlji v napravo v bližini"</string>
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"Dotaknite se za ogled"</string>
+    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
+    <skip />
+    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
+    <skip />
+    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
+    <skip />
     <string name="add" msgid="81036585205287996">"Dodaj"</string>
     <string name="manage_users" msgid="1823875311934643849">"Upravljanje uporabnikov"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"To obvestilo ne podpira vlečenja v razdeljen zaslon."</string>
