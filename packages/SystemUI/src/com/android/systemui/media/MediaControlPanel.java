@@ -28,7 +28,6 @@ import android.app.WallpaperColors;
 import android.app.smartspace.SmartspaceAction;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
@@ -45,6 +44,7 @@ import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.os.Process;
+import android.os.Trace;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -397,6 +397,7 @@ public class MediaControlPanel {
         if (mMediaViewHolder == null) {
             return;
         }
+        Trace.beginSection("MediaControlPanel#bindPlayer<" + key + ">");
         mKey = key;
         mMediaData = data;
         MediaSession.Token token = data.getToken();
@@ -455,7 +456,7 @@ public class MediaControlPanel {
         bindActionButtons(data);
 
         boolean isSongUpdated = bindSongMetadata(data);
-        bindArtworkAndColors(data, isSongUpdated);
+        bindArtworkAndColors(data, key, isSongUpdated);
 
         // TODO: We don't need to refresh this state constantly, only if the state actually changed
         // to something which might impact the measurement
@@ -463,6 +464,7 @@ public class MediaControlPanel {
         if (!mMetadataAnimationHandler.isRunning()) {
             mMediaViewController.refreshState();
         }
+        Trace.endSection();
     }
 
     private void bindOutputSwitcherChip(MediaData data) {
@@ -607,7 +609,11 @@ public class MediaControlPanel {
         mRecommendationViewHolder.getRecommendations().setContentDescription(contentDescription);
     }
 
-    private void bindArtworkAndColors(MediaData data, boolean updateBackground) {
+    private void bindArtworkAndColors(MediaData data, String key, boolean updateBackground) {
+        final int traceCookie = data.hashCode();
+        final String traceName = "MediaControlPanel#bindArtworkAndColors<" + key + ">";
+        Trace.beginAsyncSection(traceName, traceCookie);
+
         final int reqId = mArtworkNextBindRequestId++;
         if (updateBackground) {
             mIsArtworkBound = false;
@@ -648,7 +654,10 @@ public class MediaControlPanel {
             final ColorScheme colorScheme = mutableColorScheme;
             mMainExecutor.execute(() -> {
                 // Cancel the request if a later one arrived first
-                if (reqId < mArtworkBoundId) return;
+                if (reqId < mArtworkBoundId) {
+                    Trace.endAsyncSection(traceName, traceCookie);
+                    return;
+                }
                 mArtworkBoundId = reqId;
 
                 // Bind the album view to the artwork or a transition drawable
@@ -698,6 +707,7 @@ public class MediaControlPanel {
                         appIconView.setImageResource(R.drawable.ic_music_note);
                     }
                 }
+                Trace.endAsyncSection(traceName, traceCookie);
             });
         });
     }
@@ -990,6 +1000,9 @@ public class MediaControlPanel {
             return;
         }
 
+        Trace.beginSection(
+                "MediaControlPanel#bindRecommendation<" + data.getPackageName() + ">");
+
         mRecommendationData = data;
         mSmartspaceId = SmallHash.hash(data.getTargetId());
         mPackageName = data.getPackageName();
@@ -1003,12 +1016,14 @@ public class MediaControlPanel {
             mUid = applicationInfo.uid;
         } catch (PackageManager.NameNotFoundException e) {
             Log.w(TAG, "Fail to get media recommendation's app info", e);
+            Trace.endSection();
             return;
         }
 
         CharSequence appName = data.getAppName(mContext);
         if (appName == null) {
             Log.w(TAG, "Fail to get media recommendation's app name");
+            Trace.endSection();
             return;
         }
 
@@ -1123,6 +1138,7 @@ public class MediaControlPanel {
         if (mMetadataAnimationHandler == null || !mMetadataAnimationHandler.isRunning()) {
             mMediaViewController.refreshState();
         }
+        Trace.endSection();
     }
 
     private void fetchAndUpdateRecommendationColors(Drawable appIcon) {
