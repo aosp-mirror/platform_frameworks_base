@@ -652,7 +652,6 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.CLOCKWORK_SYSUI_PACKAGE,
                     Settings.Global.Wearable.CLOCKWORK_SYSUI_MAIN_ACTIVITY,
                     Settings.Global.Wearable.CLOCKWORK_LONG_PRESS_TO_ASSISTANT_ENABLED,
-                    Settings.Global.Wearable.WEAR_ACTIVITY_AUTO_RESUME_TIMEOUT_SET_BY_USER,
                     Settings.Global.Wearable.WET_MODE_ON,
                     Settings.Global.Wearable.COOLDOWN_MODE_ON,
                     Settings.Global.Wearable.CHARGING_SOUNDS_ENABLED,

@@ -93,6 +93,7 @@ public class GlobalSettings {
         Settings.Global.Wearable.AMBIENT_TOUCH_TO_WAKE,
         Settings.Global.Wearable.TOUCH_AND_HOLD_WATCH_FACE,
         Settings.Global.Wearable.BATTERY_SAVER_MODE,
-        Settings.Global.Wearable.WEAR_ACTIVITY_AUTO_RESUME_TIMEOUT_MS
+        Settings.Global.Wearable.WEAR_ACTIVITY_AUTO_RESUME_TIMEOUT_MS,
+        Settings.Global.Wearable.WEAR_ACTIVITY_AUTO_RESUME_TIMEOUT_SET_BY_USER
     };
 }
