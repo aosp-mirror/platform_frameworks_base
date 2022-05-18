@@ -39,7 +39,7 @@ import java.util.ArrayList;
 public class AnimationHandler {
 
     private static final String TAG = "AnimationHandler";
-    private static final boolean LOCAL_LOGV = true;
+    private static final boolean LOCAL_LOGV = false;
 
     /**
      * Internal per-thread collections used to avoid set collisions as animations start and end
