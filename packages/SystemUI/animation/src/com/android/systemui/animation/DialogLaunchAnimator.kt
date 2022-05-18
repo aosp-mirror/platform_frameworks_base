@@ -62,7 +62,7 @@ class DialogLaunchAnimator @JvmOverloads constructor(
             positionXInterpolator = ActivityLaunchAnimator.INTERPOLATORS.positionInterpolator
         )
 
-        private val TAG_LAUNCH_ANIMATION_RUNNING = R.id.launch_animation_running
+        private val TAG_LAUNCH_ANIMATION_RUNNING = R.id.tag_launch_animation_running
     }
 
     /**
@@ -447,6 +447,7 @@ private class AnimatedDialog(
             dialogContentWithBackground
         }
         this.dialogContentWithBackground = dialogContentWithBackground
+        dialogContentWithBackground.setTag(R.id.tag_dialog_background, true)
 
         val background = dialogContentWithBackground.background
         originalDialogBackgroundColor =
@@ -584,7 +585,7 @@ private class AnimatedDialog(
                 GhostView.removeGhost(touchSurface)
             },
             onLaunchAnimationEnd = {
-                touchSurface.setTag(R.id.launch_animation_running, null)
+                touchSurface.setTag(R.id.tag_launch_animation_running, null)
 
                 // We hide the touch surface when the dialog is showing. We will make this
                 // view visible again when dismissing the dialog.

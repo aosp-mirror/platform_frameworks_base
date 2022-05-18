@@ -305,10 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"तपाईंको पात्रोमाथि पहुँच गर्नुहोस्"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS सन्देशहरू पठाउनुहोस् र हेर्नुहोस्"</string>
-    <!-- no translation found for permgrouplab_storage (17339216290379241) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (5378659041354582769) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="17339216290379241">"फाइलहरू"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"आफ्नो डिभाइसमा रहेका फाइलहरू हेर्नुहोस् र प्रयोग गर्नुहोस्"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"सङ्गीत तथा अडियो"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"तपाईंको डिभाइसबाट सङ्गीत तथा अडियो सुन्ने अनुमति"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"फोटो र भिडियोहरू"</string>

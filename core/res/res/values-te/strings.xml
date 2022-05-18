@@ -305,10 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"మీ క్యాలెండర్‌ను యాక్సెస్ చేయడానికి"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS మెసేజ్‌లను పంపడం, వీక్షించడం"</string>
-    <!-- no translation found for permgrouplab_storage (17339216290379241) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (5378659041354582769) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="17339216290379241">"ఫైళ్లు"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"మీ పరికరంలోని ఫైళ్లను యాక్సెస్ చేయడం"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"మ్యూజిక్, ఆడియో"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"మీ పరికరంలో మ్యూజిక్, ఆడియోను యాక్సెస్ చేయండి"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ఫోటోలు, వీడియోలు"</string>

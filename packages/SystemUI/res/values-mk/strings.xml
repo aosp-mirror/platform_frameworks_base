@@ -939,12 +939,9 @@
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Изменете ја копираната слика"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Испратете до уред во близина"</string>
     <string name="clipboard_text_hidden" msgid="7926899867471812305">"Допрете за да прегледате"</string>
-    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
-    <skip />
-    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
-    <skip />
-    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
-    <skip />
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"Текстот е копиран"</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"Сликата е копирана"</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"Содржините се копирани"</string>
     <string name="add" msgid="81036585205287996">"Додај"</string>
     <string name="manage_users" msgid="1823875311934643849">"Управувајте со корисниците"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Известувањево не поддржува влечење на поделен екран."</string>
