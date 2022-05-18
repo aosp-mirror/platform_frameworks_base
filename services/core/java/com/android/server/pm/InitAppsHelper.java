@@ -24,6 +24,7 @@ import static com.android.server.pm.PackageManagerService.SCAN_AS_APK_IN_APEX;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_PRIVILEGED;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_SYSTEM;
 import static com.android.server.pm.PackageManagerService.SCAN_BOOTING;
+import static com.android.server.pm.PackageManagerService.SCAN_DROP_CACHE;
 import static com.android.server.pm.PackageManagerService.SCAN_FIRST_BOOT_OR_UPGRADE;
 import static com.android.server.pm.PackageManagerService.SCAN_INITIAL;
 import static com.android.server.pm.PackageManagerService.SCAN_NO_DEX;
@@ -167,7 +168,11 @@ final class InitAppsHelper {
                     sp.getFolder().getAbsolutePath())
                     || apexInfo.preInstalledApexPath.getAbsolutePath().startsWith(
                     sp.getFolder().getAbsolutePath() + File.separator)) {
-                return new ScanPartition(apexInfo.apexDirectory, sp, SCAN_AS_APK_IN_APEX);
+                int flags = SCAN_AS_APK_IN_APEX;
+                if (apexInfo.activeApexChanged) {
+                    flags |= SCAN_DROP_CACHE;
+                }
+                return new ScanPartition(apexInfo.apexDirectory, sp, flags);
             }
         }
         return null;

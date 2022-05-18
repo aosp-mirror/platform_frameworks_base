@@ -29,6 +29,7 @@ import android.net.wifi.WifiConfiguration.NetworkSelectionStatus;
 import android.net.wifi.WifiInfo;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
 
@@ -39,6 +40,8 @@ import java.util.Locale;
 import java.util.Map;
 
 public class WifiUtils {
+
+    private static final String TAG = "WifiUtils";
 
     private static final int INVALID_RSSI = -127;
 
@@ -314,13 +317,17 @@ public class WifiUtils {
      *
      * @param level The number of bars to show (0-4)
      * @param noInternet True if a connected Wi-Fi network cannot access the Internet
-     * @throws IllegalArgumentException if an invalid RSSI level is given.
      */
     public static int getInternetIconResource(int level, boolean noInternet) {
-        if (level < 0 || level >= WIFI_PIE.length) {
-            throw new IllegalArgumentException("No Wifi icon found for level: " + level);
+        int wifiLevel = level;
+        if (wifiLevel < 0) {
+            Log.e(TAG, "Wi-Fi level is out of range! level:" + level);
+            wifiLevel = 0;
+        } else if (level >= WIFI_PIE.length) {
+            Log.e(TAG, "Wi-Fi level is out of range! level:" + level);
+            wifiLevel = WIFI_PIE.length - 1;
         }
-        return noInternet ? NO_INTERNET_WIFI_PIE[level] : WIFI_PIE[level];
+        return noInternet ? NO_INTERNET_WIFI_PIE[wifiLevel] : WIFI_PIE[wifiLevel];
     }
 
     /**

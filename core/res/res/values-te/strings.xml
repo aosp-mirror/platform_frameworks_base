@@ -2281,5 +2281,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"యాక్టివ్‌గా ఉన్న యాప్‌లను చెక్ చేయండి"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"మీ <xliff:g id="DEVICE">%1$s</xliff:g> నుండి ఫోన్ కెమెరాను యాక్సెస్ చేయడం సాధ్యపడదు"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"మీ <xliff:g id="DEVICE">%1$s</xliff:g> నుండి టాబ్లెట్ కెమెరాను యాక్సెస్ చేయడం సాధ్యపడదు"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"సిస్టమ్ భాష"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"సిస్టమ్ ఆటోమేటిక్ సెట్టింగ్"</string>
 </resources>
