@@ -31,6 +31,7 @@ import android.os.Looper;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.TypedValue;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 import android.view.Window;
@@ -376,11 +377,17 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
     }
 
     private static int getHorizontalInsets(Dialog dialog) {
-        if (dialog.getWindow().getDecorView() == null) {
+        View decorView = dialog.getWindow().getDecorView();
+        if (decorView == null) {
             return 0;
         }
 
-        Drawable background = dialog.getWindow().getDecorView().getBackground();
+        // We first look for the background on the dialogContentWithBackground added by
+        // DialogLaunchAnimator. If it's not there, we use the background of the DecorView.
+        View viewWithBackground = decorView.findViewByPredicate(
+                view -> view.getTag(R.id.tag_dialog_background) != null);
+        Drawable background = viewWithBackground != null ? viewWithBackground.getBackground()
+                : decorView.getBackground();
         Insets insets = background != null ? background.getOpticalInsets() : Insets.NONE;
         return insets.left + insets.right;
     }
