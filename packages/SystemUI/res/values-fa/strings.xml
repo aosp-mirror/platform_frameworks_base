@@ -60,7 +60,7 @@
     <string name="wifi_debugging_title" msgid="7300007687492186076">"اشکال‌زدایی بی‌سیم در این شبکه مجاز شود؟"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"‏نام شبکه (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nنشانی Wi‑Fi (BSSID)‎\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"همیشه در این شبکه مجاز شود"</string>
-    <string name="wifi_debugging_allow" msgid="4573224609684957886">"مجاز است"</string>
+    <string name="wifi_debugging_allow" msgid="4573224609684957886">"اجازه دادن"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"اشکال‌زدایی بی‌سیم مجاز نیست"</string>
     <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"کاربری که درحال‌حاضر در این دستگاه به سیستم وارد شده است نمی‌تواند اشکال‌زدایی بی‌سیم را روشن کند. برای استفاده از این ویژگی، به کاربر اصلی بروید."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"‏درگاه USB غیرفعال شده است"</string>
@@ -78,8 +78,7 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"دوباره نماگرفت بگیرید"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"نماگرفت ذخیره نمی‌شود"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"برنامه یا سازمان شما اجازه نمی‌دهند نماگرفت بگیرید."</string>
-    <!-- no translation found for screenshot_blocked_by_admin (5486757604822795797) -->
-    <skip />
+    <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"سرپرست سیستم گرفتن نماگرفت را مسدود کرده است"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"ویرایش"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"ویرایش نماگرفت"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"هم‌رسانی نماگرفت"</string>
@@ -314,6 +313,10 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"برای باز کردن، انگشتتان را تند به‌بالا بکشید"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"برای باز کردن، نماد قفل‌گشایی را فشار دهید"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"قفلْ با چهره باز شد. برای باز کردن، نماد قفل‌گشایی را فشار دهید."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"برای امتحان مجدد، انگشتتان را تند به‌بالا بکشید"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"‏برای استفاده از NFC، قفل را باز کنید"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"این دستگاه به سازمان شما تعلق دارد"</string>
@@ -415,7 +418,7 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"برنامه سنجاق شده است"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"تا زمانی که سنجاق را برندارید، در نما نگه‌داشته می‌شود. برای برداشتن سنجاق، «برگشت» و «نمای کلی» را لمس کنید و نگه‌دارید."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"تا برداشتن سنجاق، در نما نگه‌داشته می‌شود. برای برداشتن سنجاق، «برگشت» و «صفحه اصلی» را لمس کنید و نگه‌دارید."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"به این ترتیب تا زمانی پین آن را برندارید قابل‌مشاهده است. برای برداشتن سنجاق، از پایین صفحه تند به‌طرف بالا بکشید و نگه دارید."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"به این ترتیب تا زمانی که پین آن را برندارید قابل‌مشاهده است. برای برداشتن سنجاق، از پایین صفحه تند به‌طرف بالا بکشید و نگه دارید."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"تا زمانی که پین را بردارید، در نما نگه‌داشته می‌شود. برای برداشتن سنجاق، «نمای کلی» را لمس کنید و نگه‌دارید."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"تا برداشتن سنجاق، در نما نگه‌داشته می‌شود. برای برداشتن سنجاق، «صفحه اصلی» را لمس کنید و نگه‌دارید."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"ممکن است داده‌های شخصی (مانند مخاطبین و محتوای ایمیل) در دسترس باشد."</string>
@@ -460,7 +463,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"کیف‌پول"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"برای خرید سریع‌تر و امن‌تر با تلفن، راه‌اندازی کنید"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"نمایش همه"</string>
-    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"افزودن کارت"</string>
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"برای باز کردن ضربه بزنید"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"درحال به‌روزرسانی"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"برای استفاده، قفل را باز کنید"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"هنگام دریافت کارت‌ها مشکلی پیش آمد، لطفاً بعداً دوباره امتحان کنید"</string>
@@ -714,14 +717,13 @@
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- می‌تواند اطلاعات <xliff:g id="APP">%1$s</xliff:g> را بخواند"</string>
     <string name="slice_permission_text_2" msgid="6758906940360746983">"- می‌تواند در <xliff:g id="APP">%1$s</xliff:g> اقدام انجام دهد"</string>
     <string name="slice_permission_checkbox" msgid="4242888137592298523">"به <xliff:g id="APP">%1$s</xliff:g> اجازه داده شود تکه‌هایی از برنامه‌ها نشان دهد"</string>
-    <string name="slice_permission_allow" msgid="6340449521277951123">"مجاز"</string>
+    <string name="slice_permission_allow" msgid="6340449521277951123">"اجازه دادن"</string>
     <string name="slice_permission_deny" msgid="6870256451658176895">"مجاز نبودن"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"برای زمان‌بندی «بهینه‌سازی باتری» ضربه بزنید"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"وقتی باتری روبه‌اتمام است، بهینه‌سازی باتری را روشن کنید"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"نه متشکرم"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
-    <!-- no translation found for ongoing_privacy_dialog_a11y_title (2205794093673327974) -->
-    <skip />
+    <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"استفاده شده"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"برنامه‌ها از <xliff:g id="TYPES_LIST">%s</xliff:g> شما استفاده می‌‌کنند."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">"، "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" و "</string>
@@ -819,7 +821,6 @@
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"برای پخش در <xliff:g id="DEVICENAME">%1$s</xliff:g> به دستگاه نزدیک‌تر شوید"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"برای پخش در اینجا، به <xliff:g id="DEVICENAME">%1$s</xliff:g> نزدیک‌تر شوید"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"درحال پخش در <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
-    <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"درحال پخش در این تلفن"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"مشکلی پیش آمد. دوباره امتحان کنید."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"غیرفعال، برنامه را بررسی کنید"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"پیدا نشد"</string>
@@ -840,6 +841,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"برای ارسال محتوای این جلسه، لطفاً برنامه را باز کنید."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"برنامه ناشناس"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"توقف ارسال محتوا"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"همه‌فرتستی چطور کار می‌کند"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"همه‌فرستی"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"‏افرادی که در اطرافتان دستگاه‌های Bluetooth سازگار دارند می‌توانند به رسانه‌ای که همه‌فرستی می‌کنید گوش کنند"</string>
@@ -849,10 +852,8 @@
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"ذخیره کردن"</string>
     <string name="media_output_broadcast_starting" msgid="8130153654166235557">"درحال شروع…"</string>
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"همه‌فرستی انجام نشد"</string>
-    <!-- no translation found for media_output_broadcast_update_error (1420868236079122521) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_last_update_error (5484328807296895491) -->
-    <skip />
+    <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"ذخیره نشد. دوباره امتحان کنید."</string>
+    <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"ذخیره نشد."</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"شماره ساخت"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"شماره ساخت در بریده‌دان کپی شد."</string>
     <string name="basic_status" msgid="2315371112182658176">"باز کردن مکالمه"</string>
@@ -937,6 +938,10 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"ویرایش نوشتار کپی‌شده"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"ویرایش تصویر کپی‌شده"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"ارسال به دستگاهی در اطراف"</string>
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"برای مشاهده، ضربه بزنید"</string>
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"نوشتار کپی شد"</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"تصویر کپی شد"</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"محتوا کپی شد"</string>
     <string name="add" msgid="81036585205287996">"افزودن"</string>
     <string name="manage_users" msgid="1823875311934643849">"مدیریت کاربران"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"این اعلان از تنظیم کشیدن برای دو نیمه کردن صفحه پشتیبانی نمی‌کند."</string>

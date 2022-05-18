@@ -38,9 +38,11 @@
     <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="3280816298678433681">"您嘗試解鎖手機已失敗 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。如果之後再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統將移除此工作設定檔，而所有設定檔資料亦會一併刪除。"</string>
     <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4417100487251371559">"您嘗試解鎖平板電腦已失敗 <xliff:g id="NUMBER">%d</xliff:g> 次。系統將移除此工作設定檔，而所有設定檔資料亦會一併刪除。"</string>
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"您嘗試解鎖手機已失敗 <xliff:g id="NUMBER">%d</xliff:g> 次。系統將移除此工作設定檔，而所有設定檔資料亦會一併刪除。"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"您已畫錯解鎖圖形 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。如果之後再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統會要求您透過電郵帳戶解鎖平板電腦。\n\n請在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後再試一次。"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"您已畫錯解鎖圖形 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。如果之後再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統會要求您透過電郵帳戶解鎖手機。\n\n請在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後再試一次。"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"您已畫錯解鎖圖案 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。如果之後再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統會要求您透過電郵帳戶解鎖平板電腦。\n\n請在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後再試一次。"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"您已畫錯解鎖圖案 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。如果之後再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統會要求您透過電郵帳戶解鎖手機。\n\n請在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後再試一次。"</string>
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"解鎖手機以存取更多選項"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"解鎖平板電腦以存取更多選項"</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"解鎖裝置以存取更多選項"</string>
+    <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"正在此手機上播放"</string>
+    <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"正在此平板電腦上播放"</string>
 </resources>

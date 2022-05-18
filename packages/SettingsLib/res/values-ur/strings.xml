@@ -652,9 +652,6 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"اسکرین آن کریں"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"اسکرین آن کرنے کی اجازت دیں"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"ایپ کو اسکرین آن کرنے کی اجازت دیں۔ اگر اجازت دی گئی تو ایپ آپ کے واضح مقصد کے بغیر کسی بھی وقت اسکرین کو آن کر سکتی ہے۔"</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"‏QR کوڈ اسکین کریں"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"‏سننا شروع کرنے کے لیے، نیچے کے QR کوڈ کو سینٹر میں رکھیں"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"‏QR کوڈ درست فارمیٹ نہیں ہے"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> براڈکاسٹنگ روکیں؟"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"اگر آپ <xliff:g id="SWITCHAPP">%1$s</xliff:g> براڈکاسٹ کرتے ہیں یا آؤٹ پٹ کو تبدیل کرتے ہیں تو آپ کا موجودہ براڈکاسٹ رک جائے گا"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> پر براڈکاسٹ کریں"</string>

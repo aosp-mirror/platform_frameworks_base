@@ -17,11 +17,12 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"ساتھی آلہ مینیجر"</string>
-    <string name="confirmation_title" msgid="8455544820286920304">"‏اپنے &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; کا نظم کرنے کے لیے ‎&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; کو اجازت دیں"</string>
+    <!-- no translation found for confirmation_title (3785000297483688997) -->
+    <skip />
     <string name="profile_name_watch" msgid="576290739483672360">"دیکھیں"</string>
     <string name="chooser_title" msgid="2262294130493605839">"‏&lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt; کے ذریعے نظم کئے جانے کیلئے <xliff:g id="PROFILE_NAME">%1$s</xliff:g> کو منتخب کریں"</string>
-    <string name="summary_watch" product="default" msgid="7113724443198337683">"‏<xliff:g id="APP_NAME">%1$s</xliff:g> کو آپ کی اطلاعات کے ساتھ تعامل کرنے اور آپ کے فون، SMS، رابطوں اور کیلنڈر کی اجازتوں تک رسائی کی اجازت ہوگی۔"</string>
-    <string name="summary_watch" product="tablet" msgid="7113724443198337683">"‏<xliff:g id="APP_NAME">%1$s</xliff:g> کو آپ کی اطلاعات کے ساتھ تعامل کرنے اور آپ کے فون، SMS، رابطوں اور کیلنڈر کی اجازتوں تک رسائی کی اجازت ہوگی۔"</string>
+    <!-- no translation found for summary_watch (3002344206574997652) -->
+    <skip />
     <string name="permission_apps" msgid="6142133265286656158">"ایپس"</string>
     <string name="permission_apps_summary" msgid="798718816711515431">"اپنے فون کی ایپس کی سلسلہ بندی کریں"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"‏‎&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;‎ کو اپنے فون سے ان معلومات تک رسائی حاصل کرنے کی اجازت دیں"</string>
@@ -44,4 +45,8 @@
     <string name="consent_back" msgid="2560683030046918882">"پیچھے"</string>
     <string name="permission_sync_confirmation_title" msgid="667074294393493186">"اپنی گھڑی پر ایپ کی اجازتیں منتقل کریں"</string>
     <string name="permission_sync_summary" msgid="8873391306499120778">"آپ کی گھڑی کو سیٹ اپ کرنے کے عمل کو زیادہ آسان بنانے کے لیے، سیٹ اپ کے دوران آپ کی گھڑی پر انسٹال کردہ ایپس انہیں اجازتوں کا استعمال کریں گی جن کا استعمال آپ کا فون کرتا ہے۔\n\n ان اجازتوں میں آپ کی گھڑی کے مائیکروفون اور مقام تک کی رسائی شامل ہو سکتی ہے۔"</string>
+    <!-- no translation found for vendor_icon_description (4445875290032225965) -->
+    <skip />
+    <!-- no translation found for vendor_header_button_description (6566660389500630608) -->
+    <skip />
 </resources>
