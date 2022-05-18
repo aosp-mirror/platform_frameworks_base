@@ -152,6 +152,15 @@ public class NotificationLockscreenUserManagerImpl implements
                         listener.onUserChanged(mCurrentUserId);
                     }
                     break;
+                case Intent.ACTION_USER_REMOVED:
+                    int removedUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                    if (removedUserId != -1) {
+                        for (UserChangedListener listener : mListeners) {
+                            listener.onUserRemoved(removedUserId);
+                        }
+                    }
+                    updateCurrentProfilesCache();
+                    break;
                 case Intent.ACTION_USER_ADDED:
                 case Intent.ACTION_MANAGED_PROFILE_AVAILABLE:
                 case Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE:
@@ -303,6 +312,7 @@ public class NotificationLockscreenUserManagerImpl implements
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_USER_ADDED);
+        filter.addAction(Intent.ACTION_USER_REMOVED);
         filter.addAction(Intent.ACTION_USER_UNLOCKED);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
