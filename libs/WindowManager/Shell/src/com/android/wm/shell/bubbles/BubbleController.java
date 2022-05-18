@@ -66,6 +66,7 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.util.ArraySet;
@@ -147,6 +148,7 @@ public class BubbleController {
     private final FloatingContentCoordinator mFloatingContentCoordinator;
     private final BubbleDataRepository mDataRepository;
     private final WindowManagerShellWrapper mWindowManagerShellWrapper;
+    private final UserManager mUserManager;
     private final LauncherApps mLauncherApps;
     private final IStatusBarService mBarService;
     private final WindowManager mWindowManager;
@@ -231,6 +233,7 @@ public class BubbleController {
             @Nullable IStatusBarService statusBarService,
             WindowManager windowManager,
             WindowManagerShellWrapper windowManagerShellWrapper,
+            UserManager userManager,
             LauncherApps launcherApps,
             TaskStackListenerImpl taskStackListener,
             UiEventLogger uiEventLogger,
@@ -248,8 +251,8 @@ public class BubbleController {
         BubbleData data = new BubbleData(context, logger, positioner, mainExecutor);
         return new BubbleController(context, data, synchronizer, floatingContentCoordinator,
                 new BubbleDataRepository(context, launcherApps, mainExecutor),
-                statusBarService, windowManager, windowManagerShellWrapper, launcherApps,
-                logger, taskStackListener, organizer, positioner, displayController,
+                statusBarService, windowManager, windowManagerShellWrapper, userManager,
+                launcherApps, logger, taskStackListener, organizer, positioner, displayController,
                 oneHandedOptional, dragAndDropController, mainExecutor, mainHandler, bgExecutor,
                 taskViewTransitions, syncQueue);
     }
@@ -266,6 +269,7 @@ public class BubbleController {
             @Nullable IStatusBarService statusBarService,
             WindowManager windowManager,
             WindowManagerShellWrapper windowManagerShellWrapper,
+            UserManager userManager,
             LauncherApps launcherApps,
             BubbleLogger bubbleLogger,
             TaskStackListenerImpl taskStackListener,
@@ -287,6 +291,7 @@ public class BubbleController {
                 : statusBarService;
         mWindowManager = windowManager;
         mWindowManagerShellWrapper = windowManagerShellWrapper;
+        mUserManager = userManager;
         mFloatingContentCoordinator = floatingContentCoordinator;
         mDataRepository = dataRepository;
         mLogger = bubbleLogger;
@@ -447,6 +452,10 @@ public class BubbleController {
 
         mOneHandedOptional.ifPresent(this::registerOneHandedState);
         mDragAndDropController.addListener(this::collapseStack);
+
+        // Clear out any persisted bubbles on disk that no longer have a valid user.
+        List<UserInfo> users = mUserManager.getAliveUsers();
+        mDataRepository.sanitizeBubbles(users);
     }
 
     @VisibleForTesting
@@ -588,6 +597,17 @@ public class BubbleController {
     /** Called when the profiles for the current user change. **/
     public void onCurrentProfilesChanged(SparseArray<UserInfo> currentProfiles) {
         mCurrentProfiles = currentProfiles;
+    }
+
+    /** Called when a user is removed from the device, including work profiles. */
+    public void onUserRemoved(int removedUserId) {
+        UserInfo parent = mUserManager.getProfileParent(removedUserId);
+        int parentUserId = parent != null ? parent.getUserHandle().getIdentifier() : -1;
+        mBubbleData.removeBubblesForUser(removedUserId);
+        // Typically calls from BubbleData would remove bubbles from the DataRepository as well,
+        // however, this gets complicated when users are removed (mCurrentUserId won't necessarily
+        // be correct for this) so we update the repo directly.
+        mDataRepository.removeBubblesForUser(removedUserId, parentUserId);
     }
 
     /** Whether this userId belongs to the current user. */
@@ -1805,6 +1825,13 @@ public class BubbleController {
         public void onCurrentProfilesChanged(SparseArray<UserInfo> currentProfiles) {
             mMainExecutor.execute(() -> {
                 BubbleController.this.onCurrentProfilesChanged(currentProfiles);
+            });
+        }
+
+        @Override
+        public void onUserRemoved(int removedUserId) {
+            mMainExecutor.execute(() -> {
+                BubbleController.this.onUserRemoved(removedUserId);
             });
         }
 
