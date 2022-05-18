@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.ActivityManager.isStartResultSuccessful;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_ADD_RECT_INSETS_PROVIDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT;
@@ -42,6 +43,7 @@ import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
 import static com.android.server.wm.ActivityTaskManagerService.LAYOUT_REASON_CONFIG_CHANGED;
 import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_PINNED_TASK;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_TASK_ORG;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
@@ -395,6 +397,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 }
             }
+            final List<WindowContainerTransaction.HierarchyOp> hops = t.getHierarchyOps();
+            final int hopSize = hops.size();
             ArraySet<WindowContainer> haveConfigChanges = new ArraySet<>();
             Iterator<Map.Entry<IBinder, WindowContainerTransaction.Change>> entries =
                     t.getChanges().entrySet().iterator();
@@ -422,9 +426,32 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         transition.setCanPipOnFinish(false /* canPipOnFinish */);
                     }
                 }
+                // A bit hacky, but we need to detect "remove PiP" so that we can "wrap" the
+                // setWindowingMode call in force-hidden.
+                boolean forceHiddenForPip = false;
+                if (wc.asTask() != null && wc.inPinnedWindowingMode()
+                        && entry.getValue().getWindowingMode() == WINDOWING_MODE_UNDEFINED) {
+                    // We are in pip and going to undefined. Now search hierarchy ops to determine
+                    // whether we are removing pip or expanding pip.
+                    for (int i = 0; i < hopSize; ++i) {
+                        final WindowContainerTransaction.HierarchyOp hop = hops.get(i);
+                        if (hop.getType() != HIERARCHY_OP_TYPE_REORDER) continue;
+                        final WindowContainer hopWc = WindowContainer.fromBinder(
+                                hop.getContainer());
+                        if (!wc.equals(hopWc)) continue;
+                        forceHiddenForPip = !hop.getToTop();
+                    }
+                }
+                if (forceHiddenForPip) {
+                    wc.asTask().setForceHidden(FLAG_FORCE_HIDDEN_FOR_PINNED_TASK, true /* set */);
+                }
 
                 int containerEffect = applyWindowContainerChange(wc, entry.getValue());
                 effects |= containerEffect;
+
+                if (forceHiddenForPip) {
+                    wc.asTask().setForceHidden(FLAG_FORCE_HIDDEN_FOR_PINNED_TASK, false /* set */);
+                }
 
                 // Lifecycle changes will trigger ensureConfig for everything.
                 if ((effects & TRANSACT_EFFECTS_LIFECYCLE) == 0
@@ -433,8 +460,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 }
             }
             // Hierarchy changes
-            final List<WindowContainerTransaction.HierarchyOp> hops = t.getHierarchyOps();
-            final int hopSize = hops.size();
             if (hopSize > 0) {
                 final boolean isInLockTaskMode = mService.isInLockTaskMode();
                 for (int i = 0; i < hopSize; ++i) {
