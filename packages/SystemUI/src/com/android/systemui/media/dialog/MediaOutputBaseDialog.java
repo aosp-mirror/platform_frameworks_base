@@ -186,6 +186,19 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
                 }
             };
 
+    private class LayoutManagerWrapper extends LinearLayoutManager {
+        LayoutManagerWrapper(Context context) {
+            super(context);
+        }
+
+        @Override
+        public void onLayoutCompleted(RecyclerView.State state) {
+            super.onLayoutCompleted(state);
+            mMediaOutputController.setRefreshing(false);
+            mMediaOutputController.refreshDataSetIfNeeded();
+        }
+    }
+
     public MediaOutputBaseDialog(Context context, BroadcastSender broadcastSender,
             MediaOutputController mediaOutputController) {
         super(context, R.style.Theme_SystemUI_Dialog_Media);
@@ -194,7 +207,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         mContext = getContext();
         mBroadcastSender = broadcastSender;
         mMediaOutputController = mediaOutputController;
-        mLayoutManager = new LinearLayoutManager(mContext);
+        mLayoutManager = new LayoutManagerWrapper(mContext);
         mListMaxHeight = context.getResources().getDimensionPixelSize(
                 R.dimen.media_output_dialog_list_max_height);
         mExecutor = Executors.newSingleThreadExecutor();
@@ -214,9 +227,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         lp.setFitInsetsIgnoringVisibility(true);
         window.setAttributes(lp);
         window.setContentView(mDialogView);
-        // Sets window to a blank string to avoid talkback announce app label first when pop up,
-        // which doesn't make sense.
-        window.setTitle(EMPTY_TITLE);
+        window.setTitle(mContext.getString(R.string.media_output_dialog_accessibility_title));
 
         mHeaderTitle = mDialogView.requireViewById(R.id.header_title);
         mHeaderSubtitle = mDialogView.requireViewById(R.id.header_subtitle);
@@ -276,6 +287,10 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     }
 
     void refresh(boolean deviceSetChanged) {
+        if (mMediaOutputController.isRefreshing()) {
+            return;
+        }
+        mMediaOutputController.setRefreshing(true);
         // Update header icon
         final int iconRes = getHeaderIconRes();
         final IconCompat iconCompat = getHeaderIcon();
@@ -309,10 +324,9 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
                 ColorFilter buttonColorFilter = new PorterDuffColorFilter(
                         mAdapter.getController().getColorButtonBackground(),
                         PorterDuff.Mode.SRC_IN);
-                ColorFilter onlineButtonColorFilter = new PorterDuffColorFilter(
-                        mAdapter.getController().getColorInactiveItem(), PorterDuff.Mode.SRC_IN);
                 mDoneButton.getBackground().setColorFilter(buttonColorFilter);
-                mStopButton.getBackground().setColorFilter(onlineButtonColorFilter);
+                mStopButton.getBackground().setColorFilter(buttonColorFilter);
+                mDoneButton.setTextColor(mAdapter.getController().getColorPositiveButtonText());
             }
             mHeaderIcon.setVisibility(View.VISIBLE);
             mHeaderIcon.setImageIcon(icon);
@@ -337,7 +351,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
             mHeaderSubtitle.setText(subTitle);
             mHeaderTitle.setGravity(Gravity.NO_GRAVITY);
         }
-        if (!mAdapter.isDragging() && !mAdapter.isAnimating()) {
+        if (!mAdapter.isDragging()) {
             int currentActivePosition = mAdapter.getCurrentActivePosition();
             if (!colorSetUpdated && !deviceSetChanged && currentActivePosition >= 0
                     && currentActivePosition < mAdapter.getItemCount()) {
@@ -459,7 +473,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     abstract int getStopButtonVisibility();
 
     public CharSequence getStopButtonText() {
-        return mContext.getText(R.string.keyboard_key_media_stop);
+        return mContext.getText(R.string.media_output_dialog_button_stop_casting);
     }
 
     public void onStopButtonClick() {

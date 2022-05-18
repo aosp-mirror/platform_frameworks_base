@@ -137,7 +137,7 @@
             style="@style/Widget.Dialog.Button.BorderButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/keyboard_key_media_stop"
+            android:text="@string/media_output_dialog_button_stop_casting"
             android:visibility="gone"/>
 
         <Space
