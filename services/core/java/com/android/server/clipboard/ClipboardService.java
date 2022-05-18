@@ -380,12 +380,12 @@ public class ClipboardService extends SystemService {
             }
             checkDataOwner(clip, intendingUid);
             synchronized (mLock) {
-                scheduleAutoClear(userId);
+                scheduleAutoClear(userId, intendingUid);
                 setPrimaryClipInternalLocked(clip, intendingUid, sourcePackage);
             }
         }
 
-        private void scheduleAutoClear(@UserIdInt int userId) {
+        private void scheduleAutoClear(@UserIdInt int userId, int intendingUid) {
             final long oldIdentity = Binder.clearCallingIdentity();
             try {
                 if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_CLIPBOARD,
@@ -393,7 +393,7 @@ public class ClipboardService extends SystemService {
                     mClipboardClearHandler.removeEqualMessages(ClipboardClearHandler.MSG_CLEAR,
                             userId);
                     Message clearMessage = Message.obtain(mClipboardClearHandler,
-                            ClipboardClearHandler.MSG_CLEAR, userId, 0, userId);
+                            ClipboardClearHandler.MSG_CLEAR, userId, intendingUid, userId);
                     mClipboardClearHandler.sendMessageDelayed(clearMessage,
                             getTimeoutForAutoClear());
                 }
@@ -446,7 +446,7 @@ public class ClipboardService extends SystemService {
                 showAccessNotificationLocked(pkg, intendingUid, intendingUserId, clipboard);
                 notifyTextClassifierLocked(clipboard, pkg, intendingUid);
                 if (clipboard.primaryClip != null) {
-                    scheduleAutoClear(userId);
+                    scheduleAutoClear(userId, intendingUid);
                 }
                 return clipboard.primaryClip;
             }
@@ -554,11 +554,12 @@ public class ClipboardService extends SystemService {
                 switch (msg.what) {
                     case MSG_CLEAR:
                         final int userId = msg.arg1;
+                        final int intendingUid = msg.arg2;
                         synchronized (mLock) {
                             if (getClipboardLocked(userId).primaryClip != null) {
                                 FrameworkStatsLog.write(FrameworkStatsLog.CLIPBOARD_CLEARED,
                                         FrameworkStatsLog.CLIPBOARD_CLEARED__SOURCE__AUTO_CLEAR);
-                                setPrimaryClipInternalLocked(null, Binder.getCallingUid(), null);
+                                setPrimaryClipInternalLocked(null, intendingUid, null);
                             }
                         }
                         break;
