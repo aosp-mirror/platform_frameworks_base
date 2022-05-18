@@ -1,4 +1,4 @@
-per-file PointerLocationView.java = michaelwr@google.com, svv@google.com
+per-file PointerLocationView.java = file:/INPUT_OWNERS
 per-file RecyclerView.java = mount@google.com
 per-file ViewPager.java = mount@google.com
 
