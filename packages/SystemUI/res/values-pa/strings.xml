@@ -78,8 +78,7 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਦੁਬਾਰਾ ਲੈ ਕੇ ਦੇਖੋ"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਨੂੰ ਰੱਖਿਅਤ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ਐਪ ਜਾਂ ਤੁਹਾਡੀ ਸੰਸਥਾ ਵੱਲੋਂ ਸਕ੍ਰੀਨਸ਼ਾਟ ਲੈਣ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਦਿੱਤੀ ਗਈ ਹੈ"</string>
-    <!-- no translation found for screenshot_blocked_by_admin (5486757604822795797) -->
-    <skip />
+    <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"ਤੁਹਾਡੇ ਆਈ.ਟੀ. ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਸਕ੍ਰੀਨਸ਼ਾਟ ਲੈਣ ਦੀ ਸੁਵਿਧਾ ਨੂੰ ਬਲਾਕ ਕੀਤਾ ਗਿਆ ਹੈ"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"ਸੰਪਾਦਨ ਕਰੋ"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਦਾ ਸੰਪਾਦਨ ਕਰੋ"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਸਾਂਝਾ ਕਰੋ"</string>
@@ -314,6 +313,10 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"ਖੋਲ੍ਹਣ ਲਈ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰੋ"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"ਖੋਲ੍ਹਣ ਲਈ \'ਅਣਲਾਕ ਕਰੋ\' ਪ੍ਰਤੀਕ ਨੂੰ ਦਬਾਓ"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"ਚਿਹਰੇ ਰਾਹੀਂ ਅਣਲਾਕ ਕੀਤਾ ਗਿਆ। ਖੋਲ੍ਹਣ ਲਈ \'ਅਣਲਾਕ ਕਰੋ\' ਪ੍ਰਤੀਕ ਨੂੰ ਦਬਾਓ।"</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰਨ ਲਈ ਉੱਤੇ ਵੱਲ ਸਵਾਈਪ ਕਰੋ"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ਵਰਤਣ ਲਈ ਅਣਲਾਕ ਕਰੋ"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ਇਹ ਡੀਵਾਈਸ ਤੁਹਾਡੀ ਸੰਸਥਾ ਨਾਲ ਸੰਬੰਧਿਤ ਹੈ"</string>
@@ -415,9 +418,9 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"ਐਪ ਨੂੰ ਪਿੰਨ ਕੀਤਾ ਗਿਆ ਹੈ"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"ਇਹ ਇਸ ਨੂੰ ਤਦ ਤੱਕ ਦ੍ਰਿਸ਼ ਵਿੱਚ ਰੱਖਦਾ ਹੈ ਜਦ ਤੱਕ ਤੁਸੀਂ ਅਨਪਿੰਨ ਨਹੀਂ ਕਰਦੇ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ \'ਪਿੱਛੇ\' ਅਤੇ \'ਰੂਪ-ਰੇਖਾ\' ਨੂੰ ਸਪੱਰਸ਼ ਕਰੋ ਅਤੇ ਦਬਾ ਕੇ ਰੱਖੋ।"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਅਨਪਿੰਨ ਕੀਤੇ ਜਾਣ ਤੱਕ ਇਸਨੂੰ ਦਿਖਾਇਆ ਜਾਂਦਾ ਹੈ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ \'ਪਿੱਛੇ\' ਅਤੇ \'ਹੋਮ\' ਨੂੰ ਸਪਰਸ਼ ਕਰਕੇ ਰੱਖੋ।"</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਅਨਪਿੰਨ ਕੀਤੇ ਜਾਣ ਤੱਕ ਇਸਨੂੰ ਦਿਖਾਇਆ ਜਾਂਦਾ ਹੈ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰਕੇ ਰੱਖੋ।"</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਅਣਪਿੰਨ ਕੀਤੇ ਜਾਣ ਤੱਕ ਇਸਨੂੰ ਦਿਖਾਇਆ ਜਾਂਦਾ ਹੈ। ਅਣਪਿੰਨ ਕਰਨ ਲਈ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰਕੇ ਰੱਖੋ।"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"ਇਹ ਇਸ ਨੂੰ ਤਦ ਤੱਕ ਦ੍ਰਿਸ਼ ਵਿੱਚ ਰੱਖਦਾ ਹੈ ਜਦ ਤੱਕ ਤੁਸੀਂ ਅਨਪਿੰਨ ਨਹੀਂ ਕਰਦੇ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ \'ਰੂਪ-ਰੇਖਾ\' ਨੂੰ ਸਪੱਰਸ਼ ਕਰੋ ਅਤੇ ਦਬਾ ਕੇ ਰੱਖੋ।"</string>
-    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਅਨਪਿੰਨ ਨਾ ਕੀਤੇ ਜਾਣ ਤੱਕ ਇਸਨੂੰ ਦਿਖਾਇਆ ਜਾਂਦਾ ਹੈ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ \'ਹੋਮ\' ਨੂੰ ਸਪੱਰਸ਼ ਕਰਕੇ ਦਬਾਈ ਰੱਖੋ।"</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਅਣਪਿੰਨ ਨਾ ਕੀਤੇ ਜਾਣ ਤੱਕ ਇਸਨੂੰ ਦਿਖਾਇਆ ਜਾਂਦਾ ਹੈ। ਅਣਪਿੰਨ ਕਰਨ ਲਈ \'ਹੋਮ\' ਨੂੰ ਸਪਰਸ਼ ਕਰਕੇ  ਰੱਖੋ।"</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"ਨਿੱਜੀ ਡਾਟੇ ਤੱਕ ਪਹੁੰਚ ਕੀਤੀ ਜਾ ਸਕਦੀ ਹੈ (ਜਿਵੇਂ ਕਿ ਸੰਪਰਕ ਅਤੇ ਈਮੇਲ ਸਮੱਗਰੀ)।"</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"ਪਿੰਨ ਕੀਤੀ ਐਪ ਹੋਰ ਐਪਾਂ ਨੂੰ ਖੋਲ੍ਹ ਸਕਦੀ ਹੈ।"</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"ਇਸ ਐਪ ਨੂੰ ਅਨਪਿੰਨ ਕਰਨ ਲਈ, \'ਪਿੱਛੇ\' ਅਤੇ \'ਰੂਪ-ਰੇਖਾ\' ਬਟਨਾਂ ਨੂੰ ਸਪਰਸ਼ ਕਰਕੇ ਦਬਾਈ ਰੱਖੋ"</string>
@@ -460,7 +463,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"ਵਾਲੇਟ"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"ਆਪਣੇ ਫ਼ੋਨ ਨਾਲ ਜ਼ਿਆਦਾ ਤੇਜ਼ ਅਤੇ ਜ਼ਿਆਦਾ ਸੁਰੱਖਿਅਤ ਖਰੀਦਾਂ ਕਰਨ ਲਈ ਸੈੱਟਅੱਪ ਕਰੋ"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"ਸਭ ਦਿਖਾਓ"</string>
-    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"ਕੋਈ ਕਾਰਡ ਸ਼ਾਮਲ ਕਰੋ"</string>
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"ਖੋਲ੍ਹਣ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"ਅੱਪਡੇਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ਵਰਤਣ ਲਈ ਅਣਲਾਕ ਕਰੋ"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"ਤੁਹਾਡੇ ਕਾਰਡ ਪ੍ਰਾਪਤ ਕਰਨ ਵਿੱਚ ਕੋਈ ਸਮੱਸਿਆ ਆਈ, ਕਿਰਪਾ ਕਰਕੇ ਬਾਅਦ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>
@@ -720,8 +723,7 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"ਬੈਟਰੀ ਖਤਮ ਹੋਣ ਦੀ ਸੰਭਾਵਨਾ \'ਤੇ ਚਾਲੂ ਹੁੰਦਾ ਹੈ"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"ਨਹੀਂ ਧੰਨਵਾਦ"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"SysUI ਹੀਪ ਡੰਪ ਕਰੋ"</string>
-    <!-- no translation found for ongoing_privacy_dialog_a11y_title (2205794093673327974) -->
-    <skip />
+    <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"ਵਰਤੋਂ ਵਿੱਚ"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"ਐਪਲੀਕੇਸ਼ਨਾਂ ਤੁਹਾਡੇ <xliff:g id="TYPES_LIST">%s</xliff:g> ਦੀ ਵਰਤੋਂ ਕਰ ਰਹੀਆਂ ਹਨ।"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" ਅਤੇ "</string>
@@ -799,7 +801,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"ਹੋਰ ਦੇਖਣ ਲਈ ਸਵਾਈਪ ਕਰੋ"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"ਸਿਫ਼ਾਰਸ਼ਾਂ ਲੋਡ ਹੋ ਰਹੀਆਂ ਹਨ"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"ਮੀਡੀਆ"</string>
-    <string name="controls_media_close_session" msgid="4780485355795635052">"ਕੀ <xliff:g id="APP_NAME">%1$s</xliff:g> ਲਈ ਇਸ ਮੀਡੀਆ ਕੰਟਰੋਲ ਲੁਕਾਉਣਾ ਹੈ?"</string>
+    <string name="controls_media_close_session" msgid="4780485355795635052">"ਕੀ <xliff:g id="APP_NAME">%1$s</xliff:g> ਲਈ ਇਹ ਮੀਡੀਆ ਕੰਟਰੋਲ ਲੁਕਾਉਣਾ ਹੈ?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"ਮੌਜੂਦਾ ਮੀਡੀਆ ਸੈਸ਼ਨ ਲੁਕਾਇਆ ਨਹੀਂ ਜਾ ਸਕਦਾ।"</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"ਲੁਕਾਓ"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"ਮੁੜ-ਚਾਲੂ ਕਰੋ"</string>
@@ -819,7 +821,6 @@
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g> \'ਤੇ ਚਲਾਉਣ ਲਈ ਨੇੜੇ ਲਿਜਾਓ"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"ਇੱਥੇ ਚਲਾਉਣ ਲਈ <xliff:g id="DEVICENAME">%1$s</xliff:g> ਦੇ ਨੇੜੇ ਜਾਓ"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g> \'ਤੇ ਚਲਾਇਆ ਜਾ ਰਿਹਾ ਹੈ"</string>
-    <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"ਇਸ ਫ਼ੋਨ \'ਤੇ ਚਲਾਇਆ ਜਾ ਰਿਹਾ ਹੈ"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"ਕੋਈ ਗੜਬੜ ਹੋ ਗਈ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ਅਕਿਰਿਆਸ਼ੀਲ, ਐਪ ਦੀ ਜਾਂਚ ਕਰੋ"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"ਨਹੀਂ ਮਿਲਿਆ"</string>
@@ -840,6 +841,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"ਇਸ ਸੈਸ਼ਨ ਨੂੰ ਕਾਸਟ ਕਰਨ ਲਈ, ਕਿਰਪਾ ਕਰਕੇ ਐਪ ਖੋਲ੍ਹੋ।"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"ਅਗਿਆਤ ਐਪ"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"ਕਾਸਟ ਕਰਨਾ ਬੰਦ ਕਰੋ"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ਪ੍ਰਸਾਰਨ ਕਿਵੇਂ ਕੰਮ ਕਰਦਾ ਹੈ"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ਪ੍ਰਸਾਰਨ"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"ਅਨੁਰੂਪ ਬਲੂਟੁੱਥ ਡੀਵਾਈਸਾਂ ਨਾਲ ਨਜ਼ਦੀਕੀ ਲੋਕ ਤੁਹਾਡੇ ਵੱਲੋਂ ਪ੍ਰਸਾਰਨ ਕੀਤੇ ਜਾ ਰਹੇ ਮੀਡੀਆ ਨੂੰ ਸੁਣ ਸਕਦੇ ਹਨ"</string>
@@ -849,10 +852,8 @@
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"ਰੱਖਿਅਤ ਕਰੋ"</string>
     <string name="media_output_broadcast_starting" msgid="8130153654166235557">"ਸ਼ੁਰੂ ਹੋ ਰਿਹਾ ਹੈ…"</string>
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"ਪ੍ਰਸਾਰਨ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
-    <!-- no translation found for media_output_broadcast_update_error (1420868236079122521) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_last_update_error (5484328807296895491) -->
-    <skip />
+    <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"ਰੱਖਿਅਤ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
+    <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"ਰੱਖਿਅਤ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ।"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"ਬਿਲਡ ਨੰਬਰ"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"ਬਿਲਡ ਨੰਬਰ ਨੂੰ ਕਲਿੱਪਬੋਰਡ \'ਤੇ ਕਾਪੀ ਕੀਤਾ ਗਿਆ।"</string>
     <string name="basic_status" msgid="2315371112182658176">"ਗੱਲਬਾਤ ਖੋਲ੍ਹੋ"</string>
@@ -937,6 +938,13 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"ਕਾਪੀ ਕੀਤੀ ਲਿਖਤ ਦਾ ਸੰਪਾਦਨ ਕਰੋ"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"ਕਾਪੀ ਕੀਤੇ ਗਏ ਚਿੱਤਰ ਦਾ ਸੰਪਾਦਨ ਕਰੋ"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"ਨਜ਼ਦੀਕੀ ਡੀਵਾਈਸ \'ਤੇ ਭੇਜੋ"</string>
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"ਦੇਖਣ ਲਈ ਟੈਪ ਕਰੋ"</string>
+    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
+    <skip />
+    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
+    <skip />
+    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
+    <skip />
     <string name="add" msgid="81036585205287996">"ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="manage_users" msgid="1823875311934643849">"ਵਰਤੋਂਕਾਰਾਂ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰੋ"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"ਇਹ ਸੂਚਨਾ ਸਪਲਿਟ ਸਕ੍ਰੀਨ \'ਤੇ ਘਸੀਟਣ ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦੀ ਹੈ।"</string>

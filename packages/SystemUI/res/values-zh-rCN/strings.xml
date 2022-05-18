@@ -78,8 +78,7 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"请再次尝试截屏"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"无法保存屏幕截图"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"此应用或您所在的单位不允许进行屏幕截图"</string>
-    <!-- no translation found for screenshot_blocked_by_admin (5486757604822795797) -->
-    <skip />
+    <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"您的 IT 管理员已禁止截取屏幕截图"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"编辑"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"编辑屏幕截图"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"分享屏幕截图"</string>
@@ -314,6 +313,10 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"向上滑动即可打开"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"按下解锁图标即可打开"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"已通过面孔识别解锁。按下解锁图标即可打开。"</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"向上滑动即可重试"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"需要解锁才能使用 NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"此设备归贵单位所有"</string>
@@ -460,7 +463,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"电子钱包"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"开始设置，享受更加快捷安全的手机购物体验"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"全部显示"</string>
-    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"添加卡"</string>
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"点按即可打开"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"正在更新"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"解锁设备即可使用"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"获取您的卡片时出现问题，请稍后重试"</string>
@@ -720,8 +723,7 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"在电池电量可能会耗尽时，系统会开启此模式"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"不用了"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"转储 SysUI 堆"</string>
-    <!-- no translation found for ongoing_privacy_dialog_a11y_title (2205794093673327974) -->
-    <skip />
+    <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"正在使用"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"有多个应用正在使用您的<xliff:g id="TYPES_LIST">%s</xliff:g>。"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">"、 "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" 和 "</string>
@@ -819,7 +821,6 @@
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"若要在“<xliff:g id="DEVICENAME">%1$s</xliff:g>”上播放，请靠近这台设备"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"若要在此设备上播放，请靠近“<xliff:g id="DEVICENAME">%1$s</xliff:g>”"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"正在“<xliff:g id="DEVICENAME">%1$s</xliff:g>”上播放"</string>
-    <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"正在此手机上播放"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"出了点问题，请重试。"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"无效，请检查应用"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"未找到"</string>
@@ -840,6 +841,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"如需投射此会话，请打开相关应用。"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"未知应用"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"停止投射"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"广播的运作方式"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"广播"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"附近使用兼容蓝牙设备的用户可以收听您广播的媒体内容"</string>
@@ -849,10 +852,8 @@
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"保存"</string>
     <string name="media_output_broadcast_starting" msgid="8130153654166235557">"即将开始…"</string>
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"无法广播"</string>
-    <!-- no translation found for media_output_broadcast_update_error (1420868236079122521) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_last_update_error (5484328807296895491) -->
-    <skip />
+    <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"无法保存，请重试。"</string>
+    <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"无法保存。"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"版本号"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"已将版本号复制到剪贴板。"</string>
     <string name="basic_status" msgid="2315371112182658176">"开放式对话"</string>
@@ -922,11 +923,11 @@
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"不添加图块"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"选择用户"</string>
     <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
-      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> 个应用处于活动状态</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> 个应用处于活动状态</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> 个应用正在运行</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> 个应用正在运行</item>
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"新信息"</string>
-    <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"使用中的应用"</string>
+    <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"已开启的应用"</string>
     <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"即使您未使用这些应用，它们仍会处于活动状态，并可能会影响电池续航时间"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"停止"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"已停止"</string>
@@ -937,6 +938,10 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"修改所复制的文字"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"编辑所复制的图片"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"发送到附近的设备"</string>
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"点按即可查看"</string>
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"文本已复制"</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"图片已复制"</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"内容已复制"</string>
     <string name="add" msgid="81036585205287996">"添加"</string>
     <string name="manage_users" msgid="1823875311934643849">"管理用户"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"此通知不支持拖动到分屏中。"</string>

@@ -78,8 +78,7 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"ቅጽበታዊ ገጽ ዕይታን እንደገና ማንሳት ይሞክሩ"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"ቅጽበታዊ ገጽ እይታን ማስቀመጥ አልተቻለም"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ቅጽበታዊ ገጽ እይታዎችን ማንሳት በመተግበሪያው ወይም በእርስዎ ድርጅት አይፈቀድም"</string>
-    <!-- no translation found for screenshot_blocked_by_admin (5486757604822795797) -->
-    <skip />
+    <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"ቅጽበታዊ ገጽ እይታዎችን ማንሳት በእርስዎ አይቲ አስተዳዳሪ ታግዷል"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"አርትዕ ያድርጉ"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"ቅጽበታዊ ገጽ ዕይታን አርትዕ ያድርጉ"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"ቅጽበታዊ ገጽ እይታን ያጋሩ"</string>
@@ -314,6 +313,10 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"ለመክፈት በጣት ወደ ላይ ጠረግ ያድርጉ"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"ለመክፈት የመክፈቻ አዶውን ይጫኑ"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"በመልክ ተከፍቷል። ለመክፈት የመክፈቻ አዶውን ይጫኑ።"</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"እንደገና ለመሞከር ወደ ላይ ይጥረጉ"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFCን ለመጠቀም ይክፈቱ"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ይህ መሣሪያ የድርጅትዎ ነው"</string>
@@ -460,7 +463,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"በስልክዎ በመጠቀም ፈጣን እና የበለጠ ደህንነቱ በተጠበቀ መንገድ ግዢዎችን ለመፈጸም ዝግጁ ይሁኑ"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"ሁሉንም አሳይ"</string>
-    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"ካርድ አክል"</string>
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"ለመክፈት መታ ያድርጉ"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"በማዘመን ላይ"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ለማየት ይክፈቱ"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"የእርስዎን ካርዶች ማግኘት ላይ ችግር ነበር፣ እባክዎ ቆይተው እንደገና ይሞክሩ"</string>
@@ -720,8 +723,7 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"ባትሪው የማለቅ ዕድሉ ከፍ ያለ ከሆነ ያብሩት"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"አይ፣ አመሰግናለሁ"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"SysUI Heap አራግፍ"</string>
-    <!-- no translation found for ongoing_privacy_dialog_a11y_title (2205794093673327974) -->
-    <skip />
+    <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"በጥቅም ላይ"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"መተግበሪያዎች የእርስዎን <xliff:g id="TYPES_LIST">%s</xliff:g> እየተጠቀሙ ነው።"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">"፣ "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" እና "</string>
@@ -819,7 +821,6 @@
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"በ<xliff:g id="DEVICENAME">%1$s</xliff:g> ላይ ለማጫወት ጠጋ ያድርጉ"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"እዚህ ለመጫወት ወደ <xliff:g id="DEVICENAME">%1$s</xliff:g> ቀረብ ይበሉ"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"በ<xliff:g id="DEVICENAME">%1$s</xliff:g> ላይ በማጫወት ላይ"</string>
-    <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"በዚህ ስልክ በመጫወት ላይ"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"የሆነ ችግር ተፈጥሯል። እንደገና ይሞክሩ።"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ንቁ ያልኾነ፣ መተግበሪያን ይፈትሹ"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"አልተገኘም"</string>
@@ -840,6 +841,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"ይህን ክፍለ ጊዜ cast ለማድረግ፣ እባክዎ መተግበሪያውን ይክፈቱ።"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"የማይታወቅ መተግበሪያ"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Cast ማድረግ አቁም"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ማሰራጨት እንዴት እንደሚሠራ"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ስርጭት"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"ተኳሃኝ የብሉቱዝ መሣሪያዎች ያላቸው በአቅራቢያዎ ያሉ ሰዎች እርስዎ እያሰራጩት ያሉትን ሚዲያ ማዳመጥ ይችላሉ"</string>
@@ -849,10 +852,8 @@
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"አስቀምጥ"</string>
     <string name="media_output_broadcast_starting" msgid="8130153654166235557">"በመጀመር ላይ…"</string>
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"መሰራጨት አይችልም"</string>
-    <!-- no translation found for media_output_broadcast_update_error (1420868236079122521) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_last_update_error (5484328807296895491) -->
-    <skip />
+    <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"ማስቀመጥ አልተቻለም። እንደገና ይሞክሩ።"</string>
+    <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"ማስቀመጥ አልተቻለም።"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"የግንብ ቁጥር"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"የገንባ ቁጥር ወደ ቅንጥብ ሰሌዳ ተቀድቷል።"</string>
     <string name="basic_status" msgid="2315371112182658176">"ውይይት ይክፈቱ"</string>
@@ -937,6 +938,13 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"የተቀዳ ጽሁፍ አርትዕ ያድርጉ"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"የተቀዳ ምስል አርትዕ ያድርጉ"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"በአቅራቢያ ወዳለ መሳሪያ ይላኩ"</string>
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"ለመመልከት መታ ያድርጉ"</string>
+    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
+    <skip />
+    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
+    <skip />
+    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
+    <skip />
     <string name="add" msgid="81036585205287996">"አክል"</string>
     <string name="manage_users" msgid="1823875311934643849">"ተጠቃሚዎችን ያስተዳድሩ"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"ይህ ማሳወቂያ ወደ Splitscreen መጎተትን አይደግፍም።"</string>

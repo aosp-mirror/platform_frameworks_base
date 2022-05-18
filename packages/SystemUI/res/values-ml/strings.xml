@@ -78,8 +78,7 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"സ്‌ക്രീൻഷോട്ട് എടുക്കാൻ വീണ്ടും ശ്രമിക്കുക"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"സ്‌ക്രീൻഷോട്ട് സംരക്ഷിക്കാനാകുന്നില്ല"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"സ്ക്രീൻഷോട്ടുകൾ എടുക്കുന്നത് ആപ്പോ നിങ്ങളുടെ സ്ഥാപനമോ അനുവദിക്കുന്നില്ല"</string>
-    <!-- no translation found for screenshot_blocked_by_admin (5486757604822795797) -->
-    <skip />
+    <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"സ്ക്രീൻഷോട്ടുകൾ എടുക്കുന്നത് നിങ്ങളുടെ ഐടി അഡ്‌മിൻ ബ്ലോക്ക് ചെയ്തിരിക്കുന്നു"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"എഡിറ്റ് ചെയ്യുക"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"സ്ക്രീൻഷോട്ട് എഡിറ്റ് ചെയ്യുക"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"സ്‌ക്രീൻഷോട്ട് പങ്കിടുക"</string>
@@ -314,6 +313,10 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"തുറക്കാൻ മുകളിലോട്ട് സ്വൈപ്പ് ചെയ്യുക"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"തുറക്കാൻ അൺലോക്ക് ഐക്കൺ അമർത്തുക"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"മുഖം ഉപയോഗിച്ച് അൺലോക്ക് ചെയ്‌തു. തുറക്കാൻ അൺലോക്ക് ഐക്കൺ അമർത്തുക."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"വീണ്ടും ശ്രമിക്കാൻ മുകളിലേക്ക് സ്വൈപ്പ് ചെയ്യുക"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ഉപയോഗിക്കാൻ അൺലോക്ക് ചെയ്യുക"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ഈ ഉപകരണം നിങ്ങളുടെ സ്ഥാപനത്തിന്റേതാണ്"</string>
@@ -460,7 +463,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"വാലറ്റ്"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"നിങ്ങളുടെ ഫോൺ ഉപയോഗിച്ച് വാങ്ങലുകൾ വേഗത്തിലും സുരക്ഷിതമായും നടത്താനുള്ള സജ്ജീകരണം നടത്തുക"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"എല്ലാം കാണിക്കുക"</string>
-    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"കാർഡ് ചേർക്കുക"</string>
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"തുറക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"അപ്‌ഡേറ്റ് ചെയ്യുന്നു"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ഉപയോഗിക്കാൻ അൺലോക്ക് ചെയ്യുക"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"നിങ്ങളുടെ കാർഡുകൾ ലഭ്യമാക്കുന്നതിൽ ഒരു പ്രശ്‌നമുണ്ടായി, പിന്നീട് വീണ്ടും ശ്രമിക്കുക"</string>
@@ -720,8 +723,7 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"ബാറ്ററി ചാർജ് തീരാൻ സാധ്യതയുണ്ടെങ്കിൽ ഓണാക്കുക"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"വേണ്ട"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"SysUI ഹീപ്പ് ഡമ്പ് ചെയ്യുക"</string>
-    <!-- no translation found for ongoing_privacy_dialog_a11y_title (2205794093673327974) -->
-    <skip />
+    <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"ഉപയോഗത്തിലാണ്"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"ആപ്പുകൾ നിങ്ങളുടെ <xliff:g id="TYPES_LIST">%s</xliff:g> ഉപയോഗിക്കുന്നു."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" കൂടാതെ "</string>
@@ -819,7 +821,6 @@
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g> എന്നതിൽ പ്ലേ ചെയ്യാൻ അടുത്തേക്ക് നീക്കുക"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"ഇവിടെ പ്ലേ ചെയ്യാൻ <xliff:g id="DEVICENAME">%1$s</xliff:g> എന്നതിന് അടുത്തേക്ക് നീക്കുക"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g> എന്നതിൽ പ്ലേ ചെയ്യുന്നു"</string>
-    <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"ഈ ഫോണിൽ പ്ലേ ചെയ്യുന്നു"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"എന്തോ കുഴപ്പമുണ്ടായി. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"നിഷ്‌ക്രിയം, ആപ്പ് പരിശോധിക്കൂ"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"കണ്ടെത്തിയില്ല"</string>
@@ -840,6 +841,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"ഈ സെഷൻ കാസ്റ്റ് ചെയ്യാൻ, ആപ്പ് തുറക്കുക."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"അജ്ഞാതമായ ആപ്പ്"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"കാസ്റ്റ് ചെയ്യുന്നത് നിർത്തുക"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ബ്രോഡ്‌കാസ്‌റ്റ് എങ്ങനെയാണ് പ്രവർത്തിക്കുന്നത്"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ബ്രോഡ്‌കാസ്റ്റ്"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"അനുയോജ്യമായ Bluetooth ഉപകരണങ്ങളോടെ സമീപമുള്ള ആളുകൾക്ക് നിങ്ങൾ ബ്രോഡ്‌കാസ്‌റ്റ് ചെയ്യുന്ന മീഡിയ കേൾക്കാനാകും"</string>
@@ -849,10 +852,8 @@
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"സംരക്ഷിക്കുക"</string>
     <string name="media_output_broadcast_starting" msgid="8130153654166235557">"ആരംഭിക്കുന്നു…"</string>
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"ബ്രോഡ്‌കാസ്‌റ്റ് ചെയ്യാനാകുന്നില്ല"</string>
-    <!-- no translation found for media_output_broadcast_update_error (1420868236079122521) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_last_update_error (5484328807296895491) -->
-    <skip />
+    <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"സംരക്ഷിക്കാൻ കഴിയില്ല. വീണ്ടും ശ്രമിക്കുക."</string>
+    <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"സംരക്ഷിക്കാൻ കഴിയില്ല."</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"ബിൽഡ് നമ്പർ"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"ക്ലിപ്പ്ബോർഡിലേക്ക് ബിൽഡ് നമ്പർ പകർത്തി."</string>
     <string name="basic_status" msgid="2315371112182658176">"സംഭാഷണം തുറക്കുക"</string>
@@ -903,7 +904,7 @@
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"മൊബൈൽ ഡാറ്റ"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"കണക്റ്റ് ചെയ്തു"</string>
-    <string name="mobile_data_off_summary" msgid="3663995422004150567">"മൊബൈൽ ഡാറ്റ സ്വയമേവ കണക്റ്റ് ചെയ്യില്ല"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"മൊബൈൽ ഡാറ്റ സ്വയം കണക്റ്റ് ചെയ്യില്ല"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"കണക്ഷനില്ല"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"മറ്റ് നെറ്റ്‌വർക്കുകളൊന്നും ലഭ്യമല്ല"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"നെറ്റ്‌വർക്കുകളൊന്നും ലഭ്യമല്ല"</string>
@@ -937,6 +938,10 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"പകർത്തിയ ടെക്സ്റ്റ് എഡിറ്റ് ചെയ്യുക"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"പകർത്തിയ ചിത്രം എഡിറ്റ് ചെയ്യുക"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"സമീപത്തുള്ള ഉപകരണത്തിലേക്ക് അയയ്ക്കുക"</string>
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"കാണാൻ ടാപ്പ് ചെയ്യുക"</string>
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"ടെക്‌സ്റ്റ് പകർത്തി"</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"ചിത്രം പകർത്തി"</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"ഉള്ളടക്കം പകർത്തി"</string>
     <string name="add" msgid="81036585205287996">"ചേർക്കുക"</string>
     <string name="manage_users" msgid="1823875311934643849">"ഉപയോക്താക്കളെ മാനേജ് ചെയ്യുക"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"സ്പ്ലിറ്റ് സ്ക്രീനിലേക്ക് വലിച്ചിടുന്നതിനെ ഈ അറിയിപ്പ് പിന്തുണയ്ക്കുന്നില്ല."</string>
