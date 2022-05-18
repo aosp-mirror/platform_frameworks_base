@@ -98,6 +98,7 @@ package android.animation {
 
   public abstract class Animator implements java.lang.Cloneable {
     method public static long getBackgroundPauseDelay();
+    method public static void setAnimatorPausingEnabled(boolean);
     method public static void setBackgroundPauseDelay(long);
   }
 
