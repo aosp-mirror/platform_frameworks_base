@@ -86,6 +86,8 @@ import android.net.ipsec.ike.ChildSessionConfiguration;
 import android.net.ipsec.ike.ChildSessionParams;
 import android.net.ipsec.ike.IkeSession;
 import android.net.ipsec.ike.IkeSessionCallback;
+import android.net.ipsec.ike.IkeSessionConfiguration;
+import android.net.ipsec.ike.IkeSessionConnectionInfo;
 import android.net.ipsec.ike.IkeSessionParams;
 import android.net.ipsec.ike.IkeTunnelConnectionParams;
 import android.net.ipsec.ike.exceptions.IkeNetworkLostException;
@@ -168,9 +170,10 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -2595,9 +2598,19 @@ public class Vpn {
 
         void onDefaultNetworkLost(@NonNull Network network);
 
+        void onIkeOpened(int token, @NonNull IkeSessionConfiguration ikeConfiguration);
+
+        void onIkeConnectionInfoChanged(
+                int token, @NonNull IkeSessionConnectionInfo ikeConnectionInfo);
+
         void onChildOpened(int token, @NonNull ChildSessionConfiguration childConfig);
 
         void onChildTransformCreated(int token, @NonNull IpSecTransform transform, int direction);
+
+        void onChildMigrated(
+                int token,
+                @NonNull IpSecTransform inTransform,
+                @NonNull IpSecTransform outTransform);
 
         void onSessionLost(int token, @Nullable Exception exception);
     }
@@ -2630,6 +2643,10 @@ public class Vpn {
     class IkeV2VpnRunner extends VpnRunner implements IkeV2VpnRunnerCallback {
         @NonNull private static final String TAG = "IkeV2VpnRunner";
 
+        // 5 seconds grace period before tearing down the IKE Session in case new default network
+        // will come up
+        private static final long NETWORK_LOST_TIMEOUT_MS = 5000L;
+
         @NonNull private final IpSecManager mIpSecManager;
         @NonNull private final Ikev2VpnProfile mProfile;
         @NonNull private final ConnectivityManager.NetworkCallback mNetworkCallback;
@@ -2641,7 +2658,10 @@ public class Vpn {
          * of the mutable Ikev2VpnRunner fields. The Ikev2VpnRunner is built mostly lock-free by
          * virtue of everything being serialized on this executor.
          */
-        @NonNull private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
+        @NonNull
+        private final ScheduledThreadPoolExecutor mExecutor = new ScheduledThreadPoolExecutor(1);
+
+        @Nullable private ScheduledFuture<?> mScheduledHandleNetworkLostTimeout;
 
         /** Signal to ensure shutdown is honored even if a new Network is connected. */
         private boolean mIsRunning = true;
@@ -2654,11 +2674,16 @@ public class Vpn {
         private int mCurrentToken = -1;
 
         @Nullable private IpSecTunnelInterface mTunnelIface;
-        @Nullable private IkeSession mSession;
         @Nullable private Network mActiveNetwork;
         @Nullable private NetworkCapabilities mUnderlyingNetworkCapabilities;
         @Nullable private LinkProperties mUnderlyingLinkProperties;
         private final String mSessionKey;
+
+        @Nullable private IkeSession mSession;
+        @Nullable private IkeSessionConnectionInfo mIkeConnectionInfo;
+
+        // mMobikeEnabled can only be updated after IKE AUTH is finished.
+        private boolean mMobikeEnabled = false;
 
         IkeV2VpnRunner(@NonNull Ikev2VpnProfile profile) {
             super(TAG);
@@ -2666,6 +2691,18 @@ public class Vpn {
             mIpSecManager = (IpSecManager) mContext.getSystemService(Context.IPSEC_SERVICE);
             mNetworkCallback = new VpnIkev2Utils.Ikev2VpnNetworkCallback(TAG, this, mExecutor);
             mSessionKey = UUID.randomUUID().toString();
+
+            // Set the policy so that cancelled tasks will be removed from the work queue
+            mExecutor.setRemoveOnCancelPolicy(true);
+
+            // Set the policy so that all delayed tasks will not be executed
+            mExecutor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+
+            // To avoid hitting RejectedExecutionException upon shutdown of the mExecutor */
+            mExecutor.setRejectedExecutionHandler(
+                    (r, executor) -> {
+                        Log.d(TAG, "Runnable " + r + " rejected by the mExecutor");
+                    });
         }
 
         @Override
@@ -2709,6 +2746,44 @@ public class Vpn {
         }
 
         /**
+         * Called when an IKE session has been opened
+         *
+         * <p>This method is only ever called once per IkeSession, and MUST run on the mExecutor
+         * thread in order to ensure consistency of the Ikev2VpnRunner fields.
+         */
+        public void onIkeOpened(int token, @NonNull IkeSessionConfiguration ikeConfiguration) {
+            if (!isActiveToken(token)) {
+                Log.d(TAG, "onIkeOpened called for obsolete token " + token);
+                return;
+            }
+
+            mMobikeEnabled =
+                    ikeConfiguration.isIkeExtensionEnabled(
+                            IkeSessionConfiguration.EXTENSION_TYPE_MOBIKE);
+            onIkeConnectionInfoChanged(token, ikeConfiguration.getIkeSessionConnectionInfo());
+        }
+
+        /**
+         * Called when an IKE session's {@link IkeSessionConnectionInfo} is available or updated
+         *
+         * <p>This callback is usually fired when an IKE session has been opened or migrated.
+         *
+         * <p>This method is called multiple times over the lifetime of an IkeSession, and MUST run
+         * on the mExecutor thread in order to ensure consistency of the Ikev2VpnRunner fields.
+         */
+        public void onIkeConnectionInfoChanged(
+                int token, @NonNull IkeSessionConnectionInfo ikeConnectionInfo) {
+            if (!isActiveToken(token)) {
+                Log.d(TAG, "onIkeConnectionInfoChanged called for obsolete token " + token);
+                return;
+            }
+
+            // The update on VPN and the IPsec tunnel will be done when migration is fully complete
+            // in onChildMigrated
+            mIkeConnectionInfo = ikeConnectionInfo;
+        }
+
+        /**
          * Called when an IKE Child session has been opened, signalling completion of the startup.
          *
          * <p>This method is only ever called once per IkeSession, and MUST run on the mExecutor
@@ -2741,6 +2816,11 @@ public class Vpn {
                     dnsAddrStrings.add(addr.getHostAddress());
                 }
 
+                // The actual network of this IKE session has been set up with is
+                // mIkeConnectionInfo.getNetwork() instead of mActiveNetwork because
+                // mActiveNetwork might have been updated after the setup was triggered.
+                final Network network = mIkeConnectionInfo.getNetwork();
+
                 final NetworkAgent networkAgent;
                 final LinkProperties lp;
 
@@ -2759,7 +2839,7 @@ public class Vpn {
                     mConfig.dnsServers.clear();
                     mConfig.dnsServers.addAll(dnsAddrStrings);
 
-                    mConfig.underlyingNetworks = new Network[] {mActiveNetwork};
+                    mConfig.underlyingNetworks = new Network[] {network};
 
                     mConfig.disallowedApplications = getAppExclusionList(mPackage);
 
@@ -2775,8 +2855,7 @@ public class Vpn {
                         return; // Link properties are already sent.
                     } else {
                         // Underlying networks also set in agentConnect()
-                        networkAgent.setUnderlyingNetworks(
-                                Collections.singletonList(mActiveNetwork));
+                        networkAgent.setUnderlyingNetworks(Collections.singletonList(network));
                     }
 
                     lp = makeLinkProperties(); // Accesses VPN instance fields; must be locked
@@ -2793,7 +2872,7 @@ public class Vpn {
          * Called when an IPsec transform has been created, and should be applied.
          *
          * <p>This method is called multiple times over the lifetime of an IkeSession (or default
-         * network), and is MUST always be called on the mExecutor thread in order to ensure
+         * network), and MUST always be called on the mExecutor thread in order to ensure
          * consistency of the Ikev2VpnRunner fields.
          */
         public void onChildTransformCreated(
@@ -2820,21 +2899,85 @@ public class Vpn {
         }
 
         /**
+         * Called when an IPsec transform has been created, and should be re-applied.
+         *
+         * <p>This method is called multiple times over the lifetime of an IkeSession (or default
+         * network), and MUST always be called on the mExecutor thread in order to ensure
+         * consistency of the Ikev2VpnRunner fields.
+         */
+        public void onChildMigrated(
+                int token,
+                @NonNull IpSecTransform inTransform,
+                @NonNull IpSecTransform outTransform) {
+            if (!isActiveToken(token)) {
+                Log.d(TAG, "onChildMigrated for obsolete token " + token);
+                return;
+            }
+
+            // The actual network of this IKE session has migrated to is
+            // mIkeConnectionInfo.getNetwork() instead of mActiveNetwork because mActiveNetwork
+            // might have been updated after the migration was triggered.
+            final Network network = mIkeConnectionInfo.getNetwork();
+
+            try {
+                synchronized (Vpn.this) {
+                    mConfig.underlyingNetworks = new Network[] {network};
+                    mNetworkCapabilities =
+                            new NetworkCapabilities.Builder(mNetworkCapabilities)
+                                    .setUnderlyingNetworks(Collections.singletonList(network))
+                                    .build();
+                    mNetworkAgent.setUnderlyingNetworks(Collections.singletonList(network));
+                }
+
+                mTunnelIface.setUnderlyingNetwork(network);
+
+                // Transforms do not need to be persisted; the IkeSession will keep them alive for
+                // us
+                mIpSecManager.applyTunnelModeTransform(
+                        mTunnelIface, IpSecManager.DIRECTION_IN, inTransform);
+                mIpSecManager.applyTunnelModeTransform(
+                        mTunnelIface, IpSecManager.DIRECTION_OUT, outTransform);
+            } catch (IOException e) {
+                Log.d(TAG, "Transform application failed for token " + token, e);
+                onSessionLost(token, e);
+            }
+        }
+
+        /**
          * Called when a new default network is connected.
          *
-         * <p>The Ikev2VpnRunner will unconditionally switch to the new network, killing the old IKE
-         * state in the process, and starting a new IkeSession instance.
+         * <p>The Ikev2VpnRunner will unconditionally switch to the new network. If the IKE session
+         * has mobility, Ikev2VpnRunner will migrate the existing IkeSession to the new network.
+         * Otherwise, Ikev2VpnRunner will kill the old IKE state, and start a new IkeSession
+         * instance.
          *
          * <p>This method MUST always be called on the mExecutor thread in order to ensure
          * consistency of the Ikev2VpnRunner fields.
          */
         public void onDefaultNetworkChanged(@NonNull Network network) {
-            Log.d(TAG, "Starting IKEv2/IPsec session on new network: " + network);
+            Log.d(TAG, "onDefaultNetworkChanged: " + network);
+
+            cancelHandleNetworkLostTimeout();
 
             try {
                 if (!mIsRunning) {
                     Log.d(TAG, "onDefaultNetworkChanged after exit");
                     return; // VPN has been shut down.
+                }
+
+                mActiveNetwork = network;
+
+                if (mSession != null && mMobikeEnabled) {
+                    // IKE session can schedule a migration event only when IKE AUTH is finished
+                    // and mMobikeEnabled is true.
+                    Log.d(
+                            TAG,
+                            "Migrate IKE Session with token "
+                                    + mCurrentToken
+                                    + " to network "
+                                    + network);
+                    mSession.setNetwork(network);
+                    return;
                 }
 
                 // Clear mInterface to prevent Ikev2VpnRunner being cleared when
@@ -2843,7 +2986,6 @@ public class Vpn {
                 // Without MOBIKE, we have no way to seamlessly migrate. Close on old
                 // (non-default) network, and start the new one.
                 resetIkeState();
-                mActiveNetwork = network;
 
                 // Get Ike options from IkeTunnelConnectionParams if it's available in the
                 // profile.
@@ -2866,11 +3008,14 @@ public class Vpn {
                 // TODO: Remove the need for adding two unused addresses with
                 // IPsec tunnels.
                 final InetAddress address = InetAddress.getLocalHost();
+
+                // When onChildOpened is called and transforms are applied, it is
+                // guaranteed that the underlying network is still "network", because the
+                // all the network switch events will be deferred before onChildOpened is
+                // called. Thus it is safe to build a mTunnelIface before IKE setup.
                 mTunnelIface =
                         mIpSecManager.createIpSecTunnelInterface(
-                                address /* unused */,
-                                address /* unused */,
-                                network);
+                                address /* unused */, address /* unused */, network);
                 NetdUtils.setInterfaceUp(mNetd, mTunnelIface.getInterfaceName());
 
                 final int token = ++mCurrentToken;
@@ -2904,7 +3049,9 @@ public class Vpn {
         /**
          * Handles loss of the default underlying network
          *
-         * <p>The Ikev2VpnRunner will kill the IKE session and reset the VPN.
+         * <p>If the IKE Session has mobility, Ikev2VpnRunner will schedule a teardown event with a
+         * delay so that the IKE Session can migrate if a new network is available soon. Otherwise,
+         * Ikev2VpnRunner will kill the IKE session and reset the VPN.
          *
          * <p>This method MUST always be called on the mExecutor thread in order to ensure
          * consistency of the Ikev2VpnRunner fields.
@@ -2921,7 +3068,54 @@ public class Vpn {
                 return;
             }
 
-            handleSessionLost(null);
+            if (mScheduledHandleNetworkLostTimeout != null
+                    && !mScheduledHandleNetworkLostTimeout.isCancelled()
+                    && !mScheduledHandleNetworkLostTimeout.isDone()) {
+                final IllegalStateException exception =
+                        new IllegalStateException(
+                                "Found a pending mScheduledHandleNetworkLostTimeout");
+                Log.i(
+                        TAG,
+                        "Unexpected error in onDefaultNetworkLost. Tear down session",
+                        exception);
+                handleSessionLost(exception);
+                return;
+            }
+
+            if (mSession != null && mMobikeEnabled) {
+                Log.d(
+                        TAG,
+                        "IKE Session has mobility. Delay handleSessionLost for losing network "
+                                + network
+                                + "on session with token "
+                                + mCurrentToken);
+
+                // Delay the teardown in case a new network will be available soon. For example,
+                // during handover between two WiFi networks, Android will disconnect from the
+                // first WiFi and then connects to the second WiFi.
+                mScheduledHandleNetworkLostTimeout =
+                        mExecutor.schedule(
+                                () -> {
+                                    handleSessionLost(null);
+                                },
+                                NETWORK_LOST_TIMEOUT_MS,
+                                TimeUnit.MILLISECONDS);
+            } else {
+                Log.d(TAG, "Call handleSessionLost for losing network " + network);
+                handleSessionLost(null);
+            }
+        }
+
+        private void cancelHandleNetworkLostTimeout() {
+            if (mScheduledHandleNetworkLostTimeout != null
+                    && !mScheduledHandleNetworkLostTimeout.isDone()) {
+                // It does not matter what to put in #cancel(boolean), because it is impossible
+                // that the task tracked by mScheduledHandleNetworkLostTimeout is
+                // in-progress since both that task and onDefaultNetworkChanged are submitted to
+                // mExecutor who has only one thread.
+                Log.d(TAG, "Cancel the task for handling network lost timeout");
+                mScheduledHandleNetworkLostTimeout.cancel(false /* mayInterruptIfRunning */);
+            }
         }
 
         /** Marks the state as FAILED, and disconnects. */
@@ -2943,6 +3137,8 @@ public class Vpn {
          * consistency of the Ikev2VpnRunner fields.
          */
         public void onSessionLost(int token, @Nullable Exception exception) {
+            Log.d(TAG, "onSessionLost() called for token " + token);
+
             if (!isActiveToken(token)) {
                 Log.d(TAG, "onSessionLost() called for obsolete token " + token);
 
@@ -2958,6 +3154,10 @@ public class Vpn {
         }
 
         private void handleSessionLost(@Nullable Exception exception) {
+            // Cancel mScheduledHandleNetworkLostTimeout if the session it is going to terminate is
+            // already terminated due to other failures.
+            cancelHandleNetworkLostTimeout();
+
             synchronized (Vpn.this) {
                 if (exception instanceof IkeProtocolException) {
                     final IkeProtocolException ikeException = (IkeProtocolException) exception;
@@ -3120,6 +3320,8 @@ public class Vpn {
                 mSession.kill(); // Kill here to make sure all resources are released immediately
                 mSession = null;
             }
+            mIkeConnectionInfo = null;
+            mMobikeEnabled = false;
         }
 
         /**
