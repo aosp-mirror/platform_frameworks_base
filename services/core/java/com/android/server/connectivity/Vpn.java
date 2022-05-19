@@ -2664,8 +2664,6 @@ public class Vpn {
             super(TAG);
             mProfile = profile;
             mIpSecManager = (IpSecManager) mContext.getSystemService(Context.IPSEC_SERVICE);
-            // Pass mExecutor into Ikev2VpnNetworkCallback and make sure that IkeV2VpnRunnerCallback
-            // will be called by the mExecutor thread.
             mNetworkCallback = new VpnIkev2Utils.Ikev2VpnNetworkCallback(TAG, this, mExecutor);
             mSessionKey = UUID.randomUUID().toString();
         }
