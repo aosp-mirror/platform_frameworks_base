@@ -29,7 +29,6 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.HeadsUpStatusBarView;
-import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -41,8 +40,8 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.util.ViewController;
 
-import java.util.ArrayList;
 import java.util.Optional;
+import java.util.ArrayList;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -62,17 +61,17 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
     private final NotificationIconAreaController mNotificationIconAreaController;
     private final HeadsUpManagerPhone mHeadsUpManager;
     private final NotificationStackScrollLayoutController mStackScrollerController;
+
     private final DarkIconDispatcher mDarkIconDispatcher;
     private final NotificationPanelViewController mNotificationPanelViewController;
-    private final Consumer<ExpandableNotificationRow> mSetTrackingHeadsUp =
-            this::setTrackingHeadsUp;
+    private final Consumer<ExpandableNotificationRow>
+            mSetTrackingHeadsUp = this::setTrackingHeadsUp;
     private final BiConsumer<Float, Float> mSetExpandedHeight = this::setAppearFraction;
     private final KeyguardBypassController mBypassController;
     private final StatusBarStateController mStatusBarStateController;
     private final CommandQueue mCommandQueue;
     private final NotificationWakeUpCoordinator mWakeUpCoordinator;
-    private final NotificationLockscreenUserManager mNotifLockscreenUserManager;
-    private final Runnable mRedactionChanged = this::updateRedaction;
+
     private final View mClockView;
     private final Optional<View> mOperatorNameViewOptional;
 
@@ -91,13 +90,6 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
             };
     private boolean mAnimationsEnabled = true;
     private final KeyguardStateController mKeyguardStateController;
-    private final StatusBarStateController.StateListener mStatusBarStateListener =
-            new StatusBarStateController.StateListener() {
-                @Override
-                public void onStatePostChange() {
-                    updateRedaction();
-                }
-            };
 
     @VisibleForTesting
     @Inject
@@ -106,7 +98,6 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
             HeadsUpManagerPhone headsUpManager,
             StatusBarStateController stateController,
             KeyguardBypassController bypassController,
-            NotificationLockscreenUserManager notifLockscreenUserManager,
             NotificationWakeUpCoordinator wakeUpCoordinator,
             DarkIconDispatcher darkIconDispatcher,
             KeyguardStateController keyguardStateController,
@@ -134,7 +125,6 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
         mClockView = clockView;
         mOperatorNameViewOptional = operatorNameViewOptional;
         mDarkIconDispatcher = darkIconDispatcher;
-        mNotifLockscreenUserManager = notifLockscreenUserManager;
 
         mView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override
@@ -166,8 +156,6 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
         mNotificationPanelViewController.setHeadsUpAppearanceController(this);
         mStackScrollerController.addOnExpandedHeightChangedListener(mSetExpandedHeight);
         mDarkIconDispatcher.addDarkReceiver(this);
-        mNotifLockscreenUserManager.addOnNeedsRedactionInPublicChangedListener(mRedactionChanged);
-        mStatusBarStateController.addCallback(mStatusBarStateListener);
     }
 
     @Override
@@ -179,9 +167,6 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
         mNotificationPanelViewController.setHeadsUpAppearanceController(null);
         mStackScrollerController.removeOnExpandedHeightChangedListener(mSetExpandedHeight);
         mDarkIconDispatcher.removeDarkReceiver(this);
-        mNotifLockscreenUserManager
-                .removeOnNeedsRedactionInPublicChangedListener(mRedactionChanged);
-        mStatusBarStateController.removeCallback(mStatusBarStateListener);
     }
 
     private void updateIsolatedIconLocation(boolean requireStateUpdate) {
@@ -193,19 +178,6 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
     public void onHeadsUpPinned(NotificationEntry entry) {
         updateTopEntry();
         updateHeader(entry);
-    }
-
-    private void updateRedaction() {
-        NotificationEntry showingEntry = mView.getShowingEntry();
-        if (showingEntry == null) {
-            return;
-        }
-        int notifUserId = showingEntry.getSbn().getUserId();
-        boolean redactSensitiveContent =
-                mNotifLockscreenUserManager.isLockscreenPublicMode(notifUserId)
-                        && mNotifLockscreenUserManager
-                                .sensitiveNotifsNeedRedactionInPublic(notifUserId);
-        mView.setRedactSensitiveContent(redactSensitiveContent);
     }
 
     private void updateTopEntry() {

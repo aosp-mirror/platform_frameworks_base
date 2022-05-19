@@ -53,13 +53,11 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.KeyguardNotificationSuppressor;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -108,10 +106,6 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     private BroadcastDispatcher mBroadcastDispatcher;
     @Mock
     private KeyguardStateController mKeyguardStateController;
-    @Mock
-    private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    @Mock
-    private OverviewProxyService mOverviewProxyService;
 
     private UserInfo mCurrentUser;
     private UserInfo mSecondaryUser;
@@ -125,6 +119,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
 
         int currentUserId = ActivityManager.getCurrentUser();
         mSettings = new FakeSettings();
@@ -217,7 +212,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
 
         // THEN current user's notification is redacted
-        assertTrue(mLockscreenUserManager.notifNeedsRedactionInPublic(mCurrentUserNotif));
+        assertTrue(mLockscreenUserManager.needsRedaction(mCurrentUserNotif));
     }
 
     @Test
@@ -228,7 +223,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
 
         // THEN current user's notification isn't redacted
-        assertFalse(mLockscreenUserManager.notifNeedsRedactionInPublic(mCurrentUserNotif));
+        assertFalse(mLockscreenUserManager.needsRedaction(mCurrentUserNotif));
     }
 
     @Test
@@ -239,7 +234,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
 
         // THEN work profile notification is redacted
-        assertTrue(mLockscreenUserManager.notifNeedsRedactionInPublic(mWorkProfileNotif));
+        assertTrue(mLockscreenUserManager.needsRedaction(mWorkProfileNotif));
     }
 
     @Test
@@ -250,7 +245,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
 
         // THEN work profile notification isn't redacted
-        assertFalse(mLockscreenUserManager.notifNeedsRedactionInPublic(mWorkProfileNotif));
+        assertFalse(mLockscreenUserManager.needsRedaction(mWorkProfileNotif));
     }
 
     @Test
@@ -265,11 +260,11 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
 
         // THEN the work profile notification doesn't need to be redacted
-        assertFalse(mLockscreenUserManager.notifNeedsRedactionInPublic(mWorkProfileNotif));
+        assertFalse(mLockscreenUserManager.needsRedaction(mWorkProfileNotif));
 
         // THEN the current user and secondary user notifications do need to be redacted
-        assertTrue(mLockscreenUserManager.notifNeedsRedactionInPublic(mCurrentUserNotif));
-        assertTrue(mLockscreenUserManager.notifNeedsRedactionInPublic(mSecondaryUserNotif));
+        assertTrue(mLockscreenUserManager.needsRedaction(mCurrentUserNotif));
+        assertTrue(mLockscreenUserManager.needsRedaction(mSecondaryUserNotif));
     }
 
     @Test
@@ -284,11 +279,11 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
 
         // THEN the work profile notification needs to be redacted
-        assertTrue(mLockscreenUserManager.notifNeedsRedactionInPublic(mWorkProfileNotif));
+        assertTrue(mLockscreenUserManager.needsRedaction(mWorkProfileNotif));
 
         // THEN the current user and secondary user notifications don't need to be redacted
-        assertFalse(mLockscreenUserManager.notifNeedsRedactionInPublic(mCurrentUserNotif));
-        assertFalse(mLockscreenUserManager.notifNeedsRedactionInPublic(mSecondaryUserNotif));
+        assertFalse(mLockscreenUserManager.needsRedaction(mCurrentUserNotif));
+        assertFalse(mLockscreenUserManager.needsRedaction(mSecondaryUserNotif));
     }
 
     @Test
@@ -303,7 +298,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
 
         // THEN the secondary profile notification still needs to be redacted because the current
         // user's setting takes precedence
-        assertTrue(mLockscreenUserManager.notifNeedsRedactionInPublic(mSecondaryUserNotif));
+        assertTrue(mLockscreenUserManager.needsRedaction(mSecondaryUserNotif));
     }
 
     @Test
@@ -423,12 +418,9 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
                     context,
                     mBroadcastDispatcher,
                     mDevicePolicyManager,
-                    mKeyguardUpdateMonitor,
-                    () -> mEntryManager,
-                    () -> mOverviewProxyService,
                     mUserManager,
-                    () -> mVisibilityProvider,
-                    () -> mNotifCollection,
+                    (() -> mVisibilityProvider),
+                    (() -> mNotifCollection),
                     mClickNotifier,
                     NotificationLockscreenUserManagerTest.this.mKeyguardManager,
                     mStatusBarStateController,

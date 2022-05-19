@@ -23,6 +23,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -32,12 +33,14 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.testing.AndroidTestingRunner;
 
+import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.SbnBuilder;
+import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
@@ -46,6 +49,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider;
 import com.android.systemui.statusbar.notification.collection.render.NodeController;
+import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -68,6 +72,7 @@ public class RankingCoordinatorTest extends SysuiTestCase {
     @Mock private NotifPipeline mNotifPipeline;
     @Mock private NodeController mAlertingHeaderController;
     @Mock private NodeController mSilentNodeController;
+    @Mock private SectionHeaderController mSilentHeaderController;
 
     @Captor private ArgumentCaptor<NotifFilter> mNotifFilterCaptor;
 
@@ -89,6 +94,7 @@ public class RankingCoordinatorTest extends SysuiTestCase {
                 mHighPriorityProvider,
                 mSectionStyleProvider,
                 mAlertingHeaderController,
+                mSilentHeaderController,
                 mSilentNodeController);
         mEntry = spy(new NotificationEntryBuilder().build());
         mEntry.setRanking(getRankingForUnfilteredNotif().build());
@@ -103,6 +109,25 @@ public class RankingCoordinatorTest extends SysuiTestCase {
         mSilentSectioner = mRankingCoordinator.getSilentSectioner();
         mMinimizedSectioner = mRankingCoordinator.getMinimizedSectioner();
         mSections.addAll(Arrays.asList(mAlertingSectioner, mSilentSectioner, mMinimizedSectioner));
+    }
+
+    @Test
+    public void testSilentHeaderClearableChildrenUpdate() {
+        ListEntry listEntry = new ListEntry(mEntry.getKey(), 0L) {
+            @Nullable
+            @Override
+            public NotificationEntry getRepresentativeEntry() {
+                return mEntry;
+            }
+        };
+        setRankingAmbient(false);
+        setSbnClearable(true);
+        mSilentSectioner.onEntriesUpdated(Arrays.asList(listEntry));
+        verify(mSilentHeaderController).setClearSectionEnabled(eq(true));
+
+        setSbnClearable(false);
+        mSilentSectioner.onEntriesUpdated(Arrays.asList(listEntry));
+        verify(mSilentHeaderController).setClearSectionEnabled(eq(false));
     }
 
     @Test
@@ -198,6 +223,46 @@ public class RankingCoordinatorTest extends SysuiTestCase {
         when(mHighPriorityProvider.isHighPriority(mEntry)).thenReturn(false);
         setRankingAmbient(false);
         assertInSection(mEntry, mSilentSectioner);
+    }
+
+    @Test
+    public void testClearableSilentSection() {
+        when(mHighPriorityProvider.isHighPriority(mEntry)).thenReturn(false);
+        setSbnClearable(true);
+        setRankingAmbient(false);
+        mSilentSectioner.onEntriesUpdated(Arrays.asList(mEntry));
+        verify(mSilentHeaderController).setClearSectionEnabled(eq(true));
+    }
+
+    @Test
+    public void testClearableMinimizedSection() {
+        when(mHighPriorityProvider.isHighPriority(mEntry)).thenReturn(false);
+        setSbnClearable(true);
+        setRankingAmbient(true);
+        mMinimizedSectioner.onEntriesUpdated(Arrays.asList(mEntry));
+        verify(mSilentHeaderController).setClearSectionEnabled(eq(true));
+    }
+
+    @Test
+    public void testNotClearableSilentSection() {
+        setSbnClearable(false);
+        when(mHighPriorityProvider.isHighPriority(mEntry)).thenReturn(false);
+        setRankingAmbient(false);
+        mSilentSectioner.onEntriesUpdated(Arrays.asList(mEntry));
+        mMinimizedSectioner.onEntriesUpdated(Arrays.asList(mEntry));
+        mAlertingSectioner.onEntriesUpdated(Arrays.asList(mEntry));
+        verify(mSilentHeaderController, times(2)).setClearSectionEnabled(eq(false));
+    }
+
+    @Test
+    public void testNotClearableMinimizedSection() {
+        setSbnClearable(false);
+        when(mHighPriorityProvider.isHighPriority(mEntry)).thenReturn(false);
+        setRankingAmbient(true);
+        mSilentSectioner.onEntriesUpdated(Arrays.asList(mEntry));
+        mMinimizedSectioner.onEntriesUpdated(Arrays.asList(mEntry));
+        mAlertingSectioner.onEntriesUpdated(Arrays.asList(mEntry));
+        verify(mSilentHeaderController, times(2)).setClearSectionEnabled(eq(false));
     }
 
     private void assertInSection(NotificationEntry entry, NotifSectioner section) {

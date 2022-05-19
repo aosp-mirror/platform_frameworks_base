@@ -61,7 +61,6 @@ import com.android.systemui.statusbar.policy.SmartReplyStateInflaterKt;
 import com.android.systemui.statusbar.policy.SmartReplyView;
 import com.android.systemui.statusbar.policy.dagger.RemoteInputViewSubcomponent;
 import com.android.systemui.util.Compile;
-import com.android.systemui.util.DumpUtilsKt;
 import com.android.systemui.wmshell.BubblesManager;
 
 import java.io.PrintWriter;
@@ -1995,33 +1994,22 @@ public class NotificationContentView extends FrameLayout implements Notification
         }
     }
 
-    public void dump(PrintWriter pwOriginal, String[] args) {
-        IndentingPrintWriter pw = DumpUtilsKt.asIndenting(pwOriginal);
+    public void dump(PrintWriter pw, String[] args) {
         pw.print("contentView visibility: " + getVisibility());
         pw.print(", alpha: " + getAlpha());
         pw.print(", clipBounds: " + getClipBounds());
         pw.print(", contentHeight: " + mContentHeight);
-        pw.println(", currentVisibleType: " + mVisibleType);
-        DumpUtilsKt.withIncreasedIndent(pw, () -> {
-            int[] visTypes = {
-                    VISIBLE_TYPE_CONTRACTED,
-                    VISIBLE_TYPE_EXPANDED,
-                    VISIBLE_TYPE_HEADSUP,
-                    VISIBLE_TYPE_SINGLELINE
-            };
-            for (int visType : visTypes) {
-                pw.print("visType: " + visType + " :: ");
-                View view = getViewForVisibleType(visType);
-                if (view != null) {
-                    pw.print("visibility: " + view.getVisibility());
-                    pw.print(", alpha: " + view.getAlpha());
-                    pw.print(", clipBounds: " + view.getClipBounds());
-                } else {
-                    pw.print("null");
-                }
-                pw.println();
-            }
-        });
+        pw.print(", visibleType: " + mVisibleType);
+        View view = getViewForVisibleType(mVisibleType);
+        pw.print(", visibleView ");
+        if (view != null) {
+            pw.print(" visibility: " + view.getVisibility());
+            pw.print(", alpha: " + view.getAlpha());
+            pw.print(", clipBounds: " + view.getClipBounds());
+        } else {
+            pw.print("null");
+        }
+        pw.println();
     }
 
     /** Add any existing SmartReplyView to the dump */
