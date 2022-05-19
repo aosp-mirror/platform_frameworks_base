@@ -611,6 +611,12 @@
          2 - Override the setting to never bypass keyguard -->
     <integer name="config_face_unlock_bypass_override">0</integer>
 
+    <!-- Which face help messages to surface when fingerprint is also enrolled.
+         Message ids correspond with the acquired ids in BiometricFaceConstants -->
+    <integer-array name="config_face_help_msgs_when_fingerprint_enrolled">
+        <!-- for example: <item>26</item> for FACE_ACQUIRED_MOUTH_COVERING_DETECTED -->
+    </integer-array>
+
     <!-- Whether the communal service should be enabled -->
     <bool name="config_communalServiceEnabled">false</bool>
 
