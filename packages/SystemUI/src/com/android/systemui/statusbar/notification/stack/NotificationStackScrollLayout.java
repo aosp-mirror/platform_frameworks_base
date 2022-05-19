@@ -191,7 +191,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private final boolean mDebugRemoveAnimation;
 
     private int mContentHeight;
-    private int mIntrinsicContentHeight;
+    private float mIntrinsicContentHeight;
     private int mCollapsedSize;
     private int mPaddingBetweenElements;
     private int mMaxTopPadding;
@@ -802,7 +802,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         drawDebugInfo(canvas, y, Color.MAGENTA,
                 /* label= */ "mAmbientState.getStackY() + mContentHeight = " + y);
 
-        y = (int) mAmbientState.getStackY() + mIntrinsicContentHeight;
+        y = (int) (mAmbientState.getStackY() + mIntrinsicContentHeight);
         drawDebugInfo(canvas, y, Color.YELLOW,
                 /* label= */ "mAmbientState.getStackY() + mIntrinsicContentHeight = " + y);
 
@@ -1473,7 +1473,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      */
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public int getIntrinsicContentHeight() {
-        return mIntrinsicContentHeight;
+        return (int) mIntrinsicContentHeight;
     }
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
@@ -2280,7 +2280,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private void updateContentHeight() {
         final float scrimTopPadding = mAmbientState.isOnKeyguard() ? 0 : mMinimumPaddings;
         final int shelfIntrinsicHeight = mShelf != null ? mShelf.getIntrinsicHeight() : 0;
-        final int height =
+        final float height =
                 (int) scrimTopPadding + (int) mNotificationStackSizeCalculator.computeHeight(
                         /* notificationStackScrollLayout= */ this, mMaxDisplayedNotifications,
                         shelfIntrinsicHeight);
@@ -2288,7 +2288,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
         // The topPadding can be bigger than the regular padding when qs is expanded, in that
         // state the maxPanelHeight and the contentHeight should be bigger
-        mContentHeight = height + Math.max(mIntrinsicPadding, mTopPadding) + mBottomPadding;
+        mContentHeight = (int) (height + Math.max(mIntrinsicPadding, mTopPadding) + mBottomPadding);
         updateScrollability();
         clampScrollPosition();
         updateStackPosition();
