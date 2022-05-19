@@ -379,6 +379,34 @@ public class QSTileImplTest extends SysuiTestCase {
         assertFalse(mTile.isListening());
     }
 
+    @Test
+    public void testStaleTriggeredWhileListening() throws Exception {
+        Object o = new Object();
+        mTile.clearRefreshes();
+
+        mTile.setListening(o, true); // +1 refresh
+        mTestableLooper.processAllMessages();
+
+        mTestableLooper.runWithLooper(() -> mTile.handleStale()); // +1 refresh
+        mTestableLooper.processAllMessages();
+
+        mTile.setListening(o, false);
+        mTestableLooper.processAllMessages();
+        assertFalse(mTile.isListening());
+        assertThat(mTile.mRefreshes).isEqualTo(2);
+    }
+
+    @Test
+    public void testStaleTriggeredWhileNotListening() throws Exception {
+        mTile.clearRefreshes();
+
+        mTestableLooper.runWithLooper(() -> mTile.handleStale()); // +1 refresh
+        mTestableLooper.processAllMessages();
+
+        assertFalse(mTile.isListening());
+        assertThat(mTile.mRefreshes).isEqualTo(1);
+    }
+
     private void assertEvent(UiEventLogger.UiEventEnum eventType,
             UiEventLoggerFake.FakeUiEvent fakeEvent) {
         assertEquals(eventType.getId(), fakeEvent.eventId);
@@ -418,9 +446,9 @@ public class QSTileImplTest extends SysuiTestCase {
             return mInvalid;
         }
     }
-
     private static class TileImpl extends QSTileImpl<QSTile.BooleanState> {
         boolean mClicked;
+        int mRefreshes = 0;
 
         protected TileImpl(
                 QSHost host,
@@ -453,6 +481,11 @@ public class QSTileImplTest extends SysuiTestCase {
 
         @Override
         protected void handleUpdateState(BooleanState state, Object arg) {
+            mRefreshes++;
+        }
+
+        void clearRefreshes() {
+            mRefreshes = 0;
         }
 
         @Override

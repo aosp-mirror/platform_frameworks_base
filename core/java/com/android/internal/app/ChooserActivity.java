@@ -16,6 +16,8 @@
 
 package com.android.internal.app;
 
+import static com.android.internal.util.LatencyTracker.ACTION_LOAD_SHARE_SHEET;
+
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.animation.Animator;
@@ -509,6 +511,8 @@ public class ChooserActivity extends ResolverActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         final long intentReceivedTime = System.currentTimeMillis();
+        mLatencyTracker.onActionStart(ACTION_LOAD_SHARE_SHEET);
+
         getChooserActivityLogger().logSharesheetTriggered();
         // This is the only place this value is being set. Effectively final.
         mIsAppPredictorComponentAvailable = isAppPredictionServiceAvailable();
@@ -1537,6 +1541,10 @@ public class ChooserActivity extends ResolverActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
+        if (isFinishing()) {
+            mLatencyTracker.onActionCancel(ACTION_LOAD_SHARE_SHEET);
+        }
 
         if (mRefinementResultReceiver != null) {
             mRefinementResultReceiver.destroy();
@@ -2665,6 +2673,7 @@ public class ChooserActivity extends ResolverActivity implements
         if (rebuildComplete) {
             getChooserActivityLogger().logSharesheetAppLoadComplete();
             maybeQueryAdditionalPostProcessingTargets(chooserListAdapter);
+            mLatencyTracker.onActionEnd(ACTION_LOAD_SHARE_SHEET);
         }
     }
 

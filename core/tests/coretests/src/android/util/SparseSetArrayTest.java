@@ -49,4 +49,27 @@ public class SparseSetArrayTest {
 
         assertThat(sparseSetArray.size()).isEqualTo(5);
     }
+
+    @Test
+    public void testCopyConstructor() {
+        final SparseSetArray<Integer> sparseSetArray = new SparseSetArray<>();
+
+        for (int i = 0; i < 10; ++i) {
+            for (int j = 100; j < 110; ++j) {
+                sparseSetArray.add(i, j);
+            }
+        }
+        final SparseSetArray<Integer> sparseSetArrayCopy = new SparseSetArray<>(sparseSetArray);
+        assertThat(sparseSetArray.size()).isEqualTo(sparseSetArrayCopy.size());
+        for (int i = 0; i < sparseSetArray.size(); ++i) {
+            final ArraySet<Integer> array = sparseSetArray.get(i);
+            final ArraySet<Integer> arrayCopy = sparseSetArrayCopy.get(i);
+            assertThat(array).isNotNull();
+            assertThat(arrayCopy).isNotNull();
+            assertThat(array.size()).isEqualTo(arrayCopy.size());
+            for (int j = 0; j < array.size(); j++) {
+                assertThat(array.valueAt(j)).isEqualTo(arrayCopy.valueAt(j));
+            }
+        }
+    }
 }
