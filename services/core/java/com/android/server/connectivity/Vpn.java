@@ -2388,6 +2388,9 @@ public class Vpn {
                         return; // VPN has been shut down.
                     }
 
+                    // Clear mInterface to prevent Ikev2VpnRunner being cleared when
+                    // interfaceRemoved() is called.
+                    mInterface = null;
                     // Without MOBIKE, we have no way to seamlessly migrate. Close on old
                     // (non-default) network, and start the new one.
                     resetIkeState();
