@@ -832,31 +832,47 @@ public final class UsbDescriptorParser {
         return getInputHeadsetProbability() >= IN_HEADSET_TRIGGER;
     }
 
+    // TODO: Up/Downmix process descriptor is not yet parsed, which may affect the result here.
+    private int getMaximumChannelCount() {
+        int maxChannelCount = 0;
+        for (UsbDescriptor descriptor : mDescriptors) {
+            if (descriptor instanceof UsbAudioChannelCluster) {
+                maxChannelCount = Math.max(maxChannelCount,
+                        ((UsbAudioChannelCluster) descriptor).getChannelCount());
+            }
+        }
+        return maxChannelCount;
+    }
+
     /**
      * @hide
      */
-    public float getOutputHeadsetProbability() {
+    public float getOutputHeadsetLikelihood() {
         if (hasMIDIInterface()) {
             return 0.0f;
         }
 
-        float probability = 0.0f;
+        float likelihood = 0.0f;
         ArrayList<UsbDescriptor> acDescriptors;
 
         // Look for a "speaker"
         boolean hasSpeaker = false;
+        boolean hasAssociatedInputTerminal = false;
+        boolean hasHeadphoneOrHeadset = false;
         acDescriptors =
                 getACInterfaceDescriptors(UsbACInterface.ACI_OUTPUT_TERMINAL,
                         UsbACInterface.AUDIO_AUDIOCONTROL);
         for (UsbDescriptor descriptor : acDescriptors) {
             if (descriptor instanceof UsbACTerminal) {
                 UsbACTerminal outDescr = (UsbACTerminal) descriptor;
-                if (outDescr.getTerminalType() == UsbTerminalTypes.TERMINAL_OUT_SPEAKER
-                        || outDescr.getTerminalType()
-                            == UsbTerminalTypes.TERMINAL_OUT_HEADPHONES
-                        || outDescr.getTerminalType() == UsbTerminalTypes.TERMINAL_BIDIR_HEADSET) {
+                if (outDescr.getTerminalType() == UsbTerminalTypes.TERMINAL_OUT_SPEAKER) {
                     hasSpeaker = true;
-                    break;
+                    if (outDescr.getAssocTerminal() != 0x0) {
+                        hasAssociatedInputTerminal = true;
+                    }
+                } else if (outDescr.getTerminalType() == UsbTerminalTypes.TERMINAL_OUT_HEADPHONES
+                        || outDescr.getTerminalType() == UsbTerminalTypes.TERMINAL_BIDIR_HEADSET) {
+                    hasHeadphoneOrHeadset = true;
                 }
             } else {
                 Log.w(TAG, "Undefined Audio Output terminal l: " + descriptor.getLength()
@@ -864,15 +880,27 @@ public final class UsbDescriptorParser {
             }
         }
 
-        if (hasSpeaker) {
-            probability += 0.75f;
+        if (hasHeadphoneOrHeadset) {
+            likelihood += 0.75f;
+        } else if (hasSpeaker) {
+            // The device only reports output terminal as speaker. Try to figure out if the device
+            // is a headset or not by checking if it has associated input terminal and if multiple
+            // channels are supported or not.
+            likelihood += 0.5f;
+            if (hasAssociatedInputTerminal) {
+                likelihood += 0.25f;
+            }
+            if (getMaximumChannelCount() > 2) {
+                // When multiple channels are supported, it is less likely to be a headset.
+                likelihood -= 0.25f;
+            }
         }
 
-        if (hasSpeaker && hasHIDInterface()) {
-            probability += 0.25f;
+        if ((hasHeadphoneOrHeadset || hasSpeaker) && hasHIDInterface()) {
+            likelihood += 0.25f;
         }
 
-        return probability;
+        return likelihood;
     }
 
     /**
@@ -882,7 +910,7 @@ public final class UsbDescriptorParser {
      * to count on the peripheral being a headset.
      */
     public boolean isOutputHeadset() {
-        return getOutputHeadsetProbability() >= OUT_HEADSET_TRIGGER;
+        return getOutputHeadsetLikelihood() >= OUT_HEADSET_TRIGGER;
     }
 
     /**
