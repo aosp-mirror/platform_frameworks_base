@@ -5408,6 +5408,16 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return mOverlayLayer;
     }
 
+    SurfaceControl[] findRoundedCornerOverlays() {
+        List<SurfaceControl> roundedCornerOverlays = new ArrayList<>();
+        for (WindowToken token : mTokenMap.values()) {
+            if (token.mRoundedCornerOverlay) {
+                roundedCornerOverlays.add(token.mSurfaceControl);
+            }
+        }
+        return roundedCornerOverlays.toArray(new SurfaceControl[0]);
+    }
+
     /**
      * Updates the display's system gesture exclusion.
      *
