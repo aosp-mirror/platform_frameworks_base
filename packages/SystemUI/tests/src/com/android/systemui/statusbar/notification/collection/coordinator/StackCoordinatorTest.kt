@@ -15,7 +15,6 @@
  */
 package com.android.systemui.statusbar.notification.collection.coordinator
 
-import android.os.UserHandle
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
@@ -44,11 +43,6 @@ import org.mockito.Mockito.`when` as whenever
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper
 class StackCoordinatorTest : SysuiTestCase() {
-
-    companion object {
-        const val NOTIF_USER_ID = 0
-    }
-
     private lateinit var coordinator: StackCoordinator
     private lateinit var afterRenderListListener: OnAfterRenderListListener
 
@@ -67,10 +61,7 @@ class StackCoordinatorTest : SysuiTestCase() {
         afterRenderListListener = withArgCaptor {
             verify(pipeline).addOnAfterRenderListListener(capture())
         }
-        entry = NotificationEntryBuilder()
-                .setSection(section)
-                .setUser(UserHandle.of(NOTIF_USER_ID))
-                .build()
+        entry = NotificationEntryBuilder().setSection(section).build()
     }
 
     @Test
@@ -83,31 +74,13 @@ class StackCoordinatorTest : SysuiTestCase() {
     fun testSetNotificationStats_clearableAlerting() {
         whenever(section.bucket).thenReturn(BUCKET_ALERTING)
         afterRenderListListener.onAfterRenderList(listOf(entry), stackController)
-        verify(stackController)
-                .setNotifStats(
-                        NotifStats(
-                                1,
-                                false,
-                                true,
-                                false,
-                                false,
-                                setOf(NOTIF_USER_ID),
-                                emptySet()))
+        verify(stackController).setNotifStats(NotifStats(1, false, true, false, false))
     }
 
     @Test
     fun testSetNotificationStats_clearableSilent() {
         whenever(section.bucket).thenReturn(BUCKET_SILENT)
         afterRenderListListener.onAfterRenderList(listOf(entry), stackController)
-        verify(stackController)
-                .setNotifStats(
-                        NotifStats(
-                                1,
-                                false,
-                                false,
-                                false,
-                                true,
-                                emptySet(),
-                                setOf(NOTIF_USER_ID)))
+        verify(stackController).setNotifStats(NotifStats(1, false, false, false, true))
     }
 }
