@@ -139,6 +139,9 @@ public interface ServiceProvider {
     void scheduleInternalCleanup(int sensorId, int userId,
             @Nullable ClientMonitorCallback callback);
 
+    void scheduleInternalCleanup(int sensorId, int userId,
+            @Nullable ClientMonitorCallback callback, boolean favorHalEnrollments);
+
     void dumpProtoState(int sensorId, @NonNull ProtoOutputStream proto,
             boolean clearSchedulerBuffer);
 
