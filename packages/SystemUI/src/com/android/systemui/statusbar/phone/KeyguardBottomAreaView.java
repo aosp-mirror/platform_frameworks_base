@@ -1195,10 +1195,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         public void onWalletCardsRetrieved(@NonNull GetWalletCardsResponse response) {
             mHasCard = !response.getWalletCards().isEmpty();
             Drawable tileIcon = mQuickAccessWalletController.getWalletClient().getTileIcon();
+            if (tileIcon != null) {
+                mWalletButton.setImageDrawable(tileIcon);
+            }
             post(() -> {
-                if (tileIcon != null) {
-                    mWalletButton.setImageDrawable(tileIcon);
-                }
                 updateWalletVisibility();
                 updateAffordanceColors();
             });
