@@ -957,8 +957,8 @@ class ActivityStarter {
                     && sourceRecord.info.applicationInfo.uid != aInfo.applicationInfo.uid) {
                 try {
                     intent.addCategory(Intent.CATEGORY_VOICE);
-                    if (!mService.getPackageManager().activitySupportsIntent(
-                            intent.getComponent(), intent, resolvedType)) {
+                    if (!mService.getPackageManager().activitySupportsIntentAsUser(
+                            intent.getComponent(), intent, resolvedType, userId)) {
                         Slog.w(TAG, "Activity being started in current voice task does not support "
                                 + "voice: " + intent);
                         err = ActivityManager.START_NOT_VOICE_COMPATIBLE;
@@ -974,8 +974,8 @@ class ActivityStarter {
             // If the caller is starting a new voice session, just make sure the target
             // is actually allowing it to run this way.
             try {
-                if (!mService.getPackageManager().activitySupportsIntent(intent.getComponent(),
-                        intent, resolvedType)) {
+                if (!mService.getPackageManager().activitySupportsIntentAsUser(
+                        intent.getComponent(), intent, resolvedType, userId)) {
                     Slog.w(TAG,
                             "Activity being started in new voice task does not support: " + intent);
                     err = ActivityManager.START_NOT_VOICE_COMPATIBLE;

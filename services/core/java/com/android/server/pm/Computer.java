@@ -349,8 +349,9 @@ public interface Computer extends PackageDataSnapshot {
 
     int getTargetSdkVersion(@NonNull String packageName);
 
-    boolean activitySupportsIntent(@NonNull ComponentName resolveComponentName,
-            @NonNull ComponentName component, @NonNull Intent intent, String resolvedType);
+    boolean activitySupportsIntentAsUser(@NonNull ComponentName resolveComponentName,
+            @NonNull ComponentName component, @NonNull Intent intent, String resolvedType,
+            int userId);
 
     @Nullable
     ActivityInfo getReceiverInfo(@NonNull ComponentName component,

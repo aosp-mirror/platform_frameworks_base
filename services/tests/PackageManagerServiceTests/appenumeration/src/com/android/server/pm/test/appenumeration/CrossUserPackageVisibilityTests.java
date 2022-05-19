@@ -30,7 +30,9 @@ import static org.junit.Assert.assertThrows;
 
 import android.app.AppGlobals;
 import android.app.Instrumentation;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageManager;
 import android.content.pm.KeySet;
@@ -75,6 +77,11 @@ public class CrossUserPackageVisibilityTests {
             new File(TEST_DATA_DIR, "AppEnumerationCrossUserPackageVisibilityTestApp.apk");
     private static final File SHARED_USER_TEST_APK_FILE =
             new File(TEST_DATA_DIR, "AppEnumerationSharedUserTestApp.apk");
+
+    private static final String ACTION_CROSS_USER_TEST =
+            "com.android.appenumeration.action.CROSS_USER_TEST";
+    private static final ComponentName TEST_ACTIVITY_COMPONENT_NAME = new ComponentName(
+            CROSS_USER_TEST_PACKAGE_NAME, "com.android.appenumeration.testapp.DummyActivity");
 
     private static final long DEFAULT_TIMEOUT_MS = 5000;
 
@@ -238,6 +245,23 @@ public class CrossUserPackageVisibilityTests {
 
         assertThat(movePackage(CROSS_USER_TEST_PACKAGE_NAME, null /* volumeUuid */))
                 .isEqualTo(MOVE_FAILED_DOESNT_EXIST);
+    }
+
+    @Test
+    public void testActivitySupportsIntentAsUser_cannotDetectStubPkg() throws Exception {
+        assertThat(mIPackageManager.activitySupportsIntentAsUser(
+                TEST_ACTIVITY_COMPONENT_NAME,
+                new Intent(ACTION_CROSS_USER_TEST),
+                null,
+                mCurrentUser.id())).isFalse();
+
+        installPackageForUser(CROSS_USER_TEST_APK_FILE, mOtherUser);
+
+        assertThat(mIPackageManager.activitySupportsIntentAsUser(
+                TEST_ACTIVITY_COMPONENT_NAME,
+                new Intent(ACTION_CROSS_USER_TEST),
+                null,
+                mCurrentUser.id())).isFalse();
     }
 
     private boolean clearApplicationUserData(String packageName) throws Exception {

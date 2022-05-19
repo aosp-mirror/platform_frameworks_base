@@ -148,10 +148,10 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
 
     @Override
     @Deprecated
-    public final boolean activitySupportsIntent(ComponentName component, Intent intent,
-            String resolvedType) {
-        return snapshot().activitySupportsIntent(mResolveComponentName, component, intent,
-                resolvedType);
+    public final boolean activitySupportsIntentAsUser(ComponentName component, Intent intent,
+            String resolvedType, int userId) {
+        return snapshot().activitySupportsIntentAsUser(mResolveComponentName, component, intent,
+                resolvedType, userId);
     }
 
     @Override

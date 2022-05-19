@@ -18,5 +18,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
      package="com.android.appenumeration.crossuserpackagevisibility">
     <application android:testOnly="true">
+        <activity android:name="com.android.appenumeration.testapp.DummyActivity"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="com.android.appenumeration.action.CROSS_USER_TEST"/>
+            </intent-filter>
+        </activity>
     </application>
 </manifest>

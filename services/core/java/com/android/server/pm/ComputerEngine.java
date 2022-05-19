@@ -3821,14 +3821,16 @@ public class ComputerEngine implements Computer {
     }
 
     @Override
-    public boolean activitySupportsIntent(@NonNull ComponentName resolveComponentName,
-            @NonNull ComponentName component, @NonNull Intent intent, String resolvedType) {
+    public boolean activitySupportsIntentAsUser(@NonNull ComponentName resolveComponentName,
+            @NonNull ComponentName component, @NonNull Intent intent, String resolvedType,
+            int userId) {
+        final int callingUid = Binder.getCallingUid();
+        enforceCrossUserPermission(callingUid, userId, false /* requireFullPermission */,
+                false /* checkShell */, "activitySupportsIntentAsUser");
         if (component.equals(resolveComponentName)) {
             // The resolver supports EVERYTHING!
             return true;
         }
-        final int callingUid = Binder.getCallingUid();
-        final int callingUserId = UserHandle.getUserId(callingUid);
         ParsedActivity a = mComponentResolver.getActivity(component);
         if (a == null) {
             return false;
@@ -3838,7 +3840,7 @@ public class ComputerEngine implements Computer {
             return false;
         }
         if (shouldFilterApplication(
-                ps, callingUid, component, TYPE_ACTIVITY, callingUserId)) {
+                ps, callingUid, component, TYPE_ACTIVITY, userId, true /* filterUninstall */)) {
             return false;
         }
         for (int i=0; i< a.getIntents().size(); i++) {

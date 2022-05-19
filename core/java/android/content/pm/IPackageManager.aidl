@@ -89,8 +89,8 @@ interface IPackageManager {
 
     ActivityInfo getActivityInfo(in ComponentName className, long flags, int userId);
 
-    boolean activitySupportsIntent(in ComponentName className, in Intent intent,
-            String resolvedType);
+    boolean activitySupportsIntentAsUser(in ComponentName className, in Intent intent,
+            String resolvedType, int userId);
 
     ActivityInfo getReceiverInfo(in ComponentName className, long flags, int userId);
 
