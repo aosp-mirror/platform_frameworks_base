@@ -209,7 +209,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: showMovementMenuOnly()", TAG);
         }
-        mInMoveMode = true;
+        setInMoveMode(true);
         mCloseAfterExitMoveMenu = true;
         showMenuInternal();
     }
@@ -219,7 +219,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         if (DEBUG) {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE, "%s: showMenu()", TAG);
         }
-        mInMoveMode = false;
+        setInMoveMode(false);
         mCloseAfterExitMoveMenu = false;
         showMenuInternal();
     }
@@ -293,6 +293,17 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         return mInMoveMode;
     }
 
+    private void setInMoveMode(boolean moveMode) {
+        if (mInMoveMode == moveMode) {
+            return;
+        }
+
+        mInMoveMode = moveMode;
+        if (mDelegate != null) {
+            mDelegate.onInMoveModeChanged();
+        }
+    }
+
     @Override
     public void onEnterMoveMode() {
         if (DEBUG) {
@@ -300,7 +311,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
                     "%s: onEnterMoveMode - %b, close when exiting move menu: %b", TAG, mInMoveMode,
                     mCloseAfterExitMoveMenu);
         }
-        mInMoveMode = true;
+        setInMoveMode(true);
         mPipMenuView.showMoveMenu(mDelegate.getPipGravity());
     }
 
@@ -312,13 +323,13 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
                     mCloseAfterExitMoveMenu);
         }
         if (mCloseAfterExitMoveMenu) {
-            mInMoveMode = false;
+            setInMoveMode(false);
             mCloseAfterExitMoveMenu = false;
             closeMenu();
             return true;
         }
         if (mInMoveMode) {
-            mInMoveMode = false;
+            setInMoveMode(false);
             mPipMenuView.showButtonsMenu();
             return true;
         }

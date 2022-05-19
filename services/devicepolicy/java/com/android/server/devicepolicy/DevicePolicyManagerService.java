@@ -536,7 +536,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     // to decide whether an existing policy in the {@link #DEVICE_POLICIES_XML} needs to
     // be upgraded. See {@link PolicyVersionUpgrader} on instructions how to add an upgrade
     // step.
-    static final int DPMS_VERSION = 2;
+    static final int DPMS_VERSION = 3;
 
     static {
         SECURE_SETTINGS_ALLOWLIST = new ArraySet<>();
@@ -1908,35 +1908,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 if (userHandle == UserHandle.USER_SYSTEM) {
                     mStateCache.setDeviceProvisioned(policy.mUserSetupComplete);
                 }
-
-                migrateDeviceOwnerProtectedPackagesToOwners(userHandle, policy);
             }
             return policy;
-        }
-    }
-
-    /**
-     * Only used by {@link #getUserData(int)} to migrate <b>existing</b> device owner protected
-     * packages that were stored in {@link DevicePolicyData#mUserControlDisabledPackages} to
-     * {@link Owners} because the device owner protected packages are now stored on a per device
-     * owner basis instead of on a per user basis.
-     *
-     * Any calls to {@link #setUserControlDisabledPackages(ComponentName, List)} would now store
-     * the device owner protected packages in {@link Owners} instead of {@link DevicePolicyData}.
-     * @param userHandle The device owner user
-     * @param policy The policy data of the device owner user
-     */
-    private void migrateDeviceOwnerProtectedPackagesToOwners(
-            int userHandle, DevicePolicyData policy) {
-        ComponentName deviceOwnerComponent = getOwnerComponent(userHandle);
-        if (isDeviceOwner(deviceOwnerComponent, userHandle)
-                && !policy.mUserControlDisabledPackages.isEmpty()) {
-            mOwners.setDeviceOwnerProtectedPackages(
-                    deviceOwnerComponent.getPackageName(),
-                    policy.mUserControlDisabledPackages);
-
-            policy.mUserControlDisabledPackages = new ArrayList<>();
-            saveSettingsLocked(userHandle);
         }
     }
 
@@ -1964,6 +1937,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             updatePasswordQualityCacheForUserGroup(userHandle);
             mPolicyCache.onUserRemoved(userHandle);
 
+            if (isManagedProfile(userHandle)) {
+                clearManagedProfileApnUnchecked();
+            }
             isOrgOwned = mOwners.isProfileOwnerOfOrganizationOwnedDevice(userHandle);
 
             mOwners.removeProfileOwner(userHandle);
@@ -3143,6 +3119,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             deleteTransferOwnershipBundleLocked(metadata.userId);
         }
         updateSystemUpdateFreezePeriodsRecord(/* saveIfChanged */ true);
+        pushUserControlDisabledPackagesLocked(metadata.userId);
     }
 
     private void maybeLogStart() {
@@ -3182,6 +3159,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     void handleStartUser(int userId) {
         synchronized (getLockObject()) {
             pushScreenCapturePolicy(userId);
+            pushUserControlDisabledPackagesLocked(userId);
         }
         pushUserRestrictions(userId);
         // When system user is started (device boot), load cache for all users.
@@ -3202,6 +3180,24 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         updateNetworkPreferenceForUser(userId, preferentialNetworkServiceConfigs);
 
         startOwnerService(userId, "start-user");
+    }
+
+    void pushUserControlDisabledPackagesLocked(int userId) {
+        final int targetUserId;
+        final ActiveAdmin owner;
+        if (getDeviceOwnerUserIdUncheckedLocked() == userId) {
+            owner = getDeviceOwnerAdminLocked();
+            targetUserId = UserHandle.USER_ALL;
+        } else {
+            owner = getProfileOwnerAdminLocked(userId);
+            targetUserId = userId;
+        }
+
+        List<String> protectedPackages = (owner == null || owner.protectedPackages == null)
+                ? Collections.emptyList() : owner.protectedPackages;
+        mInjector.binderWithCleanCallingIdentity(() ->
+                mInjector.getPackageManagerInternal().setOwnerProtectedPackages(
+                        targetUserId, protectedPackages));
     }
 
     @Override
@@ -8513,6 +8509,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    private boolean isDeviceOwnerUserId(int userId) {
+        synchronized (getLockObject()) {
+            return mOwners.getDeviceOwnerComponent() != null
+                    && mOwners.getDeviceOwnerUserId() == userId;
+        }
+    }
+
     private boolean isDeviceOwnerPackage(String packageName, int userId) {
         synchronized (getLockObject()) {
             return mOwners.hasDeviceOwner()
@@ -8760,6 +8763,18 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    private void clearManagedProfileApnUnchecked() {
+        if (!mHasTelephonyFeature) {
+            return;
+        }
+        final List<ApnSetting> apns = getOverrideApnsUnchecked();
+        for (ApnSetting apn : apns) {
+            if (apn.getApnTypeBitmask() == ApnSetting.TYPE_ENTERPRISE) {
+                removeOverrideApnUnchecked(apn.getId());
+            }
+        }
+    }
+
     private void clearDeviceOwnerLocked(ActiveAdmin admin, int userId) {
         mDeviceAdminServiceController.stopServiceForOwner(userId, "clear-device-owner");
 
@@ -8795,6 +8810,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         setNetworkLoggingActiveInternal(false);
         deleteTransferOwnershipBundleLocked(userId);
         toggleBackupServiceActive(UserHandle.USER_SYSTEM, true);
+        pushUserControlDisabledPackagesLocked(userId);
     }
 
     private void clearApplicationRestrictions(int userId) {
@@ -8979,7 +8995,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         policy.mLockTaskPackages.clear();
         updateLockTaskPackagesLocked(policy.mLockTaskPackages, userId);
         policy.mLockTaskFeatures = DevicePolicyManager.LOCK_TASK_FEATURE_NONE;
-        policy.mUserControlDisabledPackages.clear();
         saveSettingsLocked(userId);
 
         try {
@@ -12100,6 +12115,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    private boolean isManagedProfileOwner(CallerIdentity caller) {
+        return isProfileOwner(caller) && isManagedProfile(caller.getUserId());
+    }
+
     private boolean isDefaultSupervisor(CallerIdentity caller) {
         final String supervisor = mContext.getResources().getString(
                 com.android.internal.R.string.config_defaultSupervisionProfileOwnerComponent);
@@ -12117,10 +12136,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
         final CallerIdentity caller = getCallerIdentity();
-        Preconditions.checkCallAuthorization(isProfileOwner(caller)
+        Preconditions.checkCallAuthorization((isProfileOwner(caller)
+                        && isManagedProfile(caller.getUserId()))
                         || isDefaultDeviceOwner(caller),
-                "Caller is not profile owner or device owner;"
-                        + " only profile owner or device owner may control the preferential"
+                "Caller is not managed profile owner or device owner;"
+                        + " only managed profile owner or device owner may control the preferential"
                         + " network service");
         synchronized (getLockObject()) {
             final ActiveAdmin requiredAdmin = getDeviceOrProfileOwnerAdminLocked(
@@ -12147,11 +12167,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         final CallerIdentity caller = getCallerIdentity();
-        Preconditions.checkCallAuthorization(isProfileOwner(caller)
+        Preconditions.checkCallAuthorization((isProfileOwner(caller)
+                        && isManagedProfile(caller.getUserId()))
                         || isDefaultDeviceOwner(caller),
-                "Caller is not profile owner or device owner;"
-                        + " only profile owner or device owner may retrieve the preferential"
-                        + " network service configurations");
+                "Caller is not managed profile owner or device owner;"
+                        + " only managed profile owner or device owner may retrieve the "
+                        + "preferential network service configurations");
         synchronized (getLockObject()) {
             final ActiveAdmin requiredAdmin = getDeviceOrProfileOwnerAdminLocked(
                     caller.getUserId());
@@ -16298,7 +16319,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final CallerIdentity caller = getCallerIdentity(who);
         if (apnSetting.getApnTypeBitmask() == ApnSetting.TYPE_ENTERPRISE) {
             Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller)
-                    || isProfileOwner(caller));
+                    || isManagedProfileOwner(caller));
         } else {
             Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller));
         }
@@ -16326,7 +16347,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (apn != null && apn.getApnTypeBitmask() == ApnSetting.TYPE_ENTERPRISE
                 && apnSetting.getApnTypeBitmask() == ApnSetting.TYPE_ENTERPRISE) {
             Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller)
-                    || isProfileOwner(caller));
+                    || isManagedProfileOwner(caller));
         } else {
             Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller));
         }
@@ -16354,7 +16375,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         ApnSetting apn = getApnSetting(apnId);
         if (apn != null && apn.getApnTypeBitmask() == ApnSetting.TYPE_ENTERPRISE) {
             Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller)
-                    || isProfileOwner(caller));
+                    || isManagedProfileOwner(caller));
         } else {
             Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller));
         }
@@ -16399,8 +16420,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Objects.requireNonNull(who, "ComponentName is null");
         final CallerIdentity caller = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller));
-        return getOverrideApnsUnchecked();
+        Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller)
+                || isManagedProfileOwner(caller));
+        List<ApnSetting> apnSettings = getOverrideApnsUnchecked();
+        if (isProfileOwner(caller)) {
+            List<ApnSetting> apnSettingList = new ArrayList<>();
+            for (ApnSetting apnSetting : apnSettings) {
+                if (apnSetting.getApnTypeBitmask() == ApnSetting.TYPE_ENTERPRISE) {
+                    apnSettingList.add(apnSetting);
+                }
+            }
+            return apnSettingList;
+        } else {
+            return apnSettings;
+        }
     }
 
     private List<ApnSetting> getOverrideApnsUnchecked() {
@@ -16970,19 +17003,25 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Objects.requireNonNull(who, "ComponentName is null");
         Objects.requireNonNull(packages, "packages is null");
         final CallerIdentity caller = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(
-                isDefaultDeviceOwner(caller) || isFinancedDeviceOwner(caller));
+        Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller) || isProfileOwner(caller)
+                || isFinancedDeviceOwner(caller));
         checkCanExecuteOrThrowUnsafe(
                 DevicePolicyManager.OPERATION_SET_USER_CONTROL_DISABLED_PACKAGES);
 
         synchronized (getLockObject()) {
-            mOwners.setDeviceOwnerProtectedPackages(who.getPackageName(), packages);
-            DevicePolicyEventLogger
-                    .createEvent(DevicePolicyEnums.SET_USER_CONTROL_DISABLED_PACKAGES)
-                    .setAdmin(who)
-                    .setStrings(packages.toArray(new String[packages.size()]))
-                    .write();
+            ActiveAdmin owner = getDeviceOrProfileOwnerAdminLocked(caller.getUserId());
+            if (!Objects.equals(owner.protectedPackages, packages)) {
+                owner.protectedPackages = packages.isEmpty() ? null : packages;
+                saveSettingsLocked(caller.getUserId());
+                pushUserControlDisabledPackagesLocked(caller.getUserId());
+            }
         }
+
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_USER_CONTROL_DISABLED_PACKAGES)
+                .setAdmin(who)
+                .setStrings(packages.toArray(new String[packages.size()]))
+                .write();
     }
 
     @Override
@@ -16990,11 +17029,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Objects.requireNonNull(who, "ComponentName is null");
 
         final CallerIdentity caller = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(
-                isDefaultDeviceOwner(caller) || isFinancedDeviceOwner(caller));
+        Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller) || isProfileOwner(caller)
+                || isFinancedDeviceOwner(caller));
 
         synchronized (getLockObject()) {
-            return mOwners.getDeviceOwnerProtectedPackages(who.getPackageName());
+            ActiveAdmin deviceOwner = getDeviceOrProfileOwnerAdminLocked(caller.getUserId());
+            return deviceOwner.protectedPackages != null
+                    ? deviceOwner.protectedPackages : Collections.emptyList();
         }
     }
 
@@ -18266,7 +18307,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private void updateNetworkPreferenceForUser(int userId,
             List<PreferentialNetworkServiceConfig> preferentialNetworkServiceConfigs) {
-        if (!isManagedProfile(userId)) {
+        if (!isManagedProfile(userId) && !isDeviceOwnerUserId(userId)) {
             return;
         }
         List<ProfileNetworkPreference> preferences = new ArrayList<>();

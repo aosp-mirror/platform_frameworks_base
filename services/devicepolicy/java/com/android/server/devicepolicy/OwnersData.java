@@ -91,8 +91,10 @@ class OwnersData {
     // Device owner type for a managed device.
     final ArrayMap<String, Integer> mDeviceOwnerTypes = new ArrayMap<>();
 
-    final ArrayMap<String, List<String>> mDeviceOwnerProtectedPackages = new ArrayMap<>();
-
+    /** @deprecated moved to {@link ActiveAdmin#protectedPackages}. */
+    @Deprecated
+    @Nullable
+    ArrayMap<String, List<String>> mDeviceOwnerProtectedPackages;
 
     // Internal state for the profile owner packages.
     final ArrayMap<Integer, OwnerInfo> mProfileOwners = new ArrayMap<>();
@@ -366,21 +368,6 @@ class OwnersData {
                 }
             }
 
-            if (!mDeviceOwnerProtectedPackages.isEmpty()) {
-                for (ArrayMap.Entry<String, List<String>> entry :
-                        mDeviceOwnerProtectedPackages.entrySet()) {
-                    List<String> protectedPackages = entry.getValue();
-
-                    out.startTag(null, TAG_DEVICE_OWNER_PROTECTED_PACKAGES);
-                    out.attribute(null, ATTR_PACKAGE, entry.getKey());
-                    out.attributeInt(null, ATTR_SIZE, protectedPackages.size());
-                    for (int i = 0, size = protectedPackages.size(); i < size; i++) {
-                        out.attribute(null, ATTR_NAME + i, protectedPackages.get(i));
-                    }
-                    out.endTag(null, TAG_DEVICE_OWNER_PROTECTED_PACKAGES);
-                }
-            }
-
             if (mSystemUpdatePolicy != null) {
                 out.startTag(null, TAG_SYSTEM_UPDATE_POLICY);
                 mSystemUpdatePolicy.saveToXml(out);
@@ -444,12 +431,16 @@ class OwnersData {
                             null, ATTR_DEVICE_OWNER_TYPE_VALUE, DEVICE_OWNER_TYPE_DEFAULT);
                     mDeviceOwnerTypes.put(packageName, deviceOwnerType);
                     break;
+                // Deprecated fields below.
                 case TAG_DEVICE_OWNER_PROTECTED_PACKAGES:
                     packageName = parser.getAttributeValue(null, ATTR_PACKAGE);
                     int protectedPackagesSize = parser.getAttributeInt(null, ATTR_SIZE, 0);
                     List<String> protectedPackages = new ArrayList<>();
                     for (int i = 0; i < protectedPackagesSize; i++) {
                         protectedPackages.add(parser.getAttributeValue(null, ATTR_NAME + i));
+                    }
+                    if (mDeviceOwnerProtectedPackages == null) {
+                        mDeviceOwnerProtectedPackages = new ArrayMap<>();
                     }
                     mDeviceOwnerProtectedPackages.put(packageName, protectedPackages);
                     break;

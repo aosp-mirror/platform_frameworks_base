@@ -21,6 +21,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.any
@@ -61,7 +62,10 @@ class QSPanelControllerTest : SysuiTestCase() {
         whenever(brightnessSliderFactory.create(any(), any())).thenReturn(brightnessSlider)
         whenever(brightnessControllerFactory.create(any())).thenReturn(brightnessController)
         whenever(qsPanel.resources).thenReturn(mContext.orCreateTestableResources.resources)
-        whenever(statusBarKeyguardViewManager.bouncerIsInTransit()).thenReturn(false)
+        whenever(statusBarKeyguardViewManager.isBouncerInTransit()).thenReturn(false)
+        whenever(qsPanel.setListening(anyBoolean())).then {
+            whenever(qsPanel.isListening).thenReturn(it.getArgument(0))
+        }
 
         controller = QSPanelController(
             qsPanel,
@@ -100,7 +104,6 @@ class QSPanelControllerTest : SysuiTestCase() {
         controller.setTiles()
         whenever(tile.isListening()).thenReturn(false)
         whenever(otherTile.isListening()).thenReturn(true)
-        whenever(qsPanel.isListening).thenReturn(true)
 
         controller.setListening(true, true)
 
@@ -109,10 +112,10 @@ class QSPanelControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testBouncerIsInTransit() {
-        whenever(statusBarKeyguardViewManager.bouncerIsInTransit()).thenReturn(true)
-        assertThat(controller.bouncerInTransit()).isEqualTo(true)
-        whenever(statusBarKeyguardViewManager.bouncerIsInTransit()).thenReturn(false)
-        assertThat(controller.bouncerInTransit()).isEqualTo(false)
+    fun testIsBouncerInTransit() {
+        whenever(statusBarKeyguardViewManager.isBouncerInTransit()).thenReturn(true)
+        assertThat(controller.isBouncerInTransit()).isEqualTo(true)
+        whenever(statusBarKeyguardViewManager.isBouncerInTransit()).thenReturn(false)
+        assertThat(controller.isBouncerInTransit()).isEqualTo(false)
     }
 }

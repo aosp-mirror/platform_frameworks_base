@@ -32,6 +32,7 @@ import android.app.ActivityClient;
 import android.app.ActivityOptions;
 import android.app.ActivityThread;
 import android.app.Instrumentation;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -234,13 +235,45 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     public void onActivityReparentToTask(int taskId, @NonNull Intent activityIntent,
             @NonNull IBinder activityToken) {
         // If the activity belongs to the current app process, we treat it as a new activity launch.
-        final Activity activity = ActivityThread.currentActivityThread().getActivity(activityToken);
+        final Activity activity = getActivity(activityToken);
         if (activity != null) {
-            onActivityCreated(activity);
+            // We don't allow split as primary for new launch because we currently only support
+            // launching to top. We allow split as primary for activity reparent because the
+            // activity may be split as primary before it is reparented out. In that case, we want
+            // to show it as primary again when it is reparented back.
+            if (!resolveActivityToContainer(activity, true /* isOnReparent */)) {
+                // When there is no embedding rule matched, try to place it in the top container
+                // like a normal launch.
+                placeActivityInTopContainer(activity);
+            }
             updateCallbackIfNecessary();
             return;
         }
-        // TODO: handle for activity in other process.
+
+        final TaskContainer taskContainer = getTaskContainer(taskId);
+        if (taskContainer == null || taskContainer.isInPictureInPicture()) {
+            // We don't embed activity when it is in PIP.
+            return;
+        }
+
+        // If the activity belongs to a different app process, we treat it as starting new intent,
+        // since both actions might result in a new activity that should appear in an organized
+        // TaskFragment.
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        TaskFragmentContainer targetContainer = resolveStartActivityIntent(wct, taskId,
+                activityIntent, null /* launchingActivity */);
+        if (targetContainer == null) {
+            // When there is no embedding rule matched, try to place it in the top container like a
+            // normal launch.
+            targetContainer = taskContainer.getTopTaskFragmentContainer();
+        }
+        if (targetContainer == null) {
+            return;
+        }
+        wct.reparentActivityToTaskFragment(targetContainer.getTaskFragmentToken(), activityToken);
+        mPresenter.applyTransaction(wct);
+        // Because the activity does not belong to the organizer process, we wait until
+        // onTaskFragmentAppeared to trigger updateCallbackIfNecessary().
     }
 
     /** Called on receiving {@link #onTaskFragmentVanished(TaskFragmentInfo)} for cleanup. */
@@ -316,92 +349,242 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         return false;
     }
 
+    @VisibleForTesting
     void onActivityCreated(@NonNull Activity launchedActivity) {
-        handleActivityCreated(launchedActivity);
+        // TODO(b/229680885): we don't support launching into primary yet because we want to always
+        // launch the new activity on top.
+        resolveActivityToContainer(launchedActivity, false /* isOnReparent */);
         updateCallbackIfNecessary();
     }
 
     /**
-     * Checks if the activity start should be routed to a particular container. It can create a new
-     * container for the activity and a new split container if necessary.
+     * Checks if the new added activity should be routed to a particular container. It can create a
+     * new container for the activity and a new split container if necessary.
+     * @param activity      the activity that is newly added to the Task.
+     * @param isOnReparent  whether the activity is reparented to the Task instead of new launched.
+     *                      We only support to split as primary for reparented activity for now.
+     * @return {@code true} if the activity was placed in TaskFragment container.
      */
-    // TODO(b/190433398): Break down into smaller functions.
-    void handleActivityCreated(@NonNull Activity launchedActivity) {
-        if (isInPictureInPicture(launchedActivity)) {
-            // We don't embed activity when it is in PIP.
-            return;
-        }
-        final List<EmbeddingRule> splitRules = getSplitRules();
-        final TaskFragmentContainer currentContainer = getContainerWithActivity(
-                launchedActivity.getActivityToken());
-
-        // Check if the activity is configured to always be expanded.
-        if (shouldExpand(launchedActivity, null, splitRules)) {
-            if (shouldContainerBeExpanded(currentContainer)) {
-                // Make sure that the existing container is expanded
-                mPresenter.expandTaskFragment(currentContainer.getTaskFragmentToken());
-            } else {
-                // Put activity into a new expanded container
-                final TaskFragmentContainer newContainer = newContainer(launchedActivity,
-                        launchedActivity.getTaskId());
-                mPresenter.expandActivity(newContainer.getTaskFragmentToken(),
-                        launchedActivity);
-            }
-            return;
+    @VisibleForTesting
+    boolean resolveActivityToContainer(@NonNull Activity activity, boolean isOnReparent) {
+        if (isInPictureInPicture(activity) || activity.isFinishing()) {
+            // We don't embed activity when it is in PIP, or finishing. Return true since we don't
+            // want any extra handling.
+            return true;
         }
 
-        // Check if activity requires a placeholder
-        if (launchPlaceholderIfNecessary(launchedActivity)) {
-            return;
+        /*
+         * We will check the following to see if there is any embedding rule matched:
+         * 1. Whether the new launched activity should always expand.
+         * 2. Whether the new launched activity should launch a placeholder.
+         * 3. Whether the new launched activity has already been in a split with a rule matched
+         *    (likely done in #onStartActivity).
+         * 4. Whether the activity below (if any) should be split with the new launched activity.
+         * 5. Whether the activity split with the activity below (if any) should be split with the
+         *    new launched activity.
+         */
+
+        // 1. Whether the new launched activity should always expand.
+        if (shouldExpand(activity, null /* intent */)) {
+            expandActivity(activity);
+            return true;
         }
 
-        // TODO(b/190433398): Check if it is a placeholder and there is already another split
-        // created by the primary activity. This is necessary for the case when the primary activity
-        // launched another secondary in the split, but the placeholder was still launched by the
-        // logic above. We didn't prevent the placeholder launcher because we didn't know that
-        // another secondary activity is coming up.
+        // 2. Whether the new launched activity should launch a placeholder.
+        if (launchPlaceholderIfNecessary(activity, !isOnReparent)) {
+            return true;
+        }
 
-        // Check if the activity should form a split with the activity below in the same task
-        // fragment.
+        // 3. Whether the new launched activity has already been in a split with a rule matched.
+        if (isNewActivityInSplitWithRuleMatched(activity)) {
+            return true;
+        }
+
+        // 4. Whether the activity below (if any) should be split with the new launched activity.
+        final Activity activityBelow = findActivityBelow(activity);
+        if (activityBelow == null) {
+            // Can't find any activity below.
+            return false;
+        }
+        if (putActivitiesIntoSplitIfNecessary(activityBelow, activity)) {
+            // Have split rule of [ activityBelow | launchedActivity ].
+            return true;
+        }
+        if (isOnReparent && putActivitiesIntoSplitIfNecessary(activity, activityBelow)) {
+            // Have split rule of [ launchedActivity | activityBelow].
+            return true;
+        }
+
+        // 5. Whether the activity split with the activity below (if any) should be split with the
+        //    new launched activity.
+        final TaskFragmentContainer activityBelowContainer = getContainerWithActivity(
+                activityBelow);
+        final SplitContainer topSplit = getActiveSplitForContainer(activityBelowContainer);
+        if (topSplit == null || !isTopMostSplit(topSplit)) {
+            // Skip if it is not the topmost split.
+            return false;
+        }
+        final TaskFragmentContainer otherTopContainer =
+                topSplit.getPrimaryContainer() == activityBelowContainer
+                        ? topSplit.getSecondaryContainer()
+                        : topSplit.getPrimaryContainer();
+        final Activity otherTopActivity = otherTopContainer.getTopNonFinishingActivity();
+        if (otherTopActivity == null || otherTopActivity == activity) {
+            // Can't find the top activity on the other split TaskFragment.
+            return false;
+        }
+        if (putActivitiesIntoSplitIfNecessary(otherTopActivity, activity)) {
+            // Have split rule of [ otherTopActivity | launchedActivity ].
+            return true;
+        }
+        // Have split rule of [ launchedActivity | otherTopActivity].
+        return isOnReparent && putActivitiesIntoSplitIfNecessary(activity, otherTopActivity);
+    }
+
+    /**
+     * Places the given activity to the top most TaskFragment in the task if there is any.
+     */
+    @VisibleForTesting
+    void placeActivityInTopContainer(@NonNull Activity activity) {
+        if (getContainerWithActivity(activity) != null) {
+            // The activity has already been put in a TaskFragment. This is likely to be done by
+            // the server when the activity is started.
+            return;
+        }
+        final int taskId = getTaskId(activity);
+        final TaskContainer taskContainer = getTaskContainer(taskId);
+        if (taskContainer == null) {
+            return;
+        }
+        final TaskFragmentContainer targetContainer = taskContainer.getTopTaskFragmentContainer();
+        if (targetContainer == null) {
+            return;
+        }
+        targetContainer.addPendingAppearedActivity(activity);
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.reparentActivityToTaskFragment(targetContainer.getTaskFragmentToken(),
+                activity.getActivityToken());
+        mPresenter.applyTransaction(wct);
+    }
+
+    /**
+     * Expands the given activity by either expanding the TaskFragment it is currently in or putting
+     * it into a new expanded TaskFragment.
+     */
+    private void expandActivity(@NonNull Activity activity) {
+        final TaskFragmentContainer container = getContainerWithActivity(activity);
+        if (shouldContainerBeExpanded(container)) {
+            // Make sure that the existing container is expanded.
+            mPresenter.expandTaskFragment(container.getTaskFragmentToken());
+        } else {
+            // Put activity into a new expanded container.
+            final TaskFragmentContainer newContainer = newContainer(activity, getTaskId(activity));
+            mPresenter.expandActivity(newContainer.getTaskFragmentToken(), activity);
+        }
+    }
+
+    /** Whether the given new launched activity is in a split with a rule matched. */
+    private boolean isNewActivityInSplitWithRuleMatched(@NonNull Activity launchedActivity) {
+        final TaskFragmentContainer container = getContainerWithActivity(launchedActivity);
+        final SplitContainer splitContainer = getActiveSplitForContainer(container);
+        if (splitContainer == null) {
+            return false;
+        }
+
+        if (container == splitContainer.getPrimaryContainer()) {
+            // The new launched can be in the primary container when it is starting a new activity
+            // onCreate, thus the secondary may still be empty.
+            final TaskFragmentContainer secondaryContainer = splitContainer.getSecondaryContainer();
+            final Activity secondaryActivity = secondaryContainer.getTopNonFinishingActivity();
+            return secondaryActivity == null
+                    || getSplitRule(launchedActivity, secondaryActivity) != null;
+        }
+
+        // Check if the new launched activity is a placeholder.
+        if (splitContainer.getSplitRule() instanceof SplitPlaceholderRule) {
+            final SplitPlaceholderRule placeholderRule =
+                    (SplitPlaceholderRule) splitContainer.getSplitRule();
+            final ComponentName placeholderName = placeholderRule.getPlaceholderIntent()
+                    .getComponent();
+            // TODO(b/232330767): Do we have a better way to check this?
+            return placeholderName == null
+                    || placeholderName.equals(launchedActivity.getComponentName())
+                    || placeholderRule.getPlaceholderIntent().equals(launchedActivity.getIntent());
+        }
+
+        // Check if the new launched activity should be split with the primary top activity.
+        final Activity primaryActivity = splitContainer.getPrimaryContainer()
+                .getTopNonFinishingActivity();
+        if (primaryActivity == null) {
+            return false;
+        }
+        /* TODO(b/231845476) we should always respect clearTop.
+        final SplitPairRule curSplitRule = (SplitPairRule) splitContainer.getSplitRule();
+        final SplitPairRule splitRule = getSplitRule(primaryActivity, launchedActivity);
+        return splitRule != null && haveSamePresentation(splitRule, curSplitRule)
+                // If the new launched split rule should clear top and it is not the bottom most,
+                // it means we should create a new split pair and clear the existing secondary.
+                && (!splitRule.shouldClearTop()
+                || container.getBottomMostActivity() == launchedActivity);
+         */
+        return getSplitRule(primaryActivity, launchedActivity) != null;
+    }
+
+    /** Finds the activity below the given activity. */
+    @Nullable
+    private Activity findActivityBelow(@NonNull Activity activity) {
         Activity activityBelow = null;
-        if (currentContainer != null) {
-            final List<Activity> containerActivities = currentContainer.collectActivities();
-            final int index = containerActivities.indexOf(launchedActivity);
+        final TaskFragmentContainer container = getContainerWithActivity(activity);
+        if (container != null) {
+            final List<Activity> containerActivities = container.collectActivities();
+            final int index = containerActivities.indexOf(activity);
             if (index > 0) {
                 activityBelow = containerActivities.get(index - 1);
             }
         }
         if (activityBelow == null) {
-            IBinder belowToken = ActivityClient.getInstance().getActivityTokenBelow(
-                    launchedActivity.getActivityToken());
+            final IBinder belowToken = ActivityClient.getInstance().getActivityTokenBelow(
+                    activity.getActivityToken());
             if (belowToken != null) {
-                activityBelow = ActivityThread.currentActivityThread().getActivity(belowToken);
+                activityBelow = getActivity(belowToken);
             }
         }
-        if (activityBelow == null) {
-            return;
-        }
+        return activityBelow;
+    }
 
-        // Check if the split is already set.
-        final TaskFragmentContainer activityBelowContainer = getContainerWithActivity(
-                activityBelow.getActivityToken());
-        if (currentContainer != null && activityBelowContainer != null) {
-            final SplitContainer existingSplit = getActiveSplitForContainers(currentContainer,
-                    activityBelowContainer);
-            if (existingSplit != null) {
-                // There is already an active split with the activity below.
-                return;
+    /**
+     * Checks if there is a rule to split the two activities. If there is one, puts them into split
+     * and returns {@code true}. Otherwise, returns {@code false}.
+     */
+    private boolean putActivitiesIntoSplitIfNecessary(@NonNull Activity primaryActivity,
+            @NonNull Activity secondaryActivity) {
+        final SplitPairRule splitRule = getSplitRule(primaryActivity, secondaryActivity);
+        if (splitRule == null) {
+            return false;
+        }
+        final TaskFragmentContainer primaryContainer = getContainerWithActivity(
+                primaryActivity);
+        final SplitContainer splitContainer = getActiveSplitForContainer(primaryContainer);
+        if (splitContainer != null && primaryContainer == splitContainer.getPrimaryContainer()
+                && canReuseContainer(splitRule, splitContainer.getSplitRule())) {
+            // Can launch in the existing secondary container if the rules share the same
+            // presentation.
+            final TaskFragmentContainer secondaryContainer = splitContainer.getSecondaryContainer();
+            if (secondaryContainer == getContainerWithActivity(secondaryActivity)) {
+                // The activity is already in the target TaskFragment.
+                return true;
             }
+            secondaryContainer.addPendingAppearedActivity(secondaryActivity);
+            final WindowContainerTransaction wct = new WindowContainerTransaction();
+            wct.reparentActivityToTaskFragment(
+                    secondaryContainer.getTaskFragmentToken(),
+                    secondaryActivity.getActivityToken());
+            mPresenter.applyTransaction(wct);
+            return true;
         }
-
-        final SplitPairRule splitPairRule = getSplitRule(activityBelow, launchedActivity,
-                splitRules);
-        if (splitPairRule == null) {
-            return;
-        }
-
-        mPresenter.createNewSplitContainer(activityBelow, launchedActivity,
-                splitPairRule);
+        // Create new split pair.
+        mPresenter.createNewSplitContainer(primaryActivity, secondaryActivity, splitRule);
+        return true;
     }
 
     private void onActivityConfigurationChanged(@NonNull Activity activity) {
@@ -409,8 +592,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             // We don't embed activity when it is in PIP.
             return;
         }
-        final TaskFragmentContainer currentContainer = getContainerWithActivity(
-                activity.getActivityToken());
+        final TaskFragmentContainer currentContainer = getContainerWithActivity(activity);
 
         if (currentContainer != null) {
             // Changes to activities in controllers are handled in
@@ -419,7 +601,19 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         }
 
         // Check if activity requires a placeholder
-        launchPlaceholderIfNecessary(activity);
+        launchPlaceholderIfNecessary(activity, false /* isOnCreated */);
+    }
+
+    @VisibleForTesting
+    void onActivityDestroyed(@NonNull Activity activity) {
+        // Remove any pending appeared activity, as the server won't send finished activity to the
+        // organizer.
+        for (int i = mTaskContainers.size() - 1; i >= 0; i--) {
+            mTaskContainers.valueAt(i).cleanupPendingAppearedActivity(activity);
+        }
+        // We didn't trigger the callback if there were any pending appeared activities, so check
+        // again after the pending is removed.
+        updateCallbackIfNecessary();
     }
 
     /**
@@ -431,14 +625,149 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     /**
+     * When we are trying to handle a new activity Intent, returns the {@link TaskFragmentContainer}
+     * that we should reparent the new activity to if there is any embedding rule matched.
+     *
+     * @param wct               {@link WindowContainerTransaction} including all the window change
+     *                          requests. The caller is responsible to call
+     *                          {@link android.window.TaskFragmentOrganizer#applyTransaction}.
+     * @param taskId            The Task to start the activity in.
+     * @param intent            The {@link Intent} for starting the new launched activity.
+     * @param launchingActivity The {@link Activity} that starts the new activity. We will
+     *                          prioritize to split the new activity with it if it is not
+     *                          {@code null}.
+     * @return the {@link TaskFragmentContainer} to start the new activity in. {@code null} if there
+     *         is no embedding rule matched.
+     */
+    @VisibleForTesting
+    @Nullable
+    TaskFragmentContainer resolveStartActivityIntent(@NonNull WindowContainerTransaction wct,
+            int taskId, @NonNull Intent intent, @Nullable Activity launchingActivity) {
+        /*
+         * We will check the following to see if there is any embedding rule matched:
+         * 1. Whether the new activity intent should always expand.
+         * 2. Whether the launching activity (if set) should be split with the new activity intent.
+         * 3. Whether the top activity (if any) should be split with the new activity intent.
+         * 4. Whether the top activity (if any) in other split should be split with the new
+         *    activity intent.
+         */
+
+        // 1. Whether the new activity intent should always expand.
+        if (shouldExpand(null /* activity */, intent)) {
+            return createEmptyExpandedContainer(wct, taskId, launchingActivity);
+        }
+
+        // 2. Whether the launching activity (if set) should be split with the new activity intent.
+        if (launchingActivity != null) {
+            final TaskFragmentContainer container = getSecondaryContainerForSplitIfAny(wct,
+                    launchingActivity, intent, true /* respectClearTop */);
+            if (container != null) {
+                return container;
+            }
+        }
+
+        // 3. Whether the top activity (if any) should be split with the new activity intent.
+        final TaskContainer taskContainer = getTaskContainer(taskId);
+        if (taskContainer == null || taskContainer.getTopTaskFragmentContainer() == null) {
+            // There is no other activity in the Task to check split with.
+            return null;
+        }
+        final TaskFragmentContainer topContainer = taskContainer.getTopTaskFragmentContainer();
+        final Activity topActivity = topContainer.getTopNonFinishingActivity();
+        if (topActivity != null && topActivity != launchingActivity) {
+            final TaskFragmentContainer container = getSecondaryContainerForSplitIfAny(wct,
+                    topActivity, intent, false /* respectClearTop */);
+            if (container != null) {
+                return container;
+            }
+        }
+
+        // 4. Whether the top activity (if any) in other split should be split with the new
+        //    activity intent.
+        final SplitContainer topSplit = getActiveSplitForContainer(topContainer);
+        if (topSplit == null) {
+            return null;
+        }
+        final TaskFragmentContainer otherTopContainer =
+                topSplit.getPrimaryContainer() == topContainer
+                        ? topSplit.getSecondaryContainer()
+                        : topSplit.getPrimaryContainer();
+        final Activity otherTopActivity = otherTopContainer.getTopNonFinishingActivity();
+        if (otherTopActivity != null && otherTopActivity != launchingActivity) {
+            return getSecondaryContainerForSplitIfAny(wct, otherTopActivity, intent,
+                    false /* respectClearTop */);
+        }
+        return null;
+    }
+
+    /**
+     * Returns an empty expanded {@link TaskFragmentContainer} that we can launch an activity into.
+     */
+    @Nullable
+    private TaskFragmentContainer createEmptyExpandedContainer(
+            @NonNull WindowContainerTransaction wct, int taskId,
+            @Nullable Activity launchingActivity) {
+        // We need an activity in the organizer process in the same Task to use as the owner
+        // activity, as well as to get the Task window info.
+        final Activity activityInTask;
+        if (launchingActivity != null) {
+            activityInTask = launchingActivity;
+        } else {
+            final TaskContainer taskContainer = getTaskContainer(taskId);
+            activityInTask = taskContainer != null
+                    ? taskContainer.getTopNonFinishingActivity()
+                    : null;
+        }
+        if (activityInTask == null) {
+            // Can't find any activity in the Task that we can use as the owner activity.
+            return null;
+        }
+        final TaskFragmentContainer expandedContainer = newContainer(null /* activity */,
+                activityInTask, taskId);
+        mPresenter.createTaskFragment(wct, expandedContainer.getTaskFragmentToken(),
+                activityInTask.getActivityToken(), new Rect(), WINDOWING_MODE_UNDEFINED);
+        return expandedContainer;
+    }
+
+    /**
+     * Returns a container for the new activity intent to launch into as splitting with the primary
+     * activity.
+     */
+    @Nullable
+    private TaskFragmentContainer getSecondaryContainerForSplitIfAny(
+            @NonNull WindowContainerTransaction wct, @NonNull Activity primaryActivity,
+            @NonNull Intent intent, boolean respectClearTop) {
+        final SplitPairRule splitRule = getSplitRule(primaryActivity, intent);
+        if (splitRule == null) {
+            return null;
+        }
+        final TaskFragmentContainer existingContainer = getContainerWithActivity(primaryActivity);
+        final SplitContainer splitContainer = getActiveSplitForContainer(existingContainer);
+        if (splitContainer != null && existingContainer == splitContainer.getPrimaryContainer()
+                && (canReuseContainer(splitRule, splitContainer.getSplitRule())
+                // TODO(b/231845476) we should always respect clearTop.
+                || !respectClearTop)) {
+            // Can launch in the existing secondary container if the rules share the same
+            // presentation.
+            return splitContainer.getSecondaryContainer();
+        }
+        // Create a new TaskFragment to split with the primary activity for the new activity.
+        return mPresenter.createNewSplitWithEmptySideContainer(wct, primaryActivity, splitRule);
+    }
+
+    /**
      * Returns a container that this activity is registered with. An activity can only belong to one
      * container, or no container at all.
      */
     @Nullable
-    TaskFragmentContainer getContainerWithActivity(@NonNull IBinder activityToken) {
+    TaskFragmentContainer getContainerWithActivity(@NonNull Activity activity) {
+        final IBinder activityToken = activity.getActivityToken();
         for (int i = mTaskContainers.size() - 1; i >= 0; i--) {
             final List<TaskFragmentContainer> containers = mTaskContainers.valueAt(i).mContainers;
-            for (TaskFragmentContainer container : containers) {
+            // Traverse from top to bottom in case an activity is added to top pending, and hasn't
+            // received update from server yet.
+            for (int j = containers.size() - 1; j >= 0; j--) {
+                final TaskFragmentContainer container = containers.get(j);
                 if (container.hasActivity(activityToken)) {
                     return container;
                 }
@@ -465,12 +794,12 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         if (activityInTask == null) {
             throw new IllegalArgumentException("activityInTask must not be null,");
         }
-        final TaskFragmentContainer container = new TaskFragmentContainer(activity, taskId, this);
         if (!mTaskContainers.contains(taskId)) {
             mTaskContainers.put(taskId, new TaskContainer(taskId));
         }
         final TaskContainer taskContainer = mTaskContainers.get(taskId);
-        taskContainer.mContainers.add(container);
+        final TaskFragmentContainer container = new TaskFragmentContainer(activity, taskContainer,
+                this);
         if (!taskContainer.isTaskBoundsInitialized()) {
             // Get the initial bounds before the TaskFragment has appeared.
             final Rect taskBounds = SplitPresenter.getTaskBoundsFromActivity(activityInTask);
@@ -500,14 +829,13 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         if (splitRule instanceof SplitPairRule && ((SplitPairRule) splitRule).shouldClearTop()) {
             removeExistingSecondaryContainers(wct, primaryContainer);
         }
-        mTaskContainers.get(primaryContainer.getTaskId()).mSplitContainers.add(splitContainer);
+        primaryContainer.getTaskContainer().mSplitContainers.add(splitContainer);
     }
 
     /** Cleanups all the dependencies when the TaskFragment is entering PIP. */
     private void cleanupForEnterPip(@NonNull WindowContainerTransaction wct,
             @NonNull TaskFragmentContainer container) {
-        final int taskId = container.getTaskId();
-        final TaskContainer taskContainer = mTaskContainers.get(taskId);
+        final TaskContainer taskContainer = container.getTaskContainer();
         if (taskContainer == null) {
             return;
         }
@@ -545,8 +873,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      */
     void removeContainer(@NonNull TaskFragmentContainer container) {
         // Remove all split containers that included this one
-        final int taskId = container.getTaskId();
-        final TaskContainer taskContainer = mTaskContainers.get(taskId);
+        final TaskContainer taskContainer = container.getTaskContainer();
         if (taskContainer == null) {
             return;
         }
@@ -637,9 +964,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         if (splitContainer == null) {
             return;
         }
-        final List<SplitContainer> splitContainers = mTaskContainers.get(container.getTaskId())
-                .mSplitContainers;
-        if (splitContainer != splitContainers.get(splitContainers.size() - 1)) {
+        if (!isTopMostSplit(splitContainer)) {
             // Skip position update - it isn't the topmost split.
             return;
         }
@@ -655,13 +980,22 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         mPresenter.updateSplitContainer(splitContainer, container, wct);
     }
 
+    /** Whether the given split is the topmost split in the Task. */
+    private boolean isTopMostSplit(@NonNull SplitContainer splitContainer) {
+        final List<SplitContainer> splitContainers = splitContainer.getPrimaryContainer()
+                .getTaskContainer().mSplitContainers;
+        return splitContainer == splitContainers.get(splitContainers.size() - 1);
+    }
+
     /**
      * Returns the top active split container that has the provided container, if available.
      */
     @Nullable
-    private SplitContainer getActiveSplitForContainer(@NonNull TaskFragmentContainer container) {
-        final List<SplitContainer> splitContainers = mTaskContainers.get(container.getTaskId())
-                .mSplitContainers;
+    private SplitContainer getActiveSplitForContainer(@Nullable TaskFragmentContainer container) {
+        if (container == null) {
+            return null;
+        }
+        final List<SplitContainer> splitContainers = container.getTaskContainer().mSplitContainers;
         if (splitContainers.isEmpty()) {
             return null;
         }
@@ -679,15 +1013,13 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      * Returns the active split that has the provided containers as primary and secondary or as
      * secondary and primary, if available.
      */
+    @VisibleForTesting
     @Nullable
-    private SplitContainer getActiveSplitForContainers(
+    SplitContainer getActiveSplitForContainers(
             @NonNull TaskFragmentContainer firstContainer,
             @NonNull TaskFragmentContainer secondContainer) {
-        final List<SplitContainer> splitContainers = mTaskContainers.get(firstContainer.getTaskId())
+        final List<SplitContainer> splitContainers = firstContainer.getTaskContainer()
                 .mSplitContainers;
-        if (splitContainers == null) {
-            return null;
-        }
         for (int i = splitContainers.size() - 1; i >= 0; i--) {
             final SplitContainer splitContainer = splitContainers.get(i);
             final TaskFragmentContainer primary = splitContainer.getPrimaryContainer();
@@ -709,19 +1041,17 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             return false;
         }
 
-        return launchPlaceholderIfNecessary(topActivity);
+        return launchPlaceholderIfNecessary(topActivity, false /* isOnCreated */);
     }
 
-    boolean launchPlaceholderIfNecessary(@NonNull Activity activity) {
-        final TaskFragmentContainer container = getContainerWithActivity(
-                activity.getActivityToken());
+    boolean launchPlaceholderIfNecessary(@NonNull Activity activity, boolean isOnCreated) {
+        final TaskFragmentContainer container = getContainerWithActivity(activity);
         // Don't launch placeholder if the container is occluded.
         if (container != null && container != getTopActiveContainer(container.getTaskId())) {
             return false;
         }
 
-        SplitContainer splitContainer = container != null ? getActiveSplitForContainer(container)
-                : null;
+        final SplitContainer splitContainer = getActiveSplitForContainer(container);
         if (splitContainer != null && container.equals(splitContainer.getPrimaryContainer())) {
             // Don't launch placeholder in primary split container
             return false;
@@ -735,9 +1065,31 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         }
 
         // TODO(b/190433398): Handle failed request
-        startActivityToSide(activity, placeholderRule.getPlaceholderIntent(), null /* options */,
+        final Bundle options = getPlaceholderOptions(activity, isOnCreated);
+        startActivityToSide(activity, placeholderRule.getPlaceholderIntent(), options,
                 placeholderRule, null /* failureCallback */, true /* isPlaceholder */);
         return true;
+    }
+
+    /**
+     * Gets the activity options for starting the placeholder activity. In case the placeholder is
+     * launched when the Task is in the background, we don't want to bring the Task to the front.
+     * @param primaryActivity   the primary activity to launch the placeholder from.
+     * @param isOnCreated       whether this happens during the primary activity onCreated.
+     */
+    @VisibleForTesting
+    @Nullable
+    Bundle getPlaceholderOptions(@NonNull Activity primaryActivity, boolean isOnCreated) {
+        // Setting avoid move to front will also skip the animation. We only want to do that when
+        // the Task is currently in background.
+        // Check if the primary is resumed or if this is called when the primary is onCreated
+        // (not resumed yet).
+        if (isOnCreated || primaryActivity.isResumed()) {
+            return null;
+        }
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        options.setAvoidMoveToFront();
+        return options.toBundle();
     }
 
     @VisibleForTesting
@@ -856,18 +1208,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         if (container == null) {
             return false;
         }
-        final List<SplitContainer> splitContainers = mTaskContainers.get(container.getTaskId())
-                .mSplitContainers;
-        if (splitContainers == null) {
-            return true;
-        }
-        for (SplitContainer splitContainer : splitContainers) {
-            if (container.equals(splitContainer.getPrimaryContainer())
-                    || container.equals(splitContainer.getSecondaryContainer())) {
-                return false;
-            }
-        }
-        return true;
+        return getActiveSplitForContainer(container) == null;
     }
 
     /**
@@ -875,9 +1216,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      * if available.
      */
     @Nullable
-    private static SplitPairRule getSplitRule(@NonNull Activity primaryActivity,
-            @NonNull Intent secondaryActivityIntent, @NonNull List<EmbeddingRule> splitRules) {
-        for (EmbeddingRule rule : splitRules) {
+    private SplitPairRule getSplitRule(@NonNull Activity primaryActivity,
+            @NonNull Intent secondaryActivityIntent) {
+        for (EmbeddingRule rule : mSplitRules) {
             if (!(rule instanceof SplitPairRule)) {
                 continue;
             }
@@ -893,9 +1234,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      * Returns a split rule for the provided pair of primary and secondary activities if available.
      */
     @Nullable
-    private static SplitPairRule getSplitRule(@NonNull Activity primaryActivity,
-            @NonNull Activity secondaryActivity, @NonNull List<EmbeddingRule> splitRules) {
-        for (EmbeddingRule rule : splitRules) {
+    private SplitPairRule getSplitRule(@NonNull Activity primaryActivity,
+            @NonNull Activity secondaryActivity) {
+        for (EmbeddingRule rule : mSplitRules) {
             if (!(rule instanceof SplitPairRule)) {
                 continue;
             }
@@ -932,16 +1273,24 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         return mHandler;
     }
 
+    int getTaskId(@NonNull Activity activity) {
+        // Prefer to get the taskId from TaskFragmentContainer because Activity.getTaskId() is an
+        // IPC call.
+        final TaskFragmentContainer container = getContainerWithActivity(activity);
+        return container != null ? container.getTaskId() : activity.getTaskId();
+    }
+
+    @Nullable
+    Activity getActivity(@NonNull IBinder activityToken) {
+        return ActivityThread.currentActivityThread().getActivity(activityToken);
+    }
+
     /**
      * Returns {@code true} if an Activity with the provided component name should always be
      * expanded to occupy full task bounds. Such activity must not be put in a split.
      */
-    private static boolean shouldExpand(@Nullable Activity activity, @Nullable Intent intent,
-            List<EmbeddingRule> splitRules) {
-        if (splitRules == null) {
-            return false;
-        }
-        for (EmbeddingRule rule : splitRules) {
+    private boolean shouldExpand(@Nullable Activity activity, @Nullable Intent intent) {
+        for (EmbeddingRule rule : mSplitRules) {
             if (!(rule instanceof ActivityRule)) {
                 continue;
             }
@@ -995,8 +1344,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      */
     boolean shouldRetainAssociatedActivity(@NonNull TaskFragmentContainer finishingContainer,
             @NonNull Activity associatedActivity) {
-        TaskFragmentContainer associatedContainer = getContainerWithActivity(
-                associatedActivity.getActivityToken());
+        final TaskFragmentContainer associatedContainer = getContainerWithActivity(
+                associatedActivity);
         if (associatedContainer == null) {
             return false;
         }
@@ -1046,6 +1395,11 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         public void onActivityConfigurationChanged(Activity activity) {
             SplitController.this.onActivityConfigurationChanged(activity);
         }
+
+        @Override
+        public void onActivityPostDestroyed(Activity activity) {
+            SplitController.this.onActivityDestroyed(activity);
+        }
     }
 
     /** Executor that posts on the main application thread. */
@@ -1079,129 +1433,19 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                 return super.onStartActivity(who, intent, options);
             }
 
-            if (shouldExpand(null, intent, getSplitRules())) {
-                setLaunchingInExpandedContainer(launchingActivity, options);
-            } else if (!splitWithLaunchingActivity(launchingActivity, intent, options)) {
-                setLaunchingInSameSideContainer(launchingActivity, intent, options);
+            final int taskId = getTaskId(launchingActivity);
+            final WindowContainerTransaction wct = new WindowContainerTransaction();
+            final TaskFragmentContainer launchedInTaskFragment = resolveStartActivityIntent(wct,
+                    taskId, intent, launchingActivity);
+            if (launchedInTaskFragment != null) {
+                mPresenter.applyTransaction(wct);
+                // Amend the request to let the WM know that the activity should be placed in the
+                // dedicated container.
+                options.putBinder(ActivityOptions.KEY_LAUNCH_TASK_FRAGMENT_TOKEN,
+                        launchedInTaskFragment.getTaskFragmentToken());
             }
 
             return super.onStartActivity(who, intent, options);
-        }
-
-        private void setLaunchingInExpandedContainer(Activity launchingActivity, Bundle options) {
-            TaskFragmentContainer newContainer = mPresenter.createNewExpandedContainer(
-                    launchingActivity);
-
-            // Amend the request to let the WM know that the activity should be placed in the
-            // dedicated container.
-            options.putBinder(ActivityOptions.KEY_LAUNCH_TASK_FRAGMENT_TOKEN,
-                    newContainer.getTaskFragmentToken());
-        }
-
-        /**
-         * Returns {@code true} if the activity that is going to be started via the
-         * {@code intent} should be paired with the {@code launchingActivity} and is set to be
-         * launched in the side container.
-         */
-        private boolean splitWithLaunchingActivity(Activity launchingActivity, Intent intent,
-                Bundle options) {
-            final SplitPairRule splitPairRule = getSplitRule(launchingActivity, intent,
-                    getSplitRules());
-            if (splitPairRule == null) {
-                return false;
-            }
-
-            // Check if there is any existing side container to launch into.
-            TaskFragmentContainer secondaryContainer = findSideContainerForNewLaunch(
-                    launchingActivity, splitPairRule);
-            if (secondaryContainer == null) {
-                // Create a new split with an empty side container.
-                secondaryContainer = mPresenter
-                        .createNewSplitWithEmptySideContainer(launchingActivity, splitPairRule);
-            }
-
-            // Amend the request to let the WM know that the activity should be placed in the
-            // dedicated container.
-            options.putBinder(ActivityOptions.KEY_LAUNCH_TASK_FRAGMENT_TOKEN,
-                    secondaryContainer.getTaskFragmentToken());
-            return true;
-        }
-
-        /**
-         * Finds if there is an existing split side {@link TaskFragmentContainer} that can be used
-         * for the new rule.
-         */
-        @Nullable
-        private TaskFragmentContainer findSideContainerForNewLaunch(Activity launchingActivity,
-                SplitPairRule splitPairRule) {
-            final TaskFragmentContainer launchingContainer = getContainerWithActivity(
-                    launchingActivity.getActivityToken());
-            if (launchingContainer == null) {
-                return null;
-            }
-
-            // We only check if the launching activity is the primary of the split. We will check
-            // if the launching activity is the secondary in #setLaunchingInSameSideContainer.
-            final SplitContainer splitContainer = getActiveSplitForContainer(launchingContainer);
-            if (splitContainer == null
-                    || splitContainer.getPrimaryContainer() != launchingContainer) {
-                return null;
-            }
-
-            if (canReuseContainer(splitPairRule, splitContainer.getSplitRule())) {
-                return splitContainer.getSecondaryContainer();
-            }
-            return null;
-        }
-
-        /**
-         * Checks if the activity that is going to be started via the {@code intent} should be
-         * paired with the existing top activity which is currently paired with the
-         * {@code launchingActivity}. If so, set the activity to be launched in the same side
-         * container of the {@code launchingActivity}.
-         */
-        private void setLaunchingInSameSideContainer(Activity launchingActivity, Intent intent,
-                Bundle options) {
-            final TaskFragmentContainer launchingContainer = getContainerWithActivity(
-                    launchingActivity.getActivityToken());
-            if (launchingContainer == null) {
-                return;
-            }
-
-            final SplitContainer splitContainer = getActiveSplitForContainer(launchingContainer);
-            if (splitContainer == null) {
-                return;
-            }
-
-            if (splitContainer.getSecondaryContainer() != launchingContainer) {
-                return;
-            }
-
-            // The launching activity is on the secondary container. Retrieve the primary
-            // activity from the other container.
-            Activity primaryActivity =
-                    splitContainer.getPrimaryContainer().getTopNonFinishingActivity();
-            if (primaryActivity == null) {
-                return;
-            }
-
-            final SplitPairRule splitPairRule = getSplitRule(primaryActivity, intent,
-                    getSplitRules());
-            if (splitPairRule == null) {
-                return;
-            }
-
-            // Can only launch in the same container if the rules share the same presentation.
-            if (!canReuseContainer(splitPairRule, splitContainer.getSplitRule())) {
-                return;
-            }
-
-            // Amend the request to let the WM know that the activity should be placed in the
-            // dedicated container. This is necessary for the case that the activity is started
-            // into a new Task, or new Task will be escaped from the current host Task and be
-            // displayed in fullscreen.
-            options.putBinder(ActivityOptions.KEY_LAUNCH_TASK_FRAGMENT_TOKEN,
-                    launchingContainer.getTaskFragmentToken());
         }
     }
 
@@ -1222,8 +1466,18 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         if (!isContainerReusableRule(rule1) || !isContainerReusableRule(rule2)) {
             return false;
         }
+        return haveSamePresentation((SplitPairRule) rule1, (SplitPairRule) rule2);
+    }
+
+    /** Whether the two rules have the same presentation. */
+    private static boolean haveSamePresentation(SplitPairRule rule1, SplitPairRule rule2) {
+        // TODO(b/231655482): add util method to do the comparison in SplitPairRule.
         return rule1.getSplitRatio() == rule2.getSplitRatio()
-                && rule1.getLayoutDirection() == rule2.getLayoutDirection();
+                && rule1.getLayoutDirection() == rule2.getLayoutDirection()
+                && rule1.getFinishPrimaryWithSecondary()
+                == rule2.getFinishPrimaryWithSecondary()
+                && rule1.getFinishSecondaryWithPrimary()
+                == rule2.getFinishSecondaryWithPrimary();
     }
 
     /**

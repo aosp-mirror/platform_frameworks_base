@@ -93,6 +93,7 @@ public interface NotificationLockscreenUserManager {
     interface UserChangedListener {
         default void onUserChanged(int userId) {}
         default void onCurrentProfilesChanged(SparseArray<UserInfo> currentProfiles) {}
+        default void onUserRemoved(int userId) {}
     }
 
     /** Used to hide notifications on the lockscreen */

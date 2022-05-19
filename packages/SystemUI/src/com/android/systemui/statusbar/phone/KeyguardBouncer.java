@@ -188,6 +188,10 @@ public class KeyguardBouncer {
             }
 
             if (mContainer.getVisibility() == View.VISIBLE || mShowingSoon) {
+                // Calls to reset must resume the ViewControllers when in fullscreen mode
+                if (needsFullscreenBouncer()) {
+                    mKeyguardViewController.onResume();
+                }
                 return;
             }
 

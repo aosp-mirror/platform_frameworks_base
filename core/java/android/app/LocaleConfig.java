@@ -45,7 +45,9 @@ import java.util.Set;
  * referenced in the manifest via {@code android:localeConfig} on
  * {@code <application>}.
  *
- * For more information, see TODO(b/214154050): add link to guide
+ * <p>For more information, see
+ * <a href="https://developer.android.com/about/versions/13/features/app-languages#use-localeconfig">
+ * the section on per-app language preferences</a>.
  *
  * @attr ref android.R.styleable#LocaleConfig_Locale_name
  * @attr ref android.R.styleable#AndroidManifestApplication_localeConfig

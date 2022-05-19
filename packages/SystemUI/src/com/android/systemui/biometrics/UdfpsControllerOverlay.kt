@@ -41,6 +41,7 @@ import androidx.annotation.LayoutRes
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
@@ -83,7 +84,8 @@ class UdfpsControllerOverlay(
     @ShowReason val requestReason: Int,
     private val controllerCallback: IUdfpsOverlayControllerCallback,
     private val onTouch: (View, MotionEvent, Boolean) -> Boolean,
-    private val activityLaunchAnimator: ActivityLaunchAnimator
+    private val activityLaunchAnimator: ActivityLaunchAnimator,
+    private val broadcastSender: BroadcastSender
 ) {
     /** The view, when [isShowing], or null. */
     var overlayView: UdfpsView? = null
@@ -102,8 +104,8 @@ class UdfpsControllerOverlay(
         fitInsetsTypes = 0
         gravity = android.view.Gravity.TOP or android.view.Gravity.LEFT
         layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
-        flags =
-            (Utils.FINGERPRINT_OVERLAY_LAYOUT_PARAM_FLAGS or WindowManager.LayoutParams.FLAG_SPLIT_TOUCH)
+        flags = (Utils.FINGERPRINT_OVERLAY_LAYOUT_PARAM_FLAGS
+            or WindowManager.LayoutParams.FLAG_SPLIT_TOUCH)
         privateFlags = WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY
         // Avoid announcing window title.
         accessibilityTitle = " "
@@ -127,6 +129,8 @@ class UdfpsControllerOverlay(
     /** The animation controller if the overlay [isShowing]. */
     val animationViewController: UdfpsAnimationViewController<*>?
         get() = overlayView?.animationViewController
+
+    private var touchExplorationEnabled = false
 
     /** Show the overlay or return false and do nothing if it is already showing. */
     @SuppressLint("ClickableViewAccessibility")
@@ -152,14 +156,16 @@ class UdfpsControllerOverlay(
                     }
 
                     windowManager.addView(this, coreLayoutParams.updateDimensions(animation))
-
+                    touchExplorationEnabled = accessibilityManager.isTouchExplorationEnabled
                     overlayTouchListener = TouchExplorationStateChangeListener {
                         if (accessibilityManager.isTouchExplorationEnabled) {
                             setOnHoverListener { v, event -> onTouch(v, event, true) }
                             setOnTouchListener(null)
+                            touchExplorationEnabled = true
                         } else {
                             setOnHoverListener(null)
                             setOnTouchListener { v, event -> onTouch(v, event, true) }
+                            touchExplorationEnabled = false
                         }
                     }
                     accessibilityManager.addTouchExplorationStateChangeListener(
@@ -177,7 +183,7 @@ class UdfpsControllerOverlay(
         return false
     }
 
-    private fun inflateUdfpsAnimation(
+    fun inflateUdfpsAnimation(
         view: UdfpsView,
         controller: UdfpsController
     ): UdfpsAnimationViewController<*>? {
@@ -221,6 +227,7 @@ class UdfpsControllerOverlay(
                     statusBarStateController,
                     panelExpansionStateManager,
                     dialogManager,
+                    broadcastSender,
                     dumpManager
                 )
             }
@@ -273,6 +280,88 @@ class UdfpsControllerOverlay(
 
     fun onEnrollmentHelp() {
         enrollHelper?.onEnrollmentHelp()
+    }
+
+    /**
+     * This function computes the angle of touch relative to the sensor and maps
+     * the angle to a list of help messages which are announced if accessibility is enabled.
+     *
+     */
+    fun onTouchOutsideOfSensorArea(
+        touchX: Float,
+        touchY: Float,
+        sensorX: Float,
+        sensorY: Float,
+        rotation: Int
+    ) {
+
+        if (!touchExplorationEnabled) {
+            return
+        }
+        val touchHints =
+            context.resources.getStringArray(R.array.udfps_accessibility_touch_hints)
+        if (touchHints.size != 4) {
+            Log.e(TAG, "expected exactly 4 touch hints, got $touchHints.size?")
+            return
+        }
+        val theStr = onTouchOutsideOfSensorAreaImpl(touchX, touchY, sensorX, sensorY, rotation)
+        Log.v(TAG, "Announcing touch outside : " + theStr)
+        animationViewController?.doAnnounceForAccessibility(theStr)
+    }
+
+    /**
+     * This function computes the angle of touch relative to the sensor and maps
+     * the angle to a list of help messages which are announced if accessibility is enabled.
+     *
+     * There are 4 quadrants of the circle (90 degree arcs)
+     *
+     * [315, 360] && [0, 45) -> touchHints[0] = "Move Fingerprint to the left"
+     * [45,  135)            -> touchHints[1] = "Move Fingerprint down"
+     * And so on.
+     */
+    fun onTouchOutsideOfSensorAreaImpl(
+        touchX: Float,
+        touchY: Float,
+        sensorX: Float,
+        sensorY: Float,
+        rotation: Int
+    ): String {
+        val touchHints =
+            context.resources.getStringArray(R.array.udfps_accessibility_touch_hints)
+
+        val xRelativeToSensor = touchX - sensorX
+        // Touch coordinates are with respect to the upper left corner, so reverse
+        // this calculation
+        val yRelativeToSensor = sensorY - touchY
+
+        var angleInRad =
+            Math.atan2(yRelativeToSensor.toDouble(), xRelativeToSensor.toDouble())
+        // If the radians are negative, that means we are counting clockwise.
+        // So we need to add 360 degrees
+        if (angleInRad < 0.0) {
+            angleInRad += 2.0 * Math.PI
+        }
+        // rad to deg conversion
+        val degrees = Math.toDegrees(angleInRad)
+
+        val degreesPerBucket = 360.0 / touchHints.size
+        val halfBucketDegrees = degreesPerBucket / 2.0
+        // The mapping should be as follows
+        // [315, 360] && [0, 45] -> 0
+        // [45, 135]             -> 1
+        var index = (((degrees + halfBucketDegrees) % 360) / degreesPerBucket).toInt()
+        index %= touchHints.size
+
+        // A rotation of 90 degrees corresponds to increasing the index by 1.
+        if (rotation == Surface.ROTATION_90) {
+            index = (index + 1) % touchHints.size
+        }
+
+        if (rotation == Surface.ROTATION_270) {
+            index = (index + 3) % touchHints.size
+        }
+
+        return touchHints[index]
     }
 
     /** Cancel this request. */

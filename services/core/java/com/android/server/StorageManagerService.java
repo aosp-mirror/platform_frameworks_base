@@ -3880,9 +3880,12 @@ class StorageManagerService extends IStorageManager.Stub
                     match = vol.isVisibleForWrite(userId)
                             || (includeSharedProfile && vol.isVisibleForWrite(userIdSharingMedia));
                 } else {
+                    // Return both read only and write only volumes. When includeSharedProfile is
+                    // true, all the volumes of userIdSharingMedia should be returned when queried
+                    // from the user it shares media with
                     match = vol.isVisibleForUser(userId)
                             || (!vol.isVisible() && includeInvisible && vol.getPath() != null)
-                            || (includeSharedProfile && vol.isVisibleForRead(userIdSharingMedia));
+                            || (includeSharedProfile && vol.isVisibleForUser(userIdSharingMedia));
                 }
                 if (!match) continue;
 

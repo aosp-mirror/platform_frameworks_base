@@ -305,8 +305,10 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"atzitu egutegia"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMSak"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"bidali eta ikusi SMS mezuak"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"fitxategiak eta dokumentuak"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"gailuko fitxategiak eta dokumentuak atzitu"</string>
+    <!-- no translation found for permgrouplab_storage (17339216290379241) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_storage (5378659041354582769) -->
+    <skip />
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"musika eta audioa"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"atzitu gailuko musika eta audioak"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"argazkiak eta bideoak"</string>
@@ -1387,7 +1389,7 @@
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"Bistaratu beste aplikazioen gainean"</string>
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"<xliff:g id="NAME">%s</xliff:g> aplikazioen gainean agertzea"</string>
     <string name="alert_windows_notification_title" msgid="6331662751095228536">"Besteen gainean agertzen da <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="alert_windows_notification_message" msgid="6538171456970725333">"Ez baduzu nahi <xliff:g id="NAME">%s</xliff:g> zerbitzuak eginbide hori erabiltzea, sakatu hau ezarpenak ireki eta aukera desaktibatzeko."</string>
+    <string name="alert_windows_notification_message" msgid="6538171456970725333">"<xliff:g id="NAME">%s</xliff:g> zerbitzuak eginbide hori erabiltzea nahi ez baduzu, sakatu hau ezarpenak ireki eta aukera desaktibatzeko."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"Desaktibatu"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> egiaztatzen…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Edukia berrikusten"</string>
@@ -2281,5 +2283,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Ikusi zer aplikazio dauden aktibo"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Ezin da atzitu telefonoaren kamera <xliff:g id="DEVICE">%1$s</xliff:g> gailutik"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Ezin da atzitu tabletaren kamera <xliff:g id="DEVICE">%1$s</xliff:g> gailutik"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"Sistemaren hizkuntza"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Sistemaren balio lehenetsia"</string>
 </resources>

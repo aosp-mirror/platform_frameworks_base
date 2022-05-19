@@ -161,9 +161,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     /** */
     public void setListening(boolean listening, boolean expanded) {
         setListening(listening && expanded);
-        if (mView.isListening()) {
-            refreshAllTiles();
-        }
 
         // Set the listening as soon as the QS fragment starts listening regardless of the
         //expansion, so it will update the current brightness before the slider is visible.
@@ -254,8 +251,8 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
      *
      * @return if bouncer is in transit
      */
-    public boolean bouncerInTransit() {
-        return mStatusBarKeyguardViewManager.bouncerIsInTransit();
+    public boolean isBouncerInTransit() {
+        return mStatusBarKeyguardViewManager.isBouncerInTransit();
     }
 }
 
