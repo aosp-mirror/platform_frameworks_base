@@ -945,6 +945,7 @@ internal object MediaPlayerData {
         .thenByDescending { shouldPrioritizeSs == it.isSsMediaRec }
         .thenByDescending { !it.data.resumption }
         .thenByDescending { it.data.playbackLocation != MediaData.PLAYBACK_CAST_REMOTE }
+        .thenByDescending { it.data.lastActive }
         .thenByDescending { it.updateTime }
         .thenByDescending { it.data.notificationKey }
 
