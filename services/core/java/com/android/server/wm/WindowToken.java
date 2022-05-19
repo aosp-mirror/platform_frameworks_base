@@ -368,7 +368,7 @@ class WindowToken extends WindowContainer<WindowState> {
             super.assignRelativeLayer(t,
                     mDisplayContent.getDefaultTaskDisplayArea().getSplitScreenDividerAnchor(), 1);
         } else if (mRoundedCornerOverlay) {
-            super.assignLayer(t, WindowManagerPolicy.COLOR_FADE_LAYER + 1);
+            super.assignLayer(t, WindowManagerPolicy.SCREEN_DECOR_DISPLAY_OVERLAY_LAYER);
         } else {
             super.assignLayer(t, layer);
         }
@@ -378,7 +378,7 @@ class WindowToken extends WindowContainer<WindowState> {
     SurfaceControl.Builder makeSurface() {
         final SurfaceControl.Builder builder = super.makeSurface();
         if (mRoundedCornerOverlay) {
-            builder.setParent(null);
+            builder.setParent(getDisplayContent().getOverlayLayer());
         }
         return builder;
     }
