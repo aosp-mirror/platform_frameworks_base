@@ -94,7 +94,6 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelableException;
 import android.os.PersistableBundle;
-import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -288,15 +287,6 @@ class StorageManagerService extends IStorageManager.Stub
      * to be async with callbacks, so we want watchdog to fire if vold wedges.
      */
     private static final boolean WATCHDOG_ENABLE = true;
-
-    /**
-     * Our goal is for all Android devices to be usable as development devices,
-     * which includes the new Direct Boot mode added in N. For devices that
-     * don't have native FBE support, we offer an emulation mode for developer
-     * testing purposes, but if it's prohibitively difficult to support this
-     * mode, it can be disabled for specific products using this flag.
-     */
-    private static final boolean EMULATE_FBE_SUPPORTED = true;
 
     private static final String TAG = "StorageManagerService";
     private static final boolean LOCAL_LOGV = Log.isLoggable(TAG, Log.VERBOSE);
@@ -1091,31 +1081,6 @@ class StorageManagerService extends IStorageManager.Stub
         mVolumes.put(internal.id, internal);
     }
 
-    private void initIfBootedAndConnected() {
-        Slog.d(TAG, "Thinking about init, mBootCompleted=" + mBootCompleted
-                + ", mDaemonConnected=" + mDaemonConnected);
-        if (mBootCompleted && mDaemonConnected
-                && !StorageManager.isFileEncryptedNativeOnly()) {
-            // When booting a device without native support, make sure that our
-            // user directories are locked or unlocked based on the current
-            // emulation status.
-            final boolean initLocked = StorageManager.isFileEncryptedEmulatedOnly();
-            Slog.d(TAG, "Setting up emulation state, initlocked=" + initLocked);
-            final List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
-            for (UserInfo user : users) {
-                try {
-                    if (initLocked) {
-                        mVold.lockUserKey(user.id);
-                    } else {
-                        mVold.unlockUserKey(user.id, user.serialNumber, encodeBytes(null));
-                    }
-                } catch (Exception e) {
-                    Slog.wtf(TAG, e);
-                }
-            }
-        }
-    }
-
     private void resetIfBootedAndConnected() {
         Slog.d(TAG, "Thinking about reset, mBootCompleted=" + mBootCompleted
                 + ", mDaemonConnected=" + mDaemonConnected);
@@ -1362,7 +1327,6 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     private void handleDaemonConnected() {
-        initIfBootedAndConnected();
         resetIfBootedAndConnected();
     }
 
@@ -2110,7 +2074,6 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     private void handleBootCompleted() {
-        initIfBootedAndConnected();
         resetIfBootedAndConnected();
     }
 
@@ -2805,32 +2768,6 @@ class StorageManagerService extends IStorageManager.Stub
     public void setDebugFlags(int flags, int mask) {
         enforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
 
-        if ((mask & StorageManager.DEBUG_EMULATE_FBE) != 0) {
-            if (!EMULATE_FBE_SUPPORTED) {
-                throw new IllegalStateException(
-                        "Emulation not supported on this device");
-            }
-            if (StorageManager.isFileEncryptedNativeOnly()) {
-                throw new IllegalStateException(
-                        "Emulation not supported on device with native FBE");
-            }
-            if (mLockPatternUtils.isCredentialRequiredToDecrypt(false)) {
-                throw new IllegalStateException(
-                        "Emulation requires disabling 'Secure start-up' in Settings > Security");
-            }
-
-            final long token = Binder.clearCallingIdentity();
-            try {
-                final boolean emulateFbe = (flags & StorageManager.DEBUG_EMULATE_FBE) != 0;
-                SystemProperties.set(StorageManager.PROP_EMULATE_FBE, Boolean.toString(emulateFbe));
-
-                // Perform hard reboot to kick policy into place
-                mContext.getSystemService(PowerManager.class).reboot(null);
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
-
         if ((mask & (StorageManager.DEBUG_ADOPTABLE_FORCE_ON
                 | StorageManager.DEBUG_ADOPTABLE_FORCE_OFF)) != 0) {
             final String value;
@@ -2918,8 +2855,7 @@ class StorageManagerService extends IStorageManager.Stub
             // We need all the users unlocked to move their primary storage
             final List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
             for (UserInfo user : users) {
-                if (StorageManager.isFileEncryptedNativeOrEmulated()
-                        && !isUserKeyUnlocked(user.id)) {
+                if (StorageManager.isFileEncrypted() && !isUserKeyUnlocked(user.id)) {
                     Slog.w(TAG, "Failing move due to locked user " + user.id);
                     onMoveStatusLocked(PackageManager.MOVE_FAILED_LOCKED_USER);
                     return;
@@ -3222,9 +3158,9 @@ class StorageManagerService extends IStorageManager.Stub
 
     @Override
     public void unlockUserKey(int userId, int serialNumber, byte[] secret) {
-        boolean isFsEncrypted = StorageManager.isFileEncryptedNativeOrEmulated();
+        boolean isFileEncrypted = StorageManager.isFileEncrypted();
         Slog.d(TAG, "unlockUserKey: " + userId
-                + " isFileEncryptedNativeOrEmulated: " + isFsEncrypted
+                + " isFileEncrypted: " + isFileEncrypted
                 + " hasSecret: " + (secret != null));
         enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
 
@@ -3233,11 +3169,10 @@ class StorageManagerService extends IStorageManager.Stub
             return;
         }
 
-        if (isFsEncrypted) {
+        if (isFileEncrypted) {
             // When a user has a secure lock screen, a secret is required to
             // unlock the key, so don't bother trying to unlock it without one.
-            // This prevents misleading error messages from being logged.  This
-            // is also needed for emulated FBE to behave like native FBE.
+            // This prevents misleading error messages from being logged.
             if (mLockPatternUtils.isSecure(userId) && ArrayUtils.isEmpty(secret)) {
                 Slog.d(TAG, "Not unlocking user " + userId
                         + "'s CE storage yet because a secret is needed");
