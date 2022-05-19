@@ -91,7 +91,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
 
     @Test
     public void testGroupSummaryNotShowingIconWhenPublic() {
-        mGroupRow.setSensitive(true);
+        mGroupRow.setSensitive(true, true);
         mGroupRow.setHideSensitiveForIntrinsicHeight(true);
         assertTrue(mGroupRow.isSummaryWithChildren());
         assertFalse(mGroupRow.isShowingIcon());
@@ -99,7 +99,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
 
     @Test
     public void testNotificationHeaderVisibleWhenAnimating() {
-        mGroupRow.setSensitive(true);
+        mGroupRow.setSensitive(true, true);
         mGroupRow.setHideSensitive(true, false, 0, 0);
         mGroupRow.setHideSensitive(false, true, 0, 0);
         assertEquals(View.VISIBLE, mGroupRow.getChildrenContainer().getVisibleWrapper()
@@ -130,7 +130,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     public void testIconColorShouldBeUpdatedWhenSensitive() throws Exception {
         ExpandableNotificationRow row = spy(mNotificationTestHelper.createRow(
                 FLAG_CONTENT_VIEW_ALL));
-        row.setSensitive(true);
+        row.setSensitive(true, true);
         row.setHideSensitive(true, false, 0, 0);
         verify(row).updateShelfIconColor();
     }
@@ -214,7 +214,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     @Test
     public void testFeedback_noHeader() {
         // public notification is custom layout - no header
-        mGroupRow.setSensitive(true);
+        mGroupRow.setSensitive(true, true);
         mGroupRow.setOnFeedbackClickListener(null);
         mGroupRow.setFeedbackIcon(null);
     }

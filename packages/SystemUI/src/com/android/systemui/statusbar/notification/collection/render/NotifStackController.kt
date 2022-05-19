@@ -28,21 +28,11 @@ data class NotifStats(
     val hasNonClearableAlertingNotifs: Boolean,
     val hasClearableAlertingNotifs: Boolean,
     val hasNonClearableSilentNotifs: Boolean,
-    val hasClearableSilentNotifs: Boolean,
-    val clearableAlertingSensitiveNotifUsers: Set<Int>,
-    val clearableSilentSensitiveNotifUsers: Set<Int>
+    val hasClearableSilentNotifs: Boolean
 ) {
     companion object {
         @JvmStatic
-        val empty = NotifStats(
-            numActiveNotifs = 0,
-            hasNonClearableAlertingNotifs = false,
-            hasClearableAlertingNotifs = false,
-            hasNonClearableSilentNotifs = false,
-            hasClearableSilentNotifs = false,
-            clearableAlertingSensitiveNotifUsers = emptySet(),
-            clearableSilentSensitiveNotifUsers = emptySet(),
-        )
+        val empty = NotifStats(0, false, false, false, false)
     }
 }
 
