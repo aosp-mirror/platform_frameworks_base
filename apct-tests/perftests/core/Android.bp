@@ -43,12 +43,13 @@ android_test {
         "apct-perftests-resources-manager-apps",
         "apct-perftests-utils",
         "collector-device-lib",
+        "core-tests-support",
         "guava",
     ],
 
     libs: ["android.test.base"],
 
-    java_resources: [ ":GoogleFontDancingScript", ],
+    java_resources: [":GoogleFontDancingScript"],
 
     data: [":perfetto_artifacts"],
 
