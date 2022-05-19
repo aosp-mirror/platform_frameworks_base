@@ -1497,7 +1497,7 @@
     <string name="sync_binding_label" msgid="469249309424662147">"Penyegerakan"</string>
     <string name="accessibility_binding_label" msgid="1974602776545801715">"Kebolehaksesan"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"Kertas dinding"</string>
-    <string name="chooser_wallpaper" msgid="3082405680079923708">"Tukar kertas dinding"</string>
+    <string name="chooser_wallpaper" msgid="3082405680079923708">"Tukar hiasan latar"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"Pendengar pemberitahuan"</string>
     <string name="vr_listener_binding_label" msgid="8013112996671206429">"Pendengar VR"</string>
     <string name="condition_provider_service_binding_label" msgid="8490641013951857673">"Pembekal keadaan"</string>
