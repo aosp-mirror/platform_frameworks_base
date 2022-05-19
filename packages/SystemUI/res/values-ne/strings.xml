@@ -78,8 +78,7 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"स्क्रिनसट फेरि लिएर हेर्नुहोस्"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"स्क्रिनसट सुरक्षित गर्न सकिएन"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"उक्त एप वा तपाईंको संगठनले स्क्रिनसटहरू लिन दिँदैन"</string>
-    <!-- no translation found for screenshot_blocked_by_admin (5486757604822795797) -->
-    <skip />
+    <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"तपाईंको सूचना प्रविधि व्यवस्थापकले स्क्रिनसट लिने सुविधा ब्लक गर्नुभएको छ"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"सम्पादन गर्नुहोस्"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"स्क्रिनसट सम्पादन गर्नुहोस्"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"स्क्रिनसट सेयर गर्नुहोस्"</string>
@@ -243,7 +242,7 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi-Fi जडान गरिएको छैन"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"उज्यालपन"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"कलर इन्भर्सन"</string>
-    <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"रङ सच्याउने कार्य"</string>
+    <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"कलर करेक्सन"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"प्रयोगकर्तासम्बन्धी सेटिङ"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"भयो"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"बन्द गर्नुहोस्"</string>
@@ -314,6 +313,10 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"खोल्न माथितिर स्वाइप गर्नुहोस्"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"खोल्न अनलक आइकनमा थिच्नुहोस्"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"अनुहार प्रयोग गरी अनलक गरियो। खोल्न अनलक आइकनमा थिच्नुहोस्।"</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"फेरि प्रयास गर्न माथितिर स्वाइप गर्नुहोस्"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC प्रयोग गर्न स्क्रिन अनलक गर्नुहोस्"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"यो डिभाइस तपाईंको सङ्गठनको स्वामित्वमा छ"</string>
@@ -460,7 +463,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"वालेट"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"फोनमार्फत अझ छिटो र थप सुरक्षित तरिकाले खरिद गर्न भुक्तानी विधि सेटअप गर्नुहोस्"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"सबै देखाइयोस्"</string>
-    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"कार्ड हाल्नुहोस्"</string>
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"खोल्न ट्याप गर्नुहोस्"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"अपडेट गरिँदै छ"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"यो वालेट प्रयोग गर्न डिभाइस अनलक गर्नुहोस्"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"तपाईंका कार्डहरू प्राप्त गर्ने क्रममा समस्या भयो, कृपया पछि फेरि प्रयास गर्नुहोस्"</string>
@@ -718,10 +721,9 @@
     <string name="slice_permission_deny" msgid="6870256451658176895">"अस्वीकार गर्नु…"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"ब्याट्री सेभरको समयतालिका बनाउन ट्याप गर्नुहोस्"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"ब्याट्री सकिने सम्भावना भएमा अन गर्नुहोस्"</string>
-    <string name="no_auto_saver_action" msgid="7467924389609773835">"पर्दैन धन्यवाद"</string>
+    <string name="no_auto_saver_action" msgid="7467924389609773835">"पर्दैन, धन्यवाद"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
-    <!-- no translation found for ongoing_privacy_dialog_a11y_title (2205794093673327974) -->
-    <skip />
+    <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"प्रयोगमा छ"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"एपहरूले तपाईंको <xliff:g id="TYPES_LIST">%s</xliff:g> प्रयोग गर्दै छन्‌।"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" र "</string>
@@ -819,7 +821,6 @@
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g> मा प्ले गर्न आफ्नो डिभाइस नजिकै लैजानुहोस्"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"तपाईं यहाँ प्ले गर्न चाहनुहुन्छ भने आफ्नो डिभाइसलाई <xliff:g id="DEVICENAME">%1$s</xliff:g> नजिकै लैजानुहोस्"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g> मा प्ले गरिँदै छ"</string>
-    <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"यो फोनमा प्ले गरिँदै छ"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"केही चिज गडबड भयो। फेरि प्रयास गर्नुहोस्।"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"निष्क्रिय छ, एप जाँच गर्नु…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"फेला परेन"</string>
@@ -840,6 +841,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"यो सत्र कास्ट गर्न चाहनुहुन्छ भने कृपया एप खोल्नुहोस्।"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"अज्ञात एप"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"कास्ट गर्न छाड्नुहोस्"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"प्रसारण गर्ने सुविधाले कसरी काम गर्छ"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"प्रसारण"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"कम्प्याटिबल ब्लुटुथ डिभाइस भएका नजिकैका मान्छेहरू तपाईंले प्रसारण गरिरहनुभएको मिडिया सुन्न सक्छन्"</string>
@@ -849,10 +852,8 @@
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"सेभ गर्नुहोस्"</string>
     <string name="media_output_broadcast_starting" msgid="8130153654166235557">"सुरु गरिँदै छ…"</string>
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"प्रसारण गर्न सकिएन"</string>
-    <!-- no translation found for media_output_broadcast_update_error (1420868236079122521) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_last_update_error (5484328807296895491) -->
-    <skip />
+    <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"सेभ गर्न सकिएन। फेरि प्रयास गर्नुहोस्।"</string>
+    <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"सेभ गर्न सकिएन।"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"बिल्ड नम्बर"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"बिल्ड नम्बर कपी गरी क्लिपबोर्डमा सारियो।"</string>
     <string name="basic_status" msgid="2315371112182658176">"वार्तालाप खोल्नुहोस्"</string>
@@ -937,6 +938,13 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"कपी गरिएको टेक्स्ट सम्पादन गर्नुहोस्"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"कपी गरिएको फोटो सम्पादन गर्नुहोस्"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"नजिकैको डिभाइसमा पठाउनुहोस्"</string>
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"हेर्न ट्याप गर्नुहोस्"</string>
+    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
+    <skip />
+    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
+    <skip />
+    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
+    <skip />
     <string name="add" msgid="81036585205287996">"हाल्नुहोस्"</string>
     <string name="manage_users" msgid="1823875311934643849">"प्रयोगकर्ताहरूको व्यवस्थापन गर्नुहोस्"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"यो सूचना ड्र्याग गरेर स्प्लिटस्क्रिनमा लैजान मिल्दैन।"</string>

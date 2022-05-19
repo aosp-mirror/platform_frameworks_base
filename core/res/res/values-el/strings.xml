@@ -2281,5 +2281,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Έλεγχος ενεργών εφαρμογών"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Δεν είναι δυνατή η πρόσβαση στην κάμερα του τηλεφώνου από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Δεν είναι δυνατή η πρόσβαση στην κάμερα του tablet από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"Γλώσσα συστήματος"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Προεπιλογή συστήματος"</string>
 </resources>

@@ -2281,5 +2281,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Periksa aplikasi aktif"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Tidak dapat mengakses kamera ponsel dari <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Tidak dapat mengakses kamera tablet dari <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"Bahasa sistem"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Default sistem"</string>
 </resources>

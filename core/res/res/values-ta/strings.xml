@@ -2281,5 +2281,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"செயலிலுள்ள ஆப்ஸைப் பாருங்கள்"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"உங்கள் <xliff:g id="DEVICE">%1$s</xliff:g> சாதனத்திலிருந்து மொபைலின் கேமராவை அணுக முடியாது"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"உங்கள் <xliff:g id="DEVICE">%1$s</xliff:g> சாதனத்திலிருந்து டேப்லெட்டின் கேமராவை அணுக முடியாது"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"சிஸ்டம் மொழி"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"சிஸ்டத்தின் இயல்பு"</string>
 </resources>
