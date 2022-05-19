@@ -169,6 +169,9 @@ public final class NotificationEntry extends ListEntry {
      */
     private boolean hasSentReply;
 
+    private boolean mSensitive = true;
+    private List<OnSensitivityChangedListener> mOnSensitivityChangedListeners = new ArrayList<>();
+
     private boolean mAutoHeadsUp;
     private boolean mPulseSupressed;
     private int mBucket = BUCKET_ALERTING;
@@ -864,29 +867,33 @@ public final class NotificationEntry extends ListEntry {
     }
 
     /**
-     * Returns the visibility of this notification on the lockscreen, taking into account both the
-     * notification's defined visibility, as well as the visibility override as determined by the
-     * device policy.
+     * Set this notification to be sensitive.
+     *
+     * @param sensitive true if the content of this notification is sensitive right now
+     * @param deviceSensitive true if the device in general is sensitive right now
      */
-    public int getLockscreenVisibility() {
-        int setting = mRanking.getLockscreenVisibilityOverride();
-        if (setting == Ranking.VISIBILITY_NO_OVERRIDE) {
-            setting = mSbn.getNotification().visibility;
+    public void setSensitive(boolean sensitive, boolean deviceSensitive) {
+        getRow().setSensitive(sensitive, deviceSensitive);
+        if (sensitive != mSensitive) {
+            mSensitive = sensitive;
+            for (int i = 0; i < mOnSensitivityChangedListeners.size(); i++) {
+                mOnSensitivityChangedListeners.get(i).onSensitivityChanged(this);
+            }
         }
-        return setting;
     }
 
-    /**
-     * Does this notification contain sensitive content? If the user's settings specify, then this
-     * content would need to be redacted when the device this public.
-     *
-     * NOTE: If the notification's visibility setting is VISIBILITY_SECRET, then this will return
-     * false; SECRET notifications are omitted entirely when the device is public, so effectively
-     * the contents of the notification are not sensitive whenever the notification is actually
-     * visible.
-     */
-    public boolean hasSensitiveContents() {
-        return getLockscreenVisibility() == Notification.VISIBILITY_PRIVATE;
+    public boolean isSensitive() {
+        return mSensitive;
+    }
+
+    /** Add a listener to be notified when the entry's sensitivity changes. */
+    public void addOnSensitivityChangedListener(OnSensitivityChangedListener listener) {
+        mOnSensitivityChangedListeners.add(listener);
+    }
+
+    /** Remove a listener that was registered above. */
+    public void removeOnSensitivityChangedListener(OnSensitivityChangedListener listener) {
+        mOnSensitivityChangedListeners.remove(listener);
     }
 
     public boolean isPulseSuppressed() {
@@ -945,6 +952,12 @@ public final class NotificationEntry extends ListEntry {
             this.originalText = originalText;
             this.index = index;
         }
+    }
+
+    /** Listener interface for {@link #addOnSensitivityChangedListener} */
+    public interface OnSensitivityChangedListener {
+        /** Called when the sensitivity changes */
+        void onSensitivityChanged(@NonNull NotificationEntry entry);
     }
 
     /** @see #getDismissState() */
