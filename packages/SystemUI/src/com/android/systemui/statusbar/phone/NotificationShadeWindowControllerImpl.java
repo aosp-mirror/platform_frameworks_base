@@ -502,7 +502,8 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             cb.onStateChanged(mCurrentState.mKeyguardShowing,
                     mCurrentState.mKeyguardOccluded,
                     mCurrentState.mBouncerShowing,
-                    mCurrentState.mDozing);
+                    mCurrentState.mDozing,
+                    mCurrentState.mPanelExpanded);
         }
     }
 

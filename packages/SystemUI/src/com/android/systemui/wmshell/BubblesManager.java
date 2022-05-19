@@ -78,6 +78,7 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.No
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.phone.ShadeController;
+import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -121,6 +122,7 @@ public class BubblesManager implements Dumpable {
     private final Bubbles.SysuiProxy mSysuiProxy;
     // TODO (b/145659174): allow for multiple callbacks to support the "shadow" new notif pipeline
     private final List<NotifCallback> mCallbacks = new ArrayList<>();
+    private final StatusBarWindowCallback mStatusBarWindowCallback;
 
     /**
      * Creates {@link BubblesManager}, returns {@code null} if Optional {@link Bubbles} not present
@@ -273,9 +275,15 @@ public class BubblesManager implements Dumpable {
 
                 });
 
+        // Store callback in a field so it won't get GC'd
+        mStatusBarWindowCallback =
+                (keyguardShowing, keyguardOccluded, bouncerShowing, isDozing, panelExpanded) ->
+                        mBubbles.onNotificationPanelExpandedChanged(panelExpanded);
+        notificationShadeWindowController.registerCallback(mStatusBarWindowCallback);
+
         mSysuiProxy = new Bubbles.SysuiProxy() {
             @Override
-            public void isNotificationShadeExpand(Consumer<Boolean> callback) {
+            public void isNotificationPanelExpand(Consumer<Boolean> callback) {
                 sysuiMainExecutor.execute(() -> {
                     callback.accept(mNotificationShadeWindowController.getPanelExpanded());
                 });

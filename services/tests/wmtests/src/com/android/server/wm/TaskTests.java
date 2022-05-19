@@ -31,7 +31,6 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-import static android.util.DisplayMetrics.DENSITY_DEFAULT;
 import static android.view.IWindowManager.FIXED_TO_USER_ROTATION_ENABLED;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_90;
@@ -497,34 +496,6 @@ public class TaskTests extends WindowTestsBase {
         assertEquals(reqBounds.height(), task.getBounds().height());
     }
 
-    /** Tests that the task bounds adjust properly to changes between FULLSCREEN and FREEFORM */
-    @Test
-    public void testBoundsOnModeChangeFreeformToFullscreen() {
-        DisplayContent display = mAtm.mRootWindowContainer.getDefaultDisplay();
-        Task rootTask = new TaskBuilder(mSupervisor).setDisplay(display).setCreateActivity(true)
-                .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
-        Task task = rootTask.getBottomMostTask();
-        task.getRootActivity().setOrientation(SCREEN_ORIENTATION_UNSPECIFIED);
-        DisplayInfo info = new DisplayInfo();
-        display.mDisplay.getDisplayInfo(info);
-        final Rect fullScreenBounds = new Rect(0, 0, info.logicalWidth, info.logicalHeight);
-        final Rect freeformBounds = new Rect(fullScreenBounds);
-        freeformBounds.inset((int) (freeformBounds.width() * 0.2),
-                (int) (freeformBounds.height() * 0.2));
-        task.setBounds(freeformBounds);
-
-        assertEquals(freeformBounds, task.getBounds());
-
-        // FULLSCREEN inherits bounds
-        rootTask.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
-        assertEquals(fullScreenBounds, task.getBounds());
-        assertEquals(freeformBounds, task.mLastNonFullscreenBounds);
-
-        // FREEFORM restores bounds
-        rootTask.setWindowingMode(WINDOWING_MODE_FREEFORM);
-        assertEquals(freeformBounds, task.getBounds());
-    }
-
     /**
      * Tests that a task with forced orientation has orientation-consistent bounds within the
      * parent.
@@ -590,6 +561,7 @@ public class TaskTests extends WindowTestsBase {
 
         // FULLSCREEN letterboxes bounds on activity level, no constraint on task level.
         rootTask.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        rootTask.setBounds(null);
         assertThat(task.getBounds().height()).isGreaterThan(task.getBounds().width());
         assertThat(top.getBounds().width()).isGreaterThan(top.getBounds().height());
         assertEquals(fullScreenBoundsPort, task.getBounds());
@@ -667,8 +639,6 @@ public class TaskTests extends WindowTestsBase {
         final Task task = new TaskBuilder(mSupervisor).setDisplay(display).build();
         final Configuration inOutConfig = new Configuration();
         final Configuration parentConfig = new Configuration();
-        final int longSide = 1200;
-        final int shortSide = 600;
         final Rect parentBounds = new Rect(0, 0, 250, 500);
         final Rect parentAppBounds = new Rect(0, 0, 250, 480);
         parentConfig.windowConfiguration.setBounds(parentBounds);
@@ -689,14 +659,17 @@ public class TaskTests extends WindowTestsBase {
         // If bounds are overridden, config properties should be made to match. Surface hierarchy
         // will crop for policy.
         inOutConfig.setToDefaults();
+        final int longSide = 960;
+        final int shortSide = 540;
+        parentConfig.densityDpi = 192;
         final Rect largerPortraitBounds = new Rect(0, 0, shortSide, longSide);
         inOutConfig.windowConfiguration.setBounds(largerPortraitBounds);
         task.computeConfigResourceOverrides(inOutConfig, parentConfig);
         // The override bounds are beyond the parent, the out appBounds should not be intersected
         // by parent appBounds.
         assertEquals(largerPortraitBounds, inOutConfig.windowConfiguration.getAppBounds());
-        assertEquals(longSide, inOutConfig.screenHeightDp * parentConfig.densityDpi / 160);
-        assertEquals(shortSide, inOutConfig.screenWidthDp * parentConfig.densityDpi / 160);
+        assertEquals(800, inOutConfig.screenHeightDp); // 960/(192/160) = 800
+        assertEquals(450, inOutConfig.screenWidthDp); // 540/(192/160) = 450
 
         inOutConfig.setToDefaults();
         // Landscape bounds.
@@ -716,16 +689,17 @@ public class TaskTests extends WindowTestsBase {
         // Without limiting to be inside the parent bounds, the out screen size should keep relative
         // to the input bounds.
         final ActivityRecord activity = new ActivityBuilder(mAtm).setTask(task).build();
-        final ActivityRecord.CompatDisplayInsets compatIntsets =
+        final ActivityRecord.CompatDisplayInsets compatInsets =
                 new ActivityRecord.CompatDisplayInsets(
                         display, activity, /* fixedOrientationBounds= */ null);
-        task.computeConfigResourceOverrides(inOutConfig, parentConfig, compatIntsets);
+        task.computeConfigResourceOverrides(inOutConfig, parentConfig, compatInsets);
 
         assertEquals(largerLandscapeBounds, inOutConfig.windowConfiguration.getAppBounds());
-        assertEquals((shortSide - statusBarHeight) * DENSITY_DEFAULT / parentConfig.densityDpi,
-                inOutConfig.screenHeightDp);
-        assertEquals(longSide * DENSITY_DEFAULT / parentConfig.densityDpi,
-                inOutConfig.screenWidthDp);
+        final float density = parentConfig.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
+        final int expectedHeightDp = (int) ((shortSide - statusBarHeight) / density + 0.5f);
+        assertEquals(expectedHeightDp, inOutConfig.screenHeightDp);
+        final int expectedWidthDp = (int) (longSide / density + 0.5f);
+        assertEquals(expectedWidthDp, inOutConfig.screenWidthDp);
         assertEquals(Configuration.ORIENTATION_LANDSCAPE, inOutConfig.orientation);
     }
 
