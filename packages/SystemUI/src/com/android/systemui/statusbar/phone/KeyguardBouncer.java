@@ -246,7 +246,7 @@ public class KeyguardBouncer {
     private void onFullyShown() {
         mFalsingCollector.onBouncerShown();
         if (mKeyguardViewController == null) {
-            Log.wtf(TAG, "onFullyShown when view was null");
+            Log.e(TAG, "onFullyShown when view was null");
         } else {
             mKeyguardViewController.onResume();
             mContainer.announceForAccessibility(
