@@ -8223,6 +8223,10 @@ public final class ViewRootImpl implements ViewParent,
      */
     @Override
     public void playSoundEffect(@SoundEffectConstants.SoundEffect int effectId) {
+        if ((mDisplay.getFlags() & Display.FLAG_TOUCH_FEEDBACK_DISABLED) != 0) {
+            return;
+        }
+
         checkThread();
 
         try {
@@ -8271,6 +8275,10 @@ public final class ViewRootImpl implements ViewParent,
      */
     @Override
     public boolean performHapticFeedback(int effectId, boolean always) {
+        if ((mDisplay.getFlags() & Display.FLAG_TOUCH_FEEDBACK_DISABLED) != 0) {
+            return false;
+        }
+
         try {
             return mWindowSession.performHapticFeedback(effectId, always);
         } catch (RemoteException e) {
