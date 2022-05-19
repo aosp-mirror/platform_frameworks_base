@@ -3195,6 +3195,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
         hideStatusBarIconLocked();
         mInFullscreenMode = false;
+        mWindowManagerInternal.setDismissImeOnBackKeyPressed(false);
     }
 
     @BinderThread
