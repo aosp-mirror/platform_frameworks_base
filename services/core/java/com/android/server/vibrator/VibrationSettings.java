@@ -98,7 +98,9 @@ final class VibrationSettings {
             Arrays.asList(
                     USAGE_RINGTONE,
                     USAGE_ALARM,
-                    USAGE_COMMUNICATION_REQUEST));
+                    USAGE_COMMUNICATION_REQUEST,
+                    USAGE_PHYSICAL_EMULATION,
+                    USAGE_HARDWARE_FEEDBACK));
 
     /**
      * Usage allowed for vibrations when {@link Settings.System#VIBRATE_ON} is disabled.

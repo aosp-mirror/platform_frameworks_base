@@ -305,10 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"mengakses kalendar"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"menghantar dan melihat mesej SMS"</string>
-    <!-- no translation found for permgrouplab_storage (17339216290379241) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (5378659041354582769) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="17339216290379241">"Fail"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"akses fail pada peranti anda"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Muzik dan audio"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"akses muzik dan audio pada peranti anda"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Foto dan video"</string>
@@ -1483,7 +1481,7 @@
     <string name="sync_binding_label" msgid="469249309424662147">"Penyegerakan"</string>
     <string name="accessibility_binding_label" msgid="1974602776545801715">"Kebolehaksesan"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"Kertas dinding"</string>
-    <string name="chooser_wallpaper" msgid="3082405680079923708">"Tukar kertas dinding"</string>
+    <string name="chooser_wallpaper" msgid="3082405680079923708">"Tukar hiasan latar"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"Pendengar pemberitahuan"</string>
     <string name="vr_listener_binding_label" msgid="8013112996671206429">"Pendengar VR"</string>
     <string name="condition_provider_service_binding_label" msgid="8490641013951857673">"Pembekal keadaan"</string>

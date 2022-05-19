@@ -45,8 +45,6 @@
     <string name="consent_back" msgid="2560683030046918882">"பின்செல்"</string>
     <string name="permission_sync_confirmation_title" msgid="667074294393493186">"ஆப்ஸ் அனுமதிகளை உங்கள் வாட்ச்சிற்கு மாற்றுதல்"</string>
     <string name="permission_sync_summary" msgid="8873391306499120778">"உங்கள் வாட்ச் அமைவை எளிதாக்க, உங்கள் மொபைலில் வழங்கியுள்ள அனுமதிகளையே அமைவின்போது வாட்ச்சில் நிறுவப்பட்ட ஆப்ஸும் பயன்படுத்தும்.\n\n உங்கள் வாட்ச்சிலுள்ள மைக்ரோஃபோன், இருப்பிடம் ஆகியவற்றுக்கான அணுகலும் இந்த அனுமதிகளில் அடங்கக்கூடும்."</string>
-    <!-- no translation found for vendor_icon_description (4445875290032225965) -->
-    <skip />
-    <!-- no translation found for vendor_header_button_description (6566660389500630608) -->
-    <skip />
+    <string name="vendor_icon_description" msgid="4445875290032225965">"ஆப்ஸ் ஐகான்"</string>
+    <string name="vendor_header_button_description" msgid="6566660389500630608">"கூடுதல் தகவல்கள் பட்டன்"</string>
 </resources>
