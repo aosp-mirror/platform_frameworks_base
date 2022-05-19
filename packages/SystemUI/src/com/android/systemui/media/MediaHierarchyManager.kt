@@ -45,6 +45,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.LargeScreenUtils
 import com.android.systemui.util.animation.UniqueObjectHostView
+import com.android.systemui.util.traceSection
 import javax.inject.Inject
 
 /**
@@ -582,7 +583,7 @@ class MediaHierarchyManager @Inject constructor(
     private fun updateDesiredLocation(
         forceNoAnimation: Boolean = false,
         forceStateUpdate: Boolean = false
-    ) {
+    ) = traceSection("MediaHierarchyManager#updateDesiredLocation") {
         val desiredLocation = calculateLocation()
         if (desiredLocation != this.desiredLocation || forceStateUpdate) {
             if (this.desiredLocation >= 0 && desiredLocation != this.desiredLocation) {
@@ -616,7 +617,10 @@ class MediaHierarchyManager @Inject constructor(
         }
     }
 
-    private fun performTransitionToNewLocation(isNewView: Boolean, animate: Boolean) {
+    private fun performTransitionToNewLocation(
+        isNewView: Boolean,
+        animate: Boolean
+    ) = traceSection("MediaHierarchyManager#performTransitionToNewLocation") {
         if (previousLocation < 0 || isNewView) {
             cancelAnimationAndApplyDesiredState()
             return
@@ -899,7 +903,7 @@ class MediaHierarchyManager @Inject constructor(
         alpha: Float,
         immediately: Boolean = false,
         clipBounds: Rect = EMPTY_RECT
-    ) {
+    ) = traceSection("MediaHierarchyManager#applyState") {
         currentBounds.set(bounds)
         currentClipping = clipBounds
         carouselAlpha = if (isCurrentlyFading()) alpha else 1.0f
@@ -922,7 +926,9 @@ class MediaHierarchyManager @Inject constructor(
         }
     }
 
-    private fun updateHostAttachment() {
+    private fun updateHostAttachment() = traceSection(
+        "MediaHierarchyManager#updateHostAttachment"
+    ) {
         var newLocation = resolveLocationForFading()
         var canUseOverlay = !isCurrentlyFading()
         if (isCrossFadeAnimatorRunning) {

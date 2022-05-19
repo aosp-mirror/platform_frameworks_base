@@ -305,10 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"カレンダーへのアクセス"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMSメッセージの送信と表示"</string>
-    <!-- no translation found for permgrouplab_storage (17339216290379241) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (5378659041354582769) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="17339216290379241">"ファイル"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"デバイス内のファイルへのアクセス"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"音楽とオーディオ"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"デバイス上の音楽とオーディオにアクセスする"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"写真と動画"</string>
@@ -1828,7 +1826,7 @@
     <string name="restr_pin_confirm_pin" msgid="7143161971614944989">"新しいPINの確認"</string>
     <string name="restr_pin_create_pin" msgid="917067613896366033">"制限を変更するためのPINを作成してください"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PIN が一致しません。もう一度お試しください。"</string>
-    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PINが短すぎます。4桁以上で作成してください。"</string>
+    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PINが短すぎます。4桁以上で設定してください。"</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"しばらくしてから再試行"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"全画面表示"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"終了するには、上から下にスワイプします。"</string>

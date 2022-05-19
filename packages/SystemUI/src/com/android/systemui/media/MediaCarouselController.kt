@@ -32,6 +32,7 @@ import com.android.systemui.util.animation.UniqueObjectHostView
 import com.android.systemui.util.animation.requiresRemeasuring
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.time.SystemClock
+import com.android.systemui.util.traceSection
 import java.io.PrintWriter
 import java.util.TreeMap
 import javax.inject.Inject
@@ -425,7 +426,7 @@ class MediaCarouselController @Inject constructor(
         oldKey: String?,
         data: MediaData,
         isSsReactivated: Boolean
-    ): Boolean {
+    ): Boolean = traceSection("MediaCarouselController#addOrUpdatePlayer") {
         MediaPlayerData.moveIfExists(oldKey, key)
         val existingPlayer = MediaPlayerData.getMediaPlayer(key)
         val curVisibleMediaKey = MediaPlayerData.playerKeys()
@@ -471,7 +472,7 @@ class MediaCarouselController @Inject constructor(
         key: String,
         data: SmartspaceMediaData,
         shouldPrioritize: Boolean
-    ) {
+    ) = traceSection("MediaCarouselController#addSmartspaceMediaRecommendations") {
         if (DEBUG) Log.d(TAG, "Updating smartspace target in carousel")
         if (MediaPlayerData.getMediaPlayer(key) != null) {
             Log.w(TAG, "Skip adding smartspace target in carousel")
@@ -698,7 +699,7 @@ class MediaCarouselController @Inject constructor(
         animate: Boolean,
         duration: Long = 200,
         startDelay: Long = 0
-    ) {
+    ) = traceSection("MediaCarouselController#onDesiredLocationChanged") {
         desiredHostState?.let {
             if (this.desiredLocation != desiredLocation) {
                 // Only log an event when location changes
