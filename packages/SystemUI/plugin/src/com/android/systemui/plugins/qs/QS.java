@@ -33,7 +33,7 @@ public interface QS extends FragmentBase {
 
     String ACTION = "com.android.systemui.action.PLUGIN_QS";
 
-    int VERSION = 14;
+    int VERSION = 15;
 
     String TAG = "QS";
 
@@ -50,6 +50,14 @@ public interface QS extends FragmentBase {
     void setOverscrolling(boolean overscrolling);
     void setExpanded(boolean qsExpanded);
     void setListening(boolean listening);
+
+    /**
+     * Set whether QQS/QS is visible or not.
+     *
+     * This is different from setExpanded, as it will be true when QQS is visible. In particular,
+     * it should be false when device is locked and only notifications (in lockscreen) are visible.
+     */
+    void setQsVisible(boolean qsVisible);
     boolean isShowingDetail();
     void closeDetail();
     void animateHeaderSlidingOut();

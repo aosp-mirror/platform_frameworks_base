@@ -144,7 +144,7 @@ class TaskChangeNotificationController {
     };
 
     private final TaskStackConsumer mNotifyTaskProfileLocked = (l, m) -> {
-        l.onTaskProfileLocked(m.arg1, m.arg2);
+        l.onTaskProfileLocked((RunningTaskInfo) m.obj);
     };
 
     private final TaskStackConsumer mNotifyTaskSnapshotChanged = (l, m) -> {
@@ -467,9 +467,9 @@ class TaskChangeNotificationController {
      * Notify listeners that the task has been put in a locked state because one or more of the
      * activities inside it belong to a managed profile user that has been locked.
      */
-    void notifyTaskProfileLocked(int taskId, int userId) {
-        final Message msg = mHandler.obtainMessage(NOTIFY_TASK_PROFILE_LOCKED_LISTENERS_MSG, taskId,
-                userId);
+    void notifyTaskProfileLocked(ActivityManager.RunningTaskInfo taskInfo) {
+        final Message msg = mHandler.obtainMessage(NOTIFY_TASK_PROFILE_LOCKED_LISTENERS_MSG,
+                taskInfo);
         forAllLocalListeners(mNotifyTaskProfileLocked, msg);
         msg.sendToTarget();
     }

@@ -57,6 +57,8 @@
             android:layout_height="wrap_content"
             android:animateLayoutChanges="true">
             <include layout="@layout/overlay_action_chip"
+                     android:id="@+id/share_chip"/>
+            <include layout="@layout/overlay_action_chip"
                      android:id="@+id/remote_copy_chip"/>
             <include layout="@layout/overlay_action_chip"
                      android:id="@+id/edit_chip"/>
@@ -131,18 +133,6 @@
             android:text="@string/clipboard_text_hidden"
             android:textColor="?attr/overlayButtonTextColor"
             android:background="?androidprv:attr/colorAccentSecondary"
-            android:layout_width="@dimen/clipboard_preview_size"
-            android:layout_height="@dimen/clipboard_preview_size"/>
-        <TextView
-            android:id="@+id/hidden_image_preview"
-            android:visibility="gone"
-            android:textFontWeight="500"
-            android:padding="8dp"
-            android:gravity="center"
-            android:textSize="14sp"
-            android:text="@string/clipboard_text_hidden"
-            android:textColor="#ffffff"
-            android:background="#000000"
             android:layout_width="@dimen/clipboard_preview_size"
             android:layout_height="@dimen/clipboard_preview_size"/>
     </FrameLayout>
