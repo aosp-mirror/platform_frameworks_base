@@ -316,29 +316,28 @@ final class HotwordDetectionConnection {
                 // TODO: (b/181842909) Report an error to voice interactor
                 Slog.w(TAG, "Failed to updateState for HotwordDetectionService", e);
             }
-            return future;
-        }).orTimeout(MAX_UPDATE_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)
-                .whenComplete((res, err) -> {
-                    if (err instanceof TimeoutException) {
-                        Slog.w(TAG, "updateState timed out");
-                        if (mUpdateStateAfterStartFinished.getAndSet(true)) {
-                            return;
-                        }
-                        try {
-                            mCallback.onStatusReported(INITIALIZATION_STATUS_UNKNOWN);
-                            HotwordMetricsLogger.writeServiceInitResultEvent(mDetectorType,
-                                    METRICS_INIT_UNKNOWN_TIMEOUT);
-                        } catch (RemoteException e) {
-                            Slog.w(TAG, "Failed to report initialization status UNKNOWN", e);
-                            HotwordMetricsLogger.writeServiceInitResultEvent(mDetectorType,
-                                    METRICS_INIT_CALLBACK_STATE_ERROR);
-                        }
-                    } else if (err != null) {
-                        Slog.w(TAG, "Failed to update state: " + err);
-                    } else {
-                        // NOTE: so far we don't need to take any action.
-                    }
-                });
+            return future.orTimeout(MAX_UPDATE_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+        }).whenComplete((res, err) -> {
+            if (err instanceof TimeoutException) {
+                Slog.w(TAG, "updateState timed out");
+                if (mUpdateStateAfterStartFinished.getAndSet(true)) {
+                    return;
+                }
+                try {
+                    mCallback.onStatusReported(INITIALIZATION_STATUS_UNKNOWN);
+                    HotwordMetricsLogger.writeServiceInitResultEvent(mDetectorType,
+                            METRICS_INIT_UNKNOWN_TIMEOUT);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to report initialization status UNKNOWN", e);
+                    HotwordMetricsLogger.writeServiceInitResultEvent(mDetectorType,
+                            METRICS_INIT_CALLBACK_STATE_ERROR);
+                }
+            } else if (err != null) {
+                Slog.w(TAG, "Failed to update state: " + err);
+            } else {
+                // NOTE: so far we don't need to take any action.
+            }
+        });
     }
 
     private static Pair<Integer, Integer> getInitStatusAndMetricsResult(Bundle bundle) {
