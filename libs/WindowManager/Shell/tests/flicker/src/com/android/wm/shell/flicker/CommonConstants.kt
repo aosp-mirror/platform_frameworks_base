@@ -22,3 +22,4 @@ import com.android.server.wm.traces.common.FlickerComponentName
 const val SYSTEM_UI_PACKAGE_NAME = "com.android.systemui"
 val APP_PAIR_SPLIT_DIVIDER_COMPONENT = FlickerComponentName("", "AppPairSplitDivider#")
 val DOCKED_STACK_DIVIDER_COMPONENT = FlickerComponentName("", "DockedStackDivider#")
+val SPLIT_SCREEN_DIVIDER_COMPONENT = FlickerComponentName("", "StageCoordinatorSplitDivider#")
