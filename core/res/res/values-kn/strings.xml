@@ -1243,7 +1243,7 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> ಸಿದ್ಧಪಡಿಸಲಾಗುತ್ತಿದೆ."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಪ್ರಾರಂಭಿಸಲಾಗುತ್ತಿದೆ."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"ಬೂಟ್ ಪೂರ್ಣಗೊಳಿಸಲಾಗುತ್ತಿದೆ."</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"ಸೆಟಪ್ ಮುಂದುವರಿಸಬೇಕೆ?"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"ಸೆಟ್ ಮಾಡುವುದನ್ನು ಮುಂದುವರಿಸಬೇಕೇ?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"ನೀವು ಪವರ್ ಬಟನ್ ಒತ್ತಿದ್ದೀರಿ — ಇದು ಸಾಮಾನ್ಯವಾಗಿ ಸ್ಕ್ರೀನ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸುತ್ತದೆ.\n\nನಿಮ್ಮ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್ನು ಹೊಂದಿಸುವಾಗ ಲಘುವಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಲು ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"ಸ್ಕ್ರೀನ್ ಆಫ್ ಮಾಡಿ"</string>
     <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"ಸೆಟಪ್ ಮುಂದುವರಿಸಿ"</string>

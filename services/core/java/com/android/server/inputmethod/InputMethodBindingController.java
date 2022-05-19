@@ -91,13 +91,6 @@ final class InputMethodBindingController {
                     | Context.BIND_NOT_FOREGROUND
                     | Context.BIND_IMPORTANT_BACKGROUND;
     /**
-     * Binding flags for establishing connection to the {@link InputMethodService} when
-     * config_killableInputMethods is enabled.
-     */
-    private static final int IME_CONNECTION_LOW_PRIORITY_BIND_FLAGS =
-            Context.BIND_AUTO_CREATE
-                    | Context.BIND_REDUCTION_FLAGS;
-    /**
      * Binding flags used only while the {@link InputMethodService} is showing window.
      */
     private static final int IME_VISIBLE_BIND_FLAGS =
@@ -108,16 +101,6 @@ final class InputMethodBindingController {
                     | Context.BIND_SHOWING_UI
                     | Context.BIND_SCHEDULE_LIKE_TOP_APP;
 
-    /**
-     * Binding flags for establishing connection to the {@link InputMethodService}.
-     *
-     * <p>
-     * This defaults to {@link InputMethodBindingController#IME_CONNECTION_BIND_FLAGS} unless
-     * config_killableInputMethods is enabled, in which case this takes the value of
-     * {@link InputMethodBindingController#IME_CONNECTION_LOW_PRIORITY_BIND_FLAGS}.
-     */
-    private final int mImeConnectionBindFlags;
-
     InputMethodBindingController(@NonNull InputMethodManagerService service) {
         mService = service;
         mContext = mService.mContext;
@@ -127,17 +110,6 @@ final class InputMethodBindingController {
         mIWindowManager = mService.mIWindowManager;
         mWindowManagerInternal = mService.mWindowManagerInternal;
         mRes = mService.mRes;
-
-        // If configured, use low priority flags to make the IME killable by the lowmemorykiller
-        final boolean lowerIMEPriority = mRes.getBoolean(
-                com.android.internal.R.bool.config_killableInputMethods);
-
-        if (lowerIMEPriority) {
-            mImeConnectionBindFlags =
-                    InputMethodBindingController.IME_CONNECTION_LOW_PRIORITY_BIND_FLAGS;
-        } else {
-            mImeConnectionBindFlags = InputMethodBindingController.IME_CONNECTION_BIND_FLAGS;
-        }
     }
 
     /**
@@ -500,8 +472,7 @@ final class InputMethodBindingController {
 
     @GuardedBy("ImfLock.class")
     private boolean bindCurrentInputMethodServiceMainConnection() {
-        mHasConnection = bindCurrentInputMethodService(mMainConnection,
-                mImeConnectionBindFlags);
+        mHasConnection = bindCurrentInputMethodService(mMainConnection, IME_CONNECTION_BIND_FLAGS);
         return mHasConnection;
     }
 
