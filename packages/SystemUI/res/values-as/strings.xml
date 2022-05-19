@@ -952,12 +952,9 @@
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"প্ৰতিলিপি কৰা প্ৰতিচ্ছবি সম্পাদনা কৰক"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"নিকটৱৰ্তী ডিভাইচলৈ পঠাওক"</string>
     <string name="clipboard_text_hidden" msgid="7926899867471812305">"চাবলৈ টিপক"</string>
-    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
-    <skip />
-    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
-    <skip />
-    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
-    <skip />
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"পাঠ প্ৰতিলিপি কৰা হ’ল"</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"প্ৰতিচ্ছবি প্ৰতিলিপি কৰা হ’ল"</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"সমল প্ৰতিলিপি কৰা হ’ল"</string>
     <string name="add" msgid="81036585205287996">"যোগ দিয়ক"</string>
     <string name="manage_users" msgid="1823875311934643849">"ব্যৱহাৰকাৰী পৰিচালনা কৰক"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"এই জাননীটোৱে টানি আনি এৰাৰ পৰা বিভাজিত স্ক্ৰীন সমৰ্থন নকৰে।"</string>
@@ -966,12 +963,10 @@
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"এলাৰ্ম ছেট কৰা হ’ল"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"কেমেৰা আৰু মাইক অফ হৈ আছে"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# টা জাননী}one{# টা জাননী}other{# টা জাননী}}"</string>
-    <!-- no translation found for broadcasting_description_is_broadcasting (765627502786404290) -->
-    <skip />
+    <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"সম্প্ৰচাৰণ"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ সম্প্ৰচাৰ কৰা বন্ধ কৰিবনে?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"যদি আপুনি <xliff:g id="SWITCHAPP">%1$s</xliff:g>ৰ সম্প্ৰচাৰ কৰে অথবা আউটপুট সলনি কৰে, তেন্তে, আপোনাৰ বৰ্তমানৰ সম্প্ৰচাৰ বন্ধ হৈ যাব"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> সম্প্ৰচাৰ কৰক"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"আউটপুট সলনি কৰক"</string>
-    <!-- no translation found for bt_le_audio_broadcast_dialog_unknown_name (3791472237793443044) -->
-    <skip />
+    <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"অজ্ঞাত"</string>
 </resources>

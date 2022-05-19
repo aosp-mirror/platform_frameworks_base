@@ -2397,7 +2397,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         sl = reduceConfigLayout(sl, Surface.ROTATION_90, density, unrotDh, unrotDw, uiMode);
         sl = reduceConfigLayout(sl, Surface.ROTATION_180, density, unrotDw, unrotDh, uiMode);
         sl = reduceConfigLayout(sl, Surface.ROTATION_270, density, unrotDh, unrotDw, uiMode);
-        outConfig.smallestScreenWidthDp = (int)(displayInfo.smallestNominalAppWidth / density);
+        outConfig.smallestScreenWidthDp =
+                (int) (displayInfo.smallestNominalAppWidth / density + 0.5f);
         outConfig.screenLayout = sl;
     }
 
@@ -2419,8 +2420,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             longSize = shortSize;
             shortSize = tmp;
         }
-        longSize = (int)(longSize/density);
-        shortSize = (int)(shortSize/density);
+        longSize = (int) (longSize / density + 0.5f);
+        shortSize = (int) (shortSize / density + 0.5f);
         return Configuration.reduceScreenLayout(curLayout, longSize, shortSize);
     }
 

@@ -125,6 +125,12 @@ public final class DataFailCause {
     public static final int UNSUPPORTED_QCI_VALUE = 0x3B;
     /** Procedure requested by the UE was rejected because the bearer handling is not supported. */
     public static final int BEARER_HANDLING_NOT_SUPPORTED = 0x3C;
+    /**
+     * This cause is used to report a service or option not available event only when no other
+     * cause in the service or option not available class applies.
+     * @hide // TODO: Unhide in U.
+     */
+    public static final int SERVICE_OR_OPTION_NOT_AVAILABLE = 0x3F;
     /** Max number of Packet Data Protocol (PDP) context reached. */
     public static final int ACTIVE_PDP_CONTEXT_MAX_NUMBER_REACHED = 0x41;
     /** Unsupported APN in current public land mobile network (PLMN). */
@@ -1135,6 +1141,7 @@ public final class DataFailCause {
         sFailCauseMap.put(ONLY_NON_IP_ALLOWED, "ONLY_NON_IP_ALLOWED");
         sFailCauseMap.put(UNSUPPORTED_QCI_VALUE, "UNSUPPORTED_QCI_VALUE");
         sFailCauseMap.put(BEARER_HANDLING_NOT_SUPPORTED, "BEARER_HANDLING_NOT_SUPPORTED");
+        sFailCauseMap.put(SERVICE_OR_OPTION_NOT_AVAILABLE, "SERVICE_OR_OPTION_NOT_AVAILABLE");
         sFailCauseMap.put(ACTIVE_PDP_CONTEXT_MAX_NUMBER_REACHED,
                 "ACTIVE_PDP_CONTEXT_MAX_NUMBER_REACHED");
         sFailCauseMap.put(UNSUPPORTED_APN_IN_CURRENT_PLMN,

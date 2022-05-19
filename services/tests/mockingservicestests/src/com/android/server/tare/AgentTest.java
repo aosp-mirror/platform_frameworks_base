@@ -46,6 +46,8 @@ public class AgentTest {
     @Mock
     private CompleteEconomicPolicy mEconomicPolicy;
     @Mock
+    private Analyst mAnalyst;
+    @Mock
     private Context mContext;
     @Mock
     private InternalResourceService mIrs;
@@ -53,8 +55,8 @@ public class AgentTest {
     private Scribe mScribe;
 
     private static class MockScribe extends Scribe {
-        MockScribe(InternalResourceService irs) {
-            super(irs);
+        MockScribe(InternalResourceService irs, Analyst analyst) {
+            super(irs, analyst);
         }
 
         @Override
@@ -74,7 +76,7 @@ public class AgentTest {
         doReturn(mEconomicPolicy).when(mIrs).getCompleteEconomicPolicyLocked();
         doReturn(mIrs).when(mIrs).getLock();
         doReturn(mock(AlarmManager.class)).when(mContext).getSystemService(Context.ALARM_SERVICE);
-        mScribe = new MockScribe(mIrs);
+        mScribe = new MockScribe(mIrs, mAnalyst);
     }
 
     @After
@@ -86,7 +88,7 @@ public class AgentTest {
 
     @Test
     public void testRecordTransaction_UnderMax() {
-        Agent agent = new Agent(mIrs, mScribe);
+        Agent agent = new Agent(mIrs, mScribe, mAnalyst);
         Ledger ledger = new Ledger();
 
         doReturn(1_000_000L).when(mIrs).getConsumptionLimitLocked();
@@ -115,7 +117,7 @@ public class AgentTest {
 
     @Test
     public void testRecordTransaction_MaxConsumptionLimit() {
-        Agent agent = new Agent(mIrs, mScribe);
+        Agent agent = new Agent(mIrs, mScribe, mAnalyst);
         Ledger ledger = new Ledger();
 
         doReturn(1000L).when(mIrs).getConsumptionLimitLocked();
@@ -162,7 +164,7 @@ public class AgentTest {
 
     @Test
     public void testRecordTransaction_MaxSatiatedBalance() {
-        Agent agent = new Agent(mIrs, mScribe);
+        Agent agent = new Agent(mIrs, mScribe, mAnalyst);
         Ledger ledger = new Ledger();
 
         doReturn(1_000_000L).when(mIrs).getConsumptionLimitLocked();
