@@ -32,6 +32,7 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_N
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_QUICK_SETTINGS_EXPANDED;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
+import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
 import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_FOLD_TO_AOD;
 import static com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManagerKt.STATE_CLOSED;
 import static com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManagerKt.STATE_OPEN;
@@ -3948,6 +3949,10 @@ public class NotificationPanelViewController extends PanelViewController {
         if (mKeyguardStatusBarViewController != null) {
             mKeyguardStatusBarViewController.dump(pw, args);
         }
+    }
+
+    public boolean hasActiveClearableNotifications() {
+        return mNotificationStackScrollLayoutController.hasActiveClearableNotifications(ROWS_ALL);
     }
 
     public RemoteInputController.Delegate createRemoteInputDelegate() {
