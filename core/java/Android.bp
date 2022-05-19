@@ -51,6 +51,12 @@ filegroup {
     srcs: ["android/tracing/TraceReportParams.aidl"],
 }
 
+filegroup {
+    name: "framework-internal-display-sources",
+    srcs: ["com/android/internal/display/BrightnessSynchronizer.java"],
+    visibility: ["//frameworks/base/services/tests/mockingservicestests"],
+}
+
 // These are subset of framework-core-sources that are needed by the
 // android.test.mock library. The implementation of android.test.mock references
 // private members of various components to allow mocking of classes that cannot
