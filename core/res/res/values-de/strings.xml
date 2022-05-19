@@ -305,8 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"auf deinen Kalender zugreifen"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS senden und abrufen"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"Dateien und Dokumente"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"Auf Dateien und Dokumente auf deinem Gerät zugreifen"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"Dateien"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"auf Dateien auf deinem Gerät zugreifen"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Musik und Audio"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"Zugriff auf Musik und Audio auf deinem Gerät"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotos und Videos"</string>
@@ -2286,5 +2286,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Aktive Apps prüfen"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Zugriff auf die Kamera des Smartphones über dein Gerät (<xliff:g id="DEVICE">%1$s</xliff:g>) nicht möglich"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Zugriff auf die Kamera des Tablets über dein Gerät (<xliff:g id="DEVICE">%1$s</xliff:g>) nicht möglich"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"Systemsprache"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Standardeinstellung des Systems"</string>
 </resources>

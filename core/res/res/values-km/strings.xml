@@ -305,8 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"ចូលប្រើប្រិតិទិនរបស់អ្នក"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"សារ SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"ផ្ញើ និងមើលសារ SMS"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"ឯកសារ"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"ចូលប្រើ​ឯកសារ​នៅលើ​ឧបករណ៍​របស់អ្នក"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"ឯកសារ"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"ចូលប្រើ​ប្រាស់ឯកសារ​នៅលើ​ឧបករណ៍​របស់អ្នក"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"តន្រ្តី និងសំឡេង"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"ចូលប្រើតន្ត្រី និងសំឡេងនៅលើឧបករណ៍របស់អ្នក"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"រូបថត និងវីដេអូ"</string>
@@ -1385,7 +1385,7 @@
     <string name="select_input_method" msgid="3971267998568587025">"ជ្រើស​វិធីសាស្ត្រ​បញ្ចូល"</string>
     <string name="show_ime" msgid="6406112007347443383">"ទុកវានៅលើអេក្រង់ខណៈពេលក្តារចុចពិតប្រាកដកំពុងសកម្ម"</string>
     <string name="hardware" msgid="1800597768237606953">"បង្ហាញក្ដារចុចនិម្មិត"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"កំណត់រចនាសម្ព័ន្ធក្តារចុចពិតប្រាកដ"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"កំណត់រចនាសម្ព័ន្ធក្តារចុច​រូបវន្ត"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"ប៉ះដើម្បីជ្រើសភាសា និងប្លង់"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1686,7 +1686,7 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"អនុញ្ញាតឱ្យ <xliff:g id="SERVICE">%1$s</xliff:g> មានសិទ្ធិគ្រប់គ្រងឧបករណ៍​របស់អ្នក​ទាំងស្រុងឬ?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"ការគ្រប់គ្រង​ទាំងស្រុងមានលក្ខណៈ​សមស្របសម្រាប់​កម្មវិធី ដែលជួយអ្នក​ទាក់ទងនឹងការប្រើមុខងារភាពងាយស្រួល ប៉ុន្តែមិនសមស្របសម្រាប់​កម្មវិធីភាគច្រើនទេ។"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"មើល និង​គ្រប់គ្រងអេក្រង់"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ការគ្រប់គ្រងអេក្រង់​អាចអានខ្លឹមសារទាំងអស់​នៅលើអេក្រង់ និងបង្ហាញខ្លឹមសារ​លើកម្មវិធីផ្សេងទៀត។"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"វា​អាចអានខ្លឹមសារទាំងអស់​នៅលើអេក្រង់ និងបង្ហាញខ្លឹមសារ​លើកម្មវិធីផ្សេងទៀត។"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"មើល និង​ធ្វើសកម្មភាព"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"វា​អាចតាមដានអន្តរកម្មរបស់អ្នកជាមួយនឹងកម្មវិធី ឬឧបករណ៍ចាប់​សញ្ញាហាតវែរ និងធ្វើអន្តរកម្ម​ជាមួយកម្មវិធីនានា​ជំនួសឱ្យអ្នក។"</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"អនុញ្ញាត"</string>
@@ -2286,5 +2286,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ពិនិត្យមើលកម្មវិធីសកម្ម"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"មិនអាច​ចូលប្រើ​កាមេរ៉ាទូរសព្ទ​ពី <xliff:g id="DEVICE">%1$s</xliff:g> របស់អ្នក​បានទេ"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"មិនអាច​ចូលប្រើ​កាមេរ៉ា​ថេប្លេតពី <xliff:g id="DEVICE">%1$s</xliff:g> របស់អ្នក​បានទេ"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"ភាសាប្រព័ន្ធ"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"លំនាំ​ដើម​ប្រព័ន្ធ"</string>
 </resources>

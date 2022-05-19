@@ -305,8 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"ଆପଣଙ୍କ କ୍ୟାଲେଣ୍ଡର୍‍ ଆକ୍ସେସ୍‍ କରେ"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS ମେସେଜ୍‍ ପଠାନ୍ତୁ ଓ ଦେଖନ୍ତୁ"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"ଫାଇଲ ଏବଂ ଡକ୍ୟୁମେଣ୍ଟଗୁଡ଼ିକ"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"ଆପଣଙ୍କ ଡିଭାଇସରେ ଥିବା ଫାଇଲ ଏବଂ ଡକ୍ୟୁମେଣ୍ଟଗୁଡ଼ିକୁ ଆକ୍ସେସ କରନ୍ତୁ"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"ଫାଇଲଗୁଡ଼ିକ"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"ଆପଣଙ୍କ ଡିଭାଇସରେ ଥିବା ଫାଇଲଗୁଡ଼ିକୁ ଆକ୍ସେସ କରନ୍ତୁ"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"ମ୍ୟୁଜିକ ଏବଂ ଅଡିଓ"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"ଆପଣଙ୍କ ଡିଭାଇସରେ ମ୍ୟୁଜିକ ଏବଂ ଅଡିଓକୁ ଆକ୍ସେସ କରନ୍ତୁ"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ଫଟୋ ଏବଂ ଭିଡିଓଗୁଡ଼ିକ"</string>
@@ -1688,7 +1688,7 @@
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"ଭ୍ୟୁ ଏବଂ ସ୍କ୍ରିନ୍‍ ନିୟନ୍ତ୍ରଣ"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ଏହା ସ୍କ୍ରିନ୍‍ର ସମସ୍ତ ବିଷୟବସ୍ତୁ ପଢ଼ିପାରେ ଏବଂ ଅନ୍ୟ ଆପ୍ସରେ ବିଷୟବସ୍ତୁ ପ୍ରଦର୍ଶନ କରିପାରେ।"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"ଦେଖନ୍ତୁ ଏବଂ କାର୍ଯ୍ୟ ସମ୍ପାଦନ କରନ୍ତୁ"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"ଏହା କୌଣସି ଆପ୍‍ କିମ୍ବା ହାର୍ଡୱେର୍‍ ସେନ୍ସର୍‍ ସହ ଆପଣଙ୍କର ପାରସ୍ପରିକ ଆଦାନପ୍ରଦାନକୁ ଟ୍ରାକ୍‍ କରିପାରେ ଏବଂ ଆପଣଙ୍କ ତରଫରୁ ଆପ୍ସ ସହ ପରିଚିତ ହୋଇପାରେ।"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"ଏହା କୌଣସି ଆପ କିମ୍ବା ହାର୍ଡୱେର ସେନ୍ସର ସହ ଆପଣଙ୍କର ଇଣ୍ଟେରାକ୍ସନକୁ ଟ୍ରାକ କରିପାରେ ଏବଂ ଆପଣଙ୍କ ତରଫରୁ ଆପ୍ସ ସହ ଇଣ୍ଟରାକ୍ଟ କରିପାରେ।"</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"ଅନୁମତି"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"ଅଗ୍ରାହ୍ୟ"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ଏକ ଫିଚର୍ ବ୍ୟବହାର କରିବା ଆରମ୍ଭ କରିବାକୁ ଏହାକୁ ଟାପ୍ କରନ୍ତୁ:"</string>
@@ -2286,5 +2286,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ସକ୍ରିୟ ଆପଗୁଡ଼ିକୁ ଯାଞ୍ଚ କରନ୍ତୁ"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରୁ ଫୋନର କ୍ୟାମେରାକୁ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରୁ ଟାବଲେଟର କ୍ୟାମେରାକୁ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"ସିଷ୍ଟମ ଭାଷା"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"ସିଷ୍ଟମ ଡିଫଲ୍ଟ"</string>
 </resources>

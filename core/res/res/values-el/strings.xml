@@ -305,8 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"έχει πρόσβαση στο ημερολόγιό σας"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"στέλνει και να διαβάζει μηνύματα SMS"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"Αρχεία και έγγραφα"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"πρόσβαση σε αρχεία και έγγραφα στη συσκευή σας"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"Αρχεία"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"πρόσβαση στα αρχεία της συσκευής σας"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Μουσική και ήχος"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"πρόσβαση στη μουσική και σε αρχεία ήχου στη συσκευή σας"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Φωτογραφίες και βίντεο"</string>
@@ -2286,5 +2286,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Έλεγχος ενεργών εφαρμογών"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Δεν είναι δυνατή η πρόσβαση στην κάμερα του τηλεφώνου από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Δεν είναι δυνατή η πρόσβαση στην κάμερα του tablet από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"Γλώσσα συστήματος"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Προεπιλογή συστήματος"</string>
 </resources>

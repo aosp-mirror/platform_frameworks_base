@@ -307,8 +307,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"атрымліваць доступ да вашага календара"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"адпраўляць і праглядаць SMS-паведамленні"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"Файлы і дакументы"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"доступ да файлаў і дакументаў на вашай прыладзе"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"Файлы"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"доступ да файлаў на вашай прыладзе"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Музыка і аўдыя"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"доступ да музыкі і аўдыя на вашай прыладзе"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Фота і відэа"</string>
@@ -2288,5 +2288,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Праверце актыўныя праграмы"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Не ўдалося атрымаць доступ да камеры тэлефона з прылады \"<xliff:g id="DEVICE">%1$s</xliff:g>\""</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Не ўдалося атрымаць доступ да камеры планшэта з прылады \"<xliff:g id="DEVICE">%1$s</xliff:g>\""</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"Сістэмная мова"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Стандартная сістэмная налада"</string>
 </resources>
