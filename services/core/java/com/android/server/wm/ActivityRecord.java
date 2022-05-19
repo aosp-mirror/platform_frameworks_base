@@ -926,6 +926,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     private final ActivityRecordInputSink mActivityRecordInputSink;
 
+    // Activities with this uid are allowed to not create an input sink while being in the same
+    // task and directly above this ActivityRecord. This field is updated whenever a new activity
+    // is launched from this ActivityRecord. Touches are always allowed within the same uid.
+    int mAllowedTouchUid;
+
     private final Runnable mPauseTimeoutRunnable = new Runnable() {
         @Override
         public void run() {
@@ -2099,7 +2104,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         mAtmService.mPackageConfigPersister.updateConfigIfNeeded(this, mUserId, packageName);
 
-        mActivityRecordInputSink = new ActivityRecordInputSink(this);
+        mActivityRecordInputSink = new ActivityRecordInputSink(this, sourceRecord);
 
         updateEnterpriseThumbnailDrawable(mAtmService.mUiContext);
     }
@@ -7994,7 +7999,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // orientation with insets applied.
             return;
         }
-
+        // TODO(b/232898850): always respect fixed-orientation request.
+        // Ignore orientation request for activity in ActivityEmbedding split.
+        final TaskFragment organizedTf = getOrganizedTaskFragment();
+        if (organizedTf != null && !organizedTf.fillsParent()) {
+            return;
+        }
         if (windowingMode == WINDOWING_MODE_PINNED) {
             // PiP bounds have higher priority than the requested orientation. Otherwise the
             // activity may be squeezed into a small piece.
@@ -8070,7 +8080,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         ? letterboxAspectRatioOverride : computeAspectRatio(parentBounds);
         // Apply aspect ratio to resolved bounds
         mIsAspectRatioApplied = applyAspectRatio(resolvedBounds, containingBoundsWithInsets,
-                containingBounds, desiredAspectRatio, true);
+                containingBounds, desiredAspectRatio);
 
         if (mCompatDisplayInsets != null) {
             mCompatDisplayInsets.getBoundsByRotation(
@@ -8496,7 +8506,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private boolean applyAspectRatio(Rect outBounds, Rect containingAppBounds,
             Rect containingBounds) {
         return applyAspectRatio(outBounds, containingAppBounds, containingBounds,
-                0 /* desiredAspectRatio */, false /* fixedOrientationLetterboxed */);
+                0 /* desiredAspectRatio */);
     }
 
     /**
@@ -8507,23 +8517,18 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     // TODO(b/36505427): Consider moving this method and similar ones to ConfigurationContainer.
     private boolean applyAspectRatio(Rect outBounds, Rect containingAppBounds,
-            Rect containingBounds, float desiredAspectRatio, boolean fixedOrientationLetterboxed) {
+            Rect containingBounds, float desiredAspectRatio) {
         final float maxAspectRatio = info.getMaxAspectRatio();
         final Task rootTask = getRootTask();
         final float minAspectRatio = getMinAspectRatio();
-        // Not using ActivityRecord#isResizeable() directly because app compatibility testing
-        // showed that android:supportsPictureInPicture="true" alone is not sufficient signal for
-        // not letterboxing an app.
-        // TODO(214602463): Remove multi-window check since orientation and aspect ratio
-        // restrictions should always be applied in multi-window.
+        final TaskFragment organizedTf = getOrganizedTaskFragment();
         if (task == null || rootTask == null
-                || (inMultiWindowMode() && isResizeable(/* checkPictureInPictureSupport */ false)
-                && !fixedOrientationLetterboxed)
                 || (maxAspectRatio < 1 && minAspectRatio < 1 && desiredAspectRatio < 1)
-                || isInVrUiMode(getConfiguration())) {
-            // We don't enforce aspect ratio if the activity task is in multiwindow unless it is in
-            // size-compat mode or is letterboxed from fixed orientation. We also don't set it if we
-            // are in VR mode.
+                // Don't set aspect ratio if we are in VR mode.
+                || isInVrUiMode(getConfiguration())
+                // TODO(b/232898850): Always respect aspect ratio requests.
+                // Don't set aspect ratio for activity in ActivityEmbedding split.
+                || (organizedTf != null && !organizedTf.fillsParent())) {
             return false;
         }
 

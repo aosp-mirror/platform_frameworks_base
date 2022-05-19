@@ -305,10 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"သင့်ပြက္ခဒိန်အား ဝင်ရောက်သုံးရန်"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS စာတိုစနစ်"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS စာများကို ပို့ကာ ကြည့်မည်"</string>
-    <!-- no translation found for permgrouplab_storage (17339216290379241) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (5378659041354582769) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="17339216290379241">"ဖိုင်များ"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"သင့်စက်တွင် ဖိုင်များသုံးနိုင်သည်"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"တေးဂီတနှင့် အသံ"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"သင့်စက်တွင် တေးဂီတနှင့် အသံများ ဖွင့်နိုင်သည်"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ဓာတ်ပုံနှင့် ဗီဒီယိုများ"</string>

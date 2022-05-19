@@ -305,10 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"캘린더에 액세스"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS 메시지 전송 및 보기"</string>
-    <!-- no translation found for permgrouplab_storage (17339216290379241) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (5378659041354582769) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="17339216290379241">"파일"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"내 기기의 파일에 액세스합니다."</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"음악 및 오디오"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"기기의 음악 및 오디오에 액세스"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"사진 및 동영상"</string>

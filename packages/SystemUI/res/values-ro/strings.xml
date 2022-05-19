@@ -959,12 +959,9 @@
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Editați imaginea copiată"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Trimiteți către un dispozitiv din apropiere"</string>
     <string name="clipboard_text_hidden" msgid="7926899867471812305">"Atingeți pentru a afișa"</string>
-    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
-    <skip />
-    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
-    <skip />
-    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
-    <skip />
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"Textul a fost copiat"</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"Imaginea a fost copiată"</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"Conținutul a fost copiat"</string>
     <string name="add" msgid="81036585205287996">"Adăugați"</string>
     <string name="manage_users" msgid="1823875311934643849">"Gestionați utilizatorii"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Notificarea nu acceptă tragerea pe ecranul împărțit."</string>
@@ -973,12 +970,10 @@
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Alarmă setată"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Camera și microfonul sunt dezactivate"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# notificare}few{# notificări}other{# de notificări}}"</string>
-    <!-- no translation found for broadcasting_description_is_broadcasting (765627502786404290) -->
-    <skip />
+    <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Se difuzează"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Opriți difuzarea <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Dacă difuzați <xliff:g id="SWITCHAPP">%1$s</xliff:g> sau schimbați rezultatul, difuzarea actuală se va opri"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"Difuzați <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"Schimbați rezultatul"</string>
-    <!-- no translation found for bt_le_audio_broadcast_dialog_unknown_name (3791472237793443044) -->
-    <skip />
+    <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"Necunoscută"</string>
 </resources>

@@ -952,12 +952,9 @@
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"ကူးထားသည့်ပုံကို ပြင်ဆင်ရန်"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"အနီးတစ်ဝိုက်ရှိ စက်များသို့ ပို့ရန်"</string>
     <string name="clipboard_text_hidden" msgid="7926899867471812305">"ကြည့်ရှုရန် တို့ပါ"</string>
-    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
-    <skip />
-    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
-    <skip />
-    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
-    <skip />
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"စာသားကို မိတ္တူကူးပြီးပြီ"</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"ပုံ ကူးပြီးပြီ"</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"အကြောင်းအရာများကို ကူးယူပြီးပါပြီ"</string>
     <string name="add" msgid="81036585205287996">"ထည့်ရန်"</string>
     <string name="manage_users" msgid="1823875311934643849">"အသုံးပြုသူများ စီမံရန်"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"ဤအကြောင်းကြားချက်သည် ‘မျက်နှာပြင်ခွဲ၍ပြသမှု’ သို့ ဖိဆွဲခြင်းကို မပံ့ပိုးပါ။"</string>
@@ -966,12 +963,10 @@
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"နိုးစက် သတ်မှတ်ထားသည်"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"ကင်မရာနှင့် မိုက် ပိတ်ထားသည်"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{အကြောင်းကြားချက် # ခု}other{အကြောင်းကြားချက် # ခု}}"</string>
-    <!-- no translation found for broadcasting_description_is_broadcasting (765627502786404290) -->
-    <skip />
+    <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"ထုတ်လွှင့်ခြင်း"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> ထုတ်လွှင့်ခြင်းကို ရပ်မလား။"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> ကို ထုတ်လွှင့်သောအခါ (သို့) အထွက်ကို ပြောင်းသောအခါ သင့်လက်ရှိထုတ်လွှင့်ခြင်း ရပ်သွားမည်"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> ထုတ်လွှင့်ခြင်း"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"အထွက်ကို ပြောင်းခြင်း"</string>
-    <!-- no translation found for bt_le_audio_broadcast_dialog_unknown_name (3791472237793443044) -->
-    <skip />
+    <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"မသိ"</string>
 </resources>

@@ -273,6 +273,11 @@ public class BubblesManager implements Dumpable {
                         mBubbles.onCurrentProfilesChanged(currentProfiles);
                     }
 
+                    @Override
+                    public void onUserRemoved(int userId) {
+                        mBubbles.onUserRemoved(userId);
+                    }
+
                 });
 
         // Store callback in a field so it won't get GC'd

@@ -26,8 +26,10 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.app.IActivityTaskManager;
 import android.app.WindowConfiguration;
@@ -180,7 +182,8 @@ public class BackAnimationControllerTest {
         // b/207481538, we check that the surface is not moved for now, we can re-enable this once
         // we implement the animation
         verify(mTransaction, never()).setScale(eq(screenshotSurface), anyInt(), anyInt());
-        verify(mTransaction, never()).setPosition(animationTarget.leash, 100, 100);
+        verify(mTransaction, never()).setPosition(
+                animationTarget.leash, 100, 100);
         verify(mTransaction, atLeastOnce()).apply();
     }
 
@@ -249,6 +252,47 @@ public class BackAnimationControllerTest {
         verify(mIOnBackInvokedCallback, never()).onBackStarted();
         verify(mIOnBackInvokedCallback, never()).onBackProgressed(backEventCaptor.capture());
         verify(mIOnBackInvokedCallback, never()).onBackInvoked();
+    }
+
+    @Test
+    public void ignoresGesture_transitionInProgress() throws RemoteException {
+        mController.setBackToLauncherCallback(mIOnBackInvokedCallback);
+        RemoteAnimationTarget animationTarget = createAnimationTarget();
+        createNavigationInfo(animationTarget, null, null,
+                BackNavigationInfo.TYPE_RETURN_TO_HOME, null);
+
+        triggerBackGesture();
+        // Check that back invocation is dispatched.
+        verify(mIOnBackInvokedCallback).onBackInvoked();
+
+        reset(mIOnBackInvokedCallback);
+        // Verify that we prevent animation from restarting if another gestures happens before
+        // the previous transition is finished.
+        doMotionEvent(MotionEvent.ACTION_DOWN, 0);
+        verifyNoMoreInteractions(mIOnBackInvokedCallback);
+
+        // Verify that we start accepting gestures again once transition finishes.
+        mController.onBackToLauncherAnimationFinished();
+        doMotionEvent(MotionEvent.ACTION_DOWN, 0);
+        doMotionEvent(MotionEvent.ACTION_MOVE, 100);
+        verify(mIOnBackInvokedCallback).onBackStarted();
+    }
+
+    @Test
+    public void acceptsGesture_transitionTimeout() throws RemoteException {
+        mController.setBackToLauncherCallback(mIOnBackInvokedCallback);
+        RemoteAnimationTarget animationTarget = createAnimationTarget();
+        createNavigationInfo(animationTarget, null, null,
+                BackNavigationInfo.TYPE_RETURN_TO_HOME, null);
+
+        triggerBackGesture();
+        reset(mIOnBackInvokedCallback);
+
+        // Simulate transition timeout.
+        mShellExecutor.flushAll();
+        doMotionEvent(MotionEvent.ACTION_DOWN, 0);
+        doMotionEvent(MotionEvent.ACTION_MOVE, 100);
+        verify(mIOnBackInvokedCallback).onBackStarted();
     }
 
     private void doMotionEvent(int actionDown, int coordinate) {
