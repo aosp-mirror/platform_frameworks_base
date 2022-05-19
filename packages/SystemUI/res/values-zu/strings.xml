@@ -226,8 +226,7 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Ukuphenduka okuzenzakalelayo"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Phendula iskrini ngokuzenzakalela"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Indawo"</string>
-    <!-- no translation found for quick_settings_screensaver_label (1495003469366524120) -->
-    <skip />
+    <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Isilondolozi sesikrini"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"Ukufinyelela kwekhamera"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Ukufinyelela kwe-mic"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Iyatholakala"</string>
@@ -321,6 +320,10 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Vula ngobuso. Cindezela ukuze uvule."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Ubuso buyaziwa. Cindezela ukuze uvule."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Ubuso buyaziwa. Cindezela isithonjana sokuvula ukuze uvule."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"Swayiphela phezulu ukuze uzame futhi"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Vula ukuze usebenzise i-NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Le divayisi eyenhlangano yakho"</string>
@@ -470,8 +473,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"I-wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Lungela ukuthenga ngokushesha, ngokuphepha ngefoni yakho"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Bonisa konke"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (8488069304491125713) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Thepha ukuze uvule"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Iyabuyekeza"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Vula ukuze usebenzise"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Kube khona inkinga yokuthola amakhadi akho, sicela uzame futhi ngemuva kwesikhathi"</string>
@@ -697,7 +699,10 @@
     <string name="notification_channel_alerts" msgid="3385787053375150046">"Izexwayiso"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"Ibhethri"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"Izithombe-skrini"</string>
-    <string name="notification_channel_general" msgid="4384774889645929705">"Imilayezo ejwayelekile"</string>
+    <!-- no translation found for notification_channel_instant (7556135423486752680) -->
+    <skip />
+    <!-- no translation found for notification_channel_setup (7660580986090760350) -->
+    <skip />
     <string name="notification_channel_storage" msgid="2720725707628094977">"Isitoreji"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Ukubonisa"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Izinhlelo zokusebenza ezisheshayo"</string>
@@ -943,8 +948,10 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Hlela umbhalo okopishiwe"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Hlela umfanekiso okopishiwe"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Thumela kudivayisi eseduze"</string>
-    <!-- no translation found for clipboard_text_hidden (7926899867471812305) -->
-    <skip />
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"Thepha ukuze ubuke"</string>
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"Umbhalo ukopishiwe"</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"Umfanekiso ukopishiwe"</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"Okuqukethwe kukopishiwe"</string>
     <string name="add" msgid="81036585205287996">"Faka"</string>
     <string name="manage_users" msgid="1823875311934643849">"Phatha abasebenzisi"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Lesi saziso asikusekeli ukuhudulela ku-Splitscreen."</string>
@@ -953,4 +960,10 @@
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"I-alamu isethiwe"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Ikhamera nemakrofoni kuvaliwe"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{Isaziso esingu-#}one{Izaziso ezingu-#}other{Izaziso ezingu-#}}"</string>
+    <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Ukusakaza"</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Misa ukusakaza i-<xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Uma usakaza i-<xliff:g id="SWITCHAPP">%1$s</xliff:g> noma ushintsha okuphumayo, ukusakaza kwakho kwamanje kuzoma"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"Sakaza i-<xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"Shintsha okuphumayo"</string>
+    <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"Akwaziwa"</string>
 </resources>

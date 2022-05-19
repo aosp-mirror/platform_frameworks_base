@@ -542,7 +542,9 @@ public class PackageInfoWithoutStateUtils {
         ai.windowLayout = a.getWindowLayout();
         ai.attributionTags = a.getAttributionTags();
         if ((flags & PackageManager.GET_META_DATA) != 0) {
-            ai.metaData = a.getMetaData();
+            var metaData = a.getMetaData();
+            // Backwards compatibility, coerce to null if empty
+            ai.metaData = metaData.isEmpty() ? null : metaData;
         }
         ai.applicationInfo = applicationInfo;
         ai.setKnownActivityEmbeddingCerts(a.getKnownActivityEmbeddingCerts());
@@ -595,7 +597,9 @@ public class PackageInfoWithoutStateUtils {
         si.mForegroundServiceType = s.getForegroundServiceType();
         si.applicationInfo = applicationInfo;
         if ((flags & PackageManager.GET_META_DATA) != 0) {
-            si.metaData = s.getMetaData();
+            var metaData = s.getMetaData();
+            // Backwards compatibility, coerce to null if empty
+            si.metaData = metaData.isEmpty() ? null : metaData;
         }
         return si;
     }
@@ -656,7 +660,9 @@ public class PackageInfoWithoutStateUtils {
             pi.uriPermissionPatterns = null;
         }
         if ((flags & PackageManager.GET_META_DATA) != 0) {
-            pi.metaData = p.getMetaData();
+            var metaData = p.getMetaData();
+            // Backwards compatibility, coerce to null if empty
+            pi.metaData = metaData.isEmpty() ? null : metaData;
         }
         pi.applicationInfo = applicationInfo;
         return pi;
@@ -702,7 +708,9 @@ public class PackageInfoWithoutStateUtils {
         if ((flags & PackageManager.GET_META_DATA) == 0) {
             return ii;
         }
-        ii.metaData = i.getMetaData();
+        var metaData = i.getMetaData();
+        // Backwards compatibility, coerce to null if empty
+        ii.metaData = metaData.isEmpty() ? null : metaData;
         return ii;
     }
 
@@ -725,7 +733,9 @@ public class PackageInfoWithoutStateUtils {
         if ((flags & PackageManager.GET_META_DATA) == 0) {
             return pi;
         }
-        pi.metaData = p.getMetaData();
+        var metaData = p.getMetaData();
+        // Backwards compatibility, coerce to null if empty
+        pi.metaData = metaData.isEmpty() ? null : metaData;
         return pi;
     }
 
@@ -749,7 +759,9 @@ public class PackageInfoWithoutStateUtils {
         if ((flags & PackageManager.GET_META_DATA) == 0) {
             return pgi;
         }
-        pgi.metaData = pg.getMetaData();
+        var metaData = pg.getMetaData();
+        // Backwards compatibility, coerce to null if empty
+        pgi.metaData = metaData.isEmpty() ? null : metaData;
         return pgi;
     }
 

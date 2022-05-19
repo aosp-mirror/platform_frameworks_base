@@ -873,6 +873,7 @@
     <dimen name="autofill_save_title_start_padding">8dp</dimen>
     <dimen name="autofill_save_scroll_view_top_margin">4dp</dimen>
     <dimen name="autofill_save_button_bar_padding">16dp</dimen>
+    <dimen name="autofill_dialog_corner_radius">28dp</dimen>
 
     <!-- Max height of the the autofill save custom subtitle as a fraction of the screen width/height -->
     <dimen name="autofill_save_custom_subtitle_max_height">20%</dimen>
@@ -888,7 +889,7 @@
     <integer name="autofill_max_visible_datasets">3</integer>
 
     <!-- Size of an icon in the Autolfill fill dialog -->
-    <dimen name="autofill_dialog_icon_size">24dp</dimen>
+    <dimen name="autofill_dialog_icon_size">32dp</dimen>
 
     <!-- Size of a slice shortcut view -->
     <dimen name="slice_shortcut_size">56dp</dimen>

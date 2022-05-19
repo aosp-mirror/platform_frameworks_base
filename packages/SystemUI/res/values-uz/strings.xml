@@ -226,8 +226,7 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Avto-burilish"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Ekranning avtomatik burilishi"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Joylashuv"</string>
-    <!-- no translation found for quick_settings_screensaver_label (1495003469366524120) -->
-    <skip />
+    <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Ekran lavhasi"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"Kameraga ruxsat"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Mikrofonga ruxsat"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Mavjud"</string>
@@ -321,6 +320,10 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Yuz orqali ochildi. Ochish uchun bosing."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Yuz aniqlandi. Ochish uchun bosing."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Yuz aniqlandi. Ochish uchun ochish belgisini bosing."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"Qayta urinish uchun tepaga suring"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ishlatish uchun qurilma qulfini oching"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Bu qurilma tashkilotingizga tegishli"</string>
@@ -470,8 +473,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Telefonda tezroq va xavfsizroq xarid qilish uchun sozlang"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Hammasi"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (8488069304491125713) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Ochish uchun ustiga bosing"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Yangilanmoqda"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Foydalanish uchun qulfdan chiqarish"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Bildirgilarni yuklashda xatolik yuz berdi, keyinroq qaytadan urining"</string>
@@ -697,7 +699,10 @@
     <string name="notification_channel_alerts" msgid="3385787053375150046">"Bildirishnomalar"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"Batareya"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"Skrinshotlar"</string>
-    <string name="notification_channel_general" msgid="4384774889645929705">"Umumiy xabarlar"</string>
+    <!-- no translation found for notification_channel_instant (7556135423486752680) -->
+    <skip />
+    <!-- no translation found for notification_channel_setup (7660580986090760350) -->
+    <skip />
     <string name="notification_channel_storage" msgid="2720725707628094977">"Xotira"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Maslahatlar"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Darhol ochiladigan ilovalar"</string>
@@ -943,7 +948,12 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Nusxa olingan matnni tahrirlash"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Nusxa olingan rasmni tahrirlash"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Yaqin-atrofdagi qurilmaga yuborish"</string>
-    <!-- no translation found for clipboard_text_hidden (7926899867471812305) -->
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"Koʻrish uchun bosing"</string>
+    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
+    <skip />
+    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
+    <skip />
+    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
     <skip />
     <string name="add" msgid="81036585205287996">"Kiritish"</string>
     <string name="manage_users" msgid="1823875311934643849">"Foydalanuvchilarni boshqarish"</string>
@@ -953,4 +963,12 @@
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Signal oʻrnatildi"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Kamera va mikrofon yoqilmagan"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# ta bildirishnoma}other{# ta bildirishnoma}}"</string>
+    <!-- no translation found for broadcasting_description_is_broadcasting (765627502786404290) -->
+    <skip />
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> ilovasiga translatsiya toʻxtatilsinmi?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Agar <xliff:g id="SWITCHAPP">%1$s</xliff:g> ilovasiga translatsiya qilsangiz yoki ovoz chiqishini oʻzgartirsangiz, joriy translatsiya toʻxtab qoladi"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> ilovasiga translatsiya"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"Ovoz chiqishini oʻzgartirish"</string>
+    <!-- no translation found for bt_le_audio_broadcast_dialog_unknown_name (3791472237793443044) -->
+    <skip />
 </resources>

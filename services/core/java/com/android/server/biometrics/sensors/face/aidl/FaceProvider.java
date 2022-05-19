@@ -540,6 +540,12 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
     @Override
     public void scheduleInternalCleanup(int sensorId, int userId,
             @Nullable ClientMonitorCallback callback) {
+        scheduleInternalCleanup(sensorId, userId, callback, false /* favorHalEnrollments */);
+    }
+
+    @Override
+    public void scheduleInternalCleanup(int sensorId, int userId,
+            @Nullable ClientMonitorCallback callback, boolean favorHalEnrollments) {
         mHandler.post(() -> {
             final List<Face> enrolledList = getEnrolledFaces(sensorId, userId);
             final FaceInternalCleanupClient client =
@@ -551,6 +557,9 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                             mBiometricContext, enrolledList,
                             FaceUtils.getInstance(sensorId),
                             mSensors.get(sensorId).getAuthenticatorIds());
+            if (favorHalEnrollments) {
+                client.setFavorHalEnrollments();
+            }
             scheduleForSensor(sensorId, client, callback);
         });
     }

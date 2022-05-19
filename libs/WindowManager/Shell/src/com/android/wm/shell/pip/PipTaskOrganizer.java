@@ -367,7 +367,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         }
         mPipBoundsState.setBounds(destinationBounds);
         mSwipePipToHomeOverlay = overlay;
-        if (ENABLE_SHELL_TRANSITIONS) {
+        if (ENABLE_SHELL_TRANSITIONS && overlay != null) {
             // With Shell transition, the overlay was attached to the remote transition leash, which
             // will be removed when the current transition is finished, so we need to reparent it
             // to the actual Task surface now.
@@ -1100,11 +1100,13 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      * Handles all changes to the PictureInPictureParams.
      */
     protected void applyNewPictureInPictureParams(@NonNull PictureInPictureParams params) {
-        if (PipUtils.aspectRatioChanged(params.getAspectRatioFloat(),
+        if (mDeferredTaskInfo != null || PipUtils.aspectRatioChanged(params.getAspectRatioFloat(),
                 mPictureInPictureParams.getAspectRatioFloat())) {
             mPipParamsChangedForwarder.notifyAspectRatioChanged(params.getAspectRatioFloat());
         }
-        if (PipUtils.remoteActionsChanged(params.getActions(), mPictureInPictureParams.getActions())
+        if (mDeferredTaskInfo != null
+                || PipUtils.remoteActionsChanged(params.getActions(),
+                mPictureInPictureParams.getActions())
                 || !PipUtils.remoteActionsMatch(params.getCloseAction(),
                 mPictureInPictureParams.getCloseAction())) {
             mPipParamsChangedForwarder.notifyActionsChanged(params.getActions(),

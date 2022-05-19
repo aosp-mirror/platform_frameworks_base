@@ -36,6 +36,7 @@ import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.never
 import org.mockito.Mockito.spy
@@ -226,7 +227,8 @@ class InputManagerServiceTests {
 
     @Test
     fun onDisplayRemoved_resetAllAdditionalInputProperties() {
-        localService.setVirtualMousePointerDisplayId(10)
+        setVirtualMousePointerDisplayIdAndVerify(10)
+
         localService.setPointerIconVisible(false, 10)
         verify(native).setPointerIconType(eq(PointerIcon.TYPE_NULL))
         localService.setPointerAcceleration(5f, 10)
@@ -237,9 +239,66 @@ class InputManagerServiceTests {
         verify(native).setPointerIconType(eq(PointerIcon.TYPE_NOT_SPECIFIED))
         verify(native).setPointerAcceleration(
             eq(IInputConstants.DEFAULT_POINTER_ACCELERATION.toFloat()))
+        verifyNoMoreInteractions(native)
 
+        // This call should not block because the virtual mouse pointer override was never removed.
         localService.setVirtualMousePointerDisplayId(10)
+
         verify(native).setPointerDisplayId(eq(10))
         verifyNoMoreInteractions(native)
+    }
+
+    @Test
+    fun updateAdditionalInputPropertiesForOverrideDisplay() {
+        setVirtualMousePointerDisplayIdAndVerify(10)
+
+        localService.setPointerIconVisible(false, 10)
+        verify(native).setPointerIconType(eq(PointerIcon.TYPE_NULL))
+        localService.setPointerAcceleration(5f, 10)
+        verify(native).setPointerAcceleration(eq(5f))
+
+        localService.setPointerIconVisible(true, 10)
+        verify(native).setPointerIconType(eq(PointerIcon.TYPE_NOT_SPECIFIED))
+        localService.setPointerAcceleration(1f, 10)
+        verify(native).setPointerAcceleration(eq(1f))
+
+        // Verify that setting properties on a different display is not propagated until the
+        // pointer is moved to that display.
+        localService.setPointerIconVisible(false, 20)
+        localService.setPointerAcceleration(6f, 20)
+        verifyNoMoreInteractions(native)
+
+        clearInvocations(native)
+        setVirtualMousePointerDisplayIdAndVerify(20)
+
+        verify(native).setPointerIconType(eq(PointerIcon.TYPE_NULL))
+        verify(native).setPointerAcceleration(eq(6f))
+    }
+
+    @Test
+    fun setAdditionalInputPropertiesBeforeOverride() {
+        localService.setPointerIconVisible(false, 10)
+        localService.setPointerAcceleration(5f, 10)
+
+        verifyNoMoreInteractions(native)
+
+        setVirtualMousePointerDisplayIdAndVerify(10)
+
+        verify(native).setPointerIconType(eq(PointerIcon.TYPE_NULL))
+        verify(native).setPointerAcceleration(eq(5f))
+    }
+
+    private fun setVirtualMousePointerDisplayIdAndVerify(overrideDisplayId: Int) {
+        val thread = Thread { localService.setVirtualMousePointerDisplayId(overrideDisplayId) }
+        thread.start()
+
+        // Allow some time for the set override call to park while waiting for the native callback.
+        Thread.sleep(100 /*millis*/)
+        verify(native).setPointerDisplayId(overrideDisplayId)
+
+        service.onPointerDisplayIdChanged(overrideDisplayId, 0f, 0f)
+        testLooper.dispatchNext()
+        verify(wmCallbacks).notifyPointerDisplayIdChanged(overrideDisplayId, 0f, 0f)
+        thread.join(100 /*millis*/)
     }
 }

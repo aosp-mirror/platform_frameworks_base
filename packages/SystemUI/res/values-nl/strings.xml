@@ -226,8 +226,7 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Automatisch draaien"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Scherm automatisch draaien"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Locatie"</string>
-    <!-- no translation found for quick_settings_screensaver_label (1495003469366524120) -->
-    <skip />
+    <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Screensaver"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"Cameratoegang"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Microfoontoegang"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Beschikbaar"</string>
@@ -321,6 +320,10 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Ontgrendeld via gezicht. Druk om te openen."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Gezicht herkend. Druk om te openen."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Gezicht herkend. Druk op het ontgrendelicoon."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"Swipe omhoog om het opnieuw te proberen"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Ontgrendel het apparaat om NFC te gebruiken"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Dit apparaat is eigendom van je organisatie"</string>
@@ -428,7 +431,7 @@
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Zo blijft het scherm zichtbaar totdat je het losmaakt. Swipe omhoog en houd vast om los te maken."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Het scherm blijft zichtbaar totdat je het losmaakt. Tik op Overzicht en houd dit vast om het scherm los te maken."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Het scherm blijft zichtbaar totdat je het losmaakt. Tik op Home en houd dit vast om het scherm los te maken."</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Persoonlijke informatie kan toegankelijk zijn (zoals contacten en e-mailcontent)."</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Persoonsgegevens kunnen toegankelijk zijn (zoals contacten en e-mails)."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"De vastgezette app kan andere apps openen."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Tik op Terug en Overzicht en houd de knoppen vast om deze app los te maken"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Tik op Terug en Home en houd de knoppen vast om deze app los te maken"</string>
@@ -470,8 +473,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"Portemonnee"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Zorg dat je sneller en beter beveiligd aankopen kunt doen met je telefoon"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Alles tonen"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (8488069304491125713) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Tik om te openen"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Updaten"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Ontgrendelen om te gebruiken"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Er is een probleem opgetreden bij het ophalen van je kaarten. Probeer het later opnieuw."</string>
@@ -697,7 +699,10 @@
     <string name="notification_channel_alerts" msgid="3385787053375150046">"Meldingen"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"Batterij"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"Screenshots"</string>
-    <string name="notification_channel_general" msgid="4384774889645929705">"Algemene berichten"</string>
+    <!-- no translation found for notification_channel_instant (7556135423486752680) -->
+    <skip />
+    <!-- no translation found for notification_channel_setup (7660580986090760350) -->
+    <skip />
     <string name="notification_channel_storage" msgid="2720725707628094977">"Opslag"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Hints"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Instant-apps"</string>
@@ -943,8 +948,10 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Gekopieerde tekst bewerken"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Gekopieerde afbeelding bewerken"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Naar apparaat in de buurt sturen"</string>
-    <!-- no translation found for clipboard_text_hidden (7926899867471812305) -->
-    <skip />
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"Tik om te bekijken"</string>
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"Tekst gekopieerd"</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"Afbeelding gekopieerd"</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"Content gekopieerd"</string>
     <string name="add" msgid="81036585205287996">"Toevoegen"</string>
     <string name="manage_users" msgid="1823875311934643849">"Gebruikers beheren"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Deze melding biedt geen ondersteuning voor slepen naar het gesplitste scherm."</string>
@@ -953,4 +960,10 @@
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Wekker gezet"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Camera en microfoon staan uit"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# melding}other{# meldingen}}"</string>
+    <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Uitzending"</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Uitzending van <xliff:g id="APP_NAME">%1$s</xliff:g> stopzetten?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Als je <xliff:g id="SWITCHAPP">%1$s</xliff:g> uitzendt of de uitvoer wijzigt, wordt je huidige uitzending gestopt"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> uitzenden"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"Uitvoer wijzigen"</string>
+    <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"Onbekend"</string>
 </resources>

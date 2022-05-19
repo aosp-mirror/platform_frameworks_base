@@ -23,6 +23,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -65,6 +66,7 @@ import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.permission.CompatibilityPermissionInfo;
+import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.pm.pkg.PackageUserStateInternal;
 import com.android.server.pm.pkg.component.ParsedActivity;
 import com.android.server.pm.pkg.component.ParsedActivityImpl;
@@ -85,6 +87,7 @@ import com.android.server.pm.pkg.component.ParsedService;
 import com.android.server.pm.pkg.component.ParsedServiceImpl;
 import com.android.server.pm.pkg.component.ParsedUsesPermission;
 import com.android.server.pm.pkg.component.ParsedUsesPermissionImpl;
+import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
 import com.android.server.pm.pkg.parsing.ParsingPackage;
 
 import org.junit.Before;
@@ -591,6 +594,38 @@ public class PackageParserTest {
                     .that(Arrays.stream(COMPAT_PERMS).map(CompatibilityPermissionInfo::getName)
                             .allMatch(pkg.getImplicitPermissions()::contains))
                     .isTrue();
+        } finally {
+            testFile.delete();
+        }
+    }
+
+    @Test
+    public void testNoComponentMetadataIsCoercedToNullForInfoObject() throws Exception {
+        final File testFile = extractFile(TEST_APP4_APK);
+        try {
+            final ParsedPackage pkg = new TestPackageParser2().parsePackage(testFile, 0, false);
+            ApplicationInfo appInfo = PackageInfoWithoutStateUtils.generateApplicationInfo(pkg, 0,
+                    PackageUserState.DEFAULT, 0);
+            for (ParsedActivity activity : pkg.getActivities()) {
+                assertNotNull(activity.getMetaData());
+                assertNull(PackageInfoWithoutStateUtils.generateActivityInfoUnchecked(activity, 0,
+                        appInfo).metaData);
+            }
+            for (ParsedProvider provider : pkg.getProviders()) {
+                assertNotNull(provider.getMetaData());
+                assertNull(PackageInfoWithoutStateUtils.generateProviderInfoUnchecked(provider, 0,
+                        appInfo).metaData);
+            }
+            for (ParsedActivity receiver : pkg.getReceivers()) {
+                assertNotNull(receiver.getMetaData());
+                assertNull(PackageInfoWithoutStateUtils.generateActivityInfoUnchecked(receiver, 0,
+                        appInfo).metaData);
+            }
+            for (ParsedService service : pkg.getServices()) {
+                assertNotNull(service.getMetaData());
+                assertNull(PackageInfoWithoutStateUtils.generateServiceInfoUnchecked(service, 0,
+                        appInfo).metaData);
+            }
         } finally {
             testFile.delete();
         }

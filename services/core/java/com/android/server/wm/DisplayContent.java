@@ -2397,7 +2397,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         sl = reduceConfigLayout(sl, Surface.ROTATION_90, density, unrotDh, unrotDw, uiMode);
         sl = reduceConfigLayout(sl, Surface.ROTATION_180, density, unrotDw, unrotDh, uiMode);
         sl = reduceConfigLayout(sl, Surface.ROTATION_270, density, unrotDh, unrotDw, uiMode);
-        outConfig.smallestScreenWidthDp = (int)(displayInfo.smallestNominalAppWidth / density);
+        outConfig.smallestScreenWidthDp =
+                (int) (displayInfo.smallestNominalAppWidth / density + 0.5f);
         outConfig.screenLayout = sl;
     }
 
@@ -2419,8 +2420,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             longSize = shortSize;
             shortSize = tmp;
         }
-        longSize = (int)(longSize/density);
-        shortSize = (int)(shortSize/density);
+        longSize = (int) (longSize / density + 0.5f);
+        shortSize = (int) (shortSize / density + 0.5f);
         return Configuration.reduceScreenLayout(curLayout, longSize, shortSize);
     }
 
@@ -5455,13 +5456,18 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final Region local = Region.obtain();
         final int[] remainingLeftRight =
                 {mSystemGestureExclusionLimit, mSystemGestureExclusionLimit};
+        final RecentsAnimationController recentsAnimationController =
+                mWmService.getRecentsAnimationController();
 
         // Traverse all windows top down to assemble the gesture exclusion rects.
         // For each window, we only take the rects that fall within its touchable region.
         forAllWindows(w -> {
+            final boolean ignoreRecentsAnimationTarget = recentsAnimationController != null
+                    && recentsAnimationController.shouldApplyInputConsumer(w.getActivityRecord());
             if (!w.canReceiveTouchInput() || !w.isVisible()
                     || (w.getAttrs().flags & FLAG_NOT_TOUCHABLE) != 0
-                    || unhandled.isEmpty()) {
+                    || unhandled.isEmpty()
+                    || ignoreRecentsAnimationTarget) {
                 return;
             }
 

@@ -18,14 +18,15 @@ package com.android.server.wm;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.RemoteException;
+import android.util.Slog;
 import android.view.IDisplayChangeWindowCallback;
 import android.window.DisplayAreaInfo;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.protolog.common.ProtoLog;
-import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,16 +39,16 @@ import java.util.List;
  */
 public class RemoteDisplayChangeController {
 
+    private static final String TAG = "RemoteDisplayChangeController";
+
     private static final int REMOTE_DISPLAY_CHANGE_TIMEOUT_MS = 800;
 
     private final WindowManagerService mService;
     private final int mDisplayId;
 
-    private boolean mIsWaitingForRemoteDisplayChange;
-    private final Runnable mTimeoutRunnable = () -> {
-        continueDisplayChange(null /* appliedChange */, null /* transaction */);
-    };
+    private final Runnable mTimeoutRunnable = this::onContinueTimedOut;
 
+    // all remote changes that haven't finished yet.
     private final List<ContinueRemoteDisplayChangeCallback> mCallbacks = new ArrayList<>();
 
     public RemoteDisplayChangeController(WindowManagerService service, int displayId) {
@@ -61,7 +62,7 @@ public class RemoteDisplayChangeController {
      *  to perform in sync with the display change.
      */
     public boolean isWaitingForRemoteDisplayChange() {
-        return mIsWaitingForRemoteDisplayChange;
+        return !mCallbacks.isEmpty();
     }
 
     /**
@@ -79,7 +80,6 @@ public class RemoteDisplayChangeController {
         if (mService.mDisplayChangeController == null) {
             return false;
         }
-        mIsWaitingForRemoteDisplayChange = true;
         mCallbacks.add(callback);
 
         if (newDisplayAreaInfo != null) {
@@ -95,78 +95,67 @@ public class RemoteDisplayChangeController {
                     toRotation);
         }
 
-        final RemoteDisplayChange change = new RemoteDisplayChange(fromRotation, toRotation,
-                newDisplayAreaInfo);
-        final IDisplayChangeWindowCallback remoteCallback = createCallback(change);
+        final IDisplayChangeWindowCallback remoteCallback = createCallback(callback);
         try {
-            mService.mDisplayChangeController.onDisplayChange(mDisplayId, fromRotation, toRotation,
-                    newDisplayAreaInfo, remoteCallback);
-
             mService.mH.removeCallbacks(mTimeoutRunnable);
             mService.mH.postDelayed(mTimeoutRunnable, REMOTE_DISPLAY_CHANGE_TIMEOUT_MS);
+            mService.mDisplayChangeController.onDisplayChange(mDisplayId, fromRotation, toRotation,
+                    newDisplayAreaInfo, remoteCallback);
             return true;
         } catch (RemoteException e) {
-            mIsWaitingForRemoteDisplayChange = false;
+            Slog.e(TAG, "Exception while dispatching remote display-change", e);
+            mCallbacks.remove(callback);
             return false;
         }
     }
 
-    private void continueDisplayChange(@Nullable RemoteDisplayChange appliedChange,
-            @Nullable WindowContainerTransaction transaction) {
+    private void onContinueTimedOut() {
+        Slog.e(TAG, "RemoteDisplayChange timed-out, UI might get messed-up after this.");
+        // timed-out, so run all continue callbacks and clear the list
         synchronized (mService.mGlobalLock) {
-            if (appliedChange != null) {
-                ProtoLog.v(WM_DEBUG_CONFIGURATION,
-                        "Received remote change for Display[%d], applied: [%dx%d, rot = %d]",
-                        mDisplayId,
-                        appliedChange.displayAreaInfo != null ? appliedChange.displayAreaInfo
-                                .configuration.windowConfiguration.getMaxBounds().width() : -1,
-                        appliedChange.displayAreaInfo != null ? appliedChange.displayAreaInfo
-                                .configuration.windowConfiguration.getMaxBounds().height() : -1,
-                        appliedChange.toRotation);
-            } else {
-                ProtoLog.v(WM_DEBUG_CONFIGURATION, "Remote change for Display[%d]: timeout reached",
-                        mDisplayId);
+            for (int i = 0; i < mCallbacks.size(); ++i) {
+                mCallbacks.get(i).onContinueRemoteDisplayChange(null /* transaction */);
             }
-
-            mIsWaitingForRemoteDisplayChange = false;
-
-            for (int i = 0; i < mCallbacks.size(); i++) {
-                ContinueRemoteDisplayChangeCallback callback = mCallbacks.get(i);
-                callback.onContinueRemoteDisplayChange(appliedChange, transaction);
-            }
+            mCallbacks.clear();
         }
     }
 
-    private IDisplayChangeWindowCallback createCallback(RemoteDisplayChange originalChange) {
+    private void continueDisplayChange(@NonNull ContinueRemoteDisplayChangeCallback callback,
+            @Nullable WindowContainerTransaction transaction) {
+        synchronized (mService.mGlobalLock) {
+            int idx = mCallbacks.indexOf(callback);
+            if (idx < 0) {
+                // already called this callback or a more-recent one (eg. via timeout)
+                return;
+            }
+            for (int i = 0; i < idx; ++i) {
+                // Expect remote callbacks in order. If they don't come in order, then force
+                // ordering by continuing everything up until this one with empty transactions.
+                mCallbacks.get(i).onContinueRemoteDisplayChange(null /* transaction */);
+            }
+            mCallbacks.subList(0, idx + 1).clear();
+            if (mCallbacks.isEmpty()) {
+                mService.mH.removeCallbacks(mTimeoutRunnable);
+            }
+            callback.onContinueRemoteDisplayChange(transaction);
+        }
+    }
+
+    private IDisplayChangeWindowCallback createCallback(
+            @NonNull ContinueRemoteDisplayChangeCallback callback) {
         return new IDisplayChangeWindowCallback.Stub() {
                     @Override
                     public void continueDisplayChange(WindowContainerTransaction t) {
                         synchronized (mService.mGlobalLock) {
-                            mService.mH.removeCallbacks(mTimeoutRunnable);
-                            mService.mH.sendMessage(PooledLambda.obtainMessage(
-                                    RemoteDisplayChangeController::continueDisplayChange,
-                                    RemoteDisplayChangeController.this,
-                                    originalChange, t));
+                            if (!mCallbacks.contains(callback)) {
+                                // already ran this callback or a more-recent one.
+                                return;
+                            }
+                            mService.mH.post(() -> RemoteDisplayChangeController.this
+                                    .continueDisplayChange(callback, t));
                         }
                     }
                 };
-    }
-
-    /**
-     * Data class that contains information about a remote display change
-     */
-    public static class RemoteDisplayChange {
-        final int fromRotation;
-        final int toRotation;
-        @Nullable
-        final DisplayAreaInfo displayAreaInfo;
-
-        public RemoteDisplayChange(int fromRotation, int toRotation,
-                @Nullable DisplayAreaInfo displayAreaInfo) {
-            this.fromRotation = fromRotation;
-            this.toRotation = toRotation;
-            this.displayAreaInfo = displayAreaInfo;
-        }
     }
 
     /**
@@ -175,11 +164,8 @@ public class RemoteDisplayChangeController {
     public interface ContinueRemoteDisplayChangeCallback {
         /**
          * This method is called when the remote display change has been applied
-         * @param appliedChange the change that was applied or null if there was
-         *                      an error during remote display change (e.g. timeout)
          * @param transaction window changes collected by the remote display change
          */
-        void onContinueRemoteDisplayChange(@Nullable RemoteDisplayChange appliedChange,
-                @Nullable WindowContainerTransaction transaction);
+        void onContinueRemoteDisplayChange(@Nullable WindowContainerTransaction transaction);
     }
 }

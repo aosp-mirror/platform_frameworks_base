@@ -11433,7 +11433,9 @@ public class DevicePolicyManager {
 
     /**
      * Called by a device owner or a profile owner of an organization-owned managed profile to
-     * control whether the user can change networks configured by the admin.
+     * control whether the user can change networks configured by the admin. When this lockdown is
+     * enabled, the user can still configure and connect to other Wi-Fi networks, or use other Wi-Fi
+     * capabilities such as tethering.
      * <p>
      * WiFi network configuration lockdown is controlled by a global settings
      * {@link android.provider.Settings.Global#WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN} and calling

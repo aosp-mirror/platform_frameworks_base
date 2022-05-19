@@ -5614,6 +5614,10 @@
     <permission android:name="android.permission.MANAGE_FINGERPRINT"
         android:protectionLevel="signature|privileged" />
 
+    <!-- Allows managing (adding, removing) face templates. Reserved for the system. @hide -->
+    <permission android:name="android.permission.MANAGE_FACE"
+        android:protectionLevel="signature|privileged" />
+
     <!-- Allows an app to reset fingerprint attempt counter. Reserved for the system. @hide -->
     <permission android:name="android.permission.RESET_FINGERPRINT_LOCKOUT"
         android:protectionLevel="signature" />

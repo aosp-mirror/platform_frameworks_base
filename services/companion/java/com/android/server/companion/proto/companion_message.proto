@@ -22,7 +22,7 @@ package com.android.server.companion.proto;
 
 /* Represents a message between companion devices */
 message CompanionMessage {
-  int64 id = 1;
+  int32 id = 1;
 
   PaginationInfo paginationInfo = 2;
 
@@ -34,7 +34,7 @@ message CompanionMessage {
   /* Message pagination info */
   message PaginationInfo {
     // id of the parent message, which should be the same for all the paginated messages
-    int64 parentId = 1;
+    int32 parentId = 1;
 
     // page number of the current message in [1, total]
     int32 page = 2;

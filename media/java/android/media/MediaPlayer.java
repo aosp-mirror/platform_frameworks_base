@@ -158,6 +158,9 @@ import java.util.concurrent.Executor;
  *         the user supplied callback method OnErrorListener.onError() will be
  *         invoked by the internal player engine and the object will be
  *         transfered to the <em>Error</em> state. </li>
+ *         <li>You must keep a reference to a MediaPlayer instance to prevent it from being garbage
+ *         collected. If a MediaPlayer instance is garbage collected, {@link #release} will be
+ *         called, causing any ongoing playback to stop.
  *         <li>You must call {@link #release()} once you have finished using an instance to release
  *         acquired resources, such as memory and codecs. Once you have called {@link #release}, you
  *         must no longer interact with the released instance.

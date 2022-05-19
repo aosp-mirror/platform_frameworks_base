@@ -43,11 +43,12 @@ public class CircularQueueTest {
         mQueue = new CircularQueue<>(LIMIT);
         mQueue.put(1, "A");
         mQueue.put(2, "B");
-        mQueue.put(3, "C");
+        String removedElement = mQueue.put(3, "C");
         assertNull(mQueue.getElement(1));
         assertEquals(mQueue.getElement(2), "B");
         assertEquals(mQueue.getElement(3), "C");
-
+        // Confirming that put is returning the deleted element
+        assertEquals(removedElement, "A");
     }
 
     @Test

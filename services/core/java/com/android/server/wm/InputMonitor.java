@@ -556,12 +556,7 @@ final class InputMonitor {
         @Override
         public void accept(WindowState w) {
             final InputWindowHandleWrapper inputWindowHandle = w.mInputWindowHandle;
-            final RecentsAnimationController recentsAnimationController =
-                    mService.getRecentsAnimationController();
-            final boolean shouldApplyRecentsInputConsumer = recentsAnimationController != null
-                    && recentsAnimationController.shouldApplyInputConsumer(w.mActivityRecord);
-            if (w.mInputChannelToken == null || w.mRemoved
-                    || (!w.canReceiveTouchInput() && !shouldApplyRecentsInputConsumer)) {
+            if (w.mInputChannelToken == null || w.mRemoved || !w.canReceiveTouchInput()) {
                 if (w.mWinAnimator.hasSurface()) {
                     // Make sure the input info can't receive input event. It may be omitted from
                     // occlusion detection depending on the type or if it's a trusted overlay.
@@ -575,6 +570,10 @@ final class InputMonitor {
             }
 
             // This only works for legacy transitions.
+            final RecentsAnimationController recentsAnimationController =
+                    mService.getRecentsAnimationController();
+            final boolean shouldApplyRecentsInputConsumer = recentsAnimationController != null
+                    && recentsAnimationController.shouldApplyInputConsumer(w.mActivityRecord);
             if (mAddRecentsAnimationInputConsumerHandle && shouldApplyRecentsInputConsumer) {
                 if (recentsAnimationController.updateInputConsumerForApp(
                         mRecentsAnimationInputConsumer.mWindowHandle)) {

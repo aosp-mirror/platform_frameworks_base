@@ -224,14 +224,12 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         if (mRootTaskInfo.taskId == taskInfo.taskId) {
             // Inflates split decor view only when the root task is visible.
             if (mRootTaskInfo.isVisible != taskInfo.isVisible) {
-                mSyncQueue.runInSync(t -> {
-                    if (taskInfo.isVisible) {
-                        mSplitDecorManager.inflate(mContext, mRootLeash,
-                                taskInfo.configuration.windowConfiguration.getBounds());
-                    } else {
-                        mSplitDecorManager.release(t);
-                    }
-                });
+                if (taskInfo.isVisible) {
+                    mSplitDecorManager.inflate(mContext, mRootLeash,
+                            taskInfo.configuration.windowConfiguration.getBounds());
+                } else {
+                    mSyncQueue.runInSync(t -> mSplitDecorManager.release(t));
+                }
             }
             mRootTaskInfo = taskInfo;
         } else if (taskInfo.parentTaskId == mRootTaskInfo.taskId) {
@@ -340,6 +338,15 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         for (int i = mChildrenTaskInfo.size() - 1; i >= 0; i--) {
             final ActivityManager.RunningTaskInfo taskInfo = mChildrenTaskInfo.valueAt(i);
             wct.reparent(taskInfo.token, null /* parent */, false /* onTop */);
+        }
+    }
+
+    void evictInvisibleChildren(WindowContainerTransaction wct) {
+        for (int i = mChildrenTaskInfo.size() - 1; i >= 0; i--) {
+            final ActivityManager.RunningTaskInfo taskInfo = mChildrenTaskInfo.valueAt(i);
+            if (!taskInfo.isVisible) {
+                wct.reparent(taskInfo.token, null /* parent */, false /* onTop */);
+            }
         }
     }
 

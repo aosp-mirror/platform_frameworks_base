@@ -37,7 +37,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
-import android.os.Binder;
 import android.os.Build;
 import android.os.UserHandle;
 import android.permission.PermissionManager;
@@ -1438,29 +1437,30 @@ public final class AppPermissionGroup implements Comparable<AppPermissionGroup> 
                 }
             }
 
-            int flags = (permission.isUserSet() ? PackageManager.FLAG_PERMISSION_USER_SET : 0)
-                    | (permission.isUserFixed() ? PackageManager.FLAG_PERMISSION_USER_FIXED : 0)
-                    | (permission.isRevokedCompat()
-                    ? PackageManager.FLAG_PERMISSION_REVOKED_COMPAT : 0)
-                    | (permission.isPolicyFixed() ? PackageManager.FLAG_PERMISSION_POLICY_FIXED : 0)
-                    | (permission.isReviewRequired()
-                    ? PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED : 0)
-                    | (permission.isOneTime() ? PackageManager.FLAG_PERMISSION_ONE_TIME : 0)
-                    | (permission.isSelectedLocationAccuracy()
-                    ? PackageManager.FLAG_PERMISSION_SELECTED_LOCATION_ACCURACY : 0);
+//            int flags = (permission.isUserSet() ? PackageManager.FLAG_PERMISSION_USER_SET : 0)
+//                    | (permission.isUserFixed() ? PackageManager.FLAG_PERMISSION_USER_FIXED : 0)
+//                    | (permission.isRevokedCompat()
+//                    ? PackageManager.FLAG_PERMISSION_REVOKED_COMPAT : 0)
+//                    | (permission.isPolicyFixed() ?
+//                          PackageManager.FLAG_PERMISSION_POLICY_FIXED : 0)
+//                    | (permission.isReviewRequired()
+//                    ? PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED : 0)
+//                    | (permission.isOneTime() ? PackageManager.FLAG_PERMISSION_ONE_TIME : 0)
+//                    | (permission.isSelectedLocationAccuracy()
+//                    ? PackageManager.FLAG_PERMISSION_SELECTED_LOCATION_ACCURACY : 0);
 
-            mPackageManager.updatePermissionFlags(permission.getName(),
-                    mPackageInfo.packageName,
-                    PackageManager.FLAG_PERMISSION_USER_SET
-                            | PackageManager.FLAG_PERMISSION_USER_FIXED
-                            | PackageManager.FLAG_PERMISSION_REVOKED_COMPAT
-                            | PackageManager.FLAG_PERMISSION_POLICY_FIXED
-                            | (permission.isReviewRequired()
-                            ? 0 : PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED)
-                            | PackageManager.FLAG_PERMISSION_ONE_TIME
-                            | PackageManager.FLAG_PERMISSION_AUTO_REVOKED // clear auto revoke
-                            | PackageManager.FLAG_PERMISSION_SELECTED_LOCATION_ACCURACY,
-                    flags, mUserHandle);
+//            mPackageManager.updatePermissionFlags(permission.getName(),
+//                    mPackageInfo.packageName,
+//                    PackageManager.FLAG_PERMISSION_USER_SET
+//                            | PackageManager.FLAG_PERMISSION_USER_FIXED
+//                            | PackageManager.FLAG_PERMISSION_REVOKED_COMPAT
+//                            | PackageManager.FLAG_PERMISSION_POLICY_FIXED
+//                            | (permission.isReviewRequired()
+//                            ? 0 : PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED)
+//                            | PackageManager.FLAG_PERMISSION_ONE_TIME
+//                            | PackageManager.FLAG_PERMISSION_AUTO_REVOKED // clear auto revoke
+//                            | PackageManager.FLAG_PERMISSION_SELECTED_LOCATION_ACCURACY,
+//                    flags, mUserHandle);
 
             if (permission.affectsAppOp()) {
                 if (!permission.isSystemFixed()) {
@@ -1486,18 +1486,18 @@ public final class AppPermissionGroup implements Comparable<AppPermissionGroup> 
 //            mTriggerLocationAccessCheckOnPersist = false;
 //        }
 
-        String packageName = mPackageInfo.packageName;
-        if (areRuntimePermissionsGranted(null, true, false)) {
-            // Required to read device config in Utils.getOneTimePermissions*().
-            final long token = Binder.clearCallingIdentity();
-            try {
+//        String packageName = mPackageInfo.packageName;
+//        if (areRuntimePermissionsGranted(null, true, false)) {
+//            // Required to read device config in Utils.getOneTimePermissions*().
+//            final long token = Binder.clearCallingIdentity();
+//            try {
 //                if (SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                mContext.getSystemService(PermissionManager.class)
-                        .startOneTimePermissionSession(packageName,
-                                Utils.getOneTimePermissionsTimeout(),
-                                Utils.getOneTimePermissionsKilledDelay(mIsSelfRevoked),
-                                ONE_TIME_PACKAGE_IMPORTANCE_LEVEL_TO_RESET_TIMER,
-                                ONE_TIME_PACKAGE_IMPORTANCE_LEVEL_TO_KEEP_SESSION_ALIVE);
+//                mContext.getSystemService(PermissionManager.class)
+//                        .startOneTimePermissionSession(packageName,
+//                                Utils.getOneTimePermissionsTimeout(),
+//                                Utils.getOneTimePermissionsKilledDelay(mIsSelfRevoked),
+//                                ONE_TIME_PACKAGE_IMPORTANCE_LEVEL_TO_RESET_TIMER,
+//                                ONE_TIME_PACKAGE_IMPORTANCE_LEVEL_TO_KEEP_SESSION_ALIVE);
 //                } else {
 //                    mContext.getSystemService(PermissionManager.class)
 //                            .startOneTimePermissionSession(packageName,
@@ -1505,13 +1505,13 @@ public final class AppPermissionGroup implements Comparable<AppPermissionGroup> 
 //                                    ONE_TIME_PACKAGE_IMPORTANCE_LEVEL_TO_RESET_TIMER,
 //                                    ONE_TIME_PACKAGE_IMPORTANCE_LEVEL_TO_KEEP_SESSION_ALIVE);
 //                }
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        } else {
-            mContext.getSystemService(PermissionManager.class)
-                    .stopOneTimePermissionSession(packageName);
-        }
+//            } finally {
+//                Binder.restoreCallingIdentity(token);
+//            }
+//        } else {
+//            mContext.getSystemService(PermissionManager.class)
+//                    .stopOneTimePermissionSession(packageName);
+//        }
     }
 
     /**

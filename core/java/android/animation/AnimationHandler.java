@@ -39,7 +39,7 @@ import java.util.ArrayList;
 public class AnimationHandler {
 
     private static final String TAG = "AnimationHandler";
-    private static final boolean LOCAL_LOGV = true;
+    private static final boolean LOCAL_LOGV = false;
 
     /**
      * Internal per-thread collections used to avoid set collisions as animations start and end
@@ -52,6 +52,9 @@ public class AnimationHandler {
     private final ArrayList<AnimationFrameCallback> mCommitCallbacks =
             new ArrayList<>();
     private AnimationFrameCallbackProvider mProvider;
+
+    // Static flag which allows the pausing behavior to be globally disabled/enabled.
+    private static boolean sAnimatorPausingEnabled = true;
 
     /**
      * This paused list is used to store animators forcibly paused when the activity
@@ -93,6 +96,15 @@ public class AnimationHandler {
         return sAnimatorHandler.get();
     }
 
+    /**
+     * Disable the default behavior of pausing infinite animators when
+     * apps go into the background.
+     *
+     * @param enable Enable (default behavior) or disable background pausing behavior.
+     */
+    public static void setAnimatorPausingEnabled(boolean enable) {
+        sAnimatorPausingEnabled = enable;
+    }
 
     /**
      * This is called when a window goes away. We should remove
@@ -136,16 +148,19 @@ public class AnimationHandler {
         } else {
             mAnimatorRequestors.remove(requestor);
         }
+        if (!sAnimatorPausingEnabled) {
+            // Resume any animators that have been paused in the meantime, otherwise noop
+            // Leave logic above so that if pausing gets re-enabled, the state of the requestors
+            // list is valid
+            resumeAnimators();
+            return;
+        }
         boolean isEmpty = mAnimatorRequestors.isEmpty();
         if (wasEmpty != isEmpty) {
             // only paused/resume animators if there was a visibility change
             if (!isEmpty) {
                 // If any requestors are enabled, resume currently paused animators
-                Choreographer.getInstance().removeFrameCallback(mPauser);
-                for (int i = mPausedAnimators.size() - 1; i >= 0; --i) {
-                    mPausedAnimators.get(i).resume();
-                }
-                mPausedAnimators.clear();
+                resumeAnimators();
             } else {
                 // Wait before pausing to avoid thrashing animator state for temporary backgrounding
                 Choreographer.getInstance().postFrameCallbackDelayed(mPauser,
@@ -158,6 +173,14 @@ public class AnimationHandler {
                 Log.v(TAG, "animatorRequesters " + i + " = " + mAnimatorRequestors.valueAt(i));
             }
         }
+    }
+
+    private void resumeAnimators() {
+        Choreographer.getInstance().removeFrameCallback(mPauser);
+        for (int i = mPausedAnimators.size() - 1; i >= 0; --i) {
+            mPausedAnimators.get(i).resume();
+        }
+        mPausedAnimators.clear();
     }
 
     private Choreographer.FrameCallback mPauser = frameTimeNanos -> {
