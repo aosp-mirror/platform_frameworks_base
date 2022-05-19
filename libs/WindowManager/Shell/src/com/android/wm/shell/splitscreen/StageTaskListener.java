@@ -224,14 +224,12 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         if (mRootTaskInfo.taskId == taskInfo.taskId) {
             // Inflates split decor view only when the root task is visible.
             if (mRootTaskInfo.isVisible != taskInfo.isVisible) {
-                mSyncQueue.runInSync(t -> {
-                    if (taskInfo.isVisible) {
-                        mSplitDecorManager.inflate(mContext, mRootLeash,
-                                taskInfo.configuration.windowConfiguration.getBounds());
-                    } else {
-                        mSplitDecorManager.release(t);
-                    }
-                });
+                if (taskInfo.isVisible) {
+                    mSplitDecorManager.inflate(mContext, mRootLeash,
+                            taskInfo.configuration.windowConfiguration.getBounds());
+                } else {
+                    mSyncQueue.runInSync(t -> mSplitDecorManager.release(t));
+                }
             }
             mRootTaskInfo = taskInfo;
         } else if (taskInfo.parentTaskId == mRootTaskInfo.taskId) {
