@@ -25,11 +25,13 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
+import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.traces.common.FlickerComponentName
 import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import com.android.wm.shell.flicker.SYSTEM_UI_PACKAGE_NAME
 import com.android.wm.shell.flicker.testapp.Components
+import org.junit.Assert
 
 class SplitScreenHelper(
     instrumentation: Instrumentation,
@@ -185,6 +187,24 @@ class SplitScreenHelper(
                     currentY += stepY
                 }
                 SystemClock.sleep(GESTURE_STEP_MS)
+            }
+        }
+
+        fun createShortcutOnHotseatIfNotExist(
+            taplInstrumentation: LauncherInstrumentation,
+            appName: String
+        ) {
+            taplInstrumentation.workspace
+                .deleteAppIcon(taplInstrumentation.workspace.getHotseatAppIcon(0))
+            val allApps = taplInstrumentation.workspace.switchToAllApps()
+            allApps.freeze()
+            try {
+                val appIconSrc = allApps.getAppIcon(appName)
+                Assert.assertNotNull("Unable to find app icon", appIconSrc)
+                val appIconDest = appIconSrc.dragToHotseat(0)
+                Assert.assertNotNull("Unable to drag app icon on hotseat", appIconDest)
+            } finally {
+                allApps.unfreeze()
             }
         }
     }
