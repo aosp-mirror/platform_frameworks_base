@@ -320,10 +320,12 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"चेहऱ्याने अनलॉक केले आहे. उघडण्यासाठी दाबा."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"चेहरा ओळखला आहे. उघडण्यासाठी दाबा."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"चेहरा ओळखला आहे. उघडण्यासाठी अनलॉक करा आयकन दाबा."</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1901953991150295169">"डावीकडे हलवा"</item>
+    <item msgid="5558598599408514296">"खाली हलवा"</item>
+    <item msgid="4844142668312841831">"उजवीकडे हलवा"</item>
+    <item msgid="5640521437931460125">"वर हलवा"</item>
+  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"पुन्हा प्रयत्न करण्यासाठी वर स्‍वाइप करा"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC वापरण्यासाठी स्क्रीन अनलॉक करा"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"हे डिव्हाइस तुमच्या संस्थेचे आहे"</string>
@@ -699,10 +701,8 @@
     <string name="notification_channel_alerts" msgid="3385787053375150046">"सूचना"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"बॅटरी"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"स्क्रीनशॉट"</string>
-    <!-- no translation found for notification_channel_instant (7556135423486752680) -->
-    <skip />
-    <!-- no translation found for notification_channel_setup (7660580986090760350) -->
-    <skip />
+    <string name="notification_channel_instant" msgid="7556135423486752680">"Instant Apps"</string>
+    <string name="notification_channel_setup" msgid="7660580986090760350">"सेटअप"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"स्टोरेज"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"सूचना"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>

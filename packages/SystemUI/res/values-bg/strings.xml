@@ -320,10 +320,12 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Отключено с лице. Натиснете за отваряне."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Лицето бе разпознато. Натиснете за отваряне."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Лицето бе разпознато. Отворете чрез иконата за отключване."</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1901953991150295169">"Преместване наляво"</item>
+    <item msgid="5558598599408514296">"Преместване надолу"</item>
+    <item msgid="4844142668312841831">"Преместване надясно"</item>
+    <item msgid="5640521437931460125">"Преместване нагоре"</item>
+  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"Плъзнете бързо нагоре, за да опитате отново"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Отключете, за да използвате NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Това устройство принадлежи на организацията ви"</string>
@@ -699,10 +701,8 @@
     <string name="notification_channel_alerts" msgid="3385787053375150046">"Сигнали"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"Батерия"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"Екранни снимки"</string>
-    <!-- no translation found for notification_channel_instant (7556135423486752680) -->
-    <skip />
-    <!-- no translation found for notification_channel_setup (7660580986090760350) -->
-    <skip />
+    <string name="notification_channel_instant" msgid="7556135423486752680">"Мигновени приложения"</string>
+    <string name="notification_channel_setup" msgid="7660580986090760350">"Настройване"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"Хранилище"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Съвети"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Мигновени приложения"</string>
@@ -949,12 +949,9 @@
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Редактиране на копираното изображение"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Изпращане до устройство в близост"</string>
     <string name="clipboard_text_hidden" msgid="7926899867471812305">"Докоснете за преглед"</string>
-    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
-    <skip />
-    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
-    <skip />
-    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
-    <skip />
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"Текстът е копиран"</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"Изображението е копирано"</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"Съдържанието е копирано"</string>
     <string name="add" msgid="81036585205287996">"Добавяне"</string>
     <string name="manage_users" msgid="1823875311934643849">"Управление на потребителите"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Това известие не поддържа плъзгане за разделяне на екрана."</string>
@@ -963,12 +960,10 @@
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Будилникът е зададен"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Камерата и микрофонът са изключени"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# известие}other{# известия}}"</string>
-    <!-- no translation found for broadcasting_description_is_broadcasting (765627502786404290) -->
-    <skip />
+    <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Излъчване"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Да се спре ли предаването на <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Ако предавате <xliff:g id="SWITCHAPP">%1$s</xliff:g> или промените изхода, текущото ви предаване ще бъде прекратено"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"Предаване на <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"Промяна на изхода"</string>
-    <!-- no translation found for bt_le_audio_broadcast_dialog_unknown_name (3791472237793443044) -->
-    <skip />
+    <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"Неизвестно"</string>
 </resources>

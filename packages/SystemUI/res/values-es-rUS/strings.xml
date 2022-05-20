@@ -223,7 +223,7 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Entrada"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Audífonos"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Activando…"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Girar automáticamente"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Giro automático"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Girar la pantalla automáticamente"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Ubicación"</string>
     <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Protector de pantalla"</string>
@@ -320,10 +320,12 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Desbloqueo con rostro. Presiona para abrir."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Rostro reconocido. Presiona para abrir."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Rostro reconocido. Presiona el desbloqueo para abrir."</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1901953991150295169">"Mover hacia la izquierda"</item>
+    <item msgid="5558598599408514296">"Mover hacia abajo"</item>
+    <item msgid="4844142668312841831">"Mover hacia la derecha"</item>
+    <item msgid="5640521437931460125">"Mover hacia arriba"</item>
+  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"Desliza el dedo hacia arriba para volver a intentarlo"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Desbloquea el dispositivo para usar NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Este dispositivo pertenece a tu organización"</string>
@@ -699,10 +701,8 @@
     <string name="notification_channel_alerts" msgid="3385787053375150046">"Alertas"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"Batería"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"Capturas de pantalla"</string>
-    <!-- no translation found for notification_channel_instant (7556135423486752680) -->
-    <skip />
-    <!-- no translation found for notification_channel_setup (7660580986090760350) -->
-    <skip />
+    <string name="notification_channel_instant" msgid="7556135423486752680">"Apps instantáneas"</string>
+    <string name="notification_channel_setup" msgid="7660580986090760350">"Configuración"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"Almacenamiento"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Sugerencias"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Apps instantáneas"</string>
@@ -949,12 +949,9 @@
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Editar la imagen copiada"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Enviar a dispositivos cercanos"</string>
     <string name="clipboard_text_hidden" msgid="7926899867471812305">"Presiona para ver"</string>
-    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
-    <skip />
-    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
-    <skip />
-    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
-    <skip />
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"Se copió el texto"</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"Se copió la imagen"</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"Se copió el contenido"</string>
     <string name="add" msgid="81036585205287996">"Agregar"</string>
     <string name="manage_users" msgid="1823875311934643849">"Administrar usuarios"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Esta notificación no admite arrastrar entre pantallas divididas."</string>
@@ -963,12 +960,10 @@
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Se estableció la alarma"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"La cámara y el micrófono están apagados"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# notificación}other{# notificaciones}}"</string>
-    <!-- no translation found for broadcasting_description_is_broadcasting (765627502786404290) -->
-    <skip />
+    <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Transmitiendo"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"¿Quieres dejar de transmitir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Si transmites <xliff:g id="SWITCHAPP">%1$s</xliff:g> o cambias la salida, tu transmisión actual se detendrá"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"Transmitir <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"Cambia la salida"</string>
-    <!-- no translation found for bt_le_audio_broadcast_dialog_unknown_name (3791472237793443044) -->
-    <skip />
+    <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"Desconocido"</string>
 </resources>

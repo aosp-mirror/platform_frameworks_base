@@ -324,10 +324,12 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"הנעילה בוטלה באמצעות זיהוי הפנים. יש ללחוץ כדי לפתוח."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"הפנים זוהו. יש ללחוץ כדי לפתוח."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"הפנים זוהו. יש ללחוץ על סמל ביטול הנעילה כדי לפתוח."</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1901953991150295169">"הזזה שמאלה"</item>
+    <item msgid="5558598599408514296">"הזזה למטה"</item>
+    <item msgid="4844142668312841831">"הזזה ימינה"</item>
+    <item msgid="5640521437931460125">"הזזה למעלה"</item>
+  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"יש להחליק למעלה כדי לנסות שוב"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"‏יש לבטל את הנעילה כדי להשתמש ב-NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"המכשיר הזה שייך לארגון שלך"</string>
@@ -709,10 +711,8 @@
     <string name="notification_channel_alerts" msgid="3385787053375150046">"התראות"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"סוללה"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"צילומי מסך"</string>
-    <!-- no translation found for notification_channel_instant (7556135423486752680) -->
-    <skip />
-    <!-- no translation found for notification_channel_setup (7660580986090760350) -->
-    <skip />
+    <string name="notification_channel_instant" msgid="7556135423486752680">"אפליקציות ללא התקנה"</string>
+    <string name="notification_channel_setup" msgid="7660580986090760350">"הגדרה"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"אחסון"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"טיפים"</string>
     <string name="instant_apps" msgid="8337185853050247304">"אפליקציות ללא התקנה"</string>
@@ -963,12 +963,9 @@
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"עריכת התמונה שהועתקה"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"שליחה למכשיר בקרבת מקום"</string>
     <string name="clipboard_text_hidden" msgid="7926899867471812305">"יש להקיש כדי להציג"</string>
-    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
-    <skip />
-    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
-    <skip />
-    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
-    <skip />
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"הטקסט הועתק"</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"התמונה הועתקה"</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"התוכן הועתק"</string>
     <string name="add" msgid="81036585205287996">"הוספה"</string>
     <string name="manage_users" msgid="1823875311934643849">"ניהול משתמשים"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"ההתראה הזו לא תומכת בגרירה למסך מפוצל."</string>
@@ -977,12 +974,10 @@
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"ההתראה מוגדרת"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"המצלמה והמיקרופון כבויים"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{התראה אחת}two{# התראות}many{# התראות}other{# התראות}}"</string>
-    <!-- no translation found for broadcasting_description_is_broadcasting (765627502786404290) -->
-    <skip />
+    <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"שידור"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"האם להפסיק לשדר את התוכן מאפליקציית <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"אם משדרים את התוכן מאפליקציית <xliff:g id="SWITCHAPP">%1$s</xliff:g> או משנים את הפלט, השידור הנוכחי יפסיק לפעול"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"שידור תוכן מאפליקציית <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"שינוי הפלט"</string>
-    <!-- no translation found for bt_le_audio_broadcast_dialog_unknown_name (3791472237793443044) -->
-    <skip />
+    <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"לא ידוע"</string>
 </resources>
