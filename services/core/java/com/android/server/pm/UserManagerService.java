@@ -4251,8 +4251,8 @@ public class UserManagerService extends IUserManager.Stub {
         updateUserIds();
         Binder.withCleanCallingIdentity(() -> {
             mPm.onNewUserCreated(preCreatedUser.id, /* convertedFromPreCreated= */ true);
+            dispatchUserAdded(preCreatedUser, token);
         });
-        dispatchUserAdded(preCreatedUser, token);
         return preCreatedUser;
     }
 
