@@ -292,10 +292,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             return;
         }
 
-        final int warningLevel = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_lowBatteryWarningLevel);
         final String percentage = NumberFormat.getPercentInstance()
-                .format((double) warningLevel / 100.0);
+                .format((double) mCurrentBatterySnapshot.getBatteryLevel() / 100.0);
         final String title = mContext.getString(R.string.battery_low_title);
         final String contentText = mContext.getString(
                 R.string.battery_low_description, percentage);
@@ -340,8 +338,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     }
 
     private boolean showSevereLowBatteryDialog() {
-        final boolean isSevereState = !mCurrentBatterySnapshot.isHybrid() || mBucket < -1;
-        return isSevereState && mUseSevereDialog;
+        return mBucket < -1 && mUseSevereDialog;
     }
 
     /**
