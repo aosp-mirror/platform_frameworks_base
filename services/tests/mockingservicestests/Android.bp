@@ -37,6 +37,7 @@ android_test {
     srcs: [
         "src/**/*.java",
         "src/**/*.kt",
+        ":framework-internal-display-sources",
     ],
 
     static_libs: [
