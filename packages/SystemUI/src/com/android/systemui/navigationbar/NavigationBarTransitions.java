@@ -48,6 +48,7 @@ public final class NavigationBarTransitions extends BarTransitions implements
 
     public static final int MIN_COLOR_ADAPT_TRANSITION_TIME = 400;
     public static final int DEFAULT_COLOR_ADAPT_TRANSITION_TIME = 1700;
+    private List<Listener> mListeners = new ArrayList<>();
 
     /**
      * Notified when the color of nav bar elements changes.
@@ -162,7 +163,9 @@ public final class NavigationBarTransitions extends BarTransitions implements
     protected void onTransition(int oldMode, int newMode, boolean animate) {
         super.onTransition(oldMode, newMode, animate);
         applyLightsOut(animate, false /*force*/);
-        mView.onBarTransition(newMode);
+        for (Listener listener : mListeners) {
+            listener.onTransition(newMode);
+        }
     }
 
     private void applyLightsOut(boolean animate, boolean force) {
@@ -254,5 +257,17 @@ public final class NavigationBarTransitions extends BarTransitions implements
         pw.println("  bg overrideAlpha: " + mBarBackground.getOverrideAlpha());
         pw.println("  bg color: " + mBarBackground.getColor());
         pw.println("  bg frame: " + mBarBackground.getFrame());
+    }
+
+    void addListener(Listener listener) {
+        mListeners.add(listener);
+    }
+
+    void removeListener(Listener listener) {
+        mListeners.remove(listener);
+    }
+
+    interface Listener {
+        void onTransition(int newMode);
     }
 }

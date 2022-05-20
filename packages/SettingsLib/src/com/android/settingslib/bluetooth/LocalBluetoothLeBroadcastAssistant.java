@@ -26,6 +26,7 @@ import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothLeBroadcastAssistant;
 import android.bluetooth.BluetoothLeBroadcastMetadata;
+import android.bluetooth.BluetoothLeBroadcastReceiveState;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothProfile.ServiceListener;
 import android.content.Context;
@@ -200,6 +201,43 @@ public class LocalBluetoothLeBroadcastAssistant implements LocalBluetoothProfile
             return;
         }
         mService.startSearchingForSources(filters);
+    }
+
+    /**
+     * Return true if a search has been started by this application.
+     *
+     * @return true if a search has been started by this application
+     * @hide
+     */
+    public boolean isSearchInProgress() {
+        if (DEBUG) {
+            Log.d(TAG, "isSearchInProgress()");
+        }
+        if (mService == null) {
+            Log.d(TAG, "The BluetoothLeBroadcastAssistant is null");
+            return false;
+        }
+        return mService.isSearchInProgress();
+    }
+
+    /**
+     * Get information about all Broadcast Sources that a Broadcast Sink knows about.
+     *
+     * @param sink Broadcast Sink from which to get all Broadcast Sources
+     * @return the list of Broadcast Receive State {@link BluetoothLeBroadcastReceiveState}
+     *         stored in the Broadcast Sink
+     * @throws NullPointerException when <var>sink</var> is null
+     */
+    public @NonNull List<BluetoothLeBroadcastReceiveState> getAllSources(
+            @NonNull BluetoothDevice sink) {
+        if (DEBUG) {
+            Log.d(TAG, "getAllSources()");
+        }
+        if (mService == null) {
+            Log.d(TAG, "The BluetoothLeBroadcastAssistant is null");
+            return new ArrayList<BluetoothLeBroadcastReceiveState>();
+        }
+        return mService.getAllSources(sink);
     }
 
     public void registerServiceCallBack(@NonNull @CallbackExecutor Executor executor,

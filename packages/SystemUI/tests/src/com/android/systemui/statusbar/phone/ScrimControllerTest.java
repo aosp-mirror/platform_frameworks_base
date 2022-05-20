@@ -1490,6 +1490,13 @@ public class ScrimControllerTest extends SysuiTestCase {
         assertAlphaAfterExpansion(mNotificationsScrim, 0f, expansion);
     }
 
+    @Test
+    public void aodStateSetsFrontScrimToNotBlend() {
+        mScrimController.transitionTo(ScrimState.AOD);
+        Assert.assertFalse("Front scrim should not blend with main color",
+                mScrimInFront.shouldBlendWithMainColor());
+    }
+
     private void assertAlphaAfterExpansion(ScrimView scrim, float expectedAlpha, float expansion) {
         mScrimController.setRawPanelExpansionFraction(expansion);
         finishAnimationsImmediately();

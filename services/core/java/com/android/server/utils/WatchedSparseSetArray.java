@@ -169,7 +169,7 @@ public class WatchedSparseSetArray<T> extends WatchableImpl implements Snappable
             final ArraySet set = src.get(i);
             final int setSize = set.size();
             for (int j = 0; j < setSize; j++) {
-                dst.add(src.keyAt(i), set.valueAt(j));
+                dst.mStorage.add(src.keyAt(i), set.valueAt(j));
             }
         }
         dst.seal();

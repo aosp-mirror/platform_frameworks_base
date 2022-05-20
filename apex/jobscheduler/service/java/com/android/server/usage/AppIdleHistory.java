@@ -979,6 +979,7 @@ public class AppIdleHistory {
             dumpBucketExpiryTimes(idpw, appUsageHistory, totalElapsedTime);
             idpw.print(" lastJob=");
             TimeUtils.formatDuration(totalElapsedTime - appUsageHistory.lastJobRunTime, idpw);
+            idpw.print(" lastInformedBucket=" + appUsageHistory.lastInformedBucket);
             if (appUsageHistory.lastRestrictAttemptElapsedTime > 0) {
                 idpw.print(" lastRestrictAttempt=");
                 TimeUtils.formatDuration(

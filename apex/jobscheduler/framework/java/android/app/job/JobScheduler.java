@@ -107,7 +107,9 @@ public abstract class JobScheduler {
     /**
      * Schedule a job to be executed.  Will replace any currently scheduled job with the same
      * ID with the new information in the {@link JobInfo}.  If a job with the given ID is currently
-     * running, it will be stopped.
+     * running, it will be stopped. Note that in some cases, the newly scheduled job may be started
+     * before the previously running job has been fully stopped. See {@link JobService} for
+     * additional details.
      *
      * <p class="caution"><strong>Note:</strong> Scheduling a job can have a high cost, even if it's
      * rescheduling the same job and the job didn't execute, especially on platform versions before
@@ -131,7 +133,7 @@ public abstract class JobScheduler {
      * job.  If a job with the same ID is already scheduled, it will be replaced with the
      * new {@link JobInfo}, but any previously enqueued work will remain and be dispatched the
      * next time it runs.  If a job with the same ID is already running, the new work will be
-     * enqueued for it.
+     * enqueued for it without stopping the job.
      *
      * <p>The work you enqueue is later retrieved through
      * {@link JobParameters#dequeueWork() JobParameters.dequeueWork}.  Be sure to see there

@@ -32,7 +32,7 @@ import java.util.ArrayList;
  * <p>To use this class, please push block_device_writer binary to /data/local/tmp.
  * 1. In Android.bp, add:
  * <pre>
- *      data_device_bins: ["block_device_writer"],
+ *     target_required: ["block_device_writer_module"],
  * </pre>
  * 2. In AndroidText.xml, add:
  * <pre>
