@@ -673,6 +673,14 @@ public class WindowStateTests extends WindowTestsBase {
         // Keyguard host window should be always contained. The drawn app or app with starting
         // window are unnecessary to draw.
         assertEquals(Arrays.asList(keyguardHostWindow, startingWindow), outWaitingForDrawn);
+
+        // No need to wait for a window of invisible activity even if the window has surface.
+        final WindowState invisibleApp = mAppWindow;
+        invisibleApp.mActivityRecord.mVisibleRequested = false;
+        invisibleApp.mActivityRecord.allDrawn = false;
+        outWaitingForDrawn.clear();
+        invisibleApp.requestDrawIfNeeded(outWaitingForDrawn);
+        assertTrue(outWaitingForDrawn.isEmpty());
     }
 
     @UseTestDisplay(addWindows = W_ABOVE_ACTIVITY)
@@ -728,17 +736,6 @@ public class WindowStateTests extends WindowTestsBase {
         mWm.mResizingWindows.remove(win);
         win.updateResizingWindowIfNeeded();
         assertThat(mWm.mResizingWindows).doesNotContain(win);
-    }
-
-    @Test
-    public void testCantReceiveTouchDuringRecentsAnimation() {
-        final WindowState win0 = createWindow(null, TYPE_APPLICATION, "win0");
-
-        // Mock active recents animation
-        RecentsAnimationController recentsController = mock(RecentsAnimationController.class);
-        when(recentsController.shouldApplyInputConsumer(win0.mActivityRecord)).thenReturn(true);
-        mWm.setRecentsAnimationController(recentsController);
-        assertFalse(win0.canReceiveTouchInput());
     }
 
     @Test

@@ -97,7 +97,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private float mLastPanelFraction;
     private float mSquishinessFraction = 1;
     private boolean mQsDisabled;
-    private int[] mTemp = new int[2];
+    private int[] mLocationTemp = new int[2];
 
     private final RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
     private final MediaHost mQsMediaHost;
@@ -654,9 +654,10 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         }
         mQSPanelScrollView.setClipBounds(mQsBounds);
 
-        mQSPanelScrollView.getLocationOnScreen(mTemp);
-        int top = mTemp[1];
-        mQsMediaHost.getCurrentClipping().set(0, top, getView().getMeasuredWidth(),
+        mQSPanelScrollView.getLocationOnScreen(mLocationTemp);
+        int left = mLocationTemp[0];
+        int top = mLocationTemp[1];
+        mQsMediaHost.getCurrentClipping().set(left, top, left + getView().getMeasuredWidth(),
                 top + mQSPanelScrollView.getMeasuredHeight()
                         - mQSPanelScrollView.getPaddingBottom());
     }
@@ -801,8 +802,8 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
      * the QS container.
      */
     private int getQsMinExpansionHeightForSplitShade() {
-        getView().getLocationOnScreen(mTemp);
-        int top = mTemp[1];
+        getView().getLocationOnScreen(mLocationTemp);
+        int top = mLocationTemp[1];
         // We want to get the original top position, so we subtract any translation currently set.
         int originalTop = (int) (top - getView().getTranslationY());
         // On split shade the QS view doesn't start at the top of the screen, so we need to add the
@@ -866,7 +867,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         indentingPw.println("mLastPanelFraction: " + mLastPanelFraction);
         indentingPw.println("mSquishinessFraction: " + mSquishinessFraction);
         indentingPw.println("mQsDisabled: " + mQsDisabled);
-        indentingPw.println("mTemp: " + Arrays.toString(mTemp));
+        indentingPw.println("mTemp: " + Arrays.toString(mLocationTemp));
         indentingPw.println("mShowCollapsedOnKeyguard: " + mShowCollapsedOnKeyguard);
         indentingPw.println("mLastKeyguardAndExpanded: " + mLastKeyguardAndExpanded);
         indentingPw.println("mState: " + StatusBarState.toString(mState));

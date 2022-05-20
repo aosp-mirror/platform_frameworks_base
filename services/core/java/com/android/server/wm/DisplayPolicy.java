@@ -1247,6 +1247,29 @@ public class DisplayPolicy {
                                     }
                                     inOutFrame.inset(win.mGivenContentInsets);
                                 } : null, imeFrameProvider);
+                        if (mNavigationBar == null && (insetsType == ITYPE_NAVIGATION_BAR
+                                || insetsType == ITYPE_EXTRA_NAVIGATION_BAR)) {
+                            mDisplayContent.setInsetProvider(ITYPE_LEFT_GESTURES, win,
+                                    (displayFrames, windowState, inOutFrame) -> {
+                                final int leftSafeInset =
+                                        Math.max(displayFrames.mDisplayCutoutSafe.left,0);
+                                        inOutFrame.left = 0;
+                                        inOutFrame.top = 0;
+                                        inOutFrame.bottom = displayFrames.mDisplayHeight;
+                                        inOutFrame.right =
+                                                leftSafeInset + mLeftGestureInset;
+                                    });
+                            mDisplayContent.setInsetProvider(ITYPE_RIGHT_GESTURES, win,
+                                    (displayFrames, windowState, inOutFrame) -> {
+                                        final int rightSafeInset =
+                                                Math.min(displayFrames.mDisplayCutoutSafe.right,
+                                                        displayFrames.mUnrestricted.right);
+                                        inOutFrame.left = rightSafeInset - mRightGestureInset;
+                                        inOutFrame.top = 0;
+                                        inOutFrame.bottom = displayFrames.mDisplayHeight;
+                                        inOutFrame.right = displayFrames.mDisplayWidth;
+                                    });
+                        }
                         mInsetsSourceWindowsExceptIme.add(win);
                     }
                 }

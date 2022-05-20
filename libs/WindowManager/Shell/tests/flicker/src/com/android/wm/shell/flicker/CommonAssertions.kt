@@ -43,6 +43,32 @@ fun FlickerTestParameter.appPairsDividerBecomesVisible() {
     }
 }
 
+fun FlickerTestParameter.splitScreenDividerBecomesVisible() {
+    assertLayers {
+        this.isInvisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
+            .then()
+            .isVisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
+    }
+}
+
+fun FlickerTestParameter.appWindowBecomesVisible(
+    component: FlickerComponentName
+) {
+    assertWm {
+        this.isAppWindowInvisible(component)
+            .then()
+            .isAppWindowVisible(component)
+    }
+}
+
+fun FlickerTestParameter.appWindowIsVisibleAtEnd(
+    component: FlickerComponentName
+) {
+    assertWmEnd {
+        this.isAppWindowVisible(component)
+    }
+}
+
 fun FlickerTestParameter.dockedStackDividerIsVisibleAtEnd() {
     assertLayersEnd {
         this.isVisible(DOCKED_STACK_DIVIDER_COMPONENT)
