@@ -434,7 +434,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             }
         }
 
-        final Rect destinationBounds = mPipBoundsState.getDisplayBounds();
+        final Rect destinationBounds = getExitDestinationBounds();
         final int direction = syncWithSplitScreenBounds(destinationBounds, requestEnterSplit)
                 ? TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN
                 : TRANSITION_DIRECTION_LEAVE_PIP;
@@ -487,6 +487,11 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 animator.applySurfaceControlTransaction(mLeash, t, FRACTION_START);
             }
         });
+    }
+
+    /** Returns the bounds to restore to when exiting PIP mode. */
+    public Rect getExitDestinationBounds() {
+        return mPipBoundsState.getDisplayBounds();
     }
 
     private void exitLaunchIntoPipTask(WindowContainerTransaction wct) {
