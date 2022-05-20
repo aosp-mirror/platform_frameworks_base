@@ -305,10 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"acceder al calendario"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"enviar y ver mensajes SMS"</string>
-    <!-- no translation found for permgrouplab_storage (17339216290379241) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (5378659041354582769) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="17339216290379241">"Archivos"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"acceder a archivos de tu dispositivo"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Música y audio"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"acceder a música y audio de tu dispositivo"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotos y videos"</string>
@@ -1363,7 +1361,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Se detectó un accesorio de audio analógico"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"El dispositivo adjunto no es compatible con este teléfono. Presiona para obtener más información."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"Depuración por USB conectada"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Presiona para desactivar la depuración por USB"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Presiona para desactivar"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Seleccionar para desactivar la depuración por USB"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Se conectó la depuración inalámbrica"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Presiona para desactivar la depuración inalámbrica"</string>
