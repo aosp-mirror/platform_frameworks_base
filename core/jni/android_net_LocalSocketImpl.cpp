@@ -257,7 +257,7 @@ static jint socket_read (JNIEnv *env, jobject object, jobject fileDescriptor)
     err = socket_read_all(env, object, fd, &buf, 1);
 
     if (err < 0) {
-        jniThrowIOException(env, errno);
+        // socket_read_all has already thrown
         return (jint)0;
     }
 
