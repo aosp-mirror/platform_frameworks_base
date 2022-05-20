@@ -241,7 +241,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             // launching to top. We allow split as primary for activity reparent because the
             // activity may be split as primary before it is reparented out. In that case, we want
             // to show it as primary again when it is reparented back.
-            if (!resolveActivityToContainer(activity, true /* canSplitAsPrimary */)) {
+            if (!resolveActivityToContainer(activity, true /* isOnReparent */)) {
                 // When there is no embedding rule matched, try to place it in the top container
                 // like a normal launch.
                 placeActivityInTopContainer(activity);
@@ -353,21 +353,21 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     void onActivityCreated(@NonNull Activity launchedActivity) {
         // TODO(b/229680885): we don't support launching into primary yet because we want to always
         // launch the new activity on top.
-        resolveActivityToContainer(launchedActivity, false /* canSplitAsPrimary */);
+        resolveActivityToContainer(launchedActivity, false /* isOnReparent */);
         updateCallbackIfNecessary();
     }
 
     /**
      * Checks if the new added activity should be routed to a particular container. It can create a
      * new container for the activity and a new split container if necessary.
-     * @param launchedActivity  the new launched activity.
-     * @param canSplitAsPrimary whether we can put the new launched activity into primary split.
+     * @param activity      the activity that is newly added to the Task.
+     * @param isOnReparent  whether the activity is reparented to the Task instead of new launched.
+     *                      We only support to split as primary for reparented activity for now.
      * @return {@code true} if the activity was placed in TaskFragment container.
      */
     @VisibleForTesting
-    boolean resolveActivityToContainer(@NonNull Activity launchedActivity,
-            boolean canSplitAsPrimary) {
-        if (isInPictureInPicture(launchedActivity) || launchedActivity.isFinishing()) {
+    boolean resolveActivityToContainer(@NonNull Activity activity, boolean isOnReparent) {
+        if (isInPictureInPicture(activity) || activity.isFinishing()) {
             // We don't embed activity when it is in PIP, or finishing. Return true since we don't
             // want any extra handling.
             return true;
@@ -385,33 +385,32 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
          */
 
         // 1. Whether the new launched activity should always expand.
-        if (shouldExpand(launchedActivity, null /* intent */)) {
-            expandActivity(launchedActivity);
+        if (shouldExpand(activity, null /* intent */)) {
+            expandActivity(activity);
             return true;
         }
 
         // 2. Whether the new launched activity should launch a placeholder.
-        if (launchPlaceholderIfNecessary(launchedActivity)) {
+        if (launchPlaceholderIfNecessary(activity, !isOnReparent)) {
             return true;
         }
 
         // 3. Whether the new launched activity has already been in a split with a rule matched.
-        if (isNewActivityInSplitWithRuleMatched(launchedActivity)) {
+        if (isNewActivityInSplitWithRuleMatched(activity)) {
             return true;
         }
 
         // 4. Whether the activity below (if any) should be split with the new launched activity.
-        final Activity activityBelow = findActivityBelow(launchedActivity);
+        final Activity activityBelow = findActivityBelow(activity);
         if (activityBelow == null) {
             // Can't find any activity below.
             return false;
         }
-        if (putActivitiesIntoSplitIfNecessary(activityBelow, launchedActivity)) {
+        if (putActivitiesIntoSplitIfNecessary(activityBelow, activity)) {
             // Have split rule of [ activityBelow | launchedActivity ].
             return true;
         }
-        if (canSplitAsPrimary
-                && putActivitiesIntoSplitIfNecessary(launchedActivity, activityBelow)) {
+        if (isOnReparent && putActivitiesIntoSplitIfNecessary(activity, activityBelow)) {
             // Have split rule of [ launchedActivity | activityBelow].
             return true;
         }
@@ -430,17 +429,16 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                         ? topSplit.getSecondaryContainer()
                         : topSplit.getPrimaryContainer();
         final Activity otherTopActivity = otherTopContainer.getTopNonFinishingActivity();
-        if (otherTopActivity == null || otherTopActivity == launchedActivity) {
+        if (otherTopActivity == null || otherTopActivity == activity) {
             // Can't find the top activity on the other split TaskFragment.
             return false;
         }
-        if (putActivitiesIntoSplitIfNecessary(otherTopActivity, launchedActivity)) {
+        if (putActivitiesIntoSplitIfNecessary(otherTopActivity, activity)) {
             // Have split rule of [ otherTopActivity | launchedActivity ].
             return true;
         }
         // Have split rule of [ launchedActivity | otherTopActivity].
-        return canSplitAsPrimary
-                && putActivitiesIntoSplitIfNecessary(launchedActivity, otherTopActivity);
+        return isOnReparent && putActivitiesIntoSplitIfNecessary(activity, otherTopActivity);
     }
 
     /**
@@ -603,7 +601,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         }
 
         // Check if activity requires a placeholder
-        launchPlaceholderIfNecessary(activity);
+        launchPlaceholderIfNecessary(activity, false /* isOnCreated */);
     }
 
     @VisibleForTesting
@@ -1043,10 +1041,10 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             return false;
         }
 
-        return launchPlaceholderIfNecessary(topActivity);
+        return launchPlaceholderIfNecessary(topActivity, false /* isOnCreated */);
     }
 
-    boolean launchPlaceholderIfNecessary(@NonNull Activity activity) {
+    boolean launchPlaceholderIfNecessary(@NonNull Activity activity, boolean isOnCreated) {
         final TaskFragmentContainer container = getContainerWithActivity(activity);
         // Don't launch placeholder if the container is occluded.
         if (container != null && container != getTopActiveContainer(container.getTaskId())) {
@@ -1067,9 +1065,31 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         }
 
         // TODO(b/190433398): Handle failed request
-        startActivityToSide(activity, placeholderRule.getPlaceholderIntent(), null /* options */,
+        final Bundle options = getPlaceholderOptions(activity, isOnCreated);
+        startActivityToSide(activity, placeholderRule.getPlaceholderIntent(), options,
                 placeholderRule, null /* failureCallback */, true /* isPlaceholder */);
         return true;
+    }
+
+    /**
+     * Gets the activity options for starting the placeholder activity. In case the placeholder is
+     * launched when the Task is in the background, we don't want to bring the Task to the front.
+     * @param primaryActivity   the primary activity to launch the placeholder from.
+     * @param isOnCreated       whether this happens during the primary activity onCreated.
+     */
+    @VisibleForTesting
+    @Nullable
+    Bundle getPlaceholderOptions(@NonNull Activity primaryActivity, boolean isOnCreated) {
+        // Setting avoid move to front will also skip the animation. We only want to do that when
+        // the Task is currently in background.
+        // Check if the primary is resumed or if this is called when the primary is onCreated
+        // (not resumed yet).
+        if (isOnCreated || primaryActivity.isResumed()) {
+            return null;
+        }
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        options.setAvoidMoveToFront();
+        return options.toBundle();
     }
 
     @VisibleForTesting
