@@ -307,7 +307,6 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                         .setContentText(contentText)
                         .setContentTitle(title)
                         .setOnlyAlertOnce(true)
-                        .setOngoing(true)
                         .setStyle(new Notification.BigTextStyle().bigText(contentText))
                         .setVisibility(Notification.VISIBILITY_PUBLIC);
         if (hasBatterySettings()) {
