@@ -53,6 +53,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.biometrics.dagger.BiometricsBackground;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -76,6 +77,7 @@ import com.android.systemui.util.time.SystemClock;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -107,6 +109,7 @@ public class UdfpsController implements DozeReceiver {
     @NonNull private final LayoutInflater mInflater;
     private final WindowManager mWindowManager;
     private final DelayableExecutor mFgExecutor;
+    @NonNull private final Executor mBiometricExecutor;
     @NonNull private final PanelExpansionStateManager mPanelExpansionStateManager;
     @NonNull private final StatusBarStateController mStatusBarStateController;
     @NonNull private final KeyguardStateController mKeyguardStateController;
@@ -603,7 +606,8 @@ public class UdfpsController implements DozeReceiver {
             @NonNull LatencyTracker latencyTracker,
             @NonNull ActivityLaunchAnimator activityLaunchAnimator,
             @NonNull Optional<AlternateUdfpsTouchProvider> aternateTouchProvider,
-            @NonNull BroadcastSender broadcastSender) {
+            @NonNull BroadcastSender broadcastSender,
+            @BiometricsBackground Executor biometricsExecutor) {
         mContext = context;
         mExecution = execution;
         mVibrator = vibrator;
@@ -634,6 +638,7 @@ public class UdfpsController implements DozeReceiver {
         mActivityLaunchAnimator = activityLaunchAnimator;
         mAlternateTouchProvider = aternateTouchProvider.orElse(null);
         mBroadcastSender = broadcastSender;
+        mBiometricExecutor = biometricsExecutor;
 
         mOrientationListener = new BiometricDisplayListener(
                 context,
@@ -837,21 +842,26 @@ public class UdfpsController implements DozeReceiver {
         }
         mOnFingerDown = true;
         if (mAlternateTouchProvider != null) {
-            mAlternateTouchProvider.onPointerDown(requestId, x, y, minor, major);
+            mBiometricExecutor.execute(() -> {
+                mAlternateTouchProvider.onPointerDown(requestId, x, y, minor, major);
+            });
         } else {
             mFingerprintManager.onPointerDown(requestId, mSensorId, x, y, minor, major);
         }
         Trace.endAsyncSection("UdfpsController.e2e.onPointerDown", 0);
-
         final UdfpsView view = mOverlay.getOverlayView();
         if (view != null) {
             view.startIllumination(() -> {
                 if (mAlternateTouchProvider != null) {
-                    mAlternateTouchProvider.onUiReady();
+                    mBiometricExecutor.execute(() -> {
+                        mAlternateTouchProvider.onUiReady();
+                        mLatencyTracker.onActionEnd(LatencyTracker.ACTION_UDFPS_ILLUMINATE);
+                    });
                 } else {
                     mFingerprintManager.onUiReady(requestId, mSensorId);
+                    mLatencyTracker.onActionEnd(LatencyTracker.ACTION_UDFPS_ILLUMINATE);
+
                 }
-                mLatencyTracker.onActionEnd(LatencyTracker.ACTION_UDFPS_ILLUMINATE);
             });
         }
 
@@ -866,7 +876,9 @@ public class UdfpsController implements DozeReceiver {
         mAcquiredReceived = false;
         if (mOnFingerDown) {
             if (mAlternateTouchProvider != null) {
-                mAlternateTouchProvider.onPointerUp(requestId);
+                mBiometricExecutor.execute(() -> {
+                    mAlternateTouchProvider.onPointerUp(requestId);
+                });
             } else {
                 mFingerprintManager.onPointerUp(requestId, mSensorId);
             }

@@ -400,7 +400,8 @@ public final class LoadedApk {
         mLibDir = aInfo.nativeLibraryDir;
         mDataDirFile = FileUtils.newFileOrNull(aInfo.dataDir);
         mDeviceProtectedDataDirFile = FileUtils.newFileOrNull(aInfo.deviceProtectedDataDir);
-        mCredentialProtectedDataDirFile = FileUtils.newFileOrNull(aInfo.credentialProtectedDataDir);
+        mCredentialProtectedDataDirFile = FileUtils.newFileOrNull(
+                aInfo.credentialProtectedDataDir);
 
         mSplitNames = aInfo.splitNames;
         mSplitAppDirs = aInfo.splitSourceDirs;
@@ -412,14 +413,16 @@ public final class LoadedApk {
         }
     }
 
-    /** @hide */
-    void setSdkSandboxStorage(String sdkSandboxClientAppPackage) {
+    void setSdkSandboxStorage(@Nullable String sdkSandboxClientAppVolumeUuid,
+            String sdkSandboxClientAppPackage) {
         int userId = UserHandle.myUserId();
         mDeviceProtectedDataDirFile = Environment
-                .getDataMiscDeSharedSdkSandboxDirectory(userId, sdkSandboxClientAppPackage)
+                .getDataMiscDeSharedSdkSandboxDirectory(sdkSandboxClientAppVolumeUuid, userId,
+                        sdkSandboxClientAppPackage)
                 .getAbsoluteFile();
         mCredentialProtectedDataDirFile = Environment
-                .getDataMiscCeSharedSdkSandboxDirectory(userId, sdkSandboxClientAppPackage)
+                .getDataMiscCeSharedSdkSandboxDirectory(sdkSandboxClientAppVolumeUuid, userId,
+                        sdkSandboxClientAppPackage)
                 .getAbsoluteFile();
 
         if ((mApplicationInfo.privateFlags
