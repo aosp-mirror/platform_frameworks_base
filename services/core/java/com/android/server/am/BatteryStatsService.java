@@ -2260,7 +2260,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     private void dumpHelp(PrintWriter pw) {
         pw.println("Battery stats (batterystats) dump options:");
         pw.println("  [--checkin] [--proto] [--history] [--history-start] [--charged] [-c]");
-        pw.println("  [--daily] [--reset] [--write] [--new-daily] [--read-daily] [-h] [<package.name>]");
+        pw.println("  [--daily] [--reset] [--reset-all] [--write] [--new-daily] [--read-daily]");
+        pw.println("  [-h] [<package.name>]");
         pw.println("  --checkin: generate output for a checkin report; will write (and clear) the");
         pw.println("             last old completed stats when they had been reset.");
         pw.println("  -c: write the current stats in checkin format.");
@@ -2271,6 +2272,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         pw.println("  --charged: only output data since last charged.");
         pw.println("  --daily: only output full daily data.");
         pw.println("  --reset: reset the stats, clearing all current data.");
+        pw.println("  --reset-all: reset the stats, clearing all current and past data.");
         pw.println("  --write: force write current collected stats to disk.");
         pw.println("  --new-daily: immediately create and write new daily stats record.");
         pw.println("  --read-daily: read-load last written daily stats.");
@@ -2407,6 +2409,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     flags |= BatteryStats.DUMP_CHARGED_ONLY;
                 } else if ("--daily".equals(arg)) {
                     flags |= BatteryStats.DUMP_DAILY_ONLY;
+                } else if ("--reset-all".equals(arg)) {
+                    awaitCompletion();
+                    synchronized (mStats) {
+                        mStats.resetAllStatsCmdLocked();
+                        mBatteryUsageStatsStore.removeAllSnapshots();
+                        pw.println("Battery stats and history reset.");
+                        noOutput = true;
+                    }
                 } else if ("--reset".equals(arg)) {
                     awaitCompletion();
                     synchronized (mStats) {
