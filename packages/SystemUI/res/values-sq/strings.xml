@@ -313,10 +313,12 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Rrëshqit lart për ta hapur"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Shtyp ikonën e shkyçjes për ta hapur"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"U shkyç me fytyrë. Shtyp ikonën e shkyçjes për ta hapur."</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1901953991150295169">"Lëvize majtas"</item>
+    <item msgid="5558598599408514296">"Lëvize poshtë"</item>
+    <item msgid="4844142668312841831">"Lëvize djathtas"</item>
+    <item msgid="5640521437931460125">"Lëvize lart"</item>
+  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"Rrëshqit lart për të provuar përsëri"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Shkyçe për të përdorur NFC-në"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Kjo pajisje i përket organizatës sate"</string>
@@ -841,8 +843,7 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Hap aplikacionin për të transmetuar këtë seancë."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Aplikacion i panjohur"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Ndalo transmetimin"</string>
-    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Pajisjet që ofrohen për daljen e audios."</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Si funksionon transmetimi"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Transmetimi"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Personat në afërsi me ty me pajisje të përputhshme me Bluetooth mund të dëgjojnë median që ti po transmeton"</string>
@@ -939,12 +940,9 @@
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Modifiko imazhin e kopjuar"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Dërgo te pajisja në afërsi"</string>
     <string name="clipboard_text_hidden" msgid="7926899867471812305">"Trokit për të parë"</string>
-    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
-    <skip />
-    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
-    <skip />
-    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
-    <skip />
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"Teksti u kopjua"</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"Imazhi u kopjua"</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"Përmbajtja u kopjua"</string>
     <string name="add" msgid="81036585205287996">"Shto"</string>
     <string name="manage_users" msgid="1823875311934643849">"Menaxho përdoruesit"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Ky njoftim nuk mbështet zvarritjen në \"Ekranin e ndarë\"."</string>

@@ -313,10 +313,12 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"திறப்பதற்கு மேல் நோக்கி ஸ்வைப் செய்யவும்"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"திறக்க, அன்லாக் ஐகானை அழுத்தவும்"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"முகம் மூலம் அன்லாக் செய்யப்பட்டது. திறக்க, அன்லாக் ஐகானை அழுத்துக."</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1901953991150295169">"இடதுபுறம் நகர்த்துங்கள்"</item>
+    <item msgid="5558598599408514296">"கீழே நகர்த்துங்கள்"</item>
+    <item msgid="4844142668312841831">"வலதுபுறம் நகர்த்துங்கள்"</item>
+    <item msgid="5640521437931460125">"மேலே நகர்த்துங்கள்"</item>
+  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"மீண்டும் முயல மேல்நோக்கி ஸ்வைப் செய்யவும்"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFCயைப் பயன்படுத்த அன்லாக் செய்யவும்"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"இந்த சாதனம் உங்கள் நிறுவனத்துக்கு சொந்தமானது"</string>
@@ -841,8 +843,7 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"இந்த அமர்வை அலைபரப்ப ஆப்ஸைத் திறங்கள்."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"அறியப்படாத ஆப்ஸ்"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"அலைபரப்புவதை நிறுத்து"</string>
-    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ஆடியோ அவுட்புட்டுக்குக் கிடைக்கும் சாதனங்கள்."</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"பிராட்காஸ்ட் எவ்வாறு செயல்படுகிறது?"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"பிராட்காஸ்ட்"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"நீங்கள் பிராட்காஸ்ட் செய்யும் மீடியாவை அருகிலுள்ளவர்கள் இணக்கமான புளூடூத் சாதனங்கள் மூலம் கேட்கலாம்"</string>
@@ -939,12 +940,9 @@
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"நகலெடுத்த படத்தைத் திருத்து"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"அருகிலுள்ள சாதனத்திற்கு அனுப்பு"</string>
     <string name="clipboard_text_hidden" msgid="7926899867471812305">"பார்க்க தட்டுங்கள்"</string>
-    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
-    <skip />
-    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
-    <skip />
-    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
-    <skip />
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"வார்த்தைகள் நகலெடுக்கப்பட்டன"</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"படம் நகலெடுக்கப்பட்டது"</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"உள்ளடக்கம் நகலெடுக்கப்பட்டது"</string>
     <string name="add" msgid="81036585205287996">"சேர்"</string>
     <string name="manage_users" msgid="1823875311934643849">"பயனர்களை நிர்வகித்தல்"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"பிரிக்கப்பட்ட திரைக்குள் இந்த அறிவிப்பை இழுத்துவிட முடியாது."</string>
