@@ -108,6 +108,17 @@ public final class DisplayManager {
     public static final String DISPLAY_CATEGORY_PRESENTATION =
             "android.hardware.display.category.PRESENTATION";
 
+    /**
+     * Display category: All displays, including disabled displays.
+     * <p>
+     * This returns all displays, including currently disabled and inaccessible displays.
+     *
+     * @see #getDisplays(String)
+     * @hide
+     */
+    public static final String DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED =
+            "android.hardware.display.category.ALL_INCLUDING_DISABLED";
+
     /** @hide **/
     @IntDef(prefix = "VIRTUAL_DISPLAY_FLAG_", flag = true, value = {
             VIRTUAL_DISPLAY_FLAG_PUBLIC,
@@ -542,7 +553,8 @@ public final class DisplayManager {
         final int[] displayIds = mGlobal.getDisplayIds();
         synchronized (mLock) {
             try {
-                if (category == null) {
+                if (category == null
+                        || DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED.equals(category)) {
                     addAllDisplaysLocked(mTempDisplays, displayIds);
                 } else if (category.equals(DISPLAY_CATEGORY_PRESENTATION)) {
                     addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_WIFI);
