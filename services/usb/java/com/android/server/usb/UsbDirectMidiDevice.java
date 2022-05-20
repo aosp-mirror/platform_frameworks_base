@@ -80,9 +80,13 @@ public final class UsbDirectMidiDevice implements Closeable {
     // of cycles and not being permanently stuck.
     private static final int BULK_TRANSFER_TIMEOUT_MILLISECONDS = 10;
 
+    // Arbitrary number for timeout when closing a thread
+    private static final int THREAD_JOIN_TIMEOUT_MILLISECONDS = 50;
+
     private ArrayList<UsbDeviceConnection> mUsbDeviceConnections;
     private ArrayList<ArrayList<UsbEndpoint>> mInputUsbEndpoints;
     private ArrayList<ArrayList<UsbEndpoint>> mOutputUsbEndpoints;
+    private ArrayList<Thread> mThreads;
 
     private UsbMidiBlockParser mMidiBlockParser = new UsbMidiBlockParser();
     private int mDefaultMidiProtocol = MidiDeviceInfo.PROTOCOL_UMP_MIDI_1_0_UP_TO_64_BITS;
@@ -273,9 +277,10 @@ public final class UsbDirectMidiDevice implements Closeable {
         // to USB MIDI for each USB output.
         mUsbMidiPacketConverter = new UsbMidiPacketConverter(mNumOutputs);
 
-        mUsbDeviceConnections = new ArrayList<UsbDeviceConnection>(mUsbInterfaces.size());
-        mInputUsbEndpoints = new ArrayList<ArrayList<UsbEndpoint>>(mUsbInterfaces.size());
-        mOutputUsbEndpoints = new ArrayList<ArrayList<UsbEndpoint>>(mUsbInterfaces.size());
+        mUsbDeviceConnections = new ArrayList<UsbDeviceConnection>();
+        mInputUsbEndpoints = new ArrayList<ArrayList<UsbEndpoint>>();
+        mOutputUsbEndpoints = new ArrayList<ArrayList<UsbEndpoint>>();
+        mThreads = new ArrayList<Thread>();
 
         for (int interfaceIndex = 0; interfaceIndex < mUsbInterfaces.size(); interfaceIndex++) {
             ArrayList<UsbEndpoint> inputEndpoints = new ArrayList<UsbEndpoint>();
@@ -327,7 +332,7 @@ public final class UsbDirectMidiDevice implements Closeable {
                         mInputUsbEndpoints.get(connectionIndex).get(endpointIndex);
                 final int portFinal = portNumber;
 
-                new Thread("UsbDirectMidiDevice input thread " + portFinal) {
+                Thread newThread = new Thread("UsbDirectMidiDevice input thread " + portFinal) {
                     @Override
                     public void run() {
                         final UsbRequest request = new UsbRequest();
@@ -335,9 +340,12 @@ public final class UsbDirectMidiDevice implements Closeable {
                             request.initialize(connectionFinal, endpointFinal);
                             byte[] inputBuffer = new byte[endpointFinal.getMaxPacketSize()];
                             while (true) {
+                                if (Thread.currentThread().interrupted()) {
+                                    Log.w(TAG, "input thread interrupted");
+                                    break;
+                                }
                                 // Record time of event immediately after waking.
                                 long timestamp = System.nanoTime();
-                                if (!mIsOpen) break;
                                 final ByteBuffer byteBuffer = ByteBuffer.wrap(inputBuffer);
                                 if (!request.queue(byteBuffer)) {
                                     Log.w(TAG, "Cannot queue request");
@@ -382,8 +390,9 @@ public final class UsbDirectMidiDevice implements Closeable {
                         }
                         Log.d(TAG, "input thread exit");
                     }
-                }.start();
-
+                };
+                newThread.start();
+                mThreads.add(newThread);
                 portNumber++;
             }
         }
@@ -402,18 +411,23 @@ public final class UsbDirectMidiDevice implements Closeable {
                 final int portFinal = portNumber;
                 final MidiEventScheduler eventSchedulerFinal = mEventSchedulers[portFinal];
 
-                new Thread("UsbDirectMidiDevice output thread " + portFinal) {
+                Thread newThread = new Thread("UsbDirectMidiDevice output thread " + portFinal) {
                     @Override
                     public void run() {
                         while (true) {
+                            if (Thread.currentThread().interrupted()) {
+                                Log.w(TAG, "output thread interrupted");
+                                break;
+                            }
                             MidiEvent event;
                             try {
                                 event = (MidiEvent) eventSchedulerFinal.waitNextEvent();
                             } catch (InterruptedException e) {
-                                // try again
-                                continue;
+                                Log.w(TAG, "event scheduler interrupted");
+                                break;
                             }
                             if (event == null) {
+                                Log.w(TAG, "event is null");
                                 break;
                             }
 
@@ -446,8 +460,9 @@ public final class UsbDirectMidiDevice implements Closeable {
                         }
                         Log.d(TAG, "output thread exit");
                     }
-                }.start();
-
+                };
+                newThread.start();
+                mThreads.add(newThread);
                 portNumber++;
             }
         }
@@ -523,6 +538,27 @@ public final class UsbDirectMidiDevice implements Closeable {
 
     private void closeLocked() {
         Log.d(TAG, "closeLocked()");
+
+        // Send an interrupt signal to threads.
+        for (Thread thread : mThreads) {
+            if (thread != null) {
+                thread.interrupt();
+            }
+        }
+
+        // Wait for threads to actually stop.
+        for (Thread thread : mThreads) {
+            if (thread != null) {
+                try {
+                    thread.join(THREAD_JOIN_TIMEOUT_MILLISECONDS);
+                } catch (InterruptedException e) {
+                    Log.w(TAG, "thread join interrupted");
+                    break;
+                }
+            }
+        }
+        mThreads = null;
+
         for (int i = 0; i < mEventSchedulers.length; i++) {
             mMidiInputPortReceivers[i].setReceiver(null);
             mEventSchedulers[i].close();
