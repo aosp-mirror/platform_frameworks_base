@@ -432,6 +432,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private static final int DESTROY_TIMEOUT = 10 * 1000;
 
     final ActivityTaskManagerService mAtmService;
+    @NonNull
     final ActivityInfo info; // activity info provided by developer in AndroidManifest
     // Which user is this running for?
     final int mUserId;
@@ -9705,6 +9706,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     @Override
     boolean canBeAnimationTarget() {
         return true;
+    }
+
+    @Nullable
+    Point getMinDimensions() {
+        final ActivityInfo.WindowLayout windowLayout = info.windowLayout;
+        if (windowLayout == null) {
+            return null;
+        }
+        return new Point(windowLayout.minWidth, windowLayout.minHeight);
     }
 
     static class Builder {
