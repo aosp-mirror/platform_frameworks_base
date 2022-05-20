@@ -26,8 +26,7 @@
               android:paddingLeft="24dp"
               android:paddingRight="24dp"
               android:paddingTop="24dp"
-              android:paddingBottom="24dp"
-              android:background="?attr/colorSurface">
+              android:paddingBottom="24dp">
 
     <ImageView
             android:id="@+id/log_access_image_view"
@@ -37,8 +36,7 @@
             android:src="@drawable/ic_doc_document"
             tools:layout_editor_absoluteX="148dp"
             tools:layout_editor_absoluteY="35dp"
-            android:gravity="center"
-            android:tint="?attr/colorAccentPrimaryVariant"/>
+            android:gravity="center" />
 
     <TextView
             android:id="@+id/log_access_dialog_title"
@@ -60,29 +58,35 @@
             android:textColor="?android:attr/textColorPrimary"
             android:gravity="center" />
 
-    <Button
-            android:id="@+id/log_access_dialog_allow_button"
+    <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="@string/log_access_confirmation_allow"
-            style="@style/PermissionGrantButtonTop"
-            android:layout_marginBottom="5dp"
-            android:layout_centerHorizontal="true"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentBottom="true"
-            android:clipToOutline="true"
-            android:gravity="center" />
+            android:layout_height="wrap_content">
+        <Button
+                android:id="@+id/log_access_dialog_allow_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/log_access_confirmation_allow"
+                style="@style/PermissionGrantButtonTop"
+                android:textAppearance="@style/PermissionGrantButtonTextAppearance"
+                android:layout_marginBottom="5dp"
+                android:layout_centerHorizontal="true"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentBottom="true"
+                android:clipToOutline="true"
+                android:gravity="center" />
 
-    <Button
-            android:id="@+id/log_access_dialog_deny_button"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="@string/log_access_confirmation_deny"
-            style="@style/PermissionGrantButtonBottom"
-            android:layout_centerHorizontal="true"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentBottom="true"
-            android:clipToOutline="true"
-            android:gravity="center" />
-
+        <Button
+                android:id="@+id/log_access_dialog_deny_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/log_access_confirmation_deny"
+                style="@style/PermissionGrantButtonBottom"
+                android:textAppearance="@style/PermissionGrantButtonTextAppearance"
+                android:layout_centerHorizontal="true"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentBottom="true"
+                android:clipToOutline="true"
+                android:gravity="center" />
+    </LinearLayout>
 </LinearLayout>
