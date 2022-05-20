@@ -170,9 +170,9 @@ public final class UserTypeFactory {
                 .setBaseType(FLAG_PROFILE)
                 .setMaxAllowedPerParent(2)
                 .setLabel(0)
-                .setIconBadge(com.android.internal.R.drawable.ic_corp_icon_badge_case)
-                .setBadgePlain(com.android.internal.R.drawable.ic_corp_badge_case)
-                .setBadgeNoBackground(com.android.internal.R.drawable.ic_corp_badge_no_background)
+                .setIconBadge(com.android.internal.R.drawable.ic_test_icon_badge_experiment)
+                .setBadgePlain(com.android.internal.R.drawable.ic_test_badge_experiment)
+                .setBadgeNoBackground(com.android.internal.R.drawable.ic_test_badge_no_background)
                 .setBadgeLabels(
                         com.android.internal.R.string.managed_profile_label_badge,
                         com.android.internal.R.string.managed_profile_label_badge_2,
