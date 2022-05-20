@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.AsyncTask;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.stats.devicepolicy.DevicePolicyEnums;
@@ -286,7 +287,10 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
      * <p>Returns {@code true} if rebuild has completed.
      */
     boolean rebuildActiveTab(boolean doPostProcessing) {
-        return rebuildTab(getActiveListAdapter(), doPostProcessing);
+        Trace.beginSection("MultiProfilePagerAdapter#rebuildActiveTab");
+        boolean result = rebuildTab(getActiveListAdapter(), doPostProcessing);
+        Trace.endSection();
+        return result;
     }
 
     /**
@@ -294,10 +298,14 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
      * <p>Returns {@code true} if rebuild has completed.
      */
     boolean rebuildInactiveTab(boolean doPostProcessing) {
+        Trace.beginSection("MultiProfilePagerAdapter#rebuildInactiveTab");
         if (getItemCount() == 1) {
+            Trace.endSection();
             return false;
         }
-        return rebuildTab(getInactiveListAdapter(), doPostProcessing);
+        boolean result = rebuildTab(getInactiveListAdapter(), doPostProcessing);
+        Trace.endSection();
+        return result;
     }
 
     private int userHandleToPageIndex(UserHandle userHandle) {

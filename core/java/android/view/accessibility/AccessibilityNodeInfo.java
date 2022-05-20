@@ -3046,6 +3046,9 @@ public class AccessibilityNodeInfo implements Parcelable {
             int spanToReplaceStart = spannable.getSpanStart(span);
             int spanToReplaceEnd = spannable.getSpanEnd(span);
             int spanToReplaceFlags = spannable.getSpanFlags(span);
+            if (spanToReplaceStart < 0) {
+                continue;
+            }
             spannable.removeSpan(span);
             ClickableSpan replacementSpan = (span instanceof URLSpan)
                     ? new AccessibilityURLSpan((URLSpan) span)
@@ -3083,6 +3086,9 @@ public class AccessibilityNodeInfo implements Parcelable {
             int spanToReplaceStart = spannable.getSpanStart(span);
             int spanToReplaceEnd = spannable.getSpanEnd(span);
             int spanToReplaceFlags = spannable.getSpanFlags(span);
+            if (spanToReplaceStart < 0) {
+                continue;
+            }
             spannable.removeSpan(span);
             ReplacementSpan replacementSpan = new AccessibilityReplacementSpan(replacementText);
             spannable.setSpan(replacementSpan, spanToReplaceStart, spanToReplaceEnd,

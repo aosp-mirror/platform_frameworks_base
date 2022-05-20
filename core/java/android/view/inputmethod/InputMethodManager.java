@@ -782,6 +782,7 @@ public final class InputMethodManager {
         @Override
         public void setCurrentRootView(ViewRootImpl rootView) {
             synchronized (mH) {
+                mImeDispatcher.switchRootView(mCurRootView, rootView);
                 mCurRootView = rootView;
             }
         }

@@ -270,13 +270,12 @@ public final class QuotaController extends StateController {
     private final SparseArrayMap<String, Timer> mEJPkgTimers = new SparseArrayMap<>();
 
     /** List of all regular timing sessions for a package-userId combo, in chronological order. */
-    private final SparseArrayMap<String, List<TimingSession>> mTimingSessions =
-            new SparseArrayMap<>();
+    private final SparseArrayMap<String, List<TimedEvent>> mTimingEvents = new SparseArrayMap<>();
 
     /**
      * List of all expedited job timing sessions for a package-userId combo, in chronological order.
      */
-    private final SparseArrayMap<String, List<TimingSession>> mEJTimingSessions =
+    private final SparseArrayMap<String, List<TimedEvent>> mEJTimingSessions =
             new SparseArrayMap<>();
 
     /**
@@ -519,6 +518,14 @@ public final class QuotaController extends StateController {
 
     private long mEJGracePeriodTopAppMs = QcConstants.DEFAULT_EJ_GRACE_PERIOD_TOP_APP_MS;
 
+    private long mQuotaBumpAdditionalDurationMs =
+            QcConstants.DEFAULT_QUOTA_BUMP_ADDITIONAL_DURATION_MS;
+    private int mQuotaBumpAdditionalJobCount = QcConstants.DEFAULT_QUOTA_BUMP_ADDITIONAL_JOB_COUNT;
+    private int mQuotaBumpAdditionalSessionCount =
+            QcConstants.DEFAULT_QUOTA_BUMP_ADDITIONAL_SESSION_COUNT;
+    private long mQuotaBumpWindowSizeMs = QcConstants.DEFAULT_QUOTA_BUMP_WINDOW_SIZE_MS;
+    private int mQuotaBumpLimit = QcConstants.DEFAULT_QUOTA_BUMP_LIMIT;
+
     /**
      * List of system apps with the {@link android.Manifest.permission#INSTALL_PACKAGES} permission
      * granted for each user.
@@ -707,7 +714,7 @@ public final class QuotaController extends StateController {
         mTrackedJobs.delete(userId);
         mPkgTimers.delete(userId);
         mEJPkgTimers.delete(userId);
-        mTimingSessions.delete(userId);
+        mTimingEvents.delete(userId);
         mEJTimingSessions.delete(userId);
         mInQuotaAlarmQueue.removeAlarmsForUserId(userId);
         mExecutionStatsCache.delete(userId);
@@ -738,7 +745,7 @@ public final class QuotaController extends StateController {
                 timer.dropEverythingLocked();
             }
         }
-        mTimingSessions.delete(userId, packageName);
+        mTimingEvents.delete(userId, packageName);
         mEJTimingSessions.delete(userId, packageName);
         mInQuotaAlarmQueue.removeAlarmForKey(new Package(userId, packageName));
         mExecutionStatsCache.delete(userId, packageName);
@@ -928,7 +935,7 @@ public final class QuotaController extends StateController {
                 (stats.jobRateLimitExpirationTimeElapsed <= now
                         || stats.jobCountInRateLimitingWindow < mMaxJobCountPerRateLimitingWindow);
         return isUnderAllowedTimeQuota
-                && (stats.bgJobCountInWindow < mMaxBucketJobCounts[standbyBucket]);
+                && stats.bgJobCountInWindow < stats.jobCountLimit;
     }
 
     private boolean isUnderSessionCountQuotaLocked(@NonNull ExecutionStats stats,
@@ -937,7 +944,7 @@ public final class QuotaController extends StateController {
         final boolean isUnderAllowedTimeQuota = (stats.sessionRateLimitExpirationTimeElapsed <= now
                 || stats.sessionCountInRateLimitingWindow < mMaxSessionCountPerRateLimitingWindow);
         return isUnderAllowedTimeQuota
-                && stats.sessionCountInWindow < mMaxBucketSessionCounts[standbyBucket];
+                && stats.sessionCountInWindow < stats.sessionCountLimit;
     }
 
     @VisibleForTesting
@@ -984,12 +991,12 @@ public final class QuotaController extends StateController {
         long remainingMs = limitMs - quota.getTallyLocked();
 
         // Stale sessions may still be factored into tally. Make sure they're removed.
-        List<TimingSession> timingSessions = mEJTimingSessions.get(userId, packageName);
+        List<TimedEvent> timingSessions = mEJTimingSessions.get(userId, packageName);
         final long nowElapsed = sElapsedRealtimeClock.millis();
         final long windowStartTimeElapsed = nowElapsed - mEJLimitWindowSizeMs;
         if (timingSessions != null) {
             while (timingSessions.size() > 0) {
-                TimingSession ts = timingSessions.get(0);
+                TimingSession ts = (TimingSession) timingSessions.get(0);
                 if (ts.endTimeElapsed < windowStartTimeElapsed) {
                     final long duration = ts.endTimeElapsed - ts.startTimeElapsed;
                     remainingMs += duration;
@@ -1042,9 +1049,9 @@ public final class QuotaController extends StateController {
             return 0;
         }
 
-        List<TimingSession> sessions = mTimingSessions.get(userId, packageName);
+        List<TimedEvent> events = mTimingEvents.get(userId, packageName);
         final ExecutionStats stats = getExecutionStatsLocked(userId, packageName, standbyBucket);
-        if (sessions == null || sessions.size() == 0) {
+        if (events == null || events.size() == 0) {
             // Regular ACTIVE case. Since the bucket size equals the allowed time, the app jobs can
             // essentially run until they reach the maximum limit.
             if (stats.windowSizeMs == mAllowedTimePerPeriodMs[standbyBucket]) {
@@ -1064,7 +1071,7 @@ public final class QuotaController extends StateController {
         // essentially run until they reach the maximum limit.
         if (stats.windowSizeMs == mAllowedTimePerPeriodMs[standbyBucket]) {
             return calculateTimeUntilQuotaConsumedLocked(
-                    sessions, startMaxElapsed, maxExecutionTimeRemainingMs);
+                    events, startMaxElapsed, maxExecutionTimeRemainingMs, false);
         }
 
         // Need to check both max time and period time in case one is less than the other.
@@ -1073,9 +1080,9 @@ public final class QuotaController extends StateController {
         // bucket value.
         return Math.min(
                 calculateTimeUntilQuotaConsumedLocked(
-                        sessions, startMaxElapsed, maxExecutionTimeRemainingMs),
+                        events, startMaxElapsed, maxExecutionTimeRemainingMs, false),
                 calculateTimeUntilQuotaConsumedLocked(
-                        sessions, startWindowElapsed, allowedTimeRemainingMs));
+                        events, startWindowElapsed, allowedTimeRemainingMs, true));
     }
 
     /**
@@ -1084,12 +1091,36 @@ public final class QuotaController extends StateController {
      * @param windowStartElapsed The start of the window, in the elapsed realtime timebase.
      * @param deadSpaceMs        How much time can be allowed to count towards the quota
      */
-    private long calculateTimeUntilQuotaConsumedLocked(@NonNull List<TimingSession> sessions,
-            final long windowStartElapsed, long deadSpaceMs) {
+    private long calculateTimeUntilQuotaConsumedLocked(@NonNull List<TimedEvent> sessions,
+            final long windowStartElapsed, long deadSpaceMs, boolean allowQuotaBumps) {
         long timeUntilQuotaConsumedMs = 0;
         long start = windowStartElapsed;
-        for (int i = 0; i < sessions.size(); ++i) {
-            TimingSession session = sessions.get(i);
+        int numQuotaBumps = 0;
+        final long quotaBumpWindowStartElapsed =
+                sElapsedRealtimeClock.millis() - mQuotaBumpWindowSizeMs;
+        final int numSessions = sessions.size();
+        if (allowQuotaBumps) {
+            for (int i = numSessions - 1; i >= 0; --i) {
+                TimedEvent event = sessions.get(i);
+
+                if (event instanceof QuotaBump) {
+                    if (event.getEndTimeElapsed() >= quotaBumpWindowStartElapsed
+                            && numQuotaBumps++ < mQuotaBumpLimit) {
+                        deadSpaceMs += mQuotaBumpAdditionalDurationMs;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+        for (int i = 0; i < numSessions; ++i) {
+            TimedEvent event = sessions.get(i);
+
+            if (event instanceof QuotaBump) {
+                continue;
+            }
+
+            TimingSession session = (TimingSession) event;
 
             if (session.endTimeElapsed < windowStartElapsed) {
                 // Outside of window. Ignore.
@@ -1129,7 +1160,7 @@ public final class QuotaController extends StateController {
         final long remainingExecutionTimeMs =
                 getRemainingEJExecutionTimeLocked(userId, packageName);
 
-        List<TimingSession> sessions = mEJTimingSessions.get(userId, packageName);
+        List<TimedEvent> sessions = mEJTimingSessions.get(userId, packageName);
         if (sessions == null || sessions.size() == 0) {
             return remainingExecutionTimeMs;
         }
@@ -1146,7 +1177,7 @@ public final class QuotaController extends StateController {
         long phasedOutSessionTimeMs = 0;
 
         for (int i = 0; i < sessions.size(); ++i) {
-            TimingSession session = sessions.get(i);
+            TimingSession session = (TimingSession) sessions.get(i);
             if (session.endTimeElapsed < startWindowElapsed) {
                 // Edge case where a session became stale in the time between the call to
                 // getRemainingEJExecutionTimeLocked and this line.
@@ -1159,7 +1190,7 @@ public final class QuotaController extends StateController {
             } else {
                 // Session fully inside window
                 final long timeBetweenSessions = session.startTimeElapsed
-                        - (i == 0 ? startWindowElapsed : sessions.get(i - 1).endTimeElapsed);
+                        - (i == 0 ? startWindowElapsed : sessions.get(i - 1).getEndTimeElapsed());
                 final long usedDeadSpaceMs = Math.min(remainingDeadSpaceMs, timeBetweenSessions);
                 deadSpaceMs += usedDeadSpaceMs;
                 if (usedDeadSpaceMs == timeBetweenSessions) {
@@ -1267,22 +1298,49 @@ public final class QuotaController extends StateController {
             }
         }
 
-        List<TimingSession> sessions = mTimingSessions.get(userId, packageName);
-        if (sessions == null || sessions.size() == 0) {
+        List<TimedEvent> events = mTimingEvents.get(userId, packageName);
+        if (events == null || events.size() == 0) {
             return;
         }
 
         final long startWindowElapsed = nowElapsed - stats.windowSizeMs;
         final long startMaxElapsed = nowElapsed - MAX_PERIOD_MS;
         int sessionCountInWindow = 0;
-        // The minimum time between the start time and the beginning of the sessions that were
+        int numQuotaBumps = 0;
+        final long quotaBumpWindowStartElapsed = nowElapsed - mQuotaBumpWindowSizeMs;
+        // The minimum time between the start time and the beginning of the events that were
         // looked at --> how much time the stats will be valid for.
         long emptyTimeMs = Long.MAX_VALUE;
         // Sessions are non-overlapping and in order of occurrence, so iterating backwards will get
         // the most recent ones.
-        final int loopStart = sessions.size() - 1;
+        final int loopStart = events.size() - 1;
+        // Process QuotaBumps first to ensure the limits are properly adjusted.
         for (int i = loopStart; i >= 0; --i) {
-            TimingSession session = sessions.get(i);
+            TimedEvent event = events.get(i);
+
+            if (event.getEndTimeElapsed() < quotaBumpWindowStartElapsed
+                    || numQuotaBumps >= mQuotaBumpLimit) {
+                break;
+            }
+
+            if (event instanceof QuotaBump) {
+                stats.allowedTimePerPeriodMs += mQuotaBumpAdditionalDurationMs;
+                stats.jobCountLimit += mQuotaBumpAdditionalJobCount;
+                stats.sessionCountLimit += mQuotaBumpAdditionalSessionCount;
+                emptyTimeMs = Math.min(emptyTimeMs,
+                        event.getEndTimeElapsed() - quotaBumpWindowStartElapsed);
+                numQuotaBumps++;
+            }
+        }
+        TimingSession lastSeenTimingSession = null;
+        for (int i = loopStart; i >= 0; --i) {
+            TimedEvent event = events.get(i);
+
+            if (event instanceof QuotaBump) {
+                continue;
+            }
+
+            TimingSession session = (TimingSession) event;
 
             // Window management.
             if (startWindowElapsed < session.endTimeElapsed) {
@@ -1309,10 +1367,11 @@ public final class QuotaController extends StateController {
                     final long inQuotaTime = session.endTimeElapsed + stats.windowSizeMs;
                     stats.inQuotaTimeElapsed = Math.max(stats.inQuotaTimeElapsed, inQuotaTime);
                 }
-                if (i == loopStart
-                        || (sessions.get(i + 1).startTimeElapsed - session.endTimeElapsed)
-                                > mTimingSessionCoalescingDurationMs) {
-                    // Coalesce sessions if they are very close to each other in time
+                // Coalesce sessions if they are very close to each other in time
+                boolean shouldCoalesce = lastSeenTimingSession != null
+                        && lastSeenTimingSession.startTimeElapsed - session.endTimeElapsed
+                        <= mTimingSessionCoalescingDurationMs;
+                if (!shouldCoalesce) {
                     sessionCountInWindow++;
 
                     if (sessionCountInWindow >= stats.sessionCountLimit) {
@@ -1348,6 +1407,8 @@ public final class QuotaController extends StateController {
                 // This session ended before the window. No point in going any further.
                 break;
             }
+
+            lastSeenTimingSession = session;
         }
         stats.expirationTimeElapsed = nowElapsed + emptyTimeMs;
         stats.sessionCountInWindow = sessionCountInWindow;
@@ -1437,9 +1498,9 @@ public final class QuotaController extends StateController {
     private void saveTimingSession(final int userId, @NonNull final String packageName,
             @NonNull final TimingSession session, boolean isExpedited, long debitAdjustment) {
         synchronized (mLock) {
-            final SparseArrayMap<String, List<TimingSession>> sessionMap =
-                    isExpedited ? mEJTimingSessions : mTimingSessions;
-            List<TimingSession> sessions = sessionMap.get(userId, packageName);
+            final SparseArrayMap<String, List<TimedEvent>> sessionMap =
+                    isExpedited ? mEJTimingSessions : mTimingEvents;
+            List<TimedEvent> sessions = sessionMap.get(userId, packageName);
             if (sessions == null) {
                 sessions = new ArrayList<>();
                 sessionMap.add(userId, packageName, sessions);
@@ -1460,6 +1521,9 @@ public final class QuotaController extends StateController {
 
     private void grantRewardForInstantEvent(
             final int userId, @NonNull final String packageName, final long credit) {
+        if (credit == 0) {
+            return;
+        }
         synchronized (mLock) {
             final long nowElapsed = sElapsedRealtimeClock.millis();
             final ShrinkableDebits quota = getEJDebitsLocked(userId, packageName);
@@ -1489,13 +1553,14 @@ public final class QuotaController extends StateController {
         return changed;
     }
 
-    private final class EarliestEndTimeFunctor implements Consumer<List<TimingSession>> {
+    private final class EarliestEndTimeFunctor implements Consumer<List<TimedEvent>> {
         public long earliestEndElapsed = Long.MAX_VALUE;
 
         @Override
-        public void accept(List<TimingSession> sessions) {
-            if (sessions != null && sessions.size() > 0) {
-                earliestEndElapsed = Math.min(earliestEndElapsed, sessions.get(0).endTimeElapsed);
+        public void accept(List<TimedEvent> events) {
+            if (events != null && events.size() > 0) {
+                earliestEndElapsed =
+                        Math.min(earliestEndElapsed, events.get(0).getEndTimeElapsed());
             }
         }
 
@@ -1521,7 +1586,7 @@ public final class QuotaController extends StateController {
             return;
         }
         mEarliestEndTimeFunctor.reset();
-        mTimingSessions.forEach(mEarliestEndTimeFunctor);
+        mTimingEvents.forEach(mEarliestEndTimeFunctor);
         mEJTimingSessions.forEach(mEarliestEndTimeFunctor);
         final long earliestEndElapsed = mEarliestEndTimeFunctor.earliestEndElapsed;
         if (earliestEndElapsed == Long.MAX_VALUE) {
@@ -1809,10 +1874,10 @@ public final class QuotaController extends StateController {
                     inEJQuotaTimeElapsed = (nowElapsed - limitMs) + mEJLimitWindowSizeMs;
                 }
             }
-            List<TimingSession> timingSessions = mEJTimingSessions.get(userId, packageName);
+            List<TimedEvent> timingSessions = mEJTimingSessions.get(userId, packageName);
             if (timingSessions != null) {
                 for (int i = timingSessions.size() - 1; i >= 0; --i) {
-                    TimingSession ts = timingSessions.get(i);
+                    TimingSession ts = (TimingSession) timingSessions.get(i);
                     final long durationMs = ts.endTimeElapsed - ts.startTimeElapsed;
                     sumMs += durationMs;
                     if (sumMs >= limitMs) {
@@ -1881,7 +1946,14 @@ public final class QuotaController extends StateController {
     }
 
     @VisibleForTesting
-    static final class TimingSession {
+    interface TimedEvent {
+        long getEndTimeElapsed();
+
+        void dump(IndentingPrintWriter pw);
+    }
+
+    @VisibleForTesting
+    static final class TimingSession implements TimedEvent {
         // Start timestamp in elapsed realtime timebase.
         public final long startTimeElapsed;
         // End timestamp in elapsed realtime timebase.
@@ -1901,6 +1973,11 @@ public final class QuotaController extends StateController {
             hashCode = 31 * hashCode + hashLong(endTimeElapsed);
             hashCode = 31 * hashCode + bgJobCount;
             mHashCode = hashCode;
+        }
+
+        @Override
+        public long getEndTimeElapsed() {
+            return endTimeElapsed;
         }
 
         @Override
@@ -1926,6 +2003,7 @@ public final class QuotaController extends StateController {
             return mHashCode;
         }
 
+        @Override
         public void dump(IndentingPrintWriter pw) {
             pw.print(startTimeElapsed);
             pw.print(" -> ");
@@ -1949,6 +2027,28 @@ public final class QuotaController extends StateController {
                     bgJobCount);
 
             proto.end(token);
+        }
+    }
+
+    @VisibleForTesting
+    static final class QuotaBump implements TimedEvent {
+        // Event timestamp in elapsed realtime timebase.
+        public final long eventTimeElapsed;
+
+        QuotaBump(long eventElapsed) {
+            this.eventTimeElapsed = eventElapsed;
+        }
+
+        @Override
+        public long getEndTimeElapsed() {
+            return eventTimeElapsed;
+        }
+
+        @Override
+        public void dump(IndentingPrintWriter pw) {
+            pw.print("Quota bump @ ");
+            pw.print(eventTimeElapsed);
+            pw.println();
         }
     }
 
@@ -2381,6 +2481,21 @@ public final class QuotaController extends StateController {
                 updateStandbyBucket(userId, packageName, bucketIndex);
             });
         }
+
+        @Override
+        public void triggerTemporaryQuotaBump(String packageName, @UserIdInt int userId) {
+            synchronized (mLock) {
+                List<TimedEvent> events = mTimingEvents.get(userId, packageName);
+                if (events == null || events.size() == 0) {
+                    // If the app hasn't run any jobs, there's no point giving it a quota bump.
+                    return;
+                }
+                events.add(new QuotaBump(sElapsedRealtimeClock.millis()));
+                invalidateAllExecutionStatsLocked(userId, packageName);
+            }
+            // Update jobs out of band.
+            mHandler.obtainMessage(MSG_CHECK_PACKAGE, userId, 0, packageName).sendToTarget();
+        }
     }
 
     @VisibleForTesting
@@ -2476,7 +2591,7 @@ public final class QuotaController extends StateController {
         }
     }
 
-    private static final class TimingSessionTooOldPredicate implements Predicate<TimingSession> {
+    private static final class TimedEventTooOldPredicate implements Predicate<TimedEvent> {
         private long mNowElapsed;
 
         private void updateNow() {
@@ -2484,27 +2599,26 @@ public final class QuotaController extends StateController {
         }
 
         @Override
-        public boolean test(TimingSession ts) {
-            return ts.endTimeElapsed <= mNowElapsed - MAX_PERIOD_MS;
+        public boolean test(TimedEvent ts) {
+            return ts.getEndTimeElapsed() <= mNowElapsed - MAX_PERIOD_MS;
         }
     }
 
-    private final TimingSessionTooOldPredicate mTimingSessionTooOld =
-            new TimingSessionTooOldPredicate();
+    private final TimedEventTooOldPredicate mTimedEventTooOld = new TimedEventTooOldPredicate();
 
-    private final Consumer<List<TimingSession>> mDeleteOldSessionsFunctor = sessions -> {
-        if (sessions != null) {
+    private final Consumer<List<TimedEvent>> mDeleteOldEventsFunctor = events -> {
+        if (events != null) {
             // Remove everything older than MAX_PERIOD_MS time ago.
-            sessions.removeIf(mTimingSessionTooOld);
+            events.removeIf(mTimedEventTooOld);
         }
     };
 
     @VisibleForTesting
     void deleteObsoleteSessionsLocked() {
-        mTimingSessionTooOld.updateNow();
+        mTimedEventTooOld.updateNow();
 
         // Regular sessions
-        mTimingSessions.forEach(mDeleteOldSessionsFunctor);
+        mTimingEvents.forEach(mDeleteOldEventsFunctor);
 
         // EJ sessions
         for (int uIdx = 0; uIdx < mEJTimingSessions.numMaps(); ++uIdx) {
@@ -2512,14 +2626,14 @@ public final class QuotaController extends StateController {
             for (int pIdx = 0; pIdx < mEJTimingSessions.numElementsForKey(userId); ++pIdx) {
                 final String packageName = mEJTimingSessions.keyAt(uIdx, pIdx);
                 final ShrinkableDebits debits = getEJDebitsLocked(userId, packageName);
-                final List<TimingSession> sessions = mEJTimingSessions.get(userId, packageName);
+                final List<TimedEvent> sessions = mEJTimingSessions.get(userId, packageName);
                 if (sessions == null) {
                     continue;
                 }
 
                 while (sessions.size() > 0) {
-                    final TimingSession ts = sessions.get(0);
-                    if (mTimingSessionTooOld.test(ts)) {
+                    final TimingSession ts = (TimingSession) sessions.get(0);
+                    if (mTimedEventTooOld.test(ts)) {
                         // Stale sessions may still be factored into tally. Remove them.
                         final long duration = ts.endTimeElapsed - ts.startTimeElapsed;
                         debits.transactLocked(-duration);
@@ -2801,6 +2915,7 @@ public final class QuotaController extends StateController {
         mQcConstants.mRateLimitingConstantsUpdated = false;
         mQcConstants.mExecutionPeriodConstantsUpdated = false;
         mQcConstants.mEJLimitConstantsUpdated = false;
+        mQcConstants.mQuotaBumpConstantsUpdated = false;
     }
 
     @Override
@@ -2828,6 +2943,7 @@ public final class QuotaController extends StateController {
         private boolean mRateLimitingConstantsUpdated = false;
         private boolean mExecutionPeriodConstantsUpdated = false;
         private boolean mEJLimitConstantsUpdated = false;
+        private boolean mQuotaBumpConstantsUpdated = false;
 
         /** Prefix to use with all constant keys in order to "sub-namespace" the keys. */
         private static final String QC_CONSTANT_PREFIX = "qc_";
@@ -2975,6 +3091,21 @@ public final class QuotaController extends StateController {
         @VisibleForTesting
         static final String KEY_EJ_GRACE_PERIOD_TOP_APP_MS =
                 QC_CONSTANT_PREFIX + "ej_grace_period_top_app_ms";
+        @VisibleForTesting
+        static final String KEY_QUOTA_BUMP_ADDITIONAL_DURATION_MS =
+                QC_CONSTANT_PREFIX + "quota_bump_additional_duration_ms";
+        @VisibleForTesting
+        static final String KEY_QUOTA_BUMP_ADDITIONAL_JOB_COUNT =
+                QC_CONSTANT_PREFIX + "quota_bump_additional_job_count";
+        @VisibleForTesting
+        static final String KEY_QUOTA_BUMP_ADDITIONAL_SESSION_COUNT =
+                QC_CONSTANT_PREFIX + "quota_bump_additional_session_count";
+        @VisibleForTesting
+        static final String KEY_QUOTA_BUMP_WINDOW_SIZE_MS =
+                QC_CONSTANT_PREFIX + "quota_bump_window_size_ms";
+        @VisibleForTesting
+        static final String KEY_QUOTA_BUMP_LIMIT =
+                QC_CONSTANT_PREFIX + "quota_bump_limit";
 
         private static final long DEFAULT_ALLOWED_TIME_PER_PERIOD_EXEMPTED_MS =
                 10 * 60 * 1000L; // 10 minutes
@@ -3046,6 +3177,11 @@ public final class QuotaController extends StateController {
         private static final long DEFAULT_EJ_REWARD_NOTIFICATION_SEEN_MS = 0;
         private static final long DEFAULT_EJ_GRACE_PERIOD_TEMP_ALLOWLIST_MS = 3 * MINUTE_IN_MILLIS;
         private static final long DEFAULT_EJ_GRACE_PERIOD_TOP_APP_MS = 1 * MINUTE_IN_MILLIS;
+        private static final long DEFAULT_QUOTA_BUMP_ADDITIONAL_DURATION_MS = 1 * MINUTE_IN_MILLIS;
+        private static final int DEFAULT_QUOTA_BUMP_ADDITIONAL_JOB_COUNT = 2;
+        private static final int DEFAULT_QUOTA_BUMP_ADDITIONAL_SESSION_COUNT = 1;
+        private static final long DEFAULT_QUOTA_BUMP_WINDOW_SIZE_MS = 8 * HOUR_IN_MILLIS;
+        private static final int DEFAULT_QUOTA_BUMP_LIMIT = 8;
 
         /**
          * How much time each app in the exempted bucket will have to run jobs within their standby
@@ -3347,6 +3483,33 @@ public final class QuotaController extends StateController {
          */
         public long EJ_GRACE_PERIOD_TOP_APP_MS = DEFAULT_EJ_GRACE_PERIOD_TOP_APP_MS;
 
+        /**
+         * How much additional session duration to give an app for each accepted quota bump.
+         */
+        public long QUOTA_BUMP_ADDITIONAL_DURATION_MS = DEFAULT_QUOTA_BUMP_ADDITIONAL_DURATION_MS;
+
+        /**
+         * How many additional regular jobs to give an app for each accepted quota bump.
+         */
+        public int QUOTA_BUMP_ADDITIONAL_JOB_COUNT = DEFAULT_QUOTA_BUMP_ADDITIONAL_JOB_COUNT;
+
+        /**
+         * How many additional sessions to give an app for each accepted quota bump.
+         */
+        public int QUOTA_BUMP_ADDITIONAL_SESSION_COUNT =
+                DEFAULT_QUOTA_BUMP_ADDITIONAL_SESSION_COUNT;
+
+        /**
+         * The rolling window size within which to accept and apply quota bump events.
+         */
+        public long QUOTA_BUMP_WINDOW_SIZE_MS = DEFAULT_QUOTA_BUMP_WINDOW_SIZE_MS;
+
+        /**
+         * The maximum number of quota bumps to accept and apply within the
+         * {@link #QUOTA_BUMP_WINDOW_SIZE_MS window}.
+         */
+        public int QUOTA_BUMP_LIMIT = DEFAULT_QUOTA_BUMP_LIMIT;
+
         public void processConstantLocked(@NonNull DeviceConfig.Properties properties,
                 @NonNull String key) {
             switch (key) {
@@ -3381,6 +3544,14 @@ public final class QuotaController extends StateController {
                 case KEY_EJ_LIMIT_ADDITION_INSTALLER_MS:
                 case KEY_EJ_WINDOW_SIZE_MS:
                     updateEJLimitConstantsLocked();
+                    break;
+
+                case KEY_QUOTA_BUMP_ADDITIONAL_DURATION_MS:
+                case KEY_QUOTA_BUMP_ADDITIONAL_JOB_COUNT:
+                case KEY_QUOTA_BUMP_ADDITIONAL_SESSION_COUNT:
+                case KEY_QUOTA_BUMP_WINDOW_SIZE_MS:
+                case KEY_QUOTA_BUMP_LIMIT:
+                    updateQuotaBumpConstantsLocked();
                     break;
 
                 case KEY_MAX_JOB_COUNT_EXEMPTED:
@@ -3881,6 +4052,65 @@ public final class QuotaController extends StateController {
             }
         }
 
+        private void updateQuotaBumpConstantsLocked() {
+            if (mQuotaBumpConstantsUpdated) {
+                return;
+            }
+            mQuotaBumpConstantsUpdated = true;
+
+            // Query the values as an atomic set.
+            final DeviceConfig.Properties properties = DeviceConfig.getProperties(
+                    DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                    KEY_QUOTA_BUMP_ADDITIONAL_DURATION_MS,
+                    KEY_QUOTA_BUMP_ADDITIONAL_JOB_COUNT, KEY_QUOTA_BUMP_ADDITIONAL_SESSION_COUNT,
+                    KEY_QUOTA_BUMP_WINDOW_SIZE_MS, KEY_QUOTA_BUMP_LIMIT);
+            QUOTA_BUMP_ADDITIONAL_DURATION_MS = properties.getLong(
+                    KEY_QUOTA_BUMP_ADDITIONAL_DURATION_MS,
+                    DEFAULT_QUOTA_BUMP_ADDITIONAL_DURATION_MS);
+            QUOTA_BUMP_ADDITIONAL_JOB_COUNT = properties.getInt(
+                    KEY_QUOTA_BUMP_ADDITIONAL_JOB_COUNT, DEFAULT_QUOTA_BUMP_ADDITIONAL_JOB_COUNT);
+            QUOTA_BUMP_ADDITIONAL_SESSION_COUNT = properties.getInt(
+                    KEY_QUOTA_BUMP_ADDITIONAL_SESSION_COUNT,
+                    DEFAULT_QUOTA_BUMP_ADDITIONAL_SESSION_COUNT);
+            QUOTA_BUMP_WINDOW_SIZE_MS = properties.getLong(
+                    KEY_QUOTA_BUMP_WINDOW_SIZE_MS, DEFAULT_QUOTA_BUMP_WINDOW_SIZE_MS);
+            QUOTA_BUMP_LIMIT = properties.getInt(
+                    KEY_QUOTA_BUMP_LIMIT, DEFAULT_QUOTA_BUMP_LIMIT);
+
+            // The window must be in the range [1 hour, 24 hours].
+            long newWindowSizeMs = Math.max(HOUR_IN_MILLIS,
+                    Math.min(MAX_PERIOD_MS, QUOTA_BUMP_WINDOW_SIZE_MS));
+            if (mQuotaBumpWindowSizeMs != newWindowSizeMs) {
+                mQuotaBumpWindowSizeMs = newWindowSizeMs;
+                mShouldReevaluateConstraints = true;
+            }
+            // The limit must be nonnegative.
+            int newLimit = Math.max(0, QUOTA_BUMP_LIMIT);
+            if (mQuotaBumpLimit != newLimit) {
+                mQuotaBumpLimit = newLimit;
+                mShouldReevaluateConstraints = true;
+            }
+            // The job count must be nonnegative.
+            int newJobAddition = Math.max(0, QUOTA_BUMP_ADDITIONAL_JOB_COUNT);
+            if (mQuotaBumpAdditionalJobCount != newJobAddition) {
+                mQuotaBumpAdditionalJobCount = newJobAddition;
+                mShouldReevaluateConstraints = true;
+            }
+            // The session count must be nonnegative.
+            int newSessionAddition = Math.max(0, QUOTA_BUMP_ADDITIONAL_SESSION_COUNT);
+            if (mQuotaBumpAdditionalSessionCount != newSessionAddition) {
+                mQuotaBumpAdditionalSessionCount = newSessionAddition;
+                mShouldReevaluateConstraints = true;
+            }
+            // The additional duration must be in the range [0, 10 minutes].
+            long newAdditionalDuration = Math.max(0,
+                    Math.min(10 * MINUTE_IN_MILLIS, QUOTA_BUMP_ADDITIONAL_DURATION_MS));
+            if (mQuotaBumpAdditionalDurationMs != newAdditionalDuration) {
+                mQuotaBumpAdditionalDurationMs = newAdditionalDuration;
+                mShouldReevaluateConstraints = true;
+            }
+        }
+
         private void dump(IndentingPrintWriter pw) {
             pw.println();
             pw.println("QuotaController:");
@@ -3942,6 +4172,15 @@ public final class QuotaController extends StateController {
             pw.print(KEY_EJ_GRACE_PERIOD_TEMP_ALLOWLIST_MS,
                     EJ_GRACE_PERIOD_TEMP_ALLOWLIST_MS).println();
             pw.print(KEY_EJ_GRACE_PERIOD_TOP_APP_MS, EJ_GRACE_PERIOD_TOP_APP_MS).println();
+
+            pw.print(KEY_QUOTA_BUMP_ADDITIONAL_DURATION_MS,
+                    QUOTA_BUMP_ADDITIONAL_DURATION_MS).println();
+            pw.print(KEY_QUOTA_BUMP_ADDITIONAL_JOB_COUNT,
+                    QUOTA_BUMP_ADDITIONAL_JOB_COUNT).println();
+            pw.print(KEY_QUOTA_BUMP_ADDITIONAL_SESSION_COUNT,
+                    QUOTA_BUMP_ADDITIONAL_SESSION_COUNT).println();
+            pw.print(KEY_QUOTA_BUMP_WINDOW_SIZE_MS, QUOTA_BUMP_WINDOW_SIZE_MS).println();
+            pw.print(KEY_QUOTA_BUMP_LIMIT, QUOTA_BUMP_LIMIT).println();
 
             pw.decreaseIndent();
         }
@@ -4103,7 +4342,7 @@ public final class QuotaController extends StateController {
 
     @VisibleForTesting
     @Nullable
-    List<TimingSession> getEJTimingSessions(int userId, String packageName) {
+    List<TimedEvent> getEJTimingSessions(int userId, String packageName) {
         return mEJTimingSessions.get(userId, packageName);
     }
 
@@ -4150,14 +4389,39 @@ public final class QuotaController extends StateController {
 
     @VisibleForTesting
     @Nullable
-    List<TimingSession> getTimingSessions(int userId, String packageName) {
-        return mTimingSessions.get(userId, packageName);
+    List<TimedEvent> getTimingSessions(int userId, String packageName) {
+        return mTimingEvents.get(userId, packageName);
     }
 
     @VisibleForTesting
     @NonNull
     QcConstants getQcConstants() {
         return mQcConstants;
+    }
+
+    @VisibleForTesting
+    long getQuotaBumpAdditionDurationMs() {
+        return mQuotaBumpAdditionalDurationMs;
+    }
+
+    @VisibleForTesting
+    int getQuotaBumpAdditionJobCount() {
+        return mQuotaBumpAdditionalJobCount;
+    }
+
+    @VisibleForTesting
+    int getQuotaBumpAdditionSessionCount() {
+        return mQuotaBumpAdditionalSessionCount;
+    }
+
+    @VisibleForTesting
+    int getQuotaBumpLimit() {
+        return mQuotaBumpLimit;
+    }
+
+    @VisibleForTesting
+    long getQuotaBumpWindowSizeMs() {
+        return mQuotaBumpWindowSizeMs;
     }
 
     //////////////////////////// DATA DUMP //////////////////////////////
@@ -4250,14 +4514,14 @@ public final class QuotaController extends StateController {
                 final String pkgName = mPkgTimers.keyAt(u, p);
                 mPkgTimers.valueAt(u, p).dump(pw, predicate);
                 pw.println();
-                List<TimingSession> sessions = mTimingSessions.get(userId, pkgName);
-                if (sessions != null) {
+                List<TimedEvent> events = mTimingEvents.get(userId, pkgName);
+                if (events != null) {
                     pw.increaseIndent();
-                    pw.println("Saved sessions:");
+                    pw.println("Saved events:");
                     pw.increaseIndent();
-                    for (int j = sessions.size() - 1; j >= 0; j--) {
-                        TimingSession session = sessions.get(j);
-                        session.dump(pw);
+                    for (int j = events.size() - 1; j >= 0; j--) {
+                        TimedEvent event = events.get(j);
+                        event.dump(pw);
                     }
                     pw.decreaseIndent();
                     pw.decreaseIndent();
@@ -4273,13 +4537,13 @@ public final class QuotaController extends StateController {
                 final String pkgName = mEJPkgTimers.keyAt(u, p);
                 mEJPkgTimers.valueAt(u, p).dump(pw, predicate);
                 pw.println();
-                List<TimingSession> sessions = mEJTimingSessions.get(userId, pkgName);
+                List<TimedEvent> sessions = mEJTimingSessions.get(userId, pkgName);
                 if (sessions != null) {
                     pw.increaseIndent();
                     pw.println("Saved sessions:");
                     pw.increaseIndent();
                     for (int j = sessions.size() - 1; j >= 0; j--) {
-                        TimingSession session = sessions.get(j);
+                        TimedEvent session = sessions.get(j);
                         session.dump(pw);
                     }
                     pw.decreaseIndent();
@@ -4398,10 +4662,14 @@ public final class QuotaController extends StateController {
                             predicate);
                 }
 
-                List<TimingSession> sessions = mTimingSessions.get(userId, pkgName);
-                if (sessions != null) {
-                    for (int j = sessions.size() - 1; j >= 0; j--) {
-                        TimingSession session = sessions.get(j);
+                List<TimedEvent> events = mTimingEvents.get(userId, pkgName);
+                if (events != null) {
+                    for (int j = events.size() - 1; j >= 0; j--) {
+                        TimedEvent event = events.get(j);
+                        if (!(event instanceof TimingSession)) {
+                            continue;
+                        }
+                        TimingSession session = (TimingSession) event;
                         session.dump(proto,
                                 StateControllerProto.QuotaController.PackageStats.SAVED_SESSIONS);
                     }

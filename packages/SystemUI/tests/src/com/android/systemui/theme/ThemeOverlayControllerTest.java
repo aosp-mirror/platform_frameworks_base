@@ -733,6 +733,18 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM,
                 USER_SYSTEM);
 
+        reset(mResources);
+        when(mResources.getColor(eq(android.R.color.system_accent1_500), any()))
+                .thenReturn(mThemeOverlayController.mColorScheme.getAccent1().get(6));
+        when(mResources.getColor(eq(android.R.color.system_accent2_500), any()))
+                .thenReturn(mThemeOverlayController.mColorScheme.getAccent2().get(6));
+        when(mResources.getColor(eq(android.R.color.system_accent3_500), any()))
+                .thenReturn(mThemeOverlayController.mColorScheme.getAccent3().get(6));
+        when(mResources.getColor(eq(android.R.color.system_neutral1_500), any()))
+                .thenReturn(mThemeOverlayController.mColorScheme.getNeutral1().get(6));
+        when(mResources.getColor(eq(android.R.color.system_neutral2_500), any()))
+                .thenReturn(mThemeOverlayController.mColorScheme.getNeutral2().get(6));
+
         // Defers event because we already have initial colors.
         verify(mThemeOverlayApplier, never())
                 .applyCurrentUserOverlays(any(), any(), anyInt(), any());
