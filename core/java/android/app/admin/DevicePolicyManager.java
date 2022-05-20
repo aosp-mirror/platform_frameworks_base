@@ -2515,7 +2515,8 @@ public class DevicePolicyManager {
      * If another app already had delegated network logging access,
      * it will lose the delegation when a new app is delegated.
      *
-     * <p> Can only be granted by Device Owner or Profile Owner of a managed profile.
+     * <p> Device Owner can grant this access since Android 10. Profile Owner of a managed profile
+     * can grant this access since Android 12.
      */
     public static final String DELEGATION_NETWORK_LOGGING = "delegation-network-logging";
 
@@ -13255,9 +13256,11 @@ public class DevicePolicyManager {
      * Called by a device owner, profile owner of a managed profile or delegated app with
      * {@link #DELEGATION_NETWORK_LOGGING} to control the network logging feature.
      *
-     * <p> Supported for a device owner from Android 8. Supported for a profile owner of a managed
-     * profile from Android 12. When network logging is enabled by a profile owner, the network logs
-     * will only include work profile network activity, not activity on the personal profile.
+     * <p> Supported for a device owner from Android 8 and a delegated app granted by a device
+     * owner from Android 10. Supported for a profile owner of a managed profile and a delegated
+     * app granted by a profile owner from Android 12. When network logging is enabled by a
+     * profile owner, the network logs will only include work profile network activity, not
+     * activity on the personal profile.
      *
      * <p> Network logs contain DNS lookup and connect() library call events. The following library
      *     functions are recorded while network logging is active:
