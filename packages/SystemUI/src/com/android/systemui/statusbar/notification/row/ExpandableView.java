@@ -58,7 +58,6 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
     private ArrayList<View> mMatchParentViews = new ArrayList<View>();
     private static Rect mClipRect = new Rect();
     private boolean mWillBeGone;
-    private int mMinClipTopAmount = 0;
     private boolean mClipToActualHeight = true;
     private boolean mChangingPosition = false;
     private ViewGroup mTransientContainer;
@@ -475,14 +474,6 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
 
     public void setWillBeGone(boolean willBeGone) {
         mWillBeGone = willBeGone;
-    }
-
-    public int getMinClipTopAmount() {
-        return mMinClipTopAmount;
-    }
-
-    public void setMinClipTopAmount(int minClipTopAmount) {
-        mMinClipTopAmount = minClipTopAmount;
     }
 
     @Override
