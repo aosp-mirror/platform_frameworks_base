@@ -359,11 +359,7 @@ public class PowerUI extends CoreStartable implements CommandQueue.Callbacks {
         }
 
         mWarnings.updateSnapshot(mCurrentBatteryStateSnapshot);
-        if (mCurrentBatteryStateSnapshot.isHybrid()) {
-            maybeShowHybridWarning(mCurrentBatteryStateSnapshot, mLastBatteryStateSnapshot);
-        } else {
-            maybeShowBatteryWarning(mCurrentBatteryStateSnapshot, mLastBatteryStateSnapshot);
-        }
+        maybeShowHybridWarning(mCurrentBatteryStateSnapshot, mLastBatteryStateSnapshot);
     }
 
     // updates the time estimate if we don't have one or battery level has changed.

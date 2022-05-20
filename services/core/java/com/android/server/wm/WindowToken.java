@@ -378,7 +378,7 @@ class WindowToken extends WindowContainer<WindowState> {
     SurfaceControl.Builder makeSurface() {
         final SurfaceControl.Builder builder = super.makeSurface();
         if (mRoundedCornerOverlay) {
-            builder.setParent(getDisplayContent().getSurfaceControl());
+            builder.setParent(null);
         }
         return builder;
     }
