@@ -2494,6 +2494,7 @@ public final class DisplayManagerService extends SystemService {
         }
         pw.println();
         mDisplayModeDirector.dump(pw);
+        mBrightnessSynchronizer.dump(pw);
     }
 
     private static float[] getFloatArray(TypedArray array) {

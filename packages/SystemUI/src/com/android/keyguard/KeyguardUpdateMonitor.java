@@ -259,7 +259,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     HashMap<Integer, SimData> mSimDatas = new HashMap<>();
     HashMap<Integer, ServiceState> mServiceStates = new HashMap<Integer, ServiceState>();
 
-    private int mRingMode;
     private int mPhoneState;
     private boolean mKeyguardIsVisible;
     private boolean mCredentialAttempted;
