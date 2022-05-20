@@ -89,6 +89,7 @@ import java.util.Set;
 public final class AttributionSource implements Parcelable {
     private static final String DESCRIPTOR = "android.content.AttributionSource";
 
+    private static final Binder sDefaultToken = new Binder(DESCRIPTOR);
 
     private final @NonNull AttributionSourceState mAttributionSourceState;
 
@@ -99,7 +100,7 @@ public final class AttributionSource implements Parcelable {
     @TestApi
     public AttributionSource(int uid, @Nullable String packageName,
             @Nullable String attributionTag) {
-        this(uid, packageName, attributionTag, new Binder(DESCRIPTOR));
+        this(uid, packageName, attributionTag, sDefaultToken);
     }
 
     /** @hide */
@@ -134,7 +135,7 @@ public final class AttributionSource implements Parcelable {
 
     AttributionSource(int uid, @Nullable String packageName, @Nullable String attributionTag,
             @Nullable String[] renouncedPermissions, @Nullable AttributionSource next) {
-        this(uid, packageName, attributionTag, new Binder(DESCRIPTOR), renouncedPermissions, next);
+        this(uid, packageName, attributionTag, sDefaultToken, renouncedPermissions, next);
     }
 
     AttributionSource(int uid, @Nullable String packageName, @Nullable String attributionTag,
@@ -639,7 +640,7 @@ public final class AttributionSource implements Parcelable {
                 mAttributionSourceState.next = null;
             }
 
-            mAttributionSourceState.token = new Binder(DESCRIPTOR);
+            mAttributionSourceState.token = sDefaultToken;
 
             if (mAttributionSourceState.next == null) {
                 // The NDK aidl backend doesn't support null parcelable arrays.
