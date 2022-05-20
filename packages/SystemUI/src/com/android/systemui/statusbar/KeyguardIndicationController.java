@@ -510,7 +510,8 @@ public class KeyguardIndicationController {
                             .setMessage(trustGrantedIndication)
                             .setTextColor(mInitialTextColorState)
                             .build(),
-                    false);
+                    true);
+            hideBiometricMessage();
         } else if (!TextUtils.isEmpty(trustManagedIndication)
                 && mKeyguardUpdateMonitor.getUserTrustIsManaged(userId)
                 && !userHasTrust) {

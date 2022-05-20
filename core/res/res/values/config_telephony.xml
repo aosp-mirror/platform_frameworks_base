@@ -17,7 +17,9 @@
 <resources>
     <!-- This file defines Android telephony related resources -->
 
-    <!-- Whether force disabling telephony new data stack or not -->
+    <!-- Whether force disabling telephony new data stack or not.
+         This flag and the old data stack code will be deleted in Android 14.
+    -->
     <bool name="config_force_disable_telephony_new_data_stack">false</bool>
     <java-symbol type="bool" name="config_force_disable_telephony_new_data_stack" />
 
@@ -35,7 +37,7 @@
          rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max
          If this is configured as an empty string, the system default will be applied.
     -->
-    <string name="config_tcp_buffers" translatable="false"></string>
+    <string name="config_tcp_buffers" translatable="false">2097152,6291456,16777216,512000,2097152,8388608</string>
     <java-symbol type="string"  name="config_tcp_buffers" />
 
     <!-- What source to use to estimate link upstream and downstream bandwidth capacities.

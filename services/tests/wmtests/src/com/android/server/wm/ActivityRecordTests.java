@@ -611,10 +611,9 @@ public class ActivityRecordTests extends WindowTestsBase {
         activity.setRequestedOrientation(activityCurOrientation == ORIENTATION_LANDSCAPE
                 ? SCREEN_ORIENTATION_PORTRAIT : SCREEN_ORIENTATION_LANDSCAPE);
 
-        // Asserts fixed orientation request is ignored, and the orientation is not changed
-        // (fill Task).
-        assertEquals(activityCurOrientation, activity.getConfiguration().orientation);
-        assertFalse(activity.isLetterboxedForFixedOrientationAndAspectRatio());
+        // Asserts fixed orientation request is not ignored, and the orientation is changed.
+        assertNotEquals(activityCurOrientation, activity.getConfiguration().orientation);
+        assertTrue(activity.isLetterboxedForFixedOrientationAndAspectRatio());
     }
 
     @Test
@@ -757,6 +756,8 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityRecord activity = createActivityWithTask();
         ActivityRecord topActivity = new ActivityBuilder(mAtm).setTask(activity.getTask()).build();
         topActivity.setOccludesParent(false);
+        // The requested occluding state doesn't affect whether it fills parent.
+        assertTrue(topActivity.fillsParent());
         activity.setState(STOPPED, "Testing");
         activity.setVisibility(true);
         activity.makeActiveIfNeeded(null /* activeActivity */);
@@ -1218,7 +1219,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         task.setPausingActivity(currentTop);
         currentTop.finishing = true;
         currentTop.setState(PAUSED, "test");
-        currentTop.completeFinishing("completePauseLocked");
+        currentTop.completeFinishing(false /* updateVisibility */, "completePause");
 
         // Current top becomes stopping because it is visible and the next is invisible.
         assertEquals(STOPPING, currentTop.getState());
@@ -2629,7 +2630,11 @@ public class ActivityRecordTests extends WindowTestsBase {
             DeviceConfig.setProperty(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
                     "splash_screen_exception_list", DEFAULT_COMPONENT_PACKAGE_NAME, false);
             testLegacySplashScreen(Build.VERSION_CODES.R, TYPE_PARAMETER_LEGACY_SPLASH_SCREEN);
-            testLegacySplashScreen(Build.VERSION_CODES.S, 0);
+            testLegacySplashScreen(Build.VERSION_CODES.S, TYPE_PARAMETER_LEGACY_SPLASH_SCREEN);
+            testLegacySplashScreen(Build.VERSION_CODES.TIRAMISU,
+                    TYPE_PARAMETER_LEGACY_SPLASH_SCREEN);
+            // Above T
+            testLegacySplashScreen(Build.VERSION_CODES.TIRAMISU + 1, 0);
         } finally {
             try {
                 DeviceConfig.setProperties(properties);
@@ -2851,6 +2856,11 @@ public class ActivityRecordTests extends WindowTestsBase {
         taskFragment2.addChild(activity2);
         assertTrue(activity2.isResizeable());
         activity1.reparent(taskFragment1, POSITION_TOP);
+
+        // Adds an Activity which doesn't have shared starting data, and verify if it blocks
+        // starting window removal.
+        final ActivityRecord activity3 = new ActivityBuilder(mAtm).build();
+        taskFragment2.addChild(activity3, POSITION_TOP);
 
         verify(activity1.getSyncTransaction()).reparent(eq(startingWindow.mSurfaceControl),
                 eq(task.mSurfaceControl));
@@ -3139,7 +3149,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
 
         InsetsSource imeSource = new InsetsSource(ITYPE_IME);
-        app.getInsetsState().addSource(imeSource);
+        app.mAboveInsetsState.addSource(imeSource);
         mDisplayContent.setImeLayeringTarget(app);
         mDisplayContent.updateImeInputAndControlTarget(app);
 
@@ -3156,10 +3166,12 @@ public class ActivityRecordTests extends WindowTestsBase {
         // Simulate app re-start input or turning screen off/on then unlocked by un-secure
         // keyguard to back to the app, expect IME insets is not frozen
         mDisplayContent.updateImeInputAndControlTarget(app);
+        app.mActivityRecord.commitVisibility(true, false);
         assertFalse(app.mActivityRecord.mImeInsetsFrozenUntilStartInput);
+
+        imeSource.setVisible(true);
         imeSource.setFrame(new Rect(100, 400, 500, 500));
-        app.getInsetsState().addSource(imeSource);
-        app.getInsetsState().setSourceVisible(ITYPE_IME, true);
+        app.mAboveInsetsState.addSource(imeSource);
 
         // Verify when IME is visible and the app can receive the right IME insets from policy.
         makeWindowVisibleAndDrawn(app, mImeWindow);

@@ -597,6 +597,8 @@ public class SettingsBackupTest {
                     Settings.Global.CLOCKWORK_HOME_READY,
                     Settings.Global.WATCHDOG_TIMEOUT_MILLIS,
                     Settings.Global.MANAGED_PROVISIONING_DEFER_PROVISIONING_TO_ROLE_HOLDER,
+                    Settings.Global.REVIEW_PERMISSIONS_NOTIFICATION_STATE,
+                    Settings.Global.ENABLE_BACK_ANIMATION, // Temporary for T, dev option only
                     Settings.Global.Wearable.BATTERY_SAVER_MODE,
                     Settings.Global.Wearable.COMBINED_LOCATION_ENABLED,
                     Settings.Global.Wearable.HAS_PAY_TOKENS,

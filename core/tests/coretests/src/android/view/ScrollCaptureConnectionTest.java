@@ -47,6 +47,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayDeque;
+import java.util.Queue;
+import java.util.concurrent.Executor;
+
 /**
  * Tests of {@link ScrollCaptureConnection}.
  */
@@ -55,6 +59,7 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class ScrollCaptureConnectionTest {
+
 
     private final Point mPositionInWindow = new Point(1, 2);
     private final Rect mLocalVisibleRect = new Rect(2, 3, 4, 5);
@@ -73,6 +78,9 @@ public class ScrollCaptureConnectionTest {
     private IScrollCaptureCallbacks mRemote;
     @Mock
     private View mView;
+    private FakeExecutor mFakeUiThread;
+
+    private final Executor mImmediateExecutor = Runnable::run;
 
     @Before
     public void setUp() {
@@ -84,7 +92,9 @@ public class ScrollCaptureConnectionTest {
 
         mTarget = new ScrollCaptureTarget(mView, mLocalVisibleRect, mPositionInWindow, mCallback);
         mTarget.setScrollBounds(mScrollBounds);
-        mConnection = new ScrollCaptureConnection(Runnable::run, mTarget);
+        mFakeUiThread = new FakeExecutor();
+        mFakeUiThread.setImmediate(true);
+        mConnection = new ScrollCaptureConnection(mFakeUiThread, mTarget);
     }
 
     /** Test creating a client with valid info */
@@ -145,6 +155,21 @@ public class ScrollCaptureConnectionTest {
                 .onImageRequestCompleted(eq(0), eq(new Rect(1, 2, 3, 4)));
     }
 
+    /** Test closing while callbacks are in-flight: b/232375183 */
+    @Test
+    public void testRequestImage_afterClose() throws Exception {
+        mConnection = new ScrollCaptureConnection(mFakeUiThread, mTarget);
+        mConnection.startCapture(mSurface, mRemote);
+        mCallback.completeStartRequest();
+
+        mFakeUiThread.setImmediate(false);
+        mConnection.requestImage(new Rect(1, 2, 3, 4));
+
+        // Now close connection, before the UI thread executes
+        mConnection.close();
+        mFakeUiThread.runAll();
+    }
+
     @Test
     public void testRequestImage_cancellation() throws Exception {
         mConnection.startCapture(mSurface, mRemote);
@@ -174,6 +199,20 @@ public class ScrollCaptureConnectionTest {
         verify(mRemote, times(1)).onCaptureEnded();
 
         assertFalse(mConnection.isConnected());
+    }
+
+    /** Test closing while callbacks are in-flight: b/232375183 */
+    @Test
+    public void testEndCapture_afterClose() throws Exception {
+        mConnection.startCapture(mSurface, mRemote);
+        mCallback.completeStartRequest();
+
+        mFakeUiThread.setImmediate(false);
+        mConnection.endCapture();
+
+        // Now close connection, before the UI thread executes
+        mConnection.close();
+        mFakeUiThread.runAll();
     }
 
     /** @see ScrollCaptureConnection#endCapture() */
@@ -228,5 +267,29 @@ public class ScrollCaptureConnectionTest {
         mCallback.completeEndRequest();
         assertFalse(mConnection.isActive());
         assertFalse(mConnection.isConnected());
+    }
+
+    static class FakeExecutor implements Executor {
+        private Queue<Runnable> mQueue = new ArrayDeque<>();
+        private boolean mImmediate;
+
+        @Override
+        public void execute(Runnable command) {
+            if (mImmediate) {
+                command.run();
+            } else {
+                mQueue.add(command);
+            }
+        }
+
+        void setImmediate(boolean immediate) {
+            mImmediate = immediate;
+        }
+
+        public void runAll() {
+            while (!mQueue.isEmpty()) {
+                mQueue.remove().run();
+            }
+        }
     }
 }

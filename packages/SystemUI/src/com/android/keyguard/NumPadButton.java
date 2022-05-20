@@ -42,7 +42,7 @@ public class NumPadButton extends AlphaOptimizedImageButton {
         Drawable background = getBackground();
         if (background instanceof GradientDrawable) {
             mAnimator = new NumPadAnimator(context, background.mutate(),
-                    attrs.getStyleAttribute());
+                    attrs.getStyleAttribute(), getDrawable());
         } else {
             mAnimator = null;
         }

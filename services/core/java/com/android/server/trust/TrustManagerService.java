@@ -1184,6 +1184,22 @@ public class TrustManagerService extends SystemService {
         return false;
     }
 
+    /**
+     * We downgrade to trustable whenever keyguard changes its showing value.
+     *  - becomes showing: something has caused the device to show keyguard which happens due to
+     *  user intent to lock the device either through direct action or a timeout
+     *  - becomes not showing: keyguard was dismissed and we no longer need to keep the device
+     *  unlocked
+     *  */
+    private void dispatchTrustableDowngrade() {
+        for (int i = 0; i < mActiveAgents.size(); i++) {
+            AgentInfo info = mActiveAgents.valueAt(i);
+            if (info.userId == mCurrentUser) {
+                info.agent.downgradeToTrustable();
+            }
+        }
+    }
+
     private List<String> getTrustGrantedMessages(int userId) {
         if (!mStrongAuthTracker.isTrustAllowedForUser(userId)) {
             return new ArrayList<>();
@@ -1752,6 +1768,7 @@ public class TrustManagerService extends SystemService {
                     refreshDeviceLockedForUser(UserHandle.USER_ALL);
                     break;
                 case MSG_KEYGUARD_SHOWING_CHANGED:
+                    dispatchTrustableDowngrade();
                     refreshDeviceLockedForUser(mCurrentUser);
                     break;
                 case MSG_START_USER:

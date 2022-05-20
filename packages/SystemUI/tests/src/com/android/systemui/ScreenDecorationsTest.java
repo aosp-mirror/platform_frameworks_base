@@ -159,6 +159,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         when(mContext.getDisplay()).thenReturn(mDisplay);
         // Not support hwc layer by default
         doReturn(null).when(mDisplay).getDisplayDecorationSupport();
+        doReturn(mDisplayMode).when(mDisplay).getMode();
 
         when(mMockTypedArray.length()).thenReturn(0);
         mPrivacyDotTopLeftDecorProvider = spy(new PrivacyDotCornerDecorProviderImpl(

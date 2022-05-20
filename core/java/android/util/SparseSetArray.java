@@ -38,10 +38,7 @@ public class SparseSetArray<T> {
         for (int i = 0; i < arraySize; i++) {
             final int key = src.keyAt(i);
             final ArraySet<T> set = src.get(key);
-            final int setSize = set.size();
-            for (int j = 0; j < setSize; j++) {
-                add(key, set.valueAt(j));
-            }
+            addAll(key, set);
         }
     }
 

@@ -200,7 +200,7 @@ class GnssNetworkConnectivityHandler {
         mHandler = new Handler(looper);
         mNiHandler = niHandler;
         mConnMgr = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        mSuplConnectivityCallback = createSuplConnectivityCallback();
+        mSuplConnectivityCallback = null;
     }
 
     /**
@@ -584,11 +584,21 @@ class GnssNetworkConnectivityHandler {
             networkRequestBuilder.setNetworkSpecifier(Integer.toString(mActiveSubId));
         }
         NetworkRequest networkRequest = networkRequestBuilder.build();
-        mConnMgr.requestNetwork(
-                networkRequest,
-                mSuplConnectivityCallback,
-                mHandler,
-                SUPL_NETWORK_REQUEST_TIMEOUT_MILLIS);
+        // Make sure we only have a single request.
+        if (mSuplConnectivityCallback != null) {
+            mConnMgr.unregisterNetworkCallback(mSuplConnectivityCallback);
+        }
+        mSuplConnectivityCallback = createSuplConnectivityCallback();
+        try {
+            mConnMgr.requestNetwork(
+                    networkRequest,
+                    mSuplConnectivityCallback,
+                    mHandler,
+                    SUPL_NETWORK_REQUEST_TIMEOUT_MILLIS);
+        } catch (RuntimeException e) {
+            Log.e(TAG, "Failed to request network.", e);
+            handleReleaseSuplConnection(GPS_AGPS_DATA_CONN_FAILED);
+        }
     }
 
     private int getNetworkCapability(int agpsType) {
@@ -619,7 +629,10 @@ class GnssNetworkConnectivityHandler {
         }
 
         mAGpsDataConnectionState = AGPS_DATA_CONNECTION_CLOSED;
-        mConnMgr.unregisterNetworkCallback(mSuplConnectivityCallback);
+        if (mSuplConnectivityCallback != null) {
+            mConnMgr.unregisterNetworkCallback(mSuplConnectivityCallback);
+            mSuplConnectivityCallback = null;
+        }
         switch (agpsDataConnStatus) {
             case GPS_AGPS_DATA_CONN_FAILED:
                 native_agps_data_conn_failed();
