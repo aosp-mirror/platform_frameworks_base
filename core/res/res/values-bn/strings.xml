@@ -305,8 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"আপনার ক্যালেন্ডারে অ্যাক্সেস"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"এসএমএসগুলি পাঠাতে এবং দেখতে"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"ফাইল এবং ডকুমেন্ট"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"আপনার ডিভাইসে ফাইল ও ডকুমেন্ট অ্যাক্সেস করুন"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"ফাইল"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"আপনার ডিভাইসে ফাইল অ্যাক্সেস করবে"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"মিউজিক এবং অডিও"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"আপনার ডিভাইসে মিউজিক এবং অডিও অ্যাক্সেস করুন"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ফটো এবং ভিডিও"</string>
