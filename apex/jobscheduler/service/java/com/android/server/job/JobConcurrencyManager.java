@@ -717,17 +717,9 @@ class JobConcurrencyManager {
 
             final boolean isTopEj = nextPending.shouldTreatAsExpeditedJob()
                     && nextPending.lastEvaluatedBias == JobInfo.BIAS_TOP_APP;
-            // Avoid overlapping job execution as much as possible.
-            if (!isTopEj && isSimilarJobRunningLocked(nextPending)) {
-                if (DEBUG) {
-                    Slog.w(TAG, "Delaying execution of job because of similarly running one: "
-                            + nextPending);
-                }
-                // It would be nice to let the JobService running the other similar job know about
-                // this new job so that it doesn't unbind from the JobService and we can call
-                // onStartJob as soon as the older job finishes.
-                // TODO: optimize the job reschedule flow to reduce service binding churn
-                continue;
+            if (DEBUG && isSimilarJobRunningLocked(nextPending)) {
+                Slog.w(TAG, "Already running similar " + (isTopEj ? "TOP-EJ" : "job")
+                        + " to: " + nextPending);
             }
 
             // Find an available slot for nextPending. The context should be one of the following:
@@ -1206,13 +1198,8 @@ class JobConcurrencyManager {
                     continue;
                 }
 
-                // Avoid overlapping job execution as much as possible.
-                if (isSimilarJobRunningLocked(nextPending)) {
-                    if (DEBUG) {
-                        Slog.w(TAG, "Avoiding execution of job because of similarly running one: "
-                                + nextPending);
-                    }
-                    continue;
+                if (DEBUG && isSimilarJobRunningLocked(nextPending)) {
+                    Slog.w(TAG, "Already running similar job to: " + nextPending);
                 }
 
                 if (worker.getPreferredUid() != nextPending.getUid()) {
@@ -1298,13 +1285,8 @@ class JobConcurrencyManager {
                     continue;
                 }
 
-                // Avoid overlapping job execution as much as possible.
-                if (isSimilarJobRunningLocked(nextPending)) {
-                    if (DEBUG) {
-                        Slog.w(TAG, "Avoiding execution of job because of similarly running one: "
-                                + nextPending);
-                    }
-                    continue;
+                if (DEBUG && isSimilarJobRunningLocked(nextPending)) {
+                    Slog.w(TAG, "Already running similar job to: " + nextPending);
                 }
 
                 if (isPkgConcurrencyLimitedLocked(nextPending)) {
