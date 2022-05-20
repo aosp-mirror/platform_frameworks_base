@@ -136,7 +136,8 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     @Test
     public void testScreenOff_groupAndSectionChangesAllowed() {
         // GIVEN screen is off, panel isn't expanded and device isn't pulsing
-        setScreenOn(false);
+        setFullyDozed(true);
+        setSleepy(true);
         setPanelExpanded(false);
         setPulsing(false);
 
@@ -149,9 +150,42 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     }
 
     @Test
+    public void testScreenTurningOff_groupAndSectionChangesNotAllowed() {
+        // GIVEN the screen is turning off (sleepy but partially dozed)
+        setFullyDozed(false);
+        setSleepy(true);
+        setPanelExpanded(true);
+        setPulsing(false);
+
+        // THEN group changes are NOT allowed
+        assertFalse(mNotifStabilityManager.isGroupChangeAllowed(mEntry));
+        assertFalse(mNotifStabilityManager.isGroupPruneAllowed(mGroupEntry));
+
+        // THEN section changes are NOT allowed
+        assertFalse(mNotifStabilityManager.isSectionChangeAllowed(mEntry));
+    }
+
+    @Test
+    public void testScreenTurningOn_groupAndSectionChangesNotAllowed() {
+        // GIVEN the screen is turning on (still fully dozed, not sleepy)
+        setFullyDozed(true);
+        setSleepy(false);
+        setPanelExpanded(true);
+        setPulsing(false);
+
+        // THEN group changes are NOT allowed
+        assertFalse(mNotifStabilityManager.isGroupChangeAllowed(mEntry));
+        assertFalse(mNotifStabilityManager.isGroupPruneAllowed(mGroupEntry));
+
+        // THEN section changes are NOT allowed
+        assertFalse(mNotifStabilityManager.isSectionChangeAllowed(mEntry));
+    }
+
+    @Test
     public void testPanelNotExpanded_groupAndSectionChangesAllowed() {
         // GIVEN screen is on but the panel isn't expanded and device isn't pulsing
-        setScreenOn(true);
+        setFullyDozed(false);
+        setSleepy(false);
         setPanelExpanded(false);
         setPulsing(false);
 
@@ -166,7 +200,8 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     @Test
     public void testPanelExpanded_groupAndSectionChangesNotAllowed() {
         // GIVEN the panel true expanded and device isn't pulsing
-        setScreenOn(true);
+        setFullyDozed(false);
+        setSleepy(false);
         setPanelExpanded(true);
         setPulsing(false);
 
@@ -181,7 +216,8 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     @Test
     public void testPulsing_screenOff_groupAndSectionChangesNotAllowed() {
         // GIVEN the device is pulsing and screen is off
-        setScreenOn(false);
+        setFullyDozed(true);
+        setSleepy(true);
         setPulsing(true);
 
         // THEN group changes are NOT allowed
@@ -195,7 +231,8 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     @Test
     public void testPulsing_panelNotExpanded_groupAndSectionChangesNotAllowed() {
         // GIVEN the device is pulsing and screen is off with the panel not expanded
-        setScreenOn(false);
+        setFullyDozed(true);
+        setSleepy(true);
         setPanelExpanded(false);
         setPulsing(true);
 
@@ -211,7 +248,8 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     public void testOverrideReorderingSuppression_onlySectionChangesAllowed() {
         // GIVEN section changes typically wouldn't be allowed because the panel is expanded and
         // we're not pulsing
-        setScreenOn(true);
+        setFullyDozed(false);
+        setSleepy(false);
         setPanelExpanded(true);
         setPulsing(true);
 
@@ -233,7 +271,8 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     @Test
     public void testTemporarilyAllowSectionChanges_callsInvalidate() {
         // GIVEN section changes typically wouldn't be allowed because the panel is expanded
-        setScreenOn(true);
+        setFullyDozed(false);
+        setSleepy(false);
         setPanelExpanded(true);
         setPulsing(false);
 
@@ -247,7 +286,8 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     @Test
     public void testTemporarilyAllowSectionChanges_noInvalidationCalled() {
         // GIVEN section changes typically WOULD be allowed
-        setScreenOn(false);
+        setFullyDozed(true);
+        setSleepy(true);
         setPanelExpanded(false);
         setPulsing(false);
 
@@ -261,7 +301,8 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     @Test
     public void testTemporarilyAllowSectionChangesTimeout() {
         // GIVEN section changes typically WOULD be allowed
-        setScreenOn(false);
+        setFullyDozed(true);
+        setSleepy(true);
         setPanelExpanded(false);
         setPulsing(false);
         assertTrue(mNotifStabilityManager.isSectionChangeAllowed(mEntry));
@@ -292,7 +333,8 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     @Test
     public void testTemporarilyAllowSectionChanges_isPulsingChangeBeforeTimeout() {
         // GIVEN section changes typically wouldn't be allowed because the device is pulsing
-        setScreenOn(false);
+        setFullyDozed(true);
+        setSleepy(true);
         setPanelExpanded(false);
         setPulsing(true);
 
@@ -315,8 +357,11 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         // WHEN device isn't pulsing anymore
         setPulsing(false);
 
-        // WHEN screen isn't on
-        setScreenOn(false);
+        // WHEN fully dozed
+        setFullyDozed(true);
+
+        // WHEN sleepy
+        setSleepy(true);
 
         // WHEN panel isn't expanded
         setPanelExpanded(false);
@@ -330,7 +375,8 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     public void testNotSuppressingGroupChangesAnymore_invalidationCalled() {
         // GIVEN visual stability is being maintained b/c panel is expanded
         setPulsing(false);
-        setScreenOn(true);
+        setFullyDozed(false);
+        setSleepy(false);
         setPanelExpanded(true);
 
         assertFalse(mNotifStabilityManager.isGroupChangeAllowed(mEntry));
@@ -399,7 +445,8 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     public void testNotSuppressingEntryReorderingAnymoreWillInvalidate() {
         // GIVEN visual stability is being maintained b/c panel is expanded
         setPulsing(false);
-        setScreenOn(true);
+        setFullyDozed(false);
+        setSleepy(false);
         setPanelExpanded(true);
 
         assertFalse(mNotifStabilityManager.isEntryReorderingAllowed(mEntry));
@@ -417,7 +464,8 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     public void testQueryingEntryReorderingButNotReportingReorderSuppressedDoesNotInvalidate() {
         // GIVEN visual stability is being maintained b/c panel is expanded
         setPulsing(false);
-        setScreenOn(true);
+        setFullyDozed(false);
+        setSleepy(false);
         setPanelExpanded(true);
 
         assertFalse(mNotifStabilityManager.isEntryReorderingAllowed(mEntry));
@@ -432,7 +480,8 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     @Test
     public void testHeadsUp_allowedToChangeGroupAndSection() {
         // GIVEN group + section changes disallowed
-        setScreenOn(true);
+        setFullyDozed(false);
+        setSleepy(false);
         setPanelExpanded(true);
         setPulsing(true);
         assertFalse(mNotifStabilityManager.isGroupChangeAllowed(mEntry));
@@ -462,11 +511,16 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         mStatusBarStateListener.onPulsingChanged(pulsing);
     }
 
-    private void setScreenOn(boolean screenOn) {
-        if (screenOn) {
-            mWakefulnessObserver.onStartedWakingUp();
-        } else {
+    private void setFullyDozed(boolean fullyDozed) {
+        float dozeAmount = fullyDozed ? 1 : 0;
+        mStatusBarStateListener.onDozeAmountChanged(dozeAmount, dozeAmount);
+    }
+
+    private void setSleepy(boolean sleepy) {
+        if (sleepy) {
             mWakefulnessObserver.onFinishedGoingToSleep();
+        } else {
+            mWakefulnessObserver.onStartedWakingUp();
         }
     }
 
