@@ -319,10 +319,12 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Avati näoga. Avamiseks vajutage."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Nägu tuvastati. Avamiseks vajutage."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Nägu tuvastati. Avamiseks vajutage avamise ikooni."</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1901953991150295169">"Teisalda vasakule"</item>
+    <item msgid="5558598599408514296">"Teisalda alla"</item>
+    <item msgid="4844142668312841831">"Teisalda paremale"</item>
+    <item msgid="5640521437931460125">"Teisalda üles"</item>
+  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"Uuesti proovimiseks pühkige üles"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC kasutamiseks avage."</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"See seade kuulub teie organisatsioonile"</string>
@@ -847,8 +849,7 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Selle seansi ülekandmiseks avage rakendus."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Tundmatu rakendus"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Lõpeta ülekanne"</string>
-    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Saadaolevad seadmed heli esitamiseks."</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Kuidas ülekandmine toimib?"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Ülekanne"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Teie läheduses olevad inimesed, kellel on ühilduvad Bluetooth-seadmed, saavad kuulata teie ülekantavat meediat"</string>
@@ -945,12 +946,9 @@
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Muuda kopeeritud pilti"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Saada läheduses olevasse seadmesse"</string>
     <string name="clipboard_text_hidden" msgid="7926899867471812305">"Puudutage kuvamiseks"</string>
-    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
-    <skip />
-    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
-    <skip />
-    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
-    <skip />
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"Tekst kopeeriti"</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"Pilt kopeeriti"</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"Sisu kopeeriti"</string>
     <string name="add" msgid="81036585205287996">"Lisa"</string>
     <string name="manage_users" msgid="1823875311934643849">"Kasutajate haldamine"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"See märguanne ei toeta jagatud ekraanikuvale lohistamist."</string>
