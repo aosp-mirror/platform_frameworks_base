@@ -300,7 +300,12 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             }
         }
         if (mParticipants.contains(wc)) return;
-        mSyncEngine.addToSyncSet(mSyncId, wc);
+        // Wallpaper is like in a static drawn state unless display may have changes, so exclude
+        // the case to reduce transition latency waiting for the unchanged wallpaper to redraw.
+        final boolean needSyncDraw = !isWallpaper(wc) || mParticipants.contains(wc.mDisplayContent);
+        if (needSyncDraw) {
+            mSyncEngine.addToSyncSet(mSyncId, wc);
+        }
         ChangeInfo info = mChanges.get(wc);
         if (info == null) {
             info = new ChangeInfo(wc);
