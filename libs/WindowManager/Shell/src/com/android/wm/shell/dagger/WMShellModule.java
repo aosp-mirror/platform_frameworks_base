@@ -20,6 +20,7 @@ import android.animation.AnimationHandler;
 import android.content.Context;
 import android.content.pm.LauncherApps;
 import android.os.Handler;
+import android.os.UserManager;
 import android.view.WindowManager;
 
 import com.android.internal.jank.InteractionJankMonitor;
@@ -43,6 +44,7 @@ import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ChoreographerSfVsync;
+import com.android.wm.shell.common.annotations.ShellBackgroundThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.freeform.FreeformTaskListener;
@@ -105,6 +107,7 @@ public class WMShellModule {
             IStatusBarService statusBarService,
             WindowManager windowManager,
             WindowManagerShellWrapper windowManagerShellWrapper,
+            UserManager userManager,
             LauncherApps launcherApps,
             TaskStackListenerImpl taskStackListener,
             UiEventLogger uiEventLogger,
@@ -114,13 +117,15 @@ public class WMShellModule {
             DragAndDropController dragAndDropController,
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler,
+            @ShellBackgroundThread ShellExecutor bgExecutor,
             TaskViewTransitions taskViewTransitions,
             SyncTransactionQueue syncQueue) {
         return BubbleController.create(context, null /* synchronizer */,
                 floatingContentCoordinator, statusBarService, windowManager,
-                windowManagerShellWrapper, launcherApps, taskStackListener,
+                windowManagerShellWrapper, userManager, launcherApps, taskStackListener,
                 uiEventLogger, organizer, displayController, oneHandedOptional,
-                dragAndDropController, mainExecutor, mainHandler, taskViewTransitions, syncQueue);
+                dragAndDropController, mainExecutor, mainHandler, bgExecutor,
+                taskViewTransitions, syncQueue);
     }
 
     //

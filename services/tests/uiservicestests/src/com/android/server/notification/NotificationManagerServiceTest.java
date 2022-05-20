@@ -9573,6 +9573,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testMaybeShowReviewPermissionsNotification_unknown() {
+        reset(mMockNm);
+
         // Set up various possible states of the settings int and confirm whether or not the
         // notification is shown as expected
 
@@ -9586,6 +9588,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testMaybeShowReviewPermissionsNotification_shouldShow() {
+        reset(mMockNm);
+
         // If state is SHOULD_SHOW, it ... should show
         Settings.Global.putInt(mContext.getContentResolver(),
                 Settings.Global.REVIEW_PERMISSIONS_NOTIFICATION_STATE,
@@ -9598,6 +9602,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testMaybeShowReviewPermissionsNotification_alreadyShown() {
+        reset(mMockNm);
+
         // If state is either USER_INTERACTED or DISMISSED, we should not show this on boot
         Settings.Global.putInt(mContext.getContentResolver(),
                 Settings.Global.REVIEW_PERMISSIONS_NOTIFICATION_STATE,
@@ -9614,6 +9620,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testMaybeShowReviewPermissionsNotification_reshown() {
+        reset(mMockNm);
+
         // If we have re-shown the notification and the user did not subsequently interacted with
         // it, then make sure we show when trying on boot
         Settings.Global.putInt(mContext.getContentResolver(),
@@ -9627,6 +9635,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testRescheduledReviewPermissionsNotification() {
+        reset(mMockNm);
+
         // when rescheduled, the notification goes through the NotificationManagerInternal service
         // this call doesn't need to know anything about previously scheduled state -- if called,
         // it should send the notification & write the appropriate int to Settings

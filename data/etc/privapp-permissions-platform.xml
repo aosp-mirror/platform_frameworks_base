@@ -33,30 +33,6 @@ applications that come with the platform
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
     </privapp-permissions>
 
-    <privapp-permissions package="com.android.bluetooth.services">
-        <permission name="android.permission.DUMP"/>
-        <permission name="android.permission.MODIFY_AUDIO_ROUTING"/>
-        <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
-        <permission name="android.permission.TETHER_PRIVILEGED"/>
-        <permission name="android.permission.CALL_PRIVILEGED"/>
-        <permission name="android.permission.MODIFY_PHONE_STATE"/>
-        <permission name="android.permission.INTERACT_ACROSS_USERS"/>
-        <permission name="android.permission.INTERACT_ACROSS_USERS_FULL"/>
-        <permission name="android.permission.CONTROL_INCALL_EXPERIENCE"/>
-        <permission name="android.permission.UPDATE_DEVICE_STATS"/>
-        <permission name="android.permission.PACKAGE_USAGE_STATS"/>
-        <permission name="android.permission.NFC_HANDOVER_STATUS"/>
-        <permission name="android.permission.CONNECTIVITY_INTERNAL"/>
-        <permission name="android.permission.BLUETOOTH_PRIVILEGED"/>
-        <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
-        <permission name="android.permission.MEDIA_CONTENT_CONTROL"/>
-        <permission name="android.permission.REAL_GET_TASKS"/>
-        <permission name="android.permission.MANAGE_USERS"/>
-        <permission name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND"/>
-        <permission name="android.permission.WRITE_APN_SETTINGS"/>
-        <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
-    </privapp-permissions>
-
     <privapp-permissions package="com.android.backupconfirm">
         <permission name="android.permission.BACKUP"/>
         <permission name="android.permission.CRYPT_KEEPER"/>

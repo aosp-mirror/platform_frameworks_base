@@ -43,8 +43,6 @@
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"解鎖手機以存取更多選項"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"解鎖平板電腦以存取更多選項"</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"解鎖裝置以存取更多選項"</string>
-    <!-- no translation found for media_transfer_playing_this_device (5795784619523545556) -->
-    <skip />
-    <!-- no translation found for media_transfer_playing_this_device (222514408550408633) -->
-    <skip />
+    <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"正在此手機上播放"</string>
+    <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"正在此平板電腦上播放"</string>
 </resources>

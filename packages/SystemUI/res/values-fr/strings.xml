@@ -313,6 +313,10 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Balayer vers le haut pour ouvrir"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Appuyez sur l\'icône de déverrouillage pour ouvrir"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Déverrouillé par visage. Appuyez sur icône déverrouillage pour ouvrir."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"Balayez l\'écran vers le haut pour réessayer"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Déverrouillez l\'écran pour pouvoir utiliser la NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Cet appareil appartient à votre organisation"</string>
@@ -459,8 +463,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Configurez un mode de paiement pour régler vos achats de façon sûre et rapide via votre téléphone"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Tout afficher"</string>
-    <!-- no translation found for wallet_secondary_label_no_card (8488069304491125713) -->
-    <skip />
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Appuyer pour ouvrir"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Mise à jour…"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Déverrouiller pour utiliser"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Problème de récupération de vos cartes. Réessayez plus tard"</string>
@@ -838,6 +841,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Pour caster cette session, veuillez ouvrir l\'appli."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Appli inconnue"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Arrêter la diffusion"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Fonctionnement des annonces"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Annonce"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Les personnes à proximité équipées d\'appareils Bluetooth compatibles peuvent écouter le contenu multimédia que vous diffusez"</string>
@@ -915,7 +920,7 @@
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Désactiver le mode Avion"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> veut ajouter le bloc suivant aux Réglages rapides"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Ajouter le bloc"</string>
-    <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Ne pas ajouter bloc"</string>
+    <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Ne pas ajouter le bloc"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Choisir l\'utilisateur"</string>
     <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
       <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> appli est active</item>
@@ -933,7 +938,12 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Modifier le texte copié"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Modifier l\'image copiée"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Envoyer à un appareil à proximité"</string>
-    <!-- no translation found for clipboard_text_hidden (7926899867471812305) -->
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"Appuyez pour afficher"</string>
+    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
+    <skip />
+    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
+    <skip />
+    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
     <skip />
     <string name="add" msgid="81036585205287996">"Ajouter"</string>
     <string name="manage_users" msgid="1823875311934643849">"Gérer les utilisateurs"</string>

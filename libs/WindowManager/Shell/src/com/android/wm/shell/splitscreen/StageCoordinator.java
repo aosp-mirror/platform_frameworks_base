@@ -533,6 +533,11 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
     }
 
+    void prepareEvictInvisibleChildTasks(WindowContainerTransaction wct) {
+        mMainStage.evictInvisibleChildren(wct);
+        mSideStage.evictInvisibleChildren(wct);
+    }
+
     Bundle resolveStartStage(@StageType int stage,
             @SplitPosition int position, @androidx.annotation.Nullable Bundle options,
             @androidx.annotation.Nullable WindowContainerTransaction wct) {
@@ -1115,7 +1120,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             final SurfaceControl.Transaction transaction = mTransactionPool.acquire();
             mDividerFadeInAnimator = ValueAnimator.ofFloat(0f, 1f);
             mDividerFadeInAnimator.addUpdateListener(animation -> {
-                if (dividerLeash == null) {
+                if (dividerLeash == null || !dividerLeash.isValid()) {
                     mDividerFadeInAnimator.cancel();
                     return;
                 }
@@ -1125,7 +1130,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mDividerFadeInAnimator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationStart(Animator animation) {
-                    if (dividerLeash == null) {
+                    if (dividerLeash == null || !dividerLeash.isValid()) {
                         mDividerFadeInAnimator.cancel();
                         return;
                     }

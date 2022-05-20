@@ -43,8 +43,6 @@
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"ಹೆಚ್ಚಿನ ಆಯ್ಕೆಗಳಿಗಾಗಿ ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"ಹೆಚ್ಚಿನ ಆಯ್ಕೆಗಳಿಗಾಗಿ ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್ ಅನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"ಹೆಚ್ಚಿನ ಆಯ್ಕೆಗಳಿಗಾಗಿ ನಿಮ್ಮ ಸಾಧನವನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
-    <!-- no translation found for media_transfer_playing_this_device (5795784619523545556) -->
-    <skip />
-    <!-- no translation found for media_transfer_playing_this_device (222514408550408633) -->
-    <skip />
+    <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"ಈ ಫೋನ್‌ನಲ್ಲಿ ಪ್ಲೇ ಆಗುತ್ತಿದೆ"</string>
+    <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"ಈ ಟ್ಯಾಬ್ಲೆಟ್‌ನಲ್ಲಿ ಪ್ಲೇ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
 </resources>

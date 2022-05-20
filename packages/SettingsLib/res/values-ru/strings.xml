@@ -652,9 +652,6 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Включение экрана"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Разрешить приложению включать экран"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Приложение сможет в любое время включать экран без явного согласия с вашей стороны"</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Сканирование QR-кода"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Чтобы прослушать, поместите QR-код в центр"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Недопустимый формат QR-кода"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Остановить трансляцию \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Если вы начнете транслировать \"<xliff:g id="SWITCHAPP">%1$s</xliff:g>\" или смените целевое устройство, текущая трансляция прервется."</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Транслировать \"<xliff:g id="SWITCHAPP">%1$s</xliff:g>\""</string>

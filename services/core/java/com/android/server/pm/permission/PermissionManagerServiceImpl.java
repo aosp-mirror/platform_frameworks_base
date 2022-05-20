@@ -42,6 +42,7 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM
 import static android.content.pm.PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE;
 import static android.content.pm.PackageManager.MASK_PERMISSION_FLAGS_ALL;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.INVALID_UID;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.permission.PermissionManager.KILL_APP_REASON_GIDS_CHANGED;
@@ -97,6 +98,7 @@ import android.os.storage.StorageManager;
 import android.permission.IOnPermissionsChangeListener;
 import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -333,7 +335,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             mPackageManagerInt.writeSettings(true);
         }
         @Override
-        public void onPermissionRevoked(int uid, int userId, String reason, boolean overrideKill) {
+        public void onPermissionRevoked(int uid, int userId, String reason, boolean overrideKill,
+                @Nullable String permissionName) {
             mOnPermissionChangeListeners.onPermissionsChanged(uid);
 
             // Critical; after this call the application should never have the permission
@@ -342,13 +345,41 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                 return;
             }
 
-            final int appId = UserHandle.getAppId(uid);
-            if (reason == null) {
-                mHandler.post(() -> killUid(appId, userId, KILL_APP_REASON_PERMISSIONS_REVOKED));
-            } else {
-                mHandler.post(() -> killUid(appId, userId, reason));
+            mHandler.post(() -> {
+                if (POST_NOTIFICATIONS.equals(permissionName)
+                        && isAppBackupAndRestoreRunning(uid)) {
+                    return;
+                }
+
+                final int appId = UserHandle.getAppId(uid);
+                if (reason == null) {
+                    killUid(appId, userId, KILL_APP_REASON_PERMISSIONS_REVOKED);
+                } else {
+                    killUid(appId, userId, reason);
+                }
+            });
+        }
+
+        private boolean isAppBackupAndRestoreRunning(int uid) {
+            if (checkUidPermission(uid, Manifest.permission.BACKUP) != PERMISSION_GRANTED) {
+                return false;
+            }
+
+            try {
+                int userId = UserHandle.getUserId(uid);
+                boolean isInSetup = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.USER_SETUP_COMPLETE, userId) == 0;
+                boolean isInDeferredSetup = Settings.Secure.getIntForUser(
+                        mContext.getContentResolver(),
+                        Settings.Secure.USER_SETUP_PERSONALIZATION_STATE, userId)
+                        == Settings.Secure.USER_SETUP_PERSONALIZATION_STARTED;
+                return isInSetup || isInDeferredSetup;
+            } catch (Settings.SettingNotFoundException e) {
+                Slog.w(LOG_TAG, "Failed to check if the user is in restore: " + e);
+                return false;
             }
         }
+
         @Override
         public void onInstallPermissionRevoked() {
             mPackageManagerInt.writeSettings(true);
@@ -1600,7 +1631,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         if (callback != null) {
             if (isRuntimePermission) {
                 callback.onPermissionRevoked(UserHandle.getUid(userId, pkg.getUid()), userId,
-                        reason, overrideKill);
+                        reason, overrideKill, permName);
             } else {
                 mDefaultPermissionCallback.onInstallPermissionRevoked();
             }
@@ -2485,6 +2516,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         final int[] userIds = filterUserId == UserHandle.USER_ALL ? getAllUserIds()
                 : new int[] { filterUserId };
 
+        boolean installPermissionsChanged = false;
         boolean runtimePermissionsRevoked = false;
         int[] updatedUserIds = EMPTY_INT_ARRAY;
 
@@ -2603,7 +2635,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
                 UidPermissionState origState = uidState;
 
-                boolean changedInstallPermission = false;
+                boolean installPermissionsChangedForUser = false;
 
                 if (replace) {
                     userState.setInstallPermissionsFixed(ps.getPackageName(), false);
@@ -2769,7 +2801,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                                                     && origState.isPermissionGranted(permName))))) {
                         // Grant an install permission.
                         if (uidState.grantPermission(bp)) {
-                            changedInstallPermission = true;
+                            installPermissionsChangedForUser = true;
                         }
                     } else if (bp.isRuntime()) {
                         boolean hardRestricted = bp.isHardRestricted();
@@ -2909,12 +2941,12 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                             }
                         }
                         if (uidState.removePermissionState(bp.getName())) {
-                            changedInstallPermission = true;
+                            installPermissionsChangedForUser = true;
                         }
                     }
                 }
 
-                if ((changedInstallPermission || replace)
+                if ((installPermissionsChangedForUser || replace)
                         && !userState.areInstallPermissionsFixed(ps.getPackageName())
                         && !ps.isSystem() || ps.getTransientState().isUpdatedSystemApp()) {
                     // This is the first that we have heard about this package, so the
@@ -2923,6 +2955,12 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                     userState.setInstallPermissionsFixed(ps.getPackageName(), true);
                 }
 
+                if (installPermissionsChangedForUser) {
+                    installPermissionsChanged = true;
+                    if (replace) {
+                        updatedUserIds = ArrayUtils.appendInt(updatedUserIds, userId);
+                    }
+                }
                 updatedUserIds = revokePermissionsNoLongerImplicitLocked(uidState,
                         pkg.getPackageName(), uidImplicitPermissions, uidTargetSdkVersion, userId,
                         updatedUserIds);
@@ -2939,8 +2977,12 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         // Persist the runtime permissions state for users with changes. If permissions
         // were revoked because no app in the shared user declares them we have to
         // write synchronously to avoid losing runtime permissions state.
+        // Also write synchronously if we changed any install permission for an updated app, because
+        // the install permission state is likely already fixed before update, and if we lose the
+        // changes here the app won't be reconsidered for newly-added install permissions.
         if (callback != null) {
-            callback.onPermissionUpdated(updatedUserIds, runtimePermissionsRevoked);
+            callback.onPermissionUpdated(updatedUserIds,
+                    (replace && installPermissionsChanged) || runtimePermissionsRevoked);
         }
 
         for (int userId : updatedUserIds) {
@@ -5246,7 +5288,11 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             onPermissionRevoked(uid, userId, reason, false);
         }
         public void onPermissionRevoked(int uid, @UserIdInt int userId, String reason,
-                boolean overrideKill) {}
+                boolean overrideKill) {
+            onPermissionRevoked(uid, userId, reason, false, null);
+        }
+        public void onPermissionRevoked(int uid, @UserIdInt int userId, String reason,
+                boolean overrideKill, @Nullable String permissionName) {}
         public void onInstallPermissionRevoked() {}
         public void onPermissionUpdated(@UserIdInt int[] updatedUserIds, boolean sync) {}
         public void onPermissionUpdatedNotifyListener(@UserIdInt int[] updatedUserIds, boolean sync,

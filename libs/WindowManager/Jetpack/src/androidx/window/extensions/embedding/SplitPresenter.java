@@ -16,8 +16,6 @@
 
 package androidx.window.extensions.embedding;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-
 import android.app.Activity;
 import android.app.WindowConfiguration;
 import android.app.WindowConfiguration.WindowingMode;
@@ -100,10 +98,10 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
      * Creates a new split with the primary activity and an empty secondary container.
      * @return The newly created secondary container.
      */
-    TaskFragmentContainer createNewSplitWithEmptySideContainer(@NonNull Activity primaryActivity,
+    @NonNull
+    TaskFragmentContainer createNewSplitWithEmptySideContainer(
+            @NonNull WindowContainerTransaction wct, @NonNull Activity primaryActivity,
             @NonNull SplitPairRule rule) {
-        final WindowContainerTransaction wct = new WindowContainerTransaction();
-
         final Rect parentBounds = getParentContainerBounds(primaryActivity);
         final Rect primaryRectBounds = getBoundsForPosition(POSITION_START, parentBounds, rule,
                 isLtr(primaryActivity, rule));
@@ -126,8 +124,6 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         setAdjacentTaskFragments(wct, primaryContainer, secondaryContainer, rule);
 
         mController.registerSplit(wct, primaryContainer, primaryActivity, secondaryContainer, rule);
-
-        applyTransaction(wct);
 
         return secondaryContainer;
     }
@@ -155,8 +151,15 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
 
         final Rect secondaryRectBounds = getBoundsForPosition(POSITION_END, parentBounds, rule,
                 isLtr(primaryActivity, rule));
+        final TaskFragmentContainer curSecondaryContainer = mController.getContainerWithActivity(
+                secondaryActivity);
+        TaskFragmentContainer containerToAvoid = primaryContainer;
+        if (rule.shouldClearTop() && curSecondaryContainer != null) {
+            // Do not reuse the current TaskFragment if the rule is to clear top.
+            containerToAvoid = curSecondaryContainer;
+        }
         final TaskFragmentContainer secondaryContainer = prepareContainerForActivity(wct,
-                secondaryActivity, secondaryRectBounds, primaryContainer);
+                secondaryActivity, secondaryRectBounds, containerToAvoid);
 
         // Set adjacent to each other so that the containers below will be invisible.
         setAdjacentTaskFragments(wct, primaryContainer, secondaryContainer, rule);
@@ -167,21 +170,6 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     }
 
     /**
-     * Creates a new expanded container.
-     */
-    TaskFragmentContainer createNewExpandedContainer(@NonNull Activity launchingActivity) {
-        final TaskFragmentContainer newContainer = mController.newContainer(null /* activity */,
-                launchingActivity, launchingActivity.getTaskId());
-
-        final WindowContainerTransaction wct = new WindowContainerTransaction();
-        createTaskFragment(wct, newContainer.getTaskFragmentToken(),
-                launchingActivity.getActivityToken(), new Rect(), WINDOWING_MODE_UNDEFINED);
-
-        applyTransaction(wct);
-        return newContainer;
-    }
-
-    /**
      * Creates a new container or resizes an existing container for activity to the provided bounds.
      * @param activity The activity to be re-parented to the container if necessary.
      * @param containerToAvoid Re-parent from this container if an activity is already in it.
@@ -189,8 +177,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     private TaskFragmentContainer prepareContainerForActivity(
             @NonNull WindowContainerTransaction wct, @NonNull Activity activity,
             @NonNull Rect bounds, @Nullable TaskFragmentContainer containerToAvoid) {
-        TaskFragmentContainer container = mController.getContainerWithActivity(
-                activity.getActivityToken());
+        TaskFragmentContainer container = mController.getContainerWithActivity(activity);
         final int taskId = container != null ? container.getTaskId() : activity.getTaskId();
         if (container == null || container == containerToAvoid) {
             container = mController.newContainer(activity, taskId);
@@ -230,7 +217,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
                 isLtr(launchingActivity, rule));
 
         TaskFragmentContainer primaryContainer = mController.getContainerWithActivity(
-                launchingActivity.getActivityToken());
+                launchingActivity);
         if (primaryContainer == null) {
             primaryContainer = mController.newContainer(launchingActivity,
                     launchingActivity.getTaskId());
@@ -460,8 +447,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
 
     @NonNull
     Rect getParentContainerBounds(@NonNull Activity activity) {
-        final TaskFragmentContainer container = mController.getContainerWithActivity(
-                activity.getActivityToken());
+        final TaskFragmentContainer container = mController.getContainerWithActivity(activity);
         if (container != null) {
             return getParentContainerBounds(container);
         }

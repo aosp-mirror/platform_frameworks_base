@@ -18,6 +18,7 @@ package com.android.systemui.screenshot;
 
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_TAKE_SCREENSHOT;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_ANIM;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_DISMISS;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_INPUT;
@@ -83,6 +84,7 @@ import android.widget.LinearLayout;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.screenshot.ScreenshotController.SavedImageData.ActionTransition;
@@ -166,6 +168,9 @@ public class ScreenshotView extends FrameLayout implements
     private final ArrayList<OverlayActionChip> mSmartChips = new ArrayList<>();
     private PendingInteraction mPendingInteraction;
 
+    private final InteractionJankMonitor mInteractionJankMonitor;
+    private long mDefaultTimeoutOfTimeoutHandler;
+
     private enum PendingInteraction {
         PREVIEW,
         EDIT,
@@ -189,6 +194,7 @@ public class ScreenshotView extends FrameLayout implements
             Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         mResources = mContext.getResources();
+        mInteractionJankMonitor = getInteractionJankMonitorInstance();
 
         mFixedSize = mResources.getDimensionPixelSize(R.dimen.overlay_x_scale);
 
@@ -227,6 +233,14 @@ public class ScreenshotView extends FrameLayout implements
                 stopInputListening();
             }
         });
+    }
+
+    private InteractionJankMonitor getInteractionJankMonitorInstance() {
+        return InteractionJankMonitor.getInstance();
+    }
+
+    void setDefaultTimeoutMillis(long timeout) {
+        mDefaultTimeoutOfTimeoutHandler = timeout;
     }
 
     public void hideScrollChip() {
@@ -395,6 +409,9 @@ public class ScreenshotView extends FrameLayout implements
 
             @Override
             public void onDismissComplete() {
+                if (mInteractionJankMonitor.isInstrumenting(CUJ_TAKE_SCREENSHOT)) {
+                    mInteractionJankMonitor.end(CUJ_TAKE_SCREENSHOT);
+                }
                 mCallbacks.onDismiss();
             }
         });
@@ -595,6 +612,20 @@ public class ScreenshotView extends FrameLayout implements
 
         dropInAnimation.addListener(new AnimatorListenerAdapter() {
             @Override
+            public void onAnimationCancel(Animator animation) {
+                mInteractionJankMonitor.cancel(CUJ_TAKE_SCREENSHOT);
+            }
+
+            @Override
+            public void onAnimationStart(Animator animation) {
+                InteractionJankMonitor.Configuration.Builder builder =
+                        InteractionJankMonitor.Configuration.Builder.withView(
+                                        CUJ_TAKE_SCREENSHOT, mScreenshotPreview)
+                                .setTag("DropIn");
+                mInteractionJankMonitor.begin(builder);
+            }
+
+            @Override
             public void onAnimationEnd(Animator animation) {
                 if (DEBUG_ANIM) {
                     Log.d(TAG, "drop-in animation ended");
@@ -620,7 +651,7 @@ public class ScreenshotView extends FrameLayout implements
                 mScreenshotPreview.setX(finalPos.x - mScreenshotPreview.getWidth() / 2f);
                 mScreenshotPreview.setY(finalPos.y - mScreenshotPreview.getHeight() / 2f);
                 requestLayout();
-
+                mInteractionJankMonitor.end(CUJ_TAKE_SCREENSHOT);
                 createScreenshotActionsShadeAnimation().start();
             }
         });
@@ -650,8 +681,10 @@ public class ScreenshotView extends FrameLayout implements
         });
         chips.add(mShareChip);
 
-        mEditChip.setContentDescription(mContext.getString(R.string.screenshot_edit_description));
-        mEditChip.setIcon(Icon.createWithResource(mContext, R.drawable.ic_screenshot_edit), true);
+        mEditChip.setContentDescription(
+                mContext.getString(R.string.screenshot_edit_description));
+        mEditChip.setIcon(Icon.createWithResource(mContext, R.drawable.ic_screenshot_edit),
+                true);
         mEditChip.setOnClickListener(v -> {
             mEditChip.setIsPending(true);
             mShareChip.setIsPending(false);
@@ -690,6 +723,28 @@ public class ScreenshotView extends FrameLayout implements
         mActionsContainerBackground.setAlpha(0f);
         mActionsContainer.setVisibility(View.VISIBLE);
         mActionsContainerBackground.setVisibility(View.VISIBLE);
+
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                mInteractionJankMonitor.cancel(CUJ_TAKE_SCREENSHOT);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mInteractionJankMonitor.end(CUJ_TAKE_SCREENSHOT);
+            }
+
+            @Override
+            public void onAnimationStart(Animator animation) {
+                InteractionJankMonitor.Configuration.Builder builder =
+                        InteractionJankMonitor.Configuration.Builder.withView(
+                                        CUJ_TAKE_SCREENSHOT, mScreenshotStatic)
+                                .setTag("Actions")
+                                .setTimeout(mDefaultTimeoutOfTimeoutHandler);
+                mInteractionJankMonitor.begin(builder);
+            }
+        });
 
         animator.addUpdateListener(animation -> {
             float t = animation.getAnimatedFraction();
@@ -767,7 +822,7 @@ public class ScreenshotView extends FrameLayout implements
                             animateDismissal();
                         });
                 actionChip.setAlpha(1);
-                mActionsView.addView(actionChip);
+                mActionsView.addView(actionChip, mActionsView.getChildCount() - 1);
                 mSmartChips.add(actionChip);
             }
         }

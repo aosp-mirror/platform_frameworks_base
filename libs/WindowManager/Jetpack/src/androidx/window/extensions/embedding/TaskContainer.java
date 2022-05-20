@@ -142,4 +142,23 @@ class TaskContainer {
             container.removePendingAppearedActivity(pendingAppearedActivity);
         }
     }
+
+    @Nullable
+    TaskFragmentContainer getTopTaskFragmentContainer() {
+        if (mContainers.isEmpty()) {
+            return null;
+        }
+        return mContainers.get(mContainers.size() - 1);
+    }
+
+    @Nullable
+    Activity getTopNonFinishingActivity() {
+        for (int i = mContainers.size() - 1; i >= 0; i--) {
+            final Activity activity = mContainers.get(i).getTopNonFinishingActivity();
+            if (activity != null) {
+                return activity;
+            }
+        }
+        return null;
+    }
 }

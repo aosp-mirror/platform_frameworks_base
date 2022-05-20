@@ -652,17 +652,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Encender pantalla"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Permitir encender la pantalla"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Permite que una aplicación encienda la pantalla. Si das este permiso, la aplicación puede encender la pantalla en cualquier momento sin que se lo pidas."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Escanear código QR"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Para empezar a escuchar, centra el código QR aquí abajo"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"El formato del código QR no es válido"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"¿Dejar de emitir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Si emites <xliff:g id="SWITCHAPP">%1$s</xliff:g> o cambias la salida, tu emisión actual se detendrá"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Emitir <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Cambiar salida"</string>
-    <!-- no translation found for back_navigation_animation (8105467568421689484) -->
-    <skip />
-    <!-- no translation found for back_navigation_animation_summary (741292224121599456) -->
-    <skip />
-    <!-- no translation found for back_navigation_animation_dialog (8696966520944625596) -->
-    <skip />
+    <string name="back_navigation_animation" msgid="8105467568421689484">"Animaciones para acciones de retorno predictivas"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Habilitar animaciones del sistema para acciones de retorno predictivas."</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Este ajuste habilita animaciones del sistema para acciones gestuales predictivas. Exige definir el valor de enableOnBackInvokedCallback en \"verdadero\" para cada aplicación en el archivo de manifiesto."</string>
 </resources>

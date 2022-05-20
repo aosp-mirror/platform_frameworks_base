@@ -72,6 +72,10 @@ public class TimeoutHandler extends Handler {
         mDefaultTimeout = timeout;
     }
 
+    int getDefaultTimeoutMillis() {
+        return mDefaultTimeout;
+    }
+
     /**
      * Cancel the current timeout, if any. To reset the delayed runnable use resetTimeout instead.
      */

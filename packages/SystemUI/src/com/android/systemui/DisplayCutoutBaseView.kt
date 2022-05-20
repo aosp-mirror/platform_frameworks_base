@@ -54,7 +54,7 @@ open class DisplayCutoutBaseView : View, RegionInterceptableView {
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     @JvmField val displayInfo = DisplayInfo()
-    @JvmField protected var pendingRotationChange = false
+    @JvmField protected var pendingConfigChange = false
     @JvmField protected val paint = Paint()
     @JvmField protected val cutoutPath = Path()
 
@@ -145,7 +145,7 @@ open class DisplayCutoutBaseView : View, RegionInterceptableView {
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     open fun updateCutout() {
-        if (pendingRotationChange) {
+        if (pendingConfigChange) {
             return
         }
         cutoutPath.reset()
@@ -225,7 +225,7 @@ open class DisplayCutoutBaseView : View, RegionInterceptableView {
     }
 
     protected open fun updateProtectionBoundingPath() {
-        if (pendingRotationChange) {
+        if (pendingConfigChange) {
             return
         }
         val m = Matrix()

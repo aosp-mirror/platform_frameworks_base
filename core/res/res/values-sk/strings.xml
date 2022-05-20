@@ -307,8 +307,10 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"prístup ku kalendáru"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"posielanie a zobrazovanie SMS"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"Súbory a dokumenty"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"prístup k súborom a dokumentom vo vašom zariadení"</string>
+    <!-- no translation found for permgrouplab_storage (17339216290379241) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_storage (5378659041354582769) -->
+    <skip />
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Hudba a zvuk"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"prístup k hudbe a zvuku vo vašom zariadení"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotky a videá"</string>
@@ -352,7 +354,7 @@
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"zobrazovanie upozornení ako aktivít na celej obrazovke v uzamknutom zariadení"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Táto možnosť umožňuje aplikácii zobrazovať upozornenia ako aktivity na celej obrazovke v uzamknutom zariadení"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"Inštalovať odkazy"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Povoľuje aplikácii pridať odkazy na ploche bez zásahu používateľa."</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"povoliť aplikácii pridať odkazy na ploche bez zásahu používateľa."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"odinštalovať odkazy"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Povoľuje aplikácii odstrániť odkazy na ploche bez zásahu používateľa."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"presmerovať odchádzajúce hovory"</string>
@@ -2283,5 +2285,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Skontrolovať aktívne aplikácie"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> nemáte prístup ku kamere telefónu"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> nemáte prístup ku kamere tabletu"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"Jazyk systému"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Predvolené systémom"</string>
 </resources>

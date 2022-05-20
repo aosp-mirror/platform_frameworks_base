@@ -43,8 +43,6 @@
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"Ak chcete zobraziť ďalšie možnosti, odomknite telefón"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"Ak chcete zobraziť ďalšie možnosti, odomknite tablet"</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Ak chcete zobraziť ďalšie možnosti, odomknite zariadenie"</string>
-    <!-- no translation found for media_transfer_playing_this_device (5795784619523545556) -->
-    <skip />
-    <!-- no translation found for media_transfer_playing_this_device (222514408550408633) -->
-    <skip />
+    <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"Prehráva sa v tomto telefóne"</string>
+    <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"Prehráva sa v tomto tablete"</string>
 </resources>

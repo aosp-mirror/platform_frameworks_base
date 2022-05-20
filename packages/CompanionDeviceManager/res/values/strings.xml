@@ -20,7 +20,7 @@
     <string name="app_label">Companion Device Manager</string>
 
     <!-- Title of the device association confirmation dialog. -->
-    <string name="confirmation_title">Allow &lt;strong&gt;<xliff:g id="app_name" example="Android Wear">%1$s</xliff:g>&lt;/strong&gt; to manage your &lt;strong&gt;<xliff:g id="device_name" example="ASUS ZenWatch 2">%2$s</xliff:g>&lt;/strong&gt;</string>
+    <string name="confirmation_title">Allow &lt;strong&gt;<xliff:g id="app_name" example="Android Wear">%1$s</xliff:g>&lt;/strong&gt; to access your &lt;strong&gt;<xliff:g id="device_name" example="ASUS ZenWatch 2">%2$s</xliff:g>&lt;/strong&gt;</string>
 
     <!-- ================= DEVICE_PROFILE_WATCH and null profile ================= -->
 
@@ -31,10 +31,7 @@
     <string name="chooser_title">Choose a <xliff:g id="profile_name" example="watch">%1$s</xliff:g> to be managed by &lt;strong&gt;<xliff:g id="app_name" example="Android Wear">%2$s</xliff:g>&lt;/strong&gt;</string>
 
     <!-- Description of the privileges the application will get if associated with the companion device of WATCH profile (type) [CHAR LIMIT=NONE] -->
-    <string name="summary_watch" product="default"><xliff:g id="app_name" example="Wear">%1$s</xliff:g> will be allowed to interact with your notifications and access your Phone, SMS, Contacts and Calendar permissions.</string>
-
-    <!-- Description of the privileges the application will get if associated with the companion device of WATCH profile (type) [CHAR LIMIT=NONE] -->
-    <string name="summary_watch" product="tablet"><xliff:g id="app_name" example="Wear">%1$s</xliff:g> will be allowed to interact with your notifications and access your Phone, SMS, Contacts and Calendar permissions.</string>
+    <string name="summary_watch">This app is needed to manage your <xliff:g id="device_name" example="My Watch">%1$s</xliff:g>. <xliff:g id="app_name" example="Android Wear">%2$s</xliff:g> will be allowed to interact with your notifications and access your Phone, SMS, Contacts, Calendar, Call logs and Nearby devices permissions.</string>
 
     <!-- ================= DEVICE_PROFILE_APP_STREAMING ================= -->
 
