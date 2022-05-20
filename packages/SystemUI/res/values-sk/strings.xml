@@ -324,10 +324,12 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Odomknuté tvárou. Otvorte stlačením."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Tvár bola rozpoznaná. Otvorte stlačením."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Tvár bola rozpoznaná. Otvorte stlačením ikony odomknutia."</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1901953991150295169">"Posunúť doľava"</item>
+    <item msgid="5558598599408514296">"Posunúť nadol"</item>
+    <item msgid="4844142668312841831">"Posunúť doprava"</item>
+    <item msgid="5640521437931460125">"Posunúť nahor"</item>
+  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"Potiahnutím nahor to skúste znova"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Ak chcete použiť NFC, odomknite"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Toto zariadenie patrí vašej organizácii"</string>
@@ -709,10 +711,8 @@
     <string name="notification_channel_alerts" msgid="3385787053375150046">"Upozornenia"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"Batéria"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"Snímky obrazovky"</string>
-    <!-- no translation found for notification_channel_instant (7556135423486752680) -->
-    <skip />
-    <!-- no translation found for notification_channel_setup (7660580986090760350) -->
-    <skip />
+    <string name="notification_channel_instant" msgid="7556135423486752680">"Okamžité aplikácie"</string>
+    <string name="notification_channel_setup" msgid="7660580986090760350">"Nastavenie"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"Úložisko"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Tipy"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Okamžité aplikácie"</string>
@@ -866,8 +866,7 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Ak chcete túto reláciu prenášať, otvorte aplikáciu."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Neznáma aplikácia"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Zastaviť prenos"</string>
-    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Dostupné zariadenia pre zvukový výstup."</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Ako vysielanie funguje"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Vysielanie"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Ľudia v okolí s kompatibilnými zariadeniami s rozhraním Bluetooth si môžu vypočuť médiá, ktoré vysielate"</string>
@@ -966,12 +965,9 @@
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Upraviť skopírovaný obrázok"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Odoslať do zariadenia v okolí"</string>
     <string name="clipboard_text_hidden" msgid="7926899867471812305">"Zobrazíte klepnutím"</string>
-    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
-    <skip />
-    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
-    <skip />
-    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
-    <skip />
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"Text bol skopírovaný"</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"Obrázok bol skopírovaný"</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"Obsah bol skopírovaný"</string>
     <string name="add" msgid="81036585205287996">"Pridať"</string>
     <string name="manage_users" msgid="1823875311934643849">"Spravovať používateľov"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Toto upozornenie nepodporuje presun na rozdelenú obrazovku."</string>
@@ -980,12 +976,10 @@
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Budík je nastavený"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Kamera a mikrofón sú vypnuté"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# upozornenie}few{# upozornenia}many{# notifications}other{# upozornení}}"</string>
-    <!-- no translation found for broadcasting_description_is_broadcasting (765627502786404290) -->
-    <skip />
+    <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Vysiela"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Chcete zastaviť vysielanie aplikácie <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Ak vysielate aplikáciu <xliff:g id="SWITCHAPP">%1$s</xliff:g> alebo zmeníte výstup, aktuálne vysielanie bude zastavené"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"Vysielanie aplikácie <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"Zmena výstupu"</string>
-    <!-- no translation found for bt_le_audio_broadcast_dialog_unknown_name (3791472237793443044) -->
-    <skip />
+    <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"Neznáme"</string>
 </resources>
