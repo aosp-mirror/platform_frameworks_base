@@ -72,7 +72,6 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     private long mKeyguardFadingAwayDuration;
     private boolean mKeyguardGoingAway;
     private boolean mLaunchTransitionFadingAway;
-    private boolean mBypassFadingAnimation;
     private boolean mTrustManaged;
     private boolean mTrusted;
     private boolean mDebugUnlocked = false;
@@ -203,10 +202,9 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     }
 
     @Override
-    public void notifyKeyguardFadingAway(long delay, long fadeoutDuration, boolean isBypassFading) {
+    public void notifyKeyguardFadingAway(long delay, long fadeoutDuration) {
         mKeyguardFadingAwayDelay = delay;
         mKeyguardFadingAwayDuration = fadeoutDuration;
-        mBypassFadingAnimation = isBypassFading;
         setKeyguardFadingAway(true);
     }
 
@@ -281,11 +279,6 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     @Override
     public boolean isAnimatingBetweenKeyguardAndSurfaceBehind() {
         return mUnlockAnimationControllerLazy.get().isAnimatingBetweenKeyguardAndSurfaceBehind();
-    }
-
-    @Override
-    public boolean isBypassFadingAnimation() {
-        return mBypassFadingAnimation;
     }
 
     @Override

@@ -47,3 +47,39 @@ android_app {
         "androidx.leanback_leanback",
     ],
 }
+
+android_app {
+    name: "PackageInstaller_tablet",
+    defaults: ["platform_app_defaults"],
+
+    srcs: ["src/**/*.java"],
+
+    certificate: "platform",
+    privileged: true,
+    platform_apis: true,
+    rename_resources_package: false,
+
+    static_libs: [
+        "xz-java",
+        "androidx.leanback_leanback",
+    ],
+    aaptflags: ["--product tablet"],
+}
+
+android_app {
+    name: "PackageInstaller_tv",
+    defaults: ["platform_app_defaults"],
+
+    srcs: ["src/**/*.java"],
+
+    certificate: "platform",
+    privileged: true,
+    platform_apis: true,
+    rename_resources_package: false,
+
+    static_libs: [
+        "xz-java",
+        "androidx.leanback_leanback",
+    ],
+    aaptflags: ["--product tv"],
+}

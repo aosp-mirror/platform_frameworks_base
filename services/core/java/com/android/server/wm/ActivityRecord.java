@@ -926,6 +926,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     private final ActivityRecordInputSink mActivityRecordInputSink;
 
+    // Activities with this uid are allowed to not create an input sink while being in the same
+    // task and directly above this ActivityRecord. This field is updated whenever a new activity
+    // is launched from this ActivityRecord. Touches are always allowed within the same uid.
+    int mAllowedTouchUid;
+
     private final Runnable mPauseTimeoutRunnable = new Runnable() {
         @Override
         public void run() {
@@ -2099,7 +2104,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         mAtmService.mPackageConfigPersister.updateConfigIfNeeded(this, mUserId, packageName);
 
-        mActivityRecordInputSink = new ActivityRecordInputSink(this);
+        mActivityRecordInputSink = new ActivityRecordInputSink(this, sourceRecord);
 
         updateEnterpriseThumbnailDrawable(mAtmService.mUiContext);
     }
@@ -4449,8 +4454,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *         color mode set to avoid jank in the middle of the transition.
      */
     boolean canShowWindows() {
-        return allDrawn && !(isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION)
-                && hasNonDefaultColorWindow());
+        final boolean drawn = mTransitionController.isShellTransitionsEnabled()
+                ? mSyncState != SYNC_STATE_WAITING_FOR_DRAW : allDrawn;
+        final boolean animating = mTransitionController.isShellTransitionsEnabled()
+                ? mTransitionController.inTransition(this)
+                : isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION);
+        return drawn && !(animating && hasNonDefaultColorWindow());
     }
 
     /**
@@ -7994,7 +8003,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // orientation with insets applied.
             return;
         }
-
+        // TODO(b/232898850): always respect fixed-orientation request.
+        // Ignore orientation request for activity in ActivityEmbedding split.
+        final TaskFragment organizedTf = getOrganizedTaskFragment();
+        if (organizedTf != null && !organizedTf.fillsParent()) {
+            return;
+        }
         if (windowingMode == WINDOWING_MODE_PINNED) {
             // PiP bounds have higher priority than the requested orientation. Otherwise the
             // activity may be squeezed into a small piece.

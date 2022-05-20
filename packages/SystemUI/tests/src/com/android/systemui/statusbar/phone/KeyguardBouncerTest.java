@@ -399,11 +399,20 @@ public class KeyguardBouncerTest extends SysuiTestCase {
         mBouncer.hide(false /* destroyView */);
         verify(mHandler).removeCallbacks(eq(showRunnable.getValue()));
     }
-
     @Test
-    public void testShow_delaysIfFaceAuthIsRunning_unlessBypass() {
+    public void testShow_delaysIfFaceAuthIsRunning_unlessBypassEnabled() {
         when(mKeyguardStateController.isFaceAuthEnabled()).thenReturn(true);
         when(mKeyguardBypassController.getBypassEnabled()).thenReturn(true);
+        mBouncer.show(true /* reset */);
+
+        verify(mHandler, never()).postDelayed(any(), anyLong());
+    }
+
+    @Test
+    public void testShow_delaysIfFaceAuthIsRunning_unlessFingerprintEnrolled() {
+        when(mKeyguardStateController.isFaceAuthEnabled()).thenReturn(true);
+        when(mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(0))
+                .thenReturn(true);
         mBouncer.show(true /* reset */);
 
         verify(mHandler, never()).postDelayed(any(), anyLong());

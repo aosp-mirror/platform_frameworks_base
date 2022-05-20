@@ -109,28 +109,15 @@ public interface KeyguardStateController extends CallbackController<Callback> {
      * we're bypassing
      */
     default long getShortenedFadingAwayDuration() {
-        if (isBypassFadingAnimation()) {
-            return getKeyguardFadingAwayDuration();
-        } else {
-            return getKeyguardFadingAwayDuration() / 2;
-        }
-    }
-
-    /**
-     * @return {@code true} if the current fading away animation is the fast bypass fading.
-     */
-    default boolean isBypassFadingAnimation() {
-        return false;
+        return getKeyguardFadingAwayDuration() / 2;
     }
 
     /**
      * Notifies that the Keyguard is fading away with the specified timings.
      * @param delay the precalculated animation delay in milliseconds
      * @param fadeoutDuration the duration of the exit animation, in milliseconds
-     * @param isBypassFading is this a fading away animation while bypassing
      */
-    default void notifyKeyguardFadingAway(long delay, long fadeoutDuration,
-            boolean isBypassFading) {
+    default void notifyKeyguardFadingAway(long delay, long fadeoutDuratio) {
     }
 
     /**

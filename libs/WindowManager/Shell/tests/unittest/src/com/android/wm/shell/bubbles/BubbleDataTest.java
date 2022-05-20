@@ -129,8 +129,8 @@ public class BubbleDataTest extends ShellTestCase {
         mEntryA3 = createBubbleEntry(1, "a3", "package.a", null);
         mEntryB1 = createBubbleEntry(1, "b1", "package.b", null);
         mEntryB2 = createBubbleEntry(1, "b2", "package.b", null);
-        mEntryB3 = createBubbleEntry(1, "b3", "package.b", null);
-        mEntryC1 = createBubbleEntry(1, "c1", "package.c", null);
+        mEntryB3 = createBubbleEntry(11, "b3", "package.b", null);
+        mEntryC1 = createBubbleEntry(11, "c1", "package.c", null);
 
         NotificationListenerService.Ranking ranking =
                 mock(NotificationListenerService.Ranking.class);
@@ -1056,6 +1056,37 @@ public class BubbleDataTest extends ShellTestCase {
         assertBubbleUnsuppressed(mBubbleLocusId);
         assertSelectionNotChanged();
         assertBubbleListContains(mBubbleA2, mBubbleA1, mBubbleLocusId);
+    }
+
+    @Test
+    public void test_removeBubblesForUser() {
+        // A is user 1
+        sendUpdatedEntryAtTime(mEntryA1, 2000);
+        sendUpdatedEntryAtTime(mEntryA2, 3000);
+        // B & C belong to user 11
+        sendUpdatedEntryAtTime(mEntryB3, 4000);
+        sendUpdatedEntryAtTime(mEntryC1, 5000);
+        mBubbleData.setListener(mListener);
+
+        mBubbleData.dismissBubbleWithKey(mEntryA1.getKey(), Bubbles.DISMISS_USER_GESTURE);
+        verifyUpdateReceived();
+        assertOverflowChangedTo(ImmutableList.of(mBubbleA1));
+        assertBubbleListContains(mBubbleC1, mBubbleB3, mBubbleA2);
+
+        // Remove all the A bubbles
+        mBubbleData.removeBubblesForUser(1);
+        verifyUpdateReceived();
+
+        // Verify the update has the removals.
+        BubbleData.Update update = mUpdateCaptor.getValue();
+        assertThat(update.removedBubbles.get(0)).isEqualTo(
+                Pair.create(mBubbleA2, Bubbles.DISMISS_USER_REMOVED));
+        assertThat(update.removedBubbles.get(1)).isEqualTo(
+                Pair.create(mBubbleA1, Bubbles.DISMISS_USER_REMOVED));
+
+        // Verify no A bubbles in active or overflow.
+        assertBubbleListContains(mBubbleC1, mBubbleB3);
+        assertOverflowChangedTo(ImmutableList.of());
     }
 
     private void verifyUpdateReceived() {

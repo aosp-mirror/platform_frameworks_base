@@ -3561,6 +3561,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("     Enable/disable rate limit on FGS notification deferral policy.");
             pw.println("  force-stop [--user <USER_ID> | all | current] <PACKAGE>");
             pw.println("      Completely stop the given application package.");
+            pw.println("  stop-app [--user <USER_ID> | all | current] <PACKAGE>");
+            pw.println("      Stop an app and all of its services.  Unlike `force-stop` this does");
+            pw.println("      not cancel the app's scheduled alarms and jobs.");
             pw.println("  crash [--user <USER_ID>] <PACKAGE|PID>");
             pw.println("      Induce a VM crash in the specified package or process");
             pw.println("  kill [--user <USER_ID> | all | current] <PACKAGE>");

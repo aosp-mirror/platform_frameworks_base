@@ -537,6 +537,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
     }
 
+    void prepareEvictInvisibleChildTasks(WindowContainerTransaction wct) {
+        mMainStage.evictInvisibleChildren(wct);
+        mSideStage.evictInvisibleChildren(wct);
+    }
+
     Bundle resolveStartStage(@StageType int stage,
             @SplitPosition int position, @androidx.annotation.Nullable Bundle options,
             @androidx.annotation.Nullable WindowContainerTransaction wct) {

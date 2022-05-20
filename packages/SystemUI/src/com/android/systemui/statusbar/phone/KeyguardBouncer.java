@@ -216,9 +216,12 @@ public class KeyguardBouncer {
 
             // Split up the work over multiple frames.
             DejankUtils.removeCallbacks(mResetRunnable);
-            if (mKeyguardStateController.isFaceAuthEnabled() && !needsFullscreenBouncer()
-                && !mKeyguardUpdateMonitor.userNeedsStrongAuth()
-                && !mKeyguardBypassController.getBypassEnabled()) {
+            if (mKeyguardStateController.isFaceAuthEnabled()
+                    && !mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
+                            KeyguardUpdateMonitor.getCurrentUser())
+                    && !needsFullscreenBouncer()
+                    && !mKeyguardUpdateMonitor.userNeedsStrongAuth()
+                    && !mKeyguardBypassController.getBypassEnabled()) {
                 mHandler.postDelayed(mShowRunnable, BOUNCER_FACE_DELAY);
             } else {
                 DejankUtils.postAfterTraversal(mShowRunnable);

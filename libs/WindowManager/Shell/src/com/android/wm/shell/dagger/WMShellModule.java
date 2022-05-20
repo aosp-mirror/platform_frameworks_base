@@ -19,6 +19,7 @@ package com.android.wm.shell.dagger;
 import android.content.Context;
 import android.content.pm.LauncherApps;
 import android.os.Handler;
+import android.os.UserManager;
 import android.view.WindowManager;
 
 import com.android.internal.jank.InteractionJankMonitor;
@@ -104,6 +105,7 @@ public class WMShellModule {
             IStatusBarService statusBarService,
             WindowManager windowManager,
             WindowManagerShellWrapper windowManagerShellWrapper,
+            UserManager userManager,
             LauncherApps launcherApps,
             TaskStackListenerImpl taskStackListener,
             UiEventLogger uiEventLogger,
@@ -118,7 +120,7 @@ public class WMShellModule {
             SyncTransactionQueue syncQueue) {
         return BubbleController.create(context, null /* synchronizer */,
                 floatingContentCoordinator, statusBarService, windowManager,
-                windowManagerShellWrapper, launcherApps, taskStackListener,
+                windowManagerShellWrapper, userManager, launcherApps, taskStackListener,
                 uiEventLogger, organizer, displayController, oneHandedOptional,
                 dragAndDropController, mainExecutor, mainHandler, bgExecutor,
                 taskViewTransitions, syncQueue);
