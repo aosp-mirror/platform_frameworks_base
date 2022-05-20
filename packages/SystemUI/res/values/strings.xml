@@ -2074,6 +2074,9 @@
     <!-- Text for microphone app op [CHAR LIMIT=20]-->
     <string name="privacy_type_microphone">microphone</string>
 
+    <!-- Text for media projection privacy type [CHAR LIMIT=20]-->
+    <string name="privacy_type_media_projection">screen recording</string>
+
     <!-- What to show on the ambient display player when song doesn't have a title. [CHAR LIMIT=20] -->
     <string name="music_controls_no_title">No title</string>
 
