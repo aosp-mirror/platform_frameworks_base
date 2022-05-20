@@ -1526,15 +1526,19 @@ please see styles_device_defaults.xml.
 
     <!-- The style for log access consent text -->
     <style name="AllowLogAccess">
-        <item name="android:layout_width">332dp</item>
         <item name="android:textSize">24sp</item>
         <item name="android:fontFamily">google-sans</item>
     </style>
 
     <style name="PrimaryAllowLogAccess">
-        <item name="android:layout_width">332dp</item>
         <item name="android:textSize">14sp</item>
         <item name="android:fontFamily">google-sans-text</item>
+    </style>
+
+    <style name="PermissionGrantButtonTextAppearance">
+        <item name="android:fontFamily">google-sans-medium</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@android:color/system_neutral1_900</item>
     </style>
 
     <style name="PermissionGrantButtonTop"
@@ -1543,9 +1547,6 @@ please see styles_device_defaults.xml.
         <item name="android:layout_height">56dp</item>
         <item name="android:layout_marginTop">2dp</item>
         <item name="android:layout_marginBottom">2dp</item>
-        <item name="android:fontFamily">google-sans-medium</item>
-        <item name="android:textSize">14sp</item>
-        <item name="android:textColor">@android:color/system_neutral1_900</item>
         <item name="android:background">@drawable/grant_permissions_buttons_top</item>
     </style>
 
@@ -1555,9 +1556,6 @@ please see styles_device_defaults.xml.
         <item name="android:layout_height">56dp</item>
         <item name="android:layout_marginTop">2dp</item>
         <item name="android:layout_marginBottom">2dp</item>
-        <item name="android:fontFamily">google-sans-medium</item>
-        <item name="android:textSize">14sp</item>
-        <item name="android:textColor">@android:color/system_neutral1_900</item>
         <item name="android:background">@drawable/grant_permissions_buttons_bottom</item>
     </style>
 
