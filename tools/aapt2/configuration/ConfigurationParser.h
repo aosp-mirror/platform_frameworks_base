@@ -24,8 +24,7 @@
 #include <vector>
 
 #include "androidfw/ConfigDescription.h"
-
-#include "Diagnostics.h"
+#include "androidfw/IDiagnostics.h"
 
 namespace aapt {
 
@@ -126,9 +125,6 @@ struct OutputArtifact {
 
 }  // namespace configuration
 
-// Forward declaration of classes used in the API.
-struct IDiagnostics;
-
 /**
  * XML configuration file parser for the split and optimize commands.
  */
@@ -145,7 +141,7 @@ class ConfigurationParser {
   }
 
   /** Sets the diagnostics context to use when parsing. */
-  ConfigurationParser& WithDiagnostics(IDiagnostics* diagnostics) {
+  ConfigurationParser& WithDiagnostics(android::IDiagnostics* diagnostics) {
     diag_ = diagnostics;
     return *this;
   }
@@ -166,7 +162,7 @@ class ConfigurationParser {
   ConfigurationParser(std::string contents, const std::string& config_path);
 
   /** Returns the current diagnostics context to any subclasses. */
-  IDiagnostics* diagnostics() {
+  android::IDiagnostics* diagnostics() {
     return diag_;
   }
 
@@ -176,7 +172,7 @@ class ConfigurationParser {
   /** Path to the input configuration. */
   const std::string config_path_;
   /** The diagnostics context to send messages to. */
-  IDiagnostics* diag_;
+  android::IDiagnostics* diag_;
 };
 
 }  // namespace aapt

@@ -21,8 +21,8 @@ using android::ConfigDescription;
 namespace aapt {
 namespace test {
 
-struct TestDiagnosticsImpl : public IDiagnostics {
-  void Log(Level level, DiagMessageActual& actual_msg) override {
+struct TestDiagnosticsImpl : public android::IDiagnostics {
+  void Log(Level level, android::DiagMessageActual& actual_msg) override {
     switch (level) {
       case Level::Note:
         return;
@@ -38,7 +38,7 @@ struct TestDiagnosticsImpl : public IDiagnostics {
   }
 };
 
-IDiagnostics* GetDiagnostics() {
+android::IDiagnostics* GetDiagnostics() {
   static TestDiagnosticsImpl diag;
   return &diag;
 }

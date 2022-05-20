@@ -67,14 +67,14 @@ class PngWriteStructDeleter {
 
 // Custom warning logging method that uses IDiagnostics.
 static void LogWarning(png_structp png_ptr, png_const_charp warning_msg) {
-  IDiagnostics* diag = (IDiagnostics*)png_get_error_ptr(png_ptr);
-  diag->Warn(DiagMessage() << warning_msg);
+  android::IDiagnostics* diag = (android::IDiagnostics*)png_get_error_ptr(png_ptr);
+  diag->Warn(android::DiagMessage() << warning_msg);
 }
 
 // Custom error logging method that uses IDiagnostics.
 static void LogError(png_structp png_ptr, png_const_charp error_msg) {
-  IDiagnostics* diag = (IDiagnostics*)png_get_error_ptr(png_ptr);
-  diag->Error(DiagMessage() << error_msg);
+  android::IDiagnostics* diag = (android::IDiagnostics*)png_get_error_ptr(png_ptr);
+  diag->Error(android::DiagMessage() << error_msg);
 
   // Causes libpng to longjmp to the spot where setjmp was set. This is how libpng does
   // error handling. If this custom error handler method were to return, libpng would, by
@@ -143,10 +143,11 @@ static void WriteDataToStream(png_structp png_ptr, png_bytep buffer, png_size_t 
   }
 }
 
-std::unique_ptr<Image> ReadPng(IAaptContext* context, const Source& source, io::InputStream* in) {
+std::unique_ptr<Image> ReadPng(IAaptContext* context, const android::Source& source,
+                               io::InputStream* in) {
   TRACE_CALL();
   // Create a diagnostics that has the source information encoded.
-  SourcePathDiagnostics source_diag(source, context->GetDiagnostics());
+  android::SourcePathDiagnostics source_diag(source, context->GetDiagnostics());
 
   // Read the first 8 bytes of the file looking for the PNG signature.
   // Bail early if it does not match.
@@ -154,15 +155,16 @@ std::unique_ptr<Image> ReadPng(IAaptContext* context, const Source& source, io::
   size_t buffer_size;
   if (!in->Next((const void**)&signature, &buffer_size)) {
     if (in->HadError()) {
-      source_diag.Error(DiagMessage() << "failed to read PNG signature: " << in->GetError());
+      source_diag.Error(android::DiagMessage()
+                        << "failed to read PNG signature: " << in->GetError());
     } else {
-      source_diag.Error(DiagMessage() << "not enough data for PNG signature");
+      source_diag.Error(android::DiagMessage() << "not enough data for PNG signature");
     }
     return {};
   }
 
   if (buffer_size < kPngSignatureSize || png_sig_cmp(signature, 0, kPngSignatureSize) != 0) {
-    source_diag.Error(DiagMessage() << "file signature does not match PNG signature");
+    source_diag.Error(android::DiagMessage() << "file signature does not match PNG signature");
     return {};
   }
 
@@ -174,14 +176,14 @@ std::unique_ptr<Image> ReadPng(IAaptContext* context, const Source& source, io::
   // version of libpng.
   png_structp read_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
   if (read_ptr == nullptr) {
-    source_diag.Error(DiagMessage() << "failed to create libpng read png_struct");
+    source_diag.Error(android::DiagMessage() << "failed to create libpng read png_struct");
     return {};
   }
 
   // Create and initialize the memory for image header and data.
   png_infop info_ptr = png_create_info_struct(read_ptr);
   if (info_ptr == nullptr) {
-    source_diag.Error(DiagMessage() << "failed to create libpng read png_info");
+    source_diag.Error(android::DiagMessage() << "failed to create libpng read png_info");
     png_destroy_read_struct(&read_ptr, nullptr, nullptr);
     return {};
   }
@@ -254,7 +256,7 @@ std::unique_ptr<Image> ReadPng(IAaptContext* context, const Source& source, io::
   // something
   // that can always be represented by 9-patch.
   if (width > std::numeric_limits<int32_t>::max() || height > std::numeric_limits<int32_t>::max()) {
-    source_diag.Error(DiagMessage()
+    source_diag.Error(android::DiagMessage()
                       << "PNG image dimensions are too large: " << width << "x" << height);
     return {};
   }
@@ -490,14 +492,16 @@ bool WritePng(IAaptContext* context, const Image* image,
   // version of libpng.
   png_structp write_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
   if (write_ptr == nullptr) {
-    context->GetDiagnostics()->Error(DiagMessage() << "failed to create libpng write png_struct");
+    context->GetDiagnostics()->Error(android::DiagMessage()
+                                     << "failed to create libpng write png_struct");
     return false;
   }
 
   // Allocate memory to store image header data.
   png_infop write_info_ptr = png_create_info_struct(write_ptr);
   if (write_info_ptr == nullptr) {
-    context->GetDiagnostics()->Error(DiagMessage() << "failed to create libpng write png_info");
+    context->GetDiagnostics()->Error(android::DiagMessage()
+                                     << "failed to create libpng write png_info");
     png_destroy_write_struct(&write_ptr, nullptr);
     return false;
   }
@@ -575,7 +579,7 @@ bool WritePng(IAaptContext* context, const Image* image,
   }
 
   if (context->IsVerbose()) {
-    DiagMessage msg;
+    android::DiagMessage msg;
     msg << " paletteSize=" << color_palette.size()
         << " alphaPaletteSize=" << alpha_palette.size()
         << " maxGrayDeviation=" << max_gray_deviation
@@ -590,7 +594,7 @@ bool WritePng(IAaptContext* context, const Image* image,
       nine_patch != nullptr, color_palette.size(), alpha_palette.size());
 
   if (context->IsVerbose()) {
-    DiagMessage msg;
+    android::DiagMessage msg;
     msg << "encoding PNG ";
     if (nine_patch) {
       msg << "(with 9-patch) as ";

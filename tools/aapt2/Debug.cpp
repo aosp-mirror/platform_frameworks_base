@@ -17,6 +17,7 @@
 #include "Debug.h"
 
 #include <androidfw/TypeWrappers.h>
+#include <androidfw/Util.h>
 #include <format/binary/ResChunkPullParser.h>
 
 #include <algorithm>
@@ -592,12 +593,12 @@ using namespace android;
 
 class ChunkPrinter {
  public:
-  ChunkPrinter(const void* data, size_t len, Printer* printer, IDiagnostics* diag)
+  ChunkPrinter(const void* data, size_t len, Printer* printer, android::IDiagnostics* diag)
       : data_(data), data_len_(len), printer_(printer), diag_(diag) {
   }
 
   void PrintChunkHeader(const ResChunk_header* chunk) {
-    switch (util::DeviceToHost16(chunk->type)) {
+    switch (android::util::DeviceToHost16(chunk->type)) {
       case RES_STRING_POOL_TYPE:
         printer_->Print("[RES_STRING_POOL_TYPE]");
         break;
@@ -620,13 +621,14 @@ class ChunkPrinter {
         break;
     }
 
-    printer_->Print(StringPrintf(" chunkSize: %u", util::DeviceToHost32(chunk->size)));
-    printer_->Print(StringPrintf(" headerSize: %u", util::DeviceToHost32(chunk->headerSize)));
+    printer_->Print(StringPrintf(" chunkSize: %u", android::util::DeviceToHost32(chunk->size)));
+    printer_->Print(
+        StringPrintf(" headerSize: %u", android::util::DeviceToHost32(chunk->headerSize)));
   }
 
   bool PrintTable(const ResTable_header* chunk) {
     printer_->Print(
-        StringPrintf(" Package count: %u\n", util::DeviceToHost32(chunk->packageCount)));
+        StringPrintf(" Package count: %u\n", android::util::DeviceToHost32(chunk->packageCount)));
 
     // Print the chunks contained within the table
     printer_->Indent();
@@ -639,9 +641,10 @@ class ChunkPrinter {
   void PrintResValue(const Res_value* value, const ConfigDescription& config,
                      const ResourceType* type) {
     printer_->Print("[Res_value]");
-    printer_->Print(StringPrintf(" size: %u", util::DeviceToHost32(value->size)));
-    printer_->Print(StringPrintf(" dataType: 0x%02x", util::DeviceToHost32(value->dataType)));
-    printer_->Print(StringPrintf(" data: 0x%08x", util::DeviceToHost32(value->data)));
+    printer_->Print(StringPrintf(" size: %u", android::util::DeviceToHost32(value->size)));
+    printer_->Print(
+        StringPrintf(" dataType: 0x%02x", android::util::DeviceToHost32(value->dataType)));
+    printer_->Print(StringPrintf(" data: 0x%08x", android::util::DeviceToHost32(value->data)));
 
     if (type) {
       auto item =
@@ -655,19 +658,23 @@ class ChunkPrinter {
   }
 
   bool PrintTableType(const ResTable_type* chunk) {
-    printer_->Print(StringPrintf(" id: 0x%02x", util::DeviceToHost32(chunk->id)));
+    printer_->Print(StringPrintf(" id: 0x%02x", android::util::DeviceToHost32(chunk->id)));
     printer_->Print(StringPrintf(
-        " name: %s", util::GetString(type_pool_, util::DeviceToHost32(chunk->id) - 1).c_str()));
-    printer_->Print(StringPrintf(" flags: 0x%02x", util::DeviceToHost32(chunk->flags)));
-    printer_->Print(StringPrintf(" entryCount: %u", util::DeviceToHost32(chunk->entryCount)));
-    printer_->Print(StringPrintf(" entryStart: %u", util::DeviceToHost32(chunk->entriesStart)));
+        " name: %s",
+        android::util::GetString(type_pool_, android::util::DeviceToHost32(chunk->id) - 1)
+            .c_str()));
+    printer_->Print(StringPrintf(" flags: 0x%02x", android::util::DeviceToHost32(chunk->flags)));
+    printer_->Print(
+        StringPrintf(" entryCount: %u", android::util::DeviceToHost32(chunk->entryCount)));
+    printer_->Print(
+        StringPrintf(" entryStart: %u", android::util::DeviceToHost32(chunk->entriesStart)));
 
     ConfigDescription config;
     config.copyFromDtoH(chunk->config);
     printer_->Print(StringPrintf(" config: %s\n", config.to_string().c_str()));
 
-    const ResourceType* type =
-        ParseResourceType(util::GetString(type_pool_, util::DeviceToHost32(chunk->id) - 1));
+    const ResourceType* type = ParseResourceType(
+        android::util::GetString(type_pool_, android::util::DeviceToHost32(chunk->id) - 1));
 
     printer_->Indent();
 
@@ -682,35 +689,42 @@ class ChunkPrinter {
                                                                     : "[ResTable_entry]");
       printer_->Print(StringPrintf(" id: 0x%04x", it.index()));
       printer_->Print(StringPrintf(
-          " name: %s", util::GetString(key_pool_, util::DeviceToHost32(entry->key.index)).c_str()));
-      printer_->Print(StringPrintf(" keyIndex: %u", util::DeviceToHost32(entry->key.index)));
-      printer_->Print(StringPrintf(" size: %u", util::DeviceToHost32(entry->size)));
-      printer_->Print(StringPrintf(" flags: 0x%04x", util::DeviceToHost32(entry->flags)));
+          " name: %s",
+          android::util::GetString(key_pool_, android::util::DeviceToHost32(entry->key.index))
+              .c_str()));
+      printer_->Print(
+          StringPrintf(" keyIndex: %u", android::util::DeviceToHost32(entry->key.index)));
+      printer_->Print(StringPrintf(" size: %u", android::util::DeviceToHost32(entry->size)));
+      printer_->Print(StringPrintf(" flags: 0x%04x", android::util::DeviceToHost32(entry->flags)));
 
       printer_->Indent();
 
       if (entry->flags & ResTable_entry::FLAG_COMPLEX) {
         auto map_entry = (const ResTable_map_entry*)entry;
-        printer_->Print(StringPrintf(" count: 0x%04x", util::DeviceToHost32(map_entry->count)));
         printer_->Print(
-            StringPrintf(" parent: 0x%08x\n", util::DeviceToHost32(map_entry->parent.ident)));
+            StringPrintf(" count: 0x%04x", android::util::DeviceToHost32(map_entry->count)));
+        printer_->Print(StringPrintf(" parent: 0x%08x\n",
+                                     android::util::DeviceToHost32(map_entry->parent.ident)));
 
         // Print the name and value mappings
-        auto maps =
-            (const ResTable_map*)((const uint8_t*)entry + util::DeviceToHost32(entry->size));
-        for (size_t i = 0, count = util::DeviceToHost32(map_entry->count); i < count; i++) {
+        auto maps = (const ResTable_map*)((const uint8_t*)entry +
+                                          android::util::DeviceToHost32(entry->size));
+        for (size_t i = 0, count = android::util::DeviceToHost32(map_entry->count); i < count;
+             i++) {
           PrintResValue(&(maps[i].value), config, type);
 
           printer_->Print(StringPrintf(
               " name: %s name-id:%d\n",
-              util::GetString(key_pool_, util::DeviceToHost32(maps[i].name.ident)).c_str(),
-              util::DeviceToHost32(maps[i].name.ident)));
+              android::util::GetString(key_pool_, android::util::DeviceToHost32(maps[i].name.ident))
+                  .c_str(),
+              android::util::DeviceToHost32(maps[i].name.ident)));
         }
       } else {
         printer_->Print("\n");
 
         // Print the value of the entry
-        auto value = (const Res_value*)((const uint8_t*)entry + util::DeviceToHost32(entry->size));
+        auto value =
+            (const Res_value*)((const uint8_t*)entry + android::util::DeviceToHost32(entry->size));
         PrintResValue(value, config, type);
       }
 
@@ -735,33 +749,37 @@ class ChunkPrinter {
       return;
     }
 
-    pool->setTo(chunk,
-                util::DeviceToHost32((reinterpret_cast<const ResChunk_header*>(chunk))->size));
+    pool->setTo(chunk, android::util::DeviceToHost32(
+                           (reinterpret_cast<const ResChunk_header*>(chunk))->size));
 
     printer_->Print("\n");
 
     for (size_t i = 0; i < pool->size(); i++) {
-      printer_->Print(StringPrintf("#%zd : %s\n", i, util::GetString(*pool, i).c_str()));
+      printer_->Print(StringPrintf("#%zd : %s\n", i, android::util::GetString(*pool, i).c_str()));
     }
   }
 
   bool PrintPackage(const ResTable_package* chunk) {
-    printer_->Print(StringPrintf(" id: 0x%02x", util::DeviceToHost32(chunk->id)));
+    printer_->Print(StringPrintf(" id: 0x%02x", android::util::DeviceToHost32(chunk->id)));
 
     size_t len = strnlen16((const char16_t*)chunk->name, std::size(chunk->name));
     std::u16string package_name(len, u'\0');
     package_name.resize(len);
     for (size_t i = 0; i < len; i++) {
-      package_name[i] = util::DeviceToHost16(chunk->name[i]);
+      package_name[i] = android::util::DeviceToHost16(chunk->name[i]);
     }
 
     printer_->Print(StringPrintf("name: %s", String8(package_name.c_str()).c_str()));
-    printer_->Print(StringPrintf(" typeStrings: %u", util::DeviceToHost32(chunk->typeStrings)));
     printer_->Print(
-        StringPrintf(" lastPublicType: %u", util::DeviceToHost32(chunk->lastPublicType)));
-    printer_->Print(StringPrintf(" keyStrings: %u", util::DeviceToHost32(chunk->keyStrings)));
-    printer_->Print(StringPrintf(" lastPublicKey: %u", util::DeviceToHost32(chunk->lastPublicKey)));
-    printer_->Print(StringPrintf(" typeIdOffset: %u\n", util::DeviceToHost32(chunk->typeIdOffset)));
+        StringPrintf(" typeStrings: %u", android::util::DeviceToHost32(chunk->typeStrings)));
+    printer_->Print(
+        StringPrintf(" lastPublicType: %u", android::util::DeviceToHost32(chunk->lastPublicType)));
+    printer_->Print(
+        StringPrintf(" keyStrings: %u", android::util::DeviceToHost32(chunk->keyStrings)));
+    printer_->Print(
+        StringPrintf(" lastPublicKey: %u", android::util::DeviceToHost32(chunk->lastPublicKey)));
+    printer_->Print(
+        StringPrintf(" typeIdOffset: %u\n", android::util::DeviceToHost32(chunk->typeIdOffset)));
 
     // Print the chunks contained within the table
     printer_->Indent();
@@ -776,7 +794,7 @@ class ChunkPrinter {
       auto chunk = parser.chunk();
       PrintChunkHeader(chunk);
 
-      switch (util::DeviceToHost16(chunk->type)) {
+      switch (android::util::DeviceToHost16(chunk->type)) {
         case RES_STRING_POOL_TYPE:
           PrintStringPool(reinterpret_cast<const ResStringPool_header*>(chunk));
           break;
@@ -802,7 +820,7 @@ class ChunkPrinter {
     }
 
     if (parser.event() == ResChunkPullParser::Event::kBadDocument) {
-      diag_->Error(DiagMessage(source_) << "corrupt resource table: " << parser.error());
+      diag_->Error(android::DiagMessage(source_) << "corrupt resource table: " << parser.error());
       return false;
     }
 
@@ -815,11 +833,11 @@ class ChunkPrinter {
   }
 
  private:
-  const Source source_;
+  const android::Source source_;
   const void* data_;
   const size_t data_len_;
   Printer* printer_;
-  IDiagnostics* diag_;
+  android::IDiagnostics* diag_;
 
   // The standard value string pool for resource values.
   ResStringPool value_pool_;
@@ -832,12 +850,13 @@ class ChunkPrinter {
   // in this table.
   ResStringPool key_pool_;
 
-  StringPool out_pool_;
+  android::StringPool out_pool_;
 };
 
 }  // namespace
 
-void Debug::DumpChunks(const void* data, size_t len, Printer* printer, IDiagnostics* diag) {
+void Debug::DumpChunks(const void* data, size_t len, Printer* printer,
+                       android::IDiagnostics* diag) {
   ChunkPrinter chunk_printer(data, len, printer, diag);
   chunk_printer.Print();
 }

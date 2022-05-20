@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef AAPT_STRING_POOL_H
-#define AAPT_STRING_POOL_H
+#ifndef _ANDROID_STRING_POOL_H
+#define _ANDROID_STRING_POOL_H
 
 #include <functional>
 #include <memory>
@@ -23,14 +23,13 @@
 #include <unordered_map>
 #include <vector>
 
+#include "BigBuffer.h"
+#include "IDiagnostics.h"
 #include "android-base/macros.h"
 #include "androidfw/ConfigDescription.h"
 #include "androidfw/StringPiece.h"
 
-#include "Diagnostics.h"
-#include "util/BigBuffer.h"
-
-namespace aapt {
+namespace android {
 
 struct Span {
   std::string name;
@@ -67,8 +66,10 @@ class StringPool {
     android::ConfigDescription config;
 
     Context() = default;
-    Context(uint32_t p, const android::ConfigDescription& c) : priority(p), config(c) {}
-    explicit Context(uint32_t p) : priority(p) {}
+    Context(uint32_t p, const android::ConfigDescription& c) : priority(p), config(c) {
+    }
+    explicit Context(uint32_t p) : priority(p) {
+    }
     explicit Context(const android::ConfigDescription& c) : priority(kNormalPriority), config(c) {
     }
   };
@@ -222,6 +223,6 @@ class StringPool {
   std::unordered_multimap<android::StringPiece, Entry*> indexed_strings_;
 };
 
-}  // namespace aapt
+}  // namespace android
 
-#endif  // AAPT_STRING_POOL_H
+#endif  // _ANDROID_STRING_POOL_H

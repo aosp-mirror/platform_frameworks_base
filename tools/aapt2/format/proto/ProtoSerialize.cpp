@@ -17,7 +17,7 @@
 #include "format/proto/ProtoSerialize.h"
 
 #include "ValueVisitor.h"
-#include "util/BigBuffer.h"
+#include "androidfw/BigBuffer.h"
 
 using android::ConfigDescription;
 
@@ -25,22 +25,24 @@ using PolicyFlags = android::ResTable_overlayable_policy_header::PolicyFlags;
 
 namespace aapt {
 
-void SerializeStringPoolToPb(const StringPool& pool, pb::StringPool* out_pb_pool, IDiagnostics* diag) {
-  BigBuffer buffer(1024);
-  StringPool::FlattenUtf8(&buffer, pool, diag);
+void SerializeStringPoolToPb(const android::StringPool& pool, pb::StringPool* out_pb_pool,
+                             android::IDiagnostics* diag) {
+  android::BigBuffer buffer(1024);
+  android::StringPool::FlattenUtf8(&buffer, pool, diag);
 
   std::string* data = out_pb_pool->mutable_data();
   data->reserve(buffer.size());
 
   size_t offset = 0;
-  for (const BigBuffer::Block& block : buffer) {
+  for (const android::BigBuffer::Block& block : buffer) {
     data->insert(data->begin() + offset, block.buffer.get(), block.buffer.get() + block.size);
     offset += block.size;
   }
 }
 
-void SerializeSourceToPb(const Source& source, StringPool* src_pool, pb::Source* out_pb_source) {
-  StringPool::Ref ref = src_pool->MakeRef(source.path);
+void SerializeSourceToPb(const android::Source& source, android::StringPool* src_pool,
+                         pb::Source* out_pb_source) {
+  android::StringPool::Ref ref = src_pool->MakeRef(source.path);
   out_pb_source->set_path_idx(static_cast<uint32_t>(ref.index()));
   if (source.line) {
     out_pb_source->mutable_position()->set_line_number(static_cast<uint32_t>(source.line.value()));
@@ -276,7 +278,7 @@ void SerializeConfig(const ConfigDescription& config, pb::Configuration* out_pb_
 
 static void SerializeOverlayableItemToPb(const OverlayableItem& overlayable_item,
                                          std::vector<Overlayable*>& serialized_overlayables,
-                                         StringPool* source_pool, pb::Entry* pb_entry,
+                                         android::StringPool* source_pool, pb::Entry* pb_entry,
                                          pb::ResourceTable* pb_table) {
   // Retrieve the index of the overlayable in the list of groups that have already been serialized.
   size_t i;
@@ -337,8 +339,8 @@ static void SerializeOverlayableItemToPb(const OverlayableItem& overlayable_item
 }
 
 void SerializeTableToPb(const ResourceTable& table, pb::ResourceTable* out_table,
-                        IDiagnostics* diag, SerializeTableOptions options) {
-  auto source_pool = (options.exclude_sources) ? nullptr : util::make_unique<StringPool>();
+                        android::IDiagnostics* diag, SerializeTableOptions options) {
+  auto source_pool = (options.exclude_sources) ? nullptr : util::make_unique<android::StringPool>();
 
   pb::ToolFingerprint* pb_fingerprint = out_table->add_tool_fingerprint();
   pb_fingerprint->set_tool(util::GetToolName());
@@ -482,7 +484,7 @@ static void SerializeMacroToPb(const Macro& ref, pb::MacroBody* pb_macro) {
 }
 
 template <typename T>
-static void SerializeItemMetaDataToPb(const Item& item, T* pb_item, StringPool* src_pool) {
+static void SerializeItemMetaDataToPb(const Item& item, T* pb_item, android::StringPool* src_pool) {
   if (src_pool != nullptr) {
     SerializeSourceToPb(item.GetSource(), src_pool, pb_item->mutable_source());
   }
@@ -526,7 +528,7 @@ class ValueSerializer : public ConstValueVisitor {
  public:
   using ConstValueVisitor::Visit;
 
-  ValueSerializer(pb::Value* out_value, StringPool* src_pool)
+  ValueSerializer(pb::Value* out_value, android::StringPool* src_pool)
       : out_value_(out_value), src_pool_(src_pool) {
   }
 
@@ -545,7 +547,7 @@ class ValueSerializer : public ConstValueVisitor {
   void Visit(const StyledString* str) override {
     pb::StyledString* pb_str = out_value_->mutable_item()->mutable_styled_str();
     pb_str->set_value(str->value->value);
-    for (const StringPool::Span& span : str->value->spans) {
+    for (const android::StringPool::Span& span : str->value->spans) {
       pb::StyledString::Span* pb_span = pb_str->add_span();
       pb_span->set_tag(*span.name);
       pb_span->set_first_char(span.first_char);
@@ -693,12 +695,12 @@ class ValueSerializer : public ConstValueVisitor {
 
  private:
   pb::Value* out_value_;
-  StringPool* src_pool_;
+  android::StringPool* src_pool_;
 };
 
 }  // namespace
 
-void SerializeValueToPb(const Value& value, pb::Value* out_value, StringPool* src_pool) {
+void SerializeValueToPb(const Value& value, pb::Value* out_value, android::StringPool* src_pool) {
   ValueSerializer serializer(out_value, src_pool);
   value.Accept(&serializer);
 

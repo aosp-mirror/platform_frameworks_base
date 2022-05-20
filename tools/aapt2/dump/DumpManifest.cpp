@@ -441,7 +441,7 @@ class ManifestExtractor {
     return config;
   }
 
-  bool Extract(IDiagnostics* diag);
+  bool Extract(android::IDiagnostics* diag);
   bool Dump(text::Printer* printer);
   bool DumpProto(pb::Badging* out_badging);
 
@@ -2443,17 +2443,17 @@ static void ToProto(ManifestExtractor::Element* el, pb::Badging* out_badging) {
   }
 }
 
-bool ManifestExtractor::Extract(IDiagnostics* diag) {
+bool ManifestExtractor::Extract(android::IDiagnostics* diag) {
   // Load the manifest
   doc_ = apk_->LoadXml("AndroidManifest.xml", diag);
   if (doc_ == nullptr) {
-    diag->Error(DiagMessage() << "failed to find AndroidManifest.xml");
+    diag->Error(android::DiagMessage() << "failed to find AndroidManifest.xml");
     return false;
   }
 
   xml::Element* element = doc_->root.get();
   if (element->name != "manifest") {
-    diag->Error(DiagMessage() << "manifest does not start with <manifest> tag");
+    diag->Error(android::DiagMessage() << "manifest does not start with <manifest> tag");
     return false;
   }
 
@@ -2993,7 +2993,7 @@ std::unique_ptr<ManifestExtractor::Element> ManifestExtractor::Visit(xml::Elemen
 }
 
 int DumpManifest(LoadedApk* apk, DumpManifestOptions& options, text::Printer* printer,
-                 IDiagnostics* diag) {
+                 android::IDiagnostics* diag) {
   ManifestExtractor extractor(apk, options);
   if (!extractor.Extract(diag)) {
     return 1;
@@ -3001,7 +3001,7 @@ int DumpManifest(LoadedApk* apk, DumpManifestOptions& options, text::Printer* pr
   return extractor.Dump(printer) ? 0 : 1;
 }
 
-int DumpBadgingProto(LoadedApk* apk, pb::Badging* out_badging, IDiagnostics* diag) {
+int DumpBadgingProto(LoadedApk* apk, pb::Badging* out_badging, android::IDiagnostics* diag) {
   DumpManifestOptions options{/* include_meta_data= */ true,
                               /* only_permissions= */ false};
   ManifestExtractor extractor(apk, options);

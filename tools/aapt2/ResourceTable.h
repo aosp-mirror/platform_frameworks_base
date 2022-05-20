@@ -17,17 +17,6 @@
 #ifndef AAPT_RESOURCE_TABLE_H
 #define AAPT_RESOURCE_TABLE_H
 
-#include "Diagnostics.h"
-#include "Resource.h"
-#include "ResourceValues.h"
-#include "Source.h"
-#include "StringPool.h"
-#include "io/File.h"
-
-#include "android-base/macros.h"
-#include "androidfw/ConfigDescription.h"
-#include "androidfw/StringPiece.h"
-
 #include <functional>
 #include <map>
 #include <memory>
@@ -35,6 +24,16 @@
 #include <tuple>
 #include <unordered_map>
 #include <vector>
+
+#include "Resource.h"
+#include "ResourceValues.h"
+#include "android-base/macros.h"
+#include "androidfw/ConfigDescription.h"
+#include "androidfw/IDiagnostics.h"
+#include "androidfw/Source.h"
+#include "androidfw/StringPiece.h"
+#include "androidfw/StringPool.h"
+#include "io/File.h"
 
 using PolicyFlags = android::ResTable_overlayable_policy_header::PolicyFlags;
 
@@ -49,7 +48,7 @@ struct Visibility {
   };
 
   Level level = Level::kUndefined;
-  Source source;
+  android::Source source;
   std::string comment;
 
   // Indicates that the resource id may change across builds and that the public R.java identifier
@@ -60,14 +59,14 @@ struct Visibility {
 
 // Represents <add-resource> in an overlay.
 struct AllowNew {
-  Source source;
+  android::Source source;
   std::string comment;
 };
 
 // Represents the staged resource id of a finalized resource.
 struct StagedId {
   ResourceId id;
-  Source source;
+  android::Source source;
 };
 
 struct Overlayable {
@@ -75,13 +74,14 @@ struct Overlayable {
    Overlayable(const android::StringPiece& name, const android::StringPiece& actor)
        : name(name.to_string()), actor(actor.to_string()) {}
    Overlayable(const android::StringPiece& name, const android::StringPiece& actor,
-                    const Source& source)
-       : name(name.to_string()), actor(actor.to_string()), source(source ){}
+               const android::Source& source)
+       : name(name.to_string()), actor(actor.to_string()), source(source) {
+   }
 
   static const char* kActorScheme;
   std::string name;
   std::string actor;
-  Source source;
+  android::Source source;
 };
 
 // Represents a declaration that a resource is overlayable at runtime.
@@ -91,7 +91,7 @@ struct OverlayableItem {
   std::shared_ptr<Overlayable> overlayable;
   PolicyFlags policies = PolicyFlags::NONE;
   std::string comment;
-  Source source;
+  android::Source source;
 };
 
 class ResourceConfigValue {
@@ -300,7 +300,7 @@ class ResourceTable {
   ResourceTable() = default;
   explicit ResourceTable(Validation validation);
 
-  bool AddResource(NewResource&& res, IDiagnostics* diag);
+  bool AddResource(NewResource&& res, android::IDiagnostics* diag);
 
   // Retrieves a sorted a view of the packages, types, and entries sorted in ascending resource id
   // order.
@@ -333,7 +333,7 @@ class ResourceTable {
   // When `string_pool` references are destroyed (as they will be when `packages` is destroyed),
   // they decrement a refCount, which would cause invalid memory access if the pool was already
   // destroyed.
-  StringPool string_pool;
+  android::StringPool string_pool;
 
   // The list of packages in this table, sorted alphabetically by package name and increasing
   // package ID (missing ID being the lowest).

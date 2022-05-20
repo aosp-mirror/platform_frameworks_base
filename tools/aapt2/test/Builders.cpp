@@ -16,9 +16,9 @@
 
 #include "test/Builders.h"
 
+#include "Diagnostics.h"
 #include "android-base/logging.h"
 #include "androidfw/StringPiece.h"
-
 #include "io/StringStream.h"
 #include "test/Common.h"
 #include "util/Util.h"
@@ -151,7 +151,7 @@ ResourceTableBuilder& ResourceTableBuilder::Add(NewResource&& res) {
   return *this;
 }
 
-StringPool* ResourceTableBuilder::string_pool() {
+android::StringPool* ResourceTableBuilder::string_pool() {
   return &table_->string_pool;
 }
 
@@ -235,7 +235,7 @@ std::unique_ptr<xml::XmlResource> BuildXmlDom(const StringPiece& str) {
   input.append(str.data(), str.size());
   StringInputStream in(input);
   StdErrDiagnostics diag;
-  std::unique_ptr<xml::XmlResource> doc = xml::Inflate(&in, &diag, Source("test.xml"));
+  std::unique_ptr<xml::XmlResource> doc = xml::Inflate(&in, &diag, android::Source("test.xml"));
   CHECK(doc != nullptr && doc->root != nullptr) << "failed to parse inline XML string";
   return doc;
 }

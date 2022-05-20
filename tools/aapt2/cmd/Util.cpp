@@ -34,10 +34,12 @@ using ::android::base::StringPrintf;
 
 namespace aapt {
 
-std::optional<uint16_t> ParseTargetDensityParameter(const StringPiece& arg, IDiagnostics* diag) {
+std::optional<uint16_t> ParseTargetDensityParameter(const StringPiece& arg,
+                                                    android::IDiagnostics* diag) {
   ConfigDescription preferred_density_config;
   if (!ConfigDescription::Parse(arg, &preferred_density_config)) {
-    diag->Error(DiagMessage() << "invalid density '" << arg << "' for --preferred-density option");
+    diag->Error(android::DiagMessage()
+                << "invalid density '" << arg << "' for --preferred-density option");
     return {};
   }
 
@@ -46,14 +48,14 @@ std::optional<uint16_t> ParseTargetDensityParameter(const StringPiece& arg, IDia
 
   if (preferred_density_config.diff(ConfigDescription::DefaultConfig()) !=
       ConfigDescription::CONFIG_DENSITY) {
-    diag->Error(DiagMessage() << "invalid preferred density '" << arg << "'. "
-                              << "Preferred density must only be a density value");
+    diag->Error(android::DiagMessage() << "invalid preferred density '" << arg << "'. "
+                                       << "Preferred density must only be a density value");
     return {};
   }
   return preferred_density_config.density;
 }
 
-bool ParseSplitParameter(const StringPiece& arg, IDiagnostics* diag, std::string* out_path,
+bool ParseSplitParameter(const StringPiece& arg, android::IDiagnostics* diag, std::string* out_path,
                          SplitConstraints* out_split) {
   CHECK(diag != nullptr);
   CHECK(out_path != nullptr);
@@ -67,9 +69,9 @@ bool ParseSplitParameter(const StringPiece& arg, IDiagnostics* diag, std::string
 
   std::vector<std::string> parts = util::Split(arg, sSeparator);
   if (parts.size() != 2) {
-    diag->Error(DiagMessage() << "invalid split parameter '" << arg << "'");
-    diag->Note(DiagMessage() << "should be --split path/to/output.apk" << sSeparator
-                             << "<config>[,<config>...].");
+    diag->Error(android::DiagMessage() << "invalid split parameter '" << arg << "'");
+    diag->Note(android::DiagMessage() << "should be --split path/to/output.apk" << sSeparator
+                                      << "<config>[,<config>...].");
     return false;
   }
 
@@ -78,8 +80,8 @@ bool ParseSplitParameter(const StringPiece& arg, IDiagnostics* diag, std::string
   for (const StringPiece& config_str : util::Tokenize(parts[1], ',')) {
     ConfigDescription config;
     if (!ConfigDescription::Parse(config_str, &config)) {
-      diag->Error(DiagMessage() << "invalid config '" << config_str << "' in split parameter '"
-                                << arg << "'");
+      diag->Error(android::DiagMessage()
+                  << "invalid config '" << config_str << "' in split parameter '" << arg << "'");
       return false;
     }
     out_split->configs.insert(config);
@@ -88,7 +90,7 @@ bool ParseSplitParameter(const StringPiece& arg, IDiagnostics* diag, std::string
 }
 
 std::unique_ptr<IConfigFilter> ParseConfigFilterParameters(const std::vector<std::string>& args,
-                                                           IDiagnostics* diag) {
+                                                           android::IDiagnostics* diag) {
   std::unique_ptr<AxisConfigFilter> filter = util::make_unique<AxisConfigFilter>();
   for (const std::string& config_arg : args) {
     for (const StringPiece& config_str : util::Tokenize(config_arg, ',')) {
@@ -97,12 +99,13 @@ std::unique_ptr<IConfigFilter> ParseConfigFilterParameters(const std::vector<std
       if (lv.InitFromFilterString(config_str)) {
         lv.WriteTo(&config);
       } else if (!ConfigDescription::Parse(config_str, &config)) {
-        diag->Error(DiagMessage() << "invalid config '" << config_str << "' for -c option");
+        diag->Error(android::DiagMessage()
+                    << "invalid config '" << config_str << "' for -c option");
         return {};
       }
 
       if (config.density != 0) {
-        diag->Warn(DiagMessage() << "ignoring density '" << config << "' for -c option");
+        diag->Warn(android::DiagMessage() << "ignoring density '" << config << "' for -c option");
       } else {
         filter->AddConfig(config);
       }
@@ -331,7 +334,7 @@ static std::optional<int> ExtractSdkVersion(const xml::Attribute& attr, std::str
 }
 
 std::optional<AppInfo> ExtractAppInfoFromBinaryManifest(const xml::XmlResource& xml_res,
-                                                        IDiagnostics* diag) {
+                                                        android::IDiagnostics* diag) {
   // Make sure the first element is <manifest> with package attribute.
   const xml::Element* manifest_el = xml_res.root.get();
   if (manifest_el == nullptr) {
@@ -341,20 +344,21 @@ std::optional<AppInfo> ExtractAppInfoFromBinaryManifest(const xml::XmlResource& 
   AppInfo app_info;
 
   if (!manifest_el->namespace_uri.empty() || manifest_el->name != "manifest") {
-    diag->Error(DiagMessage(xml_res.file.source) << "root tag must be <manifest>");
+    diag->Error(android::DiagMessage(xml_res.file.source) << "root tag must be <manifest>");
     return {};
   }
 
   const xml::Attribute* package_attr = manifest_el->FindAttribute({}, "package");
   if (!package_attr) {
-    diag->Error(DiagMessage(xml_res.file.source) << "<manifest> must have a 'package' attribute");
+    diag->Error(android::DiagMessage(xml_res.file.source)
+                << "<manifest> must have a 'package' attribute");
     return {};
   }
 
   std::string error_msg;
   std::optional<std::string> maybe_package = ExtractCompiledString(*package_attr, &error_msg);
   if (!maybe_package) {
-    diag->Error(DiagMessage(xml_res.file.source.WithLine(manifest_el->line_number))
+    diag->Error(android::DiagMessage(xml_res.file.source.WithLine(manifest_el->line_number))
                 << "invalid package name: " << error_msg);
     return {};
   }
@@ -364,7 +368,7 @@ std::optional<AppInfo> ExtractAppInfoFromBinaryManifest(const xml::XmlResource& 
           manifest_el->FindAttribute(xml::kSchemaAndroid, "versionCode")) {
     std::optional<uint32_t> maybe_code = ExtractCompiledInt(*version_code_attr, &error_msg);
     if (!maybe_code) {
-      diag->Error(DiagMessage(xml_res.file.source.WithLine(manifest_el->line_number))
+      diag->Error(android::DiagMessage(xml_res.file.source.WithLine(manifest_el->line_number))
                   << "invalid android:versionCode: " << error_msg);
       return {};
     }
@@ -375,8 +379,8 @@ std::optional<AppInfo> ExtractAppInfoFromBinaryManifest(const xml::XmlResource& 
       manifest_el->FindAttribute(xml::kSchemaAndroid, "versionCodeMajor")) {
     std::optional<uint32_t> maybe_code = ExtractCompiledInt(*version_code_major_attr, &error_msg);
     if (!maybe_code) {
-      diag->Error(DiagMessage(xml_res.file.source.WithLine(manifest_el->line_number))
-                      << "invalid android:versionCodeMajor: " << error_msg);
+      diag->Error(android::DiagMessage(xml_res.file.source.WithLine(manifest_el->line_number))
+                  << "invalid android:versionCodeMajor: " << error_msg);
       return {};
     }
     app_info.version_code_major = maybe_code.value();
@@ -386,7 +390,7 @@ std::optional<AppInfo> ExtractAppInfoFromBinaryManifest(const xml::XmlResource& 
           manifest_el->FindAttribute(xml::kSchemaAndroid, "revisionCode")) {
     std::optional<uint32_t> maybe_code = ExtractCompiledInt(*revision_code_attr, &error_msg);
     if (!maybe_code) {
-      diag->Error(DiagMessage(xml_res.file.source.WithLine(manifest_el->line_number))
+      diag->Error(android::DiagMessage(xml_res.file.source.WithLine(manifest_el->line_number))
                   << "invalid android:revisionCode: " << error_msg);
       return {};
     }
@@ -397,7 +401,7 @@ std::optional<AppInfo> ExtractAppInfoFromBinaryManifest(const xml::XmlResource& 
     std::optional<std::string> maybe_split_name =
         ExtractCompiledString(*split_name_attr, &error_msg);
     if (!maybe_split_name) {
-      diag->Error(DiagMessage(xml_res.file.source.WithLine(manifest_el->line_number))
+      diag->Error(android::DiagMessage(xml_res.file.source.WithLine(manifest_el->line_number))
                   << "invalid split name: " << error_msg);
       return {};
     }
@@ -409,7 +413,7 @@ std::optional<AppInfo> ExtractAppInfoFromBinaryManifest(const xml::XmlResource& 
             uses_sdk_el->FindAttribute(xml::kSchemaAndroid, "minSdkVersion")) {
       std::optional<int> maybe_sdk = ExtractSdkVersion(*min_sdk, &error_msg);
       if (!maybe_sdk) {
-        diag->Error(DiagMessage(xml_res.file.source.WithLine(uses_sdk_el->line_number))
+        diag->Error(android::DiagMessage(xml_res.file.source.WithLine(uses_sdk_el->line_number))
                     << "invalid android:minSdkVersion: " << error_msg);
         return {};
       }

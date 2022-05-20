@@ -18,13 +18,13 @@
 #define AAPT2_APKINFO_H
 
 #include "Command.h"
-#include "Diagnostics.h"
+#include "androidfw/IDiagnostics.h"
 
 namespace aapt {
 
 class ApkInfoCommand : public Command {
  public:
-  explicit ApkInfoCommand(IDiagnostics* diag) : Command("apkinfo"), diag_(diag) {
+  explicit ApkInfoCommand(android::IDiagnostics* diag) : Command("apkinfo"), diag_(diag) {
     SetDescription("Dump information about an APK in binary proto format.");
     AddRequiredFlag("-o", "Output path", &output_path_, Command::kPath);
     AddOptionalSwitch("--include-resource-table", "Include the resource table data into output.",
@@ -38,7 +38,7 @@ class ApkInfoCommand : public Command {
   int Action(const std::vector<std::string>& args) override;
 
  private:
-  IDiagnostics* diag_;
+  android::IDiagnostics* diag_;
   std::string output_path_;
   bool include_resource_table_ = false;
   std::unordered_set<std::string> xml_resources_;

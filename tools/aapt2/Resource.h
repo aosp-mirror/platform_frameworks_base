@@ -25,8 +25,8 @@
 #include <tuple>
 #include <vector>
 
-#include "Source.h"
 #include "androidfw/ConfigDescription.h"
+#include "androidfw/Source.h"
 #include "androidfw/StringPiece.h"
 #include "utils/JenkinsHash.h"
 
@@ -228,7 +228,7 @@ struct ResourceFile {
   Type type;
 
   // Source
-  Source source;
+  android::Source source;
 
   // Exported symbols
   std::vector<SourcedResourceName> exported_symbols;
