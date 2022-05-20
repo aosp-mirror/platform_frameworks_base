@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.timedetector;
 
 import android.annotation.NonNull;
 import android.os.ShellCommand;

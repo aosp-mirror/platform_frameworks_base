@@ -563,7 +563,7 @@
     <protected-broadcast android:name="com.android.bluetooth.btservice.action.ALARM_WAKEUP" />
     <protected-broadcast android:name="com.android.server.action.NETWORK_STATS_POLL" />
     <protected-broadcast android:name="com.android.server.action.NETWORK_STATS_UPDATED" />
-    <protected-broadcast android:name="com.android.server.NetworkTimeUpdateService.action.POLL" />
+    <protected-broadcast android:name="com.android.server.timedetector.NetworkTimeUpdateService.action.POLL" />
     <protected-broadcast android:name="com.android.server.telecom.intent.action.CALLS_ADD_ENTRY" />
     <protected-broadcast android:name="com.android.settings.location.MODE_CHANGING" />
     <protected-broadcast android:name="com.android.settings.bluetooth.ACTION_DISMISS_PAIRING" />
