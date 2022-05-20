@@ -882,5 +882,5 @@
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Pour changer de réseau, débranchez le câble Ethernet"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Pour améliorer l\'expérience de l\'appareil, les applications et les services peuvent quand même rechercher des réseaux Wi-Fi en tout temps, même lorsque le Wi-Fi est désactivé. Vous pouvez modifier vos préférences dans les paramètres de recherche de réseaux Wi-Fi. "<annotation id="link">"Modifier"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Désactiver le mode Avion"</string>
-    <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Choisir utilisateur"</string>
+    <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Choisir l\'utilisateur"</string>
 </resources>
