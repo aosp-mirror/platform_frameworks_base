@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
+import static com.android.server.pm.ApexManager.ActiveApexInfo;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.PackageManagerService.DEBUG_DEXOPT;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
@@ -46,6 +47,7 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
@@ -62,12 +64,16 @@ import com.android.server.pm.pkg.PackageStateInternal;
 import dalvik.system.DexFile;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
@@ -315,10 +321,11 @@ final class DexOptHelper {
 
         // The default is "true".
         if (!"false".equals(DeviceConfig.getProperty("runtime", "dexopt_system_ui_on_boot"))) {
-            // System UI is important to user experience, so we check it on every boot. It may need
-            // to be re-compiled after a mainline update or an OTA.
-            // TODO(b/227310505): Only do this after a mainline update or an OTA.
-            checkAndDexOptSystemUi();
+            // System UI is important to user experience, so we check it after a mainline update or
+            // an OTA. It may need to be re-compiled in these cases.
+            if (hasBcpApexesChanged() || mPm.isDeviceUpgrading()) {
+                checkAndDexOptSystemUi();
+            }
         }
 
         // We need to re-extract after an OTA.
@@ -744,5 +751,43 @@ final class DexOptHelper {
 
     /*package*/ void controlDexOptBlocking(boolean block) {
         mPm.mPackageDexOptimizer.controlDexOptBlocking(block);
+    }
+
+    /**
+     * Returns the module names of the APEXes that contribute to bootclasspath.
+     */
+    private static List<String> getBcpApexes() {
+        String bcp = System.getenv("BOOTCLASSPATH");
+        if (TextUtils.isEmpty(bcp)) {
+            Log.e(TAG, "Unable to get BOOTCLASSPATH");
+            return List.of();
+        }
+
+        ArrayList<String> bcpApexes = new ArrayList<>();
+        for (String pathStr : bcp.split(":")) {
+            Path path = Paths.get(pathStr);
+            // Check if the path is in the format of `/apex/<apex-module-name>/...` and extract the
+            // apex module name from the path.
+            if (path.getNameCount() >= 2 && path.getName(0).toString().equals("apex")) {
+                bcpApexes.add(path.getName(1).toString());
+            }
+        }
+
+        return bcpApexes;
+    }
+
+    /**
+     * Returns true of any of the APEXes that contribute to bootclasspath has changed during this
+     * boot.
+     */
+    private static boolean hasBcpApexesChanged() {
+        Set<String> bcpApexes = new HashSet<>(getBcpApexes());
+        ApexManager apexManager = ApexManager.getInstance();
+        for (ActiveApexInfo apexInfo : apexManager.getActiveApexInfos()) {
+            if (bcpApexes.contains(apexInfo.apexModuleName) && apexInfo.activeApexChanged) {
+                return true;
+            }
+        }
+        return false;
     }
 }

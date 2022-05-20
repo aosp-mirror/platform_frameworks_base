@@ -17,6 +17,7 @@
 package com.android.server.pm;
 
 import com.android.server.utils.SnapshotCache;
+import com.android.server.utils.WatchedSparseBooleanMatrix;
 
 import java.util.Arrays;
 
@@ -25,22 +26,32 @@ import java.util.Arrays;
  */
 public final class AppsFilterSnapshotImpl extends AppsFilterBase {
     AppsFilterSnapshotImpl(AppsFilterImpl orig) {
-        synchronized (orig.mLock) {
+        synchronized (orig.mImplicitlyQueryableLock) {
             mImplicitlyQueryable = orig.mImplicitQueryableSnapshot.snapshot();
-            mImplicitQueryableSnapshot = new SnapshotCache.Sealed<>();
             mRetainedImplicitlyQueryable = orig.mRetainedImplicitlyQueryableSnapshot.snapshot();
-            mRetainedImplicitlyQueryableSnapshot = new SnapshotCache.Sealed<>();
-            mQueriesViaPackage = orig.mQueriesViaPackageSnapshot.snapshot();
-            mQueriesViaPackageSnapshot = new SnapshotCache.Sealed<>();
-            mQueriesViaComponent = orig.mQueriesViaComponentSnapshot.snapshot();
-            mQueriesViaComponentSnapshot = new SnapshotCache.Sealed<>();
-            mQueryableViaUsesLibrary = orig.mQueryableViaUsesLibrarySnapshot.snapshot();
-            mQueryableViaUsesLibrarySnapshot = new SnapshotCache.Sealed<>();
-            mForceQueryable = orig.mForceQueryableSnapshot.snapshot();
-            mForceQueryableSnapshot = new SnapshotCache.Sealed<>();
-            mProtectedBroadcasts = orig.mProtectedBroadcastsSnapshot.snapshot();
-            mProtectedBroadcastsSnapshot = new SnapshotCache.Sealed<>();
         }
+        mImplicitQueryableSnapshot = new SnapshotCache.Sealed<>();
+        mRetainedImplicitlyQueryableSnapshot = new SnapshotCache.Sealed<>();
+        synchronized (orig.mQueriesViaPackageLock) {
+            mQueriesViaPackage = orig.mQueriesViaPackageSnapshot.snapshot();
+        }
+        mQueriesViaPackageSnapshot = new SnapshotCache.Sealed<>();
+        synchronized (orig.mQueriesViaComponentLock) {
+            mQueriesViaComponent = orig.mQueriesViaComponentSnapshot.snapshot();
+        }
+        mQueriesViaComponentSnapshot = new SnapshotCache.Sealed<>();
+        synchronized (orig.mQueryableViaUsesLibraryLock) {
+            mQueryableViaUsesLibrary = orig.mQueryableViaUsesLibrarySnapshot.snapshot();
+        }
+        mQueryableViaUsesLibrarySnapshot = new SnapshotCache.Sealed<>();
+        synchronized (orig.mForceQueryableLock) {
+            mForceQueryable = orig.mForceQueryableSnapshot.snapshot();
+        }
+        mForceQueryableSnapshot = new SnapshotCache.Sealed<>();
+        synchronized (orig.mProtectedBroadcastsLock) {
+            mProtectedBroadcasts = orig.mProtectedBroadcastsSnapshot.snapshot();
+        }
+        mProtectedBroadcastsSnapshot = new SnapshotCache.Sealed<>();
         mQueriesViaComponentRequireRecompute = orig.mQueriesViaComponentRequireRecompute;
         mForceQueryableByDevicePackageNames =
                 Arrays.copyOf(orig.mForceQueryableByDevicePackageNames,
@@ -49,12 +60,18 @@ public final class AppsFilterSnapshotImpl extends AppsFilterBase {
         mFeatureConfig = orig.mFeatureConfig.snapshot();
         mOverlayReferenceMapper = orig.mOverlayReferenceMapper;
         mSystemSigningDetails = orig.mSystemSigningDetails;
-        synchronized (orig.mCacheLock) {
-            mShouldFilterCache = orig.mShouldFilterCacheSnapshot.snapshot();
-            mShouldFilterCacheSnapshot = new SnapshotCache.Sealed<>();
-        }
 
-        mBackgroundExecutor = null;
-        mSystemReady = orig.mSystemReady;
+        mCacheReady = orig.mCacheReady;
+        if (mCacheReady) {
+            synchronized (orig.mCacheLock) {
+                mShouldFilterCache = orig.mShouldFilterCacheSnapshot.snapshot();
+            }
+        } else {
+            // cache is not ready, use an empty cache for the snapshot
+            mShouldFilterCache = new WatchedSparseBooleanMatrix();
+        }
+        mShouldFilterCacheSnapshot = new SnapshotCache.Sealed<>();
+
+        mBackgroundHandler = null;
     }
 }
