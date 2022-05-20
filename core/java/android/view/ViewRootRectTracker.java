@@ -73,10 +73,25 @@ class ViewRootRectTracker {
     }
 
     /**
-     * @return all visible rects from all views in the global (root) coordinate system
+     * @return all Rects from all visible Views in the global (root) coordinate system,
+     * or {@code null} if Rects are unchanged since the last call to this method.
      */
     @Nullable
     public List<Rect> computeChangedRects() {
+        if (computeChanges()) {
+            return mRects;
+        }
+        return null;
+    }
+
+    /**
+     * Computes changes to all Rects from all Views.
+     * After calling this method, the updated list of Rects can be retrieved
+     * with {@link #getLastComputedRects()}.
+     *
+     * @return {@code true} if there were changes, {@code false} otherwise.
+     */
+    public boolean computeChanges() {
         boolean changed = mRootRectsChanged;
         final Iterator<ViewInfo> i = mViewInfos.iterator();
         final List<Rect> rects = new ArrayList<>(mRootRects);
@@ -100,10 +115,22 @@ class ViewRootRectTracker {
             mRootRectsChanged = false;
             if (!mRects.equals(rects)) {
                 mRects = rects;
-                return rects;
+                return true;
             }
         }
-        return null;
+        return false;
+    }
+
+    /**
+     * Returns a List of all Rects from all visible Views in the global (root) coordinate system.
+     * This list is only updated when calling {@link #computeChanges()} or
+     * {@link #computeChangedRects()}.
+     *
+     * @return all Rects from all visible Views in the global (root) coordinate system
+     */
+    @NonNull
+    public List<Rect> getLastComputedRects() {
+        return mRects;
     }
 
     /**
