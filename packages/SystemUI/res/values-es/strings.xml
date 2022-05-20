@@ -313,10 +313,12 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Desliza el dedo hacia arriba para abrir"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Pulsa el icono desbloquear para abrir"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Desbloqueado con datos faciales. Pulsa el icono desbloquear para abrir."</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1901953991150295169">"Mover hacia la izquierda"</item>
+    <item msgid="5558598599408514296">"Mover hacia abajo"</item>
+    <item msgid="4844142668312841831">"Mover hacia la derecha"</item>
+    <item msgid="5640521437931460125">"Mover hacia arriba"</item>
+  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"Desliza el dedo hacia arriba para volverlo a intentar"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Desbloquea para usar el NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Este dispositivo pertenece a tu organización"</string>
@@ -841,8 +843,7 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Para enviar esta sesión, abre la aplicación."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Aplicación desconocida"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Dejar de enviar contenido"</string>
-    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Dispositivos disponibles para la salida de audio."</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Cómo funciona la emisión"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Emisión"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Las personas cercanas con dispositivos Bluetooth compatibles pueden escuchar el contenido multimedia que emites"</string>
@@ -933,18 +934,15 @@
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Detenida"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Hecho"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Copiado"</string>
-    <string name="clipboard_edit_source" msgid="9156488177277788029">"<xliff:g id="APPNAME">%1$s</xliff:g>"</string>
+    <string name="clipboard_edit_source" msgid="9156488177277788029">"De <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"Cerrar la interfaz de copia"</string>
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Editar texto copiado"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Editar imagen copiada"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Enviar a dispositivo cercano"</string>
     <string name="clipboard_text_hidden" msgid="7926899867471812305">"Toca para ver"</string>
-    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
-    <skip />
-    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
-    <skip />
-    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
-    <skip />
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"Texto copiado"</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"Imagen copiada"</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"Contenido copiado"</string>
     <string name="add" msgid="81036585205287996">"Añadir"</string>
     <string name="manage_users" msgid="1823875311934643849">"Gestionar usuarios"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Esta notificación no se puede arrastrar a la pantalla dividida."</string>
