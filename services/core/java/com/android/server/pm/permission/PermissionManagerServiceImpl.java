@@ -2516,7 +2516,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         final int[] userIds = filterUserId == UserHandle.USER_ALL ? getAllUserIds()
                 : new int[] { filterUserId };
 
-        boolean installPermissionsChanged = false;
         boolean runtimePermissionsRevoked = false;
         int[] updatedUserIds = EMPTY_INT_ARRAY;
 
@@ -2635,7 +2634,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
                 UidPermissionState origState = uidState;
 
-                boolean installPermissionsChangedForUser = false;
+                boolean changedInstallPermission = false;
 
                 if (replace) {
                     userState.setInstallPermissionsFixed(ps.getPackageName(), false);
@@ -2801,7 +2800,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                                                     && origState.isPermissionGranted(permName))))) {
                         // Grant an install permission.
                         if (uidState.grantPermission(bp)) {
-                            installPermissionsChangedForUser = true;
+                            changedInstallPermission = true;
                         }
                     } else if (bp.isRuntime()) {
                         boolean hardRestricted = bp.isHardRestricted();
@@ -2941,12 +2940,12 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                             }
                         }
                         if (uidState.removePermissionState(bp.getName())) {
-                            installPermissionsChangedForUser = true;
+                            changedInstallPermission = true;
                         }
                     }
                 }
 
-                if ((installPermissionsChangedForUser || replace)
+                if ((changedInstallPermission || replace)
                         && !userState.areInstallPermissionsFixed(ps.getPackageName())
                         && !ps.isSystem() || ps.getTransientState().isUpdatedSystemApp()) {
                     // This is the first that we have heard about this package, so the
@@ -2955,12 +2954,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                     userState.setInstallPermissionsFixed(ps.getPackageName(), true);
                 }
 
-                if (installPermissionsChangedForUser) {
-                    installPermissionsChanged = true;
-                    if (replace) {
-                        updatedUserIds = ArrayUtils.appendInt(updatedUserIds, userId);
-                    }
-                }
                 updatedUserIds = revokePermissionsNoLongerImplicitLocked(uidState,
                         pkg.getPackageName(), uidImplicitPermissions, uidTargetSdkVersion, userId,
                         updatedUserIds);
@@ -2977,12 +2970,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         // Persist the runtime permissions state for users with changes. If permissions
         // were revoked because no app in the shared user declares them we have to
         // write synchronously to avoid losing runtime permissions state.
-        // Also write synchronously if we changed any install permission for an updated app, because
-        // the install permission state is likely already fixed before update, and if we lose the
-        // changes here the app won't be reconsidered for newly-added install permissions.
         if (callback != null) {
-            callback.onPermissionUpdated(updatedUserIds,
-                    (replace && installPermissionsChanged) || runtimePermissionsRevoked);
+            callback.onPermissionUpdated(updatedUserIds, runtimePermissionsRevoked);
         }
 
         for (int userId : updatedUserIds) {
