@@ -58,6 +58,7 @@
             android:id="@+id/edit_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:minHeight="48dp"
             android:background="@null"
             android:gravity="start|top"
             android:textSize="24sp" />
