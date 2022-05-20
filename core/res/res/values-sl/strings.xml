@@ -307,12 +307,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"dostop do koledarja"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"pošiljanje in ogled sporočil SMS"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Datoteke in dokumenti"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Datoteke in dokumenti"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"dostop do datotek in dokumentov v napravi"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Glasba in drugi zvočni posnetki"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"dostop do zvočnih datotek v napravi"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Fotografije in videoposnetki"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"dostop do slik in videodatotek v napravi"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Glasba in zvok"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"dostop do glasbe in zvoka v napravi"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotografije in videoposnetki"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"dostop do fotografij in videoposnetkov v napravi"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"snemanje zvoka"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Telesna dejavnost"</string>
@@ -351,7 +351,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Aplikaciji omogoča razširjanje ali strnjevanje vrstice stanja."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"Prikaz obvestil kot celozaslonskih dejavnosti v zaklenjeni napravi"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Aplikaciji dovoli, da prikaže obvestila kot celozaslonske dejavnosti v zaklenjeni napravi."</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"nameščanje bližnjic"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Nameščanje bližnjic"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Aplikaciji omogoča dodajanje bližnjic na začetni zaslon brez posredovanja uporabnika."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"odstranjevanje bližnjic"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Aplikaciji omogoča odstranjevanje bližnjic z začetnega zaslona brez posredovanja uporabnika."</string>
@@ -1699,7 +1699,7 @@
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inverzija barv"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Popravljanje barv"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Enoročni način"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Zelo zatemnjeno"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Zelo zatemnjen zaslon"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tipki za glasnost sta pridržani. Storitev <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je vklopljena."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tipki za glasnost sta pridržani. Storitev <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je izklopljena."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Za uporabo storitve <xliff:g id="SERVICE_NAME">%1$s</xliff:g> pritisnite obe tipki za glasnost in ju pridržite tri sekunde"</string>
@@ -2055,8 +2055,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Način »ne moti« je spremenjen"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Dotaknite se, da preverite, kaj je blokirano."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Preglejte nastavitve obvestil"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"V Androidu 13 in novejših različicah bodo aplikacije, ki jih namestite, za pošiljanje obvestil potrebovale vaše dovoljenje. Dotaknite se, če želite spremeniti to dovoljenje za obstoječe aplikacije."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Opomni me pozneje"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Opusti"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistem"</string>
@@ -2284,5 +2283,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Preverite aktivne aplikacije"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Ni mogoče dostopati do fotoaparata telefona prek naprave <xliff:g id="DEVICE">%1$s</xliff:g>."</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Ni mogoče dostopati do fotoaparata tabličnega računalnika prek naprave <xliff:g id="DEVICE">%1$s</xliff:g>."</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"Sistemski jezik"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Sistemsko privzeto"</string>
 </resources>

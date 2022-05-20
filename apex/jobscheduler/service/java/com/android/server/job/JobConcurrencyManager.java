@@ -542,6 +542,22 @@ class JobConcurrencyManager {
         return mRunningJobs.contains(job);
     }
 
+    /**
+     * Returns true if a job that is "similar" to the provided job is currently running.
+     * "Similar" in this context means any job that the {@link JobStore} would consider equivalent
+     * and replace one with the other.
+     */
+    @GuardedBy("mLock")
+    private boolean isSimilarJobRunningLocked(JobStatus job) {
+        for (int i = mRunningJobs.size() - 1; i >= 0; --i) {
+            JobStatus js = mRunningJobs.valueAt(i);
+            if (job.getUid() == js.getUid() && job.getJobId() == js.getJobId()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /** Return {@code true} if the state was updated. */
     @GuardedBy("mLock")
     private boolean refreshSystemStateLocked() {
@@ -690,6 +706,27 @@ class JobConcurrencyManager {
         int projectedRunningCount = numRunningJobs;
         while ((nextPending = pendingJobQueue.next()) != null) {
             if (mRunningJobs.contains(nextPending)) {
+                // Should never happen.
+                Slog.wtf(TAG, "Pending queue contained a running job");
+                if (DEBUG) {
+                    Slog.e(TAG, "Pending+running job: " + nextPending);
+                }
+                pendingJobQueue.remove(nextPending);
+                continue;
+            }
+
+            final boolean isTopEj = nextPending.shouldTreatAsExpeditedJob()
+                    && nextPending.lastEvaluatedBias == JobInfo.BIAS_TOP_APP;
+            // Avoid overlapping job execution as much as possible.
+            if (!isTopEj && isSimilarJobRunningLocked(nextPending)) {
+                if (DEBUG) {
+                    Slog.w(TAG, "Delaying execution of job because of similarly running one: "
+                            + nextPending);
+                }
+                // It would be nice to let the JobService running the other similar job know about
+                // this new job so that it doesn't unbind from the JobService and we can call
+                // onStartJob as soon as the older job finishes.
+                // TODO: optimize the job reschedule flow to reduce service binding churn
                 continue;
             }
 
@@ -701,8 +738,6 @@ class JobConcurrencyManager {
             ContextAssignment selectedContext = null;
             final int allWorkTypes = getJobWorkTypes(nextPending);
             final boolean pkgConcurrencyOkay = !isPkgConcurrencyLimitedLocked(nextPending);
-            final boolean isTopEj = nextPending.shouldTreatAsExpeditedJob()
-                    && nextPending.lastEvaluatedBias == JobInfo.BIAS_TOP_APP;
             final boolean isInOverage = projectedRunningCount > STANDARD_CONCURRENCY_LIMIT;
             boolean startingJob = false;
             if (idle.size() > 0) {
@@ -924,7 +959,7 @@ class JobConcurrencyManager {
         for (int i = 0; i < mActiveServices.size(); i++) {
             JobServiceContext jsc = mActiveServices.get(i);
             final JobStatus executing = jsc.getRunningJobLocked();
-            if (executing != null && executing.matches(job.getUid(), job.getJobId())) {
+            if (executing == job) {
                 jsc.cancelExecutingJobLocked(reason, internalReasonCode, debugReason);
                 return true;
             }
@@ -1137,7 +1172,8 @@ class JobConcurrencyManager {
             }
         }
 
-        if (mActiveServices.size() >= STANDARD_CONCURRENCY_LIMIT) {
+        final PendingJobQueue pendingJobQueue = mService.getPendingJobQueue();
+        if (mActiveServices.size() >= STANDARD_CONCURRENCY_LIMIT || pendingJobQueue.size() == 0) {
             worker.clearPreferredUid();
             // We're over the limit (because the TOP app scheduled a lot of EJs). Don't start
             // running anything new until we get back below the limit.
@@ -1145,7 +1181,6 @@ class JobConcurrencyManager {
             return;
         }
 
-        final PendingJobQueue pendingJobQueue = mService.getPendingJobQueue();
         if (worker.getPreferredUid() != JobServiceContext.NO_PREFERRED_UID) {
             updateCounterConfigLocked();
             // Preemption case needs special care.
@@ -1162,6 +1197,21 @@ class JobConcurrencyManager {
             pendingJobQueue.resetIterator();
             while ((nextPending = pendingJobQueue.next()) != null) {
                 if (mRunningJobs.contains(nextPending)) {
+                    // Should never happen.
+                    Slog.wtf(TAG, "Pending queue contained a running job");
+                    if (DEBUG) {
+                        Slog.e(TAG, "Pending+running job: " + nextPending);
+                    }
+                    pendingJobQueue.remove(nextPending);
+                    continue;
+                }
+
+                // Avoid overlapping job execution as much as possible.
+                if (isSimilarJobRunningLocked(nextPending)) {
+                    if (DEBUG) {
+                        Slog.w(TAG, "Avoiding execution of job because of similarly running one: "
+                                + nextPending);
+                    }
                     continue;
                 }
 
@@ -1239,6 +1289,21 @@ class JobConcurrencyManager {
             while ((nextPending = pendingJobQueue.next()) != null) {
 
                 if (mRunningJobs.contains(nextPending)) {
+                    // Should never happen.
+                    Slog.wtf(TAG, "Pending queue contained a running job");
+                    if (DEBUG) {
+                        Slog.e(TAG, "Pending+running job: " + nextPending);
+                    }
+                    pendingJobQueue.remove(nextPending);
+                    continue;
+                }
+
+                // Avoid overlapping job execution as much as possible.
+                if (isSimilarJobRunningLocked(nextPending)) {
+                    if (DEBUG) {
+                        Slog.w(TAG, "Avoiding execution of job because of similarly running one: "
+                                + nextPending);
+                    }
                     continue;
                 }
 

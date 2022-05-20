@@ -321,6 +321,11 @@ public final class ViewRootImpl implements ViewParent,
 
     private static final int UNSET_SYNC_ID = -1;
 
+    /**
+     * Minimum time to wait before reporting changes to keep clear areas.
+     */
+    private static final int KEEP_CLEAR_AREA_REPORT_RATE_MILLIS = 100;
+
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     static final ThreadLocal<HandlerActionQueue> sRunQueues = new ThreadLocal<HandlerActionQueue>();
 
@@ -585,7 +590,6 @@ public final class ViewRootImpl implements ViewParent,
     @Nullable
     int mContentCaptureEnabled = CONTENT_CAPTURE_ENABLED_NOT_CHECKED;
     boolean mPerformContentCapture;
-    boolean mPerformAutoFill;
 
 
     boolean mReportNextDraw;
@@ -796,6 +800,8 @@ public final class ViewRootImpl implements ViewParent,
             new ViewRootRectTracker(v -> v.collectPreferKeepClearRects());
     private final ViewRootRectTracker mUnrestrictedKeepClearRectsTracker =
             new ViewRootRectTracker(v -> v.collectUnrestrictedPreferKeepClearRects());
+    private List<Rect> mPendingKeepClearAreas;
+    private List<Rect> mPendingUnrestrictedKeepClearAreas;
 
     private IAccessibilityEmbeddedConnection mAccessibilityEmbeddedConnection;
 
@@ -851,6 +857,28 @@ public final class ViewRootImpl implements ViewParent,
      */
     private Bundle mRelayoutBundle = new Bundle();
 
+    private static volatile boolean sAnrReported = false;
+    static BLASTBufferQueue.TransactionHangCallback sTransactionHangCallback =
+        new BLASTBufferQueue.TransactionHangCallback() {
+            @Override
+            public void onTransactionHang(boolean isGPUHang) {
+                if (isGPUHang && !sAnrReported) {
+                    sAnrReported = true;
+                    try {
+                        ActivityManager.getService().appNotResponding(
+                            "Buffer processing hung up due to stuck fence. Indicates GPU hang");
+                    } catch (RemoteException e) {
+                        // We asked the system to crash us, but the system
+                        // already crashed. Unfortunately things may be
+                        // out of control.
+                    }
+                } else {
+                    // TODO: Do something with this later. For now we just ANR
+                    // in dequeue buffer later like we always have.
+                }
+            }
+        };
+
     private String mTag = TAG;
 
     public ViewRootImpl(Context context, Display display) {
@@ -883,7 +911,6 @@ public final class ViewRootImpl implements ViewParent,
         mPreviousTransparentRegion = new Region();
         mFirst = true; // true for the first time the view is added
         mPerformContentCapture = true; // also true for the first time the view is added
-        mPerformAutoFill = true;
         mAdded = false;
         mAttachInfo = new View.AttachInfo(mWindowSession, mWindow, display, this, mHandler, this,
                 context);
@@ -2093,6 +2120,7 @@ public final class ViewRootImpl implements ViewParent,
         }
         mBlastBufferQueue = new BLASTBufferQueue(mTag, mSurfaceControl,
                 mSurfaceSize.x, mSurfaceSize.y, mWindowAttributes.format);
+        mBlastBufferQueue.setTransactionHangCallback(sTransactionHangCallback);
         Surface blastSurface = mBlastBufferQueue.createSurface();
         // Only call transferFrom if the surface has changed to prevent inc the generation ID and
         // causing EGL resources to be recreated.
@@ -2895,6 +2923,14 @@ public final class ViewRootImpl implements ViewParent,
 
         if (mFirst || windowShouldResize || viewVisibilityChanged || params != null
                 || mForceNextWindowRelayout) {
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+                Trace.traceBegin(Trace.TRACE_TAG_VIEW,
+                        TextUtils.formatSimple("relayoutWindow#"
+                                        + "first=%b/resize=%b/vis=%b/params=%b/force=%b",
+                                mFirst, windowShouldResize, viewVisibilityChanged, params != null,
+                                mForceNextWindowRelayout));
+            }
+
             mForceNextWindowRelayout = false;
 
             // If this window is giving internal insets to the window manager, then we want to first
@@ -3085,6 +3121,10 @@ public final class ViewRootImpl implements ViewParent,
                     }
                 }
             } catch (RemoteException e) {
+            } finally {
+                if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+                    Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+                }
             }
 
             if (DEBUG_ORIENTATION) Log.v(
@@ -4177,26 +4217,6 @@ public final class ViewRootImpl implements ViewParent,
         });
     }
 
-    @Nullable
-    private void registerFrameDrawingCallbackForBlur() {
-        if (!isHardwareEnabled()) {
-            return;
-        }
-        final boolean hasBlurUpdates = mBlurRegionAggregator.hasUpdates();
-        final boolean needsCallbackForBlur = hasBlurUpdates || mBlurRegionAggregator.hasRegions();
-
-        if (!needsCallbackForBlur) {
-            return;
-        }
-
-        final BackgroundBlurDrawable.BlurRegion[] blurRegionsForFrame =
-                mBlurRegionAggregator.getBlurRegionsCopyForRT();
-
-        // The callback will run on the render thread.
-        registerRtFrameCallback((frame) -> mBlurRegionAggregator
-                .dispatchBlurTransactionIfNeeded(frame, blurRegionsForFrame, hasBlurUpdates));
-    }
-
     private void registerCallbackForPendingTransactions() {
         registerRtFrameCallback(new FrameDrawingCallback() {
             @Override
@@ -4234,7 +4254,6 @@ public final class ViewRootImpl implements ViewParent,
         mIsDrawing = true;
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "draw");
 
-        registerFrameDrawingCallbackForBlur();
         addFrameCommitCallbackIfNeeded();
 
         boolean usingAsyncReport = isHardwareEnabled() && mSyncBufferCallback != null;
@@ -4309,18 +4328,6 @@ public final class ViewRootImpl implements ViewParent,
         }
         if (mPerformContentCapture) {
             performContentCaptureInitialReport();
-        }
-
-        if (mPerformAutoFill) {
-            notifyEnterForAutoFillIfNeeded();
-        }
-    }
-
-    private void notifyEnterForAutoFillIfNeeded() {
-        mPerformAutoFill = false;
-        final AutofillManager afm = getAutofillManager();
-        if (afm != null) {
-            afm.notifyViewEnteredForActivityStarted(mView);
         }
     }
 
@@ -4824,12 +4831,39 @@ public final class ViewRootImpl implements ViewParent,
                 unrestrictedKeepClearRects = Collections.emptyList();
             }
 
-            try {
-                mWindowSession.reportKeepClearAreasChanged(mWindow, restrictedKeepClearRects,
-                        unrestrictedKeepClearRects);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
+            if (mHandler.hasMessages(MSG_REPORT_KEEP_CLEAR_RECTS)) {
+                // Keep clear areas have been reported recently, wait before reporting new set
+                // of keep clear areas
+                mPendingKeepClearAreas = restrictedKeepClearRects;
+                mPendingUnrestrictedKeepClearAreas = unrestrictedKeepClearRects;
+            } else {
+                mHandler.sendEmptyMessageDelayed(MSG_REPORT_KEEP_CLEAR_RECTS,
+                        KEEP_CLEAR_AREA_REPORT_RATE_MILLIS);
+                try {
+                    mWindowSession.reportKeepClearAreasChanged(mWindow, restrictedKeepClearRects,
+                            unrestrictedKeepClearRects);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
             }
+        }
+    }
+
+    void reportKeepClearAreasChanged() {
+        final List<Rect> restrictedKeepClearRects = mPendingKeepClearAreas;
+        final List<Rect> unrestrictedKeepClearRects = mPendingUnrestrictedKeepClearAreas;
+        if (restrictedKeepClearRects == null && unrestrictedKeepClearRects == null) {
+            return;
+        }
+
+        mPendingKeepClearAreas = null;
+        mPendingUnrestrictedKeepClearAreas = null;
+
+        try {
+            mWindowSession.reportKeepClearAreasChanged(mWindow, restrictedKeepClearRects,
+                    unrestrictedKeepClearRects);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -5035,9 +5069,6 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     void requestPointerCapture(boolean enabled) {
-        if (mPointerCapture == enabled) {
-            return;
-        }
         final IBinder inputToken = getInputToken();
         if (inputToken == null) {
             Log.e(mTag, "No input channel to request Pointer Capture.");
@@ -5325,6 +5356,7 @@ public final class ViewRootImpl implements ViewParent,
     private static final int MSG_REQUEST_SCROLL_CAPTURE = 33;
     private static final int MSG_WINDOW_TOUCH_MODE_CHANGED = 34;
     private static final int MSG_KEEP_CLEAR_RECTS_CHANGED = 35;
+    private static final int MSG_REPORT_KEEP_CLEAR_RECTS = 36;
 
 
     final class ViewRootHandler extends Handler {
@@ -5600,6 +5632,9 @@ public final class ViewRootImpl implements ViewParent,
                 }   break;
                 case MSG_KEEP_CLEAR_RECTS_CHANGED: {
                     keepClearRectsChanged();
+                }   break;
+                case MSG_REPORT_KEEP_CLEAR_RECTS: {
+                    reportKeepClearAreasChanged();
                 }   break;
                 case MSG_REQUEST_SCROLL_CAPTURE:
                     handleScrollCaptureRequest((IScrollCaptureResponseListener) msg.obj);
@@ -6060,6 +6095,28 @@ public final class ViewRootImpl implements ViewParent,
 
         @Override
         protected int onProcess(QueuedInputEvent q) {
+            if (q.mEvent instanceof KeyEvent) {
+                final KeyEvent event = (KeyEvent) q.mEvent;
+
+                // If the new back dispatch is enabled, intercept KEYCODE_BACK before it reaches the
+                // view tree or IME, and invoke the appropriate {@link OnBackInvokedCallback}.
+                if (isBack(event)
+                        && mContext != null
+                        && WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(mContext)) {
+                    OnBackInvokedCallback topCallback =
+                            getOnBackInvokedDispatcher().getTopCallback();
+                    if (event.getAction() == KeyEvent.ACTION_UP) {
+                        if (topCallback != null) {
+                            topCallback.onBackInvoked();
+                            return FINISH_HANDLED;
+                        }
+                    } else {
+                        // Drop other actions such as {@link KeyEvent.ACTION_DOWN}.
+                        return FINISH_NOT_HANDLED;
+                    }
+                }
+            }
+
             if (mInputQueue != null && q.mEvent instanceof KeyEvent) {
                 mInputQueue.sendInputEvent(q.mEvent, q, true, this);
                 return DEFER;
@@ -6409,24 +6466,6 @@ public final class ViewRootImpl implements ViewParent,
 
             if (mUnhandledKeyManager.preViewDispatch(event)) {
                 return FINISH_HANDLED;
-            }
-
-            // If the new back dispatch is enabled, intercept KEYCODE_BACK before it reaches the
-            // view tree and invoke the appropriate {@link OnBackInvokedCallback}.
-            if (isBack(event)
-                    && mContext != null
-                    && WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(mContext)) {
-                OnBackInvokedCallback topCallback =
-                        getOnBackInvokedDispatcher().getTopCallback();
-                if (event.getAction() == KeyEvent.ACTION_UP) {
-                    if (topCallback != null) {
-                        topCallback.onBackInvoked();
-                        return FINISH_HANDLED;
-                    }
-                } else {
-                    // Drop other actions such as {@link KeyEvent.ACTION_DOWN}.
-                    return FINISH_NOT_HANDLED;
-                }
             }
 
             // Deliver the key to the view hierarchy.
@@ -8161,6 +8200,10 @@ public final class ViewRootImpl implements ViewParent,
      */
     @Override
     public void playSoundEffect(@SoundEffectConstants.SoundEffect int effectId) {
+        if ((mDisplay.getFlags() & Display.FLAG_TOUCH_FEEDBACK_DISABLED) != 0) {
+            return;
+        }
+
         checkThread();
 
         try {
@@ -8209,6 +8252,10 @@ public final class ViewRootImpl implements ViewParent,
      */
     @Override
     public boolean performHapticFeedback(int effectId, boolean always) {
+        if ((mDisplay.getFlags() & Display.FLAG_TOUCH_FEEDBACK_DISABLED) != 0) {
+            return false;
+        }
+
         try {
             return mWindowSession.performHapticFeedback(effectId, always);
         } catch (RemoteException e) {

@@ -416,8 +416,22 @@ final class InputMonitor {
 
         final IBinder focusToken = focus != null ? focus.mInputChannelToken : null;
         if (focusToken == null) {
+            if (recentsAnimationInputConsumer != null
+                    && recentsAnimationInputConsumer.mWindowHandle != null
+                    && mInputFocus == recentsAnimationInputConsumer.mWindowHandle.token) {
+                // Avoid removing input focus from recentsAnimationInputConsumer.
+                // When the recents animation input consumer has the input focus,
+                // mInputFocus does not match to mDisplayContent.mCurrentFocus. Making it to be
+                // a special case, that do not remove the input focus from it when
+                // mDisplayContent.mCurrentFocus is null. This special case should be removed
+                // once recentAnimationInputConsumer is removed.
+                return;
+            }
             // When an app is focused, but its window is not showing yet, remove the input focus
-            // from the current window.
+            // from the current window. This enforces the input focus to match
+            // mDisplayContent.mCurrentFocus. However, if more special cases are discovered that
+            // the input focus and mDisplayContent.mCurrentFocus are expected to mismatch,
+            // the whole logic of how and when to revoke focus needs to be checked.
             if (mDisplayContent.mFocusedApp != null && mInputFocus != null) {
                 ProtoLog.v(WM_DEBUG_FOCUS_LIGHT, "App %s is focused,"
                         + " but the window is not ready. Start a transaction to remove focus from"
@@ -545,12 +559,7 @@ final class InputMonitor {
         @Override
         public void accept(WindowState w) {
             final InputWindowHandleWrapper inputWindowHandle = w.mInputWindowHandle;
-            final RecentsAnimationController recentsAnimationController =
-                    mService.getRecentsAnimationController();
-            final boolean shouldApplyRecentsInputConsumer = recentsAnimationController != null
-                    && recentsAnimationController.shouldApplyInputConsumer(w.mActivityRecord);
-            if (w.mInputChannelToken == null || w.mRemoved
-                    || (!w.canReceiveTouchInput() && !shouldApplyRecentsInputConsumer)) {
+            if (w.mInputChannelToken == null || w.mRemoved || !w.canReceiveTouchInput()) {
                 if (w.mWinAnimator.hasSurface()) {
                     // Make sure the input info can't receive input event. It may be omitted from
                     // occlusion detection depending on the type or if it's a trusted overlay.
@@ -566,6 +575,10 @@ final class InputMonitor {
             final int privateFlags = w.mAttrs.privateFlags;
 
             // This only works for legacy transitions.
+            final RecentsAnimationController recentsAnimationController =
+                    mService.getRecentsAnimationController();
+            final boolean shouldApplyRecentsInputConsumer = recentsAnimationController != null
+                    && recentsAnimationController.shouldApplyInputConsumer(w.mActivityRecord);
             if (mAddRecentsAnimationInputConsumerHandle && shouldApplyRecentsInputConsumer) {
                 if (recentsAnimationController.updateInputConsumerForApp(
                         mRecentsAnimationInputConsumer.mWindowHandle)) {
@@ -573,7 +586,7 @@ final class InputMonitor {
                             recentsAnimationController.getTargetAppDisplayArea();
                     if (targetDA != null) {
                         mRecentsAnimationInputConsumer.reparent(mInputTransaction, targetDA);
-                        mRecentsAnimationInputConsumer.show(mInputTransaction, MAX_VALUE - 1);
+                        mRecentsAnimationInputConsumer.show(mInputTransaction, MAX_VALUE - 2);
                         mAddRecentsAnimationInputConsumerHandle = false;
                     }
                 }
@@ -584,10 +597,14 @@ final class InputMonitor {
                     final Task rootTask = w.getTask().getRootTask();
                     mPipInputConsumer.mWindowHandle.replaceTouchableRegionWithCrop(
                             rootTask.getSurfaceControl());
+                    final DisplayArea targetDA = rootTask.getDisplayArea();
                     // We set the layer to z=MAX-1 so that it's always on top.
-                    mPipInputConsumer.reparent(mInputTransaction, rootTask);
-                    mPipInputConsumer.show(mInputTransaction, MAX_VALUE - 1);
-                    mAddPipInputConsumerHandle = false;
+                    if (targetDA != null) {
+                        mPipInputConsumer.layout(mInputTransaction, rootTask.getBounds());
+                        mPipInputConsumer.reparent(mInputTransaction, targetDA);
+                        mPipInputConsumer.show(mInputTransaction, MAX_VALUE - 1);
+                        mAddPipInputConsumerHandle = false;
+                    }
                 }
             }
 

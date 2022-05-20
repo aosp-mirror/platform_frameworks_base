@@ -349,8 +349,7 @@ std::unique_ptr<XmlResource> Inflate(const void* data, size_t len, std::string* 
         size_t len;
         const char16_t* str16 = tree.getText(&len);
         if (str16) {
-          text->text =
-              ResTable::normalizeForOutput(util::Utf16ToUtf8(StringPiece16(str16, len)).c_str());
+          text->text = util::Utf16ToUtf8(StringPiece16(str16, len));
         }
         CHECK(!node_stack.empty());
         node_stack.top()->AppendChild(std::move(text));
