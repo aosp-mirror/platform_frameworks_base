@@ -17,12 +17,10 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"Διαχείριση συνοδευτικής εφαρμογής"</string>
-    <!-- no translation found for confirmation_title (3785000297483688997) -->
-    <skip />
+    <string name="confirmation_title" msgid="3785000297483688997">"Επιτρέψτε στην εφαρμογή &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; να έχει πρόσβαση στη συσκευή &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"ρολόι"</string>
     <string name="chooser_title" msgid="2262294130493605839">"Επιλέξτε ένα προφίλ <xliff:g id="PROFILE_NAME">%1$s</xliff:g> για διαχείριση από την εφαρμογή &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
-    <!-- no translation found for summary_watch (3002344206574997652) -->
-    <skip />
+    <string name="summary_watch" msgid="3002344206574997652">"Αυτή η εφαρμογή είναι απαραίτητη για τη διαχείριση της συσκευής <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. Η εφαρμογή <xliff:g id="APP_NAME">%2$s</xliff:g> θα επιτρέπεται να αλληλεπιδρά με τις ειδοποιήσεις και να έχει πρόσβαση στις άδειες Τηλέφωνο, SMS, Επαφές, Ημερολόγιο, Αρχεία καταγραφής κλήσεων και Συσκευές σε κοντινή απόσταση."</string>
     <string name="permission_apps" msgid="6142133265286656158">"Εφαρμογές"</string>
     <string name="permission_apps_summary" msgid="798718816711515431">"Μεταδώστε σε ροή τις εφαρμογές του τηλεφώνου σας"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"Να επιτρέπεται στο &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; η πρόσβαση σε αυτές τις πληροφορίες από το τηλέφωνό σας."</string>
@@ -45,8 +43,6 @@
     <string name="consent_back" msgid="2560683030046918882">"Πίσω"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"Παραχώρηση στις εφαρμογές στη συσκευή &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; των ίδιων αδειών όπως στη συσκευή &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;;"</string>
     <string name="permission_sync_summary" msgid="4866838188678457084">"&lt;p&gt;Αυτές μπορεί να περιλαμβάνουν πρόσβαση σε μικρόφωνο, κάμερα και τοποθεσία και άλλες άδειες πρόσβασης σε ευαίσθητες πληροφορίες στη συσκευή &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt; &lt;p&gt;Μπορείτε να αλλάξετε αυτές τις άδειες ανά πάσα στιγμή στις Ρυθμίσεις σας στη συσκευή &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt;"</string>
-    <!-- no translation found for vendor_icon_description (4445875290032225965) -->
-    <skip />
-    <!-- no translation found for vendor_header_button_description (6566660389500630608) -->
-    <skip />
+    <string name="vendor_icon_description" msgid="4445875290032225965">"Εικονίδιο εφαρμογής"</string>
+    <string name="vendor_header_button_description" msgid="6566660389500630608">"Κουμπί περισσότερων πληροφορ."</string>
 </resources>
