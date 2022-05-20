@@ -3152,8 +3152,13 @@ public class Vpn {
             cancelHandleNetworkLostTimeout();
 
             synchronized (Vpn.this) {
+                String category = "";
+                int errorClass = 0;
+                int errorCode = 0;
                 if (exception instanceof IkeProtocolException) {
                     final IkeProtocolException ikeException = (IkeProtocolException) exception;
+                    category = VpnManager.CATEGORY_EVENT_IKE_ERROR;
+                    errorCode = ikeException.getErrorType();
 
                     switch (ikeException.getErrorType()) {
                         case IkeProtocolException.ERROR_TYPE_NO_PROPOSAL_CHOSEN: // Fallthrough
@@ -3163,102 +3168,50 @@ public class Vpn {
                         case IkeProtocolException.ERROR_TYPE_FAILED_CP_REQUIRED: // Fallthrough
                         case IkeProtocolException.ERROR_TYPE_TS_UNACCEPTABLE:
                             // All the above failures are configuration errors, and are terminal
-                            // TODO(b/230548427): Remove SDK check once VPN related stuff are
-                            //  decoupled from ConnectivityServiceTest.
-                            if (SdkLevel.isAtLeastT()) {
-                                sendEventToVpnManagerApp(VpnManager.CATEGORY_EVENT_IKE_ERROR,
-                                        VpnManager.ERROR_CLASS_NOT_RECOVERABLE,
-                                        ikeException.getErrorType(),
-                                        getPackage(), mSessionKey, makeVpnProfileStateLocked(),
-                                        mActiveNetwork,
-                                        getRedactedNetworkCapabilitiesOfUnderlyingNetwork(
-                                                mUnderlyingNetworkCapabilities),
-                                        getRedactedLinkPropertiesOfUnderlyingNetwork(
-                                                mUnderlyingLinkProperties));
-                            }
-                            markFailedAndDisconnect(exception);
-                            return;
+                            errorClass = VpnManager.ERROR_CLASS_NOT_RECOVERABLE;
+                            break;
                         // All other cases possibly recoverable.
                         default:
                             // All the above failures are configuration errors, and are terminal
-                            // TODO(b/230548427): Remove SDK check once VPN related stuff are
-                            //  decoupled from ConnectivityServiceTest.
-                            if (SdkLevel.isAtLeastT()) {
-                                sendEventToVpnManagerApp(VpnManager.CATEGORY_EVENT_IKE_ERROR,
-                                        VpnManager.ERROR_CLASS_RECOVERABLE,
-                                        ikeException.getErrorType(),
-                                        getPackage(), mSessionKey, makeVpnProfileStateLocked(),
-                                        mActiveNetwork,
-                                        getRedactedNetworkCapabilitiesOfUnderlyingNetwork(
-                                                mUnderlyingNetworkCapabilities),
-                                        getRedactedLinkPropertiesOfUnderlyingNetwork(
-                                                mUnderlyingLinkProperties));
-                            }
+                            errorClass = VpnManager.ERROR_CLASS_RECOVERABLE;
                     }
                 } else if (exception instanceof IllegalArgumentException) {
                     // Failed to build IKE/ChildSessionParams; fatal profile configuration error
                     markFailedAndDisconnect(exception);
                     return;
                 } else if (exception instanceof IkeNetworkLostException) {
-                    // TODO(b/230548427): Remove SDK check once VPN related stuff are
-                    //  decoupled from ConnectivityServiceTest.
-                    if (SdkLevel.isAtLeastT()) {
-                        sendEventToVpnManagerApp(VpnManager.CATEGORY_EVENT_NETWORK_ERROR,
-                                VpnManager.ERROR_CLASS_RECOVERABLE,
-                                VpnManager.ERROR_CODE_NETWORK_LOST,
-                                getPackage(), mSessionKey, makeVpnProfileStateLocked(),
-                                mActiveNetwork,
-                                getRedactedNetworkCapabilitiesOfUnderlyingNetwork(
-                                        mUnderlyingNetworkCapabilities),
-                                getRedactedLinkPropertiesOfUnderlyingNetwork(
-                                        mUnderlyingLinkProperties));
-                    }
+                    category = VpnManager.CATEGORY_EVENT_NETWORK_ERROR;
+                    errorClass = VpnManager.ERROR_CLASS_RECOVERABLE;
+                    errorCode = VpnManager.ERROR_CODE_NETWORK_LOST;
                 } else if (exception instanceof IkeNonProtocolException) {
+                    category = VpnManager.CATEGORY_EVENT_NETWORK_ERROR;
+                    errorClass = VpnManager.ERROR_CLASS_RECOVERABLE;
                     if (exception.getCause() instanceof UnknownHostException) {
-                        // TODO(b/230548427): Remove SDK check once VPN related stuff are
-                        //  decoupled from ConnectivityServiceTest.
-                        if (SdkLevel.isAtLeastT()) {
-                            sendEventToVpnManagerApp(VpnManager.CATEGORY_EVENT_NETWORK_ERROR,
-                                    VpnManager.ERROR_CLASS_RECOVERABLE,
-                                    VpnManager.ERROR_CODE_NETWORK_UNKNOWN_HOST,
-                                    getPackage(), mSessionKey, makeVpnProfileStateLocked(),
-                                    mActiveNetwork,
-                                    getRedactedNetworkCapabilitiesOfUnderlyingNetwork(
-                                            mUnderlyingNetworkCapabilities),
-                                    getRedactedLinkPropertiesOfUnderlyingNetwork(
-                                            mUnderlyingLinkProperties));
-                        }
+                        errorCode = VpnManager.ERROR_CODE_NETWORK_UNKNOWN_HOST;
                     } else if (exception.getCause() instanceof IkeTimeoutException) {
-                        // TODO(b/230548427): Remove SDK check once VPN related stuff are
-                        //  decoupled from ConnectivityServiceTest.
-                        if (SdkLevel.isAtLeastT()) {
-                            sendEventToVpnManagerApp(VpnManager.CATEGORY_EVENT_NETWORK_ERROR,
-                                    VpnManager.ERROR_CLASS_RECOVERABLE,
-                                    VpnManager.ERROR_CODE_NETWORK_PROTOCOL_TIMEOUT,
-                                    getPackage(), mSessionKey, makeVpnProfileStateLocked(),
-                                    mActiveNetwork,
-                                    getRedactedNetworkCapabilitiesOfUnderlyingNetwork(
-                                            mUnderlyingNetworkCapabilities),
-                                    getRedactedLinkPropertiesOfUnderlyingNetwork(
-                                            mUnderlyingLinkProperties));
-                        }
+                        errorCode = VpnManager.ERROR_CODE_NETWORK_PROTOCOL_TIMEOUT;
                     } else if (exception.getCause() instanceof IOException) {
-                        // TODO(b/230548427): Remove SDK check once VPN related stuff are
-                        //  decoupled from ConnectivityServiceTest.
-                        if (SdkLevel.isAtLeastT()) {
-                            sendEventToVpnManagerApp(VpnManager.CATEGORY_EVENT_NETWORK_ERROR,
-                                    VpnManager.ERROR_CLASS_RECOVERABLE,
-                                    VpnManager.ERROR_CODE_NETWORK_IO,
-                                    getPackage(), mSessionKey, makeVpnProfileStateLocked(),
-                                    mActiveNetwork,
-                                    getRedactedNetworkCapabilitiesOfUnderlyingNetwork(
-                                            mUnderlyingNetworkCapabilities),
-                                    getRedactedLinkPropertiesOfUnderlyingNetwork(
-                                            mUnderlyingLinkProperties));
-                        }
+                        errorCode = VpnManager.ERROR_CODE_NETWORK_IO;
                     }
                 } else if (exception != null) {
                     Log.wtf(TAG, "onSessionLost: exception = " + exception);
+                }
+                // TODO(b/230548427): Remove SDK check once VPN related stuff are
+                //  decoupled from ConnectivityServiceTest.
+                if (SdkLevel.isAtLeastT()) {
+                    sendEventToVpnManagerApp(category, errorClass, errorCode,
+                            getPackage(), mSessionKey, makeVpnProfileStateLocked(),
+                            mActiveNetwork,
+                            getRedactedNetworkCapabilitiesOfUnderlyingNetwork(
+                                    mUnderlyingNetworkCapabilities),
+                            getRedactedLinkPropertiesOfUnderlyingNetwork(
+                                    mUnderlyingLinkProperties));
+                }
+                if (errorClass == VpnManager.ERROR_CLASS_NOT_RECOVERABLE) {
+                    markFailedAndDisconnect(exception);
+                    return;
+                } else if (errorClass == VpnManager.ERROR_CLASS_RECOVERABLE) {
+                    // Retry a new IKE session.
                 }
             }
 
