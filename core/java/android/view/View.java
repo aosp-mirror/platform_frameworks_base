@@ -4781,9 +4781,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @UnsupportedAppUsage
     ListenerInfo mListenerInfo;
 
-    private boolean mPreferKeepClearForFocus;
-    private Runnable mMarkPreferKeepClearForFocus;
-
     private static class TooltipInfo {
         /**
          * Text to be displayed in a tooltip popup.
@@ -11962,8 +11959,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @NonNull
     List<Rect> collectPreferKeepClearRects() {
         ListenerInfo info = mListenerInfo;
-        boolean keepBoundsClear =
-                (info != null && info.mPreferKeepClear) || mPreferKeepClearForFocus;
+        boolean keepClearForFocus = isFocused()
+                && ViewConfiguration.get(mContext).isPreferKeepClearForFocusEnabled();
+        boolean keepBoundsClear = (info != null && info.mPreferKeepClear) || keepClearForFocus;
         boolean hasCustomKeepClearRects = info != null && info.mKeepClearRects != null;
 
         if (!keepBoundsClear && !hasCustomKeepClearRects) {
@@ -11985,31 +11983,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private void updatePreferKeepClearForFocus() {
-        if (mMarkPreferKeepClearForFocus != null) {
-            removeCallbacks(mMarkPreferKeepClearForFocus);
-            mMarkPreferKeepClearForFocus = null;
+        if (ViewConfiguration.get(mContext).isPreferKeepClearForFocusEnabled()) {
+            updatePositionUpdateListener();
+            post(this::updateKeepClearRects);
         }
-
-        final ViewConfiguration configuration = ViewConfiguration.get(mContext);
-        final int delay = configuration.getPreferKeepClearForFocusDelay();
-        if (delay >= 0) {
-            mMarkPreferKeepClearForFocus = () -> {
-                mPreferKeepClearForFocus = isFocused();
-                mMarkPreferKeepClearForFocus = null;
-
-                updatePositionUpdateListener();
-                post(this::updateKeepClearRects);
-            };
-            postDelayed(mMarkPreferKeepClearForFocus, delay);
-        }
-    }
-
-    private void cancelMarkPreferKeepClearForFocus() {
-        if (mMarkPreferKeepClearForFocus != null) {
-            removeCallbacks(mMarkPreferKeepClearForFocus);
-            mMarkPreferKeepClearForFocus = null;
-        }
-        mPreferKeepClearForFocus = false;
     }
 
     /**
@@ -13754,7 +13731,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
             invalidate();
             sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED);
-            updatePreferKeepClearForFocus();
             return true;
         }
         return false;
@@ -21154,7 +21130,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         removePerformClickCallback();
         clearAccessibilityThrottles();
         stopNestedScroll();
-        cancelMarkPreferKeepClearForFocus();
 
         // Anything that started animating right before detach should already
         // be in its final state when re-attached.
