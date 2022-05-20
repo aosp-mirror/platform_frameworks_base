@@ -2451,6 +2451,11 @@ class ActivityStarter {
             }
         }
 
+        if ((mLaunchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) != 0 && mSourceRecord == null) {
+            // ignore the flag if there is no the sourceRecord
+            mLaunchFlags &= ~FLAG_ACTIVITY_LAUNCH_ADJACENT;
+        }
+
         // We'll invoke onUserLeaving before onPause only if the launching
         // activity did not explicitly state that this is an automated launch.
         mSupervisor.mUserLeaving = (mLaunchFlags & FLAG_ACTIVITY_NO_USER_ACTION) == 0;
