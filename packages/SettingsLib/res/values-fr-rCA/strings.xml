@@ -380,7 +380,7 @@
     <string name="debug_layout" msgid="1659216803043339741">"Afficher les contours"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Afficher les limites, les marges de clip, etc."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Forcer droite à gauche"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Forcer l\'orientation droite à gauche (toutes langues)"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Forcer l\'orientation de droite à gauche (toutes langues)"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Autoriser le flou au niveau des fenêtres"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Forcer MSAA 4x"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Activer MSAA 4x dans les applications OpenGL ES 2.0"</string>
@@ -391,7 +391,7 @@
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Activer le journal détaillé des fournisseurs"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Incluez les journaux supplémentaires du fournisseur propres à l\'appareil dans les rapports de bogue. Ils peuvent contenir des données personnelles, épuiser la pile plus rapidement et/ou utiliser plus d\'espace de stockage."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Échelle animation fenêtres"</string>
-    <string name="transition_animation_scale_title" msgid="1278477690695439337">"Éch. d\'animation des trans."</string>
+    <string name="transition_animation_scale_title" msgid="1278477690695439337">"Éch. d\'animation des transitions"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Échelle durée animation"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simuler affich. secondaires"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Applications"</string>
@@ -667,9 +667,6 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Activation de l\'écran"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Autoriser l\'activation de l\'écran"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Autorisez une application à activer l\'écran. Lorsque vous accordez cette autorisation, l\'application peut activer l\'écran à tout moment sans votre volonté explicite."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Numériser le code QR"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Pour commencer à écouter, centrez le code QR ci-dessous"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Le format du code QR est incorrect"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Arrêter la diffusion de <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Si vous diffusez <xliff:g id="SWITCHAPP">%1$s</xliff:g> ou changez la sortie, votre diffusion actuelle s\'arrêtera"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Diffuser <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>

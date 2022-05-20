@@ -667,9 +667,6 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"화면 켜기"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"화면 켜기 허용"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"앱에서 화면을 켜도록 허용합니다. 권한이 부여된 경우 앱에서 명시적 인텐트 없이 언제든지 화면을 켤 수 있습니다."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR 코드 스캔"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"아래의 QR 코드가 스캐너 가운데에 오도록 맞춘 다음 듣기를 시작하세요"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR 코드의 형식이 유효하지 않습니다."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> 방송을 중지하시겠습니까?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> 앱을 방송하거나 출력을 변경하면 기존 방송이 중단됩니다"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> 방송"</string>

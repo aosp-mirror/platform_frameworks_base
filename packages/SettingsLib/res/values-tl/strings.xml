@@ -570,7 +570,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Pinaghihigpitang profile"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Magdagdag ng bagong user?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Puwede mong ibahagi ang device na ito sa ibang tao sa pamamagitan ng paggawa ng mga karagdagang user. May sariling espasyo ang bawat user na maaari nilang i-customize gamit ang mga app, wallpaper, at iba pa. Puwede ring isaayos ng mga user ang mga setting ng device tulad ng Wi‑Fi na nakakaapekto sa lahat.\n\nKapag nagdagdag ka ng bagong user, kailangang i-set up ng taong iyon ang kanyang espasyo.\n\nMaaaring mag-update ng mga app ang sinumang user para sa lahat ng iba pang user. Maaaring hindi malipat sa bagong user ang mga setting at serbisyo sa pagiging naa-access."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Kapag nagdagdag ka ng bagong user, kailangang i-set up ng taong iyon ang kanyang espasyo.\n\nAng sinumang user ay maaaring mag-update ng mga app para sa lahat ng iba pang user."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Kapag nagdagdag ka ng bagong user, kailangang i-set up ng taong iyon ang kanyang espasyo.\n\nAng sinumang user ay puwedeng mag-update ng mga app para sa lahat ng iba pang user."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"I-set up ang user ngayon?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Tiyaking available ang tao na kunin ang device at i-set up ang kanyang space"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Mag-set up ng profile ngayon?"</string>
@@ -667,9 +667,6 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"I-on ang screen"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Payagan ang pag-on sa screen"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Nagpapahintulot sa app na i-on ang screen. Kung papayagan, puwedeng i-on ng app ang screen anumang oras nang wala ng iyong malinaw na intent."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"I-scan ang QR code"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Para simulang makinig, igitna ang QR code sa ibaba"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Hindi valid na format ang QR code"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Ihinto ang pag-broadcast ng <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Kung magbo-broadcast ka ng <xliff:g id="SWITCHAPP">%1$s</xliff:g> o babaguhin mo ang output, hihinto ang iyong kasalukuyang broadcast"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"I-broadcast ang <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>

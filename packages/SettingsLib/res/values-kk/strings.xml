@@ -583,7 +583,7 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"Профильдік ақпарат"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Шектелген профайл жасақтауға дейін қолданбалар мен жеке деректерді қорғау үшін экран бекітпесін тағайындау қажет."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Бекітпе тағайындау"</string>
-    <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g> пайдаланушысына ауысу"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"Пайдаланушыны ауыстыру: <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Жаңа пайдаланушы профилі жасалуда…"</string>
     <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Жаңа қонақ профилі жасалуда…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"Жаңа пайдаланушы жасалмады."</string>
@@ -608,7 +608,7 @@
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Жою"</string>
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Сақтау"</string>
     <string name="guest_exit_button" msgid="5774985819191803960">"Қонақ режимінен шығу"</string>
-    <string name="guest_reset_button" msgid="2515069346223503479">"Иә"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"Қонақ режимін қалпына келтіру"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Қонақ режимінен шығу"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Шыққанда барлық әрекет жойылады."</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Шыққанда барлық әрекетті сақтай немесе жоя аласыз."</string>
@@ -667,9 +667,6 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Экранды қосу"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Экранды қосуға рұқсат беру"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Қолданбаның экранды қосуына рұқсат береді. Рұқсат берілсе, қолданба кез келген уақытта экранды өздігінен қосуы мүмкін."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR кодын сканерлеу"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Тыңдай бастау үшін төмендегі QR кодын ортаға орналастырыңыз."</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR кодының форматы жарамсыз."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> қолданбасын таратуды тоқтатасыз ба?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> қолданбасын таратсаңыз немесе аудио шығысын өзгертсеңіз, қазіргі тарату сеансы тоқтайды."</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> қолданбасын тарату"</string>
