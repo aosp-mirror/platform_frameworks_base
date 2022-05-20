@@ -28,8 +28,6 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.server.devicepolicy.DevicePolicyManagerServiceTestable.OwnersTestable;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -58,7 +56,7 @@ public class OwnersTest extends DpmTestBase {
     public void loadProfileOwner() throws Exception {
         getServices().addUsers(10);
 
-        final OwnersTestable owners = new OwnersTestable(getServices());
+        final Owners owners = makeOwners();
 
         DpmTestUtils.writeToFile(owners.getProfileOwnerFile(10),
                 DpmTestUtils.readAsset(mRealTestContext, "OwnersTest/profile_owner_1.xml"));
@@ -76,7 +74,7 @@ public class OwnersTest extends DpmTestBase {
 
     @Test
     public void loadDeviceOwner() throws Exception {
-        final OwnersTestable owners = new OwnersTestable(getServices());
+        final Owners owners = makeOwners();
 
         DpmTestUtils.writeToFile(owners.getDeviceOwnerFile(),
                 DpmTestUtils.readAsset(mRealTestContext, "OwnersTest/device_owner_1.xml"));
@@ -95,7 +93,7 @@ public class OwnersTest extends DpmTestBase {
 
     @Test
     public void testDeviceOwnerType() throws Exception {
-        final OwnersTestable owners = new OwnersTestable(getServices());
+        final Owners owners = makeOwners();
 
         DpmTestUtils.writeToFile(owners.getDeviceOwnerFile(),
                 DpmTestUtils.readAsset(mRealTestContext, "OwnersTest/device_owner_1.xml"));
@@ -116,5 +114,12 @@ public class OwnersTest extends DpmTestBase {
                 TESTDPC_PACKAGE, DEVICE_OWNER_TYPE_DEFAULT, /* isAdminTestOnly= */ false);
         assertThat(owners.getDeviceOwnerType(TESTDPC_PACKAGE))
                 .isEqualTo(DEVICE_OWNER_TYPE_FINANCED);
+    }
+
+    private Owners makeOwners() {
+        final MockSystemServices services = getServices();
+        return new Owners(services.userManager, services.userManagerInternal,
+                services.packageManagerInternal, services.activityTaskManagerInternal,
+                services.activityManagerInternal, services.pathProvider);
     }
 }

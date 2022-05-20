@@ -23,6 +23,8 @@ import android.os.PersistableBundle;
 
 import com.android.internal.util.HexDump;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -293,6 +295,30 @@ public class PersistableBundleUtils {
             result.put(key, value);
         }
         return result;
+    }
+
+    /**
+     * Converts a PersistableBundle into a disk-stable byte array format
+     *
+     * @param bundle the PersistableBundle to be converted to a disk-stable format
+     * @return the byte array representation of the PersistableBundle
+     */
+    @Nullable
+    public static byte[] toDiskStableBytes(@NonNull PersistableBundle bundle) throws IOException {
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        bundle.writeToStream(outputStream);
+        return outputStream.toByteArray();
+    }
+
+    /**
+     * Converts from a disk-stable byte array format to a PersistableBundle
+     *
+     * @param bytes the disk-stable byte array
+     * @return the PersistableBundle parsed from this byte array.
+     */
+    public static PersistableBundle fromDiskStableBytes(@NonNull byte[] bytes) throws IOException {
+        final ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
+        return PersistableBundle.readFromStream(inputStream);
     }
 
     /**

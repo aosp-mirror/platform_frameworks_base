@@ -334,10 +334,14 @@ public abstract class PackageManagerInternal {
 
     /**
      * Retrieve all receivers that can handle a broadcast of the given intent.
+     * @param filterCallingUid The results will be filtered in the context of this UID instead
+     *                         of the calling UID.
+     * @param forSend true if the invocation is intended for sending broadcasts. The value
+     *                of this parameter affects how packages are filtered.
      */
     public abstract List<ResolveInfo> queryIntentReceivers(Intent intent,
             String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags,
-            int filterCallingUid, int userId);
+            int filterCallingUid, int userId, boolean forSend);
 
     /**
      * Retrieve all services that can be performed for the given intent.
@@ -371,10 +375,10 @@ public abstract class PackageManagerInternal {
             int deviceOwnerUserId, String deviceOwner, SparseArray<String> profileOwners);
 
     /**
-     * Called by Owners to set the package names protected by the device owner.
+     * Marks packages as protected for a given user or all users in case of USER_ALL.
      */
-    public abstract void setDeviceOwnerProtectedPackages(
-            String deviceOwnerPackageName, List<String> packageNames);
+    public abstract void setOwnerProtectedPackages(
+            @UserIdInt int userId, @NonNull List<String> packageNames);
 
     /**
      * Returns {@code true} if a given package can't be wiped. Otherwise, returns {@code false}.

@@ -2221,6 +2221,7 @@
   <java-symbol type="array" name="config_supportedDreamComplications" />
   <java-symbol type="array" name="config_dreamComplicationsEnabledByDefault" />
   <java-symbol type="array" name="config_disabledDreamComponents" />
+  <java-symbol type="bool" name="config_dismissDreamOnActivityStart" />
   <java-symbol type="string" name="config_loggable_dream_prefix" />
   <java-symbol type="string" name="config_dozeComponent" />
   <java-symbol type="string" name="enable_explore_by_touch_warning_title" />
@@ -2253,7 +2254,6 @@
   <java-symbol type="bool" name="config_supportTelephonyTimeZoneFallback" />
   <java-symbol type="bool" name="config_autoResetAirplaneMode" />
   <java-symbol type="string" name="config_notificationAccessConfirmationActivity" />
-  <java-symbol type="bool" name="config_killableInputMethods" />
   <java-symbol type="bool" name="config_preventImeStartupUnlessTextEditor" />
   <java-symbol type="array" name="config_nonPreemptibleInputMethods" />
   <java-symbol type="bool" name="config_enhancedConfirmationModeEnabled" />
@@ -2722,6 +2722,7 @@
   <java-symbol type="attr" name="touchscreenBlocksFocus" />
   <java-symbol type="layout" name="resolver_list_with_default" />
   <java-symbol type="layout" name="miniresolver" />
+  <java-symbol type="layout" name="resolver_profile_tab_button" />
   <java-symbol type="string" name="activity_resolver_use_always" />
   <java-symbol type="string" name="whichApplicationNamed" />
   <java-symbol type="string" name="whichApplicationLabel" />
@@ -3416,6 +3417,9 @@
 
   <!-- Search Selector -->
   <java-symbol type="string" name="config_defaultSearchSelectorPackageName" />
+
+  <!-- Captive Portal Login -->
+  <java-symbol type="string" name="config_defaultCaptivePortalLoginPackageName" />
 
   <!-- Optional IPsec algorithms -->
   <java-symbol type="array" name="config_optionalIpSecAlgorithms" />
@@ -4149,7 +4153,7 @@
   <java-symbol type="bool" name="config_disable_all_cb_messages" />
   <java-symbol type="drawable" name="ic_close" />
 
-  <java-symbol type="bool" name="config_automotiveHideNavBarForKeyboard" />
+  <java-symbol type="bool" name="config_hideNavBarForKeyboard" />
 
   <java-symbol type="bool" name="config_showBuiltinWirelessChargingAnim" />
 
@@ -4288,7 +4292,6 @@
   <java-symbol type="id" name="resolver_empty_state_subtitle" />
   <java-symbol type="id" name="resolver_empty_state_button" />
   <java-symbol type="id" name="resolver_empty_state_progress" />
-  <java-symbol type="id" name="resolver_tab_divider" />
   <java-symbol type="id" name="resolver_button_bar_divider" />
   <java-symbol type="id" name="resolver_empty_state_container" />
   <java-symbol type="id" name="button_bar_container" />
@@ -4302,9 +4305,6 @@
   <java-symbol type="string" name="resolver_no_work_apps_available" />
   <java-symbol type="string" name="resolver_no_personal_apps_available" />
   <java-symbol type="string" name="resolver_switch_on_work" />
-  <java-symbol type="drawable" name="ic_work_apps_off" />
-  <java-symbol type="drawable" name="ic_sharing_disabled" />
-  <java-symbol type="drawable" name="ic_no_apps" />
   <java-symbol type="drawable" name="ic_screenshot_edit" />
   <java-symbol type="dimen" name="resolver_empty_state_height" />
   <java-symbol type="dimen" name="resolver_empty_state_height_with_tabs" />
@@ -4663,6 +4663,7 @@
   <java-symbol type="bool" name="config_supportsHardwareMicToggle" />
   <java-symbol type="bool" name="config_supportsHardwareCamToggle" />
   <java-symbol type="bool" name="config_launchCameraOnCameraLensCoverToggle" />
+  <java-symbol type="bool" name="config_sensorPrivacyRequiresAuthentication" />
 
   <java-symbol type="dimen" name="starting_surface_icon_size" />
   <java-symbol type="dimen" name="starting_surface_default_icon_size" />
@@ -4709,6 +4710,7 @@
 
   <java-symbol type="string" name="config_wearSysUiPackage"/>
   <java-symbol type="string" name="config_wearSysUiMainActivity"/>
+  <java-symbol type="string" name="config_defaultQrCodeComponent"/>
 
   <java-symbol type="dimen" name="secondary_rounded_corner_radius" />
   <java-symbol type="dimen" name="secondary_rounded_corner_radius_top" />
@@ -4754,7 +4756,10 @@
   <!-- For VirtualDeviceManager -->
   <java-symbol type="string" name="vdm_camera_access_denied" />
 
-  <java-symbol type="color" name="camera_privacy_light"/>
+  <java-symbol type="color" name="camera_privacy_light_day"/>
+  <java-symbol type="color" name="camera_privacy_light_night"/>
+  <java-symbol type="integer" name="config_cameraPrivacyLightAlsAveragingIntervalMillis"/>
+  <java-symbol type="integer" name="config_cameraPrivacyLightAlsNightThreshold"/>
 
   <java-symbol type="bool" name="config_bg_current_drain_monitor_enabled" />
   <java-symbol type="array" name="config_bg_current_drain_threshold_to_restricted_bucket" />
@@ -4768,13 +4773,14 @@
   <java-symbol type="array" name="config_bg_current_drain_high_threshold_to_bg_restricted" />
   <java-symbol type="integer" name="config_bg_current_drain_media_playback_min_duration" />
   <java-symbol type="integer" name="config_bg_current_drain_location_min_duration" />
+  <java-symbol type="bool" name="config_bg_current_drain_auto_restrict_abusive_apps" />
   <java-symbol type="bool" name="config_bg_prompt_fgs_with_noti_to_bg_restricted" />
   <java-symbol type="bool" name="config_bg_prompt_abusive_apps_to_bg_restricted" />
   <java-symbol type="integer" name="config_bg_current_drain_exempted_types" />
   <java-symbol type="bool" name="config_bg_current_drain_high_threshold_by_bg_location" />
   <java-symbol type="drawable" name="ic_swap_horiz" />
-  <java-symbol type="bool" name="config_notificationForceUserSetOnUpgrade" />
   <java-symbol type="array" name="config_deviceStatesAvailableForAppRequests" />
+  <java-symbol type="array" name="config_serviceStateLocationAllowedPackages" />
 
   <!-- For app language picker -->
   <java-symbol type="string" name="system_locale_title" />

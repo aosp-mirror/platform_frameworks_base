@@ -129,8 +129,9 @@ public abstract class RecognitionService extends Service {
             @NonNull AttributionSource attributionSource) {
         try {
             if (mCurrentCallback == null) {
-                boolean preflightPermissionCheckPassed = checkPermissionForPreflightNotHardDenied(
-                        attributionSource);
+                boolean preflightPermissionCheckPassed =
+                        intent.hasExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE)
+                        || checkPermissionForPreflightNotHardDenied(attributionSource);
                 if (preflightPermissionCheckPassed) {
                     if (DBG) {
                         Log.d(TAG, "created new mCurrentCallback, listener = "

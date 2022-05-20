@@ -124,8 +124,7 @@ class BackNavigationController {
                     LocalServices.getService(WindowManagerInternal.class);
             IBinder focusedWindowToken = windowManagerInternal.getFocusedWindowToken();
 
-            window = wmService.windowForClientLocked(null, focusedWindowToken,
-                    false /* throwOnError */);
+            window = wmService.getFocusedWindowLocked();
 
             if (window == null) {
                 EmbeddedWindowController.EmbeddedWindow embeddedWindow =
@@ -146,10 +145,25 @@ class BackNavigationController {
                         "Focused window found using getFocusedWindowToken");
             }
 
-            if (window == null) {
-                window = wmService.getFocusedWindowLocked();
-                ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
-                        "Focused window found using wmService.getFocusedWindowLocked()");
+            OnBackInvokedCallbackInfo overrideCallbackInfo = null;
+            if (window != null) {
+                // This is needed to bridge the old and new back behavior with recents.  While in
+                // Overview with live tile enabled, the previous app is technically focused but we
+                // add an input consumer to capture all input that would otherwise go to the apps
+                // being controlled by the animation. This means that the window resolved is not
+                // the right window to consume back while in overview, so we need to route it to
+                // launcher and use the legacy behavior of injecting KEYCODE_BACK since the existing
+                // compat callback in VRI only works when the window is focused.
+                final RecentsAnimationController recentsAnimationController =
+                        wmService.getRecentsAnimationController();
+                if (recentsAnimationController != null
+                        && recentsAnimationController.shouldApplyInputConsumer(
+                        window.getActivityRecord())) {
+                    window = recentsAnimationController.getTargetAppMainWindow();
+                    overrideCallbackInfo = recentsAnimationController.getBackInvokedInfo();
+                    ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "Current focused window being animated by "
+                            + "recents. Overriding back callback to recents controller callback.");
+                }
             }
 
             if (window == null) {
@@ -166,7 +180,9 @@ class BackNavigationController {
             if (window != null) {
                 currentActivity = window.mActivityRecord;
                 currentTask = window.getTask();
-                callbackInfo = window.getOnBackInvokedCallbackInfo();
+                callbackInfo = overrideCallbackInfo != null
+                        ? overrideCallbackInfo
+                        : window.getOnBackInvokedCallbackInfo();
                 if (callbackInfo == null) {
                     Slog.e(TAG, "No callback registered, returning null.");
                     return null;
@@ -194,7 +210,6 @@ class BackNavigationController {
             if (backType == BackNavigationInfo.TYPE_CALLBACK
                     || currentActivity == null
                     || currentTask == null
-                    || currentTask.getDisplayContent().getImeContainer().isVisible()
                     || currentActivity.isActivityTypeHome()) {
                 return infoBuilder
                         .setType(backType)
