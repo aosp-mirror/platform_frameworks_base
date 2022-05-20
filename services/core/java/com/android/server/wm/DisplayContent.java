@@ -6080,7 +6080,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 rootTask.ensureActivitiesVisible(starting, configChanges, preserveWindows,
                         notifyClients);
             });
-            if (mTransitionController.isCollecting()
+            if (mTransitionController.useShellTransitionsRotation()
+                    && mTransitionController.isCollecting()
                     && mWallpaperController.getWallpaperTarget() != null) {
                 // Also update wallpapers so that their requestedVisibility immediately reflects
                 // the changes to activity visibility.
