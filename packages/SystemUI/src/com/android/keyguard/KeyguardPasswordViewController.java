@@ -43,7 +43,6 @@ import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.util.List;
@@ -56,7 +55,7 @@ public class KeyguardPasswordViewController
     private final KeyguardSecurityCallback mKeyguardSecurityCallback;
     private final InputMethodManager mInputMethodManager;
     private final DelayableExecutor mMainExecutor;
-    private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    private final KeyguardViewController mKeyguardViewController;
     private final boolean mShowImeAtScreenOn;
     private EditText mPasswordEntry;
     private ImageView mSwitchImeButton;
@@ -119,14 +118,14 @@ public class KeyguardPasswordViewController
             @Main DelayableExecutor mainExecutor,
             @Main Resources resources,
             FalsingCollector falsingCollector,
-            StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
+            KeyguardViewController keyguardViewController) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
                 messageAreaControllerFactory, latencyTracker, falsingCollector,
                 emergencyButtonController);
         mKeyguardSecurityCallback = keyguardSecurityCallback;
         mInputMethodManager = inputMethodManager;
         mMainExecutor = mainExecutor;
-        mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
+        mKeyguardViewController = keyguardViewController;
         mShowImeAtScreenOn = resources.getBoolean(R.bool.kg_show_ime_at_screen_on);
         mPasswordEntry = mView.findViewById(mView.getPasswordTextViewId());
         mSwitchImeButton = mView.findViewById(R.id.switch_ime_button);
@@ -209,7 +208,7 @@ public class KeyguardPasswordViewController
     }
 
     private void showInput() {
-        if (!mStatusBarKeyguardViewManager.isBouncerShowing()) {
+        if (!mKeyguardViewController.isBouncerShowing()) {
             return;
         }
 

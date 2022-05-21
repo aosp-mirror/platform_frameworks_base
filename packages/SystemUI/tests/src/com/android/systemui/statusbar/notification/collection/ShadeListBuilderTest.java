@@ -1528,6 +1528,34 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     }
 
     @Test
+    public void testContiguousSections() {
+        mListBuilder.setSectioners(List.of(
+                new PackageSectioner("pkg", 1),
+                new PackageSectioner("pkg", 1),
+                new PackageSectioner("pkg", 3),
+                new PackageSectioner("pkg", 2)
+        ));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testNonContiguousSections() {
+        mListBuilder.setSectioners(List.of(
+                new PackageSectioner("pkg", 1),
+                new PackageSectioner("pkg", 1),
+                new PackageSectioner("pkg", 3),
+                new PackageSectioner("pkg", 1)
+        ));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testBucketZeroNotAllowed() {
+        mListBuilder.setSectioners(List.of(
+                new PackageSectioner("pkg", 0),
+                new PackageSectioner("pkg", 1)
+        ));
+    }
+
+    @Test
     public void testStabilizeGroupsDelayedSummaryRendersAllNotifsTopLevel() {
         // GIVEN group children posted without a summary
         addGroupChild(0, PACKAGE_1, GROUP_1);
@@ -2189,7 +2217,11 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         }
 
         PackageSectioner(String pkg) {
-            super("PackageSection_" + pkg, 0);
+            this(pkg, 0);
+        }
+
+        PackageSectioner(String pkg, int bucket) {
+            super("PackageSection_" + pkg, bucket);
             mPackages = List.of(pkg);
             mComparator = null;
         }

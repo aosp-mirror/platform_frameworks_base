@@ -2922,7 +2922,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     DisplayCutout loadDisplayCutout(int displayWidth, int displayHeight) {
-        if (mDisplayPolicy == null) {
+        if (mDisplayPolicy == null || mInitialDisplayCutout == null) {
             return null;
         }
         return DisplayCutout.fromResourcesRectApproximation(
@@ -2931,7 +2931,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     RoundedCorners loadRoundedCorners(int displayWidth, int displayHeight) {
-        if (mDisplayPolicy == null) {
+        if (mDisplayPolicy == null || mInitialRoundedCorners == null) {
             return null;
         }
         return RoundedCorners.fromResources(
@@ -4272,7 +4272,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             setImeInputTarget(target);
             mInsetsStateController.updateAboveInsetsState(mInsetsStateController
                     .getRawInsetsState().getSourceOrDefaultVisibility(ITYPE_IME));
-            updateImeControlTarget();
+            // Force updating the IME parent when the IME control target has been updated to the
+            // remote target but updateImeParent not happen because ImeLayeringTarget and
+            // ImeInputTarget are different. Then later updateImeParent would be ignored when there
+            // is no new IME control target to change the IME parent.
+            final boolean forceUpdateImeParent = mImeControlTarget == mRemoteInsetsControlTarget
+                    && (mInputMethodSurfaceParent != null
+                    && !mInputMethodSurfaceParent.isSameSurface(
+                            mImeWindowsContainer.getParent().mSurfaceControl));
+            updateImeControlTarget(forceUpdateImeParent);
         }
         // Unfreeze IME insets after the new target updated, in case updateAboveInsetsState may
         // deliver unrelated IME insets change to the non-IME requester.
@@ -5257,7 +5265,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     void prepareAppTransition(@WindowManager.TransitionType int transit,
             @WindowManager.TransitionFlags int flags) {
         final boolean prepared = mAppTransition.prepareAppTransition(transit, flags);
-        if (prepared && okToAnimate()) {
+        if (prepared && okToAnimate() && transit != TRANSIT_NONE) {
             mSkipAppTransitionAnimation = false;
         }
     }
@@ -5432,13 +5440,18 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final Region local = Region.obtain();
         final int[] remainingLeftRight =
                 {mSystemGestureExclusionLimit, mSystemGestureExclusionLimit};
+        final RecentsAnimationController recentsAnimationController =
+                mWmService.getRecentsAnimationController();
 
         // Traverse all windows top down to assemble the gesture exclusion rects.
         // For each window, we only take the rects that fall within its touchable region.
         forAllWindows(w -> {
+            final boolean ignoreRecentsAnimationTarget = recentsAnimationController != null
+                    && recentsAnimationController.shouldApplyInputConsumer(w.getActivityRecord());
             if (!w.canReceiveTouchInput() || !w.isVisible()
                     || (w.getAttrs().flags & FLAG_NOT_TOUCHABLE) != 0
-                    || unhandled.isEmpty()) {
+                    || unhandled.isEmpty()
+                    || ignoreRecentsAnimationTarget) {
                 return;
             }
 
@@ -6220,6 +6233,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     /**
      * Sets if Display APIs should be sandboxed to the activity window bounds.
      */
+    @VisibleForTesting
     void setSandboxDisplayApis(boolean sandboxDisplayApis) {
         mSandboxDisplayApis = sandboxDisplayApis;
     }

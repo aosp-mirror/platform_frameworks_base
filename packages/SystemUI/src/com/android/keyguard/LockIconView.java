@@ -55,7 +55,7 @@ public class LockIconView extends FrameLayout implements Dumpable {
 
     @NonNull private final RectF mSensorRect;
     @NonNull private PointF mLockIconCenter = new PointF(0f, 0f);
-    private int mRadius;
+    private float mRadius;
     private int mLockIconPadding;
 
     private ImageView mLockIcon;
@@ -126,7 +126,7 @@ public class LockIconView extends FrameLayout implements Dumpable {
      * Set the location of the lock icon.
      */
     @VisibleForTesting
-    public void setCenterLocation(@NonNull PointF center, int radius, int drawablePadding) {
+    public void setCenterLocation(@NonNull PointF center, float radius, int drawablePadding) {
         mLockIconCenter = center;
         mRadius = radius;
         mLockIconPadding = drawablePadding;

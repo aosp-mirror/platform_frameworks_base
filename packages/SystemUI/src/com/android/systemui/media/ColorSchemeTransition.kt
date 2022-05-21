@@ -21,7 +21,9 @@ import android.animation.ValueAnimator.AnimatorUpdateListener
 import android.animation.ValueAnimator
 import android.content.Context
 import android.content.res.ColorStateList
+import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.RippleDrawable
 import com.android.internal.R
 import com.android.internal.annotations.VisibleForTesting
 import com.android.settingslib.Utils
@@ -34,13 +36,6 @@ import com.android.systemui.util.getColorWithAlpha
  */
 interface ColorTransition {
     fun updateColorScheme(scheme: ColorScheme?)
-}
-
-/** A generic implementation of [ColorTransition] so that we can define a factory method. */
-open class GenericColorTransition(
-   private val applyTheme: (ColorScheme?) -> Unit
-) : ColorTransition {
-    override fun updateColorScheme(scheme: ColorScheme?) = applyTheme(scheme)
 }
 
 /**
@@ -95,7 +90,6 @@ open class AnimatingColorTransition(
 
 typealias AnimatingColorTransitionFactory =
             (Int, (ColorScheme) -> Int, (Int) -> Unit) -> AnimatingColorTransition
-typealias GenericColorTransitionFactory = ((ColorScheme?) -> Unit) -> GenericColorTransition
 
 /**
  * ColorSchemeTransition constructs a ColorTransition for each color in the scheme
@@ -104,23 +98,22 @@ typealias GenericColorTransitionFactory = ((ColorScheme?) -> Unit) -> GenericCol
  */
 class ColorSchemeTransition internal constructor(
     private val context: Context,
-    mediaViewHolder: MediaViewHolder,
-    animatingColorTransitionFactory: AnimatingColorTransitionFactory,
-    genericColorTransitionFactory: GenericColorTransitionFactory
+    private val mediaViewHolder: MediaViewHolder,
+    animatingColorTransitionFactory: AnimatingColorTransitionFactory
 ) {
     constructor(context: Context, mediaViewHolder: MediaViewHolder) :
-        this(context, mediaViewHolder, ::AnimatingColorTransition, ::GenericColorTransition)
+        this(context, mediaViewHolder, ::AnimatingColorTransition)
 
+    private var isGradientEnabled = true
     val bgColor = context.getColor(com.android.systemui.R.color.material_dynamic_secondary95)
-
     val surfaceColor = animatingColorTransitionFactory(
         bgColor,
         ::surfaceFromScheme
     ) { surfaceColor ->
         val colorList = ColorStateList.valueOf(surfaceColor)
-        mediaViewHolder.player.backgroundTintList = colorList
         mediaViewHolder.seamlessIcon.imageTintList = colorList
         mediaViewHolder.seamlessText.setTextColor(surfaceColor)
+        mediaViewHolder.albumView.backgroundTintList = colorList
         mediaViewHolder.gutsViewHolder.setSurfaceColor(surfaceColor)
     }
 
@@ -130,8 +123,19 @@ class ColorSchemeTransition internal constructor(
     ) { accentPrimary ->
         val accentColorList = ColorStateList.valueOf(accentPrimary)
         mediaViewHolder.actionPlayPause.backgroundTintList = accentColorList
-        mediaViewHolder.seamlessButton.backgroundTintList = accentColorList
         mediaViewHolder.gutsViewHolder.setAccentPrimaryColor(accentPrimary)
+        mediaViewHolder.seamlessButton.backgroundTintList = accentColorList
+    }
+
+    val accentSecondary = animatingColorTransitionFactory(
+        loadDefaultColor(R.attr.textColorPrimary),
+        ::accentSecondaryFromScheme
+    ) { accentSecondary ->
+        val colorList = ColorStateList.valueOf(accentSecondary)
+        (mediaViewHolder.seamlessButton.background as? RippleDrawable)?.let {
+            it.setColor(colorList)
+            it.effectColor = colorList
+        }
     }
 
     val textPrimary = animatingColorTransitionFactory(
@@ -169,52 +173,55 @@ class ColorSchemeTransition internal constructor(
         mediaViewHolder.seekBar.progressBackgroundTintList = ColorStateList.valueOf(textTertiary)
     }
 
-    // Note: This background gradient currently doesn't animate between colors.
-    val backgroundGradient = genericColorTransitionFactory { scheme ->
-        val defaultTintColor = ColorStateList.valueOf(bgColor)
-        if (scheme == null) {
-            mediaViewHolder.albumView.foregroundTintList = defaultTintColor
-            mediaViewHolder.albumView.backgroundTintList = defaultTintColor
-            return@genericColorTransitionFactory
-        }
+    val bgGradientStart = animatingColorTransitionFactory(
+        bgColor,
+        albumGradientPicker(::backgroundStartFromScheme, 0.25f)
+    ) { _ -> updateAlbumGradient() }
 
-        // If there's no album art, just hide the gradient so we show the solid background.
-        val showGradient = mediaViewHolder.albumView.drawable != null
-        val startColor = getColorWithAlpha(
-            backgroundStartFromScheme(scheme),
-            alpha = if (showGradient) .25f else 0f
-        )
-        val endColor = getColorWithAlpha(
-            backgroundEndFromScheme(scheme),
-            alpha = if (showGradient) .90f else 0f
-        )
-        val gradientColors = intArrayOf(startColor, endColor)
-
-        val foregroundGradient = mediaViewHolder.albumView.foreground?.mutate()
-        if (foregroundGradient is GradientDrawable) {
-            foregroundGradient.colors = gradientColors
-        }
-        val backgroundGradient = mediaViewHolder.albumView.background?.mutate()
-        if (backgroundGradient is GradientDrawable) {
-            backgroundGradient.colors = gradientColors
-        }
-    }
+    val bgGradientEnd = animatingColorTransitionFactory(
+        bgColor,
+        albumGradientPicker(::backgroundEndFromScheme, 0.9f)
+    ) { _ -> updateAlbumGradient() }
 
     val colorTransitions = arrayOf(
         surfaceColor,
         accentPrimary,
+        accentSecondary,
         textPrimary,
         textPrimaryInverse,
         textSecondary,
         textTertiary,
-        backgroundGradient
+        bgGradientStart,
+        bgGradientEnd
     )
+
+    private fun updateAlbumGradient() {
+        val gradient = mediaViewHolder.albumView.foreground?.mutate()
+        if (gradient is GradientDrawable) {
+            gradient.colors = intArrayOf(
+                bgGradientStart?.currentColor ?: 0,
+                bgGradientEnd?.currentColor ?: 0)
+        }
+    }
+
+    private fun albumGradientPicker(
+        inner: (ColorScheme) -> Int,
+        targetAlpha: Float
+    ): (ColorScheme) -> Int {
+        return { scheme ->
+            if (isGradientEnabled)
+                getColorWithAlpha(inner(scheme), targetAlpha)
+            else
+                Color.TRANSPARENT
+        }
+    }
 
     private fun loadDefaultColor(id: Int): Int {
         return Utils.getColorAttr(context, id).defaultColor
     }
 
-    fun updateColorScheme(colorScheme: ColorScheme?) {
+    fun updateColorScheme(colorScheme: ColorScheme?, enableGradient: Boolean) {
+        isGradientEnabled = enableGradient
         colorTransitions.forEach { it.updateColorScheme(colorScheme) }
     }
 }

@@ -18,6 +18,7 @@ package com.android.wm.shell.dagger;
 
 import android.content.Context;
 import android.os.Handler;
+import android.os.SystemClock;
 
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
@@ -29,6 +30,7 @@ import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
+import com.android.wm.shell.pip.PipAppOpsListener;
 import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipParamsChangedForwarder;
 import com.android.wm.shell.pip.PipSnapAlgorithm;
@@ -38,6 +40,7 @@ import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.PipTransitionState;
 import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.pip.tv.TvPipBoundsAlgorithm;
+import com.android.wm.shell.pip.tv.TvPipBoundsController;
 import com.android.wm.shell.pip.tv.TvPipBoundsState;
 import com.android.wm.shell.pip.tv.TvPipController;
 import com.android.wm.shell.pip.tv.TvPipMenuController;
@@ -63,6 +66,8 @@ public abstract class TvPipModule {
             Context context,
             TvPipBoundsState tvPipBoundsState,
             TvPipBoundsAlgorithm tvPipBoundsAlgorithm,
+            TvPipBoundsController tvPipBoundsController,
+            PipAppOpsListener pipAppOpsListener,
             PipTaskOrganizer pipTaskOrganizer,
             TvPipMenuController tvPipMenuController,
             PipMediaController pipMediaController,
@@ -72,13 +77,14 @@ public abstract class TvPipModule {
             PipParamsChangedForwarder pipParamsChangedForwarder,
             DisplayController displayController,
             WindowManagerShellWrapper windowManagerShellWrapper,
-            @ShellMainThread ShellExecutor mainExecutor,
-            @ShellMainThread Handler mainHandler) {
+            @ShellMainThread ShellExecutor mainExecutor) {
         return Optional.of(
                 TvPipController.create(
                         context,
                         tvPipBoundsState,
                         tvPipBoundsAlgorithm,
+                        tvPipBoundsController,
+                        pipAppOpsListener,
                         pipTaskOrganizer,
                         pipTransitionController,
                         tvPipMenuController,
@@ -88,8 +94,22 @@ public abstract class TvPipModule {
                         pipParamsChangedForwarder,
                         displayController,
                         windowManagerShellWrapper,
-                        mainExecutor,
-                        mainHandler));
+                        mainExecutor));
+    }
+
+    @WMSingleton
+    @Provides
+    static TvPipBoundsController provideTvPipBoundsController(
+            Context context,
+            @ShellMainThread Handler mainHandler,
+            TvPipBoundsState tvPipBoundsState,
+            TvPipBoundsAlgorithm tvPipBoundsAlgorithm) {
+        return new TvPipBoundsController(
+                context,
+                SystemClock::uptimeMillis,
+                mainHandler,
+                tvPipBoundsState,
+                tvPipBoundsAlgorithm);
     }
 
     @WMSingleton
@@ -140,8 +160,11 @@ public abstract class TvPipModule {
     @Provides
     static TvPipNotificationController provideTvPipNotificationController(Context context,
             PipMediaController pipMediaController,
+            PipParamsChangedForwarder pipParamsChangedForwarder,
+            TvPipBoundsState tvPipBoundsState,
             @ShellMainThread Handler mainHandler) {
-        return new TvPipNotificationController(context, pipMediaController, mainHandler);
+        return new TvPipNotificationController(context, pipMediaController,
+                pipParamsChangedForwarder, tvPipBoundsState, mainHandler);
     }
 
     @WMSingleton
@@ -184,5 +207,13 @@ public abstract class TvPipModule {
     @Provides
     static PipParamsChangedForwarder providePipParamsChangedForwarder() {
         return new PipParamsChangedForwarder();
+    }
+
+    @WMSingleton
+    @Provides
+    static PipAppOpsListener providePipAppOpsListener(Context context,
+            PipTaskOrganizer pipTaskOrganizer,
+            @ShellMainThread ShellExecutor mainExecutor) {
+        return new PipAppOpsListener(context, pipTaskOrganizer::removePip, mainExecutor);
     }
 }

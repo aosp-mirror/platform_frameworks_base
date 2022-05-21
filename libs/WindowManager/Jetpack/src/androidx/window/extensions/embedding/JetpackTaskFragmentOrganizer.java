@@ -133,8 +133,7 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
         // Create or resize the launching TaskFragment.
         if (mFragmentInfos.containsKey(launchingFragmentToken)) {
             resizeTaskFragment(wct, launchingFragmentToken, launchingFragmentBounds);
-            wct.setWindowingMode(mFragmentInfos.get(launchingFragmentToken).getToken(),
-                    windowingMode);
+            updateWindowingMode(wct, launchingFragmentToken, windowingMode);
         } else {
             createTaskFragmentAndReparentActivity(wct, launchingFragmentToken, ownerToken,
                     launchingFragmentBounds, windowingMode, launchingActivity);
@@ -157,7 +156,7 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
     void expandTaskFragment(WindowContainerTransaction wct, IBinder fragmentToken) {
         resizeTaskFragment(wct, fragmentToken, new Rect());
         setAdjacentTaskFragments(wct, fragmentToken, null /* secondary */, null /* splitRule */);
-        setWindowingMode(wct, fragmentToken, WINDOWING_MODE_UNDEFINED);
+        updateWindowingMode(wct, fragmentToken, WINDOWING_MODE_UNDEFINED);
     }
 
     /**
@@ -260,7 +259,7 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
         wct.setBounds(mFragmentInfos.get(fragmentToken).getToken(), bounds);
     }
 
-    private void setWindowingMode(WindowContainerTransaction wct, IBinder fragmentToken,
+    void updateWindowingMode(WindowContainerTransaction wct, IBinder fragmentToken,
             @WindowingMode int windowingMode) {
         if (!mFragmentInfos.containsKey(fragmentToken)) {
             throw new IllegalArgumentException(

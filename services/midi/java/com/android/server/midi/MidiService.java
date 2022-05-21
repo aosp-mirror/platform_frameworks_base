@@ -238,7 +238,7 @@ public class MidiService extends IMidiManager.Stub {
             }
         }
 
-        // called from Device.close()
+        // called from Device.closeLocked()
         public void removeDeviceConnection(DeviceConnection connection) {
             mDeviceConnections.remove(connection.getToken());
             if (mListeners.size() == 0 && mDeviceConnections.size() == 0) {
@@ -294,12 +294,6 @@ public class MidiService extends IMidiManager.Stub {
             }
 
             for (DeviceConnection connection : mDeviceConnections.values()) {
-                if (connection.getDevice().getDeviceInfo().getType()
-                        == MidiDeviceInfo.TYPE_USB) {
-                    synchronized (mUsbMidiLock) {
-                        removeUsbMidiDeviceLocked(connection.getDevice().getDeviceInfo());
-                    }
-                }
                 connection.getDevice().removeDeviceConnection(connection);
             }
         }
@@ -541,6 +535,13 @@ public class MidiService extends IMidiManager.Stub {
                 synchronized (mDeviceConnections) {
                     mDeviceConnections.remove(connection);
 
+                    if (connection.getDevice().getDeviceInfo().getType()
+                            == MidiDeviceInfo.TYPE_USB) {
+                        synchronized (mUsbMidiLock) {
+                            removeUsbMidiDeviceLocked(connection.getDevice().getDeviceInfo());
+                        }
+                    }
+
                     if (mDeviceConnections.size() == 0 && mServiceConnection != null) {
                         mContext.unbindService(mServiceConnection);
                         mServiceConnection = null;
@@ -559,6 +560,12 @@ public class MidiService extends IMidiManager.Stub {
         public void closeLocked() {
             synchronized (mDeviceConnections) {
                 for (DeviceConnection connection : mDeviceConnections) {
+                    if (connection.getDevice().getDeviceInfo().getType()
+                            == MidiDeviceInfo.TYPE_USB) {
+                        synchronized (mUsbMidiLock) {
+                            removeUsbMidiDeviceLocked(connection.getDevice().getDeviceInfo());
+                        }
+                    }
                     connection.getClient().removeDeviceConnection(connection);
                 }
                 mDeviceConnections.clear();
@@ -1401,6 +1408,8 @@ public class MidiService extends IMidiManager.Stub {
         String deviceName = extractUsbDeviceName(name);
         String tagName = extractUsbDeviceTag(name);
 
+        Log.i(TAG, "Checking " + deviceName + " " + tagName);
+
         // Only one MIDI 2.0 device can be used at once.
         // Multiple MIDI 1.0 devices can be used at once.
         if (mUsbMidiUniversalDeviceInUse.contains(deviceName)
@@ -1420,6 +1429,8 @@ public class MidiService extends IMidiManager.Stub {
         String deviceName = extractUsbDeviceName(name);
         String tagName = extractUsbDeviceTag(name);
 
+        Log.i(TAG, "Adding " + deviceName + " " + tagName);
+
         if ((tagName).equals(MIDI_UNIVERSAL_STRING)) {
             mUsbMidiUniversalDeviceInUse.add(deviceName);
         } else if ((tagName).equals(MIDI_LEGACY_STRING)) {
@@ -1436,6 +1447,8 @@ public class MidiService extends IMidiManager.Stub {
         }
         String deviceName = extractUsbDeviceName(name);
         String tagName = extractUsbDeviceTag(name);
+
+        Log.i(TAG, "Removing " + deviceName + " " + tagName);
 
         if ((tagName).equals(MIDI_UNIVERSAL_STRING)) {
             mUsbMidiUniversalDeviceInUse.remove(deviceName);

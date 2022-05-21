@@ -21,9 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.provider.Settings;
-import android.view.ContextThemeWrapper;
 import android.view.DisplayCutout;
 
 import com.android.internal.policy.SystemBarUtils;
@@ -34,6 +32,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class Utils {
+
+    private static Boolean sUseQsMediaPlayer = null;
 
     /**
      * Allows lambda iteration over a list. It is done in reverse order so it is safe
@@ -81,9 +81,16 @@ public class Utils {
      * Off by default, but can be disabled by setting to 0
      */
     public static boolean useQsMediaPlayer(Context context) {
-        int flag = Settings.Global.getInt(context.getContentResolver(),
-                Settings.Global.SHOW_MEDIA_ON_QUICK_SETTINGS, 1);
-        return flag > 0;
+        // TODO(b/192412820): Replace SHOW_MEDIA_ON_QUICK_SETTINGS with compile-time value
+        // Settings.Global.SHOW_MEDIA_ON_QUICK_SETTINGS can't be toggled at runtime, so simply
+        // cache the first result we fetch and use that going forward. Do this to avoid unnecessary
+        // binder calls which may happen on the critical path.
+        if (sUseQsMediaPlayer == null) {
+            int flag = Settings.Global.getInt(context.getContentResolver(),
+                    Settings.Global.SHOW_MEDIA_ON_QUICK_SETTINGS, 1);
+            sUseQsMediaPlayer = flag > 0;
+        }
+        return sUseQsMediaPlayer;
     }
 
     /**

@@ -365,46 +365,4 @@ public class LocationControllerImplTest extends SysuiTestCase {
         // No new callbacks
         verify(callback).onLocationSettingsChanged(anyBoolean());
     }
-
-    @Test
-    public void testExperimentFlipsSystemFlag() throws Exception {
-        mSecureSettings.putInt(Settings.Secure.LOCATION_SHOW_SYSTEM_OPS, 0);
-        mDeviceConfigProxy.setProperty(
-                DeviceConfig.NAMESPACE_PRIVACY,
-                SystemUiDeviceConfigFlags.PROPERTY_LOCATION_INDICATORS_SMALL_ENABLED,
-                "true",
-                true);
-        // Show system experiment not running
-        mDeviceConfigProxy.setProperty(
-                DeviceConfig.NAMESPACE_PRIVACY,
-                SystemUiDeviceConfigFlags.PROPERTY_LOCATION_INDICATORS_SHOW_SYSTEM,
-                "false",
-                false);
-        mTestableLooper.processAllMessages();
-
-        // Flip experiment on
-        mDeviceConfigProxy.setProperty(
-                DeviceConfig.NAMESPACE_PRIVACY,
-                SystemUiDeviceConfigFlags.PROPERTY_LOCATION_INDICATORS_SHOW_SYSTEM,
-                "true",
-                true);
-        mTestableLooper.processAllMessages();
-
-        // Verify settings were flipped
-        assertThat(mSecureSettings.getInt(Settings.Secure.LOCATION_SHOW_SYSTEM_OPS))
-                .isEqualTo(1);
-        assertThat(mSecureSettings.getInt(Settings.Secure.LOCATION_INDICATOR_EXPERIMENT_STARTED))
-                .isEqualTo(1);
-
-        // Flip experiment off
-        mDeviceConfigProxy.setProperty(
-                DeviceConfig.NAMESPACE_PRIVACY,
-                SystemUiDeviceConfigFlags.PROPERTY_LOCATION_INDICATORS_SHOW_SYSTEM,
-                "false",
-                false);
-        mTestableLooper.processAllMessages();
-
-        assertThat(mSecureSettings.getInt(Settings.Secure.LOCATION_INDICATOR_EXPERIMENT_STARTED))
-                .isEqualTo(0);
-    }
 }

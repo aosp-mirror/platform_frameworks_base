@@ -1022,6 +1022,23 @@ public class CentralSurfacesImpl extends CoreStartable implements
             public void onUnlockedChanged() {
                 logStateToEventlog();
             }
+
+            @Override
+            public void onKeyguardGoingAwayChanged() {
+                // The light reveal scrim should always be fully revealed by the time the keyguard
+                // is done going away. Double check that this is true.
+                if (!mKeyguardStateController.isKeyguardGoingAway()) {
+                    if (mLightRevealScrim.getRevealAmount() != 1f) {
+                        Log.e(TAG, "Keyguard is done going away, but someone left the light reveal "
+                                + "scrim at reveal amount: " + mLightRevealScrim.getRevealAmount());
+                    }
+
+                    // If the auth ripple is still playing, let it finish.
+                    if (!mAuthRippleController.isAnimatingLightRevealScrim()) {
+                        mLightRevealScrim.setRevealAmount(1f);
+                    }
+                }
+            }
         });
         startKeyguard();
 
@@ -4456,6 +4473,13 @@ public class CentralSurfacesImpl extends CoreStartable implements
                     updateDozingState();
                     mDozeServiceHost.updateDozing();
                     updateScrimController();
+
+                    if (mBiometricUnlockController.isWakeAndUnlock()) {
+                        // Usually doze changes are to/from lockscreen/AOD, but if we're wake and
+                        // unlocking we should hide the keyguard ASAP if necessary.
+                        updateIsKeyguard();
+                    }
+
                     updateReportRejectedTouchVisibility();
                     Trace.endSection();
                 }

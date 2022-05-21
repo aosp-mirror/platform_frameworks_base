@@ -139,6 +139,7 @@ import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
+import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.wallet.controller.QuickAccessWalletController;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
@@ -357,10 +358,12 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     private Handler mMainHandler;
     private final PanelExpansionStateManager mPanelExpansionStateManager =
             new PanelExpansionStateManager();
+    private SystemClock mSystemClock;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        mSystemClock = new FakeSystemClock();
         mStatusBarStateController = new StatusBarStateControllerImpl(mUiEventLogger, mDumpManager,
                 mInteractionJankMonitor);
 
@@ -533,7 +536,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mPanelEventsEmitter,
                 mNotificationStackSizeCalculator,
                 mUnlockedScreenOffAnimationController,
-                mShadeTransitionController);
+                mShadeTransitionController,
+                mSystemClock);
         mNotificationPanelViewController.initDependencies(
                 mCentralSurfaces,
                 () -> {},
@@ -606,13 +610,13 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         when(mLockIconViewController.getTop()).thenReturn(80f);
         when(mResources.getDimensionPixelSize(R.dimen.shelf_and_lock_icon_overlap)).thenReturn(5);
 
-        // Available space (100 - 10 - 15 = 75)
+        // Available space (100 - 0 - 15 = 85)
         when(mNotificationStackScrollLayoutController.getHeight()).thenReturn(100);
-        when(mNotificationStackScrollLayoutController.getTopPadding()).thenReturn(10);
+        when(mNotificationStackScrollLayoutController.getTop()).thenReturn(0);
         mNotificationPanelViewController.updateResources();
 
         assertThat(mNotificationPanelViewController.getSpaceForLockscreenNotifications())
-                .isEqualTo(75);
+                .isEqualTo(85);
     }
 
     @Test
@@ -1005,6 +1009,17 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testExpandWithQsMethodIsUsingLockscreenTransitionController() {
+        enableSplitShade(/* enabled= */ true);
+        mStatusBarStateController.setState(KEYGUARD);
+
+        mNotificationPanelViewController.expandWithQs();
+
+        verify(mLockscreenShadeTransitionController).goToLockedShade(
+                /* expandedView= */null, /* needsQSAnimation= */false);
+    }
+
+    @Test
     public void testUnlockAnimationDoesNotAffectScrim() {
         mNotificationPanelViewController.onUnlockHintStarted();
         verify(mScrimController).setExpansionAffectsAlpha(false);
@@ -1072,6 +1087,21 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 /* expanded= */ true, /* tracking= */ true, /* dragDownPxAmount= */ 0);
 
         assertThat(mNotificationPanelViewController.mQsExpandImmediate).isFalse();
+    }
+
+    @Test
+    public void testQsExpansionChangedToDefaultWhenRotatingFromOrToSplitShade() {
+        // to make sure shade is in expanded state
+        mNotificationPanelViewController.startWaitingForOpenPanelGesture();
+        assertThat(mNotificationPanelViewController.isQsExpanded()).isFalse();
+
+        // switch to split shade from portrait (default state)
+        enableSplitShade(/* enabled= */ true);
+        assertThat(mNotificationPanelViewController.isQsExpanded()).isTrue();
+
+        // switch to portrait from split shade
+        enableSplitShade(/* enabled= */ false);
+        assertThat(mNotificationPanelViewController.isQsExpanded()).isFalse();
     }
 
     @Test

@@ -3220,8 +3220,7 @@ public class AlarmManagerServiceTest {
         when(mRoleManager.getRoleHolders(RoleManager.ROLE_SYSTEM_WELLBEING)).thenReturn(
                 Arrays.asList(package4));
 
-        mockChangeEnabled(SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT, true);
-        mService.mConstants.SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT = false;
+        mockChangeEnabled(SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT, false);
         mService.mConstants.EXACT_ALARM_DENY_LIST = new ArraySet<>(new String[] {
                 package1,
                 package3,
@@ -3233,21 +3232,7 @@ public class AlarmManagerServiceTest {
         assertFalse(mService.isScheduleExactAlarmAllowedByDefault(package3, uid3));
         assertTrue(mService.isScheduleExactAlarmAllowedByDefault(package4, uid4));
 
-        mockChangeEnabled(SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT, false);
-        mService.mConstants.SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT = true;
-        mService.mConstants.EXACT_ALARM_DENY_LIST = new ArraySet<>(new String[] {
-                package1,
-                package3,
-        });
-
-        // Same as above, deny listed packages will be false.
-        assertFalse(mService.isScheduleExactAlarmAllowedByDefault(package1, uid1));
-        assertTrue(mService.isScheduleExactAlarmAllowedByDefault(package2, uid2));
-        assertFalse(mService.isScheduleExactAlarmAllowedByDefault(package3, uid3));
-        assertTrue(mService.isScheduleExactAlarmAllowedByDefault(package4, uid4));
-
         mockChangeEnabled(SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT, true);
-        mService.mConstants.SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT = true;
         mService.mConstants.EXACT_ALARM_DENY_LIST = new ArraySet<>(new String[] {
                 package1,
                 package3,

@@ -4781,9 +4781,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @UnsupportedAppUsage
     ListenerInfo mListenerInfo;
 
-    private boolean mPreferKeepClearForFocus;
-    private Runnable mMarkPreferKeepClearForFocus;
-
     private static class TooltipInfo {
         /**
          * Text to be displayed in a tooltip popup.
@@ -8206,24 +8203,25 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (canNotifyAutofillEnterExitEvent()) {
             AutofillManager afm = getAutofillManager();
             if (afm != null) {
-                if (enter && isFocused()) {
+                if (enter) {
                     // We have not been laid out yet, hence cannot evaluate
                     // whether this view is visible to the user, we will do
                     // the evaluation once layout is complete.
                     if (!isLaidOut()) {
                         mPrivateFlags3 |= PFLAG3_NOTIFY_AUTOFILL_ENTER_ON_LAYOUT;
                     } else if (isVisibleToUser()) {
-                        // TODO This is a potential problem that View gets focus before it's visible
-                        // to User. Ideally View should handle the event when isVisibleToUser()
-                        // becomes true where it should issue notifyViewEntered().
-                        afm.notifyViewEntered(this);
-                    } else {
-                        afm.enableFillRequestActivityStarted(this);
+                        if (isFocused()) {
+                            // TODO This is a potential problem that View gets focus before it's
+                            // visible to User. Ideally View should handle the event when
+                            // isVisibleToUser() becomes true where it should issue
+                            // notifyViewEntered().
+                            afm.notifyViewEntered(this);
+                        } else {
+                            afm.notifyViewEnteredForFillDialog(this);
+                        }
                     }
-                } else if (!enter && !isFocused()) {
+                } else if (!isFocused()) {
                     afm.notifyViewExited(this);
-                } else if (enter) {
-                    afm.enableFillRequestActivityStarted(this);
                 }
             }
         }
@@ -9921,7 +9919,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <ol>
      *   <li>It should only be called when content capture is enabled for the view.
      *   <li>It must call viewAppeared() before viewDisappeared()
-     *   <li>viewAppearead() can only be called when the view is visible and laidout
+     *   <li>viewAppeared() can only be called when the view is visible and laid out
      *   <li>It should not call the same event twice.
      * </ol>
      */
@@ -9998,6 +9996,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     Log.v(CONTENT_CAPTURE_LOG_TAG, "no AttachInfo on disappeared for " + this);
                 }
             }
+
+            // We reset any translation state as views may be re-used (e.g., as in ListView and
+            // RecyclerView). We only need to do this for views important for content capture since
+            // views unimportant for content capture won't be translated anyway.
+            clearTranslationState();
         }
     }
 
@@ -11752,6 +11755,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 && (info.mHandwritingArea == null || !isAutoHandwritingEnabled())) {
             if (info.mPositionUpdateListener != null) {
                 mRenderNode.removePositionUpdateListener(info.mPositionUpdateListener);
+                info.mPositionUpdateListener = null;
                 info.mPositionChangedUpdate = null;
             }
         } else {
@@ -11863,6 +11867,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>
      * @see #setPreferKeepClear
      * @see #getPreferKeepClearRects
+     *
+     * @param rects A list of rects in this view's local coordinate system
      */
     public final void setPreferKeepClearRects(@NonNull List<Rect> rects) {
         final ListenerInfo info = getListenerInfo();
@@ -11903,6 +11909,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #setPreferKeepClear
      * @see #getPreferKeepClearRects
      *
+     * @param rects A list of rects in this view's local coordinate system
+     *
      * @hide
      */
     @SystemApi
@@ -11930,7 +11938,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @NonNull
     public final List<Rect> getUnrestrictedPreferKeepClearRects() {
         final ListenerInfo info = mListenerInfo;
-        if (info != null && info.mKeepClearRects != null) {
+        if (info != null && info.mUnrestrictedKeepClearRects != null) {
             return new ArrayList(info.mUnrestrictedKeepClearRects);
         }
 
@@ -11951,8 +11959,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @NonNull
     List<Rect> collectPreferKeepClearRects() {
         ListenerInfo info = mListenerInfo;
-        boolean keepBoundsClear =
-                (info != null && info.mPreferKeepClear) || mPreferKeepClearForFocus;
+        boolean keepClearForFocus = isFocused()
+                && ViewConfiguration.get(mContext).isPreferKeepClearForFocusEnabled();
+        boolean keepBoundsClear = (info != null && info.mPreferKeepClear) || keepClearForFocus;
         boolean hasCustomKeepClearRects = info != null && info.mKeepClearRects != null;
 
         if (!keepBoundsClear && !hasCustomKeepClearRects) {
@@ -11974,31 +11983,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private void updatePreferKeepClearForFocus() {
-        if (mMarkPreferKeepClearForFocus != null) {
-            removeCallbacks(mMarkPreferKeepClearForFocus);
-            mMarkPreferKeepClearForFocus = null;
+        if (ViewConfiguration.get(mContext).isPreferKeepClearForFocusEnabled()) {
+            updatePositionUpdateListener();
+            post(this::updateKeepClearRects);
         }
-
-        final ViewConfiguration configuration = ViewConfiguration.get(mContext);
-        final int delay = configuration.getPreferKeepClearForFocusDelay();
-        if (delay >= 0) {
-            mMarkPreferKeepClearForFocus = () -> {
-                mPreferKeepClearForFocus = isFocused();
-                mMarkPreferKeepClearForFocus = null;
-
-                updatePositionUpdateListener();
-                post(this::updateKeepClearRects);
-            };
-            postDelayed(mMarkPreferKeepClearForFocus, delay);
-        }
-    }
-
-    private void cancelMarkPreferKeepClearForFocus() {
-        if (mMarkPreferKeepClearForFocus != null) {
-            removeCallbacks(mMarkPreferKeepClearForFocus);
-            mMarkPreferKeepClearForFocus = null;
-        }
-        mPreferKeepClearForFocus = false;
     }
 
     /**
@@ -12710,6 +12698,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public boolean hasTranslationTransientState() {
         return (mPrivateFlags4 & PFLAG4_HAS_TRANSLATION_TRANSIENT_STATE)
                 == PFLAG4_HAS_TRANSLATION_TRANSIENT_STATE;
+    }
+
+    /**
+     * @hide
+     */
+    public void clearTranslationState() {
+        if (mViewTranslationCallback != null) {
+            mViewTranslationCallback.onClearTranslation(this);
+        }
+        clearViewTranslationCallback();
+        clearViewTranslationResponse();
+        if (hasTranslationTransientState()) {
+            setHasTransientState(false);
+            setHasTranslationTransientState(false);
+        }
     }
 
     /**
@@ -13461,8 +13464,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-
-    /**
      * Returns whether this View should use a default focus highlight when it gets focused but
      * doesn't have {@link android.R.attr#state_focused} defined in its background.
      *
@@ -13730,7 +13731,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
             invalidate();
             sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED);
-            updatePreferKeepClearForFocus();
             return true;
         }
         return false;
@@ -21130,7 +21130,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         removePerformClickCallback();
         clearAccessibilityThrottles();
         stopNestedScroll();
-        cancelMarkPreferKeepClearForFocus();
 
         // Anything that started animating right before detach should already
         // be in its final state when re-attached.
@@ -21146,6 +21145,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         AccessibilityNodeIdManager.getInstance().unregisterViewWithId(getAccessibilityViewId());
+
+        if (mBackgroundRenderNode != null) {
+            mBackgroundRenderNode.forceEndAnimators();
+        }
+        mRenderNode.forceEndAnimators();
     }
 
     private void cleanupDraw() {

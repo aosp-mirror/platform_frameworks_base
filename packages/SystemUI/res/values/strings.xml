@@ -804,6 +804,14 @@
     <!-- Message shown when non-bypass face authentication succeeds and UDFPS is supported. Provides extra instructions for how the user can enter their device [CHAR LIMIT=60] -->
     <string name="keyguard_face_successful_unlock_press">Unlocked by face. Press the unlock icon to open.</string>
 
+    <!-- Messages shown when users press outside of udfps region during -->
+    <string-array name="udfps_accessibility_touch_hints">
+        <item>Move left</item>
+        <item>Move down</item>
+        <item>Move right</item>
+        <item>Move up</item>
+    </string-array>
+
     <!-- Message shown when face authentication fails and the pin pad is visible. [CHAR LIMIT=60] -->
     <string name="keyguard_retry">Swipe up to try again</string>
 
@@ -1211,7 +1219,7 @@
     <string name="wallet_app_button_label">Show all</string>
     <!-- Label of the button underneath the card carousel prompting user unlock device. [CHAR LIMIT=NONE] -->
     <!-- Secondary label of the quick access wallet tile if no card. [CHAR LIMIT=NONE] -->
-    <string name="wallet_secondary_label_no_card">Add a card</string>
+    <string name="wallet_secondary_label_no_card">Tap to open</string>
     <!-- Secondary label of the quick access wallet tile if wallet is still updating. [CHAR LIMIT=NONE] -->
     <string name="wallet_secondary_label_updating">Updating</string>
     <!-- Secondary label of the quick access wallet tile if device locked. [CHAR LIMIT=NONE] -->
@@ -2229,9 +2237,7 @@
     <string name="media_move_closer_to_end_cast">Move closer to <xliff:g id="deviceName" example="My Tablet">%1$s</xliff:g> to play here</string>
     <!-- Text informing the user that their media is now playing on a different device (deviceName). [CHAR LIMIT=50] -->
     <string name="media_transfer_playing_different_device">Playing on <xliff:g id="deviceName" example="My Tablet">%1$s</xliff:g></string>
-    <!-- Text informing the user that their media is now playing on this device. [CHAR LIMIT=50] -->
-    <string name="media_transfer_playing_this_device">Playing on this phone</string>
-    <!-- Text informing the user that the media transfer has failed because something went wrong. [CHAR LIMIT=50] -->
+    <!-- Text informing the user that the media transfer has failed because something went wrong. [CHAR LIsMIT=50] -->
     <string name="media_transfer_failed">Something went wrong. Try again.</string>
 
     <!-- Error message indicating that a control timed out while waiting for an update [CHAR_LIMIT=30] -->
@@ -2273,6 +2279,8 @@
     <string name="media_output_dialog_unknown_launch_app_name">Unknown app</string>
     <!-- Button text for stopping casting [CHAR LIMIT=60] -->
     <string name="media_output_dialog_button_stop_casting">Stop casting</string>
+    <!-- Accessibility text describing purpose of media output dialog. [CHAR LIMIT=NONE] -->
+    <string name="media_output_dialog_accessibility_title">Available devices for audio output.</string>
 
     <!-- Media Output Broadcast Dialog -->
     <!-- Title for Broadcast First Notify Dialog [CHAR LIMIT=60] -->
@@ -2477,13 +2485,21 @@
     <!-- Text informing user where text being edited was copied from [CHAR LIMIT=NONE] -->
     <string name="clipboard_edit_source">From <xliff:g id="appName" example="Gmail">%1$s</xliff:g></string>
     <!-- Label for button to dismiss clipboard overlay [CHAR LIMIT=NONE] -->
-    <string name="clipboard_dismiss_description">Dismiss copy UI</string>
+    <string name="clipboard_dismiss_description">Dismiss copied text</string>
     <!-- Label for button to edit text that was copied to the clipboard [CHAR LIMIT=NONE] -->
     <string name="clipboard_edit_text_description">Edit copied text</string>
     <!-- Label for button to edit an image that was copied to the clipboard [CHAR LIMIT=NONE] -->
     <string name="clipboard_edit_image_description">Edit copied image</string>
     <!-- Label for button to send copied content to a nearby device [CHAR LIMIT=NONE] -->
     <string name="clipboard_send_nearby_description">Send to nearby device</string>
+    <!-- Text informing user that copied content is hidden [CHAR LIMIT=NONE] -->
+    <string name="clipboard_text_hidden">Tap to view</string>
+    <!-- Accessibility announcement informing user that text has been copied [CHAR LIMIT=NONE] -->
+    <string name="clipboard_text_copied">Text copied</string>
+    <!-- Accessibility announcement informing user that text has been copied [CHAR LIMIT=NONE] -->
+    <string name="clipboard_image_copied">Image copied</string>
+    <!-- Accessibility announcement informing user that something has been copied [CHAR LIMIT=NONE] -->
+    <string name="clipboard_content_copied">Content copied</string>
 
     <!-- Generic "add" string [CHAR LIMIT=NONE] -->
     <string name="add">Add</string>

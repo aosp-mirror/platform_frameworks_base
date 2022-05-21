@@ -65,6 +65,7 @@ import com.android.systemui.util.Assert
 import com.android.systemui.util.Utils
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.time.SystemClock
+import com.android.systemui.util.traceSection
 import java.io.IOException
 import java.io.PrintWriter
 import java.util.concurrent.Executor
@@ -1031,7 +1032,11 @@ class MediaDataManager(
         )
     }
 
-    fun onMediaDataLoaded(key: String, oldKey: String?, data: MediaData) {
+    fun onMediaDataLoaded(
+        key: String,
+        oldKey: String?,
+        data: MediaData
+    ) = traceSection("MediaDataManager#onMediaDataLoaded") {
         Assert.isMainThread()
         if (mediaEntries.containsKey(key)) {
             // Otherwise this was removed already

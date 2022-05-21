@@ -14,6 +14,9 @@ import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardViewController
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.shared.system.smartspace.ILauncherUnlockAnimationController
+import com.android.systemui.statusbar.NotificationShadeWindowController
+import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import junit.framework.Assert.assertEquals
@@ -49,6 +52,13 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
     private lateinit var biometricUnlockController: BiometricUnlockController
     @Mock
     private lateinit var surfaceTransactionApplier: SyncRtSurfaceTransactionApplier
+    @Mock
+    private lateinit var statusBarStateController: SysuiStatusBarStateController
+    @Mock
+    private lateinit var notificationShadeWindowController: NotificationShadeWindowController
+
+    @Mock
+    private lateinit var launcherUnlockAnimationController: ILauncherUnlockAnimationController.Stub
 
     private lateinit var remoteAnimationTarget: RemoteAnimationTarget
 
@@ -57,8 +67,11 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         keyguardUnlockAnimationController = KeyguardUnlockAnimationController(
             context, keyguardStateController, { keyguardViewMediator }, keyguardViewController,
-            featureFlags, { biometricUnlockController }
+            featureFlags, { biometricUnlockController }, statusBarStateController,
+            notificationShadeWindowController
         )
+        keyguardUnlockAnimationController.setLauncherUnlockController(
+            launcherUnlockAnimationController)
 
         `when`(keyguardViewController.viewRootImpl).thenReturn(mock(ViewRootImpl::class.java))
 
@@ -190,5 +203,19 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
 
         assertTrue(keyguardUnlockAnimationController.isPlayingCannedUnlockAnimation())
         assertFalse(keyguardUnlockAnimationController.surfaceBehindAlphaAnimator.isRunning)
+    }
+
+    @Test
+    fun doNotPlayCannedUnlockAnimation_ifLaunchingApp() {
+        `when`(notificationShadeWindowController.isLaunchingActivity).thenReturn(true)
+
+        keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
+            remoteAnimationTarget,
+            0 /* startTime */,
+            true /* requestedShowSurfaceBehindKeyguard */
+        )
+
+        assertFalse(keyguardUnlockAnimationController.canPerformInWindowLauncherAnimations())
+        assertFalse(keyguardUnlockAnimationController.isPlayingCannedUnlockAnimation())
     }
 }

@@ -1921,6 +1921,7 @@ static void nativeRemoveCurrentInputFocus(JNIEnv* env, jclass clazz, jlong trans
     FocusRequest request;
     request.timestamp = systemTime(SYSTEM_TIME_MONOTONIC);
     request.displayId = displayId;
+    request.windowName = "<null>";
     transaction->setFocusedWindow(request);
 }
 

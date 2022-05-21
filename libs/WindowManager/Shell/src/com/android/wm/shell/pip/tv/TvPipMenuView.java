@@ -494,6 +494,14 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
         setFrameHighlighted(false);
     }
 
+    @Override
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        super.onWindowFocusChanged(hasWindowFocus);
+        if (!hasWindowFocus) {
+            hideAllUserControls();
+        }
+    }
+
     private void animateAlphaTo(float alpha, View view) {
         if (view.getAlpha() == alpha) {
             return;

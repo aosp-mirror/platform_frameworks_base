@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<root>
+    <device-owner name="" component="com.android.frameworks.servicestests/com.android.server.devicepolicy.DummyDeviceAdmins$Admin1" isPoOrganizationOwnedDevice="true" />
+    <!-- userId is substituted by the test -->
+    <device-owner-context userId="0" />
+</root>

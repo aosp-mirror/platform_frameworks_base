@@ -1869,6 +1869,11 @@
     -->
     <string name="config_defaultSearchSelectorPackageName" translatable="false"></string>
 
+    <!-- The package name of the default captive portal login app. Must be granted the
+         POST_NOTIFICATIONS permission.
+    -->
+    <string name="config_defaultCaptivePortalLoginPackageName" translatable="false"></string>
+
     <!-- Whether to enable geocoder overlay which allows geocoder to be replaced
          by an app at run-time. When disabled, only the
          config_geocoderProviderPackageName package will be searched for
@@ -2958,9 +2963,6 @@
         <item>com.android.inputmethod.latin</item>
     </string-array>
 
-    <!-- Make the IME killable by the lowmemorykiller by raising its oom_score_adj. -->
-    <bool name="config_killableInputMethods">false</bool>
-
     <!-- Prevent the InputMethodManagerService from starting up the IME unless
      the currently focused view is a text editor. -->
     <bool name="config_preventImeStartupUnlessTextEditor">false</bool>
@@ -2997,12 +2999,6 @@
         <item>com.android.server.notification.CriticalNotificationExtractor</item>
 
     </string-array>
-
-    <!-- When migrating notification settings into the permission framework, whether all existing
-         apps should be marked as 'user-set' (true) or whether only the apps that have explicitly
-         modified notification settings should be marked as 'user-set' (false). Users will not see
-         system generated permission prompts for 'user-set' apps. -->
-    <bool name="config_notificationForceUserSetOnUpgrade">true</bool>
 
     <!-- Default Gravity setting for the system Toast view. Equivalent to: Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM -->
     <integer name="config_toastDefaultGravity">0x00000051</integer>
@@ -4895,7 +4891,7 @@
     <!-- Whether or not to hide the navigation bar when the soft keyboard is visible in order to
          create additional screen real estate outside beyond the keyboard. Note that the user needs
          to have a confirmed way to dismiss the keyboard when desired. -->
-    <bool name="config_automotiveHideNavBarForKeyboard">false</bool>
+    <bool name="config_hideNavBarForKeyboard">false</bool>
 
     <!-- Whether or not to show the built-in charging animation when the device begins charging
          wirelessly. -->
@@ -5167,9 +5163,8 @@
          when TextClassifier has not been initialized. -->
     <integer name="config_smartSelectionInitializingTimeoutMillis">500</integer>
 
-    <!-- The delay in milliseconds before focused Views set themselves as preferred to keep clear.
-         Set to -1 if Views should not set themselves as preferred to keep clear. -->
-    <integer name="config_preferKeepClearForFocusDelayMillis">-1</integer>
+    <!-- If true, Views will declare they prefer to be kept clear from overlays when focused. -->
+    <bool name="config_preferKeepClearForFocus">false</bool>
 
     <!-- Indicates that default fitness tracker app needs to request sensor and location permissions. -->
     <bool name="config_trackerAppNeedsPermissions">false</bool>
@@ -5451,6 +5446,8 @@
     <bool name="config_supportsHardwareCamToggle">false</bool>
     <!-- Whether a camera intent is launched when the lens cover is toggled -->
     <bool name="config_launchCameraOnCameraLensCoverToggle">true</bool>
+    <!-- Whether changing sensor privacy SW setting requires device to be unlocked -->
+    <bool name="config_sensorPrivacyRequiresAuthentication">true</bool>
 
     <!-- List containing the allowed install sources for accessibility service. -->
     <string-array name="config_accessibility_allowed_install_source" translatable="false"/>
@@ -5660,6 +5657,9 @@
     <!-- Whether or not to enable the lock screen entry point for the QR code scanner. -->
     <bool name="config_enableQrCodeScannerOnLockScreen">false</bool>
 
+    <!-- Default component for QR code scanner -->
+    <string name="config_defaultQrCodeComponent"></string>
+
     <!-- Whether Low Power Standby is supported and can be enabled. -->
     <bool name="config_lowPowerStandbySupported">false</bool>
 
@@ -5750,6 +5750,14 @@
     -->
     <integer name="config_bg_current_drain_location_min_duration">1800</integer>
 
+    <!-- The behavior when the system detects it has abusive current drains, whether or not to
+         move the app to the restricted standby bucket level.
+         True - we'll move the app to restricted standby bucket as long as its bg battery usage
+         goes beyond the threshold, False - we'll not move it.
+         Note: This should be only enabled on devices with high confidence on power measurement.
+    -->
+    <bool name="config_bg_current_drain_auto_restrict_abusive_apps">false</bool>
+
     <!-- The behavior for an app with a FGS and its notification is still showing, when the system
          detects it's abusive and should be put into bg restricted level. True - we'll
          show the prompt to user, False - we'll not show it.
@@ -5785,4 +5793,17 @@
 
     <!-- List of the labels of requestable device state config values -->
     <string-array name="config_deviceStatesAvailableForAppRequests"/>
+
+    <!-- Interval in milliseconds to average light sensor values for camera light brightness -->
+    <integer name="config_cameraPrivacyLightAlsAveragingIntervalMillis">3000</integer>
+    <!-- Light sensor's lux value to use as the threshold between using day or night brightness -->
+    <integer name="config_cameraPrivacyLightAlsNightThreshold">4</integer>
+
+    <!-- List of system components which are allowed to receive ServiceState entries in an
+         un-sanitized form, even if the location toggle is off. This is intended ONLY for system
+         components, such as the telephony stack, which require access to the full ServiceState for
+         tasks such as network registration. -->
+    <string-array name="config_serviceStateLocationAllowedPackages">
+        <item>"com.android.phone"</item>
+    </string-array>
 </resources>

@@ -18,15 +18,18 @@ package com.android.systemui.tv;
 
 import android.app.Activity;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.View;
 import android.view.WindowManager;
 
 import com.android.systemui.R;
 
+import java.util.Collections;
 import java.util.function.Consumer;
 
 /**
@@ -75,6 +78,12 @@ public abstract class TvBottomSheetActivity extends Activity {
         getWindow().setElevation(getWindow().getElevation() + 5);
         getWindow().setBackgroundBlurRadius(getResources().getDimensionPixelSize(
                 R.dimen.bottom_sheet_background_blur_radius));
+
+        final View rootView = findViewById(R.id.bottom_sheet);
+        rootView.addOnLayoutChangeListener((view, l, t, r, b, oldL, oldT, oldR, oldB) -> {
+            rootView.setUnrestrictedPreferKeepClearRects(
+                    Collections.singletonList(new Rect(0, 0, r - l, b - t)));
+        });
     }
 
     @Override

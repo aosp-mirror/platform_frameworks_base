@@ -65,7 +65,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.CoreStartable;
-import com.android.systemui.assist.ui.DisplayUtils;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -80,6 +79,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -279,6 +279,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
                 }
             });
             mUdfpsController.setAuthControllerUpdateUdfpsLocation(this::updateUdfpsLocation);
+            mUdfpsController.setHalControlsIllumination(mUdfpsProps.get(0).halControlsIllumination);
             mUdfpsBounds = mUdfpsProps.get(0).getLocation().getRect();
             updateUdfpsLocation();
         }
@@ -446,11 +447,11 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
     /**
      * @return the radius of UDFPS on the screen in pixels
      */
-    public int getUdfpsRadius() {
+    public float getUdfpsRadius() {
         if (mUdfpsController == null || mUdfpsBounds == null) {
             return -1;
         }
-        return mUdfpsBounds.height() / 2;
+        return mUdfpsBounds.height() / 2f;
     }
 
     /**
@@ -483,7 +484,13 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
         if (mFaceProps == null || mFaceAuthSensorLocation == null) {
             return null;
         }
-        return new PointF(mFaceAuthSensorLocation.x, mFaceAuthSensorLocation.y);
+        DisplayInfo displayInfo = new DisplayInfo();
+        mContext.getDisplay().getDisplayInfo(displayInfo);
+        final float scaleFactor = android.util.DisplayUtils.getPhysicalPixelDisplaySizeRatio(
+                mStableDisplaySize.x, mStableDisplaySize.y, displayInfo.getNaturalWidth(),
+                displayInfo.getNaturalHeight());
+        return new PointF(mFaceAuthSensorLocation.x * scaleFactor,
+                mFaceAuthSensorLocation.y * scaleFactor);
     }
 
     /**
@@ -600,8 +607,14 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
         mSensorPrivacyManager = context.getSystemService(SensorPrivacyManager.class);
     }
 
+    private int getDisplayWidth() {
+        DisplayInfo displayInfo = new DisplayInfo();
+        mContext.getDisplay().getDisplayInfo(displayInfo);
+        return displayInfo.getNaturalWidth();
+    }
+
     private void updateFingerprintLocation() {
-        int xLocation = DisplayUtils.getWidth(mContext) / 2;
+        int xLocation = getDisplayWidth() / 2;
         try {
             xLocation = mContext.getResources().getDimensionPixelSize(
                     com.android.systemui.R.dimen
@@ -628,11 +641,17 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
                     displayInfo.getNaturalHeight());
 
             final FingerprintSensorPropertiesInternal udfpsProp = mUdfpsProps.get(0);
+            final Rect previousUdfpsBounds = mUdfpsBounds;
             mUdfpsBounds = udfpsProp.getLocation().getRect();
             mUdfpsBounds.scale(scaleFactor);
             mUdfpsController.updateOverlayParams(udfpsProp.sensorId,
                     new UdfpsOverlayParams(mUdfpsBounds, displayInfo.getNaturalWidth(),
                             displayInfo.getNaturalHeight(), scaleFactor, displayInfo.rotation));
+            if (!Objects.equals(previousUdfpsBounds, mUdfpsBounds)) {
+                for (Callback cb : mCallbacks) {
+                    cb.onUdfpsLocationChanged();
+                }
+            }
         }
     }
 
@@ -1048,5 +1067,10 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
          * Called when the biometric prompt is no longer showing.
          */
         default void onBiometricPromptDismissed() {}
+
+        /**
+         * The location in pixels can change due to resolution changes.
+         */
+        default void onUdfpsLocationChanged() {}
     }
 }

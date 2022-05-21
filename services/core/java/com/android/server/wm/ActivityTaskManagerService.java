@@ -6695,5 +6695,31 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         .getTaskToShowPermissionDialogOn(pkgName, uid);
             }
         }
+
+        @Override
+        public void restartTaskActivityProcessIfVisible(int taskId, String packageName) {
+            synchronized (ActivityTaskManagerService.this.mGlobalLock) {
+                final Task task =
+                        ActivityTaskManagerService.this.mRootWindowContainer
+                                .anyTaskForId(taskId, MATCH_ATTACHED_TASK_ONLY);
+                if (task == null) {
+                    Slog.w(TAG, "Failed to restart Activity. No task found for id: " + taskId);
+                    return;
+                }
+
+                final ActivityRecord activity = task.getActivity(activityRecord -> {
+                    return packageName.equals(activityRecord.packageName)
+                            && !activityRecord.finishing;
+                });
+
+                if (activity == null) {
+                    Slog.w(TAG, "Failed to restart Activity. No Activity found for package name: "
+                            + packageName + " in task: " + taskId);
+                    return;
+                }
+
+                activity.restartProcessIfVisible();
+            }
+        }
     }
 }

@@ -542,6 +542,22 @@ class JobConcurrencyManager {
         return mRunningJobs.contains(job);
     }
 
+    /**
+     * Returns true if a job that is "similar" to the provided job is currently running.
+     * "Similar" in this context means any job that the {@link JobStore} would consider equivalent
+     * and replace one with the other.
+     */
+    @GuardedBy("mLock")
+    private boolean isSimilarJobRunningLocked(JobStatus job) {
+        for (int i = mRunningJobs.size() - 1; i >= 0; --i) {
+            JobStatus js = mRunningJobs.valueAt(i);
+            if (job.getUid() == js.getUid() && job.getJobId() == js.getJobId()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /** Return {@code true} if the state was updated. */
     @GuardedBy("mLock")
     private boolean refreshSystemStateLocked() {
@@ -699,6 +715,13 @@ class JobConcurrencyManager {
                 continue;
             }
 
+            final boolean isTopEj = nextPending.shouldTreatAsExpeditedJob()
+                    && nextPending.lastEvaluatedBias == JobInfo.BIAS_TOP_APP;
+            if (DEBUG && isSimilarJobRunningLocked(nextPending)) {
+                Slog.w(TAG, "Already running similar " + (isTopEj ? "TOP-EJ" : "job")
+                        + " to: " + nextPending);
+            }
+
             // Find an available slot for nextPending. The context should be one of the following:
             // 1. Unused
             // 2. Its job should have used up its minimum execution guarantee so it
@@ -707,8 +730,6 @@ class JobConcurrencyManager {
             ContextAssignment selectedContext = null;
             final int allWorkTypes = getJobWorkTypes(nextPending);
             final boolean pkgConcurrencyOkay = !isPkgConcurrencyLimitedLocked(nextPending);
-            final boolean isTopEj = nextPending.shouldTreatAsExpeditedJob()
-                    && nextPending.lastEvaluatedBias == JobInfo.BIAS_TOP_APP;
             final boolean isInOverage = projectedRunningCount > STANDARD_CONCURRENCY_LIMIT;
             boolean startingJob = false;
             if (idle.size() > 0) {
@@ -930,7 +951,7 @@ class JobConcurrencyManager {
         for (int i = 0; i < mActiveServices.size(); i++) {
             JobServiceContext jsc = mActiveServices.get(i);
             final JobStatus executing = jsc.getRunningJobLocked();
-            if (executing != null && executing.matches(job.getUid(), job.getJobId())) {
+            if (executing == job) {
                 jsc.cancelExecutingJobLocked(reason, internalReasonCode, debugReason);
                 return true;
             }
@@ -1177,6 +1198,10 @@ class JobConcurrencyManager {
                     continue;
                 }
 
+                if (DEBUG && isSimilarJobRunningLocked(nextPending)) {
+                    Slog.w(TAG, "Already running similar job to: " + nextPending);
+                }
+
                 if (worker.getPreferredUid() != nextPending.getUid()) {
                     if (backupJob == null && !isPkgConcurrencyLimitedLocked(nextPending)) {
                         int allWorkTypes = getJobWorkTypes(nextPending);
@@ -1258,6 +1283,10 @@ class JobConcurrencyManager {
                     }
                     pendingJobQueue.remove(nextPending);
                     continue;
+                }
+
+                if (DEBUG && isSimilarJobRunningLocked(nextPending)) {
+                    Slog.w(TAG, "Already running similar job to: " + nextPending);
                 }
 
                 if (isPkgConcurrencyLimitedLocked(nextPending)) {
