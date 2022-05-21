@@ -292,7 +292,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
 
     @Test
     @RunWithLooper(setAsMainLooper = true)
-    fun testAnimatorRunWhenWakeAndUnlock() {
+    fun testAnimatorRunWhenWakeAndUnlock_fingerprint() {
         val fpsLocation = PointF(5f, 5f)
         `when`(authController.fingerprintSensorLocation).thenReturn(fpsLocation)
         controller.onViewAttached()
@@ -306,6 +306,25 @@ class AuthRippleControllerTest : SysuiTestCase() {
         controller.onKeyguardFadingAwayChanged()
         assertFalse("reveal triggers multiple times",
             controller.startLightRevealScrimOnKeyguardFadingAway)
+    }
+
+    @Test
+    @RunWithLooper(setAsMainLooper = true)
+    fun testAnimatorRunWhenWakeAndUnlock_faceUdfpsFingerDown() {
+        val faceLocation = PointF(5f, 5f)
+        `when`(authController.faceAuthSensorLocation).thenReturn(faceLocation)
+        controller.onViewAttached()
+        `when`(keyguardUpdateMonitor.isKeyguardVisible).thenReturn(true)
+        `when`(biometricUnlockController.isWakeAndUnlock).thenReturn(true)
+        `when`(authController.isUdfpsFingerDown).thenReturn(true)
+
+        controller.showUnlockRipple(BiometricSourceType.FACE)
+        assertTrue("reveal didn't start on keyguardFadingAway",
+                controller.startLightRevealScrimOnKeyguardFadingAway)
+        `when`(keyguardStateController.isKeyguardFadingAway).thenReturn(true)
+        controller.onKeyguardFadingAwayChanged()
+        assertFalse("reveal triggers multiple times",
+                controller.startLightRevealScrimOnKeyguardFadingAway)
     }
 
     @Test
