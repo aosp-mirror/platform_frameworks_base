@@ -490,7 +490,7 @@ public class WatchedSparseArray<E> extends WatchableImpl
         for (int i = 0; i < end; i++) {
             final E val = Snapshots.maybeSnapshot(src.valueAt(i));
             final int key = src.keyAt(i);
-            dst.put(key, val);
+            dst.mStorage.put(key, val);
         }
         dst.seal();
     }

@@ -513,8 +513,21 @@ public abstract class Context {
      * restart.  There is no guarantee this will be respected, as the system
      * tries to balance such requests from one app vs. the importance of
      * keeping other apps around.
+     *
+     * @deprecated Repurposed to {@link #BIND_TREAT_LIKE_VISIBLE_FOREGROUND_SERVICE}.
      */
+    @Deprecated
     public static final int BIND_VISIBLE = 0x10000000;
+
+    /**
+     * @hide Flag for {@link #bindService}: Treat the binding as hosting a foreground service
+     * and also visible to the user. That is, the app hosting the service will get its process state
+     * bumped to the {@link android.app.ActivityManager#PROCESS_STATE_FOREGROUND_SERVICE},
+     * and it's considered as visible to the user, thus less likely to be expunged from memory
+     * on low memory situations. This is intented for use by processes with the process state
+     * better than the {@link android.app.ActivityManager#PROCESS_STATE_TOP}.
+     */
+    public static final int BIND_TREAT_LIKE_VISIBLE_FOREGROUND_SERVICE = 0x10000000;
 
     /**
      * @hide
@@ -2256,6 +2269,19 @@ public abstract class Context {
      */
     public void sendBroadcastMultiplePermissions(@NonNull Intent intent,
             @NonNull String[] receiverPermissions, @Nullable String[] excludedPermissions) {
+        sendBroadcastMultiplePermissions(intent, receiverPermissions, excludedPermissions, null);
+    }
+
+
+    /**
+     * Like {@link #sendBroadcastMultiplePermissions(Intent, String[], String[])}, but also allows
+     * specification of a list of excluded packages.
+     *
+     * @hide
+     */
+    public void sendBroadcastMultiplePermissions(@NonNull Intent intent,
+            @NonNull String[] receiverPermissions, @Nullable String[] excludedPermissions,
+            @Nullable String[] excludedPackages) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 

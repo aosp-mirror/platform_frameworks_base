@@ -28,6 +28,7 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
+import com.android.server.wm.flicker.helpers.ImeStateInitializeHelper
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.traces.common.FlickerComponentName
 import org.junit.FixMethodOrder
@@ -71,17 +72,20 @@ import org.junit.runners.Parameterized
 class LaunchAppShowImeOnStartTest(private val testSpec: FlickerTestParameter) {
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     private val testApp = ImeAppAutoFocusHelper(instrumentation, testSpec.startRotation)
+    private val initializeApp = ImeStateInitializeHelper(instrumentation)
 
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
             setup {
                 eachRun {
+                    initializeApp.launchViaIntent()
                     this.setRotation(testSpec.startRotation)
                 }
             }
             teardown {
                 eachRun {
+                    initializeApp.exit()
                     testApp.exit()
                 }
             }
