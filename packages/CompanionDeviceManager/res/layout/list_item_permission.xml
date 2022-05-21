@@ -20,8 +20,8 @@
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:orientation="horizontal"
-              android:paddingLeft="32dp"
-              android:paddingRight="32dp"
+              android:paddingStart="32dp"
+              android:paddingEnd="32dp"
               android:paddingBottom="14dp">
 
     <ImageView
@@ -30,7 +30,6 @@
         android:layout_height="24dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="12dp"
-        android:tint="@android:color/system_accent1_600"
         android:contentDescription="Permission Icon"/>
 
     <LinearLayout
@@ -51,7 +50,6 @@
             android:id="@+id/permission_summary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingRight="24dp"
             android:textSize="14sp"
             android:textColor="?android:attr/textColorSecondary"/>
 

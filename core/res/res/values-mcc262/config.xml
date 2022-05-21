@@ -21,5 +21,5 @@
      for different hardware and product builds. -->
 <resources>
   <!-- Set to false to disable emergency alert. -->
-  <bool name="config_cellBroadcastAppLinks">false</bool>
+  <bool name="config_cellBroadcastAppLinks">true</bool>
 </resources>

@@ -306,6 +306,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         if (focus) {
             doReturn(window.getWindowInfo().token)
                     .when(mWindowManagerInternal).getFocusedWindowToken();
+            doReturn(window).when(mWm).getFocusedWindowLocked();
         }
     }
 }

@@ -16,12 +16,14 @@
 
 package com.android.systemui.qs.carrier;
 
+import android.annotation.StyleRes;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 
 /**
@@ -54,5 +56,12 @@ public class QSCarrierGroup extends LinearLayout {
 
     View getCarrierDivider2() {
         return findViewById(R.id.qs_carrier_divider2);
+    }
+
+    public void updateTextAppearance(@StyleRes int resId) {
+        FontSizeUtils.updateFontSizeFromStyle(getNoSimTextView(), resId);
+        getCarrier1View().updateTextAppearance(resId);
+        getCarrier2View().updateTextAppearance(resId);
+        getCarrier3View().updateTextAppearance(resId);
     }
 }

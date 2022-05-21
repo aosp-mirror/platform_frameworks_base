@@ -123,6 +123,7 @@ public class CompanionDeviceDiscoveryService extends Service {
         intent.setAction(ACTION_START_DISCOVERY);
         intent.putExtra(EXTRA_ASSOCIATION_REQUEST, associationRequest);
         sStateLiveData.setValue(DiscoveryState.STARTING);
+        sScanResultsLiveData.setValue(Collections.emptyList());
 
         context.startService(intent);
     }
@@ -150,8 +151,6 @@ public class CompanionDeviceDiscoveryService extends Service {
         mBtAdapter = mBtManager.getAdapter();
         mBleScanner = mBtAdapter.getBluetoothLeScanner();
         mWifiManager = getSystemService(WifiManager.class);
-
-        sScanResultsLiveData.setValue(Collections.emptyList());
     }
 
     @Override

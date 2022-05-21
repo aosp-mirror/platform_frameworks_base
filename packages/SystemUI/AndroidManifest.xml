@@ -323,6 +323,8 @@
     <!-- To read safety center status -->
     <uses-permission android:name="android.permission.READ_SAFETY_CENTER_STATUS" />
 
+    <uses-permission android:name="android.permission.SET_UNRESTRICTED_KEEP_CLEAR_AREAS" />
+
     <protected-broadcast android:name="com.android.settingslib.action.REGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settingslib.action.UNREGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settings.flashlight.action.FLASHLIGHT_CHANGED" />
@@ -721,7 +723,7 @@
                   android:excludeFromRecents="true"
                   android:stateNotNeeded="true"
                   android:resumeWhilePausing="true"
-                  android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen">
+                  android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
             <intent-filter>
                 <action android:name="android.app.action.CONFIRM_DEVICE_CREDENTIAL_WITH_USER" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -931,6 +933,7 @@
                   android:exported="true">
             <intent-filter>
                 <action android:name="com.android.systemui.action.LAUNCH_MEDIA_OUTPUT_DIALOG" />
+                <action android:name="com.android.systemui.action.LAUNCH_MEDIA_OUTPUT_BROADCAST_DIALOG" />
                 <action android:name="com.android.systemui.action.DISMISS_MEDIA_OUTPUT_DIALOG" />
             </intent-filter>
         </receiver>
