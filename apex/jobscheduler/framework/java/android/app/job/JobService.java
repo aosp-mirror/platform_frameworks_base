@@ -32,16 +32,11 @@ import android.os.IBinder;
  * {@link #onStopJob(android.app.job.JobParameters)}, which is meant to inform you that the
  * scheduling requirements are no longer being met.</p>
  *
- * As a subclass of {@link Service}, there will only be one active instance of any JobService
+ * <p>As a subclass of {@link Service}, there will only be one active instance of any JobService
  * subclasses, regardless of job ID. This means that if you schedule multiple jobs with different
  * job IDs but using the same JobService class, that JobService may receive multiple calls to
  * {@link #onStartJob(JobParameters)} and {@link #onStopJob(JobParameters)}, with each call being
- * for the separate jobs.
- *
- * <p class="note">Note that if you cancel and reschedule an already executing job,
- * there may be a small period of time where {@link #onStartJob(JobParameters)} has been called for
- * the newly scheduled job instance before {@link #onStopJob(JobParameters)} has been called or
- * fully processed for the old job.</p>
+ * for the separate jobs.</p>
  */
 public abstract class JobService extends Service {
     private static final String TAG = "JobService";
