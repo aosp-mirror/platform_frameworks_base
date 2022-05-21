@@ -21,11 +21,12 @@
     android:id="@+id/qs_media_controls"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:clipChildren="false"
-    android:clipToPadding="false"
+    android:clipChildren="true"
+    android:clipToPadding="true"
     android:gravity="center_horizontal|fill_vertical"
     android:forceHasOverlappingRendering="false"
-    android:background="@drawable/qs_media_background"
+    android:background="@drawable/qs_media_outline_layout_bg"
+    android:clipToOutline="true"
     android:theme="@style/MediaPlayer">
 
     <ImageView
@@ -40,8 +41,8 @@
         android:scaleType="centerCrop"
         android:adjustViewBounds="true"
         android:clipToOutline="true"
+        android:background="@drawable/qs_media_outline_album_bg"
         android:foreground="@drawable/qs_media_scrim"
-        android:background="@drawable/qs_media_scrim"
         />
 
     <!-- Guideline for output switcher -->
@@ -63,8 +64,8 @@
     <!-- App icon -->
     <com.android.internal.widget.CachingIconView
         android:id="@+id/icon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="@dimen/qs_media_app_icon_size"
+        android:layout_height="@dimen/qs_media_app_icon_size"
         android:layout_marginStart="@dimen/qs_media_padding"
         android:layout_marginTop="@dimen/qs_media_padding"
         app:layout_constraintStart_toStartOf="parent"
@@ -80,7 +81,7 @@
         android:background="@drawable/qs_media_light_source"
         android:forceHasOverlappingRendering="false"
         android:layout_width="wrap_content"
-        android:layout_height="48dp"
+        android:layout_height="@dimen/min_clickable_item_size"
         android:layout_marginStart="@dimen/qs_center_guideline_padding"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -92,8 +93,9 @@
         <LinearLayout
             android:id="@+id/media_seamless_button"
             android:layout_width="wrap_content"
-            android:layout_height="@dimen/qs_seamless_height"
+            android:layout_height="wrap_content"
             android:minHeight="@dimen/qs_seamless_height"
+            android:maxHeight="@dimen/min_clickable_item_size"
             android:theme="@style/MediaPlayer.SolidButton"
             android:background="@drawable/qs_media_seamless_background"
             android:orientation="horizontal"
@@ -157,7 +159,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:barrierDirection="start"
-        app:constraint_referenced_ids="actionPrev,media_progress_bar,actionNext,action0,action1,action2,action3,action4"
+        app:constraint_referenced_ids="actionPrev,media_scrubbing_elapsed_time,media_progress_bar,actionNext,media_scrubbing_total_time,action0,action1,action2,action3,action4"
         />
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/media_action_barrier_end"
@@ -167,7 +169,7 @@
         app:layout_constraintTop_toBottomOf="@id/media_seamless"
         app:layout_constraintBottom_toBottomOf="parent"
         app:barrierDirection="end"
-        app:constraint_referenced_ids="actionPrev,media_progress_bar,actionNext,action0,action1,action2,action3,action4"
+        app:constraint_referenced_ids="actionPrev,media_scrubbing_elapsed_time,media_progress_bar,actionNext,media_scrubbing_total_time,action0,action1,action2,action3,action4"
         app:layout_constraintStart_toStartOf="parent"
         />
 
@@ -177,7 +179,7 @@
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:barrierDirection="top"
-        app:constraint_referenced_ids="actionPrev,media_progress_bar,actionNext,action0,action1,action2,action3,action4"
+        app:constraint_referenced_ids="actionPrev,media_scrubbing_elapsed_time,media_progress_bar,actionNext,media_scrubbing_total_time,action0,action1,action2,action3,action4"
         />
 
     <!-- Button visibility will be controlled in code -->
@@ -190,6 +192,22 @@
         android:layout_marginEnd="0dp"
         android:layout_marginBottom="@dimen/qs_media_padding"
         android:layout_marginTop="0dp"
+        />
+
+    <!-- Elapsed time, shown only when scrubbing -->
+    <!-- The space to the left of the progress bar will either be actionPrev or
+         media_scrubbing_elapsed_time, so they use the same layout constraints. Visibilities of
+         elements are controlled in code. -->
+    <TextView
+        android:id="@+id/media_scrubbing_elapsed_time"
+        style="@style/MediaPlayer.ScrubbingTime"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="0dp"
+        android:layout_marginBottom="@dimen/qs_media_padding"
+        android:layout_marginTop="0dp"
+        android:visibility="gone"
         />
 
     <!-- Seek Bar -->
@@ -217,6 +235,22 @@
         android:layout_marginEnd="@dimen/qs_media_action_spacing"
         android:layout_marginBottom="@dimen/qs_media_padding"
         android:layout_marginTop="0dp" />
+
+    <!-- Total time, shown only when scrubbing -->
+    <!-- The space to the right of the progress bar will either be actionNext or
+         media_scrubbing_total_time, so they use the same layout constraints. Visibilities of
+         elements are controlled in code. -->
+    <TextView
+        android:id="@+id/media_scrubbing_total_time"
+        style="@style/MediaPlayer.ScrubbingTime"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="0dp"
+        android:layout_marginEnd="@dimen/qs_media_action_spacing"
+        android:layout_marginBottom="@dimen/qs_media_padding"
+        android:layout_marginTop="0dp"
+        android:visibility="gone"
+        />
 
     <ImageButton
         android:id="@+id/action0"
@@ -268,87 +302,7 @@
         android:layout_marginBottom="@dimen/qs_media_padding"
         android:layout_marginTop="0dp" />
 
-    <!-- Long press menu -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="0dp"
-        android:layout_marginStart="@dimen/qs_media_padding"
-        android:layout_marginEnd="@dimen/qs_media_padding"
-        android:id="@+id/remove_text"
-        android:fontFamily="@*android:string/config_headlineFontFamily"
-        android:singleLine="true"
-        android:ellipsize="marquee"
-        android:marqueeRepeatLimit="marquee_forever"
-        android:text="@string/controls_media_close_session"
-        android:gravity="center_horizontal|top"
-        app:layout_constraintTop_toBottomOf="@id/settings"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/cancel" />
+    <include
+        layout="@layout/media_long_press_menu" />
 
-    <ImageButton
-        android:id="@+id/settings"
-        android:src="@drawable/ic_settings"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="4dp"
-        android:background="@drawable/qs_media_light_source"
-        android:contentDescription="@string/controls_media_settings_button"
-        android:layout_gravity="top"
-        app:layout_constraintWidth_min="@dimen/min_clickable_item_size"
-        app:layout_constraintHeight_min="@dimen/min_clickable_item_size"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-    </ImageButton>
-
-    <FrameLayout
-        android:id="@+id/dismiss"
-        android:background="@drawable/qs_media_light_source"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/qs_media_padding"
-        android:layout_marginEnd="@dimen/qs_media_action_spacing"
-        android:layout_marginBottom="@dimen/qs_media_padding"
-        app:layout_constrainedWidth="true"
-        app:layout_constraintWidth_min="@dimen/min_clickable_item_size"
-        app:layout_constraintHeight_min="@dimen/min_clickable_item_size"
-        app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/cancel"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/remove_text">
-        <TextView
-            android:id="@+id/dismiss_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center|top"
-            style="@style/MediaPlayer.SolidButton"
-            android:background="@drawable/qs_media_solid_button"
-            android:text="@string/controls_media_dismiss_button" />
-    </FrameLayout>
-    <FrameLayout
-        android:id="@+id/cancel"
-        android:background="@drawable/qs_media_light_source"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/qs_media_action_spacing"
-        android:layout_marginEnd="@dimen/qs_media_padding"
-        android:layout_marginBottom="@dimen/qs_media_padding"
-        app:layout_constrainedWidth="true"
-        app:layout_constraintWidth_min="@dimen/min_clickable_item_size"
-        app:layout_constraintHeight_min="@dimen/min_clickable_item_size"
-        app:layout_constraintStart_toEndOf="@id/dismiss"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/remove_text">
-        <TextView
-            android:id="@+id/cancel_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center|top"
-            style="@style/MediaPlayer.OutlineButton"
-            android:text="@string/cancel" />
-    </FrameLayout>
 </com.android.systemui.util.animation.TransitionLayout>

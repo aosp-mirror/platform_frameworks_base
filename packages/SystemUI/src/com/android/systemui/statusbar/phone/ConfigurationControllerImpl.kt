@@ -20,11 +20,14 @@ import android.content.res.Configuration
 import android.graphics.Rect
 import android.os.LocaleList
 import android.view.View.LAYOUT_DIRECTION_RTL
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.policy.ConfigurationController
 
 import java.util.ArrayList
+import javax.inject.Inject
 
-class ConfigurationControllerImpl(context: Context) : ConfigurationController {
+@SysUISingleton
+class ConfigurationControllerImpl @Inject constructor(context: Context) : ConfigurationController {
 
     private val listeners: MutableList<ConfigurationController.ConfigurationListener> = ArrayList()
     private val lastConfig = Configuration()

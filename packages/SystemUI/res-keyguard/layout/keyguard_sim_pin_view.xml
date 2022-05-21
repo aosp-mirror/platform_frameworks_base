@@ -59,16 +59,17 @@
                 android:layout_height="wrap_content"
                 android:paddingBottom="4dp"
                 >
+
             <com.android.keyguard.PasswordTextView
-                    android:id="@+id/simPinEntry"
-                    android:layout_width="@dimen/keyguard_security_width"
-                    android:layout_height="@dimen/keyguard_password_height"
-                    android:gravity="center"
-                    android:layout_centerHorizontal="true"
-                    android:layout_marginRight="72dp"
-                    androidprv:scaledTextSize="@integer/scaled_password_text_size"
-                    android:contentDescription="@string/keyguard_accessibility_sim_pin_area"
-                    />
+                android:id="@+id/simPinEntry"
+                style="@style/Widget.TextView.Password"
+                android:layout_width="@dimen/keyguard_security_width"
+                android:layout_height="@dimen/keyguard_password_height"
+                android:layout_centerHorizontal="true"
+                android:layout_marginRight="72dp"
+                android:contentDescription="@string/keyguard_accessibility_sim_pin_area"
+                android:gravity="center"
+                androidprv:scaledTextSize="@integer/scaled_password_text_size" />
         </RelativeLayout>
         <LinearLayout
                 android:layout_width="wrap_content"

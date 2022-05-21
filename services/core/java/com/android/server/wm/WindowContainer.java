@@ -236,6 +236,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     private boolean mCommittedReparentToAnimationLeash;
 
+    private int mSyncTransactionCommitCallbackDepth = 0;
+
     /** Interface for {@link #isAnimating} to check which cases for the container is animating. */
     public interface AnimationFlags {
         /**
@@ -1002,7 +1004,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     void onDisplayChanged(DisplayContent dc) {
         if (mDisplayContent != null && mDisplayContent.mChangingContainers.remove(this)) {
             // Cancel any change transition queued-up for this container on the old display.
-            mSurfaceFreezer.unfreeze(getPendingTransaction());
+            mSurfaceFreezer.unfreeze(getSyncTransaction());
         }
         mDisplayContent = dc;
         if (dc != null && dc != this) {
@@ -1580,6 +1582,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     /** Returns whether the window should be shown for current user. */
     boolean showToCurrentUser() {
         return true;
+    }
+
+    void forAllWindowContainers(Consumer<WindowContainer> callback) {
+        callback.accept(this);
+        final int count = mChildren.size();
+        for (int i = 0; i < count; i++) {
+            mChildren.get(i).forAllWindowContainers(callback);
+        }
     }
 
     /**
@@ -2687,7 +2697,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * @return {@link #mBLASTSyncTransaction} if available. Otherwise, returns
      * {@link #getPendingTransaction()}
      */
+    @Override
     public Transaction getSyncTransaction() {
+        if (mSyncTransactionCommitCallbackDepth > 0) {
+            return mSyncTransaction;
+        }
         if (mSyncState != SYNC_STATE_NONE) {
             return mSyncTransaction;
         }
@@ -2754,14 +2768,17 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     void cancelAnimation() {
         doAnimationFinished(mSurfaceAnimator.getAnimationType(), mSurfaceAnimator.getAnimation());
         mSurfaceAnimator.cancelAnimation();
-        mSurfaceFreezer.unfreeze(getPendingTransaction());
+        mSurfaceFreezer.unfreeze(getSyncTransaction());
     }
 
     /** Whether we can start change transition with this window and current display status. */
     boolean canStartChangeTransition() {
         return !mWmService.mDisableTransitionAnimation && mDisplayContent != null
                 && getSurfaceControl() != null && !mDisplayContent.inTransition()
-                && isVisible() && isVisibleRequested() && okToAnimate();
+                && isVisible() && isVisibleRequested() && okToAnimate()
+                // Pip animation will be handled by PipTaskOrganizer.
+                && !inPinnedWindowingMode() && getParent() != null
+                && !getParent().inPinnedWindowingMode();
     }
 
     /**
@@ -3179,7 +3196,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     @Override
     public void onAnimationLeashLost(Transaction t) {
         mLastLayer = -1;
+        mWmService.mSurfaceAnimationRunner.onAnimationLeashLost(mAnimationLeash, t);
         mAnimationLeash = null;
+        mNeedsZBoost = false;
         reassignLayer(t);
         updateSurfacePosition(t);
     }
@@ -3731,19 +3750,34 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             }
             // Otherwise this is the "root" of a synced subtree, so continue on to preparation.
         }
+
         // This container's situation has changed so we need to restart its sync.
-        mSyncState = SYNC_STATE_NONE;
+        // We cannot reset the sync without a chance of a deadlock since it will request a new
+        // buffer from the app process. This could cause issues if the app has run out of buffers
+        // since the previous buffer was already synced and is still held in a transaction.
+        // Resetting syncState violates the policies outlined in BlastSyncEngine.md so for now
+        // disable this when shell transitions is disabled.
+        if (mTransitionController.isShellTransitionsEnabled()) {
+            mSyncState = SYNC_STATE_NONE;
+        }
         prepareSync();
     }
 
     void registerWindowContainerListener(WindowContainerListener listener) {
+        registerWindowContainerListener(listener, true /* shouldPropConfig */);
+    }
+
+    void registerWindowContainerListener(WindowContainerListener listener,
+            boolean shouldDispatchConfig) {
         if (mListeners.contains(listener)) {
             return;
         }
         mListeners.add(listener);
         // Also register to ConfigurationChangeListener to receive configuration changes.
-        registerConfigurationChangeListener(listener);
-        listener.onDisplayChanged(getDisplayContent());
+        registerConfigurationChangeListener(listener, shouldDispatchConfig);
+        if (shouldDispatchConfig) {
+            listener.onDisplayChanged(getDisplayContent());
+        }
     }
 
     void unregisterWindowContainerListener(WindowContainerListener listener) {
@@ -3781,11 +3815,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return INVALID_WINDOW_TYPE;
     }
 
-    boolean setCanScreenshot(boolean canScreenshot) {
+    boolean setCanScreenshot(Transaction t, boolean canScreenshot) {
         if (mSurfaceControl == null) {
             return false;
         }
-        getPendingTransaction().setSecure(mSurfaceControl, !canScreenshot);
+        t.setSecure(mSurfaceControl, !canScreenshot);
         return true;
     }
 
@@ -3858,7 +3892,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 @AnimationType int type, @Nullable AnimationAdapter snapshotAnim);
     }
 
-    void addTrustedOverlay(SurfaceControlViewHost.SurfacePackage overlay) {
+    void addTrustedOverlay(SurfaceControlViewHost.SurfacePackage overlay,
+            @Nullable WindowState initialWindowState) {
         if (mOverlayHost == null) {
             mOverlayHost = new TrustedOverlayHost(mWmService);
         }
@@ -3873,6 +3908,20 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             ProtoLog.e(WM_DEBUG_ANIM,
                     "Error sending initial configuration change to WindowContainer overlay");
             removeTrustedOverlay(overlay);
+        }
+
+        // Emit an initial WindowState so that proper insets are available to overlay views
+        // shortly after the overlay is added.
+        if (initialWindowState != null) {
+            final InsetsState insetsState = initialWindowState.getInsetsState();
+            final Rect dispBounds = getBounds();
+            try {
+                overlay.getRemoteInterface().onInsetsChanged(insetsState, dispBounds);
+            } catch (Exception e) {
+                ProtoLog.e(WM_DEBUG_ANIM,
+                        "Error sending initial insets change to WindowContainer overlay");
+                removeTrustedOverlay(overlay);
+            }
         }
     }
 
@@ -3889,4 +3938,29 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             p.updateOverlayInsetsState(originalChange);
         }
     }
+
+    void waitForSyncTransactionCommit(ArraySet<WindowContainer> wcAwaitingCommit) {
+        if (wcAwaitingCommit.contains(this)) {
+            return;
+        }
+        mSyncTransactionCommitCallbackDepth++;
+        wcAwaitingCommit.add(this);
+
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            mChildren.get(i).waitForSyncTransactionCommit(wcAwaitingCommit);
+        }
+    }
+
+    void onSyncTransactionCommitted(SurfaceControl.Transaction t) {
+        mSyncTransactionCommitCallbackDepth--;
+        if (mSyncTransactionCommitCallbackDepth > 0) {
+            return;
+        }
+        if (mSyncState != SYNC_STATE_NONE) {
+            return;
+        }
+
+        t.merge(mSyncTransaction);
+    }
+
 }

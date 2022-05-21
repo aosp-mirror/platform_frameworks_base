@@ -23,12 +23,14 @@ import android.util.Log;
 import android.view.IWindowManager;
 import android.view.MotionEvent;
 
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.AutoHideUiElement;
 
 import javax.inject.Inject;
 
 /** A controller to control all auto-hide things. Also see {@link AutoHideUiElement}. */
+@SysUISingleton
 public class AutoHideController {
     private static final String TAG = "AutoHideController";
     private static final long AUTO_HIDE_TIMEOUT_MS = 2250;

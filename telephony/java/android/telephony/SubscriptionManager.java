@@ -1085,6 +1085,10 @@ public class SubscriptionManager {
      * <p>Refer to voice-centric mode in 3gpp 24.301 sec 4.3 and 3gpp 24.501 sec 4.3.
      * Also refer to "UE's usage setting" as defined in 3gpp 24.301 section 3.1 and 3gpp 23.221
      * Annex A.
+     *
+     * <p>Devices that support {@link PackageManager#FEATURE_TELEPHONY_CALLING} and support usage
+     * setting configuration must support setting this value via
+     * {@link CarrierConfigManager#KEY_CELLULAR_USAGE_SETTING_INT}.
      */
     public static final int USAGE_SETTING_VOICE_CENTRIC = 1;
 
@@ -1094,6 +1098,10 @@ public class SubscriptionManager {
      * <p>Refer to data-centric mode in 3gpp 24.301 sec 4.3 and 3gpp 24.501 sec 4.3.
      * Also refer to "UE's usage setting" as defined in 3gpp 24.301 section 3.1 and 3gpp 23.221
      * Annex A.
+     *
+     * <p>Devices that support {@link PackageManager#FEATURE_TELEPHONY_DATA} and support usage
+     * setting configuration must support setting this value via.
+     * {@link CarrierConfigManager#KEY_CELLULAR_USAGE_SETTING_INT}.
      */
     public static final int USAGE_SETTING_DATA_CENTRIC = 2;
 
@@ -2767,6 +2775,8 @@ public class SubscriptionManager {
                 overrideConfig.mnc = Configuration.MNC_ZERO;
                 cacheKey = null;
             }
+        } else {
+            cacheKey = null;
         }
 
         if (useRootLocale) {
@@ -3208,6 +3218,11 @@ public class SubscriptionManager {
      *
      *  @param subId sub id
      *  @param callbackIntent pending intent that will be sent after operation is done.
+     *
+     *  to-be-deprecated this API is a duplicate of {@link EuiccManager#switchToSubscription(int,
+     *  PendingIntent)} and does not support Multiple Enabled Profile(MEP). Apps should use
+     *  {@link EuiccManager#switchToSubscription(int, PendingIntent)} or
+     *  {@link EuiccManager#switchToSubscription(int, int, PendingIntent)} instead.
      */
     @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void switchToSubscription(int subId, @NonNull PendingIntent callbackIntent) {
@@ -3411,9 +3426,20 @@ public class SubscriptionManager {
      * Get subscriptionInfo list of subscriptions that are in the same group of given subId.
      * See {@link #createSubscriptionGroup(List)} for more details.
      *
-     * Caller will either have {@link android.Manifest.permission#READ_PHONE_STATE}
-     * permission or had carrier privilege permission on the subscription.
+     * Caller must have {@link android.Manifest.permission#READ_PHONE_STATE}
+     * or carrier privilege permission on the subscription.
      * {@link TelephonyManager#hasCarrierPrivileges()}
+     *
+     * <p>Starting with API level 33, the caller needs the additional permission
+     * {@link Manifest.permission#USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER}
+     * to get the list of subscriptions associated with a group UUID.
+     * This method can be invoked if one of the following requirements is met:
+     * <ul>
+     *     <li>If the app has carrier privilege permission.
+     *     {@link TelephonyManager#hasCarrierPrivileges()}
+     *     <li>If the app has {@link android.Manifest.permission#READ_PHONE_STATE} and
+     *     {@link Manifest.permission#USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER} permission.
+     * </ul>
      *
      * @throws IllegalStateException if Telephony service is in bad state.
      * @throws SecurityException if the caller doesn't meet the requirements

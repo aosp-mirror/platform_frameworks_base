@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.policy
 
 import android.app.IActivityManager
 import android.app.admin.DevicePolicyManager
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -28,6 +29,7 @@ import android.hardware.fingerprint.FingerprintManager
 import android.os.Handler
 import android.os.UserHandle
 import android.os.UserManager
+import android.provider.Settings
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.ThreadedRenderer
@@ -51,6 +53,11 @@ import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView
 import com.android.systemui.telephony.TelephonyListenerManager
 import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.argumentCaptor
+import com.android.systemui.util.mockito.capture
+import com.android.systemui.util.mockito.nullable
+import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.time.FakeSystemClock
 import org.junit.Assert.assertEquals
@@ -61,12 +68,11 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
-import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
-import org.mockito.Mockito.any
 import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.doReturn
+import org.mockito.Mockito.eq
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -95,8 +101,10 @@ class UserSwitcherControllerTest : SysuiTestCase() {
     @Mock private lateinit var notificationShadeWindowView: NotificationShadeWindowView
     @Mock private lateinit var threadedRenderer: ThreadedRenderer
     @Mock private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
+    @Mock private lateinit var globalSettings: GlobalSettings
     private lateinit var testableLooper: TestableLooper
     private lateinit var bgExecutor: FakeExecutor
+    private lateinit var longRunningExecutor: FakeExecutor
     private lateinit var uiExecutor: FakeExecutor
     private lateinit var uiEventLogger: UiEventLoggerFake
     private lateinit var userSwitcherController: UserSwitcherController
@@ -117,6 +125,7 @@ class UserSwitcherControllerTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
         bgExecutor = FakeExecutor(FakeSystemClock())
+        longRunningExecutor = FakeExecutor(FakeSystemClock())
         uiExecutor = FakeExecutor(FakeSystemClock())
         uiEventLogger = UiEventLoggerFake()
 
@@ -146,6 +155,22 @@ class UserSwitcherControllerTest : SysuiTestCase() {
         `when`(userTracker.userId).thenReturn(ownerId)
         `when`(userTracker.userInfo).thenReturn(ownerInfo)
 
+        `when`(
+            globalSettings.getIntForUser(
+                eq(Settings.Global.ADD_USERS_WHEN_LOCKED),
+                anyInt(),
+                eq(UserHandle.USER_SYSTEM)
+            )
+        ).thenReturn(0)
+
+        `when`(
+            globalSettings.getIntForUser(
+                eq(Settings.Global.USER_SWITCHER_ENABLED),
+                anyInt(),
+                eq(UserHandle.USER_SYSTEM)
+            )
+        ).thenReturn(1)
+
         setupController()
     }
 
@@ -166,7 +191,9 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 falsingManager,
                 telephonyListenerManager,
                 secureSettings,
+                globalSettings,
                 bgExecutor,
+                longRunningExecutor,
                 uiExecutor,
                 interactionJankMonitor,
                 latencyTracker,
@@ -465,5 +492,60 @@ class UserSwitcherControllerTest : SysuiTestCase() {
 
         // THEN a supervised user can NOT be constructed
         assertFalse(userSwitcherController.canCreateSupervisedUser())
+    }
+
+    @Test
+    fun testCannotCreateUserWhenUserSwitcherDisabled() {
+        `when`(
+            globalSettings.getIntForUser(
+                eq(Settings.Global.USER_SWITCHER_ENABLED),
+                anyInt(),
+                eq(UserHandle.USER_SYSTEM)
+            )
+        ).thenReturn(0)
+        setupController()
+        assertFalse(userSwitcherController.canCreateUser())
+    }
+
+    @Test
+    fun testCannotCreateGuestUserWhenUserSwitcherDisabled() {
+        `when`(
+            globalSettings.getIntForUser(
+                eq(Settings.Global.USER_SWITCHER_ENABLED),
+                anyInt(),
+                eq(UserHandle.USER_SYSTEM)
+            )
+        ).thenReturn(0)
+        setupController()
+        assertFalse(userSwitcherController.canCreateGuest(false))
+    }
+
+    @Test
+    fun testCannotCreateSupervisedUserWhenUserSwitcherDisabled() {
+        `when`(
+            globalSettings.getIntForUser(
+                eq(Settings.Global.USER_SWITCHER_ENABLED),
+                anyInt(),
+                eq(UserHandle.USER_SYSTEM)
+            )
+        ).thenReturn(0)
+        setupController()
+        assertFalse(userSwitcherController.canCreateSupervisedUser())
+    }
+
+    @Test
+    fun addUserSwitchCallback() {
+        val broadcastReceiverCaptor = argumentCaptor<BroadcastReceiver>()
+        verify(broadcastDispatcher).registerReceiver(
+                capture(broadcastReceiverCaptor),
+                any(),
+                nullable(), nullable(), anyInt(), nullable())
+
+        val cb = mock(UserSwitcherController.UserSwitchCallback::class.java)
+        userSwitcherController.addUserSwitchCallback(cb)
+
+        val intent = Intent(Intent.ACTION_USER_SWITCHED).putExtra(Intent.EXTRA_USER_HANDLE, guestId)
+        broadcastReceiverCaptor.value.onReceive(context, intent)
+        verify(cb).onUserSwitched()
     }
 }

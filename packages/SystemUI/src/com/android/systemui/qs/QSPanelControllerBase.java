@@ -41,7 +41,6 @@ import com.android.systemui.util.LargeScreenUtils;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.animation.DisappearParameters;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -309,11 +308,16 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     }
 
     void setListening(boolean listening) {
+        if (mView.isListening() == listening) return;
         mView.setListening(listening);
 
         if (mView.getTileLayout() != null) {
             mQSLogger.logAllTilesChangeListening(listening, mView.getDumpableTag(), mCachedSpecs);
             mView.getTileLayout().setListening(listening, mUiEventLogger);
+        }
+
+        if (mView.isListening()) {
+            refreshAllTiles();
         }
     }
 
@@ -387,12 +391,12 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println(getClass().getSimpleName() + ":");
         pw.println("  Tile records:");
         for (QSPanelControllerBase.TileRecord record : mRecords) {
             if (record.tile instanceof Dumpable) {
-                pw.print("    "); ((Dumpable) record.tile).dump(fd, pw, args);
+                pw.print("    "); ((Dumpable) record.tile).dump(pw, args);
                 pw.print("    "); pw.println(record.tileView.toString());
             }
         }
@@ -422,6 +426,14 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     @Nullable
     public View getBrightnessView() {
         return mView.getBrightnessView();
+    }
+
+    /**
+     * Set a listener to collapse/expand QS.
+     * @param action
+     */
+    public void setCollapseExpandAction(Runnable action) {
+        mView.setCollapseExpandAction(action);
     }
 
     /** Sets whether we are currently on lock screen. */

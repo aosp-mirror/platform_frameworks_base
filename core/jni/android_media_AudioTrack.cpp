@@ -37,6 +37,7 @@
 #include "android_media_AudioFormat.h"
 #include "android_media_AudioTrackCallback.h"
 #include "android_media_DeviceCallback.h"
+#include "android_media_JNIUtils.h"
 #include "android_media_MediaMetricsJNI.h"
 #include "android_media_PlaybackParams.h"
 #include "android_media_VolumeShaper.h"
@@ -82,7 +83,7 @@ class AudioTrackCallbackImpl : public AudioTrack::IAudioTrackCallback {
     AudioTrackCallbackImpl(jclass audioTrackClass, jobject audioTrackWeakRef, bool isOffload)
           : mIsOffload(isOffload)
     {
-      const auto env = getJNIEnv();
+      const auto env = getJNIEnvOrDie();
       mAudioTrackClass = (jclass)env->NewGlobalRef(audioTrackClass);
       // we use a weak reference so the AudioTrack object can be garbage collected.
       mAudioTrackWeakRef = env->NewGlobalRef(audioTrackWeakRef);
@@ -92,7 +93,7 @@ class AudioTrackCallbackImpl : public AudioTrack::IAudioTrackCallback {
     AudioTrackCallbackImpl(const AudioTrackCallbackImpl&) = delete;
     AudioTrackCallbackImpl& operator=(const AudioTrackCallbackImpl&) = delete;
     ~AudioTrackCallbackImpl() {
-        const auto env = getJNIEnv();
+        const auto env = getJNIEnvOrDie();
         env->DeleteGlobalRef(mAudioTrackClass);
         env->DeleteGlobalRef(mAudioTrackWeakRef);
     }
@@ -129,16 +130,9 @@ class AudioTrackCallbackImpl : public AudioTrack::IAudioTrackCallback {
   protected:
     jobject     mAudioTrackWeakRef;
   private:
-     JNIEnv* getJNIEnv() {
-          auto jni = AndroidRuntime::getJNIEnv();
-          if (jni == nullptr) {
-              LOG_ALWAYS_FATAL("AudioTrackCallback thread JNI reference is null");
-          }
-          return jni;
-     }
 
      void postEvent(int event, int arg = 0) {
-        auto env = getJNIEnv();
+        auto env = getJNIEnvOrDie();
         env->CallStaticVoidMethod(
                 mAudioTrackClass,
                 javaAudioTrackFields.postNativeEventInJava,
@@ -216,7 +210,6 @@ public:
     static void initCheckOrDie(JNIEnv *env) { (void)getIds(env); }
 };
 
-static Mutex sLock;
 
 // ----------------------------------------------------------------------------
 #define DEFAULT_OUTPUT_SAMPLE_RATE   44100
@@ -235,32 +228,6 @@ sp<IMemory> allocSharedMem(int sizeInBytes) {
     }
     return sp<MemoryBase>::make(heap, 0, sizeInBytes);
 }
-// TODO(b/218351957) move somewhere?
-template<typename T>
-sp<T> getFieldSp(JNIEnv* env, jobject thiz, jfieldID id)
-{
-    // make these fields atomic longs on the java side
-    Mutex::Autolock l(sLock);
-    return sp<T>::fromExisting(reinterpret_cast<T*>(env->GetLongField(thiz, id)));
-}
-
-// This (semantically) should only be called on AudioTrack creation and release
-template <typename T>
-sp<T> setFieldSp(JNIEnv* env, jobject thiz, const sp<T>& at, jfieldID id)
-{
-    Mutex::Autolock l(sLock);
-    // I don't think this synchronization actually prevents a race
-    // We can still invalidate under our feet in release
-    sp<T> old = sp<T>::fromExisting(reinterpret_cast<T*>(env->GetLongField(thiz, id)));
-    if (at.get()) {
-        at->incStrong((void*)setFieldSp<T>);
-    }
-    if (old != 0) {
-        old->decStrong((void*)setFieldSp<T>);
-    }
-    env->SetLongField(thiz, id, (jlong)at.get());
-    return old;
-}
 
 sp<AudioTrack> getAudioTrack(JNIEnv* env, jobject thiz) {
     return getFieldSp<AudioTrack>(env, thiz, javaAudioTrackFields.nativeTrackInJavaObj);
@@ -268,8 +235,9 @@ sp<AudioTrack> getAudioTrack(JNIEnv* env, jobject thiz) {
 
 } // anonymous
 // ----------------------------------------------------------------------------
+// For MediaSync
 sp<AudioTrack> android_media_AudioTrack_getAudioTrack(JNIEnv* env, jobject audioTrackObj) {
-    return getFieldSp<AudioTrack>(env, audioTrackObj, javaAudioTrackFields.nativeTrackInJavaObj);
+    return getAudioTrack(env, audioTrackObj);
 }
 
 // ----------------------------------------------------------------------------
@@ -524,8 +492,9 @@ native_init_failure:
     if (nSession != NULL) {
         env->ReleasePrimitiveArrayCritical(jSession, nSession, 0);
     }
-    env->SetLongField(thiz, javaAudioTrackFields.jniData, 0);
 
+    setFieldSp(env, thiz, sp<AudioTrack>{}, javaAudioTrackFields.nativeTrackInJavaObj);
+    setFieldSp(env, thiz, sp<AudioTrackJniStorage>{}, javaAudioTrackFields.jniData);
     // lpTrack goes out of scope, so reference count drops to zero
     return (jint) AUDIOTRACK_ERROR_SETUP_NATIVEINITFAILED;
 }

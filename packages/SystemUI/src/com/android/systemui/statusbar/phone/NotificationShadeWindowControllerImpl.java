@@ -30,6 +30,7 @@ import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Region;
 import android.os.Binder;
+import android.os.Build;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.util.Log;
@@ -60,7 +61,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
@@ -111,7 +111,6 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
 
     private final SysuiColorExtractor mColorExtractor;
     private final ScreenOffAnimationController mScreenOffAnimationController;
-    private float mFaceAuthDisplayBrightness = LayoutParams.BRIGHTNESS_OVERRIDE_NONE;
     /**
      * Layout params would be aggregated and dispatched all at once if this is > 0.
      *
@@ -266,12 +265,6 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         mScreenBrightnessDoze = value / 255f;
     }
 
-    @Override
-    public void setFaceAuthDisplayBrightness(float brightness) {
-        mFaceAuthDisplayBrightness = brightness;
-        apply(mCurrentState);
-    }
-
     private void setKeyguardDark(boolean dark) {
         int vis = mNotificationShadeView.getSystemUiVisibility();
         if (dark) {
@@ -288,7 +281,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         final boolean keyguardOrAod = state.mKeyguardShowing
                 || (state.mDozing && mDozeParameters.getAlwaysOn());
         if ((keyguardOrAod && !state.mBackdropShowing && !state.mLightRevealScrimOpaque)
-                || mKeyguardViewMediator.isAnimatingBetweenKeyguardAndSurfaceBehindOrWillBe()) {
+                || mKeyguardViewMediator.isAnimatingBetweenKeyguardAndSurfaceBehind()) {
             // Show the wallpaper if we're on keyguard/AOD and the wallpaper is not occluded by a
             // solid backdrop. Also, show it if we are currently animating between the
             // keyguard and the surface behind the keyguard - we want to use the wallpaper as a
@@ -327,10 +320,20 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             Trace.setCounter("display_max_refresh_rate",
                     (long) mLpChanged.preferredMaxDisplayRefreshRate);
         }
+
+        if (state.mBouncerShowing && !isDebuggable()) {
+            mLpChanged.flags |= LayoutParams.FLAG_SECURE;
+        } else {
+            mLpChanged.flags &= ~LayoutParams.FLAG_SECURE;
+        }
+    }
+
+    protected boolean isDebuggable() {
+        return Build.IS_DEBUGGABLE;
     }
 
     private void adjustScreenOrientation(State state) {
-        if (state.isKeyguardShowingAndNotOccluded() || state.mDozing) {
+        if (state.mBouncerShowing || state.isKeyguardShowingAndNotOccluded() || state.mDozing) {
             if (mKeyguardStateController.isKeyguardScreenRotationAllowed()) {
                 mLpChanged.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_USER;
             } else {
@@ -445,7 +448,9 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
 
     private void applyWindowLayoutParams() {
         if (mDeferWindowLayoutParams == 0 && mLp != null && mLp.copyFrom(mLpChanged) != 0) {
+            Trace.beginSection("updateViewLayout");
             mWindowManager.updateViewLayout(mNotificationShadeView, mLp);
+            Trace.endSection();
         }
     }
 
@@ -513,7 +518,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         if (state.mForceDozeBrightness) {
             mLpChanged.screenBrightness = mScreenBrightnessDoze;
         } else {
-            mLpChanged.screenBrightness = mFaceAuthDisplayBrightness;
+            mLpChanged.screenBrightness = LayoutParams.BRIGHTNESS_OVERRIDE_NONE;
         }
     }
 
@@ -562,6 +567,10 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
 
     @Override
     public void setPanelVisible(boolean visible) {
+        if (mCurrentState.mPanelVisible == visible
+                && mCurrentState.mNotificationShadeFocusable == visible) {
+            return;
+        }
         mCurrentState.mPanelVisible = visible;
         mCurrentState.mNotificationShadeFocusable = visible;
         apply(mCurrentState);
@@ -616,8 +625,14 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
 
     @Override
     public void setScrimsVisibility(int scrimsVisibility) {
+        if (scrimsVisibility == mCurrentState.mScrimsVisibility) {
+            return;
+        }
+        boolean wasExpanded = isExpanded(mCurrentState);
         mCurrentState.mScrimsVisibility = scrimsVisibility;
-        apply(mCurrentState);
+        if (wasExpanded != isExpanded(mCurrentState)) {
+            apply(mCurrentState);
+        }
         mScrimsVisibilityListener.accept(scrimsVisibility);
     }
 
@@ -677,6 +692,9 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
 
     @Override
     public void setPanelExpanded(boolean isExpanded) {
+        if (mCurrentState.mPanelExpanded == isExpanded) {
+            return;
+        }
         mCurrentState.mPanelExpanded = isExpanded;
         apply(mCurrentState);
     }
@@ -693,6 +711,9 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
      */
     @Override
     public void setForceDozeBrightness(boolean forceDozeBrightness) {
+        if (mCurrentState.mForceDozeBrightness == forceDozeBrightness) {
+            return;
+        }
         mCurrentState.mForceDozeBrightness = forceDozeBrightness;
         apply(mCurrentState);
     }
@@ -754,7 +775,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println(TAG + ":");
         pw.println("  mKeyguardMaxRefreshRate=" + mKeyguardMaxRefreshRate);
         pw.println("  mKeyguardPreferredRefreshRate=" + mKeyguardPreferredRefreshRate);
@@ -831,7 +852,6 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         boolean mLightRevealScrimOpaque;
         boolean mForceCollapsed;
         boolean mForceDozeBrightness;
-        int mFaceAuthDisplayBrightness;
         boolean mForceUserActivity;
         boolean mLaunchingActivity;
         boolean mBackdropShowing;

@@ -27,9 +27,10 @@
            parent="@android:style/TextAppearance.DeviceDefault.Medium">
     </style>
 
-    <style name="Spinner.SettingsLib"
-           parent="android:style/Widget.Material.Spinner">
-        <item name="android:background">@drawable/settingslib_spinner_background</item>
-        <item name="android:dropDownVerticalOffset">48dp</item>
+    <style name="TextAppearance.TopIntroText"
+        parent="@android:style/TextAppearance.DeviceDefault">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
+
 </resources>

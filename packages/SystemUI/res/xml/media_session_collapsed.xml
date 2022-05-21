@@ -93,6 +93,11 @@
         app:layout_constraintTop_toBottomOf="@id/media_seamless"
         app:layout_constraintLeft_toRightOf="@id/media_action_barrier" />
 
+    <!-- Showing time while scrubbing isn't available in collapsed mode. -->
+    <Constraint
+        android:id="@+id/media_scrubbing_elapsed_time"
+        android:visibility="gone" />
+
     <Constraint
         android:id="@+id/media_progress_bar"
         android:layout_width="0dp"
@@ -115,6 +120,11 @@
         app:layout_constraintRight_toLeftOf="@id/action0"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/media_seamless" />
+
+    <!-- Showing time while scrubbing isn't available in collapsed mode. -->
+    <Constraint
+        android:id="@+id/media_scrubbing_total_time"
+        android:visibility="gone" />
 
     <Constraint
         android:id="@+id/action0"

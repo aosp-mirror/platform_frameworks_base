@@ -108,7 +108,7 @@ final class DeletePackageHelper {
     }
 
     /**
-     *  This method is an internal method that could be get invoked either
+     *  This method is an internal method that could be invoked either
      *  to delete an installed package or to clean up a failed installation.
      *  After deleting an installed package, a broadcast is sent to notify any
      *  listeners that the package has been removed. For cleaning up a failed
@@ -146,6 +146,8 @@ final class DeletePackageHelper {
         int[] allUsers;
         final int freezeUser;
         final SparseArray<TempUserState> priorUserStates;
+
+        final boolean isInstallerPackage;
         /** enabled state of the uninstalled application */
         synchronized (mPm.mLock) {
             final Computer computer = mPm.snapshotComputer();
@@ -164,9 +166,11 @@ final class DeletePackageHelper {
 
             if (PackageManagerServiceUtils.isSystemApp(uninstalledPs)) {
                 UserInfo userInfo = mUserManagerInternal.getUserInfo(userId);
-                if (userInfo == null || !userInfo.isAdmin()) {
+                if (userInfo == null || (!userInfo.isAdmin() && !mUserManagerInternal.getUserInfo(
+                        mUserManagerInternal.getProfileParentId(userId)).isAdmin())) {
                     Slog.w(TAG, "Not removing package " + packageName
-                            + " as only admin user may downgrade system apps");
+                            + " as only admin user (or their profile) may downgrade system apps");
+                    EventLog.writeEvent(0x534e4554, "170646036", -1, packageName);
                     return PackageManager.DELETE_FAILED_USER_RESTRICTED;
                 }
             }
@@ -225,6 +229,8 @@ final class DeletePackageHelper {
                 freezeUser = removeUser;
                 priorUserStates = null;
             }
+
+            isInstallerPackage = mPm.mSettings.isInstallerPackage(packageName);
         }
 
         synchronized (mPm.mInstallLock) {
@@ -321,6 +327,12 @@ final class DeletePackageHelper {
                     }
                 }
             }
+        }
+
+        if (res && isInstallerPackage) {
+            final PackageInstallerService packageInstallerService =
+                    mPm.mInjector.getPackageInstallerService();
+            packageInstallerService.onInstallerPackageDeleted(uninstalledPs.getAppId(), removeUser);
         }
 
         return res ? PackageManager.DELETE_SUCCEEDED : PackageManager.DELETE_FAILED_INTERNAL_ERROR;
@@ -532,8 +544,9 @@ final class DeletePackageHelper {
         synchronized (mPm.mLock) {
             if (outInfo != null) {
                 outInfo.mUid = ps.getAppId();
-                outInfo.mBroadcastAllowList = mPm.mAppsFilter.getVisibilityAllowList(ps,
-                        allUserHandles, mPm.mSettings.getPackagesLocked());
+                outInfo.mBroadcastAllowList = mPm.mAppsFilter.getVisibilityAllowList(
+                        mPm.snapshotComputer(), ps, allUserHandles,
+                        mPm.mSettings.getPackagesLocked());
             }
         }
 

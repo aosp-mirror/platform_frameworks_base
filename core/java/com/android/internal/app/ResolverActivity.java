@@ -61,6 +61,7 @@ import android.os.Bundle;
 import android.os.PatternMatcher;
 import android.os.RemoteException;
 import android.os.StrictMode;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.MediaStore;
@@ -69,7 +70,6 @@ import android.stats.devicepolicy.DevicePolicyEnums;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -99,6 +99,7 @@ import com.android.internal.app.chooser.TargetInfo;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
+import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.ResolverDrawerLayout;
 import com.android.internal.widget.ViewPager;
 
@@ -120,6 +121,11 @@ public class ResolverActivity extends Activity implements
 
     @UnsupportedAppUsage
     public ResolverActivity() {
+        mIsIntentPicker = getClass().equals(ResolverActivity.class);
+    }
+
+    protected ResolverActivity(boolean isIntentPicker) {
+        mIsIntentPicker = isIntentPicker;
     }
 
     private boolean mSafeForwardingMode;
@@ -136,6 +142,8 @@ public class ResolverActivity extends Activity implements
     private String mReferrerPackage;
     private CharSequence mTitle;
     private int mDefaultTitleResId;
+    // Expected to be true if this object is ResolverActivity or is ResolverWrapperActivity.
+    private final boolean mIsIntentPicker;
 
     // Whether or not this activity supports choosing a default handler for the intent.
     @VisibleForTesting
@@ -156,8 +164,6 @@ public class ResolverActivity extends Activity implements
 
     /** See {@link #setRetainInOnStop}. */
     private boolean mRetainInOnStop;
-
-    protected static final int REQUEST_CODE_RETURN_FROM_DELEGATE_CHOOSER = 20;
 
     private static final String EXTRA_SHOW_FRAGMENT_ARGS = ":settings:show_fragment_args";
     private static final String EXTRA_FRAGMENT_ARG_KEY = ":settings:fragment_args_key";
@@ -210,7 +216,11 @@ public class ResolverActivity extends Activity implements
 
     private UserHandle mWorkProfileUserHandle;
 
-    protected boolean mAwaitingDelegateResponse;
+    protected final LatencyTracker mLatencyTracker = getLatencyTracker();
+
+    private LatencyTracker getLatencyTracker() {
+        return LatencyTracker.getInstance(this);
+    }
 
     /**
      * Get the string resource to be used as a label for the link to the resolver activity for an
@@ -326,86 +336,6 @@ public class ResolverActivity extends Activity implements
      */
     protected void super_onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-    }
-
-    /**
-     * Pass-through API to support {@link ChooserActivity} running in "headless springboard" mode
-     * where we hand over to the unbundled chooser (while violating many of the invariants of a
-     * typical ResolverActivity implementation). Subclasses running in this mode need to be able
-     * to opt-out of the normal ResolverActivity behavior.
-     *
-     * TODO: this should be removed later on in the unbundling migration, when the springboard
-     * activity no longer needs to derive from ResolverActivity. The hold-over design here is
-     * <em>not</em> good practice (e.g. there could be other events that weren't anticipated as
-     * requiring this kind of "pass-through" override, and so might fall back on ResolverActivity
-     * implementations that depend on the invariants that are violated in the headless mode). If
-     * necessary, we could instead consider using a springboard-only activity on the system side
-     * immediately, which would delegate either to the unbundled chooser, or to a
-     * (properly-inheriting) system ChooserActivity. This would have performance implications even
-     * when the unbundling experiment is disabled.
-     */
-    protected void super_onRestart() {
-        super.onRestart();
-    }
-
-    /**
-     * Pass-through API to support {@link ChooserActivity} running in "headless springboard" mode
-     * where we hand over to the unbundled chooser (while violating many of the invariants of a
-     * typical ResolverActivity implementation). Subclasses running in this mode need to be able
-     * to opt-out of the normal ResolverActivity behavior.
-     *
-     * TODO: this should be removed later on in the unbundling migration, when the springboard
-     * activity no longer needs to derive from ResolverActivity. The hold-over design here is
-     * <em>not</em> good practice (e.g. there could be other events that weren't anticipated as
-     * requiring this kind of "pass-through" override, and so might fall back on ResolverActivity
-     * implementations that depend on the invariants that are violated in the headless mode). If
-     * necessary, we could instead consider using a springboard-only activity on the system side
-     * immediately, which would delegate either to the unbundled chooser, or to a
-     * (properly-inheriting) system ChooserActivity. This would have performance implications even
-     * when the unbundling experiment is disabled.
-     */
-    protected void super_onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-    }
-
-    /**
-     * Pass-through API to support {@link ChooserActivity} running in "headless springboard" mode
-     * where we hand over to the unbundled chooser (while violating many of the invariants of a
-     * typical ResolverActivity implementation). Subclasses running in this mode need to be able
-     * to opt-out of the normal ResolverActivity behavior.
-     *
-     * TODO: this should be removed later on in the unbundling migration, when the springboard
-     * activity no longer needs to derive from ResolverActivity. The hold-over design here is
-     * <em>not</em> good practice (e.g. there could be other events that weren't anticipated as
-     * requiring this kind of "pass-through" override, and so might fall back on ResolverActivity
-     * implementations that depend on the invariants that are violated in the headless mode). If
-     * necessary, we could instead consider using a springboard-only activity on the system side
-     * immediately, which would delegate either to the unbundled chooser, or to a
-     * (properly-inheriting) system ChooserActivity. This would have performance implications even
-     * when the unbundling experiment is disabled.
-     */
-    protected void super_onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-    }
-
-    /**
-     * Pass-through API to support {@link ChooserActivity} running in "headless springboard" mode
-     * where we hand over to the unbundled chooser (while violating many of the invariants of a
-     * typical ResolverActivity implementation). Subclasses running in this mode need to be able
-     * to opt-out of the normal ResolverActivity behavior.
-     *
-     * TODO: this should be removed later on in the unbundling migration, when the springboard
-     * activity no longer needs to derive from ResolverActivity. The hold-over design here is
-     * <em>not</em> good practice (e.g. there could be other events that weren't anticipated as
-     * requiring this kind of "pass-through" override, and so might fall back on ResolverActivity
-     * implementations that depend on the invariants that are violated in the headless mode). If
-     * necessary, we could instead consider using a springboard-only activity on the system side
-     * immediately, which would delegate either to the unbundled chooser, or to a
-     * (properly-inheriting) system ChooserActivity. This would have performance implications even
-     * when the unbundling experiment is disabled.
-     */
-    public void super_onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
     }
 
     @Override
@@ -526,10 +456,6 @@ public class ResolverActivity extends Activity implements
                 : MetricsProto.MetricsEvent.ACTION_SHOW_APP_DISAMBIG_NONE_FEATURED,
                 intent.getAction() + ":" + intent.getType() + ":"
                         + (categories != null ? Arrays.toString(categories.toArray()) : ""));
-    }
-
-    private boolean isIntentPicker() {
-        return getClass().equals(ResolverActivity.class);
     }
 
     protected AbstractMultiProfilePagerAdapter createMultiProfilePagerAdapter(
@@ -682,9 +608,7 @@ public class ResolverActivity extends Activity implements
         mProfileSwitchMessage = null;
 
         onTargetSelected(dri, false);
-        if (!mAwaitingDelegateResponse) {
-            finish();
-        }
+        finish();
     }
 
     /**
@@ -722,6 +646,12 @@ public class ResolverActivity extends Activity implements
 
         resetButtonBar();
 
+        if (shouldUseMiniResolver()) {
+            View buttonContainer = findViewById(R.id.button_bar_container);
+            buttonContainer.setPadding(0, 0, 0, mSystemWindowInsets.bottom
+                    + getResources().getDimensionPixelOffset(R.dimen.resolver_button_bar_spacing));
+        }
+
         // Need extra padding so the list can fully scroll up
         if (shouldAddFooterView()) {
             applyFooterView(mSystemWindowInsets.bottom);
@@ -734,7 +664,8 @@ public class ResolverActivity extends Activity implements
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         mMultiProfilePagerAdapter.getActiveListAdapter().handlePackagesChanged();
-        if (isIntentPicker() && shouldShowTabs() && !useLayoutWithDefault()) {
+        if (mIsIntentPicker && shouldShowTabs() && !useLayoutWithDefault()
+                && !shouldUseMiniResolver()) {
             updateIntentPickerPaddings();
         }
 
@@ -757,7 +688,6 @@ public class ResolverActivity extends Activity implements
                 getResources().getDimensionPixelSize(R.dimen.resolver_button_bar_spacing),
                 buttonBar.getPaddingRight(),
                 getResources().getDimensionPixelSize(R.dimen.resolver_button_bar_spacing));
-        mMultiProfilePagerAdapter.updateAfterConfigChange();
     }
 
     @Override // ResolverListCommunicator
@@ -974,7 +904,7 @@ public class ResolverActivity extends Activity implements
         }
         final Intent intent = getIntent();
         if ((intent.getFlags() & FLAG_ACTIVITY_NEW_TASK) != 0 && !isVoiceInteraction()
-                && !mResolvingHome && !mRetainInOnStop && !mAwaitingDelegateResponse) {
+                && !mResolvingHome && !mRetainInOnStop) {
             // This resolver is in the unusual situation where it has been
             // launched at the top of a new task.  We don't let it be added
             // to the recent tasks shown to the user, and we need to make sure
@@ -1143,9 +1073,7 @@ public class ResolverActivity extends Activity implements
                     mMultiProfilePagerAdapter.getActiveListAdapter().hasFilteredItem()
                             ? MetricsProto.MetricsEvent.ACTION_HIDE_APP_DISAMBIG_APP_FEATURED
                             : MetricsProto.MetricsEvent.ACTION_HIDE_APP_DISAMBIG_NONE_FEATURED);
-            if (!mAwaitingDelegateResponse) {
-                finish();
-            }
+            finish();
         }
     }
 
@@ -1172,7 +1100,7 @@ public class ResolverActivity extends Activity implements
         if (isAutolaunching()) {
             return;
         }
-        if (isIntentPicker()) {
+        if (mIsIntentPicker) {
             ((ResolverMultiProfilePagerAdapter) mMultiProfilePagerAdapter)
                     .setUseLayoutWithDefault(useLayoutWithDefault());
         }
@@ -1196,7 +1124,7 @@ public class ResolverActivity extends Activity implements
     protected void onListRebuilt(ResolverListAdapter listAdapter, boolean rebuildCompleted) {
         final ItemClickListener listener = new ItemClickListener();
         setupAdapterListView((ListView) mMultiProfilePagerAdapter.getActiveAdapterView(), listener);
-        if (shouldShowTabs() && isIntentPicker()) {
+        if (shouldShowTabs() && mIsIntentPicker) {
             final ResolverDrawerLayout rdl = findViewById(R.id.contentPanel);
             if (rdl != null) {
                 rdl.setMaxCollapsedHeight(getResources()
@@ -1459,27 +1387,6 @@ public class ResolverActivity extends Activity implements
     }
 
 
-    public boolean startAsCallerImpl(Intent intent, Bundle options, boolean ignoreTargetSecurity,
-            int userId) {
-        // Note: this method will be overridden in the delegate implementation to use the passed-in
-        // permission token.
-        startActivityAsCaller(intent, options, false, userId);
-        return true;
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case REQUEST_CODE_RETURN_FROM_DELEGATE_CHOOSER:
-                // Repeat the delegate's result as our own.
-                setResult(resultCode, data);
-                finish();
-                break;
-            default:
-                super.onActivityResult(requestCode, resultCode, data);
-        }
-    }
-
     public void onActivityStarted(TargetInfo cti) {
         // Do nothing
     }
@@ -1532,6 +1439,7 @@ public class ResolverActivity extends Activity implements
             throw new IllegalStateException("mMultiProfilePagerAdapter.getCurrentListAdapter() "
                     + "cannot be null.");
         }
+        Trace.beginSection("configureContentView");
         // We partially rebuild the inactive adapter to determine if we should auto launch
         // isTabLoaded will be true here if the empty state screen is shown instead of the list.
         boolean rebuildCompleted = mMultiProfilePagerAdapter.rebuildActiveTab(true)
@@ -1544,6 +1452,7 @@ public class ResolverActivity extends Activity implements
 
         if (shouldUseMiniResolver()) {
             configureMiniResolverContent();
+            Trace.endSection();
             return false;
         }
 
@@ -1554,9 +1463,17 @@ public class ResolverActivity extends Activity implements
         }
         setContentView(mLayoutId);
         mMultiProfilePagerAdapter.setupViewPager(findViewById(R.id.profile_pager));
-        return postRebuildList(rebuildCompleted);
+        boolean result = postRebuildList(rebuildCompleted);
+        Trace.endSection();
+        return result;
     }
 
+    /**
+     * Mini resolver is shown when the user is choosing between browser[s] in this profile and a
+     * single app in the other profile (see shouldUseMiniResolver()). It shows the single app icon
+     * and asks the user if they'd like to open that cross-profile app or use the in-profile
+     * browser.
+     */
     private void configureMiniResolverContent() {
         mLayoutId = R.layout.miniresolver;
         setContentView(mLayoutId);
@@ -1565,10 +1482,14 @@ public class ResolverActivity extends Activity implements
                 mMultiProfilePagerAdapter.getActiveListAdapter().mDisplayList.get(0);
         boolean inWorkProfile = getCurrentProfile() == PROFILE_WORK;
 
-        DisplayResolveInfo otherProfileResolveInfo =
-                mMultiProfilePagerAdapter.getInactiveListAdapter().mDisplayList.get(0);
+        ResolverListAdapter inactiveAdapter = mMultiProfilePagerAdapter.getInactiveListAdapter();
+        DisplayResolveInfo otherProfileResolveInfo = inactiveAdapter.mDisplayList.get(0);
+
+        // Load the icon asynchronously
         ImageView icon = findViewById(R.id.icon);
-        // TODO: Set icon drawable to app icon.
+        ResolverListAdapter.LoadIconTask iconTask = inactiveAdapter.new LoadIconTask(
+                        otherProfileResolveInfo, new ResolverListAdapter.ViewHolder(icon));
+        iconTask.execute();
 
         ((TextView) findViewById(R.id.open_cross_profile)).setText(
                 getResources().getString(
@@ -1587,13 +1508,21 @@ public class ResolverActivity extends Activity implements
             if (intent != null) {
                 prepareIntentForCrossProfileLaunch(intent);
             }
-            safelyStartActivityInternal(otherProfileResolveInfo,
-                    mMultiProfilePagerAdapter.getInactiveListAdapter().mResolverListController
-                            .getUserHandle());
+            safelyStartActivityAsUser(otherProfileResolveInfo,
+                    inactiveAdapter.mResolverListController.getUserHandle());
         });
     }
 
+    /**
+     * Mini resolver should be used when all of the following are true:
+     * 1. This is the intent picker (ResolverActivity).
+     * 2. This profile only has web browser matches.
+     * 3. The other profile has a single non-browser match.
+     */
     private boolean shouldUseMiniResolver() {
+        if (!mIsIntentPicker) {
+            return false;
+        }
         if (mMultiProfilePagerAdapter.getActiveListAdapter() == null
                 || mMultiProfilePagerAdapter.getInactiveListAdapter() == null) {
             return false;
@@ -1819,23 +1748,32 @@ public class ResolverActivity extends Activity implements
         tabHost.setup();
         ViewPager viewPager = findViewById(R.id.profile_pager);
         viewPager.setSaveEnabled(false);
+
+        Button personalButton = (Button) getLayoutInflater().inflate(
+                R.layout.resolver_profile_tab_button, tabHost.getTabWidget(), false);
+        personalButton.setText(getPersonalTabLabel());
+        personalButton.setContentDescription(getPersonalTabAccessibilityLabel());
+
         TabHost.TabSpec tabSpec = tabHost.newTabSpec(TAB_TAG_PERSONAL)
                 .setContent(R.id.profile_pager)
-                .setIndicator(getPersonalTabLabel());
+                .setIndicator(personalButton);
         tabHost.addTab(tabSpec);
+
+        Button workButton = (Button) getLayoutInflater().inflate(
+                R.layout.resolver_profile_tab_button, tabHost.getTabWidget(), false);
+        workButton.setText(getWorkTabLabel());
+        workButton.setContentDescription(getWorkTabAccessibilityLabel());
 
         tabSpec = tabHost.newTabSpec(TAB_TAG_WORK)
                 .setContent(R.id.profile_pager)
-                .setIndicator(getWorkTabLabel());
+                .setIndicator(workButton);
         tabHost.addTab(tabSpec);
 
         TabWidget tabWidget = tabHost.getTabWidget();
         tabWidget.setVisibility(View.VISIBLE);
-        resetTabsHeaderStyle(tabWidget);
         updateActiveTabStyle(tabHost);
 
         tabHost.setOnTabChangedListener(tabId -> {
-            resetTabsHeaderStyle(tabWidget);
             updateActiveTabStyle(tabHost);
             if (TAB_TAG_PERSONAL.equals(tabId)) {
                 viewPager.setCurrentItem(0);
@@ -1875,7 +1813,6 @@ public class ResolverActivity extends Activity implements
                     workTab.setFocusableInTouchMode(true);
                     workTab.requestFocus();
                 });
-        findViewById(R.id.resolver_tab_divider).setVisibility(View.VISIBLE);
     }
 
     private String getPersonalTabLabel() {
@@ -1891,7 +1828,7 @@ public class ResolverActivity extends Activity implements
     void onHorizontalSwipeStateChanged(int state) {}
 
     private void maybeHideDivider() {
-        if (!isIntentPicker()) {
+        if (!mIsIntentPicker) {
             return;
         }
         final View divider = findViewById(R.id.divider);
@@ -1908,29 +1845,13 @@ public class ResolverActivity extends Activity implements
     protected void onProfileTabSelected() { }
 
     private void resetCheckedItem() {
-        if (!isIntentPicker()) {
+        if (!mIsIntentPicker) {
             return;
         }
         mLastSelected = ListView.INVALID_POSITION;
         ListView inactiveListView = (ListView) mMultiProfilePagerAdapter.getInactiveAdapterView();
         if (inactiveListView.getCheckedItemCount() > 0) {
             inactiveListView.setItemChecked(inactiveListView.getCheckedItemPosition(), false);
-        }
-    }
-
-    private void resetTabsHeaderStyle(TabWidget tabWidget) {
-        for (int i = 0; i < tabWidget.getChildCount(); i++) {
-            View tabView = tabWidget.getChildAt(i);
-            TextView title = tabView.findViewById(android.R.id.title);
-            title.setTextAppearance(android.R.style.TextAppearance_DeviceDefault_DialogWindowTitle);
-            title.setTextColor(getAttrColor(this, android.R.attr.textColorTertiary));
-            title.setTextSize(TypedValue.COMPLEX_UNIT_PX,
-                    getResources().getDimension(R.dimen.resolver_tab_text_size));
-            if (title.getText().equals(getPersonalTabLabel())) {
-                tabView.setContentDescription(getPersonalTabAccessibilityLabel());
-            } else if (title.getText().equals(getWorkTabLabel())) {
-                tabView.setContentDescription(getWorkTabAccessibilityLabel());
-            }
         }
     }
 
@@ -1954,9 +1875,11 @@ public class ResolverActivity extends Activity implements
     }
 
     private void updateActiveTabStyle(TabHost tabHost) {
-        TextView title = tabHost.getTabWidget().getChildAt(tabHost.getCurrentTab())
-                .findViewById(android.R.id.title);
-        title.setTextColor(getAttrColor(this, android.R.attr.colorAccent));
+        int currentTab = tabHost.getCurrentTab();
+        TextView selected = (TextView) tabHost.getTabWidget().getChildAt(currentTab);
+        TextView unselected = (TextView) tabHost.getTabWidget().getChildAt(1 - currentTab);
+        selected.setSelected(true);
+        unselected.setSelected(false);
     }
 
     private void setupViewVisibilities() {
@@ -2374,9 +2297,7 @@ public class ResolverActivity extends Activity implements
                         .getItem(selections[0].getIndex());
                 if (ra.onTargetSelected(ti, false)) {
                     ra.mPickOptionRequest = null;
-                    if (!ra.mAwaitingDelegateResponse) {
-                        ra.finish();
-                    }
+                    ra.finish();
                 }
             }
         }

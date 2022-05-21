@@ -880,6 +880,38 @@ public class VpnManagerService extends IVpnManager.Stub {
         }
     }
 
+    @Override
+    public boolean setAppExclusionList(int userId, String vpnPackage, List<String> excludedApps) {
+        enforceSettingsPermission();
+        enforceCrossUserPermission(userId);
+
+        synchronized (mVpns) {
+            final Vpn vpn = mVpns.get(userId);
+            if (vpn != null) {
+                return vpn.setAppExclusionList(vpnPackage, excludedApps);
+            } else {
+                logw("User " + userId + " has no Vpn configuration");
+                throw new IllegalStateException(
+                        "VPN for user " + userId + " not ready yet. Skipping setting the list");
+            }
+        }
+    }
+
+    @Override
+    public List<String> getAppExclusionList(int userId, String vpnPackage) {
+        enforceSettingsPermission();
+        enforceCrossUserPermission(userId);
+
+        synchronized (mVpns) {
+            final Vpn vpn = mVpns.get(userId);
+            if (vpn != null) {
+                return vpn.getAppExclusionList(vpnPackage);
+            } else {
+                logw("User " + userId + " has no Vpn configuration");
+                return null;
+            }
+        }
+    }
 
     @Override
     public void factoryReset() {

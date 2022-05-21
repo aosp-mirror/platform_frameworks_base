@@ -257,7 +257,8 @@ public class UserManager {
     public static final String DISALLOW_MODIFY_ACCOUNTS = "no_modify_accounts";
 
     /**
-     * Specifies if a user is disallowed from changing Wi-Fi access points via Settings.
+     * Specifies if a user is disallowed from changing Wi-Fi access points via Settings. This
+     * restriction does not affect Wi-Fi tethering settings.
      *
      * <p>A device owner and a profile owner can set this restriction, although the restriction has
      * no effect in a managed profile. When it is set by a device owner, a profile owner on the
@@ -295,10 +296,17 @@ public class UserManager {
     /**
      * Specifies if a user is disallowed from using Wi-Fi tethering.
      *
+     * <p>This restriction does not limit the user's ability to modify or connect to regular
+     * Wi-Fi networks, which is separately controlled by {@link #DISALLOW_CONFIG_WIFI}.
+     *
      * <p>This restriction can only be set by a device owner,
      * a profile owner of an organization-owned managed profile on the parent profile.
      * When it is set by any of these owners, it prevents all users from using
      * Wi-Fi tethering. Other forms of tethering are not affected.
+     *
+     * This user restriction disables only Wi-Fi tethering.
+     * Use {@link #DISALLOW_CONFIG_TETHERING} to limit all forms of tethering.
+     * When {@link #DISALLOW_CONFIG_TETHERING} is set, this user restriction becomes obsolete.
      *
      * <p>The default value is <code>false</code>.
      *
@@ -735,7 +743,7 @@ public class UserManager {
     public static final String DISALLOW_CONFIG_DATE_TIME = "no_config_date_time";
 
     /**
-     * Specifies if a user is disallowed from configuring Tethering and portable hotspots
+     * Specifies if a user is disallowed from using and configuring Tethering and portable hotspots
      * via Settings.
      *
      * <p>This restriction can only be set by a device owner, a profile owner on the primary
@@ -2175,7 +2183,10 @@ public class UserManager {
             }
         } else {
             UserInfo userInfo = getUserInfo(mUserId);
-            return userInfo == null ? "" : userInfo.name;
+            if (userInfo != null && userInfo.name != null) {
+                return userInfo.name;
+            }
+            return "";
         }
     }
 

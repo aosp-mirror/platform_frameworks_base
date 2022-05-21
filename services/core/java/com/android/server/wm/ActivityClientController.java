@@ -85,6 +85,7 @@ import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.LocalServices;
 import com.android.server.Watchdog;
+import com.android.server.pm.KnownPackages;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.vr.VrManagerInternal;
@@ -242,6 +243,18 @@ class ActivityClientController extends IActivityClientController.Stub {
                 Binder.restoreCallingIdentity(origId);
             }
         }
+    }
+
+    @Override
+    public void activityLocalRelaunch(IBinder token) {
+        final long origId = Binder.clearCallingIdentity();
+        synchronized (mGlobalLock) {
+            final ActivityRecord r = ActivityRecord.forTokenLocked(token);
+            if (r != null) {
+                r.startRelaunching();
+            }
+        }
+        Binder.restoreCallingIdentity(origId);
     }
 
     @Override
@@ -627,7 +640,7 @@ class ActivityClientController extends IActivityClientController.Stub {
             return true;
         }
         final String[] installerNames = pm.getKnownPackageNames(
-                PackageManagerInternal.PACKAGE_INSTALLER, UserHandle.getUserId(uid));
+                KnownPackages.PACKAGE_INSTALLER, UserHandle.getUserId(uid));
         return installerNames.length > 0 && callingPkg.getPackageName().equals(installerNames[0]);
     }
 
@@ -738,20 +751,7 @@ class ActivityClientController extends IActivityClientController.Stub {
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ensureValidPictureInPictureActivityParams(
                         "setPictureInPictureParams", token, params);
-
-                // Only update the saved args from the args that are set.
                 r.setPictureInPictureParams(params);
-                if (r.inPinnedWindowingMode()) {
-                    // If the activity is already in picture-in-picture, update the pinned task now
-                    // if it is not already expanding to fullscreen. Otherwise, the arguments will
-                    // be used the next time the activity enters PiP.
-                    final Task rootTask = r.getRootTask();
-                    rootTask.setPictureInPictureAspectRatio(
-                            r.pictureInPictureArgs.getAspectRatioFloat(),
-                            r.pictureInPictureArgs.getExpandedAspectRatioFloat());
-                    rootTask.setPictureInPictureActions(r.pictureInPictureArgs.getActions(),
-                            r.pictureInPictureArgs.getCloseAction());
-                }
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -1189,10 +1189,29 @@ class ActivityClientController extends IActivityClientController.Stub {
         }
     }
 
+    /**
+     * Removes the outdated home task snapshot.
+     *
+     * @param token The token of the home task, or null if you have the
+     *              {@link android.Manifest.permission#MANAGE_ACTIVITY_TASKS}
+     *              permission and want us to find the home task token for you.
+     */
     @Override
     public void invalidateHomeTaskSnapshot(IBinder token) {
+        if (token == null) {
+            ActivityTaskManagerService.enforceTaskPermission("invalidateHomeTaskSnapshot");
+        }
+
         synchronized (mGlobalLock) {
-            final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
+            final ActivityRecord r;
+            if (token == null) {
+                final Task rootTask =
+                        mService.mRootWindowContainer.getDefaultTaskDisplayArea().getRootHomeTask();
+                r = rootTask != null ? rootTask.topRunningActivity() : null;
+            } else {
+                r = ActivityRecord.isInRootTaskLocked(token);
+            }
+
             if (r != null && r.isActivityTypeHome()) {
                 mService.mWindowManager.mTaskSnapshotController.removeSnapshotCache(
                         r.getTask().mTaskId);

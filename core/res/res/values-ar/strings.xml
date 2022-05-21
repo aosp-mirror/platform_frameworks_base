@@ -89,8 +89,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"‏أجرى مشغّل شبكة الجوّال إيقافًا مؤقتًا للخدمة لشريحة SIM رقم <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"يتعذّر الوصول إلى شبكة الجوّال."</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"حاول تغيير الشبكة المفضلة. انقر لتغييرها."</string>
-    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"قد لا تكون مكالمات الطوارئ متوفرة."</string>
-    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"‏لا تعمل خدمة مكالمات الطوارئ على شبكة Wi-Fi في <xliff:g id="SPN">%s</xliff:g>. يُرجى النقر للحصول على التفاصيل."</string>
+    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"لا تتوفر إمكانية الاتصال في حالات الطوارئ."</string>
+    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"‏يتعذّر إجراء مكالمات طوارئ عبر Wi‑Fi."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"التنبيهات"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"إعادة توجيه المكالمة"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"وضع معاودة الاتصال بالطوارئ"</string>
@@ -309,12 +309,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"الوصول إلى تقويمك"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"‏إرسال رسائل قصيرة SMS وعرضها"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"الملفات والمستندات"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"الملفات والمستندات"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"الوصول إلى الملفات والمستندات على جهازك"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"الموسيقى والملفات الصوتية الأخرى"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"الوصول إلى الملفات الصوتية على جهازك"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"الصور والفيديوهات"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"الوصول إلى الصور وملفات الفيديو على جهازك"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"الموسيقى والمقاطع الصوتية"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"تسمح فئة أذونات التطبيق هذه بالوصول إلى الموسيقى والمقاطع الصوتية على جهازك."</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"الصور والفيديوهات"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"تسمح فئة أذونات التطبيق هذه بالوصول إلى الصور والفيديوهات على جهازك."</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"الميكروفون"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"تسجيل الصوت"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"النشاط البدني"</string>
@@ -354,7 +354,7 @@
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"عرض الإشعارات كأنشطة بملء الشاشة على الأجهزة المُقفَلة"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"السماح للتطبيق بعرض الإشعارات كأنشطة بملء الشاشة على الأجهزة المُقفَلة"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"تثبيت اختصارات"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"للسماح لتطبيق بإضافة اختصارات على الشاشة الرئيسية بدون تدخل المستخدم."</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"السماح لتطبيق بإضافة اختصارات على الشاشة الرئيسية بدون تدخل المستخدم."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"إزالة الاختصارات"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"للسماح للتطبيق بإزالة اختصارات من الشاشة الرئيسية بدون تدخل المستخدم."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"إعادة توجيه المكالمات الصادرة"</string>
@@ -429,9 +429,9 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"للسماح للتطبيق بتعديل سجل مكالمات الجهاز اللوحي، بما في ذلك البيانات عن المكالمات الواردة والصادرة. وربما تستخدم التطبيقات الضارة هذا لمسح سجل المكالمات أو تعديله."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"‏للسماح للتطبيق بتعديل سجلّ مكالمات جهاز Android TV، بما في ذلك البيانات عن المكالمات الواردة والصادرة. وقد تستخدم التطبيقات الضارة هذا الإعداد لمحو سجلّ المكالمات أو تعديله."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"للسماح للتطبيق بتعديل سجل مكالمات الهاتف، بما في ذلك البيانات عن المكالمات الواردة والصادرة. وربما تستخدم التطبيقات الضارة هذا لمحو سجل المكالمات أو تعديله."</string>
-    <string name="permlab_bodySensors" msgid="662918578601619569">"تمكين التطبيق عند استخدامه من الوصول لبيانات استشعار الجسم، مثل معدل نبضات القلب"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"يتيح هذا الإذن للتطبيق الوصول إلى بيانات أجهزة استشعار الجسم، مثل معدّل نبضات القلب ودرجة الحرارة ونسبة الأكسجين في الدم، وذلك عندما يكون التطبيق قيد الاستخدام."</string>
-    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"تمكين التطبيق في الخلفية من الوصول لبيانات استشعار الجسم، مثل معدل نبضات القلب"</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"الوصول إلى بيانات استشعار الجسم، مثل معدّل نبضات القلب، أثناء استخدام التطبيق"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"يتيح هذا الإذن للتطبيق بالوصول إلى بيانات أجهزة استشعار الجسم، مثل معدّل نبضات القلب ودرجة الحرارة ونسبة الأكسجين في الدم، وذلك عندما يكون التطبيق قيد الاستخدام."</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"الوصول في الخلفية إلى بيانات استشعار الجسم، مثل معدّل نبضات القلب"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"يتيح هذا الإذن للتطبيق الوصول إلى بيانات أجهزة استشعار الجسم، مثل معدّل نبضات القلب ودرجة الحرارة ونسبة الأكسجين في الدم، وذلك عند استخدام التطبيق في الخلفية."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"قراءة أحداث التقويم والتفاصيل"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"يمكن لهذا التطبيق قراءة جميع أحداث التقويم المخزَّنة على الجهاز اللوحي ومشاركة بيانات التقويم أو حفظها."</string>
@@ -589,11 +589,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"خطأ في المصادقة"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"استخدام قفل الشاشة"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"أدخِل قفل الشاشة للمتابعة"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"تم اكتشاف بصمة إصبع جزئية."</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"اضغط بقوة على المستشعر"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"تعذرت معالجة بصمة الإصبع. يُرجى إعادة المحاولة."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"يُرجى تنظيف مستشعر بصمات الإصبع ثم إعادة المحاولة."</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"تنظيف المستشعر ثم إعادة المحاولة"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"اضغط بقوة على المستشعر."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"اضغط بقوة على المستشعر"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"تم تحريك الإصبع ببطء شديد. يُرجى إعادة المحاولة."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"يمكنك تجربة بصمة إصبع أخرى."</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"الصورة ساطعة للغاية."</string>
@@ -602,7 +602,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"لم يتمّ التعرّف على البصمة."</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"اضغط بقوة على المستشعر."</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"لم يتمّ التعرّف على بصمة الإصبع."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"تم مصادقة بصمة الإصبع"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"تمّت مصادقة الوجه"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"تمّت مصادقة الوجه، يُرجى الضغط على \"تأكيد\"."</string>
@@ -693,10 +693,8 @@
     <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"يسمح للتطبيق بقراءة الملفات الصوتية من مساحة التخزين المشتركة."</string>
     <string name="permlab_readMediaVideo" msgid="7768003311260655007">"قراءة ملفات الفيديو من مساحة التخزين المشتركة"</string>
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"يسمح للتطبيق بقراءة ملفات الفيديو من مساحة التخزين المشتركة."</string>
-    <!-- no translation found for permlab_readMediaImages (4057590631020986789) -->
-    <skip />
-    <!-- no translation found for permdesc_readMediaImages (5836219373138469259) -->
-    <skip />
+    <string name="permlab_readMediaImages" msgid="4057590631020986789">"قراءة ملفات الصور من مساحة التخزين المشتركة"</string>
+    <string name="permdesc_readMediaImages" msgid="5836219373138469259">"يسمح هذا الإذن للتطبيق بقراءة ملفات الصور من مساحة التخزين المشتركة."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"تعديل محتوى مساحة التخزين المشتركة أو حذفه"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"للسماح للتطبيق بالكتابة إلى محتوى مساحة التخزين المشتركة."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"‏إجراء/تلقي مكالمات SIP"</string>
@@ -1457,12 +1455,6 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"للسماح للتطبيق بطلب الإذن لتجاهل تحسينات البطارية في هذا التطبيق."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"البحث في كل الحِزم"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"يسمح هذا الإذن للتطبيق بعرض كل الحِزم المثبّتة."</string>
-    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"‏الوصول إلى واجهة AdServices Topics API"</string>
-    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"‏يتيح هذا الإذن للتطبيق الوصول إلى واجهة AdServices Topics API."</string>
-    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"‏الوصول إلى واجهات AdServices Attribution API"</string>
-    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"‏يتيح هذا الإذن للتطبيق الوصول إلى واجهات AdServices Attribution API."</string>
-    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"‏الوصول إلى واجهة AdServices Custom Audiences API"</string>
-    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"‏يتيح هذا الإذن للتطبيق الوصول إلى واجهة AdServices Custom Audiences API."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"اضغط مرتين للتحكم في التكبير أو التصغير"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"تعذرت إضافة أداة."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"تنفيذ"</string>
@@ -1640,7 +1632,7 @@
     <string name="display_manager_overlay_display_title" msgid="1480158037150469170">"‏<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>، <xliff:g id="DPI">%4$d</xliff:g> نقطة لكل بوصة"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="2810034719482834679">"آمن"</string>
     <string name="kg_forgot_pattern_button_text" msgid="406145459223122537">"نسيت النقش"</string>
-    <string name="kg_wrong_pattern" msgid="1342812634464179931">"النقش غير صحيح"</string>
+    <string name="kg_wrong_pattern" msgid="1342812634464179931">"النقش غير صحيح."</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"كلمة مرور خاطئة"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"رقم تعريف شخصي خاطئ"</string>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"ارسم نقشك"</string>
@@ -1691,7 +1683,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"مفعّل"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"غير مفعّل"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"هل تريد السماح لخدمة <xliff:g id="SERVICE">%1$s</xliff:g> بالتحكّم الكامل في جهازك؟"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"في حال تفعيل <xliff:g id="SERVICE">%1$s</xliff:g>، لن يستخدم جهازك ميزة قفل الشاشة لتحسين ترميز البيانات."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"إنّ التحكّم الكامل ليس ملائمًا لمعظم التطبيقات، باستثناء التطبيقات المعنية بسهولة الاستخدام."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"قراءة محتوى الشاشة والتحكم به"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"يمكنها قراءة كل المحتوى على الشاشة وعرض المحتوى عبر تطبيقات أخرى."</string>
@@ -1857,7 +1848,7 @@
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"العمل الثالث <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"طلب إدخال رقم التعريف الشخصي قبل إزالة التثبيت"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"طلب إدخال النقش الخاص بإلغاء القفل قبل إزالة التثبيت"</string>
-    <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"المطالبة بكلمة المرور قبل إزالة التثبيت"</string>
+    <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"طلب إدخال كلمة المرور قبل إزالة التثبيت"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"تم التثبيت بواسطة المشرف"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"تم التحديث بواسطة المشرف"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"تم الحذف بواسطة المشرف"</string>
@@ -1945,9 +1936,22 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"التطبيق غير متاح"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"تطبيق <xliff:g id="APP_NAME">%1$s</xliff:g> غير متاح الآن."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"تطبيق <xliff:g id="ACTIVITY">%1$s</xliff:g> غير متاح"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"‏لا يمكن الوصول إلى هذا التطبيق على <xliff:g id="DEVICE">%1$s</xliff:g> في الوقت الحالي. حاوِل الوصول إليه على جهاز Android TV بدلاً من ذلك."</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"لا يمكن الوصول إلى هذا التطبيق على <xliff:g id="DEVICE">%1$s</xliff:g> في الوقت الحالي. حاوِل الوصول إليه على جهازك اللوحي بدلاً من ذلك."</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"لا يمكن الوصول إلى هذا التطبيق على <xliff:g id="DEVICE">%1$s</xliff:g> في الوقت الحالي. حاوِل الوصول إليه على هاتفك بدلاً من ذلك."</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"مطلوب منح الإذن"</string>
+    <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"الكاميرا غير متاحة"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"الاستمرار على الهاتف"</string>
+    <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"الميكروفون غير متاح"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"‏إعدادات Android TV غير متاحة"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"إعدادات الجهاز اللوحي غير متاحة"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"إعدادات الهاتف غير متاحة"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"‏لا يمكن الوصول إلى هذا التطبيق على <xliff:g id="DEVICE">%1$s</xliff:g>. بدلاً من ذلك، جرِّب استخدام Android TV."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"لا يمكن الوصول إلى هذا التطبيق على <xliff:g id="DEVICE">%1$s</xliff:g>. بدلاً من ذلك، جرِّب استخدام جهازك اللوحي."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"لا يمكن الوصول إلى هذا التطبيق على <xliff:g id="DEVICE">%1$s</xliff:g>. بدلاً من ذلك، جرِّب استخدام هاتفك."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"‏لا يمكن الوصول إلى هذا التطبيق على <xliff:g id="DEVICE">%1$s</xliff:g> في الوقت الحالي. بدلاً من ذلك، جرِّب استخدام Android TV."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"لا يمكن الوصول إلى هذا التطبيق على <xliff:g id="DEVICE">%1$s</xliff:g> في الوقت الحالي. بدلاً من ذلك، جرِّب استخدام جهازك اللوحي."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"لا يمكن الوصول إلى هذا التطبيق على <xliff:g id="DEVICE">%1$s</xliff:g> في الوقت الحالي. بدلاً من ذلك، جرِّب استخدام هاتفك."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"‏يطلب هذا التطبيق الحصول على ميزات أمان إضافية. بدلاً من ذلك، جرِّب استخدام Android TV."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"يطلب هذا التطبيق الحصول على ميزات أمان إضافية. بدلاً من ذلك، جرِّب استخدام جهازك اللوحي."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"يطلب هذا التطبيق الحصول على ميزات أمان إضافية. بدلاً من ذلك، جرِّب استخدام هاتفك."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"‏تمّ إنشاء هذا التطبيق لإصدار قديم من Android وقد لا يعمل بشكل صحيح. جرِّب البحث عن تحديثات أو الاتصال بمطوّر البرامج."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"البحث عن تحديث"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"لديك رسائل جديدة"</string>
@@ -2038,10 +2042,9 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"الفتح على أي حال"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"تم العثور على تطبيق ضار"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"هل تريد السماح لتطبيق <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> بالوصول إلى جميع سجلّات الجهاز؟"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"هذه المرَّة فقط"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"السماح بالوصول إلى السجلّ لمرة واحدة"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"عدم السماح"</string>
-    <!-- no translation found for log_access_confirmation_body (4483075525611652922) -->
-    <skip />
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"ترصد سجلّات الجهاز ما يحدث على جهازك. يمكن أن تستخدم التطبيقات هذه السجلّات لتحديد المشاكل وحلها.\n\nقد تحتوي بعض السجلّات على معلومات حساسة، ولذلك يجب عدم السماح بالوصول إلى جميع سجلّات الجهاز إلا للتطبيقات التي تثق بها. \n\nإذا لم تسمح بوصول هذا التطبيق إلى جميع سجلّات الجهاز، يظل بإمكان التطبيق الوصول إلى سجلّاته. ويظل بإمكان الشركة المصنّعة لجهازك الوصول إلى بعض السجلّات أو المعلومات المتوفّرة على جهازك. مزيد من المعلومات"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"عدم الإظهار مرة أخرى"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"يريد تطبيق <xliff:g id="APP_0">%1$s</xliff:g> عرض شرائح تطبيق <xliff:g id="APP_2">%2$s</xliff:g>."</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"تعديل"</string>
@@ -2053,6 +2056,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"انقر لمعرفة مزيد من المعلومات وإجراء التغيير."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"تم تغيير ميزة \"عدم الإزعاج\""</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"انقر للاطّلاع على ما تم حظره."</string>
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"مراجعة إعدادات الإشعارات"</string>
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"‏بدءً من نظام التشغيل Android 13، يجب أن تحصل التطبيقات التي تُثبِّتها على إذن لإرسال الإشعارات. انقر لتغيير هذا الإذن للتطبيقات الحالية."</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"تذكيري لاحقًا"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"إغلاق"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"النظام"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"الإعدادات"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"كاميرا"</string>
@@ -2098,7 +2105,7 @@
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"سيظل البلوتوث مفعَّلاً أثناء استخدام \"وضع الطيران\"."</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"جارٍ التحميل"</string>
     <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + ملف واحد}zero{{file_name} + # ملف}two{{file_name} + ملفان}few{{file_name} + # ملفات}many{{file_name} + # ملفًا}other{{file_name} + # ملف}}"</string>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"ليس هناك أشخاص مقترحون للمشاركة معهم."</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"ما مِن أشخاص مقترحين للمشاركة معهم."</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"قائمة التطبيقات"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"‏لم يتم منح هذا التطبيق إذن تسجيل، ولكن يمكنه تسجيل الصوت من خلال جهاز USB هذا."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"الشاشة الرئيسية"</string>
@@ -2271,11 +2278,12 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> (مُترجَم)."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"الرسالة مُترجَمة من <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> إلى <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"النشاط في الخلفية"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"النشاط في الخلفية"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"يعمل تطبيق <xliff:g id="APP">%1$s</xliff:g> في الخلفية ويستنفد شحن البطارية. انقر لمراجعة الإعدادات."</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"يعمل تطبيق <xliff:g id="APP">%1$s</xliff:g> في الخلفية لفترة طويلة. انقر لمراجعة الإعدادات."</string>
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"تطبيق يستنزف طاقة البطارية"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"ثمة تطبيق لا يزال نشطًا"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"التطبيق <xliff:g id="APP">%1$s</xliff:g> قيد التشغيل في الخلفية. انقر لإدارة استخدام البطارية."</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"قد يؤثر استخدام التطبيق <xliff:g id="APP">%1$s</xliff:g> على عمر البطارية. انقر للاطّلاع على التطبيقات النشطة."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"التحقّق من التطبيقات النشطة"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"لا يمكن الوصول إلى الكاميرا من هذا الجهاز."</string>
-    <!-- no translation found for system_locale_title (3978041860457277638) -->
-    <skip />
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"يتعذّر الوصول إلى كاميرا الهاتف من على جهاز <xliff:g id="DEVICE">%1$s</xliff:g>."</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"يتعذّر الوصول إلى كاميرا الجهاز اللوحي من على جهاز <xliff:g id="DEVICE">%1$s</xliff:g>."</string>
+    <string name="system_locale_title" msgid="711882686834677268">"الإعداد التلقائي للنظام"</string>
 </resources>

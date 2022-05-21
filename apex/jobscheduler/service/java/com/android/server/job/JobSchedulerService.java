@@ -159,8 +159,6 @@ public class JobSchedulerService extends com.android.server.SystemService
     public static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     public static final boolean DEBUG_STANDBY = DEBUG || false;
 
-    /** The maximum number of concurrent jobs we run at one time. */
-    static final int MAX_JOB_CONTEXTS_COUNT = 16;
     /** The maximum number of jobs that we allow an app to schedule */
     private static final int MAX_JOBS_PER_APP = 150;
     /** The number of the most recently completed jobs to keep track of for debugging purposes. */
@@ -286,7 +284,7 @@ public class JobSchedulerService extends com.android.server.SystemService
      * Queue of pending jobs. The JobServiceContext class will receive jobs from this list
      * when ready to execute them.
      */
-    final PendingJobQueue mPendingJobQueue = new PendingJobQueue();
+    private final PendingJobQueue mPendingJobQueue = new PendingJobQueue();
 
     int[] mStartedUsers = EmptyArray.INT;
 
@@ -1009,6 +1007,9 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         @Override public void onUidCachedChanged(int uid, boolean cached) {
         }
+
+        @Override public void onUidProcAdjChanged(int uid) {
+        }
     };
 
     public Context getTestableContext() {
@@ -1025,6 +1026,11 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     public Constants getConstants() {
         return mConstants;
+    }
+
+    @NonNull
+    PendingJobQueue getPendingJobQueue() {
+        return mPendingJobQueue;
     }
 
     @NonNull
@@ -1381,6 +1387,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         if (mPendingJobQueue.remove(cancelled)) {
             mJobPackageTracker.noteNonpending(cancelled);
         }
+        mChangedJobList.remove(cancelled);
         // Cancel if running.
         mConcurrencyManager.stopJobOnServiceContextLocked(
                 cancelled, reason, internalReasonCode, debugReason);
@@ -1415,6 +1422,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 for (int c = 0; c < mControllers.size(); ++c) {
                     mControllers.get(c).onUidBiasChangedLocked(uid, prevBias, newBias);
                 }
+                mConcurrencyManager.onUidBiasChangedLocked(prevBias, newBias);
             }
         }
     }
@@ -1738,7 +1746,18 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         // Remove from store as well as controllers.
         final boolean removed = mJobs.remove(jobStatus, removeFromPersisted);
-        if (removed && mReadyToRock) {
+        if (!removed) {
+            // We never create JobStatus objects for the express purpose of removing them, and this
+            // method is only ever called for jobs that were saved in the JobStore at some point,
+            // so if we can't find it, something may be wrong. As of Android T, there is a
+            // legitimate code path where removed is false --- when an actively running job is
+            // cancelled (eg. via JobScheduler.cancel() or the app scheduling a new job with the
+            // same job ID), we remove it from the JobStore and tell the JobServiceContext to stop
+            // running the job. Once the job stops running, we then call this method again.
+            // TODO: rework code so we don't intentionally call this method twice for the same job
+            Slog.w(TAG, "Job didn't exist in JobStore: " + jobStatus.toShortString());
+        }
+        if (mReadyToRock) {
             for (int i = 0; i < mControllers.size(); i++) {
                 StateController controller = mControllers.get(i);
                 controller.maybeStopTrackingJobLocked(jobStatus, incomingJob, false);
@@ -1881,11 +1900,14 @@ public class JobSchedulerService extends com.android.server.SystemService
             // The job ran past its expected run window. Have it count towards the current window
             // and schedule a new job for the next window.
             if (DEBUG) {
-                Slog.i(TAG, "Periodic job ran after its intended window.");
+                Slog.i(TAG, "Periodic job ran after its intended window by " + diffMs + " ms");
             }
             long numSkippedWindows = (diffMs / period) + 1; // +1 to include original window
-            if (period != flex && diffMs > Math.min(PERIODIC_JOB_WINDOW_BUFFER,
-                    (period - flex) / 2)) {
+            // Determine how far into a single period the job ran, and determine if it's too close
+            // to the start of the next period. If the difference between the start of the execution
+            // window and the previous execution time inside of the period is less than the
+            // threshold, then we say that the job ran too close to the next period.
+            if (period != flex && (period - flex - (diffMs % period)) <= flex / 6) {
                 if (DEBUG) {
                     Slog.d(TAG, "Custom flex job ran too close to next window.");
                 }
@@ -3791,6 +3813,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     // Double indent for readability
                     pw.increaseIndent();
                     pw.increaseIndent();
+                    pw.println(job.toShortString());
                     job.dump(pw, true, nowElapsed);
                     pw.decreaseIndent();
                     pw.decreaseIndent();

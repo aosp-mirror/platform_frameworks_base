@@ -17,7 +17,7 @@
 package com.android.systemui.biometrics;
 
 import android.content.Context;
-import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
+import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.AttributeSet;
@@ -61,13 +61,11 @@ public class UdfpsEnrollView extends UdfpsAnimationView {
         return mFingerprintDrawable;
     }
 
-    void updateSensorLocation(@NonNull FingerprintSensorPropertiesInternal sensorProps) {
+    void updateSensorLocation(@NonNull Rect sensorBounds) {
         View fingerprintAccessibilityView = findViewById(R.id.udfps_enroll_accessibility_view);
-        final int sensorHeight = sensorProps.getLocation().sensorRadius * 2;
-        final int sensorWidth = sensorHeight;
         ViewGroup.LayoutParams params = fingerprintAccessibilityView.getLayoutParams();
-        params.width = sensorWidth;
-        params.height = sensorHeight;
+        params.width = sensorBounds.width();
+        params.height = sensorBounds.height();
         fingerprintAccessibilityView.setLayoutParams(params);
         fingerprintAccessibilityView.requestLayout();
     }

@@ -1107,6 +1107,10 @@ public class LocationProviderManagerTest {
         doReturn(true).when(mPackageManager).hasSystemFeature(FEATURE_AUTOMOTIVE);
         doReturn(true).when(mResources).getBoolean(R.bool.config_defaultAdasGnssLocationEnabled);
 
+        mInjector.getSettingsHelper().setAdasSettingsAllowlist(
+                new PackageTagsList.Builder().add(
+                        IDENTITY.getPackageName()).build());
+
         createManager(GPS_PROVIDER);
 
         ILocationListener listener1 = createMockLocationListener();
@@ -1136,6 +1140,10 @@ public class LocationProviderManagerTest {
         doReturn(true).when(mPackageManager).hasSystemFeature(FEATURE_AUTOMOTIVE);
         doReturn(true).when(mResources).getBoolean(R.bool.config_defaultAdasGnssLocationEnabled);
 
+        mInjector.getSettingsHelper().setAdasSettingsAllowlist(
+                new PackageTagsList.Builder().add(
+                        IDENTITY.getPackageName()).build());
+
         createManager(GPS_PROVIDER);
 
         ILocationListener listener1 = createMockLocationListener();
@@ -1160,11 +1168,16 @@ public class LocationProviderManagerTest {
 
     @Test
     public void testProviderRequest_AdasGnssBypass_ProviderDisabled_AdasDisabled() {
+        doReturn(true).when(mPackageManager).hasSystemFeature(FEATURE_AUTOMOTIVE);
+        doReturn(true).when(mResources).getBoolean(R.bool.config_defaultAdasGnssLocationEnabled);
+
         mInjector.getSettingsHelper().setIgnoreSettingsAllowlist(
                 new PackageTagsList.Builder().add(
                         IDENTITY.getPackageName()).build());
-        doReturn(true).when(mPackageManager).hasSystemFeature(FEATURE_AUTOMOTIVE);
-        doReturn(true).when(mResources).getBoolean(R.bool.config_defaultAdasGnssLocationEnabled);
+
+        mInjector.getSettingsHelper().setAdasSettingsAllowlist(
+                new PackageTagsList.Builder().add(
+                        IDENTITY.getPackageName()).build());
 
         createManager(GPS_PROVIDER);
 

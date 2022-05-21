@@ -23,6 +23,7 @@ import static android.app.ActivityManager.RECENT_IGNORE_UNAVAILABLE;
 import static android.app.ActivityTaskManager.getService;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityClient;
 import android.app.ActivityManager;
@@ -154,11 +155,15 @@ public class ActivityManagerWrapper {
 
     /**
      * Removes the outdated snapshot of home task.
+     *
+     * @param homeActivity The home task activity, or null if you have the
+     *                     {@link android.Manifest.permission#MANAGE_ACTIVITY_TASKS} permission and
+     *                     want us to find the home task for you.
      */
-    public void invalidateHomeTaskSnapshot(final Activity homeActivity) {
+    public void invalidateHomeTaskSnapshot(@Nullable final Activity homeActivity) {
         try {
             ActivityClient.getInstance().invalidateHomeTaskSnapshot(
-                    homeActivity.getActivityToken());
+                    homeActivity == null ? null : homeActivity.getActivityToken());
         } catch (Throwable e) {
             Log.w(TAG, "Failed to invalidate home snapshot", e);
         }

@@ -43,14 +43,13 @@ import com.android.systemui.statusbar.notification.interruption.HeadsUpControlle
 import com.android.systemui.statusbar.notification.interruption.HeadsUpViewBinder
 import com.android.systemui.statusbar.notification.row.NotifBindPipelineInitializer
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
-import com.android.systemui.statusbar.phone.NotificationGroupAlertTransferHelper
 import com.android.systemui.statusbar.phone.CentralSurfaces
+import com.android.systemui.statusbar.phone.NotificationGroupAlertTransferHelper
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.RemoteInputUriController
 import com.android.wm.shell.bubbles.Bubbles
 import dagger.Lazy
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.util.Optional
 import javax.inject.Inject
@@ -88,7 +87,7 @@ class NotificationsControllerImpl @Inject constructor(
     private val clickerBuilder: NotificationClicker.Builder,
     private val animatedImageNotificationManager: AnimatedImageNotificationManager,
     private val peopleSpaceWidgetManager: PeopleSpaceWidgetManager,
-    private val bubblesOptional: Optional<Bubbles>,
+    private val bubblesOptional: Optional<Bubbles>
 ) : NotificationsController {
 
     override fun initialize(
@@ -109,7 +108,8 @@ class NotificationsControllerImpl @Inject constructor(
 
         notificationRowBinder.setNotificationClicker(
                 clickerBuilder.build(
-                        Optional.of(centralSurfaces.get()), bubblesOptional, notificationActivityStarter))
+                    Optional.of(
+                        centralSurfaces.get()), bubblesOptional, notificationActivityStarter))
         notificationRowBinder.setUpWithPresenter(
                 presenter,
                 listContainer,
@@ -150,7 +150,6 @@ class NotificationsControllerImpl @Inject constructor(
     }
 
     override fun dump(
-        fd: FileDescriptor,
         pw: PrintWriter,
         args: Array<String>,
         dumpTruck: Boolean

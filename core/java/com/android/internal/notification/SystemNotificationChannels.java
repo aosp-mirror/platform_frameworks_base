@@ -58,7 +58,12 @@ public class SystemNotificationChannels {
     public static String USB = "USB";
     public static String FOREGROUND_SERVICE = "FOREGROUND_SERVICE";
     public static String HEAVY_WEIGHT_APP = "HEAVY_WEIGHT_APP";
-    public static String SYSTEM_CHANGES = "SYSTEM_CHANGES";
+    /**
+     * @deprecated Legacy system changes channel with low importance which is no longer used,
+     *  Use the default importance {@link #SYSTEM_CHANGES} channel instead.
+     */
+    @Deprecated public static String SYSTEM_CHANGES_DEPRECATED = "SYSTEM_CHANGES";
+    public static String SYSTEM_CHANGES = "SYSTEM_CHANGES_ALERTS";
     public static String DO_NOT_DISTURB = "DO_NOT_DISTURB";
     public static String ACCESSIBILITY_MAGNIFICATION = "ACCESSIBILITY_MAGNIFICATION";
     public static String ACCESSIBILITY_SECURITY_POLICY = "ACCESSIBILITY_SECURITY_POLICY";
@@ -189,7 +194,11 @@ public class SystemNotificationChannels {
 
         NotificationChannel systemChanges = new NotificationChannel(SYSTEM_CHANGES,
                 context.getString(R.string.notification_channel_system_changes),
-                NotificationManager.IMPORTANCE_LOW);
+                NotificationManager.IMPORTANCE_DEFAULT);
+        systemChanges.setSound(null, new AudioAttributes.Builder()
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                .build());
         channelsList.add(systemChanges);
 
         NotificationChannel dndChanges = new NotificationChannel(DO_NOT_DISTURB,
@@ -229,6 +238,7 @@ public class SystemNotificationChannels {
     public static void removeDeprecated(Context context) {
         final NotificationManager nm = context.getSystemService(NotificationManager.class);
         nm.deleteNotificationChannel(DEVICE_ADMIN_DEPRECATED);
+        nm.deleteNotificationChannel(SYSTEM_CHANGES_DEPRECATED);
     }
 
     public static void createAccountChannelForPackage(String pkg, int uid, Context context) {

@@ -674,6 +674,10 @@
     <!-- Indicates whether to enable hinge angle sensor when using unfold animation -->
     <bool name="config_unfoldTransitionHingeAngle">false</bool>
 
+    <!-- Indicates the time needed to time out the fold animation if the device stops in half folded
+         mode. -->
+    <integer name="config_unfoldTransitionHalfFoldedTimeout">600</integer>
+
     <!-- Indicates that the device supports having more than one internal display on at the same
          time. Only applicable to devices with more than one internal display. If this option is
          set to false, DisplayManager will make additional effort to ensure no more than 1 internal
@@ -690,6 +694,11 @@
            will apply, regardless of device state. -->
     <string-array name="config_perDeviceStateRotationLockDefaults" />
 
+    <!-- Dock behavior -->
+
+    <!-- Control whether to start dream immediately upon docking even if the lockscreen is unlocked.
+         This defaults to true to be consistent with historical behavior. -->
+    <bool name="config_startDreamImmediatelyOnDock">true</bool>
 
     <!-- Desk dock behavior -->
 
@@ -1372,10 +1381,6 @@
     <integer name="config_screenBrightnessDoze">1</integer>
     <item name="config_screenBrightnessDozeFloat" format="float" type="dimen">0.0</item>
 
-    <!-- Delay that allows some content to arrive at the display before switching
-         from DOZE to ON. -->
-    <integer name="config_wakeUpDelayDoze">0</integer>
-
     <!-- Whether or not to skip the initial brightness ramps when the display transitions to
          STATE_ON. Setting this to true will skip the brightness ramp to the last stored active
          brightness value and will repeat for the following ramp if autobrightness is enabled. -->
@@ -1858,6 +1863,16 @@
          This must be set to a valid network recommendation app or empty.
      -->
     <string name="config_defaultNetworkRecommendationProviderPackage" translatable="false"></string>
+
+    <!-- The package name of the default search selector app. Must be granted the POST_NOTIFICATIONS
+         permission.
+    -->
+    <string name="config_defaultSearchSelectorPackageName" translatable="false"></string>
+
+    <!-- The package name of the default captive portal login app. Must be granted the
+         POST_NOTIFICATIONS permission.
+    -->
+    <string name="config_defaultCaptivePortalLoginPackageName" translatable="false"></string>
 
     <!-- Whether to enable geocoder overlay which allows geocoder to be replaced
          by an app at run-time. When disabled, only the
@@ -2402,6 +2417,15 @@
     <integer name="config_dreamsBatteryLevelDrainCutoff">5</integer>
     <!-- Limit of how long the device can remain unlocked due to attention checking.  -->
     <integer name="config_attentionMaximumExtension">900000</integer> <!-- 15 minutes.  -->
+    <!-- Is the system user the only user allowed to dream. -->
+    <bool name="config_dreamsOnlyEnabledForSystemUser">false</bool>
+
+    <!-- Whether to dismiss the active dream when an activity is started. Doesn't apply to
+         assistant activities (ACTIVITY_TYPE_ASSISTANT) -->
+    <bool name="config_dismissDreamOnActivityStart">true</bool>
+
+    <!-- The prefix of dream component names that are loggable. If empty, logs "other" for all. -->
+    <string name="config_loggable_dream_prefix" translatable="false"></string>
 
     <!-- ComponentName of a dream to show whenever the system would otherwise have
          gone to sleep.  When the PowerManager is asked to go to sleep, it will instead
@@ -2693,37 +2717,15 @@
          rat-name:rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max
          If no value is found for the rat-name in use, the system default will be applied.
 
-         This is deprecated. Please use config_tcp_buffers.
+         This is deprecated. Please use config_mobile_tcp_buffers for rat-based TCP buffers sizes or
+         config_tcp_buffers for rat-independent TCP buffer sizes.
     -->
     <string-array name="config_mobile_tcp_buffers">
     </string-array>
 
-    <!-- Configure tcp buffer sizes in the form:
-         rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max
-         If this is configured as an empty string, the system default will be applied.
-
-         For now this config is used by mobile data only. In the future it should be
-         used by Wi-Fi as well.
-
-         Note that starting from Android 13, the TCP buffer size is fixed after boot up, and should
-         never be changed based on carriers or the network types. The value should be configured
-         appropriately based on the device's memory and performance. It is recommended to use lower
-         values if the device has low memory or doesn't support high-speed network such like LTE,
-         NR, or Wifi.
-    -->
-    <string name="config_tcp_buffers" translatable="false"></string>
-
     <!-- Configure ethernet tcp buffersizes in the form:
          rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max -->
     <string name="config_ethernet_tcp_buffers" translatable="false">524288,1048576,3145728,524288,1048576,2097152</string>
-
-    <!-- What source to use to estimate link upstream and downstream bandwidth capacities.
-         Default is bandwidth_estimator.
-         Values are bandwidth_estimator, carrier_config and modem. -->
-    <string name="config_bandwidthEstimateSource">bandwidth_estimator</string>
-
-    <!-- Whether force to enable telephony new data stack or not -->
-    <bool name="config_force_enable_telephony_new_data_stack">true</bool>
 
     <!-- Whether WiFi display is supported by this device.
          There are many prerequisites for this feature to work correctly.
@@ -2936,6 +2938,11 @@
         com.android.settings.intelligence
     </string>
 
+    <!-- System bluetooth stack package name -->
+    <string name="config_systemBluetoothStack" translatable="false">
+        com.android.bluetooth.services
+    </string>
+
     <!-- Flag indicating that the media framework should not allow changes or mute on any
          stream or global volumes. -->
     <bool name="config_useFixedVolume">false</bool>
@@ -2956,9 +2963,6 @@
         <item>com.android.inputmethod.latin</item>
     </string-array>
 
-    <!-- Make the IME killable by the lowmemorykiller by raising its oom_score_adj. -->
-    <bool name="config_killableInputMethods">false</bool>
-
     <!-- Prevent the InputMethodManagerService from starting up the IME unless
      the currently focused view is a text editor. -->
     <bool name="config_preventImeStartupUnlessTextEditor">false</bool>
@@ -2967,6 +2971,9 @@
          from the IME startup prevention behavior that is enabled by
          config_preventImeStartupUnlessTextEditor. -->
     <string-array name="config_nonPreemptibleInputMethods" translatable="false" />
+
+    <!-- Flag indicating that enhanced confirmation mode is enabled. -->
+    <bool name="config_enhancedConfirmationModeEnabled">true</bool>
 
     <!-- The list of classes that should be added to the notification ranking pipeline.
      See {@link com.android.server.notification.NotificationSignalExtractor}
@@ -2992,12 +2999,6 @@
         <item>com.android.server.notification.CriticalNotificationExtractor</item>
 
     </string-array>
-
-    <!-- When migrating notification settings into the permission framework, whether all existing
-         apps should be marked as 'user-set' (true) or whether only the apps that have explicitly
-         modified notification settings should be marked as 'user-set' (false). Users will not see
-         system generated permission prompts for 'user-set' apps. -->
-    <bool name="config_notificationForceUserSetOnUpgrade">true</bool>
 
     <!-- Default Gravity setting for the system Toast view. Equivalent to: Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM -->
     <integer name="config_toastDefaultGravity">0x00000051</integer>
@@ -3304,27 +3305,6 @@
     <!-- String array containing numbers that shouldn't be logged. Country-specific. -->
     <string-array name="unloggable_phone_numbers" />
 
-    <!-- Cellular data service package name to bind to by default. If none is specified in an overlay, an
-         empty string is passed in -->
-    <string name="config_wwan_data_service_package" translatable="false">com.android.phone</string>
-
-    <!-- IWLAN data service package name to bind to by default. If none is specified in an overlay, an
-         empty string is passed in -->
-    <string name="config_wlan_data_service_package" translatable="false"></string>
-
-    <!-- Boolean indicating whether the Iwlan data service supports persistence of iwlan ipsec
-         tunnels across service restart. If iwlan tunnels are not persisted across restart,
-         Framework will clean up dangling data connections when service restarts -->
-    <bool name="config_wlan_data_service_conn_persistence_on_restart">true</bool>
-
-    <!-- Cellular data service class name to bind to by default. If none is specified in an overlay, an
-         empty string is passed in -->
-    <string name="config_wwan_data_service_class" translatable="false"></string>
-
-    <!-- IWLAN data service class name to bind to by default. If none is specified in an overlay, an
-         empty string is passed in -->
-    <string name="config_wlan_data_service_class" translatable="false"></string>
-
     <bool name="config_networkSamplingWakesDevice">true</bool>
 
     <!--From SmsMessage-->
@@ -3423,11 +3403,6 @@
         <item>1</item>    <!-- USAGE_SETTING_VOICE_CENTRIC -->
         <item>2</item>    <!-- USAGE_SETTING_DATA_CENTRIC -->
     </integer-array>
-
-    <!-- When a radio power off request is received, we will delay completing the request until
-         either IMS moves to the deregistered state or the timeout defined by this configuration
-         elapses. If 0, this feature is disabled and we do not delay radio power off requests.-->
-    <integer name="config_delay_for_ims_dereg_millis">0</integer>
 
     <!--Thresholds for LTE dbm in status bar-->
     <integer-array translatable="false" name="config_lteDbmThresholds">
@@ -3841,6 +3816,9 @@
     <!-- True if the device supports running activities on secondary displays. -->
     <bool name="config_supportsMultiDisplay">true</bool>
 
+    <!-- Indicates whether the device supports bubble notifications or not. -->
+    <bool name="config_supportsBubble">true</bool>
+
     <!-- True if the device has no home screen. That is a launcher activity
          where the user can launch other applications from.  -->
     <bool name="config_noHomeScreen">false</bool>
@@ -4100,12 +4078,6 @@
 
     <!-- Intent extra key for the event code int array while requesting ambient context consent. -->
     <string translatable="false" name="config_ambientContextEventArrayExtraKey"></string>
-
-    <!-- The component name for the system-wide captions service.
-         This service must be trusted, as it controls part of the UI of the volume bar.
-         Example: "com.android.captions/.SystemCaptionsService"
-    -->
-    <string name="config_defaultSystemCaptionsService" translatable="false"></string>
 
     <!-- The component name for the system-wide captions manager service.
          This service must be trusted, as the system binds to it and keeps it running.
@@ -4398,24 +4370,6 @@
 
     <bool name="config_keepRestrictedProfilesInBackground">true</bool>
 
-    <!-- Cellular network service package name to bind to by default. -->
-    <string name="config_wwan_network_service_package" translatable="false">com.android.phone</string>
-
-    <!-- Cellular network service class name to bind to by default.-->
-    <string name="config_wwan_network_service_class" translatable="false"></string>
-
-    <!-- IWLAN network service package name to bind to by default. If none is specified in an overlay, an
-         empty string is passed in -->
-    <string name="config_wlan_network_service_package" translatable="false"></string>
-
-    <!-- IWLAN network service class name to bind to by default. If none is specified in an overlay, an
-         empty string is passed in -->
-    <string name="config_wlan_network_service_class" translatable="false"></string>
-    <!-- Telephony qualified networks service package name to bind to by default. -->
-    <string name="config_qualified_networks_service_package" translatable="false"></string>
-
-    <!-- Telephony qualified networks service class name to bind to by default. -->
-    <string name="config_qualified_networks_service_class" translatable="false"></string>
     <!-- Wear devices: Controls the radios affected by Activity Mode. -->
     <string-array name="config_wearActivityModeRadios">
         <item>"wifi"</item>
@@ -4937,7 +4891,7 @@
     <!-- Whether or not to hide the navigation bar when the soft keyboard is visible in order to
          create additional screen real estate outside beyond the keyboard. Note that the user needs
          to have a confirmed way to dismiss the keyboard when desired. -->
-    <bool name="config_automotiveHideNavBarForKeyboard">false</bool>
+    <bool name="config_hideNavBarForKeyboard">false</bool>
 
     <!-- Whether or not to show the built-in charging animation when the device begins charging
          wirelessly. -->
@@ -5209,9 +5163,8 @@
          when TextClassifier has not been initialized. -->
     <integer name="config_smartSelectionInitializingTimeoutMillis">500</integer>
 
-    <!-- The delay in milliseconds before focused Views set themselves as preferred to keep clear.
-         Set to -1 if Views should not set themselves as preferred to keep clear. -->
-    <integer name="config_preferKeepClearForFocusDelayMillis">-1</integer>
+    <!-- If true, Views will declare they prefer to be kept clear from overlays when focused. -->
+    <bool name="config_preferKeepClearForFocus">false</bool>
 
     <!-- Indicates that default fitness tracker app needs to request sensor and location permissions. -->
     <bool name="config_trackerAppNeedsPermissions">false</bool>
@@ -5493,6 +5446,8 @@
     <bool name="config_supportsHardwareCamToggle">false</bool>
     <!-- Whether a camera intent is launched when the lens cover is toggled -->
     <bool name="config_launchCameraOnCameraLensCoverToggle">true</bool>
+    <!-- Whether changing sensor privacy SW setting requires device to be unlocked -->
+    <bool name="config_sensorPrivacyRequiresAuthentication">true</bool>
 
     <!-- List containing the allowed install sources for accessibility service. -->
     <string-array name="config_accessibility_allowed_install_source" translatable="false"/>
@@ -5702,6 +5657,9 @@
     <!-- Whether or not to enable the lock screen entry point for the QR code scanner. -->
     <bool name="config_enableQrCodeScannerOnLockScreen">false</bool>
 
+    <!-- Default component for QR code scanner -->
+    <string name="config_defaultQrCodeComponent"></string>
+
     <!-- Whether Low Power Standby is supported and can be enabled. -->
     <bool name="config_lowPowerStandbySupported">false</bool>
 
@@ -5792,11 +5750,25 @@
     -->
     <integer name="config_bg_current_drain_location_min_duration">1800</integer>
 
+    <!-- The behavior when the system detects it has abusive current drains, whether or not to
+         move the app to the restricted standby bucket level.
+         True - we'll move the app to restricted standby bucket as long as its bg battery usage
+         goes beyond the threshold, False - we'll not move it.
+         Note: This should be only enabled on devices with high confidence on power measurement.
+    -->
+    <bool name="config_bg_current_drain_auto_restrict_abusive_apps">false</bool>
+
     <!-- The behavior for an app with a FGS and its notification is still showing, when the system
          detects it's abusive and should be put into bg restricted level. True - we'll
          show the prompt to user, False - we'll not show it.
     -->
     <bool name="config_bg_prompt_fgs_with_noti_to_bg_restricted">false</bool>
+
+    <!-- The behavior when the system detects it's abusive, should the system prompt the user
+         to put it into the bg restricted level.
+         True - we'll show the prompt to user, False - we'll not show it.
+    -->
+    <bool name="config_bg_prompt_abusive_apps_to_bg_restricted">false</bool>
 
     <!-- The types of state where we'll exempt its battery usage during that state.
          The state here must be one or a combination of STATE_TYPE_* in BaseAppStateTracker.
@@ -5818,4 +5790,20 @@
     <string name="safety_protection_display_text"></string>
 
     <!-- End safety protection resources to be overlaid -->
+
+    <!-- List of the labels of requestable device state config values -->
+    <string-array name="config_deviceStatesAvailableForAppRequests"/>
+
+    <!-- Interval in milliseconds to average light sensor values for camera light brightness -->
+    <integer name="config_cameraPrivacyLightAlsAveragingIntervalMillis">3000</integer>
+    <!-- Light sensor's lux value to use as the threshold between using day or night brightness -->
+    <integer name="config_cameraPrivacyLightAlsNightThreshold">4</integer>
+
+    <!-- List of system components which are allowed to receive ServiceState entries in an
+         un-sanitized form, even if the location toggle is off. This is intended ONLY for system
+         components, such as the telephony stack, which require access to the full ServiceState for
+         tasks such as network registration. -->
+    <string-array name="config_serviceStateLocationAllowedPackages">
+        <item>"com.android.phone"</item>
+    </string-array>
 </resources>

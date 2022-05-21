@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.notification.row;
 
 import static android.app.Notification.Action.SEMANTIC_ACTION_MARK_CONVERSATION_AS_PRIORITY;
-import static android.os.UserHandle.USER_SYSTEM;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 
 import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_HEADSUP;
@@ -32,9 +31,8 @@ import android.annotation.Nullable;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
+import android.app.role.RoleManager;
 import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Canvas;
@@ -50,7 +48,6 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.Trace;
-import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
 import android.util.AttributeSet;
@@ -59,6 +56,7 @@ import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Property;
+import android.util.Slog;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -92,7 +90,7 @@ import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
-import com.android.systemui.statusbar.notification.ExpandAnimationParameters;
+import com.android.systemui.statusbar.notification.LaunchAnimationParameters;
 import com.android.systemui.statusbar.notification.FeedbackIcon;
 import com.android.systemui.statusbar.notification.NotificationFadeAware;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorController;
@@ -111,7 +109,6 @@ import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.SwipeableView;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
@@ -121,7 +118,6 @@ import com.android.systemui.util.Compile;
 import com.android.systemui.util.DumpUtilsKt;
 import com.android.systemui.wmshell.BubblesManager;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -364,11 +360,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     @Nullable private OnExpansionChangedListener mExpansionChangedListener;
     @Nullable private Runnable mOnIntrinsicHeightReachedRunnable;
 
-    private SystemNotificationAsyncTask mSystemNotificationAsyncTask =
-            new SystemNotificationAsyncTask();
-
-    private float mTopRoundnessDuringExpandAnimation;
-    private float mBottomRoundnessDuringExpandAnimation;
+    private float mTopRoundnessDuringLaunchAnimation;
+    private float mBottomRoundnessDuringLaunchAnimation;
 
     /**
      * Returns whether the given {@code statusBarNotification} is a system notification.
@@ -376,34 +369,24 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * calls.
      */
     private static Boolean isSystemNotification(Context context, StatusBarNotification sbn) {
-        // TODO (b/194833441): clean up before launch
-        if (Settings.Secure.getIntForUser(context.getContentResolver(),
-                Settings.Secure.NOTIFICATION_PERMISSION_ENABLED, 0, USER_SYSTEM) == 1) {
-            INotificationManager iNm = INotificationManager.Stub.asInterface(
-                    ServiceManager.getService(Context.NOTIFICATION_SERVICE));
-            try {
-                return iNm.isPermissionFixed(sbn.getPackageName(), sbn.getUserId());
-            } catch (RemoteException e) {
-                Log.e(TAG, "cannot reach NMS");
-            }
-            return false;
-        } else {
-            PackageManager packageManager = CentralSurfaces.getPackageManagerForUser(
-                    context, sbn.getUser().getIdentifier());
-            Boolean isSystemNotification = null;
+        INotificationManager iNm = INotificationManager.Stub.asInterface(
+                ServiceManager.getService(Context.NOTIFICATION_SERVICE));
 
-            try {
-                PackageInfo packageInfo = packageManager.getPackageInfo(
-                        sbn.getPackageName(), PackageManager.GET_SIGNATURES);
-
-                isSystemNotification =
-                        com.android.settingslib.Utils.isSystemPackage(
-                                context.getResources(), packageManager, packageInfo);
-            } catch (PackageManager.NameNotFoundException e) {
-                Log.e(TAG, "cacheIsSystemNotification: Could not find package info");
-            }
-            return isSystemNotification;
+        boolean isSystem = false;
+        try {
+            isSystem = iNm.isPermissionFixed(sbn.getPackageName(), sbn.getUserId());
+        } catch (RemoteException e) {
+            Log.e(TAG, "cannot reach NMS");
         }
+        RoleManager rm = context.getSystemService(RoleManager.class);
+        List<String> fixedRoleHolders = new ArrayList<>();
+        fixedRoleHolders.addAll(rm.getRoleHolders(RoleManager.ROLE_DIALER));
+        fixedRoleHolders.addAll(rm.getRoleHolders(RoleManager.ROLE_EMERGENCY));
+        if (fixedRoleHolders.contains(sbn.getPackageName())) {
+            isSystem = true;
+        }
+
+        return isSystem;
     }
 
     public NotificationContentView[] getLayouts() {
@@ -528,47 +511,20 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     /**
-     * Caches whether or not this row contains a system notification. Note, this is only cached
-     * once per notification as the packageInfo can't technically change for a notification row.
-     */
-    private void cacheIsSystemNotification() {
-        //TODO: This probably shouldn't be in ExpandableNotificationRow
-        if (mEntry != null && mEntry.mIsSystemNotification == null) {
-            if (mSystemNotificationAsyncTask.getStatus() == AsyncTask.Status.PENDING) {
-                // Run async task once, only if it hasn't already been executed. Note this is
-                // executed in serial - no need to parallelize this small task.
-                mSystemNotificationAsyncTask.execute();
-            }
-        }
-    }
-
-    /**
      * Returns whether this row is considered non-blockable (i.e. it's a non-blockable system notif
      * or is in an allowList).
      */
     public boolean getIsNonblockable() {
-        // If the SystemNotifAsyncTask hasn't finished running or retrieved a value, we'll try once
-        // again, but in-place on the main thread this time. This should rarely ever get called.
-        if (mEntry != null && mEntry.mIsSystemNotification == null) {
-            if (DEBUG) {
-                Log.d(TAG, "Retrieving isSystemNotification on main thread");
-            }
-            mSystemNotificationAsyncTask.cancel(true /* mayInterruptIfRunning */);
-            mEntry.mIsSystemNotification = isSystemNotification(mContext, mEntry.getSbn());
+        if (mEntry == null || mEntry.getChannel() == null) {
+            Log.w(TAG, "missing entry or channel");
+            return true;
+        }
+        if (mEntry.getChannel().isImportanceLockedByCriticalDeviceFunction()
+                && !mEntry.getChannel().isBlockable()) {
+            return true;
         }
 
-        // TODO (b/194833441): remove when we've migrated to permission
-        boolean isNonblockable = mEntry.getChannel().isImportanceLockedByOEM()
-                || mEntry.getChannel().isImportanceLockedByCriticalDeviceFunction();
-
-        if (!isNonblockable && mEntry != null && mEntry.mIsSystemNotification != null) {
-            if (mEntry.mIsSystemNotification) {
-                if (mEntry.getChannel() != null && !mEntry.getChannel().isBlockable()) {
-                    isNonblockable = true;
-                }
-            }
-        }
-        return isNonblockable;
+        return false;
     }
 
     private boolean isConversation() {
@@ -1468,8 +1424,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         dismiss(fromAccessibility);
         if (mEntry.isDismissable()) {
             if (mOnUserInteractionCallback != null) {
-                mOnUserInteractionCallback.onDismiss(mEntry, REASON_CANCEL,
-                        mOnUserInteractionCallback.getGroupSummaryToDismiss(mEntry));
+                mOnUserInteractionCallback.registerFutureDismissal(mEntry, REASON_CANCEL).run();
             }
         }
     }
@@ -1638,8 +1593,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mBubblesManagerOptional = bubblesManagerOptional;
         mNotificationGutsManager = gutsManager;
         mMetricsLogger = metricsLogger;
-
-        cacheIsSystemNotification();
     }
 
     private void initDimens() {
@@ -2120,7 +2073,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
 
-    public void applyExpandAnimationParams(ExpandAnimationParameters params) {
+    public void applyLaunchAnimationParams(LaunchAnimationParameters params) {
         if (params == null) {
             return;
         }
@@ -2185,11 +2138,29 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         setTranslationY(top);
 
-        mTopRoundnessDuringExpandAnimation = params.getTopCornerRadius() / mOutlineRadius;
-        mBottomRoundnessDuringExpandAnimation = params.getBottomCornerRadius() / mOutlineRadius;
+        mTopRoundnessDuringLaunchAnimation = params.getTopCornerRadius() / mOutlineRadius;
+        mBottomRoundnessDuringLaunchAnimation = params.getBottomCornerRadius() / mOutlineRadius;
         invalidateOutline();
 
         mBackgroundNormal.setExpandAnimationSize(params.getWidth(), actualHeight);
+    }
+
+    @Override
+    public float getCurrentTopRoundness() {
+        if (mExpandAnimationRunning) {
+            return mTopRoundnessDuringLaunchAnimation;
+        }
+
+        return super.getCurrentTopRoundness();
+    }
+
+    @Override
+    public float getCurrentBottomRoundness() {
+        if (mExpandAnimationRunning) {
+            return mBottomRoundnessDuringLaunchAnimation;
+        }
+
+        return super.getCurrentBottomRoundness();
     }
 
     public void setExpandAnimationRunning(boolean expandAnimationRunning) {
@@ -2647,9 +2618,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (mShowingPublicInitialized && mShowingPublic == oldShowingPublic) {
             return;
         }
-
-        // bail out if no public version
-        if (mPublicLayout.getChildCount() == 0) return;
 
         if (!animated) {
             mPublicLayout.animate().cancel();
@@ -3474,7 +3442,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pwOriginal, String[] args) {
+    public void dump(PrintWriter pwOriginal, String[] args) {
         IndentingPrintWriter pw = DumpUtilsKt.asIndenting(pwOriginal);
         // Skip super call; dump viewState ourselves
         pw.println("Notification: " + mEntry.getKey());
@@ -3487,10 +3455,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             NotificationContentView showingLayout = getShowingLayout();
             pw.print(", privateShowing: " + (showingLayout == mPrivateLayout));
             pw.println();
-            showingLayout.dump(fd, pw, args);
+            showingLayout.dump(pw, args);
 
             if (getViewState() != null) {
-                getViewState().dump(fd, pw, args);
+                getViewState().dump(pw, args);
                 pw.println();
             } else {
                 pw.println("no viewState!!!");
@@ -3509,7 +3477,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 pw.increaseIndent();
                 for (ExpandableNotificationRow child : notificationChildren) {
                     pw.println();
-                    child.dump(fd, pw, args);
+                    child.dump(pw, args);
                 }
                 pw.decreaseIndent();
                 pw.println("}");
@@ -3517,25 +3485,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 mPrivateLayout.dumpSmartReplies(pw);
             }
         });
-    }
-
-    /**
-     * Background task for executing IPCs to check if the notification is a system notification. The
-     * output is used for both the blocking helper and the notification info.
-     */
-    private class SystemNotificationAsyncTask extends AsyncTask<Void, Void, Boolean> {
-
-        @Override
-        protected Boolean doInBackground(Void... voids) {
-            return isSystemNotification(mContext, mEntry.getSbn());
-        }
-
-        @Override
-        protected void onPostExecute(Boolean result) {
-            if (mEntry != null) {
-                mEntry.mIsSystemNotification = result;
-            }
-        }
     }
 
     private void setTargetPoint(Point p) {

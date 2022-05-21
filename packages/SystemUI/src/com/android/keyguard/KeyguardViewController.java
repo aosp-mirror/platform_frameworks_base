@@ -55,6 +55,11 @@ public interface KeyguardViewController {
     void reset(boolean hideBouncerWhenShowing);
 
     /**
+     * Stop showing any alternate auth methods.
+     */
+    void resetAlternateAuth(boolean forceUpdateScrim);
+
+    /**
      * Called when the device started going to sleep.
      */
     default void onStartedGoingToSleep() {};

@@ -486,6 +486,20 @@ public class IPrintManagerParametersTest extends BasePrintTest {
     }
 
     /**
+     * test IPrintManager.isPrintServiceEnabled
+     */
+    @MediumTest
+    @Test
+    @NoActivity
+    public void testIsPrintServiceEnabled() throws Throwable {
+        assertException(() -> mIPrintManager.isPrintServiceEnabled(new ComponentName("bad", "name"),
+                mUserId), SecurityException.class);
+
+        assertException(() -> mIPrintManager.isPrintServiceEnabled(null, mUserId),
+                SecurityException.class);
+    }
+
+    /**
      * test IPrintManager.addPrintServiceRecommendationsChangeListener
      */
     @MediumTest

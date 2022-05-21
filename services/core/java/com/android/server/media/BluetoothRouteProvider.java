@@ -133,6 +133,10 @@ class BluetoothRouteProvider {
                 mIntentFilter, null, null);
     }
 
+    public void stop() {
+        mContext.unregisterReceiver(mBroadcastReceiver);
+    }
+
     /**
      * Transfers to a given bluetooth route.
      * The dedicated BT device with the route would be activated.

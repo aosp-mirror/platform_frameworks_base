@@ -82,7 +82,7 @@ class NotificationLaunchAnimatorController(
         } else {
             notification.currentBackgroundRadiusTop
         }
-        val params = ExpandAnimationParameters(
+        val params = LaunchAnimationParameters(
             top = windowTop,
             bottom = location[1] + height,
             left = location[0],
@@ -165,9 +165,9 @@ class NotificationLaunchAnimatorController(
         onFinishAnimationCallback?.run()
     }
 
-    private fun applyParams(params: ExpandAnimationParameters?) {
-        notification.applyExpandAnimationParams(params)
-        notificationListContainer.applyExpandAnimationParams(params)
+    private fun applyParams(params: LaunchAnimationParameters?) {
+        notification.applyLaunchAnimationParams(params)
+        notificationListContainer.applyLaunchAnimationParams(params)
     }
 
     override fun onLaunchAnimationProgress(
@@ -175,7 +175,7 @@ class NotificationLaunchAnimatorController(
         progress: Float,
         linearProgress: Float
     ) {
-        val params = state as ExpandAnimationParameters
+        val params = state as LaunchAnimationParameters
         params.progress = progress
         params.linearProgress = linearProgress
 

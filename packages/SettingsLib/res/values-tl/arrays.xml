@@ -55,7 +55,7 @@
   </string-array>
   <string-array name="hdcp_checking_summaries">
     <item msgid="4045840870658484038">"Huwag kailanman gumamit ng pagsusuring HDCP"</item>
-    <item msgid="8254225038262324761">"Gamitin lang ang pagsusuring HDCP para sa nilalamang DRM"</item>
+    <item msgid="8254225038262324761">"Gamitin ang pagsusuring HDCP para sa content na DRM lang"</item>
     <item msgid="6421717003037072581">"Palaging gumamit ng pagsusuring HDCP"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">

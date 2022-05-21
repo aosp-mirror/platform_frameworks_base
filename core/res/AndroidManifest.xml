@@ -377,6 +377,8 @@
     <protected-broadcast android:name="com.android.server.action.REMOTE_BUGREPORT_SHARING_ACCEPTED" />
     <protected-broadcast android:name="com.android.server.action.REMOTE_BUGREPORT_SHARING_DECLINED" />
     <protected-broadcast android:name="com.android.internal.action.EUICC_FACTORY_RESET" />
+    <protected-broadcast
+        android:name="com.android.internal.action.EUICC_REMOVE_INVISIBLE_SUBSCRIPTIONS" />
     <protected-broadcast android:name="com.android.server.usb.ACTION_OPEN_IN_APPS" />
     <protected-broadcast android:name="com.android.server.am.DELETE_DUMPHEAP" />
     <protected-broadcast android:name="com.android.server.net.action.SNOOZE_WARNING" />
@@ -1993,15 +1995,6 @@
         android:label="@string/permlab_changeWifiState"
         android:protectionLevel="normal" />
 
-    <!-- Allows applications to enable/disable wifi auto join. This permission
-         is used to let OEMs grant their trusted app access to a subset of privileged wifi APIs
-         to improve wifi performance.
-         <p>Not for use by third-party applications.
-         @deprecated will be replaced with MANAGE_WIFI_NETWORK_SELECTION -->
-    <permission android:name="android.permission.MANAGE_WIFI_AUTO_JOIN"
-                android:protectionLevel="signature|privileged|knownSigner"
-                android:knownCerts="@array/wifi_known_signers" />
-
     <!-- This permission is used to let OEMs grant their trusted app access to a subset of
          privileged wifi APIs to improve wifi performance. Allows applications to manage
          Wi-Fi network selection related features such as enable or disable global auto-join,
@@ -2095,7 +2088,7 @@
 
     <!-- @SystemApi @hide Allows applications to register network factory or agent -->
     <permission android:name="android.permission.NETWORK_FACTORY"
-                android:protectionLevel="signature" />
+                android:protectionLevel="signature|role" />
 
     <!-- @SystemApi @hide Allows applications to access network stats provider -->
     <permission android:name="android.permission.NETWORK_STATS_PROVIDER"
@@ -2284,13 +2277,13 @@
          @hide
     -->
     <permission android:name="android.permission.BLUETOOTH_MAP"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|role" />
 
     <!-- Allows bluetooth stack to access files
          @hide This should only be used by Bluetooth apk.
     -->
     <permission android:name="android.permission.BLUETOOTH_STACK"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|role" />
 
     <!-- Allows uhid write access for creating virtual input devices
          @hide
@@ -2510,14 +2503,6 @@
     <permission android:name="android.permission.TRIGGER_LOST_MODE"
         android:protectionLevel="signature|role"/>
 
-    <!-- @SystemApi Allows an application to instruct the framework to send location to the device
-         admin when an organization-owned device is in lost mode.
-         <p>Not for use by third-party applications.
-         @hide
-    -->
-    <permission android:name="android.permission.SEND_LOST_MODE_LOCATION_UPDATES"
-        android:protectionLevel="signature|privileged"/>
-
     <!-- ================================== -->
     <!-- Permissions for accessing hardware -->
     <!-- ================================== -->
@@ -2569,7 +2554,7 @@
     <!-- Allows access to configure network interfaces, configure/use IPSec, etc.
          @hide -->
     <permission android:name="android.permission.NET_ADMIN"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|role" />
 
     <!-- Allows registration for remote audio playback. @hide -->
     <permission android:name="android.permission.REMOTE_AUDIO_PLAYBACK"
@@ -2693,7 +2678,7 @@
     <!-- Allows listen permission to always reported system signal strength.
          @hide Used internally. -->
     <permission android:name="android.permission.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|role" />
 
     <!-- @SystemApi Protects the ability to register any PhoneAccount with
          PhoneAccount#CAPABILITY_SIM_SUBSCRIPTION. This capability indicates that the PhoneAccount
@@ -3752,6 +3737,12 @@
     <permission android:name="android.permission.BIND_ATTESTATION_VERIFICATION_SERVICE"
                 android:protectionLevel="signature" />
 
+    <!-- Allows the caller to generate keymint keys with the INCLUDE_UNIQUE_ID tag, which
+         uniquely identifies the device via the attestation certificate.
+         @hide @TestApi -->
+    <permission android:name="android.permission.REQUEST_UNIQUE_ID_ATTESTATION"
+         android:protectionLevel="signature" />
+
     <!-- ========================================= -->
     <!-- Permissions for special development tools -->
     <!-- ========================================= -->
@@ -3922,7 +3913,7 @@
          Not for use by third party apps.
          @hide -->
     <permission android:name="android.permission.MANAGE_APP_OPS_MODES"
-        android:protectionLevel="signature|installer|verifier" />
+        android:protectionLevel="signature|installer|verifier|role" />
 
     <!-- @SystemApi Allows an application to open windows that are for use by parts
          of the system user interface.
@@ -4803,7 +4794,7 @@
     <!-- Allows an application to manage the companion devices.
          @hide -->
     <permission android:name="android.permission.MANAGE_COMPANION_DEVICES"
-                android:protectionLevel="signature" />
+                android:protectionLevel="signature|role" />
 
     <!-- Allows an application to subscribe to notifications about the presence status change
          of their associated companion device
@@ -5052,7 +5043,7 @@
     <!-- @TestApi Allows an application to query audio related state.
          @hide -->
     <permission android:name="android.permission.QUERY_AUDIO_STATE"
-                android:protectionLevel="signature" />
+                android:protectionLevel="signature|role" />
 
     <!-- Allows an application to modify what effects are applied to all audio
          (matching certain criteria) from any application.
@@ -5125,7 +5116,7 @@
         @hide
     -->
    <permission android:name="android.permission.DEVICE_POWER"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|role" />
 
     <!-- Allows toggling battery saver on the system.
          Superseded by DEVICE_POWER permission. @hide @SystemApi
@@ -5151,7 +5142,7 @@
 
    <!-- @hide Allows low-level access to tun tap driver -->
     <permission android:name="android.permission.NET_TUNNELING"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|role" />
 
     <!-- Run as a manufacturer test application, running as the root user.
          Only available when the device is running in manufacturer test mode.
@@ -6018,7 +6009,7 @@
     <!-- @SystemApi Allows an application to manage the cloudsearch service.
           @hide  <p>Not for use by third-party applications.</p> -->
     <permission android:name="android.permission.MANAGE_CLOUDSEARCH"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|privileged|role" />
 
     <!-- @SystemApi Allows an application to manage the music recognition service.
          @hide  <p>Not for use by third-party applications.</p> -->
@@ -6054,7 +6045,7 @@
      generation service.
      @hide  <p>Not for use by third-party applications.</p> -->
     <permission android:name="android.permission.MANAGE_WALLPAPER_EFFECTS_GENERATION"
-        android:protectionLevel="signature|role" />
+        android:protectionLevel="signature|privileged" />
 
     <!-- Allows an app to set the theme overlay in /vendor/overlay
          being used.
@@ -6450,11 +6441,11 @@
 
     <!-- @SystemApi Must be required by a safety source to send an update using the
              {@link android.safetycenter.SafetyCenterManager}.
-             <p>Protection level: signature|privileged
+             <p>Protection level: internal|privileged
              @hide
         -->
     <permission android:name="android.permission.SEND_SAFETY_CENTER_UPDATE"
-                android:protectionLevel="signature|privileged" />
+                android:protectionLevel="internal|privileged" />
 
     <!-- @SystemApi Allows an application to launch device manager setup screens.
          <p>Not for use by third-party applications.
@@ -6785,9 +6776,8 @@
         </activity>
 
         <activity android:name="com.android.server.logcat.LogAccessDialogActivity"
-                  android:theme="@style/Theme.DeviceDefault.Dialog.Alert.DayNight"
+                  android:theme="@style/Theme.Translucent.NoTitleBar"
                   android:excludeFromRecents="true"
-                  android:label="@string/log_access_confirmation_title"
                   android:exported="false">
         </activity>
 
@@ -6801,7 +6791,7 @@
                   android:excludeFromRecents="true"
                   android:exported="true"
                   android:permission="android.permission.MANAGE_GAME_ACTIVITY"
-                  android:theme="@style/Theme.Translucent.NoTitleBar">
+                  android:theme="@style/Theme.GameSessionTrampoline">
         </activity>
 
         <receiver android:name="com.android.server.BootReceiver"
@@ -7054,7 +7044,7 @@
                  android:permission="android.permission.BIND_JOB_SERVICE">
         </service>
 
-        <service android:name="com.android.server.companion.AssociationCleanUpService"
+        <service android:name="com.android.server.companion.InactiveAssociationsRemovalService"
                  android:permission="android.permission.BIND_JOB_SERVICE">
         </service>
 
@@ -7063,6 +7053,10 @@
         </service>
 
         <service android:name="com.android.server.BinaryTransparencyService$UpdateMeasurementsJobService"
+                 android:permission="android.permission.BIND_JOB_SERVICE">
+        </service>
+
+        <service android:name="com.android.server.notification.ReviewNotificationPermissionsJobService"
                  android:permission="android.permission.BIND_JOB_SERVICE">
         </service>
 

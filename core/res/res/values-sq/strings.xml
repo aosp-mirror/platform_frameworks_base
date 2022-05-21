@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Çaktivizuar përkohësisht nga operatori yt celular për kartën SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Rrjeti celular është i paarritshëm"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Provo të ndryshosh rrjetin e preferuar. Trokit për ta ndryshuar."</string>
-    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Telefonatat e urgjencës mund të mos ofrohen"</string>
-    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> nuk i mbështet telefonatat e urgjencës nëpërmjet Wi-Fi. Trokit për detaje."</string>
+    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Telefonatat e urgjencës nuk ofrohen"</string>
+    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Nuk mund të kryhen telefonata urgjence me Wi‑Fi"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Sinjalizimet"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Transferimi i telefonatave"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Modaliteti i \"Kthimit të telefonatës së urgjencës\""</string>
@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"qasje te kalendari yt"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"dërgo dhe shiko mesazhet SMS"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Skedarët dhe dokumentet"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Skedarët dhe dokumentet"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"përfito qasje te skedarët dhe dokumentet në pajisjen tënde"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Muzikë dhe audio të tjera"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"të ketë qasje te skedarët audio në pajisjen tënde"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Fotografitë dhe videot"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"të ketë qasje te skedarët e imazheve dhe videove në pajisjen tënde"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Muzika dhe audioja"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"të qaset te muzika dhe audioja në pajisjen tënde"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotografitë dhe videot"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"të qaset te fotografitë dhe videot në pajisjen tënde"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofoni"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"regjistro audio"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Aktiviteti fizik"</string>
@@ -585,7 +585,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Gabim gjatë vërtetimit"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Përdor kyçjen e ekranit"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Fut kyçjen e ekranit për të vazhduar"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"U zbulua gjurmë gishti e pjesshme"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Shtyp fort te sensori"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Gjurma e gishtit nuk mund të përpunohej. Provo përsëri."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Pastro sensorin e gjurmës së gishtit dhe provo sërish"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Pastro sensorin dhe provo sërish"</string>
@@ -598,7 +598,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Gjurma e gishtit nuk u njoh"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Shtyp fort te sensori"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Gjurma e gishtit nuk u njoh"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Gjurma e gishtit u vërtetua"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Fytyra u vërtetua"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Fytyra u vërtetua, shtyp \"Konfirmo\""</string>
@@ -1451,12 +1451,6 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Lejon që një aplikacion të kërkojë leje për të shpërfillur optimizimet e baterisë për atë aplikacion."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"kërko të gjitha paketat"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Lejon një aplikacion të shikojë të gjitha paketat e instaluara."</string>
-    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"qasje në AdServices Topics API"</string>
-    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"Lejon një aplikacion të ketë qasje në AdServices Topics API."</string>
-    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"qasje në AdServices Attribution APIs"</string>
-    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"Lejon një aplikacion që të ketë qasje në AdServices Attribution APIs."</string>
-    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"qasje në AdServices Custom Audiences API"</string>
-    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"Lejon një aplikacion të ketë qasje në AdServices Custom Audiences API."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Trokit dy herë për të kontrolluar zmadhimin"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Nuk mundi të shtonte miniaplikacion."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Shko"</string>
@@ -1685,7 +1679,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"AKTIV"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"JOAKTIV"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Do të lejosh që <xliff:g id="SERVICE">%1$s</xliff:g> të ketë kontroll të plotë të pajisjes sate?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Nëse aktivizon <xliff:g id="SERVICE">%1$s</xliff:g>, pajisja nuk do të përdorë kyçjen e ekranit për të përmirësuar enkriptimin e të dhënave."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Kontrolli i plotë është i përshtatshëm për aplikacionet që të ndihmojnë me nevojat e qasshmërisë, por jo për shumicën e aplikacioneve."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Shiko dhe kontrollo ekranin"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Ai mund të lexojë të gjithë përmbajtjen në ekran dhe të shfaqë përmbajtjen mbi aplikacione të tjera."</string>
@@ -1939,9 +1932,22 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikacioni nuk ofrohet"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> nuk ofrohet për momentin."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> nuk ofrohet"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Qasja është e pamundur në <xliff:g id="DEVICE">%1$s</xliff:g> për momentin. Provoje në pajisjen Android TV më mirë."</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Qasja është e pamundur në <xliff:g id="DEVICE">%1$s</xliff:g> për momentin. Provoje në tablet më mirë."</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Qasja është e pamundur në <xliff:g id="DEVICE">%1$s</xliff:g> për momentin. Provoje në telefon më mirë."</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Kërkohet leje"</string>
+    <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Kamera nuk ofrohet"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Vazhdo në telefon"</string>
+    <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Mikrofoni nuk ofrohet"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Cilësimet e Android TV nuk ofrohen"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Cilësimet e tabletit nuk ofrohen"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Cilësimet e telefonit nuk ofrohen"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"Qasja është e pamundur në <xliff:g id="DEVICE">%1$s</xliff:g>. Provoje në pajisjen Android TV më mirë."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"Qasja është e pamundur në <xliff:g id="DEVICE">%1$s</xliff:g>. Provoje në tablet më mirë."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"Qasja është e pamundur në <xliff:g id="DEVICE">%1$s</xliff:g>. Provoje në telefon më mirë."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"Qasja është e pamundur në <xliff:g id="DEVICE">%1$s</xliff:g> për momentin. Provoje në pajisjen Android TV më mirë."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"Qasja është e pamundur në <xliff:g id="DEVICE">%1$s</xliff:g> për momentin. Provoje në tablet më mirë."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"Qasja është e pamundur në <xliff:g id="DEVICE">%1$s</xliff:g> për momentin. Provoje në telefon më mirë."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Ky aplikacion po kërkon siguri shtesë. Provoje në pajisjen Android TV më mirë."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Ky aplikacion po kërkon siguri shtesë. Provoje në tablet më mirë."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Ky aplikacion po kërkon siguri shtesë. Provoje në telefon më mirë."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Ky aplikacion është ndërtuar për një version më të vjetër të Android dhe mund të mos funksionojë mirë. Provo të kontrollosh për përditësime ose kontakto me zhvilluesin."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Kontrollo për përditësim"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Ke mesazhe të reja"</string>
@@ -2032,9 +2038,9 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"HAPE GJITHSESI"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"U gjet aplikacion i dëmshëm"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Të lejohet që <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> të ketë qasje te të gjitha evidencat e pajisjes?"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"Vetëm këtë herë"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Lejo qasjen vetëm për një herë"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Mos lejo"</string>
-    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Evidencat e pajisjes regjistrojnë çfarë ndodh në pajisjen tënde. Aplikacionet mund t\'i përdorin këto evidenca për të gjetur dhe rregulluar problemet.\n\nDisa evidenca mund të përmbajnë informacione delikate, ndaj lejo vetëm aplikacionet që u beson të kenë qasje te të gjitha evidencat e pajisjes. \n\nNëse nuk e lejon këtë aplikacion që të ketë qasje te të gjitha evidencat e pajisjes, ai mund të ketë ende qasje tek evidencat e tij dhe prodhuesi i pajisjes sate mund të jetë ende në gjendje që të ketë qasje te disa evidenca ose informacione në pajisjen tënde. Mëso më shumë"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Evidencat e pajisjes regjistrojnë çfarë ndodh në pajisjen tënde. Aplikacionet mund t\'i përdorin këto evidenca për të gjetur dhe rregulluar problemet.\n\nDisa evidenca mund të përmbajnë informacione delikate, ndaj lejo vetëm aplikacionet që u beson të kenë qasje te të gjitha evidencat e pajisjes. \n\nNëse nuk e lejon këtë aplikacion që të ketë qasje tek të gjitha evidencat e pajisjes, ai mund të vazhdojë të ketë qasje tek evidencat e tij. Prodhuesi i pajisjes sate mund të jetë ende në gjendje që të ketë qasje te disa evidenca ose informacione në pajisjen tënde. Mëso më shumë"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Mos e shfaq më"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> dëshiron të shfaqë pjesë të <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Modifiko"</string>
@@ -2046,6 +2052,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Trokit për të mësuar më shumë dhe për të ndryshuar."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\"Mos shqetëso\" ka ndryshuar"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Trokit për të shënuar atë që është bllokuar"</string>
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"Rishiko cilësimet e njoftimeve"</string>
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Nga Android 13, aplikacionet që instalon kanë nevojë për lejen tënde për të dërguar njoftime. Trokit për ta ndryshuar këtë leje për aplikacionet ekzistuese."</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Më kujto më vonë"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Hiq"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistemi"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Cilësimet"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Kamera"</string>
@@ -2264,11 +2274,12 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> i përkthyer."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Mesazhi u përkthye nga <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> në <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Aktiviteti në sfond"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Aktiviteti në sfond"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> po ekzekutohet në sfond dhe po shkarkon baterinë. Trokit për ta shqyrtuar."</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> po ekzekutohet në sfond për një kohe të gjatë. Trokit për ta shqyrtuar."</string>
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"Një aplikacion po shkarkon baterinë"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Një aplikacion është ende aktiv"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> po ekzekutohet në sfond. Trokit për të menaxhuar përdorimin e baterisë."</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> mund të kenë ndikim në kohëzgjatjen e baterisë. Trokit për të rishikuar aplikacionet aktive."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Kontrollo aplikacionet aktive"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Nuk mund të qasesh te kamera nga kjo pajisje"</string>
-    <!-- no translation found for system_locale_title (3978041860457277638) -->
-    <skip />
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Nuk mund të qasesh në kamerën e telefonit tënd nga <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Nuk mund të qasesh në kamerën e tabletit tënd nga <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Parazgjedhja e sistemit"</string>
 </resources>

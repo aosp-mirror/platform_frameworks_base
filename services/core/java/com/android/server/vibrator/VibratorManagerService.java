@@ -47,6 +47,7 @@ import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
+import android.os.SystemClock;
 import android.os.Trace;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
@@ -405,7 +406,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             if (attrs.isFlagSet(VibrationAttributes.FLAG_INVALIDATE_SETTINGS_CACHE)) {
                 // Force update of user settings before checking if this vibration effect should
                 // be ignored or scaled.
-                mVibrationSettings.update();
+                mVibrationSettings.mSettingObserver.onChange(false);
             }
 
             synchronized (mLock) {
@@ -733,6 +734,12 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                             + attrs);
                 }
                 break;
+            case IGNORED_FOR_RINGTONE:
+                if (DEBUG) {
+                    Slog.d(TAG, "Ignoring incoming vibration in favor of ringtone vibration");
+                }
+                break;
+
             default:
                 if (DEBUG) {
                     Slog.d(TAG, "Vibration for uid=" + uid + " and with attrs=" + attrs
@@ -807,6 +814,10 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
         if (currentVibration.attrs.getUsage() == VibrationAttributes.USAGE_ALARM) {
             return Vibration.Status.IGNORED_FOR_ALARM;
+        }
+
+        if (currentVibration.attrs.getUsage() == VibrationAttributes.USAGE_RINGTONE) {
+            return Vibration.Status.IGNORED_FOR_RINGTONE;
         }
 
         if (currentVibration.isRepeating()) {
@@ -989,12 +1000,13 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
      */
     @NonNull
     private VibrationAttributes fixupVibrationAttributes(@Nullable VibrationAttributes attrs,
-            CombinedVibration effect) {
+            @Nullable CombinedVibration effect) {
         if (attrs == null) {
             attrs = DEFAULT_ATTRIBUTES;
         }
         int usage = attrs.getUsage();
-        if ((usage == VibrationAttributes.USAGE_UNKNOWN) && effect.isHapticFeedbackCandidate()) {
+        if ((usage == VibrationAttributes.USAGE_UNKNOWN)
+                && (effect != null) && effect.isHapticFeedbackCandidate()) {
             usage = VibrationAttributes.USAGE_TOUCH;
         }
         int flags = attrs.getFlags();
@@ -1092,7 +1104,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         }
         Vibration vib = conductor.getVibration();
         return mVibrationSettings.shouldCancelVibrationOnScreenOff(
-                vib.uid, vib.opPkg, vib.attrs.getUsage());
+                vib.uid, vib.opPkg, vib.attrs.getUsage(), vib.startUptimeMillis);
     }
 
     @GuardedBy("mLock")
@@ -1297,13 +1309,17 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         public final ExternalVibration externalVibration;
         public int scale;
 
+        private final long mStartUptimeMillis;
         private final long mStartTimeDebug;
+
+        private long mEndUptimeMillis;
         private long mEndTimeDebug;
         private Vibration.Status mStatus;
 
         private ExternalVibrationHolder(ExternalVibration externalVibration) {
             this.externalVibration = externalVibration;
             this.scale = IExternalVibratorService.SCALE_NONE;
+            mStartUptimeMillis = SystemClock.uptimeMillis();
             mStartTimeDebug = System.currentTimeMillis();
             mStatus = Vibration.Status.RUNNING;
         }
@@ -1314,6 +1330,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 return;
             }
             mStatus = status;
+            mEndUptimeMillis = SystemClock.uptimeMillis();
             mEndTimeDebug = System.currentTimeMillis();
         }
 
@@ -1330,11 +1347,12 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         }
 
         public Vibration.DebugInfo getDebugInfo() {
+            long durationMs = mEndUptimeMillis == 0 ? -1 : mEndUptimeMillis - mStartUptimeMillis;
             return new Vibration.DebugInfo(
-                    mStartTimeDebug, mEndTimeDebug, /* effect= */ null, /* originalEffect= */ null,
-                    scale, externalVibration.getVibrationAttributes(),
-                    externalVibration.getUid(), externalVibration.getPackage(),
-                    /* reason= */ null, mStatus);
+                    mStartTimeDebug, mEndTimeDebug, durationMs,
+                    /* effect= */ null, /* originalEffect= */ null, scale,
+                    externalVibration.getVibrationAttributes(), externalVibration.getUid(),
+                    externalVibration.getPackage(), /* reason= */ null, mStatus);
         }
     }
 
@@ -1852,6 +1870,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 Duration transitionDuration = isContinuous
                         ? Duration.ofMillis(durations.get(i))
                         : Duration.ZERO;
+                Duration sustainDuration = isContinuous
+                        ? Duration.ZERO
+                        : Duration.ofMillis(durations.get(i));
 
                 if (hasFrequencies) {
                     waveform.addTransition(transitionDuration, targetAmplitude(amplitudes.get(i)),
@@ -1859,8 +1880,10 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 } else {
                     waveform.addTransition(transitionDuration, targetAmplitude(amplitudes.get(i)));
                 }
-                if (!isContinuous) {
-                    waveform.addSustain(Duration.ofMillis(durations.get(i)));
+                if (!sustainDuration.isZero()) {
+                    // Add sustain only takes positive durations. Skip this since we already
+                    // did a transition to the desired values (even when duration is zero).
+                    waveform.addSustain(sustainDuration);
                 }
 
                 if ((i > 0) && (i == repeat)) {

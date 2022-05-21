@@ -53,6 +53,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.ImageUtils;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
@@ -96,24 +97,23 @@ public class PolicyWarningUIController {
         filter.addAction(ACTION_DISMISS_NOTIFICATION);
         mContext.registerReceiver(mNotificationController, filter,
                 Manifest.permission.MANAGE_ACCESSIBILITY, mMainHandler, Context.RECEIVER_EXPORTED);
-
-    }
-
-    protected void setAccessibilityPolicyManager(
-            AccessibilitySecurityPolicy accessibilitySecurityPolicy) {
-        mNotificationController.setAccessibilityPolicyManager(accessibilitySecurityPolicy);
     }
 
     /**
      * Updates enabled accessibility services and notified accessibility services after switching
      * to another user.
      *
-     * @param enabledServices The current enabled services
+     * @param enabledServices the current enabled services
      */
-    public void onSwitchUserLocked(int userId, Set<ComponentName> enabledServices) {
+    public void onSwitchUser(int userId, Set<ComponentName> enabledServices) {
+        mMainHandler.sendMessage(
+                obtainMessage(this::onSwitchUserInternal, userId, enabledServices));
+    }
+
+    private void onSwitchUserInternal(int userId, Set<ComponentName> enabledServices) {
         mEnabledA11yServices.clear();
         mEnabledA11yServices.addAll(enabledServices);
-        mMainHandler.sendMessage(obtainMessage(mNotificationController::onSwitchUser, userId));
+        mNotificationController.onSwitchUser(userId);
     }
 
     /**
@@ -122,10 +122,14 @@ public class PolicyWarningUIController {
      * setting {@link Settings.Secure#ENABLED_ACCESSIBILITY_SERVICES} changed.
      *
      * @param userId          The user id
-     * @param enabledServices The enabled services
+     * @param enabledServices The enabled services set
      */
-    public void onEnabledServicesChangedLocked(int userId,
-            Set<ComponentName> enabledServices) {
+    public void onEnabledServicesChanged(int userId, Set<ComponentName> enabledServices) {
+        mMainHandler.sendMessage(
+                obtainMessage(this::onEnabledServicesChangedInternal, userId, enabledServices));
+    }
+
+    void onEnabledServicesChangedInternal(int userId, Set<ComponentName> enabledServices) {
         final ArraySet<ComponentName> disabledServices = new ArraySet<>(mEnabledA11yServices);
         disabledServices.removeAll(enabledServices);
         mEnabledA11yServices.clear();
@@ -187,6 +191,18 @@ public class PolicyWarningUIController {
         return intent;
     }
 
+    /**
+     * Enables to send the notification for non-Accessibility services.
+     */
+    public void enableSendingNonA11yToolNotification(boolean enable) {
+        mMainHandler.sendMessage(
+                obtainMessage(this::enableSendingNonA11yToolNotificationInternal, enable));
+    }
+
+    private void enableSendingNonA11yToolNotificationInternal(boolean enable) {
+        mNotificationController.setSendingNotification(enable);
+    }
+
     /** A sub class to handle notifications and settings on the main thread. */
     @MainThread
     public static class NotificationController extends BroadcastReceiver {
@@ -194,20 +210,17 @@ public class PolicyWarningUIController {
 
         /** All accessibility services which are notified to the user by the policy warning rule. */
         private final ArraySet<ComponentName> mNotifiedA11yServices = new ArraySet<>();
+        /** The component name of sent notifications. */
+        private final List<ComponentName> mSentA11yServiceNotification = new ArrayList<>();
         private final NotificationManager mNotificationManager;
         private final Context mContext;
 
         private int mCurrentUserId;
-        private AccessibilitySecurityPolicy mAccessibilitySecurityPolicy;
+        private boolean mSendNotification;
 
         public NotificationController(Context context) {
             mContext = context;
             mNotificationManager = mContext.getSystemService(NotificationManager.class);
-        }
-
-        protected void setAccessibilityPolicyManager(
-                AccessibilitySecurityPolicy accessibilitySecurityPolicy) {
-            mAccessibilitySecurityPolicy = accessibilitySecurityPolicy;
         }
 
         @Override
@@ -238,15 +251,18 @@ public class PolicyWarningUIController {
                 }
                 mNotificationManager.cancel(componentName.flattenToShortString(),
                         NOTE_A11Y_VIEW_AND_CONTROL_ACCESS);
+                mSentA11yServiceNotification.remove(componentName);
                 onNotificationCanceled(userId, componentName);
             } else if (ACTION_DISMISS_NOTIFICATION.equals(action)) {
+                mSentA11yServiceNotification.remove(componentName);
                 onNotificationCanceled(userId, componentName);
             }
         }
 
         protected void onSwitchUser(int userId) {
-            mCurrentUserId = userId;
+            cancelSentNotifications();
             mNotifiedA11yServices.clear();
+            mCurrentUserId = userId;
             mNotifiedA11yServices.addAll(readNotifiedServiceList(userId));
         }
 
@@ -258,10 +274,11 @@ public class PolicyWarningUIController {
         }
 
         private boolean trySendNotification(int userId, ComponentName componentName) {
-            if (!AccessibilitySecurityPolicy.POLICY_WARNING_ENABLED) {
+            if (userId != mCurrentUserId) {
                 return false;
             }
-            if (userId != mCurrentUserId) {
+
+            if (!mSendNotification) {
                 return false;
             }
 
@@ -344,6 +361,7 @@ public class PolicyWarningUIController {
             mNotificationManager.notify(serviceComponentName.flattenToShortString(),
                     NOTE_A11Y_VIEW_AND_CONTROL_ACCESS,
                     notificationBuilder.build());
+            mSentA11yServiceNotification.add(serviceComponentName);
         }
 
         private ArraySet<ComponentName> readNotifiedServiceList(int userId) {
@@ -392,6 +410,16 @@ public class PolicyWarningUIController {
                     mContext);
             return accessibilityManager.getEnabledAccessibilityServiceList(
                     AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
+        }
+
+        private void cancelSentNotifications() {
+            mSentA11yServiceNotification.forEach(componentName -> mNotificationManager.cancel(
+                    componentName.flattenToShortString(), NOTE_A11Y_VIEW_AND_CONTROL_ACCESS));
+            mSentA11yServiceNotification.clear();
+        }
+
+        void setSendingNotification(boolean enable) {
+            mSendNotification = enable;
         }
     }
 }

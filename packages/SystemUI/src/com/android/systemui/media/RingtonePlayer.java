@@ -40,7 +40,6 @@ import android.util.Log;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
 
-import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
@@ -248,7 +247,7 @@ public class RingtonePlayer extends CoreStartable {
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("Clients:");
         synchronized (mClients) {
             for (Client client : mClients.values()) {

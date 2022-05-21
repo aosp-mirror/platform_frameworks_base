@@ -250,6 +250,15 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
     }
 
     /**
+     * Check if the device is Bluetooth LE Audio device.
+     *
+     * @return true if the RouteInfo equals TYPE_BLE_HEADSET.
+     */
+    public boolean isBLEDevice() {
+        return mRouteInfo.getType() == TYPE_BLE_HEADSET;
+    }
+
+    /**
      * Get application label from MediaDevice.
      *
      * @return application label.
@@ -323,6 +332,9 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      */
     @Override
     public int compareTo(MediaDevice another) {
+        if (another == null) {
+            return -1;
+        }
         // Check Bluetooth device is have same connection state
         if (isConnected() ^ another.isConnected()) {
             if (isConnected()) {

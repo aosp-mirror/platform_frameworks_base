@@ -83,7 +83,7 @@ import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
-import com.android.systemui.statusbar.notification.ExpandAnimationParameters;
+import com.android.systemui.statusbar.notification.LaunchAnimationParameters;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
@@ -117,6 +117,7 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
+import com.android.systemui.statusbar.phone.shade.transition.ShadeTransitionController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -178,10 +179,12 @@ public class NotificationStackScrollLayoutController {
     private final CentralSurfaces mCentralSurfaces;
     private final SectionHeaderController mSilentHeaderController;
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
+    private final ShadeTransitionController mShadeTransitionController;
     private final InteractionJankMonitor mJankMonitor;
     private final NotificationStackSizeCalculator mNotificationStackSizeCalculator;
     private final StackStateLogger mStackStateLogger;
     private final NotificationStackScrollLogger mLogger;
+    private final GroupExpansionManager mGroupExpansionManager;
 
     private NotificationStackScrollLayout mView;
     private boolean mFadeNotificationsOnDismiss;
@@ -307,6 +310,14 @@ public class NotificationStackScrollLayoutController {
                 public void onStateChanged(int newState) {
                     mBarState = newState;
                     mView.setStatusBarState(mBarState);
+                    if (newState == KEYGUARD) {
+                        mGroupExpansionManager.collapseGroups();
+                    }
+                }
+
+                @Override
+                public void onUpcomingStateChanged(int newState) {
+                    mView.setUpcomingStatusBarState(newState);
                 }
 
                 @Override
@@ -638,6 +649,7 @@ public class NotificationStackScrollLayoutController {
             NotifCollection notifCollection,
             NotificationEntryManager notificationEntryManager,
             LockscreenShadeTransitionController lockscreenShadeTransitionController,
+            ShadeTransitionController shadeTransitionController,
             IStatusBarService iStatusBarService,
             UiEventLogger uiEventLogger,
             LayoutInflater layoutInflater,
@@ -666,6 +678,7 @@ public class NotificationStackScrollLayoutController {
         mLockscreenUserManager = lockscreenUserManager;
         mMetricsLogger = metricsLogger;
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
+        mShadeTransitionController = shadeTransitionController;
         mFalsingCollector = falsingCollector;
         mFalsingManager = falsingManager;
         mResources = resources;
@@ -674,8 +687,7 @@ public class NotificationStackScrollLayoutController {
         mScrimController = scrimController;
         mJankMonitor = jankMonitor;
         mNotificationStackSizeCalculator = notificationStackSizeCalculator;
-        groupManager.registerGroupExpansionChangeListener(
-                (changedRow, expanded) -> mView.onGroupExpandChanged(changedRow, expanded));
+        mGroupExpansionManager = groupManager;
         legacyGroupManager.registerGroupChangeListener(new OnGroupChangeListener() {
             @Override
             public void onGroupsChanged() {
@@ -761,6 +773,7 @@ public class NotificationStackScrollLayoutController {
         mScrimController.setScrimBehindChangeRunnable(mView::updateBackgroundDimming);
 
         mLockscreenShadeTransitionController.setStackScroller(this);
+        mShadeTransitionController.setNotificationStackScrollLayoutController(this);
 
         mLockscreenUserManager.addUserChangedListener(mLockscreenUserChangeListener);
 
@@ -808,6 +821,9 @@ public class NotificationStackScrollLayoutController {
         }
         mView.addOnAttachStateChangeListener(mOnAttachStateChangeListener);
         mSilentHeaderController.setOnClearSectionClickListener(v -> clearSilentNotifications());
+
+        mGroupExpansionManager.registerGroupExpansionChangeListener(
+                (changedRow, expanded) -> mView.onGroupExpandChanged(changedRow, expanded));
     }
 
     private boolean isInVisibleLocation(NotificationEntry entry) {
@@ -1196,7 +1212,7 @@ public class NotificationStackScrollLayoutController {
      */
     public void updateShowEmptyShadeView() {
         Trace.beginSection("NSSLC.updateShowEmptyShadeView");
-        mShowEmptyShadeView = mBarState != KEYGUARD
+        mShowEmptyShadeView = mStatusBarStateController.getCurrentOrUpcomingState() != KEYGUARD
                 && !mView.isQsFullScreen()
                 && getVisibleNotificationCount() == 0;
 
@@ -1234,8 +1250,9 @@ public class NotificationStackScrollLayoutController {
         mView.setExpandedHeight(expandedHeight);
     }
 
-    public void setQsContainer(ViewGroup view) {
-        mView.setQsContainer(view);
+    /** Sets the QS header. Used to check if a touch is within its bounds. */
+    public void setQsHeader(ViewGroup view) {
+        mView.setQsHeader(view);
     }
 
     public void setAnimationsEnabled(boolean enabled) {
@@ -1291,12 +1308,6 @@ public class NotificationStackScrollLayoutController {
      */
     public void setKeyguardBottomPaddingForDebug(float keyguardBottomPadding) {
         mView.setKeyguardBottomPadding(keyguardBottomPadding);
-    }
-
-    /** For debugging only. */
-    public void mKeyguardNotificationAvailableSpaceForDebug(
-            float keyguardNotificationAvailableSpace) {
-        mView.setKeyguardAvailableSpaceForDebug(keyguardNotificationAvailableSpace);
     }
 
     public RemoteInputController.Delegate createDelegate() {
@@ -1727,8 +1738,8 @@ public class NotificationStackScrollLayoutController {
         }
 
         @Override
-        public void applyExpandAnimationParams(ExpandAnimationParameters params) {
-            mView.applyExpandAnimationParams(params);
+        public void applyLaunchAnimationParams(LaunchAnimationParameters params) {
+            mView.applyLaunchAnimationParams(params);
         }
 
         @Override

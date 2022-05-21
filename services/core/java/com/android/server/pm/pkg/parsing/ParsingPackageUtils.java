@@ -209,8 +209,6 @@ public class ParsingPackageUtils {
 
     public static final int SDK_VERSION = Build.VERSION.SDK_INT;
     public static final String[] SDK_CODENAMES = Build.VERSION.ACTIVE_CODENAMES;
-    public static final String[] PREVIOUS_CODENAMES =
-            Build.VERSION.KNOWN_CODENAMES.toArray(new String[]{});
 
     public static boolean sCompatibilityModeEnabled = true;
     public static boolean sUseRoundIcon = false;
@@ -238,7 +236,7 @@ public class ParsingPackageUtils {
      */
     public static final int PARSE_IGNORE_OVERLAY_REQUIRED_SYSTEM_PROPERTY = 1 << 7;
     public static final int PARSE_FRAMEWORK_RES_SPLITS = 1 << 8;
-    public static final int PARSE_CHECK_MAX_SDK_VERSION = 1 << 9;
+    public static final int PARSE_APK_IN_APEX = 1 << 9;
 
     public static final int PARSE_CHATTY = 1 << 31;
 
@@ -393,6 +391,9 @@ public class ParsingPackageUtils {
         int liteParseFlags = 0;
         if ((flags & PARSE_FRAMEWORK_RES_SPLITS) != 0) {
             liteParseFlags = flags;
+        }
+        if ((flags & PARSE_APK_IN_APEX) != 0) {
+            liteParseFlags |= PARSE_APK_IN_APEX;
         }
         final ParseResult<PackageLite> liteResult =
                 ApkLiteParseUtils.parseClusterPackageLite(input, packageDir, frameworkSplits,
@@ -967,7 +968,7 @@ public class ParsingPackageUtils {
         if (ParsedPermissionUtils.declareDuplicatePermission(pkg)) {
             return input.error(
                     INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
-                    "Declare duplicate permissions with different protection levels."
+                    "Found duplicate permission with a different attribute value."
             );
         }
 
@@ -1534,7 +1535,7 @@ public class ParsingPackageUtils {
             ParsingPackage pkg, Resources res, XmlResourceParser parser, int flags)
             throws IOException, XmlPullParserException {
         if (SDK_VERSION > 0) {
-            final boolean checkMaxSdkVersion = (flags & PARSE_CHECK_MAX_SDK_VERSION) != 0;
+            final boolean isApkInApex = (flags & PARSE_APK_IN_APEX) != 0;
             TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestUsesSdk);
             try {
                 int minVers = ParsingUtils.DEFAULT_MIN_SDK_VERSION;
@@ -1569,7 +1570,7 @@ public class ParsingPackageUtils {
                     targetCode = minCode;
                 }
 
-                if (checkMaxSdkVersion) {
+                if (isApkInApex) {
                     val = sa.peekValue(R.styleable.AndroidManifestUsesSdk_maxSdkVersion);
                     if (val != null) {
                         // maxSdkVersion only supports integer
@@ -1578,7 +1579,8 @@ public class ParsingPackageUtils {
                 }
 
                 ParseResult<Integer> targetSdkVersionResult = FrameworkParsingPackageUtils
-                        .computeTargetSdkVersion(targetVers, targetCode, SDK_CODENAMES, input);
+                        .computeTargetSdkVersion(targetVers, targetCode, SDK_CODENAMES, input,
+                                isApkInApex);
                 if (targetSdkVersionResult.isError()) {
                     return input.error(targetSdkVersionResult);
                 }
@@ -1601,7 +1603,7 @@ public class ParsingPackageUtils {
 
                 pkg.setMinSdkVersion(minSdkVersion)
                         .setTargetSdkVersion(targetSdkVersion);
-                if (checkMaxSdkVersion) {
+                if (isApkInApex) {
                     ParseResult<Integer> maxSdkVersionResult = FrameworkParsingPackageUtils
                             .computeMaxSdkVersion(maxVers, SDK_VERSION, input);
                     if (maxSdkVersionResult.isError()) {
@@ -3106,11 +3108,9 @@ public class ParsingPackageUtils {
         }
         final ParseResult<SigningDetails> verified;
         if (skipVerify) {
-            // systemDir APKs are already trusted, save time by not verifying; since the
-            // signature is not verified and some system apps can have their V2+ signatures
-            // stripped allow pulling the certs from the jar signature.
+            // systemDir APKs are already trusted, save time by not verifying
             verified = ApkSignatureVerifier.unsafeGetCertsWithoutVerification(input, baseCodePath,
-                    SigningDetails.SignatureSchemeVersion.JAR);
+                    minSignatureScheme);
         } else {
             verified = ApkSignatureVerifier.verify(input, baseCodePath, minSignatureScheme);
         }

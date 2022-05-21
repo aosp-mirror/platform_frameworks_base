@@ -22,7 +22,6 @@ import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_REQUES
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY;
 
 import android.graphics.Matrix;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
@@ -112,10 +111,7 @@ public final class AccessibilityInteractionController {
 
     private final ArrayList<View> mTempArrayList = new ArrayList<View>();
 
-    private final Point mTempPoint = new Point();
     private final Rect mTempRect = new Rect();
-    private final Rect mTempRect1 = new Rect();
-    private final Rect mTempRect2 = new Rect();
     private final RectF mTempRectF = new RectF();
 
     private AddNodeInfosForViewId mAddNodeInfosForViewId;
@@ -131,7 +127,7 @@ public final class AccessibilityInteractionController {
     private int mActiveRequestPreparerId;
 
     public AccessibilityInteractionController(ViewRootImpl viewRootImpl) {
-        Looper looper =  viewRootImpl.mHandler.getLooper();
+        Looper looper = viewRootImpl.mHandler.getLooper();
         mMyLooperThreadId = looper.getThread().getId();
         mMyProcessId = Process.myPid();
         mHandler = new PrivateHandler(looper);
@@ -173,7 +169,8 @@ public final class AccessibilityInteractionController {
     public void findAccessibilityNodeInfoByAccessibilityIdClientThread(
             long accessibilityNodeId, Region interactiveRegion, int interactionId,
             IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
-            long interrogatingTid, MagnificationSpec spec, Bundle arguments) {
+            long interrogatingTid, MagnificationSpec spec, float[] matrixValues,
+            Bundle arguments) {
         final Message message = mHandler.obtainMessage();
         message.what = PrivateHandler.MSG_FIND_ACCESSIBILITY_NODE_INFO_BY_ACCESSIBILITY_ID;
         message.arg1 = flags;
@@ -186,6 +183,7 @@ public final class AccessibilityInteractionController {
         args.arg2 = spec;
         args.arg3 = interactiveRegion;
         args.arg4 = arguments;
+        args.arg5 = matrixValues;
         message.obj = args;
 
         synchronized (mLock) {
@@ -344,6 +342,7 @@ public final class AccessibilityInteractionController {
         final MagnificationSpec spec = (MagnificationSpec) args.arg2;
         final Region interactiveRegion = (Region) args.arg3;
         final Bundle arguments = (Bundle) args.arg4;
+        final float[] matrixValues = (float[]) args.arg5;
 
         args.recycle();
 
@@ -378,7 +377,7 @@ public final class AccessibilityInteractionController {
             if (!interruptPrefetch) {
                 // Return found node and prefetched nodes in one IPC.
                 updateInfosForViewportAndReturnFindNodeResult(infos, callback, interactionId, spec,
-                        interactiveRegion);
+                        matrixValues, interactiveRegion);
 
                 final SatisfiedFindAccessibilityNodeByAccessibilityIdRequest satisfiedRequest =
                         getSatisfiedRequestInPrefetch(requestedNode == null ? null : requestedNode,
@@ -391,13 +390,13 @@ public final class AccessibilityInteractionController {
                 // Return found node.
                 updateInfoForViewportAndReturnFindNodeResult(
                         requestedNode == null ? null : new AccessibilityNodeInfo(requestedNode),
-                        callback, interactionId, spec, interactiveRegion);
+                        callback, interactionId, spec, matrixValues, interactiveRegion);
             }
         }
         mPrefetcher.prefetchAccessibilityNodeInfos(requestedView,
                 requestedNode == null ? null : new AccessibilityNodeInfo(requestedNode), infos);
         mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = 0;
-        updateInfosForViewPort(infos, spec, interactiveRegion);
+        updateInfosForViewPort(infos, spec, matrixValues, interactiveRegion);
         final SatisfiedFindAccessibilityNodeByAccessibilityIdRequest satisfiedRequest =
                 getSatisfiedRequestInPrefetch(requestedNode == null ? null : requestedNode, infos,
                         flags);
@@ -439,7 +438,7 @@ public final class AccessibilityInteractionController {
     public void findAccessibilityNodeInfosByViewIdClientThread(long accessibilityNodeId,
             String viewId, Region interactiveRegion, int interactionId,
             IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
-            long interrogatingTid, MagnificationSpec spec) {
+            long interrogatingTid, MagnificationSpec spec, float[] matrixValues) {
         Message message = mHandler.obtainMessage();
         message.what = PrivateHandler.MSG_FIND_ACCESSIBILITY_NODE_INFOS_BY_VIEW_ID;
         message.arg1 = flags;
@@ -451,6 +450,7 @@ public final class AccessibilityInteractionController {
         args.arg2 = spec;
         args.arg3 = viewId;
         args.arg4 = interactiveRegion;
+        args.arg5 = matrixValues;
         message.obj = args;
 
         scheduleMessage(message, interrogatingPid, interrogatingTid, CONSIDER_REQUEST_PREPARERS);
@@ -467,6 +467,7 @@ public final class AccessibilityInteractionController {
         final MagnificationSpec spec = (MagnificationSpec) args.arg2;
         final String viewId = (String) args.arg3;
         final Region interactiveRegion = (Region) args.arg4;
+        final float[] matrixValues = (float[]) args.arg5;
         args.recycle();
 
         final List<AccessibilityNodeInfo> infos = mTempAccessibilityNodeInfoList;
@@ -494,14 +495,14 @@ public final class AccessibilityInteractionController {
         } finally {
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = 0;
             updateInfosForViewportAndReturnFindNodeResult(
-                    infos, callback, interactionId, spec, interactiveRegion);
+                    infos, callback, interactionId, spec, matrixValues, interactiveRegion);
         }
     }
 
     public void findAccessibilityNodeInfosByTextClientThread(long accessibilityNodeId,
             String text, Region interactiveRegion, int interactionId,
             IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
-            long interrogatingTid, MagnificationSpec spec) {
+            long interrogatingTid, MagnificationSpec spec, float[] matrixValues) {
         Message message = mHandler.obtainMessage();
         message.what = PrivateHandler.MSG_FIND_ACCESSIBILITY_NODE_INFO_BY_TEXT;
         message.arg1 = flags;
@@ -514,6 +515,7 @@ public final class AccessibilityInteractionController {
         args.argi2 = AccessibilityNodeInfo.getVirtualDescendantId(accessibilityNodeId);
         args.argi3 = interactionId;
         args.arg4 = interactiveRegion;
+        args.arg5 = matrixValues;
         message.obj = args;
 
         scheduleMessage(message, interrogatingPid, interrogatingTid, CONSIDER_REQUEST_PREPARERS);
@@ -531,6 +533,7 @@ public final class AccessibilityInteractionController {
         final int virtualDescendantId = args.argi2;
         final int interactionId = args.argi3;
         final Region interactiveRegion = (Region) args.arg4;
+        final float[] matrixValues = (float[]) args.arg5;
         args.recycle();
 
         List<AccessibilityNodeInfo> infos = null;
@@ -577,14 +580,14 @@ public final class AccessibilityInteractionController {
         } finally {
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = 0;
             updateInfosForViewportAndReturnFindNodeResult(
-                    infos, callback, interactionId, spec, interactiveRegion);
+                    infos, callback, interactionId, spec, matrixValues, interactiveRegion);
         }
     }
 
     public void findFocusClientThread(long accessibilityNodeId, int focusType,
             Region interactiveRegion, int interactionId,
             IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
-            long interrogatingTid, MagnificationSpec spec) {
+            long interrogatingTid, MagnificationSpec spec, float[] matrixValues) {
         Message message = mHandler.obtainMessage();
         message.what = PrivateHandler.MSG_FIND_FOCUS;
         message.arg1 = flags;
@@ -597,7 +600,7 @@ public final class AccessibilityInteractionController {
         args.arg1 = callback;
         args.arg2 = spec;
         args.arg3 = interactiveRegion;
-
+        args.arg4 = matrixValues;
         message.obj = args;
 
         scheduleMessage(message, interrogatingPid, interrogatingTid, CONSIDER_REQUEST_PREPARERS);
@@ -615,6 +618,7 @@ public final class AccessibilityInteractionController {
             (IAccessibilityInteractionConnectionCallback) args.arg1;
         final MagnificationSpec spec = (MagnificationSpec) args.arg2;
         final Region interactiveRegion = (Region) args.arg3;
+        final float[] matrixValues = (float[]) args.arg4;
         args.recycle();
 
         AccessibilityNodeInfo focused = null;
@@ -672,14 +676,14 @@ public final class AccessibilityInteractionController {
         } finally {
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = 0;
             updateInfoForViewportAndReturnFindNodeResult(
-                    focused, callback, interactionId, spec, interactiveRegion);
+                    focused, callback, interactionId, spec, matrixValues, interactiveRegion);
         }
     }
 
     public void focusSearchClientThread(long accessibilityNodeId, int direction,
             Region interactiveRegion, int interactionId,
             IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
-            long interrogatingTid, MagnificationSpec spec) {
+            long interrogatingTid, MagnificationSpec spec, float[] matrixValues) {
         Message message = mHandler.obtainMessage();
         message.what = PrivateHandler.MSG_FOCUS_SEARCH;
         message.arg1 = flags;
@@ -691,6 +695,7 @@ public final class AccessibilityInteractionController {
         args.arg1 = callback;
         args.arg2 = spec;
         args.arg3 = interactiveRegion;
+        args.arg4 = matrixValues;
 
         message.obj = args;
 
@@ -708,7 +713,7 @@ public final class AccessibilityInteractionController {
             (IAccessibilityInteractionConnectionCallback) args.arg1;
         final MagnificationSpec spec = (MagnificationSpec) args.arg2;
         final Region interactiveRegion = (Region) args.arg3;
-
+        final float[] matrixValues = (float[]) args.arg4;
         args.recycle();
 
         AccessibilityNodeInfo next = null;
@@ -727,7 +732,7 @@ public final class AccessibilityInteractionController {
         } finally {
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = 0;
             updateInfoForViewportAndReturnFindNodeResult(
-                    next, callback, interactionId, spec, interactiveRegion);
+                    next, callback, interactionId, spec, matrixValues, interactiveRegion);
         }
     }
 
@@ -882,13 +887,20 @@ public final class AccessibilityInteractionController {
         }
     }
 
+    // The boundInScreen includes magnification effect, so we need to normalize it before
+    // determine the visibility.
     private void adjustIsVisibleToUserIfNeeded(AccessibilityNodeInfo info,
-            Region interactiveRegion) {
+            Region interactiveRegion, MagnificationSpec spec) {
         if (interactiveRegion == null || info == null) {
             return;
         }
         Rect boundsInScreen = mTempRect;
         info.getBoundsInScreen(boundsInScreen);
+        if (spec != null && !spec.isNop()) {
+            boundsInScreen.offset((int) -spec.offsetX, (int) -spec.offsetY);
+            boundsInScreen.scale(1 / spec.scale);
+        }
+
         if (interactiveRegion.quickReject(boundsInScreen) && !shouldBypassAdjustIsVisible()) {
             info.setVisibleToUser(false);
         }
@@ -902,36 +914,30 @@ public final class AccessibilityInteractionController {
         return false;
     }
 
-    private void applyScreenMatrixIfNeeded(List<AccessibilityNodeInfo> infos) {
-        if (infos == null || shouldBypassApplyScreenMatrix()) {
-            return;
-        }
-        final int infoCount = infos.size();
-        for (int i = 0; i < infoCount; i++) {
-            final AccessibilityNodeInfo info = infos.get(i);
-            applyScreenMatrixIfNeeded(info);
-        }
-    }
-
-    private void applyScreenMatrixIfNeeded(AccessibilityNodeInfo info) {
-        if (info == null || shouldBypassApplyScreenMatrix()) {
+    /**
+     * Applies the host-window matrix to the embedded node. After this transform, The node bounds
+     *  will be transformed from embedded window coordinates to host-window coordinates.
+     *
+     */
+    private void applyHostWindowMatrixIfNeeded(AccessibilityNodeInfo info) {
+        if (info == null || shouldBypassApplyWindowMatrix()) {
             return;
         }
         final Rect boundsInScreen = mTempRect;
         final RectF transformedBounds = mTempRectF;
-        final Matrix screenMatrix = mViewRootImpl.mAttachInfo.mScreenMatrixInEmbeddedHierarchy;
+        final Matrix windowMatrix = mViewRootImpl.mAttachInfo.mWindowMatrixInEmbeddedHierarchy;
 
         info.getBoundsInScreen(boundsInScreen);
         transformedBounds.set(boundsInScreen);
-        screenMatrix.mapRect(transformedBounds);
+        windowMatrix.mapRect(transformedBounds);
         boundsInScreen.set((int) transformedBounds.left, (int) transformedBounds.top,
                 (int) transformedBounds.right, (int) transformedBounds.bottom);
         info.setBoundsInScreen(boundsInScreen);
     }
 
-    private boolean shouldBypassApplyScreenMatrix() {
-        final Matrix screenMatrix = mViewRootImpl.mAttachInfo.mScreenMatrixInEmbeddedHierarchy;
-        return screenMatrix == null || screenMatrix.isIdentity();
+    private boolean shouldBypassApplyWindowMatrix() {
+        final Matrix windowMatrix = mViewRootImpl.mAttachInfo.mWindowMatrixInEmbeddedHierarchy;
+        return windowMatrix == null || windowMatrix.isIdentity();
     }
 
     private void associateLeashedParentIfNeeded(AccessibilityNodeInfo info) {
@@ -963,46 +969,17 @@ public final class AccessibilityInteractionController {
         if (!shouldApplyAppScaleAndMagnificationSpec(applicationScale, spec)) {
             return;
         }
-
         Rect boundsInParent = mTempRect;
-        Rect boundsInScreen = mTempRect1;
 
         info.getBoundsInParent(boundsInParent);
-        info.getBoundsInScreen(boundsInScreen);
         if (applicationScale != 1.0f) {
             boundsInParent.scale(applicationScale);
-            boundsInScreen.scale(applicationScale);
         }
         if (spec != null) {
             boundsInParent.scale(spec.scale);
             // boundsInParent must not be offset.
-            boundsInScreen.scale(spec.scale);
-            boundsInScreen.offset((int) spec.offsetX, (int) spec.offsetY);
         }
         info.setBoundsInParent(boundsInParent);
-        info.setBoundsInScreen(boundsInScreen);
-
-        // Scale text locations if they are present
-        if (info.hasExtras()) {
-            Bundle extras = info.getExtras();
-            Parcelable[] textLocations =
-                    extras.getParcelableArray(EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY);
-            if (textLocations != null) {
-                for (int i = 0; i < textLocations.length; i++) {
-                    // Unchecked cast - an app that puts other objects in this bundle with this
-                    // key will crash.
-                    RectF textLocation = ((RectF) textLocations[i]);
-                    if (textLocation == null) {
-                        continue;
-                    }
-                    textLocation.scale(applicationScale);
-                    if (spec != null) {
-                        textLocation.scale(spec.scale);
-                        textLocation.offset(spec.offsetX, spec.offsetY);
-                    }
-                }
-            }
-        }
     }
 
     private boolean shouldApplyAppScaleAndMagnificationSpec(float appScale,
@@ -1011,27 +988,88 @@ public final class AccessibilityInteractionController {
     }
 
     private void updateInfosForViewPort(List<AccessibilityNodeInfo> infos, MagnificationSpec spec,
-                                        Region interactiveRegion) {
+            float[] matrixValues, Region interactiveRegion) {
         for (int i = 0; i < infos.size(); i++) {
-            updateInfoForViewPort(infos.get(i), spec, interactiveRegion);
+            updateInfoForViewPort(infos.get(i), spec, matrixValues, interactiveRegion);
         }
     }
 
     private void updateInfoForViewPort(AccessibilityNodeInfo info, MagnificationSpec spec,
-                                       Region interactiveRegion) {
+            float[] matrixValues, Region interactiveRegion) {
         associateLeashedParentIfNeeded(info);
-        applyScreenMatrixIfNeeded(info);
-        // To avoid applyAppScaleAndMagnificationSpecIfNeeded changing the bounds of node,
-        // then impact the visibility result, we need to adjust visibility before apply scale.
-        adjustIsVisibleToUserIfNeeded(info, interactiveRegion);
+
+        applyHostWindowMatrixIfNeeded(info);
+        // Transform view bounds from window coordinates to screen coordinates.
+        transformBoundsWithScreenMatrix(info, matrixValues);
+        adjustIsVisibleToUserIfNeeded(info, interactiveRegion, spec);
         applyAppScaleAndMagnificationSpecIfNeeded(info, spec);
+    }
+
+
+    /**
+     * Transforms the regions from local screen coordinate to global screen coordinate with the
+     * given transform matrix used in on-screen coordinate.
+     *
+     * @param info the AccessibilityNodeInfo that has the region in application screen coordinate
+     * @param matrixValues the matrix to be applied
+     */
+    private void transformBoundsWithScreenMatrix(AccessibilityNodeInfo info,
+            float[] matrixValues) {
+        if (info == null || matrixValues == null) {
+            return;
+        }
+        final Rect boundInScreen = mTempRect;
+        final RectF transformedBounds = mTempRectF;
+
+        info.getBoundsInScreen(boundInScreen);
+        transformedBounds.set(boundInScreen);
+
+        final Matrix transformMatrix = new Matrix();
+        transformMatrix.setValues(matrixValues);
+        final float applicationScale = mViewRootImpl.mAttachInfo.mApplicationScale;
+        if (applicationScale != 1f) {
+            transformMatrix.preScale(applicationScale, applicationScale);
+        }
+        // Transform the bounds from application screen coordinates to global window coordinates.
+        // For the embedded node, the bounds we get is already in window coordinates, so we don't
+        // need to do it.
+        if (mViewRootImpl.mAttachInfo.mWindowMatrixInEmbeddedHierarchy == null) {
+            transformMatrix.preTranslate(-mViewRootImpl.mAttachInfo.mWindowLeft,
+                    -mViewRootImpl.mAttachInfo.mWindowTop);
+        }
+
+        if (transformMatrix.isIdentity()) {
+            return;
+        }
+        transformMatrix.mapRect(transformedBounds);
+        // Offset 0.5f to round after casting.
+        transformedBounds.offset(0.5f, 0.5f);
+        boundInScreen.set((int) (transformedBounds.left), (int) transformedBounds.top,
+                (int) transformedBounds.right, (int) transformedBounds.bottom);
+        info.setBoundsInScreen(boundInScreen);
+        // Scale text locations if they are present
+        if (info.hasExtras()) {
+            final Bundle extras = info.getExtras();
+            final RectF[] textLocations =
+                    extras.getParcelableArray(EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY, RectF.class);
+            if (textLocations != null) {
+                for (int i = 0; i < textLocations.length; i++) {
+                    // Unchecked cast - an app that puts other objects in this bundle with this
+                    // key will crash.
+                    final RectF textLocation = textLocations[i];
+                    if (textLocation != null) {
+                        transformMatrix.mapRect(textLocation);
+                    }
+                }
+            }
+        }
     }
 
     private void updateInfosForViewportAndReturnFindNodeResult(List<AccessibilityNodeInfo> infos,
             IAccessibilityInteractionConnectionCallback callback, int interactionId,
-            MagnificationSpec spec, Region interactiveRegion) {
+            MagnificationSpec spec, float[] matrixValues, Region interactiveRegion) {
         if (infos != null) {
-            updateInfosForViewPort(infos, spec, interactiveRegion);
+            updateInfosForViewPort(infos, spec, matrixValues, interactiveRegion);
         }
         returnFindNodesResult(infos, callback, interactionId);
     }
@@ -1141,8 +1179,8 @@ public final class AccessibilityInteractionController {
 
     private void updateInfoForViewportAndReturnFindNodeResult(AccessibilityNodeInfo info,
             IAccessibilityInteractionConnectionCallback callback, int interactionId,
-            MagnificationSpec spec, Region interactiveRegion) {
-        updateInfoForViewPort(info, spec, interactiveRegion);
+            MagnificationSpec spec, float[] matrixValues, Region interactiveRegion) {
+        updateInfoForViewPort(info, spec, matrixValues, interactiveRegion);
         returnFindNodeResult(info, callback, interactionId);
     }
 

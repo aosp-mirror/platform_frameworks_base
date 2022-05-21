@@ -6,7 +6,6 @@ import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.media.MediaHost
 import com.android.systemui.media.MediaHostState
 import com.android.systemui.plugins.FalsingManager
@@ -15,11 +14,14 @@ import com.android.systemui.qs.customize.QSCustomizerController
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.settings.brightness.BrightnessController
 import com.android.systemui.settings.brightness.BrightnessSliderController
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.tuner.TunerService
+import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.any
@@ -33,8 +35,6 @@ import org.mockito.Mockito.`when` as whenever
 class QSPanelControllerTest : SysuiTestCase() {
 
     @Mock private lateinit var qsPanel: QSPanel
-    @Mock private lateinit var qsFgsManagerFooter: QSFgsManagerFooter
-    @Mock private lateinit var qsSecurityFooter: QSSecurityFooter
     @Mock private lateinit var tunerService: TunerService
     @Mock private lateinit var qsTileHost: QSTileHost
     @Mock private lateinit var qsCustomizerController: QSCustomizerController
@@ -48,10 +48,10 @@ class QSPanelControllerTest : SysuiTestCase() {
     @Mock private lateinit var brightnessSlider: BrightnessSliderController
     @Mock private lateinit var brightnessSliderFactory: BrightnessSliderController.Factory
     @Mock private lateinit var falsingManager: FalsingManager
-    @Mock private lateinit var featureFlags: FeatureFlags
     @Mock private lateinit var mediaHost: MediaHost
     @Mock private lateinit var tile: QSTile
     @Mock private lateinit var otherTile: QSTile
+    @Mock private lateinit var statusBarKeyguardViewManager: StatusBarKeyguardViewManager
 
     private lateinit var controller: QSPanelController
 
@@ -62,11 +62,13 @@ class QSPanelControllerTest : SysuiTestCase() {
         whenever(brightnessSliderFactory.create(any(), any())).thenReturn(brightnessSlider)
         whenever(brightnessControllerFactory.create(any())).thenReturn(brightnessController)
         whenever(qsPanel.resources).thenReturn(mContext.orCreateTestableResources.resources)
+        whenever(statusBarKeyguardViewManager.isBouncerInTransit()).thenReturn(false)
+        whenever(qsPanel.setListening(anyBoolean())).then {
+            whenever(qsPanel.isListening).thenReturn(it.getArgument(0))
+        }
 
         controller = QSPanelController(
             qsPanel,
-            qsFgsManagerFooter,
-            qsSecurityFooter,
             tunerService,
             qsTileHost,
             qsCustomizerController,
@@ -80,7 +82,7 @@ class QSPanelControllerTest : SysuiTestCase() {
             brightnessControllerFactory,
             brightnessSliderFactory,
             falsingManager,
-            featureFlags
+            statusBarKeyguardViewManager
         )
     }
 
@@ -102,11 +104,18 @@ class QSPanelControllerTest : SysuiTestCase() {
         controller.setTiles()
         whenever(tile.isListening()).thenReturn(false)
         whenever(otherTile.isListening()).thenReturn(true)
-        whenever(qsPanel.isListening).thenReturn(true)
 
         controller.setListening(true, true)
 
         verify(tile).refreshState()
         verify(otherTile, Mockito.never()).refreshState()
+    }
+
+    @Test
+    fun testIsBouncerInTransit() {
+        whenever(statusBarKeyguardViewManager.isBouncerInTransit()).thenReturn(true)
+        assertThat(controller.isBouncerInTransit()).isEqualTo(true)
+        whenever(statusBarKeyguardViewManager.isBouncerInTransit()).thenReturn(false)
+        assertThat(controller.isBouncerInTransit()).isEqualTo(false)
     }
 }

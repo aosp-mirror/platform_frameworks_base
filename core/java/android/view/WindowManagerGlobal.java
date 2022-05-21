@@ -216,9 +216,13 @@ public final class WindowManagerGlobal {
     public String[] getViewRootNames() {
         synchronized (mLock) {
             final int numRoots = mRoots.size();
-            String[] mViewRoots = new String[numRoots];
+            final int windowlessRoots = mWindowlessRoots.size();
+            String[] mViewRoots = new String[numRoots + windowlessRoots];
             for (int i = 0; i < numRoots; ++i) {
                 mViewRoots[i] = getWindowName(mRoots.get(i));
+            }
+            for (int i = 0; i < windowlessRoots; ++i) {
+                mViewRoots[i + numRoots] = getWindowName(mWindowlessRoots.get(i));
             }
             return mViewRoots;
         }
@@ -286,6 +290,10 @@ public final class WindowManagerGlobal {
         synchronized (mLock) {
             for (int i = mRoots.size() - 1; i >= 0; --i) {
                 final ViewRootImpl root = mRoots.get(i);
+                if (name.equals(getWindowName(root))) return root.getView();
+            }
+            for (int i = mWindowlessRoots.size() - 1; i >= 0; --i) {
+                final ViewRootImpl root = mWindowlessRoots.get(i);
                 if (name.equals(getWindowName(root))) return root.getView();
             }
         }

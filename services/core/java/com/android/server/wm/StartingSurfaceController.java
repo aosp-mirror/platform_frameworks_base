@@ -26,6 +26,7 @@ import static android.window.StartingWindowInfo.TYPE_PARAMETER_PROCESS_RUNNING;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_TASK_SWITCH;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_USE_SOLID_COLOR_SPLASH_SCREEN;
 
+import static com.android.server.wm.ActivityRecord.STARTING_WINDOW_TYPE_SNAPSHOT;
 import static com.android.server.wm.ActivityRecord.STARTING_WINDOW_TYPE_SPLASH_SCREEN;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -39,6 +40,7 @@ import android.compat.annotation.EnabledSince;
 import android.content.pm.ApplicationInfo;
 import android.os.UserHandle;
 import android.util.Slog;
+import android.window.SplashScreenView;
 import android.window.TaskSnapshot;
 
 import java.util.ArrayList;
@@ -51,8 +53,10 @@ public class StartingSurfaceController {
     private static final String TAG = TAG_WITH_CLASS_NAME
             ? StartingSurfaceController.class.getSimpleName() : TAG_WM;
     /**
-     * Allow the solid color style splash screen view can be copy and transfer to another process if
-     * the app targeting to {@link android.os.Build.VERSION_CODES#TIRAMISU} or higher.
+     * Application is allowed to receive the
+     * {@link
+     * android.window.SplashScreen.OnExitAnimationListener#onSplashScreenExit(SplashScreenView)}
+     * callback, even when the splash screen only shows a solid color.
      */
     @ChangeId
     @EnabledSince(targetSdkVersion = android.os.Build.VERSION_CODES.TIRAMISU)
@@ -111,7 +115,7 @@ public class StartingSurfaceController {
         if (allowTaskSnapshot) {
             parameter |= TYPE_PARAMETER_ALLOW_TASK_SNAPSHOT;
         }
-        if (activityCreated) {
+        if (activityCreated || startingWindowType == STARTING_WINDOW_TYPE_SNAPSHOT) {
             parameter |= TYPE_PARAMETER_ACTIVITY_CREATED;
         }
         if (isSolidColor) {
@@ -135,7 +139,6 @@ public class StartingSurfaceController {
         final WindowState topFullscreenOpaqueWindow;
         final Task task;
         synchronized (mService.mGlobalLock) {
-            final WindowState mainWindow = activity.findMainWindow();
             task = activity.getTask();
             if (task == null) {
                 Slog.w(TAG, "TaskSnapshotSurface.create: Failed to find task for activity="
@@ -150,9 +153,9 @@ public class StartingSurfaceController {
                 return null;
             }
             topFullscreenOpaqueWindow = topFullscreenActivity.getTopFullscreenOpaqueWindow();
-            if (mainWindow == null || topFullscreenOpaqueWindow == null) {
-                Slog.w(TAG, "TaskSnapshotSurface.create: Failed to find main window for activity="
-                        + activity);
+            if (topFullscreenOpaqueWindow == null) {
+                Slog.w(TAG, "TaskSnapshotSurface.create: no opaque window in "
+                        + topFullscreenActivity);
                 return null;
             }
             if (topFullscreenActivity.getWindowConfiguration().getRotation()

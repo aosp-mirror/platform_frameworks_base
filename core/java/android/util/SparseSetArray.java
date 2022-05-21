@@ -15,15 +15,31 @@
  */
 package android.util;
 
+import android.annotation.NonNull;
+
 /**
  * A sparse array of ArraySets, which is suitable to hold userid->packages association.
  *
  * @hide
  */
 public class SparseSetArray<T> {
-    private final SparseArray<ArraySet<T>> mData = new SparseArray<>();
+    private final SparseArray<ArraySet<T>> mData;
 
     public SparseSetArray() {
+        mData = new SparseArray<>();
+    }
+
+    /**
+     * Copy constructor
+     */
+    public SparseSetArray(@NonNull SparseSetArray<T> src) {
+        final int arraySize = src.size();
+        mData = new SparseArray<>(arraySize);
+        for (int i = 0; i < arraySize; i++) {
+            final int key = src.keyAt(i);
+            final ArraySet<T> set = src.get(key);
+            addAll(key, set);
+        }
     }
 
     /**
@@ -41,6 +57,19 @@ public class SparseSetArray<T> {
         }
         set.add(value);
         return true;
+    }
+
+    /**
+     * Add a set of values for key n.
+     */
+    public void addAll(int n, ArraySet<T> values) {
+        ArraySet<T> set = mData.get(n);
+        if (set == null) {
+            set = new ArraySet<>(values);
+            mData.put(n, set);
+            return;
+        }
+        set.addAll(values);
     }
 
     /**
@@ -90,6 +119,7 @@ public class SparseSetArray<T> {
     public void remove(int n) {
         mData.remove(n);
     }
+
     public int size() {
         return mData.size();
     }

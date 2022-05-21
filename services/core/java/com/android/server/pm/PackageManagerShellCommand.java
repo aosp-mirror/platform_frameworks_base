@@ -17,6 +17,11 @@
 package com.android.server.pm;
 
 import static android.content.pm.PackageInstaller.LOCATION_DATA_APP;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKED_COMPAT;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_WHEN_REQUESTED;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
 
 import android.accounts.IAccountManager;
 import android.annotation.NonNull;
@@ -92,6 +97,7 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.PrintWriterPrinter;
@@ -128,6 +134,7 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -149,6 +156,18 @@ class PackageManagerShellCommand extends ShellCommand {
             "--multi-package"
     );
     private static final Set<String> UNSUPPORTED_SESSION_CREATE_OPTS = Collections.emptySet();
+    private static final Map<String, Integer> SUPPORTED_PERMISSION_FLAGS = new ArrayMap<>();
+    private static final List<String> SUPPORTED_PERMISSION_FLAGS_LIST;
+    static {
+        SUPPORTED_PERMISSION_FLAGS_LIST = List.of("review-required", "revoked-compat",
+                "revoke-when-requested", "user-fixed", "user-set");
+        SUPPORTED_PERMISSION_FLAGS.put("user-set", FLAG_PERMISSION_USER_SET);
+        SUPPORTED_PERMISSION_FLAGS.put("user-fixed", FLAG_PERMISSION_USER_FIXED);
+        SUPPORTED_PERMISSION_FLAGS.put("revoked-compat", FLAG_PERMISSION_REVOKED_COMPAT);
+        SUPPORTED_PERMISSION_FLAGS.put("review-required", FLAG_PERMISSION_REVIEW_REQUIRED);
+        SUPPORTED_PERMISSION_FLAGS.put("revoke-when-requested",
+                FLAG_PERMISSION_REVOKE_WHEN_REQUESTED);
+    }
 
     final IPackageManager mInterface;
     final LegacyPermissionManagerInternal mLegacyPermissionManager;
@@ -275,6 +294,10 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runGrantRevokePermission(false);
                 case "reset-permissions":
                     return runResetPermissions();
+                case "set-permission-flags":
+                    return setOrClearPermissionFlags(true);
+                case "clear-permission-flags":
+                    return setOrClearPermissionFlags(false);
                 case "set-permission-enforced":
                     return runSetPermissionEnforced();
                 case "get-privapp-permissions":
@@ -829,7 +852,7 @@ class PackageManagerShellCommand extends ShellCommand {
         boolean showVersionCode = false;
         boolean listApexOnly = false;
         int uid = -1;
-        int userId = UserHandle.USER_SYSTEM;
+        int defaultUserId = UserHandle.USER_ALL;
         try {
             String opt;
             while ((opt = getNextOption()) != null) {
@@ -873,7 +896,7 @@ class PackageManagerShellCommand extends ShellCommand {
                         listApexOnly = true;
                         break;
                     case "--user":
-                        userId = UserHandle.parseUserArg(getNextArgRequired());
+                        defaultUserId = UserHandle.parseUserArg(getNextArgRequired());
                         break;
                     case "--uid":
                         showUid = true;
@@ -891,84 +914,104 @@ class PackageManagerShellCommand extends ShellCommand {
 
         final String filter = getNextArg();
 
-        if (userId == UserHandle.USER_ALL) {
-            getFlags |= PackageManager.MATCH_KNOWN_PACKAGES;
+        int[] userIds = {defaultUserId};
+        if (defaultUserId == UserHandle.USER_ALL) {
+            final UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
+            userIds = umi.getUserIds();
         }
         if (showSdks) {
             getFlags |= PackageManager.MATCH_STATIC_SHARED_AND_SDK_LIBRARIES;
         }
-        final int translatedUserId =
-                translateUserId(userId, UserHandle.USER_SYSTEM, "runListPackages");
-        @SuppressWarnings("unchecked")
-        final ParceledListSlice<PackageInfo> slice =
-                mInterface.getInstalledPackages(getFlags, translatedUserId);
-        final List<PackageInfo> packages = slice.getList();
 
-        final int count = packages.size();
-        for (int p = 0; p < count; p++) {
-            final PackageInfo info = packages.get(p);
-            if (filter != null && !info.packageName.contains(filter)) {
-                continue;
-            }
-            final boolean isApex = info.isApex;
-            if (uid != -1 && !isApex && info.applicationInfo.uid != uid) {
-                continue;
-            }
+        // Build a map of packages to a list of corresponding uids. Keys are strings containing
+        // the sdk or package name along with optional additional information based on opt.
+        final Map<String, List<String>> out = new HashMap<>();
+        for (int userId : userIds) {
+            final int translatedUserId =
+                    translateUserId(userId, UserHandle.USER_SYSTEM, "runListPackages");
+            @SuppressWarnings("unchecked") final ParceledListSlice<PackageInfo> slice =
+                    mInterface.getInstalledPackages(getFlags, translatedUserId);
+            final List<PackageInfo> packages = slice.getList();
 
-            final boolean isSystem = !isApex &&
-                    (info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
-            final boolean isEnabled = !isApex && info.applicationInfo.enabled;
-            if ((listDisabled && isEnabled) ||
-                    (listEnabled && !isEnabled) ||
-                    (listSystem && !isSystem) ||
-                    (listThirdParty && isSystem) ||
-                    (listApexOnly && !isApex)) {
-                continue;
-            }
-
-            String name = null;
-            if (showSdks) {
-                final ParceledListSlice<SharedLibraryInfo> libsSlice =
-                        mInterface.getDeclaredSharedLibraries(info.packageName, getFlags, userId);
-                if (libsSlice == null) {
+            final int count = packages.size();
+            for (int p = 0; p < count; p++) {
+                final PackageInfo info = packages.get(p);
+                final StringBuilder stringBuilder = new StringBuilder();
+                if (filter != null && !info.packageName.contains(filter)) {
                     continue;
                 }
-                final List<SharedLibraryInfo> libs = libsSlice.getList();
-                for (int l = 0, lsize = libs.size(); l < lsize; ++l) {
-                    SharedLibraryInfo lib = libs.get(l);
-                    if (lib.getType() == SharedLibraryInfo.TYPE_SDK_PACKAGE) {
-                        name = lib.getName() + ":" + lib.getLongVersion();
-                        break;
+                final boolean isApex = info.isApex;
+                if (uid != -1 && !isApex && info.applicationInfo.uid != uid) {
+                    continue;
+                }
+
+                final boolean isSystem = !isApex
+                        && (info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+                final boolean isEnabled = !isApex && info.applicationInfo.enabled;
+                if ((listDisabled && isEnabled)
+                        || (listEnabled && !isEnabled)
+                        || (listSystem && !isSystem)
+                        || (listThirdParty && isSystem)
+                        || (listApexOnly && !isApex)) {
+                    continue;
+                }
+
+                String name = null;
+                if (showSdks) {
+                    final ParceledListSlice<SharedLibraryInfo> libsSlice =
+                            mInterface.getDeclaredSharedLibraries(
+                                info.packageName, getFlags, userId
+                            );
+                    if (libsSlice == null) {
+                        continue;
+                    }
+                    final List<SharedLibraryInfo> libs = libsSlice.getList();
+                    for (int l = 0, lsize = libs.size(); l < lsize; ++l) {
+                        SharedLibraryInfo lib = libs.get(l);
+                        if (lib.getType() == SharedLibraryInfo.TYPE_SDK_PACKAGE) {
+                            name = lib.getName() + ":" + lib.getLongVersion();
+                            break;
+                        }
+                    }
+                    if (name == null) {
+                        continue;
+                    }
+                } else {
+                    name = info.packageName;
+                }
+
+                stringBuilder.append(prefix);
+                if (showSourceDir) {
+                    stringBuilder.append(info.applicationInfo.sourceDir);
+                    stringBuilder.append("=");
+                }
+                stringBuilder.append(name);
+                if (showVersionCode) {
+                    stringBuilder.append(" versionCode:");
+                    if (info.applicationInfo != null) {
+                        stringBuilder.append(info.applicationInfo.longVersionCode);
+                    } else {
+                        stringBuilder.append(info.getLongVersionCode());
                     }
                 }
-                if (name == null) {
-                    continue;
+                if (listInstaller) {
+                    stringBuilder.append("  installer=");
+                    stringBuilder.append(mInterface.getInstallerPackageName(info.packageName));
                 }
-            } else {
-                name = info.packageName;
-            }
-
-            pw.print(prefix);
-            if (showSourceDir) {
-                pw.print(info.applicationInfo.sourceDir);
-                pw.print("=");
-            }
-            pw.print(name);
-            if (showVersionCode) {
-                pw.print(" versionCode:");
-                if (info.applicationInfo != null) {
-                    pw.print(info.applicationInfo.longVersionCode);
-                } else {
-                    pw.print(info.getLongVersionCode());
+                List<String> uids = out.computeIfAbsent(
+                        stringBuilder.toString(), k -> new ArrayList<>()
+                );
+                if (showUid && !isApex) {
+                    uids.add(String.valueOf(info.applicationInfo.uid));
                 }
             }
-            if (listInstaller) {
-                pw.print("  installer=");
-                pw.print(mInterface.getInstallerPackageName(info.packageName));
-            }
-            if (showUid && !isApex) {
+        }
+        for (Map.Entry<String, List<String>> entry : out.entrySet()) {
+            pw.print(entry.getKey());
+            List<String> uids = entry.getValue();
+            if (!uids.isEmpty()) {
                 pw.print(" uid:");
-                pw.print(info.applicationInfo.uid);
+                pw.print(String.join(",", uids));
             }
             pw.println();
         }
@@ -1952,8 +1995,23 @@ class PackageManagerShellCommand extends ShellCommand {
     }
 
     private int runDumpProfiles() throws RemoteException {
+        final PrintWriter pw = getOutPrintWriter();
+        boolean dumpClassesAndMethods = false;
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "--dump-classes-and-methods":
+                    dumpClassesAndMethods = true;
+                    break;
+                default:
+                    pw.println("Error: Unknown option: " + opt);
+                    return 1;
+            }
+        }
+
         String packageName = getNextArg();
-        mInterface.dumpProfiles(packageName);
+        mInterface.dumpProfiles(packageName, dumpClassesAndMethods);
         return 0;
     }
 
@@ -2211,10 +2269,23 @@ class PackageManagerShellCommand extends ShellCommand {
     }
 
     private int runClear() throws RemoteException {
+        final PrintWriter pw = getOutPrintWriter();
         int userId = UserHandle.USER_SYSTEM;
-        String option = getNextOption();
-        if (option != null && option.equals("--user")) {
-            userId = UserHandle.parseUserArg(getNextArgRequired());
+        boolean cacheOnly = false;
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "--user":
+                    userId = UserHandle.parseUserArg(getNextArgRequired());
+                    break;
+                case "--cache-only":
+                    cacheOnly = true;
+                    break;
+                default:
+                    pw.println("Error: Unknown option: " + opt);
+                    return 1;
+            }
         }
 
         String pkg = getNextArg();
@@ -2226,7 +2297,12 @@ class PackageManagerShellCommand extends ShellCommand {
         final int translatedUserId =
                 translateUserId(userId, UserHandle.USER_NULL, "runClear");
         final ClearDataObserver obs = new ClearDataObserver();
-        ActivityManager.getService().clearApplicationUserData(pkg, false, obs, translatedUserId);
+        if (!cacheOnly) {
+            ActivityManager.getService()
+                    .clearApplicationUserData(pkg, false, obs, translatedUserId);
+        } else {
+            mInterface.deleteApplicationCacheFilesAsUser(pkg, translatedUserId, obs);
+        }
         synchronized (obs) {
             while (!obs.finished) {
                 try {
@@ -2479,6 +2555,50 @@ class PackageManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int setOrClearPermissionFlags(boolean setFlags) {
+        int userId = UserHandle.USER_SYSTEM;
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = UserHandle.parseUserArg(getNextArgRequired());
+            }
+        }
+
+        String pkg = getNextArg();
+        if (pkg == null) {
+            getErrPrintWriter().println("Error: no package specified");
+            return 1;
+        }
+        String perm = getNextArg();
+        if (perm == null) {
+            getErrPrintWriter().println("Error: no permission specified");
+            return 1;
+        }
+
+        int flagMask = 0;
+        String flagName = getNextArg();
+        if (flagName == null) {
+            getErrPrintWriter().println("Error: no permission flags specified");
+            return 1;
+        }
+        while (flagName != null) {
+            if (!SUPPORTED_PERMISSION_FLAGS.containsKey(flagName)) {
+                getErrPrintWriter().println("Error: specified flag " + flagName + " is not one of "
+                        + SUPPORTED_PERMISSION_FLAGS_LIST);
+                return 1;
+            }
+            flagMask |= SUPPORTED_PERMISSION_FLAGS.get(flagName);
+            flagName = getNextArg();
+        }
+
+        final UserHandle translatedUser = UserHandle.of(translateUserId(userId,
+                UserHandle.USER_NULL, "runGrantRevokePermission"));
+        int flagSet = setFlags ? flagMask : 0;
+        mPermissionManager.updatePermissionFlags(pkg, perm, flagMask, flagSet, translatedUser);
+        return 0;
+    }
+
     private int runSetPermissionEnforced() throws RemoteException {
         final String permission = getNextArg();
         if (permission == null) {
@@ -2675,7 +2795,8 @@ class PackageManagerShellCommand extends ShellCommand {
         while ((opt = getNextOption()) != null) {
             String newUserType = null;
             if ("--profileOf".equals(opt)) {
-                userId = UserHandle.parseUserArg(getNextArgRequired());
+                userId = translateUserId(UserHandle.parseUserArg(getNextArgRequired()),
+                            UserHandle.USER_ALL, "runCreateUser");
             } else if ("--managed".equals(opt)) {
                 newUserType = UserManager.USER_TYPE_PROFILE_MANAGED;
             } else if ("--restricted".equals(opt)) {
@@ -3672,7 +3793,7 @@ class PackageManagerShellCommand extends ShellCommand {
             }
             List<PermissionInfo> ps = mPermissionManager
                     .queryPermissionsByGroup(groupList.get(i), 0 /*flags*/);
-            final int count = ps.size();
+            final int count = (ps == null ? 0 : ps.size());
             boolean first = true;
             for (int p = 0 ; p < count ; p++) {
                 PermissionInfo pi = ps.get(p);
@@ -3939,8 +4060,10 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      --user: remove the app from the given user.");
         pw.println("      --versionCode: only uninstall if the app has the given version code.");
         pw.println("");
-        pw.println("  clear [--user USER_ID] PACKAGE");
-        pw.println("    Deletes all data associated with a package.");
+        pw.println("  clear [--user USER_ID] [--cache-only] PACKAGE");
+        pw.println("    Deletes data associated with a package. Options are:");
+        pw.println("    --user: specifies the user for which we need to clear data");
+        pw.println("    --cache-only: a flag which tells if we only need to clear cache data");
         pw.println("");
         pw.println("  enable [--user USER_ID] PACKAGE_OR_COMPONENT");
         pw.println("  disable [--user USER_ID] PACKAGE_OR_COMPONENT");
@@ -3974,6 +4097,13 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("    These commands either grant or revoke permissions to apps.  The permissions");
         pw.println("    must be declared as used in the app's manifest, be runtime permissions");
         pw.println("    (protection level dangerous), and the app targeting SDK greater than Lollipop MR1.");
+        pw.println("");
+        pw.println("  set-permission-flags [--user USER_ID] PACKAGE PERMISSION [FLAGS..]");
+        pw.println("  clear-permission-flags [--user USER_ID] PACKAGE PERMISSION [FLAGS..]");
+        pw.println("    These commands either set or clear permission flags on apps.  The permissions");
+        pw.println("    must be declared as used in the app's manifest, be runtime permissions");
+        pw.println("    (protection level dangerous), and the app targeting SDK greater than Lollipop MR1.");
+        pw.println("    The flags must be one or more of " + SUPPORTED_PERMISSION_FLAGS_LIST);
         pw.println("");
         pw.println("  reset-permissions");
         pw.println("    Revert all runtime permissions to their default state.");
@@ -4070,9 +4200,12 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("  reconcile-secondary-dex-files TARGET-PACKAGE");
         pw.println("    Reconciles the package secondary dex files with the generated oat files.");
         pw.println("");
-        pw.println("  dump-profiles TARGET-PACKAGE");
+        pw.println("  dump-profiles [--dump-classes-and-methods] TARGET-PACKAGE");
         pw.println("    Dumps method/class profile files to");
-        pw.println("    " + ART_PROFILE_SNAPSHOT_DEBUG_LOCATION + "TARGET-PACKAGE.txt");
+        pw.println("    " + ART_PROFILE_SNAPSHOT_DEBUG_LOCATION
+                + "TARGET-PACKAGE-primary.prof.txt.");
+        pw.println("      --dump-classes-and-methods: passed along to the profman binary to");
+        pw.println("        switch to the format used by 'profman --create-profile-from'.");
         pw.println("");
         pw.println("  snapshot-profile TARGET-PACKAGE [--code-path path]");
         pw.println("    Take a snapshot of the package profiles to");

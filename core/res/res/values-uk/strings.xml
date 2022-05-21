@@ -87,8 +87,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Оператор тимчасово вимкнув службу для SIM-карти <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Не вдається під’єднатися до мобільної мережі"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Спробуйте змінити вибрану мережу. Торкніться, щоб це зробити."</string>
-    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Екстрені виклики можуть бути недоступні"</string>
-    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> не підтримує екстрені виклики через Wi-Fi. Натисніть, щоб дізнатися більше."</string>
+    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Екстрені виклики недоступні"</string>
+    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Не можна здійснювати екстрені виклики через Wi-Fi"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Сповіщення"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Переадресація виклику"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Режим екстреного зворотного виклику"</string>
@@ -307,12 +307,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"отримувати доступ до календаря"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"надсилати та переглядати SMS-повідомлення"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Файли та документи"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Файли й документи"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"отримувати доступ до файлів і документів на вашому пристрої"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Музика й інше аудіо"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"отримувати доступ до аудіофайлів на вашому пристрої"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Фото й відео"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"отримувати доступ до відеофайлів на вашому пристрої"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Музика й аудіо"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"отримувати доступ до музики й аудіо на пристрої"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Фото й відео"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"отримувати доступ до фото й відео на пристрої"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Мікрофон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"записувати аудіо"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Фізична активність"</string>
@@ -351,7 +351,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Дозволяє програмі розгортати чи згортати рядок стану."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"Показувати сповіщення як активності на весь екран заблокованого пристрою"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Додаток зможе показувати сповіщення як активності на весь екран заблокованого пристрою"</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"створення ярликів"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Створювати ярлики"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Дозволяє програмі самостійно додавати ярлики на головний екран."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"видаляти ярлики"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Дозволяє програмі самостійно вилучати ярлики з головного екрана."</string>
@@ -587,7 +587,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Помилка автентифікації"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Доступ розблокуванням екрана"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Щоб продовжити, введіть дані для розблокування екрана"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Виявлено частковий відбиток пальця"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Міцно притисніть палець до сканера"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Не вдалось обробити відбиток пальця. Повторіть спробу."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Очистьте сканер відбитків пальців і повторіть спробу"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Очистьте сканер і повторіть спробу"</string>
@@ -600,7 +600,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Відбиток пальця не розпізнано"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Міцно притисніть палець до сканера"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Відбиток пальця не розпізнано"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Відбиток пальця автентифіковано"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Обличчя автентифіковано"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Обличчя автентифіковано. Натисніть \"Підтвердити\""</string>
@@ -1357,7 +1357,7 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Під’єднаний пристрій заряджається. Торкніться, щоб побачити більше опцій."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Виявлено аналоговий аксесуар для аудіо"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Під’єднаний пристрій несумісний із цим телефоном. Торкніться, щоб дізнатися більше."</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"Налагодження USB підключено"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"Налагодження через USB активне"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"Торкніться, щоб вимкнути його"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Виберіть, щоб вимкнути налагодження за USB"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Активне налагодження через Wi-Fi"</string>
@@ -1453,12 +1453,6 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Додаток зможе запитувати дозвіл ігнорувати оптимізацію використання заряду акумулятора."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"подавати запити на всі пакети"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Дозволяє додатку переглядати всі встановлені пакети."</string>
-    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"надавати доступ до AdServices Topics API"</string>
-    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"Надає додатку доступ до AdServices Topics API."</string>
-    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"надавати доступ до інтерфейсів API AdServices Attribution"</string>
-    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"Надає додатку доступ до інтерфейсів API AdServices Attribution."</string>
-    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"надавати доступ до AdServices Custom Audiences API"</string>
-    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"Надає додатку доступ до AdServices Custom Audiences API."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Двічі натис. для кер. масшт."</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Не вдалося додати віджет."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Йти"</string>
@@ -1485,7 +1479,7 @@
     <string name="accessibility_binding_label" msgid="1974602776545801715">"Спеціальні можливості"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"Фоновий мал."</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"Змінити фоновий малюнок"</string>
-    <string name="notification_listener_binding_label" msgid="2702165274471499713">"Служба читання сповіщень"</string>
+    <string name="notification_listener_binding_label" msgid="2702165274471499713">"Сервіс читання сповіщень"</string>
     <string name="vr_listener_binding_label" msgid="8013112996671206429">"VR-режим"</string>
     <string name="condition_provider_service_binding_label" msgid="8490641013951857673">"Постачальник умов"</string>
     <string name="notification_ranker_binding_label" msgid="432708245635563763">"Служба встановлення пріоритетності сповіщень"</string>
@@ -1687,7 +1681,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"УВІМК."</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ВИМК."</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Надати сервісу <xliff:g id="SERVICE">%1$s</xliff:g> повний доступ до вашого пристрою?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Якщо ви ввімкнете сервіс <xliff:g id="SERVICE">%1$s</xliff:g>, дані на пристрої не захищатимуться екраном блокування."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Повний доступ доречний для додатків, які надають спеціальні можливості, але його не варто відкривати для більшості інших додатків."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Перегляд і контроль екрана"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Цей сервіс може переглядати всі дані на екрані й показувати вміст над іншими додатками."</string>
@@ -1941,9 +1934,22 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Додаток недоступний"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Додаток <xliff:g id="APP_NAME">%1$s</xliff:g> зараз недоступний."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"Недоступно: <xliff:g id="ACTIVITY">%1$s</xliff:g>"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Цей додаток зараз недоступний на вашому <xliff:g id="DEVICE">%1$s</xliff:g>. Спробуйте натомість скористатися пристроєм Android TV."</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Цей додаток зараз недоступний на вашому <xliff:g id="DEVICE">%1$s</xliff:g>. Спробуйте натомість скористатися планшетом."</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Цей додаток зараз недоступний на вашому <xliff:g id="DEVICE">%1$s</xliff:g>. Спробуйте натомість скористатися телефоном."</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Потрібен дозвіл"</string>
+    <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Камера недоступна"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Продовжте на телефоні"</string>
+    <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Мікрофон недоступний"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Налаштування Android TV недоступні"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Налаштування планшета недоступні"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Налаштування телефона недоступні"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"Цей додаток недоступний на вашому пристрої (<xliff:g id="DEVICE">%1$s</xliff:g>). Спробуйте натомість скористатися пристроєм Android TV."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"Цей додаток недоступний на вашому пристрої (<xliff:g id="DEVICE">%1$s</xliff:g>). Спробуйте натомість скористатися планшетом."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"Цей додаток недоступний на вашому пристрої (<xliff:g id="DEVICE">%1$s</xliff:g>). Спробуйте натомість скористатися телефоном."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"Цей додаток зараз недоступний на вашому пристрої (<xliff:g id="DEVICE">%1$s</xliff:g>). Спробуйте натомість скористатися пристроєм Android TV."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"Цей додаток зараз недоступний на вашому пристрої (<xliff:g id="DEVICE">%1$s</xliff:g>). Спробуйте натомість скористатися планшетом."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"Цей додаток зараз недоступний на вашому пристрої (<xliff:g id="DEVICE">%1$s</xliff:g>). Спробуйте натомість скористатися телефоном."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Цьому додатку потрібен додатковий рівень безпеки. Спробуйте натомість скористатися пристроєм Android TV."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Цьому додатку потрібен додатковий рівень безпеки. Спробуйте натомість скористатися планшетом."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Цьому додатку потрібен додатковий рівень безпеки. Спробуйте натомість скористатися телефоном."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Цей додаток створений для старішої версії Android і може працювати неналежним чином. Спробуйте знайти оновлення або зв’яжіться з розробником."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Шукати оновлення"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"У вас є нові повідомлення"</string>
@@ -2034,9 +2040,9 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"УСЕ ОДНО ВІДКРИТИ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Виявлено шкідливий додаток"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Надати додатку <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> доступ до всіх журналів пристрою?"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"Лише цього разу"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Надати доступ лише цього разу"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Не дозволяти"</string>
-    <string name="log_access_confirmation_body" msgid="4483075525611652922">"У журналах пристрою реєструється все, що відбувається на ньому. За допомогою цих журналів додатки можуть виявляти й усувати проблеми.\n\nДеякі журнали можуть містити конфіденційні дані, тому надавати доступ до всіх журналів пристрою слід лише надійним додаткам. \n\nЯкщо додаток не має доступу до всіх журналів пристрою, він усе одно може використовувати власні журнали, а виробник вашого пристрою – деякі журнали чи інформацію на ньому. Докладніше"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"У журналах пристрою реєструється все, що відбувається на ньому. За допомогою цих журналів додатки можуть виявляти й усувати проблеми.\n\nДеякі журнали можуть містити конфіденційні дані, тому надавати доступ до всіх журналів пристрою слід лише надійним додаткам. \n\nЯкщо додаток не має доступу до всіх журналів пристрою, він усе одно може використовувати власні журнали. Виробник вашого пристрою все одно може використовувати деякі журнали чи інформацію на ньому. Докладніше"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Більше не показувати"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> хоче показати фрагменти додатка <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Редагувати"</string>
@@ -2048,6 +2054,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Торкніться, щоб дізнатися більше та змінити."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Налаштування режиму \"Не турбувати\" змінено"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Торкніться, щоб перевірити, що заблоковано."</string>
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"Перегляньте налаштування сповіщень"</string>
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Починаючи з ОС Android 13, установленим додаткам потрібно надати дозвіл, щоб вони могли надсилати сповіщення. Натисніть, щоб змінити цей дозвіл для наявних додатків."</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Нагадати пізніше"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Закрити"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Система"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Налаштування"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Камера"</string>
@@ -2093,7 +2103,7 @@
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"У режимі польоту Bluetooth залишатиметься ввімкненим"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Завантаження"</string>
     <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} і ще # файл}one{{file_name} і ще # файл}few{{file_name} і ще # файли}many{{file_name} і ще # файлів}other{{file_name} і ще # файлу}}"</string>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Немає рекомендацій щодо людей, з якими можна поділитися"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Немає рекомендацій про те, з ким поділитися"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Список додатків"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Цей додаток не має дозволу на запис, але він може фіксувати звук через цей USB-пристрій."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"На головний екран"</string>
@@ -2266,11 +2276,12 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> (перекладене повідомлення)."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Повідомлення перекладено (мова оригіналу: <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>, мова перекладу: <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>)."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Робота у фоновому режимі"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Робота у фоновому режимі"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"Додаток <xliff:g id="APP">%1$s</xliff:g> працює у фоновому режимі та розряджає акумулятор. Натисніть, щоб переглянути."</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"Додаток <xliff:g id="APP">%1$s</xliff:g> довго працює у фоновому режимі. Натисніть, щоб переглянути."</string>
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"Додаток швидко розряджає акумулятор"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Додаток досі активний"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"Додаток <xliff:g id="APP">%1$s</xliff:g> працює у фоновому режимі. Натисніть, щоб керувати використанням заряду."</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"Додаток <xliff:g id="APP">%1$s</xliff:g> може вплинути на час роботи акумулятора. Натисніть, щоб переглянути активні додатки."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Перевірте активні додатки"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Не вдається отримати доступ до камери через цей пристрій"</string>
-    <!-- no translation found for system_locale_title (3978041860457277638) -->
-    <skip />
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Не вдається отримати доступ до камери телефона з пристрою <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Не вдається отримати доступ до камери планшета з пристрою <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Налаштування системи за умовчанням"</string>
 </resources>

@@ -147,7 +147,10 @@ public class CloudSearchPerUserService extends
                 }
             });
             if (sessionInfo.linkToDeath()) {
-                mCallbackQueue.put(requestId, sessionInfo);
+                CloudSearchCallbackInfo removedInfo = mCallbackQueue.put(requestId, sessionInfo);
+                if (removedInfo != null) {
+                    removedInfo.destroy();
+                }
             } else {
                 // destroy the session if calling process is already dead
                 onDestroyLocked(requestId);
@@ -197,7 +200,9 @@ public class CloudSearchPerUserService extends
             Slog.d(TAG, "onDestroyLocked(): requestId=" + requestId);
         }
         final CloudSearchCallbackInfo sessionInfo = mCallbackQueue.removeElement(requestId);
-        sessionInfo.destroy();
+        if (sessionInfo != null) {
+            sessionInfo.destroy();
+        }
     }
 
     @Override

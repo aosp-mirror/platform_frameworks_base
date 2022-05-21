@@ -26,6 +26,7 @@ import com.android.systemui.util.animation.MeasurementOutput
 import com.android.systemui.util.animation.TransitionLayout
 import com.android.systemui.util.animation.TransitionLayoutController
 import com.android.systemui.util.animation.TransitionViewState
+import com.android.systemui.util.traceSection
 import javax.inject.Inject
 
 /**
@@ -35,7 +36,8 @@ import javax.inject.Inject
 class MediaViewController @Inject constructor(
     private val context: Context,
     private val configurationController: ConfigurationController,
-    private val mediaHostStatesManager: MediaHostStatesManager
+    private val mediaHostStatesManager: MediaHostStatesManager,
+    private val logger: MediaViewLogger
 ) {
 
     /**
@@ -260,10 +262,7 @@ class MediaViewController @Inject constructor(
             TYPE.PLAYER -> MediaViewHolder.controlsIds
             TYPE.RECOMMENDATION -> RecommendationViewHolder.controlsIds
         }
-        val gutsIds = when (type) {
-            TYPE.PLAYER -> MediaViewHolder.gutsIds
-            TYPE.RECOMMENDATION -> RecommendationViewHolder.gutsIds
-        }
+        val gutsIds = GutsViewHolder.ids
         controlsIds.forEach { id ->
             viewState.widgetStates.get(id)?.let { state ->
                 // Make sure to use the unmodified state if guts are not visible.
@@ -280,13 +279,14 @@ class MediaViewController @Inject constructor(
     /**
      * Apply squishFraction to a copy of viewState such that the cached version is untouched.
      */
-    private fun squishViewState(
+    @VisibleForTesting
+    internal fun squishViewState(
         viewState: TransitionViewState,
         squishFraction: Float
     ): TransitionViewState {
         val squishedViewState = viewState.copy()
         squishedViewState.height = (squishedViewState.height * squishFraction).toInt()
-        val albumArtViewState = viewState.widgetStates.get(R.id.album_art)
+        val albumArtViewState = squishedViewState.widgetStates.get(R.id.album_art)
         if (albumArtViewState != null) {
             albumArtViewState.height = squishedViewState.height
         }
@@ -319,6 +319,7 @@ class MediaViewController @Inject constructor(
         if (transitionLayout == null) {
             return null
         }
+
         // Not cached. Let's create a new measurement
         if (state.expansion == 0.0f || state.expansion == 1.0f) {
             result = transitionLayout!!.calculateViewState(
@@ -330,6 +331,7 @@ class MediaViewController @Inject constructor(
             // is cheap
             setGutsViewState(result)
             viewStates[cacheKey] = result
+            logger.logMediaSize("measured new viewState", result.width, result.height)
         } else {
             // This is an interpolated state
             val startState = state.copy().also { it.expansion = 0.0f }
@@ -344,6 +346,7 @@ class MediaViewController @Inject constructor(
                     startViewState,
                     endViewState,
                     state.expansion)
+            logger.logMediaSize("interpolated viewState", result.width, result.height)
         }
         if (state.squishFraction < 1f) {
             return squishViewState(result, state.squishFraction)
@@ -369,8 +372,12 @@ class MediaViewController @Inject constructor(
      * Attach a view to this controller. This may perform measurements if it's not available yet
      * and should therefore be done carefully.
      */
-    fun attach(transitionLayout: TransitionLayout, type: TYPE) {
+    fun attach(
+        transitionLayout: TransitionLayout,
+        type: TYPE
+    ) = traceSection("MediaViewController#attach") {
         updateMediaViewControllerType(type)
+        logger.logMediaLocation("attach", currentStartLocation, currentEndLocation)
         this.transitionLayout = transitionLayout
         layoutController.attach(transitionLayout)
         if (currentEndLocation == -1) {
@@ -389,7 +396,9 @@ class MediaViewController @Inject constructor(
      * and all widgets know their location. Calling this method may create a measurement if we
      * don't have a cached value available already.
      */
-    fun getMeasurementsForState(hostState: MediaHostState): MeasurementOutput? {
+    fun getMeasurementsForState(
+        hostState: MediaHostState
+    ): MeasurementOutput? = traceSection("MediaViewController#getMeasurementsForState") {
         val viewState = obtainViewState(hostState) ?: return null
         measurement.measuredWidth = viewState.width
         measurement.measuredHeight = viewState.height
@@ -405,10 +414,11 @@ class MediaViewController @Inject constructor(
         @MediaLocation endLocation: Int,
         transitionProgress: Float,
         applyImmediately: Boolean
-    ) {
+    ) = traceSection("MediaViewController#setCurrentState") {
         currentEndLocation = endLocation
         currentStartLocation = startLocation
         currentTransitionProgress = transitionProgress
+        logger.logMediaLocation("setCurrentState", startLocation, endLocation)
 
         val shouldAnimate = animateNextStateChange && !applyImmediately
 
@@ -461,6 +471,7 @@ class MediaViewController @Inject constructor(
             result = layoutController.getInterpolatedState(startViewState, endViewState,
                     transitionProgress, tmpState)
         }
+        logger.logMediaSize("setCurrentState", result.width, result.height)
         layoutController.setState(result, applyImmediately, shouldAnimate, animationDuration,
                 animationDelay)
     }
@@ -478,6 +489,7 @@ class MediaViewController @Inject constructor(
             result.height = Math.max(it.measuredHeight, result.height)
             result.width = Math.max(it.measuredWidth, result.width)
         }
+        logger.logMediaSize("update to carousel", result.width, result.height)
         return result
     }
 
@@ -534,7 +546,7 @@ class MediaViewController @Inject constructor(
     /**
      * Clear all existing measurements and refresh the state to match the view.
      */
-    fun refreshState() {
+    fun refreshState() = traceSection("MediaViewController#refreshState") {
         // Let's clear all of our measurements and recreate them!
         viewStates.clear()
         if (firstRefresh) {

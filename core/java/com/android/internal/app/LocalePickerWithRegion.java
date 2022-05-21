@@ -16,6 +16,8 @@
 
 package com.android.internal.app;
 
+import static com.android.internal.app.AppLocaleStore.AppLocaleResult.LocaleStatus;
+
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.ListFragment;
@@ -27,13 +29,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MenuItem.OnActionExpandListener;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.SearchView;
 
 import com.android.internal.R;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Locale;
@@ -61,6 +63,8 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
     private int mFirstVisiblePosition = 0;
     private int mTopDistance = 0;
     private String mAppPackageName;
+    private CharSequence mTitle = null;
+    private OnActionExpandListener mOnActionExpandListener;
 
     /**
      * Other classes can register to be notified when a locale was selected.
@@ -77,8 +81,10 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
 
     private static LocalePickerWithRegion createCountryPicker(Context context,
             LocaleSelectedListener listener, LocaleStore.LocaleInfo parent,
-            boolean translatedOnly, String appPackageName) {
+            boolean translatedOnly, String appPackageName,
+            OnActionExpandListener onActionExpandListener) {
         LocalePickerWithRegion localePicker = new LocalePickerWithRegion();
+        localePicker.setOnActionExpandListener(onActionExpandListener);
         boolean shouldShowTheList = localePicker.setListener(context, listener, parent,
                 translatedOnly, appPackageName);
         return shouldShowTheList ? localePicker : null;
@@ -92,8 +98,10 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
     }
 
     public static LocalePickerWithRegion createLanguagePicker(Context context,
-            LocaleSelectedListener listener, boolean translatedOnly, String appPackageName) {
+            LocaleSelectedListener listener, boolean translatedOnly, String appPackageName,
+            OnActionExpandListener onActionExpandListener) {
         LocalePickerWithRegion localePicker = new LocalePickerWithRegion();
+        localePicker.setOnActionExpandListener(onActionExpandListener);
         localePicker.setListener(
                 context, listener, /* parent */ null, translatedOnly, appPackageName);
         return localePicker;
@@ -126,6 +134,12 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
         boolean isForCountryMode = parent != null;
 
         if (!TextUtils.isEmpty(appPackageName) && !isForCountryMode) {
+            // Filter current system locale to add them into suggestion
+            LocaleList systemLangList = LocaleList.getDefault();
+            for(int i = 0; i < systemLangList.size(); i++) {
+                langTagsToIgnore.add(systemLangList.get(i).toLanguageTag());
+            }
+
             if (appCurrentLocale != null) {
                 Log.d(TAG, "appCurrentLocale: " + appCurrentLocale.getLocale().toLanguageTag());
                 langTagsToIgnore.add(appCurrentLocale.getLocale().toLanguageTag());
@@ -158,30 +172,57 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
             if (appCurrentLocale != null && !isForCountryMode) {
                 mLocaleList.add(appCurrentLocale);
             }
-            filterTheLanguagesNotSupportedInApp(context, appPackageName);
 
-            if (!isForCountryMode) {
-                mLocaleList.add(LocaleStore.getSystemDefaultLocaleInfo());
+            AppLocaleStore.AppLocaleResult result =
+                    AppLocaleStore.getAppSupportedLocales(context, appPackageName);
+            boolean shouldShowList =
+                    result.mLocaleStatus == LocaleStatus.GET_SUPPORTED_LANGUAGE_FROM_LOCAL_CONFIG
+                    || result.mLocaleStatus == LocaleStatus.GET_SUPPORTED_LANGUAGE_FROM_ASSET;
+
+            // Add current system language into suggestion list
+            for(LocaleStore.LocaleInfo localeInfo: LocaleStore.getSystemCurrentLocaleInfo()) {
+                boolean isNotCurrentLocale = appCurrentLocale == null
+                        || !localeInfo.getLocale().equals(appCurrentLocale.getLocale());
+                if (!isForCountryMode && isNotCurrentLocale) {
+                    mLocaleList.add(localeInfo);
+                }
+            }
+
+            // Filter the language not support in app
+            mLocaleList = filterTheLanguagesNotSupportedInApp(
+                    shouldShowList, result.mAppSupportedLocales);
+
+            Log.d(TAG, "mLocaleList after app-supported filter:  " + mLocaleList.size());
+
+            // Add "system language"
+            if (!isForCountryMode && shouldShowList) {
+                mLocaleList.add(LocaleStore.getSystemDefaultLocaleInfo(appCurrentLocale == null));
             }
         }
         return true;
     }
 
-    private void filterTheLanguagesNotSupportedInApp(Context context, String appPackageName) {
-        ArrayList<Locale> supportedLocales =
-                AppLocaleStore.getAppSupportedLocales(context, appPackageName);
-
+    private Set<LocaleStore.LocaleInfo> filterTheLanguagesNotSupportedInApp(
+            boolean shouldShowList, HashSet<Locale> supportedLocales) {
         Set<LocaleStore.LocaleInfo> filteredList = new HashSet<>();
+        if (!shouldShowList) {
+            return filteredList;
+        }
+
         for(LocaleStore.LocaleInfo li: mLocaleList) {
-            for(Locale l: supportedLocales) {
-                if(LocaleList.matchesLanguageAndScript(li.getLocale(), l)) {
-                    filteredList.add(li);
+            if (supportedLocales.contains(li.getLocale())) {
+                filteredList.add(li);
+            } else {
+                for(Locale l: supportedLocales) {
+                    if(LocaleList.matchesLanguageAndScript(li.getLocale(), l)) {
+                        filteredList.add(li);
+                        break;
+                    }
                 }
             }
         }
-        Log.d(TAG, "mLocaleList after app-supported filter:  " + filteredList.size());
 
-        mLocaleList = filteredList;
+        return filteredList;
     }
 
     private void returnToParentFrame() {
@@ -202,6 +243,7 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
             return;
         }
 
+        mTitle = getActivity().getTitle();
         final boolean countryMode = mParentLocale != null;
         final Locale sortingLocale = countryMode ? mParentLocale.getLocale() : Locale.getDefault();
         mAdapter = new SuggestedLocaleAdapter(mLocaleList, countryMode, mAppPackageName);
@@ -217,6 +259,7 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
         // In order to make the list view work with CollapsingToolbarLayout,
         // we have to enable the nested scrolling feature of the list view.
         getListView().setNestedScrollingEnabled(true);
+        getListView().setDivider(null);
     }
 
     @Override
@@ -237,7 +280,7 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
         if (mParentLocale != null) {
             getActivity().setTitle(mParentLocale.getFullNameNative());
         } else {
-            getActivity().setTitle(R.string.language_selection_title);
+            getActivity().setTitle(mTitle);
         }
 
         getListView().requestFocus();
@@ -264,10 +307,9 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
     }
 
     @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        SuggestedLocaleAdapter adapter = (SuggestedLocaleAdapter) getListAdapter();
+    public void onListItemClick(ListView parent, View v, int position, long id) {
         final LocaleStore.LocaleInfo locale =
-                (LocaleStore.LocaleInfo) adapter.getItem(position);
+                (LocaleStore.LocaleInfo) parent.getAdapter().getItem(position);
         // Special case for resetting the app locale to equal the system locale.
         boolean isSystemLocale = locale.isSystemLocale();
         boolean isRegionLocale = locale.getParent() != null;
@@ -280,7 +322,7 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
         } else {
             LocalePickerWithRegion selector = LocalePickerWithRegion.createCountryPicker(
                     getContext(), mListener, locale, mTranslatedOnly /* translate only */,
-                    adapter.getAppPackageName());
+                    mAppPackageName, mOnActionExpandListener);
             if (selector != null) {
                 getFragmentManager().beginTransaction()
                         .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
@@ -298,8 +340,11 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
             inflater.inflate(R.menu.language_selection_list, menu);
 
             final MenuItem searchMenuItem = menu.findItem(R.id.locale_search_menu);
-            mSearchView = (SearchView) searchMenuItem.getActionView();
+            if (!TextUtils.isEmpty(mAppPackageName) && mOnActionExpandListener != null) {
+                searchMenuItem.setOnActionExpandListener(mOnActionExpandListener);
+            }
 
+            mSearchView = (SearchView) searchMenuItem.getActionView();
             mSearchView.setQueryHint(getText(R.string.search_language_hint));
             mSearchView.setOnQueryTextListener(this);
 
@@ -332,5 +377,12 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
             mAdapter.getFilter().filter(newText);
         }
         return false;
+    }
+
+    /**
+     * Sets OnActionExpandListener to LocalePickerWithRegion to dectect action of search bar.
+     */
+    public void setOnActionExpandListener(OnActionExpandListener onActionExpandListener) {
+        mOnActionExpandListener = onActionExpandListener;
     }
 }

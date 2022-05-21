@@ -46,7 +46,7 @@ import android.annotation.Nullable;
 import android.app.ActivityTaskManager;
 import android.app.StatusBarManager;
 import android.app.WindowConfiguration;
-import android.graphics.Insets;
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.util.ArrayMap;
 import android.util.IntArray;
@@ -124,14 +124,17 @@ class InsetsPolicy {
      * Let remote insets controller control system bars regardless of other settings.
      */
     private boolean mRemoteInsetsControllerControlsSystemBars;
+    private final boolean mHideNavBarForKeyboard;
     private final float[] mTmpFloat9 = new float[9];
 
     InsetsPolicy(InsetsStateController stateController, DisplayContent displayContent) {
         mStateController = stateController;
         mDisplayContent = displayContent;
         mPolicy = displayContent.getDisplayPolicy();
-        mRemoteInsetsControllerControlsSystemBars = mPolicy.getContext().getResources().getBoolean(
+        final Resources r = mPolicy.getContext().getResources();
+        mRemoteInsetsControllerControlsSystemBars = r.getBoolean(
                 R.bool.config_remoteInsetsControllerControlsSystemBars);
+        mHideNavBarForKeyboard = r.getBoolean(R.bool.config_hideNavBarForKeyboard);
     }
 
     boolean getRemoteInsetsControllerControlsSystemBars() {
@@ -289,6 +292,23 @@ class InsetsPolicy {
         return adjustVisibilityForTransientTypes(originalState);
     }
 
+    /**
+     * @param type the internal type of the insets.
+     * @return {@code true} if the given type is controllable, {@code false} otherwise.
+     */
+    static boolean isInsetsTypeControllable(@InternalInsetsType int type) {
+        switch (type) {
+            case ITYPE_STATUS_BAR:
+            case ITYPE_NAVIGATION_BAR:
+            case ITYPE_IME:
+            case ITYPE_CLIMATE_BAR:
+            case ITYPE_EXTRA_NAVIGATION_BAR:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     private static @InternalInsetsType int getInsetsTypeForLayoutParams(
             WindowManager.LayoutParams attrs) {
         @WindowManager.LayoutParams.WindowType int type = attrs.type;
@@ -412,13 +432,15 @@ class InsetsPolicy {
     private InsetsState adjustVisibilityForIme(WindowState w, InsetsState originalState,
             boolean copyState) {
         if (w.mIsImWindow) {
-            // Navigation bar insets is always visible to IME.
+            // If navigation bar is not hidden by IME, IME should always receive visible
+            // navigation bar insets.
+            final boolean navVisible = !mHideNavBarForKeyboard;
             final InsetsSource originalNavSource = originalState.peekSource(ITYPE_NAVIGATION_BAR);
-            if (originalNavSource != null && !originalNavSource.isVisible()) {
+            if (originalNavSource != null && originalNavSource.isVisible() != navVisible) {
                 final InsetsState state = copyState ? new InsetsState(originalState)
                         : originalState;
                 final InsetsSource navSource = new InsetsSource(originalNavSource);
-                navSource.setVisible(true);
+                navSource.setVisible(navVisible);
                 state.addSource(navSource);
                 return state;
             }
@@ -444,22 +466,10 @@ class InsetsPolicy {
 
     private InsetsState adjustInsetsForRoundedCorners(WindowState w, InsetsState originalState,
             boolean copyState) {
-        final WindowState roundedCornerWindow = mPolicy.getRoundedCornerWindow();
         final Task task = w.getTask();
-        if (task != null && !task.getWindowConfiguration().tasksAreFloating()
-                && (roundedCornerWindow != null || task.inSplitScreen())) {
-            // Instead of using display frame to calculating rounded corner, for the fake rounded
-            // corners drawn by divider bar or task bar, we need to re-calculate rounded corners
-            // based on task bounds and if the task bounds is intersected with task bar, we should
-            // exclude the intersected part.
+        if (task != null && !task.getWindowConfiguration().tasksAreFloating()) {
+            // Use task bounds to calculating rounded corners if the task is not floating.
             final Rect roundedCornerFrame = new Rect(task.getBounds());
-            if (roundedCornerWindow != null
-                    && roundedCornerWindow.getControllableInsetProvider() != null) {
-                final InsetsSource source =
-                        roundedCornerWindow.getControllableInsetProvider().getSource();
-                final Insets insets = source.calculateInsets(roundedCornerFrame, false);
-                roundedCornerFrame.inset(insets);
-            }
             final InsetsState state = copyState ? new InsetsState(originalState) : originalState;
             state.setRoundedCornerFrame(roundedCornerFrame);
             return state;
@@ -533,7 +543,7 @@ class InsetsPolicy {
         }
         if (remoteInsetsControllerControlsSystemBars(focusedWin)) {
             mDisplayContent.mRemoteInsetsControlTarget.topFocusedWindowChanged(
-                    focusedWin.mAttrs.packageName);
+                    focusedWin.mAttrs.packageName, focusedWin.getRequestedVisibilities());
             return mDisplayContent.mRemoteInsetsControlTarget;
         }
         if (mPolicy.areSystemBarsForcedShownLw()) {
@@ -569,8 +579,9 @@ class InsetsPolicy {
     private @Nullable InsetsControlTarget getNavControlTarget(@Nullable WindowState focusedWin,
             boolean fake) {
         final WindowState imeWin = mDisplayContent.mInputMethodWindow;
-        if (imeWin != null && imeWin.isVisible()) {
-            // Force showing navigation bar while IME is visible.
+        if (imeWin != null && imeWin.isVisible() && !mHideNavBarForKeyboard) {
+            // Force showing navigation bar while IME is visible and if navigation bar is not
+            // configured to be hidden by the IME.
             return null;
         }
         if (!fake && isShowingTransientTypes(Type.navigationBars())) {
@@ -590,7 +601,7 @@ class InsetsPolicy {
         }
         if (remoteInsetsControllerControlsSystemBars(focusedWin)) {
             mDisplayContent.mRemoteInsetsControlTarget.topFocusedWindowChanged(
-                    focusedWin.mAttrs.packageName);
+                    focusedWin.mAttrs.packageName, focusedWin.getRequestedVisibilities());
             return mDisplayContent.mRemoteInsetsControlTarget;
         }
         if (mPolicy.areSystemBarsForcedShownLw()) {

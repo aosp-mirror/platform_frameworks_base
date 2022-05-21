@@ -635,7 +635,7 @@ public class LockSettingsService extends ILockSettings.Stub {
      * If the account is credential-encrypted, show notification requesting the user to unlock the
      * device.
      */
-    private void maybeShowEncryptionNotificationForUser(@UserIdInt int userId) {
+    private void maybeShowEncryptionNotificationForUser(@UserIdInt int userId, String reason) {
         final UserInfo user = mUserManager.getUserInfo(userId);
         if (!user.isManagedProfile()) {
             // When the user is locked, we communicate it loud-and-clear
@@ -659,27 +659,34 @@ public class LockSettingsService extends ILockSettings.Stub {
                     !mUserManager.isQuietModeEnabled(userHandle)) {
                 // Only show notifications for managed profiles once their parent
                 // user is unlocked.
-                showEncryptionNotificationForProfile(userHandle);
+                showEncryptionNotificationForProfile(userHandle, reason);
             }
         }
     }
 
-    private void showEncryptionNotificationForProfile(UserHandle user) {
+    private void showEncryptionNotificationForProfile(UserHandle user, String reason) {
         Resources r = mContext.getResources();
         CharSequence title = getEncryptionNotificationTitle();
         CharSequence message = getEncryptionNotificationMessage();
         CharSequence detail = getEncryptionNotificationDetail();
 
         final KeyguardManager km = (KeyguardManager) mContext.getSystemService(KEYGUARD_SERVICE);
-        final Intent unlockIntent = km.createConfirmDeviceCredentialIntent(null, null,
-                user.getIdentifier());
+        final Intent unlockIntent =
+                km.createConfirmDeviceCredentialIntent(null, null, user.getIdentifier());
         if (unlockIntent == null) {
             return;
         }
+
+        // Suppress all notifications on non-FBE devices for now
+        if (!StorageManager.isFileEncryptedNativeOrEmulated()) return;
+
         unlockIntent.setFlags(
                 Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
         PendingIntent intent = PendingIntent.getActivity(mContext, 0, unlockIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED);
+
+        Slog.d(TAG, String.format("showing encryption notification, user: %d; reason: %s",
+                user.getIdentifier(), reason));
 
         showEncryptionNotification(user, title, message, detail, intent);
     }
@@ -704,11 +711,6 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private void showEncryptionNotification(UserHandle user, CharSequence title,
             CharSequence message, CharSequence detail, PendingIntent intent) {
-        if (DEBUG) Slog.v(TAG, "showing encryption notification, user: " + user.getIdentifier());
-
-        // Suppress all notifications on non-FBE devices for now
-        if (!StorageManager.isFileEncryptedNativeOrEmulated()) return;
-
         Notification notification =
                 new Notification.Builder(mContext, SystemNotificationChannels.DEVICE_ADMIN)
                         .setSmallIcon(com.android.internal.R.drawable.ic_user_secure)
@@ -728,7 +730,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private void hideEncryptionNotification(UserHandle userHandle) {
-        if (DEBUG) Slog.v(TAG, "hide encryption notification, user: " + userHandle.getIdentifier());
+        Slog.d(TAG, "hide encryption notification, user: " + userHandle.getIdentifier());
         mNotificationManager.cancelAsUser(null, SystemMessage.NOTE_FBE_ENCRYPTED_NOTIFICATION,
             userHandle);
     }
@@ -746,7 +748,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     public void onStartUser(final int userId) {
-        maybeShowEncryptionNotificationForUser(userId);
+        maybeShowEncryptionNotificationForUser(userId, "user started");
     }
 
     /**
@@ -1497,7 +1499,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             if (!alreadyUnlocked) {
                 final long ident = clearCallingIdentity();
                 try {
-                    maybeShowEncryptionNotificationForUser(profile.id);
+                    maybeShowEncryptionNotificationForUser(profile.id, "parent unlocked");
                 } finally {
                     restoreCallingIdentity(ident);
                 }
@@ -2473,7 +2475,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     private void removeUser(int userId, boolean unknownUser) {
         Slog.i(TAG, "RemoveUser: " + userId);
         removeBiometricsForUser(userId);
-        mSpManager.removeUser(userId);
+        mSpManager.removeUser(getGateKeeperService(), userId);
         mStrongAuth.removeUser(userId);
 
         AndroidKeyStoreMaintenance.onUserRemoved(userId);
@@ -3315,6 +3317,10 @@ public class LockSettingsService extends ILockSettings.Stub {
         synchronized (mSpManager) {
             if (!mSpManager.hasEscrowData(userId)) {
                 throw new SecurityException("Escrow token is disabled on the current user");
+            }
+            if (!isEscrowTokenActive(tokenHandle, userId)) {
+                Slog.e(TAG, "Unknown or unactivated token: " + Long.toHexString(tokenHandle));
+                return false;
             }
             result = setLockCredentialWithTokenInternalLocked(
                     credential, tokenHandle, token, userId);

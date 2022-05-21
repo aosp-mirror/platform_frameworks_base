@@ -33,7 +33,6 @@ import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.Build;
-import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.text.BidiFormatter;
 import android.view.LayoutInflater;
@@ -282,19 +281,7 @@ public final class AccessibilityTargetHelper {
                 Context.LAYOUT_INFLATER_SERVICE);
 
         final View content = inflater.inflate(
-                R.layout.accessibility_enable_service_encryption_warning, /* root= */ null);
-
-        final TextView encryptionWarningView = (TextView) content.findViewById(
-                R.id.accessibility_encryption_warning);
-        if (StorageManager.isNonDefaultBlockEncrypted()) {
-            final String text = context.getString(
-                    R.string.accessibility_enable_service_encryption_warning,
-                    getServiceName(context, target.getLabel()));
-            encryptionWarningView.setText(text);
-            encryptionWarningView.setVisibility(View.VISIBLE);
-        } else {
-            encryptionWarningView.setVisibility(View.GONE);
-        }
+                R.layout.accessibility_enable_service_warning, /* root= */ null);
 
         final ImageView dialogIcon = content.findViewById(
                 R.id.accessibility_permissionDialog_icon);

@@ -234,9 +234,9 @@
     <!-- Displayed to tell the user that they should switch their network preference. -->
     <string name="NetworkPreferenceSwitchSummary">Try changing preferred network. Tap to change.</string>
     <!-- Displayed to tell the user that emergency calls might not be available. -->
-    <string name="EmergencyCallWarningTitle">Emergency calls may be unavailable</string>
+    <string name="EmergencyCallWarningTitle">Emergency calling unavailable</string>
     <!-- Displayed to tell the user that emergency calls might not be available. -->
-    <string name="EmergencyCallWarningSummary"><xliff:g id="spn" example="Operator">%s</xliff:g> doesn\'t support emergency calls over Wi-Fi. Tap for details.</string>
+    <string name="EmergencyCallWarningSummary">Can\u2019t make emergency calls over Wi\u2011Fi</string>
 
     <!-- Telephony notification channel name for a channel containing network alert notifications. -->
     <string name="notification_channel_network_alert">Alerts</string>
@@ -876,19 +876,19 @@
     <string name="permgroupdesc_sms">send and view SMS messages</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_storage">Files &amp; documents</string>
+    <string name="permgrouplab_storage">Files</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_storage">access files and documents on your device</string>
+    <string name="permgroupdesc_storage">access files on your device</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=40]-->
-    <string name="permgrouplab_readMediaAural">Music &amp; other audio</string>
+    <string name="permgrouplab_readMediaAural">Music and audio</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE]-->
-    <string name="permgroupdesc_readMediaAural">access audio files on your device</string>
+    <string name="permgroupdesc_readMediaAural">access music and audio on your device</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=40]-->
-    <string name="permgrouplab_readMediaVisual">Photos &amp; videos</string>
+    <string name="permgrouplab_readMediaVisual">Photos and videos</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE]-->
-    <string name="permgroupdesc_readMediaVisual">access images and video files on your device</string>
+    <string name="permgroupdesc_readMediaVisual">access photos and videos on your device</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_microphone">Microphone</string>
@@ -1694,7 +1694,7 @@
     <string name="screen_lock_dialog_default_subtitle">Enter your screen lock to continue</string>
 
     <!-- Message shown during fingerprint acquisision when the fingerprint cannot be recognized -->
-    <string name="fingerprint_acquired_partial">Partial fingerprint detected</string>
+    <string name="fingerprint_acquired_partial">Press firmly on the sensor</string>
     <!-- Message shown during fingerprint acquisision when the fingerprint cannot be recognized -->
     <string name="fingerprint_acquired_insufficient">Couldn\'t process fingerprint. Please try again.</string>
     <!-- Message shown during fingerprint acquisision when the fingerprint sensor needs cleaning -->
@@ -1718,7 +1718,7 @@
     <!-- Message shown when fingerprint fails to match -->
     <string name="fingerprint_error_not_match">Fingerprint not recognized</string>
     <!-- Message shown when UDFPS fails to match -->
-    <string name="fingerprint_udfps_error_not_match">Press firmly on the sensor</string>
+    <string name="fingerprint_udfps_error_not_match">Fingerprint not recognized</string>
 
     <!-- Accessibility message announced when a fingerprint has been authenticated [CHAR LIMIT=NONE] -->
     <string name="fingerprint_authenticated">Fingerprint authenticated</string>
@@ -4768,13 +4768,6 @@
         <xliff:g id="service" example="TalkBack">%1$s</xliff:g> to have full control of your
         device?</string>
 
-    <!-- Warning that the device data will not be encrypted with password or PIN if
-    enabling an accessibility service and there is a secure lock setup. [CHAR LIMIT=NONE] -->
-    <string name="accessibility_enable_service_encryption_warning">If you turn on
-        <xliff:g id="service" example="TalkBack">%1$s</xliff:g>, your device won’t use your screen
-        lock to enhance data encryption.
-    </string>
-
     <!-- Warning description that explains that it's appropriate for accessibility
      services to have full control to help users with accessibility needs. [CHAR LIMIT=NONE] -->
     <string name="accessibility_service_warning_description">Full control is appropriate for apps
@@ -5466,12 +5459,36 @@
     <string name="app_streaming_blocked_title"><xliff:g id="activity" example="Permission dialog">%1$s</xliff:g> unavailable</string>
     <!-- Title of the dialog shown when the permissioncontroller is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
     <string name="app_streaming_blocked_title_for_permission_dialog">Permission needed</string>
+    <!-- Title of the dialog shown when the camera permission is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_title_for_camera_dialog">Camera unavailable</string>
+    <!-- Title of the dialog shown when the fingerprint permission is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog">Continue on phone</string>
+    <!-- Title of the dialog shown when the microphone permission is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_title_for_microphone_dialog">Microphone unavailable</string>
+    <!-- Title of the dialog shown when the settings is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tv">Android TV settings unavailable</string>
+    <!-- Title of the dialog shown when the settings is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet">Tablet settings unavailable</string>
+    <!-- Title of the dialog shown when the settings is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="default">Phone settings unavailable</string>
     <!-- Message shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
-    <string name="app_streaming_blocked_message" product="tv">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g> at this time. Try on your Android TV device instead.</string>
+    <string name="app_streaming_blocked_message" product="tv">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g>. Try on your Android TV device instead.</string>
     <!-- Message shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
-    <string name="app_streaming_blocked_message" product="tablet">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g> at this time. Try on your tablet instead.</string>
+    <string name="app_streaming_blocked_message" product="tablet">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g>. Try on your tablet instead.</string>
     <!-- Message shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
-    <string name="app_streaming_blocked_message" product="default">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g> at this time. Try on your phone instead.</string>
+    <string name="app_streaming_blocked_message" product="default">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g>. Try on your phone instead.</string>
+    <!-- Message shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g> at this time. Try on your Android TV device instead.</string>
+    <!-- Message shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g> at this time. Try on your tablet instead.</string>
+    <!-- Message shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g> at this time. Try on your phone instead.</string>
+    <!-- Message shown when the fingerprint permission is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv">This app is requesting additional security. Try on your Android TV device instead.</string>
+    <!-- Message shown when the fingerprint permission is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet">This app is requesting additional security. Try on your tablet instead.</string>
+    <!-- Message shown when the fingerprint permission is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default">This app is requesting additional security. Try on your phone instead.</string>
 
     <!-- Message displayed in dialog when app is too old to run on this verison of android. [CHAR LIMIT=NONE] -->
     <string name="deprecated_target_sdk_message">This app was built for an older version of Android and may not work properly. Try checking for updates, or contact the developer.</string>
@@ -5716,14 +5733,14 @@
 
     <!-- Title for the log access confirmation dialog. [CHAR LIMIT=NONE] -->
     <string name="log_access_confirmation_title">Allow <xliff:g id="log_access_app_name" example="Example App">%s</xliff:g> to access all device logs?</string>
-    <!-- Label for the allow button on the log access confirmation dialog. [CHAR LIMIT=20] -->
-    <string name="log_access_confirmation_allow">Only this time</string>
+    <!-- Label for the allow button on the log access confirmation dialog. [CHAR LIMIT=40] -->
+    <string name="log_access_confirmation_allow">Allow one-time access</string>
     <!-- Label for the deny button on the log access confirmation dialog. [CHAR LIMIT=20] -->
     <string name="log_access_confirmation_deny">Don\u2019t allow</string>
 
     <!-- Content for the log access confirmation dialog. [CHAR LIMIT=NONE]-->
     <string name="log_access_confirmation_body">Device logs record what happens on your device. Apps can use these logs to find and fix issues.\n\nSome logs may contain sensitive info, so only allow apps you trust to access all device logs.
-        \n\nIf you don’t allow this app to access all device logs, it can still access its own logs and your device manufacturer may still be able to access some logs or info on your device. Learn more
+        \n\nIf you don’t allow this app to access all device logs, it can still access its own logs. Your device manufacturer may still be able to access some logs or info on your device. Learn more
     </string>
 
     <!-- Privacy notice do not show [CHAR LIMIT=20] -->
@@ -5751,6 +5768,16 @@
     <string name="zen_upgrade_notification_title">Do Not Disturb has changed</string>
     <!-- Content of notification indicating users can tap on the notification to go to dnd behavior settings -->
     <string name="zen_upgrade_notification_content">Tap to check what\'s blocked.</string>
+
+    <!-- Notification permission informational notification text -->
+    <!-- Title for notification inviting users to review their notification settings [CHAR LIMIT=NONE] -->
+    <string name="review_notification_settings_title">Review notification settings</string>
+    <!-- Content of notification informing users of notification permission change, and inviting them to modify current settings. [CHAR LIMIT=NONE]-->
+    <string name="review_notification_settings_text">Starting in Android 13, apps that you install need your permission to send notifications. Tap to change this permission for existing apps.</string>
+    <!-- Notification action text for having this notification come back later [CHAR LIMIT=20] -->
+    <string name="review_notification_settings_remind_me_action">Remind me later</string>
+    <!-- Notification action text to dismiss this notification [CHAR LIMIT=20]-->
+    <string name="review_notification_settings_dismiss">Dismiss</string>
 
     <!-- Application name displayed in notifications [CHAR LIMIT=60] -->
     <string name="notification_app_name_system">System</string>
@@ -6265,14 +6292,16 @@ ul.</string>
     <!-- Title for the notification channel notifying user of abusive background apps. [CHAR LIMIT=NONE] -->
     <string name="notification_channel_abusive_bg_apps">Background Activity</string>
     <!-- Title of notification indicating abusive background apps. [CHAR LIMIT=NONE] -->
-    <string name="notification_title_abusive_bg_apps">Background Activity</string>
+    <string name="notification_title_abusive_bg_apps">An app is draining battery</string>
+    <!-- Title of notification indicating long running foreground services. [CHAR LIMIT=NONE] -->
+    <string name="notification_title_long_running_fgs">An app is still active</string>
     <!-- Content of notification indicating abusive background apps. [CHAR LIMIT=NONE] -->
     <string name="notification_content_abusive_bg_apps">
-        <xliff:g id="app" example="Gmail">%1$s</xliff:g> is running in the background and draining battery. Tap to review.
+        <xliff:g id="app" example="Gmail">%1$s</xliff:g> is running in the background. Tap to manage battery usage.
     </string>
     <!-- Content of notification indicating long running foreground service. [CHAR LIMIT=NONE] -->
     <string name="notification_content_long_running_fgs">
-        <xliff:g id="app" example="Gmail">%1$s</xliff:g> is running in the background for a long time. Tap to review.
+        <xliff:g id="app" example="Gmail">%1$s</xliff:g> might affect battery life. Tap to review active apps.
     </string>
     <!-- Action label of notification for user to check background apps. [CHAR LIMIT=NONE]  -->
     <string name="notification_action_check_bg_apps">Check active apps</string>
@@ -6284,5 +6313,5 @@ ul.</string>
     <string name="vdm_camera_access_denied" product="tablet">Can’t access the tablet’s camera from your <xliff:g id="device" example="Chromebook">%1$s</xliff:g></string>
 
     <!-- Title for preference of the system default locale. [CHAR LIMIT=50]-->
-    <string name="system_locale_title">System language</string>
+    <string name="system_locale_title">System default</string>
 </resources>

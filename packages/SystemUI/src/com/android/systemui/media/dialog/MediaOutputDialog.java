@@ -87,8 +87,46 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
 
     @Override
     int getStopButtonVisibility() {
-        return mMediaOutputController.isActiveRemoteDevice(
-                mMediaOutputController.getCurrentConnectedMediaDevice()) ? View.VISIBLE : View.GONE;
+        boolean isActiveRemoteDevice = false;
+        if (mMediaOutputController.getCurrentConnectedMediaDevice() != null) {
+            isActiveRemoteDevice = mMediaOutputController.isActiveRemoteDevice(
+                    mMediaOutputController.getCurrentConnectedMediaDevice());
+        }
+        boolean showBroadcastButton = isBroadcastSupported() && mMediaOutputController.isPlaying();
+
+        return (isActiveRemoteDevice || showBroadcastButton) ? View.VISIBLE : View.GONE;
+    }
+
+    @Override
+    public boolean isBroadcastSupported() {
+        return mMediaOutputController.isBroadcastSupported();
+    }
+
+    @Override
+    public CharSequence getStopButtonText() {
+        int resId = R.string.media_output_dialog_button_stop_casting;
+        if (isBroadcastSupported() && mMediaOutputController.isPlaying()
+                && !mMediaOutputController.isBluetoothLeBroadcastEnabled()) {
+            resId = R.string.media_output_broadcast;
+        }
+        return mContext.getText(resId);
+    }
+
+    @Override
+    public void onStopButtonClick() {
+        if (isBroadcastSupported() && mMediaOutputController.isPlaying()) {
+            if (!mMediaOutputController.isBluetoothLeBroadcastEnabled()) {
+                if (startLeBroadcastDialogForFirstTime()) {
+                    return;
+                }
+                startLeBroadcast();
+            } else {
+                stopLeBroadcast();
+            }
+        } else {
+            mMediaOutputController.releaseSession();
+            dismiss();
+        }
     }
 
     @VisibleForTesting

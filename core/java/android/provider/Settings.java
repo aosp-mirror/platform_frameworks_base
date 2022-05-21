@@ -2013,6 +2013,15 @@ public final class Settings {
             "android.settings.ALL_APPS_NOTIFICATION_SETTINGS";
 
     /**
+     * Activity Action: Show app settings specifically for sending notifications. Same as
+     * ALL_APPS_NOTIFICATION_SETTINGS but meant for internal use.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_ALL_APPS_NOTIFICATION_SETTINGS_FOR_REVIEW =
+            "android.settings.ALL_APPS_NOTIFICATION_SETTINGS_FOR_REVIEW";
+
+    /**
      * Activity Action: Show notification settings for a single app.
      * <p>
      *     Input: {@link #EXTRA_APP_PACKAGE}, the package to display.
@@ -4517,13 +4526,6 @@ public final class Settings {
          */
         @Readable
         public static final String SCREEN_OFF_TIMEOUT = "screen_off_timeout";
-
-        /**
-         * The amount of time in milliseconds before the device goes to sleep or begins to dream
-         * after a period of inactivity while it is docked.
-         * @hide
-         */
-        public static final String SCREEN_OFF_TIMEOUT_DOCKED = "screen_off_timeout_docked";
 
         /**
          * The screen backlight brightness between 0 and 255.
@@ -7084,7 +7086,7 @@ public final class Settings {
          *
          * @hide
          */
-        @Readable
+        @Readable(maxTargetSdk = Build.VERSION_CODES.S)
         public static final String ALWAYS_ON_VPN_LOCKDOWN_WHITELIST =
                 "always_on_vpn_lockdown_whitelist";
 
@@ -9673,6 +9675,60 @@ public final class Settings {
         public static final String BIOMETRIC_APP_ENABLED = "biometric_app_enabled";
 
         /**
+         * Whether or not active unlock triggers on wake.
+         * @hide
+         */
+        public static final String ACTIVE_UNLOCK_ON_WAKE = "active_unlock_on_wake";
+
+        /**
+         * Whether or not active unlock triggers on unlock intent.
+         * @hide
+         */
+        public static final String ACTIVE_UNLOCK_ON_UNLOCK_INTENT =
+                "active_unlock_on_unlock_intent";
+
+        /**
+         * Whether or not active unlock triggers on biometric failure.
+         * @hide
+         */
+        public static final String ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL =
+                "active_unlock_on_biometric_fail";
+
+        /**
+         * If active unlock triggers on biometric failures, include the following error codes
+         * as a biometric failure. See {@link android.hardware.biometrics.BiometricFaceConstants}.
+         * Error codes should be separated by a pipe. For example: "1|4|5". If active unlock
+         * should never trigger on any face errors, this should be set to an empty string.
+         * A null value will use the system default value (TIMEOUT).
+         * @hide
+         */
+        public static final String ACTIVE_UNLOCK_ON_FACE_ERRORS =
+                "active_unlock_on_face_errors";
+
+        /**
+         * If active unlock triggers on biometric failures, include the following acquired info
+         * as a "biometric failure". See {@link android.hardware.biometrics.BiometricFaceConstants}.
+         * Acquired codes should be separated by a pipe. For example: "1|4|5". If active unlock
+         * should never on trigger on any acquired info messages, this should be
+         * set to an empty string. A null value will use the system default value (none).
+         * @hide
+         */
+        public static final String ACTIVE_UNLOCK_ON_FACE_ACQUIRE_INFO =
+                "active_unlock_on_face_acquire_info";
+
+        /**
+         * If active unlock triggers on biometric failures, then also request active unlock on
+         * unlock intent when each setting (BiometricType) is the only biometric type enrolled.
+         * Biometric types should be separated by a pipe. For example: "0|3" or "0". If this
+         * setting should be disabled, then this should be set to an empty string. A null value
+         * will use the system default value (0 / None).
+         *   0 = None, 1 = Any face, 2 = Any fingerprint, 3 = Under display fingerprint
+         * @hide
+         */
+        public static final String ACTIVE_UNLOCK_ON_UNLOCK_INTENT_WHEN_BIOMETRIC_ENROLLED =
+                "active_unlock_on_unlock_intent_when_biometric_enrolled";
+
+        /**
          * Whether the assist gesture should be enabled.
          *
          * @hide
@@ -10099,15 +10155,6 @@ public final class Settings {
         public static final String NOTIFICATION_DISMISS_RTL = "notification_dismiss_rtl";
 
         /**
-         * Whether the app-level notification setting is represented by a manifest permission.
-         *
-         * @hide
-         */
-        @Readable
-        public static final String NOTIFICATION_PERMISSION_ENABLED =
-                "notification_permission_enabled";
-
-        /**
          * Comma separated list of QS tiles that have been auto-added already.
          * @hide
          */
@@ -10283,10 +10330,18 @@ public final class Settings {
          * The strategy used for generating the tonal palettes can be defined with the
          * {@code android.theme.customization.theme_style} key, with one of the following options:
          * <ul>
-         *   <li> TONAL_SPOT = Default Material You theme since Android S.</li>
-         *   <li> VIBRANT = Theme where accent 2 and 3 are analogous to accent 1.</li>
-         *   <li> EXPRESSIVE = Highly chromatic theme.</li>
-         *   <li> SPRITZ = Desaturated theme, almost greyscale.</li>
+         *   <li> {@code TONAL_SPOT} is a mid vibrancy palette that uses an accent 3 analogous to
+         *   accent 1.</li>
+         *   <li> {@code VIBRANT} is a high vibrancy palette that harmoniously blends subtle shifts
+         *   between colors.</li>
+         *   <li> {@code EXPRESSIVE} is a high vibrancy palette that pairs unexpected and unique
+         *   accents colors together.</li>
+         *   <li> {@code SPRITZ} is a low vibrancy palette that creates a soft wash between
+         *   colors.</li>
+         *   <li> {@code RAINBOW} uses both chromatic accents and neutral surfaces to create a more
+         *   subtle color experience for users.</li>
+         *   <li> {@code FRUIT_SALAD} experiments with the concept of "two tone colors" to give
+         *   users more expression.</li>
          * </ul>
          *
          * Example of valid fabricated theme specification:
@@ -11480,6 +11535,15 @@ public final class Settings {
         */
         @Readable
         public static final String DEVICE_PROVISIONED = "device_provisioned";
+
+        /**
+         * Whether bypassing the device policy management role holder qualifcation is allowed,
+         * (0 = false, 1 = true).
+         *
+         * @hide
+         */
+        public static final String BYPASS_DEVICE_POLICY_MANAGEMENT_ROLE_QUALIFICATIONS =
+                "bypass_device_policy_management_role_qualifications";
 
         /**
          * Indicates whether mobile data should be allowed while the device is being provisioned.
@@ -14247,6 +14311,14 @@ public final class Settings {
                 "emergency_gesture_power_button_cooldown_period_ms";
 
         /**
+         * The minimum time in milliseconds to perform the emergency gesture.
+         *
+         * @hide
+         */
+        public static final String EMERGENCY_GESTURE_TAP_DETECTION_MIN_TIME_MS =
+                "emergency_gesture_tap_detection_min_time_ms";
+
+        /**
          * Whether to enable automatic system server heap dumps. This only works on userdebug or
          * eng builds, not on user builds. This is set by the user and overrides the config value.
          * 1 means enable, 0 means disable.
@@ -14986,6 +15058,14 @@ public final class Settings {
          */
         public static final String DEVICE_CONFIG_SYNC_DISABLED = "device_config_sync_disabled";
 
+
+        /**
+         * Whether back preview animations are played when user does a back gesture or presses
+         * the back button.
+         * @hide
+         */
+        public static final String ENABLE_BACK_ANIMATION = "enable_back_animation";
+
         /** @hide */ public static String zenModeToString(int mode) {
             if (mode == ZEN_MODE_IMPORTANT_INTERRUPTIONS) return "ZEN_MODE_IMPORTANT_INTERRUPTIONS";
             if (mode == ZEN_MODE_ALARMS) return "ZEN_MODE_ALARMS";
@@ -15341,16 +15421,6 @@ public final class Settings {
         @SystemApi
         @Readable
         public static final String DEVICE_DEMO_MODE = "device_demo_mode";
-
-        /**
-         * Indicates the maximum time that an app is blocked for the network rules to get updated.
-         *
-         * Type: long
-         *
-         * @hide
-         */
-        @Readable
-        public static final String NETWORK_ACCESS_TIMEOUT_MS = "network_access_timeout_ms";
 
         /**
          * The reason for the settings database being downgraded. This is only for
@@ -16926,6 +16996,21 @@ public final class Settings {
          */
         public static final String MANAGED_PROVISIONING_DEFER_PROVISIONING_TO_ROLE_HOLDER =
                 "managed_provisioning_defer_provisioning_to_role_holder";
+
+        /**
+         * State of whether review notification permissions notification needs to
+         * be shown the user, and whether the user has interacted.
+         *
+         * Valid values:
+         *   -1 = UNKNOWN
+         *    0 = SHOULD_SHOW
+         *    1 = USER_INTERACTED
+         *    2 = DISMISSED
+         *    3 = RESHOWN
+         * @hide
+         */
+        public static final String REVIEW_PERMISSIONS_NOTIFICATION_STATE =
+                "review_permissions_notification_state";
 
         /**
          * Settings migrated from Wear OS settings provider.

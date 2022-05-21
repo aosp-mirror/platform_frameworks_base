@@ -25,6 +25,7 @@ android_test {
         "androidx.test.uiautomator_uiautomator",
         "compatibility-device-util-axt",
         "platform-test-annotations",
+        "platform-test-rules",
         "truth-prebuilt",
     ],
     test_suites: [

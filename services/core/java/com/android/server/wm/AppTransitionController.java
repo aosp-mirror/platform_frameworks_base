@@ -68,6 +68,7 @@ import static com.android.server.wm.AppTransition.isNormalTransit;
 import static com.android.server.wm.NonAppWindowAnimationAdapter.shouldAttachNavBarToApp;
 import static com.android.server.wm.NonAppWindowAnimationAdapter.shouldStartNonAppWindowAnimationsForKeyguardExit;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.WallpaperAnimationAdapter.shouldStartWallpaperAnimation;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
@@ -562,9 +563,6 @@ public class AppTransitionController {
                 leafTask = null;
                 break;
             }
-            // The activity may be a child of embedded Task, but we want to find the owner Task.
-            // As a result, find the organized TaskFragment first.
-            final TaskFragment organizedTaskFragment = r.getOrganizedTaskFragment();
             // There are also cases where the Task contains non-embedded activity, such as launching
             // split TaskFragments from a non-embedded activity.
             // The hierarchy may looks like this:
@@ -575,10 +573,9 @@ public class AppTransitionController {
             //    - TaskFragment
             //       - Activity
             // We also want to have the organizer handle the transition for such case.
-            final Task task = organizedTaskFragment != null
-                    ? organizedTaskFragment.getTask()
-                    : r.getTask();
-            if (task == null) {
+            final Task task = r.getTask();
+            // We don't support embedding in PiP, leave the animation to the PipTaskOrganizer.
+            if (task == null || task.inPinnedWindowingMode()) {
                 leafTask = null;
                 break;
             }
@@ -653,7 +650,7 @@ public class AppTransitionController {
         final ITaskFragmentOrganizer organizer = findTaskFragmentOrganizer(task);
         final RemoteAnimationDefinition definition = organizer != null
                 ? mDisplayContent.mAtmService.mTaskFragmentOrganizerController
-                    .getRemoteAnimationDefinition(organizer)
+                    .getRemoteAnimationDefinition(organizer, task.mTaskId)
                 : null;
         final RemoteAnimationAdapter adapter = definition != null
                 ? definition.getAdapter(transit, activityTypes)
@@ -666,11 +663,16 @@ public class AppTransitionController {
                 "Override with TaskFragment remote animation for transit=%s",
                 AppTransition.appTransitionOldToString(transit));
 
+        final int organizerUid = mDisplayContent.mAtmService.mTaskFragmentOrganizerController
+                .getTaskFragmentOrganizerUid(organizer);
+        final boolean shouldDisableInputForRemoteAnimation = !task.isFullyTrustedEmbedding(
+                organizerUid);
         final RemoteAnimationController remoteAnimationController =
                 mDisplayContent.mAppTransition.getRemoteAnimationController();
-        if (remoteAnimationController != null) {
+        if (shouldDisableInputForRemoteAnimation && remoteAnimationController != null) {
             // We are going to use client-driven animation, Disable all input on activity windows
-            // during the animation to ensure it is safe to allow client to animate the surfaces.
+            // during the animation (unless it is fully trusted) to ensure it is safe to allow
+            // client to animate the surfaces.
             // This is needed for all activity windows in the animation Task.
             remoteAnimationController.setOnRemoteAnimationReady(() -> {
                 final Consumer<ActivityRecord> updateActivities =
@@ -897,7 +899,11 @@ public class AppTransitionController {
                     // We cannot promote the animation on Task's parent when the task is in
                     // clearing task in case the animating get stuck when performing the opening
                     // task that behind it.
-                    || (current.asTask() != null && current.asTask().mInRemoveTask)) {
+                    || (current.asTask() != null && current.asTask().mInRemoveTask)
+                    // We cannot promote the animation to changing window. This may happen when an
+                    // activity is open in a TaskFragment that is resizing, while the existing
+                    // activity in the TaskFragment is reparented to another TaskFragment.
+                    || parent.isChangingAppTransition()) {
                 canPromote = false;
             } else {
                 // In case a descendant of the parent belongs to the other group, we cannot promote
@@ -913,6 +919,15 @@ public class AppTransitionController {
                 // [Task] +- [ActivityRecord1] (in opening apps)
                 //        +- [ActivityRecord2] (in closing apps)
                 if (otherAncestors.contains(parent)) {
+                    canPromote = false;
+                }
+
+                // If the current window container is task and it have adjacent task, it means
+                // both tasks will open or close app toghther but we want get their opening or
+                // closing animation target independently so do not promote.
+                if (current.asTask() != null
+                        && current.asTask().getAdjacentTaskFragment() != null
+                        && current.asTask().getAdjacentTaskFragment().asTask() != null) {
                     canPromote = false;
                 }
 
@@ -1137,13 +1152,17 @@ public class AppTransitionController {
             if (activity == null) {
                 continue;
             }
+            if (activity.isAnimating(PARENTS, ANIMATION_TYPE_RECENTS)) {
+                ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
+                        "Delaying app transition for recents animation to finish");
+                return false;
+            }
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                     "Check opening app=%s: allDrawn=%b startingDisplayed=%b "
                             + "startingMoved=%b isRelaunching()=%b startingWindow=%s",
                     activity, activity.allDrawn, activity.startingDisplayed,
                     activity.startingMoved, activity.isRelaunching(),
                     activity.mStartingWindow);
-
             final boolean allDrawn = activity.allDrawn && !activity.isRelaunching();
             if (!allDrawn && !activity.startingDisplayed && !activity.startingMoved) {
                 return false;

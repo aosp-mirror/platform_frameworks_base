@@ -34,6 +34,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Дэлгэцийг автоматаар эргүүлэх"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="APPLICATION">%1$s</xliff:g>-г <xliff:g id="USB_DEVICE">%2$s</xliff:g>-д хандахыг зөвшөөрөх үү?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="APPLICATION">%1$s</xliff:g>-д <xliff:g id="USB_DEVICE">%2$s</xliff:g>-д хандахыг зөвшөөрөх үү?\nЭнэ аппад бичих зөвшөөрөл олгогдоогүй ч USB төхөөрөмжөөр дамжуулан аудио бичиж чадсан."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"<xliff:g id="APPLICATION">%1$s</xliff:g>-д <xliff:g id="USB_DEVICE">%2$s</xliff:g>-д хандахыг зөвшөөрөх үү?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>-г зохицуулахын тулд <xliff:g id="APPLICATION">%1$s</xliff:g>-г нээх үү?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Энэ аппад бичих зөвшөөрөл олгоогүй хэдий ч энэ USB төхөөрөмжөөр дамжуулан аудио бичиж болно. <xliff:g id="APPLICATION">%1$s</xliff:g>-г энэ төхөөрөмжтэй ашигласнаар дуудлага, мэдэгдэл болон сэрүүлэг сонсохоос сэргийлж магадгүй."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"<xliff:g id="APPLICATION">%1$s</xliff:g>-г энэ төхөөрөмжтэй ашигласнаар дуудлага, мэдэгдэл болон сэрүүлэг сонсохоос сэргийлж магадгүй."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="APPLICATION">%1$s</xliff:g>-г <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>-д хандахыг зөвшөөрөх үү?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>-г зохицуулахын тулд <xliff:g id="APPLICATION">%1$s</xliff:g>-г нээх үү?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>-г зохицуулахын тулд <xliff:g id="APPLICATION">%1$s</xliff:g>-г нээх үү?\nЭнэ апликейшнд бичих зөвшөөрөл олгогдоогүй ч энэ USB төхөөрөмжөөр дамжуулан аудио бичиж чадсан."</string>
@@ -74,6 +78,7 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Дэлгэцийн зургийг дахин дарж үзнэ үү"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Дэлгэцийн агшныг хадгалах боломжгүй"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Таны апп, байгууллагад дэлгэцийн зураг авахыг зөвшөөрдөггүй"</string>
+    <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Таны IT админ дэлгэцийн агшин авахыг блоклосон байна"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Засах"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Дэлгэцийн агшныг засах"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Дэлгэцийн агшныг хуваалцах"</string>
@@ -131,7 +136,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Царайг баталгаажууллаа"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Баталгаажсан"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Дуусгахын тулд баталгаажуулахыг товших"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"Таны царайгаар түгжээг тайлсан. Үргэлжлүүлэхийн тулд дарна уу."</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Царайгаар түгжээг тайлсан. Үргэлжлүүлэхийн тулд түгжээг тайлах дүрс тэмдэг дээр дараарай."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Баталгаажуулагдсан"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"ПИН ашиглах"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Хээ ашиглах"</string>
@@ -287,6 +292,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Энэ нь таны микрофоныг ашиглах зөвшөөрөлтэй бүх апп болон үйлчилгээний хандалтыг блокоос гаргана."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Энэ нь таны камерыг ашиглах зөвшөөрөлтэй бүх апп болон үйлчилгээний хандалтыг блокоос гаргана."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Энэ нь таны камер эсвэл микрофоныг ашиглах зөвшөөрөлтэй бүх апп болон үйлчилгээний хандалтыг блокоос гаргана."</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Микрофоныг блоклосон байна"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Камерыг блоклосон байна"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"Микрофон &amp; камерыг блоклосон"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"Блокоос гаргахын тулд төхөөрөмжийнхөө нууцлалын сэлгүүрийг микрофоныг асаах байрлал руу зөөж, микрофонд хандахыг зөвшөөрнө үү. Төхөөрөмжийнхөө нууцлалын сэлгүүрийн байрлалыг илрүүлэхийн тулд төхөөрөмжийн гарыг авлагыг уншина уу."</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"Блокоос гаргахын тулд төхөөрөмжийнхөө нууцлалын сэлгүүрийг камерыг асаах байрлал руу зөөж, камерт хандахыг зөвшөөрнө үү. Төхөөрөмжийнхөө нууцлалын сэлгүүрийн байрлалыг илрүүлэхийн тулд төхөөрөмжийн гарыг авлагыг уншина уу."</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"Тэдгээрийг блокоос гаргахын тулд төхөөрөмжийнхөө нууцлалын сэлгүүрийг блокоос гаргах байрлал руу зөөж, хандахыг зөвшөөрнө үү. Төхөөрөмжийнхөө нууцлалын сэлгүүрийн байрлалыг илрүүлэхийн тулд төхөөрөмжийн гарыг авлагыг уншина уу."</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"Микрофон боломжтой байна"</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"Камер боломжтой байна"</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"Микрофон болон камер боломжтой байна"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Бусад төхөөрөмж"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Тоймыг асаах/унтраах"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Танд сэрүүлэг, сануулга, арга хэмжээ, таны сонгосон дуудлага илгээгчээс бусад дуу, чичиргээ саад болохгүй. Та хөгжим, видео, тоглоом зэрэг тоглуулахыг хүссэн бүх зүйлээ сонсох боломжтой хэвээр байна."</string>
@@ -297,7 +311,12 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Нээхийн тулд дахин товшино уу"</string>
     <string name="tap_again" msgid="1315420114387908655">"Дaхин товшино уу"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Нээхийн тулд дээш шударна уу"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Нээхийн тулд дарна уу"</string>
+    <string name="keyguard_unlock_press" msgid="9140109453735019209">"Нээхийн тулд түгжээг тайлах дүрс тэмдэг дээр дараарай"</string>
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Царайгаар түгжээг тайлсан. Нээхийн тулд түгжээг тайлах дүрс тэмдэг дээр дараарай."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"Дахин оролдохын тулд дээш шударна уу"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC-г ашиглахын тулд түгжээг тайлна уу"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Энэ төхөөрөмж танай байгууллагад харьяалагддаг"</string>
@@ -320,7 +339,6 @@
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Цэнэглэх холбогч • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>-н дараа дүүрнэ"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Хэрэглэгчийг сэлгэх"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Энэ харилцан үйлдлийн бүх апп болон дата устах болно."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Хасах"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Эргэн тавтай морилно уу!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Та үргэлжлүүлэхийг хүсэж байна уу?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Дахин эхлүүлэх"</string>
@@ -352,20 +370,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Танай байгууллага энэ төхөөрөмжийг эзэмшдэг бөгөөд сүлжээний ачааллыг хянаж болно"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> энэ төхөөрөмжийг эзэмшдэг бөгөөд сүлжээний ачааллыг хянаж болно"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Энэ төхөөрөмжийг <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>-с нийлүүлдэг"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Энэ төхөөрөмж танай байгууллагад харьяалагддаг бөгөөд <xliff:g id="VPN_APP">%1$s</xliff:g>-д холбогдсон байна"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Энэ төхөөрөмж <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>-д харьяалагддаг бөгөөд <xliff:g id="VPN_APP">%2$s</xliff:g>-д холбогдсон байна"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Энэ төхөөрөмж танай байгууллагад харьяалагддаг бөгөөд <xliff:g id="VPN_APP">%1$s</xliff:g>-р интернэтэд холбогдсон байна"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Энэ төхөөрөмж <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>-д харьяалагддаг бөгөөд <xliff:g id="VPN_APP">%2$s</xliff:g>-р интернэтэд холбогдсон байна"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Энэ төхөөрөмж танай байгууллагад харьяалагддаг"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Энэ төхөөрөмж <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>-д харьяалагддаг"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Энэ төхөөрөмж танай байгууллагад харьяалагддаг бөгөөд VPN-д холбогдсон байна"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Энэ төхөөрөмж <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>-д харьяалагддаг бөгөөд VPN-д холбогдсон байна"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Энэ төхөөрөмж танай байгууллагад харьяалагддаг бөгөөд VPN-р интернэтэд холбогдсон байна"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Энэ төхөөрөмж <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>-д харьяалагддаг бөгөөд VPN-р интернэтэд холбогдсон байна"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Таны байгууллага таны ажлын профайлын сүлжээний ачааллыг хянадаг"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> таны ажлын профайлын сүлжээний ачааллыг хянадаг"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Таны IT админд ажлын профайлын сүлжээний үйл ажиллагаа харагдана"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Сүлжээг хянаж байж болзошгүй"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Энэ төхөөрөмж VPN-д холбогдсон байна"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Таны ажлын профайл <xliff:g id="VPN_APP">%1$s</xliff:g>-д холбогдсон байна"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Таны хувийн профайл <xliff:g id="VPN_APP">%1$s</xliff:g>-д холбогдсон байна"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Энэ төхөөрөмж <xliff:g id="VPN_APP">%1$s</xliff:g>-д холбогдсон байна"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Энэ төхөөрөмж VPN-р интернэтэд холбогдсон байна"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Таны ажлын аппууд <xliff:g id="VPN_APP">%1$s</xliff:g>-р интернэтэд холбогдсон байна"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Таны хувийн аппууд <xliff:g id="VPN_APP">%1$s</xliff:g>-р интернэтэд холбогдсон байна"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Энэ төхөөрөмж <xliff:g id="VPN_APP">%1$s</xliff:g>-р интернэтэд холбогдсон байна"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Энэ төхөөрөмжийг <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>-с нийлүүлдэг"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Төхөөрөмжийн удирдлага"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -381,10 +399,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Сертификатын зөвшөөрлийг энэ төхөөрөмжид суулгасан байна. Таны аюулгүй сүлжээний ачааллыг өөрчлөх эсвэл хянах боломжтой."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Таны админ төхөөрөмжийн ачааллыг хянадаг сүлжээний логийг асаасан байна."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Таны админ ажлын профайлын тань ачааллыг хянадаг сүлжээний логийг асаасан бөгөөд энэ нь хувийн профайлын ачааллыг хянахгүй."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Та имэйл, апп, веб хуудас зэрэг сүлжээний үйл ажиллагааг хянах боломжтой <xliff:g id="VPN_APP">%1$s</xliff:g>-д холбогдсон байна."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Та имэйл, апп, веб хуудас зэрэг сүлжээний үйл ажиллагааг хянах боломжтой <xliff:g id="VPN_APP_0">%1$s</xliff:g>, <xliff:g id="VPN_APP_1">%2$s</xliff:g>-д холбогдсон байна."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Таны ажлын профайл <xliff:g id="VPN_APP">%1$s</xliff:g>-д холбогдсон байна. Энэ нь таны имэйл, апп, веб хуудас зэрэг сүлжээний үйл ажиллагааг хянах боломжтой."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Таны хувийн профайлыг имэйл, апп, веб хуудас зэрэг сүлжээний үйл ажиллагааг хянах боломжтой <xliff:g id="VPN_APP">%1$s</xliff:g>-д холбосон байна."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Энэ төхөөрөмж <xliff:g id="VPN_APP">%1$s</xliff:g>-р интернэтэд холбогдсон байна. Таны имэйл болон интернэтээр үзсэн өгөгдөл зэрэг сүлжээний үйл ажиллагаа таны IT админд харагдана."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Энэ төхөөрөмж <xliff:g id="VPN_APP_0">%1$s</xliff:g> болон <xliff:g id="VPN_APP_1">%2$s</xliff:g>-р интернэтэд холбогдсон байна. Таны имэйл болон интернэтээр үзсэн өгөгдөл зэрэг сүлжээний үйл ажиллагаа таны IT админд харагдана."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Таны ажлын аппууд <xliff:g id="VPN_APP">%1$s</xliff:g>-р интернэтэд холбогдсон байна. Таны имэйл болон интернэтээр үзсэн өгөгдөл зэрэг ажлын аппууд дахь сүлжээний үйл ажиллагаа таны IT админ болон VPN-н үйлчилгээ үзүүлэгчид харагдана."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Таны хувийн аппууд <xliff:g id="VPN_APP">%1$s</xliff:g>-р интернэтэд холбогдсон байна. Таны имэйл болон интернэтээр үзсэн өгөгдөл зэрэг сүлжээний үйл ажиллагаа таны VPN-н үйлчилгээ үзүүлэгчид харагдана."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN тохиргоог нээх"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Энэ төхөөрөмжийг таны эцэг эх удирддаг. Таны эцэг эх таны хэрэглэдэг апп, байршил, дэлгэцийн цаг зэрэг мэдээллийг харж, удирдах боломжтой."</string>
@@ -445,7 +463,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"Түрийвч"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Утсаараа илүү хурдан, аюулгүй худалдан авалт хийхийн тулд тохируулгыг авна уу"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Бүгдийг харуулах"</string>
-    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Карт нэмэх"</string>
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Нээх бол товшино уу"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Шинэчилж байна"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Ашиглахын тулд түгжээг тайлах"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Таны картыг авахад асуудал гарлаа. Дараа дахин оролдоно уу"</string>
@@ -493,6 +511,7 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"Чухал"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> нь харилцан ярианы онцлогуудыг дэмждэггүй"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Эдгээр мэдэгдлийг өөрчлөх боломжгүй."</string>
+    <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Дуудлагын мэдэгдлийг өөрчлөх боломжгүй."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Энэ бүлэг мэдэгдлийг энд тохируулах боломжгүй байна"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Прокси хийсэн мэдэгдэл"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"<xliff:g id="APP_NAME">%1$s</xliff:g>-н бүх мэдэгдэл"</string>
@@ -704,6 +723,7 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"Батарей дуусах гэж байгаа үед асаана уу"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Үгүй, баярлалаа"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
+    <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"Ашиглаж байгаа"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Аппууд таны <xliff:g id="TYPES_LIST">%s</xliff:g>-г ашиглаж байна."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" болон "</string>
@@ -766,6 +786,12 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Нэмэх"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g>-н санал болгосон"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"Төхөөрөмжийг түгжсэн"</string>
+    <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Түгжигдсэн дэлгэцээс төхөөрөмжүүдийг харуулж, хянах уу?"</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Та түгжигдсэн дэлгэцэд гадаад төхөөрөмжүүдийнхээ хяналтыг нэмэх боломжтой.\n\nТаны төхөөрөмжийн апп танд утас эсвэл таблетынхаа түгжээг тайлахгүйгээр зарим төхөөрөмжийг хянах боломжийг олгож магадгүй.\n\nТа хүссэн үедээ Тохиргоонд өөрчлөлт хийж болно."</string>
+    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Төхөөрөмжүүдийг түгжигдсэн дэлгэцээс хянах уу?"</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"Та утас эсвэл таблетынхаа түгжээг тайлахгүйгээр зарим төхөөрөмжийг хянах боломжтой.\n\nТаны төхөөрөмжийн апп энэ аргаар ямар төхөөрөмжүүдийг хянах боломжтойг тодорхойлно."</string>
+    <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Үгүй, баярлалаа"</string>
+    <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Тийм"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"ПИН нь үсэг эсвэл дүрс тэмдэгт агуулдаг"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g>-г бататгах"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"ПИН код буруу байна"</string>
@@ -775,8 +801,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Илүү ихийг харахын тулд шударна уу"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Зөвлөмжүүдийг ачаалж байна"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Медиа"</string>
-    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Энэ медиа хяналтыг <xliff:g id="APP_NAME">%1$s</xliff:g>-д нуух уу?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Одоогийн медиа харилцан үйлдлийг нуух боломжгүй."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Нуух"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Үргэлжлүүлэх"</string>
@@ -787,6 +812,7 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Түр зогсоох"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Өмнөх бичлэг"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"Дараагийн бичлэг"</string>
+    <string name="controls_media_button_connecting" msgid="3138354625847598095">"Холбогдож байна"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Тоглуулах"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g>-г нээх"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="ARTIST_NAME">%2$s</xliff:g>-н <xliff:g id="SONG_NAME">%1$s</xliff:g>-г <xliff:g id="APP_LABEL">%3$s</xliff:g> дээр тоглуулах"</string>
@@ -795,7 +821,6 @@
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g> дээр тоглуулахын тулд төхөөрөмжөө ойртуулна уу"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Энд тоглуулахын тулд <xliff:g id="DEVICENAME">%1$s</xliff:g>-д ойртоно уу"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g> дээр тоглуулж байна"</string>
-    <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Энэ утсан дээр тоглуулж байна"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Алдаа гарлаа. Дахин оролдоно уу."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Идэвхгүй байна, аппыг шалгана уу"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Олдсонгүй"</string>
@@ -816,10 +841,23 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Энэ үйл явдлыг дамжуулахын тулд аппыг нээнэ үү."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Үл мэдэгдэх апп"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Дамжуулахыг зогсоох"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Нэвтрүүлэлт хэрхэн ажилладаг вэ?"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"Нэвтрүүлэлт"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Тохиромжтой Bluetooth төхөөрөмжүүдтэй таны ойролцоох хүмүүс таны нэвтрүүлж буй медиаг сонсох боломжтой"</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"Таны нэвтрүүлэлтийг сонсохын тулд тохиромжтой Bluetooth төхөөрөмжүүдтэй ойролцоох хүмүүс таны QR кодыг скан хийх эсвэл нэвтрүүлэлтийн тань нэр болон нууц үгийг ашиглах боломжтой"</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"Нэвтрүүлэлтийн нэр"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"Нууц үг"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Хадгалах"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Эхлүүлж байна…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Нэвтрүүлэх боломжгүй"</string>
+    <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Хадгалах боломжгүй. Дахин оролдоно уу."</string>
+    <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Хадгалах боломжгүй."</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Хийцийн дугаар"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Хийцийн дугаарыг түр санах ойд хуулсан."</string>
     <string name="basic_status" msgid="2315371112182658176">"Харилцан яриаг нээх"</string>
-    <string name="select_conversation_title" msgid="6716364118095089519">"Харилцан ярианы жижиг хэрэгслүүд"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"Харилцан ярианы виджетүүд"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Үндсэн нүүрэндээ нэмэх харилцан яриаг товшино уу"</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"Таны сүүлийн харилцан яриа энд харагдана"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Чухал харилцан яриа"</string>
@@ -884,21 +922,26 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Хавтан нэмэх"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Хавтанг бүү нэм"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Хэрэглэгч сонгох"</string>
-    <plurals name="fgs_manager_footer_label" formatted="false" msgid="9091110396713032871">
-      <item quantity="other">Идэвхтэй <xliff:g id="COUNT_1">%s</xliff:g> апп</item>
-      <item quantity="one">Идэвхтэй <xliff:g id="COUNT_0">%s</xliff:g> апп</item>
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> апп идэвхтэй байна</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> апп идэвхтэй байна</item>
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Шинэ мэдээлэл"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Идэвхтэй аппууд"</string>
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Та эдгээр аппыг ашиглаагүй байсан ч тэдгээр нь идэвхтэй хэвээр байгаа бөгөөд батарейн ажиллах хугацаанд нөлөөлж болзошгүй"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Зогсоох"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Зогсоосон"</string>
-    <string name="clipboard_edit_text_copy" msgid="770856373439969178">"Хуулах"</string>
+    <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Болсон"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Хууллаа"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"<xliff:g id="APPNAME">%1$s</xliff:g>-с"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"Хуулах UI-г хаах"</string>
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Хуулсан текстийг засах"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Хуулсан зургийг засах"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Ойролцоох төхөөрөмж рүү илгээх"</string>
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"Харахын тулд товшино уу"</string>
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"Текстийг хуулсан"</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"Зургийг хуулсан"</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"Контентыг хуулсан"</string>
     <string name="add" msgid="81036585205287996">"Нэмэх"</string>
     <string name="manage_users" msgid="1823875311934643849">"Хэрэглэгчдийг удирдах"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Энэ мэдэгдэл нь Дэлгэцийг хуваах горим руу чирэхийг дэмждэггүй."</string>

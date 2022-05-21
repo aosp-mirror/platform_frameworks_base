@@ -61,6 +61,7 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.tuner.TunerService;
+import com.android.systemui.util.CarrierConfigTracker;
 import com.android.systemui.util.settings.SecureSettings;
 
 import java.util.concurrent.Executor;
@@ -263,6 +264,7 @@ public abstract class StatusBarViewModule {
             NetworkController networkController,
             StatusBarStateController statusBarStateController,
             CommandQueue commandQueue,
+            CarrierConfigTracker carrierConfigTracker,
             CollapsedStatusBarFragmentLogger collapsedStatusBarFragmentLogger,
             OperatorNameViewController.Factory operatorNameViewControllerFactory,
             SecureSettings secureSettings,
@@ -282,6 +284,7 @@ public abstract class StatusBarViewModule {
                 networkController,
                 statusBarStateController,
                 commandQueue,
+                carrierConfigTracker,
                 collapsedStatusBarFragmentLogger,
                 operatorNameViewControllerFactory,
                 secureSettings,

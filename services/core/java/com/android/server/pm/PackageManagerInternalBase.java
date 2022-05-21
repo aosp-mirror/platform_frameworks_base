@@ -83,6 +83,7 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
     @NonNull protected abstract PackageObserverHelper getPackageObserverHelper();
     @NonNull protected abstract ResolveIntentHelper getResolveIntentHelper();
     @NonNull protected abstract SuspendPackageHelper getSuspendPackageHelper();
+    @NonNull protected abstract DistractingPackageHelper getDistractingPackageHelper();
     @NonNull protected abstract ProtectedPackages getProtectedPackages();
     @NonNull protected abstract UserNeedsBadgingCache getUserNeedsBadging();
     @NonNull protected abstract InstantAppRegistry getInstantAppRegistry();
@@ -248,8 +249,8 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
     @Override
     @Deprecated
     public final void removeDistractingPackageRestrictions(String packageName, int userId) {
-        mService.removeDistractingPackageRestrictions(snapshot(), new String[]{packageName},
-                userId);
+        getDistractingPackageHelper().removeDistractingPackageRestrictions(snapshot(),
+                new String[]{packageName}, userId);
     }
 
     @Override
@@ -314,9 +315,9 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
     @Deprecated
     public final List<ResolveInfo> queryIntentReceivers(Intent intent,
             String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags,
-            int filterCallingUid, int userId) {
-        return getResolveIntentHelper().queryIntentReceiversInternal(
-                snapshot(), intent, resolvedType, flags, userId, filterCallingUid);
+            int filterCallingUid, int userId, boolean forSend) {
+        return getResolveIntentHelper().queryIntentReceiversInternal(snapshot(), intent,
+                resolvedType, flags, userId, filterCallingUid, forSend);
     }
 
     @Override
@@ -351,10 +352,9 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
 
     @Override
     @Deprecated
-    public final void setDeviceOwnerProtectedPackages(
-            String deviceOwnerPackageName, List<String> packageNames) {
-        getProtectedPackages().setDeviceOwnerProtectedPackages(
-                deviceOwnerPackageName, packageNames);
+    public final void setOwnerProtectedPackages(
+            @UserIdInt int userId, @NonNull List<String> packageNames) {
+        getProtectedPackages().setOwnerProtectedPackages(userId, packageNames);
     }
 
     @Override
@@ -719,6 +719,11 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
     @Nullable
     public SharedUserApi getSharedUserApi(int sharedUserAppId) {
         return snapshot().getSharedUser(sharedUserAppId);
+    }
+
+    @Override
+    public boolean isUidPrivileged(int uid) {
+        return snapshot().isUidPrivileged(uid);
     }
 
     @NonNull

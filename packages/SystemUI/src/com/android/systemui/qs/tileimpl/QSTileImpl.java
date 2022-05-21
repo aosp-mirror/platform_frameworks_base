@@ -69,7 +69,6 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.SideLabelTileLayout;
 import com.android.systemui.qs.logging.QSLogger;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -234,7 +233,13 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
 
     @VisibleForTesting
     protected void handleStale() {
-        setListening(mStaleListener, true);
+        if (!mListeners.isEmpty()) {
+            // If the tile is already listening (it's been a long time since it refreshed), just
+            // force a refresh. Don't add the staleListener because there's already a listener there
+            refreshState();
+        } else {
+            setListening(mStaleListener, true);
+        }
     }
 
     public String getTileSpec() {
@@ -735,7 +740,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
      * This may be used for CTS testing of tiles.
      */
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println(this.getClass().getSimpleName() + ":");
         pw.print("    "); pw.println(getState().toString());
     }

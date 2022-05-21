@@ -61,7 +61,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.PowerExemptionManager;
 import android.os.PowerExemptionManager.ReasonCode;
 import android.os.PowerExemptionManager.TempAllowListType;
 import android.os.Process;
@@ -861,6 +860,21 @@ public final class BroadcastQueue {
             }
         }
 
+        // Check that the receiver does *not* belong to any of the excluded packages
+        if (!skip && r.excludedPackages != null && r.excludedPackages.length > 0) {
+            if (ArrayUtils.contains(r.excludedPackages, filter.packageName)) {
+                Slog.w(TAG, "Skipping delivery of excluded package "
+                        + r.intent.toString()
+                        + " to " + filter.receiverList.app
+                        + " (pid=" + filter.receiverList.pid
+                        + ", uid=" + filter.receiverList.uid + ")"
+                        + " excludes package " + filter.packageName
+                        + " due to sender " + r.callerPackage
+                        + " (uid " + r.callingUid + ")");
+                skip = true;
+            }
+        }
+
         // If the broadcast also requires an app op check that as well.
         if (!skip && r.appOp != AppOpsManager.OP_NONE
                 && mService.getAppOpsManager().noteOpNoThrow(r.appOp,
@@ -880,9 +894,9 @@ public final class BroadcastQueue {
 
         // Ensure that broadcasts are only sent to other apps if they are explicitly marked as
         // exported, or are System level broadcasts
-        if (!skip && !filter.exported && !Process.isCoreUid(r.callingUid)
-                && filter.receiverList.uid != r.callingUid) {
-
+        if (!skip && !filter.exported && mService.checkComponentPermission(null, r.callingPid,
+                r.callingUid, filter.receiverList.uid, filter.exported)
+                != PackageManager.PERMISSION_GRANTED) {
             Slog.w(TAG, "Exported Denial: sending "
                     + r.intent.toString()
                     + ", action: " + r.intent.getAction()
@@ -1722,6 +1736,19 @@ public final class BroadcastQueue {
             }
         }
 
+        // Check that the receiver does *not* belong to any of the excluded packages
+        if (!skip && r.excludedPackages != null && r.excludedPackages.length > 0) {
+            if (ArrayUtils.contains(r.excludedPackages, component.getPackageName())) {
+                Slog.w(TAG, "Skipping delivery of excluded package "
+                        + r.intent + " to "
+                        + component.flattenToShortString()
+                        + " excludes package " + component.getPackageName()
+                        + " due to sender " + r.callerPackage
+                        + " (uid " + r.callingUid + ")");
+                skip = true;
+            }
+        }
+
         if (!skip && info.activityInfo.applicationInfo.uid != Process.SYSTEM_UID &&
                 r.requiredPermissions != null && r.requiredPermissions.length > 0) {
             for (int i = 0; i < r.requiredPermissions.length; i++) {
@@ -1918,7 +1945,7 @@ public final class BroadcastQueue {
                             + " completeLatency:" + completeLatency
                             + " dispatchRealLatency:" + dispatchRealLatency
                             + " completeRealLatency:" + completeRealLatency
-                            + " receiversSize:" + r.receivers.size()
+                            + " receiversSize:" + numReceivers
                             + " userId:" + r.userId
                             + " userType:" + (userInfo != null? userInfo.userType : null));
             FrameworkStatsLog.write(
@@ -1934,9 +1961,6 @@ public final class BroadcastQueue {
     }
 
     private void maybeReportBroadcastDispatchedEventLocked(BroadcastRecord r, int targetUid) {
-        // STOPSHIP (217251579): Temporarily use temp-allowlist reason to identify
-        // push messages and record response events.
-        useTemporaryAllowlistReasonAsSignal(r);
         if (r.options == null || r.options.getIdForResponseEvent() <= 0) {
             return;
         }
@@ -1949,17 +1973,6 @@ public final class BroadcastQueue {
                 r.callingUid, targetPackage, UserHandle.of(r.userId),
                 r.options.getIdForResponseEvent(), SystemClock.elapsedRealtime(),
                 mService.getUidStateLocked(targetUid));
-    }
-
-    private void useTemporaryAllowlistReasonAsSignal(BroadcastRecord r) {
-        if (r.options == null || r.options.getIdForResponseEvent() > 0) {
-            return;
-        }
-        final int reasonCode = r.options.getTemporaryAppAllowlistReasonCode();
-        if (reasonCode == PowerExemptionManager.REASON_PUSH_MESSAGING
-                || reasonCode == PowerExemptionManager.REASON_PUSH_MESSAGING_OVER_QUOTA) {
-            r.options.recordResponseEventWhileInBackground(reasonCode);
-        }
     }
 
     @NonNull
@@ -2233,7 +2246,7 @@ public final class BroadcastQueue {
     }
 
     boolean isIdle() {
-        return mParallelBroadcasts.isEmpty() && mDispatcher.isEmpty()
+        return mParallelBroadcasts.isEmpty() && mDispatcher.isIdle()
                 && (mPendingBroadcast == null);
     }
 

@@ -124,4 +124,10 @@ public interface TimeZoneDetectorStrategy extends Dumpable {
     /** Generates a state snapshot for metrics. */
     @NonNull
     MetricsTimeZoneDetectorState generateMetricsState();
+
+    /** Returns {@code true} if the device supports telephony time zone detection. */
+    boolean isTelephonyTimeZoneDetectionSupported();
+
+    /** Returns {@code true} if the device supports geolocation time zone detection. */
+    boolean isGeoTimeZoneDetectionSupported();
 }

@@ -44,6 +44,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 public class Installer extends SystemService {
     private static final String TAG = "Installer";
@@ -118,9 +120,13 @@ public class Installer extends SystemService {
     public static final int FLAG_CLEAR_APP_DATA_KEEP_ART_PROFILES =
             IInstalld.FLAG_CLEAR_APP_DATA_KEEP_ART_PROFILES;
 
-    private final boolean mIsolated;
+    private static final long CONNECT_RETRY_DELAY_MS = DateUtils.SECOND_IN_MILLIS;
+    private static final long CONNECT_WAIT_MS = 10 * DateUtils.SECOND_IN_MILLIS;
 
-    private volatile IInstalld mInstalld;
+    private final boolean mIsolated;
+    private volatile boolean mDeferSetFirstBoot;
+    private volatile IInstalld mInstalld = null;
+    private volatile CountDownLatch mInstalldLatch = new CountDownLatch(1);
     private volatile Object mWarnIfHeld;
 
     public Installer(Context context) {
@@ -149,6 +155,7 @@ public class Installer extends SystemService {
     public void onStart() {
         if (mIsolated) {
             mInstalld = null;
+            mInstalldLatch.countDown();
         } else {
             connect();
         }
@@ -160,6 +167,7 @@ public class Installer extends SystemService {
             try {
                 binder.linkToDeath(() -> {
                     Slog.w(TAG, "installd died; reconnecting");
+                    mInstalldLatch = new CountDownLatch(1);
                     connect();
                 }, 0);
             } catch (RemoteException e) {
@@ -168,14 +176,26 @@ public class Installer extends SystemService {
         }
 
         if (binder != null) {
-            mInstalld = IInstalld.Stub.asInterface(binder);
+            IInstalld installd = IInstalld.Stub.asInterface(binder);
+            mInstalld = installd;
+            mInstalldLatch.countDown();
             try {
                 invalidateMounts();
+                executeDeferredActions();
             } catch (InstallerException ignored) {
             }
         } else {
             Slog.w(TAG, "installd not found; trying again");
-            BackgroundThread.getHandler().postDelayed(this::connect, DateUtils.SECOND_IN_MILLIS);
+            BackgroundThread.getHandler().postDelayed(this::connect, CONNECT_RETRY_DELAY_MS);
+        }
+    }
+
+    /**
+     * Perform any deferred actions on mInstalld while the connection could not be made.
+     */
+    private void executeDeferredActions() throws InstallerException {
+        if (mDeferSetFirstBoot) {
+            setFirstBoot();
         }
     }
 
@@ -184,7 +204,7 @@ public class Installer extends SystemService {
      *
      * @return if the remote call should continue.
      */
-    private boolean checkBeforeRemote() {
+    private boolean checkBeforeRemote() throws InstallerException {
         if (mWarnIfHeld != null && Thread.holdsLock(mWarnIfHeld)) {
             Slog.wtf(TAG, "Calling thread " + Thread.currentThread().getName() + " is holding 0x"
                     + Integer.toHexString(System.identityHashCode(mWarnIfHeld)), new Throwable());
@@ -192,9 +212,17 @@ public class Installer extends SystemService {
         if (mIsolated) {
             Slog.i(TAG, "Ignoring request because this installer is isolated");
             return false;
-        } else {
-            return true;
         }
+
+        try {
+            if (!mInstalldLatch.await(CONNECT_WAIT_MS, TimeUnit.MILLISECONDS)) {
+                throw new InstallerException("time out waiting for the installer to be ready");
+            }
+        } catch (InterruptedException e) {
+            // Do nothing.
+        }
+
+        return true;
     }
 
     // We explicitly do NOT set previousAppId because the default value should always be 0.
@@ -287,9 +315,19 @@ public class Installer extends SystemService {
      * Sets in Installd that it is first boot after data wipe
      */
     public void setFirstBoot() throws InstallerException {
+        if (!checkBeforeRemote()) {
+            return;
+        }
         try {
-            mInstalld.setFirstBoot();
-        } catch (RemoteException e) {
+            // mInstalld might be null if the connection could not be established.
+            if (mInstalld != null) {
+                mInstalld.setFirstBoot();
+            } else {
+                // if it is null while trying to set the first boot, set a flag to try and set the
+                // first boot when the connection is eventually established
+                mDeferSetFirstBoot = true;
+            }
+        } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
@@ -626,12 +664,17 @@ public class Installer extends SystemService {
         }
     }
 
-    public boolean dumpProfiles(int uid, String packageName, String profileName, String codePath)
+    /**
+     * Dumps profiles associated with a package in a human readable format.
+     */
+    public boolean dumpProfiles(int uid, String packageName, String profileName, String codePath,
+                                boolean dumpClassesAndMethods)
             throws InstallerException {
         if (!checkBeforeRemote()) return false;
         BlockGuard.getVmPolicy().onPathAccess(codePath);
         try {
-            return mInstalld.dumpProfiles(uid, packageName, profileName, codePath);
+            return mInstalld.dumpProfiles(uid, packageName, profileName, codePath,
+                    dumpClassesAndMethods);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
@@ -684,6 +727,20 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.destroyAppProfiles(packageName);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    /**
+     * Deletes the reference profile with the given name of the given package.
+     * @throws InstallerException if the deletion fails.
+     */
+    public void deleteReferenceProfile(String packageName, String profileName)
+            throws InstallerException {
+        if (!checkBeforeRemote()) return;
+        try {
+            mInstalld.deleteReferenceProfile(packageName, profileName);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }

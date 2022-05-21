@@ -64,7 +64,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.pip.Pip;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Optional;
 
@@ -245,9 +244,9 @@ public class NavigationBarController implements
 
     @Override
     public void setNavigationBarLumaSamplingEnabled(int displayId, boolean enable) {
-        final NavigationBarView navigationBarView = getNavigationBarView(displayId);
-        if (navigationBarView != null) {
-            navigationBarView.setNavigationBarLumaSamplingEnabled(enable);
+        final NavigationBar navigationBar = getNavigationBar(displayId);
+        if (navigationBar != null) {
+            navigationBar.setNavigationBarLumaSamplingEnabled(enable);
         }
     }
 
@@ -405,8 +404,12 @@ public class NavigationBarController implements
      *         {@code null} if no navigation bar on that display.
      */
     public @Nullable NavigationBarView getNavigationBarView(int displayId) {
-        NavigationBar navBar = mNavigationBars.get(displayId);
+        NavigationBar navBar = getNavigationBar(displayId);
         return (navBar == null) ? null : navBar.getView();
+    }
+
+    private @Nullable NavigationBar getNavigationBar(int displayId) {
+        return mNavigationBars.get(displayId);
     }
 
     public void showPinningEnterExitToast(int displayId, boolean entering) {
@@ -427,6 +430,15 @@ public class NavigationBarController implements
         }
     }
 
+    public boolean isOverviewEnabled(int displayId) {
+        final NavigationBarView navBarView = getNavigationBarView(displayId);
+        if (navBarView != null) {
+            return navBarView.isOverviewEnabled();
+        } else {
+            return mTaskbarDelegate.isOverviewEnabled();
+        }
+    }
+
     /** @return {@link NavigationBar} on the default display. */
     @Nullable
     public NavigationBar getDefaultNavigationBar() {
@@ -434,7 +446,7 @@ public class NavigationBarController implements
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         for (int i = 0; i < mNavigationBars.size(); i++) {
             if (i > 0) {
                 pw.println();

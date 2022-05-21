@@ -158,6 +158,7 @@ public class AccessibilitySecurityPolicyTest {
 
         mA11ySecurityPolicy = new AccessibilitySecurityPolicy(
                 mPolicyWarningUIController, mContext, mMockA11yUserManager);
+        mA11ySecurityPolicy.setSendingNonA11yToolNotificationLocked(true);
         mA11ySecurityPolicy.setAccessibilityWindowManager(mMockA11yWindowManager);
         mA11ySecurityPolicy.setAppWidgetManager(mMockAppWidgetManager);
         mA11ySecurityPolicy.onSwitchUserLocked(TEST_USER_ID, new HashSet<>());
@@ -573,6 +574,18 @@ public class AccessibilitySecurityPolicyTest {
     }
 
     @Test
+    public void canRegisterService_isExternalService_returnFalse() {
+        final ServiceInfo serviceInfo = new ServiceInfo();
+        serviceInfo.applicationInfo = new ApplicationInfo();
+        serviceInfo.packageName = PACKAGE_NAME;
+        serviceInfo.name = AccessibilitySecurityPolicyTest.class.getSimpleName();
+        serviceInfo.permission = android.Manifest.permission.BIND_ACCESSIBILITY_SERVICE;
+        serviceInfo.flags |= ServiceInfo.FLAG_EXTERNAL_SERVICE;
+
+        assertFalse(mA11ySecurityPolicy.canRegisterService(serviceInfo));
+    }
+
+    @Test
     public void checkAccessibilityAccess_shouldCheckAppOps() {
         final AccessibilityServiceInfo mockServiceInfo = Mockito.mock(
                 AccessibilityServiceInfo.class);
@@ -641,9 +654,16 @@ public class AccessibilitySecurityPolicyTest {
 
         mA11ySecurityPolicy.onSwitchUserLocked(newUserId, new HashSet<>());
 
-        verify(mPolicyWarningUIController).onSwitchUserLocked(eq(newUserId), eq(new HashSet<>()));
+        verify(mPolicyWarningUIController).onSwitchUser(eq(newUserId), eq(new HashSet<>()));
         verify(mPolicyWarningUIController).onNonA11yCategoryServiceUnbound(eq(TEST_USER_ID),
                 eq(TEST_COMPONENT_NAME));
+    }
+
+    @Test
+    public void enableSendingNonA11yToolNotificationLocked_propagateToPolicyWarningController() {
+        mA11ySecurityPolicy.setSendingNonA11yToolNotificationLocked(true);
+
+        verify(mPolicyWarningUIController).enableSendingNonA11yToolNotification(true);
     }
 
     private void initServiceInfoAndConnection(ComponentName componentName,

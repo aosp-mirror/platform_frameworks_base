@@ -31,6 +31,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.BypassController;
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.SectionProvider;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 
 import javax.inject.Inject;
 
@@ -45,6 +46,10 @@ public class AmbientState {
 
     private final SectionProvider mSectionProvider;
     private final BypassController mBypassController;
+    /**
+     *  Used to read bouncer states.
+     */
+    private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private int mScrollY;
     private boolean mDimmed;
     private ActivatableNotificationView mActivatedChild;
@@ -77,13 +82,29 @@ public class AmbientState {
     private boolean mAppearing;
     private float mPulseHeight = MAX_PULSE_HEIGHT;
 
+    /** Fraction of lockscreen to shade animation (on lockscreen swipe down). */
+    private float mFractionToShade;
+
+    /**
+     * @param fractionToShade Fraction of lockscreen to shade transition
+     */
+    public void setFractionToShade(float fractionToShade) {
+        mFractionToShade = fractionToShade;
+    }
+
+    /**
+     * @return fractionToShade Fraction of lockscreen to shade transition
+     */
+    public float getFractionToShade() {
+        return mFractionToShade;
+    }
+
     /** How we much we are sleeping. 1f fully dozing (AOD), 0f fully awake (for all other states) */
     private float mDozeAmount = 0.0f;
 
     private Runnable mOnPulseHeightChangedListener;
     private ExpandableNotificationRow mTrackedHeadsUpRow;
     private float mAppearFraction;
-    private boolean mIsShadeOpening;
     private float mOverExpansion;
     private int mStackTopMargin;
 
@@ -205,9 +226,11 @@ public class AmbientState {
     public AmbientState(
             Context context,
             @NonNull SectionProvider sectionProvider,
-            @NonNull BypassController bypassController) {
+            @NonNull BypassController bypassController,
+            @Nullable StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
         mSectionProvider = sectionProvider;
         mBypassController = bypassController;
+        mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         reload(context);
     }
 
@@ -217,14 +240,6 @@ public class AmbientState {
     public void reload(Context context) {
         mZDistanceBetweenElements = getZDistanceBetweenElements(context);
         mBaseZHeight = getBaseHeight(mZDistanceBetweenElements);
-    }
-
-    public void setIsShadeOpening(boolean isOpening) {
-        mIsShadeOpening = isOpening;
-    }
-
-    public boolean isShadeOpening() {
-        return mIsShadeOpening;
     }
 
     void setOverExpansion(float overExpansion) {
@@ -669,5 +684,15 @@ public class AmbientState {
 
     public int getStackTopMargin() {
         return mStackTopMargin;
+    }
+
+    /**
+     * Check to see if we are about to show bouncer.
+     *
+     * @return if bouncer expansion is between 0 and 1.
+     */
+    public boolean isBouncerInTransit() {
+        return mStatusBarKeyguardViewManager != null
+                && mStatusBarKeyguardViewManager.isBouncerInTransit();
     }
 }

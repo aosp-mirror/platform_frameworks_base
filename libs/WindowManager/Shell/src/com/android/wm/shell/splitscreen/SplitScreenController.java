@@ -188,9 +188,9 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         if (mStageCoordinator == null) {
             // TODO: Multi-display
             mStageCoordinator = new StageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
-                    mRootTDAOrganizer, mTaskOrganizer, mDisplayController, mDisplayImeController,
+                    mTaskOrganizer, mDisplayController, mDisplayImeController,
                     mDisplayInsetsController, mTransitions, mTransactionPool, mLogger,
-                    mIconProvider, mRecentTasksOptional, mUnfoldControllerProvider);
+                    mIconProvider, mMainExecutor, mRecentTasksOptional, mUnfoldControllerProvider);
         }
     }
 
@@ -237,10 +237,6 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
 
     public void setSideStagePosition(@SplitPosition int sideStagePosition) {
         mStageCoordinator.setSideStagePosition(sideStagePosition, null /* wct */);
-    }
-
-    public void setSideStageVisibility(boolean visible) {
-        mStageCoordinator.setSideStageVisibility(visible);
     }
 
     public void enterSplitScreen(int taskId, boolean leftOrTop) {
@@ -381,7 +377,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                     return;
                 }
 
-                mStageCoordinator.updateSurfaceBounds(null /* layout */, t);
+                mStageCoordinator.updateSurfaceBounds(null /* layout */, t,
+                        false /* applyResizingOffset */);
                 for (int i = 0; i < apps.length; ++i) {
                     if (apps[i].mode == MODE_OPENING) {
                         t.show(apps[i].leash);
@@ -416,9 +413,29 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mSyncQueue.queue(transition, WindowManager.TRANSIT_OPEN, wct);
     }
 
-    RemoteAnimationTarget[] onGoingToRecentsLegacy(boolean cancel, RemoteAnimationTarget[] apps) {
-        if (ENABLE_SHELL_TRANSITIONS || apps.length < 2) return null;
+    RemoteAnimationTarget[] onGoingToRecentsLegacy(RemoteAnimationTarget[] apps) {
+        if (isSplitScreenVisible()) {
+            // Evict child tasks except the top visible one under split root to ensure it could be
+            // launched as full screen when switching to it on recents.
+            final WindowContainerTransaction wct = new WindowContainerTransaction();
+            mStageCoordinator.prepareEvictInvisibleChildTasks(wct);
+            mSyncQueue.queue(wct);
+        }
+        return reparentSplitTasksForAnimation(apps, true /*splitExpectedToBeVisible*/);
+    }
+
+    RemoteAnimationTarget[] onStartingSplitLegacy(RemoteAnimationTarget[] apps) {
+        return reparentSplitTasksForAnimation(apps, false /*splitExpectedToBeVisible*/);
+    }
+
+    private RemoteAnimationTarget[] reparentSplitTasksForAnimation(RemoteAnimationTarget[] apps,
+            boolean splitExpectedToBeVisible) {
+        if (ENABLE_SHELL_TRANSITIONS) return null;
         // TODO(b/206487881): Integrate this with shell transition.
+        if (splitExpectedToBeVisible && !isSplitScreenVisible()) return null;
+        // Split not visible, but not enough apps to have split, also return null
+        if (!splitExpectedToBeVisible && apps.length < 2) return null;
+
         SurfaceControl.Transaction transaction = new SurfaceControl.Transaction();
         if (mSplitTasksContainerLayer != null) {
             // Remove the previous layer before recreating
@@ -445,7 +462,6 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         transaction.close();
         return new RemoteAnimationTarget[]{mStageCoordinator.getDividerBarLegacyTarget()};
     }
-
     /**
      * Sets drag info to be logged when splitscreen is entered.
      */
@@ -645,14 +661,6 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         }
 
         @Override
-        public void setSideStageVisibility(boolean visible) {
-            executeRemoteCallWithTaskPermission(mController, "setSideStageVisibility",
-                    (controller) -> {
-                        controller.setSideStageVisibility(visible);
-                    });
-        }
-
-        @Override
         public void removeFromSideStage(int taskId) {
             executeRemoteCallWithTaskPermission(mController, "removeFromSideStage",
                     (controller) -> {
@@ -718,11 +726,19 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         }
 
         @Override
-        public RemoteAnimationTarget[] onGoingToRecentsLegacy(boolean cancel,
-                RemoteAnimationTarget[] apps) {
+        public RemoteAnimationTarget[] onGoingToRecentsLegacy(RemoteAnimationTarget[] apps) {
             final RemoteAnimationTarget[][] out = new RemoteAnimationTarget[][]{null};
             executeRemoteCallWithTaskPermission(mController, "onGoingToRecentsLegacy",
-                    (controller) -> out[0] = controller.onGoingToRecentsLegacy(cancel, apps),
+                    (controller) -> out[0] = controller.onGoingToRecentsLegacy(apps),
+                    true /* blocking */);
+            return out[0];
+        }
+
+        @Override
+        public RemoteAnimationTarget[] onStartingSplitLegacy(RemoteAnimationTarget[] apps) {
+            final RemoteAnimationTarget[][] out = new RemoteAnimationTarget[][]{null};
+            executeRemoteCallWithTaskPermission(mController, "onStartingSplitLegacy",
+                    (controller) -> out[0] = controller.onStartingSplitLegacy(apps),
                     true /* blocking */);
             return out[0];
         }

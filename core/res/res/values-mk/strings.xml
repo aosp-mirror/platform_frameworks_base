@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Привремено исклучена од вашиот оператор за SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Мобилната мрежа е недостапна"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Сменете ја претпочитаната мрежа. Допрете за промена."</string>
-    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Можно е итните повици да се недостапни"</string>
-    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> не поддржува итни повици преку Wi-Fi. Допрете за детали."</string>
+    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Итните повици се недостапни"</string>
+    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Не може да остваруваат итни повици преку Wi-Fi"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Предупредувања"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Проследување повик"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Режим на итен повратен повик"</string>
@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"пристапува до календарот"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"испраќа и прикажува SMS-пораки"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Датотеки и документи"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Датотеки и документи"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"да пристапува до датотеки и документи на уредот"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Музика и друго аудио"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"да пристапува до аудиодатотеки на вашиот уред"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Фотографии и видеа"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"да пристапува до слики и видеодатотеки на вашиот уред"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Музика и аудио"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"пристапувајте до музика и аудио на вашиот уред"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Фотографии и видеа"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"пристапувајте до фотографии и видеа на вашиот уред"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"снима аудио"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Физичка активност"</string>
@@ -349,10 +349,10 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Дозволува апликацијата да ја прошири или собере статусната лента."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"да прикажува известувања како активности на цел екран на заклучен уред"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Дозволува апликацијата да прикажува известувања како активности на цел екран на заклучен уред"</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"инсталирај кратенки"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Овозможува апликацијата да додава кратенки до почетниот екран без интервенција на корисникот."</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"инсталирање кратенки"</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Овозможува апликацијата да додава кратенки на почетниот екран без интервенција на корисникот."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"деинсталирај кратенки"</string>
-    <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Овозможува апликацијата да отстранува кратенки до почетниот екран без интервенција на корисникот."</string>
+    <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Овозможува апликацијата да отстранува кратенки од почетниот екран без интервенција на корисникот."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"пренасочи појдовни повици"</string>
     <string name="permdesc_processOutgoingCalls" msgid="7833149750590606334">"Дозволува апликацијата да го види бројот што се повикува за време на појдовен повик, со опција да го пренасочи повикот кон друг број или да го прекине повикот."</string>
     <string name="permlab_answerPhoneCalls" msgid="4131324833663725855">"одговара телефонски повици"</string>
@@ -426,7 +426,7 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Дозволува апликацијата да го менува дневникот на повици на вашиот уред Android TV, вклучувајќи и податоци за дојдовните или појдовните повици. Злонамерните апликации може да го искористат ова за да го избришат или да го менуваат дневникот на повици."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Овозможува апликацијата да го менува дневникот на повици на вашиот телефон, вклучувајќи податоци за дојдовни и појдовни повици. Злонамерните апликации може да го искористат ова да го избришат или да го менуваат вашиот дневник на повици."</string>
     <string name="permlab_bodySensors" msgid="662918578601619569">"Пристап до податоци од телесните сензори, како пулсот, додека се користи"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Дозволува апликацијата да пристапува до податоци од телесните сензори, како што се пулс, температура и процент на кислород во телото, додека апликацијата се користи."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Дозволува апликацијата да пристапува до податоци од телесните сензори, како што се пулс, температура и процент на кислород во телото, додека се користи апликацијата."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Пристап до податоци од телесните сензори, како пулсот, додека работи во заднина"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Дозволува апликацијата да пристапува до податоци од телесните сензори, како што се пулс, температура и процент на кислород во телото, додека апликацијата работи во заднина."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Чита настани и детали од календарот"</string>
@@ -585,7 +585,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Грешка при проверката"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Користи заклучување екран"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Внесете го заклучувањето на екранот за да продолжите"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Откриен е делумен отпечаток"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Цврсто притиснете на сензорот"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Отпечатокот не може да се обработи. Обидете се повторно."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Исчистете го сензорот за отпечатоци и обидете се повторно"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Исчистете го сензорот и обидете се повторно"</string>
@@ -598,7 +598,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Отпечатокот не е препознаен"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Цврсто притиснете на сензорот"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Отпечатокот не е препознаен"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Отпечатокот е проверен"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Лицето е проверено"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Лицето е проверено, притиснете го копчето „Потврди“"</string>
@@ -1451,12 +1451,6 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Овозможува апликацијата да побара дозвола за игнорирање на оптимизациите на батеријата за таа апликација."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"пребарување на сите пакети"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Дозволува апликацијата да ги гледа сите инсталирани пакети."</string>
-    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"да пристапува до AdServices Topics API"</string>
-    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"Дозволува апликацијата да пристапува до AdServices Topics API."</string>
-    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"да пристапува до AdServices Attribution API"</string>
-    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"Дозволува апликацијата да пристапува до AdServices Attribution API."</string>
-    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"да пристапува до AdServices Custom Audiences API"</string>
-    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"Дозволува апликацијата да пристапува до AdServices Custom Audiences API."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Допрете двапати за контрола на зумот"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Не може да се додаде виџет."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Оди"</string>
@@ -1685,7 +1679,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ВКЛУЧЕНО"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ИСКЛУЧЕНО"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Дали дозволувате <xliff:g id="SERVICE">%1$s</xliff:g> да има целосна контрола врз вашиот уред?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Ако вклучите <xliff:g id="SERVICE">%1$s</xliff:g>, уредот нема да го користи заклучувањето на екранот за да го подобри шифрирањето на податоците."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Целосната контрола е соодветна за апликации што ви помагаат со потребите за пристапност, но не и за повеќето апликации."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Приказ и контрола на екранот"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Може да ги чита сите содржини на екранот и да прикажува содржини врз другите апликации."</string>
@@ -1851,13 +1844,13 @@
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"Трета деловна <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Побарај PIN пред откачување"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Побарај шема за откл. пред откачување"</string>
-    <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Прашај за лозинка пред откачување"</string>
+    <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Побарај лозинка пред откачување"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"Инсталирано од администраторот"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Ажурирано од администраторот"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Избришано од администраторот"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Во ред"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"„Штедачот на батерија“ вклучува темна тема и ја ограничува или исклучува активноста во заднина, некои визуелни ефекти, одредени функции и некои мрежни врски."</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"„Штедачот на батерија“ вклучува темна тема и ја ограничува или исклучува активноста во заднина, некои визуелни ефекти, одредени функции и некои мрежни врски."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"„Штедачот на батерија“ вклучува „Темна тема“ и ограничува или исклучува активност во заднина, некои визуелни ефекти, одредени функции и некои мрежни врски."</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"„Штедачот на батерија“ вклучува „Темна тема“ и ограничува или исклучува активност во заднина, некои визуелни ефекти, одредени функции и некои мрежни врски."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"За да се намали користењето интернет, „Штедачот на интернет“ спречува дел од апликациите да испраќаат или да примаат податоци во заднина. Одредена апликација што ја користите ќе може да користи интернет, но можеби тоа ќе го прави поретко. Ова значи, на пример, дека сликите нема да се прикажуваат додека не ги допрете."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Да се вклучи „Штедач на интернет“?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Вклучи"</string>
@@ -1939,9 +1932,22 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Апликацијата не е достапна"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> не е достапна во моментов."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> е недостапна"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Ова не може да се отвори на <xliff:g id="DEVICE">%1$s</xliff:g> во моментов. Пробајте на вашиот Android TV како алтернатива."</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Ова не може да се отвори на <xliff:g id="DEVICE">%1$s</xliff:g> во моментов. Пробајте на вашиот таблет како алтернатива."</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Ова не може да се отвори на <xliff:g id="DEVICE">%1$s</xliff:g> во моментов. Пробајте на вашиот телефон како алтернатива."</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Потребна е дозвола"</string>
+    <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Камерата е недостапна"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Продолжете на телефонот"</string>
+    <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Микрофонот не е достапен"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Поставките за Android TV не се достапни"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Поставките за таблетот не се достапни"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Поставките за телефонот не се достапни"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"Ова не може да се отвори на <xliff:g id="DEVICE">%1$s</xliff:g>. Пробајте на вашиот Android TV како алтернатива."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"Ова не може да се отвори на <xliff:g id="DEVICE">%1$s</xliff:g>. Пробајте на вашиот таблет како алтернатива."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"Ова не може да се отвори на <xliff:g id="DEVICE">%1$s</xliff:g>. Пробајте на вашиот телефон како алтернатива."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"Ова не може да се отвори на <xliff:g id="DEVICE">%1$s</xliff:g> во моментов. Пробајте на вашиот Android TV како алтернатива."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"Ова не може да се отвори на <xliff:g id="DEVICE">%1$s</xliff:g> во моментов. Пробајте на вашиот таблет како алтернатива."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"Ова не може да се отвори на <xliff:g id="DEVICE">%1$s</xliff:g> во моментов. Пробајте на вашиот телефон како алтернатива."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Апликацијава бара дополнителна безбедност. Пробајте на вашиот Android TV како алтернатива."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Апликацијава бара дополнителна безбедност. Пробајте на вашиот таблет како алтернатива."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Апликацијава бара дополнителна безбедност. Пробајте на вашиот телефон како алтернатива."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Апликацијава е создадена за постара верзија на Android и може да не функционира правилно. Проверете за ажурирања или контактирајте со програмерот."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Проверка за ажурирање"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Имате нови пораки"</string>
@@ -2032,9 +2038,9 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"СЕПАК ОТВОРИ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Откриена е штетна апликација"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Да се дозволи <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> да пристапува до целата евиденција на уредот?"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"Само овој пат"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Дозволи еднократен пристап"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Не дозволувај"</string>
-    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Дневниците за евиденција на уредот снимаат што се случува на вашиот уред. Апликациите може да ги користат овие дневници за евиденција за да наоѓаат и поправаат проблеми.\n\nНекои дневници за евиденција може да содржат чувствителни податоци, па затоа дозволете им пристап до сите дневници за евиденција на уредот само на апликациите во кои имате доверба. \n\nАко не ѝ дозволите на апликацијава да пристапува до сите дневници за евиденција на уредот, таа сепак ќе може да пристапува до сопствените дневници за евиденција, а производителот на вашиот уред можеби сепак ќе може да пристапува до некои дневници за евиденција или податоци на уредот. Дознајте повеќе"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Евиденцијата на уредот снима што се случува со вашиот уред. Апликациите можат да ја користат евиденцијата за да наоѓаат и поправаат проблеми.\n\nНекоја евиденција може да содржи чувствителни податоци, па затоа дозволувајте само апликации на кои им верувате да пристапуваат до целата евиденција на уредот. \n\nАко не ѝ дозволите на апликацијава да пристапува до сите евиденции на уредот, сепак ќе може да пристапува до сопствената евиденција. Производителот на вашиот уред можеби сепак ќе може да пристапува до некои евиденции или податоци на уредот. Дознајте повеќе"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Не прикажувај повторно"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> сака да прикажува делови од <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Измени"</string>
@@ -2046,6 +2052,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Допрете за да дознаете повеќе и да ги промените поставките."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Поставките за „Не вознемирувај“ се изменија"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Допрете за да проверите што е блокирано."</string>
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"Прегледајте ги поставките за известувања"</string>
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Почнувајќи од Android 13, на апликациите што ги инсталирате им е потребна ваша дозвола за испраќање известувања. Допрете за да ја промените оваа дозвола за постојни апликации."</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Потсети ме подоцна"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Отфрли"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Систем"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Поставки"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Камера"</string>
@@ -2123,7 +2133,7 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"За работа"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Личен приказ"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Работен приказ"</string>
-    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Блокирано од вашиот IT-администратор"</string>
+    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Блокирано од IT-администраторот"</string>
     <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"Овие содржини не може да се споделуваат со работни апликации"</string>
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Овие содржини не може да се отвораат со работни апликации"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Овие содржини не може да се споделуваат со лични апликации"</string>
@@ -2264,11 +2274,12 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g>, преведено."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Пораката е преведена од <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> на <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Активност во заднина"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Активност во заднина"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> работи во заднина и ја троши батеријата. Допрете за да прегледате."</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> работи во заднина веќе долго време. Допрете за да прегледате."</string>
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"Апликација ја празни батеријата"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Апликација сѐ уште е активна"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> се извршува во заднина. Допрете за да управувате со користењето на батеријата."</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> може да влијае врз траење на батеријата. Допрете за да ги прегледате активните апликации."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Проверете ги активните апликации"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Не може да се пристапи до камерата од уредов"</string>
-    <!-- no translation found for system_locale_title (3978041860457277638) -->
-    <skip />
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Не може да се пристапи до камерата на вашиот телефон од <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Не може да се пристапи до камерата на вашиот таблет од <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Стандардно за системот"</string>
 </resources>

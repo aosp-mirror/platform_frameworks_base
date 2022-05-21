@@ -16,6 +16,8 @@
 
 package com.android.server.display;
 
+import static android.text.TextUtils.formatSimple;
+
 import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Resources;
@@ -36,6 +38,7 @@ import com.android.server.display.whitebalance.DisplayWhiteBalanceController;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -358,7 +361,10 @@ public abstract class BrightnessMappingStrategy {
      */
     public abstract long getShortTermModelTimeout();
 
-    public abstract void dump(PrintWriter pw);
+    /**
+     * Prints dump output for display dumpsys.
+     */
+    public abstract void dump(PrintWriter pw, float hbmTransition);
 
     /**
      * We can designate a mapping strategy to be used for idle screen brightness mode.
@@ -714,7 +720,7 @@ public abstract class BrightnessMappingStrategy {
         }
 
         @Override
-        public void dump(PrintWriter pw) {
+        public void dump(PrintWriter pw, float hbmTransition) {
             pw.println("SimpleMappingStrategy");
             pw.println("  mSpline=" + mSpline);
             pw.println("  mMaxGamma=" + mMaxGamma);
@@ -947,7 +953,7 @@ public abstract class BrightnessMappingStrategy {
         }
 
         @Override
-        public void dump(PrintWriter pw) {
+        public void dump(PrintWriter pw, float hbmTransition) {
             pw.println("PhysicalMappingStrategy");
             pw.println("  mConfig=" + mConfig);
             pw.println("  mBrightnessSpline=" + mBrightnessSpline);
@@ -959,11 +965,124 @@ public abstract class BrightnessMappingStrategy {
             pw.println("  mUserBrightness=" + mUserBrightness);
             pw.println("  mDefaultConfig=" + mDefaultConfig);
             pw.println("  mBrightnessRangeAdjustmentApplied=" + mBrightnessRangeAdjustmentApplied);
+
+            dumpConfigDiff(pw, hbmTransition);
         }
 
         @Override
         public boolean isForIdleMode() {
             return mIsForIdleMode;
+        }
+
+        /**
+         * Prints out the default curve and how it differs from the long-term curve
+         * and the current curve (in case the current curve includes short-term adjustments).
+         *
+         * @param pw The print-writer to write to.
+         */
+        private void dumpConfigDiff(PrintWriter pw, float hbmTransition) {
+            pw.println("  Difference between current config and default: ");
+
+            Pair<float[], float[]> currentCurve = mConfig.getCurve();
+            Spline currSpline = Spline.createSpline(currentCurve.first, currentCurve.second);
+
+            Pair<float[], float[]> defaultCurve = mDefaultConfig.getCurve();
+            Spline defaultSpline = Spline.createSpline(defaultCurve.first, defaultCurve.second);
+
+            // Add the short-term curve lux point if present
+            float[] luxes = currentCurve.first;
+            if (mUserLux >= 0) {
+                luxes = Arrays.copyOf(currentCurve.first, currentCurve.first.length + 1);
+                luxes[luxes.length - 1] = mUserLux;
+                Arrays.sort(luxes);
+            }
+
+            StringBuilder sbLux = null;
+            StringBuilder sbNits = null;
+            StringBuilder sbLong = null;
+            StringBuilder sbShort = null;
+            StringBuilder sbBrightness = null;
+            StringBuilder sbPercent = null;
+            StringBuilder sbPercentHbm = null;
+            boolean needsHeaders = true;
+            String separator = "";
+            for (int i = 0; i < luxes.length; i++) {
+                float lux = luxes[i];
+                if (needsHeaders) {
+                    sbLux = new StringBuilder("            lux: ");
+                    sbNits = new StringBuilder("        default: ");
+                    sbLong = new StringBuilder("      long-term: ");
+                    sbShort = new StringBuilder("        current: ");
+                    sbBrightness = new StringBuilder("    current(bl): ");
+                    sbPercent = new StringBuilder("     current(%): ");
+                    sbPercentHbm = new StringBuilder("  current(hbm%): ");
+                    needsHeaders = false;
+                }
+
+                float defaultNits = defaultSpline.interpolate(lux);
+                float longTermNits = currSpline.interpolate(lux);
+                float shortTermNits = mBrightnessSpline.interpolate(lux);
+                float brightness = mNitsToBrightnessSpline.interpolate(shortTermNits);
+
+                String luxPrefix = (lux == mUserLux ? "^" : "");
+                String strLux = luxPrefix + toStrFloatForDump(lux);
+                String strNits = toStrFloatForDump(defaultNits);
+                String strLong = toStrFloatForDump(longTermNits);
+                String strShort = toStrFloatForDump(shortTermNits);
+                String strBrightness = toStrFloatForDump(brightness);
+                String strPercent = String.valueOf(
+                        Math.round(100.0f * BrightnessUtils.convertLinearToGamma(
+                            (brightness / hbmTransition))));
+                String strPercentHbm = String.valueOf(
+                        Math.round(100.0f * BrightnessUtils.convertLinearToGamma(brightness)));
+
+                int maxLen = Math.max(strLux.length(),
+                        Math.max(strNits.length(),
+                        Math.max(strBrightness.length(),
+                        Math.max(strPercent.length(),
+                        Math.max(strPercentHbm.length(),
+                        Math.max(strLong.length(), strShort.length()))))));
+                String format = separator + "%" + maxLen + "s";
+                separator = ", ";
+
+                sbLux.append(formatSimple(format, strLux));
+                sbNits.append(formatSimple(format, strNits));
+                sbLong.append(formatSimple(format, strLong));
+                sbShort.append(formatSimple(format, strShort));
+                sbBrightness.append(formatSimple(format, strBrightness));
+                sbPercent.append(formatSimple(format, strPercent));
+                sbPercentHbm.append(formatSimple(format, strPercentHbm));
+
+                // At 80 chars, start another row
+                if (sbLux.length() > 80 || (i == luxes.length - 1)) {
+                    pw.println(sbLux);
+                    pw.println(sbNits);
+                    pw.println(sbLong);
+                    pw.println(sbShort);
+                    pw.println(sbBrightness);
+                    pw.println(sbPercent);
+                    if (hbmTransition < PowerManager.BRIGHTNESS_MAX) {
+                        pw.println(sbPercentHbm);
+                    }
+                    pw.println("");
+                    needsHeaders = true;
+                    separator = "";
+                }
+            }
+        }
+
+        private String toStrFloatForDump(float value) {
+            if (value == 0.0f) {
+                return "0";
+            } else if (value < 0.1f) {
+                return String.format(Locale.US, "%.3f", value);
+            } else if (value < 1) {
+                return String.format(Locale.US, "%.2f", value);
+            } else if (value < 10) {
+                return String.format(Locale.US, "%.1f", value);
+            } else {
+                return formatSimple("%d", Math.round(value));
+            }
         }
 
         private void computeNitsBrightnessSplines(float[] nits) {

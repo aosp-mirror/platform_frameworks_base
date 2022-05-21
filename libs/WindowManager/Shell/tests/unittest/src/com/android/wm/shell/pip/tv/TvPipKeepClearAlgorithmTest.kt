@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.pip.tv
 
+import android.graphics.Insets
 import android.graphics.Rect
 import android.testing.AndroidTestingRunner
 import android.util.Size
@@ -24,11 +25,14 @@ import org.junit.runner.RunWith
 import com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_NONE
 import com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_BOTTOM
 import com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_RIGHT
+import com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_TOP
 import com.android.wm.shell.pip.tv.TvPipKeepClearAlgorithm.Placement
 import org.junit.Before
 import org.junit.Test
 import junit.framework.Assert.assertEquals
+import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertNull
+import junit.framework.Assert.assertTrue
 
 @RunWith(AndroidTestingRunner::class)
 class TvPipKeepClearAlgorithmTest {
@@ -44,7 +48,6 @@ class TvPipKeepClearAlgorithmTest {
     private lateinit var pipSize: Size
     private lateinit var movementBounds: Rect
     private lateinit var algorithm: TvPipKeepClearAlgorithm
-    private var currentTime = 0L
     private var restrictedAreas = mutableSetOf<Rect>()
     private var unrestrictedAreas = mutableSetOf<Rect>()
     private var gravity: Int = 0
@@ -56,16 +59,14 @@ class TvPipKeepClearAlgorithmTest {
 
         restrictedAreas.clear()
         unrestrictedAreas.clear()
-        currentTime = 0L
         pipSize = DEFAULT_PIP_SIZE
         gravity = Gravity.BOTTOM or Gravity.RIGHT
 
-        algorithm = TvPipKeepClearAlgorithm({ currentTime })
+        algorithm = TvPipKeepClearAlgorithm()
         algorithm.setScreenSize(SCREEN_SIZE)
         algorithm.setMovementBounds(movementBounds)
         algorithm.pipAreaPadding = PADDING
         algorithm.stashOffset = STASH_OFFSET
-        algorithm.stashDuration = 5000L
         algorithm.setGravity(gravity)
         algorithm.maxRestrictedDistanceFraction = 0.3
     }
@@ -263,7 +264,7 @@ class TvPipKeepClearAlgorithmTest {
         assertEquals(expectedBounds, placement.bounds)
         assertEquals(STASH_TYPE_BOTTOM, placement.stashType)
         assertEquals(getExpectedAnchorBounds(), placement.unstashDestinationBounds)
-        assertEquals(algorithm.stashDuration, placement.unstashTime)
+        assertTrue(placement.triggerStash)
     }
 
     @Test
@@ -303,7 +304,7 @@ class TvPipKeepClearAlgorithmTest {
         assertEquals(expectedBounds, placement.bounds)
         assertEquals(STASH_TYPE_RIGHT, placement.stashType)
         assertEquals(expectedUnstashBounds, placement.unstashDestinationBounds)
-        assertEquals(algorithm.stashDuration, placement.unstashTime)
+        assertTrue(placement.triggerStash)
     }
 
     @Test
@@ -350,9 +351,7 @@ class TvPipKeepClearAlgorithmTest {
         assertEquals(expectedBounds, placement.bounds)
         assertEquals(STASH_TYPE_RIGHT, placement.stashType)
         assertEquals(expectedUnstashBounds, placement.unstashDestinationBounds)
-        assertEquals(algorithm.stashDuration, placement.unstashTime)
-
-        currentTime += 1000
+        assertTrue(placement.triggerStash)
 
         restrictedAreas.remove(sideBar)
         placement = getActualPlacement()
@@ -361,7 +360,7 @@ class TvPipKeepClearAlgorithmTest {
     }
 
     @Test
-    fun test_Stashed_UnstashBoundsStaysObstructed_UnstashesAfterTimeout() {
+    fun test_Stashed_UnstashBoundsStaysObstructed_DoesNotTriggerStash() {
         gravity = Gravity.BOTTOM or Gravity.RIGHT
 
         val bottomBar = makeBottomBar(BOTTOM_SHEET_HEIGHT)
@@ -382,13 +381,13 @@ class TvPipKeepClearAlgorithmTest {
         assertEquals(expectedBounds, placement.bounds)
         assertEquals(STASH_TYPE_RIGHT, placement.stashType)
         assertEquals(expectedUnstashBounds, placement.unstashDestinationBounds)
-        assertEquals(algorithm.stashDuration, placement.unstashTime)
-
-        currentTime += algorithm.stashDuration
+        assertTrue(placement.triggerStash)
 
         placement = getActualPlacement()
-        assertEquals(expectedUnstashBounds, placement.bounds)
-        assertNotStashed(placement)
+        assertEquals(expectedBounds, placement.bounds)
+        assertEquals(STASH_TYPE_RIGHT, placement.stashType)
+        assertEquals(expectedUnstashBounds, placement.unstashDestinationBounds)
+        assertFalse(placement.triggerStash)
     }
 
     @Test
@@ -413,9 +412,7 @@ class TvPipKeepClearAlgorithmTest {
         assertEquals(expectedBounds, placement.bounds)
         assertEquals(STASH_TYPE_RIGHT, placement.stashType)
         assertEquals(expectedUnstashBounds, placement.unstashDestinationBounds)
-        assertEquals(algorithm.stashDuration, placement.unstashTime)
-
-        currentTime += 1000
+        assertTrue(placement.triggerStash)
 
         val newObstruction = Rect(
                 0,
@@ -429,7 +426,75 @@ class TvPipKeepClearAlgorithmTest {
         assertEquals(expectedBounds, placement.bounds)
         assertEquals(STASH_TYPE_RIGHT, placement.stashType)
         assertEquals(expectedUnstashBounds, placement.unstashDestinationBounds)
-        assertEquals(currentTime + algorithm.stashDuration, placement.unstashTime)
+        assertTrue(placement.triggerStash)
+    }
+
+    @Test
+    fun test_ExpandedPiPHeightExceedsMovementBounds_AtAnchor() {
+        gravity = Gravity.RIGHT or Gravity.CENTER_VERTICAL
+        pipSize = Size(DEFAULT_PIP_SIZE.width, SCREEN_SIZE.height)
+        testAnchorPosition()
+    }
+
+    @Test
+    fun test_ExpandedPiPHeightExceedsMovementBounds_BottomBar_StashedUp() {
+        gravity = Gravity.RIGHT or Gravity.CENTER_VERTICAL
+        pipSize = Size(DEFAULT_PIP_SIZE.width, SCREEN_SIZE.height)
+        val bottomBar = makeBottomBar(96)
+        unrestrictedAreas.add(bottomBar)
+
+        val expectedBounds = getExpectedAnchorBounds()
+        expectedBounds.offset(0, -bottomBar.height() - PADDING)
+        val placement = getActualPlacement()
+        assertEquals(expectedBounds, placement.bounds)
+        assertEquals(STASH_TYPE_TOP, placement.stashType)
+        assertEquals(getExpectedAnchorBounds(), placement.unstashDestinationBounds)
+    }
+
+    @Test
+    fun test_PipInsets() {
+        val insets = Insets.of(-1, -2, -3, -4)
+        algorithm.setPipPermanentDecorInsets(insets)
+
+        gravity = Gravity.BOTTOM or Gravity.RIGHT
+        testAnchorPositionWithInsets(insets)
+
+        gravity = Gravity.BOTTOM or Gravity.LEFT
+        testAnchorPositionWithInsets(insets)
+
+        gravity = Gravity.TOP or Gravity.LEFT
+        testAnchorPositionWithInsets(insets)
+
+        gravity = Gravity.TOP or Gravity.RIGHT
+        testAnchorPositionWithInsets(insets)
+
+        pipSize = EXPANDED_WIDE_PIP_SIZE
+
+        gravity = Gravity.BOTTOM
+        testAnchorPositionWithInsets(insets)
+
+        gravity = Gravity.TOP
+        testAnchorPositionWithInsets(insets)
+
+        pipSize = Size(pipSize.height, pipSize.width)
+
+        gravity = Gravity.LEFT
+        testAnchorPositionWithInsets(insets)
+
+        gravity = Gravity.RIGHT
+        testAnchorPositionWithInsets(insets)
+    }
+
+    private fun testAnchorPositionWithInsets(insets: Insets) {
+        var pipRect = Rect(0, 0, pipSize.width, pipSize.height)
+        pipRect.inset(insets)
+        var expectedBounds = Rect()
+        Gravity.apply(gravity, pipRect.width(), pipRect.height(), movementBounds, expectedBounds)
+        val reverseInsets = Insets.subtract(Insets.NONE, insets)
+        expectedBounds.inset(reverseInsets)
+
+        var placement = getActualPlacement()
+        assertEquals(expectedBounds, placement.bounds)
     }
 
     private fun makeSideBar(width: Int, @Gravity.GravityFlags side: Int): Rect {
@@ -464,6 +529,6 @@ class TvPipKeepClearAlgorithmTest {
     private fun assertNotStashed(actual: Placement) {
         assertEquals(STASH_TYPE_NONE, actual.stashType)
         assertNull(actual.unstashDestinationBounds)
-        assertEquals(0L, actual.unstashTime)
+        assertFalse(actual.triggerStash)
     }
 }

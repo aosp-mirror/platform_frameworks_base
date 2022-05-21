@@ -16,6 +16,8 @@
 
 package com.android.internal.app;
 
+import static com.android.internal.util.LatencyTracker.ACTION_LOAD_SHARE_SHEET;
+
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.animation.Animator;
@@ -152,18 +154,6 @@ public class ChooserActivity extends ResolverActivity implements
         SelectableTargetInfoCommunicator {
     private static final String TAG = "ChooserActivity";
 
-    /**
-     * Whether this chooser is operating in "headless springboard" mode (as determined during
-     * onCreate). In this mode, our activity sits in the background and waits for the new
-     * "unbundled" chooser to handle the Sharesheet experience; the system ChooserActivity is
-     * responsible only for providing the startActivityAsCaller permission token and keeping it
-     * valid for the life of the unbundled delegate activity.
-     *
-     * TODO: when the unbundled chooser is fully launched, the system-side "springboard" can use a
-     * simpler implementation that doesn't inherit from ResolverActivity.
-     */
-    private boolean mIsHeadlessSpringboardActivity;
-
     private AppPredictor mPersonalAppPredictor;
     private AppPredictor mWorkAppPredictor;
     private boolean mShouldDisplayLandscape;
@@ -179,16 +169,6 @@ public class ChooserActivity extends ResolverActivity implements
     public static final String EXTRA_PRIVATE_RETAIN_IN_ON_STOP
             = "com.android.internal.app.ChooserActivity.EXTRA_PRIVATE_RETAIN_IN_ON_STOP";
 
-    /**
-     * Boolean extra added to "unbundled Sharesheet" delegation intents to signal whether the app
-     * prediction service is available. Our query of the service <em>availability</em> depends on
-     * privileges that are only available in the system, even though the service itself would then
-     * be available to the unbundled component. For now, we just include the query result as part of
-     * the handover intent.
-     * TODO: investigate whether the privileged query is necessary to determine the availability.
-     */
-    public static final String EXTRA_IS_APP_PREDICTION_SERVICE_AVAILABLE =
-            "com.android.internal.app.ChooserActivity.EXTRA_IS_APP_PREDICTION_SERVICE_AVAILABLE";
 
     /**
      * Transition name for the first image preview.
@@ -212,12 +192,10 @@ public class ChooserActivity extends ResolverActivity implements
     private static final String SHORTCUT_TARGET = "shortcut_target";
     private static final int APP_PREDICTION_SHARE_TARGET_QUERY_PACKAGE_LIMIT = 20;
     public static final String APP_PREDICTION_INTENT_FILTER_KEY = "intent_filter";
+    private static final String SHARED_TEXT_KEY = "shared_text";
 
     private static final String PLURALS_COUNT = "count";
     private static final String PLURALS_FILE_NAME = "file_name";
-
-    @VisibleForTesting
-    public static final int LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS = 250;
 
     private boolean mIsAppPredictorComponentAvailable;
     private Map<ChooserTarget, AppTarget> mDirectShareAppTargetCache;
@@ -259,11 +237,6 @@ public class ChooserActivity extends ResolverActivity implements
 
     private static final float DIRECT_SHARE_EXPANSION_RATE = 0.78f;
 
-    private boolean mEnableChooserDelegate =
-            DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
-                    SystemUiDeviceConfigFlags.USE_DELEGATE_CHOOSER,
-                    false);
-
     private static final int DEFAULT_SALT_EXPIRATION_DAYS = 7;
     private int mMaxHashSaltDays = DeviceConfig.getInt(DeviceConfig.NAMESPACE_SYSTEMUI,
             SystemUiDeviceConfigFlags.HASH_SALT_MAX_DAYS,
@@ -274,6 +247,13 @@ public class ChooserActivity extends ResolverActivity implements
             DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
                     SystemUiDeviceConfigFlags.IS_NEARBY_SHARE_FIRST_TARGET_IN_RANKED_APP,
                     DEFAULT_IS_NEARBY_SHARE_FIRST_TARGET_IN_RANKED_APP);
+
+    private static final int DEFAULT_LIST_VIEW_UPDATE_DELAY_MS = 125;
+
+    @VisibleForTesting
+    int mListViewUpdateDelayMs = DeviceConfig.getInt(DeviceConfig.NAMESPACE_SYSTEMUI,
+            SystemUiDeviceConfigFlags.SHARESHEET_LIST_VIEW_UPDATE_DELAY,
+            DEFAULT_LIST_VIEW_UPDATE_DELAY_MS);
 
     private Bundle mReplacementExtras;
     private IntentSender mChosenComponentSender;
@@ -530,13 +510,9 @@ public class ChooserActivity extends ResolverActivity implements
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (handOverToDelegateChooser()) {
-            super_onCreate(savedInstanceState);
-            mIsHeadlessSpringboardActivity = true;
-            return;
-        }
-
         final long intentReceivedTime = System.currentTimeMillis();
+        mLatencyTracker.onActionStart(ACTION_LOAD_SHARE_SHEET);
+
         getChooserActivityLogger().logSharesheetTriggered();
         // This is the only place this value is being set. Effectively final.
         mIsAppPredictorComponentAvailable = isAppPredictionServiceAvailable();
@@ -749,56 +725,6 @@ public class ChooserActivity extends ResolverActivity implements
             }
         });
         postponeEnterTransition();
-    }
-
-    private boolean handOverToDelegateChooser() {
-        // Check the explicit classname so that we don't interfere with the flow of any subclasses.
-        if (!this.getClass().getName().equals("com.android.internal.app.ChooserActivity")
-                || !mEnableChooserDelegate) {
-            return false;
-        }
-
-        Intent delegationIntent = new Intent();
-        final ComponentName delegateActivity = ComponentName.unflattenFromString(
-                Resources.getSystem().getString(R.string.config_chooserActivity));
-        delegationIntent.setComponent(delegateActivity);
-        delegationIntent.putExtra(Intent.EXTRA_INTENT, getIntent());
-        delegationIntent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
-
-        // Don't close until the delegate finishes, or the token will be invalidated.
-        mAwaitingDelegateResponse = true;
-        startActivityForResult(delegationIntent, REQUEST_CODE_RETURN_FROM_DELEGATE_CHOOSER);
-        return true;
-    }
-
-    @Override
-    protected void onRestart() {
-        if (mIsHeadlessSpringboardActivity) {
-            super_onRestart();
-            return;
-        }
-
-        super.onRestart();
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        if (mIsHeadlessSpringboardActivity) {
-            super_onSaveInstanceState(outState);
-            return;
-        }
-
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        if (mIsHeadlessSpringboardActivity) {
-            super_onRestoreInstanceState(savedInstanceState);
-            return;
-        }
-
-        super.onRestoreInstanceState(savedInstanceState);
     }
 
     @Override
@@ -1050,7 +976,8 @@ public class ChooserActivity extends ResolverActivity implements
             getChooserActivityLogger().logShareTargetSelected(
                     SELECTION_TYPE_COPY,
                     "",
-                    -1);
+                    -1,
+                    false);
 
             setResult(RESULT_OK);
             finish();
@@ -1058,12 +985,13 @@ public class ChooserActivity extends ResolverActivity implements
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        if (mIsHeadlessSpringboardActivity) {
-            super_onConfigurationChanged(newConfig);
-            return;
-        }
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume: " + getComponentName().flattenToShortString());
+    }
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         ViewPager viewPager = findViewById(R.id.profile_pager);
         if (viewPager.isLayoutRtl()) {
@@ -1233,12 +1161,11 @@ public class ChooserActivity extends ResolverActivity implements
                     getChooserActivityLogger().logShareTargetSelected(
                             SELECTION_TYPE_NEARBY,
                             "",
-                            -1);
+                            -1,
+                            false);
                     // Action bar is user-independent, always start as primary
                     safelyStartActivityAsUser(ti, getPersonalProfileUserHandle());
-                    if (!mAwaitingDelegateResponse) {
-                        finish();
-                    }
+                    finish();
                 }
         );
         b.setId(R.id.chooser_nearby_button);
@@ -1257,12 +1184,11 @@ public class ChooserActivity extends ResolverActivity implements
                     getChooserActivityLogger().logShareTargetSelected(
                             SELECTION_TYPE_EDIT,
                             "",
-                            -1);
+                            -1,
+                            false);
                     // Action bar is user-independent, always start as primary
                     safelyStartActivityAsUser(ti, getPersonalProfileUserHandle());
-                    if (!mAwaitingDelegateResponse) {
-                        finish();
-                    }
+                    finish();
                 }
         );
         b.setId(R.id.chooser_edit_button);
@@ -1616,8 +1542,8 @@ public class ChooserActivity extends ResolverActivity implements
     protected void onDestroy() {
         super.onDestroy();
 
-        if (mIsHeadlessSpringboardActivity) {
-            return;
+        if (isFinishing()) {
+            mLatencyTracker.onActionCancel(ACTION_LOAD_SHARE_SHEET);
         }
 
         if (mRefinementResultReceiver != null) {
@@ -1706,29 +1632,48 @@ public class ChooserActivity extends ResolverActivity implements
         return getIntent().getBooleanExtra(Intent.EXTRA_AUTO_LAUNCH_SINGLE_CHOICE, true);
     }
 
-    private void showTargetDetails(DisplayResolveInfo ti) {
-        if (ti == null) return;
+    private void showTargetDetails(TargetInfo targetInfo) {
+        if (targetInfo == null) return;
 
         ArrayList<DisplayResolveInfo> targetList;
+        ChooserTargetActionsDialogFragment fragment = new ChooserTargetActionsDialogFragment();
+        Bundle bundle = new Bundle();
 
-        // For multiple targets, include info on all targets
-        if (ti instanceof MultiDisplayResolveInfo) {
-            MultiDisplayResolveInfo mti = (MultiDisplayResolveInfo) ti;
+        if (targetInfo instanceof SelectableTargetInfo) {
+            SelectableTargetInfo selectableTargetInfo = (SelectableTargetInfo) targetInfo;
+            if (selectableTargetInfo.getDisplayResolveInfo() == null
+                    || selectableTargetInfo.getChooserTarget() == null) {
+                Log.e(TAG, "displayResolveInfo or chooserTarget in selectableTargetInfo are null");
+                return;
+            }
+            targetList = new ArrayList<>();
+            targetList.add(selectableTargetInfo.getDisplayResolveInfo());
+            bundle.putString(ChooserTargetActionsDialogFragment.SHORTCUT_ID_KEY,
+                    selectableTargetInfo.getChooserTarget().getIntentExtras().getString(
+                            Intent.EXTRA_SHORTCUT_ID));
+            bundle.putBoolean(ChooserTargetActionsDialogFragment.IS_SHORTCUT_PINNED_KEY,
+                    selectableTargetInfo.isPinned());
+            bundle.putParcelable(ChooserTargetActionsDialogFragment.INTENT_FILTER_KEY,
+                    getTargetIntentFilter());
+            if (selectableTargetInfo.getDisplayLabel() != null) {
+                bundle.putString(ChooserTargetActionsDialogFragment.SHORTCUT_TITLE_KEY,
+                        selectableTargetInfo.getDisplayLabel().toString());
+            }
+        } else if (targetInfo instanceof MultiDisplayResolveInfo) {
+            // For multiple targets, include info on all targets
+            MultiDisplayResolveInfo mti = (MultiDisplayResolveInfo) targetInfo;
             targetList = mti.getTargets();
         } else {
             targetList = new ArrayList<DisplayResolveInfo>();
-            targetList.add(ti);
+            targetList.add((DisplayResolveInfo) targetInfo);
         }
-
-        ChooserTargetActionsDialogFragment f = new ChooserTargetActionsDialogFragment();
-        Bundle b = new Bundle();
-        b.putParcelable(ChooserTargetActionsDialogFragment.USER_HANDLE_KEY,
+        bundle.putParcelable(ChooserTargetActionsDialogFragment.USER_HANDLE_KEY,
                 mChooserMultiProfilePagerAdapter.getCurrentUserHandle());
-        b.putParcelableArrayList(ChooserTargetActionsDialogFragment.TARGET_INFOS_KEY,
+        bundle.putParcelableArrayList(ChooserTargetActionsDialogFragment.TARGET_INFOS_KEY,
                 targetList);
-        f.setArguments(b);
+        fragment.setArguments(bundle);
 
-        f.show(getFragmentManager(), TARGET_DETAILS_FRAGMENT_TAG);
+        fragment.show(getFragmentManager(), TARGET_DETAILS_FRAGMENT_TAG);
     }
 
     private void modifyTargetIntent(Intent in) {
@@ -1821,7 +1766,8 @@ public class ChooserActivity extends ResolverActivity implements
                             target.getComponentName().getPackageName()
                                     + target.getTitle().toString(),
                             mMaxHashSaltDays);
-                    directTargetAlsoRanked = getRankedPosition((SelectableTargetInfo) targetInfo);
+                    SelectableTargetInfo selectableTargetInfo = (SelectableTargetInfo) targetInfo;
+                    directTargetAlsoRanked = getRankedPosition(selectableTargetInfo);
 
                     if (mCallerChooserTargets != null) {
                         numCallerProvided = mCallerChooserTargets.length;
@@ -1829,7 +1775,8 @@ public class ChooserActivity extends ResolverActivity implements
                     getChooserActivityLogger().logShareTargetSelected(
                             SELECTION_TYPE_SERVICE,
                             targetInfo.getResolveInfo().activityInfo.processName,
-                            value
+                            value,
+                            selectableTargetInfo.isPinned()
                     );
                     break;
                 case ChooserListAdapter.TARGET_CALLER:
@@ -1840,7 +1787,8 @@ public class ChooserActivity extends ResolverActivity implements
                     getChooserActivityLogger().logShareTargetSelected(
                             SELECTION_TYPE_APP,
                             targetInfo.getResolveInfo().activityInfo.processName,
-                            value
+                            value,
+                            targetInfo.isPinned()
                     );
                     break;
                 case ChooserListAdapter.TARGET_STANDARD_AZ:
@@ -1851,7 +1799,8 @@ public class ChooserActivity extends ResolverActivity implements
                     getChooserActivityLogger().logShareTargetSelected(
                             SELECTION_TYPE_STANDARD,
                             targetInfo.getResolveInfo().activityInfo.processName,
-                            value
+                            value,
+                            false
                     );
                     break;
             }
@@ -1921,10 +1870,10 @@ public class ChooserActivity extends ResolverActivity implements
         try {
             final Intent intent = getTargetIntent();
             String dataString = intent.getDataString();
-            if (!TextUtils.isEmpty(dataString)) {
-                return new IntentFilter(intent.getAction(), dataString);
-            }
             if (intent.getType() == null) {
+                if (!TextUtils.isEmpty(dataString)) {
+                    return new IntentFilter(intent.getAction(), dataString);
+                }
                 Log.e(TAG, "Failed to get target intent filter: intent data and type are null");
                 return null;
             }
@@ -2261,6 +2210,7 @@ public class ChooserActivity extends ResolverActivity implements
         final IntentFilter filter = getTargetIntentFilter();
         Bundle extras = new Bundle();
         extras.putParcelable(APP_PREDICTION_INTENT_FILTER_KEY, filter);
+        populateTextContent(extras);
         AppPredictionContext appPredictionContext = new AppPredictionContext.Builder(contextAsUser)
             .setUiSurface(APP_PREDICTION_SHARE_UI_SURFACE)
             .setPredictedTargetCount(APP_PREDICTION_SHARE_TARGET_QUERY_PACKAGE_LIMIT)
@@ -2277,6 +2227,12 @@ public class ChooserActivity extends ResolverActivity implements
             mWorkAppPredictor = appPredictionSession;
         }
         return appPredictionSession;
+    }
+
+    private void populateTextContent(Bundle extras) {
+        final Intent intent = getTargetIntent();
+        String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
+        extras.putString(SHARED_TEXT_KEY, sharedText);
     }
 
     /**
@@ -2313,9 +2269,7 @@ public class ChooserActivity extends ResolverActivity implements
             TargetInfo clonedTarget = selectedTarget.cloneFilledIn(matchingIntent, 0);
             if (super.onTargetSelected(clonedTarget, false)) {
                 updateModelAndChooserCounts(clonedTarget);
-                if (!mAwaitingDelegateResponse) {
-                    finish();
-                }
+                finish();
                 return;
             }
         }
@@ -2576,11 +2530,6 @@ public class ChooserActivity extends ResolverActivity implements
                     offset += findViewById(R.id.tabs).getHeight();
                 }
 
-                View tabDivider = findViewById(R.id.resolver_tab_divider);
-                if (tabDivider.getVisibility() == View.VISIBLE) {
-                    offset += tabDivider.getHeight();
-                }
-
                 if (recyclerView.getVisibility() == View.VISIBLE) {
                     int directShareHeight = 0;
                     rowsToShow = Math.min(4, rowsToShow);
@@ -2697,7 +2646,7 @@ public class ChooserActivity extends ResolverActivity implements
         Message msg = Message.obtain();
         msg.what = ChooserHandler.LIST_VIEW_UPDATE_MESSAGE;
         msg.obj = userHandle;
-        mChooserHandler.sendMessageDelayed(msg, LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS);
+        mChooserHandler.sendMessageDelayed(msg, mListViewUpdateDelayMs);
     }
 
     @Override
@@ -2724,6 +2673,7 @@ public class ChooserActivity extends ResolverActivity implements
         if (rebuildComplete) {
             getChooserActivityLogger().logSharesheetAppLoadComplete();
             maybeQueryAdditionalPostProcessingTargets(chooserListAdapter);
+            mLatencyTracker.onActionEnd(ACTION_LOAD_SHARE_SHEET);
         }
     }
 
@@ -2769,7 +2719,7 @@ public class ChooserActivity extends ResolverActivity implements
         if (mResolverDrawerLayout == null) {
             return;
         }
-        int elevatedViewResId = shouldShowTabs() ? R.id.resolver_tab_divider : R.id.chooser_header;
+        int elevatedViewResId = shouldShowTabs() ? R.id.tabs : R.id.chooser_header;
         final View elevatedView = mResolverDrawerLayout.findViewById(elevatedViewResId);
         final float defaultElevation = elevatedView.getElevation();
         final float chooserHeaderScrollElevation =
@@ -2956,8 +2906,10 @@ public class ChooserActivity extends ResolverActivity implements
     private boolean shouldShowTargetDetails(TargetInfo ti) {
         ComponentName nearbyShare = getNearbySharingComponent();
         //  Suppress target details for nearby share to hide pin/unpin action
-        return !(nearbyShare != null && nearbyShare.equals(ti.getResolvedComponentName())
-                && shouldNearbyShareBeFirstInRankedRow());
+        boolean isNearbyShare = nearbyShare != null && nearbyShare.equals(
+                ti.getResolvedComponentName()) && shouldNearbyShareBeFirstInRankedRow();
+        return ti instanceof SelectableTargetInfo
+                || (ti instanceof DisplayResolveInfo && !isNearbyShare);
     }
 
     /**
@@ -3054,8 +3006,6 @@ public class ChooserActivity extends ResolverActivity implements
         private DirectShareViewHolder mDirectShareViewHolder;
         private int mChooserTargetWidth = 0;
         private boolean mShowAzLabelIfPoss;
-
-        private boolean mHideContentPreview = false;
         private boolean mLayoutRequested = false;
 
         private int mFooterHeight = 0;
@@ -3126,7 +3076,6 @@ public class ChooserActivity extends ResolverActivity implements
          * personal and work tabs.
          */
         public void hideContentPreview() {
-            mHideContentPreview = true;
             mLayoutRequested = true;
             notifyDataSetChanged();
         }
@@ -3316,18 +3265,15 @@ public class ChooserActivity extends ResolverActivity implements
                     }
                 });
 
-                // Direct Share targets should not show any menu
-                if (!isDirectShare) {
-                    v.setOnLongClickListener(v1 -> {
-                        final TargetInfo ti = mChooserListAdapter.targetInfoForPosition(
-                                holder.getItemIndex(column), true);
-                        // This should always be the case for non-DS targets, check for validity
-                        if (ti instanceof DisplayResolveInfo && shouldShowTargetDetails(ti)) {
-                            showTargetDetails((DisplayResolveInfo) ti);
-                        }
-                        return true;
-                    });
-                }
+                // Show menu for both direct share and app share targets after long click.
+                v.setOnLongClickListener(v1 -> {
+                    TargetInfo ti = mChooserListAdapter.targetInfoForPosition(
+                            holder.getItemIndex(column), true);
+                    if (shouldShowTargetDetails(ti)) {
+                        showTargetDetails(ti);
+                    }
+                    return true;
+                });
 
                 holder.addView(i, v);
 

@@ -223,7 +223,8 @@ import java.util.stream.Collectors;
 public class AudioService extends IAudioService.Stub
         implements AccessibilityManager.TouchExplorationStateChangeListener,
             AccessibilityManager.AccessibilityServicesStateChangeListener,
-            AudioSystemAdapter.OnRoutingUpdatedListener {
+            AudioSystemAdapter.OnRoutingUpdatedListener,
+            AudioSystemAdapter.OnVolRangeInitRequestListener {
 
     private static final String TAG = "AS.AudioService";
 
@@ -340,7 +341,7 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_DISPATCH_AUDIO_MODE = 40;
     private static final int MSG_ROUTING_UPDATED = 41;
     private static final int MSG_INIT_HEADTRACKING_SENSORS = 42;
-    private static final int MSG_PERSIST_SPATIAL_AUDIO_ENABLED = 43;
+    private static final int MSG_PERSIST_SPATIAL_AUDIO_DEVICE_SETTINGS = 43;
     private static final int MSG_ADD_ASSISTANT_SERVICE_UID = 44;
     private static final int MSG_REMOVE_ASSISTANT_SERVICE_UID = 45;
     private static final int MSG_UPDATE_ACTIVE_ASSISTANT_SERVICE_UID = 46;
@@ -905,6 +906,9 @@ public class AudioService extends IAudioService.Stub
             disableAudioForUid(cached, uid);
         }
 
+        @Override public void onUidProcAdjChanged(int uid) {
+        }
+
         private void disableAudioForUid(boolean disable, int uid) {
             queueMsgUnderWakeLock(mAudioHandler, MSG_DISABLE_AUDIO_FOR_UID,
                     disable ? 1 : 0 /* arg1 */,  uid /* arg2 */,
@@ -1133,6 +1137,9 @@ public class AudioService extends IAudioService.Stub
 
         // monitor routing updates coming from native
         mAudioSystem.setRoutingListener(this);
+        // monitor requests for volume range initialization coming from native (typically when
+        // errors are found by AudioPolicyManager
+        mAudioSystem.setVolRangeInitReqListener(this);
 
         // done with service initialization, continue additional work in our Handler thread
         queueMsgUnderWakeLock(mAudioHandler, MSG_INIT_STREAMS_VOLUMES,
@@ -1354,6 +1361,14 @@ public class AudioService extends IAudioService.Stub
     }
 
     //-----------------------------------------------------------------
+    // monitoring requests for volume range initialization
+    @Override // AudioSystemAdapter.OnVolRangeInitRequestListener
+    public void onVolumeRangeInitRequestFromNative() {
+        sendMsg(mAudioHandler, MSG_REINIT_VOLUMES, SENDMSG_REPLACE, 0, 0,
+                "onVolumeRangeInitRequestFromNative" /*obj: caller, for dumpsys*/, /*delay*/ 0);
+    }
+
+    //-----------------------------------------------------------------
     RoleObserver mRoleObserver;
 
     class RoleObserver implements OnRoleHoldersChangedListener {
@@ -1540,9 +1555,7 @@ public class AudioService extends IAudioService.Stub
             }
         }
 
-        if (mHasSpatializerEffect) {
-            mSpatializerHelper.reset(/* featureEnabled */ isSpatialAudioEnabled());
-        }
+        mSpatializerHelper.reset(/* featureEnabled */ mHasSpatializerEffect);
 
         onIndicateSystemReady();
         // indicate the end of reconfiguration phase to audio HAL
@@ -3226,7 +3239,8 @@ public class AudioService extends IAudioService.Stub
                 dispatchAbsoluteVolumeChanged(streamType, info, newIndex);
             }
 
-            if (device == AudioSystem.DEVICE_OUT_BLE_HEADSET
+            if ((device == AudioSystem.DEVICE_OUT_BLE_HEADSET
+                    || device == AudioSystem.DEVICE_OUT_BLE_BROADCAST)
                     && streamType == getBluetoothContextualVolumeStream()
                     && (flags & AudioManager.FLAG_BLUETOOTH_ABS_VOLUME) == 0) {
                 if (DEBUG_VOL) {
@@ -3889,7 +3903,8 @@ public class AudioService extends IAudioService.Stub
                 dispatchAbsoluteVolumeChanged(streamType, info, index);
             }
 
-            if (device == AudioSystem.DEVICE_OUT_BLE_HEADSET
+            if ((device == AudioSystem.DEVICE_OUT_BLE_HEADSET
+                    || device == AudioSystem.DEVICE_OUT_BLE_BROADCAST)
                     && streamType == getBluetoothContextualVolumeStream()
                     && (flags & AudioManager.FLAG_BLUETOOTH_ABS_VOLUME) == 0) {
                 if (DEBUG_VOL) {
@@ -4130,19 +4145,8 @@ public class AudioService extends IAudioService.Stub
     {
         streamType = mStreamVolumeAlias[streamType];
 
-        if (streamType == AudioSystem.STREAM_MUSIC) {
-            flags = updateFlagsForTvPlatform(flags);
-            synchronized (mHdmiClientLock) {
-                // Don't display volume UI on a TV Playback device when using absolute volume
-                if (mHdmiCecVolumeControlEnabled && mHdmiPlaybackClient != null
-                        && (isAbsoluteVolumeDevice(device)
-                        || isA2dpAbsoluteVolumeDevice(device))) {
-                    flags &= ~AudioManager.FLAG_SHOW_UI;
-                }
-            }
-            if (isFullVolumeDevice(device)) {
-                flags &= ~AudioManager.FLAG_SHOW_UI;
-            }
+        if (streamType == AudioSystem.STREAM_MUSIC && isFullVolumeDevice(device)) {
+            flags &= ~AudioManager.FLAG_SHOW_UI;
         }
         mVolumeController.postVolumeChanged(streamType, flags);
     }
@@ -6632,6 +6636,11 @@ public class AudioService extends IAudioService.Stub
         // verify arguments
         Objects.requireNonNull(device);
         AudioManager.enforceValidVolumeBehavior(deviceVolumeBehavior);
+        sVolumeLogger.log(new AudioEventLogger.StringEvent("setDeviceVolumeBehavior: dev:"
+                + AudioSystem.getOutputDeviceName(device.getInternalType()) + " addr:"
+                + device.getAddress() + " behavior:"
+                + AudioDeviceVolumeManager.volumeBehaviorName(deviceVolumeBehavior)
+                + " pack:" + pkgName).printLog(TAG));
         if (pkgName == null) {
             pkgName = "";
         }
@@ -6830,6 +6839,7 @@ public class AudioService extends IAudioService.Stub
             BluetoothProfile.A2DP,
             BluetoothProfile.A2DP_SINK,
             BluetoothProfile.LE_AUDIO,
+            BluetoothProfile.LE_AUDIO_BROADCAST,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface BtProfile {}
@@ -6851,6 +6861,7 @@ public class AudioService extends IAudioService.Stub
         final int profile = info.getProfile();
         if (profile != BluetoothProfile.A2DP && profile != BluetoothProfile.A2DP_SINK
                 && profile != BluetoothProfile.LE_AUDIO
+                && profile != BluetoothProfile.LE_AUDIO_BROADCAST
                 && profile != BluetoothProfile.HEARING_AID) {
             throw new IllegalArgumentException("Illegal BluetoothProfile profile for device "
                     + previousDevice + " -> " + newDevice + ". Got: " + profile);
@@ -8110,15 +8121,16 @@ public class AudioService extends IAudioService.Stub
                     break;
 
                 case MSG_INIT_SPATIALIZER:
-                    mSpatializerHelper.init(/*effectExpected*/ mHasSpatializerEffect);
-                    if (mHasSpatializerEffect) {
-                        mSpatializerHelper.setFeatureEnabled(isSpatialAudioEnabled());
-                    }
+                    onInitSpatializer();
                     mAudioEventWakeLock.release();
                     break;
 
                 case MSG_INIT_HEADTRACKING_SENSORS:
                     mSpatializerHelper.onInitSensors();
+                    break;
+
+                case MSG_PERSIST_SPATIAL_AUDIO_DEVICE_SETTINGS:
+                    onPersistSpatialAudioDeviceSettings();
                     break;
 
                 case MSG_CHECK_MUSIC_ACTIVE:
@@ -8254,10 +8266,6 @@ public class AudioService extends IAudioService.Stub
                     onRoutingUpdatedFromAudioThread();
                     break;
 
-                case MSG_PERSIST_SPATIAL_AUDIO_ENABLED:
-                    onPersistSpatialAudioEnabled(msg.arg1 == 1);
-                    break;
-
                 case MSG_ADD_ASSISTANT_SERVICE_UID:
                     onAddAssistantServiceUids(new int[]{msg.arg1});
                     break;
@@ -8351,7 +8359,7 @@ public class AudioService extends IAudioService.Stub
     private void avrcpSupportsAbsoluteVolume(String address, boolean support) {
         // address is not used for now, but may be used when multiple a2dp devices are supported
         sVolumeLogger.log(new AudioEventLogger.StringEvent("avrcpSupportsAbsoluteVolume addr="
-                + address + " support=" + support));
+                + address + " support=" + support).printLog(TAG));
         mDeviceBroker.setAvrcpAbsoluteVolumeSupported(support);
         setAvrcpAbsoluteVolumeSupported(support);
     }
@@ -8861,31 +8869,6 @@ public class AudioService extends IAudioService.Stub
      */
     private static final boolean SPATIAL_AUDIO_ENABLED_DEFAULT = true;
 
-    /**
-     * persist in user settings whether the feature is enabled.
-     * Can change when {@link Spatializer#setEnabled(boolean)} is called and successfully
-     * changes the state of the feature
-     * @param featureEnabled
-     */
-    void persistSpatialAudioEnabled(boolean featureEnabled) {
-        sendMsg(mAudioHandler,
-                MSG_PERSIST_SPATIAL_AUDIO_ENABLED,
-                SENDMSG_REPLACE, featureEnabled ? 1 : 0, 0, null,
-                /*delay ms*/ 100);
-    }
-
-    void onPersistSpatialAudioEnabled(boolean enabled) {
-        mSettings.putSecureIntForUser(mContentResolver,
-                Settings.Secure.SPATIAL_AUDIO_ENABLED, enabled ? 1 : 0,
-                UserHandle.USER_CURRENT);
-    }
-
-    boolean isSpatialAudioEnabled() {
-        return mSettings.getSecureIntForUser(mContentResolver,
-                Settings.Secure.SPATIAL_AUDIO_ENABLED, SPATIAL_AUDIO_ENABLED_DEFAULT ? 1 : 0,
-                UserHandle.USER_CURRENT) == 1;
-    }
-
     private void enforceModifyDefaultAudioEffectsPermission() {
         if (mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS)
@@ -9118,6 +9101,45 @@ public class AudioService extends IAudioService.Stub
                 /*arg1*/ 0, /*arg2*/ 0, TAG, /*delay*/ 0);
     }
 
+    void onInitSpatializer() {
+        final String settings = mSettings.getSecureStringForUser(mContentResolver,
+                Settings.Secure.SPATIAL_AUDIO_ENABLED, UserHandle.USER_CURRENT);
+        if (settings == null) {
+            Log.e(TAG, "error reading spatial audio device settings");
+        } else {
+            Log.v(TAG, "restoring spatial audio device settings: " + settings);
+            mSpatializerHelper.setSADeviceSettings(settings);
+        }
+        mSpatializerHelper.init(/*effectExpected*/ mHasSpatializerEffect);
+        mSpatializerHelper.setFeatureEnabled(mHasSpatializerEffect);
+    }
+
+    /**
+     * post a message to persist the spatial audio device settings.
+     * Message is delayed by 1s on purpose in case of successive changes in quick succession (at
+     * init time for instance)
+     * Note this method is made public to work around a Mockito bug where it needs to be public
+     * in order to be mocked by a test a the same package
+     * (see https://code.google.com/archive/p/mockito/issues/127)
+     */
+    public void persistSpatialAudioDeviceSettings() {
+        sendMsg(mAudioHandler,
+                MSG_PERSIST_SPATIAL_AUDIO_DEVICE_SETTINGS,
+                SENDMSG_REPLACE, /*arg1*/ 0, /*arg2*/ 0, TAG,
+                /*delay*/ 1000);
+    }
+
+    void onPersistSpatialAudioDeviceSettings() {
+        final String settings = mSpatializerHelper.getSADeviceSettings();
+        Log.v(TAG, "saving spatial audio device settings: " + settings);
+        boolean res = mSettings.putSecureStringForUser(mContentResolver,
+                Settings.Secure.SPATIAL_AUDIO_ENABLED,
+                settings, UserHandle.USER_CURRENT);
+        if (!res) {
+            Log.e(TAG, "error saving spatial audio device settings: " + settings);
+        }
+    }
+
     //==========================================================================================
     private boolean readCameraSoundForced() {
         return SystemProperties.getBoolean("audio.camerasound.force", false) ||
@@ -9148,6 +9170,8 @@ public class AudioService extends IAudioService.Stub
         if (timeOutMs <= 0 || usages.length == 0) {
             throw new IllegalArgumentException("Invalid timeOutMs/usagesToMute");
         }
+        Log.i(TAG, "muteAwaitConnection dev:" + device + " timeOutMs:" + timeOutMs
+                + " usages:" + usages);
 
         if (mDeviceBroker.isDeviceConnected(device)) {
             // not throwing an exception as there could be a race between a connection (server-side,
@@ -9191,7 +9215,7 @@ public class AudioService extends IAudioService.Stub
                 Log.i(TAG, "cancelMuteAwaitConnection ignored, no expected device");
                 return;
             }
-            if (!device.equals(mMutingExpectedDevice)) {
+            if (!device.equalTypeAddress(mMutingExpectedDevice)) {
                 Log.e(TAG, "cancelMuteAwaitConnection ignored, got " + device
                         + "] but expected device is" + mMutingExpectedDevice);
                 throw new IllegalStateException("cancelMuteAwaitConnection for wrong device");
@@ -9741,10 +9765,11 @@ public class AudioService extends IAudioService.Stub
     //==========================================================================================
     static final int LOG_NB_EVENTS_LIFECYCLE = 20;
     static final int LOG_NB_EVENTS_PHONE_STATE = 20;
-    static final int LOG_NB_EVENTS_DEVICE_CONNECTION = 30;
+    static final int LOG_NB_EVENTS_DEVICE_CONNECTION = 50;
     static final int LOG_NB_EVENTS_FORCE_USE = 20;
     static final int LOG_NB_EVENTS_VOLUME = 40;
     static final int LOG_NB_EVENTS_DYN_POLICY = 10;
+    static final int LOG_NB_EVENTS_SPATIAL = 30;
 
     static final AudioEventLogger sLifecycleLogger = new AudioEventLogger(LOG_NB_EVENTS_LIFECYCLE,
             "audio services lifecycle");
@@ -9764,6 +9789,9 @@ public class AudioService extends IAudioService.Stub
 
     static final AudioEventLogger sVolumeLogger = new AudioEventLogger(LOG_NB_EVENTS_VOLUME,
             "volume changes (logged when command received by AudioService)");
+
+    static final AudioEventLogger sSpatialLogger = new AudioEventLogger(LOG_NB_EVENTS_SPATIAL,
+            "spatial audio");
 
     final private AudioEventLogger mDynPolicyLogger = new AudioEventLogger(LOG_NB_EVENTS_DYN_POLICY,
             "dynamic policy events (logged when command received by AudioService)");
@@ -9903,10 +9931,10 @@ public class AudioService extends IAudioService.Stub
 
         pw.println("\n");
         pw.println("\nSpatial audio:");
-        pw.println("mHasSpatializerEffect:" + mHasSpatializerEffect);
-        pw.println("isSpatializerEnabled:" + isSpatializerEnabled());
-        pw.println("isSpatialAudioEnabled:" + isSpatialAudioEnabled());
+        pw.println("mHasSpatializerEffect:" + mHasSpatializerEffect + " (effect present)");
+        pw.println("isSpatializerEnabled:" + isSpatializerEnabled() + " (routing dependent)");
         mSpatializerHelper.dump(pw);
+        sSpatialLogger.dump(pw);
 
         mAudioSystem.dump(pw);
     }
@@ -10734,7 +10762,8 @@ public class AudioService extends IAudioService.Stub
         return mMediaFocusControl.sendFocusLoss(focusLoser);
     }
 
-    private static final String[] HAL_VERSIONS = new String[] {"7.1", "7.0", "6.0", "4.0", "2.0"};
+    private static final String[] HAL_VERSIONS =
+            new String[] {"7.1", "7.0", "6.0", "5.0", "4.0", "2.0"};
 
     /** @see AudioManager#getHalVersion */
     public @Nullable String getHalVersion() {

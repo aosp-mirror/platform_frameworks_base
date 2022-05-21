@@ -559,30 +559,26 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
-    public void vibrate_withRingtone_usesRingtoneSettings() throws Exception {
+    public void vibrate_withRingtone_usesRingerModeSettings() throws Exception {
         mockVibrators(1);
         FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(1);
         fakeVibrator.setSupportedEffects(VibrationEffect.EFFECT_CLICK,
                 VibrationEffect.EFFECT_HEAVY_CLICK, VibrationEffect.EFFECT_DOUBLE_CLICK);
 
-        setRingerMode(AudioManager.RINGER_MODE_NORMAL);
-        setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 0);
-        setUserSetting(Settings.System.APPLY_RAMPING_RINGER, 0);
+        setRingerMode(AudioManager.RINGER_MODE_SILENT);
         VibratorManagerService service = createSystemReadyService();
         vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_CLICK), RINGTONE_ATTRS);
         // Wait before checking it never played.
         assertFalse(waitUntil(s -> !fakeVibrator.getAllEffectSegments().isEmpty(),
                 service, /* timeout= */ 50));
 
-        setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 0);
-        setUserSetting(Settings.System.APPLY_RAMPING_RINGER, 1);
+        setRingerMode(AudioManager.RINGER_MODE_NORMAL);
         service = createSystemReadyService();
         vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_HEAVY_CLICK), RINGTONE_ATTRS);
         assertTrue(waitUntil(s -> fakeVibrator.getAllEffectSegments().size() == 1,
                 service, TEST_TIMEOUT_MILLIS));
 
-        setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 1);
-        setUserSetting(Settings.System.APPLY_RAMPING_RINGER, 0);
+        setRingerMode(AudioManager.RINGER_MODE_VIBRATE);
         service = createSystemReadyService();
         vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK), RINGTONE_ATTRS);
         assertTrue(waitUntil(s -> fakeVibrator.getAllEffectSegments().size() == 2,
@@ -602,10 +598,15 @@ public class VibratorManagerServiceTest {
                 VibrationEffect.EFFECT_HEAVY_CLICK, VibrationEffect.EFFECT_DOUBLE_CLICK);
         VibratorManagerService service = createSystemReadyService();
         mRegisteredPowerModeListener.onLowPowerModeChanged(LOW_POWER_STATE);
+
+        // The haptic feedback should be ignored in low power, but not the ringtone. The end
+        // of the test asserts which actual effects ended up playing.
         vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_TICK), HAPTIC_FEEDBACK_ATTRS);
         vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_CLICK), RINGTONE_ATTRS);
         assertTrue(waitUntil(s -> fakeVibrator.getAllEffectSegments().size() == 1,
                 service, TEST_TIMEOUT_MILLIS));
+        // Allow the ringtone to complete, as the other vibrations won't cancel it.
+        assertTrue(waitUntil(s -> !s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
 
         mRegisteredPowerModeListener.onLowPowerModeChanged(NORMAL_POWER_STATE);
         vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_HEAVY_CLICK),
@@ -801,6 +802,29 @@ public class VibratorManagerServiceTest {
                 new long[]{10_000, 10_000}, new int[]{128, 255}, -1);
         vibrate(service, alarmEffect, new VibrationAttributes.Builder().setUsage(
                 VibrationAttributes.USAGE_ALARM).build());
+
+        // VibrationThread will start this vibration async, so wait before checking it started.
+        assertTrue(waitUntil(s -> !mVibratorProviders.get(1).getAllEffectSegments().isEmpty(),
+                service, TEST_TIMEOUT_MILLIS));
+
+        vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_CLICK),
+                HAPTIC_FEEDBACK_ATTRS);
+
+        // Wait before checking it never played a second effect.
+        assertFalse(waitUntil(s -> mVibratorProviders.get(1).getAllEffectSegments().size() > 1,
+                service, /* timeout= */ 50));
+    }
+
+    @Test
+    public void vibrate_withOngoingRingtoneVibration_ignoresEffect() throws Exception {
+        mockVibrators(1);
+        mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
+        VibratorManagerService service = createSystemReadyService();
+
+        VibrationEffect alarmEffect = VibrationEffect.createWaveform(
+                new long[]{10_000, 10_000}, new int[]{128, 255}, -1);
+        vibrate(service, alarmEffect, new VibrationAttributes.Builder().setUsage(
+                VibrationAttributes.USAGE_RINGTONE).build());
 
         // VibrationThread will start this vibration async, so wait before checking it started.
         assertTrue(waitUntil(s -> !mVibratorProviders.get(1).getAllEffectSegments().isEmpty(),
@@ -1197,7 +1221,6 @@ public class VibratorManagerServiceTest {
         mockVibrators(1);
         mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_EXTERNAL_CONTROL);
         setRingerMode(AudioManager.RINGER_MODE_NORMAL);
-        setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 1);
         createSystemReadyService();
 
         IBinder firstToken = mock(IBinder.class);
@@ -1268,21 +1291,17 @@ public class VibratorManagerServiceTest {
         ExternalVibration externalVibration = new ExternalVibration(UID, PACKAGE_NAME, audioAttrs,
                 mock(IExternalVibrationController.class));
 
-        setRingerMode(AudioManager.RINGER_MODE_NORMAL);
-        setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 0);
-        setUserSetting(Settings.System.APPLY_RAMPING_RINGER, 0);
+        setRingerMode(AudioManager.RINGER_MODE_SILENT);
         createSystemReadyService();
         int scale = mExternalVibratorService.onExternalVibrationStart(externalVibration);
         assertEquals(IExternalVibratorService.SCALE_MUTE, scale);
 
-        setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 0);
-        setUserSetting(Settings.System.APPLY_RAMPING_RINGER, 1);
+        setRingerMode(AudioManager.RINGER_MODE_NORMAL);
         createSystemReadyService();
         scale = mExternalVibratorService.onExternalVibrationStart(externalVibration);
         assertNotEquals(IExternalVibratorService.SCALE_MUTE, scale);
 
-        setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 1);
-        setUserSetting(Settings.System.APPLY_RAMPING_RINGER, 0);
+        setRingerMode(AudioManager.RINGER_MODE_VIBRATE);
         createSystemReadyService();
         scale = mExternalVibratorService.onExternalVibrationStart(externalVibration);
         assertNotEquals(IExternalVibratorService.SCALE_MUTE, scale);
@@ -1313,6 +1332,24 @@ public class VibratorManagerServiceTest {
                 new ExternalVibration(UID, PACKAGE_NAME, flaggedAudioAttrs,
                         mock(IExternalVibrationController.class)));
         assertNotEquals(IExternalVibratorService.SCALE_MUTE, scale);
+    }
+
+    @Test
+    public void onExternalVibration_withUnknownUsage_appliesMediaSettings() {
+        mockVibrators(1);
+        mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_EXTERNAL_CONTROL);
+        setUserSetting(Settings.System.MEDIA_VIBRATION_INTENSITY,
+                Vibrator.VIBRATION_INTENSITY_OFF);
+        AudioAttributes flaggedAudioAttrs = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_UNKNOWN)
+                .setFlags(AudioAttributes.FLAG_BYPASS_MUTE)
+                .build();
+        createSystemReadyService();
+
+        int scale = mExternalVibratorService.onExternalVibrationStart(
+                new ExternalVibration(/* uid= */ 123, PACKAGE_NAME, flaggedAudioAttrs,
+                        mock(IExternalVibrationController.class)));
+        assertEquals(IExternalVibratorService.SCALE_MUTE, scale);
     }
 
     private VibrationEffectSegment expectedPrebaked(int effectId) {

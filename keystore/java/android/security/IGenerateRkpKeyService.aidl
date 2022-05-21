@@ -26,11 +26,35 @@ package android.security;
  * @hide
  */
 interface IGenerateRkpKeyService {
+    @JavaDerive(toString=true)
+    @Backing(type="int")
+    enum Status {
+        /** No error(s) occurred */
+        OK = 0,
+        /** Unable to provision keys due to a lack of internet connectivity. */
+        NO_NETWORK_CONNECTIVITY = 1,
+        /** An error occurred while communicating with the RKP server. */
+        NETWORK_COMMUNICATION_ERROR = 2,
+        /** The given device was not registered with the RKP backend. */
+        DEVICE_NOT_REGISTERED = 4,
+        /** The RKP server returned an HTTP client error, indicating a misbehaving client. */
+        HTTP_CLIENT_ERROR = 5,
+        /** The RKP server returned an HTTP server error, indicating something went wrong on the server. */
+        HTTP_SERVER_ERROR = 6,
+        /** The RKP server returned an HTTP status that is unknown. This should never happen. */
+        HTTP_UNKNOWN_ERROR = 7,
+        /** An unexpected internal error occurred. This should never happen. */
+        INTERNAL_ERROR = 8,
+    }
+
     /**
      * Ping the provisioner service to let it know an app generated a key. This may or may not have
      * consumed a remotely provisioned attestation key, so the RemoteProvisioner app should check.
      */
     oneway void notifyKeyGenerated(in int securityLevel);
-    /** Ping the provisioner service to indicate there are no remaining attestation keys left. */
-    void generateKey(in int securityLevel);
+
+    /**
+     * Ping the provisioner service to indicate there are no remaining attestation keys left.
+     */
+    Status generateKey(in int securityLevel);
 }

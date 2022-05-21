@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -25,10 +26,12 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.IActivityManager;
@@ -92,11 +95,17 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
                 mConfigurationController, mKeyguardViewMediator, mKeyguardBypassController,
                 mColorExtractor, mDumpManager, mKeyguardStateController,
-                mScreenOffAnimationController, mAuthController);
+                mScreenOffAnimationController, mAuthController) {
+                    @Override
+                    protected boolean isDebuggable() {
+                        return false;
+                    }
+            };
         mNotificationShadeWindowController.setScrimsVisibilityListener((visibility) -> {});
         mNotificationShadeWindowController.setNotificationShadeView(mNotificationShadeWindowView);
 
         mNotificationShadeWindowController.attach();
+        verify(mWindowManager).addView(eq(mNotificationShadeWindowView), any());
     }
 
     @Test
@@ -168,6 +177,14 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     }
 
     @Test
+    public void setScrimsVisibility_earlyReturn() {
+        clearInvocations(mWindowManager);
+        mNotificationShadeWindowController.setScrimsVisibility(ScrimController.TRANSPARENT);
+        // Abort early if value didn't change
+        verify(mWindowManager, never()).updateViewLayout(any(), mLayoutParameters.capture());
+    }
+
+    @Test
     public void attach_animatingKeyguardAndSurface_wallpaperVisible() {
         clearInvocations(mWindowManager);
         when(mKeyguardViewMediator.isShowingAndNotOccluded()).thenReturn(true);
@@ -215,6 +232,8 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     public void setPanelExpanded_notFocusable_altFocusable_whenPanelIsOpen() {
         mNotificationShadeWindowController.setPanelExpanded(true);
         clearInvocations(mWindowManager);
+        mNotificationShadeWindowController.setPanelExpanded(true);
+        verifyNoMoreInteractions(mWindowManager);
         mNotificationShadeWindowController.setNotificationShadeFocusable(true);
 
         verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
@@ -229,6 +248,22 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
         verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
         assertThat((mLayoutParameters.getValue().flags & FLAG_NOT_FOCUSABLE) != 0).isTrue();
         assertThat((mLayoutParameters.getValue().flags & FLAG_ALT_FOCUSABLE_IM) == 0).isTrue();
+    }
+
+    @Test
+    public void setKeyguardShowing_enablesSecureFlag() {
+        mNotificationShadeWindowController.setBouncerShowing(true);
+
+        verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
+        assertThat((mLayoutParameters.getValue().flags & FLAG_SECURE) != 0).isTrue();
+    }
+
+    @Test
+    public void setKeyguardNotShowing_disablesSecureFlag() {
+        mNotificationShadeWindowController.setBouncerShowing(false);
+
+        verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
+        assertThat((mLayoutParameters.getValue().flags & FLAG_SECURE) == 0).isTrue();
     }
 
     @Test
@@ -265,6 +300,8 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     public void batchApplyWindowLayoutParams_doesNotDispatchEvents() {
         mNotificationShadeWindowController.setForceDozeBrightness(true);
         verify(mWindowManager).updateViewLayout(any(), any());
+        mNotificationShadeWindowController.setForceDozeBrightness(true);
+        verifyNoMoreInteractions(mWindowManager);
 
         clearInvocations(mWindowManager);
         mNotificationShadeWindowController.batchApplyWindowLayoutParams(()-> {
@@ -272,5 +309,18 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
             verify(mWindowManager, never()).updateViewLayout(any(), any());
         });
         verify(mWindowManager).updateViewLayout(any(), any());
+    }
+
+    @Test
+    public void bouncerShowing_OrientationNoSensor() {
+        mNotificationShadeWindowController.setKeyguardShowing(true);
+        mNotificationShadeWindowController.setKeyguardOccluded(true);
+        mNotificationShadeWindowController.setBouncerShowing(true);
+        when(mKeyguardStateController.isKeyguardScreenRotationAllowed()).thenReturn(false);
+        mNotificationShadeWindowController.onConfigChanged(new Configuration());
+
+        verify(mWindowManager, atLeastOnce()).updateViewLayout(any(), mLayoutParameters.capture());
+        assertThat(mLayoutParameters.getValue().screenOrientation)
+                .isEqualTo(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
     }
 }

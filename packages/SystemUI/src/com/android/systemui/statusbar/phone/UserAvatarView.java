@@ -137,4 +137,8 @@ public class UserAvatarView extends View {
         mDrawable.setIconDrawable(d);
         mDrawable.setBadgeIfManagedUser(getContext(), userId);
     }
+
+    public boolean isEmpty() {
+        return mDrawable.isEmpty();
+    }
 }

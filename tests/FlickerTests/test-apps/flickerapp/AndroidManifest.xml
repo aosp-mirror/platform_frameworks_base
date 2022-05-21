@@ -52,6 +52,16 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity android:name=".ImeStateInitializeActivity"
+                  android:theme="@style/no_starting_window"
+                  android:windowSoftInputMode="stateAlwaysHidden"
+                  android:label="ImeStateInitializeActivity"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
         <activity android:name=".SeamlessRotationActivity"
              android:taskAffinity="com.android.server.wm.flicker.testapp.SeamlessRotationActivity"
              android:theme="@style/CutoutShortEdges"
@@ -112,6 +122,39 @@
             android:taskAffinity="com.android.server.wm.flicker.testapp.PortraitOnlyActivity"
             android:theme="@style/CutoutShortEdges"
             android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".ImeEditorPopupDialogActivity"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.ImeEditorPopupDialogActivity"
+            android:configChanges="orientation|screenSize"
+            android:theme="@style/CutoutShortEdges"
+            android:label="ImeEditorPopupDialogActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".ShowWhenLockedActivity"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.ShowWhenLockedActivity"
+            android:theme="@style/CutoutShortEdges"
+            android:configChanges="orientation|screenSize"
+            android:label="ShowWhenLockedActivity"
+            android:showWhenLocked="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".NotificationActivity"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.NotificationActivity"
+            android:theme="@style/CutoutShortEdges"
             android:configChanges="orientation|screenSize"
             android:exported="true">
             <intent-filter>

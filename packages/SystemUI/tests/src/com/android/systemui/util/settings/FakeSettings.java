@@ -16,6 +16,7 @@
 
 package com.android.systemui.util.settings;
 
+import android.annotation.UserIdInt;
 import android.content.ContentResolver;
 import android.database.ContentObserver;
 import android.net.Uri;
@@ -34,6 +35,8 @@ public class FakeSettings implements SecureSettings, GlobalSettings, SystemSetti
     private final Map<String, List<ContentObserver>> mContentObserversAllUsers = new HashMap<>();
 
     public static final Uri CONTENT_URI = Uri.parse("content://settings/fake");
+    @UserIdInt
+    private int mUserId = UserHandle.USER_CURRENT;
 
     public FakeSettings() {
     }
@@ -85,9 +88,13 @@ public class FakeSettings implements SecureSettings, GlobalSettings, SystemSetti
         return Uri.withAppendedPath(CONTENT_URI, name);
     }
 
+    public void setUserId(@UserIdInt int userId) {
+        mUserId = userId;
+    }
+
     @Override
     public int getUserId() {
-        return UserHandle.USER_CURRENT;
+        return mUserId;
     }
 
     @Override

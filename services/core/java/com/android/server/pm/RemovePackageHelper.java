@@ -17,6 +17,7 @@
 package com.android.server.pm;
 
 import static android.content.pm.PackageManager.UNINSTALL_REASON_UNKNOWN;
+import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.os.incremental.IncrementalManager.isIncrementalPath;
 import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
@@ -29,6 +30,7 @@ import static com.android.server.pm.PackageManagerService.TAG;
 
 import android.annotation.NonNull;
 import android.content.pm.PackageManager;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.incremental.IncrementalManager;
 import android.util.Log;
@@ -272,8 +274,9 @@ final class RemovePackageHelper {
             synchronized (mPm.mLock) {
                 mPm.mDomainVerificationManager.clearPackage(deletedPs.getPackageName());
                 mPm.mSettings.getKeySetManagerService().removeAppKeySetDataLPw(packageName);
-                mPm.mAppsFilter.removePackage(mPm.snapshotComputer()
-                                .getPackageStateInternal(packageName), false /* isReplace */);
+                final Computer snapshot = mPm.snapshotComputer();
+                mPm.mAppsFilter.removePackage(snapshot,
+                        snapshot.getPackageStateInternal(packageName), false /* isReplace */);
                 removedAppId = mPm.mSettings.removePackageLPw(packageName);
                 if (outInfo != null) {
                     outInfo.mRemovedAppId = removedAppId;
@@ -334,10 +337,19 @@ final class RemovePackageHelper {
                 mPm.mSettings.writeKernelMappingLPr(deletedPs);
             }
         }
+
         if (removedAppId != -1) {
-            // A user ID was deleted here. Go through all users and remove it
-            // from KeyStore.
-            mAppDataHelper.clearKeystoreData(UserHandle.USER_ALL, removedAppId);
+            // A user ID was deleted here. Go through all users and remove it from KeyStore.
+            final int appIdToRemove = removedAppId;
+            mPm.mInjector.getBackgroundHandler().post(() -> {
+                try {
+                    Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER,
+                            "clearKeystoreData:" + appIdToRemove);
+                    mAppDataHelper.clearKeystoreData(UserHandle.USER_ALL, appIdToRemove);
+                } finally {
+                    Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+                }
+            });
         }
     }
 }

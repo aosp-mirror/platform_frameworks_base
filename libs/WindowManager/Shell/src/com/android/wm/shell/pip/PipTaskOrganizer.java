@@ -62,7 +62,6 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.util.Rational;
 import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceControl;
@@ -127,6 +126,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     private final @NonNull PipMenuController mPipMenuController;
     private final PipAnimationController mPipAnimationController;
     private final PipTransitionController mPipTransitionController;
+    protected final PipParamsChangedForwarder mPipParamsChangedForwarder;
     private final PipUiEventLogger mPipUiEventLoggerLogger;
     private final int mEnterAnimationDuration;
     private final int mExitAnimationDuration;
@@ -219,7 +219,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     private long mLastOneShotAlphaAnimationTime;
     private PipSurfaceTransactionHelper.SurfaceControlTransactionFactory
             mSurfaceControlTransactionFactory;
-    private PictureInPictureParams mPictureInPictureParams;
+    protected PictureInPictureParams mPictureInPictureParams;
     private IntConsumer mOnDisplayIdChangeCallback;
     /**
      * The end transaction of PiP animation for switching between PiP and fullscreen with
@@ -259,6 +259,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             @NonNull PipAnimationController pipAnimationController,
             @NonNull PipSurfaceTransactionHelper surfaceTransactionHelper,
             @NonNull PipTransitionController pipTransitionController,
+            @NonNull PipParamsChangedForwarder pipParamsChangedForwarder,
             Optional<SplitScreenController> splitScreenOptional,
             @NonNull DisplayController displayController,
             @NonNull PipUiEventLogger pipUiEventLogger,
@@ -271,6 +272,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mPipBoundsAlgorithm = boundsHandler;
         mPipMenuController = pipMenuController;
         mPipTransitionController = pipTransitionController;
+        mPipParamsChangedForwarder = pipParamsChangedForwarder;
         mEnterAnimationDuration = context.getResources()
                 .getInteger(R.integer.config_pipEnterAnimationDuration);
         mExitAnimationDuration = context.getResources()
@@ -361,7 +363,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         }
         mPipBoundsState.setBounds(destinationBounds);
         mSwipePipToHomeOverlay = overlay;
-        if (ENABLE_SHELL_TRANSITIONS) {
+        if (ENABLE_SHELL_TRANSITIONS && overlay != null) {
             // With Shell transition, the overlay was attached to the remote transition leash, which
             // will be removed when the current transition is finished, so we need to reparent it
             // to the actual Task surface now.
@@ -559,6 +561,14 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mPictureInPictureParams = mTaskInfo.pictureInPictureParams;
         setBoundsStateForEntry(mTaskInfo.topActivity, mPictureInPictureParams,
                 mTaskInfo.topActivityInfo);
+        if (mPictureInPictureParams != null) {
+            mPipParamsChangedForwarder.notifyActionsChanged(mPictureInPictureParams.getActions(),
+                    mPictureInPictureParams.getCloseAction());
+            mPipParamsChangedForwarder.notifyTitleChanged(
+                    mPictureInPictureParams.getTitle());
+            mPipParamsChangedForwarder.notifySubtitleChanged(
+                    mPictureInPictureParams.getSubtitle());
+        }
 
         mPipUiEventLoggerLogger.setTaskInfo(mTaskInfo);
         mPipUiEventLoggerLogger.log(PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_ENTER);
@@ -664,6 +674,15 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 mSurfaceControlTransactionFactory.getTransaction();
         tx.setAlpha(mLeash, 0f);
         tx.apply();
+
+        // When entering PiP this transaction will be applied within WindowContainerTransaction and
+        // ensure that the PiP has rounded corners.
+        final SurfaceControl.Transaction boundsChangeTx =
+                mSurfaceControlTransactionFactory.getTransaction();
+        mSurfaceTransactionHelper
+                .crop(boundsChangeTx, mLeash, destinationBounds)
+                .round(boundsChangeTx, mLeash, true /* applyCornerRadius */);
+
         mPipTransitionState.setTransitionState(PipTransitionState.ENTRY_SCHEDULED);
         applyEnterPipSyncTransaction(destinationBounds, () -> {
             mPipAnimationController
@@ -676,7 +695,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             // mState is set right after the animation is kicked off to block any resize
             // requests such as offsetPip that may have been called prior to the transition.
             mPipTransitionState.setTransitionState(PipTransitionState.ENTERING_PIP);
-        }, null /* boundsChangeTransaction */);
+        }, boundsChangeTx);
     }
 
     private void onEndOfSwipePipToHomeTransition() {
@@ -810,17 +829,13 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mPipBoundsState.setOverrideMinSize(
                 mPipBoundsAlgorithm.getMinimalSize(info.topActivityInfo));
         final PictureInPictureParams newParams = info.pictureInPictureParams;
-        if (newParams == null || !applyPictureInPictureParams(newParams)) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: Ignored onTaskInfoChanged with PiP param: %s", TAG, newParams);
+
+        // mPictureInPictureParams is only null if there is no PiP
+        if (newParams == null || mPictureInPictureParams == null) {
             return;
         }
-        // Aspect ratio changed, re-calculate bounds if valid.
-        final Rect destinationBounds = mPipBoundsAlgorithm.getAdjustedDestinationBounds(
-                mPipBoundsState.getBounds(), mPipBoundsState.getAspectRatio());
-        Objects.requireNonNull(destinationBounds, "Missing destination bounds");
-        scheduleAnimateResizePip(destinationBounds, mEnterAnimationDuration,
-                null /* updateBoundsCallback */);
+        applyNewPictureInPictureParams(newParams);
+        mPictureInPictureParams = newParams;
     }
 
     @Override
@@ -914,6 +929,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             removeContentOverlay(mSwipePipToHomeOverlay, null /* callback */);
             mSwipePipToHomeOverlay = null;
         }
+        resetShadowRadius();
         mPipTransitionState.setInSwipePipToHomeTransition(false);
         mPictureInPictureParams = null;
         mPipTransitionState.setTransitionState(PipTransitionState.UNDEFINED);
@@ -947,6 +963,17 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     private void clearWaitForFixedRotation() {
         mWaitForFixedRotation = false;
         mDeferredAnimEndTransaction = null;
+    }
+
+    /** Explicitly set the visibility of PiP window. */
+    public void setPipVisibility(boolean visible) {
+        if (!isInPip()) {
+            return;
+        }
+        final SurfaceControl.Transaction tx =
+                mSurfaceControlTransactionFactory.getTransaction();
+        mSurfaceTransactionHelper.alpha(tx, mLeash, visible ? 1f : 0f);
+        tx.apply();
     }
 
     @Override
@@ -1066,20 +1093,21 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     }
 
     /**
-     * @return {@code true} if the aspect ratio is changed since no other parameters within
-     * {@link PictureInPictureParams} would affect the bounds.
+     * Handles all changes to the PictureInPictureParams.
      */
-    private boolean applyPictureInPictureParams(@NonNull PictureInPictureParams params) {
-        final Rational currentAspectRatio =
-                mPictureInPictureParams != null ? mPictureInPictureParams.getAspectRatio()
-                        : null;
-        final boolean aspectRatioChanged = !Objects.equals(currentAspectRatio,
-                params.getAspectRatio());
-        mPictureInPictureParams = params;
-        if (aspectRatioChanged) {
-            mPipBoundsState.setAspectRatio(params.getAspectRatioFloat());
+    protected void applyNewPictureInPictureParams(@NonNull PictureInPictureParams params) {
+        if (mDeferredTaskInfo != null || PipUtils.aspectRatioChanged(params.getAspectRatioFloat(),
+                mPictureInPictureParams.getAspectRatioFloat())) {
+            mPipParamsChangedForwarder.notifyAspectRatioChanged(params.getAspectRatioFloat());
         }
-        return aspectRatioChanged;
+        if (mDeferredTaskInfo != null
+                || PipUtils.remoteActionsChanged(params.getActions(),
+                mPictureInPictureParams.getActions())
+                || !PipUtils.remoteActionsMatch(params.getCloseAction(),
+                mPictureInPictureParams.getCloseAction())) {
+            mPipParamsChangedForwarder.notifyActionsChanged(params.getActions(),
+                    params.getCloseAction());
+        }
     }
 
     /**
@@ -1266,7 +1294,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      */
     public void scheduleOffsetPip(Rect originalBounds, int offset, int duration,
             Consumer<Rect> updateBoundsCallback) {
-        if (mPipTransitionState.shouldBlockResizeRequest()) {
+        if (mPipTransitionState.shouldBlockResizeRequest()
+                || mPipTransitionState.getInSwipePipToHomeTransition()) {
             return;
         }
         if (mWaitForFixedRotation) {
@@ -1559,11 +1588,26 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             // Avoid double removal, which is fatal.
             return;
         }
-        final SurfaceControl.Transaction tx =
-                mSurfaceControlTransactionFactory.getTransaction();
+        final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
         tx.remove(surface);
         tx.apply();
         if (callback != null) callback.run();
+    }
+
+    private void resetShadowRadius() {
+        if (mPipTransitionState.getTransitionState() == PipTransitionState.UNDEFINED) {
+            // mLeash is undefined when in PipTransitionState.UNDEFINED
+            return;
+        }
+        final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
+        tx.setShadowRadius(mLeash, 0f);
+        tx.apply();
+    }
+
+    @VisibleForTesting
+    public void setSurfaceControlTransactionFactory(
+            PipSurfaceTransactionHelper.SurfaceControlTransactionFactory factory) {
+        mSurfaceControlTransactionFactory = factory;
     }
 
     /**

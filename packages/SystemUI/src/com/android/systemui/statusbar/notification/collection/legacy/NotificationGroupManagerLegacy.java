@@ -43,7 +43,6 @@ import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.util.Compile;
 import com.android.wm.shell.bubbles.Bubbles;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -875,7 +874,7 @@ public class NotificationGroupManagerLegacy implements
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("GroupManagerLegacy state:");
         pw.println("  number of groups: " +  mGroupMap.size());
         for (Map.Entry<String, NotificationGroup>  entry : mGroupMap.entrySet()) {

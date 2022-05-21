@@ -20,7 +20,9 @@ import com.android.internal.annotations.Keep;
 import com.android.systemui.R;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -112,6 +114,10 @@ public class Flags {
     public static final ResourceBooleanFlag QS_USER_DETAIL_SHORTCUT =
             new ResourceBooleanFlag(503, R.bool.flag_lockscreen_qs_user_detail_shortcut);
 
+    /**
+     * @deprecated Not needed anymore
+     */
+    @Deprecated
     public static final BooleanFlag NEW_FOOTER = new BooleanFlag(504, true);
 
     public static final BooleanFlag NEW_HEADER = new BooleanFlag(505, false);
@@ -158,6 +164,17 @@ public class Flags {
     public static final SysPropBooleanFlag WM_ENABLE_SHELL_TRANSITIONS =
             new SysPropBooleanFlag(1100, "persist.wm.debug.shell_transit", false);
 
+    // 1200 - predictive back
+    @Keep
+    public static final SysPropBooleanFlag WM_ENABLE_PREDICTIVE_BACK = new SysPropBooleanFlag(
+            1200, "persist.wm.debug.predictive_back", true);
+    @Keep
+    public static final SysPropBooleanFlag WM_ENABLE_PREDICTIVE_BACK_ANIM = new SysPropBooleanFlag(
+            1201, "persist.wm.debug.predictive_back_anim", false);
+    @Keep
+    public static final SysPropBooleanFlag WM_ALWAYS_ENFORCE_PREDICTIVE_BACK =
+            new SysPropBooleanFlag(1202, "persist.wm.debug.predictive_back_always_enforce", false);
+
     // Pay no attention to the reflection behind the curtain.
     // ========================== Curtain ==========================
     // |                                                           |
@@ -167,25 +184,36 @@ public class Flags {
         if (sFlagMap != null) {
             return sFlagMap;
         }
+
         Map<Integer, Flag<?>> flags = new HashMap<>();
+        List<Field> flagFields = getFlagFields();
 
-        Field[] fields = Flags.class.getFields();
-
-        for (Field field : fields) {
-            Class<?> t = field.getType();
-            if (Flag.class.isAssignableFrom(t)) {
-                try {
-                    Flag<?> flag = (Flag<?>) field.get(null);
-                    flags.put(flag.getId(), flag);
-                } catch (IllegalAccessException e) {
-                    // no-op
-                }
+        for (Field field : flagFields) {
+            try {
+                Flag<?> flag = (Flag<?>) field.get(null);
+                flags.put(flag.getId(), flag);
+            } catch (IllegalAccessException e) {
+                // no-op
             }
         }
 
         sFlagMap = flags;
 
         return sFlagMap;
+    }
+
+    static List<Field> getFlagFields() {
+        Field[] fields = Flags.class.getFields();
+        List<Field> result = new ArrayList<>();
+
+        for (Field field : fields) {
+            Class<?> t = field.getType();
+            if (Flag.class.isAssignableFrom(t)) {
+                result.add(field);
+            }
+        }
+
+        return result;
     }
     // |  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  |
     // |                                                           |

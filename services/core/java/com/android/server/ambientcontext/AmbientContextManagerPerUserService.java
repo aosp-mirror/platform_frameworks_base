@@ -43,7 +43,6 @@ import android.os.RemoteException;
 import android.service.ambientcontext.AmbientContextDetectionResult;
 import android.service.ambientcontext.AmbientContextDetectionServiceStatus;
 import android.text.TextUtils;
-import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
@@ -54,7 +53,6 @@ import com.android.server.infra.AbstractPerUserSystemService;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Set;
 
 /**
  * Per-user manager service for {@link AmbientContextEvent}s.
@@ -69,19 +67,13 @@ final class AmbientContextManagerPerUserService extends
     RemoteAmbientContextDetectionService mRemoteService;
 
     private ComponentName mComponentName;
-    private Set<PendingIntent> mExistingPendingIntents;
 
     AmbientContextManagerPerUserService(
             @NonNull AmbientContextManagerService master, Object lock, @UserIdInt int userId) {
         super(master, lock, userId);
-        mExistingPendingIntents = new ArraySet<>();
     }
 
     void destroyLocked() {
-        if (isVerbose()) {
-            Slog.v(TAG, "destroyLocked()");
-        }
-
         Slog.d(TAG, "Trying to cancel the remote request. Reason: Service destroyed.");
         if (mRemoteService != null) {
             synchronized (mLock) {
@@ -118,7 +110,19 @@ final class AmbientContextManagerPerUserService extends
         if (mComponentName == null) {
             mComponentName = updateServiceInfoLocked();
         }
-        return mComponentName != null;
+        if (mComponentName == null) {
+            return false;
+        }
+
+        ServiceInfo serviceInfo;
+        try {
+            serviceInfo = AppGlobals.getPackageManager().getServiceInfo(
+                    mComponentName, 0, mUserId);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "RemoteException while setting up service");
+            return false;
+        }
+        return serviceInfo != null;
     }
 
     @Override
@@ -171,18 +175,10 @@ final class AmbientContextManagerPerUserService extends
                 return;
             }
 
-            // Remove any existing PendingIntent for this package.
-            String callingPackage = pendingIntent.getCreatorPackage();
-            PendingIntent duplicatePendingIntent = findExistingRequestByPackage(callingPackage);
-            if (duplicatePendingIntent != null) {
-                Slog.d(TAG, "Replace duplicate request from " + callingPackage);
-                mExistingPendingIntents.remove(duplicatePendingIntent);
-            }
-
-            // Register package and add pendingIntent to mExistingPendingIntents
-            startDetection(request, callingPackage, createDetectionResultRemoteCallback(),
-                    getServerStatusCallback(clientStatusCallback));
-            mExistingPendingIntents.add(pendingIntent);
+            // Register package and add to existing ClientRequests cache
+            startDetection(request, pendingIntent.getCreatorPackage(),
+                    createDetectionResultRemoteCallback(), clientStatusCallback);
+            mMaster.newClientAdded(mUserId, request, pendingIntent, clientStatusCallback);
         }
     }
 
@@ -214,12 +210,18 @@ final class AmbientContextManagerPerUserService extends
 
     @VisibleForTesting
     void startDetection(AmbientContextEventRequest request, String callingPackage,
-            RemoteCallback detectionResultCallback, RemoteCallback statusCallback) {
+            RemoteCallback detectionResultCallback, RemoteCallback clientStatusCallback) {
         Slog.d(TAG, "Requested detection of " + request.getEventTypes());
         synchronized (mLock) {
-            ensureRemoteServiceInitiated();
-            mRemoteService.startDetection(request, callingPackage, detectionResultCallback,
-                    statusCallback);
+            if (setUpServiceIfNeeded()) {
+                ensureRemoteServiceInitiated();
+                mRemoteService.startDetection(request, callingPackage, detectionResultCallback,
+                        getServerStatusCallback(clientStatusCallback));
+            } else {
+                Slog.w(TAG, "No valid component found for AmbientContextDetectionService");
+                sendStatusToCallback(clientStatusCallback,
+                        AmbientContextManager.STATUS_NOT_SUPPORTED);
+            }
         }
     }
 
@@ -241,15 +243,8 @@ final class AmbientContextManagerPerUserService extends
      */
     public void onUnregisterObserver(String callingPackage) {
         synchronized (mLock) {
-            PendingIntent pendingIntent = findExistingRequestByPackage(callingPackage);
-            if (pendingIntent == null) {
-                Slog.d(TAG, "No registration found for " + callingPackage);
-                return;
-            }
-
-            // Remove from existing requests
-            mExistingPendingIntents.remove(pendingIntent);
-            stopDetection(pendingIntent.getCreatorPackage());
+            stopDetection(callingPackage);
+            mMaster.clientRemoved(mUserId, callingPackage);
         }
     }
 
@@ -261,7 +256,7 @@ final class AmbientContextManagerPerUserService extends
             if (!setUpServiceIfNeeded()) {
                 Slog.w(TAG, "Detection service is not available at this moment.");
                 sendStatusToCallback(statusCallback,
-                        AmbientContextManager.STATUS_SERVICE_UNAVAILABLE);
+                        AmbientContextManager.STATUS_NOT_SUPPORTED);
                 return;
             }
             ensureRemoteServiceInitiated();
@@ -371,19 +366,11 @@ final class AmbientContextManagerPerUserService extends
     void stopDetection(String packageName) {
         Slog.d(TAG, "Stop detection for " + packageName);
         synchronized (mLock) {
-            ensureRemoteServiceInitiated();
-            mRemoteService.stopDetection(packageName);
-        }
-    }
-
-    @Nullable
-    private PendingIntent findExistingRequestByPackage(String callingPackage) {
-        for (PendingIntent pendingIntent : mExistingPendingIntents) {
-            if (pendingIntent.getCreatorPackage().equals(callingPackage)) {
-                return pendingIntent;
+            if (mComponentName != null) {
+                ensureRemoteServiceInitiated();
+                mRemoteService.stopDetection(packageName);
             }
         }
-        return null;
     }
 
     /**
@@ -412,22 +399,22 @@ final class AmbientContextManagerPerUserService extends
     }
 
     @NonNull
-    private RemoteCallback createDetectionResultRemoteCallback() {
+    RemoteCallback createDetectionResultRemoteCallback() {
         return new RemoteCallback(result -> {
             AmbientContextDetectionResult detectionResult =
                     (AmbientContextDetectionResult) result.get(
                             AmbientContextDetectionResult.RESULT_RESPONSE_BUNDLE_KEY);
+            String packageName = detectionResult.getPackageName();
+            PendingIntent pendingIntent = mMaster.getPendingIntent(mUserId, packageName);
+            if (pendingIntent == null) {
+                return;
+            }
+
             final long token = Binder.clearCallingIdentity();
             try {
-                for (PendingIntent pendingIntent : mExistingPendingIntents) {
-                    // Send PendingIntent to requesting packages
-                    String creatorPackage = pendingIntent.getCreatorPackage();
-                    if (detectionResult.getPackageName().equals(creatorPackage)) {
-                        sendDetectionResultIntent(pendingIntent, detectionResult);
-                        Slog.i(TAG, "Got detection result of " + detectionResult.getEvents()
-                                + " for " + creatorPackage);
-                    }
-                }
+                sendDetectionResultIntent(pendingIntent, detectionResult);
+                Slog.i(TAG, "Got detection result of " + detectionResult.getEvents()
+                        + " for " + packageName);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

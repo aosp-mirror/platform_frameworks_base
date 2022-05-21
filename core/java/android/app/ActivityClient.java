@@ -98,6 +98,15 @@ public class ActivityClient {
         }
     }
 
+    /** Reports the activity starts local relaunch. */
+    public void activityLocalRelaunch(IBinder token) {
+        try {
+            getActivityClientController().activityLocalRelaunch(token);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
     /** Reports the activity has completed relaunched. */
     public void activityRelaunched(IBinder token) {
         try {
@@ -454,7 +463,13 @@ public class ActivityClient {
         }
     }
 
-    /** Removes the snapshot of home task. */
+    /**
+     * Removes the outdated snapshot of the home task.
+     *
+     * @param homeToken The token of the home task, or null if you have the
+     *                  {@link android.Manifest.permission#MANAGE_ACTIVITY_TASKS} permission and
+     *                  want us to find the home task token for you.
+     */
     public void invalidateHomeTaskSnapshot(IBinder homeToken) {
         try {
             getActivityClientController().invalidateHomeTaskSnapshot(homeToken);

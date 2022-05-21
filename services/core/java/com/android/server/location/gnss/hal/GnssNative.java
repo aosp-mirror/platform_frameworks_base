@@ -47,6 +47,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Entry point for most GNSS HAL commands and callbacks.
@@ -1271,7 +1272,8 @@ public class GnssNative {
     @NativeEntryPoint
     boolean isInEmergencySession() {
         return Binder.withCleanCallingIdentity(
-                () -> mEmergencyHelper.isInEmergency(mConfiguration.getEsExtensionSec()));
+                () -> mEmergencyHelper.isInEmergency(
+                        TimeUnit.SECONDS.toMillis(mConfiguration.getEsExtensionSec())));
     }
 
     /**

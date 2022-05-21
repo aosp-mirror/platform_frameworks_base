@@ -32,7 +32,6 @@ import android.graphics.Region;
 import android.os.Bundle;
 import android.os.IRemoteCallback;
 import android.os.ParcelFileDescriptor;
-import android.view.ContentRecordingSession;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.IAppTransitionAnimationSpecsFuture;
@@ -249,7 +248,7 @@ interface IWindowManager
      * Set whether screen capture is disabled for all windows of a specific user from
      * the device policy cache.
      */
-    void refreshScreenCaptureDisabled(int userId);
+    void refreshScreenCaptureDisabled();
 
     // These can only be called with the SET_ORIENTATION permission.
     /**
@@ -677,17 +676,6 @@ interface IWindowManager
     void setDisplayImePolicy(int displayId, int imePolicy);
 
     /**
-     * Waits for transactions to get applied before injecting input, optionally waiting for
-     * animations to complete. This includes waiting for the input windows to get sent to
-     * InputManager.
-     *
-     * This is needed for testing since the system add windows and injects input
-     * quick enough that the windows don't have time to get sent to InputManager.
-     */
-    boolean injectInputAfterTransactionsApplied(in InputEvent ev, int mode,
-            boolean waitForAnimations);
-
-    /**
      * Waits until input information has been sent from WindowManager to native InputManager,
      * optionally waiting for animations to complete.
      *
@@ -883,17 +871,6 @@ interface IWindowManager
      * @param clientToken the window context's token
      */
     void detachWindowContextFromWindowContainer(IBinder clientToken);
-
-    /**
-     * Updates the content recording session. If a different session is already in progress, then
-     * the pre-existing session is stopped, and the new incoming session takes over.
-     *
-     * The DisplayContent for the new session will begin recording when
-     * {@link RootWindowContainer#onDisplayChanged} is invoked for the new {@link VirtualDisplay}.
-     *
-     * @param incomingSession the nullable incoming content recording session
-     */
-    void setContentRecordingSession(in ContentRecordingSession incomingSession);
 
     /**
      * Registers a listener, which is to be called whenever cross-window blur is enabled/disabled.

@@ -45,6 +45,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
+import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionListener;
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -124,7 +125,7 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
         when(mView.getContext()).thenReturn(mResourceContext);
         when(mResourceContext.getString(anyInt())).thenReturn("test string");
         when(mKeyguardViewMediator.isAnimatingScreenOff()).thenReturn(false);
-        when(mView.getDialogSuggestedAlpha()).thenReturn(1f);
+        when(mView.getUnpausedAlpha()).thenReturn(255);
         mController = new UdfpsKeyguardViewController(
                 mView,
                 mStatusBarStateController,
@@ -167,7 +168,8 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
 
         mController.onViewAttached();
         verify(mView, atLeast(1)).setPauseAuth(true);
-        verify(mView).onDozeAmountChanged(dozeAmount, dozeAmount, true);
+        verify(mView).onDozeAmountChanged(dozeAmount, dozeAmount,
+                UdfpsKeyguardView.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN);
     }
 
     @Test
@@ -194,7 +196,8 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
         final float eased = .65f;
         mStatusBarStateListener.onDozeAmountChanged(linear, eased);
 
-        verify(mView).onDozeAmountChanged(linear, eased, true);
+        verify(mView).onDozeAmountChanged(linear, eased,
+                UdfpsKeyguardView.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN);
     }
 
     @Test
@@ -205,17 +208,18 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
 
         captureAltAuthInterceptor();
         when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(true);
+        when(mStatusBarKeyguardViewManager.bouncerIsOrWillBeShowing()).thenReturn(true);
         mAltAuthInterceptor.onBouncerVisibilityChanged();
 
         assertTrue(mController.shouldPauseAuth());
     }
 
     @Test
-    public void testShouldPauseAuthDialogSuggestedAlpha0() {
+    public void testShouldPauseAuthUnpausedAlpha0() {
         mController.onViewAttached();
         captureStatusBarStateListeners();
 
-        when(mView.getDialogSuggestedAlpha()).thenReturn(0f);
+        when(mView.getUnpausedAlpha()).thenReturn(0);
         sendStatusBarStateChanged(StatusBarState.KEYGUARD);
 
         assertTrue(mController.shouldPauseAuth());
@@ -482,8 +486,11 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
     }
 
     private void updateStatusBarExpansion(float fraction, boolean expanded) {
+        PanelExpansionChangeEvent event =
+                new PanelExpansionChangeEvent(
+                        fraction, expanded, /* tracking= */ false, /* dragDownPxAmount= */ 0f);
         for (PanelExpansionListener listener : mExpansionListeners) {
-            listener.onPanelExpansionChanged(fraction, expanded, /* tracking= */ false);
+            listener.onPanelExpansionChanged(event);
         }
     }
 

@@ -30,7 +30,6 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.qs.customize.QSCustomizer;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 /**
@@ -48,9 +47,10 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
     private QSCustomizer mQSCustomizer;
     private NonInterceptingScrollView mQSPanelContainer;
 
-    private int mSideMargins;
+    private int mHorizontalMargins;
+    private int mTilesPageMargin;
     private boolean mQsDisabled;
-    private int mContentPadding = -1;
+    private int mContentHorizontalPadding = -1;
     private boolean mClippingEnabled;
 
     public QSContainerImpl(Context context, AttributeSet attrs) {
@@ -138,24 +138,25 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
     }
 
     void updateResources(QSPanelController qsPanelController,
-            QuickStatusBarHeaderController quickStatusBarHeaderController,
-            boolean newFooter) {
-        int bottomPadding = 0;
-        if (newFooter) {
-            bottomPadding = getResources().getDimensionPixelSize(R.dimen.qs_panel_padding_bottom);
-        }
+            QuickStatusBarHeaderController quickStatusBarHeaderController) {
+        int bottomPadding = getResources().getDimensionPixelSize(R.dimen.qs_panel_padding_bottom);
         mQSPanelContainer.setPaddingRelative(
                 mQSPanelContainer.getPaddingStart(),
                 QSUtils.getQsHeaderSystemIconsAreaHeight(mContext),
                 mQSPanelContainer.getPaddingEnd(),
                 bottomPadding);
 
-        int sideMargins = getResources().getDimensionPixelSize(R.dimen.notification_side_paddings);
-        int padding = getResources().getDimensionPixelSize(
-                R.dimen.notification_shade_content_margin_horizontal);
-        boolean marginsChanged = padding != mContentPadding || sideMargins != mSideMargins;
-        mContentPadding = padding;
-        mSideMargins = sideMargins;
+        int horizontalMargins = getResources().getDimensionPixelSize(R.dimen.qs_horizontal_margin);
+        int horizontalPadding = getResources().getDimensionPixelSize(
+                R.dimen.qs_content_horizontal_padding);
+        int tilesPageMargin = getResources().getDimensionPixelSize(
+                R.dimen.qs_tiles_page_horizontal_margin);
+        boolean marginsChanged = horizontalPadding != mContentHorizontalPadding
+                || horizontalMargins != mHorizontalMargins
+                || tilesPageMargin != mTilesPageMargin;
+        mContentHorizontalPadding = horizontalPadding;
+        mHorizontalMargins = horizontalMargins;
+        mTilesPageMargin = tilesPageMargin;
         if (marginsChanged) {
             updatePaddingsAndMargins(qsPanelController, quickStatusBarHeaderController);
         }
@@ -203,22 +204,22 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
                 // Only padding for FooterActionsView, no margin. That way, the background goes
                 // all the way to the edge.
                 LayoutParams lp = (LayoutParams) view.getLayoutParams();
-                lp.rightMargin = mSideMargins;
-                lp.leftMargin = mSideMargins;
+                lp.rightMargin = mHorizontalMargins;
+                lp.leftMargin = mHorizontalMargins;
             }
             if (view == mQSPanelContainer) {
                 // QS panel lays out some of its content full width
-                qsPanelController.setContentMargins(mContentPadding, mContentPadding);
-                // Set it as double the side margin (to simulate end margin of current page +
-                // start margin of next page).
-                qsPanelController.setPageMargin(mSideMargins);
+                qsPanelController.setContentMargins(mContentHorizontalPadding,
+                        mContentHorizontalPadding);
+                qsPanelController.setPageMargin(mTilesPageMargin);
             } else if (view == mHeader) {
-                quickStatusBarHeaderController.setContentMargins(mContentPadding, mContentPadding);
+                quickStatusBarHeaderController.setContentMargins(mContentHorizontalPadding,
+                        mContentHorizontalPadding);
             } else {
                 view.setPaddingRelative(
-                        mContentPadding,
+                        mContentHorizontalPadding,
                         view.getPaddingTop(),
-                        mContentPadding,
+                        mContentHorizontalPadding,
                         view.getPaddingBottom());
             }
         }
@@ -277,7 +278,7 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println(getClass().getSimpleName() + " updateClippingPath: top("
                 + mFancyClippingTop + ") bottom(" + mFancyClippingBottom  + ") mClippingEnabled("
                 + mClippingEnabled + ")");

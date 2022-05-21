@@ -54,7 +54,7 @@ public final class ProfcollectForwardingService extends SystemService {
 
     private static final boolean DEBUG = Log.isLoggable(LOG_TAG, Log.DEBUG);
 
-    private static final long BG_PROCESS_PERIOD = TimeUnit.DAYS.toMillis(1); // every 1 day.
+    private static final long BG_PROCESS_PERIOD = TimeUnit.HOURS.toMillis(4); // every 4 hours.
 
     private IProfCollectd mIProfcollect;
     private static ProfcollectForwardingService sSelfService;
@@ -274,35 +274,10 @@ public final class ProfcollectForwardingService extends SystemService {
         }
     }
 
-    private class AppLaunchObserver implements ActivityMetricsLaunchObserver {
+    private class AppLaunchObserver extends ActivityMetricsLaunchObserver {
         @Override
         public void onIntentStarted(Intent intent, long timestampNanos) {
             traceOnAppStart(intent.getPackage());
-        }
-
-        @Override
-        public void onIntentFailed() {
-            // Ignored
-        }
-
-        @Override
-        public void onActivityLaunched(byte[] activity, int temperature) {
-            // Ignored
-        }
-
-        @Override
-        public void onActivityLaunchCancelled(byte[] abortingActivity) {
-            // Ignored
-        }
-
-        @Override
-        public void onActivityLaunchFinished(byte[] finalActivity, long timestampNanos) {
-            // Ignored
-        }
-
-        @Override
-        public void onReportFullyDrawn(byte[] activity, long timestampNanos) {
-            // Ignored
         }
     }
 
