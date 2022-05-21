@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2013 The Android Open Source Project
+<!-- Copyright (C) 2022 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -15,13 +15,9 @@
 -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- Skeleton string format for displaying the date. -->
+    <!-- Skeleton string format for displaying the time in 12-hour format. -->
+    <string name="clock_12hr_format">hm</string>
 
-    <!-- Skeleton string format for displaying the date when an alarm is set. -->
-    <string name="abbrev_wday_month_day_no_year_alarm">EEEMMMd</string>
-
-    <!-- Skeleton string format for displaying the date shorter. -->
-    <string name="abbrev_month_day_no_year">MMMd</string>
-
-    <string name="num_pad_key_ratio">1</string>
+    <!-- Skeleton string format for displaying the time in 24-hour format. -->
+    <string name="clock_24hr_format">Hm</string>
 </resources>
