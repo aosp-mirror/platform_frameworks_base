@@ -4199,8 +4199,8 @@ final class InstallPackageHelper {
                 assertOverlayIsValid(pkg, parseFlags, scanFlags);
             }
 
-            // If the package is not on a system partition ensure it is signed with at least the
-            // minimum signature scheme version required for its target SDK.
+            // Ensure the package is signed with at least the minimum signature scheme version
+            // required for its target SDK.
             ScanPackageUtils.assertMinSignatureSchemeIsValid(pkg, parseFlags);
         }
     }
