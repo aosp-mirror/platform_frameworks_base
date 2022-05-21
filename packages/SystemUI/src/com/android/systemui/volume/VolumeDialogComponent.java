@@ -152,7 +152,7 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
 
     private void applyConfiguration() {
         mController.setVolumePolicy(mVolumePolicy);
-        mController.showDndTile(true);
+        mController.showDndTile();
     }
 
     @Override

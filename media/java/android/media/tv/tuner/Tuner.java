@@ -1728,7 +1728,9 @@ public class Tuner implements AutoCloseable  {
         }
         int res = nativeSetMaxNumberOfFrontends(frontendType, maxNumber);
         if (res == RESULT_SUCCESS) {
-            // TODO: b/211778848 Update Tuner Resource Manager.
+            if (!mTunerResourceManager.setMaxNumberOfFrontends(frontendType, maxNumber)) {
+                res = RESULT_INVALID_ARGUMENT;
+            }
         }
         return res;
     }
@@ -1749,7 +1751,13 @@ public class Tuner implements AutoCloseable  {
                     TunerVersionChecker.TUNER_VERSION_2_0, "Set maximum Frontends")) {
             return -1;
         }
-        return nativeGetMaxNumberOfFrontends(frontendType);
+        int maxNumFromHAL = nativeGetMaxNumberOfFrontends(frontendType);
+        int maxNumFromTRM = mTunerResourceManager.getMaxNumberOfFrontends(frontendType);
+        if (maxNumFromHAL != maxNumFromTRM) {
+            Log.w(TAG, "max num of usable frontend is out-of-sync b/w " + maxNumFromHAL
+                    + " != " + maxNumFromTRM);
+        }
+        return maxNumFromHAL;
     }
 
     /** @hide */

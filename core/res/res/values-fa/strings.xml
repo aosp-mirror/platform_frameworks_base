@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"دسترسی به تقویم شما"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"پیامک"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"ارسال و مشاهده پیامک‌ها"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"فایل‌ها و اسناد"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"فایل‌ها و سندها"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"دسترسی به فایل‌ها و اسناد موجود در دستگاه"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"موسیقی و فایل‌های صوتی دیگر"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"دسترسی به فایل‌های صوتی موجود در دستگاه"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"عکس‌ها و ویدیوها"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"دسترسی به فایل‌های تصویری و ویدیویی موجود در دستگاه"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"موسیقی و صدا"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"دسترسی به موسیقی و صدا در دستگاه شما"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"عکس‌ها و ویدیوها"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"دسترسی به عکس‌ها و ویدیوها در دستگاه شما"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"میکروفن"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ضبط صدا"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"فعالیت فیزیکی"</string>
@@ -604,7 +604,7 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"چهره اصالت‌سنجی شد، لطفاً تأیید را فشار دهید"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"سخت‌افزار اثرانگشت در دسترس نیست."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"اثر انگشت راه‌اندازی نشد"</string>
-    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"درنگ ثبت اثر انگشت به پایان رسید. دوباره امتحان کنید."</string>
+    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"مهلت ثبت اثر انگشت به‌پایان رسید. دوباره امتحان کنید."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"عملکرد اثر انگشت لغو شد."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"کاربر عملیات اثر انگشت را لغو کرد"</string>
     <string name="fingerprint_error_lockout" msgid="7853461265604738671">"تلاش‌های زیادی انجام شده است. بعداً دوباره امتحان کنید."</string>
@@ -734,7 +734,7 @@
     <string name="permlab_removeDrmCertificates" msgid="710576248717404416">"‏حذف گواهی‌های DRM"</string>
     <string name="permdesc_removeDrmCertificates" msgid="4068445390318355716">"‏به برنامه امکان می‌دهد گواهی‌های DRM را حذف کند. نباید برای برنامه‌های عادی هیچ‌وقت لازم باشد."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="3363450860593096967">"مقید به سرویس پیام‌رسانی شرکت مخابراتی"</string>
-    <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"به کنترل‌کننده اجازه می‌دهد که به سطح بالای میانای کاربر سرویس پیام‌رسانی شرکت مخابراتی مقید شود. هرگز نباید برای برنامه‌های عادی مورد نیاز شود."</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"به کنترل‌کننده اجازه می‌دهد که به سطح بالای واسط کاربر سرویس پیام‌رسانی شرکت مخابراتی مقید شود. هرگز نباید برای برنامه‌های عادی مورد نیاز شود."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"اتصال به سرویس‌های شرکت مخابراتی"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"به دارنده امکان می‌دهد به سرویس‌های شرکت مخابراتی متصل شود. هرگز نباید برای برنامه‌های عادی مورد نیاز باشد."</string>
     <string name="permlab_access_notification_policy" msgid="5524112842876975537">"دسترسی به حالت «مزاحم نشوید»"</string>
@@ -1312,7 +1312,7 @@
     <string name="select_character" msgid="3352797107930786979">"درج نویسه"</string>
     <string name="sms_control_title" msgid="4748684259903148341">"درحال ارسال پیامک‌ها"</string>
     <string name="sms_control_message" msgid="6574313876316388239">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; درحال ارسال تعداد زیادی پیامک است. آیا اجازه می‌دهید این برنامه همچنان پیامک ارسال کند؟"</string>
-    <string name="sms_control_yes" msgid="4858845109269524622">"مجاز است"</string>
+    <string name="sms_control_yes" msgid="4858845109269524622">"اجازه دادن"</string>
     <string name="sms_control_no" msgid="4845717880040355570">"مجاز نبودن"</string>
     <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; مایل است پیامی به &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; ارسال کند."</string>
     <string name="sms_short_code_details" msgid="2723725738333388351">"این مورد "<b>"شاید هزینه‌ای"</b>" را به حساب دستگاه همراهتان بگذارد."</string>
@@ -1684,7 +1684,7 @@
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"می‌تواند همه محتوای صفحه را بخواند و آن را روی بقیه برنامه‌ها نمایش دهد."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"مشاهده و انجام کنش‌ها"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"این عملکرد می‌تواند با برنامه یا حسگری سخت‌افزاری تعاملاتتان را ردیابی کند و ازطرف شما با برنامه‌ها تعامل داشته باشد."</string>
-    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"مجاز"</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"اجازه دادن"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"مجاز نبودن"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"برای استفاده از ویژگی، روی آن ضربه بزنید:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"انتخاب ویژگی‌های موردنظر برای استفاده با دکمه دسترس‌پذیری"</string>
@@ -2053,8 +2053,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"«مزاحم نشوید» تغییر کرده است"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"برای بررسی موارد مسدودشده ضربه بزنید."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"مرور تنظیمات اعلان"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"‏از Android نسخه ۱۳ به بعد، برنامه‌هایی که نصب می‌کنید برای ارسال اعلان به اجازه شما نیاز دارند. برای تغییر دادن این اجازه در برنامه‌های موجود، ضربه بزنید."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"بعداً یادآوری شود"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"رد شدن"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"سیستم"</string>
@@ -2282,5 +2281,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"بررسی برنامه‌های فعال"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"نمی‌توان از <xliff:g id="DEVICE">%1$s</xliff:g> شما به دوربین تلفن دسترسی داشت"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"نمی‌توان از <xliff:g id="DEVICE">%1$s</xliff:g> شما به دوربین رایانه لوحی دسترسی داشت"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"زبان سیستم"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"پیش‌فرض سیستم"</string>
 </resources>

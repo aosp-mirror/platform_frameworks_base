@@ -22,6 +22,10 @@ import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
+import android.os.Process;
+import android.os.VibrationAttributes;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
@@ -46,6 +50,17 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
     private static final float STROKE_WIDTH_DP = 12f;
     private static final Interpolator DEACCEL = new DecelerateInterpolator();
 
+    private static final VibrationEffect VIBRATE_EFFECT_ERROR =
+            VibrationEffect.createWaveform(new long[] {0, 5, 55, 60}, -1);
+    private static final VibrationAttributes FINGERPRINT_ENROLLING_SONFICATION_ATTRIBUTES =
+            VibrationAttributes.createForUsage(VibrationAttributes.USAGE_ACCESSIBILITY);
+
+    private static final VibrationAttributes HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES =
+            VibrationAttributes.createForUsage(VibrationAttributes.USAGE_HARDWARE_FEEDBACK);
+
+    private static final VibrationEffect SUCCESS_VIBRATION_EFFECT =
+            VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
+
     private final float mStrokeWidthPx;
     @ColorInt private final int mProgressColor;
     @ColorInt private final int mHelpColor;
@@ -54,6 +69,9 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
     @NonNull private final Interpolator mCheckmarkInterpolator;
     @NonNull private final Paint mBackgroundPaint;
     @NonNull private final Paint mFillPaint;
+    @NonNull private final Vibrator mVibrator;
+    @NonNull private final boolean mIsAccessibilityEnabled;
+    @NonNull private final Context mContext;
 
     private boolean mAfterFirstTouch;
 
@@ -76,11 +94,12 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
     @NonNull private final ValueAnimator.AnimatorUpdateListener mCheckmarkUpdateListener;
 
     public UdfpsEnrollProgressBarDrawable(@NonNull Context context) {
+        mContext = context;
         mStrokeWidthPx = Utils.dpToPixels(context, STROKE_WIDTH_DP);
         mProgressColor = context.getColor(R.color.udfps_enroll_progress);
         final AccessibilityManager am = context.getSystemService(AccessibilityManager.class);
-        final boolean isAccessbilityEnabled = am.isTouchExplorationEnabled();
-        if (!isAccessbilityEnabled) {
+        mIsAccessibilityEnabled = am.isTouchExplorationEnabled();
+        if (!mIsAccessibilityEnabled) {
             mHelpColor = context.getColor(R.color.udfps_enroll_progress_help);
             mOnFirstBucketFailedColor = context.getColor(R.color.udfps_moving_target_fill_error);
         } else {
@@ -105,6 +124,8 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
         mFillPaint.setAntiAlias(true);
         mFillPaint.setStyle(Paint.Style.STROKE);
         mFillPaint.setStrokeCap(Paint.Cap.ROUND);
+
+        mVibrator = mContext.getSystemService(Vibrator.class);
 
         mProgressUpdateListener = animation -> {
             mProgress = (float) animation.getAnimatedValue();
@@ -141,14 +162,41 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
     }
 
     private void updateState(int remainingSteps, int totalSteps, boolean showingHelp) {
-        updateProgress(remainingSteps, totalSteps);
+        updateProgress(remainingSteps, totalSteps, showingHelp);
         updateFillColor(showingHelp);
     }
 
-    private void updateProgress(int remainingSteps, int totalSteps) {
+    private void updateProgress(int remainingSteps, int totalSteps, boolean showingHelp) {
         if (mRemainingSteps == remainingSteps && mTotalSteps == totalSteps) {
             return;
         }
+
+        if (mShowingHelp) {
+            if (mVibrator != null && mIsAccessibilityEnabled) {
+                mVibrator.vibrate(Process.myUid(), mContext.getOpPackageName(),
+                        VIBRATE_EFFECT_ERROR, getClass().getSimpleName() + "::onEnrollmentHelp",
+                        FINGERPRINT_ENROLLING_SONFICATION_ATTRIBUTES);
+            }
+        } else {
+            // If the first touch is an error, remainingSteps will be -1 and the callback
+            // doesn't come from onEnrollmentHelp. If we are in the accessibility flow,
+            // we still would like to vibrate.
+            if (mVibrator != null) {
+                if (remainingSteps == -1 && mIsAccessibilityEnabled) {
+                    mVibrator.vibrate(Process.myUid(), mContext.getOpPackageName(),
+                            VIBRATE_EFFECT_ERROR,
+                            getClass().getSimpleName() + "::onFirstTouchError",
+                            FINGERPRINT_ENROLLING_SONFICATION_ATTRIBUTES);
+                } else if (remainingSteps != -1 && !mIsAccessibilityEnabled) {
+                    mVibrator.vibrate(Process.myUid(),
+                            mContext.getOpPackageName(),
+                            SUCCESS_VIBRATION_EFFECT,
+                            getClass().getSimpleName() + "::OnEnrollmentProgress",
+                            HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES);
+                }
+            }
+        }
+
         mRemainingSteps = remainingSteps;
         mTotalSteps = totalSteps;
 

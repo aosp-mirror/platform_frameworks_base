@@ -38,7 +38,7 @@ public interface TaskStackListenerCallback {
 
     default void onTaskStackChanged() { }
 
-    default void onTaskProfileLocked(int taskId, int userId) { }
+    default void onTaskProfileLocked(RunningTaskInfo taskInfo) { }
 
     default void onTaskDisplayChanged(int taskId, int newDisplayId) { }
 
