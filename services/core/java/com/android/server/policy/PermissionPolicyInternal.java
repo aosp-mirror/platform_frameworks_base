@@ -74,10 +74,13 @@ public abstract class PermissionPolicyInternal {
      *
      * @param taskInfo The task to be checked
      * @param currPkg The package of the current top visible activity
+     * @param callingPkg The package that started the top visible activity
      * @param intent The intent of the current top visible activity
+     * @param activityName The name of the current top visible activity
      */
     public abstract boolean shouldShowNotificationDialogForTask(@Nullable TaskInfo taskInfo,
-            @Nullable String currPkg, @Nullable Intent intent);
+            @Nullable String currPkg, @Nullable String callingPkg, @Nullable Intent intent,
+            @NonNull String activityName);
 
     /**
      * @return true if an intent will resolve to a permission request dialog activity

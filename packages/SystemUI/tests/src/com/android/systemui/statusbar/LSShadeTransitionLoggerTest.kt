@@ -30,7 +30,7 @@ class LSShadeTransitionLoggerTest : SysuiTestCase() {
     @Before
     fun setup() {
         logger = LSShadeTransitionLogger(
-                LogBuffer("Test", 10, 10, mock()),
+                LogBuffer("Test", 10, mock()),
                 gestureLogger,
                 displayMetrics)
     }
