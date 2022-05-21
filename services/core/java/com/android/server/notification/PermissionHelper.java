@@ -16,7 +16,6 @@
 
 package com.android.server.notification;
 
-import static android.content.pm.PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -55,31 +54,12 @@ public final class PermissionHelper {
     private final PermissionManagerServiceInternal mPmi;
     private final IPackageManager mPackageManager;
     private final IPermissionManager mPermManager;
-    // TODO (b/194833441): Remove this boolean (but keep the isMigrationEnabled() method)
-    //  when the migration is enabled
-    private final boolean mMigrationEnabled;
-    private final boolean mIsTv;
-    private final boolean mForceUserSetOnUpgrade;
 
     public PermissionHelper(PermissionManagerServiceInternal pmi, IPackageManager packageManager,
-            IPermissionManager permManager, boolean migrationEnabled,
-            boolean forceUserSetOnUpgrade) {
+            IPermissionManager permManager) {
         mPmi = pmi;
         mPackageManager = packageManager;
         mPermManager = permManager;
-        mMigrationEnabled = migrationEnabled;
-        mForceUserSetOnUpgrade = forceUserSetOnUpgrade;
-        boolean isTv;
-        try {
-            isTv = mPackageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK, 0);
-        } catch (RemoteException e) {
-            isTv = false;
-        }
-        mIsTv = isTv;
-    }
-
-    public boolean isMigrationEnabled() {
-        return mMigrationEnabled && !mIsTv;
     }
 
     /**
@@ -87,11 +67,9 @@ public final class PermissionHelper {
      * with a lock held.
      */
     public boolean hasPermission(int uid) {
-        assertFlag();
         final long callingId = Binder.clearCallingIdentity();
         try {
-            return mPmi.checkPostNotificationsPermissionGrantedOrLegacyAccess(uid)
-                    == PERMISSION_GRANTED;
+            return mPmi.checkUidPermission(uid, NOTIFICATION_PERMISSION) == PERMISSION_GRANTED;
         } finally {
             Binder.restoreCallingIdentity(callingId);
         }
@@ -102,7 +80,6 @@ public final class PermissionHelper {
      * Must not be called with a lock held. Format: uid, packageName
      */
     Set<Pair<Integer, String>> getAppsRequestingPermission(int userId) {
-        assertFlag();
         Set<Pair<Integer, String>> requested = new HashSet<>();
         List<PackageInfo> pkgs = getInstalledPackages(userId);
         for (PackageInfo pi : pkgs) {
@@ -140,7 +117,6 @@ public final class PermissionHelper {
      * with a lock held. Format: uid, packageName.
      */
     Set<Pair<Integer, String>> getAppsGrantedPermission(int userId) {
-        assertFlag();
         Set<Pair<Integer, String>> granted = new HashSet<>();
         ParceledListSlice<PackageInfo> parceledList = null;
         try {
@@ -162,7 +138,6 @@ public final class PermissionHelper {
     public @NonNull
             ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>>
                     getNotificationPermissionValues(int userId) {
-        assertFlag();
         ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> notifPermissions = new ArrayMap<>();
         Set<Pair<Integer, String>> allRequestingUids = getAppsRequestingPermission(userId);
         Set<Pair<Integer, String>> allApprovedUids = getAppsGrantedPermission(userId);
@@ -174,22 +149,13 @@ public final class PermissionHelper {
     }
 
     /**
-     * @see setNotificationPermission(String, int, boolean, boolean, boolean)
-     */
-    public void setNotificationPermission(String packageName, @UserIdInt int userId, boolean grant,
-            boolean userSet) {
-        setNotificationPermission(packageName, userId, grant, userSet, false);
-    }
-
-    /**
      * Grants or revokes the notification permission for a given package/user. UserSet should
      * only be true if this method is being called to migrate existing user choice, because it
      * can prevent the user from seeing the in app permission dialog. Must not be called
      * with a lock held.
      */
     public void setNotificationPermission(String packageName, @UserIdInt int userId, boolean grant,
-            boolean userSet, boolean reviewRequired) {
-        assertFlag();
+            boolean userSet) {
         final long callingId = Binder.clearCallingIdentity();
         try {
             // Do not change the permission if the package doesn't request it, do not change fixed
@@ -203,7 +169,7 @@ public final class PermissionHelper {
 
             boolean currentlyGranted = mPmi.checkPermission(packageName, NOTIFICATION_PERMISSION,
                     userId) != PackageManager.PERMISSION_DENIED;
-            if (grant && !reviewRequired && !currentlyGranted) {
+            if (grant && !currentlyGranted) {
                 mPermManager.grantRuntimePermission(packageName, NOTIFICATION_PERMISSION, userId);
             } else if (!grant && currentlyGranted) {
                 mPermManager.revokeRuntimePermission(packageName, NOTIFICATION_PERMISSION,
@@ -211,12 +177,10 @@ public final class PermissionHelper {
             }
             if (userSet) {
                 mPermManager.updatePermissionFlags(packageName, NOTIFICATION_PERMISSION,
-                        FLAG_PERMISSION_USER_SET | FLAG_PERMISSION_REVIEW_REQUIRED,
-                        FLAG_PERMISSION_USER_SET, true, userId);
-            } else if (reviewRequired) {
+                        FLAG_PERMISSION_USER_SET, FLAG_PERMISSION_USER_SET, true, userId);
+            } else {
                 mPermManager.updatePermissionFlags(packageName, NOTIFICATION_PERMISSION,
-                        FLAG_PERMISSION_REVIEW_REQUIRED, FLAG_PERMISSION_REVIEW_REQUIRED, true,
-                        userId);
+                        0, FLAG_PERMISSION_USER_SET, true, userId);
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "Could not reach system server", e);
@@ -230,19 +194,16 @@ public final class PermissionHelper {
      * restoring a pre-T backup on a T+ device
      */
     public void setNotificationPermission(PackagePermission pkgPerm) {
-        assertFlag();
         if (pkgPerm == null || pkgPerm.packageName == null) {
             return;
         }
         if (!isPermissionFixed(pkgPerm.packageName, pkgPerm.userId)) {
-            boolean userSet = mForceUserSetOnUpgrade ? true : pkgPerm.userModifiedSettings;
             setNotificationPermission(pkgPerm.packageName, pkgPerm.userId, pkgPerm.granted,
-                    userSet, !userSet);
+                    true /* userSet always true on upgrade */);
         }
     }
 
     public boolean isPermissionFixed(String packageName, @UserIdInt int userId) {
-        assertFlag();
         final long callingId = Binder.clearCallingIdentity();
         try {
             try {
@@ -260,7 +221,6 @@ public final class PermissionHelper {
     }
 
     boolean isPermissionUserSet(String packageName, @UserIdInt int userId) {
-        assertFlag();
         final long callingId = Binder.clearCallingIdentity();
         try {
             try {
@@ -278,7 +238,6 @@ public final class PermissionHelper {
     }
 
     boolean isPermissionGrantedByDefaultOrRole(String packageName, @UserIdInt int userId) {
-        assertFlag();
         final long callingId = Binder.clearCallingIdentity();
         try {
             try {
@@ -297,7 +256,6 @@ public final class PermissionHelper {
 
     private boolean packageRequestsNotificationPermission(String packageName,
             @UserIdInt int userId) {
-        assertFlag();
         try {
             String[] permissions = mPackageManager.getPackageInfo(packageName, GET_PERMISSIONS,
                     userId).requestedPermissions;
@@ -306,12 +264,6 @@ public final class PermissionHelper {
             Slog.e(TAG, "Could not reach system server", e);
         }
         return false;
-    }
-
-    private void assertFlag() {
-        if (!mMigrationEnabled) {
-            throw new IllegalStateException("Method called without checking flag value");
-        }
     }
 
     public static class PackagePermission {

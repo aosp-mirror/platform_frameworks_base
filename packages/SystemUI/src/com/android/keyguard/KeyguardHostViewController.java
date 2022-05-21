@@ -68,22 +68,19 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
     private final KeyguardUpdateMonitorCallback mUpdateCallback =
             new KeyguardUpdateMonitorCallback() {
                 @Override
-                public void onUserSwitchComplete(int userId) {
-                    mKeyguardSecurityContainerController.showPrimarySecurityScreen(
-                            false /* turning off */);
-                }
-
-                @Override
                 public void onTrustGrantedWithFlags(int flags, int userId) {
                     if (userId != KeyguardUpdateMonitor.getCurrentUser()) return;
                     boolean bouncerVisible = mView.isVisibleToUser();
+                    boolean temporaryAndRenewable =
+                            (flags & TrustAgentService.FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE)
+                            != 0;
                     boolean initiatedByUser =
                             (flags & TrustAgentService.FLAG_GRANT_TRUST_INITIATED_BY_USER) != 0;
                     boolean dismissKeyguard =
                             (flags & TrustAgentService.FLAG_GRANT_TRUST_DISMISS_KEYGUARD) != 0;
 
                     if (initiatedByUser || dismissKeyguard) {
-                        if (mViewMediatorCallback.isScreenOn()
+                        if ((mViewMediatorCallback.isScreenOn() || temporaryAndRenewable)
                                 && (bouncerVisible || dismissKeyguard)) {
                             if (!bouncerVisible) {
                                 // The trust agent dismissed the keyguard without the user proving

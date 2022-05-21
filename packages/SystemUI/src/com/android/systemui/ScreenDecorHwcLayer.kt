@@ -380,7 +380,7 @@ class ScreenDecorHwcLayer(context: Context, displayDecorationSupport: DisplayDec
     ) {
         if (hasTopRoundedCorner == hasTop &&
                 hasBottomRoundedCorner == hasBottom &&
-                roundedCornerBottomSize == bottomSize &&
+                roundedCornerTopSize == topSize &&
                 roundedCornerBottomSize == bottomSize) {
             return
         }

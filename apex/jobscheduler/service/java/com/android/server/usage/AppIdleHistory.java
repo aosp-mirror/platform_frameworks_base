@@ -328,11 +328,13 @@ public class AppIdleHistory {
             appUsageHistory.lastUsedScreenTime = getScreenOnTime(nowElapsedRealtimeMs);
         }
 
-        if (appUsageHistory.currentBucket > newBucket) {
-            appUsageHistory.currentBucket = newBucket;
-            logAppStandbyBucketChanged(packageName, userId, newBucket, bucketingReason);
+        if (appUsageHistory.currentBucket >= newBucket) {
+            if (appUsageHistory.currentBucket > newBucket) {
+                appUsageHistory.currentBucket = newBucket;
+                logAppStandbyBucketChanged(packageName, userId, newBucket, bucketingReason);
+            }
+            appUsageHistory.bucketingReason = bucketingReason;
         }
-        appUsageHistory.bucketingReason = bucketingReason;
 
         return appUsageHistory;
     }
@@ -979,6 +981,7 @@ public class AppIdleHistory {
             dumpBucketExpiryTimes(idpw, appUsageHistory, totalElapsedTime);
             idpw.print(" lastJob=");
             TimeUtils.formatDuration(totalElapsedTime - appUsageHistory.lastJobRunTime, idpw);
+            idpw.print(" lastInformedBucket=" + appUsageHistory.lastInformedBucket);
             if (appUsageHistory.lastRestrictAttemptElapsedTime > 0) {
                 idpw.print(" lastRestrictAttempt=");
                 TimeUtils.formatDuration(

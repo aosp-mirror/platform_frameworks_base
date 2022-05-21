@@ -23,4 +23,10 @@ import android.content.Context
  */
 interface UserContextProvider {
     val userContext: Context
+
+    /**
+     * Creates the {@code context} with the current user.
+     * @see Context#createContextAsUser(UserHandle, int)
+     */
+    fun createCurrentUserContext(context: Context): Context
 }

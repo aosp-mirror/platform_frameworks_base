@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"اپنے کیلنڈر تک رسائی حاصل کریں"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"‏SMS پیغامات بھیجیں اور دیکھیں"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"فائلز اور دستاویزات"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"فائلز اور دستاویزات"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"آپ کے آلے پر فائلز اور دستاویزات تک رسائی حاصل کریں"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"موسیقی اور دیگر آڈیو"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"آپ کے آلے پر آڈیو فائلز تک رسائی حاصل کریں"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"تصاویر اور ویڈیوز"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"آپ کے آلے پر تصاویر اور ویڈیو فائلز تک رسائی حاصل کریں"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"موسیقی اور آڈیو"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"اپنے آلے پر موسیقی اور آڈیو تک رسائی حاصل کریں"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"تصاویر اور ویڈیوز"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"اپنے آلے پر تصاویر اور ویڈیوز تک رسائی حاصل کریں"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"مائیکروفون"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"آڈیو ریکارڈ کریں"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"جسمانی سرگرمی"</string>
@@ -1616,7 +1616,7 @@
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"اسکرین کو آلہ پر کاسٹ کریں"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"آلات تلاش کر رہا ہے…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"ترتیبات"</string>
-    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"غیر مربوط کریں"</string>
+    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"منقطع کریں"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"اسکین کر رہا ہے…"</string>
     <string name="media_route_status_connecting" msgid="5845597961412010540">"مربوط ہو رہا ہے…"</string>
     <string name="media_route_status_available" msgid="1477537663492007608">"دستیاب"</string>
@@ -1681,9 +1681,9 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> کو آپ کے آلے کا مکمل کنٹرول حاصل کرنے کی اجازت دیں؟"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"مکمل کنٹرول ان ایپس کے لیے مناسب ہے جو ایکسیسبیلٹی کی ضروریات میں آپ کی مدد کرتی ہیں، لیکن زیادہ تر ایپس کیلئے مناسب نہیں۔"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"اسکرین کو دیکھیں اور کنٹرول کریں"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"یہ تمام مواد کو اسکرین پر پڑھ اور دیگر ایپس پر مواد کو ڈسپلے کر سکتا ہے۔"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"یہ اسکرین پر موجود تمام مواد کو پڑھ سکتا ہے اور دیگر ایپس پر مواد کو ڈسپلے کر سکتا ہے۔"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"کارروائیاں دیکھیں اور انجام دیں"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"یہ آپ کے تعاملات کو ایپ یا ہارڈویئر سینسر کے ذریعے ٹریک کر سکتا ہے، اور آپ کی طرف سے ایپ کے ساتھ تعمل کر سکتا ہے۔"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"یہ کسی ایپ یا ہارڈویئر سینسر کے ساتھ آپ کے تعاملات کو ٹریک کر سکتا ہے، اور آپ کی طرف سے ایپس کے ساتھ تعامل کر سکتا ہے۔"</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"اجازت دیں"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"مسترد کریں"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ایک خصوصیت کا استعمال شروع کرنے کیلئے اسے تھپتھپائیں:"</string>
@@ -1697,7 +1697,7 @@
     <string name="color_inversion_feature_name" msgid="326050048927789012">"رنگوں کی تقلیب"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"رنگ کی تصحیح"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"ایک ہاتھ کی وضع"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"اضافی دھندلا"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"اضافی مدھم"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"والیوم کی کلیدوں کو دبائے رکھا گیا۔ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> آن ہے۔"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"والیوم کی کلیدوں کو دبائے رکھا گیا۔ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> آف ہے۔"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> کا استعمال کرنے کے لیے 3 سیکنڈ تک والیوم کی دونوں کلیدوں کو چھوئیں اور دبائے رکھیں"</string>
@@ -2053,8 +2053,7 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\'ڈسٹرب نہ کریں\' تبدیل ہو گيا ہے"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"مسدود کی گئی چیزوں کو چیک کرنے کے لیے تھپتھپائیں۔"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"اطلاع کی ترتیبات کا جائزہ لیں"</string>
-    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
-    <skip />
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"‏Android 13 کے ساتھ اب آپ جو بھی ایپس انسٹال کریں گے انہیں اطلاعات بھیجنے کے لیے آپ کی اجازت درکار ہوگی۔ موجودہ ایپس کے لیے اس اجازت کو تبدیل کرنے کی خاطر تھپتھپائیں۔"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"بعد میں یاد دلائیں"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"برخاست کریں"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"سسٹم"</string>
@@ -2282,5 +2281,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"فعال ایپس چیک کریں"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"آپ کے <xliff:g id="DEVICE">%1$s</xliff:g> سے فون کے کیمرا تک رسائی حاصل نہیں کی جا سکتی"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"آپ کے <xliff:g id="DEVICE">%1$s</xliff:g> سے ٹیبلیٹ کے کیمرا تک رسائی حاصل نہیں کی جا سکتی"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"سسٹم کی زبان"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"سسٹم ڈیفالٹ"</string>
 </resources>

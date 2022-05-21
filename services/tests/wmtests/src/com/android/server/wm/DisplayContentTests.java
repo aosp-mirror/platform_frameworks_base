@@ -41,8 +41,10 @@ import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
+import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
@@ -1165,6 +1167,45 @@ public class DisplayContentTests extends WindowTestsBase {
         // Expect null means no change IME parent when the IME layering target not yet
         // request IME to be the input target.
         assertNull(mDisplayContent.computeImeParent());
+    }
+
+    @UseTestDisplay(addWindows = W_ACTIVITY)
+    @Test
+    public void testComputeImeParent_updateParentWhenTargetNotUseIme() throws Exception {
+        WindowState overlay = createWindow(null, TYPE_APPLICATION_OVERLAY, "overlay");
+        overlay.setBounds(100, 100, 200, 200);
+        overlay.mAttrs.flags = FLAG_NOT_FOCUSABLE | FLAG_ALT_FOCUSABLE_IM;
+        WindowState app = createWindow(null, TYPE_BASE_APPLICATION, "app");
+        mDisplayContent.setImeLayeringTarget(overlay);
+        mDisplayContent.setImeInputTarget(app);
+        assertFalse(mDisplayContent.shouldImeAttachedToApp());
+        assertEquals(mDisplayContent.getImeContainer().getParentSurfaceControl(),
+                mDisplayContent.computeImeParent());
+    }
+
+    @Test
+    public void testComputeImeParent_remoteControlTarget() throws Exception {
+        final DisplayContent dc = mDisplayContent;
+        WindowState app1 = createWindow(null, TYPE_BASE_APPLICATION, "app1");
+        WindowState app2 = createWindow(null, TYPE_BASE_APPLICATION, "app2");
+
+        dc.setImeLayeringTarget(app1);
+        dc.setImeInputTarget(app2);
+        dc.setRemoteInsetsController(createDisplayWindowInsetsController());
+        dc.getImeTarget(IME_TARGET_LAYERING).getWindow().setWindowingMode(
+                WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW);
+        dc.getImeInputTarget().getWindowState().setWindowingMode(
+                WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW);
+
+        // Expect ImeParent is null since ImeLayeringTarget and ImeInputTarget are different.
+        assertNull(dc.computeImeParent());
+
+        // ImeLayeringTarget and ImeInputTarget are updated to the same.
+        dc.setImeInputTarget(app1);
+        assertEquals(dc.getImeTarget(IME_TARGET_LAYERING), dc.getImeInputTarget());
+
+        // The ImeParent should be the display.
+        assertEquals(dc.getImeContainer().getParent().getSurfaceControl(), dc.computeImeParent());
     }
 
     @Test
@@ -2400,7 +2441,7 @@ public class DisplayContentTests extends WindowTestsBase {
         ContentRecordingSession session = ContentRecordingSession.createDisplaySession(
                 tokenToMirror);
         session.setDisplayId(displayId);
-        mWm.setContentRecordingSession(session);
+        mWm.mContentRecordingController.setContentRecordingSessionLocked(session, mWm);
         actualDC.updateRecording();
 
         // THEN mirroring is not started, since a null surface indicates the VirtualDisplay is off.
@@ -2429,7 +2470,7 @@ public class DisplayContentTests extends WindowTestsBase {
         ContentRecordingSession session = ContentRecordingSession.createDisplaySession(
                 tokenToMirror);
         session.setDisplayId(displayId);
-        mWm.setContentRecordingSession(session);
+        mWm.mContentRecordingController.setContentRecordingSessionLocked(session, mWm);
         mWm.mRoot.onDisplayAdded(displayId);
 
         // WHEN getting the DisplayContent for the new virtual display.

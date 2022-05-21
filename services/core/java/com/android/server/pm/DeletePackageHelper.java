@@ -166,9 +166,10 @@ final class DeletePackageHelper {
 
             if (PackageManagerServiceUtils.isSystemApp(uninstalledPs)) {
                 UserInfo userInfo = mUserManagerInternal.getUserInfo(userId);
-                if (userInfo == null || !userInfo.isAdmin()) {
+                if (userInfo == null || (!userInfo.isAdmin() && !mUserManagerInternal.getUserInfo(
+                        mUserManagerInternal.getProfileParentId(userId)).isAdmin())) {
                     Slog.w(TAG, "Not removing package " + packageName
-                            + " as only admin user may downgrade system apps");
+                            + " as only admin user (or their profile) may downgrade system apps");
                     EventLog.writeEvent(0x534e4554, "170646036", -1, packageName);
                     return PackageManager.DELETE_FAILED_USER_RESTRICTED;
                 }

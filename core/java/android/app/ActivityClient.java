@@ -98,6 +98,15 @@ public class ActivityClient {
         }
     }
 
+    /** Reports the activity starts local relaunch. */
+    public void activityLocalRelaunch(IBinder token) {
+        try {
+            getActivityClientController().activityLocalRelaunch(token);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
     /** Reports the activity has completed relaunched. */
     public void activityRelaunched(IBinder token) {
         try {

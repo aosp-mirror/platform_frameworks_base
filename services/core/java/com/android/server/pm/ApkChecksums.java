@@ -34,13 +34,14 @@ import android.content.Context;
 import android.content.pm.ApkChecksum;
 import android.content.pm.Checksum;
 import android.content.pm.IOnChecksumsReadyListener;
-import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.Signature;
 import android.content.pm.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
+import android.os.Environment;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -63,7 +64,6 @@ import android.util.apk.VerityBuilder;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.security.VerityUtils;
-import com.android.server.LocalServices;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.ByteArrayOutputStream;
@@ -77,6 +77,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.security.DigestException;
 import java.security.InvalidParameterException;
@@ -584,7 +585,7 @@ public class ApkChecksums {
                         });
                 checksums.put(TYPE_WHOLE_MERKLE_ROOT_4K_SHA256,
                         new ApkChecksum(split, TYPE_WHOLE_MERKLE_ROOT_4K_SHA256,
-                                generatedRootHash));
+                                verityHashForFile(file, generatedRootHash)));
             } catch (IOException | NoSuchAlgorithmException | DigestException e) {
                 Slog.e(TAG, "Error calculating WHOLE_MERKLE_ROOT_4K_SHA256", e);
             }
@@ -637,22 +638,32 @@ public class ApkChecksums {
         return null;
     }
 
+    private static boolean containsFile(File dir, String filePath) {
+        if (dir == null) {
+            return false;
+        }
+        return FileUtils.contains(dir.getAbsolutePath(), filePath);
+    }
+
     private static ApkChecksum extractHashFromFS(String split, String filePath) {
         // verity first
-        {
-            byte[] hash = VerityUtils.getFsverityRootHash(filePath);
-            if (hash != null) {
-                return new ApkChecksum(split, TYPE_WHOLE_MERKLE_ROOT_4K_SHA256, hash);
+        // Skip /product folder.
+        // TODO(b/231354111): remove this hack once we are allowed to change SELinux rules.
+        if (!containsFile(Environment.getProductDirectory(), filePath)) {
+            byte[] verityHash = VerityUtils.getFsverityRootHash(filePath);
+            if (verityHash != null) {
+                return new ApkChecksum(split, TYPE_WHOLE_MERKLE_ROOT_4K_SHA256, verityHash);
             }
         }
         // v4 next
         try {
             ApkSignatureSchemeV4Verifier.VerifiedSigner signer =
                     ApkSignatureSchemeV4Verifier.extractCertificates(filePath);
-            byte[] hash = signer.contentDigests.getOrDefault(CONTENT_DIGEST_VERITY_CHUNKED_SHA256,
-                    null);
-            if (hash != null) {
-                return new ApkChecksum(split, TYPE_WHOLE_MERKLE_ROOT_4K_SHA256, hash);
+            byte[] rootHash = signer.contentDigests.getOrDefault(
+                    CONTENT_DIGEST_VERITY_CHUNKED_SHA256, null);
+            if (rootHash != null) {
+                return new ApkChecksum(split, TYPE_WHOLE_MERKLE_ROOT_4K_SHA256,
+                        verityHashForFile(new File(filePath), rootHash));
             }
         } catch (SignatureNotFoundException e) {
             // Nothing
@@ -660,6 +671,41 @@ public class ApkChecksums {
             Slog.e(TAG, "V4 signature error", e);
         }
         return null;
+    }
+
+    /**
+     * Returns fs-verity digest as described in
+     * https://www.kernel.org/doc/html/latest/filesystems/fsverity.html#fs-verity-descriptor
+     * @param file the Merkle tree is built over
+     * @param rootHash Merkle tree root hash
+     */
+    static byte[] verityHashForFile(File file, byte[] rootHash) {
+        try {
+            ByteBuffer buffer = ByteBuffer.allocate(256); // sizeof(fsverity_descriptor)
+            buffer.order(ByteOrder.LITTLE_ENDIAN);
+            buffer.put((byte) 1);               // __u8 version, must be 1
+            buffer.put((byte) 1);               // __u8 hash_algorithm, FS_VERITY_HASH_ALG_SHA256
+            buffer.put((byte) 12);              // __u8, FS_VERITY_LOG_BLOCKSIZE
+            buffer.put((byte) 0);               // __u8, size of salt in bytes; 0 if none
+            buffer.putInt(0);                   // __le32 __reserved_0x04, must be 0
+            buffer.putLong(file.length());      // __le64 data_size
+            buffer.put(rootHash);               // root_hash, first 32 bytes
+            final int padding = 32 + 32 + 144;  // root_hash, last 32 bytes, we are using sha256.
+            // salt, 32 bytes
+            // reserved, 144 bytes
+            for (int i = 0; i < padding; ++i) {
+                buffer.put((byte) 0);
+            }
+
+            buffer.flip();
+
+            final MessageDigest md = MessageDigest.getInstance(ALGO_SHA256);
+            md.update(buffer);
+            return md.digest();
+        } catch (NoSuchAlgorithmException e) {
+            Slog.e(TAG, "Device does not support MessageDigest algorithm", e);
+            return null;
+        }
     }
 
     private static Map<Integer, ApkChecksum> extractHashFromV2V3Signature(
