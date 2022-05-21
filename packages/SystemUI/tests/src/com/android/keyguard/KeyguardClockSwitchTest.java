@@ -43,6 +43,7 @@ import android.widget.TextClock;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ClockPlugin;
+import com.android.systemui.shared.clocks.AnimatableClockView;
 import com.android.systemui.statusbar.StatusBarState;
 
 import org.junit.Before;
