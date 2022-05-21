@@ -167,6 +167,11 @@ class WindowContainerThumbnail implements Animatable {
     }
 
     @Override
+    public Transaction getSyncTransaction() {
+        return mWindowContainer.getSyncTransaction();
+    }
+
+    @Override
     public Transaction getPendingTransaction() {
         return mWindowContainer.getPendingTransaction();
     }

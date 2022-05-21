@@ -157,13 +157,14 @@ class ActiveAdmin {
     private static final String TAG_SSID_ALLOWLIST = "ssid-allowlist";
     private static final String TAG_SSID_DENYLIST = "ssid-denylist";
     private static final String TAG_SSID = "ssid";
-    private static final String ATTR_VALUE = "value";
-    private static final String ATTR_LAST_NETWORK_LOGGING_NOTIFICATION = "last-notification";
-    private static final String ATTR_NUM_NETWORK_LOGGING_NOTIFICATIONS = "num-notifications";
     private static final String TAG_PREFERENTIAL_NETWORK_SERVICE_CONFIGS =
             "preferential_network_service_configs";
     private static final String TAG_PREFERENTIAL_NETWORK_SERVICE_CONFIG =
             "preferential_network_service_config";
+    private static final String TAG_PROTECTED_PACKAGES = "protected_packages";
+    private static final String ATTR_VALUE = "value";
+    private static final String ATTR_LAST_NETWORK_LOGGING_NOTIFICATION = "last-notification";
+    private static final String ATTR_NUM_NETWORK_LOGGING_NOTIFICATIONS = "num-notifications";
 
     DeviceAdminInfo info;
 
@@ -252,6 +253,9 @@ class ActiveAdmin {
 
     // List of package names to keep cached.
     List<String> keepUninstalledPackages;
+
+    // List of packages for which the user cannot invoke "clear data" or "force stop".
+    List<String> protectedPackages;
 
     // Wi-Fi SSID restriction policy.
     WifiSsidPolicy mWifiSsidPolicy;
@@ -505,6 +509,7 @@ class ActiveAdmin {
                 permittedNotificationListeners);
         writePackageListToXml(out, TAG_KEEP_UNINSTALLED_PACKAGES, keepUninstalledPackages);
         writePackageListToXml(out, TAG_METERED_DATA_DISABLED_PACKAGES, meteredDisabledPackages);
+        writePackageListToXml(out, TAG_PROTECTED_PACKAGES, protectedPackages);
         if (hasUserRestrictions()) {
             UserRestrictionsUtils.writeRestrictions(
                     out, userRestrictions, TAG_USER_RESTRICTIONS);
@@ -771,6 +776,8 @@ class ActiveAdmin {
                 keepUninstalledPackages = readPackageList(parser, tag);
             } else if (TAG_METERED_DATA_DISABLED_PACKAGES.equals(tag)) {
                 meteredDisabledPackages = readPackageList(parser, tag);
+            } else if (TAG_PROTECTED_PACKAGES.equals(tag)) {
+                protectedPackages = readPackageList(parser, tag);
             } else if (TAG_USER_RESTRICTIONS.equals(tag)) {
                 userRestrictions = UserRestrictionsUtils.readRestrictions(parser);
             } else if (TAG_DEFAULT_ENABLED_USER_RESTRICTIONS.equals(tag)) {
@@ -1208,6 +1215,16 @@ class ActiveAdmin {
         if (keepUninstalledPackages != null) {
             pw.print("keepUninstalledPackages=");
             pw.println(keepUninstalledPackages);
+        }
+
+        if (meteredDisabledPackages != null) {
+            pw.print("meteredDisabledPackages=");
+            pw.println(meteredDisabledPackages);
+        }
+
+        if (protectedPackages != null) {
+            pw.print("protectedPackages=");
+            pw.println(protectedPackages);
         }
 
         pw.print("organizationColor=");

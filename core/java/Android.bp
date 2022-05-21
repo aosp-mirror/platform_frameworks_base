@@ -15,6 +15,14 @@ filegroup {
         "**/*.java",
         "**/*.aidl",
     ],
+    exclude_srcs: [
+        // Remove election toolbar code from build time
+        "android/service/selectiontoolbar/*.aidl",
+        "android/service/selectiontoolbar/*.java",
+        "android/view/selectiontoolbar/*.aidl",
+        "android/view/selectiontoolbar/*.java",
+        "com/android/internal/widget/floatingtoolbar/RemoteFloatingToolbarPopup.java",
+    ],
     visibility: ["//frameworks/base"],
 }
 
@@ -41,6 +49,12 @@ filegroup {
 filegroup {
     name: "TraceReportParams.aidl",
     srcs: ["android/tracing/TraceReportParams.aidl"],
+}
+
+filegroup {
+    name: "framework-internal-display-sources",
+    srcs: ["com/android/internal/display/BrightnessSynchronizer.java"],
+    visibility: ["//frameworks/base/services/tests/mockingservicestests"],
 }
 
 // These are subset of framework-core-sources that are needed by the

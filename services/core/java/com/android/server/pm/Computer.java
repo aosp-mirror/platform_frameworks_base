@@ -94,12 +94,13 @@ import java.util.Set;
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
 public interface Computer extends PackageDataSnapshot {
 
+    int getVersion();
+
     /**
      * Administrative statistics: record that the snapshot has been used.  Every call
      * to use() increments the usage counter.
      */
-    default void use() {
-    }
+    Computer use();
     /**
      * Fetch the snapshot usage counter.
      * @return The number of times this snapshot was used.

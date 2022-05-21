@@ -21,6 +21,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.any
@@ -62,6 +63,9 @@ class QSPanelControllerTest : SysuiTestCase() {
         whenever(brightnessControllerFactory.create(any())).thenReturn(brightnessController)
         whenever(qsPanel.resources).thenReturn(mContext.orCreateTestableResources.resources)
         whenever(statusBarKeyguardViewManager.isBouncerInTransit()).thenReturn(false)
+        whenever(qsPanel.setListening(anyBoolean())).then {
+            whenever(qsPanel.isListening).thenReturn(it.getArgument(0))
+        }
 
         controller = QSPanelController(
             qsPanel,
@@ -100,7 +104,6 @@ class QSPanelControllerTest : SysuiTestCase() {
         controller.setTiles()
         whenever(tile.isListening()).thenReturn(false)
         whenever(otherTile.isListening()).thenReturn(true)
-        whenever(qsPanel.isListening).thenReturn(true)
 
         controller.setListening(true, true)
 

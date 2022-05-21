@@ -154,7 +154,9 @@ public class UdfpsDialogMeasureAdapter {
 
         //re-calculate the height of description
         View description = mView.findViewById(R.id.description);
-        totalHeight += measureDescription(description, displayHeight, width, totalHeight);
+        if (description != null && description.getVisibility() != View.GONE) {
+            totalHeight += measureDescription(description, displayHeight, width, totalHeight);
+        }
 
         return new AuthDialog.LayoutParams(width, totalHeight);
     }

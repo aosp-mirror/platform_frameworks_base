@@ -168,16 +168,7 @@ class MediaResumeListenerTest : SysuiTestCase() {
 
     @Test
     fun testOnLoad_checksForResume_badService() {
-        // Set up MBS that will allow connection but not return valid media
-        val pm = mock(PackageManager::class.java)
-        whenever(mockContext.packageManager).thenReturn(pm)
-        val resolveInfo = ResolveInfo()
-        val serviceInfo = ServiceInfo()
-        serviceInfo.packageName = PACKAGE_NAME
-        resolveInfo.serviceInfo = serviceInfo
-        resolveInfo.serviceInfo.name = CLASS_NAME
-        val resumeInfo = listOf(resolveInfo)
-        whenever(pm.queryIntentServices(any(), anyInt())).thenReturn(resumeInfo)
+        setUpMbsWithValidResolveInfo()
 
         whenever(resumeBrowser.testConnection()).thenAnswer {
             callbackCaptor.value.onError()
@@ -213,16 +204,7 @@ class MediaResumeListenerTest : SysuiTestCase() {
 
     @Test
     fun testOnLoad_checksForResume_hasService() {
-        // Set up mocks to successfully find a MBS that returns valid media
-        val pm = mock(PackageManager::class.java)
-        whenever(mockContext.packageManager).thenReturn(pm)
-        val resolveInfo = ResolveInfo()
-        val serviceInfo = ServiceInfo()
-        serviceInfo.packageName = PACKAGE_NAME
-        resolveInfo.serviceInfo = serviceInfo
-        resolveInfo.serviceInfo.name = CLASS_NAME
-        val resumeInfo = listOf(resolveInfo)
-        whenever(pm.queryIntentServices(any(), anyInt())).thenReturn(resumeInfo)
+        setUpMbsWithValidResolveInfo()
 
         val description = MediaDescription.Builder().setTitle(TITLE).build()
         val component = ComponentName(PACKAGE_NAME, CLASS_NAME)
@@ -288,16 +270,7 @@ class MediaResumeListenerTest : SysuiTestCase() {
 
     @Test
     fun testGetResumeAction_restarts() {
-        // Set up mocks to successfully find a MBS that returns valid media
-        val pm = mock(PackageManager::class.java)
-        whenever(mockContext.packageManager).thenReturn(pm)
-        val resolveInfo = ResolveInfo()
-        val serviceInfo = ServiceInfo()
-        serviceInfo.packageName = PACKAGE_NAME
-        resolveInfo.serviceInfo = serviceInfo
-        resolveInfo.serviceInfo.name = CLASS_NAME
-        val resumeInfo = listOf(resolveInfo)
-        whenever(pm.queryIntentServices(any(), anyInt())).thenReturn(resumeInfo)
+        setUpMbsWithValidResolveInfo()
 
         val description = MediaDescription.Builder().setTitle(TITLE).build()
         val component = ComponentName(PACKAGE_NAME, CLASS_NAME)
@@ -425,5 +398,92 @@ class MediaResumeListenerTest : SysuiTestCase() {
                     assertThat(result[2].toLong()).isEqualTo(currentTime)
                 }
         verify(sharedPrefsEditor, times(1)).apply()
+    }
+
+    @Test
+    fun testOnMediaDataLoaded_newKeyDifferent_oldMediaBrowserDisconnected() {
+        setUpMbsWithValidResolveInfo()
+
+        resumeListener.onMediaDataLoaded(key = KEY, oldKey = null, data)
+        executor.runAllReady()
+
+        resumeListener.onMediaDataLoaded(key = "newKey", oldKey = KEY, data)
+
+        verify(resumeBrowser).disconnect()
+    }
+
+    @Test
+    fun testOnMediaDataLoaded_updatingResumptionListError_mediaBrowserDisconnected() {
+        setUpMbsWithValidResolveInfo()
+
+        // Set up mocks to return with an error
+        whenever(resumeBrowser.testConnection()).thenAnswer {
+            callbackCaptor.value.onError()
+        }
+
+        resumeListener.onMediaDataLoaded(key = KEY, oldKey = null, data)
+        executor.runAllReady()
+
+        // Ensure we disconnect the browser
+        verify(resumeBrowser).disconnect()
+    }
+
+    @Test
+    fun testOnMediaDataLoaded_trackAdded_mediaBrowserDisconnected() {
+        setUpMbsWithValidResolveInfo()
+
+        // Set up mocks to return with a track added
+        val description = MediaDescription.Builder().setTitle(TITLE).build()
+        val component = ComponentName(PACKAGE_NAME, CLASS_NAME)
+        whenever(resumeBrowser.testConnection()).thenAnswer {
+            callbackCaptor.value.addTrack(description, component, resumeBrowser)
+        }
+
+        resumeListener.onMediaDataLoaded(key = KEY, oldKey = null, data)
+        executor.runAllReady()
+
+        // Ensure we disconnect the browser
+        verify(resumeBrowser).disconnect()
+    }
+
+    @Test
+    fun testResumeAction_oldMediaBrowserDisconnected() {
+        setUpMbsWithValidResolveInfo()
+
+        val description = MediaDescription.Builder().setTitle(TITLE).build()
+        val component = ComponentName(PACKAGE_NAME, CLASS_NAME)
+        whenever(resumeBrowser.testConnection()).thenAnswer {
+            callbackCaptor.value.addTrack(description, component, resumeBrowser)
+        }
+
+        // Load media data that will require us to get the resume action
+        val dataCopy = data.copy(resumeAction = null, hasCheckedForResume = false)
+        resumeListener.onMediaDataLoaded(KEY, null, dataCopy)
+        executor.runAllReady()
+        verify(mediaDataManager, times(2)).setResumeAction(eq(KEY), capture(actionCaptor))
+
+        // Set up our factory to return a new browser so we can verify we disconnected the old one
+        val newResumeBrowser = mock(ResumeMediaBrowser::class.java)
+        whenever(resumeBrowserFactory.create(capture(callbackCaptor), any()))
+            .thenReturn(newResumeBrowser)
+
+        // When the resume action is run
+        actionCaptor.value.run()
+
+        // Then we disconnect the old one
+        verify(resumeBrowser).disconnect()
+    }
+
+    /** Sets up mocks to successfully find a MBS that returns valid media. */
+    private fun setUpMbsWithValidResolveInfo() {
+        val pm = mock(PackageManager::class.java)
+        whenever(mockContext.packageManager).thenReturn(pm)
+        val resolveInfo = ResolveInfo()
+        val serviceInfo = ServiceInfo()
+        serviceInfo.packageName = PACKAGE_NAME
+        resolveInfo.serviceInfo = serviceInfo
+        resolveInfo.serviceInfo.name = CLASS_NAME
+        val resumeInfo = listOf(resolveInfo)
+        whenever(pm.queryIntentServices(any(), anyInt())).thenReturn(resumeInfo)
     }
 }

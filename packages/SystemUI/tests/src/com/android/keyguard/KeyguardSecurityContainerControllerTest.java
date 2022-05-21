@@ -123,6 +123,8 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     private UserSwitcherController mUserSwitcherController;
     @Mock
     private SessionTracker mSessionTracker;
+    @Mock
+    private KeyguardViewController mKeyguardViewController;
     private Configuration mConfiguration;
 
     private KeyguardSecurityContainerController mKeyguardSecurityContainerController;
@@ -150,7 +152,7 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
                 (KeyguardPasswordView) mKeyguardPasswordView, mKeyguardUpdateMonitor,
                 SecurityMode.Password, mLockPatternUtils, null,
                 mKeyguardMessageAreaControllerFactory, null, null, mEmergencyButtonController,
-                null, mock(Resources.class), null);
+                null, mock(Resources.class), null, mKeyguardViewController);
 
         mKeyguardSecurityContainerController = new KeyguardSecurityContainerController.Factory(
                 mView, mAdminSecondaryLockScreenControllerFactory, mLockPatternUtils,
@@ -286,5 +288,15 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
         mKeyguardSecurityContainerController.showSecurityScreen(SecurityMode.Password);
         verify(mView).initMode(MODE_DEFAULT, mGlobalSettings, mFalsingManager,
                 mUserSwitcherController);
+    }
+
+    @Test
+    public void addUserSwitchCallback() {
+        mKeyguardSecurityContainerController.onViewAttached();
+        verify(mUserSwitcherController)
+                .addUserSwitchCallback(any(UserSwitcherController.UserSwitchCallback.class));
+        mKeyguardSecurityContainerController.onViewDetached();
+        verify(mUserSwitcherController)
+                .removeUserSwitchCallback(any(UserSwitcherController.UserSwitchCallback.class));
     }
 }

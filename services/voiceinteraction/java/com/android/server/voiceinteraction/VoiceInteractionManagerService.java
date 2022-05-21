@@ -323,6 +323,16 @@ public class VoiceInteractionManagerService extends SystemService {
             new RoleObserver(mContext.getMainExecutor());
         }
 
+        void handleUserStop(String packageName, int userHandle) {
+            synchronized (VoiceInteractionManagerServiceStub.this) {
+                ComponentName curInteractor = getCurInteractor(userHandle);
+                if (curInteractor != null && packageName.equals(curInteractor.getPackageName())) {
+                    Slog.d(TAG, "switchImplementation for user stop.");
+                    switchImplementationIfNeededLocked(true);
+                }
+            }
+        }
+
         @Override
         public @NonNull IVoiceInteractionSoundTriggerSession createSoundTriggerSessionAsOriginator(
                 @NonNull Identity originatorIdentity, IBinder client) {
@@ -1824,6 +1834,32 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
+        public void setSessionWindowVisible(IBinder token, boolean visible) {
+            synchronized (this) {
+                if (mImpl == null) {
+                    Slog.w(TAG, "setSessionWindowVisible called without running voice interaction "
+                            + "service");
+                    return;
+                }
+                if (mImpl.mActiveSession == null || token != mImpl.mActiveSession.mToken) {
+                    Slog.w(TAG, "setSessionWindowVisible does not match active session");
+                    return;
+                }
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    mVoiceInteractionSessionListeners.broadcast(listener -> {
+                        try {
+                            listener.onVoiceSessionWindowVisibilityChanged(visible);
+                        } catch (RemoteException e) {
+                            Slog.e(TAG, "Error delivering window visibility event to listener.", e);
+                        }
+                    });
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
+        }
+
         @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
@@ -2045,6 +2081,7 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         PackageMonitor mPackageMonitor = new PackageMonitor() {
+
             @Override
             public boolean onHandleForceStop(Intent intent, String[] packages, int uid, boolean doit) {
                 if (DEBUG) Slog.d(TAG, "onHandleForceStop uid=" + uid + " doit=" + doit);
@@ -2077,11 +2114,17 @@ public class VoiceInteractionManagerService extends SystemService {
                         }
 
                         setCurInteractor(null, userHandle);
+                        // TODO: should not reset null here. But even remove this line, the
+                        // initForUser() still reset it because the interactor will be null. Keep
+                        // it now but we should still need to fix it.
                         setCurRecognizer(null, userHandle);
                         resetCurAssistant(userHandle);
                         initForUser(userHandle);
                         switchImplementationIfNeededLocked(true);
 
+                        // When resetting the interactor, the recognizer and the assistant settings
+                        // value, we also need to reset the assistant role to keep the values
+                        // consistent. Clear the assistant role will reset to the default value.
                         Context context = getContext();
                         context.getSystemService(RoleManager.class).clearRoleHoldersAsUser(
                                 RoleManager.ROLE_ASSISTANT, 0, UserHandle.of(userHandle),

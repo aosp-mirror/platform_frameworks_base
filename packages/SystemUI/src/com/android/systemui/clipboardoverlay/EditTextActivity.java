@@ -20,10 +20,12 @@ import static java.util.Objects.requireNonNull;
 
 import android.app.Activity;
 import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.ClipboardManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -41,6 +43,7 @@ public class EditTextActivity extends Activity
     private EditText mEditText;
     private ClipboardManager mClipboardManager;
     private TextView mAttribution;
+    private boolean mSensitive;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +75,9 @@ public class EditTextActivity extends Activity
         }
         mEditText.setText(clip.getItemAt(0).getText());
         mEditText.requestFocus();
+        mSensitive = clip.getDescription().getExtras() != null
+                && clip.getDescription().getExtras()
+                .getBoolean(ClipDescription.EXTRA_IS_SENSITIVE);
         mClipboardManager.addPrimaryClipChangedListener(this);
     }
 
@@ -88,6 +94,9 @@ public class EditTextActivity extends Activity
 
     private void saveToClipboard() {
         ClipData clip = ClipData.newPlainText("text", mEditText.getText());
+        PersistableBundle extras = new PersistableBundle();
+        extras.putBoolean(ClipDescription.EXTRA_IS_SENSITIVE, mSensitive);
+        clip.getDescription().setExtras(extras);
         mClipboardManager.setPrimaryClip(clip);
         hideImeAndFinish();
     }

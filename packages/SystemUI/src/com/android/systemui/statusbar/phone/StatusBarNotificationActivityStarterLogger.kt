@@ -23,46 +23,48 @@ import com.android.systemui.log.LogLevel.ERROR
 import com.android.systemui.log.LogLevel.INFO
 import com.android.systemui.log.LogLevel.WARNING
 import com.android.systemui.log.dagger.NotifInteractionLog
+import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.logKey
 import javax.inject.Inject
 
 class StatusBarNotificationActivityStarterLogger @Inject constructor(
     @NotifInteractionLog private val buffer: LogBuffer
 ) {
-    fun logStartingActivityFromClick(key: String) {
+    fun logStartingActivityFromClick(entry: NotificationEntry) {
         buffer.log(TAG, DEBUG, {
-            str1 = key
+            str1 = entry.logKey
         }, {
             "(1/5) onNotificationClicked: $str1"
         })
     }
 
-    fun logHandleClickAfterKeyguardDismissed(key: String) {
+    fun logHandleClickAfterKeyguardDismissed(entry: NotificationEntry) {
         buffer.log(TAG, DEBUG, {
-            str1 = key
+            str1 = entry.logKey
         }, {
             "(2/5) handleNotificationClickAfterKeyguardDismissed: $str1"
         })
     }
 
-    fun logHandleClickAfterPanelCollapsed(key: String) {
+    fun logHandleClickAfterPanelCollapsed(entry: NotificationEntry) {
         buffer.log(TAG, DEBUG, {
-            str1 = key
+            str1 = entry.logKey
         }, {
             "(3/5) handleNotificationClickAfterPanelCollapsed: $str1"
         })
     }
 
-    fun logStartNotificationIntent(key: String) {
+    fun logStartNotificationIntent(entry: NotificationEntry) {
         buffer.log(TAG, INFO, {
-            str1 = key
+            str1 = entry.logKey
         }, {
             "(4/5) startNotificationIntent: $str1"
         })
     }
 
-    fun logSendPendingIntent(key: String, pendingIntent: PendingIntent, result: Int) {
+    fun logSendPendingIntent(entry: NotificationEntry, pendingIntent: PendingIntent, result: Int) {
         buffer.log(TAG, INFO, {
-            str1 = key
+            str1 = entry.logKey
             str2 = pendingIntent.intent.toString()
             int1 = result
         }, {
@@ -70,9 +72,9 @@ class StatusBarNotificationActivityStarterLogger @Inject constructor(
         })
     }
 
-    fun logExpandingBubble(key: String) {
+    fun logExpandingBubble(entry: NotificationEntry) {
         buffer.log(TAG, DEBUG, {
-            str1 = key
+            str1 = entry.logKey
         }, {
             "Expanding bubble for $str1 (rather than firing intent)"
         })
@@ -86,33 +88,33 @@ class StatusBarNotificationActivityStarterLogger @Inject constructor(
         })
     }
 
-    fun logNonClickableNotification(key: String) {
+    fun logNonClickableNotification(entry: NotificationEntry) {
         buffer.log(TAG, ERROR, {
-            str1 = key
+            str1 = entry.logKey
         }, {
             "onNotificationClicked called for non-clickable notification! $str1"
         })
     }
 
-    fun logFullScreenIntentSuppressedByDnD(key: String) {
+    fun logFullScreenIntentSuppressedByDnD(entry: NotificationEntry) {
         buffer.log(TAG, DEBUG, {
-            str1 = key
+            str1 = entry.logKey
         }, {
             "No Fullscreen intent: suppressed by DND: $str1"
         })
     }
 
-    fun logFullScreenIntentNotImportantEnough(key: String) {
+    fun logFullScreenIntentNotImportantEnough(entry: NotificationEntry) {
         buffer.log(TAG, DEBUG, {
-            str1 = key
+            str1 = entry.logKey
         }, {
             "No Fullscreen intent: not important enough: $str1"
         })
     }
 
-    fun logSendingFullScreenIntent(key: String, pendingIntent: PendingIntent) {
+    fun logSendingFullScreenIntent(entry: NotificationEntry, pendingIntent: PendingIntent) {
         buffer.log(TAG, INFO, {
-            str1 = key
+            str1 = entry.logKey
             str2 = pendingIntent.intent.toString()
         }, {
             "Notification $str1 has fullScreenIntent; sending fullScreenIntent $str2"

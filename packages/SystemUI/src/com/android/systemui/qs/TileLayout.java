@@ -17,6 +17,7 @@ import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.QSPanelControllerBase.TileRecord;
 import com.android.systemui.qs.tileimpl.HeightOverrideable;
+import com.android.systemui.qs.tileimpl.QSTileViewImplKt;
 
 import java.util.ArrayList;
 
@@ -46,7 +47,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     private int mMaxColumns = NO_MAX_COLUMNS;
     protected int mResourceColumns;
     private float mSquishinessFraction = 1f;
-    private int mLastTileBottom;
+    protected int mLastTileBottom;
 
     public TileLayout(Context context) {
         this(context, null);
@@ -242,7 +243,11 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
                 record.tileView.setLeftTopRightBottom(left, top, right, bottom);
             }
             record.tileView.setPosition(i);
-            mLastTileBottom = bottom;
+
+            // Set the bottom to the unoverriden squished bottom. This is to avoid fake bottoms that
+            // are only used for QQS -> QS expansion animations
+            float scale = QSTileViewImplKt.constrainSquishiness(mSquishinessFraction);
+            mLastTileBottom = top + (int) (record.tileView.getMeasuredHeight() * scale);
         }
     }
 
@@ -252,7 +257,8 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     }
 
     protected int getRowTop(int row) {
-        return (int) (row * (mCellHeight * mSquishinessFraction + mCellMarginVertical));
+        float scale = QSTileViewImplKt.constrainSquishiness(mSquishinessFraction);
+        return (int) (row * (mCellHeight * scale + mCellMarginVertical));
     }
 
     protected int getColumnStart(int column) {

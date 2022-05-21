@@ -21,10 +21,13 @@ import android.provider.Settings
 import android.testing.AndroidTestingRunner
 
 import androidx.test.filters.SmallTest
+import com.android.dx.mockito.inline.extended.ExtendedMockito
 
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.NOTIFICATIONS_USE_PEOPLE_FILTERING
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.DeviceConfigProxyFake
+import com.android.systemui.util.Utils
+import com.android.systemui.util.mockito.any
 
 import org.junit.After
 import org.junit.Assert.assertFalse
@@ -32,28 +35,33 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.`when`
+import org.mockito.MockitoSession
+import org.mockito.quality.Strictness
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
 class NotificationSectionsFeatureManagerTest : SysuiTestCase() {
     var manager: NotificationSectionsFeatureManager? = null
     val proxyFake = DeviceConfigProxyFake()
-    var originalQsMediaPlayer: Int = 0
+    private lateinit var staticMockSession: MockitoSession
 
     @Before
     public fun setup() {
         manager = NotificationSectionsFeatureManager(proxyFake, mContext)
         manager!!.clearCache()
-        originalQsMediaPlayer = Settings.Global.getInt(context.getContentResolver(),
-                Settings.Global.SHOW_MEDIA_ON_QUICK_SETTINGS, 1)
+        staticMockSession = ExtendedMockito.mockitoSession()
+            .mockStatic<Utils>(Utils::class.java)
+            .strictness(Strictness.LENIENT)
+            .startMocking()
+        `when`(Utils.useQsMediaPlayer(any())).thenReturn(false)
         Settings.Global.putInt(context.getContentResolver(),
                 Settings.Global.SHOW_MEDIA_ON_QUICK_SETTINGS, 0)
     }
 
     @After
     public fun teardown() {
-        Settings.Global.putInt(context.getContentResolver(),
-                Settings.Global.SHOW_MEDIA_ON_QUICK_SETTINGS, originalQsMediaPlayer)
+        staticMockSession.finishMocking()
     }
 
     @Test
