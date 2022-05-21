@@ -24,6 +24,8 @@ import android.os.Parcelable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
+import java.util.StringJoiner;
 
 /**
  * Describe the state of VPN.
@@ -149,5 +151,45 @@ public final class VpnProfileState implements Parcelable {
         mSessionKey = in.readString();
         mAlwaysOn = in.readBoolean();
         mLockdown = in.readBoolean();
+    }
+
+    private String convertStateToString(@State int state) {
+        switch (state) {
+            case STATE_CONNECTED:
+                return "CONNECTED";
+            case STATE_CONNECTING:
+                return "CONNECTING";
+            case STATE_DISCONNECTED:
+                return "DISCONNECTED";
+            case STATE_FAILED:
+                return "FAILED";
+            default:
+                return "UNKNOWN";
+        }
+    }
+
+    @Override
+    public String toString() {
+        final StringJoiner resultJoiner = new StringJoiner(", ", "{", "}");
+        resultJoiner.add("State: " + convertStateToString(getState()));
+        resultJoiner.add("SessionId: " + getSessionId());
+        resultJoiner.add("Always-on: " + isAlwaysOn());
+        resultJoiner.add("Lockdown: " + isLockdownEnabled());
+        return resultJoiner.toString();
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (!(obj instanceof VpnProfileState)) return false;
+        final VpnProfileState that = (VpnProfileState) obj;
+        return (getState() == that.getState()
+                && Objects.equals(getSessionId(), that.getSessionId())
+                && isAlwaysOn() == that.isAlwaysOn()
+                && isLockdownEnabled() == that.isLockdownEnabled());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getState(), getSessionId(), isAlwaysOn(), isLockdownEnabled());
     }
 }

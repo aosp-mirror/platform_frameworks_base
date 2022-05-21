@@ -1065,9 +1065,8 @@ public class NotificationRecordTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testApplyImportanceAdjustmentsForNonOemDefaultAppLockedChannels() {
+    public void testApplyImportanceAdjustments() {
         NotificationChannel channel = new NotificationChannel("a", "a", IMPORTANCE_DEFAULT);
-        channel.setImportanceLockedByOEM(false);
 
         StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,

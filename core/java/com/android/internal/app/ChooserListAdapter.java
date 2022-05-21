@@ -31,6 +31,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.DeviceConfig;
@@ -144,7 +145,9 @@ public class ChooserListAdapter extends ResolverListAdapter {
                     }
                 }
                 if (ai == null) {
-                    ri = packageManager.resolveActivity(ii, PackageManager.MATCH_DEFAULT_ONLY);
+                    // Because of AIDL bug, resolveActivity can't accept subclasses of Intent.
+                    final Intent rii = (ii.getClass() == Intent.class) ? ii : new Intent(ii);
+                    ri = packageManager.resolveActivity(rii, PackageManager.MATCH_DEFAULT_ONLY);
                     ai = ri != null ? ri.activityInfo : null;
                 }
                 if (ai == null) {
@@ -665,8 +668,10 @@ public class ChooserListAdapter extends ResolverListAdapter {
             @Override
             protected List<ResolvedComponentInfo> doInBackground(
                     List<ResolvedComponentInfo>... params) {
+                Trace.beginSection("ChooserListAdapter#SortingTask");
                 mResolverListController.topK(params[0],
                         mChooserListCommunicator.getMaxRankedTargets());
+                Trace.endSection();
                 return params[0];
             }
             @Override

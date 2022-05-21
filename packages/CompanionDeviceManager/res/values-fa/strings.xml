@@ -17,11 +17,10 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"مدیر دستگاه مرتبط"</string>
-    <string name="confirmation_title" msgid="8455544820286920304">"‏مجاز کردن &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; برای مدیریت کردن &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
+    <string name="confirmation_title" msgid="3785000297483688997">"‏به &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; اجازه دهید به &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; دسترسی داشته باشد"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"ساعت"</string>
     <string name="chooser_title" msgid="2262294130493605839">"‏انتخاب <xliff:g id="PROFILE_NAME">%1$s</xliff:g> برای مدیریت کردن با &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>‏&lt;/strong&gt;"</string>
-    <string name="summary_watch" product="default" msgid="7113724443198337683">"<xliff:g id="APP_NAME">%1$s</xliff:g> می‌تواند با اعلان‌های شما تعامل داشته باشد و به اجازه‌های «تلفن»، «پیامک»، «مخاطبین»، و «تقویم» دسترسی پیدا کند."</string>
-    <string name="summary_watch" product="tablet" msgid="7113724443198337683">"<xliff:g id="APP_NAME">%1$s</xliff:g> می‌تواند با اعلان‌های شما تعامل داشته باشد و به اجازه‌های «تلفن»، «پیامک»، «مخاطبین»، و «تقویم» دسترسی پیدا کند."</string>
+    <string name="summary_watch" msgid="3002344206574997652">"این برنامه برای مدیریت <xliff:g id="DEVICE_NAME">%1$s</xliff:g> شما لازم است. <xliff:g id="APP_NAME">%2$s</xliff:g> می‌تواند با اعلان‌های شما تعامل داشته باشد و به اجازه‌های «تلفن»، «پیامک»، «مخاطبین»، «تقویم»، «گزارش‌های تماس» و «دستگاه‌های اطراف» دسترسی خواهد داشت."</string>
     <string name="permission_apps" msgid="6142133265286656158">"برنامه‌ها"</string>
     <string name="permission_apps_summary" msgid="798718816711515431">"جاری‌سازی برنامه‌های تلفن"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"‏اجازه دادن به &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; برای دسترسی به اطلاعات تلفن"</string>
@@ -39,9 +38,11 @@
     <string name="helper_summary_computer" msgid="1676407599909474428">"<xliff:g id="APP_NAME">%1$s</xliff:g> اجازه می‌خواهد ازطرف <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> برنامه‌ها را بین دستگاه‌های شما جاری‌سازی کند"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"دستگاه"</string>
     <string name="summary_generic" msgid="2346762210105903720"></string>
-    <string name="consent_yes" msgid="8344487259618762872">"مجاز است"</string>
+    <string name="consent_yes" msgid="8344487259618762872">"اجازه دادن"</string>
     <string name="consent_no" msgid="2640796915611404382">"مجاز نبودن"</string>
     <string name="consent_back" msgid="2560683030046918882">"برگشت"</string>
     <string name="permission_sync_confirmation_title" msgid="667074294393493186">"انتقال اجازه‌های برنامه به ساعت"</string>
     <string name="permission_sync_summary" msgid="8873391306499120778">"برای آسان‌تر کردن راه‌اندازی ساعت، برنامه‌های نصب‌شده در ساعت درحین راه‌اندازی از همان اجازه‌های تلفن استفاده خواهند کرد.\n\n ممکن است این اجازه‌ها شامل دسترسی به میکروفون و مکان ساعت باشد."</string>
+    <string name="vendor_icon_description" msgid="4445875290032225965">"نماد برنامه"</string>
+    <string name="vendor_header_button_description" msgid="6566660389500630608">"دکمه اطلاعات بیشتر"</string>
 </resources>

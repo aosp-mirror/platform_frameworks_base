@@ -103,8 +103,6 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.provider.DeviceConfig;
-import android.provider.DeviceConfigInterface;
 import android.provider.Settings;
 import android.sysprop.DisplayProperties;
 import android.text.TextUtils;
@@ -406,7 +404,6 @@ public final class DisplayManagerService extends SystemService {
     private final SparseArray<IntArray> mDisplayAccessUIDs = new SparseArray<>();
 
     private final Injector mInjector;
-    private final DeviceConfigInterface mDeviceConfig;
 
     // The minimum brightness curve, which guarantess that any brightness curve that dips below it
     // is rejected by the system.
@@ -483,7 +480,6 @@ public final class DisplayManagerService extends SystemService {
     DisplayManagerService(Context context, Injector injector) {
         super(context);
         mInjector = injector;
-        mDeviceConfig = mInjector.getDeviceConfig();
         mContext = context;
         mHandler = new DisplayManagerHandler(DisplayThread.get().getLooper());
         mUiHandler = UiThread.getHandler();
@@ -1332,21 +1328,6 @@ public final class DisplayManagerService extends SystemService {
                         "Requires ADD_ALWAYS_UNLOCKED_DISPLAY permission to "
                                 + "create an always unlocked virtual display.");
             }
-            boolean allowedByDeviceConfig = false;
-            final long token = Binder.clearCallingIdentity();
-            try {
-                allowedByDeviceConfig = mDeviceConfig.getBoolean(
-                        DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
-                        DisplayManager.DeviceConfig.KEY_ALLOW_ALWAYS_UNLOCKED_VIRTUAL_DISPLAYS,
-                        false);
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-            if (!allowedByDeviceConfig) {
-                Slog.w(TAG, "Ignoring flag VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED "
-                        + "because it is not allowed by DeviceConfig");
-                flags &= ~VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED;
-            }
         }
 
         if ((flags & VIRTUAL_DISPLAY_FLAG_TRUSTED) == 0) {
@@ -1459,16 +1440,6 @@ public final class DisplayManagerService extends SystemService {
             DisplayDevice device =
                     mVirtualDisplayAdapter.releaseVirtualDisplayLocked(appToken);
             if (device != null) {
-                final LogicalDisplay display = mLogicalDisplayMapper.getDisplayLocked(device);
-                if (display != null) {
-                    final int displayId = display.getDisplayIdLocked();
-                    if (mDisplayWindowPolicyControllers.contains(displayId)) {
-                        Pair<IVirtualDevice, DisplayWindowPolicyController> pair =
-                                mDisplayWindowPolicyControllers.removeReturnOld(displayId);
-                        getLocalService(VirtualDeviceManagerInternal.class)
-                                .onVirtualDisplayRemoved(pair.first, displayId);
-                    }
-                }
                 // TODO: multi-display - handle virtual displays the same as other display adapters.
                 mDisplayDeviceRepo.onDisplayDeviceEvent(device,
                         DisplayAdapter.DISPLAY_DEVICE_EVENT_REMOVED);
@@ -1628,6 +1599,17 @@ public final class DisplayManagerService extends SystemService {
         DisplayManagerGlobal.invalidateLocalDisplayInfoCaches();
         sendDisplayEventLocked(displayId, DisplayManagerGlobal.EVENT_DISPLAY_REMOVED);
         scheduleTraversalLocked(false);
+
+        if (mDisplayWindowPolicyControllers.contains(displayId)) {
+            final IVirtualDevice virtualDevice = mDisplayWindowPolicyControllers.removeReturnOld(
+                    displayId).first;
+            if (virtualDevice != null) {
+                mHandler.post(() -> {
+                    getLocalService(VirtualDeviceManagerInternal.class)
+                            .onVirtualDisplayRemoved(virtualDevice, displayId);
+                });
+            }
+        }
     }
 
     private void handleLogicalDisplaySwappedLocked(@NonNull LogicalDisplay display) {
@@ -2521,6 +2503,7 @@ public final class DisplayManagerService extends SystemService {
         }
         pw.println();
         mDisplayModeDirector.dump(pw);
+        mBrightnessSynchronizer.dump(pw);
     }
 
     private static float[] getFloatArray(TypedArray array) {
@@ -2561,11 +2544,6 @@ public final class DisplayManagerService extends SystemService {
         boolean getAllowNonNativeRefreshRateOverride() {
             return DisplayProperties
                     .debug_allow_non_native_refresh_rate_override().orElse(true);
-        }
-
-        @NonNull
-        public DeviceConfigInterface getDeviceConfig() {
-            return DeviceConfigInterface.REAL;
         }
     }
 

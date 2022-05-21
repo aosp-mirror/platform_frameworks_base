@@ -1089,7 +1089,7 @@ public final class NotificationRecord {
     }
 
     /**
-     * @see PreferencesHelper#getIsAppImportanceLocked(String, int)
+     * @see PermissionHelper#isPermissionUserSet(String, int)
      */
     public boolean getIsAppImportanceLocked() {
         return mIsAppImportanceLocked;
