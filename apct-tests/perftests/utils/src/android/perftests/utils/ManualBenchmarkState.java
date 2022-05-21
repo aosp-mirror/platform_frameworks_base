@@ -306,7 +306,7 @@ public final class ManualBenchmarkState {
 
     private void fillStatus(Bundle status, String key, Stats stats) {
         if (shouldReport(StatsReport.FLAG_ITERATION)) {
-            status.putLong(key + "_iteration (ns)", stats.getSize());
+            status.putLong(key + "_iteration", stats.getSize());
         }
         if (shouldReport(StatsReport.FLAG_MEDIAN)) {
             status.putLong(key + "_median (ns)", stats.getMedian());

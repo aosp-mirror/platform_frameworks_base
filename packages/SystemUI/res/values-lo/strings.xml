@@ -78,6 +78,7 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"ກະລຸນາລອງຖ່າຍຮູບໜ້າຈໍອີກຄັ້ງ"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"ບໍ່ສາມາດບັນທຶກຮູບໜ້າຈໍໄດ້"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ແອັບ ຫຼື ອົງກອນຂອງທ່ານບໍ່ອະນຸຍາດໃຫ້ຖ່າຍຮູບໜ້າຈໍ"</string>
+    <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"ຜູ້ເບິ່ງແຍງໄອທີຂອງທ່ານບລັອກການຖ່າຍຮູບໜ້າຈໍໄວ້."</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"ແກ້ໄຂ"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"ແກ້ໄຂຮູບໜ້າຈໍ"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"ແບ່ງປັນຮູບໜ້າຈໍ"</string>
@@ -312,6 +313,10 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"ປັດຂຶ້ນເພື່ອເປີດ"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"ກົດໄອຄອນປົດລັອກເພື່ອເປີດ"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"ປົດລັອກດ້ວຍໜ້າແລ້ວ. ກົດໄອຄອນປົດລັອກເພື່ອເປີດ."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"ປັດຂຶ້ນເພື່ອລອງໃໝ່"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"ປົດລັອກເພື່ອໃຊ້ NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ອຸປະກອນນີ້ເປັນຂອງອົງການທ່ານ"</string>
@@ -365,28 +370,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"ອົງການຂອງທ່ານເປັນເຈົ້າຂອງອຸປະກອນນີ້ ແລະ ສາມາດຕິດຕາມທຣາບຟິກເຄືອຂ່າຍໄດ້"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ເປັນເຈົ້າຂອງອຸປະກອນນີ້ ແລະ ສາມາດຕິດຕາມທຣາບຟິກເຄືອຂ່າຍໄດ້"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"ອຸປະກອນນີ້ແມ່ນສະໜອງໃຫ້ໂດຍ <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <!-- no translation found for quick_settings_disclosure_management_named_vpn (4137564460025113168) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_named_management_named_vpn (2169227918166358741) -->
-    <skip />
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"ອຸປະກອນນີ້ເປັນຂອງອົງການທ່ານ ແລະ ເຊື່ອມຕໍ່ອິນເຕີເນັດຜ່ານ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"ອຸປະກອນນີ້ເປັນຂອງ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ແລະ ເຊື່ອມຕໍ່ອິນເຕີເນັດຜ່ານ <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"ອຸປະກອນນີ້ເປັນຂອງອົງການທ່ານ"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"ອຸ​ປະ​ກອນ​ນີ້​ເປັນ​ຂອງ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for quick_settings_disclosure_management_vpns (929181757984262902) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_named_management_vpns (3312645578322079185) -->
-    <skip />
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"ອຸປະກອນນີ້ເປັນຂອງອົງການທ່ານ ແລະ ເຊື່ອມຕໍ່ອິນເຕີເນັດຜ່ານ VPN"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"ອຸປະກອນນີ້ເປັນຂອງ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ແລະ ເຊື່ອມຕໍ່ອິນເຕີເນັດຜ່ານ VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"ອົງກອນຂອງທ່ານສາມາດຕິດຕາມທຣາບຟິກເຄືອຂ່າຍໃນໂປຣໄຟລ໌ບ່ອນເຮັດວຽກຂອງທ່ານໄດ້"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ສາມາດຕິດຕາມທຣາບຟິກເຄືອຂ່າຍໃນໂປຣໄຟລ໌ບ່ອນເຮັດວຽກຂອງທ່ານໄດ້"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"ການເຄື່ອນໄຫວເຄືອຂ່າຍ​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກແມ່ນສະແດງໃຫ້ຜູ້ເບິ່ງແຍງໄອທີຂອງທ່ານເຫັນໄດ້"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"ເຄືອຂ່າຍອາດຖືກຕິດຕາມ"</string>
-    <!-- no translation found for quick_settings_disclosure_vpns (3586175303518266301) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_managed_profile_named_vpn (153393105176944100) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_personal_profile_named_vpn (451254750289172191) -->
-    <skip />
-    <!-- no translation found for quick_settings_disclosure_named_vpn (6191822916936028208) -->
-    <skip />
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"ອຸປະກອນນີ້ເຊື່ອມຕໍ່ອິນເຕີເນັດຜ່ານ VPN"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"ແອັບບ່ອນເຮັດວຽກຂອງທ່ານແມ່ນເຊື່ອມຕໍ່ຫາອິນເຕີເນັດຜ່ານ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"ແອັບສ່ວນຕົວຂອງທ່ານເຊື່ອມຕໍ່ອິນເຕີເນັດຜ່ານ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"ອຸປະກອນນີ້ເຊື່ອມຕໍ່ອິນເຕີເນັດຜ່ານ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"ອຸປະກອນນີ້ແມ່ນສະໜອງໃຫ້ໂດຍ <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"ການຈັດການອຸປະກອນ"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -402,14 +399,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"ມີອຳນາດໃບຮັບຮອງຕິດຕັ້ງຢູ່ໃນອຸປະກອນນີ້. ທຣາບຟິກເຄືອຂ່າຍທີ່ເຂົ້າລະຫັດໄວ້ຂອງທ່ານອາດຖືກຕິດຕາມ ຫຼື ແກ້ໄຂໄດ້."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"ຜູ້ເບິ່ງແຍງຂອງທ່ານໄດ້ເປີດໃຊ້ການບັນທຶກເຄືອຂ່າຍໄວ້, ເຊິ່ງຈະຕິດຕາມທຣາບຟິກໃນອຸປະກອນຂອງທ່ານ."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"ຜູ້ເບິ່ງແຍງຂອງທ່ານໄດ້ເປີດໃຊ້ການບັນທຶກເຄືອຂ່າຍໄວ້, ເຊິ່ງຈະຕິດຕາມທຣາບຟິກໃນໂປຣໄຟລ໌ບ່ອນເຮັດວຽກຂອງທ່ານ ແຕ່ຈະບໍ່ຕິດຕາມໃນໂປຣໄຟລ໌ສ່ວນຕົວຂອງທ່ານ."</string>
-    <!-- no translation found for monitoring_description_named_vpn (7502657784155456414) -->
-    <skip />
-    <!-- no translation found for monitoring_description_two_named_vpns (6726394451199620634) -->
-    <skip />
-    <!-- no translation found for monitoring_description_managed_profile_named_vpn (7254359257263069766) -->
-    <skip />
-    <!-- no translation found for monitoring_description_personal_profile_named_vpn (5083909710727365452) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"ອຸປະກອນນີ້ເຊື່ອມຕໍ່ອິນເຕີເນັດຜ່ານ <xliff:g id="VPN_APP">%1$s</xliff:g>. ການເຄື່ອນໄຫວເຄືອຂ່າຍຂອງທ່ານ, ຮວມທັງອີເມວ ແລະ ຂໍ້ມູນການນຳໃຊ້, ແມ່ນສະແດງໃຫ້ຜູ້ເບິ່ງແຍງໄອທີເຫັນໄດ້."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"ອຸປະກອນນີ້ເຊື່ອມຕໍ່ອິນເຕີເນັດຜ່ານ <xliff:g id="VPN_APP_0">%1$s</xliff:g> ແລະ <xliff:g id="VPN_APP_1">%2$s</xliff:g>. ການເຄື່ອນໄຫວເຄືອຂ່າຍຂອງທ່ານ, ຮວມທັງອີເມວ ແລະ ຂໍ້ມູນການນຳໃຊ້, ແມ່ນສະແດງໃຫ້ຜູ້ເບິ່ງແຍງໄອທີເຫັນໄດ້."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"ແອັບບ່ອນເຮັດວຽກຂອງທ່ານເຊື່ອມຕໍ່ອິນເຕີເນັດຜ່ານ <xliff:g id="VPN_APP">%1$s</xliff:g>. ການເຄື່ອນໄຫວເຄືອຂ່າຍຂອງທ່ານໃນແອັບບ່ອນເຮັດວຽກ, ຮວມທັງອີເມວ ແລະ ຂໍ້ມູນການນຳໃຊ້, ແມ່ນສະແດງໃຫ້ຜູ້ເບິ່ງແຍງໄອທີ ແລະ ຜູ້ໃຫ້ບໍລິການ VPN ຂອງທ່ານເຫັນໄດ້."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"ແອັບສ່ວນຕົວຂອງທ່ານເຊື່ອມຕໍ່ອິນເຕີເນັດຜ່ານ <xliff:g id="VPN_APP">%1$s</xliff:g>. ການເຄື່ອນໄຫວເຄືອຂ່າຍຂອງທ່ານ, ຮວມທັງອີເມວ ແລະ ຂໍ້ມູນການນຳໃຊ້, ແມ່ນສະແດງໃຫ້ຜູ້ໃຫ້ບໍລິການ VPN ຂອງທ່ານເຫັນໄດ້."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"ເປີດການຕັ້ງຄ່າ VPN"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"ອຸປະກອນນີ້ແມ່ນຈັດການໂດຍພໍ່ແມ່ຂອງທ່ານ. ພໍ່ແມ່ຂອງທ່ານສາມາດເບິ່ງ ແລະ ຈັດການຂໍ້ມູນໄດ້ ເຊັ່ນ: ແອັບທີ່ທ່ານໃຊ້, ສະຖານທີ່ ແລະ ເວລາໜ້າຈໍຂອງທ່ານ."</string>
@@ -470,7 +463,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"ກະເປົາ"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"ຕັ້ງຄ່າເພື່ອຊື້ດ້ວຍໂທລະສັບຂອງທ່ານໄດ້ໄວຂຶ້ນ ແລະ ປອດໄພຂຶ້ນ"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"ສະແດງທັງໝົດ"</string>
-    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"ເພີ່ມບັດ"</string>
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"ແຕະເພື່ອເປີດ"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"ກຳລັງອັບເດດ"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ປົດລັອກເພື່ອໃຊ້"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"ເກີດບັນຫາໃນການໂຫຼດບັດຂອງທ່ານ, ກະລຸນາລອງໃໝ່ໃນພາຍຫຼັງ"</string>
@@ -730,6 +723,7 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"ເປີດໃຊ້ເມື່ອແບັດເຕີຣີໜ້າຈະໃກ້ໝົດ"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"ບໍ່, ຂອບໃຈ"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
+    <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"ກຳລັງນຳໃຊ້ຢູ່"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"ແອັບພລິເຄຊັນກຳລັງໃຊ້ <xliff:g id="TYPES_LIST">%s</xliff:g> ຂອງທ່ານ."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" ແລະ "</string>
@@ -827,7 +821,6 @@
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"ຍ້າຍໄປໃກ້ຂຶ້ນເພື່ອຫຼິ້ນຢູ່ <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"ກະລຸນາຍ້າຍເຂົ້າໃກ້ <xliff:g id="DEVICENAME">%1$s</xliff:g> ເພື່ອຫຼິ້ນຢູ່ບ່ອນນີ້"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"ກຳລັງຫຼິ້ນຢູ່ <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
-    <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"ກຳລັງຫຼິ້ນຢູ່ໂທລະສັບນີ້"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"ມີບາງຢ່າງຜິດພາດເກີດຂຶ້ນ. ກະລຸນາລອງໃໝ່."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ບໍ່ເຮັດວຽກ, ກະລຸນາກວດສອບແອັບ"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"ບໍ່ພົບ"</string>
@@ -848,6 +841,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"ເພື່ອສົ່ງສັນຍານເຊດຊັນນີ້, ກະລຸນາເປີດແອັບ."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"ແອັບທີ່ບໍ່ຮູ້ຈັກ"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"ຢຸດການສົ່ງສັນຍານ"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ການອອກອາກາດເຮັດວຽກແນວໃດ"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ອອກອາກາດ"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"ຄົນທີ່ຢູ່ໃກ້ທ່ານທີ່ມີອຸປະກອນ Bluetooth ທີ່ເຂົ້າກັນໄດ້ຈະສາມາດຟັງມີເດຍທີ່ທ່ານກຳລັງອອກອາກາດຢູ່ໄດ້"</string>
@@ -855,10 +850,10 @@
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"ຊື່ການອອກອາກາດ"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"ລະຫັດຜ່ານ"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"ບັນທຶກ"</string>
-    <!-- no translation found for media_output_broadcast_starting (8130153654166235557) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_start_failed (3670835946856129775) -->
-    <skip />
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"ກໍາລັງເລີ່ມ…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"ບໍ່ສາມາດອອກອາກາດໄດ້"</string>
+    <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"ບໍ່ສາມາດບັນທຶກໄດ້. ກະລຸນາລອງໃໝ່."</string>
+    <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"ບໍ່ສາມາດບັນທຶກໄດ້."</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"ໝາຍເລກສ້າງ"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"ສຳເນົາໝາຍເລກສ້າງໄປໃສ່ຄລິບບອດແລ້ວ."</string>
     <string name="basic_status" msgid="2315371112182658176">"ເປີດການສົນທະນາ"</string>
@@ -943,6 +938,13 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"ແກ້ໄຂຂໍ້ຄວາມທີ່ສຳເນົາແລ້ວ"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"ແກ້ໄຂຮູບທີ່ສຳເນົາແລ້ວ"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"ສົ່ງໄປຫາອຸປະກອນທີ່ຢູ່ໃກ້ຄຽງ"</string>
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"ແຕະເພື່ອເບິ່ງ"</string>
+    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
+    <skip />
+    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
+    <skip />
+    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
+    <skip />
     <string name="add" msgid="81036585205287996">"ເພີ່ມ"</string>
     <string name="manage_users" msgid="1823875311934643849">"ຈັດການຜູ້ໃຊ້"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"ການແຈ້ງເຕືອນນີ້ບໍ່ຮອງຮັບການລາກໄປໃສ່ Splitscreen."</string>

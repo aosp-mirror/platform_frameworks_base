@@ -25,6 +25,7 @@ import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_PHONE_CALL_CAMERA;
 import static android.app.AppOpsManager.OP_PHONE_CALL_MICROPHONE;
+import static android.app.AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.content.Intent.EXTRA_PACKAGE_NAME;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
@@ -727,7 +728,8 @@ public final class SensorPrivacyService extends SystemService {
                 return false;
             }
 
-            if (mKeyguardManager != null && mKeyguardManager.isDeviceLocked(userId)) {
+            if (requiresAuthentication() && mKeyguardManager != null
+                    && mKeyguardManager.isDeviceLocked(userId)) {
                 Log.i(TAG, "Can't change mic/cam toggle while device is locked");
                 return false;
             }
@@ -993,6 +995,13 @@ public final class SensorPrivacyService extends SystemService {
         }
 
         @Override
+        public boolean requiresAuthentication() {
+            enforceObserveSensorPrivacyPermission();
+            return mContext.getResources()
+                    .getBoolean(R.bool.config_sensorPrivacyRequiresAuthentication);
+        }
+
+        @Override
         public void showSensorUseDialog(int sensor) {
             if (Binder.getCallingUid() != Process.SYSTEM_UID) {
                 throw new SecurityException("Can only be called by the system uid");
@@ -1059,6 +1068,10 @@ public final class SensorPrivacyService extends SystemService {
                             mAppOpsRestrictionToken);
                     mAppOpsManagerInternal.setGlobalRestriction(OP_PHONE_CALL_MICROPHONE, enabled,
                             mAppOpsRestrictionToken);
+                    // We don't show the dialog for RECEIVE_SOUNDTRIGGER_AUDIO, but still want to
+                    // restrict it when the microphone is disabled
+                    mAppOpsManagerInternal.setGlobalRestriction(OP_RECEIVE_AMBIENT_TRIGGER_AUDIO,
+                            enabled, mAppOpsRestrictionToken);
                     break;
                 case CAMERA:
                     mAppOpsManagerInternal.setGlobalRestriction(OP_CAMERA, enabled,

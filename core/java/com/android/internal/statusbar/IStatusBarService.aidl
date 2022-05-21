@@ -88,7 +88,7 @@ interface IStatusBarService
             in int notificationLocation, boolean modifiedBeforeSending);
     void onNotificationSettingsViewed(String key);
     void onNotificationBubbleChanged(String key, boolean isBubble, int flags);
-    void onBubbleNotificationSuppressionChanged(String key, boolean isNotifSuppressed, boolean isBubbleSuppressed);
+    void onBubbleMetadataFlagChanged(String key, int flags);
     void hideCurrentInputMethodForBubbles();
     void grantInlineReplyUriPermission(String key, in Uri uri, in UserHandle user, String packageName);
     oneway void clearInlineReplyUriPermissions(String key);

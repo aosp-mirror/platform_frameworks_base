@@ -33,5 +33,5 @@
     <string name="configure" msgid="4905518375574791375">"Configurar"</string>
     <string name="disconnect" msgid="971412338304200056">"Desconectar"</string>
     <string name="open_app" msgid="3717639178595958667">"Abrir aplicación"</string>
-    <string name="dismiss" msgid="6192859333764711227">"Ignorar"</string>
+    <string name="dismiss" msgid="6192859333764711227">"Pechar"</string>
 </resources>
