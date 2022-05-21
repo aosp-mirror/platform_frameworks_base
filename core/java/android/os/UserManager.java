@@ -4854,17 +4854,14 @@ public class UserManager {
      * shares media with its parent user (the user that created this profile).
      * Returns false for any other type of user.
      *
-     * <p>Requires {@link android.Manifest.permission#MANAGE_USERS} or
-     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS} permission, otherwise the
-     * caller must be in the same profile group as the user.
-     *
      * @return true if the user shares media with its parent user, false otherwise.
      * @hide
      */
     @SystemApi
-    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
-            Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
-    @UserHandleAware
+    @UserHandleAware(
+            requiresAnyOfPermissionsIfNotCallerProfileGroup = {
+                    Manifest.permission.MANAGE_USERS,
+                    Manifest.permission.INTERACT_ACROSS_USERS})
     @SuppressAutoDoc
     public boolean isMediaSharedWithParent() {
         try {
