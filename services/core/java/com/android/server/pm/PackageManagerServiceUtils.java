@@ -1069,7 +1069,7 @@ public class PackageManagerServiceUtils {
             if (ArrayUtils.isEmpty(hashInfo.rawRootHash)) {
                 throw new IOException("Root has not present");
             }
-            return hashInfo.rawRootHash;
+            return ApkChecksums.verityHashForFile(new File(filename), hashInfo.rawRootHash);
         } catch (IOException ignore) {
             Slog.e(TAG, "ERROR: could not load root hash from incremental install");
         }
